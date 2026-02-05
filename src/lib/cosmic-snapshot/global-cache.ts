@@ -357,7 +357,15 @@ export type TransitMilestoneEvent = {
   sign: string;
   totalDays: number;
   remainingDays: number;
-  milestone: 'halfway' | '3_months' | '1_month' | '1_week';
+  milestone:
+    | 'halfway'
+    | '6_months'
+    | '3_months'
+    | '1_month'
+    | '2_weeks'
+    | '1_week'
+    | '3_days'
+    | 'tomorrow';
   milestoneLabel: string;
   displayText: string;
 };
@@ -365,10 +373,14 @@ export type TransitMilestoneEvent = {
 /**
  * Detect transit milestones for slow-moving planets.
  * Returns milestone events when a slow planet transit hits:
- * - Halfway point
+ * - Halfway point (truly halfway through the transit)
+ * - 6 months remaining
  * - 3 months remaining
  * - 1 month remaining
+ * - 2 weeks remaining
  * - 1 week remaining
+ * - 3 days remaining
+ * - Tomorrow (final day before sign change)
  *
  * Only triggers on the exact day of the milestone to avoid duplicates.
  */
@@ -390,31 +402,52 @@ export async function detectTransitMilestones(
     if (!duration || !duration.totalDays || !duration.remainingDays) continue;
 
     const { totalDays, remainingDays } = duration;
+    const elapsedDays = totalDays - remainingDays;
     const halfwayDays = Math.floor(totalDays / 2);
 
     // Check for milestone matches (use ranges to account for daily check)
     let milestone: TransitMilestoneEvent['milestone'] | null = null;
     let milestoneLabel = '';
 
-    // Halfway point (within 1 day of halfway)
-    if (remainingDays === halfwayDays || remainingDays === halfwayDays + 1) {
+    // Halfway point - check when elapsed days equals halfway (more accurate)
+    if (elapsedDays >= halfwayDays - 1 && elapsedDays <= halfwayDays + 1) {
       milestone = 'halfway';
       milestoneLabel = 'Halfway through';
     }
-    // 3 months remaining (90 days, check 89-91)
-    else if (remainingDays >= 89 && remainingDays <= 91) {
+    // 6 months remaining (180 days, check 178-182)
+    else if (remainingDays >= 178 && remainingDays <= 182) {
+      milestone = '6_months';
+      milestoneLabel = '6 months remaining';
+    }
+    // 3 months remaining (90 days, check 88-92)
+    else if (remainingDays >= 88 && remainingDays <= 92) {
       milestone = '3_months';
       milestoneLabel = '3 months remaining';
     }
-    // 1 month remaining (30 days, check 29-31)
-    else if (remainingDays >= 29 && remainingDays <= 31) {
+    // 1 month remaining (30 days, check 28-32)
+    else if (remainingDays >= 28 && remainingDays <= 32) {
       milestone = '1_month';
       milestoneLabel = '1 month remaining';
+    }
+    // 2 weeks remaining (14 days, check 13-15)
+    else if (remainingDays >= 13 && remainingDays <= 15) {
+      milestone = '2_weeks';
+      milestoneLabel = '2 weeks remaining';
     }
     // 1 week remaining (7 days, check 6-8)
     else if (remainingDays >= 6 && remainingDays <= 8) {
       milestone = '1_week';
       milestoneLabel = '1 week remaining';
+    }
+    // 3 days remaining (check 2-4)
+    else if (remainingDays >= 2 && remainingDays <= 4) {
+      milestone = '3_days';
+      milestoneLabel = '3 days remaining';
+    }
+    // Tomorrow (1 day remaining, check 0-1)
+    else if (remainingDays >= 0 && remainingDays <= 1) {
+      milestone = 'tomorrow';
+      milestoneLabel = 'Leaving tomorrow';
     }
 
     if (milestone) {

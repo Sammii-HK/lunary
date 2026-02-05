@@ -157,19 +157,29 @@ export default function FriendProfilePage() {
     RELATIONSHIP_ICONS[friend.relationshipType || 'friend'] || Users;
 
   return (
-    <div className='flex flex-col items-center gap-6 p-4 h-fit mb-16'>
+    <div
+      className='flex flex-col items-center gap-6 p-4 h-fit mb-16'
+      data-testid='friend-profile-page'
+    >
       {/* Header */}
       <div className='w-full max-w-3xl'>
         <button
           onClick={() => router.push('/profile?tab=circle')}
           className='flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-4'
+          data-testid='back-to-circle'
         >
           <ArrowLeft className='w-4 h-4' />
           Back to Circle
         </button>
 
-        <div className='flex items-center gap-4'>
-          <div className='w-16 h-16 rounded-full bg-gradient-to-br from-lunary-primary to-lunary-highlight flex items-center justify-center'>
+        <div
+          className='flex items-center gap-4'
+          data-testid='friend-profile-header'
+        >
+          <div
+            className='w-16 h-16 rounded-full bg-gradient-to-br from-lunary-primary to-lunary-highlight flex items-center justify-center'
+            data-testid='friend-avatar'
+          >
             {friend.avatar ? (
               <img
                 src={friend.avatar}
@@ -202,9 +212,15 @@ export default function FriendProfilePage() {
             </p>
           </div>
           {friend.synastry && (
-            <div className='ml-auto flex items-center gap-4'>
+            <div
+              className='ml-auto flex items-center gap-4'
+              data-testid='compatibility-score-header'
+            >
               <div className='text-center'>
-                <div className='text-3xl font-bold text-lunary-accent-200'>
+                <div
+                  className='text-3xl font-bold text-lunary-accent-200'
+                  data-testid='compatibility-score'
+                >
                   {friend.synastry.compatibilityScore}%
                 </div>
                 <div className='text-xs text-zinc-400'>Compatible</div>
@@ -229,7 +245,10 @@ export default function FriendProfilePage() {
 
       {/* Tabs */}
       <div className='w-full max-w-3xl'>
-        <div className='flex gap-1 p-1 rounded-lg bg-zinc-800/50 border border-zinc-700/50'>
+        <div
+          className='flex gap-1 p-1 rounded-lg bg-zinc-800/50 border border-zinc-700/50'
+          data-testid='friend-profile-tabs'
+        >
           {[
             { id: 'overview', label: 'Overview', icon: CircleDot },
             { id: 'synastry', label: 'Synastry', icon: Sparkles },
@@ -239,6 +258,7 @@ export default function FriendProfilePage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as FriendTab)}
+              data-testid={`tab-${tab.id}`}
               className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors inline-flex items-center justify-center gap-1.5 ${
                 activeTab === tab.id
                   ? 'bg-lunary-primary-900/50 text-white border border-lunary-primary-700/50'
@@ -286,10 +306,13 @@ function OverviewTab({
     );
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6' data-testid='overview-tab-content'>
       {/* Compatibility Card */}
       {friend.synastry && (
-        <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'>
+        <div
+          className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+          data-testid='overview-compatibility'
+        >
           <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
             Compatibility Overview
           </h3>
@@ -315,6 +338,7 @@ function OverviewTab({
             variant='outline'
             size='sm'
             className='mt-4 gap-1.5'
+            data-testid='view-full-synastry'
           >
             <Sparkles className='w-4 h-4' />
             View Full Synastry
@@ -324,11 +348,17 @@ function OverviewTab({
 
       {/* Key Placements */}
       {keyPlacements && keyPlacements.length > 0 && (
-        <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'>
+        <div
+          className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+          data-testid='key-placements'
+        >
           <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
             {friend.name}&apos;s Key Placements
           </h3>
-          <div className='grid grid-cols-2 sm:grid-cols-3 gap-3'>
+          <div
+            className='grid grid-cols-2 sm:grid-cols-3 gap-3'
+            data-testid='key-placements-grid'
+          >
             {keyPlacements.map((placement) => (
               <div
                 key={placement.body}
@@ -374,7 +404,10 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
 
   if (!synastry) {
     return (
-      <div className='rounded-xl border-2 border-dashed border-zinc-700 p-8 text-center'>
+      <div
+        className='rounded-xl border-2 border-dashed border-zinc-700 p-8 text-center'
+        data-testid='synastry-unavailable'
+      >
         <Sparkles className='w-10 h-10 mx-auto text-zinc-600 mb-3' />
         <h3 className='font-medium text-zinc-300 mb-1'>
           Synastry Not Available
@@ -390,12 +423,18 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
   const challengingAspects = synastry.aspects.filter((a) => !a.isHarmonious);
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6' data-testid='synastry-tab-content'>
       {/* Score */}
-      <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'>
+      <div
+        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        data-testid='synastry-score-section'
+      >
         <div className='flex items-center gap-6'>
           <div className='text-center'>
-            <div className='text-4xl font-bold text-lunary-accent-200'>
+            <div
+              className='text-4xl font-bold text-lunary-accent-200'
+              data-testid='synastry-compatibility-score'
+            >
               {synastry.compatibilityScore}%
             </div>
             <div className='text-xs text-zinc-400'>Compatibility</div>
@@ -413,11 +452,17 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
       </div>
 
       {/* Element Balance */}
-      <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'>
+      <div
+        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        data-testid='synastry-element-balance'
+      >
         <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
           Element Balance
         </h3>
-        <div className='grid grid-cols-4 gap-3'>
+        <div
+          className='grid grid-cols-4 gap-3'
+          data-testid='element-balance-grid'
+        >
           {(['fire', 'earth', 'air', 'water'] as const).map((element) => {
             const data = synastry.elementBalance[element];
             const colors: Record<string, string> = {
@@ -463,11 +508,17 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
       </div>
 
       {/* Modality Balance */}
-      <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'>
+      <div
+        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        data-testid='synastry-modality-balance'
+      >
         <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
           Modality Balance
         </h3>
-        <div className='grid grid-cols-3 gap-3'>
+        <div
+          className='grid grid-cols-3 gap-3'
+          data-testid='modality-balance-grid'
+        >
           {(['cardinal', 'fixed', 'mutable'] as const).map((modality) => {
             const data = synastry.modalityBalance[modality];
             return (
@@ -491,13 +542,16 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
       </div>
 
       {/* Aspects */}
-      <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'>
+      <div
+        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        data-testid='synastry-aspects-section'
+      >
         <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
           Aspects ({synastry.aspects.length})
         </h3>
 
         <div className='grid sm:grid-cols-2 gap-4 mb-4'>
-          <div className='space-y-2'>
+          <div className='space-y-2' data-testid='harmonious-aspects'>
             <h4 className='text-xs font-medium text-green-400 flex items-center gap-1'>
               <TrendingUp className='w-3 h-3' />
               Harmonious ({harmoniousAspects.length})
@@ -508,7 +562,7 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
                 <AspectRow key={i} aspect={aspect} />
               ))}
           </div>
-          <div className='space-y-2'>
+          <div className='space-y-2' data-testid='challenging-aspects'>
             <h4 className='text-xs font-medium text-lunary-error-300 flex items-center gap-1'>
               <Sparkles className='w-3 h-3' />
               Challenging ({challengingAspects.length})
@@ -526,6 +580,7 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
             onClick={() => setShowAllAspects(!showAllAspects)}
             variant='outline'
             size='sm'
+            data-testid='toggle-all-aspects'
           >
             {showAllAspects ? 'Show Less' : 'Show All Aspects'}
           </Button>
@@ -597,12 +652,16 @@ function ChartTab({
   );
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6' data-testid='chart-tab-content'>
       {/* View Toggle */}
       <div className='flex justify-center'>
-        <div className='flex gap-1 p-1 rounded-lg bg-zinc-800/50 border border-zinc-700/50'>
+        <div
+          className='flex gap-1 p-1 rounded-lg bg-zinc-800/50 border border-zinc-700/50'
+          data-testid='chart-view-toggle'
+        >
           <button
             onClick={() => setShowWheel(true)}
+            data-testid='chart-wheel-button'
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               showWheel
                 ? 'bg-lunary-primary-900/50 text-white border border-lunary-primary-700/50'
@@ -613,6 +672,7 @@ function ChartTab({
           </button>
           <button
             onClick={() => setShowWheel(false)}
+            data-testid='placements-list-button'
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               !showWheel
                 ? 'bg-lunary-primary-900/50 text-white border border-lunary-primary-700/50'
@@ -804,8 +864,11 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
   }
 
   return (
-    <div className='space-y-6'>
-      <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'>
+    <div className='space-y-6' data-testid='timing-tab-content'>
+      <div
+        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        data-testid='timing-windows'
+      >
         <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
           Best Times to Connect
         </h3>
@@ -857,7 +920,10 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
         )}
       </div>
 
-      <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'>
+      <div
+        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        data-testid='shared-cosmic-events'
+      >
         <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
           Shared Cosmic Events
         </h3>

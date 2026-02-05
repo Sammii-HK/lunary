@@ -16,6 +16,8 @@ interface AnimatedBackgroundProps {
   gradientEndColor?: string;
   /** When true, renders only stars without background gradient (for overlaying on images) */
   overlayMode?: boolean;
+  /** Unique seed for generating different star positions and comet paths per video */
+  seed?: string;
 }
 
 // Natural meteor colors based on element composition when burning up
@@ -60,6 +62,7 @@ export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
   backgroundColor = COLORS.cosmicBlack,
   gradientEndColor = COLORS.deepPurple,
   overlayMode = false,
+  seed = 'default',
 }) => {
   const frame = useCurrentFrame();
   const { durationInFrames, fps } = useVideoConfig();
@@ -90,10 +93,23 @@ export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
           frame={frame}
           durationInFrames={durationInFrames}
           fps={fps}
+          seed={seed}
         />
       )}
     </AbsoluteFill>
   );
+};
+
+/**
+ * Simple hash function to convert string seed to number
+ */
+const simpleHash = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash);
 };
 
 /**
@@ -110,22 +126,23 @@ const seededRandom = (seed: number) => {
 const generateShootingStars = (
   durationInFrames: number,
   fps: number,
+  seedHash: number,
 ): ShootingStar[] => {
   const stars: ShootingStar[] = [];
   const durationSeconds = durationInFrames / fps;
 
-  // First shooting star at 1-2 seconds
-  let currentTime = 1 + seededRandom(1) * 1;
+  // First shooting star at 1-2 seconds (use seedHash for variation)
+  let currentTime = 1 + seededRandom(seedHash + 1) * 1;
   let index = 0;
 
   while (currentTime < durationSeconds - 1) {
     const colorIndex = Math.floor(
-      seededRandom(index * 9) * METEOR_COLORS.length,
+      seededRandom(seedHash + index * 9) * METEOR_COLORS.length,
     );
 
     // Variety of entry positions - not just from top
     // 0 = top edge, 1 = left edge, 2 = top-left corner area
-    const entryType = Math.floor(seededRandom(index * 9 + 1) * 3);
+    const entryType = Math.floor(seededRandom(seedHash + index * 9 + 1) * 3);
 
     let startX: number;
     let startY: number;
@@ -133,27 +150,28 @@ const generateShootingStars = (
 
     if (entryType === 0) {
       // From top - going down-right or down-left
-      startX = 5 + seededRandom(index * 9 + 2) * 90; // 5-95% across
-      startY = -2 + seededRandom(index * 9 + 3) * 15; // -2% to 13% (near top)
+      startX = 5 + seededRandom(seedHash + index * 9 + 2) * 90; // 5-95% across
+      startY = -2 + seededRandom(seedHash + index * 9 + 3) * 15; // -2% to 13% (near top)
       angle =
-        seededRandom(index * 9 + 4) > 0.5
-          ? 25 + seededRandom(index * 9 + 5) * 40 // 25-65° down-right
-          : 115 + seededRandom(index * 9 + 5) * 40; // 115-155° down-left
+        seededRandom(seedHash + index * 9 + 4) > 0.5
+          ? 25 + seededRandom(seedHash + index * 9 + 5) * 40 // 25-65° down-right
+          : 115 + seededRandom(seedHash + index * 9 + 5) * 40; // 115-155° down-left
     } else if (entryType === 1) {
       // From left side - going right and slightly down
-      startX = -2 + seededRandom(index * 9 + 2) * 10; // -2% to 8% (near left)
-      startY = 10 + seededRandom(index * 9 + 3) * 50; // 10-60% down
-      angle = -15 + seededRandom(index * 9 + 5) * 50; // -15° to 35°
+      startX = -2 + seededRandom(seedHash + index * 9 + 2) * 10; // -2% to 8% (near left)
+      startY = 10 + seededRandom(seedHash + index * 9 + 3) * 50; // 10-60% down
+      angle = -15 + seededRandom(seedHash + index * 9 + 5) * 50; // -15° to 35°
     } else {
       // From right side - going left and down
-      startX = 92 + seededRandom(index * 9 + 2) * 10; // 92-102% (near right)
-      startY = 5 + seededRandom(index * 9 + 3) * 40; // 5-45% down
-      angle = 145 + seededRandom(index * 9 + 5) * 30; // 145-175°
+      startX = 92 + seededRandom(seedHash + index * 9 + 2) * 10; // 92-102% (near right)
+      startY = 5 + seededRandom(seedHash + index * 9 + 3) * 40; // 5-45% down
+      angle = 145 + seededRandom(seedHash + index * 9 + 5) * 30; // 145-175°
     }
 
     // Size variety - thick meteors are FAST, thin ones can be slower
-    const thickness = 0.8 + seededRandom(index * 9 + 6) * 1.8; // 0.8-2.6px
-    const trailLengthMultiplier = 0.6 + seededRandom(index * 9 + 7) * 0.8; // 0.6-1.4x
+    const thickness = 0.8 + seededRandom(seedHash + index * 9 + 6) * 1.8; // 0.8-2.6px
+    const trailLengthMultiplier =
+      0.6 + seededRandom(seedHash + index * 9 + 7) * 0.8; // 0.6-1.4x
 
     // Thick = fast, thin = can be slower (inverse relationship)
     const thicknessNormalized = (thickness - 0.8) / 1.8; // 0 to 1
@@ -164,18 +182,18 @@ const generateShootingStars = (
       startX,
       startY,
       angle,
-      speed: baseSpeed + seededRandom(index * 9 + 8) * 0.5, // slight variation
+      speed: baseSpeed + seededRandom(seedHash + index * 9 + 8) * 0.5, // slight variation
       thickness,
       trailLengthMultiplier,
       colorIndex,
       startFrame: Math.floor(currentTime * fps),
       duration: Math.floor(
-        (baseDuration + seededRandom(index * 9 + 9) * 0.1) * fps,
+        (baseDuration + seededRandom(seedHash + index * 9 + 9) * 0.1) * fps,
       ),
     });
 
     // Every 3-6 seconds
-    currentTime += 3 + seededRandom(index * 9 + 10) * 3;
+    currentTime += 3 + seededRandom(seedHash + index * 9 + 10) * 3;
     index++;
   }
 
@@ -303,8 +321,12 @@ const StarField: React.FC<{
   frame: number;
   durationInFrames: number;
   fps: number;
-}> = ({ frame, durationInFrames, fps }) => {
-  // Generate consistent star positions
+  seed: string;
+}> = ({ frame, durationInFrames, fps, seed }) => {
+  // Convert seed string to number hash
+  const seedHash = React.useMemo(() => simpleHash(seed), [seed]);
+
+  // Generate consistent star positions using the seed
   const stars = React.useMemo(() => {
     const result: Array<{
       x: number;
@@ -316,21 +338,21 @@ const StarField: React.FC<{
 
     for (let i = 0; i < 60; i++) {
       result.push({
-        x: seededRandom(i * 5) * 100,
-        y: seededRandom(i * 5 + 1) * 100,
-        baseSize: 2 + seededRandom(i * 5 + 2) * 2, // 2-4px (visible on 1080x1920)
-        delay: Math.floor(seededRandom(i * 5 + 3) * 100),
-        twinkleSpeed: 0.08 + seededRandom(i * 5 + 4) * 0.12, // 0.08-0.2 Hz (gentle, slow twinkle ~5-12 second cycles)
+        x: seededRandom(seedHash + i * 5) * 100,
+        y: seededRandom(seedHash + i * 5 + 1) * 100,
+        baseSize: 2 + seededRandom(seedHash + i * 5 + 2) * 2, // 2-4px (visible on 1080x1920)
+        delay: Math.floor(seededRandom(seedHash + i * 5 + 3) * 100),
+        twinkleSpeed: 0.08 + seededRandom(seedHash + i * 5 + 4) * 0.12, // 0.08-0.2 Hz (gentle, slow twinkle ~5-12 second cycles)
       });
     }
 
     return result;
-  }, []);
+  }, [seedHash]);
 
-  // Generate shooting stars for the video duration
+  // Generate shooting stars for the video duration using the seed
   const shootingStars = React.useMemo(() => {
-    return generateShootingStars(durationInFrames, fps);
-  }, [durationInFrames, fps]);
+    return generateShootingStars(durationInFrames, fps, seedHash);
+  }, [durationInFrames, fps, seedHash]);
 
   return (
     <div
