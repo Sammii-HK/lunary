@@ -300,17 +300,30 @@ export async function GET(
     `;
     const subscriptionStatus = subscriptionResult.rows[0]?.status || 'free';
 
+    // Basic friend connections require Lunary+
     if (
       !hasFeatureAccess(subscriptionStatus, user.plan, 'friend_connections')
     ) {
       return NextResponse.json(
         {
-          error: 'Relationship timing requires a Lunary+ subscription',
+          error: 'Friend connections require a Lunary+ subscription',
           requiresUpgrade: true,
         },
         { status: 403 },
       );
     }
+
+    // Best Times to Connect and Shared Events require Pro
+    const hasRelationshipTiming = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'relationship_timing',
+    );
+    const hasSharedEvents = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'shared_cosmic_events',
+    );
 
     // Get friend connection
     const connectionResult = await sql`
@@ -349,19 +362,20 @@ export async function GET(
       });
     }
 
-    // Calculate timing windows and shared events
-    const timingWindows = calculateRelationshipTiming(
-      userBirthChart,
-      friendBirthChart,
-    );
-    const sharedEvents = getSharedCosmicEvents(
-      userBirthChart,
-      friendBirthChart,
-    );
+    // Calculate timing windows and shared events (Pro-only features)
+    const timingWindows = hasRelationshipTiming
+      ? calculateRelationshipTiming(userBirthChart, friendBirthChart)
+      : [];
+    const sharedEvents = hasSharedEvents
+      ? getSharedCosmicEvents(userBirthChart, friendBirthChart)
+      : [];
 
     return NextResponse.json({
       timingWindows,
       sharedEvents,
+      // Include upgrade hints for Lunary+ users
+      requiresProForTiming: !hasRelationshipTiming,
+      requiresProForEvents: !hasSharedEvents,
     });
   } catch (error) {
     console.error('[Friends] Error calculating relationship timing:', error);
