@@ -5,6 +5,7 @@ import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Heading } from './ui/Heading';
 
 // Lazy load auth client to avoid webpack issues
 let betterAuthClient: any = null;
@@ -167,7 +168,9 @@ export function NewsletterSignupForm({
           )}
         >
           <div className='space-y-2'>
-            <h3 className='text-xl sm:text-2xl text-white'>{headline}</h3>
+            <Heading as='h2' variant='h2'>
+              {headline}
+            </Heading>
             <p className='text-sm sm:text-base text-lunary-accent-100/80'>
               {description}
             </p>
