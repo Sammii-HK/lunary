@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
     // Get top 3 friends sorted by last check-in (most recent first)
     const friendsResult = await sql`
       SELECT
+        fc.id as connection_id,
         fc.friend_id,
         fc.nickname,
         fc.synastry_score,
@@ -69,6 +70,7 @@ export async function GET(request: NextRequest) {
       }
 
       return {
+        connectionId: row.connection_id,
         friendId: row.friend_id,
         name: row.nickname || friendName || 'Friend',
         avatar: row.friend_avatar,
