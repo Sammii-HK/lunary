@@ -38,6 +38,8 @@ export interface MediumFormVideoProps {
   showProgress?: boolean;
   /** Text overlays (hook, cta, stamps, chapters) */
   overlays?: Overlay[];
+  /** Unique seed for generating different star positions and comet paths */
+  seed?: string;
 }
 
 /**
@@ -57,6 +59,7 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
   highlightTerms = [],
   showProgress = true,
   overlays = [],
+  seed = 'default',
 }) => {
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -90,7 +93,7 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
       })}
 
       {/* Stars render ON TOP of background images */}
-      <AnimatedBackground showStars={true} overlayMode={true} />
+      <AnimatedBackground showStars={true} overlayMode={true} seed={seed} />
 
       {/* Fade in from black */}
       <TransitionEffect

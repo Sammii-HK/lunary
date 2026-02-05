@@ -46,6 +46,8 @@ export interface LongFormVideoProps {
     title: string;
     subtitle?: string;
   };
+  /** Unique seed for generating different star positions and comet paths */
+  seed?: string;
 }
 
 /**
@@ -69,6 +71,7 @@ export const LongFormVideo: React.FC<LongFormVideoProps> = ({
   highlightTerms = [],
   showProgress = true,
   lowerThirdInfo,
+  seed = 'default',
 }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
@@ -112,7 +115,7 @@ export const LongFormVideo: React.FC<LongFormVideoProps> = ({
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.cosmicBlack }}>
       {/* Animated background */}
-      <AnimatedBackground showStars={true} />
+      <AnimatedBackground showStars={true} seed={seed} />
 
       {/* Background images with crossfade */}
       {images.map((image, index) => {

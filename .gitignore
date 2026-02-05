@@ -72,3 +72,5 @@ PRESS-KIT-TODO.md
 
 # Claude plans
 .claude/plans
+ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+.temp-sitemaps/

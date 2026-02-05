@@ -44,6 +44,8 @@ export interface ShortFormVideoProps {
   showProgress?: boolean;
   /** Text overlays (hook, cta, stamps, chapters) */
   overlays?: Overlay[];
+  /** Unique seed for generating different star positions and comet paths */
+  seed?: string;
 }
 
 /**
@@ -65,6 +67,7 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
   highlightTerms = [],
   showProgress = true,
   overlays = [],
+  seed = 'default',
 }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
@@ -99,7 +102,7 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
       )}
 
       {/* Stars render ON TOP of background image */}
-      <AnimatedBackground showStars={true} overlayMode={true} />
+      <AnimatedBackground showStars={true} overlayMode={true} seed={seed} />
 
       {/* Fade in from black */}
       <TransitionEffect

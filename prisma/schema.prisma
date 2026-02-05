@@ -34,11 +34,20 @@ model SocialPost {
   source_type       String?
   source_id         String?
   source_title      String?
+  // New content generation fields
+  content_type      String?   // app-demo, comparison, transit-alert, educational-deepdive, testimonial
+  grimoire_slug     String?   // Link to grimoire content (e.g. "numerology/life-path-5")
+  app_feature       String?   // Which app feature to demo (e.g. "daily-transits")
+  video_script      Json?     // Full VideoScript object with sections
+  starfield_seed    String?   // Unique seed for starfield generation
+  video_metadata    Json?     // Additional metadata (angle, aspect, facetTitle, etc.)
 
   @@index([status], map: "idx_social_posts_status")
   @@index([platform], map: "idx_social_posts_platform")
   @@index([createdAt], map: "idx_social_posts_created_at")
   @@index([scheduledDate], map: "idx_social_posts_scheduled_date")
+  @@index([content_type], map: "idx_social_posts_content_type")
+  @@index([grimoire_slug], map: "idx_social_posts_grimoire_slug")
   @@map("social_posts")
 }
 

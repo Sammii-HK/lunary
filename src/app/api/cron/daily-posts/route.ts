@@ -39,6 +39,7 @@ import {
   checkSeasonalEvents,
   calculateRealAspects,
   checkRetrogradeEvents,
+  getSignDescription,
 } from '../../../../../utils/astrology/cosmic-og';
 import {
   getAllPlatformHashtags,
@@ -686,9 +687,6 @@ async function runDailyPosts(dateStr: string) {
 
   // Generate platform-optimized hashtags
   const platformHashtags = getAllPlatformHashtags(dateStr, cosmicContext);
-  const dailyTransitTextSchedule = new Date(
-    dateStr + 'T13:00:00Z',
-  ).toISOString();
   const majorTransitBase = new Date(dateStr + 'T16:00:00Z');
   let majorTransitOffsetMinutes = 0;
   const getMajorTransitSchedule = () => {
@@ -950,7 +948,7 @@ async function runDailyPosts(dateStr: string) {
         platforms: ['pinterest'],
         imageUrls,
         alt: `Pinterest quote for ${dateStr}`,
-        scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
+        scheduledDate: new Date(dateStr + 'T17:00:00Z').toISOString(),
         variants: {
           pinterest: {
             content: pinterestQuoteContent,
@@ -3793,6 +3791,8 @@ function buildAspectTextPosts({
   for (const aspect of selectedAspects) {
     const planetA = aspect.planetA?.name || aspect.planetA;
     const planetB = aspect.planetB?.name || aspect.planetB;
+    const signA = aspect.planetA?.constellation || 'in transit';
+    const signB = aspect.planetB?.constellation || 'in transit';
     const aspectType = aspect.aspect?.toLowerCase() || 'aspect';
     const aspectLabel =
       aspectType.charAt(0).toUpperCase() + aspectType.slice(1);
@@ -3811,19 +3811,46 @@ function buildAspectTextPosts({
       domain: planetB.toLowerCase(),
     };
 
-    // Build description based on aspect type
+    // Get sign energies for richer context
+    const signAEnergy = signA !== 'in transit' ? getSignDescription(signA) : '';
+    const signBEnergy = signB !== 'in transit' ? getSignDescription(signB) : '';
+
+    // Build energy description based on aspect type
     const isTension = isTensionAspect(aspectType);
-    const connectionWord = isTension ? 'Tension between' : 'Connection between';
-    const description = `${connectionWord} ${planetAInfo.domain} and ${planetBInfo.domain}.`;
+    let energyDescription = '';
+
+    if (signAEnergy && signBEnergy) {
+      if (isTension) {
+        energyDescription = `${planetAInfo.domain} meets resistance, challenging ${signAEnergy} drive with ${signBEnergy} force`;
+      } else if (aspectType === 'conjunction') {
+        energyDescription = `${planetAInfo.domain} and ${planetBInfo.domain} unite, amplifying ${signAEnergy} energy`;
+      } else if (aspectType === 'trine' || aspectType === 'sextile') {
+        energyDescription = `${planetAInfo.domain} flows harmoniously with ${planetBInfo.domain}, blending ${signAEnergy} and ${signBEnergy} energies`;
+      } else {
+        energyDescription = `${planetAInfo.domain} connects with ${planetBInfo.domain}, weaving ${signAEnergy} and ${signBEnergy} themes`;
+      }
+    } else {
+      // Fallback if signs not available
+      const connectionWord = isTension
+        ? 'Tension between'
+        : 'Connection between';
+      energyDescription = `${connectionWord} ${planetAInfo.domain} and ${planetBInfo.domain}`;
+    }
 
     // Create seed for deterministic hook selection
     const seed = `aspect-${planetA}-${aspectType}-${planetB}-${dateStr}`;
     const engagementHook = getAspectHook(aspectType, seed);
 
-    // Threads: conversational with engagement hook, no CTA
+    // Format headline with signs
+    const headlineWithSigns =
+      signA !== 'in transit' && signB !== 'in transit'
+        ? `${planetA} in ${signA} ${aspectLabel.toLowerCase()}s ${planetB} in ${signB}`
+        : `${planetA} ${aspectLabel.toLowerCase()} ${planetB}`;
+
+    // Threads: conversational with engagement hook
     const threadsBody = [
-      `${planetA} ${aspectLabel.toLowerCase()} ${planetB} today.`,
-      description,
+      headlineWithSigns,
+      energyDescription,
       '',
       engagementHook,
     ].join('\n');
@@ -3833,18 +3860,15 @@ function buildAspectTextPosts({
     );
 
     // X/Twitter: compact with CTA
-    const xBody = [
-      `${planetA} ${aspectLabel.toLowerCase()} ${planetB} today.`,
-      description,
-      '',
-      'lunary.app',
-    ].join('\n');
+    const xBody = [headlineWithSigns, energyDescription, '', 'lunary.app'].join(
+      '\n',
+    );
     const xContent = addTransitHashtags(xBody, platformHashtags.twitter);
 
     // Bluesky: informational with CTA
     const blueskyBody = [
-      `${planetA} ${aspectLabel.toLowerCase()} ${planetB} today.`,
-      description,
+      headlineWithSigns,
+      energyDescription,
       '',
       'lunary.app',
     ].join('\n');
@@ -4253,57 +4277,166 @@ function buildTransitMilestoneTextPosts({
     Pluto: 'transformation, power, and rebirth',
   };
 
+  // Zodiac signs in order for calculating next sign
+  const zodiacSigns = [
+    'Aries',
+    'Taurus',
+    'Gemini',
+    'Cancer',
+    'Leo',
+    'Virgo',
+    'Libra',
+    'Scorpio',
+    'Sagittarius',
+    'Capricorn',
+    'Aquarius',
+    'Pisces',
+  ];
+
+  const getNextSign = (currentSign: string): string => {
+    const index = zodiacSigns.indexOf(currentSign);
+    if (index === -1) return 'the next sign';
+    return zodiacSigns[(index + 1) % zodiacSigns.length];
+  };
+
   for (const milestone of milestones) {
     const { planet, sign, milestoneLabel, remainingDays, totalDays } =
       milestone;
     const theme = planetThemes[planet] || `${planet.toLowerCase()} energy`;
+    const nextSign = getNextSign(sign);
+
+    // Get sign energies for transition messaging
+    const currentSignEnergy = getSignDescription(sign);
+    const nextSignEnergy = getSignDescription(nextSign);
 
     // Create seed for deterministic hook selection
     const seed = `milestone-${planet}-${sign}-${milestone.milestone}-${dateStr}`;
     const engagementHook = getEngagementHook('transitMilestone', seed);
 
-    // Format duration context
-    const durationContext =
-      milestone.milestone === 'halfway'
-        ? `This ${Math.round(totalDays / 365)}-year transit is at the midpoint.`
-        : `${milestoneLabel} in this transit.`;
+    // Milestones that use "leaving/entering" format (countdown to sign change)
+    const isCountdownMilestone = [
+      '1_month',
+      '2_weeks',
+      '1_week',
+      '3_days',
+      'tomorrow',
+    ].includes(milestone.milestone);
 
-    // Threads: reflective with engagement hook
-    const threadsBody = [
-      `${planet} in ${sign}: ${milestoneLabel}.`,
-      durationContext,
-      `Themes of ${theme} continue to unfold.`,
-      '',
-      engagementHook,
-    ].join('\n');
+    // Calculate duration display for next sign
+    const transitYears = Math.round(totalDays / 365);
+    const transitMonths = Math.round(totalDays / 30);
+    let durationInNextSign = '';
+    if (transitYears >= 1) {
+      durationInNextSign = `~${transitYears} ${transitYears === 1 ? 'year' : 'years'} in ${nextSign}`;
+    } else if (transitMonths >= 2) {
+      durationInNextSign = `~${transitMonths} months in ${nextSign}`;
+    } else {
+      durationInNextSign = `~${totalDays} days in ${nextSign}`;
+    }
+
+    let threadsBody = '';
+    let xBody = '';
+    let blueskyBody = '';
+    let postName = '';
+
+    if (isCountdownMilestone) {
+      // Format: "Jupiter leaves Aries and enters Taurus in ~1 week"
+      // "~12 years in Taurus"
+      // "Shifting from initiating energy to grounding energy"
+
+      const timeframe =
+        milestone.milestone === 'tomorrow'
+          ? 'tomorrow'
+          : milestone.milestone === '3_days'
+            ? '~3 days'
+            : milestone.milestone === '1_week'
+              ? '~1 week'
+              : milestone.milestone === '2_weeks'
+                ? '~2 weeks'
+                : '~1 month';
+
+      const headline = `${planet} leaves ${sign} and enters ${nextSign} in ${timeframe}`;
+      const energyShift = `Shifting from ${currentSignEnergy} to ${nextSignEnergy} energy`;
+
+      // Threads: detailed with engagement hook
+      threadsBody = [
+        headline,
+        durationInNextSign,
+        energyShift,
+        '',
+        engagementHook,
+      ].join('\n');
+
+      // X/Twitter: compact
+      xBody = [
+        headline,
+        durationInNextSign,
+        energyShift,
+        '',
+        'lunary.app',
+      ].join('\n');
+
+      // Bluesky: informational
+      blueskyBody = [
+        headline,
+        durationInNextSign,
+        energyShift,
+        '',
+        'Track slow planet transits at lunary.app',
+      ].join('\n');
+
+      postName = `Transit Milestone • ${planet} leaves ${sign}, enters ${nextSign} ${timeframe}`;
+    } else {
+      // For halfway, 6_months, 3_months: traditional milestone format
+      let durationContext = '';
+      if (milestone.milestone === 'halfway') {
+        const yearsOrMonths =
+          transitYears >= 1 ? `${transitYears}-year` : `${transitMonths}-month`;
+        durationContext = `This ${yearsOrMonths} transit is at the midpoint.`;
+      } else {
+        durationContext = `${milestoneLabel} in this transit.`;
+      }
+
+      // Threads: reflective with engagement hook
+      threadsBody = [
+        `${planet} in ${sign}: ${milestoneLabel}.`,
+        durationContext,
+        `Themes of ${theme} continue to unfold.`,
+        '',
+        engagementHook,
+      ].join('\n');
+
+      // X/Twitter: compact with CTA
+      xBody = [
+        `${planet} in ${sign}: ${milestoneLabel}.`,
+        `Themes of ${theme} continue.`,
+        '',
+        'lunary.app',
+      ].join('\n');
+
+      // Bluesky: informational with CTA
+      blueskyBody = [
+        `${planet} in ${sign}: ${milestoneLabel}.`,
+        durationContext,
+        '',
+        'Track slow planet transits at lunary.app',
+      ].join('\n');
+
+      postName = `Transit Milestone • ${planet} in ${sign} ${milestoneLabel}`;
+    }
+
     const threadsContent = addTransitHashtags(
       threadsBody,
       platformHashtags.threads,
     );
-
-    // X/Twitter: compact with CTA
-    const xBody = [
-      `${planet} in ${sign}: ${milestoneLabel}.`,
-      `Themes of ${theme} continue.`,
-      '',
-      'lunary.app',
-    ].join('\n');
     const xContent = addTransitHashtags(xBody, platformHashtags.twitter);
-
-    // Bluesky: informational with CTA
-    const blueskyBody = [
-      `${planet} in ${sign}: ${milestoneLabel}.`,
-      durationContext,
-      '',
-      'Track slow planet transits at lunary.app',
-    ].join('\n');
     const blueskyContent = addTransitHashtags(
       blueskyBody,
       platformHashtags.bluesky,
     );
 
     posts.push({
-      name: `Transit Milestone • ${planet} in ${sign} ${milestoneLabel}`,
+      name: postName,
       content: xContent,
       platforms: ['x', 'threads', 'bluesky'],
       imageUrls: [],
