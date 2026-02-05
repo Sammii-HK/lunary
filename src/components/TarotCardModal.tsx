@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { X } from 'lucide-react';
 import { TarotCard } from './TarotCard';
@@ -9,6 +10,7 @@ import { TarotTransitConnection } from './tarot/TarotTransitConnection';
 import type { BirthChartPlacement } from '@/context/UserContext';
 import type { AstroChartInformation } from '../../utils/astrology/astrology';
 import { isInDemoMode } from '@/lib/demo-mode';
+import { hapticService } from '@/services/native/haptic-service';
 
 interface TarotCardModalProps {
   card: {
@@ -31,11 +33,24 @@ export function TarotCardModal({
   userBirthday,
   currentTransits,
 }: TarotCardModalProps) {
+  const hasTriggeredHaptic = useRef(false);
+
   useModal({
     isOpen,
     onClose,
     closeOnClickOutside: false,
   });
+
+  // Trigger haptic when modal opens
+  useEffect(() => {
+    if (isOpen && card && !hasTriggeredHaptic.current) {
+      hapticService.medium(); // Card reveal feeling
+      hasTriggeredHaptic.current = true;
+    }
+    if (!isOpen) {
+      hasTriggeredHaptic.current = false;
+    }
+  }, [isOpen, card]);
 
   if (!isOpen || !card) return null;
 

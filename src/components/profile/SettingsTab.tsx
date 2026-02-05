@@ -42,6 +42,14 @@ const ReferralProgram = dynamic(
   { ssr: false },
 );
 
+const NativeAppSettings = dynamic(
+  () =>
+    import('@/components/native/NativeAppSettings').then((m) => ({
+      default: m.NativeAppSettings,
+    })),
+  { ssr: false },
+);
+
 type SettingSection = {
   id: string;
   title: string;
@@ -94,6 +102,12 @@ export function SettingsTab({
       title: 'Referral Program',
       description: 'Share the magic and unlock rewards.',
       content: <ReferralProgram />,
+    },
+    {
+      id: 'app',
+      title: 'App Settings',
+      description: 'Haptics, offline content, and app preferences.',
+      content: <NativeAppSettings />,
     },
   ];
 

@@ -147,7 +147,12 @@ export async function GET(request: NextRequest) {
       totals: {
         total_accounts: dauWauMau?.total_accounts ?? null,
       },
+      // Engagement events trends (default)
       trends: dauWauMau?.trends ?? [],
+      // Additional trend series for different metric types
+      app_opened_trends: dauWauMau?.app_opened_trends ?? [],
+      signed_in_product_trends: dauWauMau?.signed_in_product_trends ?? [],
+      grimoire_trends: dauWauMau?.grimoire_trends ?? [],
       cohorts: cohorts?.cohorts ?? [],
       conversion_funnel: conversions?.funnel ?? null,
     };
@@ -222,11 +227,38 @@ export async function GET(request: NextRequest) {
         csvContent += `${row.metric},${row.value}\n`;
       });
 
-      // Trends section
+      // Trends section - Engagement Events
       if (exportData.trends.length > 0) {
-        csvContent += '\nDAILY TRENDS\n';
+        csvContent += '\nDAILY TRENDS (Engagement Events)\n';
         csvContent += 'Date,DAU,WAU,MAU\n';
         exportData.trends.forEach((trend: any) => {
+          csvContent += `${trend.date},${trend.dau},${trend.wau},${trend.mau}\n`;
+        });
+      }
+
+      // Trends section - App Opened
+      if (exportData.app_opened_trends.length > 0) {
+        csvContent += '\nDAILY TRENDS (App Opened)\n';
+        csvContent += 'Date,DAU,WAU,MAU\n';
+        exportData.app_opened_trends.forEach((trend: any) => {
+          csvContent += `${trend.date},${trend.dau},${trend.wau},${trend.mau}\n`;
+        });
+      }
+
+      // Trends section - Signed-In Product Usage
+      if (exportData.signed_in_product_trends.length > 0) {
+        csvContent += '\nDAILY TRENDS (Signed-In Product Usage)\n';
+        csvContent += 'Date,DAU,WAU,MAU\n';
+        exportData.signed_in_product_trends.forEach((trend: any) => {
+          csvContent += `${trend.date},${trend.dau},${trend.wau},${trend.mau}\n`;
+        });
+      }
+
+      // Trends section - Grimoire
+      if (exportData.grimoire_trends.length > 0) {
+        csvContent += '\nDAILY TRENDS (Grimoire)\n';
+        csvContent += 'Date,DAU,WAU,MAU\n';
+        exportData.grimoire_trends.forEach((trend: any) => {
           csvContent += `${trend.date},${trend.dau},${trend.wau},${trend.mau}\n`;
         });
       }

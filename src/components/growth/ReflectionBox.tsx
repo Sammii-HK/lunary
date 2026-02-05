@@ -8,6 +8,7 @@ import {
   extractMoodTags,
   extractCardReferences,
 } from '@/lib/journal/extract-moments';
+import { useHaptic } from '@/hooks/useHaptic';
 
 interface ReflectionBoxProps {
   context: 'horoscope' | 'tarot' | 'moon';
@@ -30,6 +31,7 @@ export function ReflectionBox({
   const [reflection, setReflection] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const haptic = useHaptic();
 
   if (!isAuthenticated) {
     return null;
@@ -69,6 +71,7 @@ export function ReflectionBox({
       });
 
       if (response.ok) {
+        haptic.success();
         setIsSaved(true);
         setTimeout(() => {
           setReflection('');
@@ -77,6 +80,7 @@ export function ReflectionBox({
       }
     } catch (error) {
       console.error('[ReflectionBox] Failed to save:', error);
+      haptic.error();
     } finally {
       setIsSubmitting(false);
     }

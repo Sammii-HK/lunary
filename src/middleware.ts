@@ -295,7 +295,7 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
       });
     }
 
-    const trackingUrl = new URL('/api/telemetry/pageview', request.url);
+    const trackingUrl = new URL('/api/ether/visit', request.url);
     const headers = new Headers();
     headers.set('content-type', 'application/json');
     headers.set('x-lunary-anon-id', anonId);
@@ -338,7 +338,7 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     );
 
     // Track app_opened (one per user per UTC day) - server-side for reliability
-    const appOpenedUrl = new URL('/api/telemetry/app-opened', request.url);
+    const appOpenedUrl = new URL('/api/ether/open', request.url);
     console.log('[middleware] Calling app_opened:', { path: finalPath });
     event.waitUntil(
       fetch(appOpenedUrl, {
@@ -359,10 +359,7 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
 
     // Track product_opened (one per authenticated user per UTC day)
     // Endpoint checks auth and skips if user not logged in
-    const productOpenedUrl = new URL(
-      '/api/telemetry/product-opened',
-      request.url,
-    );
+    const productOpenedUrl = new URL('/api/ether/product', request.url);
     event.waitUntil(
       fetch(productOpenedUrl, {
         method: 'POST',

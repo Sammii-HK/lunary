@@ -1,3 +1,5 @@
+import { getISOWeek, getISOWeekYear } from 'date-fns';
+
 export interface BlogPost {
   id: string;
   title: string;
@@ -51,12 +53,14 @@ export function generateWeeks(): BlogPost[] {
   const currentWeekStart = getMonday(today);
 
   let weekDate = new Date(startOf2025);
-  let weekNumber = 1;
-  const year = 2025;
 
   while (weekDate <= currentWeekStart) {
     const weekEnd = new Date(weekDate);
     weekEnd.setDate(weekEnd.getDate() + 6);
+
+    // Use ISO week numbering - resets each year
+    const weekNumber = getISOWeek(weekDate);
+    const year = getISOWeekYear(weekDate);
 
     weeks.push({
       id: `week-${weekNumber}-${year}`,
@@ -79,7 +83,6 @@ export function generateWeeks(): BlogPost[] {
 
     weekDate = new Date(weekDate);
     weekDate.setDate(weekDate.getDate() + 7);
-    weekNumber++;
   }
 
   return weeks;

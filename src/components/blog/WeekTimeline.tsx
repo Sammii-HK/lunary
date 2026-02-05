@@ -1,14 +1,22 @@
 // Visual timeline of the week's major cosmic events
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
-import { getPlanetSymbol, getMoonPhaseIcon } from '@/constants/symbols';
+import {
+  getPlanetSymbol,
+  getMoonPhaseIcon,
+  getAspectSymbol,
+  getZodiacSymbol,
+} from '@/constants/symbols';
 
 interface TimelineEvent {
   date: Date;
   type: 'ingress' | 'retrograde' | 'direct' | 'moon-phase' | 'aspect';
   title: string;
   planet?: string;
+  planetB?: string;
+  aspect?: string;
   sign?: string;
   phase?: string;
 }
@@ -20,6 +28,72 @@ interface WeekTimelineProps {
 }
 
 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// Format event title with astronomical symbols
+function formatEventTitle(event: TimelineEvent): string {
+  if (
+    event.type === 'aspect' &&
+    event.planet &&
+    event.planetB &&
+    event.aspect
+  ) {
+    const planetASymbol = getPlanetSymbol(event.planet);
+    const aspectSymbol = getAspectSymbol(event.aspect);
+    const planetBSymbol = getPlanetSymbol(event.planetB);
+    return `${planetASymbol} ${event.planet} ${aspectSymbol} ${planetBSymbol} ${event.planetB}`;
+  }
+  if (event.type === 'ingress' && event.planet && event.sign) {
+    const planetSymbol = getPlanetSymbol(event.planet);
+    const signSymbol = getZodiacSymbol(event.sign);
+    return `${planetSymbol} ${event.planet} enters ${signSymbol} ${event.sign}`;
+  }
+  if (
+    (event.type === 'retrograde' || event.type === 'direct') &&
+    event.planet
+  ) {
+    const planetSymbol = getPlanetSymbol(event.planet);
+    return `${planetSymbol} ${event.title}`;
+  }
+  return event.title;
+}
+
+// Tooltip component with proper positioning
+function EventTooltip({
+  children,
+  content,
+  dayIndex,
+}: {
+  children: React.ReactNode;
+  content: React.ReactNode;
+  dayIndex: number;
+}) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Determine tooltip alignment based on position in the week
+  // Left columns align left, right columns align right, middle centers
+  const getAlignment = () => {
+    if (dayIndex <= 1) return 'left-0';
+    if (dayIndex >= 5) return 'right-0';
+    return 'left-1/2 -translate-x-1/2';
+  };
+
+  return (
+    <div
+      className='relative'
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
+    >
+      {children}
+      {isVisible && (
+        <div
+          className={`absolute bottom-full mb-2 px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-xs z-20 whitespace-nowrap ${getAlignment()}`}
+        >
+          {content}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function getEventColor(type: TimelineEvent['type']): string {
   switch (type) {
@@ -113,43 +187,52 @@ export function WeekTimeline({
               <div key={dayIndex} className='flex flex-col items-center gap-1'>
                 {dayEvents.length > 0 ? (
                   dayEvents.slice(0, 2).map((event, eventIndex) => (
-                    <div
+                    <EventTooltip
                       key={eventIndex}
-                      className='group relative cursor-default'
+                      content={formatEventTitle(event)}
+                      dayIndex={dayIndex}
                     >
-                      {event.type === 'moon-phase' && event.phase ? (
-                        <Image
-                          src={getMoonPhaseIcon(event.phase)}
-                          alt={event.phase}
-                          width={24}
-                          height={24}
-                          className='opacity-80'
-                        />
-                      ) : (
-                        <div
-                          className={`w-6 h-6 rounded-full ${getEventColor(
-                            event.type,
-                          )} flex items-center justify-center text-xs font-medium text-zinc-900`}
-                        >
-                          {event.planet
-                            ? getPlanetSymbol(event.planet)
-                            : event.type.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-
-                      {/* Tooltip */}
-                      <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10'>
-                        {event.title}
+                      <div className='cursor-default'>
+                        {event.type === 'moon-phase' && event.phase ? (
+                          <Image
+                            src={getMoonPhaseIcon(event.phase)}
+                            alt={event.phase}
+                            width={24}
+                            height={24}
+                            className='opacity-80'
+                          />
+                        ) : (
+                          <div
+                            className={`w-6 h-6 rounded-full ${getEventColor(
+                              event.type,
+                            )} flex items-center justify-center text-xs font-medium text-zinc-900`}
+                          >
+                            {event.planet
+                              ? getPlanetSymbol(event.planet)
+                              : event.type.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    </EventTooltip>
                   ))
                 ) : (
                   <div className='w-6 h-6' /> // Spacer for empty days
                 )}
                 {dayEvents.length > 2 && (
-                  <span className='text-xs text-zinc-500'>
-                    +{dayEvents.length - 2}
-                  </span>
+                  <EventTooltip
+                    content={
+                      <div className='space-y-1'>
+                        {dayEvents.slice(2).map((e, i) => (
+                          <div key={i}>{formatEventTitle(e)}</div>
+                        ))}
+                      </div>
+                    }
+                    dayIndex={dayIndex}
+                  >
+                    <span className='text-xs text-zinc-500 cursor-default'>
+                      +{dayEvents.length - 2}
+                    </span>
+                  </EventTooltip>
                 )}
               </div>
             ))}

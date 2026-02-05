@@ -620,12 +620,15 @@ export async function GET(request: NextRequest) {
     });
 
     const endOfRangeDay = toUtcStartOfDay(range.end);
+    // Lookback 30 days before today to find returning users
+    const lookbackStart = new Date(endOfRangeDay);
+    lookbackStart.setUTCDate(lookbackStart.getUTCDate() - 30);
     const lookbackEnd = new Date(endOfRangeDay);
     lookbackEnd.setUTCDate(lookbackEnd.getUTCDate() - 1);
     // Use activityMap (engagement events) for returning users to match DAU/WAU/MAU
     const earlierLookbackSet = gatherUsersBetween(
       activityMap,
-      lookbackEnd,
+      lookbackStart,
       lookbackEnd,
     );
     const currentDaySet =

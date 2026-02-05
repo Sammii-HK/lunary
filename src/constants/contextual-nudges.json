@@ -1,6 +1,8 @@
 {
   "version": 2,
   "rules": [
+    { "match": "^/blog/week/", "hub": "weeklyForecast" },
+    { "match": "^/blog", "hub": "weeklyForecast" },
     { "match": "^/grimoire/tarot/spreads$", "hub": "tarotSpreadsIndex" },
     { "match": "^/grimoire/tarot/spreads/", "hub": "tarotSpreadsDetail" },
     { "match": "^/tarot/spreads$", "hub": "tarotSpreadsIndex" },
@@ -708,6 +710,41 @@
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "Knowledge becomes useful when it's about YOU."
+      }
+    ],
+
+    "weeklyForecast": [
+      {
+        "headline": "Same week, different impact for everyone",
+        "subline": "These transits hit your chart differently based on your placements. See where they land for you.",
+        "buttonLabel": "See this in my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Same week, different impact. See YOUR chart."
+      },
+      {
+        "headline": "Generic weekly forecast? Your chart is more specific.",
+        "subline": "Which houses are these transits activating for you? Your placements tell a different story.",
+        "buttonLabel": "Get my personalised view",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Generic forecast? Your chart is more specific."
+      },
+      {
+        "headline": "This week's transits are hitting specific houses in your chart",
+        "subline": "The aspects and moon phases affect everyone differently based on their natal placements.",
+        "buttonLabel": "See my transits",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "This week's transits hit YOUR chart differently."
+      },
+      {
+        "headline": "Your rising sign changes how you read this forecast",
+        "subline": "Many astrologers say read for your rising sign. See your full chart to know which houses are active.",
+        "buttonLabel": "Find my rising sign",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Your rising sign changes how you read this."
       }
     ]
   }

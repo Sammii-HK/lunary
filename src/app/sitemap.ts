@@ -34,7 +34,10 @@ import {
 } from '@/constants/grimoire/numerology-extended-data';
 import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
 import { getAllProducts } from '@/lib/shop/generators';
+
+dayjs.extend(isoWeek);
 import { getAllSynastryAspectSlugs } from '@/constants/seo/synastry-aspects';
 import { getAllCompatibilitySlugs } from '@/constants/seo/compatibility-content';
 import {
@@ -569,19 +572,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes = staticPageConfigs.map(createRouteEntry);
 
   // Generate all blog week posts (from start of 2025 to current week)
+  // Uses ISO week numbering which resets each year
   const blogRoutes: MetadataRoute.Sitemap = [];
   const startOf2025 = dayjs('2025-01-06'); // First Monday of 2025
   const today = dayjs();
   const currentWeekStart = today.startOf('week').add(1, 'day'); // Get Monday of current week
 
   let weekDate = startOf2025;
-  let weekNumber = 1;
-  const year = 2025;
 
   while (
     weekDate.isBefore(currentWeekStart) ||
     weekDate.isSame(currentWeekStart, 'day')
   ) {
+    // Use ISO week numbering - resets each year
+    const weekNumber = weekDate.isoWeek();
+    const year = weekDate.isoWeekYear();
     const weekSlug = `week-${weekNumber}-${year}`;
     blogRoutes.push({
       url: `${baseUrl}/blog/week/${weekSlug}`,
@@ -591,7 +596,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
 
     weekDate = weekDate.add(7, 'day');
-    weekNumber++;
   }
 
   // Generate blog pagination pages

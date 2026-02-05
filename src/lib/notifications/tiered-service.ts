@@ -12,6 +12,7 @@ import {
   PersonalizedContext,
 } from './copy-library';
 import { getEnergyThemeFromCosmicData } from './energy-theme';
+import { broadcastNativePush } from './native-push-sender';
 
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
@@ -458,19 +459,54 @@ export async function sendTieredNotification(
       }
     }
 
+    // Also send to native push devices (iOS/Android via FCM)
+    let nativeSuccessful = 0;
+    let nativeFailed = 0;
+    try {
+      // Map notification type to preference key
+      const preferenceKey = mapTypeToPreferenceKey(type);
+      const nativePayload = {
+        title: getNotificationCopy(cadence, type, 'free', {}).title,
+        body: getNotificationCopy(cadence, type, 'free', {}).body,
+        data: {
+          url: getNotificationUrl(cadence, type, cosmicData),
+          type,
+          cadence,
+        },
+      };
+
+      const nativeResult = await broadcastNativePush(
+        nativePayload,
+        preferenceKey,
+      );
+      nativeSuccessful = nativeResult.successful;
+      nativeFailed = nativeResult.failed;
+
+      if (nativeResult.tokens > 0) {
+        console.log(
+          `📱 Native push: ${nativeSuccessful} success, ${nativeFailed} failed out of ${nativeResult.tokens}`,
+        );
+      }
+    } catch (nativeError) {
+      console.error('Native push failed (non-blocking):', nativeError);
+    }
+
     await markEventAsSent(today, eventKey, cadence, type, 5, 'daily');
 
+    const totalSuccessful = successful + nativeSuccessful;
+    const totalFailed = failed + nativeFailed;
+
     console.log(
-      `✅ Tiered notification sent: ${successful} successful, ${failed} failed`,
+      `✅ Tiered notification sent: ${totalSuccessful} successful (${successful} web, ${nativeSuccessful} native), ${totalFailed} failed`,
     );
 
     return {
-      success: successful > 0,
+      success: totalSuccessful > 0,
       totalRecipients: users.length,
       freeRecipients: freeUsers.length,
       paidRecipients: paidUsers.length,
-      successful,
-      failed,
+      successful: totalSuccessful,
+      failed: totalFailed,
       eventKey,
       failureDetails: failed > 0 ? failureDetails : undefined,
     };
@@ -592,6 +628,29 @@ function getNotificationUrl(
 
   // Default fallback
   return '/app';
+}
+
+/**
+ * Map notification type to native push preference key
+ */
+function mapTypeToPreferenceKey(type: string): string | undefined {
+  const mapping: Record<string, string> = {
+    tarot: 'daily_card',
+    energy_theme: 'daily_card',
+    insight: 'daily_card',
+    moon_phase: 'moon_phase',
+    moon_circle: 'moon_phase',
+    transit_change: 'transit',
+    sky_shift: 'transit',
+    cosmic_changes: 'transit',
+    personal_transit: 'transit',
+    rising_activation: 'transit',
+    weekly_report: 'weekly_report',
+    sunday_reset: 'weekly_report',
+    monday_week_ahead: 'weekly_report',
+    friday_tarot: 'daily_card',
+  };
+  return mapping[type];
 }
 
 function selectDailyNotificationType(cosmicData?: any): string {

@@ -1,12 +1,14 @@
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { TarotKeywords } from '@/components/grimoire/TarotKeywords';
 import { tarotCards } from '../../../../../utils/tarot/tarot-cards';
 import { tarotSuits } from '@/constants/tarot';
 import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createTarotCardSchema, renderJsonLd } from '@/lib/schema';
 import { getTarotYesNo } from '@/utils/tarot/yes-no';
+import { deriveReversedKeywords } from '@/utils/tarot/reversed-keywords';
 
 // Helper to find card by slug
 
@@ -158,6 +160,9 @@ export default async function TarotCardPage({
     suit: cardData.suit,
     keywords: cardData.card.keywords,
   });
+
+  // Generate reversed keywords from upright keywords
+  const reversedKeywords = deriveReversedKeywords(cardData.card.keywords);
 
   // Generate related cards (simplified)
   const relatedCards: Array<{ name: string; href: string; type: string }> = [];
@@ -439,6 +444,12 @@ Mystical Properties: ${suitInfo.mysticalProperties}`
         ctaText={`Want a personalized interpretation of ${cardData.card.name}?`}
         ctaHref='/pricing'
         faqs={faqs}
+        components={
+          <TarotKeywords
+            uprightKeywords={cardData.card.keywords}
+            reversedKeywords={reversedKeywords}
+          />
+        }
         cosmicConnections={
           <CosmicConnections
             entityType='tarot'

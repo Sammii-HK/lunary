@@ -3,13 +3,15 @@ import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../utils/string';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 export const metadata: Metadata = {
-  title: 'Days of the Week Correspondences: Planetary Magic | Lunary',
+  title:
+    'Magical Days of the Week: Planetary Correspondences & Best Spells for Each Day',
   description:
-    'Complete guide to magical correspondences for each day. Learn planetary rulers, best magic for Monday through Sunday, and timing your spells.',
+    'Complete guide to planetary days and magical timing. Learn which day is best for love spells (Friday), money magic (Thursday), protection (Saturday), and more. Plan your spellwork by planetary ruler.',
   keywords: [
     'day correspondences',
     'planetary days',
@@ -84,13 +86,37 @@ const faqs = [
     answer:
       'Yes, any magic can be done any day. However, timing your work to match the planetary ruler of the day adds extra power and alignment. If you cannot wait for the ideal day, work during the corresponding planetary hour instead.',
   },
+  {
+    question: 'What day is best for protection spells?',
+    answer:
+      'Saturday (Saturn) is the primary day for protection magic, banishing, and boundary setting. Tuesday (Mars) also works well for aggressive protection and warding off enemies. For gentle protective blessings, Sunday (Sun) provides strength and vitality.',
+  },
+  {
+    question: 'What day should I do divination?',
+    answer:
+      'Monday (Moon) is ideal for psychic work, intuition, and dream divination. Wednesday (Mercury) supports intellectual divination like tarot interpretation and pendulum work. Full Moon Mondays are especially powerful for scrying.',
+  },
 ];
 
 export default function DaysIndexPage() {
   const days = Object.entries(correspondencesData.days);
 
+  // Create ItemList schema for days
+  const daysListSchema = createItemListSchema({
+    name: 'Magical Days of the Week',
+    description:
+      'Complete guide to planetary day correspondences for magical timing and spellwork.',
+    url: 'https://lunary.app/grimoire/correspondences/days',
+    items: days.map(([name, data]) => ({
+      name: `${name} - ${data.planet} Day`,
+      url: `https://lunary.app/grimoire/correspondences/days/${stringToKebabCase(name)}`,
+      description: `${name} is ruled by ${data.planet}. Best for ${data.uses.slice(0, 2).join(', ')}.`,
+    })),
+  });
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(daysListSchema)}
       <SEOContentTemplate
         title='Days of the Week | Lunary'
         h1='Days of the Week: Planetary Correspondences'
@@ -159,6 +185,22 @@ Banishing, protection, boundaries, endings, long-term goals. Use black candles.
               ['Thursday', 'Jupiter', 'Abundance, luck', 'Blue, Purple'],
               ['Friday', 'Venus', 'Love, beauty', 'Green, Pink'],
               ['Saturday', 'Saturn', 'Banishing, endings', 'Black'],
+            ],
+          },
+          {
+            title: 'Quick Day Finder by Intention',
+            headers: ['I want to...', 'Best Day', 'Backup Day'],
+            rows: [
+              ['Attract love', 'Friday (Venus)', 'Monday (Moon)'],
+              ['Get more money', 'Thursday (Jupiter)', 'Sunday (Sun)'],
+              ['Protect myself', 'Saturday (Saturn)', 'Tuesday (Mars)'],
+              ['Improve communication', 'Wednesday (Mercury)', 'Sunday (Sun)'],
+              ['Banish negativity', 'Saturday (Saturn)', 'Tuesday (Mars)'],
+              ['Boost confidence', 'Sunday (Sun)', 'Tuesday (Mars)'],
+              ['Enhance intuition', 'Monday (Moon)', 'Wednesday (Mercury)'],
+              ['Heal relationships', 'Friday (Venus)', 'Monday (Moon)'],
+              ['Start something new', 'Sunday (Sun)', 'Thursday (Jupiter)'],
+              ['End bad habits', 'Saturday (Saturn)', 'Tuesday (Mars)'],
             ],
           },
         ]}

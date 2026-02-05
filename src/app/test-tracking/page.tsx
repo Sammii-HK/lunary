@@ -80,7 +80,7 @@ export default function TestTrackingPage() {
       </div>
       <div className='mt-4 text-sm text-gray-600'>
         <p>Check browser console for detailed logs.</p>
-        <p>Also check Network tab for /api/analytics/conversion requests.</p>
+        <p>Also check Network tab for /api/ether/cv requests.</p>
       </div>
     </div>
   );

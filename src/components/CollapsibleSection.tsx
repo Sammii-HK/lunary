@@ -3,6 +3,7 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { hapticService } from '@/services/native/haptic-service';
 
 interface CollapsibleSectionProps {
   title: string | ReactNode;
@@ -53,10 +54,15 @@ export function CollapsibleSection({
     }
   }, [isCollapsed, titleString, persistState]);
 
+  const handleToggle = () => {
+    hapticService.light();
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
     <div className={cn('space-y-4', className)} data-collapsible={titleString}>
       <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
+        onClick={handleToggle}
         className='flex w-full items-center justify-between rounded-lg border border-zinc-800/50 bg-zinc-900/30 px-4 py-3 text-left transition-colors hover:bg-zinc-900/50'
       >
         <div className='flex items-center gap-3'>

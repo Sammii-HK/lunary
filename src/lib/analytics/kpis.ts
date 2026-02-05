@@ -294,6 +294,8 @@ export async function getEngagementOverview(
   const rangeStartKey = range.start.toISOString().slice(0, 10);
   const rangeEndKey = range.end.toISOString().slice(0, 10);
 
+  // Returning DAU = users active on day X who were also active on ANY previous day
+  // within the lookback window (30 days before the range start)
   const dauTrendResult = await sql.query(
     `
       WITH ${buildCanonicalEventCtes(1, 3)}
@@ -306,7 +308,8 @@ export async function getEngagementOverview(
               SELECT 1
               FROM canonical prev
               WHERE prev.canonical_identity = c.canonical_identity
-                AND prev.day = c.day - 1
+                AND prev.day < c.day
+                AND prev.day >= c.day - 30
             )
           ) AS returning_dau
       FROM canonical c
@@ -491,35 +494,39 @@ export async function getEngagementOverview(
     ),
   };
 
-  // Returning DAU (selected end day): active on end day AND also active on an earlier day in the selected range.
+  // Returning DAU (selected end day): active on end day AND also active on ANY earlier day
+  // within a 30-day lookback window. This measures users who have returned, not just D1 retention.
   const endDayDate = parseIsoDay(endDayKey);
-  const prevDayDate = new Date(endDayDate);
-  prevDayDate.setUTCDate(prevDayDate.getUTCDate() - 1);
-  const prevDayKey = toDateKey(prevDayDate);
-  const d1Start = new Date(prevDayDate);
-  d1Start.setUTCHours(0, 0, 0, 0);
-  const d1End = new Date(endDayDate);
-  d1End.setUTCHours(23, 59, 59, 999);
+  const lookbackStart = new Date(endDayDate);
+  lookbackStart.setUTCDate(lookbackStart.getUTCDate() - 30);
+  const lookbackStartKey = toDateKey(lookbackStart);
+
+  // Extend the query window to include the lookback period
+  const extendedStart = new Date(lookbackStart);
+  extendedStart.setUTCHours(0, 0, 0, 0);
+  const extendedEnd = new Date(endDayDate);
+  extendedEnd.setUTCHours(23, 59, 59, 999);
 
   const returningDauResult = await sql.query(
     `
       WITH ${buildCanonicalEventCtes(1, 3)}
-      SELECT COUNT(*) AS returning_dau
+      SELECT COUNT(DISTINCT c.canonical_identity) AS returning_dau
       FROM canonical c
       WHERE c.day = $4::date
         AND EXISTS (
           SELECT 1
           FROM canonical prev
           WHERE prev.canonical_identity = c.canonical_identity
-            AND prev.day = $5::date
+            AND prev.day < $4::date
+            AND prev.day >= $5::date
         )
     `,
     [
-      formatTimestamp(d1Start),
-      formatTimestamp(d1End),
+      formatTimestamp(extendedStart),
+      formatTimestamp(extendedEnd),
       eventType,
       endDayKey,
-      prevDayKey,
+      lookbackStartKey,
     ],
   );
   const returningDau = Number(returningDauResult.rows[0]?.returning_dau || 0);
@@ -705,7 +712,7 @@ export async function getEngagementOverview(
       anomalies.push('WAU is greater than MAU');
     }
     if (returningDau > dau) {
-      anomalies.push('Returning DAU (D1) is greater than DAU');
+      anomalies.push('Returning DAU is greater than DAU');
     }
     if (returningWau > wau) {
       anomalies.push('Returning WAU overlap is greater than WAU');

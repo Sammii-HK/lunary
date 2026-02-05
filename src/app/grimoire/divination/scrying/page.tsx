@@ -8,35 +8,35 @@ export const revalidate = 2592000;
 const scryingMethods = [
   {
     slug: 'crystal-ball',
-    name: 'Crystal Ball',
-    description: 'Classic divination using a clear sphere to receive visions',
+    name: 'Crystal Ball Scrying',
+    description:
+      'Classic divination using a clear or smoky sphere to receive visions and prophetic insights',
   },
   {
     slug: 'mirror',
-    name: 'Mirror Scrying',
-    description: 'Using a black mirror or reflective surface for visions',
+    name: 'Black Mirror Scrying',
+    description:
+      'Using a dark reflective surface to peer into other realms and contact spirits',
   },
   {
     slug: 'water',
-    name: 'Water Scrying',
-    description: 'Gazing into still water to perceive images and messages',
+    name: 'Water Scrying (Hydromancy)',
+    description:
+      'Gazing into still water for visions connected to lunar and emotional energies',
   },
   {
     slug: 'fire',
-    name: 'Fire Scrying',
-    description: 'Reading flames and embers for divination and insight',
-  },
-  {
-    slug: 'smoke',
-    name: 'Smoke Scrying',
-    description: 'Interpreting patterns in rising smoke from incense or fire',
+    name: 'Fire Scrying (Pyromancy)',
+    description:
+      'Reading dancing flames and their colors for divination and ancestral connection',
   },
 ];
 
 export const metadata: Metadata = {
-  title: 'Scrying: How to Use a Crystal Ball or Mirror for Divination | Lunary',
+  title:
+    'Scrying for Beginners: Crystal Ball, Mirror & Water Gazing Guide [2026]',
   description:
-    'Master scrying techniques including crystal ball gazing, black mirror scrying, water scrying, and fire scrying. Learn how to receive psychic visions through reflective surfaces.',
+    'Complete scrying guide for beginners: crystal ball gazing, black mirror scrying, water scrying (hydromancy), and fire scrying (pyromancy). Step-by-step techniques to receive psychic visions.',
   keywords: [
     'scrying',
     'crystal ball',

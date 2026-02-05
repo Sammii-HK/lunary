@@ -361,7 +361,7 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
                   process.env.NODE_ENV === 'production'
                     ? 'https://lunary.app'
                     : 'http://localhost:3000';
-                await fetch(`${baseUrl}/api/analytics/conversion`, {
+                await fetch(`${baseUrl}/api/ether/cv`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
@@ -397,7 +397,7 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
               process.env.NODE_ENV === 'production'
                 ? 'https://lunary.app'
                 : 'http://localhost:3000';
-            await fetch(`${baseUrl}/api/analytics/conversion`, {
+            await fetch(`${baseUrl}/api/ether/cv`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

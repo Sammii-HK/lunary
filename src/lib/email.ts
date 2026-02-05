@@ -253,7 +253,7 @@ function buildTrackingPixelUrl(tracking?: EmailTrackingOptions) {
     return null;
   }
 
-  const url = new URL('/api/analytics/track-notification', APP_BASE_URL);
+  const url = new URL('/api/ether/pulse', APP_BASE_URL);
   url.searchParams.set('user', tracking.userId);
   url.searchParams.set('event', 'opened');
 
