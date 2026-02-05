@@ -24,44 +24,8 @@ export function OptimizedDemoIframe({
   preload = true,
 }: OptimizedDemoIframeProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [loadStartTime] = useState(Date.now());
   const [loadTime, setLoadTime] = useState<number | null>(null);
-
-  // Prevent scroll events from escaping the iframe container
-  // When user hovers over the demo, lock body scroll to prevent page scrolling
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    let savedOverflow = '';
-    let savedPosition = '';
-
-    const lockBodyScroll = () => {
-      savedOverflow = document.body.style.overflow;
-      savedPosition = document.body.style.position;
-      document.body.style.overflow = 'hidden';
-    };
-
-    const unlockBodyScroll = () => {
-      document.body.style.overflow = savedOverflow;
-      document.body.style.position = savedPosition;
-    };
-
-    container.addEventListener('mouseenter', lockBodyScroll);
-    container.addEventListener('mouseleave', unlockBodyScroll);
-    container.addEventListener('touchstart', lockBodyScroll, { passive: true });
-    container.addEventListener('touchend', unlockBodyScroll, { passive: true });
-
-    return () => {
-      container.removeEventListener('mouseenter', lockBodyScroll);
-      container.removeEventListener('mouseleave', unlockBodyScroll);
-      container.removeEventListener('touchstart', lockBodyScroll);
-      container.removeEventListener('touchend', unlockBodyScroll);
-      // Ensure body scroll is restored on unmount
-      unlockBodyScroll();
-    };
-  }, []);
 
   // For lazy loading, use intersection observer
   const { ref: observerRef, inView } = useInView({
@@ -149,12 +113,10 @@ export function OptimizedDemoIframe({
     >
       {/* iPhone frame */}
       <div
-        ref={containerRef}
         className='relative w-full h-full bg-zinc-950 rounded-[2.5rem] border border-zinc-800 overflow-hidden'
         style={{
           boxShadow:
             '0 18px 28px rgba(0, 0, 0, 0.28), 0 0 22px rgba(178, 126, 255, 0.18)',
-          overscrollBehavior: 'contain', // Prevent scroll from escaping iframe
         }}
       >
         {shouldLoad ? (
