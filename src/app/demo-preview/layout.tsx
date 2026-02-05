@@ -42,10 +42,7 @@ export default function DemoPreviewLayout({
         `}
       </Script>
 
-      <div
-        className='h-screen w-screen overflow-hidden bg-zinc-950'
-        style={{ overscrollBehavior: 'none' }}
-      >
+      <div className='h-screen w-screen overflow-hidden bg-zinc-950'>
         {children}
       </div>
     </>

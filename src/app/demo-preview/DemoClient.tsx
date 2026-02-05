@@ -80,23 +80,6 @@ export function DemoClient() {
   const [cycleProgress, setCycleProgress] = useState(0);
   const celesteUser = DEMO_USER_DATA;
 
-  // Prevent scroll chaining to parent iframe at document level
-  useEffect(() => {
-    document.documentElement.style.overscrollBehavior = 'none';
-    document.body.style.overscrollBehavior = 'none';
-    document.body.style.overflow = 'hidden';
-    document.body.style.height = '100%';
-    document.documentElement.style.height = '100%';
-
-    return () => {
-      document.documentElement.style.overscrollBehavior = '';
-      document.body.style.overscrollBehavior = '';
-      document.body.style.overflow = '';
-      document.body.style.height = '';
-      document.documentElement.style.height = '';
-    };
-  }, []);
-
   useEffect(() => {
     // Warm preload other tab components for instant switching
     const preloadTimer = setTimeout(() => {
@@ -143,21 +126,9 @@ export function DemoClient() {
       }
     }, 100);
 
-    // Listen for scroll messages from parent
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data.type === 'SCROLL') {
-        const container = document.getElementById('demo-preview-container');
-        if (container) {
-          container.scrollBy({ top: event.data.deltaY, behavior: 'auto' });
-        }
-      }
-    };
-    window.addEventListener('message', handleMessage);
-
     return () => {
       clearTimeout(preloadTimer);
       clearTimeout(notifyTimer);
-      window.removeEventListener('message', handleMessage);
     };
   }, []);
 
@@ -269,12 +240,11 @@ export function DemoClient() {
     <div className='flex flex-col h-full w-full bg-zinc-950'>
       {/* Content area - Demo content area */}
       <div
-        className='flex-1 overflow-y-auto demo-mobile-view'
+        className='flex-1 overflow-hidden demo-mobile-view'
         id='demo-preview-container'
         style={{
           containerType: 'inline-size',
           maxWidth: '100%',
-          overscrollBehavior: 'none',
         }}
       >
         <DemoModeProvider>
