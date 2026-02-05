@@ -475,25 +475,25 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
       ] = await Promise.all([
         fetch(
           `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
-          { cache: 'no-store' }, // Force fresh data on manual refresh
+          { cache: 'default' }, // Force fresh data on manual refresh
         ),
         fetch(
           `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}`,
-          { cache: 'no-store' },
+          { cache: 'default' },
         ),
         fetch(`/api/admin/analytics/conversions?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(
           `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}`,
-          { cache: 'no-store' },
+          { cache: 'default' },
         ),
         fetch(`/api/admin/analytics/activation?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(
           `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`,
-          { cache: 'no-store' },
+          { cache: 'default' },
         ),
       ]);
 
@@ -507,22 +507,22 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         intentionBreakdownRes,
       ] = await Promise.all([
         fetch(`/api/admin/analytics/feature-adoption?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/feature-usage?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/grimoire-health?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/conversion-influence?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/success-metrics?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/intention-breakdown?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
       ]);
 
@@ -537,26 +537,26 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         userSegmentsRes,
       ] = await Promise.all([
         fetch(`/api/admin/analytics/subscription-30d?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(
           `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`,
-          { cache: 'no-store' },
+          { cache: 'default' },
         ),
         fetch(`/api/admin/analytics/plan-breakdown?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/cta-conversions?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/cta-locations?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/api-costs?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/user-segments?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
       ]);
 
@@ -570,21 +570,21 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         grimoireTopPagesRes,
       ] = await Promise.all([
         fetch(`/api/admin/analytics/notifications?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/attribution?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/analytics/discord-interactions?range=7d`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/search-console?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
         fetch(`/api/admin/analytics/insights?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'default',
         }),
-        fetch(`/api/grimoire/stats?top=20`, { cache: 'no-store' }),
+        fetch(`/api/grimoire/stats?top=20`, { cache: 'default' }),
       ]);
 
       const errors: string[] = [];
