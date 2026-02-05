@@ -78,7 +78,7 @@ async function addIndexes() {
     console.log('\n💡 Tip: Run ANALYZE on your tables periodically:');
     console.log('   ANALYZE conversion_events;');
     console.log('   ANALYZE "user";');
-    console.log('   ANALYZE "Subscription";');
+    console.log('   ANALYZE "subscriptions";');
   } catch (error) {
     console.error('\n❌ Error adding indexes:', error);
     process.exit(1);

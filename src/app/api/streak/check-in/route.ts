@@ -93,6 +93,13 @@ export async function POST(request: NextRequest) {
           await import('@/lib/progress/server');
         await setExplorerProgress(userId, currentStreak);
         await incrementProgress(userId, 'ritual', 1);
+
+        // Track ritual completion in canonical analytics
+        const { conversionTracking } = await import('@/lib/analytics');
+        conversionTracking.ritualStarted(userId, user.email, undefined, {
+          context: 'daily_check_in',
+          streak: currentStreak,
+        });
       } catch (progressError) {
         console.warn('[Streak] Failed to update progress:', progressError);
       }

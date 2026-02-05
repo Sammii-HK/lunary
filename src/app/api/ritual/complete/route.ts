@@ -29,6 +29,14 @@ export async function POST(request: NextRequest) {
     try {
       const { incrementProgress } = await import('@/lib/progress/server');
       await incrementProgress(userId, 'ritual', 1);
+
+      // Track ritual completion in canonical analytics
+      const { conversionTracking } = await import('@/lib/analytics');
+      conversionTracking.ritualStarted(userId, user.email, undefined, {
+        context: 'ritual_complete',
+        ritualType,
+        ...metadata,
+      });
     } catch (progressError) {
       console.warn(
         '[Ritual Complete] Failed to track progress:',
