@@ -2,8 +2,31 @@
 
 import { cn } from '@/lib/utils';
 import { ProgressBar } from './ProgressBar';
-import { ChevronRight, Sparkles } from 'lucide-react';
+import {
+  ChevronRight,
+  Sparkles,
+  MoonStar,
+  PenTool,
+  SquareStar,
+  Shell,
+} from 'lucide-react';
 import Link from 'next/link';
+import type { LucideIcon } from 'lucide-react';
+
+const SKILL_ICONS: Record<string, LucideIcon> = {
+  'moon-star': MoonStar,
+  'pen-tool': PenTool,
+  'square-star': SquareStar,
+  shell: Shell,
+};
+
+function SkillIcon({ icon, className }: { icon: string; className?: string }) {
+  const IconComponent = SKILL_ICONS[icon];
+  if (IconComponent) {
+    return <IconComponent className={cn('text-lunary-accent', className)} />;
+  }
+  return <span className={className}>{icon}</span>;
+}
 
 interface SkillTreeCardProps {
   name: string;
@@ -37,14 +60,16 @@ export function SkillTreeCard({
   const isMaxLevel = currentLevel >= 10;
 
   if (variant === 'compact') {
-    return (
+    const compactContent = (
       <div
         className={cn(
           'flex items-center gap-3 p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50',
+          featureRoute &&
+            'hover:border-zinc-700/50 transition-colors cursor-pointer',
           className,
         )}
       >
-        <span className='text-2xl'>{icon}</span>
+        <SkillIcon icon={icon} className='w-6 h-6' />
         <div className='flex-1 min-w-0'>
           <div className='flex items-center justify-between mb-1'>
             <span className='text-sm font-medium text-white truncate'>
@@ -61,6 +86,11 @@ export function SkillTreeCard({
         </div>
       </div>
     );
+
+    if (featureRoute) {
+      return <Link href={featureRoute}>{compactContent}</Link>;
+    }
+    return compactContent;
   }
 
   const unlockText =
@@ -78,7 +108,7 @@ export function SkillTreeCard({
       {/* Header */}
       <div className='flex items-start justify-between mb-3'>
         <div className='flex items-center gap-3'>
-          <span className='text-3xl'>{icon}</span>
+          <SkillIcon icon={icon} className='w-8 h-8' />
           <div>
             <h3 className='font-semibold text-white'>{name}</h3>
             <p className='text-xs text-zinc-400'>

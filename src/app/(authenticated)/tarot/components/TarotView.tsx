@@ -49,9 +49,9 @@ import { TarotSeasonReading } from '@/components/tarot/TarotSeasonReading';
 import { TarotRitualForPatterns } from '@/components/tarot/TarotRitualForPatterns';
 import { TarotReflectionPrompts } from '@/components/tarot/TarotReflectionPrompts';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
+import { Heading } from '@/components/ui/Heading';
 
 const GuideNudge = dynamic(
   () =>
@@ -572,22 +572,21 @@ export function TarotView({
   return (
     <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-32'>
       {/* Header */}
-      <div className='pt-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+      <div>
+        <Heading variant='h1' as='h1'>
           {hasPaidAccess && userName
             ? `${userName}'s Tarot Readings`
             : hasPaidAccess
               ? 'Your Tarot Readings'
               : "Today's Tarot Readings"}
-        </h1>
+        </Heading>
         <p className='text-xs md:text-sm text-zinc-400'>
           {hasPaidAccess
             ? 'Personalized guidance based on your cosmic signature'
             : 'General cosmic guidance based on universal energies'}
         </p>
       </div>
-
-      {/* Moon Phase */}
+      {/* Moon Phase
       <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-3'>
         <div className='flex items-center gap-3'>
           <img
@@ -611,10 +610,9 @@ export function TarotView({
             </div>
           </div>
         </div>
-      </div>
-
+      </div> */}
       {/* CTA button to scroll to spreads */}
-      {authStatus.isAuthenticated && (
+      {/* {authStatus.isAuthenticated && (
         <div className='flex gap-3'>
           <Button
             onClick={() => {
@@ -632,8 +630,7 @@ export function TarotView({
             {hasPaidAccess ? 'Do a Reading' : 'Pull a Tarot Spread Reading'}
           </Button>
         </div>
-      )}
-
+      )} */}
       <div className='space-y-6'>
         {/* Daily & Weekly Cards section */}
         {hasPaidAccess ? (
@@ -1302,7 +1299,6 @@ export function TarotView({
           </p>
         </div>
       </div>
-
       {/* Modals */}
       <TarotCardModal
         card={selectedCard}
@@ -1312,7 +1308,6 @@ export function TarotView({
         userBirthday={userBirthday}
         currentTransits={currentAstrologicalChart}
       />
-
       {/* Share Modal */}
       {shareTarget && (
         <div
@@ -1400,7 +1395,6 @@ export function TarotView({
           </div>
         </div>
       )}
-
       {/* Upgrade Modal */}
       {showUpgradeModal && (
         <div

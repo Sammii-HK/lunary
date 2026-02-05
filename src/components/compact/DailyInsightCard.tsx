@@ -292,12 +292,11 @@ export const DailyInsightCard = () => {
     selectedDay.valueOf(),
   ]);
 
-  // Calculate transit event sentences (enters/leaves)
+  // Calculate transit event sentences (enters/leaves) — TODAY ONLY
   const transitHighlights = useMemo<PersonalTransitImpact[]>(() => {
     if (!authStatus.isAuthenticated || !birthChart) return [];
     const todayStart = selectedDay.startOf('day');
-    const windowStart = todayStart.subtract(2, 'day');
-    const windowEnd = todayStart.add(1, 'day');
+    const todayEnd = todayStart.add(1, 'day');
     const upcomingTransits = getUpcomingTransits(todayStart);
     const impacts = getPersonalTransitImpacts(upcomingTransits, birthChart, 60);
 
@@ -306,30 +305,24 @@ export const DailyInsightCard = () => {
       number
     > = { high: 3, medium: 2, low: 1 };
 
-    const candidates = impacts.filter((impact) => {
+    // Only show transits that fall on today (not yesterday, not tomorrow)
+    const todayCandidates = impacts.filter((impact) => {
       const val = impact.date.startOf('day').valueOf();
       return (
-        val >= windowStart.valueOf() &&
-        val <= windowEnd.valueOf() &&
+        val >= todayStart.valueOf() &&
+        val < todayEnd.valueOf() &&
         !Number.isNaN(significanceOrder[impact.significance])
       );
     });
 
-    const withHouse = candidates.filter((impact) => impact.house);
-    const pool = withHouse.length > 0 ? withHouse : candidates;
+    const withHouse = todayCandidates.filter((impact) => impact.house);
+    const pool = withHouse.length > 0 ? withHouse : todayCandidates;
     if (pool.length === 0) return [];
 
-    const today = dayjs().startOf('day');
     const sorted = pool
       .map((impact) => {
-        // Tier: today > yesterday > tomorrow
-        const daysDiff = impact.date.startOf('day').diff(today, 'day');
-        let tierScore = 0;
-        if (daysDiff === 0) tierScore = 3_000_000;
-        else if (daysDiff === -1 || daysDiff === -2) tierScore = 2_000_000;
-        else if (daysDiff === 1) tierScore = 1_000_000;
         const sigScore = (significanceOrder[impact.significance] ?? 1) * 1_000;
-        return { impact, score: tierScore + sigScore };
+        return { impact, score: sigScore };
       })
       .sort((a, b) => b.score - a.score);
 
@@ -363,11 +356,10 @@ export const DailyInsightCard = () => {
 
   const displayText = transitSummaryText ?? insight.text;
 
-  // General (non-personalized) transit text for free users
+  // General (non-personalized) transit text for free users — TODAY ONLY
   const generalTransitText = useMemo(() => {
     const todayStart = selectedDay.startOf('day');
-    const windowStart = todayStart.subtract(1, 'day');
-    const windowEnd = todayStart.add(1, 'day');
+    const todayEnd = todayStart.add(1, 'day');
     const transits = getUpcomingTransits(todayStart);
 
     const significanceOrder: Record<string, number> = {
@@ -376,25 +368,19 @@ export const DailyInsightCard = () => {
       low: 1,
     };
 
+    // Only show transits that fall on today
     const relevant = transits.filter((t) => {
       const val = t.date.startOf('day').valueOf();
-      return val >= windowStart.valueOf() && val <= windowEnd.valueOf();
+      return val >= todayStart.valueOf() && val < todayEnd.valueOf();
     });
 
     if (relevant.length === 0) return null;
 
-    const today = dayjs().startOf('day');
-    const sorted = [...relevant].sort((a, b) => {
-      const aDiff = a.date.startOf('day').diff(today, 'day');
-      const bDiff = b.date.startOf('day').diff(today, 'day');
-      const aTier = aDiff === 0 ? 3 : aDiff < 0 ? 2 : 1;
-      const bTier = bDiff === 0 ? 3 : bDiff < 0 ? 2 : 1;
-      if (bTier !== aTier) return bTier - aTier;
-      return (
+    const sorted = [...relevant].sort(
+      (a, b) =>
         (significanceOrder[b.significance] ?? 1) -
-        (significanceOrder[a.significance] ?? 1)
-      );
-    });
+        (significanceOrder[a.significance] ?? 1),
+    );
 
     const top2 = sorted.slice(0, 2);
     return top2

@@ -6,6 +6,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
 import { Check, Circle, Orbit, ArrowRight, Sparkles } from 'lucide-react';
+import { mutate } from 'swr';
 import Link from 'next/link';
 import { recordCheckIn, type StreakRecord } from '@/lib/streak/check-in';
 import { useRouter } from 'next/navigation';
@@ -13,6 +14,8 @@ import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhan
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
 import { MoreForToday } from '@/components/horoscope/MoreForToday';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { useProgress } from '@/components/progress/useProgress';
+import { ProgressBar } from '@/components/progress/ProgressBar';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { shouldRedactWord } from '@/constants/redactedWords';
 import { isInDemoMode } from '@/lib/demo-mode';
@@ -58,6 +61,8 @@ export const PersonalizedHoroscopePreview = () => {
     user?.birthChart;
 
   const router = useRouter();
+  const { progress: skillProgress } = useProgress();
+  const ritualSkill = skillProgress.find((p) => p.skillTree === 'ritual');
 
   const [ritualComplete, setRitualComplete] = useState(false);
   const [streakInfo, setStreakInfo] = useState<StreakRecord | null>(null);
@@ -211,6 +216,7 @@ export const PersonalizedHoroscopePreview = () => {
     if (result?.streak) {
       setStreakInfo(result.streak);
     }
+    mutate('/api/progress');
   };
 
   const focusText = ritualComplete
@@ -439,10 +445,31 @@ export const PersonalizedHoroscopePreview = () => {
               </p>
             )}
 
-            {streakCopy && (
-              <p className='text-[0.65rem] text-lunary-accent-200'>
-                {streakCopy}
-              </p>
+            {ritualComplete && ritualSkill ? (
+              <div className='mt-1'>
+                <div className='flex items-center justify-between mb-0.5'>
+                  <span className='text-[0.6rem] text-zinc-400'>
+                    Ritual Keeper · Lv. {ritualSkill.currentLevel}
+                  </span>
+                  {streakCopy && (
+                    <span className='text-[0.6rem] text-lunary-accent-200'>
+                      {streakCopy}
+                    </span>
+                  )}
+                </div>
+                <ProgressBar
+                  progress={ritualSkill.progressToNext}
+                  level={ritualSkill.currentLevel}
+                  size='sm'
+                  showLabel={false}
+                />
+              </div>
+            ) : (
+              streakCopy && (
+                <p className='text-[0.65rem] text-lunary-accent-200'>
+                  {streakCopy}
+                </p>
+              )
             )}
 
             {/* <div className='flex flex-wrap items-center gap-2 text-[0.65rem] text-zinc-500'>

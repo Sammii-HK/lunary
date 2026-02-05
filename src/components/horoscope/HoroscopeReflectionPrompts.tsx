@@ -4,116 +4,144 @@ import { useState, useMemo } from 'react';
 import { ChevronDown, BookOpen, Check, Loader2, PenTool } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
-import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
 import { useProgress } from '@/components/progress/useProgress';
 import { ProgressBar } from '@/components/progress/ProgressBar';
 import { mutate } from 'swr';
 
-interface TarotReflectionPromptsProps {
-  trendAnalysis: TrendAnalysis | null;
+interface HoroscopeReflectionPromptsProps {
+  sunSign?: string | null;
+  moonPhase?: string | null;
   className?: string;
 }
 
-const THEME_PROMPTS: Record<string, string[]> = {
-  healing: [
-    'What part of me is asking for healing right now?',
-    'How have I been caring for my emotional wellbeing lately?',
-    'What old wound feels ready to be released?',
-    'Where do I need to be more gentle with myself?',
-    'What would deep self-compassion look like today?',
+const SIGN_PROMPTS: Record<string, string[]> = {
+  aries: [
+    'Where am I being called to take bold action today?',
+    'What fear is holding me back from stepping into my power?',
+    'How can I channel my fire energy without burning out?',
+    'What new beginning is trying to emerge in my life?',
+    'Where do I need more courage right now?',
   ],
-  transformation: [
-    'What am I being asked to let go of?',
-    'What is trying to emerge in my life right now?',
-    'Where am I resisting change, and why?',
-    'How would I describe the person I am becoming?',
-    'What feels like it is dying in order for something new to be born?',
+  taurus: [
+    'What am I building that brings me lasting security?',
+    'Where can I slow down and trust the process?',
+    'What simple pleasure have I been neglecting?',
+    'How is my body asking me to care for it today?',
+    'What am I ready to release that no longer serves my growth?',
   ],
-  creativity: [
-    'What creative impulse have I been ignoring?',
-    'How can I express myself more authentically today?',
-    'What would I create if I knew I could not fail?',
-    'Where does inspiration find me most easily?',
-    'What project or idea keeps calling to me?',
+  gemini: [
+    'What conversation have I been avoiding that needs to happen?',
+    'How can I better integrate my many interests?',
+    'What is my curious mind drawn to right now?',
+    'Where do I need to listen more than I speak?',
+    'What ideas are ready to be shared with the world?',
   ],
-  action: [
-    'What action have I been delaying that I know I need to take?',
-    'Where do I need to be more decisive?',
-    'What gives me the courage to move forward?',
-    'How can I channel my energy more effectively?',
-    'What first step could I take today?',
+  cancer: [
+    'What does my inner sanctuary need from me today?',
+    'Where am I holding on too tightly out of fear?',
+    'How can I nurture myself the way I nurture others?',
+    'What emotions are asking for my attention?',
+    'What would it look like to feel truly safe right now?',
   ],
-  truth: [
-    'What truth have I been avoiding?',
-    'Where am I not being honest with myself?',
-    'What would change if I saw this situation clearly?',
-    'How can I communicate more authentically?',
-    'What insight is trying to break through?',
+  leo: [
+    'Where am I dimming my light to make others comfortable?',
+    'What creative expression wants to flow through me today?',
+    'How can I lead with my heart instead of my ego?',
+    'What brings me genuine joy, not just external validation?',
+    'Where can I be more generous with my warmth?',
   ],
-  abundance: [
-    'What am I grateful for in this moment?',
-    'Where do I already have enough?',
-    'What beliefs about scarcity am I ready to release?',
-    'How can I be more generous with myself and others?',
-    'What would true abundance feel like?',
+  virgo: [
+    'What small improvement would have the biggest impact today?',
+    'Where am I being too critical of myself or others?',
+    'How can I be of service without depleting myself?',
+    'What system in my life needs attention or refinement?',
+    'Where can I trust imperfection as part of the process?',
   ],
-  connection: [
-    'How open is my heart right now?',
-    'What relationship needs more of my attention?',
-    'Where am I holding back from connection?',
-    'How can I deepen intimacy in my life?',
-    'What do I truly need from others?',
+  libra: [
+    'Where do I need to find better balance in my life?',
+    'What relationship dynamic needs my honest attention?',
+    'How can I make a decision from my own centre today?',
+    'What beauty am I creating or noticing around me?',
+    'Where am I sacrificing my needs for false harmony?',
+  ],
+  scorpio: [
+    'What truth is hiding beneath the surface right now?',
+    'Where am I resisting transformation?',
+    'What am I ready to release from my emotional depths?',
+    'How can I channel my intensity into healing?',
+    'What power am I reclaiming today?',
+  ],
+  sagittarius: [
+    'What belief system am I ready to outgrow?',
+    'Where is my sense of adventure leading me?',
+    'How can I expand my perspective on a current challenge?',
+    'What wisdom have I gained that I can share?',
+    'Where do I need more freedom in my life?',
+  ],
+  capricorn: [
+    'What long-term goal deserves my focus today?',
+    'Where am I confusing productivity with self-worth?',
+    'How can I build something meaningful one step at a time?',
+    'What responsibility can I set down for a moment?',
+    'Where do I need to be more patient with my progress?',
+  ],
+  aquarius: [
+    'What innovative idea am I sitting on?',
+    'How can I contribute to my community today?',
+    'Where am I being contrarian versus genuinely visionary?',
+    'What connection between people needs my attention?',
+    'How can I honour my uniqueness without isolating myself?',
+  ],
+  pisces: [
+    'What is my intuition whispering to me today?',
+    'Where do I need stronger boundaries to protect my energy?',
+    'How can I ground my dreams into reality?',
+    'What creative or spiritual practice is calling to me?',
+    'Where am I absorbing emotions that are not mine?',
   ],
 };
 
-const SUIT_PROMPTS: Record<string, string[]> = {
-  Cups: [
-    'What emotions am I experiencing most strongly?',
-    'How am I honoring my intuition?',
-    'What does my heart want me to know?',
-    'Where do I need more emotional flow?',
-    'How can I better nurture my inner world?',
+const MOON_PHASE_PROMPTS: Record<string, string[]> = {
+  new: [
+    'What intention am I planting during this new moon?',
+    'What old pattern am I ready to release to make space for the new?',
+    'How does this moment of darkness feel — scary or restful?',
   ],
-  Wands: [
-    'What ignites my passion right now?',
-    'Where am I being called to take action?',
-    'What creative project wants my attention?',
-    'How can I sustain my energy for what matters?',
-    'What adventure is calling to me?',
+  waxing: [
+    'What am I actively growing and nurturing right now?',
+    'Where do I need to put in more effort to reach my goals?',
+    'What momentum am I building?',
   ],
-  Swords: [
-    'What thoughts are dominating my mind?',
-    'Where do I need more clarity?',
-    'What conversation have I been avoiding?',
-    'How can I think more clearly about this situation?',
-    'What truth is trying to emerge?',
+  full: [
+    'What is being illuminated in my life during this full moon?',
+    'What have I manifested that I can celebrate?',
+    'What emotions are being amplified right now?',
   ],
-  Pentacles: [
-    'What am I building in my life right now?',
-    'How am I caring for my body and physical needs?',
-    'What practical steps can I take today?',
-    'Where do I feel most grounded?',
-    'What resources do I have that I am not using?',
+  waning: [
+    'What am I ready to let go of as the moon wanes?',
+    'How can I rest and restore before the next cycle?',
+    'What lesson from this lunar cycle do I want to carry forward?',
   ],
 };
 
 const DEFAULT_PROMPTS = [
-  'What message from my recent readings feels most important?',
-  'How can I apply the wisdom of the cards to my life today?',
-  'What patterns am I noticing in my readings?',
-  'What question do I want to bring to my next reading?',
-  'How has tarot helped me understand myself better?',
+  'What cosmic energy do I most need to work with today?',
+  'How can I align my daily actions with the current sky?',
+  'What celestial message feels most personal to me right now?',
+  'Where do I feel most in sync with the universe today?',
+  'What area of my life is the cosmos asking me to pay attention to?',
 ];
 
-export function TarotReflectionPrompts({
-  trendAnalysis,
+export function HoroscopeReflectionPrompts({
+  sunSign,
+  moonPhase,
   className = '',
-}: TarotReflectionPromptsProps) {
+}: HoroscopeReflectionPromptsProps) {
   const subscription = useSubscription();
-  const hasTarotPatternsAccess = hasFeatureAccess(
+  const hasAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
-    'tarot_patterns',
+    'personalized_horoscope',
   );
   const { progress: skillProgress } = useProgress();
   const journalSkill = skillProgress.find((p) => p.skillTree === 'journal');
@@ -126,26 +154,45 @@ export function TarotReflectionPrompts({
   const [drafts, setDrafts] = useState<Record<string, string>>({});
 
   const prompts = useMemo(() => {
-    if (!trendAnalysis)
-      return DEFAULT_PROMPTS.slice(0, hasTarotPatternsAccess ? 5 : 1);
-
-    const topTheme = trendAnalysis.dominantThemes[0]?.toLowerCase();
-    const topSuit = trendAnalysis.suitPatterns[0];
-
     let selectedPrompts: string[] = [];
 
-    if (topTheme && THEME_PROMPTS[topTheme]) {
-      selectedPrompts = [...THEME_PROMPTS[topTheme]];
-    } else if (topSuit && SUIT_PROMPTS[topSuit.suit]) {
-      selectedPrompts = [...SUIT_PROMPTS[topSuit.suit]];
-    } else {
+    // Try sign-based prompts first
+    if (sunSign) {
+      const signKey = sunSign.toLowerCase();
+      if (SIGN_PROMPTS[signKey]) {
+        selectedPrompts = [...SIGN_PROMPTS[signKey]];
+      }
+    }
+
+    // Mix in moon phase prompts if available
+    if (moonPhase) {
+      const phaseKey = moonPhase.toLowerCase().includes('new')
+        ? 'new'
+        : moonPhase.toLowerCase().includes('full')
+          ? 'full'
+          : moonPhase.toLowerCase().includes('waning')
+            ? 'waning'
+            : 'waxing';
+      const phasePrompts = MOON_PHASE_PROMPTS[phaseKey] || [];
+      if (selectedPrompts.length === 0) {
+        selectedPrompts = phasePrompts;
+      } else {
+        // Interleave: 3 sign + 2 phase
+        selectedPrompts = [
+          ...selectedPrompts.slice(0, 3),
+          ...phasePrompts.slice(0, 2),
+        ];
+      }
+    }
+
+    if (selectedPrompts.length === 0) {
       selectedPrompts = [...DEFAULT_PROMPTS];
     }
 
-    return hasTarotPatternsAccess
+    return hasAccess
       ? selectedPrompts.slice(0, 5)
       : selectedPrompts.slice(0, 1);
-  }, [trendAnalysis, hasTarotPatternsAccess]);
+  }, [sunSign, moonPhase, hasAccess]);
 
   const handleSaveToJournal = async (prompt: string, reflection: string) => {
     if (!reflection.trim()) return;
@@ -160,7 +207,7 @@ export function TarotReflectionPrompts({
           content: `Reflection prompt: ${prompt}\n\n${reflection.trim()}`,
           moodTags: ['reflection'],
           cardReferences: [],
-          source: 'tarot-prompt',
+          source: 'horoscope-prompt',
         }),
       });
 
@@ -175,7 +222,7 @@ export function TarotReflectionPrompts({
         mutate('/api/progress');
       }
     } catch (error) {
-      console.error('[TarotReflectionPrompts] Failed to save:', error);
+      console.error('[HoroscopeReflectionPrompts] Failed to save:', error);
     } finally {
       setSavingPrompt(null);
     }
@@ -190,18 +237,16 @@ export function TarotReflectionPrompts({
         className='w-full flex items-center justify-between p-4 text-left hover:bg-zinc-800/30 transition-colors'
       >
         <div className='flex items-center gap-3'>
-          <div className='p-2 rounded-lg bg-lunary-accent-900/30'>
-            <BookOpen className='w-4 h-4 text-lunary-accent-400' />
+          <div className='p-2 rounded-lg bg-lunary-primary-900/30'>
+            <BookOpen className='w-4 h-4 text-lunary-primary-400' />
           </div>
           <div>
             <p className='text-sm font-medium text-zinc-100'>
-              Reflection Prompts
+              Cosmic Reflection Prompts
             </p>
             <p className='text-xs text-zinc-400'>
-              {hasTarotPatternsAccess
-                ? `${prompts.length} prompts`
-                : '1 prompt'}{' '}
-              for your journal
+              {hasAccess ? `${prompts.length} prompts` : '1 prompt'} for your
+              journal
             </p>
           </div>
         </div>
@@ -232,7 +277,7 @@ export function TarotReflectionPrompts({
                 className='p-3 rounded-lg border border-zinc-800/50 bg-zinc-800/20'
               >
                 <p className='text-sm text-zinc-300 mb-2'>{prompt}</p>
-                {hasTarotPatternsAccess && (
+                {hasAccess && (
                   <div className='space-y-2'>
                     {activePromptIndex === i && !isSaved ? (
                       <>
@@ -299,10 +344,10 @@ export function TarotReflectionPrompts({
             );
           })}
 
-          {!hasTarotPatternsAccess && (
+          {!hasAccess && (
             <p className='text-xs text-zinc-500'>
-              Unlock more reflection prompts with Lunary+, plus save prompts
-              into your journal.
+              Unlock more cosmic reflection prompts with Lunary+, plus save
+              reflections to your journal.
             </p>
           )}
 

@@ -31,12 +31,16 @@ export interface LevelConfig {
   featureRoute?: string;
 }
 
+export type SkillIconId = 'square-star' | 'pen-tool' | 'moon-star' | 'shell';
+
 export interface SkillTreeConfig {
   id: SkillTreeId;
   name: string;
-  icon: string;
+  icon: SkillIconId;
   description: string;
   actionVerb: string;
+  /** Default route to improve this skill (used when no level-specific route) */
+  defaultRoute: string;
   levels: LevelConfig[];
 }
 
@@ -44,9 +48,10 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
   tarot: {
     id: 'tarot',
     name: 'Tarot Mastery',
-    icon: '🎴',
+    icon: 'square-star',
     description: 'Deepen your tarot practice with spreads',
     actionVerb: 'spreads completed',
+    defaultRoute: '/tarot#spreads',
     levels: [
       {
         level: 1,
@@ -57,7 +62,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           'Moon phase patterns unlocked! See how the moon influences your tarot pulls.',
         proRequired: false,
-        featureRoute: '/patterns',
+        featureRoute: undefined,
       },
       {
         level: 2,
@@ -68,7 +73,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           'Your tarot data can now contribute to archetype detection!',
         proRequired: false,
-        featureRoute: '/patterns',
+        featureRoute: undefined,
       },
       {
         level: 3,
@@ -79,7 +84,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           'Planetary tarot patterns unlocked! See how planetary alignments shape your readings.',
         proRequired: true,
-        featureRoute: '/patterns',
+        featureRoute: undefined,
       },
       {
         level: 4,
@@ -91,7 +96,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           'Natal transit patterns unlocked! See how transits to your birth chart affect your tarot.',
         proRequired: true,
-        featureRoute: '/patterns',
+        featureRoute: undefined,
       },
       {
         level: 5,
@@ -153,9 +158,10 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
   journal: {
     id: 'journal',
     name: 'Journal Keeper',
-    icon: '✍️',
+    icon: 'pen-tool',
     description: 'Chronicle your inner world',
     actionVerb: 'entries written',
+    defaultRoute: '/guide?journal=1',
     levels: [
       {
         level: 1,
@@ -166,7 +172,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           'Moon mood patterns unlocked! See how the moon influences your emotions.',
         proRequired: false,
-        featureRoute: '/patterns',
+        featureRoute: undefined,
       },
       {
         level: 2,
@@ -178,7 +184,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           'Your daily thread now includes personalised transits and pattern insights!',
         proRequired: false,
-        featureRoute: '/guide',
+        featureRoute: '/guide?journal=1',
       },
       {
         level: 3,
@@ -189,7 +195,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
           'Archetype detection from journal + planetary emotion patterns',
         unlockMessage: 'Your journal data now reveals your cosmic archetype!',
         proRequired: false,
-        featureRoute: '/patterns',
+        featureRoute: undefined,
       },
       {
         level: 4,
@@ -201,7 +207,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           'Natal transit emotion patterns unlocked! See how personal transits shape your moods.',
         proRequired: true,
-        featureRoute: '/patterns',
+        featureRoute: undefined,
       },
       {
         level: 5,
@@ -263,9 +269,10 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
   explorer: {
     id: 'explorer',
     name: 'Cosmic Explorer',
-    icon: '🌟',
+    icon: 'moon-star',
     description: 'Build a consistent cosmic practice',
     actionVerb: 'day streak',
+    defaultRoute: '/horoscope',
     levels: [
       {
         level: 1,
@@ -287,7 +294,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           '7-day streak! Streak milestones are now tracked in your journey.',
         proRequired: false,
-        featureRoute: '/guide',
+        featureRoute: '/horoscope',
       },
       {
         level: 3,
@@ -298,7 +305,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           '14-day streak! Your daily thread now includes pattern insights.',
         proRequired: false,
-        featureRoute: '/guide',
+        featureRoute: '/horoscope',
       },
       {
         level: 4,
@@ -310,7 +317,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           '30-day streak! You now have the full integrative daily thread experience.',
         proRequired: false,
-        featureRoute: '/guide',
+        featureRoute: '/horoscope',
       },
       {
         level: 5,
@@ -372,9 +379,10 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
   ritual: {
     id: 'ritual',
     name: 'Ritual Keeper',
-    icon: '🕯️',
+    icon: 'shell',
     description: 'Build sacred daily practices',
     actionVerb: 'rituals completed',
+    defaultRoute: '/app',
     levels: [
       {
         level: 1,
@@ -385,7 +393,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           'Ritual tracking active! Your practice is building momentum.',
         proRequired: false,
-        featureRoute: '/profile',
+        featureRoute: '/app',
       },
       {
         level: 2,
@@ -396,7 +404,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           '10 rituals completed! Your ritual streak milestones are now tracked.',
         proRequired: false,
-        featureRoute: '/profile',
+        featureRoute: '/app',
       },
       {
         level: 3,
@@ -407,7 +415,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           'Moon ritual alignment unlocked! Get rituals tuned to the lunar cycle.',
         proRequired: false,
-        featureRoute: '/profile',
+        featureRoute: '/app',
       },
       {
         level: 4,
@@ -418,7 +426,7 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         unlockMessage:
           'Ritual calendar unlocked! Plan rituals aligned with cosmic events.',
         proRequired: true,
-        featureRoute: '/profile',
+        featureRoute: '/app',
       },
       {
         level: 5,

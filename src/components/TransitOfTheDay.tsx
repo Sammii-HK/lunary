@@ -40,18 +40,15 @@ const getPlanetSymbol = (planet: string): string => {
   return bodiesSymbols[key] || planet.charAt(0);
 };
 
-/** Compact relative time for badge display (future-only) */
+/** Compact relative time for badge display (future-only, tomorrow+) */
 const formatRelativeTime = (date: dayjs.Dayjs): string => {
   const now = dayjs();
   const today = now.startOf('day');
   const transitDay = date.startOf('day');
   const daysDiff = transitDay.diff(today, 'day');
 
-  if (daysDiff === 0) {
-    const hours = Math.round(date.diff(now) / (1000 * 60 * 60));
-    return hours < 1 ? 'in <1h' : `in ${hours}h`;
-  }
-  if (daysDiff === 1) return 'tomorrow';
+  if (daysDiff <= 1) return 'tomorrow';
+  if (daysDiff <= 6) return date.format('ddd');
   return date.format('MMM D');
 };
 
@@ -88,17 +85,18 @@ export const TransitOfTheDay = () => {
       low: 1,
     };
 
-    const futureTransits = upcomingTransits.filter((t) =>
-      dayjs(t.date).isAfter(now),
+    // Strictly future events only (tomorrow onward) — today is covered by Today's Influence
+    const relevantTransits = upcomingTransits.filter(
+      (t) => dayjs(t.date).startOf('day').diff(today, 'day') > 0,
     );
-    if (futureTransits.length === 0) return null;
+    if (relevantTransits.length === 0) return null;
 
-    const sorted = futureTransits
+    const sorted = relevantTransits
       .map((t) => {
         const daysDiff = dayjs(t.date).startOf('day').diff(today, 'day');
+        // Sooner events rank higher
         let tierScore = 0;
-        if (daysDiff === 0) tierScore = 3_000_000;
-        else if (daysDiff === 1) tierScore = 2_000_000;
+        if (daysDiff === 1) tierScore = 2_000_000;
         else if (daysDiff <= 7) tierScore = 1_000_000;
         const sigScore = (priorityOrder[t.significance] ?? 1) * 1_000;
         return { transit: t, score: tierScore + sigScore };
@@ -128,17 +126,18 @@ export const TransitOfTheDay = () => {
       low: 1,
     };
 
-    const futureImpacts = personalImpacts.filter((impact) =>
-      dayjs(impact.date).isAfter(now),
+    // Strictly future events only (tomorrow onward) — today is covered by Today's Influence
+    const relevantImpacts = personalImpacts.filter(
+      (impact) => dayjs(impact.date).startOf('day').diff(today, 'day') > 0,
     );
-    if (futureImpacts.length === 0) return null;
+    if (relevantImpacts.length === 0) return null;
 
-    const sorted = futureImpacts
+    const sorted = relevantImpacts
       .map((impact) => {
         const daysDiff = dayjs(impact.date).startOf('day').diff(today, 'day');
+        // Sooner events rank higher
         let tierScore = 0;
-        if (daysDiff === 0) tierScore = 3_000_000;
-        else if (daysDiff === 1) tierScore = 2_000_000;
+        if (daysDiff === 1) tierScore = 2_000_000;
         else if (daysDiff <= 7) tierScore = 1_000_000;
         const sigScore = (priorityOrder[impact.significance] ?? 1) * 1_000;
         return { impact, score: tierScore + sigScore };

@@ -58,6 +58,63 @@ export async function GET(request: NextRequest) {
       progressMap.set(row.skill_tree, row);
     }
 
+    // Lazy backfill: seed progress from historical data when tracked count is behind
+    try {
+      const needsBackfill = (['ritual', 'journal', 'tarot'] as const).filter(
+        (id) => {
+          const rec = progressMap.get(id);
+          return !rec || rec.total_actions === 0;
+        },
+      );
+
+      if (needsBackfill.length > 0) {
+        // Fetch actual counts from source tables in parallel
+        const [streakResult, journalResult, tarotResult] = await Promise.all([
+          needsBackfill.includes('ritual')
+            ? sql`SELECT total_check_ins FROM user_streaks WHERE user_id = ${user.id} LIMIT 1`
+            : null,
+          needsBackfill.includes('journal')
+            ? sql`SELECT COUNT(*)::int AS count FROM collections WHERE user_id = ${user.id} AND category IN ('journal', 'dream')`
+            : null,
+          needsBackfill.includes('tarot')
+            ? sql`SELECT COUNT(*)::int AS count FROM tarot_readings WHERE user_id = ${user.id} AND jsonb_array_length(cards) > 1`
+            : null,
+        ]);
+
+        const backfills: { id: SkillTreeId; count: number }[] = [];
+        if (streakResult) {
+          const count = streakResult.rows[0]?.total_check_ins || 0;
+          if (count > 0) backfills.push({ id: 'ritual', count });
+        }
+        if (journalResult) {
+          const count = journalResult.rows[0]?.count || 0;
+          if (count > 0) backfills.push({ id: 'journal', count });
+        }
+        if (tarotResult) {
+          const count = tarotResult.rows[0]?.count || 0;
+          if (count > 0) backfills.push({ id: 'tarot', count });
+        }
+
+        if (backfills.length > 0) {
+          const { incrementProgress } = await import('@/lib/progress/server');
+          await Promise.all(
+            backfills.map(async ({ id, count }) => {
+              await incrementProgress(user.id, id, count, isPro);
+              progressMap.set(id, {
+                skill_tree: id,
+                current_level: 0,
+                total_actions: count,
+                unlocked_features: [],
+                last_level_up_at: null,
+              });
+            }),
+          );
+        }
+      }
+    } catch (backfillError) {
+      console.warn('[Progress] Backfill failed:', backfillError);
+    }
+
     // Build response for all skill trees
     const progress: SkillTreeProgress[] = Object.values(SKILL_TREES).map(
       (config) => {
@@ -98,7 +155,7 @@ export async function GET(request: NextRequest) {
           featureRoute:
             currentLevelConfig?.featureRoute ||
             nextLevelConfig?.featureRoute ||
-            null,
+            config.defaultRoute,
         };
       },
     );

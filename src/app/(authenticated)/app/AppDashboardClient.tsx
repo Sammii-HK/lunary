@@ -332,7 +332,7 @@ export default function AppDashboardClient() {
 
         <PostTrialMessaging />
 
-        <header className='py-4'>
+        <header>
           <div className='flex items-center justify-between mb-2'>
             <div className='w-16' />
             <p className='text-lg text-zinc-300 text-center flex-1'>

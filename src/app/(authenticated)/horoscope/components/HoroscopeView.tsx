@@ -21,6 +21,8 @@ import { UnifiedTransitList } from './UnifiedTransitList';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { ShareRetrogradeBadge } from '@/components/share/ShareRetrogradeBadge';
 import { ShareHoroscope } from '@/components/share/ShareHoroscope';
+import { HoroscopeReflectionPrompts } from '@/components/horoscope/HoroscopeReflectionPrompts';
+import { Heading } from '@/components/ui/Heading';
 
 const GuideNudge = dynamic(
   () =>
@@ -343,14 +345,14 @@ export function HoroscopeView({
   return (
     <div className='h-full space-y-6 p-4 pb-16 md:pb-20 overflow-auto'>
       {/* Header */}
-      <div className='pt-6'>
+      <div>
         <div className='flex flex-wrap items-start justify-between gap-3'>
           <div className='flex-1'>
-            <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+            <Heading variant='h1' as='h1'>
               {hasPaidAccess && userName
                 ? `${userName}'s Horoscope`
                 : 'Your Horoscope'}
-            </h1>
+            </Heading>
             <p className='text-sm text-zinc-400'>
               {hasPaidAccess
                 ? 'Guidance written just for you'
@@ -872,6 +874,15 @@ export function HoroscopeView({
             Update Profile
           </Link>
         </HoroscopeSection>
+      )}
+
+      {/* Reflection Prompts — paid */}
+      {hasPaidAccess && (
+        <HoroscopeReflectionPrompts
+          sunSign={horoscope?.sunSign}
+          moonPhase={horoscope?.moonPhase || generalHoroscope?.moonPhase}
+          className='mt-4'
+        />
       )}
 
       {/* PremiumPathway — paid only */}

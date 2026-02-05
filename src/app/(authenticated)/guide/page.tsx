@@ -44,6 +44,9 @@ import {
 } from '@/lib/journal/extract-moments';
 import { DailyThread } from '@/components/daily-thread/DailyThread';
 import { useRouter } from 'next/navigation';
+import { mutate } from 'swr';
+import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
+import { Heading } from '@/components/ui/Heading';
 
 interface CollectionFolder {
   id: number;
@@ -668,6 +671,10 @@ function BookOfShadowsContent() {
     if (currentPrompt) {
       setPromptHandled(decodeURIComponent(currentPrompt.trim()));
     }
+    // Auto-enable journal mode when linked from skill tree
+    if (searchParams.get('journal') === '1') {
+      setIsJournalMode(true);
+    }
   }, [searchParams]);
 
   const attemptSend = () => {
@@ -762,6 +769,8 @@ function BookOfShadowsContent() {
           role: 'assistant',
           content: `✨ Journal entry saved to your Book of Shadows${moonPhase ? ` (${moonPhase})` : ''}`,
         });
+        // Refresh skill progress (journal keeper)
+        mutate('/api/progress');
       }
     } catch (error) {
       console.error('Failed to save journal entry:', error);
@@ -791,9 +800,9 @@ function BookOfShadowsContent() {
       <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
         <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 py-6 md:py-10'>
           <header className='mb-6 space-y-2'>
-            <h1 className='text-3xl font-light tracking-tight text-zinc-50 md:text-4xl'>
+            <Heading variant='h1' as='h1'>
               Astral Guide
-            </h1>
+            </Heading>
             {/* <p className='text-sm text-zinc-400 md:text-base'>
               Your calm astro–tarot companion. Share what's stirring and Lunary
               will gather the sky around you.
@@ -873,9 +882,11 @@ function BookOfShadowsContent() {
     <div className='flex flex-col flex-1 min-h-0 w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
       <div className='mx-auto flex flex-1 min-h-0 w-full max-w-3xl flex-col p-4'>
         <header className='mb-2 shrink-0 md:mb-4'>
-          <h1 className='text-xl font-light tracking-tight text-zinc-50 md:text-4xl'>
+          <SkillProgressWidget skillTree='journal' className='shrink-0 mb-2' />
+
+          <Heading variant='h1' as='h1'>
             Astral Guide
-          </h1>
+          </Heading>
           <div className='hidden md:flex flex-wrap items-center gap-2 mt-2 text-xs text-zinc-400'>
             {planId ? (
               <span className='rounded-full border border-lunary-primary-600 px-3 py-1 text-lunary-primary-300/90'>
@@ -897,7 +908,7 @@ function BookOfShadowsContent() {
         </header>
 
         <div className='flex min-h-0 flex-1 flex-col gap-2'>
-          <div className='pt-3 md:pt-6'>
+          <div className='pt-1 md:pt-2'>
             <div className='mx-auto max-w-2xl w-full'>
               <DailyThread />
             </div>
@@ -1072,28 +1083,38 @@ function BookOfShadowsContent() {
             <div className='shrink-0 border-t border-zinc-800/70 bg-zinc-900/40'>
               <div className='flex items-center px-3 py-2 md:px-6 md:py-3'>
                 <button
-                  onClick={() => setIsJournalMode(!isJournalMode)}
-                  className={`p-1.5 rounded-lg transition mr-2 ${
-                    isJournalMode
-                      ? 'bg-lunary-primary-600/30 text-lunary-primary-300 ring-1 ring-lunary-primary-500'
-                      : 'text-zinc-400 hover:text-lunary-primary-400 hover:bg-zinc-800/50'
-                  }`}
-                  title={
-                    isJournalMode ? 'Exit journal mode' : 'Write journal entry'
-                  }
-                >
-                  <NotebookPen className='w-4 h-4' />
-                </button>
-                <button
                   onClick={() => setIsAssistExpanded(!isAssistExpanded)}
                   className='flex flex-1 items-center justify-between text-sm font-semibold text-lunary-primary-300/90 transition hover:text-lunary-primary-200'
                 >
-                  <span>{isJournalMode ? 'Journal Mode' : 'Assist'}</span>
+                  <span>Assist</span>
                   {isAssistExpanded ? (
                     <ChevronUp className='w-4 h-4' />
                   ) : (
                     <ChevronDown className='w-4 h-4' />
                   )}
+                </button>
+                <button
+                  onClick={() => setIsJournalMode(!isJournalMode)}
+                  className='flex items-center gap-2 ml-3 pl-3 border-l border-zinc-700/60'
+                  title={
+                    isJournalMode ? 'Exit journal mode' : 'Write journal entry'
+                  }
+                >
+                  <NotebookPen className='w-4 h-4 text-zinc-400' />
+                  <span className='text-xs text-zinc-400'>Journal</span>
+                  <div
+                    className={`relative w-8 h-[18px] rounded-full transition-colors ${
+                      isJournalMode ? 'bg-lunary-primary-600' : 'bg-zinc-700'
+                    }`}
+                  >
+                    <div
+                      className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white transition-transform ${
+                        isJournalMode
+                          ? 'translate-x-[16px]'
+                          : 'translate-x-[2px]'
+                      }`}
+                    />
+                  </div>
                 </button>
               </div>
               {isAssistExpanded && (
@@ -1139,18 +1160,6 @@ function BookOfShadowsContent() {
                         className='px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg border border-zinc-700 text-zinc-200 transition hover:border-lunary-primary/80 hover:text-lunary-primary-200'
                       >
                         Collections
-                      </button>
-                      <button
-                        type='button'
-                        aria-pressed={isJournalMode}
-                        onClick={() => setIsJournalMode((prev) => !prev)}
-                        className={`px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg border transition ${
-                          isJournalMode
-                            ? 'border-lunary-primary bg-lunary-primary-600/20 text-lunary-primary-100'
-                            : 'border-zinc-700 text-zinc-200 hover:border-lunary-primary/80 hover:text-lunary-primary-200'
-                        }`}
-                      >
-                        {isJournalMode ? 'Exit journal' : 'Journal mode'}
                       </button>
                     </div>
                   </div>
