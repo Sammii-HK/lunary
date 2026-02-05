@@ -36,13 +36,22 @@ async function createDailyMetricsTable() {
     );
     const sqlContent = readFileSync(sqlFile, 'utf-8');
 
-    // Split into individual statements
+    // Split into individual statements and clean them
     const statements = sqlContent
       .split(';')
       .map((s) => s.trim())
-      .filter(
-        (s) => s.length > 0 && !s.startsWith('--') && !s.startsWith('COMMENT'),
-      );
+      .filter((s) => s.length > 0)
+      .map((s) => {
+        // Remove leading comment-only lines (keep inline comments)
+        const lines = s.split('\n');
+        const firstNonComment = lines.findIndex((line) => {
+          const trimmed = line.trim();
+          return trimmed.length > 0 && !trimmed.startsWith('--');
+        });
+        if (firstNonComment === -1) return ''; // All comments
+        return lines.slice(firstNonComment).join('\n').trim();
+      })
+      .filter((s) => s.length > 0 && !s.startsWith('COMMENT')); // Remove COMMENT statements
 
     console.log(`🔨 Executing ${statements.length} SQL statements...\n`);
 
