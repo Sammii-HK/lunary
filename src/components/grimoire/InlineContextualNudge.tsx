@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
 import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
 import { Heading } from '../ui/Heading';
-import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { getABTestVariantClient } from '@/lib/ab-tests-client';
 
 /**
  * Inline CTA Style Variants:
@@ -38,7 +38,7 @@ export function InlineContextualNudge({
   const pathname = usePathname() || '';
   const [showAuthModal, setShowAuthModal] = useState(false);
   const impressionTracked = useRef(false);
-  const signupPageVariant = useFeatureFlagVariant('grimoire-signup-page');
+  const signupPageVariant = getABTestVariantClient('grimoire-signup-page');
 
   // Use server-assigned variant (works for all users, no PostHog needed)
   const variant: InlineCtaVariant = serverVariant || 'sparkles';

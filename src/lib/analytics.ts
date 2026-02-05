@@ -377,18 +377,36 @@ function extractUTMParams(): Record<string, string> {
   return utmParams;
 }
 
+function getAnonIdFromCookie(): string | undefined {
+  if (typeof document === 'undefined') return undefined;
+  const match = document.cookie.match(/(?:^|; )lunary_anon_id=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
 export function getAnonymousId(): string | undefined {
   if (typeof window === 'undefined') {
     return undefined;
   }
 
   try {
-    let anonId = window.localStorage.getItem(ANON_ID_STORAGE_KEY);
-    if (!anonId) {
-      anonId = generateUUID();
-      window.localStorage.setItem(ANON_ID_STORAGE_KEY, anonId);
+    // Prefer the middleware-set cookie so server and client share one identity
+    const cookieId = getAnonIdFromCookie();
+    const localId = window.localStorage.getItem(ANON_ID_STORAGE_KEY);
+
+    if (cookieId) {
+      // Sync cookie value to localStorage so both pipelines use the same ID
+      if (localId !== cookieId) {
+        window.localStorage.setItem(ANON_ID_STORAGE_KEY, cookieId);
+      }
+      return cookieId;
     }
-    return anonId;
+
+    // Fallback: use existing localStorage ID or generate a new one
+    if (localId) return localId;
+
+    const newId = generateUUID();
+    window.localStorage.setItem(ANON_ID_STORAGE_KEY, newId);
+    return newId;
   } catch (error) {
     console.warn('Unable to access localStorage for anon id:', error);
     return undefined;

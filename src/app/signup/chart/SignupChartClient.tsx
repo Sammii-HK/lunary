@@ -11,6 +11,7 @@ import {
   conversionTracking,
 } from '@/lib/analytics';
 import { captureEvent } from '@/lib/posthog-client';
+import { getABTestVariantClient } from '@/lib/ab-tests-client';
 
 const FEATURES = [
   'Your personal birth chart overview and key placements',
@@ -27,6 +28,9 @@ export default function SignupChartClient() {
   const searchParams = useSearchParams();
   const authState = useAuthStatus();
   const impressionTracked = useRef(false);
+
+  const abVariant =
+    getABTestVariantClient('grimoire-signup-page') || 'value-prop';
 
   const hub = searchParams.get('hub') || '';
   const headline = searchParams.get('headline') || 'Unlock your personal chart';
@@ -60,7 +64,7 @@ export default function SignupChartClient() {
       hub,
       location,
       pagePath,
-      variant: 'value-prop',
+      variant: abVariant,
     });
   }, [hub, location, pagePath]);
 
@@ -86,7 +90,7 @@ export default function SignupChartClient() {
       hub,
       location,
       pagePath,
-      variant: 'value-prop',
+      variant: abVariant,
     });
 
     // Redirect to app — onboarding flow triggers automatically for new users
