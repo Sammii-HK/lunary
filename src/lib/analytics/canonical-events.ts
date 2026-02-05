@@ -149,6 +149,12 @@ export type CanonicaliseResult =
   | { ok: true; row: CanonicalInsertRow }
   | { ok: false; reason: 'skipped_no_user' | 'skipped_invalid' };
 
+function stripTrailingSlashes(s: string): string {
+  let end = s.length;
+  while (end > 0 && s[end - 1] === '/') end--;
+  return end === s.length ? s : s.slice(0, end);
+}
+
 function normalizePath(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   const trimmed = value.trim();
@@ -157,11 +163,11 @@ function normalizePath(value: unknown): string | null {
   // Accept either a pathname or a full URL.
   try {
     const url = new URL(trimmed);
-    return url.pathname.replace(/\/+$/, '') || '/';
+    return stripTrailingSlashes(url.pathname) || '/';
   } catch {
     // Not a URL, assume it's already a path.
     const pathname = trimmed.split('?')[0]?.split('#')[0] ?? trimmed;
-    return pathname.replace(/\/+$/, '') || '/';
+    return stripTrailingSlashes(pathname) || '/';
   }
 }
 
@@ -271,8 +277,13 @@ function extractGrimoireEntityId(pagePath: string | null): string | null {
   // - /grimoire -> null (no slug)
   // - /grimoire/houses/mars -> houses/mars
   // - /grimoire/events/2026 -> events/2026
-  const rest = pagePath.replace(/^\/grimoire\/?/, '');
-  const normalized = rest.replace(/\/+$/, '');
+  let rest = pagePath;
+  if (rest.startsWith('/grimoire/')) {
+    rest = rest.slice('/grimoire/'.length);
+  } else if (rest === '/grimoire') {
+    rest = '';
+  }
+  const normalized = stripTrailingSlashes(rest);
   return normalized ? normalized : null;
 }
 
@@ -343,6 +354,11 @@ function sanitiseMetadata(
   for (const [key, value] of Object.entries(input)) {
     if (blockedKeys.has(key)) continue;
 
+    // Prevent prototype pollution via user-controlled keys
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      continue;
+    }
+
     // Keep only simple, privacy-safe primitives at top-level unless explicitly allowlisted.
     if (!allowlistedTopLevelKeys.has(key)) {
       if (
@@ -351,7 +367,12 @@ function sanitiseMetadata(
         typeof value === 'boolean' ||
         value === null
       ) {
-        result[key] = value;
+        Object.defineProperty(result, key, {
+          value,
+          writable: true,
+          enumerable: true,
+          configurable: true,
+        });
       }
       continue;
     }
@@ -363,7 +384,12 @@ function sanitiseMetadata(
       typeof value === 'boolean' ||
       value === null
     ) {
-      result[key] = value;
+      Object.defineProperty(result, key, {
+        value,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
     }
   }
 
