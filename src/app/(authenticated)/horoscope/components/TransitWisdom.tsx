@@ -64,6 +64,8 @@ function calculateAspectsForWisdom(
             aspectType: aspectDef.name,
             orbDegrees: Math.round(orb * 10) / 10,
             house: natal.house,
+            transitLongitude: transit.eclipticLongitude,
+            natalLongitude: natal.eclipticLongitude,
           });
           break;
         }
@@ -119,7 +121,7 @@ function ThemeTags({ themes }: { themes: ThemeTag[] }) {
   if (!themes || themes.length === 0) return null;
 
   return (
-    <div className='flex flex-wrap gap-1.5'>
+    <>
       {themes.map((theme) => (
         <span
           key={theme}
@@ -128,9 +130,20 @@ function ThemeTags({ themes }: { themes: ThemeTag[] }) {
           {theme}
         </span>
       ))}
-    </div>
+    </>
   );
 }
+
+const formatTimingDate = (date: Date): string => {
+  const d = new Date(date);
+  const month = d.toLocaleString('en-US', { month: 'short' });
+  const day = d.getDate();
+  const hours = d.getHours();
+  const mins = d.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  const h = hours % 12 || 12;
+  return `${month} ${day}, ${h}:${mins}${ampm}`;
+};
 
 function PremiumSection({ premium }: { premium: TransitDetail['premium'] }) {
   if (!premium) return null;
@@ -141,12 +154,22 @@ function PremiumSection({ premium }: { premium: TransitDetail['premium'] }) {
     premium.orbExplanation ||
     premium.timingSummary ||
     premium.stackingNotes ||
-    premium.pastPattern;
+    premium.pastPattern ||
+    premium.aspectTiming;
 
   if (!hasContent) return null;
 
   return (
     <div className='pt-3 mt-3 border-t border-zinc-800/50 space-y-2'>
+      {premium.aspectTiming && (
+        <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-zinc-500'>
+          <span>
+            In orb: {formatTimingDate(premium.aspectTiming.startDate)}
+          </span>
+          <span>Exact: {formatTimingDate(premium.aspectTiming.exactDate)}</span>
+          <span>Leaves: {formatTimingDate(premium.aspectTiming.endDate)}</span>
+        </div>
+      )}
       {premium.houseSummary && (
         <p className='text-xs text-zinc-400'>
           <span className='text-zinc-500'>Where it lands:</span>{' '}
@@ -183,6 +206,44 @@ function PremiumSection({ premium }: { premium: TransitDetail['premium'] }) {
         </p>
       )}
     </div>
+  );
+}
+
+const orbBadgeStyles: Record<
+  string,
+  { bg: string; text: string; border: string }
+> = {
+  Exact: {
+    bg: 'bg-lunary-primary-950/60',
+    text: 'text-lunary-primary-300',
+    border: 'border-lunary-primary-700/50',
+  },
+  Strong: {
+    bg: 'bg-lunary-secondary-950/60',
+    text: 'text-lunary-secondary-300',
+    border: 'border-lunary-secondary-700/50',
+  },
+  Subtle: {
+    bg: 'bg-zinc-900/60',
+    text: 'text-zinc-400',
+    border: 'border-zinc-700/50',
+  },
+};
+
+function OrbBadge({
+  orbDegrees,
+  intensity,
+}: {
+  orbDegrees: number;
+  intensity: string;
+}) {
+  const styles = orbBadgeStyles[intensity] || orbBadgeStyles.Subtle;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border ${styles.bg} ${styles.text} ${styles.border}`}
+    >
+      {intensity} · {orbDegrees}°
+    </span>
   );
 }
 
@@ -223,9 +284,14 @@ function TransitCard({
         </div>
       </div>
 
-      <ThemeTags themes={detail.themes} />
-
-      {detail.duration && <TransitDurationBadge duration={detail.duration} />}
+      <div className='flex flex-wrap items-center gap-1.5'>
+        <ThemeTags themes={detail.themes} />
+        <OrbBadge orbDegrees={detail.orbDegrees} intensity={detail.intensity} />
+        {detail.duration && <TransitDurationBadge duration={detail.duration} />}
+        <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border bg-zinc-900 border-zinc-800 text-zinc-400'>
+          {detail.transitCycle}
+        </span>
+      </div>
 
       <p className='text-xs text-zinc-500 leading-relaxed'>
         {detail.degreeInfo}

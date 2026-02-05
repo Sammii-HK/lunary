@@ -3,10 +3,19 @@
 import Image from 'next/image';
 import { BirthChartData } from '../../../../../utils/astrology/birthChart';
 import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
+import { PLANET_DAILY_MOTION } from '../../../../../utils/astrology/transit-duration-constants';
+import { formatDuration } from '../../../../../utils/astrology/transit-duration';
 
 interface TodaysAspectsProps {
   birthChart: BirthChartData[];
   currentTransits: any[];
+}
+
+interface AspectDuration {
+  totalDays: number;
+  remainingDays: number;
+  displayText: string;
+  isApplying: boolean;
 }
 
 interface PersonalAspect {
@@ -20,6 +29,7 @@ interface PersonalAspect {
   aspectSymbol: string;
   orb: number;
   interpretation: string;
+  duration: AspectDuration;
 }
 
 const formatDegree = (longitude: number, sign: string): string => {
@@ -93,6 +103,23 @@ const calculateAspectsWithDegrees = (
       for (const aspectDef of aspectDefinitions) {
         const orb = Math.abs(diff - aspectDef.angle);
         if (orb <= aspectDef.orb) {
+          const dailyMotion =
+            PLANET_DAILY_MOTION[
+              transit.body as keyof typeof PLANET_DAILY_MOTION
+            ] || 1;
+
+          // Determine applying vs separating by estimating yesterday's orb
+          const yesterdayLong = transit.eclipticLongitude - dailyMotion;
+          let yesterdayDiff = Math.abs(yesterdayLong - natal.eclipticLongitude);
+          if (yesterdayDiff > 180) yesterdayDiff = 360 - yesterdayDiff;
+          const yesterdayOrb = Math.abs(yesterdayDiff - aspectDef.angle);
+          const isApplying = yesterdayOrb > orb;
+
+          const totalDays = (2 * aspectDef.orb) / dailyMotion;
+          const remainingDays = isApplying
+            ? orb / dailyMotion + aspectDef.orb / dailyMotion
+            : (aspectDef.orb - orb) / dailyMotion;
+
           aspects.push({
             transitPlanet: transit.body,
             transitSign: transit.sign,
@@ -111,6 +138,12 @@ const calculateAspectsWithDegrees = (
               natal.body,
               aspectDef.name,
             ),
+            duration: {
+              totalDays,
+              remainingDays,
+              displayText: formatDuration(remainingDays),
+              isApplying,
+            },
           });
           break;
         }
@@ -373,6 +406,21 @@ export function TodaysAspects({
                   <span className='text-zinc-300'>{aspect.natalPlanet}</span>
                   <span className='text-zinc-600'>
                     {aspect.natalDegree.split(' ')[0]}
+                  </span>
+                </div>
+
+                <div className='flex flex-wrap items-center gap-1.5 mb-2'>
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${
+                      aspect.duration.isApplying
+                        ? 'bg-lunary-primary-950/60 text-lunary-primary-300 border-lunary-primary-700/50'
+                        : 'bg-zinc-900/60 text-zinc-400 border-zinc-700/50'
+                    }`}
+                  >
+                    {aspect.duration.isApplying ? 'Applying' : 'Separating'}
+                  </span>
+                  <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border bg-zinc-900 border-zinc-800 text-zinc-400'>
+                    {aspect.duration.displayText}
                   </span>
                 </div>
 
