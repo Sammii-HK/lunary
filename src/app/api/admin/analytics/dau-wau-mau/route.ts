@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
 import { ANALYTICS_REALTIME_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { filterFields, getFieldsParam } from '@/lib/analytics/field-selection';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -989,7 +990,7 @@ export async function GET(request: NextRequest) {
     const engagedRateMau =
       productMau > 0 ? engagementEventsMau / productMau : 0;
 
-    const response = NextResponse.json({
+    const fullData = {
       // Engagement = total events (not distinct users) - shows usage intensity
       dau: engagementEventsDau,
       wau: engagementEventsWau,
@@ -1109,7 +1110,13 @@ export async function GET(request: NextRequest) {
         grimoire_only_calculated: grimoireOnlyMau,
       },
       source: 'database',
-    });
+    };
+
+    // Apply field selection if requested (e.g., ?fields=dau,wau,mau)
+    const fields = getFieldsParam(searchParams);
+    const responseData = filterFields(fullData, fields);
+
+    const response = NextResponse.json(responseData);
 
     // Cache for 5 minutes - balance between freshness and performance
     response.headers.set(

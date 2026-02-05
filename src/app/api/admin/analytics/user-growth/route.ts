@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { resolveDateRange, formatTimestamp } from '@/lib/analytics/date-range';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { filterFields, getFieldsParam } from '@/lib/analytics/field-selection';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -112,12 +113,18 @@ export async function GET(request: NextRequest) {
         ? ((totalSignups - previousTotalSignups) / previousTotalSignups) * 100
         : 0;
 
-    const response = NextResponse.json({
+    const fullData = {
       trends,
       growthRate: Number(growthRate.toFixed(2)),
       totalSignups,
       source: 'users',
-    });
+    };
+
+    // Apply field selection if requested (e.g., ?fields=growthRate,totalSignups)
+    const fields = getFieldsParam(searchParams);
+    const responseData = filterFields(fullData, fields);
+
+    const response = NextResponse.json(responseData);
     response.headers.set(
       'Cache-Control',
       `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,

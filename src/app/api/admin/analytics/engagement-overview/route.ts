@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { getEngagementOverview } from '@/lib/analytics/kpis';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { filterFields, getFieldsParam } from '@/lib/analytics/field-selection';
 
 const familyToEventType = (
   family: string | null,
@@ -30,13 +31,20 @@ export async function GET(request: NextRequest) {
       includeAudit,
       eventType,
     });
-    const response = NextResponse.json({
+
+    const fullData = {
       source: 'database',
       family: family ?? 'site',
       event_type: eventType,
       range,
       ...overview,
-    });
+    };
+
+    // Apply field selection if requested (e.g., ?fields=dau,wau,retention)
+    const fields = getFieldsParam(searchParams);
+    const responseData = filterFields(fullData, fields);
+
+    const response = NextResponse.json(responseData);
     response.headers.set(
       'Cache-Control',
       `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
