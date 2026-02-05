@@ -947,8 +947,7 @@ export function TarotView({
           </div>
         )}
 
-        {/* GuideNudge - paid only */}
-        {hasPaidAccess && <GuideNudge location='tarot' className='mb-2' />}
+        <GuideNudge location='tarot' className='mb-2' />
 
         {/* Season/Ritual/Reflection prompts - paid with tarot_patterns access */}
         {hasPaidAccess &&
