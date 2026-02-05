@@ -174,6 +174,13 @@ export const JOURNAL_LIMITS = {
   freeMonthlyEntries: 3,
 } as const;
 
+export const JOURNAL_PROMPT_LIMITS: Record<PlanKey, number> = {
+  free: 1,
+  lunary_plus: 5,
+  lunary_plus_ai: 5,
+  lunary_plus_ai_annual: 5,
+};
+
 export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'free',
@@ -197,6 +204,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'General daily horoscope',
       'Access to grimoire knowledge',
       'Book of Shadows journal (3 entries/month)',
+      '1 journal prompt per tarot/horoscope page',
       'Smart keyword mood detection (auto-tags journal emotions)',
       'Basic cosmic pattern detection (moon phase correlations)',
       'Astral Guide context memory (no history, no memory snippets)',
@@ -236,6 +244,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Basic cosmic pattern detection (moon phase correlations)',
       'Cosmic State (shareable snapshot)',
       'Book of Shadows journal (no limit)',
+      '5 journal prompts per tarot/horoscope page',
       'Astral Guide context memory (4 recent messages + 2 memory snippets)',
       'Save chat messages to collections (no limit)',
       'Collections (no limit)',
