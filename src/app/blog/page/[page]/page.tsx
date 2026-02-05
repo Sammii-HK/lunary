@@ -1,13 +1,10 @@
 import { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { BlogList } from '../../BlogList';
-import {
-  getPaginatedPosts,
-  getSortedPosts,
-  POSTS_PER_PAGE,
-} from '../../blog-utils';
+import { getPaginatedPosts, POSTS_PER_PAGE } from '../../blog-utils';
 
 export const revalidate = 3600;
+export const dynamicParams = true;
 
 interface PageProps {
   params: Promise<{ page: string }>;
@@ -15,14 +12,8 @@ interface PageProps {
 
 const year = new Date().getFullYear();
 
-export async function generateStaticParams() {
-  const allPosts = getSortedPosts();
-  const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
-
-  return Array.from({ length: totalPages - 1 }, (_, i) => ({
-    page: String(i + 2),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 1-hour revalidation
 
 export async function generateMetadata({
   params,
