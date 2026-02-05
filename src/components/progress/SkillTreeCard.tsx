@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { ProgressBar } from './ProgressBar';
-import { ChevronRight, Lock, Sparkles } from 'lucide-react';
+import { ChevronRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 interface SkillTreeCardProps {
@@ -34,7 +34,7 @@ export function SkillTreeCard({
   variant = 'full',
   className,
 }: SkillTreeCardProps) {
-  const isMaxLevel = currentLevel >= 4;
+  const isMaxLevel = currentLevel >= 10;
 
   if (variant === 'compact') {
     return (
@@ -111,9 +111,12 @@ export function SkillTreeCard({
             </>
           ) : (
             <>
-              <Lock className='w-4 h-4 text-zinc-500 shrink-0' />
+              <Sparkles className='w-4 h-4 text-zinc-400 shrink-0' />
               <span className='text-xs text-zinc-400'>
-                {actionsToNext} more to reach level {currentLevel + 1}
+                <span className='text-zinc-300 font-medium'>
+                  {actionsToNext}
+                </span>{' '}
+                more to reach level {currentLevel + 1}
               </span>
             </>
           )}

@@ -14,7 +14,7 @@ interface ProgressBarProps {
 export function ProgressBar({
   progress,
   level,
-  maxLevel = 4,
+  maxLevel = 10,
   size = 'md',
   showLabel = true,
   className,
