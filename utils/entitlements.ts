@@ -184,7 +184,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     interval: 'month',
     stripePriceId: '', // No Stripe for free plan
     chatLimitPerDay: CHAT_LIMITS.free,
-    chatLabel: 'Astral Guide chat',
+    chatLabel: 'Limited daily Astral Guide chat',
     trialDays: 0,
     features: [
       'Your personal birth chart',
@@ -256,7 +256,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     features: [
       'Everything in Lunary+',
       'Personalized weekly reports',
-      'Astral Guide ritual prompts (AI)',
+      'Astral Guide ritual generation',
       'Tarot pattern analysis (up to 12 months + year-over-year)',
       'Advanced multi-dimensional pattern analysis',
       'Enhanced mood detection (catches subtle emotions & implicit feelings)',
