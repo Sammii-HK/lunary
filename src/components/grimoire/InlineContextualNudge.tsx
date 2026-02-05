@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
 import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
 import { Heading } from '../ui/Heading';
+import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 
 /**
  * Inline CTA Style Variants:
@@ -37,6 +38,7 @@ export function InlineContextualNudge({
   const pathname = usePathname() || '';
   const [showAuthModal, setShowAuthModal] = useState(false);
   const impressionTracked = useRef(false);
+  const signupPageVariant = useFeatureFlagVariant('grimoire-signup-page');
 
   // Use server-assigned variant (works for all users, no PostHog needed)
   const variant: InlineCtaVariant = serverVariant || 'sparkles';
@@ -100,7 +102,18 @@ export function InlineContextualNudge({
     }
 
     if (!authState.isAuthenticated) {
-      setShowAuthModal(true);
+      if (signupPageVariant === 'value-prop') {
+        const params = new URLSearchParams({
+          hub: nudge.hub,
+          headline: nudge.headline || nudge.ctaHeadline || '',
+          subline: nudge.subline || nudge.ctaSubline || '',
+          location,
+          pagePath: pathname,
+        });
+        router.push(`/signup/chart?${params.toString()}`);
+      } else {
+        setShowAuthModal(true);
+      }
       return;
     }
 
