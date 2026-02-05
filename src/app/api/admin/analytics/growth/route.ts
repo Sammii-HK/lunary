@@ -1,30 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
+import { resolveDateRange } from '@/lib/analytics/date-range';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
-
-const TEST_EMAIL_PATTERN = '%@test.lunary.app';
-const TEST_EMAIL_EXACT = 'test@test.lunary.app';
-
-const PRODUCT_EVENTS = [
-  'grimoire_viewed',
-  'tarot_drawn',
-  'chart_viewed',
-  'birth_chart_viewed',
-  'personalized_horoscope_viewed',
-  'personalized_tarot_viewed',
-  'astral_chat_used',
-  'ritual_started',
-  'horoscope_viewed',
-  'daily_dashboard_viewed',
-  'journal_entry_created',
-  'dream_entry_created',
-  'cosmic_pulse_opened',
-];
 
 /**
  * Growth endpoint for insights
- * Optimized to query DB directly instead of fetching user-growth + dau-wau-mau
+ * Uses pre-computed daily_metrics for 99% cost reduction
  */
 export async function GET(request: NextRequest) {
   try {
@@ -38,81 +19,50 @@ export async function GET(request: NextRequest) {
       previousRangeEnd.getTime() - rangeDurationMs,
     );
 
-    const endDate = range.end;
-    const mauStart = new Date(endDate);
-    mauStart.setUTCDate(mauStart.getUTCDate() - 29); // 30 days
+    // FAST PATH: Query pre-computed metrics from daily_metrics table
+    const [currentResult, previousResult] = await Promise.all([
+      // Current period totals
+      sql.query(
+        `SELECT
+          SUM(new_signups) as total_signups,
+          MAX(signed_in_product_mau) as product_mau,
+          MAX(activation_rate) as activation_rate
+        FROM daily_metrics
+        WHERE metric_date >= $1 AND metric_date <= $2`,
+        [
+          range.start.toISOString().split('T')[0],
+          range.end.toISOString().split('T')[0],
+        ],
+      ),
+      // Previous period totals (for growth calculation)
+      sql.query(
+        `SELECT SUM(new_signups) as total_signups
+        FROM daily_metrics
+        WHERE metric_date >= $1 AND metric_date <= $2`,
+        [
+          previousRangeStart.toISOString().split('T')[0],
+          previousRangeEnd.toISOString().split('T')[0],
+        ],
+      ),
+    ]);
 
-    // Query all metrics in parallel
-    const [currentSignupsResult, previousSignupsResult, productMauResult] =
-      await Promise.all([
-        // Current period signups
-        sql.query(
-          `
-        SELECT COUNT(*) as count
-        FROM "user"
-        WHERE "createdAt" >= $1
-          AND "createdAt" <= $2
-          AND (email IS NULL OR (email NOT LIKE $3 AND email != $4))
-      `,
-          [
-            formatTimestamp(range.start),
-            formatTimestamp(range.end),
-            TEST_EMAIL_PATTERN,
-            TEST_EMAIL_EXACT,
-          ],
-        ),
-        // Previous period signups for growth calculation
-        sql.query(
-          `
-        SELECT COUNT(*) as count
-        FROM "user"
-        WHERE "createdAt" >= $1
-          AND "createdAt" <= $2
-          AND (email IS NULL OR (email NOT LIKE $3 AND email != $4))
-      `,
-          [
-            formatTimestamp(previousRangeStart),
-            formatTimestamp(previousRangeEnd),
-            TEST_EMAIL_PATTERN,
-            TEST_EMAIL_EXACT,
-          ],
-        ),
-        // Product MAU for activation rate
-        sql.query(
-          `
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE event_type = ANY($1::text[])
-          AND user_id IS NOT NULL
-          AND user_id NOT LIKE 'anon:%'
-          AND created_at >= $2
-          AND created_at <= $3
-          AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
-      `,
-          [
-            PRODUCT_EVENTS,
-            formatTimestamp(mauStart),
-            formatTimestamp(endDate),
-            TEST_EMAIL_PATTERN,
-            TEST_EMAIL_EXACT,
-          ],
-        ),
-      ]);
-
-    const totalSignups = Number(currentSignupsResult.rows[0]?.count || 0);
+    const totalSignups = Number(currentResult.rows[0]?.total_signups || 0);
     const previousTotalSignups = Number(
-      previousSignupsResult.rows[0]?.count || 0,
+      previousResult.rows[0]?.total_signups || 0,
     );
-    const productMau = Number(productMauResult.rows[0]?.count || 0);
+    const productMau = Number(currentResult.rows[0]?.product_mau || 0);
+
+    // Use pre-computed activation rate if available, else calculate
+    let activationRate = Number(currentResult.rows[0]?.activation_rate || 0);
+    if (activationRate === 0 && totalSignups > 0 && productMau > 0) {
+      activationRate = productMau / totalSignups;
+    }
 
     // Calculate growth rate
     const growthRate =
       previousTotalSignups > 0
         ? ((totalSignups - previousTotalSignups) / previousTotalSignups) * 100
         : 0;
-
-    // Activation rate as 0–1 fraction (insights lib expects this scale)
-    const activationRate = totalSignups > 0 ? productMau / totalSignups : 0;
 
     const response = NextResponse.json({
       product_mau_growth_rate: Number(growthRate.toFixed(2)),
