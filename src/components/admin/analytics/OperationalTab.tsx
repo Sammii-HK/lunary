@@ -1001,7 +1001,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                   align: 'right',
                 },
               ]}
-              data={grimoireTopPages}
+              data={grimoireTopPages ?? []}
               emptyMessage='No grimoire page view data yet.'
             />
           </CardContent>
