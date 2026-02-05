@@ -41,8 +41,6 @@ const defaultShortFormProps: ShortFormVideoProps = {
 };
 
 const defaultMediumFormProps: MediumFormVideoProps = {
-  hookText: 'Your Weekly Cosmic Forecast',
-  hookSubtitle: 'Week of January 20-26, 2026',
   segments: [
     {
       text: 'This week begins with powerful lunar energy.',
