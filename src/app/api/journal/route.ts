@@ -204,6 +204,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Check referral activation (fire-and-forget)
+    if (entry.category === 'journal' || entry.category === 'dream') {
+      import('@/lib/referrals/check-activation')
+        .then(({ checkInviteActivation }) =>
+          checkInviteActivation(user.id, 'journal_entry_created'),
+        )
+        .catch(() => {});
+    }
+
     // Track journal progress for skill tree (journals and dreams count)
     if (entry.category === 'journal' || entry.category === 'dream') {
       try {

@@ -501,8 +501,17 @@ export async function POST(request: NextRequest) {
     const savedReading = mapRowToReading(insertResult.rows[0]);
     const updatedUsage = await computeUsageSnapshot(userId, subscription);
 
-    // Increment tarot progress for multi-card spreads only (not daily single cards)
+    // Check referral activation for multi-card spreads (fire-and-forget)
     const cardCount = cardsForStorage.length;
+    if (cardCount > 1) {
+      import('@/lib/referrals/check-activation')
+        .then(({ checkInviteActivation }) =>
+          checkInviteActivation(userId, 'tarot_spread_completed'),
+        )
+        .catch(() => {});
+    }
+
+    // Increment tarot progress for multi-card spreads only (not daily single cards)
     if (cardCount > 1) {
       const isPro = subscription.plan !== 'free';
       try {

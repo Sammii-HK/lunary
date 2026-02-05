@@ -2,6 +2,7 @@ import Link from 'next/link';
 import {
   BookMarked,
   User,
+  Users,
   Stars,
   BookOpen,
   Tag,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { HappeningNowSection } from '@/components/explore/HappeningNowSection';
+import { CircleInviteCTA } from '@/components/CircleInviteCTA';
 
 export const metadata = {
   title: 'Explore | Lunary',
@@ -79,6 +81,18 @@ const cosmicTools: ExploreItem[] = [
     label: 'Cosmic State',
     description: 'Current planetary positions',
     icon: Globe,
+  },
+  {
+    href: '/profile',
+    label: 'Profile',
+    description: 'Your cosmic identity',
+    icon: User,
+  },
+  {
+    href: '/profile?tab=circle',
+    label: 'Your Circle',
+    description: 'Friends & compatibility',
+    icon: Users,
   },
 ];
 
@@ -160,6 +174,9 @@ export default function ExplorePage() {
               ))}
             </div>
           </section>
+
+          {/* Invite/Referral CTA */}
+          <CircleInviteCTA />
 
           {/* Section 3: Learn & Connect */}
           <section>

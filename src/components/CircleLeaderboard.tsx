@@ -100,18 +100,27 @@ export function CircleLeaderboard() {
     );
   }
 
-  // Build leaderboard entries (top 3 friends + user)
-  const topFriends = data.friends.slice(0, 3);
+  // Build leaderboard entries (user + friends, top 3 total)
   const allEntries = [
-    { type: 'user' as const, streak: data.userStreak },
-    ...topFriends.map((f) => ({ type: 'friend' as const, ...f })),
-  ].sort((a, b) => b.streak - a.streak);
+    { type: 'user' as const, streak: data.userStreak } as const,
+    ...data.friends.map(
+      (f) =>
+        ({
+          type: 'friend' as const,
+          ...f,
+          streak: f.currentStreak,
+        }) as const,
+    ),
+  ]
+    .sort((a, b) => b.streak - a.streak)
+    .slice(0, 3);
 
   // Get motivational copy
+  const topFriendStreak = data.friends[0]?.currentStreak || 0;
   const motivationalCopy = getMotivationalCopy(
     data.userPosition,
     data.userStreak,
-    topFriends[0]?.currentStreak || 0,
+    topFriendStreak,
   );
 
   return (
@@ -131,7 +140,7 @@ export function CircleLeaderboard() {
 
       {/* Leaderboard List */}
       <div className='space-y-2'>
-        {allEntries.slice(0, 4).map((entry, index) => {
+        {allEntries.map((entry, index) => {
           const position = index + 1;
           const isUser = entry.type === 'user';
 

@@ -17,6 +17,7 @@ import {
 } from '@/lib/grimoire/getContextualNudge';
 import { SEOCTAButton } from '@/components/grimoire/SEOCTAButton';
 import { ExploreGrimoire } from './ExploreGrimoire';
+import { GrimoireStats } from './GrimoireStats';
 import { Heading } from '../ui/Heading';
 import { ArticleFooter } from './ArticleFooter';
 import { PeopleAlsoAsk } from './PeopleAlsoAsk';
@@ -741,6 +742,9 @@ export async function SEOContentTemplate({
             />
           </section>
         ) : null}
+
+        {/* Social proof stats */}
+        <GrimoireStats pagePath={canonicalPathname} />
 
         {/* Universal Grimoire Exploration - always shown */}
         <ExploreGrimoire />

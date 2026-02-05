@@ -158,6 +158,13 @@ export async function completeRitual({
       }
     }
 
+    // Check referral activation (fire-and-forget)
+    import('@/lib/referrals/check-activation')
+      .then(({ checkInviteActivation }) =>
+        checkInviteActivation(userId, 'daily_ritual_completed'),
+      )
+      .catch(() => {});
+
     return {
       success: true,
       ritualStreak,

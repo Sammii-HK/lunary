@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import {
   Plus,
   Heart,
@@ -15,7 +14,6 @@ import {
   Copy,
   Check,
   UserPlus,
-  ExternalLink,
   Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,6 +21,7 @@ import { BirthdayInput } from '@/components/ui/birthday-input';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { CircleLeaderboard } from '@/components/CircleLeaderboard';
 import { CircleInviteCTA } from '@/components/CircleInviteCTA';
+import { FriendActivityFeed } from '@/components/friends/FriendActivityFeed';
 
 type Friend = {
   id: string;
@@ -229,22 +228,6 @@ export function CircleTab() {
       }
     } catch (error) {
       console.error('Failed to delete profile:', error);
-    }
-  };
-
-  const handleRemoveFriend = async (id: string) => {
-    try {
-      await fetch(`/api/friends/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      setFriends(friends.filter((f) => f.id !== id));
-      if (selectedItem?.type === 'friend' && selectedItem.id === id) {
-        setSelectedItem(null);
-        setSynastryResult(null);
-      }
-    } catch (error) {
-      console.error('Failed to remove friend:', error);
     }
   };
 
@@ -553,19 +536,16 @@ export function CircleTab() {
 
   return (
     <div className='w-full max-w-3xl space-y-6'>
-      {/* Leaderboard & Invite CTA at top */}
+      {/* Leaderboard & Invite CTA */}
       <div className='grid gap-4 sm:grid-cols-2'>
         <CircleLeaderboard />
         <CircleInviteCTA />
       </div>
 
-      <div className='flex items-center justify-between'>
-        <div>
-          <h2 className='text-lg font-semibold text-white'>Your Circle</h2>
-          <p className='text-sm text-zinc-400'>
-            Connect with friends or add birth data manually
-          </p>
-        </div>
+      <div>
+        <p className='text-sm text-zinc-400 mb-3'>
+          Connect with friends or add birth data manually
+        </p>
         <div className='flex gap-2'>
           <Button
             onClick={() => setShowInviteSection(!showInviteSection)}
@@ -783,69 +763,6 @@ export function CircleTab() {
         </div>
       )}
 
-      {friends.length > 0 && (
-        <div className='space-y-3'>
-          <h3 className='text-sm font-medium text-zinc-400 uppercase tracking-wide'>
-            Connected Friends
-          </h3>
-          {friends.map((friend) => {
-            const Icon =
-              RELATIONSHIP_TYPES.find(
-                (t) => t.value === friend.relationshipType,
-              )?.icon || Users;
-
-            return (
-              <Link
-                key={friend.id}
-                href={`/profile/friends/${friend.id}`}
-                className='block rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 hover:border-lunary-primary-600 transition-all'
-              >
-                <div className='p-4 flex items-center gap-4'>
-                  <div className='w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center'>
-                    <Icon className='w-5 h-5 text-lunary-accent-300' />
-                  </div>
-                  <div className='flex-1 min-w-0'>
-                    <h3 className='font-medium text-white truncate'>
-                      {friend.name}
-                    </h3>
-                    <p className='text-xs text-zinc-400'>
-                      {friend.sunSign}
-                      <span className='ml-2 text-lunary-primary-400'>
-                        Connected
-                      </span>
-                    </p>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    {friend.synastryScore && (
-                      <div className='text-center mr-2'>
-                        <div className='text-lg font-bold text-lunary-accent-200'>
-                          {friend.synastryScore}%
-                        </div>
-                        <div className='text-[10px] text-zinc-500'>Match</div>
-                      </div>
-                    )}
-                    <div className='flex items-center gap-1 text-xs text-zinc-400'>
-                      View Profile
-                      <ExternalLink className='w-3.5 h-3.5' />
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleRemoveFriend(friend.id);
-                      }}
-                      className='p-2 text-zinc-500 hover:text-red-400 transition-colors'
-                    >
-                      <Trash2 className='w-4 h-4' />
-                    </button>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
-
       {profiles.length > 0 && (
         <div className='space-y-3'>
           <h3 className='text-sm font-medium text-zinc-400 uppercase tracking-wide'>
@@ -916,6 +833,9 @@ export function CircleTab() {
           })}
         </div>
       )}
+
+      {/* Activity Feed at bottom */}
+      <FriendActivityFeed />
 
       <p className='text-xs text-zinc-500 text-center'>
         Synastry compares birth charts to reveal cosmic compatibility.

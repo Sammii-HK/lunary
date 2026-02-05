@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
+import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
 import { signMeta } from '@/lib/horoscope-meta';
 
 import {
@@ -151,6 +152,7 @@ export default async function SignHoroscopePage({
           currentYear={currentYear}
         />
       }
+      components={<PlacementSelector signName={signName} />}
       ctaText={birthChartCta.text}
       ctaHref={birthChartCta.href}
       childrenPosition='after-description'

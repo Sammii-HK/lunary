@@ -225,11 +225,9 @@ export async function processReferralCode(
       WHERE code = ${code.toUpperCase()}
     `;
 
-    // Grant trial to BOTH parties
-    // 1. Grant to referrer
-    await grantReferralReward(validation.userId!);
-    // 2. Grant to referred user
-    await grantReferralReward(newUserId);
+    // Reward is deferred until the referred user completes an activation event
+    // (tarot spread, journal entry, or ritual completion).
+    // See src/lib/referrals/check-activation.ts
 
     return { success: true, referrerUserId: validation.userId };
   } catch (error) {
