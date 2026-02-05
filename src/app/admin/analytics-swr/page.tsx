@@ -8,6 +8,7 @@ import { useAnalyticsDataSWR } from '@/hooks/useAnalyticsDataSWR';
 import { useAnalyticsComputations } from '@/hooks/useAnalyticsComputations';
 import { SnapshotTab } from '@/components/admin/analytics/SnapshotTab';
 import { OperationalTab } from '@/components/admin/analytics/OperationalTab';
+import { AnalyticsDashboardSkeleton } from '@/components/admin/analytics/AnalyticsSkeleton';
 import { formatDateInput } from '@/lib/analytics/utils';
 
 const DEFAULT_RANGE_DAYS = 30;
@@ -239,16 +240,8 @@ export default function AnalyticsPageSWR() {
         </div>
       )}
 
-      {/* Loading State */}
-      {analyticsData.loading && (
-        <div className='flex items-center justify-center py-12'>
-          <div className='flex items-center gap-3'>
-            <div className='h-2 w-2 animate-pulse rounded-full bg-lunary-primary' />
-            <div className='h-2 w-2 animate-pulse rounded-full bg-lunary-primary delay-75' />
-            <div className='h-2 w-2 animate-pulse rounded-full bg-lunary-primary delay-150' />
-          </div>
-        </div>
-      )}
+      {/* Loading State - Show skeleton for better UX */}
+      {analyticsData.loading && <AnalyticsDashboardSkeleton />}
 
       {/* Main Content */}
       {!analyticsData.loading && (
