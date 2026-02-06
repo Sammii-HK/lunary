@@ -21,6 +21,7 @@ import {
   getFeatureRecording,
   getAllFeatureIds,
   type RecordingStep,
+  type FeatureRecordingConfig,
 } from '../src/lib/video/app-feature-recordings';
 
 const OUTPUT_DIR = join(process.cwd(), 'public', 'app-demos');
@@ -31,7 +32,8 @@ const PERSONA_PASSWORD = process.env.PERSONA_PASSWORD;
 /**
  * Validate required environment variables
  */
-function validateEnvironment(): void {
+function validateEnvironment(needsAuth: boolean): void {
+  if (!needsAuth) return;
   if (!PERSONA_EMAIL) {
     throw new Error(
       'Missing PERSONA_EMAIL environment variable. Add it to .env.local',
@@ -209,7 +211,7 @@ async function executeStep(page: Page, step: RecordingStep): Promise<void> {
                 : window.scrollY;
 
             // Perform slow, incremental scroll for human-like effect
-            const steps = Math.ceil(distance / 80); // Scroll 80px per step
+            const steps = Math.ceil(Math.abs(distance) / 80); // Scroll 80px per step
             const stepDistance = distance / steps;
             const stepDelay = 150; // 150ms between steps
 
@@ -288,8 +290,10 @@ async function recordFeature(featureId: string): Promise<string> {
     // Handle cookies FIRST, before auth
     await handleCookieConsent(page);
 
-    // Then authenticate
-    await authenticate(page);
+    // Only authenticate if the feature requires it
+    if (config.requiresAuth !== false) {
+      await authenticate(page);
+    }
 
     // Record the feature
     return await recordFeatureSteps(page, context, browser, config, featureId);
@@ -309,7 +313,7 @@ async function recordFeatureSteps(
   page: Page,
   context: BrowserContext,
   browser: any,
-  config: any,
+  config: FeatureRecordingConfig,
   featureId: string,
 ): Promise<string> {
   try {
@@ -318,12 +322,8 @@ async function recordFeatureSteps(
     const currentPath = new URL(currentUrl).pathname;
     const targetUrl = BASE_URL + config.startUrl;
 
-    // Safety check: ensure we're not on the marketing page root
-    if (currentPath === '/' || currentPath === '') {
-      console.log(`   Warning: On marketing page, navigating to app...`);
-      await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
-      await page.waitForTimeout(3000); // Extra time for React hydration
-    } else if (!currentUrl.includes(config.startUrl)) {
+    // Navigate to start URL if not already there
+    if (currentPath !== config.startUrl) {
       console.log(`   Loading: ${targetUrl}`);
       await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(3000); // Extra time for React hydration
@@ -386,6 +386,10 @@ async function recordSuite(
     `\n🎬 Suite Mode: Recording ${featureIds.length} features with single login\n`,
   );
 
+  // Separate features by auth requirement
+  const configs = featureIds.map((id) => getFeatureRecording(id));
+  const needsAuth = configs.some((c) => c.requiresAuth !== false);
+
   // Launch browser once
   const browser = await chromium.launch({
     headless: true,
@@ -394,35 +398,39 @@ async function recordSuite(
   const results: Record<string, string> = {};
 
   try {
-    // Create initial context for authentication
-    const authContext = await browser.newContext({
-      viewport: { width: 390, height: 844 },
-      userAgent:
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
-      deviceScaleFactor: 3,
-    });
+    let storage: any = undefined;
 
-    const authPage = await authContext.newPage();
+    // Only authenticate if at least one feature requires auth
+    if (needsAuth) {
+      const authContext = await browser.newContext({
+        viewport: { width: 390, height: 844 },
+        userAgent:
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
+        deviceScaleFactor: 3,
+      });
 
-    // Handle cookies and authenticate ONCE
-    console.log('🔐 Authenticating once for all recordings...');
-    await handleCookieConsent(authPage);
-    await authenticate(authPage);
-    console.log('✓ Authentication complete\n');
+      const authPage = await authContext.newPage();
 
-    // Save auth state
-    const storage = await authContext.storageState();
-    await authContext.close();
+      console.log('🔐 Authenticating once for all recordings...');
+      await handleCookieConsent(authPage);
+      await authenticate(authPage);
+      console.log('✓ Authentication complete\n');
 
-    // Record each feature with the saved auth state
+      storage = await authContext.storageState();
+      await authContext.close();
+    }
+
+    // Record each feature
     for (const featureId of featureIds) {
       const config = getFeatureRecording(featureId);
+      const useAuth = config.requiresAuth !== false;
 
       console.log(`\n🎬 Recording: ${config.name}`);
       console.log(`   Duration: ${config.durationSeconds}s`);
       console.log(`   Steps: ${config.steps.length}`);
+      console.log(`   Auth: ${useAuth ? 'yes' : 'no (public)'}`);
 
-      // Create new context with saved auth
+      // Create new context, with auth state only if needed
       const context = await browser.newContext({
         viewport: config.viewport || { width: 390, height: 844 },
         recordVideo: {
@@ -432,7 +440,7 @@ async function recordSuite(
         userAgent:
           'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
         deviceScaleFactor: 3,
-        storageState: storage, // Reuse auth state
+        ...(useAuth && storage ? { storageState: storage } : {}),
       });
 
       const page = await context.newPage();
@@ -461,13 +469,18 @@ async function recordSuite(
  * Record all features or a specific one
  */
 async function main() {
-  // Validate environment variables
-  validateEnvironment();
-
   const args = process.argv.slice(2);
   const useSuiteMode = args.includes('--suite');
   const featureArgs = args.filter((arg) => !arg.startsWith('--'));
   const targetFeatures = featureArgs.length > 0 ? featureArgs : null;
+
+  // Determine which features to record
+  const featuresToRecord = targetFeatures || getAllFeatureIds();
+
+  // Check if any features need auth, validate env vars accordingly
+  const configs = featuresToRecord.map((id) => getFeatureRecording(id));
+  const anyNeedsAuth = configs.some((c) => c.requiresAuth !== false);
+  validateEnvironment(anyNeedsAuth);
 
   // Ensure output directory exists
   await mkdir(OUTPUT_DIR, { recursive: true });
@@ -476,13 +489,12 @@ async function main() {
   console.log('━'.repeat(50));
   console.log(`Output: ${OUTPUT_DIR}`);
   console.log(`Base URL: ${BASE_URL}`);
-  console.log(`Persona: ${PERSONA_EMAIL}`);
+  if (anyNeedsAuth) {
+    console.log(`Persona: ${PERSONA_EMAIL}`);
+  }
   console.log(
     `Mode: ${useSuiteMode || (targetFeatures && targetFeatures.length > 1) ? 'Suite (login once)' : 'Single'}`,
   );
-
-  // Determine which features to record
-  const featuresToRecord = targetFeatures || getAllFeatureIds();
 
   console.log(`\nRecording ${featuresToRecord.length} feature(s)...`);
 

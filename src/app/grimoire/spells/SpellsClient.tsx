@@ -266,7 +266,7 @@ export function SpellsClient({
   const endIndex = Math.min(currentPage * pageSize, totalCount);
 
   return (
-    <div className='space-y-8'>
+    <div className='space-y-8' data-testid='spells-page'>
       <MoonBanner phase={DEFAULT_CURRENT_MOON_PHASE} />
 
       <SearchInput
@@ -283,6 +283,7 @@ export function SpellsClient({
       <div className='flex items-center justify-between'>
         <button
           onClick={() => setShowFilters(!showFilters)}
+          data-testid='spell-filters'
           className='flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all'
         >
           <Filter className='w-4 h-4' />
@@ -365,7 +366,7 @@ export function SpellsClient({
       )}
 
       {safeSpells.length > 0 ? (
-        <div className='grid gap-4'>
+        <div className='grid gap-4' data-testid='spell-list'>
           {safeSpells.map((spell) => {
             const TypeIcon = typeIcons[spell.type] ?? Sparkles;
 
@@ -373,6 +374,8 @@ export function SpellsClient({
               <Link
                 key={spell.id}
                 href={`/grimoire/spells/${spell.id}`}
+                data-testid='spell-card'
+                data-spell-slug={spell.id}
                 className='group block rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-violet-700/50 transition-all'
               >
                 <div className='flex items-start justify-between gap-4 mb-3'>

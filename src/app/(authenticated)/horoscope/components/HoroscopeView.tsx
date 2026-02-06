@@ -437,7 +437,10 @@ export function HoroscopeView({
         )}
 
         {/* Numerology Grid */}
-        <div className='mt-2 grid grid-cols-2 gap-3'>
+        <div
+          className='mt-2 grid grid-cols-2 gap-3'
+          data-testid='numerology-section'
+        >
           {/* Universal Day — always interactive */}
           <div className='relative'>
             <button
@@ -451,6 +454,7 @@ export function HoroscopeView({
                 )
               }
               className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400 w-full'
+              data-testid='numerology-day'
             >
               <div className='text-xs uppercase tracking-widest text-zinc-400'>
                 Universal Day
@@ -496,6 +500,7 @@ export function HoroscopeView({
                       )
                     }
                     className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center transition hover:border-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300 w-full'
+                    data-testid='numerology-month'
                   >
                     <div className='text-xs uppercase tracking-widest text-zinc-400'>
                       Personal Day
@@ -562,7 +567,7 @@ export function HoroscopeView({
 
       {/* Season & Ritual — paid with horoscope data */}
       {hasPaidAccess && horoscope && (
-        <div className='space-y-3'>
+        <div className='space-y-3' data-testid='ritual-section'>
           <HoroscopeSeasonReading
             sunSign={horoscope.sunSign}
             moonPhase={horoscope.moonPhase}

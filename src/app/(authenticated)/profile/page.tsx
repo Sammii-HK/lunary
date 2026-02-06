@@ -521,7 +521,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className='flex flex-col items-center gap-6 p-4'>
+    <div
+      className='flex flex-col items-center gap-6 p-4'
+      data-testid='profile-page'
+    >
       <div className='flex items-center justify-between w-full max-w-3xl'>
         <Heading as='h1' variant='h1' className='text-center md:text-left'>
           Your Profile
@@ -530,7 +533,9 @@ export default function ProfilePage() {
 
       {/* Tab Navigation */}
       {authState.isAuthenticated && (
-        <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange} />
+        <div data-testid='profile-tabs'>
+          <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange} />
+        </div>
       )}
 
       {/* Profile Tab Content */}
@@ -844,11 +849,13 @@ export default function ProfilePage() {
             !isEditing &&
             birthday &&
             hasBirthChartAccessData && (
-              <CosmicProfileGrid
-                birthday={birthday}
-                personalCard={user?.personalCard}
-                onPersonalCardClick={() => setShowPersonalCardModal(true)}
-              />
+              <div data-testid='cosmic-profile-grid'>
+                <CosmicProfileGrid
+                  birthday={birthday}
+                  personalCard={user?.personalCard}
+                  onPersonalCardClick={() => setShowPersonalCardModal(true)}
+                />
+              </div>
             )}
 
           {/* Daily Cosmic Overview & Life Themes */}
@@ -891,7 +898,11 @@ export default function ProfilePage() {
       )}
 
       {/* Circle Tab Content */}
-      {activeTab === 'circle' && authState.isAuthenticated && <CircleTab />}
+      {activeTab === 'circle' && authState.isAuthenticated && (
+        <div data-testid='circle-section'>
+          <CircleTab />
+        </div>
+      )}
 
       {/* Settings Tab Content */}
       {activeTab === 'settings' && authState.isAuthenticated && (

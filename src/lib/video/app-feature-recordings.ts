@@ -1,11 +1,19 @@
 /**
  * App Feature Recording Configuration
  *
- * Defines how to navigate and record each app feature for demo videos
+ * Generates Playwright recording configs from TikTok scripts.
+ * Single source of truth: tiktok-scripts.ts defines the storyboard,
+ * this file converts scenes → recording steps.
  */
 
+import {
+  TIKTOK_SCRIPTS,
+  type TikTokScript,
+  type Scene,
+} from './tiktok-scripts';
+
 export interface FeatureRecordingConfig {
-  /** Feature ID from app-features.ts */
+  /** Feature ID from tiktok-scripts.ts */
   id: string;
   /** Feature name */
   name: string;
@@ -17,6 +25,8 @@ export interface FeatureRecordingConfig {
   durationSeconds: number;
   /** Viewport size for recording */
   viewport?: { width: number; height: number };
+  /** Whether this feature requires authentication (default: true) */
+  requiresAuth?: boolean;
 }
 
 export interface RecordingStep {
@@ -46,440 +56,267 @@ export interface RecordingStep {
   description?: string;
   /** If true, step failure won't stop recording (optional interactions) */
   optional?: boolean;
-  /** If true, force the click even if element is obscured (bypasses actionability checks) */
+  /** If true, force the click even if element is obscured */
   force?: boolean;
 }
 
+/** Per-script overrides for the generator */
+interface ScriptOverrides {
+  /** Steps to insert before the generated steps */
+  beforeSteps?: RecordingStep[];
+  /** Steps to insert after specific scene indices */
+  afterScene?: Record<number, RecordingStep[]>;
+  /** Override requiresAuth (default: true) */
+  requiresAuth?: boolean;
+}
+
 /**
- * Feature recording configurations for all 6 app features
+ * Convert a TikTok scene action to RecordingStep(s)
  */
-export const FEATURE_RECORDINGS: FeatureRecordingConfig[] = [
-  {
-    id: 'dashboard-overview-simple',
-    name: 'Dashboard Overview (Simple)',
-    startUrl: '/app',
-    durationSeconds: 15,
-    viewport: { width: 390, height: 844 }, // iPhone 12 Pro
-    steps: [
-      {
+function sceneToSteps(scene: Scene): RecordingStep[] {
+  const steps: RecordingStep[] = [];
+  const durationMs = scene.durationSeconds * 1000;
+
+  switch (scene.action) {
+    case 'show':
+      steps.push({
         type: 'wait',
-        duration: 3000,
-        description: 'Let dashboard fully load',
-      },
-      {
-        type: 'pressKey',
-        key: 'Escape',
-        description: 'Close any modals',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Wait after escape',
-      },
-      {
+        duration: durationMs,
+        description: scene.description,
+      });
+      break;
+
+    case 'scroll':
+      steps.push({
         type: 'scroll',
-        distance: 400,
-        description: 'Scroll through dashboard',
-      },
-      {
+        distance: scene.scrollDistance || 300,
+        description: scene.description,
+      });
+      // Use remaining time as a wait to let content settle
+      steps.push({
         type: 'wait',
-        duration: 3000,
-        description: 'Show content',
-      },
-      {
-        type: 'scroll',
-        distance: 400,
-        description: 'Continue scrolling',
-      },
-      {
+        duration: Math.max(durationMs - 1000, 500),
+        description: `Show: ${scene.focusPoint}`,
+      });
+      break;
+
+    case 'click':
+    case 'expand':
+      if (scene.target) {
+        steps.push({
+          type: 'click',
+          selector: scene.target,
+          description: scene.description,
+          force: true,
+        });
+        steps.push({
+          type: 'wait',
+          duration: Math.max(durationMs - 500, 500),
+          description: `Show: ${scene.focusPoint}`,
+        });
+      }
+      break;
+
+    case 'type':
+      if (scene.target && scene.typeText) {
+        steps.push({
+          type: 'type',
+          selector: scene.target,
+          text: scene.typeText,
+          description: scene.description,
+        });
+        steps.push({
+          type: 'wait',
+          duration: Math.max(durationMs - 1000, 500),
+          description: `Show: ${scene.focusPoint}`,
+        });
+      }
+      break;
+
+    case 'navigate':
+      steps.push({
+        type: 'navigate',
+        url: scene.target || scene.path,
+        description: scene.description,
+      });
+      steps.push({
         type: 'wait',
-        duration: 3000,
-        description: 'Show more content',
-      },
-    ],
-  },
-  {
-    id: 'dashboard-overview',
-    name: 'Dashboard Overview',
-    startUrl: '/app',
-    durationSeconds: 18,
-    steps: [
-      {
+        duration: Math.max(durationMs - 1500, 500),
+        description: `Show: ${scene.focusPoint}`,
+      });
+      break;
+
+    case 'wait':
+      steps.push({
         type: 'wait',
-        duration: 2000,
-        description: 'Let dashboard load',
-      },
-      {
-        type: 'pressKey',
-        key: 'Escape',
-        description: 'Close any open modals (press Escape)',
-      },
-      {
-        type: 'wait',
-        duration: 500,
-        description: 'Wait for modal to start closing',
-      },
-      {
-        type: 'click',
-        selector:
-          '.fixed.inset-0.bg-black, [class*="backdrop"], [class*="overlay"]',
-        description: 'Click backdrop to close modal',
-        optional: true,
-      },
-      {
-        type: 'wait',
-        duration: 1000,
-        description: 'Wait for modal to fully close',
-      },
-      {
-        type: 'scroll',
-        distance: 200,
-        description: 'Show moon phase section',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Display moon phases',
-      },
-      {
-        type: 'click',
-        selector: '[data-testid="sky-now-widget"]',
-        description: 'Expand sky now widget',
-        force: true, // Force click even if backdrop is present
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Show all planetary positions',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll to transits section',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Show daily transits',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll to tarot cards',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Display tarot cards',
-      },
-      {
-        type: 'scroll',
-        distance: 200,
-        description: 'Scroll to crystal recommendation',
-      },
-      {
+        duration: durationMs,
+        description: scene.description,
+      });
+      break;
+  }
+
+  return steps;
+}
+
+/**
+ * Generate a FeatureRecordingConfig from a TikTok script
+ */
+function generateRecordingFromScript(
+  script: TikTokScript,
+  overrides?: ScriptOverrides,
+): FeatureRecordingConfig {
+  const steps: RecordingStep[] = [];
+
+  // Add pre-steps (e.g., dismiss modals)
+  if (overrides?.beforeSteps) {
+    steps.push(...overrides.beforeSteps);
+  }
+
+  // Add hook wait
+  steps.push({
+    type: 'wait',
+    duration: script.hook.durationSeconds * 1000,
+    description: `Hook: ${script.hook.text.substring(0, 60)}...`,
+  });
+
+  // Process each scene
+  let lastPath = script.scenes[0]?.path || '';
+
+  for (let i = 0; i < script.scenes.length; i++) {
+    const scene = script.scenes[i];
+
+    // Auto-insert navigate when path changes (and action isn't already navigate)
+    if (scene.path !== lastPath && scene.action !== 'navigate') {
+      steps.push({
+        type: 'navigate',
+        url: scene.path,
+        description: `Navigate to ${scene.path}`,
+      });
+      steps.push({
         type: 'wait',
         duration: 1500,
-        description: 'Let crystal card load',
-      },
-      {
-        type: 'click',
-        selector: '[data-testid="crystal-card"]',
-        description: 'Open crystal recommendation',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Show crystal modal',
-      },
-    ],
+        description: 'Wait for page load',
+      });
+    }
+
+    // Convert scene to recording steps
+    steps.push(...sceneToSteps(scene));
+
+    // Add per-scene overrides
+    if (overrides?.afterScene?.[i]) {
+      steps.push(...overrides.afterScene[i]);
+    }
+
+    lastPath = scene.path;
+  }
+
+  // Add outro wait
+  steps.push({
+    type: 'wait',
+    duration: script.outro.durationSeconds * 1000,
+    description: `Outro: ${script.outro.text}`,
+  });
+
+  return {
+    id: script.id,
+    name: script.title,
+    startUrl: script.scenes[0]?.path || '/app',
+    steps,
+    durationSeconds: script.totalSeconds,
+    viewport: { width: 390, height: 844 },
+    requiresAuth: overrides?.requiresAuth ?? true,
+  };
+}
+
+// ============================================================================
+// RECORDING CONFIGS — generated from TikTok scripts with per-script overrides
+// ============================================================================
+
+const DISMISS_MODALS: RecordingStep[] = [
+  {
+    type: 'pressKey',
+    key: 'Escape',
+    description: 'Close any open modals',
   },
   {
-    id: 'horoscope-deepdive',
-    name: 'Horoscope Deep Dive',
-    startUrl: '/horoscope',
-    durationSeconds: 20,
-    steps: [
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Let horoscope load',
-      },
-      {
-        type: 'scroll',
-        distance: 200,
-        description: 'Show personal numerology',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Display numerology insights',
-      },
-      {
-        type: 'scroll',
-        distance: 350,
-        description: 'Scroll to transit wisdom',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show personalized transit wisdom',
-      },
-      {
-        type: 'scroll',
-        distance: 350,
-        description: 'Scroll to upcoming transits',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Display upcoming transits',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll to more content',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Show additional insights',
-      },
-    ],
+    type: 'wait',
+    duration: 500,
+    description: 'Wait for modal to close',
   },
   {
-    id: 'tarot-patterns',
-    name: 'Tarot Pattern Analysis',
-    startUrl: '/tarot',
-    durationSeconds: 20,
-    steps: [
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Let tarot page load',
-      },
-      {
-        type: 'scroll',
-        distance: 250,
-        description: 'Show daily and weekly cards',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Display tarot cards',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll to pattern analysis',
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Show pattern timeframes',
-      },
-      {
-        type: 'click',
-        selector:
-          '[data-pattern-timeframe]:first-child, button:has-text("7 days"), button:has-text("14 days")',
-        description: 'Select pattern timeframe',
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Display pattern insights',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll to rituals',
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Show ritual suggestions',
-      },
-      {
-        type: 'scroll',
-        distance: 250,
-        description: 'Scroll to journal prompts',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Display journal prompts',
-      },
-    ],
+    type: 'click',
+    selector:
+      '.fixed.inset-0.bg-black, [class*="backdrop"], [class*="overlay"]',
+    description: 'Click backdrop to close modal',
+    optional: true,
   },
   {
-    id: 'astral-guide',
-    name: 'Astral Guide AI Assistant',
-    startUrl: '/guide',
-    durationSeconds: 18,
-    steps: [
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Let guide page load',
-      },
-      {
-        type: 'click',
-        selector:
-          'button:has-text("Tarot Patterns"), [data-guide-option="tarot"]',
-        description: 'Select tarot patterns option',
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Show tarot pattern prompt',
-      },
-      {
-        type: 'type',
-        selector: 'textarea, [contenteditable="true"], input[type="text"]',
-        text: 'What patterns do you see in my recent cards?',
-        description: 'Type question',
-      },
-      {
-        type: 'click',
-        selector:
-          'button[type="submit"], button:has-text("Send"), [aria-label="Send"]',
-        description: 'Send question',
-      },
-      {
-        type: 'wait',
-        duration: 4000,
-        description: 'Show AI response',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll through response',
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Display full AI insights',
-      },
-    ],
-  },
-  {
-    id: 'birth-chart',
-    name: 'Birth Chart Walkthrough',
-    startUrl: '/chart',
-    durationSeconds: 22,
-    steps: [
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Let chart render fully',
-      },
-      {
-        type: 'scroll',
-        distance: 200,
-        description: 'Show chart visualization',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Display planetary positions',
-      },
-      {
-        type: 'scroll',
-        distance: 350,
-        description: 'Scroll to planetary list',
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Show all planet placements',
-      },
-      {
-        type: 'click',
-        selector: '[data-tab="aspects"], button:has-text("Aspects")',
-        description: 'Switch to aspects tab',
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Show aspects list',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll through aspects',
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Display detailed aspects',
-      },
-      {
-        type: 'click',
-        selector: '[data-tab="houses"], button:has-text("Houses")',
-        description: 'Switch to houses tab',
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Show house placements',
-      },
-    ],
-  },
-  {
-    id: 'profile-circle',
-    name: 'Profile & Circle',
-    startUrl: '/profile',
-    durationSeconds: 18,
-    steps: [
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Let profile load',
-      },
-      {
-        type: 'scroll',
-        distance: 250,
-        description: 'Show profile information',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Display user stats',
-      },
-      {
-        type: 'click',
-        selector:
-          '[data-tab="circle"], button:has-text("Circle"), a[href*="circle"]',
-        description: 'Navigate to circle',
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Show circle/friends list',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll through circle',
-      },
-      {
-        type: 'wait',
-        duration: 2500,
-        description: 'Display leaderboard',
-      },
-      {
-        type: 'click',
-        selector: '[data-friend]:first-child, [class*="friend" i]:first-child',
-        description: 'Click on friend',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show synastry comparison',
-      },
-    ],
+    type: 'wait',
+    duration: 500,
+    description: 'Wait for backdrop to dismiss',
   },
 ];
+
+/** Script-specific overrides */
+const OVERRIDES: Record<string, ScriptOverrides> = {
+  'dashboard-overview': {
+    beforeSteps: DISMISS_MODALS,
+  },
+  'sky-now-deepdive': {
+    beforeSteps: DISMISS_MODALS,
+  },
+  'ritual-system': {
+    beforeSteps: DISMISS_MODALS,
+  },
+  'horoscope-deepdive': {
+    // Close numerology modal after scene 2 (click numerology-day)
+    afterScene: {
+      2: [
+        {
+          type: 'pressKey',
+          key: 'Escape',
+          description: 'Close numerology modal',
+        },
+        {
+          type: 'wait',
+          duration: 500,
+          description: 'Wait for modal to close',
+        },
+      ],
+    },
+  },
+  'numerology-deepdive': {
+    // numerology-close click is already in the scenes
+  },
+  'profile-circle': {
+    // Need to navigate to profile first (circle tab), friend card click is in scenes
+  },
+  'crystals-overview': {
+    requiresAuth: false,
+  },
+  'spells-overview': {
+    requiresAuth: false,
+  },
+  'grimoire-search': {
+    requiresAuth: false,
+  },
+};
+
+/**
+ * Generate all recording configs from TikTok scripts
+ */
+function generateAllConfigs(): FeatureRecordingConfig[] {
+  return TIKTOK_SCRIPTS.map((script) => {
+    const overrides = OVERRIDES[script.id];
+    return generateRecordingFromScript(script, overrides);
+  });
+}
+
+/**
+ * All 16 feature recording configurations
+ */
+export const FEATURE_RECORDINGS: FeatureRecordingConfig[] =
+  generateAllConfigs();
 
 /**
  * Get recording config for a specific feature
