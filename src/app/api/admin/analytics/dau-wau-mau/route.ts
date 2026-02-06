@@ -467,10 +467,14 @@ export async function GET(request: NextRequest) {
           engaged_users_dau: allUserDau,
           engaged_users_wau: allUserWau,
           engaged_users_mau: allUserMau,
-          // Engaged rate = total events / product users (not in daily_metrics, needs live path)
-          engaged_rate_dau: null,
-          engaged_rate_wau: null,
-          engaged_rate_mau: null,
+          // Engaged rate = all-user XAU / signed-in product XAU
+          // (matches snapshot-extractors formula; live path uses event counts instead)
+          engaged_rate_dau:
+            productDau > 0 ? Number((allUserDau / productDau).toFixed(1)) : 0,
+          engaged_rate_wau:
+            productWau > 0 ? Number((allUserWau / productWau).toFixed(1)) : 0,
+          engaged_rate_mau:
+            productMau > 0 ? Number((allUserMau / productMau).toFixed(1)) : 0,
           // Stickiness
           stickiness_dau_mau:
             signedInProductMau > 0
