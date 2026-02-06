@@ -14,8 +14,8 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { chromium, type Page, type BrowserContext } from '@playwright/test';
-import { mkdir, rename } from 'fs/promises';
+import { chromium, type Page } from '@playwright/test';
+import { mkdir, unlink } from 'fs/promises';
 import { join } from 'path';
 import {
   getFeatureRecording,
@@ -53,25 +53,34 @@ async function handleCookieConsent(page: Page): Promise<void> {
   console.log(`   Handling cookie consent...`);
 
   // Navigate to home page first to trigger cookie popup
-  await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1000);
 
-  // Try to dismiss cookie popup
+  // Set the cookie_consent key that CookieConsent.tsx checks (localStorage + cookie)
   try {
-    const cookieButton = page.locator(
-      '[data-testid="accept-all-cookies"], button:has-text("Accept"), button:has-text("OK"), button:has-text("Got it"), button:has-text("Allow")',
-    );
-    await cookieButton.click({ timeout: 3000 });
-    await page.waitForTimeout(500);
-    console.log(`   ✓ Accepted cookies`);
-  } catch {
-    // No cookie popup found, set localStorage flags as backup
     await page.evaluate(() => {
-      localStorage.setItem('cookies-accepted', 'true');
-      localStorage.setItem('cookie-consent', 'accepted');
-      localStorage.setItem('cookieConsent', 'true');
+      const payload = JSON.stringify({
+        version: 1,
+        preferences: {
+          essential: true,
+          analytics: true,
+          timestamp: Date.now(),
+        },
+      });
+      localStorage.setItem('cookie_consent', payload);
+      document.cookie = `cookie_consent=${encodeURIComponent(payload)}; max-age=31536000; path=/; SameSite=Lax`;
     });
-    console.log(`   ✓ Set cookie consent flags`);
+    console.log(`   ✓ Cookie consent set`);
+  } catch {
+    // Page may be navigating, try clicking the popup instead
+    try {
+      const cookieButton = page.locator('[data-testid="accept-all-cookies"]');
+      await cookieButton.click({ timeout: 3000 });
+      await page.waitForTimeout(1000);
+      console.log(`   ✓ Accepted cookies via popup`);
+    } catch {
+      console.log(`   ⊘ No cookie popup found`);
+    }
   }
 }
 
@@ -82,7 +91,9 @@ async function authenticate(page: Page): Promise<void> {
   console.log(`   Authenticating as: ${PERSONA_EMAIL}`);
 
   // Navigate to auth page
-  await page.goto(BASE_URL + '/auth?login=true', { waitUntil: 'networkidle' });
+  await page.goto(BASE_URL + '/auth?login=true', {
+    waitUntil: 'domcontentloaded',
+  });
   await page.waitForTimeout(1000);
 
   // Fill in email and password
@@ -130,31 +141,31 @@ async function executeStep(page: Page, step: RecordingStep): Promise<void> {
     switch (step.type) {
       case 'navigate':
         if (step.url) {
-          await page.goto(BASE_URL + step.url, { waitUntil: 'networkidle' });
+          await page.goto(BASE_URL + step.url, {
+            waitUntil: 'domcontentloaded',
+          });
           console.log(`    ✓ Navigated`);
         }
         break;
 
       case 'pressKey':
-        if ((step as any).key) {
-          await page.keyboard.press((step as any).key);
+        if (step.key) {
+          await page.keyboard.press(step.key);
           await page.waitForTimeout(500);
-          console.log(`    ✓ Pressed ${(step as any).key}`);
+          console.log(`    ✓ Pressed ${step.key}`);
         }
         break;
 
       case 'click':
         if (step.selector) {
           try {
-            // Use shorter timeout for optional clicks
-            const timeout = (step as any).optional ? 2000 : 30000;
-            const force = (step as any).force || false;
+            const timeout = step.optional ? 5000 : 30000;
+            const force = step.force || false;
             await page.click(step.selector, { timeout, force });
             await page.waitForTimeout(500); // Let click animation finish
             console.log(`    ✓ Clicked`);
           } catch (error) {
-            // If optional and not found, just continue
-            if ((step as any).optional) {
+            if (step.optional) {
               console.log(`    ⊘ Optional click skipped (element not found)`);
             } else {
               console.error(`    ✗ Click failed:`, error);
@@ -166,7 +177,11 @@ async function executeStep(page: Page, step: RecordingStep): Promise<void> {
 
       case 'type':
         if (step.selector && step.text) {
-          await page.fill(step.selector, step.text);
+          // Click the input first to focus it
+          await page.click(step.selector, { timeout: 5000 });
+          await page.waitForTimeout(200);
+          // Type character by character for a natural typing effect
+          await page.keyboard.type(step.text, { delay: 80 });
           await page.waitForTimeout(300);
           console.log(`    ✓ Typed text`);
         }
@@ -258,7 +273,142 @@ async function executeStep(page: Page, step: RecordingStep): Promise<void> {
 }
 
 /**
- * Record a single feature (with auth)
+ * Setup: handle cookies + auth in a throwaway context (no video).
+ * Returns saved storage state for clean recording contexts.
+ */
+async function setupAuth(browser: any, needsAuth: boolean): Promise<any> {
+  const setupContext = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
+    deviceScaleFactor: 3,
+  });
+
+  const setupPage = await setupContext.newPage();
+
+  await handleCookieConsent(setupPage);
+  if (needsAuth) {
+    await authenticate(setupPage);
+  }
+
+  const storage = await setupContext.storageState();
+  await setupContext.close();
+  return storage;
+}
+
+/**
+ * Navigate to target page and wait until fully loaded (no video).
+ * Then create a recording context that opens to the already-warm page.
+ */
+async function recordClean(
+  browser: any,
+  config: FeatureRecordingConfig,
+  storage: any,
+  featureId: string,
+): Promise<string> {
+  const viewport = config.viewport || { width: 390, height: 844 };
+  const targetUrl = BASE_URL + config.startUrl;
+
+  // 1. Warm-up: open the target page in a non-recording context so it's cached
+  const warmupContext = await browser.newContext({
+    viewport,
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
+    deviceScaleFactor: 3,
+    storageState: storage,
+  });
+  const warmupPage = await warmupContext.newPage();
+  console.log(`   Warming up: ${targetUrl}`);
+  await warmupPage.goto(targetUrl, { waitUntil: 'domcontentloaded' });
+  // Wait for auth check + API calls to complete
+  try {
+    await warmupPage.waitForLoadState('networkidle', { timeout: 15000 });
+  } catch {
+    // Fine if it times out
+  }
+  // Wait for content to appear (past "checking auth" screen)
+  try {
+    await warmupPage.waitForSelector('main h1, main h2, [data-testid], nav', {
+      state: 'visible',
+      timeout: 10000,
+    });
+  } catch {
+    // Fallback
+  }
+  await warmupPage.waitForTimeout(1000);
+  // Save the updated storage (cookies from this page visit)
+  const warmedStorage = await warmupContext.storageState();
+  await warmupContext.close();
+
+  // 2. Record: fresh context with video — page loads fast from cache/state
+  const recordContext = await browser.newContext({
+    viewport,
+    recordVideo: { dir: OUTPUT_DIR, size: viewport },
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
+    deviceScaleFactor: 3,
+    storageState: warmedStorage,
+  });
+
+  const page = await recordContext.newPage();
+
+  try {
+    // Navigate to target — auth state is in storage, warmup primed the session
+    await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
+
+    // Wait for the page to be fully loaded:
+    // 1. Wait for network to settle (auth check + API data fetched)
+    try {
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
+    } catch {
+      // Some pages have persistent connections, that's fine
+    }
+    // 2. Wait for actual content to render (not "checking auth" screens)
+    //    Look for common content indicators: main content area, nav, headings
+    try {
+      await page.waitForSelector('main h1, main h2, [data-testid], nav', {
+        state: 'visible',
+        timeout: 10000,
+      });
+    } catch {
+      // Fallback: page structure may differ
+    }
+    // 3. Small buffer for animations/transitions to settle
+    await page.waitForTimeout(500);
+
+    const landedUrl = new URL(page.url()).pathname;
+    console.log(`   ✓ Page ready at: ${landedUrl}`);
+
+    // Execute all recording steps
+    for (const step of config.steps) {
+      await executeStep(page, step);
+    }
+
+    // Final pause to capture last interactions
+    console.log(`   ⏸  Final pause before saving...`);
+    await page.waitForTimeout(2000);
+    console.log(`   ✓ Recording complete`);
+
+    // Finalize video — close context first, then save
+    const finalPath = join(OUTPUT_DIR, `${featureId}.webm`);
+    const rawVideoPath = await page.video()?.path();
+    await recordContext.close();
+    // saveAs waits for the video file to be fully written
+    await page.video()?.saveAs(finalPath);
+    // Delete the hash-named duplicate Playwright creates
+    if (rawVideoPath && rawVideoPath !== finalPath) {
+      await unlink(rawVideoPath).catch(() => {});
+    }
+    console.log(`   📹 Saved: ${featureId}.webm`);
+    return finalPath;
+  } catch (error) {
+    await recordContext.close().catch(() => {});
+    throw error;
+  }
+}
+
+/**
+ * Record a single feature
  */
 async function recordFeature(featureId: string): Promise<string> {
   const config = getFeatureRecording(featureId);
@@ -267,112 +417,17 @@ async function recordFeature(featureId: string): Promise<string> {
   console.log(`   Duration: ${config.durationSeconds}s`);
   console.log(`   Steps: ${config.steps.length}`);
 
-  // Launch browser with video recording
-  const browser = await chromium.launch({
-    headless: true, // Set to false to watch recording
-  });
-
-  const context = await browser.newContext({
-    viewport: config.viewport || { width: 390, height: 844 }, // iPhone 12 Pro dimensions
-    recordVideo: {
-      dir: OUTPUT_DIR,
-      size: config.viewport || { width: 390, height: 844 },
-    },
-    // Simulate iPhone 12 Pro for app-like experience
-    userAgent:
-      'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
-    deviceScaleFactor: 3, // iPhone 12 Pro has 3x pixel density
-  });
-
-  const page = await context.newPage();
+  const browser = await chromium.launch({ headless: true });
 
   try {
-    // Handle cookies FIRST, before auth
-    await handleCookieConsent(page);
-
-    // Only authenticate if the feature requires it
-    if (config.requiresAuth !== false) {
-      await authenticate(page);
-    }
-
-    // Record the feature
-    return await recordFeatureSteps(page, context, browser, config, featureId);
+    const needsAuth = config.requiresAuth !== false;
+    const storage = await setupAuth(browser, needsAuth);
+    return await recordClean(browser, config, storage, featureId);
   } catch (error) {
     console.error(`   ✗ Error during recording:`, error);
     throw error;
   } finally {
-    // Always close browser
     await browser.close();
-  }
-}
-
-/**
- * Record feature steps (used by both single and suite mode)
- */
-async function recordFeatureSteps(
-  page: Page,
-  context: BrowserContext,
-  browser: any,
-  config: FeatureRecordingConfig,
-  featureId: string,
-): Promise<string> {
-  try {
-    // Navigate to starting URL if not already there
-    const currentUrl = page.url();
-    const currentPath = new URL(currentUrl).pathname;
-    const targetUrl = BASE_URL + config.startUrl;
-
-    // Navigate to start URL if not already there
-    if (currentPath !== config.startUrl) {
-      console.log(`   Loading: ${targetUrl}`);
-      await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
-      await page.waitForTimeout(3000); // Extra time for React hydration
-    } else {
-      console.log(`   Already at: ${targetUrl}`);
-      await page.waitForTimeout(2000); // Let page settle
-    }
-
-    // Dismiss cookie popup if present (for suite mode where each page might show it)
-    try {
-      const cookieButton = page.locator('[data-testid="accept-all-cookies"]');
-      await cookieButton.click({ timeout: 2000 });
-      await page.waitForTimeout(1000); // Wait for popup to fully dismiss
-      console.log(`   ✓ Dismissed cookie popup`);
-    } catch {
-      // No cookie popup found, continue
-    }
-
-    // Extra wait to ensure page is fully interactive
-    await page.waitForTimeout(2000);
-    console.log(`   ✓ Page ready for recording`);
-
-    // Execute all recording steps
-    for (const step of config.steps) {
-      await executeStep(page, step);
-    }
-
-    // Add final pause to ensure all interactions are captured
-    console.log(`   ⏸  Final pause before saving...`);
-    await page.waitForTimeout(3000);
-
-    console.log(`   ✓ Recording complete`);
-
-    // Get video path before closing
-    const videoPath = await page.video()?.path();
-    if (!videoPath) {
-      throw new Error('Video path not found');
-    }
-
-    // Close context to finalize video recording
-    await context.close();
-
-    // Rename video from hash to feature ID
-    const finalPath = join(OUTPUT_DIR, `${featureId}.webm`);
-    await rename(videoPath, finalPath);
-    console.log(`   📹 Saved: ${finalPath}`);
-    return finalPath;
-  } catch (error) {
-    throw error;
   }
 }
 
@@ -386,71 +441,32 @@ async function recordSuite(
     `\n🎬 Suite Mode: Recording ${featureIds.length} features with single login\n`,
   );
 
-  // Separate features by auth requirement
   const configs = featureIds.map((id) => getFeatureRecording(id));
   const needsAuth = configs.some((c) => c.requiresAuth !== false);
 
-  // Launch browser once
-  const browser = await chromium.launch({
-    headless: true,
-  });
-
+  const browser = await chromium.launch({ headless: true });
   const results: Record<string, string> = {};
 
   try {
-    let storage: any = undefined;
+    // Setup auth once (no video)
+    const storage = await setupAuth(browser, needsAuth);
 
-    // Only authenticate if at least one feature requires auth
-    if (needsAuth) {
-      const authContext = await browser.newContext({
-        viewport: { width: 390, height: 844 },
-        userAgent:
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
-        deviceScaleFactor: 3,
-      });
-
-      const authPage = await authContext.newPage();
-
-      console.log('🔐 Authenticating once for all recordings...');
-      await handleCookieConsent(authPage);
-      await authenticate(authPage);
-      console.log('✓ Authentication complete\n');
-
-      storage = await authContext.storageState();
-      await authContext.close();
-    }
-
-    // Record each feature
+    // Record each feature cleanly
     for (const featureId of featureIds) {
       const config = getFeatureRecording(featureId);
-      const useAuth = config.requiresAuth !== false;
 
       console.log(`\n🎬 Recording: ${config.name}`);
       console.log(`   Duration: ${config.durationSeconds}s`);
       console.log(`   Steps: ${config.steps.length}`);
-      console.log(`   Auth: ${useAuth ? 'yes' : 'no (public)'}`);
-
-      // Create new context, with auth state only if needed
-      const context = await browser.newContext({
-        viewport: config.viewport || { width: 390, height: 844 },
-        recordVideo: {
-          dir: OUTPUT_DIR,
-          size: config.viewport || { width: 390, height: 844 },
-        },
-        userAgent:
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
-        deviceScaleFactor: 3,
-        ...(useAuth && storage ? { storageState: storage } : {}),
-      });
-
-      const page = await context.newPage();
+      console.log(
+        `   Auth: ${config.requiresAuth !== false ? 'yes' : 'no (public)'}`,
+      );
 
       try {
-        const videoPath = await recordFeatureSteps(
-          page,
-          context,
+        const videoPath = await recordClean(
           browser,
           config,
+          storage,
           featureId,
         );
         results[featureId] = videoPath;

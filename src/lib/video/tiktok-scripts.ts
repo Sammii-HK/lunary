@@ -507,73 +507,86 @@ const astralGuide: TikTokScript = {
   title: 'Every Answer Is Sourced From 2,000+ Articles',
   tier: 1,
   category: 'feature-reveal',
-  totalSeconds: 22,
+  totalSeconds: 23,
   hook: {
     // Open loop - show the impressive result FIRST, then reveal the source
     text: 'I asked about Mars in my 3rd house. It pulled the exact grimoire article.',
     durationSeconds: 2,
   },
   scenes: [
-    // START with the answer (the payoff) - reverse chronology
+    // Show the guide page
     {
-      description: 'Guide page showing a detailed response already loaded',
+      description: 'Guide page ready - show the input area',
       path: '/guide',
-      durationSeconds: 2,
+      durationSeconds: 1,
       action: 'show',
-      focusPoint:
-        'Rich response visible - referenced articles, chart data, crystal recs',
+      focusPoint: 'Clean chat interface ready for questions',
     },
+    // Ask a career timing question
     {
-      description: 'Scroll through response showing sourced data',
-      path: '/guide',
-      durationSeconds: 3,
-      action: 'scroll',
-      scrollDistance: 200,
-      focusPoint:
-        'Crystal from 200+ database with correspondences, spell from grimoire',
-    },
-    // REWIND: "Here's what I asked"
-    {
-      description: 'Scroll back up to show the original question',
-      path: '/guide',
-      durationSeconds: 2,
-      action: 'scroll',
-      scrollDistance: -400,
-      focusPoint:
-        'The question: "Why do I feel restless when Mars transits my 3rd house?"',
-    },
-    // RETENTION HOOK at ~9s: show WHERE the data comes from
-    {
-      description: 'Type a new question to show it live',
+      description: 'Type a career question',
       path: '/guide',
       durationSeconds: 3,
       action: 'type',
       target: '[data-testid="guide-input"]',
-      typeText: 'What crystal should I use today?',
-      focusPoint: 'Quick question showing breadth - it covers everything',
+      typeText: 'When is a good time for my career based on my transits?',
+      focusPoint: 'Typing a real question about career timing',
     },
     {
-      description: 'Submit and watch response stream in',
+      description: 'Submit career question',
       path: '/guide',
-      durationSeconds: 3,
+      durationSeconds: 1,
       action: 'click',
       target: '[data-testid="guide-submit"]',
-      focusPoint:
-        'Response pulls from crystal database + current transits + journal',
+      focusPoint: 'Send the question',
     },
-    // ESCALATION at ~15s: show the quick actions
+    // Wait for response to stream in
     {
-      description: 'Show quick action buttons for common questions',
+      description: 'Watch response stream in - career timing analysis',
+      path: '/guide',
+      durationSeconds: 4,
+      action: 'wait',
+      focusPoint:
+        'Response streaming with transit data, house placements, timing windows',
+    },
+    // Scroll through the response
+    {
+      description: 'Scroll through career response showing depth',
       path: '/guide',
       durationSeconds: 2,
       action: 'scroll',
-      scrollDistance: -200,
-      focusPoint: 'Pre-built prompts: no need to know what to ask',
+      scrollDistance: 200,
+      focusPoint: 'Detailed transit timing, specific dates, house activations',
+    },
+    // Ask a manifestation incantation question
+    {
+      description: 'Type an incantation request',
+      path: '/guide',
+      durationSeconds: 3,
+      action: 'type',
+      target: '[data-testid="guide-input"]',
+      typeText: 'Give me an incantation for prosperity and abundance',
+      focusPoint: 'Showing the guide can create custom incantations',
+    },
+    {
+      description: 'Submit incantation request',
+      path: '/guide',
+      durationSeconds: 1,
+      action: 'click',
+      target: '[data-testid="guide-submit"]',
+      focusPoint: 'Send the request',
+    },
+    // Wait for incantation response
+    {
+      description: 'Watch incantation stream in',
+      path: '/guide',
+      durationSeconds: 4,
+      action: 'wait',
+      focusPoint: 'Custom incantation with lunar timing and crystal pairing',
     },
   ],
   outro: {
-    // LOOP: "Nothing invented" → viewer questions their own tools → rewatches
-    text: 'Nothing invented. Everything referenced.',
+    text: 'Ask it anything. Career. Love. Incantations. Transits.',
     durationSeconds: 2,
   },
   voiceover:
@@ -634,7 +647,7 @@ const birthChart: TikTokScript = {
   title: 'Your App Only Shows 10 Planets',
   tier: 1,
   category: 'feature-reveal',
-  totalSeconds: 21,
+  totalSeconds: 22,
   hook: {
     // Bold claim + number contrast - stops scroll
     text: 'Your astrology app shows 10 planets. This one shows 24.',
@@ -655,7 +668,7 @@ const birthChart: TikTokScript = {
       path: '/birth-chart',
       durationSeconds: 2,
       action: 'scroll',
-      scrollDistance: 350,
+      scrollDistance: 300,
       focusPoint: 'Sun through Pluto visible - "ok normal so far"',
     },
     {
@@ -667,7 +680,15 @@ const birthChart: TikTokScript = {
       focusPoint:
         'Chiron, Lilith, North Node, South Node - "wait there is more"',
     },
-    // RETENTION HOOK at ~8s: switch to aspects tab
+    {
+      description: 'Keep scrolling - asteroids too',
+      path: '/birth-chart',
+      durationSeconds: 1,
+      action: 'scroll',
+      scrollDistance: 200,
+      focusPoint: 'Juno, Ceres, Pallas, Vesta - the count keeps going',
+    },
+    // RETENTION HOOK at ~9s: switch to aspects tab
     {
       description: 'Click Aspects tab - pattern interrupt',
       path: '/birth-chart',
@@ -677,14 +698,22 @@ const birthChart: TikTokScript = {
       focusPoint: 'Aspect grid appears with real orbs',
     },
     {
-      description: 'Scroll through aspects - conjunctions, trines, squares',
+      description: 'Scroll through aspects slowly - show the depth',
       path: '/birth-chart',
-      durationSeconds: 3,
+      durationSeconds: 2,
       action: 'scroll',
-      scrollDistance: 300,
-      focusPoint: 'Every aspect explained with exact orbs - real data',
+      scrollDistance: 250,
+      focusPoint: 'Conjunctions, trines, squares with exact orbs',
     },
-    // SECOND ESCALATION at ~13s: houses tab
+    {
+      description: 'Keep scrolling aspects - there are many',
+      path: '/birth-chart',
+      durationSeconds: 2,
+      action: 'scroll',
+      scrollDistance: 250,
+      focusPoint: 'Every aspect between every planet - real astronomical data',
+    },
+    // SECOND ESCALATION: houses tab
     {
       description: 'Click Houses tab',
       path: '/birth-chart',
@@ -700,6 +729,14 @@ const birthChart: TikTokScript = {
       action: 'scroll',
       scrollDistance: 250,
       focusPoint: 'Career, love, home, identity - all mapped to YOUR signs',
+    },
+    {
+      description: 'Keep scrolling houses - 12 areas of life',
+      path: '/birth-chart',
+      durationSeconds: 1,
+      action: 'scroll',
+      scrollDistance: 200,
+      focusPoint: 'Communication, creativity, health, partnerships...',
     },
   ],
   outro: {
@@ -913,7 +950,7 @@ const skyNowDeepDive: TikTokScript = {
   title: 'Mercury Retrograde Is in My 6th House. That Explains Work.',
   tier: 2,
   category: 'deep-dive',
-  totalSeconds: 19,
+  totalSeconds: 17,
   hook: {
     // Specific example hook - relatable + curiosity about "which house"
     text: "Mercury retrograde is in my 6th house. That's why work feels chaotic.",
@@ -924,7 +961,7 @@ const skyNowDeepDive: TikTokScript = {
     {
       description: 'Sky Now widget collapsed - planet symbols visible',
       path: '/app',
-      durationSeconds: 2,
+      durationSeconds: 1,
       action: 'show',
       focusPoint: 'Planet grid - "what does all this mean?"',
     },
@@ -936,30 +973,38 @@ const skyNowDeepDive: TikTokScript = {
       target: '[data-testid="sky-now-widget"]',
       focusPoint: 'Every planet: sign, degree, YOUR house - satisfying reveal',
     },
+    // Now slowly scroll through the expanded planet list
     {
-      description: 'Scroll to Mercury - the retrograde proof',
+      description: 'Scroll through Sun, Moon, Mercury - personal planets',
       path: '/app',
-      durationSeconds: 3,
+      durationSeconds: 2,
       action: 'scroll',
-      scrollDistance: 150,
-      focusPoint:
-        'Mercury with retrograde symbol + house placement - hook payoff',
+      scrollDistance: 120,
+      focusPoint: 'Sun sign + degree + house, Moon + house, Mercury retrograde',
+    },
+    {
+      description: 'Scroll to Venus, Mars - relationship & drive planets',
+      path: '/app',
+      durationSeconds: 2,
+      action: 'scroll',
+      scrollDistance: 120,
+      focusPoint: 'Venus in YOUR love house, Mars in YOUR career house',
     },
     // RETENTION HOOK at ~9s: keep scrolling to outer planets
     {
-      description: 'Keep scrolling - Jupiter, Saturn appearing',
+      description: 'Scroll to Jupiter, Saturn - life themes',
       path: '/app',
       durationSeconds: 2,
       action: 'scroll',
-      scrollDistance: 150,
-      focusPoint: 'Outer planets with YOUR house placements',
+      scrollDistance: 120,
+      focusPoint: 'Jupiter expansion + Saturn lessons in YOUR houses',
     },
     {
-      description: 'Scroll to Uranus, Neptune, Pluto',
+      description: 'Scroll to Uranus, Neptune, Pluto - generational',
       path: '/app',
       durationSeconds: 2,
       action: 'scroll',
-      scrollDistance: 150,
+      scrollDistance: 120,
       focusPoint: 'Generational planets mapped to YOUR specific houses',
     },
   ],
@@ -1755,25 +1800,33 @@ const crystalsOverview: TikTokScript = {
     durationSeconds: 2,
   },
   scenes: [
-    // Show the sheer volume immediately
+    // Show the categories briefly
     {
       description: 'Crystal categories - 8 visible at once',
       path: '/grimoire/crystals',
-      durationSeconds: 2,
+      durationSeconds: 1,
       action: 'show',
-      focusPoint:
-        'Protection, Love, Spiritual, Manifestation, Healing, Communication...',
+      focusPoint: 'Protection, Love, Spiritual, Manifestation, Healing...',
     },
+    // Use search to find a crystal
     {
-      description: 'Fast scroll through crystal list - volume flex',
+      description: 'Type into crystal search - demo the search',
       path: '/grimoire/crystals',
-      durationSeconds: 2,
-      action: 'scroll',
-      scrollDistance: 400,
-      focusPoint:
-        'Dozens of crystal cards scrolling past - "there are SO many"',
+      durationSeconds: 3,
+      action: 'type',
+      target: 'input[placeholder*="Search crystals"]',
+      typeText: 'amethyst',
+      focusPoint: 'Typing crystal name - results filter instantly',
     },
-    // PAYOFF at ~6s: tap into one for the deep dive
+    // Show filtered results
+    {
+      description: 'Show search results for amethyst',
+      path: '/grimoire/crystals',
+      durationSeconds: 1,
+      action: 'show',
+      focusPoint: 'Amethyst card visible after filtering',
+    },
+    // Click the crystal
     {
       description: 'Tap Amethyst - detail page opens',
       path: '/grimoire/crystals',
@@ -1782,18 +1835,18 @@ const crystalsOverview: TikTokScript = {
       target: '[data-crystal-slug="amethyst"], [data-testid="crystal-card"]',
       focusPoint: 'Crystal detail page loading instantly',
     },
-    // RETENTION HOOK at ~8s: depth of the guide
+    // Show crystal detail
     {
       description: 'Show crystal detail - meaning, properties',
       path: '/grimoire/crystals/amethyst',
-      durationSeconds: 3,
+      durationSeconds: 2,
       action: 'show',
       focusPoint: 'Full guide: what it is, meaning, properties',
     },
     {
       description: 'Scroll to chakras + how to use',
       path: '/grimoire/crystals/amethyst',
-      durationSeconds: 3,
+      durationSeconds: 2,
       action: 'scroll',
       scrollDistance: 300,
       focusPoint: 'Chakra connections, how to use, timing recommendations',
@@ -1803,8 +1856,16 @@ const crystalsOverview: TikTokScript = {
       path: '/grimoire/crystals/amethyst',
       durationSeconds: 2,
       action: 'scroll',
-      scrollDistance: 200,
+      scrollDistance: 250,
       focusPoint: 'Planetary correspondences + when to use',
+    },
+    {
+      description: 'Scroll to show even more detail',
+      path: '/grimoire/crystals/amethyst',
+      durationSeconds: 2,
+      action: 'scroll',
+      scrollDistance: 200,
+      focusPoint: 'How to cleanse, charge, and program this crystal',
     },
   ],
   outro: {
@@ -1865,14 +1926,14 @@ const spellsOverview: TikTokScript = {
   title: 'It Knows Which Spells Work Best Tonight',
   tier: 3,
   category: 'feature-reveal',
-  totalSeconds: 20,
+  totalSeconds: 18,
   hook: {
     // Curiosity + practical value - "which spells work TONIGHT" is immediately useful
     text: '112 spells. It knows which ones work best tonight based on the moon.',
     durationSeconds: 2,
   },
   scenes: [
-    // Show the moon phase indicator first - proof of "tonight"
+    // Show the spells page with moon phase
     {
       description: 'Spells page with current moon phase visible',
       path: '/grimoire/spells',
@@ -1880,51 +1941,54 @@ const spellsOverview: TikTokScript = {
       action: 'show',
       focusPoint: 'Moon phase indicator at top - "it knows the current moon"',
     },
+    // Use the search bar to find a spell
     {
-      description: 'Show filter buttons - Current Moon Phase highlighted',
+      description: 'Type into search bar - search for protection spell',
+      path: '/grimoire/spells',
+      durationSeconds: 3,
+      action: 'type',
+      target: 'input[placeholder*="Search spells"]',
+      typeText: 'protection',
+      focusPoint: 'Results filtering as you type',
+    },
+    // Show filtered results
+    {
+      description: 'Show search results - protection spells',
       path: '/grimoire/spells',
       durationSeconds: 2,
       action: 'show',
-      focusPoint: 'Filter options visible including "Current Moon Phase"',
+      focusPoint:
+        'Protection spells filtered - cards with difficulty + duration',
     },
-    // PAYOFF at ~6s: filter activates, list transforms
+    // Scroll through results
     {
-      description: 'Click Current Moon Phase filter - list transforms',
+      description: 'Scroll through protection spells',
       path: '/grimoire/spells',
       durationSeconds: 2,
-      action: 'click',
-      target: '[data-testid="filter-moon-phase"]',
-      focusPoint: "List filtered to ONLY tonight's optimal spells",
-    },
-    {
-      description: "Scroll through filtered spells - tonight's options",
-      path: '/grimoire/spells',
-      durationSeconds: 3,
       action: 'scroll',
       scrollDistance: 300,
-      focusPoint: 'Spell cards with difficulty, duration, category badges',
+      focusPoint: 'Multiple protection spells with different difficulties',
     },
-    // RETENTION HOOK at ~11s: tap into a spell for full detail
+    // Click a spell to see detail
     {
       description: 'Tap a spell - full guide opens',
       path: '/grimoire/spells',
       durationSeconds: 2,
       action: 'click',
       target: '[data-testid="spell-card"]',
-      focusPoint: 'Full spell detail loading',
+      focusPoint: 'Full spell detail page loads',
     },
+    // Scroll through spell detail
     {
-      description: 'Scroll through spell: purpose, timing, ingredients, steps',
-      path: '/grimoire/spells/[spell]',
+      description: 'Scroll through spell detail - purpose, timing, ingredients',
+      path: '/grimoire/spells',
       durationSeconds: 3,
       action: 'scroll',
       scrollDistance: 400,
-      focusPoint:
-        'Complete guide: ingredients with substitutes, step-by-step, timing',
+      focusPoint: 'Complete guide: ingredients, step-by-step, timing',
     },
   ],
   outro: {
-    // LOOP: "What's the moon phase right now?" → viewer checks → comes back
     text: 'A grimoire that knows the current moon. Free.',
     durationSeconds: 2,
   },
@@ -2016,7 +2080,8 @@ const grimoireSearch: TikTokScript = {
       path: '/grimoire',
       durationSeconds: 3,
       action: 'type',
-      target: '[data-testid="grimoire-search"], input[type="search"]',
+      target:
+        '[data-testid="grimoire-search"], input[name="grimoire-search"], input[aria-label="Search grimoire"]',
       typeText: 'Venus in Scorpio',
       focusPoint: 'Results appearing as you type - instant',
     },
@@ -2028,13 +2093,22 @@ const grimoireSearch: TikTokScript = {
       action: 'show',
       focusPoint: 'Matching articles with rich previews - real depth',
     },
+    // Click on the first search result to show the full article
     {
-      description: 'Scroll through results showing breadth',
+      description: 'Click first result - full article opens',
+      path: '/grimoire',
+      durationSeconds: 2,
+      action: 'click',
+      target: '.max-h-80 a, [data-testid="grimoire-categories"] a',
+      focusPoint: 'Full article page loads instantly',
+    },
+    {
+      description: 'Scroll through the article showing depth',
       path: '/grimoire',
       durationSeconds: 2,
       action: 'scroll',
-      scrollDistance: 200,
-      focusPoint: 'Multiple articles matching - comprehensive coverage',
+      scrollDistance: 300,
+      focusPoint: 'Complete article - not a snippet, a full guide',
     },
   ],
   outro: {

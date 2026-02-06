@@ -108,6 +108,7 @@ function sceneToSteps(scene: Scene): RecordingStep[] {
           selector: scene.target,
           description: scene.description,
           force: true,
+          optional: true,
         });
         steps.push({
           type: 'wait',
@@ -240,20 +241,8 @@ const DISMISS_MODALS: RecordingStep[] = [
   },
   {
     type: 'wait',
-    duration: 500,
+    duration: 1000,
     description: 'Wait for modal to close',
-  },
-  {
-    type: 'click',
-    selector:
-      '.fixed.inset-0.bg-black, [class*="backdrop"], [class*="overlay"]',
-    description: 'Click backdrop to close modal',
-    optional: true,
-  },
-  {
-    type: 'wait',
-    duration: 500,
-    description: 'Wait for backdrop to dismiss',
   },
 ];
 
@@ -299,6 +288,21 @@ const OVERRIDES: Record<string, ScriptOverrides> = {
   },
   'grimoire-search': {
     requiresAuth: false,
+    // Scroll back to top after category scroll so search input is visible for typing
+    afterScene: {
+      1: [
+        {
+          type: 'scroll',
+          distance: -400,
+          description: 'Scroll back to search bar',
+        },
+        {
+          type: 'wait',
+          duration: 500,
+          description: 'Let scroll settle',
+        },
+      ],
+    },
   },
 };
 
