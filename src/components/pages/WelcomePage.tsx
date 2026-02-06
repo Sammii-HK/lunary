@@ -397,7 +397,7 @@ export default function WelcomePage() {
                 <span>Pro: Best Times + Shared Events</span>
               </div>
               <Button variant='outline' asChild>
-                <Link href='/features#connect'>Explore Circle features</Link>
+                <Link href='/circle'>Explore Circle features</Link>
               </Button>
             </div>
           </div>
