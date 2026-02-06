@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
           FROM conversion_events
           WHERE metadata->>'abTest' = ${testName}
             AND metadata->>'abVariant' = ${variant}
-            AND event_type IN ('app_opened', 'pricing_page_viewed', 'cta_impression')
+            AND event_type IN ('app_opened', 'pricing_page_viewed', 'cta_impression', 'page_viewed')
             AND created_at >= ${dateCutoff.toISOString()}
         `;
 

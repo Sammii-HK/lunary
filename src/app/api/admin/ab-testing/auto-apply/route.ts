@@ -16,32 +16,32 @@ export interface AutoApplySuggestion {
   }>;
 }
 
+function getDateCutoff(timeRange: string): Date {
+  const now = new Date();
+  switch (timeRange) {
+    case '7d':
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case '30d':
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case '90d':
+      return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    default:
+      return new Date(0);
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('timeRange') || '30d';
-
-    let dateFilter = '';
-    switch (timeRange) {
-      case '7d':
-        dateFilter = "created_at >= NOW() - INTERVAL '7 days'";
-        break;
-      case '30d':
-        dateFilter = "created_at >= NOW() - INTERVAL '30 days'";
-        break;
-      case '90d':
-        dateFilter = "created_at >= NOW() - INTERVAL '90 days'";
-        break;
-      default:
-        dateFilter = '1=1';
-    }
+    const dateCutoff = getDateCutoff(timeRange);
 
     // Get all A/B tests with significant results
     const abTests = await sql`
       SELECT DISTINCT metadata->>'abTest' as test_name
       FROM conversion_events
       WHERE metadata->>'abTest' IS NOT NULL
-      AND ${(sql as any).raw(dateFilter)}
+      AND created_at >= ${dateCutoff.toISOString()}
     `;
 
     const suggestions: AutoApplySuggestion[] = [];
@@ -50,92 +50,92 @@ export async function GET(request: NextRequest) {
       const testName = row.test_name;
       if (!testName) continue;
 
-      // Get variant performance
-      const impressionsA = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
+      // Get all variants for this test
+      const variantsResult = await sql`
+        SELECT DISTINCT metadata->>'abVariant' as variant
         FROM conversion_events
         WHERE metadata->>'abTest' = ${testName}
-        AND metadata->>'abVariant' = 'A'
-        AND event_type IN ('app_opened', 'pricing_page_viewed')
-        AND ${(sql as any).raw(dateFilter)}
+          AND metadata->>'abVariant' IS NOT NULL
+          AND created_at >= ${dateCutoff.toISOString()}
       `;
 
-      const impressionsB = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE metadata->>'abTest' = ${testName}
-        AND metadata->>'abVariant' = 'B'
-        AND event_type IN ('app_opened', 'pricing_page_viewed')
-        AND ${(sql as any).raw(dateFilter)}
-      `;
+      const variants = variantsResult.rows
+        .map((r) => r.variant)
+        .filter(Boolean) as string[];
+      if (variants.length < 2) continue;
 
-      const conversionsA = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE metadata->>'abTest' = ${testName}
-        AND metadata->>'abVariant' = 'A'
-        AND event_type IN ('trial_started', 'subscription_started', 'trial_converted')
-        AND ${(sql as any).raw(dateFilter)}
-      `;
+      // Get impressions and conversions per variant
+      const variantMetrics: Array<{
+        name: string;
+        impressions: number;
+        conversions: number;
+        rate: number;
+      }> = [];
 
-      const conversionsB = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE metadata->>'abTest' = ${testName}
-        AND metadata->>'abVariant' = 'B'
-        AND event_type IN ('trial_started', 'subscription_started', 'trial_converted')
-        AND ${(sql as any).raw(dateFilter)}
-      `;
+      for (const variant of variants) {
+        const impressionsResult = await sql`
+          SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+          FROM conversion_events
+          WHERE metadata->>'abTest' = ${testName}
+            AND metadata->>'abVariant' = ${variant}
+            AND event_type IN ('app_opened', 'pricing_page_viewed', 'cta_impression', 'page_viewed')
+            AND created_at >= ${dateCutoff.toISOString()}
+        `;
 
-      const impressionsA_count = parseInt(impressionsA.rows[0]?.count || '0');
-      const impressionsB_count = parseInt(impressionsB.rows[0]?.count || '0');
-      const conversionsA_count = parseInt(conversionsA.rows[0]?.count || '0');
-      const conversionsB_count = parseInt(conversionsB.rows[0]?.count || '0');
+        const conversionsResult = await sql`
+          SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
+          FROM conversion_events
+          WHERE metadata->>'abTest' = ${testName}
+            AND metadata->>'abVariant' = ${variant}
+            AND event_type IN ('trial_started', 'subscription_started', 'trial_converted', 'cta_clicked')
+            AND created_at >= ${dateCutoff.toISOString()}
+        `;
 
-      const conversionRateA =
-        impressionsA_count > 0
-          ? (conversionsA_count / impressionsA_count) * 100
-          : 0;
-      const conversionRateB =
-        impressionsB_count > 0
-          ? (conversionsB_count / impressionsB_count) * 100
-          : 0;
+        const impressions = parseInt(impressionsResult.rows[0]?.count || '0');
+        const conversions = parseInt(conversionsResult.rows[0]?.count || '0');
+        const rate = impressions > 0 ? (conversions / impressions) * 100 : 0;
+
+        variantMetrics.push({ name: variant, impressions, conversions, rate });
+      }
+
+      // Sort by conversion rate descending
+      variantMetrics.sort((a, b) => b.rate - a.rate);
+
+      const best = variantMetrics[0];
+      const worst = variantMetrics[variantMetrics.length - 1];
+
+      if (!best || !worst || best.impressions === 0 || worst.impressions === 0)
+        continue;
 
       const improvement =
-        conversionRateA > 0
-          ? ((conversionRateB - conversionRateA) / conversionRateA) * 100
-          : conversionRateB > 0
+        worst.rate > 0
+          ? ((best.rate - worst.rate) / worst.rate) * 100
+          : best.rate > 0
             ? 100
             : 0;
 
-      // Calculate confidence
       const confidence = calculateConfidence(
-        impressionsA_count,
-        conversionsA_count,
-        impressionsB_count,
-        conversionsB_count,
+        best.impressions,
+        best.conversions,
+        worst.impressions,
+        worst.conversions,
       );
 
       // Only suggest if statistically significant and meaningful improvement
       if (confidence >= 95 && Math.abs(improvement) >= 5) {
-        const winningVariant = conversionRateB > conversionRateA ? 'B' : 'A';
-        const currentVariant = 'A'; // Assume A is current (could be tracked in config)
-
-        if (winningVariant !== currentVariant) {
-          const suggestion = await generateCodeChanges(
-            testName,
-            winningVariant,
-          );
-          suggestions.push({
-            testName,
-            currentVariant,
-            suggestedVariant: winningVariant,
-            improvement: Math.abs(improvement),
-            confidence,
-            reason: `Variant ${winningVariant} shows ${Math.abs(improvement).toFixed(1)}% improvement with ${confidence.toFixed(1)}% confidence`,
-            changes: suggestion.changes,
-          });
-        }
+        const suggestion = await generateCodeChanges(
+          testName,
+          best.name as 'A' | 'B',
+        );
+        suggestions.push({
+          testName,
+          currentVariant: 'A',
+          suggestedVariant: best.name as 'A' | 'B',
+          improvement: Math.abs(improvement),
+          confidence,
+          reason: `Variant "${best.name}" shows ${Math.abs(improvement).toFixed(1)}% improvement with ${confidence.toFixed(1)}% confidence`,
+          changes: suggestion.changes,
+        });
       }
     }
 
@@ -162,14 +162,6 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-
-    // Apply changes (this would integrate with your codebase)
-    // For now, we'll return a success response
-    // In production, you'd want to:
-    // 1. Create a git branch
-    // 2. Apply the code changes
-    // 3. Create a PR or commit
-    // 4. Update the A/B test config to use the winning variant
 
     console.log(`Applying changes for ${testName} - Variant ${variant}`);
     console.log('Changes:', JSON.stringify(changes, null, 2));
@@ -230,7 +222,6 @@ async function generateCodeChanges(
     description: string;
   }>;
 }> {
-  // Map test names to code locations
   const testMappings: Record<
     string,
     {
@@ -260,7 +251,7 @@ async function generateCodeChanges(
     changes: [
       {
         file: mapping.file,
-        oldCode: `const ctaText = ctaVariant === 'A' 
+        oldCode: `const ctaText = ctaVariant === 'A'
                   ? ${mapping.variantA}
                   : ${mapping.variantB};`,
         newCode: `const ctaText = ${newCode};`,
