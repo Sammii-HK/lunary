@@ -464,7 +464,7 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
     const debugParam = includeAudit ? '&debug=1' : '';
 
     try {
-      // Batch 1: Core metrics (6 requests)
+      // ALL requests in parallel - no more sequential batches
       const [
         activityRes,
         engagementOverviewRes,
@@ -472,62 +472,12 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         userGrowthRes,
         activationRes,
         cohortsRes,
-      ] = await Promise.all([
-        fetch(
-          `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
-          { cache: 'default' }, // Force fresh data on manual refresh
-        ),
-        fetch(
-          `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}`,
-          { cache: 'default' },
-        ),
-        fetch(`/api/admin/analytics/conversions?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(
-          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}`,
-          { cache: 'default' },
-        ),
-        fetch(`/api/admin/analytics/activation?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(
-          `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`,
-          { cache: 'default' },
-        ),
-      ]);
-
-      // Batch 2: Feature metrics (6 requests)
-      const [
         featureAdoptionRes,
         featureUsageRes,
         grimoireHealthRes,
         conversionInfluenceRes,
         successMetricsRes,
         intentionBreakdownRes,
-      ] = await Promise.all([
-        fetch(`/api/admin/analytics/feature-adoption?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/feature-usage?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/grimoire-health?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/conversion-influence?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/success-metrics?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/intention-breakdown?${queryParams}`, {
-          cache: 'default',
-        }),
-      ]);
-
-      // Batch 3: Subscription & monetization (7 requests)
-      const [
         subscription30dRes,
         subscriptionLifecycleRes,
         planBreakdownRes,
@@ -535,33 +485,6 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         ctaLocationsRes,
         apiCostsRes,
         userSegmentsRes,
-      ] = await Promise.all([
-        fetch(`/api/admin/analytics/subscription-30d?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(
-          `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`,
-          { cache: 'default' },
-        ),
-        fetch(`/api/admin/analytics/plan-breakdown?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/cta-conversions?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/cta-locations?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/api-costs?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/user-segments?${queryParams}`, {
-          cache: 'default',
-        }),
-      ]);
-
-      // Batch 4: External & misc (6 requests)
-      const [
         notificationsRes,
         attributionRes,
         discordRes,
@@ -569,22 +492,43 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         insightsRes,
         grimoireTopPagesRes,
       ] = await Promise.all([
-        fetch(`/api/admin/analytics/notifications?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/attribution?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/analytics/discord-interactions?range=7d`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/search-console?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/admin/analytics/insights?${queryParams}`, {
-          cache: 'default',
-        }),
-        fetch(`/api/grimoire/stats?top=20`, { cache: 'default' }),
+        // Core metrics
+        fetch(
+          `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
+        ),
+        fetch(
+          `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}`,
+        ),
+        fetch(`/api/admin/analytics/conversions?${queryParams}`),
+        fetch(
+          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}`,
+        ),
+        fetch(`/api/admin/analytics/activation?${queryParams}`),
+        fetch(`/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`),
+        // Feature metrics
+        fetch(`/api/admin/analytics/feature-adoption?${queryParams}`),
+        fetch(`/api/admin/analytics/feature-usage?${queryParams}`),
+        fetch(`/api/admin/analytics/grimoire-health?${queryParams}`),
+        fetch(`/api/admin/analytics/conversion-influence?${queryParams}`),
+        fetch(`/api/admin/analytics/success-metrics?${queryParams}`),
+        fetch(`/api/admin/analytics/intention-breakdown?${queryParams}`),
+        // Subscription & monetization
+        fetch(`/api/admin/analytics/subscription-30d?${queryParams}`),
+        fetch(
+          `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`,
+        ),
+        fetch(`/api/admin/analytics/plan-breakdown?${queryParams}`),
+        fetch(`/api/admin/analytics/cta-conversions?${queryParams}`),
+        fetch(`/api/admin/analytics/cta-locations?${queryParams}`),
+        fetch(`/api/admin/analytics/api-costs?${queryParams}`),
+        fetch(`/api/admin/analytics/user-segments?${queryParams}`),
+        // External & misc
+        fetch(`/api/admin/analytics/notifications?${queryParams}`),
+        fetch(`/api/admin/analytics/attribution?${queryParams}`),
+        fetch(`/api/analytics/discord-interactions?range=7d`),
+        fetch(`/api/admin/analytics/search-console?${queryParams}`),
+        fetch(`/api/admin/analytics/insights?${queryParams}`),
+        fetch(`/api/grimoire/stats?top=20`),
       ]);
 
       const errors: string[] = [];

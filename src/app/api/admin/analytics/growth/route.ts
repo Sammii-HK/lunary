@@ -26,7 +26,12 @@ export async function GET(request: NextRequest) {
         `SELECT
           SUM(new_signups) as total_signups,
           MAX(signed_in_product_mau) as product_mau,
-          MAX(activation_rate) as activation_rate
+          SUM(activated_users) as total_activated,
+          -- Weighted activation rate: total activated / total signups across range
+          CASE WHEN SUM(new_signups) > 0
+            THEN ROUND(SUM(activated_users)::numeric / SUM(new_signups) * 100, 2)
+            ELSE 0
+          END as activation_rate
         FROM daily_metrics
         WHERE metric_date >= $1 AND metric_date <= $2`,
         [

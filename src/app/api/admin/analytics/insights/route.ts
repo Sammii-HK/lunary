@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { resolveDateRange } from '@/lib/analytics/date-range';
+import { resolveDateRange, formatDate } from '@/lib/analytics/date-range';
 import {
   generateInsights,
   detectTrackingIssues,
@@ -18,6 +18,11 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_SITE_URL ||
       'http://localhost:3000';
 
+    // Format dates as YYYY-MM-DD for sub-route query params
+    const startDate = formatDate(range.start);
+    const endDate = formatDate(range.end);
+    const dateParams = `start_date=${startDate}&end_date=${endDate}`;
+
     // Fetch all necessary metrics in parallel
     const [
       activityResponse,
@@ -27,24 +32,14 @@ export async function GET(request: NextRequest) {
       growthResponse,
       revenueResponse,
     ] = await Promise.all([
+      fetch(`${baseUrl}/api/admin/analytics/activity?${dateParams}`),
+      fetch(`${baseUrl}/api/admin/analytics/engagement?${dateParams}`),
+      fetch(`${baseUrl}/api/admin/analytics/feature-adoption?${dateParams}`),
       fetch(
-        `${baseUrl}/api/admin/analytics/activity?start=${range.start}&end=${range.end}`,
+        `${baseUrl}/api/admin/analytics/cohort-retention?start=${startDate}&end=${endDate}`,
       ),
-      fetch(
-        `${baseUrl}/api/admin/analytics/engagement?start=${range.start}&end=${range.end}`,
-      ),
-      fetch(
-        `${baseUrl}/api/admin/analytics/feature-adoption?start=${range.start}&end=${range.end}`,
-      ),
-      fetch(
-        `${baseUrl}/api/admin/analytics/cohort-retention?start=${range.start}&end=${range.end}`,
-      ),
-      fetch(
-        `${baseUrl}/api/admin/analytics/growth?start=${range.start}&end=${range.end}`,
-      ),
-      fetch(
-        `${baseUrl}/api/admin/analytics/revenue?start=${range.start}&end=${range.end}`,
-      ),
+      fetch(`${baseUrl}/api/admin/analytics/growth?${dateParams}`),
+      fetch(`${baseUrl}/api/admin/analytics/revenue?${dateParams}`),
     ]);
 
     // Validate all responses are successful
@@ -107,9 +102,14 @@ export async function GET(request: NextRequest) {
     const getAdoption = (eventType: string): number =>
       featureAdoptionMap.get(eventType) || 0;
 
+    // Upstream APIs return percentages (0-100). generateInsights() expects
+    // decimals (0-1) and multiplies by 100 for display. Normalize here.
+    const pct = (v: number | undefined | null) =>
+      Math.min((Number(v) || 0) / 100, 1);
+
     // Build metrics object for insights generation
     const metrics: AnalyticsMetrics = {
-      // Core metrics
+      // Core metrics (counts, not percentages — no conversion needed)
       productMAU: activity.signed_in_product_mau || 0,
       appMAU: activity.app_opened_mau || 0,
       productDAU: activity.signed_in_product_dau || 0,
@@ -118,31 +118,43 @@ export async function GET(request: NextRequest) {
       // Growth
       productMAUGrowth: growth.product_mau_growth_rate || 0,
       signupCount: growth.new_signups || 0,
-      activationRate: growth.activation_rate || 0,
+      activationRate: pct(growth.activation_rate),
 
-      // Retention
+      // Retention (APIs return 0-100)
+      // If no cohorts are mature enough for D30 data, use -1 sentinel
+      // so generateInsights() can distinguish "no data" from "0% retention"
       recentCohortRetention:
-        cohortRetention.cohorts?.[0]?.day_30_retention || 0,
+        cohortRetention.cohorts?.length > 0
+          ? pct(cohortRetention.cohorts[0]?.day_30_retention)
+          : -1,
       earlyCohortRetention:
-        cohortRetention.cohorts?.[cohortRetention.cohorts.length - 1]
-          ?.day_30_retention || 0,
-      day30Retention: cohortRetention.overall_d30_retention || 0,
+        cohortRetention.cohorts?.length > 0
+          ? pct(
+              cohortRetention.cohorts[cohortRetention.cohorts.length - 1]
+                ?.day_30_retention,
+            )
+          : -1,
+      day30Retention:
+        cohortRetention.cohorts?.length > 0
+          ? pct(cohortRetention.overall_d30_retention)
+          : -1,
 
-      // Engagement
+      // Engagement (stickiness API returns 0-100)
       avgActiveDays: engagement.avg_active_days_per_week || 0,
-      stickiness: engagement.stickiness || 0,
+      stickiness: pct(engagement.stickiness),
+      d1Retention: pct(activity.d1_retention),
 
-      // Feature adoption (Product MAU as denominator)
-      dashboardAdoption: getAdoption('daily_dashboard_viewed'),
-      horoscopeAdoption: getAdoption('personalized_horoscope_viewed'),
-      tarotAdoption: getAdoption('tarot_drawn'),
-      guideAdoption: getAdoption('astral_chat_used'),
-      chartAdoption: getAdoption('chart_viewed'),
-      ritualAdoption: getAdoption('ritual_started'),
+      // Feature adoption (API returns 0-100)
+      dashboardAdoption: pct(getAdoption('daily_dashboard_viewed')),
+      horoscopeAdoption: pct(getAdoption('personalized_horoscope_viewed')),
+      tarotAdoption: pct(getAdoption('tarot_drawn')),
+      guideAdoption: pct(getAdoption('astral_chat_used')),
+      chartAdoption: pct(getAdoption('chart_viewed')),
+      ritualAdoption: pct(getAdoption('ritual_started')),
 
-      // Revenue
+      // Revenue (API returns 0-100)
       mrr: revenue.mrr || 0,
-      conversionRate: revenue.free_to_trial_rate || 0,
+      conversionRate: pct(revenue.free_to_trial_rate),
 
       // Tracking quality
       trackingIssues: detectTrackingIssues(

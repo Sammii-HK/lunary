@@ -31,16 +31,19 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
-    // FAST PATH: Query pre-computed metrics from daily_metrics table
-    // This is 99% cheaper than querying conversion_events!
+    // FAST PATH: Use rolling 7-day average stickiness from daily_metrics
+    // A single day's DAU/MAU is volatile; averaging over 7 days is more representative.
     const result = await sql.query(
       `SELECT
-        avg_active_days_per_week,
-        stickiness
-      FROM daily_metrics
-      WHERE metric_date >= $1 AND metric_date <= $2
-      ORDER BY metric_date DESC
-      LIMIT 1`,
+        AVG(stickiness) as avg_stickiness,
+        AVG(avg_active_days_per_week) as avg_active_days
+      FROM (
+        SELECT stickiness, avg_active_days_per_week
+        FROM daily_metrics
+        WHERE metric_date >= $1 AND metric_date <= $2
+        ORDER BY metric_date DESC
+        LIMIT 7
+      ) recent`,
       [
         range.start.toISOString().split('T')[0],
         range.end.toISOString().split('T')[0],
@@ -50,12 +53,10 @@ export async function GET(request: NextRequest) {
     let avgActiveDaysPerWeek: number;
     let stickiness: number;
 
-    if (result.rows.length > 0) {
-      // Got pre-computed metrics - FAST!
-      avgActiveDaysPerWeek = Number(
-        result.rows[0].avg_active_days_per_week || 0,
-      );
-      stickiness = Number(result.rows[0].stickiness || 0);
+    if (result.rows.length > 0 && result.rows[0].avg_stickiness != null) {
+      // 7-day rolling average — smooths out daily volatility
+      avgActiveDaysPerWeek = Number(result.rows[0].avg_active_days || 0);
+      stickiness = Number(result.rows[0].avg_stickiness || 0);
     } else {
       // LIVE PATH: Query conversion_events for today's data (slow but necessary)
       const dauStart = new Date(range.end);

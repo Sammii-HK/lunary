@@ -1,6 +1,7 @@
 'use client';
 
-import useSWR from 'swr';
+import { useCallback } from 'react';
+import useSWR, { useSWRConfig } from 'swr';
 import type {
   ActivityResponse,
   ConversionResponse,
@@ -33,31 +34,28 @@ const fetcher = async (url: string) => {
 const REFRESH_INTERVALS = {
   REALTIME: 5 * 60 * 1000, // 5 minutes for DAU/WAU/MAU
   STANDARD: 30 * 60 * 1000, // 30 minutes for most metrics
-  HISTORICAL: 4 * 60 * 60 * 1000, // 4 hours for historical data
-  STATIC: 24 * 60 * 60 * 1000, // 24 hours for static data
   DISABLED: 0, // No auto-refresh - only fetch once
 } as const;
 
-// SWR configuration presets to respect HTTP cache
+// SWR configuration presets
 const SWR_CONFIGS = {
   REALTIME: {
     refreshInterval: REFRESH_INTERVALS.REALTIME,
-    revalidateOnFocus: false, // Don't refetch on window focus
-    revalidateOnReconnect: false, // Don't refetch on reconnect
-    dedupingInterval: REFRESH_INTERVALS.REALTIME, // Dedupe within 5min
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: REFRESH_INTERVALS.REALTIME,
   },
   STANDARD: {
     refreshInterval: REFRESH_INTERVALS.STANDARD,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
-    dedupingInterval: REFRESH_INTERVALS.STANDARD, // Dedupe within 30min
+    dedupingInterval: REFRESH_INTERVALS.STANDARD,
   },
   DISABLED: {
     refreshInterval: REFRESH_INTERVALS.DISABLED,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
-    revalidateOnMount: false, // Don't even refetch on mount - use cache
-    dedupingInterval: 24 * 60 * 60 * 1000, // Dedupe for 24 hours
+    dedupingInterval: 24 * 60 * 60 * 1000,
   },
 } as const;
 
@@ -66,13 +64,24 @@ export interface UseAnalyticsDataSWROptions {
   endDate: string;
   granularity: 'day' | 'week' | 'month';
   includeAudit: boolean;
+  /** When false, Tier 2 (Operational tab) endpoints won't fetch. */
+  operationalTabActive?: boolean;
 }
 
 export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
-  const { startDate, endDate, granularity, includeAudit } = options;
+  const {
+    startDate,
+    endDate,
+    granularity,
+    includeAudit,
+    operationalTabActive = false,
+  } = options;
+  const { mutate: globalMutate } = useSWRConfig();
 
   const queryParams = `start_date=${startDate}&end_date=${endDate}`;
   const debugParam = includeAudit ? '&debug=1' : '';
+
+  // ── Tier 1: Snapshot tab (load immediately) ──────────────────────────
 
   // Core metrics - refresh every 5 minutes
   const { data: activity, error: activityError } = useSWR<ActivityResponse>(
@@ -94,7 +103,6 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     SWR_CONFIGS.REALTIME,
   );
 
-  // Standard metrics - refresh every 30 minutes
   const { data: conversions, error: conversionsError } =
     useSWR<ConversionResponse>(
       `/api/admin/analytics/conversions?${queryParams}`,
@@ -142,14 +150,6 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     SWR_CONFIGS.STANDARD,
   );
 
-  const { data: intentionBreakdownData, error: intentionBreakdownError } =
-    useSWR(
-      `/api/admin/analytics/intention-breakdown?${queryParams}`,
-      fetcher,
-      SWR_CONFIGS.STANDARD,
-    );
-
-  // Subscription & monetization
   const { data: subscription30d, error: subscription30dError } =
     useSWR<Subscription30dResponse>(
       `/api/admin/analytics/subscription-30d?${queryParams}`,
@@ -157,102 +157,145 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
       SWR_CONFIGS.STANDARD,
     );
 
-  const { data: subscriptionLifecycle, error: subscriptionLifecycleError } =
+  const { data: attribution, error: attributionError } =
+    useSWR<AttributionResponse>(
+      `/api/admin/analytics/attribution?${queryParams}`,
+      fetcher,
+      SWR_CONFIGS.DISABLED,
+    );
+
+  const { data: insightsResponse, error: insightsError } = useSWR(
+    `/api/admin/analytics/insights?${queryParams}`,
+    fetcher,
+    SWR_CONFIGS.REALTIME,
+  );
+
+  const { data: intentionBreakdownData, error: intentionBreakdownError } =
     useSWR(
-      `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`,
+      `/api/admin/analytics/intention-breakdown?${queryParams}`,
       fetcher,
       SWR_CONFIGS.STANDARD,
     );
 
-  const { data: planBreakdown, error: planBreakdownError } = useSWR(
-    `/api/admin/analytics/plan-breakdown?${queryParams}`,
+  const { data: metricSnapshotsWeekly, error: snapshotsWeeklyError } = useSWR(
+    `/api/admin/analytics/metric-snapshots?type=weekly&limit=12`,
     fetcher,
-    SWR_CONFIGS.STANDARD,
+    SWR_CONFIGS.DISABLED,
+  );
+
+  const { data: metricSnapshotsMonthly, error: snapshotsMonthlyError } = useSWR(
+    `/api/admin/analytics/metric-snapshots?type=monthly&limit=12`,
+    fetcher,
+    SWR_CONFIGS.DISABLED,
+  );
+
+  // ── Tier 2: Operational tab (load on demand) ─────────────────────────
+  // SWR conditional fetching: pass null key to skip the request
+
+  const { data: cohorts, error: cohortsError } = useSWR(
+    operationalTabActive
+      ? `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`
+      : null,
+    fetcher,
+    SWR_CONFIGS.DISABLED,
   );
 
   const { data: ctaConversions, error: ctaConversionsError } =
     useSWR<CtaConversionResponse>(
-      `/api/admin/analytics/cta-conversions?${queryParams}`,
+      operationalTabActive
+        ? `/api/admin/analytics/cta-conversions?${queryParams}`
+        : null,
       fetcher,
       SWR_CONFIGS.STANDARD,
     );
 
   const { data: ctaLocations, error: ctaLocationsError } =
     useSWR<CtaLocationsResponse>(
-      `/api/admin/analytics/cta-locations?${queryParams}`,
+      operationalTabActive
+        ? `/api/admin/analytics/cta-locations?${queryParams}`
+        : null,
       fetcher,
       SWR_CONFIGS.STANDARD,
     );
 
-  const { data: apiCosts, error: apiCostsError } = useSWR(
-    `/api/admin/analytics/api-costs?${queryParams}`,
+  const { data: subscriptionLifecycle, error: subscriptionLifecycleError } =
+    useSWR(
+      operationalTabActive
+        ? `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`
+        : null,
+      fetcher,
+      SWR_CONFIGS.STANDARD,
+    );
+
+  const { data: planBreakdown, error: planBreakdownError } = useSWR(
+    operationalTabActive
+      ? `/api/admin/analytics/plan-breakdown?${queryParams}`
+      : null,
     fetcher,
-    SWR_CONFIGS.DISABLED, // Historical data
+    SWR_CONFIGS.STANDARD,
+  );
+
+  const { data: apiCosts, error: apiCostsError } = useSWR(
+    operationalTabActive
+      ? `/api/admin/analytics/api-costs?${queryParams}`
+      : null,
+    fetcher,
+    SWR_CONFIGS.DISABLED,
   );
 
   const { data: userSegments, error: userSegmentsError } = useSWR(
-    `/api/admin/analytics/user-segments?${queryParams}`,
+    operationalTabActive
+      ? `/api/admin/analytics/user-segments?${queryParams}`
+      : null,
     fetcher,
-    SWR_CONFIGS.DISABLED, // Changes slowly
+    SWR_CONFIGS.DISABLED,
   );
 
-  // External & misc
   const { data: notifications, error: notificationsError } =
     useSWR<NotificationResponse>(
-      `/api/admin/analytics/notifications?${queryParams}`,
+      operationalTabActive
+        ? `/api/admin/analytics/notifications?${queryParams}`
+        : null,
       fetcher,
-      SWR_CONFIGS.DISABLED, // Historical data
-    );
-
-  const { data: attribution, error: attributionError } =
-    useSWR<AttributionResponse>(
-      `/api/admin/analytics/attribution?${queryParams}`,
-      fetcher,
-      SWR_CONFIGS.DISABLED, // Changes slowly
+      SWR_CONFIGS.DISABLED,
     );
 
   const { data: discordAnalytics, error: discordError } = useSWR(
-    `/api/analytics/discord-interactions?range=7d`,
+    operationalTabActive
+      ? `/api/analytics/discord-interactions?range=7d`
+      : null,
     fetcher,
-    SWR_CONFIGS.DISABLED, // Not time-critical
+    SWR_CONFIGS.DISABLED,
   );
 
   const { data: searchConsoleResponse, error: searchConsoleError } = useSWR(
-    `/api/admin/analytics/search-console?${queryParams}`,
+    operationalTabActive
+      ? `/api/admin/analytics/search-console?${queryParams}`
+      : null,
     fetcher,
-    SWR_CONFIGS.DISABLED, // Slow external API
-  );
-
-  const { data: insightsResponse, error: insightsError } = useSWR(
-    `/api/admin/analytics/insights?${queryParams}`,
-    fetcher,
-    SWR_CONFIGS.REALTIME, // Keep insights fresh
+    SWR_CONFIGS.DISABLED,
   );
 
   const { data: grimoireTopPagesResponse, error: grimoireTopPagesError } =
-    useSWR(`/api/grimoire/stats?top=20`, fetcher, SWR_CONFIGS.DISABLED);
+    useSWR(
+      operationalTabActive ? `/api/grimoire/stats?top=20` : null,
+      fetcher,
+      SWR_CONFIGS.DISABLED,
+    );
 
-  // Historical data - no auto-refresh needed
-  const { data: cohorts, error: cohortsError } = useSWR(
-    `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`,
-    fetcher,
-    SWR_CONFIGS.DISABLED, // Historical, doesn't change
-  );
+  // ── Refresh function ─────────────────────────────────────────────────
 
-  // Static data - no auto-refresh needed
-  const { data: metricSnapshotsWeekly, error: snapshotsWeeklyError } = useSWR(
-    `/api/admin/analytics/metric-snapshots?type=weekly&limit=12`,
-    fetcher,
-    SWR_CONFIGS.DISABLED, // Weekly snapshots don't change
-  );
+  const refresh = useCallback(async () => {
+    // Revalidate all SWR keys matching our API prefix
+    await globalMutate(
+      (key) => typeof key === 'string' && key.startsWith('/api/'),
+      undefined,
+      { revalidate: true },
+    );
+  }, [globalMutate]);
 
-  const { data: metricSnapshotsMonthly, error: snapshotsMonthlyError } = useSWR(
-    `/api/admin/analytics/metric-snapshots?type=monthly&limit=12`,
-    fetcher,
-    SWR_CONFIGS.DISABLED, // Monthly snapshots don't change
-  );
+  // ── Combine errors ───────────────────────────────────────────────────
 
-  // Combine errors
   const errors = [
     activityError && 'DAU/WAU/MAU',
     engagementError && 'Engagement overview',
@@ -268,7 +311,7 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     attributionError && 'Attribution',
   ].filter(Boolean);
 
-  // Check if any data is loading
+  // Only block on the 5 critical endpoints
   const loading =
     !activity ||
     !engagementOverview ||
@@ -326,5 +369,8 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
       errors.length > 0
         ? `Some metrics unavailable: ${errors.join(', ')}`
         : null,
+
+    // Actions
+    refresh,
   };
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   CalendarRange,
   Download,
@@ -10,35 +10,37 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAnalyticsData } from '@/hooks/useAnalyticsData';
+import { useAnalyticsDataSWR } from '@/hooks/useAnalyticsDataSWR';
 import { useAnalyticsComputations } from '@/hooks/useAnalyticsComputations';
 import { SnapshotTab } from '@/components/admin/analytics/SnapshotTab';
 import { OperationalTab } from '@/components/admin/analytics/OperationalTab';
+import { AnalyticsDashboardSkeleton } from '@/components/admin/analytics/AnalyticsSkeleton';
+import { formatDateInput } from '@/lib/analytics/utils';
+
+const DEFAULT_RANGE_DAYS = 30;
 
 export default function AnalyticsPage() {
-  const analyticsData = useAnalyticsData();
-  const computedMetrics = useAnalyticsComputations(analyticsData);
+  const today = new Date();
+  const defaultEnd = formatDateInput(today);
+  const defaultStart = (() => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - (DEFAULT_RANGE_DAYS - 1));
+    return formatDateInput(d);
+  })();
 
-  const {
-    startDate,
-    endDate,
-    granularity,
-    includeAudit,
-    loading,
-    error,
-    showExportMenu,
-    showProductSeries,
-    setStartDate,
-    setEndDate,
-    setGranularity,
-    setIncludeAudit,
-    setShowExportMenu,
-    setShowProductSeries,
-    fetchAnalytics,
-    exportMenuRef,
-  } = analyticsData;
-
-  const { wauWindowStart, mauWindowStart, chartSeries } = computedMetrics;
+  // Date & UI state (owned by the page component)
+  const [startDate, setStartDate] = useState(defaultStart);
+  const [endDate, setEndDate] = useState(defaultEnd);
+  const [granularity, setGranularity] = useState<'day' | 'week' | 'month'>(
+    'day',
+  );
+  const [includeAudit, setIncludeAudit] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showProductSeries, setShowProductSeries] = useState(false);
+  const [insightTypeFilter, setInsightTypeFilter] = useState<string>('all');
+  const [insightCategoryFilter, setInsightCategoryFilter] =
+    useState<string>('all');
+  const exportMenuRef = useRef<HTMLDivElement>(null);
 
   const VALID_TABS = ['snapshot', 'details'] as const;
   type Tab = (typeof VALID_TABS)[number];
@@ -54,6 +56,57 @@ export default function AnalyticsPage() {
   useEffect(() => {
     window.location.hash = activeTab;
   }, [activeTab]);
+
+  // SWR-based data fetching — Tier 2 endpoints only load when Operational tab is active
+  const swrData = useAnalyticsDataSWR({
+    startDate,
+    endDate,
+    granularity,
+    includeAudit,
+    operationalTabActive: activeTab === 'details',
+  });
+
+  // Compose the analyticsData object for downstream components
+  const analyticsData = {
+    ...swrData,
+    startDate,
+    endDate,
+    granularity,
+    includeAudit,
+    showExportMenu,
+    showProductSeries,
+    insightTypeFilter,
+    insightCategoryFilter,
+    setStartDate,
+    setEndDate,
+    setGranularity,
+    setIncludeAudit,
+    setShowExportMenu,
+    setShowProductSeries,
+    setInsightTypeFilter,
+    setInsightCategoryFilter,
+    fetchAnalytics: swrData.refresh,
+    exportMenuRef,
+  };
+
+  const computedMetrics = useAnalyticsComputations(analyticsData);
+  const { wauWindowStart, mauWindowStart } = computedMetrics;
+
+  // Close export menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        exportMenuRef.current &&
+        !exportMenuRef.current.contains(e.target as Node)
+      ) {
+        setShowExportMenu(false);
+      }
+    };
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showExportMenu]);
 
   const handleExportInsights = () => {
     const insightsJson = JSON.stringify(analyticsData.insights, null, 2);
@@ -211,11 +264,11 @@ export default function AnalyticsPage() {
           <Button
             variant='outline'
             size='sm'
-            onClick={fetchAnalytics}
-            disabled={loading}
+            onClick={swrData.refresh}
+            disabled={swrData.loading}
             className='gap-2'
           >
-            {loading ? (
+            {swrData.loading ? (
               <Loader2 className='h-4 w-4 animate-spin' />
             ) : (
               <RefreshCw className='h-4 w-4' />
@@ -232,21 +285,17 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Error Display */}
-      {error && (
+      {analyticsData.error && (
         <div className='rounded-xl border border-lunary-error-700/40 bg-lunary-error-950/40 px-4 py-3 text-sm text-lunary-error-200'>
-          {error}
+          {analyticsData.error}
         </div>
       )}
 
       {/* Loading State */}
-      {loading && (
-        <div className='flex items-center justify-center py-12'>
-          <Loader2 className='h-8 w-8 animate-spin text-lunary-primary' />
-        </div>
-      )}
+      {swrData.loading && <AnalyticsDashboardSkeleton />}
 
       {/* Main Content */}
-      {!loading && (
+      {!swrData.loading && (
         <Tabs
           value={activeTab}
           onValueChange={(v) => setActiveTab(v as Tab)}
@@ -257,7 +306,7 @@ export default function AnalyticsPage() {
               value='snapshot'
               className='rounded-lg px-4 py-2 text-sm'
             >
-              Snapshot
+              Investor Snapshot
             </TabsTrigger>
             <TabsTrigger
               value='details'

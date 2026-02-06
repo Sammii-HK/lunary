@@ -13,17 +13,19 @@ export function MetricCardSkeleton() {
   );
 }
 
+const SKELETON_BAR_HEIGHTS = [72, 58, 85, 64, 91, 50, 78];
+
 export function ChartSkeleton() {
   return (
     <div className='animate-pulse rounded-xl border border-zinc-800 bg-zinc-900/40 p-6'>
       <div className='mb-4 h-6 w-48 rounded bg-zinc-700' />
       <div className='h-64 rounded-lg bg-zinc-700/50'>
         <div className='flex h-full items-end justify-around p-4'>
-          {[...Array(7)].map((_, i) => (
+          {SKELETON_BAR_HEIGHTS.map((h, i) => (
             <div
               key={i}
               className='w-8 rounded-t bg-zinc-600'
-              style={{ height: `${Math.random() * 60 + 40}%` }}
+              style={{ height: `${h}%` }}
             />
           ))}
         </div>

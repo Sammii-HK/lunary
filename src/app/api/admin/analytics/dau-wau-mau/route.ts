@@ -12,35 +12,32 @@ const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
 /**
  * FAST PATH: Get snapshot data from daily_metrics
- * Returns WAU/MAU from snapshots, DAU is computed real-time
+ * Returns all rows in the date range for building trends,
+ * plus real-time DAU for today
  */
-async function getSnapshotMetrics(rangeEnd: Date) {
+async function getSnapshotRows(rangeStart: Date, rangeEnd: Date) {
+  const startDateStr = rangeStart.toISOString().split('T')[0];
   const endDateStr = rangeEnd.toISOString().split('T')[0];
 
-  // Get the most recent snapshot (yesterday or earlier)
   const snapshotResult = await sql.query(
-    `SELECT
-      metric_date,
-      dau, wau, mau,
-      signed_in_product_dau,
-      signed_in_product_wau,
-      signed_in_product_mau,
-      app_opened_mau,
-      stickiness,
-      avg_active_days_per_week
+    `SELECT *
     FROM daily_metrics
-    WHERE metric_date <= $1
-    ORDER BY metric_date DESC
-    LIMIT 1`,
-    [endDateStr],
+    WHERE metric_date >= $1 AND metric_date <= $2
+    ORDER BY metric_date ASC`,
+    [startDateStr, endDateStr],
   );
 
-  if (snapshotResult.rows.length === 0) {
-    return null;
-  }
-
-  return snapshotResult.rows[0];
+  return snapshotResult.rows;
 }
+
+/** Normalize a metric_date value from daily_metrics to YYYY-MM-DD string */
+const snapshotRowDate = (row: Record<string, unknown>): string => {
+  const d = row.metric_date;
+  if (d instanceof Date) return d.toISOString().split('T')[0];
+  if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}/.test(d))
+    return d.split('T')[0];
+  return String(d);
+};
 
 /**
  * Get real-time DAU for today from conversion_events
@@ -386,48 +383,140 @@ export async function GET(request: NextRequest) {
     const range = resolveDateRange(searchParams, 30);
     const forceLive = searchParams.get('live') === '1';
 
-    // FAST PATH: Use daily_metrics snapshots for WAU/MAU, real-time for DAU
-    // Skip this if ?live=1 is passed or if granularity is not 'day'
+    // FAST PATH: Use pre-computed daily_metrics for instant load (~2 queries vs 12+).
+    // daily_metrics uses user_id counts (no identity resolution) — close enough
+    // for dashboard monitoring. Use ?live=1 for exact identity-resolved numbers.
+    // Only for daily granularity — weekly/monthly need date bucketing the live path provides.
     if (!forceLive && granularity === 'day') {
-      const snapshot = await getSnapshotMetrics(range.end);
+      const snapshotRows = await getSnapshotRows(range.start, range.end);
 
-      if (snapshot) {
-        // Get real-time DAU for today
+      if (snapshotRows.length > 0) {
         const realtimeDAU = await getRealtimeDAU();
+        const latest = snapshotRows[snapshotRows.length - 1];
 
-        // Use snapshot WAU/MAU, but real-time DAU
-        const signedInProductDau = realtimeDAU;
-        const signedInProductWau = Number(snapshot.signed_in_product_wau || 0);
-        const signedInProductMau = Number(snapshot.signed_in_product_mau || 0);
-        const appOpenedMau = Number(snapshot.app_opened_mau || 0);
-        const stickiness = Number(snapshot.stickiness || 0);
+        // Build trend arrays from all daily_metrics rows
+        const trends = snapshotRows.map((row) => ({
+          date: snapshotRowDate(row),
+          dau: Number(row.dau || 0),
+          wau: Number(row.wau || 0),
+          mau: Number(row.mau || 0),
+        }));
+
+        const productTrends = snapshotRows.map((row) => ({
+          date: snapshotRowDate(row),
+          dau: Number(row.signed_in_product_dau || 0),
+          wau: Number(row.signed_in_product_wau || 0),
+          mau: Number(row.signed_in_product_mau || 0),
+        }));
+
+        const appOpenedTrends = snapshotRows.map((row) => ({
+          date: snapshotRowDate(row),
+          dau: Number(row.app_opened_dau || 0),
+          wau: Number(row.app_opened_wau || 0),
+          mau: Number(row.app_opened_mau || 0),
+        }));
+
+        const sitewideTrends = snapshotRows.map((row) => ({
+          date: snapshotRowDate(row),
+          dau: Number(row.reach_dau || 0),
+          wau: Number(row.reach_wau || 0),
+          mau: Number(row.reach_mau || 0),
+        }));
+
+        const grimoireTrends = snapshotRows.map((row) => ({
+          date: snapshotRowDate(row),
+          dau: Number(row.grimoire_dau || 0),
+          wau: Number(row.grimoire_wau || 0),
+          mau: Number(row.grimoire_mau || 0),
+        }));
+
+        // Summary metrics: use real-time DAU if available (during the day),
+        // fall back to latest snapshot DAU (at midnight / early morning)
+        const snapshotDau = Number(latest.signed_in_product_dau || 0);
+        const signedInProductDau = realtimeDAU > 0 ? realtimeDAU : snapshotDau;
+        const signedInProductWau = Number(latest.signed_in_product_wau || 0);
+        const signedInProductMau = Number(latest.signed_in_product_mau || 0);
+        const appOpenedDau = Number(latest.app_opened_dau || 0);
+        const appOpenedWau = Number(latest.app_opened_wau || 0);
+        const appOpenedMau = Number(latest.app_opened_mau || 0);
+        const returningDau = Number(latest.returning_dau || 0);
+        const returningWau = Number(latest.returning_wau || 0);
+        const returningMau = Number(latest.returning_mau || 0);
+        const reachDau = Number(latest.reach_dau || 0);
+        const reachWau = Number(latest.reach_wau || 0);
+        const reachMau = Number(latest.reach_mau || 0);
+        const grimoireDau = Number(latest.grimoire_dau || 0);
+        const grimoireWau = Number(latest.grimoire_wau || 0);
+        const grimoireMau = Number(latest.grimoire_mau || 0);
+        const grimoireOnlyMau = Number(latest.grimoire_only_mau || 0);
+        const totalAccounts = Number(latest.total_accounts || 0);
+        const productDau = Number(latest.signed_in_product_dau || 0);
+        const productWau = Number(latest.signed_in_product_wau || 0);
+        const productMau = Number(latest.signed_in_product_mau || 0);
+
+        // All-user DAU/WAU/MAU (any event, including anonymous)
+        const allUserDau = Number(latest.dau || 0);
+        const allUserWau = Number(latest.wau || 0);
+        const allUserMau = Number(latest.mau || 0);
 
         const fullData = {
-          // Core metrics - DAU is real-time, WAU/MAU from snapshot
-          dau: realtimeDAU,
-          wau: signedInProductWau,
-          mau: signedInProductMau,
-          engaged_users_dau: realtimeDAU,
-          engaged_users_wau: signedInProductWau,
-          engaged_users_mau: signedInProductMau,
-          // Stickiness using real-time DAU with snapshot MAU
+          // Core engagement metrics (all-user, not just signed-in product)
+          dau: allUserDau,
+          wau: allUserWau,
+          mau: allUserMau,
+          engaged_users_dau: allUserDau,
+          engaged_users_wau: allUserWau,
+          engaged_users_mau: allUserMau,
+          // Engaged rates - not computable from snapshots (need total event counts)
+          engaged_rate_dau: null,
+          engaged_rate_wau: null,
+          engaged_rate_mau: null,
+          // Stickiness
           stickiness_dau_mau:
             signedInProductMau > 0
               ? Number(
                   ((signedInProductDau / signedInProductMau) * 100).toFixed(2),
                 )
               : 0,
-          stickiness_wau_mau:
-            signedInProductMau > 0
-              ? Number(
-                  ((signedInProductWau / signedInProductMau) * 100).toFixed(2),
-                )
-              : 0,
+          stickiness_wau_mau: Number(latest.stickiness_wau_mau || 0),
           stickiness_dau_wau:
             signedInProductWau > 0
               ? Number(
                   ((signedInProductDau / signedInProductWau) * 100).toFixed(2),
                 )
+              : 0,
+          // Returning users
+          returning_dau: returningDau,
+          returning_wau: returningWau,
+          returning_mau: returningMau,
+          // Retention from snapshot
+          retention: {
+            day_1: Number(latest.d1_retention || 0),
+            day_7: Number(latest.d7_retention || 0),
+            day_30: Number(latest.d30_retention || 0),
+          },
+          churn_rate:
+            latest.d30_retention != null
+              ? Number((100 - Number(latest.d30_retention)).toFixed(2))
+              : null,
+          // Trend arrays (critical for momentum calculations and charts)
+          trends,
+          product_trends: productTrends,
+          signed_in_product_trends: productTrends,
+          grimoire_trends: grimoireTrends,
+          app_opened_trends: appOpenedTrends,
+          sitewide_trends: sitewideTrends,
+          // Product metrics (unsigned variant)
+          product_dau: productDau,
+          product_wau: productWau,
+          product_mau: productMau,
+          product_stickiness_dau_mau:
+            productMau > 0
+              ? Number(((productDau / productMau) * 100).toFixed(2))
+              : 0,
+          product_stickiness_wau_mau:
+            productMau > 0
+              ? Number(((productWau / productMau) * 100).toFixed(2))
               : 0,
           // Signed-in product metrics
           signed_in_product_dau: signedInProductDau,
@@ -445,11 +534,38 @@ export async function GET(request: NextRequest) {
                   ((signedInProductWau / signedInProductMau) * 100).toFixed(2),
                 )
               : 0,
+          signed_in_product_returning_users: returningMau,
+          signed_in_product_users: signedInProductMau,
+          signed_in_product_avg_sessions_per_user: Number(
+            latest.avg_active_days_per_week || 0,
+          ),
           // App opened metrics
+          app_opened_dau: appOpenedDau,
+          app_opened_wau: appOpenedWau,
           app_opened_mau: appOpenedMau,
+          app_opened_stickiness_dau_mau:
+            appOpenedMau > 0
+              ? Number(((appOpenedDau / appOpenedMau) * 100).toFixed(2))
+              : 0,
+          app_opened_stickiness_wau_mau:
+            appOpenedMau > 0
+              ? Number(((appOpenedWau / appOpenedMau) * 100).toFixed(2))
+              : 0,
+          // Sitewide (reach) metrics
+          sitewide_dau: reachDau,
+          sitewide_wau: reachWau,
+          sitewide_mau: reachMau,
+          // Grimoire metrics
+          grimoire_dau: grimoireDau,
+          grimoire_wau: grimoireWau,
+          grimoire_mau: grimoireMau,
+          content_mau_grimoire: grimoireMau,
+          grimoire_only_mau: grimoireOnlyMau,
+          // Total accounts
+          total_accounts: totalAccounts,
           // Source indicator
           source: 'daily_metrics',
-          snapshot_date: snapshot.metric_date,
+          snapshot_date: latest.metric_date,
           dau_source: 'realtime',
         };
 

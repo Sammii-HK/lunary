@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
           adoption_rate: Number(row.dashboard_adoption || 0),
         },
         {
-          event_type: 'horoscope_viewed',
+          event_type: 'personalized_horoscope_viewed',
           users: Math.round((Number(row.horoscope_adoption || 0) / 100) * mau),
           adoption_rate: Number(row.horoscope_adoption || 0),
         },
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
           adoption_rate: Number(row.chart_adoption || 0),
         },
         {
-          event_type: 'grimoire_viewed',
+          event_type: 'astral_chat_used',
           users: Math.round((Number(row.guide_adoption || 0) / 100) * mau),
           adoption_rate: Number(row.guide_adoption || 0),
         },

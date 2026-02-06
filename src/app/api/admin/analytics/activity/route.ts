@@ -19,7 +19,9 @@ export async function GET(request: NextRequest) {
         signed_in_product_mau,
         app_opened_mau,
         signed_in_product_dau,
-        signed_in_product_wau
+        signed_in_product_wau,
+        d1_retention,
+        returning_dau
       FROM daily_metrics
       WHERE metric_date >= $1 AND metric_date <= $2
       ORDER BY metric_date DESC
@@ -34,6 +36,8 @@ export async function GET(request: NextRequest) {
     let appOpenedMau = 0;
     let signedInProductDau = 0;
     let signedInProductWau = 0;
+    let d1Retention = 0;
+    let returningDau = 0;
 
     if (result.rows.length > 0) {
       // Got pre-computed metrics - FAST!
@@ -41,6 +45,8 @@ export async function GET(request: NextRequest) {
       appOpenedMau = Number(result.rows[0].app_opened_mau || 0);
       signedInProductDau = Number(result.rows[0].signed_in_product_dau || 0);
       signedInProductWau = Number(result.rows[0].signed_in_product_wau || 0);
+      d1Retention = Number(result.rows[0].d1_retention || 0);
+      returningDau = Number(result.rows[0].returning_dau || 0);
     }
     // If no snapshot, return zeros (cron job will compute it tonight)
 
@@ -49,6 +55,8 @@ export async function GET(request: NextRequest) {
       app_opened_mau: appOpenedMau,
       signed_in_product_dau: signedInProductDau,
       signed_in_product_wau: signedInProductWau,
+      d1_retention: d1Retention,
+      returning_dau: returningDau,
     });
 
     // Cache activity metrics for 30 minutes with stale-while-revalidate

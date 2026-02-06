@@ -26,13 +26,15 @@ export function MetricTable({
     if (value == null) return '—';
 
     if (column.type === 'number') {
-      return typeof value === 'number' ? value.toLocaleString() : String(value);
+      const num = typeof value === 'number' ? value : Number(value);
+      return Number.isFinite(num) ? num.toLocaleString() : String(value);
     }
 
     if (column.type === 'percentage') {
-      if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
+      const num = typeof value === 'number' ? value : Number(value);
+      if (!Number.isFinite(num)) return '—';
       const decimals = column.decimals ?? 1;
-      return `${value.toFixed(decimals)}%`;
+      return `${num.toFixed(decimals)}%`;
     }
 
     if (column.type === 'ratio') {

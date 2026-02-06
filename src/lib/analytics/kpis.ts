@@ -776,6 +776,7 @@ export async function getFeatureAdoption(
 
   const featureTypes = options?.featureTypes ?? [
     'daily_dashboard_viewed',
+    'personalized_horoscope_viewed',
     'grimoire_viewed',
     'astral_chat_used',
     'tarot_drawn',
@@ -1037,12 +1038,14 @@ export async function getConversionInfluence(
   const testEmailExact = 'test@test.lunary.app';
 
   // Subscription influence: % of subscription_started users that had a prior grimoire view
+  // Uses identity resolution so anonymous grimoire views link to signed-in users
   const subscriptionEventTypes = ['subscription_started', 'trial_converted'];
   const signupEventTypes = ['signup_completed', 'signup'];
 
   const base = await sql.query(
     `
-      WITH subs AS (
+      WITH ${identityLinksCte},
+      subs AS (
         SELECT user_id, MIN(created_at) AS sub_at
         FROM conversion_events
         WHERE event_type = ANY($3::text[])
@@ -1058,7 +1061,8 @@ export async function getConversionInfluence(
           WHERE EXISTS (
             SELECT 1
             FROM conversion_events gv
-            WHERE gv.user_id = subs.user_id
+            LEFT JOIN identity_links gl ON gl.anonymous_id = gv.anonymous_id
+            WHERE (gv.user_id = subs.user_id OR gl.user_id = subs.user_id)
               AND gv.event_type = 'grimoire_viewed'
               AND gv.created_at < subs.sub_at
               AND (gv.user_email IS NULL OR (gv.user_email NOT LIKE $4 AND gv.user_email != $5))
@@ -1076,7 +1080,8 @@ export async function getConversionInfluence(
 
   const medians = await sql.query(
     `
-      WITH subs AS (
+      WITH ${identityLinksCte},
+      subs AS (
         SELECT user_id, MIN(created_at) AS sub_at
         FROM conversion_events
         WHERE event_type = ANY($3::text[])
@@ -1087,12 +1092,25 @@ export async function getConversionInfluence(
         GROUP BY user_id
       ),
       grimoire_first AS (
-        SELECT user_id, MIN(created_at) AS first_grimoire_at
-        FROM conversion_events
-        WHERE event_type = 'grimoire_viewed'
-          AND user_id IS NOT NULL
-          AND (user_email IS NULL OR (user_email NOT LIKE $5 AND user_email != $6))
-        GROUP BY user_id
+        -- Resolve anonymous grimoire viewers to their signed-in user_id
+        SELECT
+          resolved_user_id,
+          MIN(first_grimoire_at) AS first_grimoire_at
+        FROM (
+          SELECT
+            COALESCE(
+              CASE WHEN ce.user_id IS NOT NULL AND ce.user_id <> '' THEN ce.user_id END,
+              linked.user_id
+            ) AS resolved_user_id,
+            ce.created_at AS first_grimoire_at
+          FROM conversion_events ce
+          ${identityLinkJoin}
+          WHERE ce.event_type = 'grimoire_viewed'
+            AND (ce.user_id IS NOT NULL OR ce.anonymous_id IS NOT NULL)
+            AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE $5 AND ce.user_email != $6))
+        ) gv
+        WHERE resolved_user_id IS NOT NULL
+        GROUP BY resolved_user_id
       ),
       signup_first AS (
         SELECT user_id, MIN(created_at) AS signup_at
@@ -1109,7 +1127,7 @@ export async function getConversionInfluence(
           gf.first_grimoire_at,
           sf.signup_at
         FROM subs s
-        LEFT JOIN grimoire_first gf ON gf.user_id = s.user_id
+        LEFT JOIN grimoire_first gf ON gf.resolved_user_id = s.user_id
         LEFT JOIN signup_first sf ON sf.user_id = s.user_id
         WHERE gf.first_grimoire_at IS NOT NULL
           AND sf.signup_at IS NOT NULL

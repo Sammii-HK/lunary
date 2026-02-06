@@ -222,43 +222,27 @@ export async function GET(request: NextRequest) {
     const freeUsers = cohortUserIds.length;
 
     // 2. Of the cohort, count how many EVER started a trial (even after the range)
-    // Match using user: prefix, raw user_id, or linked anonymous_id
+    // Check both conversion_events AND subscriptions table (source of truth)
     const trialUsersResult =
       cohortUserIds.length > 0
         ? await sql.query(
-            hasIdentityLinks
-              ? `
+            `
           SELECT COUNT(DISTINCT u.id) AS count
           FROM "user" u
           WHERE u.id = ANY($1::text[])
-            AND EXISTS (
-              SELECT 1
-              FROM conversion_events ce
-              WHERE ce.event_type = 'trial_started'
-                AND (
-                  ce.user_id = 'user:' || u.id
-                  OR ce.user_id = u.id
-                  OR (
-                    ce.anonymous_id IS NOT NULL
-                    AND EXISTS (
-                      SELECT 1
-                      FROM analytics_identity_links l
-                      WHERE l.user_id = u.id
-                        AND l.anonymous_id = ce.anonymous_id
-                    )
-                  )
-                )
-            )
-        `
-              : `
-          SELECT COUNT(DISTINCT u.id) AS count
-          FROM "user" u
-          WHERE u.id = ANY($1::text[])
-            AND EXISTS (
-              SELECT 1
-              FROM conversion_events ce
-              WHERE ce.event_type = 'trial_started'
-                AND (ce.user_id = 'user:' || u.id OR ce.user_id = u.id)
+            AND (
+              -- Check subscriptions table: any non-free status means at least trial
+              EXISTS (
+                SELECT 1 FROM subscriptions s
+                WHERE s.user_id = u.id
+                  AND s.status != 'free'
+              )
+              OR EXISTS (
+                SELECT 1
+                FROM conversion_events ce
+                WHERE ce.event_type = 'trial_started'
+                  AND (ce.user_id = 'user:' || u.id OR ce.user_id = u.id)
+              )
             )
         `,
             [cohortUserIds],
@@ -266,44 +250,29 @@ export async function GET(request: NextRequest) {
         : { rows: [{ count: 0 }] };
     const trialUsers = Number(trialUsersResult.rows[0]?.count || 0);
 
-    // 3. Of the cohort, count how many EVER became paid (even after the range)
-    // Handle both user_id formats: 'user:xxx' (prefixed) and 'xxx' (raw)
+    // 3. Of the cohort, count how many EVER became subscribers (even after the range)
+    // Check both conversion_events AND subscriptions table (source of truth)
     const paidUsersResult =
       cohortUserIds.length > 0
         ? await sql.query(
-            hasIdentityLinks
-              ? `
+            `
           SELECT COUNT(DISTINCT u.id) AS count
           FROM "user" u
           WHERE u.id = ANY($1::text[])
-            AND EXISTS (
-              SELECT 1
-              FROM conversion_events ce
-              WHERE ce.event_type IN ('subscription_started', 'trial_converted')
-                AND (
-                  ce.user_id = 'user:' || u.id
-                  OR ce.user_id = u.id
-                  OR (
-                    ce.anonymous_id IS NOT NULL
-                    AND EXISTS (
-                      SELECT 1
-                      FROM analytics_identity_links l
-                      WHERE l.user_id = u.id
-                        AND l.anonymous_id = ce.anonymous_id
-                    )
-                  )
-                )
-            )
-        `
-              : `
-          SELECT COUNT(DISTINCT u.id) AS count
-          FROM "user" u
-          WHERE u.id = ANY($1::text[])
-            AND EXISTS (
-              SELECT 1
-              FROM conversion_events ce
-              WHERE ce.event_type IN ('subscription_started', 'trial_converted')
-                AND (ce.user_id = 'user:' || u.id OR ce.user_id = u.id)
+            AND (
+              -- Check subscriptions table: active/past_due/canceled = had a subscription
+              EXISTS (
+                SELECT 1 FROM subscriptions s
+                WHERE s.user_id = u.id
+                  AND s.status IN ('active', 'past_due', 'canceled', 'trialing')
+                  AND s.stripe_subscription_id IS NOT NULL
+              )
+              OR EXISTS (
+                SELECT 1
+                FROM conversion_events ce
+                WHERE ce.event_type IN ('subscription_started', 'trial_converted')
+                  AND (ce.user_id = 'user:' || u.id OR ce.user_id = u.id)
+              )
             )
         `,
             [cohortUserIds],
