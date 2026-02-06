@@ -5,17 +5,12 @@ import {
 } from '@/hooks/useABTestTracking';
 
 // Mock dependencies
-const mockUseFeatureFlagVariant = jest.fn();
-const mockGetABTestMetadataFromVariant = jest.fn();
+const mockGetABTestVariantClient = jest.fn();
 const mockTrackEvent = jest.fn();
 
-jest.mock('@/hooks/useFeatureFlag', () => ({
-  useFeatureFlagVariant: (flag: string) => mockUseFeatureFlagVariant(flag),
-}));
-
-jest.mock('@/lib/ab-test-tracking', () => ({
-  getABTestMetadataFromVariant: (test: string, variant: any) =>
-    mockGetABTestMetadataFromVariant(test, variant),
+jest.mock('@/lib/ab-tests-client', () => ({
+  getABTestVariantClient: (testName: string) =>
+    mockGetABTestVariantClient(testName),
 }));
 
 jest.mock('@/lib/analytics', () => ({
@@ -25,90 +20,59 @@ jest.mock('@/lib/analytics', () => ({
 describe('useABTestTracking', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default: no variants active (user not in any test)
-    mockUseFeatureFlagVariant.mockReturnValue(null);
-    mockGetABTestMetadataFromVariant.mockReturnValue(null);
+    mockGetABTestVariantClient.mockReturnValue(undefined);
   });
 
-  describe('Critical: Event tracking for users NOT in A/B tests', () => {
-    it('should track app_opened event when user is NOT in any test but flags resolved', async () => {
-      // Simulate PostHog loaded but user not in any test (flags return false/null variants)
-      // At least one flag must return a non-undefined value to signal "resolved"
-      mockUseFeatureFlagVariant.mockImplementation((flag: string) => {
-        if (flag === 'cta-copy-test') return false; // resolved but not in test
+  describe('Cookie-based variant reading (no PostHog timing dependency)', () => {
+    it('should read variants from cookie immediately on first render', () => {
+      mockGetABTestVariantClient.mockImplementation((testName: string) => {
+        if (testName === 'cta-copy-test') return 'mystical';
         return undefined;
       });
-      mockGetABTestMetadataFromVariant.mockReturnValue(null);
 
+      const { result } = renderHook(() =>
+        useABTestTracking('dashboard', 'app_opened', ['cta-copy-test']),
+      );
+
+      // Available immediately — no waiting for PostHog
+      expect(result.current.hasActiveTest).toBe(true);
+      expect(result.current.activeTests).toContainEqual({
+        abTest: 'cta_copy',
+        abVariant: 'mystical',
+      });
+    });
+  });
+
+  describe('Event tracking for users NOT in A/B tests', () => {
+    it('should fire 1 bare event when no tests are active', async () => {
       renderHook(() =>
         useABTestTracking('dashboard', 'app_opened', ['cta-copy-test']),
       );
 
       await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1);
         expect(mockTrackEvent).toHaveBeenCalledWith('app_opened', {
           pagePath: '/dashboard',
-          metadata: {
-            page: 'dashboard',
-          },
+          metadata: { page: 'dashboard' },
         });
-      });
-    });
-
-    it('should NOT fire events before PostHog flags resolve', async () => {
-      // All flags return undefined — PostHog hasn't loaded
-      mockUseFeatureFlagVariant.mockReturnValue(undefined);
-      mockGetABTestMetadataFromVariant.mockReturnValue(null);
-
-      renderHook(() => useABTestTracking('dashboard', 'app_opened'));
-
-      // Should not fire any events yet
-      expect(mockTrackEvent).not.toHaveBeenCalled();
-    });
-
-    it('should fire exactly 1 event when flags resolved but no tests active', async () => {
-      mockUseFeatureFlagVariant.mockImplementation((flag: string) => {
-        if (flag === 'cta-copy-test') return false;
-        return undefined;
-      });
-      mockGetABTestMetadataFromVariant.mockReturnValue(null);
-
-      renderHook(() => useABTestTracking('dashboard', 'app_opened'));
-
-      await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(1);
       });
     });
   });
 
   describe('Critical: ALL active tests must be tracked independently', () => {
     it('should fire one event PER active test when user is in multiple tests', async () => {
-      // User is in 3 tests simultaneously
-      mockUseFeatureFlagVariant.mockImplementation((flag: string) => {
-        if (flag === 'cta-copy-test') return 'mystical';
-        if (flag === 'paywall_preview_style_v1') return 'blur';
-        if (flag === 'feature_preview_blur_v1') return 'peek';
-        return null;
+      mockGetABTestVariantClient.mockImplementation((testName: string) => {
+        const variants: Record<string, string> = {
+          'cta-copy-test': 'mystical',
+          paywall_preview_style_v1: 'blur',
+          feature_preview_blur_v1: 'peek',
+        };
+        return variants[testName];
       });
-
-      mockGetABTestMetadataFromVariant.mockImplementation(
-        (test: string, variant: any) => {
-          if (test === 'cta-copy-test' && variant === 'mystical') {
-            return { abTest: 'cta_copy', abVariant: 'mystical' };
-          }
-          if (test === 'paywall_preview_style_v1' && variant === 'blur') {
-            return { abTest: 'paywall_preview', abVariant: 'blur' };
-          }
-          if (test === 'feature_preview_blur_v1' && variant === 'peek') {
-            return { abTest: 'feature_preview', abVariant: 'peek' };
-          }
-          return null;
-        },
-      );
 
       renderHook(() => useABTestTracking('horoscope', 'page_viewed'));
 
       await waitFor(() => {
-        // Must fire 3 separate events — one per active test
         expect(mockTrackEvent).toHaveBeenCalledTimes(3);
 
         expect(mockTrackEvent).toHaveBeenCalledWith('page_viewed', {
@@ -141,50 +105,26 @@ describe('useABTestTracking', () => {
     });
 
     it('should track all 8 PostHog tests when user is in all of them', async () => {
-      // Simulate user assigned to ALL 8 PostHog tests
-      mockUseFeatureFlagVariant.mockImplementation((flag: string) => {
-        const variants: Record<string, string> = {
-          'cta-copy-test': 'no-verb',
-          paywall_preview_style_v1: 'blur',
-          'homepage-features-test': 'four-cards-updated',
-          feature_preview_blur_v1: 'peek',
-          'transit-overflow-style': 'blurred',
-          'weekly-lock-style': 'heavy-blur',
-          'tarot-truncation-length': 'short',
-          'transit-limit-test': 'one-transit',
-        };
-        return variants[flag] ?? null;
-      });
+      const allVariants: Record<string, string> = {
+        'cta-copy-test': 'no-verb',
+        paywall_preview_style_v1: 'blur',
+        'homepage-features-test': 'four-cards-updated',
+        feature_preview_blur_v1: 'peek',
+        'transit-overflow-style': 'blurred',
+        'weekly-lock-style': 'heavy-blur',
+        'tarot-truncation-length': 'short',
+        'transit-limit-test': 'one-transit',
+      };
 
-      mockGetABTestMetadataFromVariant.mockImplementation(
-        (test: string, variant: any) => {
-          if (variant) {
-            // Return mapped test name (mimics real mapping)
-            const mapping: Record<string, string> = {
-              'cta-copy-test': 'cta_copy',
-              paywall_preview_style_v1: 'paywall_preview',
-              'homepage-features-test': 'homepage_features',
-              feature_preview_blur_v1: 'feature_preview',
-              'transit-overflow-style': 'transit_overflow',
-              'weekly-lock-style': 'weekly_lock',
-              'tarot-truncation-length': 'tarot_truncation',
-              'transit-limit-test': 'transit_limit',
-            };
-            if (mapping[test]) {
-              return { abTest: mapping[test], abVariant: variant };
-            }
-          }
-          return null;
-        },
+      mockGetABTestVariantClient.mockImplementation(
+        (testName: string) => allVariants[testName],
       );
 
       renderHook(() => useABTestTracking('horoscope', 'page_viewed'));
 
       await waitFor(() => {
-        // All 8 tests should fire separate events
         expect(mockTrackEvent).toHaveBeenCalledTimes(8);
 
-        // Verify each test name appears in exactly one call
         const trackedTests = mockTrackEvent.mock.calls.map(
           (call: any[]) => call[1]?.metadata?.abTest,
         );
@@ -200,33 +140,17 @@ describe('useABTestTracking', () => {
     });
 
     it('should only track filtered tests when tests parameter is provided', async () => {
-      // User is in 4 tests but page only tracks 2
-      mockUseFeatureFlagVariant.mockImplementation((flag: string) => {
-        if (flag === 'cta-copy-test') return 'mystical';
-        if (flag === 'paywall_preview_style_v1') return 'blur';
-        if (flag === 'feature_preview_blur_v1') return 'peek';
-        if (flag === 'transit-overflow-style') return 'blurred';
-        return null;
-      });
+      const allVariants: Record<string, string> = {
+        'cta-copy-test': 'mystical',
+        paywall_preview_style_v1: 'blur',
+        feature_preview_blur_v1: 'peek',
+        'transit-overflow-style': 'blurred',
+      };
 
-      mockGetABTestMetadataFromVariant.mockImplementation(
-        (test: string, variant: any) => {
-          if (variant) {
-            const mapping: Record<string, string> = {
-              'cta-copy-test': 'cta_copy',
-              paywall_preview_style_v1: 'paywall_preview',
-              feature_preview_blur_v1: 'feature_preview',
-              'transit-overflow-style': 'transit_overflow',
-            };
-            if (mapping[test]) {
-              return { abTest: mapping[test], abVariant: variant };
-            }
-          }
-          return null;
-        },
+      mockGetABTestVariantClient.mockImplementation(
+        (testName: string) => allVariants[testName],
       );
 
-      // Only track cta-copy-test and feature_preview_blur_v1
       renderHook(() =>
         useABTestTracking('horoscope', 'page_viewed', [
           'cta-copy-test',
@@ -235,7 +159,6 @@ describe('useABTestTracking', () => {
       );
 
       await waitFor(() => {
-        // Only 2 events for the filtered tests
         expect(mockTrackEvent).toHaveBeenCalledTimes(2);
 
         const trackedTests = mockTrackEvent.mock.calls.map(
@@ -248,25 +171,12 @@ describe('useABTestTracking', () => {
       });
     });
 
-    it('should track multivariate variant keys correctly (not normalize to A/B)', async () => {
-      // Tests use multivariate keys like "blur", "peek", "heavy-blur" — not "A"/"B"
-      mockUseFeatureFlagVariant.mockImplementation((flag: string) => {
-        if (flag === 'weekly-lock-style') return 'heavy-blur';
-        if (flag === 'tarot-truncation-length') return 'short';
-        return null;
+    it('should track multivariate variant keys correctly', async () => {
+      mockGetABTestVariantClient.mockImplementation((testName: string) => {
+        if (testName === 'weekly-lock-style') return 'heavy-blur';
+        if (testName === 'tarot-truncation-length') return 'short';
+        return undefined;
       });
-
-      mockGetABTestMetadataFromVariant.mockImplementation(
-        (test: string, variant: any) => {
-          if (test === 'weekly-lock-style' && variant === 'heavy-blur') {
-            return { abTest: 'weekly_lock', abVariant: 'heavy-blur' };
-          }
-          if (test === 'tarot-truncation-length' && variant === 'short') {
-            return { abTest: 'tarot_truncation', abVariant: 'short' };
-          }
-          return null;
-        },
-      );
 
       renderHook(() =>
         useABTestTracking('tarot', 'page_viewed', [
@@ -278,7 +188,6 @@ describe('useABTestTracking', () => {
       await waitFor(() => {
         expect(mockTrackEvent).toHaveBeenCalledTimes(2);
 
-        // Variant keys should be the actual PostHog multivariate values
         expect(mockTrackEvent).toHaveBeenCalledWith('page_viewed', {
           pagePath: '/tarot',
           metadata: {
@@ -312,23 +221,11 @@ describe('useABTestTracking', () => {
     });
 
     it('should return activeTests with all active tests', () => {
-      mockUseFeatureFlagVariant.mockImplementation((flag: string) => {
-        if (flag === 'cta-copy-test') return 'mystical';
-        if (flag === 'paywall_preview_style_v1') return 'blur';
-        return null;
+      mockGetABTestVariantClient.mockImplementation((testName: string) => {
+        if (testName === 'cta-copy-test') return 'mystical';
+        if (testName === 'paywall_preview_style_v1') return 'blur';
+        return undefined;
       });
-
-      mockGetABTestMetadataFromVariant.mockImplementation(
-        (test: string, variant: any) => {
-          if (test === 'cta-copy-test' && variant === 'mystical') {
-            return { abTest: 'cta_copy', abVariant: 'mystical' };
-          }
-          if (test === 'paywall_preview_style_v1' && variant === 'blur') {
-            return { abTest: 'paywall_preview', abVariant: 'blur' };
-          }
-          return null;
-        },
-      );
 
       const { result } = renderHook(() =>
         useABTestTracking('dashboard', 'app_opened'),
@@ -344,11 +241,6 @@ describe('useABTestTracking', () => {
         abTest: 'paywall_preview',
         abVariant: 'blur',
       });
-      // abMetadata returns first for backward compatibility
-      expect(result.current.abMetadata).toEqual({
-        abTest: 'cta_copy',
-        abVariant: 'mystical',
-      });
     });
   });
 });
@@ -356,11 +248,10 @@ describe('useABTestTracking', () => {
 describe('useABTestConversion', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseFeatureFlagVariant.mockReturnValue(null);
-    mockGetABTestMetadataFromVariant.mockReturnValue(null);
+    mockGetABTestVariantClient.mockReturnValue(undefined);
   });
 
-  it('should track conversion events without A/B metadata when user is not in a test', () => {
+  it('should track conversion without A/B metadata when user is not in a test', () => {
     const { result } = renderHook(() => useABTestConversion());
 
     result.current.trackConversion('upgrade_clicked', {
@@ -374,27 +265,14 @@ describe('useABTestConversion', () => {
   });
 
   it('should fire one conversion event PER active test', () => {
-    mockUseFeatureFlagVariant.mockImplementation((flag: string) => {
-      if (flag === 'cta-copy-test') return 'mystical';
-      if (flag === 'paywall_preview_style_v1') return 'blur';
-      if (flag === 'feature_preview_blur_v1') return 'peek';
-      return null;
+    mockGetABTestVariantClient.mockImplementation((testName: string) => {
+      const variants: Record<string, string> = {
+        'cta-copy-test': 'mystical',
+        paywall_preview_style_v1: 'blur',
+        feature_preview_blur_v1: 'peek',
+      };
+      return variants[testName];
     });
-
-    mockGetABTestMetadataFromVariant.mockImplementation(
-      (test: string, variant: any) => {
-        if (test === 'cta-copy-test' && variant === 'mystical') {
-          return { abTest: 'cta_copy', abVariant: 'mystical' };
-        }
-        if (test === 'paywall_preview_style_v1' && variant === 'blur') {
-          return { abTest: 'paywall_preview', abVariant: 'blur' };
-        }
-        if (test === 'feature_preview_blur_v1' && variant === 'peek') {
-          return { abTest: 'feature_preview', abVariant: 'peek' };
-        }
-        return null;
-      },
-    );
 
     const { result } = renderHook(() => useABTestConversion());
 
@@ -402,56 +280,35 @@ describe('useABTestConversion', () => {
       featureName: 'tarot_full_reading',
     });
 
-    // 3 conversion events — one per active test
     expect(mockTrackEvent).toHaveBeenCalledTimes(3);
 
     expect(mockTrackEvent).toHaveBeenCalledWith('upgrade_clicked', {
       featureName: 'tarot_full_reading',
-      metadata: {
-        abTest: 'cta_copy',
-        abVariant: 'mystical',
-      },
+      metadata: { abTest: 'cta_copy', abVariant: 'mystical' },
     });
 
     expect(mockTrackEvent).toHaveBeenCalledWith('upgrade_clicked', {
       featureName: 'tarot_full_reading',
-      metadata: {
-        abTest: 'paywall_preview',
-        abVariant: 'blur',
-      },
+      metadata: { abTest: 'paywall_preview', abVariant: 'blur' },
     });
 
     expect(mockTrackEvent).toHaveBeenCalledWith('upgrade_clicked', {
       featureName: 'tarot_full_reading',
-      metadata: {
-        abTest: 'feature_preview',
-        abVariant: 'peek',
-      },
+      metadata: { abTest: 'feature_preview', abVariant: 'peek' },
     });
   });
 
   it('should preserve existing metadata when adding A/B data', () => {
-    mockUseFeatureFlagVariant.mockImplementation((flag: string) => {
-      if (flag === 'cta-copy-test') return 'mystical';
-      return null;
+    mockGetABTestVariantClient.mockImplementation((testName: string) => {
+      if (testName === 'cta-copy-test') return 'mystical';
+      return undefined;
     });
-
-    mockGetABTestMetadataFromVariant.mockImplementation(
-      (test: string, variant: any) => {
-        if (test === 'cta-copy-test' && variant === 'mystical') {
-          return { abTest: 'cta_copy', abVariant: 'mystical' };
-        }
-        return null;
-      },
-    );
 
     const { result } = renderHook(() => useABTestConversion());
 
     result.current.trackConversion('upgrade_clicked', {
       featureName: 'tarot_full_reading',
-      metadata: {
-        custom_field: 'custom_value',
-      },
+      metadata: { custom_field: 'custom_value' },
     });
 
     expect(mockTrackEvent).toHaveBeenCalledWith('upgrade_clicked', {
