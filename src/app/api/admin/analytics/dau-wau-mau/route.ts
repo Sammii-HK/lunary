@@ -569,15 +569,22 @@ export async function GET(request: NextRequest) {
           dau_source: 'realtime',
         };
 
-        const fields = getFieldsParam(searchParams);
-        const responseData = filterFields(fullData, fields);
+        // If daily_metrics is missing critical derived data, fall through to live path
+        // (this will auto-resolve as the cron populates these columns)
+        const hasCriticalData =
+          returningDau > 0 || returningWau > 0 || returningMau > 0;
 
-        const response = NextResponse.json(responseData);
-        response.headers.set(
-          'Cache-Control',
-          `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}, stale-while-revalidate=${ANALYTICS_CACHE_TTL_SECONDS * 2}`,
-        );
-        return response;
+        if (hasCriticalData) {
+          const fields = getFieldsParam(searchParams);
+          const responseData = filterFields(fullData, fields);
+
+          const response = NextResponse.json(responseData);
+          response.headers.set(
+            'Cache-Control',
+            `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}, stale-while-revalidate=${ANALYTICS_CACHE_TTL_SECONDS * 2}`,
+          );
+          return response;
+        }
       }
     }
 

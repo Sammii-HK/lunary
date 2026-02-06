@@ -59,7 +59,20 @@ export async function GET(request: NextRequest) {
             0,
         );
 
-      if (snapshotResult.rows.length > 0 && !includeAudit && hasReferrerData) {
+      const hasActiveDaysData = snapshotResult.rows.some(
+        (r) =>
+          Number(r.active_days_1 || 0) +
+            Number(r.active_days_2_3 || 0) +
+            Number(r.active_days_4_7 || 0) >
+          0,
+      );
+
+      if (
+        snapshotResult.rows.length > 0 &&
+        !includeAudit &&
+        hasReferrerData &&
+        hasActiveDaysData
+      ) {
         const rows = snapshotResult.rows;
         const latest = rows[rows.length - 1];
         const dau = Number(latest.dau || 0);
