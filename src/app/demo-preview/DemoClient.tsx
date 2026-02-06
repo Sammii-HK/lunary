@@ -80,20 +80,13 @@ export function DemoClient() {
   const [cycleProgress, setCycleProgress] = useState(0);
   const celesteUser = DEMO_USER_DATA;
 
-  // NUCLEAR: Disable ALL scrolling in demo - inject global CSS override
+  // Prevent scroll chaining to parent - allow scroll inside but contain it
   useEffect(() => {
     const style = document.createElement('style');
-    style.id = 'demo-no-scroll';
+    style.id = 'demo-scroll-contain';
     style.textContent = `
       * {
-        overflow: hidden !important;
-        overscroll-behavior: none !important;
-      }
-      html, body {
-        overflow: hidden !important;
-        height: 100% !important;
-        position: fixed !important;
-        width: 100% !important;
+        overscroll-behavior: contain !important;
       }
     `;
     document.head.appendChild(style);
@@ -262,7 +255,7 @@ export function DemoClient() {
     <div className='flex flex-col h-full w-full bg-zinc-950'>
       {/* Content area - Demo content area */}
       <div
-        className='flex-1 overflow-hidden demo-mobile-view'
+        className='flex-1 overflow-y-auto demo-mobile-view'
         id='demo-preview-container'
         style={{
           containerType: 'inline-size',
