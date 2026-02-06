@@ -5,7 +5,6 @@ import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
-const CONVERSION_WINDOW_DAYS = 7;
 
 export async function GET(request: NextRequest) {
   try {
@@ -54,7 +53,7 @@ export async function GET(request: NextRequest) {
           FROM conversion_events
           WHERE event_type = 'signup_completed'
             AND created_at >= $1
-            AND created_at <= $2 + INTERVAL '${CONVERSION_WINDOW_DAYS} days'
+            AND created_at <= $2
             AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))
         ),
         impression_counts AS (
@@ -71,7 +70,7 @@ export async function GET(request: NextRequest) {
           clicks.cta_id AS cta_id,
           COUNT(*) AS total_clicks,
           COUNT(DISTINCT COALESCE(clicks.user_id::text, clicks.anonymous_id)) AS unique_clickers,
-          COUNT(DISTINCT signup_match.user_id) AS signups_7d,
+          COUNT(DISTINCT signup_match.user_id) AS signups,
           COALESCE(ic.total_impressions, 0) AS total_impressions,
           COALESCE(ic.unique_viewers, 0) AS unique_viewers
         FROM clicks
@@ -80,7 +79,6 @@ export async function GET(request: NextRequest) {
           SELECT s.user_id
           FROM signups s
           WHERE s.created_at >= clicks.created_at
-            AND s.created_at <= clicks.created_at + INTERVAL '${CONVERSION_WINDOW_DAYS} days'
             AND (
               s.user_id = clicks.user_id
               OR (
@@ -97,7 +95,7 @@ export async function GET(request: NextRequest) {
           LIMIT 1
         ) signup_match ON true
         GROUP BY clicks.location, clicks.cta_id, ic.total_impressions, ic.unique_viewers
-        ORDER BY signups_7d DESC, total_clicks DESC
+        ORDER BY signups DESC, total_clicks DESC
       `,
       [
         formatTimestamp(range.start),
@@ -111,7 +109,7 @@ export async function GET(request: NextRequest) {
     const locations = results.rows.map((row) => {
       const totalClicks = Number(row.total_clicks || 0);
       const uniqueClickers = Number(row.unique_clickers || 0);
-      const signups = Number(row.signups_7d || 0);
+      const signups = Number(row.signups || 0);
       const totalImpressions = Number(row.total_impressions || 0);
       const uniqueViewers = Number(row.unique_viewers || 0);
 
@@ -134,13 +132,13 @@ export async function GET(request: NextRequest) {
         total_clicks: totalClicks,
         unique_clickers: uniqueClickers,
         signups_7d: signups,
-        click_through_rate: Number(clickThroughRate.toFixed(2)),
+        click_through_rate:
+          totalImpressions > 0 ? Number(clickThroughRate.toFixed(2)) : null,
         conversion_rate: Number(conversionRate.toFixed(2)),
       };
     });
 
     const response = NextResponse.json({
-      window_days: CONVERSION_WINDOW_DAYS,
       locations,
       source: 'database',
     });
@@ -156,7 +154,6 @@ export async function GET(request: NextRequest) {
     );
     return NextResponse.json(
       {
-        window_days: CONVERSION_WINDOW_DAYS,
         locations: [],
         error: error instanceof Error ? error.message : 'Unknown error',
       },

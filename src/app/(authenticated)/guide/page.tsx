@@ -879,7 +879,10 @@ function BookOfShadowsContent() {
   }
 
   return (
-    <div className='flex flex-col flex-1 min-h-0 w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
+    <div
+      className='flex flex-col flex-1 min-h-0 w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'
+      data-testid='astral-guide'
+    >
       <div className='mx-auto flex flex-1 min-h-0 w-full max-w-3xl flex-col p-4'>
         <header className='mb-2 shrink-0 md:mb-4'>
           <SkillProgressWidget skillTree='journal' className='shrink-0 mb-2' />
@@ -917,6 +920,7 @@ function BookOfShadowsContent() {
             <div
               ref={messagesContainerRef}
               className='min-h-0 flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6'
+              data-testid='guide-messages'
             >
               <div className='mx-auto flex max-w-2xl flex-col gap-3 md:gap-6 w-full'>
                 {isLoadingHistory ? (
@@ -1184,6 +1188,7 @@ function BookOfShadowsContent() {
             </label>
             <textarea
               id='book-of-shadows-message'
+              data-testid='guide-input'
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleKeyDown}
@@ -1210,6 +1215,7 @@ function BookOfShadowsContent() {
             ) : (
               <button
                 type='submit'
+                data-testid='guide-submit'
                 disabled={input.trim().length === 0 || isSubmittingJournal}
                 className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white transition disabled:opacity-40 disabled:cursor-not-allowed ${
                   isJournalMode

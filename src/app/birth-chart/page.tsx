@@ -1541,7 +1541,7 @@ const BirthChartPage = () => {
   }
 
   return (
-    <div className='h-full overflow-auto'>
+    <div className='h-full overflow-auto' data-testid='birth-chart-page'>
       <div className='flex w-full flex-col gap-4 max-w-2xl sm:max-w-3xl md:max-w-4xl mx-auto p-4 mb-16'>
         {/* Internal Links for SEO */}
         <nav className='p-4 bg-zinc-900/50 rounded-lg border border-zinc-800'>
@@ -1627,13 +1627,15 @@ const BirthChartPage = () => {
             )}
           </div>
 
-          <BirthChart
-            birthChart={birthChartData}
-            userName={userName}
-            birthDate={userBirthday}
-            showAspects={showAspects}
-            aspectFilter={aspectFilter}
-          />
+          <div data-testid='chart-visualization'>
+            <BirthChart
+              birthChart={birthChartData}
+              userName={userName}
+              birthDate={userBirthday}
+              showAspects={showAspects}
+              aspectFilter={aspectFilter}
+            />
+          </div>
         </div>
 
         {birthChartData && (
@@ -1648,7 +1650,7 @@ const BirthChartPage = () => {
 
         {/* Planetary Interpretations - Stacked Sections */}
         {birthChartData && (
-          <div className='flex flex-col gap-3'>
+          <div className='flex flex-col gap-3' data-testid='planets-list'>
             {/* Big Three - Sun, Moon, Rising */}
             {(() => {
               const sun = birthChartData.find((p) => p.body === 'Sun');
@@ -1968,7 +1970,7 @@ const BirthChartPage = () => {
               const houses = calculateWholeSigHouses(birthChartData);
               if (!houses) {
                 return (
-                  <div className=''>
+                  <div className='' data-testid='houses-list'>
                     <CollapsibleSection
                       title='Houses'
                       defaultCollapsed={true}
@@ -1985,7 +1987,7 @@ const BirthChartPage = () => {
               }
 
               return (
-                <div className=''>
+                <div className='' data-testid='houses-list'>
                   <CollapsibleSection
                     title='Your 12 Houses'
                     defaultCollapsed={true}
@@ -2346,7 +2348,7 @@ const BirthChartPage = () => {
 
             {/* Planetary Aspects */}
             {getPlanetaryAspects(birthChartData).length > 0 && (
-              <div className=''>
+              <div className='' data-testid='aspects-list'>
                 <CollapsibleSection
                   title='Major Aspects'
                   defaultCollapsed={true}

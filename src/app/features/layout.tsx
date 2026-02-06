@@ -1,22 +1,22 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Meet Celeste — Explore Lunary Features | Lunary',
+  title: 'Features — Your Complete Cosmic Toolkit | Lunary',
   description:
-    'See how Lunary connects your birth chart with real astronomical data. Meet Celeste, our reference persona, and explore personalised cosmic insights that update monthly with current transits.',
+    'Complete astrology toolkit: birth charts, pattern recognition, synastry analysis, tarot spreads, transit calendar, and 2,000+ free educational articles. Learn by doing.',
   openGraph: {
-    title: 'Meet Celeste — Explore Lunary Features',
+    title: 'Features — Your Complete Cosmic Toolkit | Lunary',
     description:
-      'See how Lunary connects birth charts with real astronomical data for personalised cosmic insights.',
+      'Complete astrology toolkit: birth charts, pattern recognition, synastry analysis, tarot spreads, transit calendar, and 2,000+ free educational articles.',
     url: 'https://lunary.app/features',
     siteName: 'Lunary',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Meet Celeste — Explore Lunary Features',
+    title: 'Features — Your Complete Cosmic Toolkit | Lunary',
     description:
-      'See how Lunary connects birth charts with real astronomical data for personalised cosmic insights.',
+      'Complete astrology toolkit: birth charts, pattern recognition, synastry analysis, tarot spreads, transit calendar, and 2,000+ free educational articles.',
   },
   alternates: {
     canonical: 'https://lunary.app/features',

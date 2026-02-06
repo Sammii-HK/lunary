@@ -60,6 +60,7 @@ export function ConditionalMainWrapper({
       '/features',
       '/faq',
       '/about',
+      '/circle',
     ];
     const isCoreMarketingRoute =
       coreMarketingRoutes.includes(pathname) ||

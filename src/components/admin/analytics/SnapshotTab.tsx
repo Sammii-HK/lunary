@@ -3,7 +3,6 @@
 import {
   Activity,
   CheckCircle,
-  DollarSign,
   Download,
   Loader2,
   RefreshCw,
@@ -33,7 +32,9 @@ import type {
 } from '@/hooks/useAnalyticsData';
 import {
   formatPercent,
+  describeTrend,
   type PrimaryCard,
+  type MomentumRow,
 } from '@/hooks/useAnalyticsComputations';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -72,6 +73,9 @@ interface SnapshotTabProps {
       direct_returning: number;
       internal_returning: number;
     };
+    siteMomentumRows: MomentumRow[];
+    productMomentumRows: MomentumRow[];
+    activationMomentumRows: MomentumRow[];
   };
   handleExportInsights: () => void;
 }
@@ -125,6 +129,9 @@ export function SnapshotTab({
     engagedMatchesApp,
     filteredInsights,
     returningReferrerBreakdown,
+    siteMomentumRows,
+    productMomentumRows,
+    activationMomentumRows,
   } = computed;
 
   return (
@@ -169,21 +176,39 @@ export function SnapshotTab({
             />
 
             <HealthMetricCard
-              icon={DollarSign}
-              label='Monthly Revenue'
-              value={`$${planBreakdown?.totalMrr?.toLocaleString() || 0}`}
-              unit='MRR'
-              status='good'
-              description='Recurring revenue'
+              icon={Activity}
+              label='Product WAU'
+              value={activity?.signed_in_product_wau ?? 0}
+              unit='WAU'
+              status={
+                (activity?.signed_in_product_wau ?? 0) > 10
+                  ? 'excellent'
+                  : (activity?.signed_in_product_wau ?? 0) > 0
+                    ? 'good'
+                    : 'warning'
+              }
+              description='7-day rolling (signed-in)'
             />
 
             <HealthMetricCard
               icon={RefreshCw}
               label='User Retention'
-              value={`${(overallD7Retention * 100).toFixed(0)}%`}
+              value={
+                activity?.retention?.day_7 != null
+                  ? `${Number(activity.retention.day_7).toFixed(0)}%`
+                  : overallD7Retention > 0
+                    ? `${(overallD7Retention * 100).toFixed(0)}%`
+                    : '—'
+              }
               unit='D7'
-              status={overallD7Retention > 0.3 ? 'excellent' : 'good'}
-              description='7-day retention'
+              status={
+                (activity?.retention?.day_7 ?? overallD7Retention * 100) > 30
+                  ? 'excellent'
+                  : (activity?.retention?.day_7 ?? overallD7Retention * 100) > 0
+                    ? 'good'
+                    : 'warning'
+              }
+              description='7-day retention (rolling cohort)'
             />
 
             <HealthMetricCard
@@ -757,10 +782,97 @@ export function SnapshotTab({
         </Card>
       </section>
 
+      {/* Momentum */}
+      <section className='space-y-3'>
+        <div>
+          <h2 className='text-sm font-medium text-zinc-200'>Momentum</h2>
+          <p className='text-xs text-zinc-500'>
+            Rolling 7-day averages plus week-over-week deltas for site and
+            signed-in product usage.
+          </p>
+        </div>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <CardHeader>
+            <CardTitle className='text-base font-medium'>Momentum</CardTitle>
+            <CardDescription className='text-xs text-zinc-400'>
+              Site momentum uses app_opened. Product momentum uses signed-in
+              product events. Activation uses signup activation rate.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className='space-y-3'>
+            <MomentumSection
+              title='Site momentum (app_opened)'
+              rows={siteMomentumRows}
+            />
+            <MomentumSection
+              title='Product momentum (signed-in)'
+              rows={productMomentumRows}
+            />
+            <MomentumSection
+              title='Activation momentum'
+              rows={activationMomentumRows}
+            />
+            <p className='text-xs text-zinc-400'>
+              Activation momentum is expressed as the rolling rate plus its
+              change vs. the previous 7-day window.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+
       {/* Growth History */}
       <section>
         <GrowthHistoryCard metricSnapshots={metricSnapshots} />
       </section>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Momentum Section
+// ─────────────────────────────────────────────────────────────────────────────
+
+function MomentumSection({
+  title,
+  rows,
+}: {
+  title: string;
+  rows: MomentumRow[];
+}) {
+  return (
+    <div className='space-y-2'>
+      <p className='text-xs uppercase tracking-wider text-zinc-500'>{title}</p>
+      {rows.map((row) => (
+        <div
+          key={row.id}
+          className='flex items-start justify-between gap-4 rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-4 py-3'
+        >
+          <div>
+            <p className='text-xs uppercase tracking-wider text-zinc-500'>
+              {row.label}
+            </p>
+            <p className='text-2xl font-light text-white'>
+              {row.formatter(row.stats.average)}
+            </p>
+            <p className='text-xs text-zinc-500'>7-day rolling</p>
+          </div>
+          <div className='text-right text-xs'>
+            <p className='text-sm font-semibold text-white'>
+              {row.change !== null
+                ? `${row.change >= 0 ? '+' : ''}${row.change.toLocaleString()}`
+                : 'N/A'}
+            </p>
+            <p className='text-[11px] text-zinc-500'>
+              {row.percentChange !== null
+                ? `${row.percentChange.toFixed(1)}% vs prior 7d`
+                : 'No prior window'}
+            </p>
+            <p className='text-[11px] text-zinc-500'>
+              {describeTrend(row.stats.average, row.stats.previousAverage)}
+            </p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

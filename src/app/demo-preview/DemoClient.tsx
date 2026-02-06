@@ -80,6 +80,21 @@ export function DemoClient() {
   const [cycleProgress, setCycleProgress] = useState(0);
   const celesteUser = DEMO_USER_DATA;
 
+  // Prevent scroll chaining to parent - allow scroll inside but contain it
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.id = 'demo-scroll-contain';
+    style.textContent = `
+      * {
+        overscroll-behavior: contain !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   useEffect(() => {
     // Warm preload other tab components for instant switching
     const preloadTimer = setTimeout(() => {

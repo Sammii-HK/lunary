@@ -125,10 +125,10 @@ export async function GET(): Promise<Response> {
               }}
             >
               <span style={{ display: 'flex', justifyContent: 'center' }}>
-                Personalised astrology for clarity
+                The astrology app that teaches
               </span>
               <span style={{ display: 'flex', justifyContent: 'center' }}>
-                and self understanding
+                you to read your own chart
               </span>
             </div>
 
@@ -143,8 +143,9 @@ export async function GET(): Promise<Response> {
                 display: 'flex',
               }}
             >
-              Lunary brings together your birth chart, today's sky, tarot and
-              lunar cycles to give you calm and personal daily guidance.
+              Track how planets affect YOU specifically. After 2-3 months,
+              patterns emerge that help you interpret transits without depending
+              on generic predictions.
             </div>
           </div>
         </div>

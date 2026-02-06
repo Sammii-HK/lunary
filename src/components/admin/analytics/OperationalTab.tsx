@@ -28,11 +28,7 @@ import type {
   AnalyticsDataActions,
   NotificationBucket,
 } from '@/hooks/useAnalyticsData';
-import {
-  describeTrend,
-  ACTIVATION_FEATURES,
-  type MomentumRow,
-} from '@/hooks/useAnalyticsComputations';
+import { ACTIVATION_FEATURES } from '@/hooks/useAnalyticsComputations';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -61,9 +57,6 @@ interface OperationalTabProps {
     conversionStages: Array<{ label: string; value: number }>;
     conversionDropOff: any[];
     integrityWarnings: string[];
-    siteMomentumRows: MomentumRow[];
-    productMomentumRows: MomentumRow[];
-    activationMomentumRows: MomentumRow[];
     heatmapData: Array<{
       date: string;
       entries: Array<{ feature: string; value: number }>;
@@ -125,9 +118,6 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
     conversionStages,
     conversionDropOff,
     integrityWarnings,
-    siteMomentumRows,
-    productMomentumRows,
-    activationMomentumRows,
     heatmapData,
     reachMau,
     engagedMau,
@@ -402,7 +392,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
             CTA Conversions by Hub
           </h2>
           <p className='text-xs text-zinc-500'>
-            Clickers, signups within 7 days, and conversion % per hub.
+            Clickers, signups in range, and conversion % per hub.
           </p>
         </div>
         <Card className='border-zinc-800/30 bg-zinc-900/10'>
@@ -411,11 +401,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               CTA conversion performance
             </CardTitle>
             <CardDescription className='text-xs text-zinc-400'>
-              Click + signup window is{' '}
-              <span className='font-semibold'>
-                {ctaConversions?.window_days ?? 7}
-              </span>{' '}
-              days.
+              Signups attributed to CTA clicks within the selected date range.
             </CardDescription>
           </CardHeader>
           <CardContent className='overflow-x-auto'>
@@ -429,7 +415,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                   align: 'right',
                 },
                 {
-                  label: 'Signups (7d)',
+                  label: 'Signups',
                   key: 'signups_7d',
                   type: 'number',
                   align: 'right',
@@ -467,7 +453,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
             </CardTitle>
             <CardDescription className='text-xs text-zinc-400'>
               Track which CTA position converts better. CTR = clicks /
-              impressions. Conversion = signups / clickers (7d window).
+              impressions. Conversion = signups / clickers (in range).
             </CardDescription>
           </CardHeader>
           <CardContent className='overflow-x-auto'>
@@ -494,7 +480,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                   decimals: 2,
                 },
                 {
-                  label: 'Signups (7d)',
+                  label: 'Signups',
                   key: 'signups_7d',
                   type: 'number',
                   align: 'right',
@@ -616,44 +602,6 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               }))}
               emptyMessage='No activation data for this range.'
             />
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Momentum */}
-      <section className='space-y-3'>
-        <div>
-          <h2 className='text-sm font-medium text-zinc-200'>Momentum</h2>
-          <p className='text-xs text-zinc-500'>
-            Rolling 7-day averages plus week-over-week deltas for site and
-            signed-in product usage.
-          </p>
-        </div>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>Momentum</CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
-              Site momentum uses app_opened. Product momentum uses signed-in
-              product events. Activation uses signup activation rate.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='space-y-3'>
-            <MomentumSection
-              title='Site momentum (app_opened)'
-              rows={siteMomentumRows}
-            />
-            <MomentumSection
-              title='Product momentum (signed-in)'
-              rows={productMomentumRows}
-            />
-            <MomentumSection
-              title='Activation momentum'
-              rows={activationMomentumRows}
-            />
-            <p className='text-xs text-zinc-400'>
-              Activation momentum is expressed as the rolling rate plus its
-              change vs. the previous 7-day window.
-            </p>
           </CardContent>
         </Card>
       </section>
@@ -1041,10 +989,11 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
           <Card className='border-zinc-800/30 bg-zinc-900/10'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
-                Conversion funnel
+                Conversion funnel (cohort)
               </CardTitle>
               <CardDescription className='text-xs text-zinc-400'>
-                Free -&gt; trial -&gt; paid transitions for the selected range.
+                Tracks users who signed up in the selected range through free
+                &rarr; trial &rarr; paid. Only this cohort, not all subscribers.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1209,51 +1158,6 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper Components
 // ─────────────────────────────────────────────────────────────────────────────
-
-function MomentumSection({
-  title,
-  rows,
-}: {
-  title: string;
-  rows: MomentumRow[];
-}) {
-  return (
-    <div className='space-y-2'>
-      <p className='text-xs uppercase tracking-wider text-zinc-500'>{title}</p>
-      {rows.map((row) => (
-        <div
-          key={row.id}
-          className='flex items-start justify-between gap-4 rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-4 py-3'
-        >
-          <div>
-            <p className='text-xs uppercase tracking-wider text-zinc-500'>
-              {row.label}
-            </p>
-            <p className='text-2xl font-light text-white'>
-              {row.formatter(row.stats.average)}
-            </p>
-            <p className='text-xs text-zinc-500'>7-day rolling</p>
-          </div>
-          <div className='text-right text-xs'>
-            <p className='text-sm font-semibold text-white'>
-              {row.change !== null
-                ? `${row.change >= 0 ? '+' : ''}${row.change.toLocaleString()}`
-                : 'N/A'}
-            </p>
-            <p className='text-[11px] text-zinc-500'>
-              {row.percentChange !== null
-                ? `${row.percentChange.toFixed(1)}% vs prior 7d`
-                : 'No prior window'}
-            </p>
-            <p className='text-[11px] text-zinc-500'>
-              {describeTrend(row.stats.average, row.stats.previousAverage)}
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function SubscriptionLifecycleCard({
   lifecycleStateEntries,

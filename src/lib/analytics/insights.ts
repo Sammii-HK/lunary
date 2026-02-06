@@ -44,6 +44,7 @@ export interface AnalyticsMetrics {
   // Engagement
   avgActiveDays: number; // days per week
   stickiness: number; // DAU/MAU ratio
+  d1Retention: number; // 0-1, returning DAU D1
 
   // Feature adoption (0-1, can be >1 for Product MAU)
   dashboardAdoption: number;
@@ -71,8 +72,12 @@ export interface AnalyticsMetrics {
 export function generateInsights(metrics: AnalyticsMetrics): Insight[] {
   const insights: Insight[] = [];
 
+  // Skip retention insights when no mature cohorts exist (day30Retention === -1)
+  const hasRetentionData = metrics.day30Retention >= 0;
+
   // Retention improvements
   if (
+    hasRetentionData &&
     metrics.recentCohortRetention > 0.5 &&
     metrics.earlyCohortRetention < 0.2 &&
     metrics.recentCohortRetention > metrics.earlyCohortRetention * 3
@@ -91,7 +96,11 @@ export function generateInsights(metrics: AnalyticsMetrics): Insight[] {
   }
 
   // Low retention warning
-  if (metrics.day30Retention < 0.15 && metrics.productMAU > 50) {
+  if (
+    hasRetentionData &&
+    metrics.day30Retention < 0.15 &&
+    metrics.productMAU > 50
+  ) {
     insights.push({
       type: 'warning',
       category: 'retention',
@@ -151,17 +160,17 @@ export function generateInsights(metrics: AnalyticsMetrics): Insight[] {
     });
   }
 
-  // Low stickiness
-  if (metrics.stickiness < 0.15 && metrics.productMAU > 20) {
+  // Low D1 retention (returning users next day)
+  if (metrics.d1Retention < 0.15 && metrics.productMAU > 20) {
     insights.push({
       type: 'warning',
       category: 'engagement',
-      message: `Stickiness is ${(metrics.stickiness * 100).toFixed(1)}% (DAU/MAU). Users only check in ~${(metrics.avgActiveDays || metrics.stickiness * 30).toFixed(1)} days/month. Need more engagement triggers.`,
+      message: `D1 Retention is ${(metrics.d1Retention * 100).toFixed(1)}%. Only ${(metrics.d1Retention * 100).toFixed(1)}% of users return the next day. Need more engagement triggers.`,
       priority: 'high',
       action: 'Add daily notifications + email reminders',
       metric: {
-        label: 'Stickiness',
-        value: `${(metrics.stickiness * 100).toFixed(1)}%`,
+        label: 'D1 Retention',
+        value: `${(metrics.d1Retention * 100).toFixed(1)}%`,
       },
     });
   }

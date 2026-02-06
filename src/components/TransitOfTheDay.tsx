@@ -284,6 +284,7 @@ export const TransitOfTheDay = () => {
       <Link
         href='/horoscope'
         className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
+        data-testid='transit-card'
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
@@ -373,6 +374,7 @@ export const TransitOfTheDay = () => {
     <Link
       href='/horoscope'
       className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
+      data-testid='transit-card'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>

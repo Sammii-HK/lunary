@@ -130,18 +130,32 @@ export async function GET(request: NextRequest) {
       ORDER BY total_users DESC
     `);
 
+    // Postgres ROUND() and COUNT() return numeric/bigint as strings via
+    // @vercel/postgres. Coerce to JS numbers so the UI can type-check them.
+    const coerceRows = (rows: Record<string, unknown>[]) =>
+      rows.map((row) => {
+        const out: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(row)) {
+          out[k] =
+            typeof v === 'string' && /^-?\d+(\.\d+)?$/.test(v) ? Number(v) : v;
+        }
+        return out;
+      });
+
     const response = NextResponse.json({
       summary: {
-        totalUsers: organicStats.rows[0]?.total_users || 0,
-        organicUsers: organicStats.rows[0]?.organic_users || 0,
-        organicPercentage: organicStats.rows[0]?.organic_percentage || 0,
+        totalUsers: Number(organicStats.rows[0]?.total_users || 0),
+        organicUsers: Number(organicStats.rows[0]?.organic_users || 0),
+        organicPercentage: Number(
+          organicStats.rows[0]?.organic_percentage || 0,
+        ),
       },
-      sourceBreakdown: sourceBreakdown.rows,
-      mediumBreakdown: mediumBreakdown.rows,
-      topLandingPages: topLandingPages.rows,
-      keywordBreakdown: keywordBreakdown.rows,
-      dailyTrend: dailyTrend.rows,
-      conversionBySource: conversionBySource.rows,
+      sourceBreakdown: coerceRows(sourceBreakdown.rows),
+      mediumBreakdown: coerceRows(mediumBreakdown.rows),
+      topLandingPages: coerceRows(topLandingPages.rows),
+      keywordBreakdown: coerceRows(keywordBreakdown.rows),
+      dailyTrend: coerceRows(dailyTrend.rows),
+      conversionBySource: coerceRows(conversionBySource.rows),
     });
     response.headers.set(
       'Cache-Control',

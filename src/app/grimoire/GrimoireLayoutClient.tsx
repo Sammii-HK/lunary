@@ -690,7 +690,7 @@ function GrimoireIndexPage({
   withNavParams: (href: string) => string;
 }) {
   return (
-    <div className='p-4 md:py-12 lg:py-16'>
+    <div className='p-4 md:py-12 lg:py-16' data-testid='grimoire-page'>
       <div className='max-w-6xl mx-auto'>
         {/* Header with Search */}
         <div className='text-center mb-12 md:mb-16'>
@@ -710,7 +710,10 @@ function GrimoireIndexPage({
         </div>
 
         {/* Categories with all subsections */}
-        <div className='space-y-12 md:space-y-16'>
+        <div
+          className='space-y-12 md:space-y-16'
+          data-testid='grimoire-categories'
+        >
           {GRIMOIRE_FULL_STRUCTURE.map((category) => (
             <section key={category.name}>
               {/* Category Header */}

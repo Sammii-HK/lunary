@@ -1,198 +1,164 @@
 /**
  * Automatic A/B Test Tracking Hook
  *
- * Automatically tracks PostHog A/B test variants with page views and conversions
+ * Reads variants from the server-assigned cookie (set by middleware) for instant
+ * availability — no PostHog SDK timing dependency. Fires one impression event
+ * per active test so each test appears in the admin dashboard.
  */
 
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import { useFeatureFlagVariant } from './useFeatureFlag';
-import { getABTestMetadataFromVariant } from '@/lib/ab-test-tracking';
+import { getABTestVariantClient } from '@/lib/ab-tests-client';
 import { trackEvent } from '@/lib/analytics';
 
+/** PostHog test name -> admin dashboard test name */
+const TEST_NAME_MAPPING: Record<string, string> = {
+  'cta-copy-test': 'cta_copy',
+  paywall_preview_style_v1: 'paywall_preview',
+  'homepage-features-test': 'homepage_features',
+  feature_preview_blur_v1: 'feature_preview',
+  'transit-overflow-style': 'transit_overflow',
+  'weekly-lock-style': 'weekly_lock',
+  'tarot-truncation-length': 'tarot_truncation',
+  'transit-limit-test': 'transit_limit',
+  'inline-cta-style': 'inline_cta',
+};
+
+/** All trackable test names (read from middleware cookie) */
+const ALL_TEST_NAMES = Object.keys(TEST_NAME_MAPPING);
+
 /**
- * Track page view with all active A/B test variants
- *
- * @param pageName - Name of the page for tracking (e.g., 'horoscope', 'tarot', 'dashboard')
- * @param eventType - Event type to track (default: 'page_viewed')
- * @param tests - Optional array of specific tests to track. If not provided, tracks all common tests.
- *
- * @example
- * ```tsx
- * function HoroscopePage() {
- *   useABTestTracking('horoscope');
- *   // Automatically tracks all active A/B tests on this page
- * }
- * ```
+ * Track page view with all active A/B test variants.
+ * Reads variants from the middleware cookie — available on first render.
+ * Fires one event per active test so each records impressions independently.
  */
 export function useABTestTracking(
   pageName: string,
   eventType: 'page_viewed' | 'app_opened' = 'page_viewed',
   tests?: string[],
 ) {
-  // Fetch all relevant A/B test variants
-  const ctaCopy = useFeatureFlagVariant('cta-copy-test');
-  const paywallPreview = useFeatureFlagVariant('paywall_preview_style_v1');
-  const homepageFeatures = useFeatureFlagVariant('homepage-features-test');
-  const featurePreview = useFeatureFlagVariant('feature_preview_blur_v1');
-  const transitOverflow = useFeatureFlagVariant('transit-overflow-style');
-  const weeklyLock = useFeatureFlagVariant('weekly-lock-style');
-  const tarotTruncation = useFeatureFlagVariant('tarot-truncation-length');
-  const transitLimit = useFeatureFlagVariant('transit-limit-test');
+  // Read variants from cookie (instant, no async)
+  const activeTests = useMemo(() => {
+    const testNames = tests ?? ALL_TEST_NAMES;
+    const results: Array<{ abTest: string; abVariant: string }> = [];
 
-  // Collect active A/B test metadata
-  const abMetadata = useMemo(() => {
-    const allTests = [
-      { test: 'cta-copy-test', variant: ctaCopy },
-      { test: 'paywall_preview_style_v1', variant: paywallPreview },
-      { test: 'homepage-features-test', variant: homepageFeatures },
-      { test: 'feature_preview_blur_v1', variant: featurePreview },
-      { test: 'transit-overflow-style', variant: transitOverflow },
-      { test: 'weekly-lock-style', variant: weeklyLock },
-      { test: 'tarot-truncation-length', variant: tarotTruncation },
-      { test: 'transit-limit-test', variant: transitLimit },
-    ];
+    for (const testName of testNames) {
+      const dashboardName = TEST_NAME_MAPPING[testName];
+      if (!dashboardName) continue;
 
-    // Filter to specific tests if provided
-    const relevantTests = tests
-      ? allTests.filter((t) => tests.includes(t.test))
-      : allTests;
-
-    // Find first active test (user is in)
-    for (const { test, variant } of relevantTests) {
-      const metadata = getABTestMetadataFromVariant(test, variant);
-      if (metadata) {
-        return metadata;
+      const variant = getABTestVariantClient(testName);
+      if (variant) {
+        results.push({ abTest: dashboardName, abVariant: variant });
       }
     }
 
-    return null;
-  }, [
-    ctaCopy,
-    paywallPreview,
-    homepageFeatures,
-    featurePreview,
-    transitOverflow,
-    weeklyLock,
-    tarotTruncation,
-    transitLimit,
-    tests,
-  ]);
+    return results;
+    // Cookie doesn't change during the session, so this only needs to run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tests]);
 
-  // Track page view with A/B metadata (always track, include A/B data when available)
+  // Stable key for useEffect dependency
+  const activeTestsKey = useMemo(
+    () =>
+      activeTests
+        .map((t) => `${t.abTest}:${t.abVariant}`)
+        .sort()
+        .join(','),
+    [activeTests],
+  );
+
+  // Fire one impression event per active test
   useEffect(() => {
-    trackEvent(eventType, {
-      pagePath: `/${pageName}`,
-      metadata: abMetadata
-        ? {
-            ...abMetadata,
-            page: pageName,
-          }
-        : {
-            page: pageName,
-          },
-    });
-  }, [pageName, eventType, abMetadata]);
+    if (activeTests.length === 0) {
+      trackEvent(eventType, {
+        pagePath: `/${pageName}`,
+        metadata: { page: pageName },
+      });
+      return;
+    }
+
+    for (const testMeta of activeTests) {
+      trackEvent(eventType, {
+        pagePath: `/${pageName}`,
+        metadata: {
+          ...testMeta,
+          page: pageName,
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageName, eventType, activeTestsKey]);
+
+  // Backward compatibility
+  const abMetadata = activeTests.length > 0 ? activeTests[0] : null;
 
   return {
     abMetadata,
-    hasActiveTest: !!abMetadata,
+    activeTests,
+    hasActiveTest: activeTests.length > 0,
   };
 }
 
 /**
- * Track a conversion event with active A/B test metadata
- *
- * @example
- * ```tsx
- * const { trackConversion } = useABTestConversion();
- *
- * const handleUpgradeClick = () => {
- *   trackConversion('upgrade_clicked', { featureName: 'tarot_full_reading' });
- * };
- * ```
+ * Track a conversion event with ALL active A/B test metadata.
+ * Fires one conversion per active test so each records conversions independently.
  */
 export function useABTestConversion() {
-  // Fetch all A/B test variants
-  const ctaCopy = useFeatureFlagVariant('cta-copy-test');
-  const paywallPreview = useFeatureFlagVariant('paywall_preview_style_v1');
-  const homepageFeatures = useFeatureFlagVariant('homepage-features-test');
-  const featurePreview = useFeatureFlagVariant('feature_preview_blur_v1');
+  const activeTests = useMemo(() => {
+    const results: Array<{ abTest: string; abVariant: string }> = [];
+
+    for (const testName of ALL_TEST_NAMES) {
+      const dashboardName = TEST_NAME_MAPPING[testName];
+      if (!dashboardName) continue;
+
+      const variant = getABTestVariantClient(testName);
+      if (variant) {
+        results.push({ abTest: dashboardName, abVariant: variant });
+      }
+    }
+
+    return results;
+  }, []);
 
   const trackConversion = useMemo(() => {
     return (
       eventName: string,
       data?: { featureName?: string; pagePath?: string; [key: string]: any },
     ) => {
-      // Try to find active A/B test metadata
-      const tests = [
-        { test: 'cta-copy-test', variant: ctaCopy },
-        { test: 'paywall_preview_style_v1', variant: paywallPreview },
-        { test: 'homepage-features-test', variant: homepageFeatures },
-        { test: 'feature_preview_blur_v1', variant: featurePreview },
-      ];
-
-      let abMetadata = null;
-      for (const { test, variant } of tests) {
-        const metadata = getABTestMetadataFromVariant(test, variant);
-        if (metadata) {
-          abMetadata = metadata;
-          break;
-        }
+      if (activeTests.length === 0) {
+        trackEvent(eventName as any, data);
+        return;
       }
 
-      if (abMetadata) {
+      for (const abMeta of activeTests) {
         trackEvent(eventName as any, {
           ...data,
           metadata: {
-            ...abMetadata,
+            ...abMeta,
             ...data?.metadata,
           },
         });
-      } else {
-        // Track without A/B metadata if no active test
-        trackEvent(eventName as any, data);
       }
     };
-  }, [ctaCopy, paywallPreview, homepageFeatures, featurePreview]);
+  }, [activeTests]);
 
   return { trackConversion };
 }
 
 /**
- * Get active A/B test variants for the current user
- * Useful for conditional rendering based on test variant
- *
- * @example
- * ```tsx
- * const { ctaCopy } = useABTestVariants();
- *
- * return (
- *   <button>
- *     {ctaCopy === 'mystical' ? 'Unlock Your Destiny' : 'Get Started'}
- *   </button>
- * );
- * ```
+ * Get active A/B test variants for the current user.
+ * Reads from the middleware cookie for instant availability.
  */
 export function useABTestVariants() {
-  const ctaCopy = useFeatureFlagVariant('cta-copy-test');
-  const paywallPreview = useFeatureFlagVariant('paywall_preview_style_v1');
-  const homepageFeatures = useFeatureFlagVariant('homepage-features-test');
-  const featurePreview = useFeatureFlagVariant('feature_preview_blur_v1');
-  const transitOverflow = useFeatureFlagVariant('transit-overflow-style');
-  const weeklyLock = useFeatureFlagVariant('weekly-lock-style');
-  const tarotTruncation = useFeatureFlagVariant('tarot-truncation-length');
-  const transitLimit = useFeatureFlagVariant('transit-limit-test');
-
   return {
-    ctaCopy,
-    paywallPreview,
-    homepageFeatures,
-    featurePreview,
-    transitOverflow,
-    weeklyLock,
-    tarotTruncation,
-    transitLimit,
+    ctaCopy: getABTestVariantClient('cta-copy-test'),
+    paywallPreview: getABTestVariantClient('paywall_preview_style_v1'),
+    homepageFeatures: getABTestVariantClient('homepage-features-test'),
+    featurePreview: getABTestVariantClient('feature_preview_blur_v1'),
+    transitOverflow: getABTestVariantClient('transit-overflow-style'),
+    weeklyLock: getABTestVariantClient('weekly-lock-style'),
+    tarotTruncation: getABTestVariantClient('tarot-truncation-length'),
+    transitLimit: getABTestVariantClient('transit-limit-test'),
   };
 }

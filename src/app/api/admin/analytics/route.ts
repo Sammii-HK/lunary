@@ -4,6 +4,7 @@ import {
   testUserFilter,
   testUserFilterUsers,
 } from '@/lib/analytics/test-filter';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 const ACTIVITY_EVENTS = [
   'app_opened',
   'tarot_viewed',
@@ -307,7 +308,7 @@ export async function GET(request: NextRequest) {
       console.warn('Error calculating AI usage:', error);
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       metrics: {
         totalSignups,
@@ -349,6 +350,14 @@ export async function GET(request: NextRequest) {
       },
       events: eventsWithPercentage,
     });
+
+    // Cache dashboard metrics for 30 minutes with stale-while-revalidate
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}, stale-while-revalidate=${ANALYTICS_CACHE_TTL_SECONDS * 2}`,
+    );
+
+    return response;
   } catch (error) {
     console.error('Error fetching analytics:', error);
     return NextResponse.json(

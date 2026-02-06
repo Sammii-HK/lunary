@@ -105,6 +105,28 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Identity stitching MUST run before dedup early-return.
+    // When a logged-in user's event is deduplicated (anonymous event already
+    // exists today), we still need the identity link so dau-wau-mau can
+    // resolve their anonymous events to their real user ID.
+    if (userId && anonymousId && !userId.startsWith('anon:')) {
+      sql
+        .query(
+          `INSERT INTO analytics_identity_links (user_id, anonymous_id)
+           VALUES ($1, $2)
+           ON CONFLICT DO NOTHING`,
+          [userId, anonymousId],
+        )
+        .catch((e) => {
+          if (
+            !(e instanceof Error) ||
+            !e.message.includes('analytics_identity_links')
+          ) {
+            console.warn('[app_opened] identity link error:', e);
+          }
+        });
+    }
+
     // Check if already tracked by user_id OR anonymous_id
     const existing = await sql`
       SELECT 1 FROM conversion_events
@@ -128,25 +150,6 @@ export async function POST(request: NextRequest) {
     }
 
     await insertCanonicalEvent(canonical.row);
-
-    // Server-side identity stitching (ad-blocker proof, runs from middleware)
-    if (userId && anonymousId && !userId.startsWith('anon:')) {
-      sql
-        .query(
-          `INSERT INTO analytics_identity_links (user_id, anonymous_id)
-           VALUES ($1, $2)
-           ON CONFLICT DO NOTHING`,
-          [userId, anonymousId],
-        )
-        .catch((e) => {
-          if (
-            !(e instanceof Error) ||
-            !e.message.includes('analytics_identity_links')
-          ) {
-            console.warn('[app_opened] identity link error:', e);
-          }
-        });
-    }
 
     console.log('[app_opened] INSERT success', {
       duration: Date.now() - startTime,

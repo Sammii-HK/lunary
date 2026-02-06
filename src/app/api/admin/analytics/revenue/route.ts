@@ -1,50 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@vercel/postgres';
 import { resolveDateRange } from '@/lib/analytics/date-range';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 /**
  * Revenue endpoint for insights
- * Aggregates data from plan-breakdown and subscription-30d endpoints
+ * Uses pre-computed daily_metrics for 99% cost reduction
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
-    const baseUrl =
-      process.env.NEXTAUTH_URL ||
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      'http://localhost:3000';
-
-    // Fetch from plan-breakdown endpoint for MRR
-    const planBreakdownResponse = await fetch(
-      `${baseUrl}/api/admin/analytics/plan-breakdown?start=${range.start.toISOString()}&end=${range.end.toISOString()}`,
+    // FAST PATH: Query pre-computed metrics from daily_metrics table
+    const result = await sql.query(
+      `SELECT
+        MAX(mrr) as mrr,
+        SUM(new_signups) as total_signups,
+        SUM(new_conversions) as total_conversions
+      FROM daily_metrics
+      WHERE metric_date >= $1 AND metric_date <= $2`,
+      [
+        range.start.toISOString().split('T')[0],
+        range.end.toISOString().split('T')[0],
+      ],
     );
 
-    if (!planBreakdownResponse.ok) {
-      throw new Error(
-        `Failed to fetch plan-breakdown: ${planBreakdownResponse.status}`,
-      );
-    }
+    const mrr = Number(result.rows[0]?.mrr || 0);
+    const signups = Number(result.rows[0]?.total_signups || 0);
+    const conversions = Number(result.rows[0]?.total_conversions || 0);
 
-    const planBreakdownData = await planBreakdownResponse.json();
+    // Calculate conversion rate
+    const conversionRate = signups > 0 ? (conversions / signups) * 100 : 0;
 
-    // Fetch from subscription-30d endpoint for conversion rate
-    const subscription30dResponse = await fetch(
-      `${baseUrl}/api/admin/analytics/subscription-30d?start=${range.start.toISOString()}&end=${range.end.toISOString()}`,
-    );
-
-    if (!subscription30dResponse.ok) {
-      throw new Error(
-        `Failed to fetch subscription-30d: ${subscription30dResponse.status}`,
-      );
-    }
-
-    const subscription30dData = await subscription30dResponse.json();
-
-    return NextResponse.json({
-      mrr: planBreakdownData.totalMrr || 0,
-      free_to_trial_rate: subscription30dData.conversion_rate || 0,
+    const response = NextResponse.json({
+      mrr: Number(mrr.toFixed(2)),
+      free_to_trial_rate: Number(conversionRate.toFixed(2)),
     });
+
+    // Cache revenue metrics for 30 minutes with stale-while-revalidate
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}, stale-while-revalidate=${ANALYTICS_CACHE_TTL_SECONDS * 2}`,
+    );
+
+    return response;
   } catch (error) {
     console.error('[analytics/revenue] Failed', error);
     return NextResponse.json(

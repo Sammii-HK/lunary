@@ -4,11 +4,13 @@ import { randomBytes } from 'crypto';
 import { requireUser } from '@/lib/ai/auth';
 import { hashForLookup } from '@/lib/encryption';
 import { hasFeatureAccess } from '../../../../../utils/pricing';
+import { FRIEND_LIMITS } from '../../../../../utils/entitlements';
 
 /**
  * POST /api/friends/invite
  * Generate a friend invite link
- * Requires paid subscription
+ * Free users: limited to 5 friends with basic compatibility
+ * Paid users: unlimited friends with full synastry
  */
 export async function POST(request: NextRequest) {
   try {
@@ -23,16 +25,47 @@ export async function POST(request: NextRequest) {
     `;
     const subscriptionStatus = subscriptionResult.rows[0]?.status || 'free';
 
-    if (
-      !hasFeatureAccess(subscriptionStatus, user.plan, 'friend_connections')
-    ) {
+    // Check if user has any friend connection access (basic or full)
+    const hasFullAccess = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'friend_connections',
+    );
+    const hasBasicAccess = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'friend_connections_basic',
+    );
+
+    if (!hasFullAccess && !hasBasicAccess) {
       return NextResponse.json(
         {
-          error: 'Friend invites require a Lunary+ subscription',
+          error: 'Friend connections require an account',
           requiresUpgrade: true,
         },
         { status: 403 },
       );
+    }
+
+    // For free users, check if they've hit the friend limit
+    if (!hasFullAccess && hasBasicAccess) {
+      const friendCountResult = await sql`
+        SELECT COUNT(*) as count FROM friend_connections
+        WHERE user_id = ${user.id}
+      `;
+      const friendCount = parseInt(friendCountResult.rows[0]?.count || '0', 10);
+
+      if (friendCount >= FRIEND_LIMITS.free) {
+        return NextResponse.json(
+          {
+            error: `Free accounts can add up to ${FRIEND_LIMITS.free} friends. Upgrade to Lunary+ for unlimited connections.`,
+            requiresUpgrade: true,
+            friendLimit: FRIEND_LIMITS.free,
+            currentCount: friendCount,
+          },
+          { status: 403 },
+        );
+      }
     }
 
     // Generate a unique invite code

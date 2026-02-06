@@ -12,9 +12,14 @@ import {
   Gem,
   BookText,
   Check,
+  Users,
+  Clock,
+  Moon,
+  Hash,
 } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Heading } from '@/components/ui/Heading';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { PricingComparisonTable } from '@/components/PricingComparisonTable';
 import { CTA_COPY } from '@/lib/cta-copy';
@@ -41,9 +46,9 @@ export default function FeaturesPage() {
       {/* Hero */}
       <section className='py-12 md:py-16 px-4 md:px-6'>
         <div className='max-w-4xl mx-auto text-center space-y-4'>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100'>
+          <Heading as='h1' variant='h1'>
             Your Complete Cosmic Toolkit
-          </h1>
+          </Heading>
           <p className='text-sm md:text-base text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
             From your daily morning briefing to deep pattern recognition,
             everything you need to understand yourself through the cosmos
@@ -80,6 +85,12 @@ export default function FeaturesPage() {
               Deep Exploration
             </a>
             <a
+              href='#connect'
+              className='text-xs md:text-sm text-zinc-400 hover:text-lunary-primary-300 transition-colors whitespace-nowrap'
+            >
+              Connect
+            </a>
+            <a
               href='#learning'
               className='text-xs md:text-sm text-zinc-400 hover:text-lunary-primary-300 transition-colors whitespace-nowrap'
             >
@@ -97,9 +108,9 @@ export default function FeaturesPage() {
           className='scroll-mt-20 space-y-8 md:space-y-12'
         >
           <div className='text-center space-y-3'>
-            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+            <Heading as='h2' variant='h2'>
               Getting Started
-            </h2>
+            </Heading>
             <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
               Everything begins with your birth chart
             </p>
@@ -127,6 +138,40 @@ export default function FeaturesPage() {
             cta='Calculate my chart'
             ctaHref='/auth?signup=true'
           />
+
+          {/* Personal Card */}
+          <FeatureCard
+            icon={<Layers className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Personal Card'
+            description='Your tarot birth card - the archetype that represents your life path'
+            features={[
+              'Calculated from your birthdate',
+              'Permanent card that represents your core energy',
+              'Deeper understanding of your personal archetype',
+              'Educational interpretation of your card',
+              'See how it connects to your birth chart themes',
+            ]}
+            freeTier='Complete personal card with full interpretation'
+            cta='Discover your card'
+            ctaHref='/auth?signup=true'
+          />
+
+          {/* Numerology */}
+          <FeatureCard
+            icon={<Hash className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Life Path & Personal Year'
+            description='Your numerology destiny - understand the numbers guiding your life'
+            features={[
+              'Life Path number - your core life purpose (e.g., "8")',
+              'Personal Year - your current annual cycle (e.g., "4")',
+              'Based on YOUR birth date, not the universal year',
+              'Universal Day numbers for daily timing',
+              'Understand your numerological journey',
+            ]}
+            freeTier='Complete numerology profile'
+            cta='Calculate your numbers'
+            ctaHref='/auth?signup=true'
+          />
         </section>
 
         {/* Section 2: Daily Practice */}
@@ -135,9 +180,9 @@ export default function FeaturesPage() {
           className='scroll-mt-20 space-y-8 md:space-y-12'
         >
           <div className='text-center space-y-3'>
-            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+            <Heading as='h2' variant='h2'>
               Daily Practice
-            </h2>
+            </Heading>
             <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
               Your morning cosmic weather report
             </p>
@@ -151,11 +196,12 @@ export default function FeaturesPage() {
             features={[
               "Today's cosmic energy overview",
               'Moon phase with personal meaning',
+              "Today's ritual with completion tracking",
               'Recommended spells aligned to today',
-              'Crystal guidance for current energy',
+              'Daily crystal guidance aligned to your chart',
               'Sky Now: real-time planetary positions',
               'Daily tarot card seeded from your chart',
-              'Example: "Mars in your 10th house = career focus for the next 6 weeks"',
+              'Transit durations: "Mars in your 10th house = career focus for the next 6 weeks"',
             ]}
             freeTier='General cosmic energy + moon phase'
             paidTier='Full personalized dashboard with interpretations'
@@ -167,16 +213,17 @@ export default function FeaturesPage() {
           <FeatureCard
             icon={<Sparkles className='w-5 h-5 md:w-6 md:h-6' />}
             title='Personal Daily Horoscope'
-            description='Not your sun sign. YOUR specific planetary movements based on your full chart.'
+            description='Not your sun sign. YOUR specific planetary movements based on your full chart—with exact timing.'
             features={[
-              'Based on current planets transiting YOUR natal chart',
-              'Updates daily with real astronomical data',
-              'Shows which house is being activated',
-              'Explains what this means for YOUR life',
-              'Universal vs Personal day numbers',
+              'Today\'s aspects to YOUR natal chart with duration: "15h left", "3w left", "2.3y left"',
+              'Applying vs Separating status - know if energy is building or fading',
+              'Orb precision to 0.1° - see exactly how strong each influence is',
+              'Transit cycles: "This opposition recurs roughly every 84y"',
+              'Theme connections: see how transits relate to your current life themes',
+              'Shows which house is being activated and why it matters for YOU',
             ]}
             freeTier='2 major transits'
-            paidTier='All 5-10 daily transits with full interpretations'
+            paidTier='All daily transits with durations + applying/separating status'
             cta="See today's transits"
             ctaHref='/auth?signup=true'
           />
@@ -205,9 +252,9 @@ export default function FeaturesPage() {
           className='scroll-mt-20 space-y-8 md:space-y-12'
         >
           <div className='text-center space-y-3'>
-            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+            <Heading as='h2' variant='h2'>
               Weekly Guidance
-            </h2>
+            </Heading>
             <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
               Deeper themes and upcoming shifts
             </p>
@@ -234,16 +281,19 @@ export default function FeaturesPage() {
           <FeatureCard
             icon={<Calendar className='w-5 h-5 md:w-6 md:h-6' />}
             title='Transit Calendar'
-            description="See what's coming in YOUR chart"
+            description="See what's coming in YOUR chart - with exact durations and timing"
             features={[
-              'Upcoming transits for next 30 days',
-              'Which ones affect YOUR natal planets',
-              'Retrograde periods',
-              'Eclipse seasons',
-              'Major aspects forming',
+              'Sky Now: every planet\'s position with time remaining: "Sun 14d left", "Moon 3h left"',
+              'Your Next Transit: know exactly when the next shift happens',
+              'Upcoming transits for next 30-90 days affecting YOUR natal planets',
+              'Planet time in each zodiac sign: "Mars in Aquarius for 5w left"',
+              'Retrograde periods with shadow phases',
+              'Eclipse seasons and major aspects forming',
+              '"Connects to your theme" - see how transits relate to your current patterns',
             ]}
             freeTier='2 transits (general descriptions only)'
-            paidTier='All 5-10 daily transits + personalized to YOUR chart + 30-day calendar'
+            paidTier='All daily transits + Sky Now durations + 30-day calendar'
+            proTier='90-day view + weekly email reports'
             cta="See what's ahead"
             ctaHref='/auth?signup=true'
           />
@@ -255,9 +305,9 @@ export default function FeaturesPage() {
           className='scroll-mt-20 space-y-8 md:space-y-12'
         >
           <div className='text-center space-y-3'>
-            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+            <Heading as='h2' variant='h2'>
               Deep Exploration
-            </h2>
+            </Heading>
             <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
               When you need more than daily guidance
             </p>
@@ -283,18 +333,18 @@ export default function FeaturesPage() {
             ctaHref='/auth?signup=true'
           />
 
-          {/* Astral Guide Chat */}
+          {/* Astral Guide */}
           <FeatureCard
             icon={<MessageCircle className='w-5 h-5 md:w-6 md:h-6' />}
-            title='Your Personal Astrology Teacher (Pro)'
-            description='Like having an astrology teacher who knows your birth chart'
+            title='Astral Guide - Your Personal Astrology Teacher'
+            description='Like having an astrology teacher who knows your birth chart inside and out'
             features={[
-              'Knows your complete birth chart',
-              'Aware of current transits affecting YOU',
-              'References your journal entries and patterns',
+              'Knows your complete birth chart - every placement, aspect, and house',
+              'Aware of current transits affecting YOU specifically',
+              'References your journal entries and patterns over time',
               'Example: "Why do I always feel anxious during Mercury retrograde?"',
               'Example: "What does Mars in my 10th house mean for my career?"',
-              'Different from ChatGPT: answers are specific to YOUR astrology, not generic',
+              'Every answer is grounded in YOUR chart, not generic sun sign advice',
             ]}
             freeTier='3 messages per day'
             paidTier='50 messages per day'
@@ -310,14 +360,14 @@ export default function FeaturesPage() {
             description="This is Lunary's unique feature. No other app tracks patterns from YOUR experience."
             features={[
               'After 6-8 weeks, patterns emerge from your data',
-              'Example: "You always pull The Tower during Pluto transits"',
-              'Example: "During the last 6 Full Moons, you journaled about relationships"',
+              'Example: "The Tower appeared 4 times during Mercury retrograde"',
+              'Example: "Full Moon tends to bring reflective energy for you"',
               'Track your tarot cards over time and see what cosmic conditions were present',
               'View cosmic context for each card appearance (moon phase & planetary aspects)',
               'Personalized transit analysis for your frequently pulled cards',
               'This is personal proof astrology works for YOU specifically',
               'Your own data becomes your astrology education',
-              'Next time that transit happens, you get a heads up based on YOUR history',
+              'Suit distribution shows your elemental balance: "Cups appear in 40% of readings"',
             ]}
             freeTier='Tarot pattern tracking (last 7 days) + basic moon phase correlations'
             paidTier='Up to 6 months history + cosmic context for each card + personalized transit analysis'
@@ -337,7 +387,7 @@ export default function FeaturesPage() {
               'Track how transits affected you',
               'Note tarot insights and meanings',
               'Document moon phase experiences',
-              'See "Last time Mars was here, you noted..."',
+              'Correlate your moods with moon phases over time',
               'Pro: Enhanced detection catches subtle emotions & implicit feelings',
             ]}
             freeTier='Basic journaling (3 entries/month) + smart mood detection'
@@ -348,12 +398,83 @@ export default function FeaturesPage() {
           />
         </section>
 
-        {/* Section 5: Learning & Discovery */}
+        {/* Section 5: Connect & Compare */}
+        <section id='connect' className='scroll-mt-20 space-y-8 md:space-y-12'>
+          <div className='text-center space-y-3'>
+            <Heading as='h2' variant='h2'>
+              Connect & Compare
+            </Heading>
+            <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
+              See how your charts interact with friends
+            </p>
+          </div>
+
+          {/* Circle + Synastry */}
+          <FeatureCard
+            icon={<Users className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Your Cosmic Circle'
+            description='Connect with friends and see how your charts interact. Full synastry analysis shows exactly where you click—and where you clash.'
+            features={[
+              'Add friends and track compatibility percentages',
+              'Full synastry analysis - all major aspects between your planets',
+              'Element & modality balance comparisons',
+              "View friends' complete birth charts",
+              "Circle leaderboard showing who's staying consistent",
+              'Activity feed: see when friends check in',
+              'Celebrate milestones together',
+            ]}
+            freeTier='Add up to 5 friends with basic compatibility %'
+            paidTier='Unlimited circle + full synastry analysis with all aspects'
+            proTier='Best Times to Connect + Shared Cosmic Events'
+            cta='Connect with friends'
+            ctaHref='/auth?signup=true'
+          />
+
+          {/* Best Times to Connect */}
+          <FeatureCard
+            icon={<Clock className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Best Times to Connect'
+            description='Know when cosmic timing supports connection. No more guessing when to reach out.'
+            features={[
+              "Analyzes BOTH people's transits simultaneously",
+              'Shows optimal windows: "Feb 17-24: Great for deep conversations"',
+              'Personalized timing for each relationship',
+              'Know when to have important conversations',
+              'Different from generic moon calendars—this is YOUR timing with THEM',
+            ]}
+            freeTier='Not included'
+            paidTier='Not included'
+            proTier='Full access to relationship timing windows'
+            cta='See optimal timing'
+            ctaHref='/pricing'
+          />
+
+          {/* Shared Cosmic Events */}
+          <FeatureCard
+            icon={<Moon className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Shared Cosmic Events'
+            description='Moon phases that activate compatible houses for both of you'
+            features={[
+              'Example: "New Moon in Pisces activates your 5th and their 7th houses"',
+              'Never miss cosmically significant moments together',
+              'Relationship-specific lunar timing',
+              'Great for planning dates, conversations, or projects together',
+              'Shows upcoming shared events for each friend',
+            ]}
+            freeTier='Not included'
+            paidTier='Not included'
+            proTier='Full access to shared cosmic events'
+            cta='Explore shared timing'
+            ctaHref='/pricing'
+          />
+        </section>
+
+        {/* Section 6: Learning & Discovery */}
         <section id='learning' className='scroll-mt-20 space-y-8 md:space-y-12'>
           <div className='text-center space-y-3'>
-            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+            <Heading as='h2' variant='h2'>
               Learning & Discovery
-            </h2>
+            </Heading>
             <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
               Free education, always
             </p>
@@ -401,9 +522,9 @@ export default function FeaturesPage() {
         {/* Comparison Table */}
         <section className='py-12 md:py-20 border-t border-zinc-800/30'>
           <div className='text-center space-y-3 mb-12'>
-            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+            <Heading as='h2' variant='h2'>
               Compare Plans
-            </h2>
+            </Heading>
             <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
               See what's included at each tier
             </p>
@@ -415,9 +536,9 @@ export default function FeaturesPage() {
         <section className='py-12 md:py-20 border-t border-zinc-800/30'>
           <div className='max-w-4xl mx-auto space-y-8'>
             <div className='text-center space-y-3'>
-              <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+              <Heading as='h2' variant='h2'>
                 Which astrology app is right for you?
-              </h2>
+              </Heading>
               <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
                 Different tools for different needs
               </p>
@@ -426,9 +547,9 @@ export default function FeaturesPage() {
             <div className='grid md:grid-cols-2 gap-6'>
               {/* Lunary */}
               <div className='rounded-xl border border-lunary-primary-700/30 bg-lunary-primary-900/10 p-6 space-y-4'>
-                <h3 className='text-lg font-medium text-lunary-primary-300'>
+                <Heading as='h3' variant='h3'>
                   Choose Lunary if you want to:
-                </h3>
+                </Heading>
                 <ul className='space-y-2 text-sm text-zinc-300'>
                   <li className='flex items-start gap-2'>
                     <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
@@ -463,54 +584,50 @@ export default function FeaturesPage() {
                 </ul>
               </div>
 
-              {/* Other Apps */}
+              {/* What Makes Lunary Different */}
               <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-6 space-y-4'>
-                <h3 className='text-lg font-medium text-zinc-300'>
-                  Other apps might be better if you want:
-                </h3>
+                <Heading as='h3' variant='h3' className='text-zinc-300'>
+                  What makes Lunary different:
+                </Heading>
                 <ul className='space-y-2 text-sm text-zinc-400'>
                   <li className='flex items-start gap-2'>
-                    <span className='text-zinc-600 mt-0.5 flex-shrink-0'>
-                      •
-                    </span>
+                    <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                     <span>
-                      <span className='text-zinc-300'>Social features:</span>{' '}
-                      Co-Star has friend compatibility and social sharing
+                      <span className='text-zinc-300'>Full synastry:</span> Most
+                      apps show a basic % - we show every aspect between your
+                      charts
                     </span>
                   </li>
                   <li className='flex items-start gap-2'>
-                    <span className='text-zinc-600 mt-0.5 flex-shrink-0'>
-                      •
-                    </span>
-                    <span>
-                      <span className='text-zinc-300'>Technical analysis:</span>{' '}
-                      TimePassages offers advanced chart calculations for
-                      astrologers
-                    </span>
-                  </li>
-                  <li className='flex items-start gap-2'>
-                    <span className='text-zinc-600 mt-0.5 flex-shrink-0'>
-                      •
-                    </span>
+                    <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                     <span>
                       <span className='text-zinc-300'>
-                        Quick entertainment:
+                        Real astronomical data:
                       </span>{' '}
-                      Many apps focus on bite-sized daily horoscopes
+                      24+ celestial bodies with precise calculations, not
+                      simplified sun sign readings
                     </span>
                   </li>
                   <li className='flex items-start gap-2'>
-                    <span className='text-zinc-600 mt-0.5 flex-shrink-0'>
-                      •
-                    </span>
+                    <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                     <span>
-                      <span className='text-zinc-300'>Relationship focus:</span>{' '}
-                      Some apps specialize in compatibility readings
+                      <span className='text-zinc-300'>
+                        Pattern recognition:
+                      </span>{' '}
+                      Your data becomes your astrology textbook over time
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                    <span>
+                      <span className='text-zinc-300'>Tarot + astrology:</span>{' '}
+                      See cosmic context for every card you pull
                     </span>
                   </li>
                 </ul>
                 <p className='text-xs text-zinc-500 pt-2'>
-                  Many people use multiple apps for different purposes
+                  Lunary teaches you to read your own chart - not just entertain
+                  you
                 </p>
               </div>
             </div>
@@ -523,13 +640,17 @@ export default function FeaturesPage() {
                 </span>
                 ,{' '}
                 <span className='text-lunary-primary-300'>
+                  relationship timing
+                </span>
+                ,{' '}
+                <span className='text-lunary-primary-300'>
                   educational depth
                 </span>
                 , and{' '}
                 <span className='text-lunary-primary-300'>
                   tarot integration
                 </span>
-                . No other app combines these three.
+                . No other app combines all four.
               </p>
             </div>
           </div>
@@ -538,9 +659,9 @@ export default function FeaturesPage() {
         {/* Final CTA */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/20 border-t border-zinc-800/30'>
           <div className='max-w-2xl mx-auto text-center space-y-6'>
-            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+            <Heading as='h2' variant='h2'>
               Ready to start your practice?
-            </h2>
+            </Heading>
 
             <div className='max-w-md mx-auto text-left space-y-2'>
               <div className='flex items-center gap-2'>
@@ -646,9 +767,9 @@ function FeatureCard({
           {icon}
         </div>
         <div className='flex-1 min-w-0'>
-          <h3 className='text-base md:text-lg lg:text-xl font-light text-zinc-100 mb-1.5 md:mb-2'>
+          <Heading as='h3' variant='h3' className='text-zinc-100'>
             {title}
-          </h3>
+          </Heading>
           <p className='text-xs md:text-sm lg:text-base text-zinc-300 leading-relaxed'>
             {description}
           </p>

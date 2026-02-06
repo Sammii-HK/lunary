@@ -485,6 +485,7 @@ export const MoonPreview = ({
       isExpanded={isExpanded}
       onToggle={onToggle}
       className='moon-preview-card'
+      data-testid='moon-phase-card'
     />
   );
 };

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { formatTimestamp } from '@/lib/analytics/date-range';
 import { EngagementEventType, getEventAudit } from '@/lib/analytics/kpis';
+import { ANALYTICS_REALTIME_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 const HEARTBEAT_WINDOW_MINUTES = 30;
 
@@ -36,11 +37,19 @@ export async function GET(_request: NextRequest) {
       }),
     );
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       window_minutes: HEARTBEAT_WINDOW_MINUTES,
       events,
       source: 'database',
     });
+
+    // Cache heartbeat for 5 minutes (real-time data, shorter TTL)
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_REALTIME_TTL_SECONDS}, stale-while-revalidate=${ANALYTICS_REALTIME_TTL_SECONDS * 2}`,
+    );
+
+    return response;
   } catch (error) {
     console.error('[analytics/heartbeat] Failed', error);
     return NextResponse.json(

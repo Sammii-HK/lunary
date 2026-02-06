@@ -242,6 +242,7 @@ export const CrystalPreview = () => {
           }
         }}
         className='w-full h-full py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group text-left min-h-16 cursor-pointer'
+        data-testid='crystal-card'
       >
         <div className='flex items-start gap-3 h-full'>
           <div className='flex-1 min-w-0 h-full mt-1 flex flex-col justify-between'>
@@ -307,6 +308,7 @@ export const CrystalPreview = () => {
         <div
           className='fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50'
           onClick={closeModal}
+          data-testid='crystal-modal'
         >
           <div
             className='bg-zinc-900 border border-zinc-700 rounded-xl p-6 max-w-md w-full relative'

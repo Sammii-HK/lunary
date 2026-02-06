@@ -926,6 +926,7 @@ export function GrimoireSearch({
           if (searchQuery.length > 0) setShowSearchResults(true);
         }}
         name='grimoire-search'
+        data-testid='grimoire-search'
         aria-label='Search grimoire'
         className={`w-full bg-zinc-800/80 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent ${
           compact

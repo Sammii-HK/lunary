@@ -5,7 +5,6 @@ import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
-const CONVERSION_WINDOW_DAYS = 7;
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,20 +38,19 @@ export async function GET(request: NextRequest) {
           FROM conversion_events
           WHERE event_type = 'signup_completed'
             AND created_at >= $1
-            AND created_at <= $2 + INTERVAL '${CONVERSION_WINDOW_DAYS} days'
+            AND created_at <= $2
             AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))
         )
         SELECT
           clicks.hub AS hub,
           COUNT(*) AS total_clicks,
           COUNT(DISTINCT clicks.user_id) AS unique_clickers,
-          COUNT(DISTINCT signup_match.user_id) AS signups_7d
+          COUNT(DISTINCT signup_match.user_id) AS signups
         FROM clicks
         LEFT JOIN LATERAL (
           SELECT s.user_id
           FROM signups s
           WHERE s.created_at >= clicks.created_at
-            AND s.created_at <= clicks.created_at + INTERVAL '${CONVERSION_WINDOW_DAYS} days'
             AND (
               s.user_id = clicks.user_id
               OR (
@@ -69,7 +67,7 @@ export async function GET(request: NextRequest) {
           LIMIT 1
         ) signup_match ON true
         GROUP BY clicks.hub
-        ORDER BY signups_7d DESC, total_clicks DESC
+        ORDER BY signups DESC, total_clicks DESC
       `,
       [
         formatTimestamp(range.start),
@@ -83,7 +81,7 @@ export async function GET(request: NextRequest) {
     const hubs = results.rows.map((row) => {
       const totalClicks = Number(row.total_clicks || 0);
       const uniqueClickers = Number(row.unique_clickers || 0);
-      const signups = Number(row.signups_7d || 0);
+      const signups = Number(row.signups || 0);
       const conversionRate =
         uniqueClickers > 0 ? (signups / uniqueClickers) * 100 : 0;
 
@@ -97,7 +95,6 @@ export async function GET(request: NextRequest) {
     });
 
     const response = NextResponse.json({
-      window_days: CONVERSION_WINDOW_DAYS,
       hubs,
       source: 'database',
     });
@@ -113,7 +110,6 @@ export async function GET(request: NextRequest) {
     );
     return NextResponse.json(
       {
-        window_days: CONVERSION_WINDOW_DAYS,
         hubs: [],
         error: error instanceof Error ? error.message : 'Unknown error',
       },

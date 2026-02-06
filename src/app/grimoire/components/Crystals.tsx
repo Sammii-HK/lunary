@@ -98,7 +98,11 @@ const Crystals = ({
         </div>
       </section>
 
-      <section id='crystal-categories' className='space-y-6'>
+      <section
+        id='crystal-categories'
+        className='space-y-6'
+        data-testid='crystal-categories'
+      >
         <Heading as='h3' variant='h3'>
           Crystal Categories
         </Heading>
@@ -144,6 +148,8 @@ const Crystals = ({
                       <Link
                         key={crystal.name}
                         href={`/grimoire/crystals/${crystal.slug}`}
+                        data-testid='crystal-card'
+                        data-crystal-slug={crystal.slug}
                         className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-secondary-400 transition-all group'
                       >
                         <Heading

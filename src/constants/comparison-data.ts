@@ -86,6 +86,66 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'text', value: 'Basic %' },
+      },
+      {
+        name: 'Pattern Recognition',
+        description: 'Tracks YOUR patterns over time',
+        lunary: {
+          type: 'text',
+          value: 'Your textbook',
+          highlight: true,
+        },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Best Times to Connect',
+        description: 'Optimal timing for relationships',
+        lunary: {
+          type: 'text',
+          value: 'Pro',
+          highlight: true,
+        },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Shareable Features',
         description: 'Share your dashboard, birth chart, horoscope',
         lunary: { type: 'check' },
@@ -165,11 +225,16 @@ export const comparisonData: Record<string, ComparisonData> = {
         description:
           'The Astral Guide has complete context of your birth chart, tarot patterns, readings history, and archetypes to provide comprehensive insights in plain language. It understands your unique astrological profile and how it evolves over time.',
       },
+      {
+        title: 'Cosmic Circle with Deep Synastry',
+        description:
+          'Connect with friends and see how your charts interact with full synastry analysis. Best Times to Connect shows optimal windows for important conversations. Free users get 5 friends with basic compatibility.',
+      },
     ],
     competitorStrengths:
       'Co-Star may be a good choice if you prefer their minimalist, text-based interface and social features for comparing charts with friends. Their hyper-personalized push notifications and unique aesthetic appeal to users who want a different astrology app experience.',
     conclusion:
-      "Both apps offer free tiers—Lunary's is ad-free with 2000+ grimoire articles, while Co-Star's free tier has ads. Choose Lunary if you want: no ads, real astronomical calculations (±1 arcminute accuracy), a complete grimoire with magical tools, and personalized tarot readings based on your exact birth chart. Choose Co-Star if you prefer their minimalist text-based interface and social features for comparing charts with friends.",
+      "Both apps offer free tiers—Lunary's is ad-free with 2000+ grimoire articles, while Co-Star's free tier has ads. Choose Lunary if you want: no ads, real astronomical calculations (±1 arcminute accuracy), a complete grimoire with magical tools, full synastry analysis, and personalized tarot readings based on your exact birth chart. Choose Co-Star if you prefer their minimalist text-based interface.",
     faqs: [
       {
         question: 'Does Lunary have a free tier?',
@@ -250,6 +315,46 @@ export const comparisonData: Record<string, ComparisonData> = {
         description: 'Personalized monthly guidance',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
+      },
+      {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'text', value: 'Workshop ($108)' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
       },
       {
         name: 'Shareable Features',
@@ -398,6 +503,46 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Archetypes',
         description: 'Patterns detected from your Book of Shadows journaling',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'text', value: 'Manual diary' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
       },
@@ -567,6 +712,46 @@ export const comparisonData: Record<string, ComparisonData> = {
         description: 'One-on-one with astrologers',
         lunary: { type: 'x' },
         competitor: { type: 'check' },
+      },
+      {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'text', value: 'Sign-based only' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'text', value: 'Via live readers' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
       },
       {
         name: 'Shareable Features',
@@ -743,6 +928,40 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'check' },
       },
       {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'text', value: 'Bonds feature' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Shareable Features',
         description: 'Share your dashboard, birth chart, horoscope',
         lunary: { type: 'check' },
@@ -913,6 +1132,46 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
+      },
+      {
         name: 'Shareable Features',
         description: 'Share your dashboard, birth chart, horoscope',
         lunary: { type: 'check' },
@@ -1068,6 +1327,46 @@ export const comparisonData: Record<string, ComparisonData> = {
         name: 'Solar Return',
         lunary: { type: 'check' },
         competitor: { type: 'check' },
+      },
+      {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
       },
       {
         name: 'Shareable Features',
@@ -1234,6 +1533,46 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'check' },
       },
       {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Shareable Features',
         description: 'Share your dashboard, birth chart, horoscope',
         lunary: { type: 'check' },
@@ -1386,6 +1725,46 @@ export const comparisonData: Record<string, ComparisonData> = {
       },
       {
         name: 'Book of Shadows Journal',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
       },
@@ -1547,6 +1926,46 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Shareable Features',
         description: 'Share your dashboard, birth chart, horoscope',
         lunary: { type: 'check' },
@@ -1701,6 +2120,36 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Shareable Features',
         description: 'Share your dashboard, birth chart, horoscope',
         lunary: { type: 'check' },
@@ -1847,6 +2296,46 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Shareable Features',
         description: 'Share your dashboard, birth chart, horoscope',
         lunary: { type: 'check' },
@@ -1978,6 +2467,36 @@ export const comparisonData: Record<string, ComparisonData> = {
       },
       {
         name: 'Transparent Methodology',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
       },
@@ -2128,6 +2647,36 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Shareable Features',
         description: 'Share your dashboard, birth chart, horoscope',
         lunary: { type: 'check' },
@@ -2195,7 +2744,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         title: 'Better Value',
         description:
-          'At $4.99/month, Lunary offers exceptional value with AI insights and magical tools.',
+          'At $4.99/month, Lunary offers exceptional value with personalized insights and magical tools.',
       },
     ],
     competitorStrengths:
@@ -2276,6 +2825,46 @@ export const comparisonData: Record<string, ComparisonData> = {
       },
       {
         name: 'Transit Calendar',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
       },
@@ -2450,6 +3039,46 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Shareable Features',
         description: 'Share your dashboard, birth chart, horoscope',
         lunary: { type: 'check' },
@@ -2603,6 +3232,46 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'text', value: 'Moon rituals' },
+      },
+      {
         name: 'Shareable Features',
         description: 'Share your dashboard, birth chart, horoscope',
         lunary: { type: 'check' },
@@ -2747,6 +3416,46 @@ export const comparisonData: Record<string, ComparisonData> = {
         name: 'Archetypes',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
+      },
+      {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: 'Full analysis',
+          highlight: true,
+        },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Numerology',
+        description: 'Life Path number & Personal Year calculations',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Birth Card',
+        description: 'Permanent personal card based on your birthdate',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Smart Mood Detection',
+        description: 'Detects emotions from journal entries',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Streak & Progress Tracking',
+        description: 'Daily check-in streaks and milestones',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Daily Rituals & Practices',
+        description: 'Rituals, spells, and ceremonies aligned to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
       },
       {
         name: 'Shareable Features',

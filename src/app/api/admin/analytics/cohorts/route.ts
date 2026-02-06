@@ -93,10 +93,13 @@ export async function GET(request: NextRequest) {
     const retentionMatrix: Array<{
       cohort: string;
       day0: number;
-      day1: number;
-      day7: number;
-      day30: number;
+      day1: number | null;
+      day7: number | null;
+      day30: number | null;
     }> = [];
+
+    // Cohorts younger than their retention window show null (displayed as "—")
+    const nowMs = Date.now();
 
     // DB SSOT: retention is based on meaningful opens (deduped at source).
     // Use product_opened for cohort retention (authenticated product usage)
@@ -302,12 +305,18 @@ export async function GET(request: NextRequest) {
         );
       }
 
+      // Check if cohort is old enough for each retention window
+      const cohortEndMs = cohortEndDate.getTime();
+      const day1Mature = cohortEndMs + 1 * 86_400_000 <= nowMs;
+      const day7Mature = cohortEndMs + 7 * 86_400_000 <= nowMs;
+      const day30Mature = cohortEndMs + 30 * 86_400_000 <= nowMs;
+
       retentionMatrix.push({
         cohort: formattedStart,
         day0: cohortSize,
-        day1: Number(day1Retention.toFixed(2)),
-        day7: Number(day7Retention.toFixed(2)),
-        day30: Number(day30Retention.toFixed(2)),
+        day1: day1Mature ? Number(day1Retention.toFixed(2)) : null,
+        day7: day7Mature ? Number(day7Retention.toFixed(2)) : null,
+        day30: day30Mature ? Number(day30Retention.toFixed(2)) : null,
       });
     }
 

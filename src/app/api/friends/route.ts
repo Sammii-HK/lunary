@@ -3,11 +3,13 @@ import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 import { hasFeatureAccess } from '../../../../utils/pricing';
 import { decrypt } from '@/lib/encryption';
+import { FRIEND_LIMITS } from '../../../../utils/entitlements';
 
 /**
  * GET /api/friends
  * List all friends with their basic profile info
- * Requires paid subscription
+ * Free users: up to 5 friends with basic compatibility %
+ * Paid users: unlimited friends with full synastry
  */
 export async function GET(request: NextRequest) {
   try {
@@ -22,9 +24,19 @@ export async function GET(request: NextRequest) {
     `;
     const subscriptionStatus = subscriptionResult.rows[0]?.status || 'free';
 
-    if (
-      !hasFeatureAccess(subscriptionStatus, user.plan, 'friend_connections')
-    ) {
+    // Check if user has any friend connection access (basic or full)
+    const hasFullAccess = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'friend_connections',
+    );
+    const hasBasicAccess = hasFeatureAccess(
+      subscriptionStatus,
+      user.plan,
+      'friend_connections_basic',
+    );
+
+    if (!hasFullAccess && !hasBasicAccess) {
       return NextResponse.json(
         {
           error: 'Friend connections require a Lunary+ subscription',
@@ -81,7 +93,13 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    return NextResponse.json({ friends });
+    return NextResponse.json({
+      friends,
+      // Include tier info for UI
+      tier: hasFullAccess ? 'full' : 'basic',
+      friendLimit: hasFullAccess ? null : FRIEND_LIMITS.free,
+      friendCount: friends.length,
+    });
   } catch (error: any) {
     if (error?.code === '42P01') {
       return NextResponse.json({ friends: [] });

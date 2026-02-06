@@ -20,6 +20,12 @@ export type PricingPlan = {
   trialDays?: number;
 };
 
+// Friend limits by tier
+export const FRIEND_LIMITS = {
+  free: 5, // Free users can add up to 5 friends with basic compatibility
+  paid: Infinity, // Paid users get unlimited friends
+} as const;
+
 const FEATURE_ACCESS_BASE = {
   free: [
     'moon_phases',
@@ -35,6 +41,7 @@ const FEATURE_ACCESS_BASE = {
     'personal_year_number',
     'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
     'keyword_mood_detection', // Free keyword-based mood tagging (70% coverage)
+    'friend_connections_basic', // Free users can add up to 5 friends with basic compatibility %
   ],
   lunary_plus: [
     'birth_chart',
@@ -59,7 +66,7 @@ const FEATURE_ACCESS_BASE = {
     'personal_year_meaning',
     'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
     'keyword_mood_detection', // Free keyword-based mood tagging (70% coverage)
-    'friend_connections', // Friend invites, synastry analysis, relationship timing
+    'friend_connections', // Friend invites, synastry analysis (basic tier)
   ],
   lunary_plus_ai: [
     'birth_chart',
@@ -98,7 +105,9 @@ const FEATURE_ACCESS_BASE = {
     'keyword_mood_detection', // Keyword-based mood tagging
     'ai_mood_detection', // AI-enhanced mood tagging (smart fallback for complex emotions)
     'enhanced_pattern_analysis', // Moon phase, transit, and house activation patterns
-    'friend_connections', // Friend invites, synastry analysis, relationship timing
+    'friend_connections', // Friend invites, synastry analysis
+    'relationship_timing', // Best Times to Connect - Pro only
+    'shared_cosmic_events', // Shared Cosmic Events - Pro only
   ],
   lunary_plus_ai_annual: [
     'birth_chart',
@@ -145,7 +154,9 @@ const FEATURE_ACCESS_BASE = {
     'keyword_mood_detection', // Keyword-based mood tagging
     'ai_mood_detection', // AI-enhanced mood tagging (smart fallback for complex emotions)
     'enhanced_pattern_analysis', // Moon phase, transit, and house activation patterns
-    'friend_connections', // Friend invites, synastry analysis, relationship timing
+    'friend_connections', // Friend invites, synastry analysis
+    'relationship_timing', // Best Times to Connect - Pro only
+    'shared_cosmic_events', // Shared Cosmic Events - Pro only
   ],
 } as const satisfies Record<PlanKey, readonly string[]>;
 
@@ -211,6 +222,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Chat history (last 50 messages)',
       'Personal Day number (number only)',
       'Personal Year number (number only)',
+      'Cosmic Circle: Add up to 5 friends with basic compatibility %',
     ],
   },
   {
@@ -249,6 +261,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Save chat messages to collections (no limit)',
       'Collections (no limit)',
       'Collection folders (no limit)',
+      'Cosmic Circle: Unlimited friends + full synastry analysis',
     ],
   },
   {
@@ -278,6 +291,9 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Save chat messages to collections (no limit)',
       'Collections (no limit)',
       'Collection folders (no limit)',
+      'Cosmic Circle: Unlimited friends + full synastry analysis',
+      'Best Times to Connect: know when cosmic timing supports connection',
+      'Shared Cosmic Events: moon phases that activate both charts',
     ],
   },
   {
@@ -304,6 +320,9 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Astral Guide context memory (8 recent messages + 4 memory snippets)',
       'Save chat messages to collections (no limit)',
       'Collections & folders (no limit)',
+      'Cosmic Circle: Unlimited friends + full synastry analysis',
+      'Best Times to Connect: know when cosmic timing supports connection',
+      'Shared Cosmic Events: moon phases that activate both charts',
     ],
   },
 ];

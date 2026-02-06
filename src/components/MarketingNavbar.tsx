@@ -50,6 +50,12 @@ export function MarketingNavbar() {
               Shop
             </Link>
             <Link
+              href='/features'
+              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors px-3 py-3 min-h-12 flex items-center'
+            >
+              Features
+            </Link>
+            <Link
               href='/pricing'
               className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors px-3 py-3 min-h-12 flex items-center'
             >
@@ -134,6 +140,13 @@ export function MarketingNavbar() {
                 className='block text-sm text-zinc-300 hover:text-zinc-100 transition-colors py-2 px-3 rounded-md hover:bg-lunary-primary-900/50 text-center'
               >
                 Shop
+              </Link>
+              <Link
+                href='/features'
+                onClick={() => setMobileMenuOpen(false)}
+                className='block text-sm text-zinc-300 hover:text-zinc-100 transition-colors py-2 px-3 rounded-md hover:bg-lunary-primary-900/50 text-center'
+              >
+                Features
               </Link>
               <Link
                 href='/pricing'

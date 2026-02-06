@@ -1,11 +1,19 @@
 /**
  * App Feature Recording Configuration
  *
- * Defines how to navigate and record each app feature for demo videos
+ * Generates Playwright recording configs from TikTok scripts.
+ * Single source of truth: tiktok-scripts.ts defines the storyboard,
+ * this file converts scenes → recording steps.
  */
 
+import {
+  TIKTOK_SCRIPTS,
+  type TikTokScript,
+  type Scene,
+} from './tiktok-scripts';
+
 export interface FeatureRecordingConfig {
-  /** Feature ID from app-features.ts */
+  /** Feature ID from tiktok-scripts.ts */
   id: string;
   /** Feature name */
   name: string;
@@ -17,6 +25,8 @@ export interface FeatureRecordingConfig {
   durationSeconds: number;
   /** Viewport size for recording */
   viewport?: { width: number; height: number };
+  /** Whether this feature requires authentication (default: true) */
+  requiresAuth?: boolean;
 }
 
 export interface RecordingStep {
@@ -28,7 +38,8 @@ export interface RecordingStep {
     | 'wait'
     | 'scroll'
     | 'hover'
-    | 'screenshot';
+    | 'screenshot'
+    | 'pressKey';
   /** Selector for the element (for click, type, hover) */
   selector?: string;
   /** Text to type (for type action) */
@@ -39,299 +50,277 @@ export interface RecordingStep {
   duration?: number;
   /** Scroll distance in pixels (for scroll action) */
   distance?: number;
+  /** Key to press (for pressKey action) - e.g., 'Escape', 'Enter' */
+  key?: string;
   /** Description of what this step does */
   description?: string;
+  /** If true, step failure won't stop recording (optional interactions) */
+  optional?: boolean;
+  /** If true, force the click even if element is obscured */
+  force?: boolean;
+}
+
+/** Per-script overrides for the generator */
+interface ScriptOverrides {
+  /** Steps to insert before the generated steps */
+  beforeSteps?: RecordingStep[];
+  /** Steps to insert after specific scene indices */
+  afterScene?: Record<number, RecordingStep[]>;
+  /** Override requiresAuth (default: true) */
+  requiresAuth?: boolean;
 }
 
 /**
- * Feature recording configurations for all 6 app features
+ * Convert a TikTok scene action to RecordingStep(s)
  */
-export const FEATURE_RECORDINGS: FeatureRecordingConfig[] = [
-  {
-    id: 'daily-transits',
-    name: 'Daily Transits',
-    startUrl: '/',
-    durationSeconds: 15,
-    steps: [
-      {
+function sceneToSteps(scene: Scene): RecordingStep[] {
+  const steps: RecordingStep[] = [];
+  const durationMs = scene.durationSeconds * 1000;
+
+  switch (scene.action) {
+    case 'show':
+      steps.push({
         type: 'wait',
-        duration: 1000,
-        description: 'Let app load',
-      },
-      {
+        duration: durationMs,
+        description: scene.description,
+      });
+      break;
+
+    case 'scroll':
+      steps.push({
+        type: 'scroll',
+        distance: scene.scrollDistance || 300,
+        description: scene.description,
+      });
+      // Use remaining time as a wait to let content settle
+      steps.push({
+        type: 'wait',
+        duration: Math.max(durationMs - 1000, 500),
+        description: `Show: ${scene.focusPoint}`,
+      });
+      break;
+
+    case 'click':
+    case 'expand':
+      if (scene.target) {
+        steps.push({
+          type: 'click',
+          selector: scene.target,
+          description: scene.description,
+          force: true,
+          optional: true,
+        });
+        steps.push({
+          type: 'wait',
+          duration: Math.max(durationMs - 500, 500),
+          description: `Show: ${scene.focusPoint}`,
+        });
+      }
+      break;
+
+    case 'type':
+      if (scene.target && scene.typeText) {
+        steps.push({
+          type: 'type',
+          selector: scene.target,
+          text: scene.typeText,
+          description: scene.description,
+        });
+        steps.push({
+          type: 'wait',
+          duration: Math.max(durationMs - 1000, 500),
+          description: `Show: ${scene.focusPoint}`,
+        });
+      }
+      break;
+
+    case 'navigate':
+      steps.push({
         type: 'navigate',
-        url: '/cosmic-weather',
-        description: 'Navigate to cosmic weather page',
-      },
-      {
+        url: scene.target || scene.path,
+        description: scene.description,
+      });
+      steps.push({
         type: 'wait',
-        duration: 2000,
-        description: 'Show daily transits overview',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll to see transit details',
-      },
-      {
+        duration: Math.max(durationMs - 1500, 500),
+        description: `Show: ${scene.focusPoint}`,
+      });
+      break;
+
+    case 'wait':
+      steps.push({
         type: 'wait',
-        duration: 2000,
-        description: 'Show detailed transit information',
-      },
-      {
-        type: 'click',
-        selector: '[data-transit-card]:first-child',
-        description: 'Click on first transit',
-      },
-      {
+        duration: durationMs,
+        description: scene.description,
+      });
+      break;
+  }
+
+  return steps;
+}
+
+/**
+ * Generate a FeatureRecordingConfig from a TikTok script
+ */
+function generateRecordingFromScript(
+  script: TikTokScript,
+  overrides?: ScriptOverrides,
+): FeatureRecordingConfig {
+  const steps: RecordingStep[] = [];
+
+  // Add pre-steps (e.g., dismiss modals)
+  if (overrides?.beforeSteps) {
+    steps.push(...overrides.beforeSteps);
+  }
+
+  // Add hook wait
+  steps.push({
+    type: 'wait',
+    duration: script.hook.durationSeconds * 1000,
+    description: `Hook: ${script.hook.text.substring(0, 60)}...`,
+  });
+
+  // Process each scene
+  let lastPath = script.scenes[0]?.path || '';
+
+  for (let i = 0; i < script.scenes.length; i++) {
+    const scene = script.scenes[i];
+
+    // Auto-insert navigate when path changes (and action isn't already navigate)
+    if (scene.path !== lastPath && scene.action !== 'navigate') {
+      steps.push({
+        type: 'navigate',
+        url: scene.path,
+        description: `Navigate to ${scene.path}`,
+      });
+      steps.push({
         type: 'wait',
-        duration: 3000,
-        description: 'Show personalized interpretation',
-      },
-    ],
+        duration: 1500,
+        description: 'Wait for page load',
+      });
+    }
+
+    // Convert scene to recording steps
+    steps.push(...sceneToSteps(scene));
+
+    // Add per-scene overrides
+    if (overrides?.afterScene?.[i]) {
+      steps.push(...overrides.afterScene[i]);
+    }
+
+    lastPath = scene.path;
+  }
+
+  // Add outro wait
+  steps.push({
+    type: 'wait',
+    duration: script.outro.durationSeconds * 1000,
+    description: `Outro: ${script.outro.text}`,
+  });
+
+  return {
+    id: script.id,
+    name: script.title,
+    startUrl: script.scenes[0]?.path || '/app',
+    steps,
+    durationSeconds: script.totalSeconds,
+    viewport: { width: 390, height: 844 },
+    requiresAuth: overrides?.requiresAuth ?? true,
+  };
+}
+
+// ============================================================================
+// RECORDING CONFIGS — generated from TikTok scripts with per-script overrides
+// ============================================================================
+
+const DISMISS_MODALS: RecordingStep[] = [
+  {
+    type: 'pressKey',
+    key: 'Escape',
+    description: 'Close any open modals',
   },
   {
-    id: 'synastry-comparison',
-    name: 'Relationship Compatibility',
-    startUrl: '/synastry',
-    durationSeconds: 18,
-    steps: [
-      {
-        type: 'wait',
-        duration: 1000,
-        description: 'Let page load',
-      },
-      {
-        type: 'click',
-        selector: '[data-add-person]',
-        description: 'Click add person button',
-      },
-      {
-        type: 'wait',
-        duration: 1000,
-        description: 'Form appears',
-      },
-      {
-        type: 'type',
-        selector: '[name="name"]',
-        text: 'Alex',
-        description: 'Enter name',
-      },
-      {
-        type: 'click',
-        selector: '[data-submit]',
-        description: 'Submit form',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show synastry chart',
-      },
-      {
-        type: 'scroll',
-        distance: 400,
-        description: 'Scroll to compatibility insights',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show detailed compatibility',
-      },
-      {
-        type: 'click',
-        selector: '[data-aspect-card]:first-child',
-        description: 'Click on first aspect',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Show aspect interpretation',
-      },
-    ],
-  },
-  {
-    id: 'pattern-recognition',
-    name: 'Pattern Recognition',
-    startUrl: '/patterns',
-    durationSeconds: 16,
-    steps: [
-      {
-        type: 'wait',
-        duration: 1000,
-        description: 'Let page load',
-      },
-      {
-        type: 'scroll',
-        distance: 200,
-        description: 'Show pattern overview',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Display discovered patterns',
-      },
-      {
-        type: 'click',
-        selector: '[data-pattern-card]:first-child',
-        description: 'Click on first pattern',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show pattern details',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll to correlations',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show transit correlations',
-      },
-    ],
-  },
-  {
-    id: 'birth-chart-walkthrough',
-    name: 'Birth Chart Walkthrough',
-    startUrl: '/chart',
-    durationSeconds: 20,
-    steps: [
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Let chart render',
-      },
-      {
-        type: 'hover',
-        selector: '[data-planet="sun"]',
-        description: 'Hover over Sun',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Show Sun tooltip',
-      },
-      {
-        type: 'hover',
-        selector: '[data-planet="moon"]',
-        description: 'Hover over Moon',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Show Moon tooltip',
-      },
-      {
-        type: 'click',
-        selector: '[data-planet="rising"]',
-        description: 'Click Rising sign',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show Rising interpretation',
-      },
-      {
-        type: 'scroll',
-        distance: 400,
-        description: 'Scroll to planet list',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show all placements',
-      },
-    ],
-  },
-  {
-    id: 'aspect-analysis',
-    name: 'Aspect Analysis',
-    startUrl: '/chart',
-    durationSeconds: 14,
-    steps: [
-      {
-        type: 'wait',
-        duration: 1000,
-        description: 'Let page load',
-      },
-      {
-        type: 'click',
-        selector: '[data-tab="aspects"]',
-        description: 'Switch to aspects tab',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Show aspects list',
-      },
-      {
-        type: 'scroll',
-        distance: 200,
-        description: 'Scroll through aspects',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Display aspect grid',
-      },
-      {
-        type: 'click',
-        selector: '[data-aspect]:first-child',
-        description: 'Click first aspect',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show aspect interpretation',
-      },
-    ],
-  },
-  {
-    id: 'moon-phase-guidance',
-    name: 'Moon Phase Rituals',
-    startUrl: '/moon',
-    durationSeconds: 16,
-    steps: [
-      {
-        type: 'wait',
-        duration: 1000,
-        description: 'Let page load',
-      },
-      {
-        type: 'scroll',
-        distance: 200,
-        description: 'Show moon phase calendar',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Display current phase',
-      },
-      {
-        type: 'click',
-        selector: '[data-moon-phase="full"]',
-        description: 'Click full moon',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show full moon guidance',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll to rituals',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show ritual suggestions',
-      },
-    ],
+    type: 'wait',
+    duration: 1000,
+    description: 'Wait for modal to close',
   },
 ];
+
+/** Script-specific overrides */
+const OVERRIDES: Record<string, ScriptOverrides> = {
+  'dashboard-overview': {
+    beforeSteps: DISMISS_MODALS,
+  },
+  'sky-now-deepdive': {
+    beforeSteps: DISMISS_MODALS,
+  },
+  'ritual-system': {
+    beforeSteps: DISMISS_MODALS,
+  },
+  'horoscope-deepdive': {
+    // Close numerology modal after scene 2 (click numerology-day)
+    afterScene: {
+      2: [
+        {
+          type: 'pressKey',
+          key: 'Escape',
+          description: 'Close numerology modal',
+        },
+        {
+          type: 'wait',
+          duration: 500,
+          description: 'Wait for modal to close',
+        },
+      ],
+    },
+  },
+  'numerology-deepdive': {
+    // numerology-close click is already in the scenes
+  },
+  'profile-circle': {
+    // Need to navigate to profile first (circle tab), friend card click is in scenes
+  },
+  'crystals-overview': {
+    requiresAuth: false,
+  },
+  'spells-overview': {
+    requiresAuth: false,
+  },
+  'grimoire-search': {
+    requiresAuth: false,
+    // Scroll back to top after category scroll so search input is visible for typing
+    afterScene: {
+      1: [
+        {
+          type: 'scroll',
+          distance: -400,
+          description: 'Scroll back to search bar',
+        },
+        {
+          type: 'wait',
+          duration: 500,
+          description: 'Let scroll settle',
+        },
+      ],
+    },
+  },
+};
+
+/**
+ * Generate all recording configs from TikTok scripts
+ */
+function generateAllConfigs(): FeatureRecordingConfig[] {
+  return TIKTOK_SCRIPTS.map((script) => {
+    const overrides = OVERRIDES[script.id];
+    return generateRecordingFromScript(script, overrides);
+  });
+}
+
+/**
+ * All 16 feature recording configurations
+ */
+export const FEATURE_RECORDINGS: FeatureRecordingConfig[] =
+  generateAllConfigs();
 
 /**
  * Get recording config for a specific feature

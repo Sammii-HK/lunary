@@ -270,7 +270,7 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
   const appWau = activity?.app_opened_wau ?? 0;
   const appMau = activity?.app_opened_mau ?? 0;
 
-  // Engaged metrics
+  // Engaged metrics (total events — shows usage intensity)
   const engagedDau = activity?.dau ?? 0;
   const engagedWau = activity?.wau ?? 0;
   const engagedMau = activity?.mau ?? 0;
@@ -325,7 +325,7 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
       ? [
           { label: 'Free users', value: conversions.funnel.free_users },
           { label: 'Trial users', value: conversions.funnel.trial_users },
-          { label: 'Paid users', value: conversions.funnel.paid_users },
+          { label: 'Subscribers', value: conversions.funnel.paid_users },
         ]
       : [];
 
@@ -343,18 +343,13 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
     if (appWau < appDau) {
       warnings.push('App WAU is below DAU, which suggests a window miscount.');
     }
-    if (engagedMau > appMau) {
-      warnings.push(
-        'Engaged MAU exceeds App MAU; key action totals surpass app opens.',
-      );
-    }
     if (productMaError) {
       warnings.push(
         'Signed-in Product MAU exceeds App MAU; review the canonical `app_opened` audit.',
       );
     }
     return warnings;
-  }, [appMau, appWau, appDau, engagedMau, productMaError]);
+  }, [appMau, appWau, appDau, productMaError]);
 
   // Pageviews per reach user
   const pageviewFeature = featureUsage?.features?.find(
@@ -751,17 +746,18 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
     };
   }, [cohorts?.cohorts]);
 
-  // Overall retention
+  // Overall retention (exclude immature cohorts where day7/day30 is null)
   const overallD7Retention = useMemo(() => {
     const rows = cohorts?.cohorts ?? [];
-    if (!rows.length) return 0;
-    const totalUsers = rows.reduce(
+    const mature = rows.filter((r: any) => r.day7 != null);
+    if (!mature.length) return 0;
+    const totalUsers = mature.reduce(
       (sum: number, r: any) => sum + (r.day0 || 0),
       0,
     );
     if (totalUsers === 0) return 0;
-    const weightedSum = rows.reduce(
-      (sum: number, r: any) => sum + ((r.day7 || 0) / 100) * (r.day0 || 0),
+    const weightedSum = mature.reduce(
+      (sum: number, r: any) => sum + (r.day7 / 100) * (r.day0 || 0),
       0,
     );
     return weightedSum / totalUsers;
@@ -769,14 +765,15 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
 
   const overallD30Retention = useMemo(() => {
     const rows = cohorts?.cohorts ?? [];
-    if (!rows.length) return 0;
-    const totalUsers = rows.reduce(
+    const mature = rows.filter((r: any) => r.day30 != null);
+    if (!mature.length) return 0;
+    const totalUsers = mature.reduce(
       (sum: number, r: any) => sum + (r.day0 || 0),
       0,
     );
     if (totalUsers === 0) return 0;
-    const weightedSum = rows.reduce(
-      (sum: number, r: any) => sum + ((r.day30 || 0) / 100) * (r.day0 || 0),
+    const weightedSum = mature.reduce(
+      (sum: number, r: any) => sum + (r.day30 / 100) * (r.day0 || 0),
       0,
     );
     return weightedSum / totalUsers;

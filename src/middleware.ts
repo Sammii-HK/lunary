@@ -15,14 +15,37 @@ const ANON_ID_COOKIE = 'lunary_anon_id';
 const AB_TEST_COOKIE = 'lunary_ab_tests';
 
 // A/B test definitions: test name -> variants with weights
+// All tests are assigned server-side via cookie for instant availability (no PostHog timing).
 const AB_TESTS: Record<string, { variants: string[]; weights?: number[] }> = {
   'inline-cta-style': {
     variants: ['control', 'minimal', 'sparkles', 'card'],
-    // Equal weights by default (25% each)
   },
   'grimoire-signup-page': {
     variants: ['control', 'value-prop'],
-    // 50/50 split
+  },
+  'cta-copy-test': {
+    variants: ['no-verb', 'mystical', 'simple'],
+  },
+  paywall_preview_style_v1: {
+    variants: ['blur', 'truncated'],
+  },
+  'homepage-features-test': {
+    variants: ['control', 'four-cards-updated', 'three-sections'],
+  },
+  feature_preview_blur_v1: {
+    variants: ['blur', 'peek'],
+  },
+  'transit-overflow-style': {
+    variants: ['blurred', 'blocked'],
+  },
+  'weekly-lock-style': {
+    variants: ['heavy-blur', 'light-blur', 'no-preview'],
+  },
+  'tarot-truncation-length': {
+    variants: ['short', 'medium', 'long'],
+  },
+  'transit-limit-test': {
+    variants: ['one-transit', 'two-transit'],
   },
 };
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { ParsedMarkdown } from '@/utils/markdown';
+import { Heading } from '@/components/ui/Heading';
 
 interface FAQAccordionProps {
   question: string;
@@ -22,9 +23,13 @@ export function FAQAccordion({
         className='w-full flex items-center justify-between text-left px-5 py-4 hover:bg-zinc-800/30 transition-colors'
         aria-expanded={isOpen}
       >
-        <h3 className='text-base md:text-lg font-normal text-lunary-secondary-200 pr-4'>
+        <Heading
+          as='h2'
+          variant='h3'
+          className='text-lunary-secondary-200 pr-4'
+        >
           {question}
-        </h3>
+        </Heading>
         <svg
           className={`w-5 h-5 text-zinc-400 flex-shrink-0 transition-transform ${
             isOpen ? 'rotate-180' : ''

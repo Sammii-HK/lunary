@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL('https://lunary.app'),
     title: 'Lunary',
     description:
-      'Your Lunar Diary - Astrology based on real astronomical data. Personalized birth chart analysis, daily horoscopes, tarot readings, moon phases, and cosmic guidance. Free monthly or annual trial - no card required.',
+      'Learn to read your own birth chart through daily practice. Track patterns, interpret transits, and understand relationships with full synastry analysis. 2,000+ free astrology articles.',
     manifest: PWA_MANIFEST_URL,
     keywords: [
       'astrology',
@@ -68,9 +68,9 @@ export async function generateMetadata(): Promise<Metadata> {
       },
     },
     openGraph: {
-      title: 'Lunary - Your Daily Cosmic Guide',
+      title: 'Lunary - Learn to Read Your Own Chart',
       description:
-        'Astrology based on real astronomical data. Personalized birth chart analysis, daily insights, and cosmic guidance.',
+        'Learn to read your own birth chart through daily practice. Track patterns, interpret transits, and understand relationships with full synastry analysis. 2,000+ free astrology articles.',
       url: 'https://lunary.app',
       siteName: 'Lunary',
       images: [
@@ -78,7 +78,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: '/api/og/cosmic',
           width: 1200,
           height: 630,
-          alt: 'Lunary - Your Daily Cosmic Guide',
+          alt: 'Lunary - The astrology app that teaches you to read your own chart',
         },
       ],
       locale: 'en_US',
@@ -86,9 +86,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Lunary - Your Daily Cosmic Guide',
+      title: 'Lunary - Learn to Read Your Own Chart',
       description:
-        'Astrology based on real astronomical data. Personalized birth chart analysis and daily insights.',
+        'Learn to read your own birth chart through daily practice. Track patterns, interpret transits, and understand relationships with full synastry analysis.',
       images: ['/api/og/cosmic'],
     },
     appleWebApp: {
