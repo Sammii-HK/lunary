@@ -27,6 +27,7 @@ logs/
 # generated data / output files
 /data/
 scripts/output/
+public/app-demos/
 
 # production
 /build

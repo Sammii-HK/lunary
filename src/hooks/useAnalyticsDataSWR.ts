@@ -1,25 +1,29 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import type {
   ActivityResponse,
   ConversionResponse,
   NotificationResponse,
   FeatureUsageResponse,
-  EngagementOverviewResponse,
-  FeatureAdoptionResponse,
   GrimoireHealthResponse,
-  ConversionInfluenceResponse,
+  EngagementOverviewResponse,
   CtaConversionResponse,
   CtaLocationsResponse,
-  Subscription30dResponse,
   AttributionResponse,
   GrimoireTopPage,
   IntentionBreakdown,
   InsightData,
   MetricSnapshot,
 } from './useAnalyticsData';
+import {
+  extractFeatureAdoption,
+  extractUserGrowth,
+  extractSubscription30d,
+  computeInsights,
+  type ConsolidatedSnapshot,
+} from '@/lib/analytics/snapshot-extractors';
 
 // Generic fetcher for SWR
 const fetcher = async (url: string) => {
@@ -81,28 +85,31 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
   const queryParams = `start_date=${startDate}&end_date=${endDate}`;
   const debugParam = includeAudit ? '&debug=1' : '';
 
-  // ── Tier 1: Snapshot tab (load immediately) ──────────────────────────
+  // ── Tier 1: Snapshot tab (12 calls total) ─────────────────────────
 
-  // Core metrics - refresh every 5 minutes
-  const { data: activity, error: activityError } = useSWR<ActivityResponse>(
+  // 1. Consolidated snapshot (replaces feature-adoption, user-growth, subscription-30d, insights)
+  const { data: snapshot, error: snapshotError } = useSWR<ConsolidatedSnapshot>(
+    `/api/admin/analytics/snapshot?${queryParams}`,
+    fetcher,
+    SWR_CONFIGS.REALTIME,
+  );
+
+  // 2. DAU/WAU/MAU — same params as original (granularity triggers fast/live path)
+  const { data: activityLive, error: activityError } = useSWR<ActivityResponse>(
     `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
     fetcher,
     SWR_CONFIGS.REALTIME,
   );
 
-  const { data: engagementOverview, error: engagementError } =
+  // 3. Engagement overview — debugParam passes includeAudit to trigger live path when needed
+  const { data: engagementOverviewLive, error: engagementOverviewError } =
     useSWR<EngagementOverviewResponse>(
       `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}`,
       fetcher,
       SWR_CONFIGS.REALTIME,
     );
 
-  const { data: userGrowth, error: userGrowthError } = useSWR(
-    `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}`,
-    fetcher,
-    SWR_CONFIGS.REALTIME,
-  );
-
+  // 4-12. Live endpoints that can't be pre-computed
   const { data: conversions, error: conversionsError } =
     useSWR<ConversionResponse>(
       `/api/admin/analytics/conversions?${queryParams}`,
@@ -110,18 +117,12 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
       SWR_CONFIGS.STANDARD,
     );
 
-  const { data: activation, error: activationError } = useSWR(
+  // Activation needs live query for per-feature breakdown by plan tier
+  const { data: activationLive, error: activationError } = useSWR(
     `/api/admin/analytics/activation?${queryParams}`,
     fetcher,
     SWR_CONFIGS.STANDARD,
   );
-
-  const { data: featureAdoption, error: featureAdoptionError } =
-    useSWR<FeatureAdoptionResponse>(
-      `/api/admin/analytics/feature-adoption?${queryParams}`,
-      fetcher,
-      SWR_CONFIGS.STANDARD,
-    );
 
   const { data: featureUsage, error: featureUsageError } =
     useSWR<FeatureUsageResponse>(
@@ -137,25 +138,11 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
       SWR_CONFIGS.STANDARD,
     );
 
-  const { data: conversionInfluence, error: conversionInfluenceError } =
-    useSWR<ConversionInfluenceResponse>(
-      `/api/admin/analytics/conversion-influence?${queryParams}`,
-      fetcher,
-      SWR_CONFIGS.STANDARD,
-    );
-
   const { data: successMetrics, error: successMetricsError } = useSWR(
     `/api/admin/analytics/success-metrics?${queryParams}`,
     fetcher,
     SWR_CONFIGS.STANDARD,
   );
-
-  const { data: subscription30d, error: subscription30dError } =
-    useSWR<Subscription30dResponse>(
-      `/api/admin/analytics/subscription-30d?${queryParams}`,
-      fetcher,
-      SWR_CONFIGS.STANDARD,
-    );
 
   const { data: attribution, error: attributionError } =
     useSWR<AttributionResponse>(
@@ -164,41 +151,31 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
       SWR_CONFIGS.DISABLED,
     );
 
-  const { data: insightsResponse, error: insightsError } = useSWR(
-    `/api/admin/analytics/insights?${queryParams}`,
-    fetcher,
-    SWR_CONFIGS.REALTIME,
-  );
-
-  const { data: intentionBreakdownData, error: intentionBreakdownError } =
-    useSWR(
-      `/api/admin/analytics/intention-breakdown?${queryParams}`,
-      fetcher,
-      SWR_CONFIGS.STANDARD,
-    );
-
-  const { data: metricSnapshotsWeekly, error: snapshotsWeeklyError } = useSWR(
-    `/api/admin/analytics/metric-snapshots?type=weekly&limit=12`,
+  // 7. Metric snapshots (single call returns both weekly + monthly)
+  const { data: metricSnapshotsData } = useSWR(
+    `/api/admin/analytics/metric-snapshots?type=both&limit=12`,
     fetcher,
     SWR_CONFIGS.DISABLED,
   );
 
-  const { data: metricSnapshotsMonthly, error: snapshotsMonthlyError } = useSWR(
-    `/api/admin/analytics/metric-snapshots?type=monthly&limit=12`,
-    fetcher,
-    SWR_CONFIGS.DISABLED,
-  );
+  // ── Tier 2: Operational tab (load on demand) ─────────────────────
 
-  // ── Tier 2: Operational tab (load on demand) ─────────────────────────
-  // SWR conditional fetching: pass null key to skip the request
-
-  const { data: cohorts, error: cohortsError } = useSWR(
+  const { data: cohorts } = useSWR(
     operationalTabActive
       ? `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`
       : null,
     fetcher,
     SWR_CONFIGS.DISABLED,
   );
+
+  const { data: intentionBreakdownData, error: intentionBreakdownError } =
+    useSWR(
+      operationalTabActive
+        ? `/api/admin/analytics/intention-breakdown?${queryParams}`
+        : null,
+      fetcher,
+      SWR_CONFIGS.STANDARD,
+    );
 
   const { data: ctaConversions, error: ctaConversionsError } =
     useSWR<CtaConversionResponse>(
@@ -218,16 +195,15 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
       SWR_CONFIGS.STANDARD,
     );
 
-  const { data: subscriptionLifecycle, error: subscriptionLifecycleError } =
-    useSWR(
-      operationalTabActive
-        ? `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`
-        : null,
-      fetcher,
-      SWR_CONFIGS.STANDARD,
-    );
+  const { data: subscriptionLifecycle } = useSWR(
+    operationalTabActive
+      ? `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`
+      : null,
+    fetcher,
+    SWR_CONFIGS.STANDARD,
+  );
 
-  const { data: planBreakdown, error: planBreakdownError } = useSWR(
+  const { data: planBreakdown } = useSWR(
     operationalTabActive
       ? `/api/admin/analytics/plan-breakdown?${queryParams}`
       : null,
@@ -235,7 +211,7 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     SWR_CONFIGS.STANDARD,
   );
 
-  const { data: apiCosts, error: apiCostsError } = useSWR(
+  const { data: apiCosts } = useSWR(
     operationalTabActive
       ? `/api/admin/analytics/api-costs?${queryParams}`
       : null,
@@ -243,7 +219,7 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     SWR_CONFIGS.DISABLED,
   );
 
-  const { data: userSegments, error: userSegmentsError } = useSWR(
+  const { data: userSegments } = useSWR(
     operationalTabActive
       ? `/api/admin/analytics/user-segments?${queryParams}`
       : null,
@@ -260,7 +236,7 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
       SWR_CONFIGS.DISABLED,
     );
 
-  const { data: discordAnalytics, error: discordError } = useSWR(
+  const { data: discordAnalytics } = useSWR(
     operationalTabActive
       ? `/api/analytics/discord-interactions?range=7d`
       : null,
@@ -268,7 +244,7 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     SWR_CONFIGS.DISABLED,
   );
 
-  const { data: searchConsoleResponse, error: searchConsoleError } = useSWR(
+  const { data: searchConsoleResponse } = useSWR(
     operationalTabActive
       ? `/api/admin/analytics/search-console?${queryParams}`
       : null,
@@ -276,17 +252,49 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     SWR_CONFIGS.DISABLED,
   );
 
-  const { data: grimoireTopPagesResponse, error: grimoireTopPagesError } =
-    useSWR(
-      operationalTabActive ? `/api/grimoire/stats?top=20` : null,
-      fetcher,
-      SWR_CONFIGS.DISABLED,
-    );
+  const { data: grimoireTopPagesResponse } = useSWR(
+    operationalTabActive ? `/api/grimoire/stats?top=20` : null,
+    fetcher,
+    SWR_CONFIGS.DISABLED,
+  );
 
-  // ── Refresh function ─────────────────────────────────────────────────
+  // ── Extract data from consolidated snapshot ────────────────────────
+
+  // Activity from live dau-wau-mau endpoint (returning users, app opened, engaged rate)
+  const activity = activityLive || null;
+
+  // Engagement overview from live endpoint (returning referrer, retention cohorts)
+  const engagementOverview = engagementOverviewLive || null;
+
+  const featureAdoption = useMemo(
+    () => (snapshot ? extractFeatureAdoption(snapshot) : null),
+    [snapshot],
+  );
+
+  // Activation from live endpoint (has per-feature breakdown by plan tier)
+  const activation = activationLive || null;
+
+  const userGrowth = useMemo(
+    () => (snapshot ? extractUserGrowth(snapshot) : null),
+    [snapshot],
+  );
+
+  const subscription30d = useMemo(
+    () => (snapshot ? extractSubscription30d(snapshot) : null),
+    [snapshot],
+  );
+
+  const insights: InsightData[] = useMemo(
+    () => (snapshot ? computeInsights(snapshot) : []),
+    [snapshot],
+  );
+
+  // Conversion influence comes from grimoire-health (no separate API call)
+  const conversionInfluence = grimoireHealth?.influence ?? null;
+
+  // ── Refresh function ───────────────────────────────────────────────
 
   const refresh = useCallback(async () => {
-    // Revalidate all SWR keys matching our API prefix
     await globalMutate(
       (key) => typeof key === 'string' && key.startsWith('/api/'),
       undefined,
@@ -294,30 +302,26 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     );
   }, [globalMutate]);
 
-  // ── Combine errors ───────────────────────────────────────────────────
+  // ── Combine errors ─────────────────────────────────────────────────
 
   const errors = [
-    activityError && 'DAU/WAU/MAU',
-    engagementError && 'Engagement overview',
-    featureAdoptionError && 'Feature adoption',
+    snapshotError && 'Snapshot (features, growth, subscription)',
+    activityError && 'DAU/WAU/MAU activity',
+    engagementOverviewError && 'Engagement overview',
+    activationError && 'Activation',
     grimoireHealthError && 'Grimoire health',
-    conversionInfluenceError && 'Conversion influence',
     conversionsError && 'Conversions',
     ctaConversionsError && 'CTA conversions',
     ctaLocationsError && 'CTA locations',
-    subscription30dError && 'Subscription 30d',
     notificationsError && 'Notifications',
     featureUsageError && 'Feature usage',
     attributionError && 'Attribution',
+    successMetricsError && 'Success metrics',
+    intentionBreakdownError && 'Intention breakdown',
   ].filter(Boolean);
 
-  // Only block on the 5 critical endpoints
-  const loading =
-    !activity ||
-    !engagementOverview ||
-    !conversions ||
-    !userGrowth ||
-    !activation;
+  // Only block on snapshot (the critical path)
+  const loading = !snapshot;
 
   // Parse intention breakdown
   const intentionBreakdown: IntentionBreakdown | null = intentionBreakdownData
@@ -330,25 +334,25 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
 
   return {
     // Data
-    activity: activity || null,
+    activity,
     conversions: conversions || null,
     notifications: notifications || null,
     featureUsage: featureUsage || null,
-    engagementOverview: engagementOverview || null,
-    featureAdoption: featureAdoption || null,
+    engagementOverview,
+    featureAdoption,
     grimoireHealth: grimoireHealth || null,
-    conversionInfluence: conversionInfluence || null,
+    conversionInfluence,
     ctaConversions: ctaConversions || null,
     ctaLocations: ctaLocations || null,
-    subscription30d: subscription30d || null,
+    subscription30d,
     attribution: attribution || null,
     successMetrics: successMetrics || null,
     discordAnalytics: discordAnalytics || null,
     searchConsoleData: searchConsoleResponse?.success
       ? searchConsoleResponse.data
       : null,
-    userGrowth: userGrowth || null,
-    activation: activation || null,
+    userGrowth,
+    activation,
     subscriptionLifecycle: subscriptionLifecycle || null,
     planBreakdown: planBreakdown || null,
     apiCosts: apiCosts || null,
@@ -357,10 +361,10 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     grimoireTopPages:
       (grimoireTopPagesResponse?.pages as GrimoireTopPage[]) || [],
     intentionBreakdown,
-    insights: (insightsResponse?.insights as InsightData[]) || [],
+    insights,
     metricSnapshots: {
-      weekly: (metricSnapshotsWeekly?.snapshots as MetricSnapshot[]) || [],
-      monthly: (metricSnapshotsMonthly?.snapshots as MetricSnapshot[]) || [],
+      weekly: (metricSnapshotsData?.weekly as MetricSnapshot[]) || [],
+      monthly: (metricSnapshotsData?.monthly as MetricSnapshot[]) || [],
     },
 
     // State

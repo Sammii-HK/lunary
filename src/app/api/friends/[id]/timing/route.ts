@@ -8,8 +8,9 @@ import type { BirthChartData } from '../../../../../../utils/astrology/birthChar
 
 type TimingWindow = {
   date: string;
+  endDate?: string;
   dateFormatted: string;
-  quality: 'great' | 'good' | 'neutral';
+  quality: 'great' | 'good' | 'neutral' | 'challenging';
   reason: string;
   transitingPlanet: string;
   aspectType: string;
@@ -196,16 +197,100 @@ function calculateRelationshipTiming(
         });
       }
     }
+
+    // Check for challenging times (Mars squares/oppositions)
+    const transitMars = positions['Mars'];
+    if (transitMars && userMercury && friendMercury) {
+      const userAspect = findAspect(
+        transitMars.longitude,
+        userMercury.eclipticLongitude,
+      );
+      const friendAspect = findAspect(
+        transitMars.longitude,
+        friendMercury.eclipticLongitude,
+      );
+
+      if (
+        userAspect &&
+        !userAspect.isHarmonious &&
+        friendAspect &&
+        !friendAspect.isHarmonious
+      ) {
+        timingWindows.push({
+          date: date.format('YYYY-MM-DD'),
+          dateFormatted: date.format('MMM D'),
+          quality: 'challenging',
+          reason: `Mars creates tension in communication - not ideal for difficult conversations`,
+          transitingPlanet: 'Mars',
+          aspectType: `${userAspect.aspectType}/${friendAspect.aspectType}`,
+          affectedPlanets: ['Mercury', 'Mercury'],
+        });
+      }
+    }
+
+    // Check Saturn challenging aspects (delays, restrictions)
+    const transitSaturn = positions['Saturn'];
+    if (transitSaturn && userVenus && friendVenus) {
+      const userAspect = findAspect(
+        transitSaturn.longitude,
+        userVenus.eclipticLongitude,
+      );
+      const friendAspect = findAspect(
+        transitSaturn.longitude,
+        friendVenus.eclipticLongitude,
+      );
+
+      if (
+        userAspect &&
+        !userAspect.isHarmonious &&
+        friendAspect &&
+        !friendAspect.isHarmonious
+      ) {
+        timingWindows.push({
+          date: date.format('YYYY-MM-DD'),
+          dateFormatted: date.format('MMM D'),
+          quality: 'challenging',
+          reason: `Saturn brings heaviness - wait on major relationship decisions`,
+          transitingPlanet: 'Saturn',
+          aspectType: `${userAspect.aspectType}/${friendAspect.aspectType}`,
+          affectedPlanets: ['Venus', 'Venus'],
+        });
+      }
+    }
   }
 
-  // Sort by quality and date, return top windows
-  return timingWindows
-    .sort((a, b) => {
-      if (a.quality === 'great' && b.quality !== 'great') return -1;
-      if (b.quality === 'great' && a.quality !== 'great') return 1;
-      return dayjs(a.date).valueOf() - dayjs(b.date).valueOf();
-    })
-    .slice(0, 10);
+  // Sort by date first, then quality
+  const qualityOrder = { great: 0, good: 1, neutral: 2, challenging: 3 };
+  const sorted = timingWindows.sort((a, b) => {
+    const dateCompare = dayjs(a.date).valueOf() - dayjs(b.date).valueOf();
+    if (dateCompare !== 0) return dateCompare;
+    return qualityOrder[a.quality] - qualityOrder[b.quality];
+  });
+
+  // Group consecutive dates with same quality and reason into windows
+  const grouped: TimingWindow[] = [];
+  for (const window of sorted) {
+    const last = grouped[grouped.length - 1];
+    if (
+      last &&
+      last.quality === window.quality &&
+      last.transitingPlanet === window.transitingPlanet &&
+      last.reason === window.reason
+    ) {
+      // Check if consecutive (within 1 day)
+      const lastEnd = last.endDate || last.date;
+      const daysDiff = dayjs(window.date).diff(dayjs(lastEnd), 'day');
+      if (daysDiff <= 1) {
+        // Extend the window
+        last.endDate = window.date;
+        last.dateFormatted = `${dayjs(last.date).format('MMM D')}-${dayjs(window.date).format('D')}`;
+        continue;
+      }
+    }
+    grouped.push({ ...window });
+  }
+
+  return grouped.slice(0, 10);
 }
 
 /**

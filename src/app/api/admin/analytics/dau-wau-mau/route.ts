@@ -467,7 +467,7 @@ export async function GET(request: NextRequest) {
           engaged_users_dau: allUserDau,
           engaged_users_wau: allUserWau,
           engaged_users_mau: allUserMau,
-          // Engaged rates - not computable from snapshots (need total event counts)
+          // Engaged rate = total events / product users (not in daily_metrics, needs live path)
           engaged_rate_dau: null,
           engaged_rate_wau: null,
           engaged_rate_mau: null,
@@ -1264,7 +1264,7 @@ export async function GET(request: NextRequest) {
         ? (signedInProductWau / signedInProductMau) * 100
         : 0;
 
-    // Engaged Rate = events per signed-in user (how much each user engages)
+    // Engaged Rate = total events / product users (events per user)
     const engagedRateDau =
       productDau > 0 ? engagementEventsDau / productDau : 0;
     const engagedRateWau =
@@ -1281,10 +1281,10 @@ export async function GET(request: NextRequest) {
       engaged_users_dau: engagementUsersDau,
       engaged_users_wau: engagementUsersWau,
       engaged_users_mau: engagementUsersMau,
-      // Engaged Rate = events per signed-in user (replaces stickiness)
-      engaged_rate_dau: Number(engagedRateDau.toFixed(2)),
-      engaged_rate_wau: Number(engagedRateWau.toFixed(2)),
-      engaged_rate_mau: Number(engagedRateMau.toFixed(2)),
+      // Engaged Rate = total events / product users (events per user)
+      engaged_rate_dau: Number(engagedRateDau.toFixed(1)),
+      engaged_rate_wau: Number(engagedRateWau.toFixed(1)),
+      engaged_rate_mau: Number(engagedRateMau.toFixed(1)),
       // Keep stickiness for backwards compatibility
       stickiness_dau_mau:
         engagementUsersMau > 0

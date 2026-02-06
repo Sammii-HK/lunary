@@ -2,52 +2,12 @@
 
 import useSWR from 'swr';
 import { formatDateInput } from '@/lib/analytics/utils';
+import type { ConsolidatedSnapshot } from '@/lib/analytics/snapshot-extractors';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export interface AnalyticsSnapshot {
-  source: 'hybrid' | 'snapshot';
-  snapshot_date: string;
-  range: { start: Date; end: Date };
-
-  // Core engagement
-  dau: number;
-  wau: number;
-  mau: number;
-  signed_in_product_dau: number;
-  signed_in_product_wau: number;
-  signed_in_product_mau: number;
-  app_opened_mau: number;
-
-  // Stickiness
-  stickiness: number;
-  stickiness_dau_mau: number;
-  stickiness_wau_mau: number;
-  avg_active_days_per_week: number;
-
-  // Growth
-  new_signups: number;
-  activated_users: number;
-  activation_rate: number;
-
-  // Revenue
-  mrr: number;
-  active_subscriptions: number;
-  trial_subscriptions: number;
-  new_conversions: number;
-
-  // Feature adoption
-  feature_adoption: {
-    dashboard: number;
-    horoscope: number;
-    tarot: number;
-    chart: number;
-    guide: number;
-    ritual: number;
-  };
-
-  is_realtime_dau: boolean;
-}
+// Re-export the consolidated type for consumers
+export type AnalyticsSnapshot = ConsolidatedSnapshot;
 
 interface UseAnalyticsSnapshotOptions {
   startDate?: string;
@@ -56,7 +16,7 @@ interface UseAnalyticsSnapshotOptions {
 
 /**
  * Fast analytics hook using single snapshot endpoint
- * Loads in <1s instead of 30s
+ * Loads in <100ms instead of 30s
  */
 export function useAnalyticsSnapshot(
   options: UseAnalyticsSnapshotOptions = {},

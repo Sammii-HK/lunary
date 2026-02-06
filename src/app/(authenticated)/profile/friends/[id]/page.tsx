@@ -13,6 +13,7 @@ import {
   Sun,
   Moon,
   TrendingUp,
+  Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
@@ -777,8 +778,9 @@ function PlacementSection({
 
 type TimingWindow = {
   date: string;
+  endDate?: string;
   dateFormatted: string;
-  quality: 'great' | 'good' | 'neutral';
+  quality: 'great' | 'good' | 'neutral' | 'challenging';
   reason: string;
   transitingPlanet: string;
   aspectType: string;
@@ -883,17 +885,26 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
                 key={i}
                 className={`flex items-center gap-3 p-3 rounded-lg ${
                   timing.quality === 'great'
-                    ? 'bg-green-900/20 border border-green-800/30'
-                    : 'bg-zinc-800/50'
+                    ? 'bg-lunary-success-900/20 border border-lunary-success-800/30'
+                    : timing.quality === 'challenging'
+                      ? 'bg-lunary-rose-900/20 border border-lunary-rose-800/30'
+                      : timing.quality === 'good'
+                        ? 'bg-lunary-secondary-900/20 border border-lunary-secondary-800/30'
+                        : 'bg-zinc-800/50'
                 }`}
               >
-                <Calendar
-                  className={`w-5 h-5 ${
-                    timing.quality === 'great'
-                      ? 'text-green-400'
-                      : 'text-zinc-400'
-                  }`}
-                />
+                {timing.quality === 'great' && (
+                  <Sparkles className='w-5 h-5 text-lunary-success-400' />
+                )}
+                {timing.quality === 'good' && (
+                  <Calendar className='w-5 h-5 text-lunary-secondary-400' />
+                )}
+                {timing.quality === 'challenging' && (
+                  <Clock className='w-5 h-5 text-lunary-rose-400' />
+                )}
+                {timing.quality === 'neutral' && (
+                  <Calendar className='w-5 h-5 text-zinc-400' />
+                )}
                 <div className='flex-1'>
                   <div className='text-sm font-medium text-white'>
                     {timing.dateFormatted}
@@ -901,13 +912,18 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
                   <div className='text-xs text-zinc-400'>{timing.reason}</div>
                 </div>
                 {timing.quality === 'great' && (
-                  <span className='text-xs px-2 py-0.5 rounded-full bg-green-800/50 text-green-300'>
-                    Great
+                  <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-success-800/50 text-lunary-success-300'>
+                    Great Window
                   </span>
                 )}
                 {timing.quality === 'good' && (
-                  <span className='text-xs px-2 py-0.5 rounded-full bg-blue-800/50 text-blue-300'>
+                  <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-secondary-800/50 text-lunary-secondary-300'>
                     Good
+                  </span>
+                )}
+                {timing.quality === 'challenging' && (
+                  <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-rose-800/50 text-lunary-rose-300'>
+                    Wait on This
                   </span>
                 )}
               </div>
@@ -930,16 +946,25 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
         {sharedEvents.length > 0 ? (
           <div className='space-y-3'>
             {sharedEvents.map((event, i) => (
-              <div key={i} className='p-3 rounded-lg bg-zinc-800/50'>
-                <div className='flex items-center justify-between mb-1'>
-                  <div className='text-sm font-medium text-white'>
-                    {event.event}
+              <div
+                key={i}
+                className='flex items-start gap-3 p-3 rounded-lg bg-lunary-accent-900/20 border border-lunary-accent-800/30'
+              >
+                <Moon className='w-5 h-5 text-lunary-accent-400 mt-0.5' />
+                <div className='flex-1'>
+                  <div className='flex items-center justify-between mb-1'>
+                    <div className='text-sm font-medium text-white'>
+                      {event.event}
+                    </div>
+                    <div className='text-xs text-zinc-500'>
+                      {event.dateFormatted}
+                    </div>
                   </div>
-                  <div className='text-xs text-zinc-500'>
-                    {event.dateFormatted}
-                  </div>
+                  <div className='text-xs text-zinc-400'>{event.impact}</div>
                 </div>
-                <div className='text-xs text-zinc-400'>{event.impact}</div>
+                <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-accent-800/50 text-lunary-accent-300'>
+                  Shared Event
+                </span>
               </div>
             ))}
           </div>

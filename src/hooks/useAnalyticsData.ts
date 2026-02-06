@@ -3,6 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AuditInfo } from '@/lib/analytics/kpis';
 import { formatDateInput } from '@/lib/analytics/utils';
+import {
+  extractFeatureAdoption,
+  extractUserGrowth,
+  extractSubscription30d,
+  computeInsights,
+  type ConsolidatedSnapshot,
+} from '@/lib/analytics/snapshot-extractors';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -23,10 +30,10 @@ export type ActivityResponse = {
   engaged_users_dau: number;
   engaged_users_wau: number;
   engaged_users_mau: number;
-  // Engaged rate = events per signed-in user
-  engaged_rate_dau: number;
-  engaged_rate_wau: number;
-  engaged_rate_mau: number;
+  // Engaged rate = total events / product users (null when using fast path)
+  engaged_rate_dau: number | null;
+  engaged_rate_wau: number | null;
+  engaged_rate_mau: number | null;
   // Legacy stickiness (kept for backwards compatibility)
   stickiness_dau_mau: number;
   stickiness_wau_mau: number;
@@ -461,24 +468,26 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
     setError(null);
 
     const queryParams = `start_date=${startDate}&end_date=${endDate}`;
-    const debugParam = includeAudit ? '&debug=1' : '';
 
     try {
-      // ALL requests in parallel - no more sequential batches
+      // Consolidated: 1 snapshot replaces 8 endpoints
+      // + 5 live endpoints + 1 metric-snapshots = 7 snapshot-tab calls
+      // + 12 operational endpoints (kept as-is)
       const [
-        activityRes,
+        // Snapshot tab (10 calls)
+        snapshotRes,
+        dauWauMauRes,
         engagementOverviewRes,
         conversionsRes,
-        userGrowthRes,
         activationRes,
-        cohortsRes,
-        featureAdoptionRes,
         featureUsageRes,
         grimoireHealthRes,
-        conversionInfluenceRes,
         successMetricsRes,
+        attributionRes,
+        metricSnapshotsRes,
+        // Operational tab (12 calls)
+        cohortsRes,
         intentionBreakdownRes,
-        subscription30dRes,
         subscriptionLifecycleRes,
         planBreakdownRes,
         ctaConversionsRes,
@@ -486,34 +495,28 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         apiCostsRes,
         userSegmentsRes,
         notificationsRes,
-        attributionRes,
         discordRes,
         searchConsoleRes,
-        insightsRes,
         grimoireTopPagesRes,
       ] = await Promise.all([
-        // Core metrics
+        // Snapshot tab: 1 consolidated + 8 live + 1 metric-snapshots
+        fetch(`/api/admin/analytics/snapshot?${queryParams}`),
         fetch(
           `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
         ),
         fetch(
-          `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}`,
+          `/api/admin/analytics/engagement-overview?${queryParams}${includeAudit ? '&debug=1' : ''}`,
         ),
         fetch(`/api/admin/analytics/conversions?${queryParams}`),
-        fetch(
-          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}`,
-        ),
         fetch(`/api/admin/analytics/activation?${queryParams}`),
-        fetch(`/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`),
-        // Feature metrics
-        fetch(`/api/admin/analytics/feature-adoption?${queryParams}`),
         fetch(`/api/admin/analytics/feature-usage?${queryParams}`),
         fetch(`/api/admin/analytics/grimoire-health?${queryParams}`),
-        fetch(`/api/admin/analytics/conversion-influence?${queryParams}`),
         fetch(`/api/admin/analytics/success-metrics?${queryParams}`),
+        fetch(`/api/admin/analytics/attribution?${queryParams}`),
+        fetch('/api/admin/analytics/metric-snapshots?type=both&limit=12'),
+        // Operational tab endpoints
+        fetch(`/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`),
         fetch(`/api/admin/analytics/intention-breakdown?${queryParams}`),
-        // Subscription & monetization
-        fetch(`/api/admin/analytics/subscription-30d?${queryParams}`),
         fetch(
           `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`,
         ),
@@ -522,75 +525,51 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         fetch(`/api/admin/analytics/cta-locations?${queryParams}`),
         fetch(`/api/admin/analytics/api-costs?${queryParams}`),
         fetch(`/api/admin/analytics/user-segments?${queryParams}`),
-        // External & misc
         fetch(`/api/admin/analytics/notifications?${queryParams}`),
-        fetch(`/api/admin/analytics/attribution?${queryParams}`),
         fetch(`/api/analytics/discord-interactions?range=7d`),
         fetch(`/api/admin/analytics/search-console?${queryParams}`),
-        fetch(`/api/admin/analytics/insights?${queryParams}`),
         fetch(`/api/grimoire/stats?top=20`),
       ]);
 
       const errors: string[] = [];
 
-      if (activityRes.ok) {
-        setActivity(await activityRes.json());
+      // --- Consolidated snapshot → 4 data fields ---
+      if (snapshotRes.ok) {
+        const snapshot: ConsolidatedSnapshot = await snapshotRes.json();
+        setFeatureAdoption(extractFeatureAdoption(snapshot));
+        setUserGrowth(extractUserGrowth(snapshot));
+        setSubscription30d(extractSubscription30d(snapshot));
+        setInsights(computeInsights(snapshot));
+        setConversionInfluence(null);
       } else {
-        errors.push('DAU/WAU/MAU');
+        errors.push('Snapshot (features, growth, subscription)');
       }
 
+      // --- DAU/WAU/MAU (live, has returning users + app opened fallback) ---
+      if (dauWauMauRes.ok) {
+        setActivity(await dauWauMauRes.json());
+      } else {
+        errors.push('DAU/WAU/MAU activity');
+      }
+
+      // --- Engagement overview (live, has returning referrer fallback) ---
       if (engagementOverviewRes.ok) {
         setEngagementOverview(await engagementOverviewRes.json());
       } else {
         errors.push('Engagement overview');
       }
 
-      if (featureAdoptionRes.ok) {
-        setFeatureAdoption(await featureAdoptionRes.json());
-      } else {
-        errors.push('Feature adoption');
-      }
-
-      if (grimoireHealthRes.ok) {
-        setGrimoireHealth(await grimoireHealthRes.json());
-      } else {
-        errors.push('Grimoire health');
-      }
-
-      if (conversionInfluenceRes.ok) {
-        setConversionInfluence(await conversionInfluenceRes.json());
-      } else {
-        errors.push('Conversion influence');
-      }
-
+      // --- Live endpoints ---
       if (conversionsRes.ok) {
         setConversions(await conversionsRes.json());
       } else {
         errors.push('Conversions');
       }
 
-      if (ctaConversionsRes.ok) {
-        setCtaConversions(await ctaConversionsRes.json());
+      if (activationRes.ok) {
+        setActivation(await activationRes.json());
       } else {
-        errors.push('CTA conversions');
-      }
-
-      if (ctaLocationsRes.ok) {
-        setCtaLocations(await ctaLocationsRes.json());
-      } else {
-        errors.push('CTA locations');
-      }
-
-      if (subscription30dRes.ok) {
-        setSubscription30d(await subscription30dRes.json());
-      } else {
-        errors.push('Subscription 30d');
-      }
-
-      if (notificationsRes.ok) {
-        setNotifications(await notificationsRes.json());
-      } else {
-        errors.push('Notifications');
+        errors.push('Activation');
       }
 
       if (featureUsageRes.ok) {
@@ -599,10 +578,15 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         errors.push('Feature usage');
       }
 
-      if (attributionRes.ok) {
-        setAttribution(await attributionRes.json());
+      if (grimoireHealthRes.ok) {
+        const ghData = await grimoireHealthRes.json();
+        setGrimoireHealth(ghData);
+        // grimoire-health includes conversion influence data
+        if (ghData.influence) {
+          setConversionInfluence(ghData.influence);
+        }
       } else {
-        errors.push('Attribution');
+        errors.push('Grimoire health');
       }
 
       if (successMetricsRes.ok) {
@@ -611,43 +595,24 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         errors.push('Success metrics');
       }
 
-      if (discordRes.ok) {
-        setDiscordAnalytics(await discordRes.json());
+      if (attributionRes.ok) {
+        setAttribution(await attributionRes.json());
+      } else {
+        errors.push('Attribution');
       }
 
-      if (searchConsoleRes.ok) {
-        const searchData = await searchConsoleRes.json();
-        if (searchData.success) {
-          setSearchConsoleData(searchData.data);
-        }
+      // Metric snapshots (single call returns both weekly + monthly)
+      if (metricSnapshotsRes.ok) {
+        const data = await metricSnapshotsRes.json();
+        setMetricSnapshots({
+          weekly: data.weekly ?? [],
+          monthly: data.monthly ?? [],
+        });
       }
 
-      if (userGrowthRes.ok) {
-        setUserGrowth(await userGrowthRes.json());
-      }
-
-      if (activationRes.ok) {
-        setActivation(await activationRes.json());
-      }
-
-      if (subscriptionLifecycleRes.ok) {
-        setSubscriptionLifecycle(await subscriptionLifecycleRes.json());
-      }
-
-      if (planBreakdownRes.ok) {
-        setPlanBreakdown(await planBreakdownRes.json());
-      }
-
-      if (apiCostsRes.ok) {
-        setApiCosts(await apiCostsRes.json());
-      }
-
+      // --- Operational endpoints ---
       if (cohortsRes.ok) {
         setCohorts(await cohortsRes.json());
-      }
-
-      if (userSegmentsRes.ok) {
-        setUserSegments(await userSegmentsRes.json());
       }
 
       if (intentionBreakdownRes.ok) {
@@ -662,9 +627,49 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         errors.push('Intention breakdown');
       }
 
-      if (insightsRes.ok) {
-        const data = await insightsRes.json();
-        setInsights(data.insights || []);
+      if (subscriptionLifecycleRes.ok) {
+        setSubscriptionLifecycle(await subscriptionLifecycleRes.json());
+      }
+
+      if (planBreakdownRes.ok) {
+        setPlanBreakdown(await planBreakdownRes.json());
+      }
+
+      if (ctaConversionsRes.ok) {
+        setCtaConversions(await ctaConversionsRes.json());
+      } else {
+        errors.push('CTA conversions');
+      }
+
+      if (ctaLocationsRes.ok) {
+        setCtaLocations(await ctaLocationsRes.json());
+      } else {
+        errors.push('CTA locations');
+      }
+
+      if (apiCostsRes.ok) {
+        setApiCosts(await apiCostsRes.json());
+      }
+
+      if (userSegmentsRes.ok) {
+        setUserSegments(await userSegmentsRes.json());
+      }
+
+      if (notificationsRes.ok) {
+        setNotifications(await notificationsRes.json());
+      } else {
+        errors.push('Notifications');
+      }
+
+      if (discordRes.ok) {
+        setDiscordAnalytics(await discordRes.json());
+      }
+
+      if (searchConsoleRes.ok) {
+        const searchData = await searchConsoleRes.json();
+        if (searchData.success) {
+          setSearchConsoleData(searchData.data);
+        }
       }
 
       if (grimoireTopPagesRes.ok) {
@@ -684,34 +689,12 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
     } finally {
       setLoading(false);
     }
-  }, [granularity, startDate, endDate, includeAudit]);
+  }, [startDate, endDate]);
 
   // Fetch analytics on mount and when dependencies change
   useEffect(() => {
     fetchAnalytics();
   }, [fetchAnalytics]);
-
-  // Fetch metric snapshots on mount
-  useEffect(() => {
-    const fetchSnapshots = async () => {
-      try {
-        const [weeklyRes, monthlyRes] = await Promise.all([
-          fetch('/api/admin/analytics/metric-snapshots?type=weekly&limit=12'),
-          fetch('/api/admin/analytics/metric-snapshots?type=monthly&limit=12'),
-        ]);
-        const weekly = weeklyRes.ok
-          ? ((await weeklyRes.json()).snapshots ?? [])
-          : [];
-        const monthly = monthlyRes.ok
-          ? ((await monthlyRes.json()).snapshots ?? [])
-          : [];
-        setMetricSnapshots({ weekly, monthly });
-      } catch {
-        // Snapshots are supplementary - fail silently
-      }
-    };
-    fetchSnapshots();
-  }, []);
 
   // Close export menu when clicking outside
   useEffect(() => {
