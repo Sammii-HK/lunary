@@ -32,49 +32,55 @@ export async function GET(request: NextRequest) {
     const family = searchParams.get('family');
     const eventType = familyToEventType(family);
 
-    // FAST PATH: Use pre-computed daily_metrics for instant load.
+    // FAST PATH: Use pre-computed daily_metrics + lightweight real-time queries for today.
     // daily_metrics uses user_id counts (no identity resolution) — close enough
     // for dashboard monitoring. Use ?debug=1 for exact identity-resolved numbers.
     {
-      const snapshotResult = await sql.query(
-        `SELECT *
-      FROM daily_metrics
-      WHERE metric_date >= $1 AND metric_date <= $2
-      ORDER BY metric_date ASC`,
-        [
-          range.start.toISOString().split('T')[0],
-          range.end.toISOString().split('T')[0],
-        ],
-      );
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const rangeEndDate = new Date(range.end);
+      rangeEndDate.setUTCHours(0, 0, 0, 0);
+      const includesToday = rangeEndDate.getTime() >= today.getTime();
+      const tomorrow = new Date(today);
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
 
-      // Check if returning_referrer data exists in daily_metrics.
-      // If all zeros, the cron hasn't populated these columns yet — fall through to live path.
-      const hasReferrerData =
-        snapshotResult.rows.length > 0 &&
-        snapshotResult.rows.some(
-          (r) =>
-            Number(r.returning_referrer_organic || 0) +
-              Number(r.returning_referrer_direct || 0) +
-              Number(r.returning_referrer_internal || 0) >
-            0,
-        );
+      const TEST_EMAIL_PATTERN = '%@test.lunary.app';
+      const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
-      const hasActiveDaysData = snapshotResult.rows.some(
-        (r) =>
-          Number(r.active_days_1 || 0) +
-            Number(r.active_days_2_3 || 0) +
-            Number(r.active_days_4_7 || 0) >
-          0,
-      );
+      const [snapshotResult, todaySignupsResult] = await Promise.all([
+        sql.query(
+          `SELECT *
+        FROM daily_metrics
+        WHERE metric_date >= $1 AND metric_date <= $2
+        ORDER BY metric_date ASC`,
+          [
+            range.start.toISOString().split('T')[0],
+            range.end.toISOString().split('T')[0],
+          ],
+        ),
+        // Real-time: count today's signups (cheap query, ~5ms)
+        includesToday
+          ? sql.query(
+              `SELECT COUNT(*) as count
+             FROM "user"
+             WHERE "createdAt" >= $1 AND "createdAt" < $2
+               AND (email IS NULL OR (email NOT LIKE $3 AND email != $4))`,
+              [
+                today.toISOString(),
+                tomorrow.toISOString(),
+                TEST_EMAIL_PATTERN,
+                TEST_EMAIL_EXACT,
+              ],
+            )
+          : Promise.resolve(null),
+      ]);
 
-      if (
-        snapshotResult.rows.length > 0 &&
-        !includeAudit &&
-        hasReferrerData &&
-        hasActiveDaysData
-      ) {
+      if (snapshotResult.rows.length > 0 && !includeAudit) {
         const rows = snapshotResult.rows;
         const latest = rows[rows.length - 1];
+        const todaySignups = todaySignupsResult
+          ? Number(todaySignupsResult.rows[0]?.count || 0)
+          : 0;
         const dau = Number(latest.dau || 0);
         const wau = Number(latest.wau || 0);
         const mau = Number(latest.mau || 0);
@@ -125,10 +131,9 @@ export async function GET(request: NextRequest) {
           returning_dau: Number(latest.returning_dau || 0),
           returning_wau: Number(latest.returning_wau || 0),
           returning_mau: Number(latest.returning_mau || 0),
-          new_users: rows.reduce(
-            (sum, row) => sum + Number(row.new_signups || 0),
-            0,
-          ),
+          new_users:
+            rows.reduce((sum, row) => sum + Number(row.new_signups || 0), 0) +
+            todaySignups,
           returning_users_lifetime: Number(latest.returning_mau || 0),
           returning_users_range: Number(latest.returning_mau || 0),
           // Active days distribution
