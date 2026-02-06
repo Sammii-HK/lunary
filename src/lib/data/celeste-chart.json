@@ -1,0 +1,202 @@
+[
+  {
+    "body": "Sun",
+    "sign": "Capricorn",
+    "degree": 25,
+    "minute": 4,
+    "retrograde": false,
+    "eclipticLongitude": 295.0783407965632
+  },
+  {
+    "body": "Moon",
+    "sign": "Virgo",
+    "degree": 17,
+    "minute": 30,
+    "retrograde": false,
+    "eclipticLongitude": 167.50119126967783
+  },
+  {
+    "body": "Mercury",
+    "sign": "Capricorn",
+    "degree": 11,
+    "minute": 20,
+    "retrograde": true,
+    "eclipticLongitude": 281.34236632829004
+  },
+  {
+    "body": "Venus",
+    "sign": "Aquarius",
+    "degree": 0,
+    "minute": 41,
+    "retrograde": true,
+    "eclipticLongitude": 300.68714264606456
+  },
+  {
+    "body": "Mars",
+    "sign": "Sagittarius",
+    "degree": 19,
+    "minute": 54,
+    "retrograde": false,
+    "eclipticLongitude": 259.90922051238084
+  },
+  {
+    "body": "Jupiter",
+    "sign": "Cancer",
+    "degree": 3,
+    "minute": 21,
+    "retrograde": true,
+    "eclipticLongitude": 93.36603328025112
+  },
+  {
+    "body": "Saturn",
+    "sign": "Capricorn",
+    "degree": 17,
+    "minute": 18,
+    "retrograde": false,
+    "eclipticLongitude": 287.3143953278553
+  },
+  {
+    "body": "Uranus",
+    "sign": "Capricorn",
+    "degree": 6,
+    "minute": 36,
+    "retrograde": false,
+    "eclipticLongitude": 276.6120586394487
+  },
+  {
+    "body": "Neptune",
+    "sign": "Capricorn",
+    "degree": 12,
+    "minute": 33,
+    "retrograde": false,
+    "eclipticLongitude": 282.5653582530946
+  },
+  {
+    "body": "Pluto",
+    "sign": "Scorpio",
+    "degree": 17,
+    "minute": 25,
+    "retrograde": false,
+    "eclipticLongitude": 227.42884628854748
+  },
+  {
+    "body": "Ascendant",
+    "sign": "Taurus",
+    "degree": 21,
+    "minute": 11,
+    "retrograde": false,
+    "eclipticLongitude": 51.185554213911644
+  },
+  {
+    "body": "Descendant",
+    "sign": "Scorpio",
+    "degree": 21,
+    "minute": 11,
+    "retrograde": false,
+    "eclipticLongitude": 231.1855542139117
+  },
+  {
+    "body": "Midheaven",
+    "sign": "Capricorn",
+    "degree": 22,
+    "minute": 44,
+    "retrograde": false,
+    "eclipticLongitude": 292.73838624917573
+  },
+  {
+    "body": "North Node",
+    "sign": "Aquarius",
+    "degree": 16,
+    "minute": 27,
+    "retrograde": false,
+    "eclipticLongitude": 316.4500397886228
+  },
+  {
+    "body": "South Node",
+    "sign": "Leo",
+    "degree": 16,
+    "minute": 32,
+    "retrograde": false,
+    "eclipticLongitude": 136.53482245696694
+  },
+  {
+    "body": "Chiron",
+    "sign": "Cancer",
+    "degree": 15,
+    "minute": 13,
+    "retrograde": true,
+    "eclipticLongitude": 105.22743081079471
+  },
+  {
+    "body": "Lilith",
+    "sign": "Scorpio",
+    "degree": 7,
+    "minute": 46,
+    "retrograde": false,
+    "eclipticLongitude": 217.77513495342032
+  },
+  {
+    "body": "Ceres",
+    "sign": "Aquarius",
+    "degree": 18,
+    "minute": 49,
+    "retrograde": false,
+    "eclipticLongitude": 318.82397642673715
+  },
+  {
+    "body": "Pallas",
+    "sign": "Capricorn",
+    "degree": 27,
+    "minute": 55,
+    "retrograde": false,
+    "eclipticLongitude": 297.92522336653485
+  },
+  {
+    "body": "Juno",
+    "sign": "Pisces",
+    "degree": 7,
+    "minute": 10,
+    "retrograde": false,
+    "eclipticLongitude": 337.1697805480853
+  },
+  {
+    "body": "Vesta",
+    "sign": "Leo",
+    "degree": 25,
+    "minute": 44,
+    "retrograde": true,
+    "eclipticLongitude": 145.73652448442897
+  },
+  {
+    "body": "Hygiea",
+    "sign": "Cancer",
+    "degree": 6,
+    "minute": 56,
+    "retrograde": true,
+    "eclipticLongitude": 96.94025537257812
+  },
+  {
+    "body": "Pholus",
+    "sign": "Aquarius",
+    "degree": 5,
+    "minute": 59,
+    "retrograde": false,
+    "eclipticLongitude": 305.995904638331
+  },
+  {
+    "body": "Psyche",
+    "sign": "Pisces",
+    "degree": 1,
+    "minute": 3,
+    "retrograde": false,
+    "eclipticLongitude": 331.0585312590853
+  },
+  {
+    "body": "Eros",
+    "sign": "Aquarius",
+    "degree": 3,
+    "minute": 49,
+    "retrograde": false,
+    "eclipticLongitude": 303.82490418003164
+  }
+]

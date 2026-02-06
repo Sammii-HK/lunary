@@ -411,7 +411,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: 'comparison', changeFrequency: 'monthly', priority: 0.8 },
     { path: 'horoscope', changeFrequency: 'daily', priority: 0.7 },
     { path: 'tarot', changeFrequency: 'daily', priority: 0.7 },
-    { path: 'birth-chart', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'birth-chart', changeFrequency: 'weekly', priority: 0.9 },
     { path: 'guide', changeFrequency: 'monthly', priority: 0.7 },
     { path: 'help', changeFrequency: 'monthly', priority: 0.7 },
     { path: 'press-kit', changeFrequency: 'monthly', priority: 0.6 },

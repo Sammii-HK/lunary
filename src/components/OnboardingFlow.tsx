@@ -1291,7 +1291,7 @@ export function OnboardingFlow({
                 Profile
               </Link>
               <Link
-                href='/birth-chart'
+                href='/app/birth-chart'
                 onClick={handleComplete}
                 className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
               >

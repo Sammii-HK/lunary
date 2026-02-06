@@ -124,7 +124,7 @@ export const BirthChartWidget = () => {
 
       <div className='text-center mt-3'>
         <Link
-          href='/birth-chart'
+          href='/app/birth-chart'
           className='text-lunary-accent text-xs underline'
         >
           View Full Chart

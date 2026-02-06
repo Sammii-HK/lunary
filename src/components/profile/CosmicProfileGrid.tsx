@@ -36,7 +36,7 @@ export function CosmicProfileGrid({
       </SectionTitle>
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
         <Link
-          href='/birth-chart'
+          href='/app/birth-chart'
           className='group rounded-xl border border-lunary-primary-700 bg-gradient-to-br from-lunary-primary-950/60 to-zinc-900 p-4 shadow-lg hover:border-lunary-primary-600 transition-colors'
         >
           <div className='flex items-center justify-between'>

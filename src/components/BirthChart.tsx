@@ -106,6 +106,7 @@ type BirthChartProps = {
   birthDate?: string;
   showAspects?: boolean;
   aspectFilter?: 'all' | 'harmonious' | 'challenging';
+  showAsteroids?: boolean;
   onAspectsToggle?: (show: boolean) => void;
 };
 
@@ -116,6 +117,7 @@ export const BirthChart = ({
   birthDate,
   showAspects = false,
   aspectFilter = 'all',
+  showAsteroids = true,
   onAspectsToggle,
 }: BirthChartProps) => {
   const [hoveredBody, setHoveredBody] = useState<string | null>(null);
@@ -208,20 +210,27 @@ export const BirthChart = ({
 
   const allAspects = useAspects(chartData);
 
+  const asteroidNames = ASTEROIDS;
   const aspects = useMemo(() => {
-    if (aspectFilter === 'all') return allAspects;
-    if (aspectFilter === 'harmonious') {
-      return allAspects.filter((a) =>
-        ['Trine', 'Sextile', 'Conjunction'].includes(a.type),
+    let filtered = allAspects;
+    if (!showAsteroids) {
+      filtered = filtered.filter(
+        (a) =>
+          !asteroidNames.includes(a.planet1) &&
+          !asteroidNames.includes(a.planet2),
       );
     }
-    if (aspectFilter === 'challenging') {
-      return allAspects.filter((a) =>
+    if (aspectFilter === 'harmonious') {
+      filtered = filtered.filter((a) =>
+        ['Trine', 'Sextile', 'Conjunction'].includes(a.type),
+      );
+    } else if (aspectFilter === 'challenging') {
+      filtered = filtered.filter((a) =>
         ['Square', 'Opposition'].includes(a.type),
       );
     }
-    return allAspects;
-  }, [allAspects, aspectFilter]);
+    return filtered;
+  }, [allAspects, aspectFilter, showAsteroids, asteroidNames]);
 
   return (
     <div className='flex flex-col items-center space-y-4 md:space-y-6'>
@@ -426,84 +435,82 @@ export const BirthChart = ({
           ))}
 
           {/* Render all planets */}
-          {[...mainPlanets, ...angles, ...points, ...asteroids].map(
-            ({ body, x, y, retrograde, sign, degree, minute }) => {
-              const isAngle = ANGLES.includes(body);
-              const isPoint = POINTS.includes(body);
-              const isPlanet = MAIN_PLANETS.includes(body);
-              const isAsteroid = ASTEROIDS.includes(body);
-              const isHovered = body === hoveredBody;
+          {[
+            ...mainPlanets,
+            ...angles,
+            ...points,
+            ...(showAsteroids ? asteroids : []),
+          ].map(({ body, x, y, retrograde, sign, degree, minute }) => {
+            const isAngle = ANGLES.includes(body);
+            const isPoint = POINTS.includes(body);
+            const isPlanet = MAIN_PLANETS.includes(body);
+            const isAsteroid = ASTEROIDS.includes(body);
+            const isHovered = body === hoveredBody;
 
-              // Get element color for planets based on their sign
-              const elementColor =
-                isPlanet && sign && SIGN_ELEMENTS[sign]
-                  ? ELEMENT_COLORS[SIGN_ELEMENTS[sign]]
-                  : undefined;
+            // Get element color for planets based on their sign
+            const elementColor =
+              isPlanet && sign && SIGN_ELEMENTS[sign]
+                ? ELEMENT_COLORS[SIGN_ELEMENTS[sign]]
+                : undefined;
 
-              const baseColor = retrograde
-                ? '#f87171'
-                : isAngle
-                  ? '#C77DFF'
-                  : isPoint
-                    ? '#7B7BE8'
-                    : isAsteroid
-                      ? '#FCD34D'
-                      : elementColor || '#ffffff';
+            const baseColor = retrograde
+              ? '#f87171'
+              : isAngle
+                ? '#C77DFF'
+                : isPoint
+                  ? '#7B7BE8'
+                  : isAsteroid
+                    ? '#FCD34D'
+                    : elementColor || '#ffffff';
 
-              const color = isHovered ? '#ffffff' : baseColor;
-              const opacity = isHovered ? 1 : hoveredBody ? 0.4 : 1;
+            const color = isHovered ? '#ffffff' : baseColor;
+            const opacity = isHovered ? 1 : hoveredBody ? 0.4 : 1;
 
-              return (
-                <g
-                  key={body}
-                  className={cx('planet-node', styles.planetNode)}
-                  onMouseEnter={() => setHoveredBody(body)}
-                  onMouseLeave={() => setHoveredBody(null)}
-                  onClick={() =>
-                    setHighlightedPlanet(
-                      highlightedPlanet === body ? null : body,
-                    )
+            return (
+              <g
+                key={body}
+                className={cx('planet-node', styles.planetNode)}
+                onMouseEnter={() => setHoveredBody(body)}
+                onMouseLeave={() => setHoveredBody(null)}
+                onClick={() =>
+                  setHighlightedPlanet(highlightedPlanet === body ? null : body)
+                }
+                opacity={opacity}
+              >
+                <title>
+                  {formatPlacementLabel({
+                    body,
+                    sign,
+                    degree,
+                    minute,
+                    retrograde,
+                  })}
+                </title>
+                <line
+                  x1='0'
+                  y1='0'
+                  x2={x}
+                  y2={y}
+                  stroke={color}
+                  strokeWidth={isHovered ? '0.5' : '0.3'}
+                  opacity='0.2'
+                />
+                <text
+                  x={x}
+                  y={y}
+                  textAnchor='middle'
+                  dominantBaseline='central'
+                  className={cx('planet-glyph font-astro', styles.planetGlyph)}
+                  fontSize={
+                    isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
                   }
-                  opacity={opacity}
+                  fill={color}
                 >
-                  <title>
-                    {formatPlacementLabel({
-                      body,
-                      sign,
-                      degree,
-                      minute,
-                      retrograde,
-                    })}
-                  </title>
-                  <line
-                    x1='0'
-                    y1='0'
-                    x2={x}
-                    y2={y}
-                    stroke={color}
-                    strokeWidth={isHovered ? '0.5' : '0.3'}
-                    opacity='0.2'
-                  />
-                  <text
-                    x={x}
-                    y={y}
-                    textAnchor='middle'
-                    dominantBaseline='central'
-                    className={cx(
-                      'planet-glyph font-astro',
-                      styles.planetGlyph,
-                    )}
-                    fontSize={
-                      isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
-                    }
-                    fill={color}
-                  >
-                    {getSymbolForBody(body)}
-                  </text>
-                </g>
-              );
-            },
-          )}
+                  {getSymbolForBody(body)}
+                </text>
+              </g>
+            );
+          })}
         </svg>
       </div>
 
