@@ -181,6 +181,7 @@ export function AppChrome() {
     '/features',
     '/faq',
     '/about',
+    '/circle',
   ];
 
   const isCoreMarketingRoute =

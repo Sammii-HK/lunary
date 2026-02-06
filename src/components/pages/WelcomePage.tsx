@@ -216,7 +216,7 @@ export default function WelcomePage() {
               </p>
               <p className='text-zinc-300'>
                 <span className='text-lunary-primary-400'>Lunary:</span> Full
-                synastry with 31+ aspects + Best Times to Connect
+                synastry analysis + Best Times to Connect
               </p>
               <p className='text-zinc-400'>
                 <span className='text-zinc-500'>Generic apps:</span> Tell you
@@ -232,7 +232,7 @@ export default function WelcomePage() {
                 Plus: 2,000+ free education articles
               </p>
               <Button variant='outline' asChild>
-                <Link href='#features'>See all features</Link>
+                <Link href='/features'>See all features</Link>
               </Button>
             </div>
           </div>
@@ -354,8 +354,8 @@ export default function WelcomePage() {
                   </Heading>
                 </div>
                 <p className='text-sm text-zinc-400'>
-                  See exactly how your charts interact with 31+ aspects
-                  analyzed. Element and modality balance comparisons.
+                  See exactly how your charts interact with full aspect
+                  analysis. Element and modality balance comparisons.
                 </p>
               </div>
               <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5 space-y-3'>
