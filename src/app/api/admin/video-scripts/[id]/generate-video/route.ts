@@ -96,24 +96,29 @@ export async function POST(
     );
     const safeSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '-');
 
-    const { images, overlays, highlightTerms, highlightColor } =
-      buildThematicVideoComposition({
-        script: script.fullScript,
-        facet: matchedFacet || {
-          dayIndex: 0,
-          title: script.facetTitle,
-          grimoireSlug: slug,
-          focus: script.facetTitle,
-          shortFormHook: script.facetTitle,
-          threads: {
-            keyword: script.facetTitle,
-            angles: [],
-          },
+    const {
+      images,
+      overlays,
+      highlightTerms,
+      highlightColor,
+      categoryVisuals,
+    } = buildThematicVideoComposition({
+      script: script.fullScript,
+      facet: matchedFacet || {
+        dayIndex: 0,
+        title: script.facetTitle,
+        grimoireSlug: slug,
+        focus: script.facetTitle,
+        shortFormHook: script.facetTitle,
+        threads: {
+          keyword: script.facetTitle,
+          angles: [],
         },
-        theme,
-        baseUrl,
-        slug,
-      });
+      },
+      theme,
+      baseUrl,
+      slug,
+    });
 
     const audioBuffer = await generateVoiceover(script.fullScript, {
       voiceName: 'alloy',
@@ -151,30 +156,23 @@ export async function POST(
           2.6,
         );
 
-        // Determine format based on number of images
+        // Use MediumFormVideo for thematic videos (multi-segment), ShortFormVideo for short
         const remotionFormat =
-          images.length > 1 ? 'MediumFormVideo' : 'ShortFormVideo';
+          audioDuration > 45 ? 'MediumFormVideo' : 'ShortFormVideo';
+
+        // Unique seed per render — same script + timestamp = different background each time
+        const videoSeed = `${safeSlug}-${scriptId}-${Date.now()}`;
 
         videoBuffer = await renderRemotionVideo({
           format: remotionFormat,
           outputPath: '',
           segments,
           audioUrl: audioBlob.url,
-          images:
-            images.length > 1
-              ? images.map((img, idx) => ({
-                  url: img.url,
-                  startTime:
-                    img.startTime || (idx * audioDuration) / images.length,
-                  endTime:
-                    img.endTime || ((idx + 1) * audioDuration) / images.length,
-                  topic: script.facetTitle,
-                }))
-              : undefined,
-          backgroundImage: images.length === 1 ? images[0].url : undefined,
           highlightTerms: highlightTerms || [],
           durationSeconds: audioDuration + 2,
           overlays: overlays || [],
+          categoryVisuals,
+          seed: videoSeed,
         });
 
         console.log(`✅ Remotion: Video rendered with shooting stars`);

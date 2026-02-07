@@ -33,8 +33,17 @@ const SCRIPT_VERSION = {
   long: 'v24',
 };
 
-// Bank of CTA messages to rotate through
-const CTA_MESSAGES = [
+// Engagement CTAs for TikTok interaction
+const ENGAGEMENT_CTAS = [
+  'Which part hit different?',
+  'Drop your sign below',
+  'Save this for later',
+  'Does this resonate?',
+  'Comment your experience',
+];
+
+// Brand CTAs to drive traffic
+const BRAND_CTAS = [
   'Dive deeper with Lunary',
   'Find more insights on Lunary',
   'Learn more with Lunary',
@@ -42,8 +51,10 @@ const CTA_MESSAGES = [
   'Discover more with Lunary',
 ];
 
+// 70% engagement / 30% brand rotation
 function getRandomCTA(): string {
-  return CTA_MESSAGES[Math.floor(Math.random() * CTA_MESSAGES.length)];
+  const pool = Math.random() < 0.7 ? ENGAGEMENT_CTAS : BRAND_CTAS;
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 export const runtime = 'nodejs';
@@ -1290,6 +1301,7 @@ export async function POST(request: NextRequest) {
               })),
               highlightTerms: [],
               durationSeconds: actualAudioDuration! + 2, // Add buffer at end
+              seed: `${weekKey}-${type}-${Date.now()}`,
             });
             console.log(
               `✅ Remotion: Video rendered with ${topicImages.length} images, shooting stars, animated subtitles`,
@@ -1402,6 +1414,7 @@ export async function POST(request: NextRequest) {
             backgroundImage: imageUrl,
             highlightTerms: [],
             durationSeconds: actualAudioDuration! + 2,
+            seed: `${weekKey}-short-${Date.now()}`,
           });
           console.log(
             `✅ Remotion: Short-form video rendered with shooting stars, animated subtitles`,

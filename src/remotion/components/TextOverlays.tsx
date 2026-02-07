@@ -1,29 +1,34 @@
 import React from 'react';
 import { useCurrentFrame, useVideoConfig, interpolate, Easing } from 'remotion';
 
-interface Overlay {
+export interface Overlay {
   text: string;
   startTime: number;
   endTime: number;
-  style?: 'hook' | 'cta' | 'stamp' | 'chapter';
+  style?: 'hook' | 'hook_large' | 'cta' | 'stamp' | 'chapter';
 }
 
 interface TextOverlaysProps {
   overlays: Overlay[];
+  /** Accent color for themed elements (hook highlight, CTA underline, stamp border) */
+  accentColor?: string;
 }
 
 /**
- * Text Overlays Component - matches FFmpeg styling exactly
+ * Text Overlays Component - matches FFmpeg styling with category theming
  *
  * Styles:
- * - hook: 55% from top, fontSize 46px
- * - cta: 25% from top, fontSize 48px
- * - stamp: 90% from top, fontSize 32px
+ * - hook: 55% from top, fontSize 46px, first highlight term colored
+ * - cta: 25% from top, fontSize 48px, subtle accent underline
+ * - stamp: 90% from top, fontSize 32px, left accent border
  * - chapter: 55% from top, fontSize 44px
  *
  * All use: Roboto Mono Regular (400), white, no background, outline + shadow
  */
-export const TextOverlays: React.FC<TextOverlaysProps> = ({ overlays }) => {
+export const TextOverlays: React.FC<TextOverlaysProps> = ({
+  overlays,
+  accentColor,
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const currentTime = frame / fps;
@@ -135,6 +140,10 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({ overlays }) => {
 
         const opacity = Math.min(fadeIn, fadeOut);
 
+        // Style-specific accent enhancements
+        const isStamp = style === 'stamp';
+        const isCta = style === 'cta';
+
         return (
           <div
             key={`overlay-${index}-${overlay.startTime}`}
@@ -155,11 +164,30 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({ overlays }) => {
                 style={{
                   fontFamily: 'Roboto Mono, monospace',
                   fontSize,
-                  fontWeight: 400, // Regular weight to match FFmpeg RobotoMono-Regular
+                  fontWeight: 400,
                   color: '#ffffff',
                   lineHeight: `${lineHeight}px`,
                   margin: 0,
                   textShadow,
+                  // Stamp: left accent border + semi-transparent background
+                  ...(isStamp && accentColor
+                    ? {
+                        borderLeft: `3px solid ${accentColor}`,
+                        paddingLeft: 12,
+                        paddingTop: 4,
+                        paddingBottom: 4,
+                        backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                        display: 'inline-block',
+                      }
+                    : {}),
+                  // CTA: subtle accent underline
+                  ...(isCta && accentColor
+                    ? {
+                        borderBottom: `2px solid ${accentColor}`,
+                        paddingBottom: 4,
+                        display: 'inline-block',
+                      }
+                    : {}),
                 }}
               >
                 {line}

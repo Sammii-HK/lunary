@@ -2,7 +2,7 @@ import React from 'react';
 import { useCurrentFrame, interpolate, Easing } from 'remotion';
 import { COLORS, STYLES } from '../styles/theme';
 import type { AudioSegment } from '../utils/timing';
-import { secondsToFrames } from '../utils/timing';
+import { secondsToFrames, splitTextWithTiming } from '../utils/timing';
 
 interface AnimatedSubtitlesProps {
   /** Audio segments with text and timing */
@@ -17,15 +17,18 @@ interface AnimatedSubtitlesProps {
   bottomPosition?: number;
   /** FPS for timing calculations */
   fps?: number;
+  /** Enable word-level highlighting (TikTok CapCut style) */
+  wordHighlight?: boolean;
 }
 
 /**
  * Animated Subtitles Component
  *
  * Brand-compliant subtitle system:
- * - Clean fade-in by sentence (not word-by-word)
- * - Subtle keyword emphasis via opacity or slight weight change
- * - Smooth 200ms fade-out
+ * - Clean fade-in by sentence
+ * - Word-level highlighting: active word scales up and colors
+ * - Keyword emphasis via color
+ * - Smooth 200ms fade in/out
  * - Good contrast against dark backgrounds
  */
 export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
@@ -35,6 +38,7 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
   fontSize = STYLES.subtitle.fontSize,
   bottomPosition = 12,
   fps = 30,
+  wordHighlight = true,
 }) => {
   const frame = useCurrentFrame();
   const currentTime = frame / fps;
@@ -90,18 +94,71 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
     },
   );
 
-  // Render text with highlights
+  // Check if a word is a highlight term
+  const isHighlightTerm = (word: string): boolean => {
+    if (highlightTerms.length === 0) return false;
+    const clean = word.replace(/[.,!?;:'"]/g, '');
+    return highlightTerms.some(
+      (term) => clean.toLowerCase() === term.toLowerCase(),
+    );
+  };
+
+  // Render text with word-level highlighting
+  const renderWordHighlight = () => {
+    const wordTimings = splitTextWithTiming(
+      currentSegment.text,
+      currentSegment.startTime,
+      currentSegment.endTime,
+      fps,
+    );
+
+    return wordTimings.map((wt, index) => {
+      const isActive = frame >= wt.startFrame && frame < wt.endFrame;
+      const isKeyword = isHighlightTerm(wt.word);
+
+      // Scale animation for active word (3 frame transition)
+      const scaleTransition = 3;
+      const scale = isActive
+        ? interpolate(
+            frame,
+            [wt.startFrame, wt.startFrame + scaleTransition],
+            [1.0, 1.08],
+            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+          )
+        : 1.0;
+
+      // Active word or keyword gets highlight color
+      const color = isActive || isKeyword ? highlightColor : COLORS.primaryText;
+      const fontWeight = isActive ? 600 : isKeyword ? 500 : 500;
+
+      return (
+        <span
+          key={index}
+          style={{
+            color,
+            fontWeight,
+            display: 'inline-block',
+            transform: `scale(${scale})`,
+            transition: 'transform 0.1s ease-out',
+            marginRight: '0.25em',
+          }}
+        >
+          {wt.word}
+        </span>
+      );
+    });
+  };
+
+  // Legacy render: highlight terms only (no word-level)
   const renderText = () => {
     if (highlightTerms.length === 0) {
       return currentSegment.text;
     }
 
-    // Build regex to find highlight terms
     const escapedTerms = highlightTerms.map((term) =>
       term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
     );
     const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
-
     const parts = currentSegment.text.split(regex);
 
     return parts.map((part, index) => {
@@ -132,18 +189,17 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
         textAlign: 'center',
         opacity,
         transform: `translateY(${slideUp}px)`,
-        zIndex: 15, // Above stars (5), below fade transitions (100)
+        zIndex: 15,
       }}
     >
       <p
         style={{
           fontFamily: 'Roboto Mono, monospace',
           fontSize,
-          fontWeight: 500, // Medium weight - less bold
+          fontWeight: 500,
           color: COLORS.primaryText,
           lineHeight: 1.4,
           margin: 0,
-          // Softer shadow - subtle outline + gentle glow
           textShadow: `
             -1px -1px 0 rgba(0,0,0,0.5),
             1px -1px 0 rgba(0,0,0,0.5),
@@ -154,7 +210,7 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
           `,
         }}
       >
-        {renderText()}
+        {wordHighlight ? renderWordHighlight() : renderText()}
       </p>
     </div>
   );

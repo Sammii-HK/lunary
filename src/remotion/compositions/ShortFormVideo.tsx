@@ -1,25 +1,14 @@
 import React from 'react';
-import {
-  AbsoluteFill,
-  Audio,
-  Img,
-  useCurrentFrame,
-  useVideoConfig,
-} from 'remotion';
+import { AbsoluteFill, Audio, useVideoConfig } from 'remotion';
 import { AnimatedBackground } from '../components/AnimatedBackground';
 import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
-import { TextOverlays } from '../components/TextOverlays';
+import { TextOverlays, type Overlay } from '../components/TextOverlays';
+import { HookIntro } from '../components/HookIntro';
 import { ProgressIndicator } from '../components/ProgressIndicator';
 import { TransitionEffect } from '../components/TransitionEffect';
 import type { AudioSegment } from '../utils/timing';
+import type { CategoryVisualConfig } from '../config/category-visuals';
 import { COLORS } from '../styles/theme';
-
-interface Overlay {
-  text: string;
-  startTime: number;
-  endTime: number;
-  style?: 'hook' | 'cta' | 'stamp' | 'chapter';
-}
 
 export interface ShortFormVideoProps {
   /** Title/hook text for the intro (deprecated - use overlays) */
@@ -30,7 +19,7 @@ export interface ShortFormVideoProps {
   segments?: AudioSegment[];
   /** Audio file URL */
   audioUrl?: string;
-  /** Background images (with timestamps) */
+  /** Background images (with timestamps) — optional, animated bg used when absent */
   images?: Array<{
     url: string;
     startTime: number;
@@ -46,63 +35,49 @@ export interface ShortFormVideoProps {
   overlays?: Overlay[];
   /** Unique seed for generating different star positions and comet paths */
   seed?: string;
+  /** Category visual configuration for themed backgrounds */
+  categoryVisuals?: CategoryVisualConfig;
 }
 
 /**
  * Short Form Video Composition (15-60 seconds)
  *
  * Optimized for TikTok, Instagram Reels, YouTube Shorts
- * - Hook sequence at start
+ * - Animated hook intro at start
  * - Animated subtitles throughout
- * - Premium dark aesthetic
+ * - Category-themed animated backgrounds
  * - 9:16 aspect ratio (1080x1920)
  */
 export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
-  hookText,
-  hookSubtitle,
   segments,
   audioUrl,
-  images,
-  backgroundImage,
   highlightTerms = [],
   showProgress = true,
   overlays = [],
   seed = 'default',
+  categoryVisuals,
 }) => {
-  const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  // Determine current background image - use last image as fallback to prevent early fade
-  const currentTime = frame / fps;
-  let currentImage = backgroundImage;
-
-  if (images && images.length > 0) {
-    const activeImage = images.find(
-      (img) => currentTime >= img.startTime && currentTime < img.endTime,
-    );
-    // Fall back to LAST image (not first) to keep showing until video ends
-    currentImage = activeImage?.url || images[images.length - 1].url;
-  }
+  // Separate hook overlays from other overlays — hooks are rendered by HookIntro
+  const hookOverlay = overlays.find(
+    (o) => o.style === 'hook' || o.style === 'hook_large',
+  );
+  const otherOverlays = overlays.filter(
+    (o) => o.style !== 'hook' && o.style !== 'hook_large',
+  );
 
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.cosmicBlack }}>
-      {/* Background image first */}
-      {currentImage && (
-        <AbsoluteFill>
-          <Img
-            src={currentImage}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              opacity: 0.6, // Dim for text readability
-            }}
-          />
-        </AbsoluteFill>
-      )}
-
-      {/* Stars render ON TOP of background image */}
-      <AnimatedBackground showStars={true} overlayMode={true} seed={seed} />
+      {/* Animated background with category gradient — the full visual backdrop */}
+      <AnimatedBackground
+        showStars={true}
+        overlayMode={false}
+        seed={seed}
+        animationType={categoryVisuals?.backgroundAnimation}
+        particleTintColor={categoryVisuals?.particleTintColor}
+        gradientColors={categoryVisuals?.gradientColors}
+      />
 
       {/* Fade in from black */}
       <TransitionEffect
@@ -112,25 +87,48 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
         direction='in'
       />
 
+      {/* Animated hook intro — word-by-word entrance */}
+      {hookOverlay && (
+        <HookIntro
+          text={hookOverlay.text}
+          startTime={hookOverlay.startTime}
+          endTime={hookOverlay.endTime}
+          accentColor={categoryVisuals?.accentColor}
+          highlightTerms={highlightTerms}
+        />
+      )}
+
       {/* Animated subtitles - matches FFmpeg ASS styling */}
       {segments && segments.length > 0 && (
         <AnimatedSubtitles
           segments={segments}
           highlightTerms={highlightTerms}
+          highlightColor={categoryVisuals?.highlightColor}
           fontSize={44}
           bottomPosition={12}
           fps={fps}
         />
       )}
 
-      {/* Text overlays (hook, cta, stamps, chapters) - matches FFmpeg drawtext */}
-      {overlays.length > 0 && <TextOverlays overlays={overlays} />}
+      {/* Text overlays (cta, stamps, chapters) — hooks handled above */}
+      {otherOverlays.length > 0 && (
+        <TextOverlays
+          overlays={otherOverlays}
+          accentColor={categoryVisuals?.accentColor}
+        />
+      )}
 
       {/* Audio track */}
       {audioUrl && <Audio src={audioUrl} />}
 
       {/* Progress indicator */}
-      {showProgress && <ProgressIndicator position='bottom' height={2} />}
+      {showProgress && (
+        <ProgressIndicator
+          position='bottom'
+          height={2}
+          color={categoryVisuals?.accentColor}
+        />
+      )}
 
       {/* Fade out at end */}
       <TransitionEffect

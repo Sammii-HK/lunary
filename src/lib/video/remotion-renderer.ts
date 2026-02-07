@@ -3,6 +3,7 @@ import { readFile, unlink, mkdtemp } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import type { AudioSegment } from '@/remotion/utils/timing';
+import type { CategoryVisualConfig } from '@/remotion/config/category-visuals';
 
 // Note: @remotion/bundler and @remotion/renderer are dynamically imported
 // to avoid Next.js trying to parse the esbuild binary at compile time
@@ -76,7 +77,7 @@ interface Overlay {
   text: string;
   startTime: number;
   endTime: number;
-  style?: 'hook' | 'cta' | 'stamp' | 'chapter';
+  style?: 'hook' | 'hook_large' | 'cta' | 'stamp' | 'chapter';
 }
 
 export interface RemotionVideoProps {
@@ -117,6 +118,10 @@ export interface RemotionVideoProps {
   };
   /** Text overlays (hook, cta, stamps, chapters) */
   overlays?: Overlay[];
+  /** Category visual configuration for themed backgrounds */
+  categoryVisuals?: CategoryVisualConfig;
+  /** Unique seed for deterministic but varied backgrounds per render */
+  seed?: string;
 }
 
 /**
@@ -156,6 +161,9 @@ export async function renderRemotionVideo(
   // Prepare input props based on format
   let inputProps: Record<string, unknown>;
 
+  // Generate a fallback seed if none provided
+  const seed = props.seed || `video-${Date.now()}`;
+
   if (props.format === 'ShortFormVideo') {
     inputProps = {
       hookText: props.hookText || props.title,
@@ -167,6 +175,8 @@ export async function renderRemotionVideo(
       highlightTerms: props.highlightTerms || [],
       showProgress: true,
       overlays: props.overlays || [],
+      categoryVisuals: props.categoryVisuals,
+      seed,
     };
   } else if (props.format === 'MediumFormVideo') {
     inputProps = {
@@ -178,6 +188,8 @@ export async function renderRemotionVideo(
       highlightTerms: props.highlightTerms || [],
       showProgress: true,
       overlays: props.overlays || [],
+      categoryVisuals: props.categoryVisuals,
+      seed,
     };
   } else {
     // LongFormVideo
@@ -194,6 +206,8 @@ export async function renderRemotionVideo(
         title: 'Lunary',
         subtitle: 'Your Cosmic Guide',
       },
+      categoryVisuals: props.categoryVisuals,
+      seed,
     };
   }
 

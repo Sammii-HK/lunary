@@ -6,6 +6,12 @@ import {
   useVideoConfig,
 } from 'remotion';
 import { COLORS } from '../styles/theme';
+import { AuroraEffect } from './backgrounds/Aurora';
+import { FloatingOrbsEffect } from './backgrounds/FloatingOrbs';
+import { CandleFlamesEffect } from './backgrounds/CandleFlames';
+import { SacredGeometryEffect } from './backgrounds/SacredGeometry';
+import { MistWispsEffect } from './backgrounds/MistWisps';
+import { EmberParticlesEffect } from './backgrounds/EmberParticles';
 
 interface AnimatedBackgroundProps {
   /** Whether to show subtle starfield (very minimal) */
@@ -18,6 +24,12 @@ interface AnimatedBackgroundProps {
   overlayMode?: boolean;
   /** Unique seed for generating different star positions and comet paths per video */
   seed?: string;
+  /** Tint color for stars (defaults to white) */
+  particleTintColor?: string;
+  /** Category gradient colors [dark, mid, light] */
+  gradientColors?: string[];
+  /** Background animation type — dispatches to different animation components */
+  animationType?: string;
 }
 
 // Natural meteor colors based on element composition when burning up
@@ -63,9 +75,16 @@ export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
   gradientEndColor = COLORS.deepPurple,
   overlayMode = false,
   seed = 'default',
+  particleTintColor,
+  gradientColors,
+  animationType = 'starfield',
 }) => {
   const frame = useCurrentFrame();
   const { durationInFrames, fps } = useVideoConfig();
+
+  // Use category gradient colors if provided
+  const effectiveBg = gradientColors?.[0] || backgroundColor;
+  const effectiveGradientEnd = gradientColors?.[1] || gradientEndColor;
 
   // Very slow, subtle gradient position shift
   const gradientPosition = interpolate(frame, [0, 900], [50, 55], {
@@ -82,18 +101,73 @@ export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
             position: 'absolute',
             width: '100%',
             height: '100%',
-            background: `radial-gradient(ellipse at ${gradientPosition}% ${gradientPosition}%, ${gradientEndColor} 0%, ${backgroundColor} 70%)`,
+            background: `radial-gradient(ellipse at ${gradientPosition}% ${gradientPosition}%, ${effectiveGradientEnd} 0%, ${effectiveBg} 70%)`,
           }}
         />
       )}
 
-      {/* Optional subtle starfield with shooting stars */}
-      {showStars && (
+      {/* Animated background layer */}
+      {showStars && animationType === 'starfield' && (
         <StarField
           frame={frame}
           durationInFrames={durationInFrames}
           fps={fps}
           seed={seed}
+          tintColor={particleTintColor}
+        />
+      )}
+      {showStars && animationType === 'aurora' && (
+        <AuroraEffect
+          frame={frame}
+          durationInFrames={durationInFrames}
+          fps={fps}
+          seed={seed}
+          tintColor={particleTintColor}
+        />
+      )}
+      {showStars && animationType === 'floating-orbs' && (
+        <FloatingOrbsEffect
+          frame={frame}
+          durationInFrames={durationInFrames}
+          fps={fps}
+          seed={seed}
+          tintColor={particleTintColor}
+        />
+      )}
+      {showStars && animationType === 'candle-flames' && (
+        <CandleFlamesEffect
+          frame={frame}
+          durationInFrames={durationInFrames}
+          fps={fps}
+          seed={seed}
+          tintColor={particleTintColor}
+        />
+      )}
+      {showStars && animationType === 'sacred-geometry' && (
+        <SacredGeometryEffect
+          frame={frame}
+          durationInFrames={durationInFrames}
+          fps={fps}
+          seed={seed}
+          tintColor={particleTintColor}
+        />
+      )}
+      {showStars && animationType === 'mist-wisps' && (
+        <MistWispsEffect
+          frame={frame}
+          durationInFrames={durationInFrames}
+          fps={fps}
+          seed={seed}
+          tintColor={particleTintColor}
+        />
+      )}
+      {showStars && animationType === 'ember-particles' && (
+        <EmberParticlesEffect
+          frame={frame}
+          durationInFrames={durationInFrames}
+          fps={fps}
+          seed={seed}
+          tintColor={particleTintColor}
         />
       )}
     </AbsoluteFill>
@@ -315,14 +389,16 @@ const ShootingStarElement: React.FC<{
 };
 
 /**
- * Starfield with twinkling stars and occasional shooting stars
+ * Starfield with twinkling stars and occasional shooting stars.
+ * Exported for reuse in admin preview.
  */
-const StarField: React.FC<{
+export const StarField: React.FC<{
   frame: number;
   durationInFrames: number;
   fps: number;
   seed: string;
-}> = ({ frame, durationInFrames, fps, seed }) => {
+  tintColor?: string;
+}> = ({ frame, durationInFrames, fps, seed, tintColor }) => {
   // Convert seed string to number hash
   const seedHash = React.useMemo(() => simpleHash(seed), [seed]);
 
