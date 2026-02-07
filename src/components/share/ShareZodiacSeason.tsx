@@ -430,7 +430,7 @@ export function ShareZodiacSeason({
       { type: 'image/png' },
     );
 
-    const shareText = `Happy ${seasonData?.sign} Season! ✨`;
+    const shareText = `Happy ${seasonData?.sign} Season`;
     const shareMessage = shareInfo?.shareUrl
       ? `${shareText}\n${shareInfo.shareUrl}`
       : shareText;
@@ -493,7 +493,7 @@ export function ShareZodiacSeason({
     typeof navigator.canShare === 'function';
 
   const socialShareUrl = shareRecord?.shareUrl || 'https://lunary.app';
-  const socialText = `Happy ${seasonData?.sign} Season! ✨`;
+  const socialText = `Happy ${seasonData?.sign} Season`;
 
   const socialUrls = {
     x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(socialText)}&url=${encodeURIComponent(socialShareUrl)}`,

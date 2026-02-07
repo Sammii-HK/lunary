@@ -7,6 +7,13 @@ import {
   generateStarfield,
   getStarCount,
 } from '@/lib/share/og-utils';
+import {
+  truncateText,
+  ShareFooter,
+  SHARE_BASE_URL,
+  SHARE_BORDERS,
+  SHARE_CARDS,
+} from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
@@ -133,7 +140,7 @@ export async function GET(request: NextRequest) {
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+    const baseUrl = SHARE_BASE_URL;
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
@@ -145,9 +152,7 @@ export async function GET(request: NextRequest) {
     const insightSize = isLandscape ? 22 : isStory ? 36 : 32;
     const moonIconSize = isLandscape ? 140 : isStory ? 250 : 200;
 
-    // Truncation helper for text overflow prevention
-    const truncate = (text: string, limit: number) =>
-      text.length > limit ? text.slice(0, limit - 1) + '…' : text;
+    const truncate = truncateText;
 
     // Format-specific character limits - increased for better space utilization
     const insightLimit = isLandscape ? 140 : isStory ? 350 : 250;
@@ -253,8 +258,8 @@ export async function GET(request: NextRequest) {
               display: 'flex',
               flexDirection: 'column',
               padding: '24px',
-              background: OG_COLORS.cardBg,
-              border: `1px solid ${OG_COLORS.border}`,
+              background: SHARE_CARDS.primary,
+              border: SHARE_BORDERS.card,
               borderRadius: 16,
               alignItems: 'center',
               justifyContent: 'center',
@@ -311,8 +316,8 @@ export async function GET(request: NextRequest) {
                 display: 'flex',
                 flexDirection: 'column',
                 padding: '24px',
-                background: OG_COLORS.cardBg,
-                border: `1px solid ${OG_COLORS.border}`,
+                background: SHARE_CARDS.primary,
+                border: SHARE_BORDERS.card,
                 borderRadius: 16,
                 flex: 1,
                 justifyContent: 'center',
@@ -349,7 +354,7 @@ export async function GET(request: NextRequest) {
                   display: 'flex',
                   flexDirection: 'column',
                   padding: '20px 24px',
-                  background: OG_COLORS.cardBg,
+                  background: SHARE_CARDS.primary,
                   border: `2px solid ${OG_COLORS.galaxyHaze}`,
                   borderRadius: 16,
                 }}
@@ -381,40 +386,7 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            marginTop: 20,
-            position: 'absolute',
-            bottom: 40,
-            left: 0,
-            right: 0,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={24}
-            height={24}
-            style={{ opacity: 0.6 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontFamily: 'Roboto Mono',
-              fontWeight: 300,
-              fontSize: 16,
-              opacity: 0.6,
-              letterSpacing: '0.1em',
-              color: OG_COLORS.textPrimary,
-              display: 'flex',
-            }}
-          >
-            Join free at lunary.app
-          </span>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     ) : isStory ? (
       // Story Layout - Large moon, vertical stacking
@@ -516,8 +488,8 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             padding: '36px 40px',
-            background: OG_COLORS.cardBg,
-            border: `1px solid ${OG_COLORS.border}`,
+            background: SHARE_CARDS.primary,
+            border: SHARE_BORDERS.card,
             borderRadius: 20,
             marginBottom: data.transit ? 28 : 0,
             flex: data.transit ? 0 : 1,
@@ -556,7 +528,7 @@ export async function GET(request: NextRequest) {
               display: 'flex',
               flexDirection: 'column',
               padding: '32px 40px',
-              background: OG_COLORS.cardBg,
+              background: SHARE_CARDS.primary,
               border: `2px solid ${OG_COLORS.galaxyHaze}`,
               borderRadius: 20,
               flex: 1,
@@ -590,39 +562,7 @@ export async function GET(request: NextRequest) {
         )}
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            position: 'absolute',
-            bottom: 40,
-            left: 0,
-            right: 0,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={28}
-            height={28}
-            style={{ opacity: 0.6 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontFamily: 'Roboto Mono',
-              fontWeight: 300,
-              fontSize: 20,
-              opacity: 0.6,
-              letterSpacing: '0.1em',
-              color: OG_COLORS.textPrimary,
-              display: 'flex',
-            }}
-          >
-            Join free at lunary.app
-          </span>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     ) : (
       // Square Layout
@@ -680,8 +620,8 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             padding: '32px',
-            background: OG_COLORS.cardBg,
-            border: `1px solid ${OG_COLORS.border}`,
+            background: SHARE_CARDS.primary,
+            border: SHARE_BORDERS.card,
             borderRadius: 20,
             marginBottom: 28,
             alignItems: 'center',
@@ -728,8 +668,8 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             padding: '28px 32px',
-            background: OG_COLORS.cardBg,
-            border: `1px solid ${OG_COLORS.border}`,
+            background: SHARE_CARDS.primary,
+            border: SHARE_BORDERS.card,
             borderRadius: 20,
             marginBottom: data.transit ? 24 : 0,
             flex: data.transit ? 0 : 1,
@@ -768,7 +708,7 @@ export async function GET(request: NextRequest) {
               display: 'flex',
               flexDirection: 'column',
               padding: '24px 32px',
-              background: OG_COLORS.cardBg,
+              background: SHARE_CARDS.primary,
               border: `2px solid ${OG_COLORS.galaxyHaze}`,
               borderRadius: 20,
               flex: 1,
@@ -802,39 +742,7 @@ export async function GET(request: NextRequest) {
         )}
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            position: 'absolute',
-            bottom: 40,
-            left: 0,
-            right: 0,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={24}
-            height={24}
-            style={{ opacity: 0.6 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontFamily: 'Roboto Mono',
-              fontWeight: 300,
-              fontSize: 16,
-              opacity: 0.6,
-              letterSpacing: '0.1em',
-              color: OG_COLORS.textPrimary,
-              display: 'flex',
-            }}
-          >
-            Join free at lunary.app
-          </span>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     );
 

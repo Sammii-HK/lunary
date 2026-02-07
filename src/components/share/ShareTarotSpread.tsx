@@ -202,8 +202,8 @@ export function ShareTarotSpread({
 
   const socialUrls = shareRecord?.shareUrl
     ? {
-        x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My ${spreadData.spreadName} tarot spread ✨`)}&url=${encodeURIComponent(shareRecord.shareUrl)}`,
-        threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My ${spreadData.spreadName} tarot spread ✨ ${shareRecord.shareUrl}`)}`,
+        x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My ${spreadData.spreadName} tarot spread`)}&url=${encodeURIComponent(shareRecord.shareUrl)}`,
+        threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My ${spreadData.spreadName} tarot spread ${shareRecord.shareUrl}`)}`,
       }
     : undefined;
 

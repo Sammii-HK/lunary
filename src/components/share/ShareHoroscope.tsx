@@ -211,8 +211,8 @@ export function ShareHoroscope({
 
   const socialUrls = shareRecord?.shareUrl
     ? {
-        x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My ${sunSign} horoscope ✨`)}&url=${encodeURIComponent(shareRecord.shareUrl)}`,
-        threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My ${sunSign} horoscope ✨ ${shareRecord.shareUrl}`)}`,
+        x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My ${sunSign} horoscope`)}&url=${encodeURIComponent(shareRecord.shareUrl)}`,
+        threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My ${sunSign} horoscope ${shareRecord.shareUrl}`)}`,
       }
     : undefined;
 

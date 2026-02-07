@@ -272,8 +272,8 @@ export function ShareDailyCosmicState({
     typeof navigator.canShare === 'function';
 
   const socialUrls = {
-    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent("Today's cosmic state ✨")}&url=${encodeURIComponent('https://lunary.app')}`,
-    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent("Today's cosmic state ✨ lunary.app")}`,
+    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent("Today's cosmic state")}&url=${encodeURIComponent('https://lunary.app')}`,
+    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent("Today's cosmic state lunary.app")}`,
   };
 
   return (

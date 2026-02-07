@@ -7,7 +7,13 @@ import {
   getFormatDimensions,
   generateStarfield,
   getStarCount,
+  OG_COLORS,
 } from '@/lib/share/og-utils';
+import {
+  ShareFooter,
+  SHARE_BASE_URL,
+  SHARE_BORDERS,
+} from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 import {
   elementAstro,
@@ -412,7 +418,7 @@ export async function GET(request: NextRequest) {
   // Generate unique starfield based on shareId
   const starfieldId = shareId || 'default-birth-chart';
   const stars = generateStarfield(starfieldId, getStarCount(format));
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+  const baseUrl = SHARE_BASE_URL;
 
   // Starfield component - increased opacity for better visibility
   const starfieldJsx = stars.map((star, i) => (
@@ -601,7 +607,7 @@ export async function GET(request: NextRequest) {
                   gap: 4,
                   padding: '10px 14px',
                   borderRadius: 12,
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  border: SHARE_BORDERS.card,
                   background: 'rgba(0,0,0,0.15)',
                   minWidth: 100,
                   alignItems: 'center',
@@ -697,35 +703,7 @@ export async function GET(request: NextRequest) {
       </div>
 
       {/* Branded Footer */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 24,
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          justifyContent: 'center',
-        }}
-      >
-        <img
-          src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-          width={24}
-          height={24}
-          style={{ opacity: 0.6 }}
-          alt=''
-        />
-        <span
-          style={{
-            fontSize: 16,
-            opacity: 0.6,
-            letterSpacing: '0.1em',
-            display: 'flex',
-          }}
-        >
-          Join free at lunary.app
-        </span>
-      </div>
+      <ShareFooter baseUrl={baseUrl} format={format} />
     </div>
   ) : (
     // Square/Story Layout
@@ -898,7 +876,7 @@ export async function GET(request: NextRequest) {
                   gap: 6,
                   padding: isLandscape ? '12px 16px' : '16px 20px',
                   borderRadius: 14,
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  border: SHARE_BORDERS.card,
                   background: 'rgba(0,0,0,0.15)',
                   minWidth: isLandscape ? 120 : 150,
                   alignItems: 'center',
@@ -1002,7 +980,7 @@ export async function GET(request: NextRequest) {
                   width: 6,
                   height: 6,
                   borderRadius: 999,
-                  background: '#7BFFB8',
+                  background: OG_COLORS.cometTrail,
                   display: 'flex',
                 }}
               />
@@ -1022,7 +1000,7 @@ export async function GET(request: NextRequest) {
                   width: 6,
                   height: 6,
                   borderRadius: 999,
-                  background: '#94d1ff',
+                  background: OG_COLORS.galaxyHaze,
                   display: 'flex',
                 }}
               />
@@ -1100,35 +1078,7 @@ export async function GET(request: NextRequest) {
         </div>
       </div>
       {/* Branded Footer */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 33,
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          justifyContent: 'center',
-        }}
-      >
-        <img
-          src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-          width={24}
-          height={24}
-          style={{ opacity: 0.6 }}
-          alt=''
-        />
-        <span
-          style={{
-            fontSize: 16,
-            opacity: 0.6,
-            letterSpacing: '0.1em',
-            display: 'flex',
-          }}
-        >
-          Join free at lunary.app
-        </span>
-      </div>
+      <ShareFooter baseUrl={baseUrl} format={format} />
     </div>
   );
 

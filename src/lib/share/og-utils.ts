@@ -2,7 +2,7 @@ import type { ShareFormat } from '@/hooks/useShareModal';
 import { FORMAT_SIZES, STORY_SAFE_ZONES } from './types';
 
 // Increment this to bust OG image caches when designs change
-export const OG_IMAGE_VERSION = 6;
+export const OG_IMAGE_VERSION = 7;
 
 export function getFormatDimensions(format: ShareFormat = 'square') {
   return FORMAT_SIZES[format];

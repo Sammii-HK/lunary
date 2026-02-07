@@ -236,8 +236,8 @@ export function ShareWeeklyPattern({ onDataFetch }: ShareWeeklyPatternProps) {
 
   const socialShareUrl = shareRecord?.shareUrl || 'https://lunary.app';
   const socialUrls = {
-    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My week in tarot: ${patternData?.season.name || 'Check it out!'} ✨`)}&url=${encodeURIComponent(socialShareUrl)}`,
-    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My week in tarot: ${patternData?.season.name || 'Check it out!'} ✨ ${socialShareUrl}`)}`,
+    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My week in tarot: ${patternData?.season.name || 'Check it out!'}`)}&url=${encodeURIComponent(socialShareUrl)}`,
+    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My week in tarot: ${patternData?.season.name || 'Check it out!'} ${socialShareUrl}`)}`,
   };
 
   // Show locked state if not enough readings
