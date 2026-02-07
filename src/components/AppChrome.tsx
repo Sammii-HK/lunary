@@ -143,7 +143,7 @@ export function AppChrome() {
     '/app',
     '/tarot',
     '/horoscope',
-    '/birth-chart',
+    '/app/birth-chart',
     '/book-of-shadows',
     '/grimoire',
     '/profile',
@@ -182,6 +182,7 @@ export function AppChrome() {
     '/faq',
     '/about',
     '/circle',
+    '/birth-chart',
   ];
 
   const isCoreMarketingRoute =

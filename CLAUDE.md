@@ -119,6 +119,7 @@ src/
 - **Exports**: Use named exports, barrel files (`index.ts`) for component directories
 - **Styling**: Tailwind CSS, use `cn()` for conditional classes
 - **Colors**: Use brand colors (`lunary-primary`, `lunary-secondary`, `lunary-accent`, `lunary-success`, `lunary-rose`) not basic Tailwind colors (`blue`, `green`, `red`)
+- **Icons**: Prefer `lucide-react` icons over emojis in components and UI
 - **Data handling**: Use optional chaining (`?.`) and nullish coalescing (`?? []`) for safety
 
 ## Testing

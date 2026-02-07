@@ -1,6 +1,6 @@
 'use client';
 
-import { BirthChartData } from '@/utils/astrology/birthChart';
+import { BirthChartData } from '../../../utils/astrology/birthChart';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { astroPointSymbols } from '../../../utils/zodiac/zodiac';
 

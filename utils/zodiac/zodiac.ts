@@ -50,6 +50,7 @@ export const astroPointSymbols = {
   chiron: 'q', // Chiron is 'q' not 'c'
   lilith: 'z', // Lilith
   partoffortune: '?', // Part of Fortune
+  vertex: 'k', // Vertex - Astronomicon official mapping
   // Asteroids - Official Astronomicon mappings (v1.1)
   ceres: 'l',
   pallas: 'm',
@@ -73,6 +74,7 @@ export const astroPointUnicode = {
   chiron: '⚷',
   lilith: '⚸',
   partoffortune: '⊗',
+  vertex: 'Vx', // No standard Unicode for Vertex
 };
 
 // Astromicon zodiac characters (use with font-astro class)
@@ -1109,6 +1111,18 @@ export const astrologicalPoints = {
     alias: 'The Passionate',
     mysticalProperties:
       'Governs erotic love, passion, and creative life force. Shows what turns you on at a soul level and where you experience deep desire.',
+  },
+  partoffortune: {
+    name: 'Part of Fortune',
+    alias: 'Fortuna',
+    mysticalProperties:
+      'An Arabic Part combining Sun, Moon, and Ascendant. Reveals where you find greatest joy, prosperity, and natural flow in life.',
+  },
+  vertex: {
+    name: 'Vertex',
+    alias: 'The Fated Encounter',
+    mysticalProperties:
+      'A sensitive point linked to fated encounters and destined relationships. Shows where pivotal people and events enter your life beyond your control.',
   },
 };
 

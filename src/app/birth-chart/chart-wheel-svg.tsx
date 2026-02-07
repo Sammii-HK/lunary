@@ -12,6 +12,7 @@ import {
 } from '../../../utils/zodiac/zodiac';
 import { useAspects } from '@/hooks/useAspects';
 import { AspectLines } from '@/components/AspectLines';
+import { isHarmoniousAspect, isChallengingAspect } from '@/hooks/useAspects';
 
 const MAIN_PLANETS = [
   'Sun',
@@ -37,6 +38,28 @@ const ASTEROIDS = [
   'Psyche',
   'Eros',
 ];
+
+const ELEMENT_COLORS: Record<string, string> = {
+  Fire: '#ff6b6b',
+  Earth: '#6b8e4e',
+  Air: '#5dade2',
+  Water: '#9b59b6',
+};
+
+const SIGN_ELEMENTS: Record<string, string> = {
+  Aries: 'Fire',
+  Taurus: 'Earth',
+  Gemini: 'Air',
+  Cancer: 'Water',
+  Leo: 'Fire',
+  Virgo: 'Earth',
+  Libra: 'Air',
+  Scorpio: 'Water',
+  Sagittarius: 'Fire',
+  Capricorn: 'Earth',
+  Aquarius: 'Air',
+  Pisces: 'Water',
+};
 
 function getSymbolForBody(body: string): string {
   const key = body
@@ -79,9 +102,26 @@ function polarFromLongitude(
   return {
     angle,
     radian,
-    x: Math.cos(radian) * radius,
-    y: Math.sin(radian) * radius,
+    x: Math.round(Math.cos(radian) * radius * 1000) / 1000,
+    y: Math.round(Math.sin(radian) * radius * 1000) / 1000,
   };
+}
+
+function getBodyColor(
+  body: string,
+  sign: string,
+  retrograde: boolean,
+  colours: Record<string, string>,
+) {
+  if (retrograde) return colours.retrograde;
+  if (ANGLES.includes(body)) return colours.angle;
+  if (POINTS.includes(body)) return colours.point;
+  if (ASTEROIDS.includes(body)) return colours.asteroid;
+
+  const element = SIGN_ELEMENTS[sign];
+  if (element && ELEMENT_COLORS[element]) return ELEMENT_COLORS[element];
+
+  return colours.planet;
 }
 
 export function ChartWheelSvg({
@@ -90,6 +130,8 @@ export function ChartWheelSvg({
   size = 280,
   showHouseNumbers = true,
   showAspects = false,
+  aspectFilter = 'all',
+  showAsteroids = true,
   colours = {
     ring: '#3f3f46',
     ringInner: '#27272a',
@@ -110,6 +152,8 @@ export function ChartWheelSvg({
   size?: number;
   showHouseNumbers?: boolean;
   showAspects?: boolean;
+  aspectFilter?: 'all' | 'harmonious' | 'challenging';
+  showAsteroids?: boolean;
   colours?: Partial<{
     ring: string;
     ringInner: string;
@@ -185,7 +229,23 @@ export function ChartWheelSvg({
   const points = chartData.filter((p) => POINTS.includes(p.body));
   const asteroids = chartData.filter((p) => ASTEROIDS.includes(p.body));
 
-  const aspects = useAspects(chartData);
+  const allAspects = useAspects(chartData);
+  const filteredAspects = allAspects.filter((a) => {
+    if (!showAsteroids) {
+      if (ASTEROIDS.includes(a.planet1) || ASTEROIDS.includes(a.planet2))
+        return false;
+    }
+    if (aspectFilter === 'harmonious') return isHarmoniousAspect(a.type);
+    if (aspectFilter === 'challenging') return isChallengingAspect(a.type);
+    return true;
+  });
+
+  const visibleBodies = [
+    ...mainPlanets,
+    ...angles,
+    ...points,
+    ...(showAsteroids ? asteroids : []),
+  ];
 
   const view = '-140 -140 280 280';
 
@@ -258,7 +318,7 @@ export function ChartWheelSvg({
       {/* Aspect lines */}
       {showAspects && (
         <AspectLines
-          aspects={aspects}
+          aspects={filteredAspects}
           visible={showAspects}
           highlightedPlanet={highlightedPlanet}
           opacity={0.15}
@@ -356,72 +416,67 @@ export function ChartWheelSvg({
       ))}
 
       {/* Planets + angles + points + asteroids */}
-      {[...mainPlanets, ...angles, ...points, ...asteroids].map(
-        ({ body, x, y, retrograde, sign, degree, minute }) => {
-          const isAngle = ANGLES.includes(body);
-          const isPoint = POINTS.includes(body);
-          const isAsteroid = ASTEROIDS.includes(body);
+      {visibleBodies.map(({ body, x, y, retrograde, sign, degree, minute }) => {
+        const isAngle = ANGLES.includes(body);
+        const isPoint = POINTS.includes(body);
+        const isAsteroid = ASTEROIDS.includes(body);
 
-          const colour = retrograde
-            ? colours.retrograde
-            : isAngle
-              ? colours.angle
-              : isPoint
-                ? colours.point
-                : isAsteroid
-                  ? colours.asteroid
-                  : colours.planet;
+        const colour = getBodyColor(
+          body,
+          sign,
+          retrograde,
+          colours as Record<string, string>,
+        );
 
-          return (
-            <g
-              key={body}
-              className='planet-node'
-              onClick={() =>
-                setHighlightedPlanet(highlightedPlanet === body ? null : body)
-              }
+        return (
+          <g
+            key={body}
+            className='planet-node'
+            onClick={() =>
+              setHighlightedPlanet(highlightedPlanet === body ? null : body)
+            }
+          >
+            <title>
+              {formatPlacementLabel({
+                body,
+                sign,
+                degree,
+                minute,
+                retrograde,
+              })}
+            </title>
+            <circle
+              className='planet-highlight'
+              cx={x}
+              cy={y}
+              r={isAngle || isPoint ? 10 : 9}
+              fill={hoverColor}
+            />
+            <line
+              x1='0'
+              y1='0'
+              x2={x}
+              y2={y}
+              stroke={colour}
+              strokeWidth='0.3'
+              opacity='0.2'
+              className='planet-line'
+            />
+            <text
+              x={x}
+              y={y}
+              textAnchor='middle'
+              dominantBaseline='central'
+              fontSize={isAsteroid ? '11' : isAngle || isPoint ? '12' : '14'}
+              fill={colour}
+              style={{ fontFamily: fontFamilySymbols }}
+              className='planet-glyph'
             >
-              <title>
-                {formatPlacementLabel({
-                  body,
-                  sign,
-                  degree,
-                  minute,
-                  retrograde,
-                })}
-              </title>
-              <circle
-                className='planet-highlight'
-                cx={x}
-                cy={y}
-                r={isAngle || isPoint ? 10 : 9}
-                fill={hoverColor}
-              />
-              <line
-                x1='0'
-                y1='0'
-                x2={x}
-                y2={y}
-                stroke={colour}
-                strokeWidth='0.3'
-                opacity='0.2'
-                className='planet-line'
-              />
-              <text
-                x={x}
-                y={y}
-                textAnchor='middle'
-                dominantBaseline='central'
-                fontSize={isAsteroid ? '11' : isAngle || isPoint ? '12' : '14'}
-                fill={colour}
-                style={{ fontFamily: fontFamilySymbols }}
-                className='planet-glyph'
-              >
-                {getSymbolForBody(body)}
-              </text>
-            </g>
-          );
-        },
-      )}
+              {getSymbolForBody(body)}
+            </text>
+          </g>
+        );
+      })}
     </svg>
   );
 }

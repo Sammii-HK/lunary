@@ -43,19 +43,22 @@ export async function GET(request: NextRequest) {
     rangeEndDate.setUTCHours(0, 0, 0, 0);
     const includesToday = rangeEndDate.getTime() >= today.getTime();
 
+    const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+
     // Query ALL rows in date range (not LIMIT 1)
-    const [allRowsResult, realtimeDauResult] = await Promise.all([
-      sql.query(
-        `SELECT *
+    const [allRowsResult, realtimeDauResult, todaySignupsResult] =
+      await Promise.all([
+        sql.query(
+          `SELECT *
          FROM daily_metrics
          WHERE metric_date >= $1 AND metric_date <= $2
          ORDER BY metric_date ASC`,
-        [startDateStr, endDateStr],
-      ),
-      // Real-time DAU only if querying today
-      includesToday
-        ? sql.query(
-            `SELECT COUNT(DISTINCT user_id) as count
+          [startDateStr, endDateStr],
+        ),
+        // Real-time DAU only if querying today
+        includesToday
+          ? sql.query(
+              `SELECT COUNT(DISTINCT user_id) as count
              FROM conversion_events
              WHERE event_type = ANY($1::text[])
                AND user_id IS NOT NULL
@@ -63,16 +66,31 @@ export async function GET(request: NextRequest) {
                AND created_at >= $2
                AND created_at < $3
                AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
-            [
-              PRODUCT_EVENTS,
-              today.toISOString(),
-              new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString(),
-              TEST_EMAIL_PATTERN,
-              TEST_EMAIL_EXACT,
-            ],
-          )
-        : Promise.resolve(null),
-    ]);
+              [
+                PRODUCT_EVENTS,
+                today.toISOString(),
+                tomorrow.toISOString(),
+                TEST_EMAIL_PATTERN,
+                TEST_EMAIL_EXACT,
+              ],
+            )
+          : Promise.resolve(null),
+        // Real-time signups for today
+        includesToday
+          ? sql.query(
+              `SELECT COUNT(*) as count
+             FROM "user"
+             WHERE "createdAt" >= $1 AND "createdAt" < $2
+               AND (email IS NULL OR (email NOT LIKE $3 AND email != $4))`,
+              [
+                today.toISOString(),
+                tomorrow.toISOString(),
+                TEST_EMAIL_PATTERN,
+                TEST_EMAIL_EXACT,
+              ],
+            )
+          : Promise.resolve(null),
+      ]);
 
     if (allRowsResult.rows.length === 0) {
       return NextResponse.json(
@@ -144,10 +162,12 @@ export async function GET(request: NextRequest) {
     }));
 
     // Derived: user growth rate (period-over-period)
-    const totalSignupsRange = rows.reduce(
-      (sum, r) => sum + Number(r.new_signups || 0),
-      0,
-    );
+    const todaySignups = todaySignupsResult
+      ? Number(todaySignupsResult.rows[0]?.count || 0)
+      : 0;
+    const totalSignupsRange =
+      rows.reduce((sum, r) => sum + Number(r.new_signups || 0), 0) +
+      todaySignups;
     const totalConversionsRange = rows.reduce(
       (sum, r) => sum + Number(r.new_conversions || 0),
       0,

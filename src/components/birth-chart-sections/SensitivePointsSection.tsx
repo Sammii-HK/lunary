@@ -1,6 +1,6 @@
 'use client';
 
-import { BirthChartData } from '@/utils/astrology/birthChart';
+import { BirthChartData } from '../../../utils/astrology/birthChart';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import {
   astroPointSymbols,
@@ -32,6 +32,10 @@ export function SensitivePointsSection({
   const chiron = birthChartData.find((p) => p.body === 'Chiron');
   const lilith = birthChartData.find((p) => p.body === 'Lilith');
   const descendant = birthChartData.find((p) => p.body === 'Descendant');
+  const partOfFortune = birthChartData.find(
+    (p) => p.body === 'Part of Fortune',
+  );
+  const vertex = birthChartData.find((p) => p.body === 'Vertex');
   const asteroidsData = birthChartData.filter((p) =>
     ASTEROIDS_LIST.includes(p.body),
   );
@@ -43,6 +47,8 @@ export function SensitivePointsSection({
     southNode ||
     chiron ||
     lilith ||
+    partOfFortune ||
+    vertex ||
     asteroidsData.length > 0;
 
   if (!hasPoints) return null;
@@ -172,6 +178,46 @@ export function SensitivePointsSection({
               </h5>
               <p className='text-xs text-zinc-300 mt-1'>
                 {astrologicalPoints.lilith.mysticalProperties}
+              </p>
+            </div>
+          )}
+          {partOfFortune && (
+            <div className='border-l-2 border-lunary-accent pl-3'>
+              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                <span className='font-astro text-lg text-lunary-accent'>
+                  {astroPointSymbols.partoffortune}
+                </span>
+                Part of Fortune in {partOfFortune.sign}
+                <span className='font-astro text-zinc-400'>
+                  {
+                    zodiacSymbol[
+                      partOfFortune.sign.toLowerCase() as keyof typeof zodiacSymbol
+                    ]
+                  }
+                </span>
+              </h5>
+              <p className='text-xs text-zinc-300 mt-1'>
+                {astrologicalPoints.partoffortune.mysticalProperties}
+              </p>
+            </div>
+          )}
+          {vertex && (
+            <div className='border-l-2 border-cyan-500 pl-3'>
+              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                <span className='font-astro text-lg text-cyan-400'>
+                  {astroPointSymbols.vertex}
+                </span>
+                Vertex in {vertex.sign}
+                <span className='font-astro text-zinc-400'>
+                  {
+                    zodiacSymbol[
+                      vertex.sign.toLowerCase() as keyof typeof zodiacSymbol
+                    ]
+                  }
+                </span>
+              </h5>
+              <p className='text-xs text-zinc-300 mt-1'>
+                {astrologicalPoints.vertex.mysticalProperties}
               </p>
             </div>
           )}

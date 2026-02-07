@@ -621,6 +621,52 @@ export const generateBirthChart = async (
       eclipticLongitude: mcLongitude,
       retrograde: false,
     });
+
+    // Part of Fortune calculation
+    const sunData = birthChartData.find((p) => p.body === 'Sun');
+    const moonData = birthChartData.find((p) => p.body === 'Moon');
+    if (sunData && moonData) {
+      const sunLong = sunData.eclipticLongitude;
+      const moonLong = moonData.eclipticLongitude;
+      // Day/night: Sun is below horizon when normalizeDegrees(sunLong - ascLong) > 180
+      const isNight = normalizeDegrees(sunLong - ascendantLongitudeDeg) > 180;
+      const pofLong = isNight
+        ? normalizeDegrees(ascendantLongitudeDeg + sunLong - moonLong)
+        : normalizeDegrees(ascendantLongitudeDeg + moonLong - sunLong);
+      const pofSign = getZodiacSign(pofLong);
+      const pofFormatted = formatDegree(pofLong);
+
+      birthChartData.push({
+        body: 'Part of Fortune',
+        sign: pofSign,
+        degree: pofFormatted.degree,
+        minute: pofFormatted.minute,
+        eclipticLongitude: pofLong,
+        retrograde: false,
+      });
+    }
+
+    // Vertex calculation: Ascendant at co-latitude (90 - latitude)
+    const coLatitude = 90 - finalObserver.latitude;
+    let vertexLong = calculateAscendant(lstDeg, coLatitude, obliquity);
+    // Vertex is always in the western hemisphere (houses 5-8).
+    // calculateAscendant may return the Anti-Vertex (eastern hemisphere).
+    // If the result is within 90° of the Ascendant, we have the Anti-Vertex — flip by 180°.
+    const vertexRelative = normalizeDegrees(vertexLong - ascendantLongitudeDeg);
+    if (vertexRelative < 90 || vertexRelative > 270) {
+      vertexLong = normalizeDegrees(vertexLong + 180);
+    }
+    const vertexSign = getZodiacSign(vertexLong);
+    const vertexFormatted = formatDegree(vertexLong);
+
+    birthChartData.push({
+      body: 'Vertex',
+      sign: vertexSign,
+      degree: vertexFormatted.degree,
+      minute: vertexFormatted.minute,
+      eclipticLongitude: vertexLong,
+      retrograde: false,
+    });
   } catch {
     // If angle calculations fail, continue without them
   }
