@@ -7,6 +7,10 @@ import {
   Check,
   X,
   ChevronDown,
+  Star,
+  Moon,
+  Orbit,
+  Layers,
 } from 'lucide-react';
 import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/button';
@@ -127,6 +131,10 @@ export default function BirthChartLandingPage() {
             Discover your cosmic blueprint with 24+ celestial bodies, planetary
             aspects, dignities, and personalized interpretations — all
             calculated from real astronomical data.
+          </p>
+          <p className='text-zinc-500 text-sm max-w-xl mx-auto'>
+            Beyond the 10 classical planets — track asteroids, lunar nodes,
+            Lilith, Part of Fortune, Vertex, and more.
           </p>
           <div className='flex flex-col sm:flex-row gap-3 justify-center pt-2'>
             <Link href='/auth'>
@@ -324,6 +332,77 @@ export default function BirthChartLandingPage() {
           </div>
         </section>
 
+        {/* Your Chart Powers Everything */}
+        <section>
+          <div className='text-center mb-4'>
+            <Heading as='h2' variant='h2'>
+              Your Chart Powers Everything
+            </Heading>
+            <p className='text-sm text-zinc-400'>
+              Your birth chart is the foundation. With Lunary+, it unlocks
+              personalised features across the entire app.
+            </p>
+          </div>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 flex gap-3'>
+              <Star className='w-5 h-5 text-lunary-accent flex-shrink-0 mt-0.5' />
+              <div>
+                <h3 className='text-sm font-medium text-white mb-1'>
+                  Daily Personalised Horoscopes
+                </h3>
+                <p className='text-xs text-zinc-400'>
+                  Readings calculated from your exact natal placements — not
+                  just your Sun sign.
+                </p>
+              </div>
+            </div>
+            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 flex gap-3'>
+              <Orbit className='w-5 h-5 text-lunary-primary-300 flex-shrink-0 mt-0.5' />
+              <div>
+                <h3 className='text-sm font-medium text-white mb-1'>
+                  Personal Transit Tracking
+                </h3>
+                <p className='text-xs text-zinc-400'>
+                  See how today&apos;s planets interact with your chart and what
+                  it means for you specifically.
+                </p>
+              </div>
+            </div>
+            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 flex gap-3'>
+              <Layers className='w-5 h-5 text-lunary-secondary-300 flex-shrink-0 mt-0.5' />
+              <div>
+                <h3 className='text-sm font-medium text-white mb-1'>
+                  Tarot Seeded from Your Placements
+                </h3>
+                <p className='text-xs text-zinc-400'>
+                  Daily card draws informed by your natal chart and current
+                  transits for deeper relevance.
+                </p>
+              </div>
+            </div>
+            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 flex gap-3'>
+              <Moon className='w-5 h-5 text-lunary-rose-300 flex-shrink-0 mt-0.5' />
+              <div>
+                <h3 className='text-sm font-medium text-white mb-1'>
+                  Moon Circle Rituals
+                </h3>
+                <p className='text-xs text-zinc-400'>
+                  New and full moon ceremonies personalised to your chart&apos;s
+                  unique placements.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className='text-center mt-4'>
+            <Link href='/pricing'>
+              <Button variant='outline' className='gap-2'>
+                See Lunary+ Plans
+                <ArrowRight className='w-4 h-4' />
+              </Button>
+            </Link>
+          </div>
+        </section>
+
         {/* FAQ Section */}
         <section>
           <Heading as='h2' variant='h2'>
@@ -355,8 +434,8 @@ export default function BirthChartLandingPage() {
             Ready to Discover Your Cosmic Blueprint?
           </Heading>
           <p className='text-sm text-zinc-400 mb-4'>
-            Join Lunary and get your complete birth chart — free, accurate, and
-            beautifully detailed.
+            Your birth chart calculation is free. Upgrade to Lunary+ for
+            personalised horoscopes, transit tracking, and more.
           </p>
           <Link href='/auth'>
             <Button size='lg' className='gap-2'>

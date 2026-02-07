@@ -198,5 +198,21 @@
     "minute": 49,
     "retrograde": false,
     "eclipticLongitude": 303.82490418003164
+  },
+  {
+    "body": "Part of Fortune",
+    "sign": "Virgo",
+    "degree": 28,
+    "minute": 45,
+    "retrograde": false,
+    "eclipticLongitude": 178.76257888976738
+  },
+  {
+    "body": "Vertex",
+    "sign": "Scorpio",
+    "degree": 8,
+    "minute": 43,
+    "retrograde": false,
+    "eclipticLongitude": 218.72574830233498
   }
 ]

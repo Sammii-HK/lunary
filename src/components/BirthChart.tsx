@@ -15,6 +15,9 @@ import styles from './BirthChart.module.css';
 
 const cx = classNames;
 
+/** Round to 6 decimal places to prevent SSR/client hydration mismatch from float precision drift. */
+const r6 = (n: number) => Math.round(n * 1e6) / 1e6;
+
 const ELEMENT_COLORS = {
   Fire: '#ff6b6b',
   Earth: '#6b8e4e',
@@ -55,7 +58,14 @@ const ANGLE_DISPLAY: Record<string, string> = {
   Descendant: 'Descendant',
   Midheaven: 'Midheaven',
 };
-const POINTS = ['North Node', 'South Node', 'Chiron', 'Lilith'];
+const POINTS = [
+  'North Node',
+  'South Node',
+  'Chiron',
+  'Lilith',
+  'Part of Fortune',
+  'Vertex',
+];
 const ASTEROIDS = [
   'Ceres',
   'Pallas',
@@ -135,8 +145,8 @@ export const BirthChart = ({
       const radian = (angle * Math.PI) / 180;
 
       const radius = 65;
-      const x = Math.cos(radian) * radius;
-      const y = Math.sin(radian) * radius;
+      const x = r6(Math.cos(radian) * radius);
+      const y = r6(Math.sin(radian) * radius);
 
       return {
         ...planet,
@@ -171,8 +181,8 @@ export const BirthChart = ({
       const angle = (180 + adjustedMid) % 360;
       const radian = (angle * Math.PI) / 180;
       const radius = 100;
-      const x = Math.cos(radian) * radius;
-      const y = Math.sin(radian) * radius;
+      const x = r6(Math.cos(radian) * radius);
+      const y = r6(Math.sin(radian) * radius);
 
       return { sign, angle, x, y };
     });
@@ -348,10 +358,10 @@ export const BirthChart = ({
 
           {houseData.map((house, i) => {
             const radian = house.radian;
-            const x1 = Math.cos(radian) * 50;
-            const y1 = Math.sin(radian) * 50;
-            const x2 = Math.cos(radian) * 85;
-            const y2 = Math.sin(radian) * 85;
+            const x1 = r6(Math.cos(radian) * 50);
+            const y1 = r6(Math.sin(radian) * 50);
+            const x2 = r6(Math.cos(radian) * 85);
+            const y2 = r6(Math.sin(radian) * 85);
 
             const isAngular = [1, 4, 7, 10].includes(house.house);
 
@@ -378,8 +388,8 @@ export const BirthChart = ({
                 : midAngle;
             const radian = (adjustedMid * Math.PI) / 180;
             const radius = 38;
-            const x = Math.cos(radian) * radius;
-            const y = Math.sin(radian) * radius;
+            const x = r6(Math.cos(radian) * radius);
+            const y = r6(Math.sin(radian) * radius);
 
             return (
               <text
@@ -401,10 +411,10 @@ export const BirthChart = ({
             const adjustedStart = (signStart - ascendantAngle + 360) % 360;
             const angle = (180 + adjustedStart) % 360;
             const radian = (angle * Math.PI) / 180;
-            const x1 = Math.cos(radian) * 85;
-            const y1 = Math.sin(radian) * 85;
-            const x2 = Math.cos(radian) * 120;
-            const y2 = Math.sin(radian) * 120;
+            const x1 = r6(Math.cos(radian) * 85);
+            const y1 = r6(Math.sin(radian) * 85);
+            const x2 = r6(Math.cos(radian) * 120);
+            const y2 = r6(Math.sin(radian) * 120);
 
             return (
               <line
@@ -446,6 +456,9 @@ export const BirthChart = ({
             const isPlanet = MAIN_PLANETS.includes(body);
             const isAsteroid = ASTEROIDS.includes(body);
             const isHovered = body === hoveredBody;
+            const symbol = getSymbolForBody(body);
+            const isAstroFont =
+              symbol.length === 1 && symbol.charCodeAt(0) < 128;
 
             // Get element color for planets based on their sign
             const elementColor =
@@ -500,13 +513,17 @@ export const BirthChart = ({
                   y={y}
                   textAnchor='middle'
                   dominantBaseline='central'
-                  className={cx('planet-glyph font-astro', styles.planetGlyph)}
+                  className={cx(
+                    'planet-glyph',
+                    isAstroFont && 'font-astro',
+                    styles.planetGlyph,
+                  )}
                   fontSize={
                     isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
                   }
                   fill={color}
                 >
-                  {getSymbolForBody(body)}
+                  {symbol}
                 </text>
               </g>
             );
@@ -610,47 +627,53 @@ export const BirthChart = ({
               Sensitive Points
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
-              {points.map(({ body, sign, degree, minute, retrograde }) => (
-                <div
-                  key={body}
-                  className='flex items-center justify-between p-2 md:p-3 bg-zinc-900 rounded-lg'
-                >
-                  <div className='flex items-center space-x-2 md:space-x-3'>
-                    <span
-                      className={cx(
-                        'text-base md:text-lg font-astro',
-                        retrograde ? 'text-red-400' : 'text-lunary-secondary',
-                      )}
-                    >
-                      {getSymbolForBody(body)}
-                    </span>
-                    <span className='font-medium text-white text-sm md:text-base'>
-                      {body}
-                    </span>
-                  </div>
-
-                  <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>
-                    <span className='text-zinc-300'>
-                      {degree}°{minute.toString().padStart(2, '0')}&apos;
-                    </span>
-                    <span className='text-base md:text-lg font-astro'>
-                      {
-                        zodiacSymbol[
-                          sign.toLowerCase() as keyof typeof zodiacSymbol
-                        ]
-                      }
-                    </span>
-                    <span className='text-zinc-400 hidden sm:inline'>
-                      {sign}
-                    </span>
-                    {retrograde && (
-                      <span className='text-red-400 text-xs font-medium'>
-                        ℞
+              {points.map(({ body, sign, degree, minute, retrograde }) => {
+                const pointSymbol = getSymbolForBody(body);
+                const useAstroFont =
+                  pointSymbol.length === 1 && pointSymbol.charCodeAt(0) < 128;
+                return (
+                  <div
+                    key={body}
+                    className='flex items-center justify-between p-2 md:p-3 bg-zinc-900 rounded-lg'
+                  >
+                    <div className='flex items-center space-x-2 md:space-x-3'>
+                      <span
+                        className={cx(
+                          'text-base md:text-lg',
+                          useAstroFont && 'font-astro',
+                          retrograde ? 'text-red-400' : 'text-lunary-secondary',
+                        )}
+                      >
+                        {pointSymbol}
                       </span>
-                    )}
+                      <span className='font-medium text-white text-sm md:text-base'>
+                        {body}
+                      </span>
+                    </div>
+
+                    <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>
+                      <span className='text-zinc-300'>
+                        {degree}°{minute.toString().padStart(2, '0')}&apos;
+                      </span>
+                      <span className='text-base md:text-lg font-astro'>
+                        {
+                          zodiacSymbol[
+                            sign.toLowerCase() as keyof typeof zodiacSymbol
+                          ]
+                        }
+                      </span>
+                      <span className='text-zinc-400 hidden sm:inline'>
+                        {sign}
+                      </span>
+                      {retrograde && (
+                        <span className='text-red-400 text-xs font-medium'>
+                          ℞
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )}
