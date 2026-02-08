@@ -140,6 +140,8 @@ export default function SocialPostsPage() {
   const [generatingVideoId, setGeneratingVideoId] = useState<string | null>(
     null,
   );
+  const [generatingMissingScripts, setGeneratingMissingScripts] =
+    useState(false);
   const [activeVariantByGroup, setActiveVariantByGroup] = useState<
     Record<string, string>
   >({});
@@ -387,6 +389,30 @@ export default function SocialPostsPage() {
       }
     } catch (error) {
       alert('Failed to refresh post images');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBumpOgImages = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/social-posts/refresh-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          weekStart: resolveQueueWeekStart(),
+        }),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        alert(data.error || 'Failed to bump OG images');
+      } else {
+        alert(`Bumped OG images on ${data.updated} posts.`);
+        loadPendingPosts();
+      }
+    } catch (error) {
+      alert('Failed to bump OG images');
     } finally {
       setLoading(false);
     }
@@ -642,6 +668,38 @@ export default function SocialPostsPage() {
       }
     } catch (error) {
       console.error('Failed to load pending posts:', error);
+    }
+  };
+
+  const handleGenerateMissingScripts = async () => {
+    if (
+      !confirm(
+        `Generate scripts for ${missingScriptCount} video post(s) missing scripts?`,
+      )
+    )
+      return;
+    setGeneratingMissingScripts(true);
+    setVideoJobFeedback(null);
+    try {
+      const response = await fetch(
+        '/api/admin/video-scripts/generate-missing',
+        { method: 'POST', body: JSON.stringify({}) },
+      );
+      const data = await response.json();
+      if (data.success) {
+        const msg = `Generated ${data.generated} script(s)${data.failed ? `, ${data.failed} failed` : ''}.`;
+        setVideoJobFeedback(msg);
+        await loadPendingPosts();
+        if (data.generated > 0) {
+          handleProcessVideoJobs();
+        }
+      } else {
+        alert(data.error || 'Failed to generate missing scripts');
+      }
+    } catch (error) {
+      alert('Failed to generate missing scripts');
+    } finally {
+      setGeneratingMissingScripts(false);
     }
   };
 
@@ -1116,6 +1174,9 @@ export default function SocialPostsPage() {
   const failedVideoCount = pendingPosts.filter(
     (p) => p.postType === 'video' && p.videoJobStatus === 'failed',
   ).length;
+  const missingScriptCount = pendingPosts.filter(
+    (p) => p.postType === 'video' && !p.videoScriptId,
+  ).length;
 
   const queuedPrimaryTheme = resolveQueueWeekTheme();
   const queuedSecondaryTheme = resolveQueueSecondaryTheme();
@@ -1514,7 +1575,8 @@ export default function SocialPostsPage() {
                 </div>
                 {(queuedVideoCount > 0 ||
                   processingVideoCount > 0 ||
-                  failedVideoCount > 0) && (
+                  failedVideoCount > 0 ||
+                  missingScriptCount > 0) && (
                   <div className='flex gap-2 items-center text-xs text-zinc-300'>
                     {queuedVideoCount > 0 && (
                       <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600'>
@@ -1546,6 +1608,20 @@ export default function SocialPostsPage() {
                           {requeueingFailed
                             ? 'Requeuing...'
                             : `${failedVideoCount} failed`}
+                        </Badge>
+                      </button>
+                    )}
+                    {missingScriptCount > 0 && (
+                      <button
+                        type='button'
+                        onClick={handleGenerateMissingScripts}
+                        disabled={generatingMissingScripts}
+                        className='disabled:cursor-not-allowed'
+                      >
+                        <Badge className='bg-lunary-accent-900/30 text-lunary-accent-300 border-lunary-accent-700'>
+                          {generatingMissingScripts
+                            ? 'Generating...'
+                            : `${missingScriptCount} missing scripts`}
                         </Badge>
                       </button>
                     )}
@@ -1602,6 +1678,24 @@ export default function SocialPostsPage() {
                   className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
                 >
                   {processingAllVideos ? 'Processing...' : 'Process all videos'}
+                </Button>
+                <Button
+                  onClick={handleBumpOgImages}
+                  disabled={loading}
+                  variant='outline'
+                  className='border-lunary-accent-600 text-lunary-accent-300 hover:bg-lunary-accent-900/30'
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                      Bumping...
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon className='h-4 w-4 mr-2' />
+                      Bump OG images
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
@@ -1849,7 +1943,7 @@ export default function SocialPostsPage() {
                                 variant.platform === activePlatform;
                               return (
                                 <button
-                                  key={`${group.key}-${variant.platform}`}
+                                  key={`${group.key}-${variant.platform}-${variant.id}`}
                                   onClick={() =>
                                     setActiveVariantByGroup({
                                       ...activeVariantByGroup,

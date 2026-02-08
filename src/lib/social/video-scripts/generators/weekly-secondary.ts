@@ -84,7 +84,7 @@ const DAY_NAMES = [
 /**
  * Generate a script from a content type config
  */
-async function generateScriptForContentType(
+export async function generateScriptForContentType(
   contentType: ContentType,
   date: Date,
 ): Promise<VideoScript | null> {
