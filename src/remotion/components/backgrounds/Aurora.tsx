@@ -103,7 +103,7 @@ export const AuroraEffect: React.FC<AuroraProps> = ({ frame, fps, seed }) => {
         driftPeriod: Math.round((28 + seededRandom(base + 104) * 14) * fps),
         phase: seededRandom(base + 105) * Math.PI * 2,
         // Green bands (lower) are brightest, pink bands (upper) are faintest
-        baseOpacity: 0.14 - i * 0.012 + seededRandom(base + 106) * 0.04,
+        baseOpacity: 0.22 - i * 0.018 + seededRandom(base + 106) * 0.05, // Increased from 0.14 for more visibility
         breathPeriod: Math.round((12 + seededRandom(base + 107) * 10) * fps),
         blur: 12 + i * 2 + seededRandom(base + 109) * 6,
       };

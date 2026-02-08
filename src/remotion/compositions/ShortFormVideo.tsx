@@ -5,6 +5,7 @@ import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
 import { TextOverlays, type Overlay } from '../components/TextOverlays';
 import { HookIntro } from '../components/HookIntro';
 import { ProgressIndicator } from '../components/ProgressIndicator';
+import { ZodiacSymbolOverlay } from '../components/ZodiacSymbolOverlay';
 import type { AudioSegment } from '../utils/timing';
 import type { CategoryVisualConfig } from '../config/category-visuals';
 import { COLORS } from '../styles/theme';
@@ -49,6 +50,10 @@ export interface ShortFormVideoProps {
   sfxTimings?: SfxTiming[];
   /** Subtitle background opacity override (#14) */
   subtitleBackgroundOpacity?: number;
+  /** Zodiac sign for symbol overlay (optional) */
+  zodiacSign?: string;
+  /** Background music URL (optional, plays at low volume under voiceover) */
+  backgroundMusicUrl?: string;
 }
 
 /**
@@ -71,6 +76,8 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
   hookIntroVariant,
   sfxTimings,
   subtitleBackgroundOpacity,
+  zodiacSign,
+  backgroundMusicUrl,
 }) => {
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -94,6 +101,9 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
         gradientColors={categoryVisuals?.gradientColors}
       />
 
+      {/* Symbol overlay - zodiac, planet, numerology, or tarot */}
+      {zodiacSign && <ZodiacSymbolOverlay content={zodiacSign} fps={fps} />}
+
       {/* Animated hook intro — word-by-word entrance (#7: variant support) */}
       {hookOverlay && (
         <HookIntro
@@ -113,7 +123,7 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
           highlightTerms={highlightTerms}
           highlightColor={categoryVisuals?.highlightColor}
           fontSize={44}
-          bottomPosition={12}
+          bottomPosition={22}
           fps={fps}
           backgroundOpacity={subtitleBackgroundOpacity}
         />
@@ -139,6 +149,9 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
 
       {/* Audio track */}
       {audioUrl && <Audio src={audioUrl} />}
+
+      {/* Background music (low volume under voiceover) */}
+      {backgroundMusicUrl && <Audio src={backgroundMusicUrl} volume={0.12} />}
 
       {/* Progress indicator */}
       {showProgress && (

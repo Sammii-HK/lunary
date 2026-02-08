@@ -17,7 +17,6 @@ import {
   type WeeklyTheme,
   type DailyFacet,
 } from '@/lib/social/weekly-themes';
-import { getVideoScripts } from '@/lib/social/video-script-generator';
 import { buildThematicVideoComposition } from '@/lib/video/thematic-video';
 import { getImageBaseUrl } from '@/lib/urls';
 
@@ -80,14 +79,48 @@ export async function POST(
 
     const baseUrl = getImageBaseUrl();
 
-    const scripts = await getVideoScripts();
-    const script = scripts.find((s) => s.id === scriptId);
-    if (!script) {
+    // Fetch script directly by ID instead of loading all scripts
+    const scriptResult = await sql`
+      SELECT * FROM video_scripts WHERE id = ${scriptId}
+    `;
+    if (scriptResult.rows.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Script not found' },
         { status: 404 },
       );
     }
+
+    const row = scriptResult.rows[0];
+    const script = {
+      id: row.id,
+      themeId: row.theme_id,
+      themeName: row.theme_name,
+      facetTitle: row.facet_title,
+      platform: row.platform,
+      sections: row.sections,
+      fullScript: row.full_script,
+      wordCount: row.word_count,
+      estimatedDuration: row.estimated_duration,
+      scheduledDate: new Date(row.scheduled_date),
+      status: row.status,
+      metadata: row.metadata,
+      coverImageUrl: row.cover_image_url,
+      partNumber: row.part_number,
+    };
+
+    // Detect if this is an engagement video (not educational)
+    const isEngagementVideo =
+      script.themeName?.startsWith('Sign Check') ||
+      script.themeName === 'Ranking' ||
+      script.themeName === 'Hot Take' ||
+      script.themeName?.startsWith('Quiz') ||
+      script.themeName === 'Myth' ||
+      script.themeName === 'Transit Alert';
+
+    console.log(
+      `🎯 Script theme: "${script.themeName}", facet: "${script.facetTitle}"`,
+    );
+    console.log(`🎯 Is engagement video: ${isEngagementVideo}`);
 
     const theme = categoryThemes.find((t) => t.name === script.themeName);
     const { slug, facet: matchedFacet } = getFacetInfo(
@@ -96,29 +129,87 @@ export async function POST(
     );
     const safeSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '-');
 
-    const {
-      images,
-      overlays,
-      highlightTerms,
-      highlightColor,
-      categoryVisuals,
-    } = buildThematicVideoComposition({
-      script: script.fullScript,
-      facet: matchedFacet || {
-        dayIndex: 0,
-        title: script.facetTitle,
-        grimoireSlug: slug,
-        focus: script.facetTitle,
-        shortFormHook: script.facetTitle,
-        threads: {
-          keyword: script.facetTitle,
-          angles: [],
+    let images: Array<{ url: string; startTime: number; endTime: number }> = [];
+    let overlays: Array<{
+      text: string;
+      startTime: number;
+      endTime: number;
+      style?:
+        | 'hook'
+        | 'hook_large'
+        | 'cta'
+        | 'stamp'
+        | 'chapter'
+        | 'series_badge';
+    }> = [];
+    let highlightTerms: string[] = [];
+    let highlightColor = '#5AD7FF';
+    let categoryVisuals: any;
+
+    if (isEngagementVideo) {
+      // Engagement videos: no OG images, just clean background with subtitles
+      categoryVisuals = {
+        gradientColors: ['#2a2f4a', '#3d4571', '#2a2f4a'], // Even brighter blue gradient for visibility
+        particleTintColor: '#7ec8ff',
+        accentColor: '#5AD7FF',
+        backgroundAnimation: 'starfield' as const,
+      };
+      // Extract highlight terms from script (zodiac signs, planets)
+      const scriptLower = script.fullScript.toLowerCase();
+      const zodiacSigns = [
+        'aries',
+        'taurus',
+        'gemini',
+        'cancer',
+        'leo',
+        'virgo',
+        'libra',
+        'scorpio',
+        'sagittarius',
+        'capricorn',
+        'aquarius',
+        'pisces',
+      ];
+      const planets = [
+        'sun',
+        'moon',
+        'mercury',
+        'venus',
+        'mars',
+        'jupiter',
+        'saturn',
+        'uranus',
+        'neptune',
+        'pluto',
+      ];
+      highlightTerms = [...zodiacSigns, ...planets].filter((term) =>
+        scriptLower.includes(term),
+      );
+    } else {
+      // Educational videos: use thematic composition with OG images
+      const composition = buildThematicVideoComposition({
+        script: script.fullScript,
+        facet: matchedFacet || {
+          dayIndex: 0,
+          title: script.facetTitle,
+          grimoireSlug: slug,
+          focus: script.facetTitle,
+          shortFormHook: script.facetTitle,
+          threads: {
+            keyword: script.facetTitle,
+            angles: [],
+          },
         },
-      },
-      theme,
-      baseUrl,
-      slug,
-    });
+        theme,
+        baseUrl,
+        slug,
+      });
+      images = composition.images;
+      overlays = composition.overlays;
+      highlightTerms = composition.highlightTerms;
+      highlightColor = composition.highlightColor;
+      categoryVisuals = composition.categoryVisuals;
+    }
 
     const audioBuffer = await generateVoiceover(script.fullScript, {
       voiceName: 'alloy',
@@ -137,6 +228,13 @@ export async function POST(
     // Try Remotion first for beautiful shooting stars animation
     const remotionAvailable = await isRemotionAvailable();
     let useFFmpegFallback = !remotionAvailable || !audioDuration;
+
+    console.log(
+      `🎥 Remotion available: ${remotionAvailable}, audio duration: ${audioDuration}s`,
+    );
+    console.log(
+      `🎥 Will use: ${useFFmpegFallback ? 'FFmpeg fallback' : 'Remotion'}`,
+    );
 
     if (!useFFmpegFallback) {
       try {
@@ -163,6 +261,15 @@ export async function POST(
         // Unique seed per render — same script + timestamp = different background each time
         const videoSeed = `${safeSlug}-${scriptId}-${Date.now()}`;
 
+        // Extract symbol content (zodiac, planet, numerology, tarot) for overlay
+        // Pass facetTitle + beginning of script for detection
+        const symbolContent = `${script.facetTitle || ''} ${script.fullScript?.substring(0, 200) || ''}`;
+
+        // Background music for ambient atmosphere
+        const musicBaseUrl =
+          process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
+        const backgroundMusicUrl = `${musicBaseUrl}/audio/series/lunary-bed-v1.mp3`;
+
         videoBuffer = await renderRemotionVideo({
           format: remotionFormat,
           outputPath: '',
@@ -173,13 +280,20 @@ export async function POST(
           overlays: overlays || [],
           categoryVisuals,
           seed: videoSeed,
+          zodiacSign: symbolContent,
+          backgroundMusicUrl,
         });
 
         console.log(`✅ Remotion: Video rendered with shooting stars`);
       } catch (remotionError) {
+        const errMsg =
+          remotionError instanceof Error
+            ? remotionError.message
+            : String(remotionError);
+        const errStack =
+          remotionError instanceof Error ? remotionError.stack : '';
         console.error(
-          `❌ Remotion render failed, falling back to FFmpeg:`,
-          remotionError,
+          `❌ Remotion render failed, falling back to FFmpeg:\n  Message: ${errMsg}\n  Stack: ${errStack}`,
         );
         useFFmpegFallback = true;
       }
@@ -187,6 +301,8 @@ export async function POST(
 
     if (useFFmpegFallback) {
       console.log(`⚠️ Using FFmpeg fallback for video generation...`);
+      // FFmpeg doesn't support series_badge style, filter it out
+      const ffmpegOverlays = overlays.filter((o) => o.style !== 'series_badge');
       videoBuffer = await composeVideo({
         images,
         audioBuffer,
@@ -195,7 +311,7 @@ export async function POST(
         subtitlesText: script.fullScript,
         subtitlesHighlightTerms: highlightTerms,
         subtitlesHighlightColor: highlightColor,
-        overlays,
+        overlays: ffmpegOverlays as any,
       });
     }
 

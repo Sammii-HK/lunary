@@ -156,6 +156,8 @@ export interface RemotionVideoProps {
   sfxTimings?: SfxTiming[];
   /** Subtitle background opacity (#14) */
   subtitleBackgroundOpacity?: number;
+  /** Zodiac sign for symbol overlay */
+  zodiacSign?: string;
 }
 
 /**
@@ -184,10 +186,20 @@ export async function renderRemotionVideo(
   );
 
   // Bundle the Remotion project
+  const projectRoot = process.cwd();
   const bundleLocation = await bundle({
-    entryPoint: path.join(process.cwd(), 'src/remotion/index.ts'),
-    // Enable caching for faster subsequent renders
-    webpackOverride: (config) => config,
+    entryPoint: path.join(projectRoot, 'src/remotion/index.ts'),
+    webpackOverride: (config) => ({
+      ...config,
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...(config.resolve?.alias || {}),
+          '@': path.join(projectRoot, 'src'),
+          '@lib': path.join(projectRoot, 'src/lib'),
+        },
+      },
+    }),
   });
 
   console.log(`📦 Remotion: Bundled to ${bundleLocation}`);
@@ -228,13 +240,12 @@ export async function renderRemotionVideo(
       categoryVisuals: props.categoryVisuals,
       seed,
       hookIntroVariant: props.hookIntroVariant,
-      sfxTimings: props.sfxTimings || [
-        { time: 3, type: 'whoosh' as const },
-        { time: 6, type: 'pop' as const },
-      ],
+      sfxTimings: props.sfxTimings || [],
       subtitleBackgroundOpacity:
         props.subtitleBackgroundOpacity ??
         props.categoryVisuals?.subtitleBackgroundOpacity,
+      zodiacSign: props.zodiacSign,
+      backgroundMusicUrl: props.backgroundMusicUrl,
     };
   } else if (props.format === 'MediumFormVideo') {
     inputProps = {
@@ -248,6 +259,8 @@ export async function renderRemotionVideo(
       overlays: props.overlays || [],
       categoryVisuals: props.categoryVisuals,
       seed,
+      zodiacSign: props.zodiacSign,
+      backgroundMusicUrl: props.backgroundMusicUrl,
     };
   } else {
     // LongFormVideo

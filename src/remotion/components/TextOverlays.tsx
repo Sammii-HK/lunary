@@ -57,16 +57,16 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
   const getYPosition = (style: string) => {
     switch (style) {
       case 'hook':
-        return '68%'; // Closer to subtitles
+        return '40%'; // TikTok safe zone - centered upper
       case 'cta':
-        return '25%';
+        return '18%'; // TikTok safe zone - upper third, well clear of stars
       case 'stamp':
-        return '88%'; // Near bottom, below subtitles
+        return '60%'; // TikTok safe zone - well above subtitles (which are at 78%)
       case 'series_badge':
-        return '5%'; // Top of frame
+        return '15%'; // TikTok safe zone - just below top UI
       case 'chapter':
       default:
-        return '68%'; // Closer to subtitles
+        return '40%'; // TikTok safe zone - centered upper
     }
   };
 
@@ -77,8 +77,11 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
     let currentLine = '';
 
     for (const word of words) {
-      if (currentLine.length + word.length + 1 <= maxChars) {
-        currentLine += (currentLine ? ' ' : '') + word;
+      const separator = currentLine ? ' ' : '';
+      const testLine = currentLine + separator + word;
+
+      if (testLine.length <= maxChars) {
+        currentLine = testLine;
       } else {
         if (currentLine) lines.push(currentLine);
         currentLine = word;

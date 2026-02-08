@@ -188,7 +188,7 @@ export const LongFormVideo: React.FC<LongFormVideoProps> = ({
         highlightTerms={highlightTerms}
         highlightColor={categoryVisuals?.highlightColor}
         fontSize={36}
-        bottomPosition={10}
+        bottomPosition={22}
         fps={fps}
       />
 

@@ -5,6 +5,7 @@ import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
 import { TextOverlays, type Overlay } from '../components/TextOverlays';
 import { HookIntro } from '../components/HookIntro';
 import { ProgressIndicator } from '../components/ProgressIndicator';
+import { ZodiacSymbolOverlay } from '../components/ZodiacSymbolOverlay';
 import type { AudioSegment } from '../utils/timing';
 import type { CategoryVisualConfig } from '../config/category-visuals';
 import { COLORS } from '../styles/theme';
@@ -32,6 +33,10 @@ export interface MediumFormVideoProps {
   seed?: string;
   /** Category visual configuration for themed backgrounds */
   categoryVisuals?: CategoryVisualConfig;
+  /** Content for symbol detection (zodiac, planet, numerology, tarot) */
+  zodiacSign?: string;
+  /** Background music URL (optional, plays at low volume under voiceover) */
+  backgroundMusicUrl?: string;
 }
 
 /**
@@ -51,6 +56,8 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
   overlays = [],
   seed = 'default',
   categoryVisuals,
+  zodiacSign,
+  backgroundMusicUrl,
 }) => {
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -74,6 +81,9 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
         gradientColors={categoryVisuals?.gradientColors}
       />
 
+      {/* Symbol overlay - zodiac, planet, numerology, or tarot */}
+      {zodiacSign && <ZodiacSymbolOverlay content={zodiacSign} fps={fps} />}
+
       {/* Animated hook intro — word-by-word entrance */}
       {hookOverlay && (
         <HookIntro
@@ -91,7 +101,7 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
         highlightTerms={highlightTerms}
         highlightColor={categoryVisuals?.highlightColor}
         fontSize={42}
-        bottomPosition={15}
+        bottomPosition={22}
         fps={fps}
       />
 
@@ -105,6 +115,9 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
 
       {/* Audio track */}
       {audioUrl && <Audio src={audioUrl} />}
+
+      {/* Background music (low volume under voiceover) */}
+      {backgroundMusicUrl && <Audio src={backgroundMusicUrl} volume={0.12} />}
 
       {/* Progress indicator */}
       {showProgress && (

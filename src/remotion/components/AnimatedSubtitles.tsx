@@ -38,7 +38,7 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
   highlightTerms = [],
   highlightColor = COLORS.highlightBlue,
   fontSize = STYLES.subtitle.fontSize,
-  bottomPosition = 12,
+  bottomPosition = 20, // TikTok safe zone: 20% from bottom = 80% from top
   fps = 30,
   wordHighlight = true,
   backgroundOpacity,
@@ -119,20 +119,9 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
       const isActive = frame >= wt.startFrame && frame < wt.endFrame;
       const isKeyword = isHighlightTerm(wt.word);
 
-      // Scale animation for active word (3 frame transition)
-      const scaleTransition = 3;
-      const scale = isActive
-        ? interpolate(
-            frame,
-            [wt.startFrame, wt.startFrame + scaleTransition],
-            [1.0, 1.08],
-            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-          )
-        : 1.0;
-
       // Active word or keyword gets highlight color
       const color = isActive || isKeyword ? highlightColor : COLORS.primaryText;
-      const fontWeight = isActive ? 600 : isKeyword ? 500 : 500;
+      const fontWeight = isActive ? 700 : isKeyword ? 600 : 500;
 
       return (
         <span
@@ -141,9 +130,8 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
             color,
             fontWeight,
             display: 'inline-block',
-            transform: `scale(${scale})`,
-            transition: 'transform 0.1s ease-out',
-            marginRight: '0.25em',
+            marginRight: '0.3em', // Increased spacing to prevent overlap
+            transition: 'color 0.1s ease-out, font-weight 0.1s ease-out',
           }}
         >
           {wt.word}
