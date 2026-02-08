@@ -919,7 +919,11 @@ async function generateThematicWeeklyPosts(
         : (post.postType as SocialPostType);
     let postContent = post.content;
     let hashtags: string[] = [];
-    if (facet && theme) {
+    // Threads question/beta CTA posts have pre-generated content — skip AI copy generation
+    const isPreGenerated =
+      post.postType === 'threads_question' ||
+      post.postType === 'threads_beta_cta';
+    if (facet && theme && !isPreGenerated) {
       const sourcePack = buildSourcePack({
         topic: post.topic || facet.title,
         theme,

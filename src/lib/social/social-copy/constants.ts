@@ -62,6 +62,15 @@ export const POST_TYPE_SPECS: Record<
     sentenceCount: [2, 4],
     toneNote: 'complement the video with context and insight',
   },
+  threads_question: {
+    sentenceCount: [1, 2],
+    ending: 'question',
+    toneNote: 'genuine curiosity, conversational and engaging',
+  },
+  threads_beta_cta: {
+    sentenceCount: [1, 2],
+    toneNote: 'warm invitation, personal and approachable',
+  },
 };
 
 export const QUESTION_STARTERS = [
