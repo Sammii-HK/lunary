@@ -134,11 +134,11 @@ const pickGradient = (seed: string) => {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const card = sanitize(searchParams.get('card'), 48) ?? 'Your Tarot Card';
+  const card = sanitize(searchParams.get('card'), 40) ?? 'Your Tarot Card';
   const timeframe = sanitize(searchParams.get('timeframe'), 24) ?? 'Daily';
   const name = sanitize(searchParams.get('name'), 24);
   const keywords = parseKeywords(searchParams.get('keywords'));
-  const text = sanitize(searchParams.get('text'), 160);
+  const text = sanitize(searchParams.get('text'), 140);
   const date = sanitize(searchParams.get('date'), 32);
   const variant = sanitize(searchParams.get('variant'), 16)?.toLowerCase();
   const isPattern = variant === 'pattern';
@@ -171,13 +171,15 @@ export async function GET(request: NextRequest) {
     return timeframe;
   })();
 
-  const headline = isPattern
+  const rawHeadline = isPattern
     ? name
       ? `${name}'s ${baseLabel}`
       : baseLabel
     : name
       ? `${name}'s ${baseLabel} Tarot`
       : `${baseLabel} Tarot Spotlight`;
+  const headline =
+    rawHeadline.length > 60 ? `${rawHeadline.slice(0, 59)}…` : rawHeadline;
   const theme = pickGradient(`${card}-${timeframe}-${name ?? 'general'}`);
   const primaryHandle = getPrimaryHandle(platform);
   const insights = Array.from(

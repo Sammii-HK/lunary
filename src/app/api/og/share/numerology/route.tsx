@@ -11,6 +11,7 @@ import {
   loadShareFonts,
   ShareFooter,
   SHARE_BASE_URL,
+  SHARE_BORDERS,
 } from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
@@ -28,6 +29,12 @@ interface NumerologyShareRecord {
   expressionMeaning: string;
   createdAt: string;
 }
+
+const NUMBER_COLORS = {
+  lifePath: OG_COLORS.primaryViolet,
+  expression: OG_COLORS.cometTrail,
+  soulUrge: OG_COLORS.galaxyHaze,
+} as const;
 
 export async function GET(request: NextRequest) {
   try {
@@ -99,11 +106,11 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 48 : isStory ? 60 : 60;
     const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
-    const numberSize = isLandscape ? 80 : isStory ? 160 : 140;
-    const labelSize = isLandscape ? 22 : isStory ? 38 : 34;
-    const meaningSize = isLandscape ? 20 : isStory ? 34 : 28;
+    const subtitleSize = isLandscape ? 18 : isStory ? 28 : 24;
+    const numberSize = isLandscape ? 64 : isStory ? 120 : 100;
+    const labelSize = isLandscape ? 14 : isStory ? 24 : 20;
+    const meaningSize = isLandscape ? 16 : isStory ? 24 : 22;
 
     // Generate unique starfield based on shareId
     const stars = generateStarfield(data.shareId, getStarCount(format));
@@ -125,90 +132,58 @@ export async function GET(request: NextRequest) {
       />
     ));
 
-    // Number card component
+    // Card-based number component matching app aesthetic
     const renderNumberCard = (
       number: number,
       label: string,
       meaning: string,
       color: string,
-      compact: boolean = false,
     ) => {
-      const cardPadding = compact
-        ? '16px 20px'
-        : isStory
-          ? '32px 36px'
-          : '28px 32px';
-      const numSize = compact ? 56 : numberSize;
-      const lblSize = compact ? 16 : labelSize;
-      const mngSize = compact ? 14 : meaningSize;
-
       return (
         <div
           style={{
             display: 'flex',
-            flexDirection: compact ? 'row' : 'column',
-            padding: cardPadding,
-            background: OG_COLORS.cardBg,
-            border: `1px solid ${OG_COLORS.border}`,
-            borderRadius: compact ? 14 : 20,
-            alignItems: compact ? 'center' : 'flex-start',
-            gap: compact ? 20 : 12,
+            flexDirection: 'column',
+            padding: isLandscape ? '20px 24px' : '28px 32px',
+            background:
+              'linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))',
+            border: SHARE_BORDERS.card,
+            borderRadius: isLandscape ? 16 : 20,
             flex: 1,
+            gap: isLandscape ? 8 : 12,
           }}
         >
           <div
             style={{
+              fontSize: numberSize,
+              fontWeight: 300,
+              color: color,
               display: 'flex',
-              width: compact ? 80 : 'auto',
-              height: compact ? 80 : 'auto',
-              borderRadius: '50%',
-              background: `rgba(${color === OG_COLORS.primaryViolet ? '132, 88, 216' : color === OG_COLORS.cosmicRose ? '238, 120, 158' : '199, 125, 255'}, 0.15)`,
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: compact ? 0 : '16px 32px',
+              lineHeight: 1,
             }}
           >
-            <div
-              style={{
-                fontSize: numSize,
-                fontWeight: 400,
-                color: color,
-                display: 'flex',
-              }}
-            >
-              {number}
-            </div>
+            {number}
           </div>
           <div
             style={{
+              fontSize: labelSize,
+              color: OG_COLORS.textTertiary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.15em',
               display: 'flex',
-              flexDirection: 'column',
-              flex: 1,
             }}
           >
-            <div
-              style={{
-                fontSize: lblSize,
-                color: OG_COLORS.textSecondary,
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                fontWeight: 300,
-                display: 'flex',
-              }}
-            >
-              {label}
-            </div>
-            <div
-              style={{
-                fontSize: mngSize,
-                color: OG_COLORS.textPrimary,
-                marginTop: 6,
-                lineHeight: 1.4,
-                display: 'flex',
-              }}
-            >
-              {meaning}
-            </div>
+            {label}
+          </div>
+          <div
+            style={{
+              fontSize: meaningSize,
+              color: OG_COLORS.textSecondary,
+              lineHeight: 1.4,
+              display: 'flex',
+            }}
+          >
+            {meaning}
           </div>
         </div>
       );
@@ -216,7 +191,7 @@ export async function GET(request: NextRequest) {
 
     // Layout based on format
     const layoutJsx = isLandscape ? (
-      // Landscape Layout - Three numbers in horizontal row
+      // Landscape Layout - Three cards in a row
       <div
         style={{
           width: '100%',
@@ -224,7 +199,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: `${padding}px`,
+          padding: '48px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -250,33 +225,27 @@ export async function GET(request: NextRequest) {
               display: 'flex',
             }}
           >
-            {firstName ? `${firstName}'s Numerology` : 'My Numerology'}
+            {firstName ? `${firstName}'s Numbers` : 'Your Numbers'}
           </div>
-          {data.birthDate && (
-            <div
-              style={{
-                fontSize: 18,
-                color: OG_COLORS.textTertiary,
-                marginTop: 8,
-                letterSpacing: '0.1em',
-                display: 'flex',
-              }}
-            >
-              {new Date(data.birthDate).toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </div>
-          )}
+          <div
+            style={{
+              fontSize: subtitleSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 6,
+              letterSpacing: '0.1em',
+              display: 'flex',
+            }}
+          >
+            Numerology Profile
+          </div>
         </div>
 
-        {/* Three numbers in row */}
+        {/* Three cards in row */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'row',
-            gap: 16,
+            gap: 20,
             flex: 1,
           }}
         >
@@ -284,22 +253,19 @@ export async function GET(request: NextRequest) {
             data.lifePath,
             'Life Path',
             data.lifePathMeaning,
-            OG_COLORS.primaryViolet,
-            true,
-          )}
-          {renderNumberCard(
-            data.soulUrge,
-            'Soul Urge',
-            data.soulUrgeMeaning,
-            OG_COLORS.cosmicRose,
-            true,
+            NUMBER_COLORS.lifePath,
           )}
           {renderNumberCard(
             data.expression,
             'Expression',
             data.expressionMeaning,
-            OG_COLORS.galaxyHaze,
-            true,
+            NUMBER_COLORS.expression,
+          )}
+          {renderNumberCard(
+            data.soulUrge,
+            'Soul Urge',
+            data.soulUrgeMeaning,
+            NUMBER_COLORS.soulUrge,
           )}
         </div>
 
@@ -307,7 +273,7 @@ export async function GET(request: NextRequest) {
         <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     ) : isStory ? (
-      // Story Layout - Numbers stacked vertically with full meaning
+      // Story Layout - Cards stacked vertically with breathing room
       <div
         style={{
           width: '100%',
@@ -315,7 +281,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: '120px 60px 200px 60px',
+          padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -341,25 +307,19 @@ export async function GET(request: NextRequest) {
               display: 'flex',
             }}
           >
-            {firstName ? `${firstName}'s Numerology` : 'My Numerology'}
+            {firstName ? `${firstName}'s Numbers` : 'Your Numbers'}
           </div>
-          {data.birthDate && (
-            <div
-              style={{
-                fontSize: 28,
-                color: OG_COLORS.textTertiary,
-                marginTop: 12,
-                letterSpacing: '0.1em',
-                display: 'flex',
-              }}
-            >
-              {new Date(data.birthDate).toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </div>
-          )}
+          <div
+            style={{
+              fontSize: subtitleSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 12,
+              letterSpacing: '0.1em',
+              display: 'flex',
+            }}
+          >
+            Numerology Profile
+          </div>
         </div>
 
         {/* Numbers stacked */}
@@ -375,19 +335,19 @@ export async function GET(request: NextRequest) {
             data.lifePath,
             'Life Path',
             data.lifePathMeaning,
-            OG_COLORS.primaryViolet,
-          )}
-          {renderNumberCard(
-            data.soulUrge,
-            'Soul Urge',
-            data.soulUrgeMeaning,
-            OG_COLORS.cosmicRose,
+            NUMBER_COLORS.lifePath,
           )}
           {renderNumberCard(
             data.expression,
             'Expression',
             data.expressionMeaning,
-            OG_COLORS.galaxyHaze,
+            NUMBER_COLORS.expression,
+          )}
+          {renderNumberCard(
+            data.soulUrge,
+            'Soul Urge',
+            data.soulUrgeMeaning,
+            NUMBER_COLORS.soulUrge,
           )}
         </div>
 
@@ -395,7 +355,7 @@ export async function GET(request: NextRequest) {
         <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     ) : (
-      // Square Layout
+      // Square Layout - Cards stacked vertically
       <div
         style={{
           width: '100%',
@@ -403,7 +363,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: `${padding}px`,
+          padding: '60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -429,25 +389,19 @@ export async function GET(request: NextRequest) {
               display: 'flex',
             }}
           >
-            {firstName ? `${firstName}'s Numerology` : 'My Numerology'}
+            {firstName ? `${firstName}'s Numbers` : 'Your Numbers'}
           </div>
-          {data.birthDate && (
-            <div
-              style={{
-                fontSize: 24,
-                color: OG_COLORS.textTertiary,
-                marginTop: 10,
-                letterSpacing: '0.1em',
-                display: 'flex',
-              }}
-            >
-              {new Date(data.birthDate).toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </div>
-          )}
+          <div
+            style={{
+              fontSize: subtitleSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 10,
+              letterSpacing: '0.1em',
+              display: 'flex',
+            }}
+          >
+            Numerology Profile
+          </div>
         </div>
 
         {/* Numbers Grid */}
@@ -455,7 +409,7 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 24,
+            gap: 20,
             flex: 1,
           }}
         >
@@ -463,19 +417,19 @@ export async function GET(request: NextRequest) {
             data.lifePath,
             'Life Path',
             data.lifePathMeaning,
-            OG_COLORS.primaryViolet,
-          )}
-          {renderNumberCard(
-            data.soulUrge,
-            'Soul Urge',
-            data.soulUrgeMeaning,
-            OG_COLORS.cosmicRose,
+            NUMBER_COLORS.lifePath,
           )}
           {renderNumberCard(
             data.expression,
             'Expression',
             data.expressionMeaning,
-            OG_COLORS.galaxyHaze,
+            NUMBER_COLORS.expression,
+          )}
+          {renderNumberCard(
+            data.soulUrge,
+            'Soul Urge',
+            data.soulUrgeMeaning,
+            NUMBER_COLORS.soulUrge,
           )}
         </div>
 

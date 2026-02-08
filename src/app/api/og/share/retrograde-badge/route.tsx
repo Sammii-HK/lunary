@@ -7,7 +7,11 @@ import {
   generateStarfield,
   getStarCount,
 } from '@/lib/share/og-utils';
-import { ShareFooter, SHARE_BASE_URL } from '@/lib/share/og-share-utils';
+import {
+  truncateText,
+  ShareFooter,
+  SHARE_BASE_URL,
+} from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
@@ -183,9 +187,11 @@ export async function GET(request: NextRequest) {
       ? `${firstName ? `${firstName} Survived` : 'I Survived'} Mercury Retrograde`
       : `Day ${data.survivalDays} of Mercury Retrograde`;
 
-    const humorLine = data.isCompleted
+    const humorLimit = isLandscape ? 80 : 120;
+    const rawHumor = data.isCompleted
       ? 'Mercury went direct. I made it through.'
       : 'Still standing, still surviving';
+    const humorLine = truncateText(rawHumor, humorLimit);
 
     // Starfield component
     const starfieldJsx = stars.map((star, i) => (
@@ -279,7 +285,7 @@ export async function GET(request: NextRequest) {
               display: 'flex',
               flexDirection: 'column',
               gap: 16,
-              maxWidth: 550,
+              maxWidth: '60%',
             }}
           >
             {/* Title */}
@@ -348,7 +354,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: '120px 60px 200px 60px',
+          padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}

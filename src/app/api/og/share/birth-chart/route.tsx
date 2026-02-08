@@ -547,7 +547,7 @@ export async function GET(request: NextRequest) {
         {/* Left column: Chart */}
         <div
           style={{
-            width: 420,
+            width: 360,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -567,7 +567,7 @@ export async function GET(request: NextRequest) {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            gap: 16,
+            gap: 12,
           }}
         >
           {/* Element & Modality Badges */}
@@ -609,7 +609,7 @@ export async function GET(request: NextRequest) {
                   borderRadius: 12,
                   border: SHARE_BORDERS.card,
                   background: 'rgba(0,0,0,0.15)',
-                  minWidth: 100,
+                  minWidth: 90,
                   alignItems: 'center',
                 }}
               >
@@ -741,8 +741,7 @@ export async function GET(request: NextRequest) {
           justifyContent: 'center',
           width: '100%',
           maxWidth: 960,
-          minHeight: isSquare ? 900 : 1180,
-          gap: isStory ? 64 : isSquare ? 32 : 54,
+          gap: isStory ? 48 : isSquare ? 28 : 40,
           alignItems: 'center',
           position: 'relative',
         }}
@@ -878,7 +877,7 @@ export async function GET(request: NextRequest) {
                   borderRadius: 14,
                   border: SHARE_BORDERS.card,
                   background: 'rgba(0,0,0,0.15)',
-                  minWidth: isLandscape ? 120 : 150,
+                  minWidth: isLandscape ? 100 : 130,
                   alignItems: 'center',
                 }}
               >

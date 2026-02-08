@@ -189,7 +189,7 @@ export async function GET(request: NextRequest) {
     const isStory = format === 'story';
     const padding = isLandscape ? 48 : isStory ? 60 : 60;
     const titleSize = isLandscape ? 44 : isStory ? 84 : 72;
-    const symbolSize = isLandscape ? 140 : isStory ? 280 : 200;
+    const symbolSize = isLandscape ? 120 : isStory ? 200 : 160;
     const signSize = isLandscape ? 52 : isStory ? 96 : 72;
     const badgeSize = isLandscape ? 20 : isStory ? 32 : 28;
     const themeSize = isLandscape ? 18 : isStory ? 32 : 30;
@@ -413,7 +413,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: '120px 60px 200px 60px',
+          padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -694,6 +694,7 @@ export async function GET(request: NextRequest) {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
+                flexWrap: 'wrap',
                 gap: 12,
                 alignItems: 'center',
               }}

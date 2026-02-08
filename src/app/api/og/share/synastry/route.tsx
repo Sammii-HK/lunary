@@ -9,6 +9,7 @@ import {
 } from '@/lib/share/og-utils';
 import {
   loadShareFonts,
+  truncateText,
   ShareFooter,
   SHARE_BASE_URL,
 } from '@/lib/share/og-share-utils';
@@ -124,6 +125,15 @@ export async function GET(request: NextRequest) {
 
     const scoreColor = getScoreColor(data.compatibilityScore);
 
+    // Truncation limits
+    const nameLimit = isLandscape ? 40 : 50;
+    const summaryLimit = isLandscape ? 120 : 200;
+    const combinedNames = truncateText(
+      `${data.userName || 'You'} & ${data.friendName}`,
+      nameLimit,
+    );
+    const truncatedSummary = truncateText(data.summary, summaryLimit);
+
     const fonts = await loadShareFonts(request);
 
     return new ImageResponse(
@@ -196,7 +206,7 @@ export async function GET(request: NextRequest) {
                 textAlign: 'center',
               }}
             >
-              {data.userName || 'You'} & {data.friendName}
+              {combinedNames}
             </div>
           </div>
 
@@ -248,7 +258,7 @@ export async function GET(request: NextRequest) {
               lineHeight: 1.4,
             }}
           >
-            {data.summary}
+            {truncatedSummary}
           </div>
 
           {/* Aspect counts */}

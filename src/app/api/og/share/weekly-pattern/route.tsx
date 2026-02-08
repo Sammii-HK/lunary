@@ -67,13 +67,7 @@ const SUIT_COLORS: Record<string, string> = {
   'Major Arcana': OG_COLORS.galaxyHaze,
 };
 
-const SUIT_SYMBOLS: Record<string, string> = {
-  Cups: '*',
-  Wands: '*',
-  Swords: '*',
-  Pentacles: '*',
-  'Major Arcana': '+',
-};
+// Suit symbols removed - using colored circles instead
 
 export async function GET(request: NextRequest) {
   try {
@@ -196,8 +190,6 @@ export async function GET(request: NextRequest) {
     const cardNameSize = isLandscape ? 22 : isStory ? 36 : 32;
     const labelSize = isLandscape ? 20 : isStory ? 32 : 28;
     const seasonTitleSize = isLandscape ? 36 : isStory ? 56 : 52;
-    const suitSymbolSize = isLandscape ? 72 : isStory ? 120 : 108;
-
     const truncate = truncateText;
 
     // Limit top cards to prevent overflow (max 3 for landscape/square)
@@ -206,7 +198,8 @@ export async function GET(request: NextRequest) {
 
     const suitColor =
       SUIT_COLORS[data.dominantSuit.suit] || OG_COLORS.primaryViolet;
-    const suitSymbol = SUIT_SYMBOLS[data.dominantSuit.suit] || '★';
+
+    const seasonNameLimit = isLandscape ? 30 : 40;
 
     // Generate unique starfield based on shareId
     const stars = generateStarfield(data.shareId, getStarCount(format));
@@ -290,7 +283,7 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             flexDirection: 'row',
-            gap: 24,
+            gap: 20,
             flex: 1,
           }}
         >
@@ -310,14 +303,14 @@ export async function GET(request: NextRequest) {
           >
             <div
               style={{
-                fontSize: suitSymbolSize,
-                color: suitColor,
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                background: suitColor,
                 display: 'flex',
                 marginBottom: 16,
               }}
-            >
-              {suitSymbol}
-            </div>
+            />
             <div
               style={{
                 fontSize: seasonTitleSize,
@@ -329,7 +322,7 @@ export async function GET(request: NextRequest) {
                 marginBottom: 8,
               }}
             >
-              {data.season.name}
+              {truncate(data.season.name, seasonNameLimit)}
             </div>
             <div
               style={{
@@ -417,7 +410,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: '120px 60px 200px 60px',
+          padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -464,24 +457,24 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: '40px 48px',
+            padding: '36px 44px',
             background: SHARE_CARDS.primary,
             border: `3px solid ${suitColor}`,
             borderRadius: 24,
-            marginBottom: 36,
+            marginBottom: 32,
             alignItems: 'center',
           }}
         >
           <div
             style={{
-              fontSize: suitSymbolSize,
-              color: suitColor,
+              width: 16,
+              height: 16,
+              borderRadius: '50%',
+              background: suitColor,
               display: 'flex',
               marginBottom: 20,
             }}
-          >
-            {suitSymbol}
-          </div>
+          />
           <div
             style={{
               fontSize: seasonTitleSize,
@@ -493,7 +486,7 @@ export async function GET(request: NextRequest) {
               marginBottom: 12,
             }}
           >
-            {data.season.name}
+            {truncate(data.season.name, seasonNameLimit)}
           </div>
           <div
             style={{
@@ -626,24 +619,24 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: '32px 36px',
+            padding: '28px 32px',
             background: SHARE_CARDS.primary,
             border: `2px solid ${suitColor}`,
             borderRadius: 20,
-            marginBottom: 28,
+            marginBottom: 24,
             alignItems: 'center',
           }}
         >
           <div
             style={{
-              fontSize: suitSymbolSize,
-              color: suitColor,
+              width: 14,
+              height: 14,
+              borderRadius: '50%',
+              background: suitColor,
               display: 'flex',
               marginBottom: 16,
             }}
-          >
-            {suitSymbol}
-          </div>
+          />
           <div
             style={{
               fontSize: seasonTitleSize,
@@ -655,7 +648,7 @@ export async function GET(request: NextRequest) {
               marginBottom: 10,
             }}
           >
-            {data.season.name}
+            {truncate(data.season.name, seasonNameLimit)}
           </div>
           <div
             style={{

@@ -128,9 +128,9 @@ export async function GET(request: NextRequest) {
 
     const truncate = truncateText;
 
-    // Format-specific character limits - increased for better space usage
-    const headlineLimit = isLandscape ? 70 : isStory ? 140 : 100;
-    const overviewLimit = isLandscape ? 160 : isStory ? 280 : 220;
+    // Format-specific character limits
+    const headlineLimit = isLandscape ? 70 : isStory ? 120 : 100;
+    const overviewLimit = isLandscape ? 140 : isStory ? 240 : 180;
 
     // Generate unique starfield based on shareId
     const stars = generateStarfield(data.shareId, getStarCount(format));
@@ -385,6 +385,7 @@ export async function GET(request: NextRequest) {
               gap: 16,
               flex: 1,
               justifyContent: 'center',
+              maxWidth: '60%',
             }}
           >
             {/* Headline */}
@@ -458,7 +459,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: '120px 60px 200px 60px',
+          padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -472,7 +473,7 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 40,
+            marginBottom: 32,
           }}
         >
           <div
@@ -505,7 +506,7 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 48,
+            marginBottom: 32,
           }}
         >
           <div
@@ -539,8 +540,8 @@ export async function GET(request: NextRequest) {
             background: 'rgba(255, 255, 255, 0.03)',
             border: '1px solid rgba(255, 255, 255, 0.12)',
             borderRadius: 24,
-            padding: '36px 40px',
-            marginBottom: 28,
+            padding: '32px 36px',
+            marginBottom: 20,
           }}
         >
           <div
@@ -597,7 +598,7 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             justifyContent: 'center',
             gap: 20,
-            marginTop: 28,
+            marginTop: 20,
           }}
         >
           <div
