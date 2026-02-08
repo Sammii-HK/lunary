@@ -19,7 +19,6 @@ import {
   segmentScriptIntoItems,
   segmentScriptIntoMediumItems,
 } from '@/lib/video/narrative-generator';
-import { generateTopicImages } from '@/lib/video/image-generator';
 import { resolveThemeCategory } from '@/lib/video/theme-category';
 import { BRAND_COLORS, getThemePalette } from '@/lib/video/theme-palette';
 import { clampHueShift, getThemeHueBase } from '@/lib/video/hue';
@@ -1221,59 +1220,20 @@ export async function POST(request: NextRequest) {
         // No proportional scaling needed - timestamps are already accurate based on actual audio
         const scaledItems = items;
 
-        console.log(`🎨 Generating images for ${scaledItems.length} items...`);
-        const topicImages = await generateTopicImages(
-          scaledItems,
-          weeklyData,
-          baseUrl,
-          videoFormat,
-          {
-            palette: resolvedThemePalette || undefined,
-            introBg: BRAND_COLORS.cosmicBlack,
-            lockIntroHue: true,
-          },
+        console.log(
+          `🎨 Creating topic metadata for ${scaledItems.length} items (no images needed for Remotion)...`,
         );
 
-        console.log(`✅ Generated ${topicImages.length} topic images`);
+        // Create topic metadata without generating image URLs (Remotion renders everything)
+        const topicImages = scaledItems.map((item) => ({
+          topic: item.topic,
+          item: item.item,
+          imageUrl: '', // Not needed - Remotion generates visuals
+          startTime: item.startTime,
+          endTime: item.endTime,
+        }));
 
-        if (topicImages.length > 0) {
-          const firstImage = topicImages[0];
-          const parsed = new URL(firstImage.imageUrl);
-          const bgParam = parsed.searchParams.get('bg');
-          if (
-            !bgParam ||
-            bgParam.toLowerCase() !== BRAND_COLORS.cosmicBlack.toLowerCase()
-          ) {
-            console.warn(
-              '[Intro Frame] Enforcing cosmic black background for first frame',
-            );
-            parsed.searchParams.set('bg', BRAND_COLORS.cosmicBlack);
-            parsed.searchParams.set('lockHue', '1');
-            if (resolvedThemePalette) {
-              parsed.searchParams.set('fg', resolvedThemePalette.foreground);
-              parsed.searchParams.set('accent', resolvedThemePalette.accent);
-              parsed.searchParams.set(
-                'highlight',
-                resolvedThemePalette.highlight,
-              );
-            }
-            firstImage.imageUrl = parsed.toString();
-            await sendDiscordNotification({
-              title: 'Intro hue lock enforced',
-              description: 'First frame was rebuilt with cosmic black.',
-              fields: [
-                { name: 'Week', value: weekKey || 'unknown', inline: true },
-                {
-                  name: 'Category',
-                  value: themeCategory || 'unknown',
-                  inline: true,
-                },
-              ],
-              category: 'general',
-              dedupeKey: `intro-hue-lock-${weekKey || 'unknown'}`,
-            });
-          }
-        }
+        console.log(`✅ Created ${topicImages.length} topic segments`);
 
         // Compose video with multiple images using Remotion
         // Extract hook (first sentence) for overlay
@@ -1318,7 +1278,7 @@ export async function POST(request: NextRequest) {
               audioUrl: audioUrl!,
               backgroundMusicUrl,
               images: topicImages.map((img) => ({
-                url: img.imageUrl,
+                url: '', // No image URLs needed - Remotion generates visuals
                 startTime: img.startTime,
                 endTime: img.endTime,
                 topic: img.topic,
@@ -1396,14 +1356,23 @@ export async function POST(request: NextRequest) {
         }
       } catch (error) {
         console.error(
-          '❌ Failed to generate topic-based images:',
+          '❌ Failed to create topic segments:',
           error instanceof Error ? error.message : error,
           error instanceof Error ? error.stack : '',
         );
-        // Don't silently fall back - throw the error so we can see what's wrong
-        throw new Error(
-          `Failed to generate topic-based images for long-form video: ${error instanceof Error ? error.message : 'Unknown error'}. This is required for long-form videos.`,
+        // Fall back to simple intro-only video
+        console.log(
+          '⚠️ Falling back to intro-only video without topic segments',
         );
+        const topicImages = [
+          {
+            topic: 'intro',
+            item: title,
+            imageUrl: '',
+            startTime: 0,
+            endTime: actualAudioDuration || 60,
+          },
+        ];
       }
     } else {
       // Short-form or fallback: single image
