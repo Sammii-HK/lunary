@@ -180,6 +180,8 @@ export const AstronomyContextProvider = ({
   );
   const [cosmicData, setCosmicData] = useState<GlobalCosmicData | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  // Tick counter to trigger duration recalculation every 60s
+  const [durationTick, setDurationTick] = useState(0);
 
   useEffect(() => {
     if (isDemoMode) return; // Skip fetching in demo mode
@@ -214,6 +216,13 @@ export const AstronomyContextProvider = ({
       isMounted = false;
     };
   }, [currentDate, refreshKey, isDemoMode]);
+
+  // Recalculate durations every 60s so badges stay current
+  useEffect(() => {
+    if (isDemoMode || !cosmicData?.planetaryPositions) return;
+    const id = setInterval(() => setDurationTick((t) => t + 1), 60_000);
+    return () => clearInterval(id);
+  }, [isDemoMode, cosmicData]);
 
   const currentAstrologicalChart = useMemo(() => {
     if (!cosmicData?.planetaryPositions) return [];
@@ -252,7 +261,8 @@ export const AstronomyContextProvider = ({
     }) as AstroChartInformation[];
 
     return result;
-  }, [cosmicData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cosmicData, durationTick]);
 
   const generalTransits = useMemo(
     () => cosmicData?.generalTransits ?? [],
