@@ -1439,7 +1439,6 @@ async function generateThematicWeeklyPosts(
                 videoCaption,
               );
             }
-            const imageUrl: string | null = null;
 
             await sql`
               INSERT INTO social_posts (
@@ -1447,7 +1446,7 @@ async function generateThematicWeeklyPosts(
                 scheduled_date, week_theme, week_start, source_type, source_id,
                 source_title, base_group_key, created_at
               )
-              SELECT ${videoCaption}, ${dbPlatform}, 'video', ${dayInfo.facetTitle}, 'pending', ${imageUrl}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${dayInfo.theme.name}, ${weekStartDate.toISOString().split('T')[0]}, 'video_script', ${script.id || null}, ${script.facetTitle}, ${baseGroupKey}, NOW()
+              SELECT ${videoCaption}, ${dbPlatform}, 'video', ${dayInfo.facetTitle}, 'pending', ${null}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${dayInfo.theme.name}, ${weekStartDate.toISOString().split('T')[0]}, 'video_script', ${script.id || null}, ${script.facetTitle}, ${baseGroupKey}, NOW()
               WHERE NOT EXISTS (
                 SELECT 1 FROM social_posts
                 WHERE platform = ${dbPlatform}

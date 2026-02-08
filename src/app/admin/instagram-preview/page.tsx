@@ -7,6 +7,7 @@ import { generateRankingBatch } from '@/lib/instagram/ranking-content';
 import { generateCompatibilityBatch } from '@/lib/instagram/compatibility-content';
 import { generateDailyStories } from '@/lib/instagram/story-content';
 import type { IGCarouselContent } from '@/lib/instagram/types';
+import { sanitizeImageUrl } from '@/utils/url-security';
 
 type Tab =
   | 'memes'
@@ -423,7 +424,7 @@ export default function InstagramPreviewPage() {
                     <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={url}
+                        src={sanitizeImageUrl(url)}
                         alt={`${template} meme for ${selectedSign}`}
                         className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
                       />
@@ -466,7 +467,7 @@ export default function InstagramPreviewPage() {
                           <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={imageUrls[i]}
+                              src={sanitizeImageUrl(imageUrls[i])}
                               alt={`${carousel.title} - ${slide.subtitle || `Slide ${i + 1}`}`}
                               className='w-full h-full object-cover'
                             />
@@ -508,7 +509,7 @@ export default function InstagramPreviewPage() {
                     <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={url}
+                        src={sanitizeImageUrl(url)}
                         alt={`${variant} cosmic card`}
                         className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
                       />
@@ -538,7 +539,7 @@ export default function InstagramPreviewPage() {
                     <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={url}
+                        src={sanitizeImageUrl(url)}
                         alt='Quote card'
                         className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
                       />
@@ -573,7 +574,7 @@ export default function InstagramPreviewPage() {
                     <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={item.url}
+                        src={sanitizeImageUrl(item.url)}
                         alt={`Did you know - ${item.category}`}
                         className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
                       />
@@ -612,7 +613,7 @@ export default function InstagramPreviewPage() {
                     <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={item.url}
+                        src={sanitizeImageUrl(item.url)}
                         alt={`Signs ranked by ${item.trait}`}
                         className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
                       />
@@ -649,7 +650,7 @@ export default function InstagramPreviewPage() {
                     <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={item.url}
+                        src={sanitizeImageUrl(item.url)}
                         alt={`${item.sign1} + ${item.sign2} compatibility`}
                         className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
                       />
@@ -685,7 +686,7 @@ export default function InstagramPreviewPage() {
                     <div className='aspect-[9/16] max-h-[600px] rounded-lg overflow-hidden border border-zinc-600 mx-auto'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={item.url}
+                        src={sanitizeImageUrl(item.url)}
                         alt={`Story - ${item.variant}`}
                         className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
                       />

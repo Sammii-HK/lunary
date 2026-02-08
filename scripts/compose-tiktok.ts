@@ -19,7 +19,7 @@ import { config } from 'dotenv';
 import { resolve, join } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { mkdir, access, writeFile } from 'fs/promises';
 import { constants } from 'fs';
 import {
@@ -42,8 +42,17 @@ const TTS_DIR = join(process.cwd(), 'public', 'app-demos', 'tts');
 // ============================================================================
 
 function getAudioDuration(audioPath: string): number {
-  const output = execSync(
-    `ffprobe -v quiet -show_entries format=duration -of csv=p=0 "${audioPath}"`,
+  const output = execFileSync(
+    'ffprobe',
+    [
+      '-v',
+      'quiet',
+      '-show_entries',
+      'format=duration',
+      '-of',
+      'csv=p=0',
+      audioPath,
+    ],
     { encoding: 'utf-8', timeout: 10000 },
   ).trim();
   return parseFloat(output);
@@ -75,17 +84,16 @@ function findRecordingExtension(featureId: string): string | null {
   const webmPath = join(INPUT_DIR, `${featureId}.webm`);
   const mp4Path = join(INPUT_DIR, `${featureId}.mp4`);
 
-  try {
-    execSync(`test -f "${webmPath}"`, { stdio: 'pipe' });
+  // Use fs.existsSync instead of shell command
+  const { existsSync } = require('fs');
+
+  if (existsSync(webmPath)) {
     return 'webm';
-  } catch {
-    try {
-      execSync(`test -f "${mp4Path}"`, { stdio: 'pipe' });
-      return 'mp4';
-    } catch {
-      return null;
-    }
   }
+  if (existsSync(mp4Path)) {
+    return 'mp4';
+  }
+  return null;
 }
 
 // ============================================================================

@@ -17,7 +17,7 @@ config({ path: resolve(process.cwd(), '.env.local') });
 import { chromium, type Page } from '@playwright/test';
 import { mkdir, unlink, rename, stat } from 'fs/promises';
 import { join } from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import {
   getFeatureRecording,
   getAllFeatureIds,
@@ -379,9 +379,19 @@ async function executeStep(page: Page, step: RecordingStep): Promise<void> {
 async function trimBlackFrames(videoPath: string): Promise<void> {
   try {
     // Detect black frames at the start
-    const detectOutput = execSync(
-      `ffmpeg -i "${videoPath}" -vf "blackdetect=d=0.1:pix_th=0.05" -an -f null - 2>&1`,
-      { encoding: 'utf-8', timeout: 30000 },
+    const detectOutput = execFileSync(
+      'ffmpeg',
+      [
+        '-i',
+        videoPath,
+        '-vf',
+        'blackdetect=d=0.1:pix_th=0.05',
+        '-an',
+        '-f',
+        'null',
+        '-',
+      ],
+      { encoding: 'utf-8', timeout: 30000, stdio: ['pipe', 'pipe', 'pipe'] },
     );
 
     // Parse blackdetect output: [blackdetect @ ...] black_start:0 black_end:3.5 black_duration:3.5
@@ -406,8 +416,20 @@ async function trimBlackFrames(videoPath: string): Promise<void> {
     // Trim the video — re-encode to avoid keyframe issues
     const trimmedPath = videoPath.replace('.webm', '.trimmed.webm');
     try {
-      execSync(
-        `ffmpeg -y -ss ${trimStart.toFixed(2)} -i "${videoPath}" -c:v libvpx-vp9 -b:v 2M "${trimmedPath}"`,
+      execFileSync(
+        'ffmpeg',
+        [
+          '-y',
+          '-ss',
+          trimStart.toFixed(2),
+          '-i',
+          videoPath,
+          '-c:v',
+          'libvpx-vp9',
+          '-b:v',
+          '2M',
+          trimmedPath,
+        ],
         { timeout: 60000, stdio: 'pipe' },
       );
     } catch (encodeError) {
