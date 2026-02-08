@@ -1463,13 +1463,17 @@ async function generateThematicWeeklyPosts(
             continue;
           }
 
-          await sql`
-            INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
-            VALUES (${script.id}, ${weekStartKey}, ${dateKey}, ${dayInfo.facetTitle}, 'pending', NOW(), NOW())
-            ON CONFLICT (script_id)
-            DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
-          `;
-          dailyShortVideosQueued += 1;
+          // Only queue video render jobs for scripts saved to the DB (have an id)
+          // Engagement scripts without IDs get their social_posts entry but skip rendering
+          if (script.id) {
+            await sql`
+              INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
+              VALUES (${script.id}, ${weekStartKey}, ${dateKey}, ${dayInfo.facetTitle}, 'pending', NOW(), NOW())
+              ON CONFLICT (script_id)
+              DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
+            `;
+            dailyShortVideosQueued += 1;
+          }
           dailyShortVideosGenerated += 1;
         } catch (error) {
           console.error('❌ Failed to generate daily short:', {
