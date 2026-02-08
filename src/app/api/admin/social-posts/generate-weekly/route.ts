@@ -2012,10 +2012,7 @@ export async function POST(request: NextRequest) {
         days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         count: 5,
       },
-      tiktok: {
-        days: [],
-        count: 0,
-      },
+      tiktok: { days: ['Tuesday', 'Thursday', 'Saturday'], count: 3 },
     };
 
     // Build comprehensive weekly post plan
