@@ -554,7 +554,10 @@ export function TarotSpreadExperience({
   }, []);
 
   return (
-    <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'>
+    <div
+      data-testid='tarot-spreads-section'
+      className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'
+    >
       <div className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
         <div>
           <h2 className='text-xl font-medium text-zinc-100'>
@@ -825,6 +828,7 @@ export function TarotSpreadExperience({
                   return (
                     <div
                       key={card.positionId}
+                      data-testid={`spread-card-${cardIndex}`}
                       className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4'
                     >
                       {/* Card header - clickable to preview */}
@@ -871,6 +875,7 @@ export function TarotSpreadExperience({
                       <div className='mt-4'>
                         <button
                           type='button'
+                          data-testid={`spread-transit-toggle-${cardIndex}`}
                           onClick={() =>
                             setExpandedTransitCardIndex(
                               isTransitExpanded ? -1 : cardIndex,
@@ -889,7 +894,10 @@ export function TarotSpreadExperience({
                         </button>
 
                         {isTransitExpanded && (
-                          <div className='mt-2'>
+                          <div
+                            className='mt-2'
+                            data-testid={`spread-transit-content-${cardIndex}`}
+                          >
                             <TarotTransitConnection
                               cardName={card.card.name}
                               birthChart={birthChart}
