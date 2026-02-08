@@ -1554,3 +1554,29 @@ model native_push_tokens {
   @@index([user_id], map: "idx_native_push_user")
   @@index([platform], map: "idx_native_push_platform")
 }
+
+model instagram_performance {
+  id               Int       @id @default(autoincrement())
+  post_type        String    // meme, carousel, quote, daily_cosmic, did_you_know, sign_ranking, compatibility, story
+  content_category String?   // tarot, zodiac, crystals, etc.
+  post_url         String?
+  image_url        String?
+  impressions      Int?      @default(0)
+  reach            Int?      @default(0)
+  likes            Int?      @default(0)
+  comments         Int?      @default(0)
+  saves            Int?      @default(0)
+  shares           Int?      @default(0)
+  engagement_rate  Float?    @default(0) @db.Real
+  save_rate        Float?    @default(0) @db.Real
+  posted_at        DateTime? @db.Timestamptz(6)
+  metadata         Json?     // Additional fields like sign, trait, slug, etc.
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([post_type], map: "idx_ig_performance_post_type")
+  @@index([content_category], map: "idx_ig_performance_category")
+  @@index([posted_at], map: "idx_ig_performance_posted_at")
+  @@index([engagement_rate], map: "idx_ig_performance_engagement")
+  @@index([save_rate], map: "idx_ig_performance_save_rate")
+}

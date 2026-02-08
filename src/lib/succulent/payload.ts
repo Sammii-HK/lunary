@@ -162,13 +162,57 @@ export const buildPlatformPayload = (
     };
   }
 
+  // TikTok photo mode for static IG content types
+  const tiktokPhotoTypes = [
+    'instagram_meme',
+    'instagram_did_you_know',
+    'instagram_sign_ranking',
+    'instagram_compatibility',
+    'instagram_quote',
+  ];
+
   if (platformStr === 'tiktok' && media.length > 0) {
-    payload.tiktokOptions = {
-      type: 'post',
-      ...(shouldUseVideo && imageUrlForPlatform
-        ? { coverUrl: imageUrlForPlatform }
-        : {}),
-    };
+    if (tiktokPhotoTypes.includes(post.post_type)) {
+      payload.tiktokOptions = { type: 'photo' };
+    } else if (post.post_type === 'instagram_carousel' && post.image_url) {
+      // TikTok photo carousel: split pipe-delimited images
+      const carouselUrls = post.image_url.split('|').filter(Boolean);
+      if (carouselUrls.length > 1) {
+        payload.media = carouselUrls.map((url) => {
+          let normalizedUrl = url.trim();
+          try {
+            if (
+              !normalizedUrl.startsWith('http://') &&
+              !normalizedUrl.startsWith('https://')
+            ) {
+              normalizedUrl = new URL(normalizedUrl, baseUrl).toString();
+            }
+          } catch {
+            // keep as-is
+          }
+          return {
+            type: 'image' as const,
+            url: normalizedUrl,
+            alt: 'Carousel slide',
+          };
+        });
+        payload.tiktokOptions = { type: 'photo' };
+      } else {
+        payload.tiktokOptions = {
+          type: 'post',
+          ...(shouldUseVideo && imageUrlForPlatform
+            ? { coverUrl: imageUrlForPlatform }
+            : {}),
+        };
+      }
+    } else {
+      payload.tiktokOptions = {
+        type: 'post',
+        ...(shouldUseVideo && imageUrlForPlatform
+          ? { coverUrl: imageUrlForPlatform }
+          : {}),
+      };
+    }
   }
 
   if (platformStr === 'instagram' && shouldUseVideo) {
@@ -176,6 +220,46 @@ export const buildPlatformPayload = (
       type: 'reel',
       ...(imageUrlForPlatform ? { coverUrl: imageUrlForPlatform } : {}),
     };
+  }
+
+  // Instagram story support
+  if (
+    platformStr === 'instagram' &&
+    !shouldUseVideo &&
+    post.post_type === 'instagram_story'
+  ) {
+    payload.instagramOptions = { type: 'story' };
+  }
+
+  // Instagram carousel support: multiple image URLs in post
+  if (
+    platformStr === 'instagram' &&
+    !shouldUseVideo &&
+    post.post_type === 'instagram_carousel' &&
+    post.image_url
+  ) {
+    const carouselUrls = post.image_url.split('|').filter(Boolean);
+    if (carouselUrls.length > 1) {
+      payload.media = carouselUrls.map((url) => {
+        let normalizedUrl = url.trim();
+        try {
+          if (
+            !normalizedUrl.startsWith('http://') &&
+            !normalizedUrl.startsWith('https://')
+          ) {
+            normalizedUrl = new URL(normalizedUrl, baseUrl).toString();
+          }
+        } catch {
+          // keep as-is
+        }
+        return {
+          type: 'image' as const,
+          url: normalizedUrl,
+          alt: 'Carousel slide',
+        };
+      });
+      payload.instagramOptions = { type: 'carousel' };
+    }
   }
 
   return payload;
