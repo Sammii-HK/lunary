@@ -7,6 +7,7 @@
 
 import { generateContent } from '@/lib/ai/content-generator';
 import type { VideoScript } from '../types';
+import { getOptimalPostingHour } from '@/utils/posting-times';
 
 export interface TransitEvent {
   type: 'ingress' | 'station' | 'aspect' | 'eclipse';
@@ -110,7 +111,7 @@ Write naturally and make complex astrology feel accessible.`;
     topic: transitDesc,
     angle: 'timely',
     aspect: 'awareness',
-    contentType: 'educational-deepdive',
+    contentType: 'transit-alert',
     platform: 'tiktok',
     sections,
     fullScript: scriptText,
@@ -127,8 +128,12 @@ Write naturally and make complex astrology feel accessible.`;
       angle: 'timely',
       topic: transitDesc,
       aspect: 'awareness',
-      scheduledHour: 17, // Educational content time
-      targetAudience: 'consideration',
+      scheduledHour: getOptimalPostingHour({
+        contentType: 'transit-alert',
+        scheduledDate,
+        topic: transitDesc,
+      }),
+      targetAudience: 'discovery',
     },
   };
 }

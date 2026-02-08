@@ -28,6 +28,7 @@ export const domainHashtags: Record<ThemeCategory, string> = {
   crystals: '#crystalhealing',
   chakras: '#spirituality',
   runes: '#runes',
+  spells: '#witchtok',
 };
 
 // ============================================================================
@@ -55,19 +56,21 @@ export const sabbatThemes: SabbatTheme[] = withSabbatThreads(
 // ============================================================================
 
 /**
- * Theme category weights for selection
- * Numerology gets 3x weight because it's the best-performing topic
+ * Theme category weights for selection — aligned with TikTok audience size
+ * tarot (#tarot 73.9B views), zodiac (#astrology 84.2B), numerology (fast-growing)
+ * Sabbat seasonal only (handled by getSabbatForDate), chakras/runes too niche
  */
 export const THEME_CATEGORY_WEIGHTS: Record<string, number> = {
-  numerology: 3, // Best performing - boost to ~18% of weeks
-  tarot: 2,
-  lunar: 2,
-  zodiac: 1,
-  planetary: 1,
-  crystals: 2,
-  sabbat: 1,
-  chakras: 1,
-  runes: 1,
+  tarot: 4, // 73.9B views — massively underserved
+  zodiac: 3, // 84.2B views — largest audience
+  numerology: 3, // Fast-growing, high per-video engagement
+  spells: 3, // 201 spells, #witchtok growing, practical 'how to' content
+  planetary: 2, // Feeds into #astrology, transit content
+  lunar: 2, // Dedicated audience
+  crystals: 2, // Growing via #witchtok
+  sabbat: 0, // Seasonal only — handled by getSabbatForDate()
+  chakras: 0, // Too niche for TikTok rotation
+  runes: 0, // Extremely niche
 };
 
 /**
@@ -124,6 +127,96 @@ export function getSabbatForDate(date: Date): {
   }
 
   return null;
+}
+
+/**
+ * Check if a date falls within ±3 days of a planetary sign ingress.
+ * Uses astronomy-engine to detect when slow-moving planets change sign.
+ * Returns a transit-specific theme that can override regular rotation.
+ */
+export function getTransitThemeForDate(date: Date): {
+  planet: string;
+  fromSign: string;
+  toSign: string;
+  ingressDate: Date;
+  daysUntil: number;
+} | null {
+  try {
+    // Dynamic import to keep this lightweight when not needed
+    const Astronomy = require('astronomy-engine');
+
+    const TRACKED_PLANETS = [
+      { name: 'Saturn', body: Astronomy.Body.Saturn },
+      { name: 'Jupiter', body: Astronomy.Body.Jupiter },
+      { name: 'Mars', body: Astronomy.Body.Mars },
+      { name: 'Venus', body: Astronomy.Body.Venus },
+    ];
+
+    const ZODIAC_SIGNS = [
+      'Aries',
+      'Taurus',
+      'Gemini',
+      'Cancer',
+      'Leo',
+      'Virgo',
+      'Libra',
+      'Scorpio',
+      'Sagittarius',
+      'Capricorn',
+      'Aquarius',
+      'Pisces',
+    ];
+
+    const getEclipticSign = (body: any, t: Date): string => {
+      const equator = Astronomy.Equator(body, t, true, true);
+      const ecliptic = Astronomy.Ecliptic(equator.vec);
+      const longitude = ecliptic.elon;
+      const signIndex = Math.floor(longitude / 30) % 12;
+      return ZODIAC_SIGNS[signIndex];
+    };
+
+    // Check ±3 day window around the given date
+    for (const planet of TRACKED_PLANETS) {
+      const before = new Date(date.getTime() - 3 * 24 * 60 * 60 * 1000);
+      const after = new Date(date.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+      const signBefore = getEclipticSign(planet.body, before);
+      const signAfter = getEclipticSign(planet.body, after);
+
+      if (signBefore !== signAfter) {
+        // Binary search for ingress date
+        let lo = before.getTime();
+        let hi = after.getTime();
+        while (hi - lo > 60 * 60 * 1000) {
+          // within 1 hour
+          const mid = (lo + hi) / 2;
+          const midSign = getEclipticSign(planet.body, new Date(mid));
+          if (midSign === signBefore) {
+            lo = mid;
+          } else {
+            hi = mid;
+          }
+        }
+        const ingressDate = new Date((lo + hi) / 2);
+        const daysUntil = Math.ceil(
+          (ingressDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+        );
+
+        return {
+          planet: planet.name,
+          fromSign: signBefore,
+          toSign: signAfter,
+          ingressDate,
+          daysUntil,
+        };
+      }
+    }
+
+    return null;
+  } catch {
+    // astronomy-engine not available or calculation error
+    return null;
+  }
 }
 
 /**
@@ -200,6 +293,7 @@ export function generateHashtags(
     crystals: '#crystalhealing',
     tarot: '#tarot',
     chakras: '#chakrahealing',
+    spells: '#witchtok',
   };
 
   return {

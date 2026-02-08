@@ -9,7 +9,13 @@ export type ContentType =
   | 'educational-deepdive' // Deep grimoire content, numerology focus (17:00 UTC)
   | 'app-demo' // Feature showcase for conversions (20:00 UTC)
   | 'comparison' // Before/After value proposition (20:00 UTC)
-  | 'testimonial'; // User stories and social proof (18:00 UTC)
+  | 'testimonial' // User stories and social proof (18:00 UTC)
+  | 'quiz' // Interactive identity quiz (12:00 UTC)
+  | 'ranking' // "Ranking signs by [trait]" list format (12:00 UTC)
+  | 'hot-take' // "Unpopular opinion: [take]" debate format (12:00 UTC)
+  | 'sign-check' // "If you're a [sign], stop scrolling" callout (12:00 UTC)
+  | 'myth' // "The real reason [sign] is..." storytime (12:00 UTC)
+  | 'transit-alert'; // Timely transit content when major transits detected (12:00 UTC)
 
 export type TargetAudience = 'discovery' | 'consideration' | 'conversion';
 
@@ -81,6 +87,66 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
     description:
       'User stories and testimonials. Scheduled at prime engagement time in both US and UK markets.',
   },
+
+  quiz: {
+    type: 'quiz',
+    purpose: 'Interactive identity quiz driving comments and shares',
+    idealTime: 12, // Discovery window
+    targetAudience: 'discovery',
+    platforms: ['tiktok', 'instagram'],
+    description:
+      'Identity-based quiz format that drives comments and shares. "Which one are you?" framing for maximum engagement.',
+  },
+
+  ranking: {
+    type: 'ranking',
+    purpose: 'Ranking signs by traits for discovery engagement',
+    idealTime: 12, // Discovery window
+    targetAudience: 'discovery',
+    platforms: ['tiktok', 'instagram'],
+    description:
+      'Provocative sign rankings by traits. List format drives debate in comments. High share potential.',
+  },
+
+  'hot-take': {
+    type: 'hot-take',
+    purpose: 'Debate-provoking opinions for engagement',
+    idealTime: 12, // Discovery window
+    targetAudience: 'discovery',
+    platforms: ['tiktok', 'instagram'],
+    description:
+      'Bold, confident takes on astrology that provoke debate. Designed for duets, stitches, and comment wars.',
+  },
+
+  'sign-check': {
+    type: 'sign-check',
+    purpose: 'Direct sign callouts for targeted engagement',
+    idealTime: 12, // Discovery window
+    targetAudience: 'discovery',
+    platforms: ['tiktok', 'instagram'],
+    description:
+      '"If you\'re a [sign], stop scrolling" format. Personal, direct, teasing. High save and share rate.',
+  },
+
+  myth: {
+    type: 'myth',
+    purpose: 'Zodiac mythology and origin stories',
+    idealTime: 12, // Discovery window
+    targetAudience: 'discovery',
+    platforms: ['tiktok', 'instagram'],
+    description:
+      'Captivating origin stories and hidden history behind zodiac signs, planets, and symbols. Reveal-structured for rewatches.',
+  },
+
+  'transit-alert': {
+    type: 'transit-alert',
+    purpose: 'Timely content for major upcoming transits',
+    idealTime: 12, // Discovery window
+    targetAudience: 'discovery',
+    platforms: ['tiktok', 'instagram'],
+    description:
+      'Auto-generated alerts for major transits within 14 days. Timely but meaning-focused for evergreen value.',
+  },
 };
 
 /**
@@ -95,6 +161,46 @@ export function getContentTypeConfig(type: ContentType): ContentTypeConfig {
  */
 export function getIdealPostingHour(type: ContentType): number {
   return CONTENT_TYPE_CONFIGS[type].idealTime;
+}
+
+/**
+ * Posting time windows per audience tier for A/B testing
+ *
+ * Each tier has a set of hours to rotate through deterministically.
+ * Different dates naturally land on different hours, providing built-in
+ * A/B comparison data without randomness.
+ */
+export interface PostingTimeWindow {
+  baseHour: number; // Centre of optimal window (UTC)
+  windowHours: number[]; // Hours to rotate through for A/B testing
+  weekendAdjust: number; // Hour offset for Sat/Sun
+}
+
+export const POSTING_TIME_WINDOWS: Record<TargetAudience, PostingTimeWindow> = {
+  discovery: {
+    baseHour: 12,
+    windowHours: [11, 12, 13, 14], // UK lunch + US morning
+    weekendAdjust: 1, // People scroll later on weekends
+  },
+  consideration: {
+    baseHour: 17,
+    windowHours: [16, 17, 18], // UK evening + US lunch
+    weekendAdjust: -1, // Weekend leisure shifts earlier
+  },
+  conversion: {
+    baseHour: 20,
+    windowHours: [19, 20, 21], // UK leisure + US afternoon peak
+    weekendAdjust: 0, // Stable - conversion timing is consistent
+  },
+};
+
+/**
+ * Get posting time window for an audience tier
+ */
+export function getPostingTimeWindow(
+  audience: TargetAudience,
+): PostingTimeWindow {
+  return POSTING_TIME_WINDOWS[audience];
 }
 
 /**

@@ -5,7 +5,7 @@ export interface Overlay {
   text: string;
   startTime: number;
   endTime: number;
-  style?: 'hook' | 'hook_large' | 'cta' | 'stamp' | 'chapter';
+  style?: 'hook' | 'hook_large' | 'cta' | 'stamp' | 'chapter' | 'series_badge';
 }
 
 interface TextOverlaysProps {
@@ -45,6 +45,8 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
         return baseFontSize + 4; // 48px
       case 'stamp':
         return baseFontSize - 12; // 32px
+      case 'series_badge':
+        return 28;
       case 'chapter':
       default:
         return baseFontSize; // 44px
@@ -60,6 +62,8 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
         return '25%';
       case 'stamp':
         return '88%'; // Near bottom, below subtitles
+      case 'series_badge':
+        return '5%'; // Top of frame
       case 'chapter':
       default:
         return '68%'; // Closer to subtitles
@@ -143,6 +147,7 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
         // Style-specific accent enhancements
         const isStamp = style === 'stamp';
         const isCta = style === 'cta';
+        const isSeriesBadge = style === 'series_badge';
 
         return (
           <div
@@ -186,6 +191,22 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
                         borderBottom: `2px solid ${accentColor}`,
                         paddingBottom: 4,
                         display: 'inline-block',
+                      }
+                    : {}),
+                  // Series badge: pill-shaped with accent background
+                  ...(isSeriesBadge
+                    ? {
+                        borderRadius: 20,
+                        backgroundColor: accentColor
+                          ? `${accentColor}4D` // 30% opacity
+                          : 'rgba(90, 215, 255, 0.3)',
+                        border: `1px solid ${accentColor || 'rgba(90, 215, 255, 0.6)'}`,
+                        paddingLeft: 16,
+                        paddingRight: 16,
+                        paddingTop: 6,
+                        paddingBottom: 6,
+                        display: 'inline-block',
+                        fontWeight: 600,
                       }
                     : {}),
                 }}

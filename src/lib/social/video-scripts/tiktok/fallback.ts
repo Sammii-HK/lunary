@@ -1071,6 +1071,336 @@ const FALLBACK_TEMPLATES: Record<
     ],
   },
 
+  spells: {
+    context: [
+      '{topic} works with specific ingredients and timing.',
+      '{topic} is practical craft, not performance.',
+      'Every ingredient in {topic} has a mechanism.',
+      '{topic} follows principles you can learn.',
+    ],
+    middle: [
+      'The timing matters as much as the intention.',
+      'Simple ingredients work better than elaborate ones.',
+      'Moon phase amplifies or reduces the effect.',
+      'Start simple. Build complexity with experience.',
+    ],
+    action: {
+      [ContentAspect.CORE_MEANING]: [
+        '{topic} works because each component has a purpose.',
+        'The core of {topic} is intention matched with materials.',
+      ],
+      [ContentAspect.COMMON_MISCONCEPTION]: [
+        '{topic} does not require expensive tools.',
+        'The power of {topic} comes from focus, not materials.',
+      ],
+      [ContentAspect.EMOTIONAL_IMPACT]: [
+        '{topic} shifts energy in ways you can feel.',
+        'After {topic}, pay attention to subtle changes.',
+      ],
+      [ContentAspect.REAL_LIFE_EXPRESSION]: [
+        '{topic} shows results in small, practical ways.',
+        'You will notice {topic} working through coincidences.',
+      ],
+      [ContentAspect.TIMING_AND_CONTEXT]: [
+        'Best time for {topic}: match the moon phase to intention.',
+        '{topic} timing makes the difference between okay and effective.',
+      ],
+      [ContentAspect.PRACTICAL_APPLICATION]: [
+        'Try {topic} with just three ingredients to start.',
+        '{topic} needs consistent intention, not perfect execution.',
+      ],
+      [ContentAspect.WHEN_TO_AVOID]: [
+        'Skip {topic} when your energy is scattered.',
+        '{topic} during the wrong moon phase can miss the mark.',
+      ],
+      [ContentAspect.SUBTLE_INSIGHT]: [
+        'The overlooked detail in {topic} is the closing step.',
+        '{topic} works on layers you might not notice immediately.',
+      ],
+    },
+    closing: [
+      'Start with one spell. Master it before adding complexity.',
+      'The best spell is the one you actually do.',
+      'Keep a record. Patterns emerge over time.',
+      'Practical magic is about consistency.',
+    ],
+  },
+
+  quiz: {
+    context: [
+      'Time for a quick quiz about {topic}.',
+      'Which {topic} type are you?',
+      'Let us find out where you land with {topic}.',
+      '{topic} quiz: be honest with your answer.',
+    ],
+    middle: [
+      'Option A: you already knew this about yourself.',
+      'Option B: this catches you off guard.',
+      'Option C: you pretend this does not apply.',
+      'The answer says more about you than you think.',
+    ],
+    action: {
+      [ContentAspect.CORE_MEANING]: [
+        'Drop your answer in the comments.',
+        'Tag a friend who matches option A.',
+      ],
+      [ContentAspect.COMMON_MISCONCEPTION]: [
+        'Which one did you pick? Comment below.',
+        'Most people get this one wrong.',
+      ],
+      [ContentAspect.EMOTIONAL_IMPACT]: [
+        'Be honest. Which one hit closest?',
+        'Comment your reaction.',
+      ],
+      [ContentAspect.REAL_LIFE_EXPRESSION]: [
+        'Which option is your daily reality?',
+        'Tag someone who is definitely option B.',
+      ],
+      [ContentAspect.TIMING_AND_CONTEXT]: [
+        'Does your answer change depending on the day?',
+        'Comment when this applies most.',
+      ],
+      [ContentAspect.PRACTICAL_APPLICATION]: [
+        'Save this and test it on your friends.',
+        'Try asking someone else. Compare answers.',
+      ],
+      [ContentAspect.WHEN_TO_AVOID]: [
+        'Which option should you avoid? Comment below.',
+        'Tag the friend who always picks option C.',
+      ],
+      [ContentAspect.SUBTLE_INSIGHT]: [
+        'The real answer is between the lines. Comment yours.',
+        'Which one surprised you?',
+      ],
+    },
+    closing: [
+      'No wrong answers. Just patterns.',
+      'Comment your answer and find your people.',
+      'Tag someone who needs to take this quiz.',
+      'Save this and come back with a friend.',
+    ],
+  },
+
+  ranking: {
+    context: [
+      'Ranking signs by {topic}. Starting from the bottom.',
+      'Time to settle this: who wins at {topic}?',
+      '{topic} tier list. Some signs will be mad.',
+      'The definitive ranking for {topic}. No appeals.',
+    ],
+    middle: [
+      'Bottom tier earned their spot.',
+      'The middle is where it gets controversial.',
+      'Top tier and it is not even close.',
+      'This placement is going to start arguments.',
+    ],
+    action: {
+      [ContentAspect.CORE_MEANING]: [
+        'Comment your sign and tell me I am wrong.',
+        'Where did your sign land? Drop it below.',
+      ],
+      [ContentAspect.COMMON_MISCONCEPTION]: [
+        'You think your sign should be higher? Prove it in the comments.',
+        'The sign you think is top tier probably is not.',
+      ],
+      [ContentAspect.EMOTIONAL_IMPACT]: [
+        'If this offended you, your sign is probably at the bottom.',
+        'The ranking that hurts is the one that is accurate.',
+      ],
+      [ContentAspect.REAL_LIFE_EXPRESSION]: [
+        'Tag the friend whose sign is bottom tier.',
+        'Send this to your group chat and watch the chaos.',
+      ],
+      [ContentAspect.TIMING_AND_CONTEXT]: [
+        'This ranking shifts by season. Check back later.',
+        'Right now? This is where the signs stand.',
+      ],
+      [ContentAspect.PRACTICAL_APPLICATION]: [
+        'Screenshot your ranking and share it.',
+        'Save this and compare to next month.',
+      ],
+      [ContentAspect.WHEN_TO_AVOID]: [
+        'If your sign is last, don not take it personally. Actually, do.',
+        'Some signs should not see this ranking.',
+      ],
+      [ContentAspect.SUBTLE_INSIGHT]: [
+        'The real ranking is in the reasons, not the order.',
+        'The sign you least expect is always top 3.',
+      ],
+    },
+    closing: [
+      'Comment your sign. Let the debate begin.',
+      'Fight me on this. Comments are open.',
+      'Where did your sign land? Be honest.',
+      'Share this and tag the sign at the bottom.',
+    ],
+  },
+
+  hot_take: {
+    context: [
+      'Unpopular opinion about {topic}.',
+      'Nobody wants to say this about {topic}. I will.',
+      'Hot take: {topic} is not what you think.',
+      '{topic}. We need to talk about this.',
+    ],
+    middle: [
+      'And I am not apologising for it.',
+      'The evidence is right there if you look.',
+      'You already know this is true.',
+      'Somebody had to say it.',
+    ],
+    action: {
+      [ContentAspect.CORE_MEANING]: [
+        'Prove me wrong. Comment below.',
+        'Stitch this if you disagree.',
+      ],
+      [ContentAspect.COMMON_MISCONCEPTION]: [
+        'The popular opinion on {topic} is wrong. Here is why.',
+        'What everyone says about {topic} misses the point.',
+      ],
+      [ContentAspect.EMOTIONAL_IMPACT]: [
+        'If this made you uncomfortable, sit with that.',
+        'The take that triggers you is the one that is true.',
+      ],
+      [ContentAspect.REAL_LIFE_EXPRESSION]: [
+        'You have seen {topic} in action. You know I am right.',
+        'Think about the last time {topic} proved this point.',
+      ],
+      [ContentAspect.TIMING_AND_CONTEXT]: [
+        'This take gets more accurate every year.',
+        'Give it time. You will agree with me eventually.',
+      ],
+      [ContentAspect.PRACTICAL_APPLICATION]: [
+        'Try seeing {topic} this way for one week.',
+        'Apply this take and see what shifts.',
+      ],
+      [ContentAspect.WHEN_TO_AVOID]: [
+        'If you can not handle this take, scroll past.',
+        'Not ready for this conversation? That is fine.',
+      ],
+      [ContentAspect.SUBTLE_INSIGHT]: [
+        'The real take is what this says about the people who disagree.',
+        'The controversy is not the point. The truth underneath is.',
+      ],
+    },
+    closing: [
+      'I said what I said.',
+      'Comment if you agree. Stitch if you do not.',
+      'This take stands. Fight me.',
+      'Share this with someone who needs to hear it.',
+    ],
+  },
+
+  sign_check: {
+    context: [
+      'If you are a {topic}, stop scrolling.',
+      '{topic}. This one is for you.',
+      '{topic} energy check. Right now.',
+      'Calling all {topic} placements.',
+    ],
+    middle: [
+      'You already know what I am about to say.',
+      'And you are doing it right now.',
+      'This is the part where you feel called out.',
+      'Nobody had to tell you. You felt it.',
+    ],
+    action: {
+      [ContentAspect.CORE_MEANING]: [
+        'Be honest: did this hit? Comment below.',
+        'Tag a {topic} who needs to see this.',
+      ],
+      [ContentAspect.COMMON_MISCONCEPTION]: [
+        'People think {topic} is about one thing. It is not.',
+        'The {topic} stereotype misses this completely.',
+      ],
+      [ContentAspect.EMOTIONAL_IMPACT]: [
+        'If this felt personal, it was supposed to.',
+        'The accuracy is not a coincidence.',
+      ],
+      [ContentAspect.REAL_LIFE_EXPRESSION]: [
+        'Send this to your {topic} friend without context.',
+        'Every {topic} reading this just nodded.',
+      ],
+      [ContentAspect.TIMING_AND_CONTEXT]: [
+        'This week especially. {topic} energy is peaking.',
+        'Right now, {topic} is going through it.',
+      ],
+      [ContentAspect.PRACTICAL_APPLICATION]: [
+        'Save this and come back when you need reminding.',
+        'Screenshot this. You will need it later.',
+      ],
+      [ContentAspect.WHEN_TO_AVOID]: [
+        'If you are not a {topic}, this still applies to your {topic} friend.',
+        'Not a {topic}? Send this to one.',
+      ],
+      [ContentAspect.SUBTLE_INSIGHT]: [
+        'The thing about {topic} nobody mentions is the quiet part.',
+        '{topic} already knew this. They just needed to hear it out loud.',
+      ],
+    },
+    closing: [
+      'You know who you are. Tag yourself.',
+      'Send this to a {topic}. No caption needed.',
+      'Save this. You will feel this again next week.',
+      '{topic}, this is your reminder.',
+    ],
+  },
+
+  myth: {
+    context: [
+      'The real reason {topic} exists is not what you think.',
+      'Nobody tells you this about {topic}.',
+      'The origin of {topic} changes everything.',
+      '{topic} has a history most people have never heard.',
+    ],
+    middle: [
+      'The story goes deeper than the surface.',
+      'The original meaning got lost along the way.',
+      'Once you know this, you can not unsee it.',
+      'The mythology explains the behaviour perfectly.',
+    ],
+    action: {
+      [ContentAspect.CORE_MEANING]: [
+        'Now you know the real story behind {topic}.',
+        'The origin of {topic} explains more than any horoscope.',
+      ],
+      [ContentAspect.COMMON_MISCONCEPTION]: [
+        'What you thought {topic} meant is only half the story.',
+        'The popular version of {topic} misses the point entirely.',
+      ],
+      [ContentAspect.EMOTIONAL_IMPACT]: [
+        'Does knowing this change how you see {topic}?',
+        'The real story behind {topic} hits differently.',
+      ],
+      [ContentAspect.REAL_LIFE_EXPRESSION]: [
+        'You can see this myth play out in every {topic} you know.',
+        'The ancient story is still happening in modern life.',
+      ],
+      [ContentAspect.TIMING_AND_CONTEXT]: [
+        'This story becomes relevant every time {topic} activates.',
+        'The myth resurfaces when the energy matches.',
+      ],
+      [ContentAspect.PRACTICAL_APPLICATION]: [
+        'Save this for next time someone asks about {topic}.',
+        'Share this with someone who thinks they know {topic}.',
+      ],
+      [ContentAspect.WHEN_TO_AVOID]: [
+        'If you prefer the simple version, stop here.',
+        'The deeper story is not always comfortable.',
+      ],
+      [ContentAspect.SUBTLE_INSIGHT]: [
+        'The part of the myth everyone forgets is the most important.',
+        'The symbol tells the story if you know how to read it.',
+      ],
+    },
+    closing: [
+      'Now you know. You will never see {topic} the same way.',
+      'The real story changes the meaning.',
+      'Save this. The origin matters.',
+      'Once you know the myth, the sign makes sense.',
+    ],
+  },
+
   default: {
     context: [
       '{topic} has patterns worth noticing.',

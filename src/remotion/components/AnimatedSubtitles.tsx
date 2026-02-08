@@ -19,6 +19,8 @@ interface AnimatedSubtitlesProps {
   fps?: number;
   /** Enable word-level highlighting (TikTok CapCut style) */
   wordHighlight?: boolean;
+  /** Background opacity override for adaptive contrast (#14) */
+  backgroundOpacity?: number;
 }
 
 /**
@@ -39,6 +41,7 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
   bottomPosition = 12,
   fps = 30,
   wordHighlight = true,
+  backgroundOpacity,
 }) => {
   const frame = useCurrentFrame();
   const currentTime = frame / fps;
@@ -200,13 +203,18 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
           color: COLORS.primaryText,
           lineHeight: 1.4,
           margin: 0,
+          backgroundColor: `rgba(0, 0, 0, ${backgroundOpacity ?? 0.45})`,
+          borderRadius: 8,
+          paddingLeft: 16,
+          paddingRight: 16,
+          paddingTop: 8,
+          paddingBottom: 8,
+          display: 'inline-block',
           textShadow: `
-            -1px -1px 0 rgba(0,0,0,0.5),
-            1px -1px 0 rgba(0,0,0,0.5),
-            -1px 1px 0 rgba(0,0,0,0.5),
-            1px 1px 0 rgba(0,0,0,0.5),
-            0 0 8px rgba(0,0,0,0.4),
-            2px 2px 4px rgba(0,0,0,0.3)
+            -1px -1px 0 rgba(0,0,0,0.3),
+            1px -1px 0 rgba(0,0,0,0.3),
+            -1px 1px 0 rgba(0,0,0,0.3),
+            1px 1px 0 rgba(0,0,0,0.3)
           `,
         }}
       >

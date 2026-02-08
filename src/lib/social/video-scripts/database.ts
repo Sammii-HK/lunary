@@ -276,6 +276,210 @@ export async function updateVideoScriptStatus(
 }
 
 /**
+ * Ensure video_performance table exists for tracking engagement metrics
+ */
+export async function ensureVideoPerformanceTable(): Promise<void> {
+  const { sql } = await import('@vercel/postgres');
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS video_performance (
+      id SERIAL PRIMARY KEY,
+      video_script_id INTEGER REFERENCES video_scripts(id),
+      platform TEXT NOT NULL DEFAULT 'tiktok',
+      views INTEGER DEFAULT 0,
+      likes INTEGER DEFAULT 0,
+      comments INTEGER DEFAULT 0,
+      shares INTEGER DEFAULT 0,
+      saves INTEGER DEFAULT 0,
+      watch_time_avg REAL,
+      completion_rate REAL,
+      hook_style TEXT,
+      script_structure TEXT,
+      content_type TEXT,
+      has_loop_structure BOOLEAN DEFAULT false,
+      cta_type TEXT,
+      theme_category TEXT,
+      recorded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_video_perf_script ON video_performance(video_script_id)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_video_perf_platform ON video_performance(platform)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_video_perf_hook ON video_performance(hook_style)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_video_perf_structure ON video_performance(script_structure)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_video_perf_content ON video_performance(content_type)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_video_perf_loop ON video_performance(has_loop_structure)
+  `;
+
+  // Add time-based columns for posting time optimisation
+  try {
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS scheduled_hour INTEGER`;
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS day_of_week INTEGER`;
+    // #1: Track aspect + angle
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS aspect TEXT`;
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS angle TEXT`;
+    // #7: Track hook intro animation variant
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS hook_intro_variant TEXT`;
+    // #10: Track stitch-bait separately
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS has_stitch_bait BOOLEAN DEFAULT false`;
+    // #13: Retention curve checkpoints
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS retention_3s REAL`;
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS retention_6s REAL`;
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS retention_15s REAL`;
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS retention_30s REAL`;
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS retention_60s REAL`;
+  } catch {
+    // Columns may already exist
+  }
+
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_video_perf_hour ON video_performance(scheduled_hour)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_video_perf_dow ON video_performance(day_of_week)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_video_perf_aspect ON video_performance(aspect)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_video_perf_angle ON video_performance(angle)
+  `;
+}
+
+/**
+ * Save video performance metrics, auto-populating scheduled_hour and
+ * day_of_week from the linked video script.
+ */
+export async function saveVideoPerformance(params: {
+  videoScriptId: number;
+  platform?: string;
+  views?: number;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  saves?: number;
+  watchTimeAvg?: number;
+  completionRate?: number;
+  recordedAt?: Date;
+  retention3s?: number;
+  retention6s?: number;
+  retention15s?: number;
+  retention30s?: number;
+  retention60s?: number;
+}): Promise<number> {
+  const { sql } = await import('@vercel/postgres');
+
+  // Look up script to auto-populate time + tracking fields
+  const scriptRow = await sql`
+    SELECT scheduled_date, metadata, hook_text, theme_name
+    FROM video_scripts WHERE id = ${params.videoScriptId}
+  `;
+
+  if (scriptRow.rows.length === 0) {
+    throw new Error(`Video script ${params.videoScriptId} not found`);
+  }
+
+  const script = scriptRow.rows[0];
+  const scheduledDate = new Date(script.scheduled_date);
+  const metadata = script.metadata || {};
+  const themeCategory = THEME_CATEGORY_BY_NAME.get(script.theme_name) ?? null;
+
+  const scheduledHour: number | null = metadata.scheduledHour ?? null;
+  const dayOfWeek = scheduledDate.getDay(); // 0 = Sun, 6 = Sat
+
+  const result = await sql`
+    INSERT INTO video_performance (
+      video_script_id, platform,
+      views, likes, comments, shares, saves,
+      watch_time_avg, completion_rate,
+      hook_style, script_structure, content_type,
+      has_loop_structure, cta_type, theme_category,
+      scheduled_hour, day_of_week,
+      aspect, angle, hook_intro_variant, has_stitch_bait,
+      retention_3s, retention_6s, retention_15s, retention_30s, retention_60s,
+      recorded_at
+    ) VALUES (
+      ${params.videoScriptId},
+      ${params.platform || 'tiktok'},
+      ${params.views ?? 0},
+      ${params.likes ?? 0},
+      ${params.comments ?? 0},
+      ${params.shares ?? 0},
+      ${params.saves ?? 0},
+      ${params.watchTimeAvg ?? null},
+      ${params.completionRate ?? null},
+      ${metadata.hookStyle ?? null},
+      ${metadata.scriptStructureName ?? null},
+      ${metadata.contentTypeKey ?? null},
+      ${metadata.hasLoopStructure ?? false},
+      ${metadata.ctaType ?? null},
+      ${themeCategory},
+      ${scheduledHour},
+      ${dayOfWeek},
+      ${metadata.aspect ?? null},
+      ${metadata.angle ?? null},
+      ${metadata.hookIntroVariant ?? null},
+      ${metadata.hasStitchBait ?? false},
+      ${params.retention3s ?? null},
+      ${params.retention6s ?? null},
+      ${params.retention15s ?? null},
+      ${params.retention30s ?? null},
+      ${params.retention60s ?? null},
+      ${params.recordedAt?.toISOString() ?? new Date().toISOString()}
+    )
+    RETURNING id
+  `;
+
+  return result.rows[0].id;
+}
+
+/**
+ * Get top-performing script structures for a content type (#11)
+ * Scores by weighted average of views (0.4) and saves (0.6)
+ * Requires at least 3 data points per structure
+ */
+export async function getTopPerformingStructures(
+  contentType: string,
+  limit: number = 5,
+): Promise<Array<{ name: string; score: number; count: number }>> {
+  try {
+    const { sql } = await import('@vercel/postgres');
+    const result = await sql`
+      SELECT
+        script_structure as name,
+        (AVG(views) * 0.4 + AVG(saves) * 0.6) as score,
+        COUNT(*)::int as count
+      FROM video_performance
+      WHERE content_type = ${contentType}
+        AND script_structure IS NOT NULL
+      GROUP BY script_structure
+      HAVING COUNT(*) >= 3
+      ORDER BY score DESC
+      LIMIT ${limit}
+    `;
+    return result.rows.map((row) => ({
+      name: row.name,
+      score: Number(row.score),
+      count: Number(row.count),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Update video script written post content
  */
 export async function updateVideoScriptWrittenPost(

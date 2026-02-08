@@ -15,6 +15,37 @@ export interface CategoryVisualConfig {
   highlightColor: string;
   particleTintColor: string;
   accentColor: string;
+  /** Adaptive subtitle background opacity based on gradient brightness (#14) */
+  subtitleBackgroundOpacity?: number;
+}
+
+/**
+ * Calculate relative luminance from a hex color string
+ * Returns 0-255 range
+ */
+function hexLuminance(hex: string): number {
+  const clean = hex.replace('#', '');
+  if (clean.length < 6) return 40; // default mid-dark
+  const r = parseInt(clean.substring(0, 2), 16);
+  const g = parseInt(clean.substring(2, 4), 16);
+  const b = parseInt(clean.substring(4, 6), 16);
+  return 0.299 * r + 0.587 * g + 0.114 * b;
+}
+
+/**
+ * Calculate adaptive subtitle opacity from gradient colors (#14)
+ * Dark backgrounds need less contrast, bright backgrounds need more
+ */
+function calculateSubtitleOpacity(
+  gradientColors: [string, string, string],
+): number {
+  const avgLuminance =
+    gradientColors.reduce((sum, c) => sum + hexLuminance(c), 0) /
+    gradientColors.length;
+
+  if (avgLuminance < 40) return 0.35; // Dark backgrounds
+  if (avgLuminance > 80) return 0.65; // Bright backgrounds
+  return 0.5; // Medium backgrounds
 }
 
 /**
@@ -85,6 +116,7 @@ const DEFAULT_VISUALS: CategoryVisualConfig = {
   highlightColor: '#5AD7FF',
   particleTintColor: '#5AD7FF',
   accentColor: '#5AD7FF',
+  subtitleBackgroundOpacity: 0.35,
 };
 
 /**
@@ -103,13 +135,15 @@ export function getCategoryVisuals(category: string): CategoryVisualConfig {
   }
 
   const backgroundAnimation = CATEGORY_ANIMATION_MAP[category] || 'starfield';
+  const gradientColors = [...palette.backgrounds] as [string, string, string];
 
   return {
     backgroundAnimation,
-    gradientColors: [...palette.backgrounds] as [string, string, string],
+    gradientColors,
     highlightColor: palette.highlight,
     particleTintColor: palette.highlight,
     accentColor: palette.highlight,
+    subtitleBackgroundOpacity: calculateSubtitleOpacity(gradientColors),
   };
 }
 

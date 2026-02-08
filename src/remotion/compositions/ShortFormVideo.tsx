@@ -9,6 +9,13 @@ import { TransitionEffect } from '../components/TransitionEffect';
 import type { AudioSegment } from '../utils/timing';
 import type { CategoryVisualConfig } from '../config/category-visuals';
 import { COLORS } from '../styles/theme';
+import type { HookIntroVariant } from '@/lib/social/video-scripts/types';
+
+/** SFX timing entry for pattern interrupts (#12) */
+interface SfxTiming {
+  time: number;
+  type: 'whoosh' | 'pop' | 'chime';
+}
 
 export interface ShortFormVideoProps {
   /** Title/hook text for the intro (deprecated - use overlays) */
@@ -37,6 +44,12 @@ export interface ShortFormVideoProps {
   seed?: string;
   /** Category visual configuration for themed backgrounds */
   categoryVisuals?: CategoryVisualConfig;
+  /** Hook intro animation variant (#7) */
+  hookIntroVariant?: HookIntroVariant;
+  /** SFX timings for pattern interrupts (#12) */
+  sfxTimings?: SfxTiming[];
+  /** Subtitle background opacity override (#14) */
+  subtitleBackgroundOpacity?: number;
 }
 
 /**
@@ -56,6 +69,9 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
   overlays = [],
   seed = 'default',
   categoryVisuals,
+  hookIntroVariant,
+  sfxTimings,
+  subtitleBackgroundOpacity,
 }) => {
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -87,7 +103,7 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
         direction='in'
       />
 
-      {/* Animated hook intro — word-by-word entrance */}
+      {/* Animated hook intro — word-by-word entrance (#7: variant support) */}
       {hookOverlay && (
         <HookIntro
           text={hookOverlay.text}
@@ -95,10 +111,11 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
           endTime={hookOverlay.endTime}
           accentColor={categoryVisuals?.accentColor}
           highlightTerms={highlightTerms}
+          variant={hookIntroVariant}
         />
       )}
 
-      {/* Animated subtitles - matches FFmpeg ASS styling */}
+      {/* Animated subtitles - matches FFmpeg ASS styling (#14: adaptive contrast) */}
       {segments && segments.length > 0 && (
         <AnimatedSubtitles
           segments={segments}
@@ -107,8 +124,19 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
           fontSize={44}
           bottomPosition={12}
           fps={fps}
+          backgroundOpacity={subtitleBackgroundOpacity}
         />
       )}
+
+      {/* SFX for pattern interrupts (#12) */}
+      {sfxTimings?.map((sfx, i) => (
+        <Audio
+          key={`sfx-${i}`}
+          src={`/sfx/${sfx.type}.mp3`}
+          startFrom={Math.round(sfx.time * fps)}
+          volume={0.3}
+        />
+      ))}
 
       {/* Text overlays (cta, stamps, chapters) — hooks handled above */}
       {otherOverlays.length > 0 && (
