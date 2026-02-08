@@ -349,8 +349,144 @@ export async function detectUpcomingRetrogradeStations(
   return stations;
 }
 
-// Slow planets that get milestone posts
-const SLOW_PLANETS = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+export type CountdownEvent = {
+  name: string;
+  energy: string;
+  priority: number;
+  type: 'retrograde_countdown' | 'sign_change_countdown';
+  planet: string;
+  sign: string;
+  daysUntil: 3 | 7;
+  event: 'retrograde_start' | 'retrograde_end' | 'sign_ingress';
+};
+
+/**
+ * Detect major transit countdowns (3 days and 7 days before events)
+ * Detects upcoming retrogrades and sign changes to post advance warnings
+ */
+export async function detectMajorEventCountdowns(
+  today: Date,
+): Promise<CountdownEvent[]> {
+  const threeDaysAhead = new Date(today);
+  threeDaysAhead.setDate(threeDaysAhead.getDate() + 3);
+
+  const sevenDaysAhead = new Date(today);
+  sevenDaysAhead.setDate(sevenDaysAhead.getDate() + 7);
+
+  const [todayData, in3Days, in7Days] = await Promise.all([
+    getGlobalCosmicData(today),
+    getGlobalCosmicData(threeDaysAhead),
+    getGlobalCosmicData(sevenDaysAhead),
+  ]);
+
+  const countdowns: CountdownEvent[] = [];
+
+  if (!todayData?.planetaryPositions) return countdowns;
+
+  // Check retrograde stations
+  for (const [planet, todayPos] of Object.entries(
+    todayData.planetaryPositions,
+  )) {
+    const in3DaysPos = in3Days?.planetaryPositions?.[planet];
+    const in7DaysPos = in7Days?.planetaryPositions?.[planet];
+
+    // 3 days countdown
+    if (in3DaysPos && todayPos.retrograde !== in3DaysPos.retrograde) {
+      const event = in3DaysPos.retrograde
+        ? 'retrograde_start'
+        : 'retrograde_end';
+      countdowns.push({
+        name: `${planet} ${event === 'retrograde_start' ? 'retrograde' : 'direct'} in 3 days`,
+        energy:
+          event === 'retrograde_start'
+            ? `Prepare for ${planet.toLowerCase()} review mode`
+            : `${planet} momentum returns soon`,
+        priority: 8,
+        type: 'retrograde_countdown',
+        planet,
+        sign: todayPos.sign,
+        daysUntil: 3,
+        event,
+      });
+    }
+
+    // 7 days countdown (only for Mercury, Venus, Mars - high interest)
+    if (
+      in7DaysPos &&
+      ['Mercury', 'Venus', 'Mars'].includes(planet) &&
+      todayPos.retrograde !== in7DaysPos.retrograde
+    ) {
+      const event = in7DaysPos.retrograde
+        ? 'retrograde_start'
+        : 'retrograde_end';
+      countdowns.push({
+        name: `${planet} ${event === 'retrograde_start' ? 'retrograde' : 'direct'} in 1 week`,
+        energy:
+          event === 'retrograde_start'
+            ? `${planet} retrograde approaches - start preparations`
+            : `${planet} direct station approaching`,
+        priority: 7,
+        type: 'retrograde_countdown',
+        planet,
+        sign: todayPos.sign,
+        daysUntil: 7,
+        event,
+      });
+    }
+
+    // Sign change countdowns (slow planets only - frequent changes for fast planets)
+    const SLOW_PLANETS_FOR_COUNTDOWN = [
+      'Jupiter',
+      'Saturn',
+      'Uranus',
+      'Neptune',
+      'Pluto',
+    ];
+    if (!SLOW_PLANETS_FOR_COUNTDOWN.includes(planet)) continue;
+
+    // 3 days countdown for sign change
+    if (in3DaysPos && todayPos.sign !== in3DaysPos.sign) {
+      countdowns.push({
+        name: `${planet} enters ${in3DaysPos.sign} in 3 days`,
+        energy: `Major shift approaching: ${getSignDescription(in3DaysPos.sign)}`,
+        priority: 8,
+        type: 'sign_change_countdown',
+        planet,
+        sign: in3DaysPos.sign,
+        daysUntil: 3,
+        event: 'sign_ingress',
+      });
+    }
+
+    // 7 days countdown for sign change
+    if (in7DaysPos && todayPos.sign !== in7DaysPos.sign) {
+      countdowns.push({
+        name: `${planet} enters ${in7DaysPos.sign} in 1 week`,
+        energy: `Generational shift ahead: ${getSignDescription(in7DaysPos.sign)}`,
+        priority: 7,
+        type: 'sign_change_countdown',
+        planet,
+        sign: in7DaysPos.sign,
+        daysUntil: 7,
+        event: 'sign_ingress',
+      });
+    }
+  }
+
+  return countdowns;
+}
+
+// Planets that get milestone posts (both fast and slow)
+const MILESTONE_PLANETS = [
+  'Mercury',
+  'Venus',
+  'Mars', // Fast planets
+  'Jupiter',
+  'Saturn',
+  'Uranus',
+  'Neptune',
+  'Pluto', // Slow planets
+];
 
 export type TransitMilestoneEvent = {
   planet: string;
@@ -371,8 +507,8 @@ export type TransitMilestoneEvent = {
 };
 
 /**
- * Detect transit milestones for slow-moving planets.
- * Returns milestone events when a slow planet transit hits:
+ * Detect transit milestones for both fast and slow-moving planets.
+ * Returns milestone events when a planet transit hits:
  * - Halfway point (truly halfway through the transit)
  * - 6 months remaining
  * - 3 months remaining
@@ -395,8 +531,8 @@ export async function detectTransitMilestones(
   }
 
   for (const [planet, position] of Object.entries(data.planetaryPositions)) {
-    // Only check slow planets
-    if (!SLOW_PLANETS.includes(planet)) continue;
+    // Only check milestone planets
+    if (!MILESTONE_PLANETS.includes(planet)) continue;
 
     const duration = position.duration;
     if (!duration || !duration.totalDays || !duration.remainingDays) continue;
@@ -409,45 +545,70 @@ export async function detectTransitMilestones(
     let milestone: TransitMilestoneEvent['milestone'] | null = null;
     let milestoneLabel = '';
 
-    // Halfway point - check when elapsed days equals halfway (more accurate)
-    if (elapsedDays >= halfwayDays - 1 && elapsedDays <= halfwayDays + 1) {
-      milestone = 'halfway';
-      milestoneLabel = 'Halfway through';
-    }
-    // 6 months remaining (180 days, check 178-182)
-    else if (remainingDays >= 178 && remainingDays <= 182) {
-      milestone = '6_months';
-      milestoneLabel = '6 months remaining';
-    }
-    // 3 months remaining (90 days, check 88-92)
-    else if (remainingDays >= 88 && remainingDays <= 92) {
-      milestone = '3_months';
-      milestoneLabel = '3 months remaining';
-    }
-    // 1 month remaining (30 days, check 28-32)
-    else if (remainingDays >= 28 && remainingDays <= 32) {
-      milestone = '1_month';
-      milestoneLabel = '1 month remaining';
-    }
-    // 2 weeks remaining (14 days, check 13-15)
-    else if (remainingDays >= 13 && remainingDays <= 15) {
-      milestone = '2_weeks';
-      milestoneLabel = '2 weeks remaining';
-    }
-    // 1 week remaining (7 days, check 6-8)
-    else if (remainingDays >= 6 && remainingDays <= 8) {
-      milestone = '1_week';
-      milestoneLabel = '1 week remaining';
-    }
-    // 3 days remaining (check 2-4)
-    else if (remainingDays >= 2 && remainingDays <= 4) {
-      milestone = '3_days';
-      milestoneLabel = '3 days remaining';
-    }
-    // Tomorrow (1 day remaining, check 0-1)
-    else if (remainingDays >= 0 && remainingDays <= 1) {
-      milestone = 'tomorrow';
-      milestoneLabel = 'Leaving tomorrow';
+    // Planet-specific milestone thresholds
+    if (planet === 'Mercury') {
+      // ~20 day transits - halfway and 3 days
+      if (elapsedDays >= halfwayDays - 1 && elapsedDays <= halfwayDays + 1) {
+        milestone = 'halfway';
+        milestoneLabel = 'Halfway through';
+      } else if (remainingDays >= 2 && remainingDays <= 4) {
+        milestone = '3_days';
+        milestoneLabel = '3 days remaining';
+      }
+    } else if (planet === 'Venus') {
+      // ~25 day transits - halfway, 1 week, 3 days
+      if (elapsedDays >= halfwayDays - 1 && elapsedDays <= halfwayDays + 1) {
+        milestone = 'halfway';
+        milestoneLabel = 'Halfway through';
+      } else if (remainingDays >= 6 && remainingDays <= 8) {
+        milestone = '1_week';
+        milestoneLabel = '1 week remaining';
+      } else if (remainingDays >= 2 && remainingDays <= 4) {
+        milestone = '3_days';
+        milestoneLabel = '3 days remaining';
+      }
+    } else if (planet === 'Mars') {
+      // ~60 day transits - halfway, 1 month, 1 week, 3 days
+      if (elapsedDays >= halfwayDays - 1 && elapsedDays <= halfwayDays + 1) {
+        milestone = 'halfway';
+        milestoneLabel = 'Halfway through';
+      } else if (remainingDays >= 28 && remainingDays <= 32) {
+        milestone = '1_month';
+        milestoneLabel = '1 month remaining';
+      } else if (remainingDays >= 6 && remainingDays <= 8) {
+        milestone = '1_week';
+        milestoneLabel = '1 week remaining';
+      } else if (remainingDays >= 2 && remainingDays <= 4) {
+        milestone = '3_days';
+        milestoneLabel = '3 days remaining';
+      }
+    } else {
+      // Slow planets - existing logic with all milestones
+      if (elapsedDays >= halfwayDays - 1 && elapsedDays <= halfwayDays + 1) {
+        milestone = 'halfway';
+        milestoneLabel = 'Halfway through';
+      } else if (remainingDays >= 178 && remainingDays <= 182) {
+        milestone = '6_months';
+        milestoneLabel = '6 months remaining';
+      } else if (remainingDays >= 88 && remainingDays <= 92) {
+        milestone = '3_months';
+        milestoneLabel = '3 months remaining';
+      } else if (remainingDays >= 28 && remainingDays <= 32) {
+        milestone = '1_month';
+        milestoneLabel = '1 month remaining';
+      } else if (remainingDays >= 13 && remainingDays <= 15) {
+        milestone = '2_weeks';
+        milestoneLabel = '2 weeks remaining';
+      } else if (remainingDays >= 6 && remainingDays <= 8) {
+        milestone = '1_week';
+        milestoneLabel = '1 week remaining';
+      } else if (remainingDays >= 2 && remainingDays <= 4) {
+        milestone = '3_days';
+        milestoneLabel = '3 days remaining';
+      } else if (remainingDays >= 0 && remainingDays <= 1) {
+        milestone = 'tomorrow';
+        milestoneLabel = 'Leaving tomorrow';
+      }
     }
 
     if (milestone) {

@@ -132,6 +132,24 @@ export const supermoonHooks = [
 ];
 
 /**
+ * Micromoon hooks - for micromoon full moons (extra distant)
+ */
+export const micromoonHooks = [
+  'What perspective does distance reveal?',
+  'What truth becomes clear from afar?',
+  'What do you see differently tonight?',
+  'What emerges when you step back?',
+  'What wisdom comes from distance?',
+  'How does space change your view?',
+  'What clarity arrives with detachment?',
+  'What does objectivity show you?',
+  'What becomes visible from this vantage point?',
+  'What insights come from the long view?',
+  'What patterns do you notice from here?',
+  'How are you honoring this perspective?',
+];
+
+/**
  * Eclipse hooks - for solar and lunar eclipses
  */
 export const eclipseHooks = [
@@ -261,6 +279,7 @@ export type HookType =
   | 'harmony'
   | 'retrograde'
   | 'supermoon'
+  | 'micromoon'
   | 'eclipse'
   | 'newMoon'
   | 'fullMoon'
@@ -277,6 +296,7 @@ export function getEngagementHook(type: HookType, seed: string): string {
     harmony: harmonyAspectHooks,
     retrograde: retrogradeHooks,
     supermoon: supermoonHooks,
+    micromoon: micromoonHooks,
     eclipse: eclipseHooks,
     newMoon: newMoonHooks,
     fullMoon: fullMoonHooks,
