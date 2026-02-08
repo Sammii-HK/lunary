@@ -16,6 +16,7 @@ import { ProgressIndicator } from '../components/ProgressIndicator';
 import { TransitionEffect } from '../components/TransitionEffect';
 import type { AudioSegment } from '../utils/timing';
 import { secondsToFrames } from '../utils/timing';
+import type { CategoryVisualConfig } from '../config/category-visuals';
 import { COLORS } from '../styles/theme';
 
 export interface LongFormVideoProps {
@@ -48,6 +49,8 @@ export interface LongFormVideoProps {
   };
   /** Unique seed for generating different star positions and comet paths */
   seed?: string;
+  /** Category visual configuration for themed backgrounds */
+  categoryVisuals?: CategoryVisualConfig;
 }
 
 /**
@@ -72,6 +75,7 @@ export const LongFormVideo: React.FC<LongFormVideoProps> = ({
   showProgress = true,
   lowerThirdInfo,
   seed = 'default',
+  categoryVisuals,
 }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
@@ -115,7 +119,13 @@ export const LongFormVideo: React.FC<LongFormVideoProps> = ({
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.cosmicBlack }}>
       {/* Animated background */}
-      <AnimatedBackground showStars={true} seed={seed} />
+      <AnimatedBackground
+        showStars={true}
+        seed={seed}
+        animationType={categoryVisuals?.backgroundAnimation}
+        particleTintColor={categoryVisuals?.particleTintColor}
+        gradientColors={categoryVisuals?.gradientColors}
+      />
 
       {/* Background images with crossfade */}
       {images.map((image, index) => {
@@ -139,14 +149,6 @@ export const LongFormVideo: React.FC<LongFormVideoProps> = ({
           </Sequence>
         );
       })}
-
-      {/* Fade in from black */}
-      <TransitionEffect
-        type='dissolve'
-        startFrame={0}
-        durationFrames={30}
-        direction='in'
-      />
 
       {/* Intro/Hook sequence */}
       {showIntro && (
@@ -184,6 +186,7 @@ export const LongFormVideo: React.FC<LongFormVideoProps> = ({
       <AnimatedSubtitles
         segments={segments}
         highlightTerms={highlightTerms}
+        highlightColor={categoryVisuals?.highlightColor}
         fontSize={36}
         bottomPosition={10}
         fps={fps}
@@ -196,7 +199,13 @@ export const LongFormVideo: React.FC<LongFormVideoProps> = ({
       {backgroundMusicUrl && <Audio src={backgroundMusicUrl} volume={0.15} />}
 
       {/* Progress indicator */}
-      {showProgress && <ProgressIndicator position='bottom' height={2} />}
+      {showProgress && (
+        <ProgressIndicator
+          position='bottom'
+          height={2}
+          color={categoryVisuals?.accentColor}
+        />
+      )}
 
       {/* Fade out at end */}
       <TransitionEffect

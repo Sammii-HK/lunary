@@ -3,7 +3,12 @@ export type ThreadIntent =
   | 'contrast'
   | 'misconception'
   | 'quick_rule'
-  | 'signal';
+  | 'signal'
+  | 'hot_take'
+  | 'poll'
+  | 'identity_callout'
+  | 'cosmic_now'
+  | 'ranking';
 
 export interface ThreadAngle {
   intent: ThreadIntent;
@@ -18,6 +23,17 @@ export interface ThreadsSeed {
   angles: ThreadAngle[];
 }
 
+export interface EnrichmentData {
+  keywords?: string[];
+  element?: string;
+  ruler?: string;
+  affirmation?: string;
+  meaning?: string;
+  description?: string;
+  category?: string;
+  difficulty?: string;
+}
+
 export interface DailyFacet {
   dayIndex: number;
   title: string;
@@ -25,6 +41,7 @@ export interface DailyFacet {
   focus: string;
   shortFormHook: string;
   threads: ThreadsSeed;
+  enrichmentData?: EnrichmentData;
 }
 
 export type ThemeCategory =
@@ -36,7 +53,8 @@ export type ThemeCategory =
   | 'numerology'
   | 'chakras'
   | 'sabbat'
-  | 'runes';
+  | 'runes'
+  | 'spells';
 
 export interface WeeklyTheme {
   id: string;

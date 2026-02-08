@@ -1,24 +1,19 @@
 import React from 'react';
-import {
-  AbsoluteFill,
-  Audio,
-  Img,
-  useCurrentFrame,
-  useVideoConfig,
-} from 'remotion';
+import { AbsoluteFill, Audio, useVideoConfig } from 'remotion';
 import { AnimatedBackground } from '../components/AnimatedBackground';
 import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
-import { TextOverlays } from '../components/TextOverlays';
+import { TextOverlays, type Overlay } from '../components/TextOverlays';
+import { HookIntro } from '../components/HookIntro';
 import { ProgressIndicator } from '../components/ProgressIndicator';
-import { TransitionEffect } from '../components/TransitionEffect';
 import type { AudioSegment } from '../utils/timing';
+import type { CategoryVisualConfig } from '../config/category-visuals';
 import { COLORS } from '../styles/theme';
+import type { HookIntroVariant } from '@/lib/social/video-scripts/types';
 
-interface Overlay {
-  text: string;
-  startTime: number;
-  endTime: number;
-  style?: 'hook' | 'cta' | 'stamp' | 'chapter';
+/** SFX timing entry for pattern interrupts (#12) */
+interface SfxTiming {
+  time: number;
+  type: 'whoosh' | 'pop' | 'chime';
 }
 
 export interface ShortFormVideoProps {
@@ -30,7 +25,7 @@ export interface ShortFormVideoProps {
   segments?: AudioSegment[];
   /** Audio file URL */
   audioUrl?: string;
-  /** Background images (with timestamps) */
+  /** Background images (with timestamps) — optional, animated bg used when absent */
   images?: Array<{
     url: string;
     startTime: number;
@@ -46,99 +41,113 @@ export interface ShortFormVideoProps {
   overlays?: Overlay[];
   /** Unique seed for generating different star positions and comet paths */
   seed?: string;
+  /** Category visual configuration for themed backgrounds */
+  categoryVisuals?: CategoryVisualConfig;
+  /** Hook intro animation variant (#7) */
+  hookIntroVariant?: HookIntroVariant;
+  /** SFX timings for pattern interrupts (#12) */
+  sfxTimings?: SfxTiming[];
+  /** Subtitle background opacity override (#14) */
+  subtitleBackgroundOpacity?: number;
 }
 
 /**
  * Short Form Video Composition (15-60 seconds)
  *
  * Optimized for TikTok, Instagram Reels, YouTube Shorts
- * - Hook sequence at start
+ * - Animated hook intro at start
  * - Animated subtitles throughout
- * - Premium dark aesthetic
+ * - Category-themed animated backgrounds
  * - 9:16 aspect ratio (1080x1920)
  */
 export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
-  hookText,
-  hookSubtitle,
   segments,
   audioUrl,
-  images,
-  backgroundImage,
   highlightTerms = [],
   showProgress = true,
   overlays = [],
   seed = 'default',
+  categoryVisuals,
+  hookIntroVariant,
+  sfxTimings,
+  subtitleBackgroundOpacity,
 }) => {
-  const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  // Determine current background image - use last image as fallback to prevent early fade
-  const currentTime = frame / fps;
-  let currentImage = backgroundImage;
-
-  if (images && images.length > 0) {
-    const activeImage = images.find(
-      (img) => currentTime >= img.startTime && currentTime < img.endTime,
-    );
-    // Fall back to LAST image (not first) to keep showing until video ends
-    currentImage = activeImage?.url || images[images.length - 1].url;
-  }
+  // Separate hook overlays from other overlays — hooks are rendered by HookIntro
+  const hookOverlay = overlays.find(
+    (o) => o.style === 'hook' || o.style === 'hook_large',
+  );
+  const otherOverlays = overlays.filter(
+    (o) => o.style !== 'hook' && o.style !== 'hook_large',
+  );
 
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.cosmicBlack }}>
-      {/* Background image first */}
-      {currentImage && (
-        <AbsoluteFill>
-          <Img
-            src={currentImage}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              opacity: 0.6, // Dim for text readability
-            }}
-          />
-        </AbsoluteFill>
-      )}
-
-      {/* Stars render ON TOP of background image */}
-      <AnimatedBackground showStars={true} overlayMode={true} seed={seed} />
-
-      {/* Fade in from black */}
-      <TransitionEffect
-        type='fade'
-        startFrame={0}
-        durationFrames={30}
-        direction='in'
+      {/* Animated background with category gradient — the full visual backdrop */}
+      <AnimatedBackground
+        showStars={true}
+        overlayMode={false}
+        seed={seed}
+        animationType={categoryVisuals?.backgroundAnimation}
+        particleTintColor={categoryVisuals?.particleTintColor}
+        gradientColors={categoryVisuals?.gradientColors}
       />
 
-      {/* Animated subtitles - matches FFmpeg ASS styling */}
+      {/* Animated hook intro — word-by-word entrance (#7: variant support) */}
+      {hookOverlay && (
+        <HookIntro
+          text={hookOverlay.text}
+          startTime={hookOverlay.startTime}
+          endTime={hookOverlay.endTime}
+          accentColor={categoryVisuals?.accentColor}
+          highlightTerms={highlightTerms}
+          variant={hookIntroVariant}
+        />
+      )}
+
+      {/* Animated subtitles - matches FFmpeg ASS styling (#14: adaptive contrast) */}
       {segments && segments.length > 0 && (
         <AnimatedSubtitles
           segments={segments}
           highlightTerms={highlightTerms}
+          highlightColor={categoryVisuals?.highlightColor}
           fontSize={44}
           bottomPosition={12}
           fps={fps}
+          backgroundOpacity={subtitleBackgroundOpacity}
         />
       )}
 
-      {/* Text overlays (hook, cta, stamps, chapters) - matches FFmpeg drawtext */}
-      {overlays.length > 0 && <TextOverlays overlays={overlays} />}
+      {/* SFX for pattern interrupts (#12) */}
+      {sfxTimings?.map((sfx, i) => (
+        <Audio
+          key={`sfx-${i}`}
+          src={`/sfx/${sfx.type}.mp3`}
+          startFrom={Math.round(sfx.time * fps)}
+          volume={0.3}
+        />
+      ))}
+
+      {/* Text overlays (cta, stamps, chapters) — hooks handled above */}
+      {otherOverlays.length > 0 && (
+        <TextOverlays
+          overlays={otherOverlays}
+          accentColor={categoryVisuals?.accentColor}
+        />
+      )}
 
       {/* Audio track */}
       {audioUrl && <Audio src={audioUrl} />}
 
       {/* Progress indicator */}
-      {showProgress && <ProgressIndicator position='bottom' height={2} />}
-
-      {/* Fade out at end */}
-      <TransitionEffect
-        type='fade'
-        startFrame={durationInFrames - 45}
-        durationFrames={45}
-        direction='out'
-      />
+      {showProgress && (
+        <ProgressIndicator
+          position='bottom'
+          height={2}
+          color={categoryVisuals?.accentColor}
+        />
+      )}
     </AbsoluteFill>
   );
 };

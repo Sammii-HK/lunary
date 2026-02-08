@@ -11,6 +11,7 @@ import { getImageBaseUrl } from '@/lib/urls';
 import { createHash } from 'crypto';
 
 export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes for video processing
 
 function getWeekStart(date: Date): Date {
   const d = new Date(date);

@@ -238,8 +238,8 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
 
   const socialUrls = shareRecord?.shareUrl
     ? {
-        x: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Current sky positions ✨')}&url=${encodeURIComponent(shareRecord.shareUrl)}`,
-        threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`Current sky positions ✨ ${shareRecord.shareUrl}`)}`,
+        x: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Current sky positions')}&url=${encodeURIComponent(shareRecord.shareUrl)}`,
+        threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`Current sky positions ${shareRecord.shareUrl}`)}`,
       }
     : undefined;
 

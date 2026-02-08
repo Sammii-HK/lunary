@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { getPrimaryHandle } from '@/constants/socialHandles';
+import { ShareFooter } from '@/lib/share/og-share-utils';
 
 export const runtime = 'edge';
 export const revalidate = 60; // Cache for 1 minute – dynamic data but not ultra volatile
@@ -133,11 +134,11 @@ const pickGradient = (seed: string) => {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const card = sanitize(searchParams.get('card'), 48) ?? 'Your Tarot Card';
+  const card = sanitize(searchParams.get('card'), 40) ?? 'Your Tarot Card';
   const timeframe = sanitize(searchParams.get('timeframe'), 24) ?? 'Daily';
   const name = sanitize(searchParams.get('name'), 24);
   const keywords = parseKeywords(searchParams.get('keywords'));
-  const text = sanitize(searchParams.get('text'), 160);
+  const text = sanitize(searchParams.get('text'), 140);
   const date = sanitize(searchParams.get('date'), 32);
   const variant = sanitize(searchParams.get('variant'), 16)?.toLowerCase();
   const isPattern = variant === 'pattern';
@@ -170,13 +171,15 @@ export async function GET(request: NextRequest) {
     return timeframe;
   })();
 
-  const headline = isPattern
+  const rawHeadline = isPattern
     ? name
       ? `${name}'s ${baseLabel}`
       : baseLabel
     : name
       ? `${name}'s ${baseLabel} Tarot`
       : `${baseLabel} Tarot Spotlight`;
+  const headline =
+    rawHeadline.length > 60 ? `${rawHeadline.slice(0, 59)}…` : rawHeadline;
   const theme = pickGradient(`${card}-${timeframe}-${name ?? 'general'}`);
   const primaryHandle = getPrimaryHandle(platform);
   const insights = Array.from(
@@ -200,11 +203,6 @@ export async function GET(request: NextRequest) {
     ),
   ).slice(0, 4);
   const robotoMono = await loadRobotoMono(request);
-
-  const logoUrl = new URL(
-    '/icons/moon-phases/full-moon.svg',
-    request.url,
-  ).toString();
 
   const spreadCardsToShow = spreadCards.slice(0, 12);
   const cleanedSnippet =
@@ -388,34 +386,7 @@ export async function GET(request: NextRequest) {
           ))}
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            fontFamily: 'Roboto Mono',
-            fontSize: 18,
-            opacity: 0.9,
-            gap: '12px',
-          }}
-        >
-          <img
-            src={logoUrl}
-            alt='Lunary full moon logo'
-            width={36}
-            height={36}
-            style={{ display: 'flex' }}
-          />
-          <span
-            style={{
-              fontSize: 26,
-              letterSpacing: 1.8,
-              fontWeight: 600,
-            }}
-          >
-            lunary.app/tarot
-          </span>
-        </div>
+        <ShareFooter baseUrl='https://lunary.app' format='landscape' />
       </div>,
       {
         width: 1200,
@@ -446,19 +417,6 @@ export async function GET(request: NextRequest) {
         gap: '24px',
       }}
     >
-      {/* <div
-        style={{
-          display: 'flex',
-          fontFamily: 'Roboto Mono',
-          fontSize: 28,
-          letterSpacing: 4,
-          textTransform: 'uppercase',
-          opacity: 0.8,
-        }}
-      >
-        Shared from Lunary
-      </div> */}
-
       <div
         style={{
           display: 'flex',
@@ -522,34 +480,7 @@ export async function GET(request: NextRequest) {
         )}
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          fontFamily: 'Roboto Mono',
-          fontSize: 24,
-          opacity: 0.85,
-          gap: '12px',
-        }}
-      >
-        <img
-          src={logoUrl}
-          alt='Lunary full moon logo'
-          width={40}
-          height={40}
-          style={{ display: 'flex' }}
-        />
-        <span
-          style={{
-            fontSize: 28,
-            letterSpacing: 1.8,
-            fontWeight: 600,
-          }}
-        >
-          lunary.app/tarot
-        </span>
-      </div>
+      <ShareFooter baseUrl='https://lunary.app' format='landscape' />
     </div>,
     {
       width: WIDTH,

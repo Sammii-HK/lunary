@@ -336,6 +336,45 @@ export const validateScriptBody = (
       );
     }
 
+    // Soft: Pacing check — flag if most sentences are too long
+    const longSentences = lines.filter((line) => countWords(line) > 18).length;
+    if (longSentences > lines.length * 0.5) {
+      reasons.push(
+        'SOFT: Most lines are 18+ words - shorten for TikTok pacing',
+      );
+    }
+
+    // Soft: Duration sweet-spot — flag scripts outside 25-40 second range
+    const totalWords = lines.reduce((sum, line) => sum + countWords(line), 0);
+    if (totalWords < 80) {
+      reasons.push(
+        'SOFT: Script is under 80 words - may be too short for educational TikTok',
+      );
+    }
+    if (totalWords > 120) {
+      reasons.push(
+        'SOFT: Script is over 120 words - may lose viewers before completion',
+      );
+    }
+
+    // Soft: Monotonous openings — flag if 3+ lines start with the same word
+    const openingWords = lines.map((line) =>
+      line.split(/\s+/)[0]?.toLowerCase(),
+    );
+    const wordCounts = openingWords.reduce(
+      (acc, w) => {
+        if (w) acc[w] = (acc[w] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+    const maxRepeat = Math.max(...Object.values(wordCounts), 0);
+    if (maxRepeat >= 3) {
+      reasons.push(
+        'SOFT: 3+ lines start with the same word - vary line openings',
+      );
+    }
+
     // Add any soft warnings
     const warnings = getSoftWarnings(combined);
     for (const warning of warnings) {

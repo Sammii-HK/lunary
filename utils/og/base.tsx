@@ -1,5 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { ReactNode } from 'react';
+import { generateStarfield, type Star } from '@/lib/share/og-utils';
+import { hexToRgba } from './gradients';
 
 export type OGTheme = {
   background: string;
@@ -71,6 +73,8 @@ export function OGWrapper({
         color: resolvedTheme.textColor || 'white',
         padding,
         justifyContent: 'space-between',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       {children}
@@ -501,4 +505,132 @@ export function getThematicSizes(format: OGImageSize) {
         padding: '40px 60px',
       };
   }
+}
+
+// ============================================================================
+// ATMOSPHERIC COMPONENTS
+// ============================================================================
+
+export interface OGStarfieldProps {
+  seed: string;
+  count?: number;
+  accentColor?: string;
+}
+
+/**
+ * Starfield background layer using generateStarfield from og-utils.
+ * ~20% of stars are tinted with the accent color.
+ */
+export function OGStarfield({
+  seed,
+  count = 60,
+  accentColor,
+}: OGStarfieldProps) {
+  const stars: Star[] = generateStarfield(seed, count);
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+      }}
+    >
+      {stars.map((star, i) => {
+        const isTinted = accentColor && i % 5 === 0; // ~20% tinted
+        return (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${star.x}%`,
+              top: `${star.y}%`,
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              borderRadius: '50%',
+              backgroundColor: isTinted
+                ? hexToRgba(accentColor, star.opacity * 0.9)
+                : `rgba(255, 255, 255, ${star.opacity * 0.7})`,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+export interface OGGlowOrbsProps {
+  accentColor: string;
+}
+
+/**
+ * Two large radial-gradient ellipses in accent color at low opacity for depth.
+ */
+export function OGGlowOrbs({ accentColor }: OGGlowOrbsProps) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+      }}
+    >
+      {/* Primary orb - centered behind content */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '20%',
+          left: '15%',
+          width: '70%',
+          height: '60%',
+          borderRadius: '50%',
+          background: `radial-gradient(ellipse at center, ${hexToRgba(accentColor, 0.25)} 0%, transparent 70%)`,
+        }}
+      />
+      {/* Secondary orb - lower corner for depth */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '5%',
+          right: '5%',
+          width: '50%',
+          height: '45%',
+          borderRadius: '50%',
+          background: `radial-gradient(ellipse at center, ${hexToRgba(accentColor, 0.18)} 0%, transparent 70%)`,
+        }}
+      />
+    </div>
+  );
+}
+
+export interface OGSymbolBackdropProps {
+  accentColor: string;
+  size?: number;
+}
+
+/**
+ * Radial-gradient circle behind the symbol for visual weight.
+ */
+export function OGSymbolBackdrop({
+  accentColor,
+  size = 250,
+}: OGSymbolBackdropProps) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        width: `${size}px`,
+        height: `${size}px`,
+        borderRadius: '50%',
+        background: `radial-gradient(circle at center, ${hexToRgba(accentColor, 0.35)} 0%, ${hexToRgba(accentColor, 0.12)} 50%, transparent 70%)`,
+        display: 'flex',
+      }}
+    />
+  );
 }

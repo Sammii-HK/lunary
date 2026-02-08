@@ -33,7 +33,7 @@ export function getPlatformImageFormat(platform: string): ImageFormat {
     tiktok: 'story', // 1080x1920 (9:16)
     reddit: 'landscape', // 1200x630
     bluesky: 'landscape', // 1200x630
-    threads: 'square', // 1080x1080 (1:1)
+    threads: 'landscape', // 1200x630 (better for low-content educational images)
   };
 
   return formatMap[platform.toLowerCase()] || 'landscape';
@@ -119,7 +119,7 @@ export function getThematicImageUrl(
       : null;
 
   // Build URL - include version for cache busting when we make changes
-  const IMAGE_VERSION = '4';
+  const IMAGE_VERSION = '7';
   const params = new URLSearchParams({
     category: thematicCategory,
     title: formattedTitle,

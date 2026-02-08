@@ -78,7 +78,6 @@ export async function GET(request: NextRequest) {
         WHERE platform = 'tiktok'
           AND scheduled_date = sp.scheduled_date::date
           AND facet_title = sp.topic
-          AND theme_name = sp.week_theme
         ORDER BY id DESC
         LIMIT 1
       ) vs ON true

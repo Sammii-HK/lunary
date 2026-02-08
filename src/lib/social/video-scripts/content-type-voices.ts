@@ -23,6 +23,12 @@ export type ContentTypeKey =
   | 'eclipses'
   | 'houses'
   | 'aspects'
+  | 'spells'
+  | 'quiz'
+  | 'ranking'
+  | 'hot_take'
+  | 'sign_check'
+  | 'myth'
   | 'default';
 
 /**
@@ -30,6 +36,19 @@ export type ContentTypeKey =
  */
 export function getContentTypeFromCategory(category: string): ContentTypeKey {
   const lower = category.toLowerCase();
+
+  // Spells
+  if (
+    lower.includes('spell') ||
+    lower.includes('ritual') ||
+    lower.includes('witchcraft') ||
+    lower.includes('incantation') ||
+    /\b(protection spell|love spell|abundance spell|cleansing|banishing|manifestation spell)\b/i.test(
+      lower,
+    )
+  ) {
+    return 'spells';
+  }
 
   // Angel Numbers
   if (
@@ -710,6 +729,190 @@ export const CONTENT_TYPE_VOICES: Record<
     ],
   },
 
+  spells: {
+    tone: 'Practical, instructional, empowering',
+    voiceDescription: `SPELL VOICE:
+- Speak like you're teaching a practical skill, not performing mysticism
+- Focus on INGREDIENTS, TIMING, and INTENTION
+- Be specific about when, how, and why
+- This is practical craft, not fantasy
+- Every spell has a mechanism — explain it
+- Connect moon phases, days of the week, and seasons to timing`,
+    exampleEnergy: `Example energy:
+"Protection salt doesn't just sit there. Salt absorbs. Place it at thresholds, windows, anywhere energy enters. Replace it monthly."
+"Friday isn't random for love spells. Venus rules Friday. You're matching the intention to the planetary energy."
+"Cinnamon in abundance spells isn't decorative. Cinnamon generates heat. Heat moves energy. That's why you blow it toward the door, not away from it."`,
+    specificBans: [
+      'magical powers',
+      'cast a spell to make',
+      'this spell will make someone',
+      'guaranteed results',
+      'dark magic',
+      'hexing instructions',
+    ],
+    keyPhrases: [
+      'the timing matters because',
+      'the ingredient does',
+      'practically speaking',
+      'the mechanism here',
+      'pair this with',
+      'moon phase for this',
+    ],
+  },
+
+  ranking: {
+    tone: 'Provocative, definitive, list-format',
+    voiceDescription: `RANKING VOICE:
+- Speak with absolute confidence, like you've settled the debate
+- Rankings must feel specific and opinionated, not generic
+- Use tier-list and ranked-list language
+- Each sign's placement must feel earned with a specific reason
+- The goal is DEBATE in comments — make people agree AND disagree
+- Brief, punchy justifications per rank`,
+    exampleEnergy: `Example energy:
+"Ranking signs by who'd survive a zombie apocalypse. Scorpio goes first because they've already planned for this. Gemini goes last because they'd try to negotiate."
+"Top 3 signs you don't want to argue with: 1. Scorpio. They remember everything. 2. Capricorn. They have receipts. 3. Aries. They don't care if they're wrong."
+"Signs ranked by how fast they move on: Sagittarius is already dating someone new before the conversation ends. Cancer is still thinking about it 3 years later."`,
+    specificBans: [
+      'all signs are equal',
+      'no offense',
+      'just kidding',
+      'this is just for fun',
+      'dont take it personally',
+      'every sign is special',
+    ],
+    keyPhrases: [
+      'ranked from',
+      'and its not close',
+      'bottom tier',
+      'top tier',
+      'fight me on this',
+      'comment if you disagree',
+    ],
+  },
+
+  hot_take: {
+    tone: 'Confident, debate-provoking, combative',
+    voiceDescription: `HOT TAKE VOICE:
+- Lead with the most controversial claim possible
+- Speak like someone who has a STRONG opinion and doesn't apologise for it
+- Back up the take with one specific, undeniable observation
+- The goal is duets, stitches, and comment wars
+- Short, declarative sentences
+- End with something that dares people to disagree`,
+    exampleEnergy: `Example energy:
+"Unpopular opinion: Libras are the most manipulative sign. They're just so charming about it you don't notice until it's too late."
+"Hot take: your rising sign matters more than your sun sign. The sun sign is who you think you are. The rising is who everyone else actually deals with."
+"I don't trust anyone who says they 'don't believe in astrology' but then acts exactly like their sign."`,
+    specificBans: [
+      'I could be wrong',
+      'some people might disagree',
+      'this is just my opinion',
+      'no shade',
+      'with all due respect',
+      'everyone is different',
+    ],
+    keyPhrases: [
+      'unpopular opinion',
+      'hot take',
+      'nobody talks about this',
+      'fight me',
+      'I said what I said',
+      'prove me wrong',
+    ],
+  },
+
+  sign_check: {
+    tone: 'Direct, personal, teasing',
+    voiceDescription: `SIGN CHECK VOICE:
+- Speak DIRECTLY to one sign as if you're calling them out personally
+- Use "you" language constantly — this is a conversation
+- Tease but with affection — callout, not attack
+- Reference specific, hyper-relatable behaviours
+- The viewer should feel SEEN, almost uncomfortably so
+- End with something that makes them save or share`,
+    exampleEnergy: `Example energy:
+"If you're a Virgo, stop scrolling. You've reorganised your entire life this week and still feel like it's not enough. That's not productivity. That's avoidance."
+"Capricorns. You're working right now, aren't you? Put the phone down. Actually, no. Listen to this first."
+"Geminis. You've started 4 conversations today and finished none of them. Not a character flaw. Just Tuesday."`,
+    specificBans: [
+      'all signs should',
+      'if you happen to be',
+      'some of you might',
+      'this might apply',
+      'no judgment',
+      'just a generalisation',
+    ],
+    keyPhrases: [
+      'stop scrolling',
+      'this is your sign',
+      'you already know',
+      'be honest',
+      'tag yourself',
+      'send this to your',
+    ],
+  },
+
+  myth: {
+    tone: 'Storytelling, captivating, reveal-structured',
+    voiceDescription: `MYTH VOICE:
+- Open with intrigue — "The real reason...", "Nobody tells you..."
+- Build like a story with a setup, twist, and reveal
+- Ground mythology in real meaning — why this origin story MATTERS
+- Make ancient stories feel relevant to modern life
+- The payoff should make the viewer see the sign/planet differently
+- Pace it like a bedtime story that gets intense`,
+    exampleEnergy: `Example energy:
+"The real reason Scorpio is associated with death has nothing to do with being dark. The original symbol was the eagle. Death and rebirth. Transformation. Somewhere along the way, we forgot the rebirth part."
+"Nobody tells you why Cancer's symbol is the crab. It's not about being moody. Crabs carry their home on their back. They never feel safe unless they can retreat. That's the whole sign."
+"Aquarius isn't actually a water sign. The water bearer is pouring knowledge, not water. The original myth is about someone who saw the truth and shared it regardless of consequence."`,
+    specificBans: [
+      'according to legend',
+      'ancient peoples believed',
+      'in olden times',
+      'the mythology says',
+      'scholars think',
+      'its commonly believed',
+    ],
+    keyPhrases: [
+      'the real reason',
+      'nobody tells you',
+      'the part they leave out',
+      'here is what actually happened',
+      'the origin changes everything',
+      'once you know this',
+    ],
+  },
+
+  quiz: {
+    tone: 'Interactive, identity-affirming, playful',
+    voiceDescription: `QUIZ VOICE:
+- Frame everything as identity discovery
+- Use "which one are you" framing
+- Make viewers comment their answer
+- Each option must be recognizable and specific
+- The goal is engagement, not education
+- Viewers should tag friends who match each option`,
+    exampleEnergy: `Example energy:
+"Which moon sign response is yours? Option A: 'I need to be alone.' Option B: 'Let me process this out loud.' Option C: 'I'm fine.' (they are not fine)"
+"Rank these by how much they describe you: 1. Overplans everything 2. Wings it and somehow wins 3. Plans, then throws out the plan"`,
+    specificBans: [
+      'correct answer',
+      'you should be',
+      'the best one is',
+      'wrong answer',
+      'the right choice',
+    ],
+    keyPhrases: [
+      'which one are you',
+      'drop yours',
+      'tag the friend who',
+      'comment your answer',
+      'be honest',
+      'no wrong answers',
+    ],
+  },
+
   default: {
     tone: 'Clear, grounded, educational',
     voiceDescription: `DEFAULT VOICE:
@@ -909,6 +1112,47 @@ export const SCRIPT_STRUCTURES: Record<ContentTypeKey, string[]> = {
     `SYNASTRY: "[Aspect] between two charts shows [relationship dynamic]." - Relationship meaning - How it plays out - Challenges - Gifts`,
   ],
 
+  spells: [
+    `QUICK RITUAL: "[Spell] takes 5 minutes and one ingredient. Here's how." - Lead with simplicity - Name the ingredient and why - Step-by-step (3-4 steps) - When to do it - What to notice after`,
+    `INGREDIENT SPOTLIGHT: "Why [ingredient] appears in [type] spells." - Name the ingredient - Explain the mechanism (absorbs, generates, attracts) - Three ways to use it - Storage/disposal tips`,
+    `TIMING GUIDE: "[Spell] works best on [day/moon phase]. Here's why." - Lead with timing - Explain planetary/lunar connection - What happens if timing is wrong - Alternative windows`,
+    `BEGINNER SPELL: "Your first [type] spell needs only [items]." - Name 2-3 accessible items - Why each item matters - Simple steps - Setting intention - What to expect`,
+    `MOON PHASE RITUAL: "[Moon phase] is the window for [intention]. Try this." - Name the phase and energy - What it amplifies - Simple ritual steps - Duration and follow-up`,
+    `SEASONAL SPELL: "[Season] energy supports [intention]. Here's a simple practice." - Connect to current season - Available natural materials - Simple steps - How to close the ritual`,
+  ],
+
+  ranking: [
+    `DEFINITIVE_LIST: "Ranking [signs] by [trait]. Starting from the bottom." - Open with the ranking premise - Work through each tier with a punchy one-liner reason - Top placement gets the most detail - Close with "Comment your sign and whether you agree"`,
+    `TIER_LIST: "Tier list: [trait]. S tier to F tier." - Open with the rating system - Group signs into tiers (S/A/B/C/F) - Each tier gets one justification - The controversial placements get extra emphasis - Close with "Which tier are you?"`,
+    `SPEED_RANK: "Speed ranking signs by [trait]. Go." - Ultra-fast, one sentence per sign - Rapid delivery, no pauses - The speed itself is the hook - Close with "Pause on yours and tell me I'm wrong"`,
+    `TOP_3_BOTTOM_3: "Top 3 and bottom 3 signs for [trait]." - Open with the bottom 3 (controversy first) - Brief reason for each - Then the top 3 with slightly more detail - Close with "Where do you land?"`,
+  ],
+
+  hot_take: [
+    `BOLD_CLAIM: "Unpopular opinion: [statement]." - Open with the take, no buildup - One supporting observation that's undeniable - Double down on the claim - Close with a dare: "Prove me wrong"`,
+    `COMPARISON: "[Thing A] matters more than [Thing B] and here's why." - Open with the controversial comparison - Explain why the popular choice is overrated - Show why the underdog wins - Close with "Stitch this if you disagree"`,
+    `RANT: "I need to talk about [thing] because nobody else will." - Open with frustrated energy - Build the case with specific examples - Peak intensity at the middle - Close with "Am I wrong? Comment."`,
+  ],
+
+  sign_check: [
+    `CALLOUT: "If you're a [sign], stop scrolling." - Direct address to one sign - Name the specific thing they're doing RIGHT NOW - Explain why they do it (the deeper pattern) - Close with "Send this to your [sign] friend"`,
+    `WAKE_UP: "[Sign]. We need to talk." - Open like an intervention - Name the blind spot they don't see - Explain what everyone else notices - Close with "You know I'm right. Save this."`,
+    `REALITY_CHECK: "Things [sign] does and thinks nobody notices." - List 3-4 hyper-specific behaviours - Each one more accurate than the last - The final one should make them feel exposed - Close with "Tag yourself"`,
+  ],
+
+  myth: [
+    `ORIGIN_STORY: "The real reason [sign] is associated with [thing]." - Open with what everyone assumes - Reveal the actual origin/mythology - Explain why the real meaning matters more - Close with "You'll never see [sign] the same way"`,
+    `HIDDEN_HISTORY: "Nobody tells you this about [topic]." - Open with the gap in common knowledge - Tell the story that fills it - The reveal should recontextualise something familiar - Close with "Now you know"`,
+    `SYMBOL_DECODE: "The symbol for [sign/planet] means something most people miss." - Open with the visual symbol - Decode what it actually represents - Connect to how the sign/planet actually works - Close with "Save this for next time someone asks"`,
+  ],
+
+  quiz: [
+    `WHICH_ONE: "Which [type] are you?" - Present 3-4 recognizable options - Each option is a specific, relatable behavior - Ask viewers to drop their answer - End with "Tag the friend who is Option [X]"`,
+    `RANKING: "Rank these [topic] traits from most to least you." - List 4-5 specific traits or habits - Each must be immediately recognizable - Ask: "What's your order?" - Drive comments by making each ranking feel personal`,
+    `SCENARIO: "[Scenario]. What do you do?" - Paint a specific, relatable situation - Give 3 options, each tied to a sign/number/type - Reveal what each choice says about them - "Comment your answer and I'll tell you what it means"`,
+    `PAIR_TEST: "These two [types] either love or hate each other." - Name a specific pairing - Describe why they click or clash - Ask: "Is this your dynamic?" - "Tag who this is about"`,
+  ],
+
   default: [
     `DIRECT: State what it is. When it matters. What to do. One takeaway.`,
     `CONTRAST: What people assume. What's true. Why difference matters. New understanding.`,
@@ -920,11 +1164,168 @@ export const SCRIPT_STRUCTURES: Record<ContentTypeKey, string[]> = {
 };
 
 /**
+ * Loop/rewatch script structures appended to every content type
+ * These structures are designed to maximize TikTok rewatch rates
+ */
+const LOOP_STRUCTURES: Array<{ name: string; structure: string }> = [
+  {
+    name: 'OPEN_LOOP',
+    structure: `OPEN LOOP: Tease the payoff in the hook but don't deliver it. - Hook references "the part most miss" or "one detail changes everything" - Lines 2-6 build context, each adding one layer - Lines 7-8 reveal the actual insight - Final line callbacks to the hook so viewers rewatch to connect them`,
+  },
+  {
+    name: 'BOOKEND',
+    structure: `BOOKEND: Same observation opens and closes, but the middle changes its meaning. - Open with a statement that reads one way - Build 5-6 lines that recontextualize it - Close by repeating the same opening statement - Viewer rewatches to see how the meaning shifts`,
+  },
+  {
+    name: 'COUNTDOWN',
+    structure: `COUNTDOWN: "[Topic] has 3 layers most miss." - Hook with number and intrigue - Layer 1: The obvious reading - Layer 2: The practical nuance - Layer 3: The insight that recontextualizes layers 1-2 - Close with callback to hook`,
+  },
+  {
+    name: 'REVEAL',
+    structure: `REVEAL: Start with a surface-level read, then peel it back layer by layer. - Hook with the common understanding - Lines 2-3: Present the standard view (what most people think) - Line 4: "But here's what that misses..." - Lines 5-7: Reveal the deeper mechanic or surprising connection - Final line: Restate the topic with the new lens - viewer now sees it differently - Goal: the viewer's understanding is genuinely different by the end`,
+  },
+  {
+    name: 'STITCH_BAIT',
+    structure: `STITCH BAIT: End with a claim or question that invites creators to respond. - Hook with a confident take - Lines 2-6: Build the case with specific evidence - Line 7: Land the main insight - Final line: Provocative open question or "hot take" that invites disagreement or expansion - Goal: another creator stitches this to add their perspective, sending your video to their audience`,
+  },
+];
+
+/**
  * Get a random script structure for a content type
  */
 export function getRandomScriptStructure(contentType: ContentTypeKey): string {
   const structures = SCRIPT_STRUCTURES[contentType];
+  // 55% chance of using a loop structure for rewatch optimization
+  if (Math.random() < 0.55) {
+    const loop =
+      LOOP_STRUCTURES[Math.floor(Math.random() * LOOP_STRUCTURES.length)];
+    return loop.structure;
+  }
   return structures[Math.floor(Math.random() * structures.length)];
+}
+
+/**
+ * Get a random script structure with metadata for tracking (#10)
+ *
+ * Selection weights:
+ * - 30% → STITCH_BAIT specifically (up from ~11%)
+ * - 25% → other 4 loop structures
+ * - 45% → content-type-specific structures
+ */
+export function getRandomScriptStructureWithName(contentType: ContentTypeKey): {
+  structure: string;
+  name: string;
+  isLoop: boolean;
+  isStitchBait: boolean;
+} {
+  const structures = SCRIPT_STRUCTURES[contentType];
+  const roll = Math.random();
+
+  // 30% → STITCH_BAIT specifically
+  if (roll < 0.3) {
+    const stitchBait = LOOP_STRUCTURES.find((l) => l.name === 'STITCH_BAIT');
+    if (stitchBait) {
+      return {
+        structure: stitchBait.structure,
+        name: stitchBait.name,
+        isLoop: true,
+        isStitchBait: true,
+      };
+    }
+  }
+
+  // 25% → other loop structures (excluding STITCH_BAIT)
+  if (roll < 0.55) {
+    const nonStitchLoops = LOOP_STRUCTURES.filter(
+      (l) => l.name !== 'STITCH_BAIT',
+    );
+    const loop =
+      nonStitchLoops[Math.floor(Math.random() * nonStitchLoops.length)];
+    return {
+      structure: loop.structure,
+      name: loop.name,
+      isLoop: true,
+      isStitchBait: false,
+    };
+  }
+
+  // 45% → content-type-specific structures
+  const idx = Math.floor(Math.random() * structures.length);
+  const structureText = structures[idx];
+  const name = structureText.split(':')[0]?.trim() || `STRUCTURE_${idx}`;
+  return { structure: structureText, name, isLoop: false, isStitchBait: false };
+}
+
+/**
+ * Get a performance-biased script structure (#11)
+ *
+ * - 70% chance: pick from top-performing structures (if data exists)
+ * - 30% chance: random (exploration)
+ * - Falls back to random when DB unavailable or insufficient data
+ */
+export async function getPerformanceBiasedStructure(
+  contentType: ContentTypeKey,
+): Promise<{
+  structure: string;
+  name: string;
+  isLoop: boolean;
+  isStitchBait: boolean;
+}> {
+  // 30% exploration — always random
+  if (Math.random() < 0.3) {
+    return getRandomScriptStructureWithName(contentType);
+  }
+
+  try {
+    const { getTopPerformingStructures } = await import('./database');
+    const topStructures = await getTopPerformingStructures(contentType);
+
+    if (topStructures.length === 0) {
+      return getRandomScriptStructureWithName(contentType);
+    }
+
+    // Pick from top performers weighted by score
+    const totalScore = topStructures.reduce((sum, s) => sum + s.score, 0);
+    let roll = Math.random() * totalScore;
+    let selectedName = topStructures[0].name;
+    for (const s of topStructures) {
+      roll -= s.score;
+      if (roll <= 0) {
+        selectedName = s.name;
+        break;
+      }
+    }
+
+    // Find matching structure text
+    const allStructures = SCRIPT_STRUCTURES[contentType];
+    const matchIdx = allStructures.findIndex((s) =>
+      s.startsWith(selectedName + ':'),
+    );
+
+    if (matchIdx >= 0) {
+      return {
+        structure: allStructures[matchIdx],
+        name: selectedName,
+        isLoop: false,
+        isStitchBait: false,
+      };
+    }
+
+    // Check loop structures
+    const loopMatch = LOOP_STRUCTURES.find((l) => l.name === selectedName);
+    if (loopMatch) {
+      return {
+        structure: loopMatch.structure,
+        name: loopMatch.name,
+        isLoop: true,
+        isStitchBait: loopMatch.name === 'STITCH_BAIT',
+      };
+    }
+
+    return getRandomScriptStructureWithName(contentType);
+  } catch {
+    return getRandomScriptStructureWithName(contentType);
+  }
 }
 
 /**

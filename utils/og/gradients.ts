@@ -61,6 +61,32 @@ export function createSubtleGradient(
   return `linear-gradient(${angle}, ${start} 0%, ${middle} 50%, ${end} 85%, ${DEFAULT_BASE_COLOR} 100%)`;
 }
 
+/**
+ * Convert hex color to rgba string
+ */
+export function hexToRgba(hex: string, alpha: number = 1): string {
+  const [r, g, b] = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${Math.max(0, Math.min(1, alpha))})`;
+}
+
+/**
+ * Create a vibrant gradient from a 3-color palette array.
+ * Uses palette colors directly (no darkening) since they're already
+ * designed as dark cosmic backgrounds. Brightens the mid/end stops
+ * slightly to make the color clearly visible.
+ */
+export function createVibrantGradient(
+  backgrounds: readonly [string, string, string],
+  angle: string = '145deg',
+): string {
+  const [anchor, mid, bright] = backgrounds;
+  // Lighten the mid and end colors to make them pop
+  const midBoosted = mixColors(mid, bright, 0.3);
+  const endBoosted = mixColors(bright, '#ffffff', 0.15);
+
+  return `linear-gradient(${angle}, ${anchor} 0%, ${midBoosted} 40%, ${endBoosted} 75%, ${mid} 100%)`;
+}
+
 export function createSectionGradient(
   accentColor: string,
   options?: { angle?: string; secondaryColor?: string },

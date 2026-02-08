@@ -50,6 +50,8 @@ export interface RecordingStep {
   duration?: number;
   /** Scroll distance in pixels (for scroll action) */
   distance?: number;
+  /** Selector to scroll into view (for scroll action, alternative to distance) */
+  scrollTo?: string;
   /** Key to press (for pressKey action) - e.g., 'Escape', 'Enter' */
   key?: string;
   /** Description of what this step does */
@@ -87,11 +89,19 @@ function sceneToSteps(scene: Scene): RecordingStep[] {
       break;
 
     case 'scroll':
-      steps.push({
-        type: 'scroll',
-        distance: scene.scrollDistance || 300,
-        description: scene.description,
-      });
+      if (scene.scrollTo) {
+        steps.push({
+          type: 'scroll',
+          scrollTo: scene.scrollTo,
+          description: scene.description,
+        });
+      } else {
+        steps.push({
+          type: 'scroll',
+          distance: scene.scrollDistance || 300,
+          description: scene.description,
+        });
+      }
       // Use remaining time as a wait to let content settle
       steps.push({
         type: 'wait',
@@ -126,11 +136,16 @@ function sceneToSteps(scene: Scene): RecordingStep[] {
           text: scene.typeText,
           description: scene.description,
         });
-        steps.push({
-          type: 'wait',
-          duration: Math.max(durationMs - 1000, 500),
-          description: `Show: ${scene.focusPoint}`,
-        });
+        // Typing overhead: 200ms focus + (80ms × chars) + 300ms settle
+        const typingMs = 200 + scene.typeText.length * 80 + 300;
+        const remainingAfterType = durationMs - typingMs;
+        if (remainingAfterType > 200) {
+          steps.push({
+            type: 'wait',
+            duration: remainingAfterType,
+            description: `Show: ${scene.focusPoint}`,
+          });
+        }
       }
       break;
 
@@ -140,9 +155,11 @@ function sceneToSteps(scene: Scene): RecordingStep[] {
         url: scene.target || scene.path,
         description: scene.description,
       });
+      // Navigation is invisible (cloaked). Only ~400ms reveal is visible,
+      // so the remaining scene duration is nearly the full amount.
       steps.push({
         type: 'wait',
-        duration: Math.max(durationMs - 1500, 500),
+        duration: Math.max(durationMs - 400, 500),
         description: `Show: ${scene.focusPoint}`,
       });
       break;
@@ -186,8 +203,19 @@ function generateRecordingFromScript(
   for (let i = 0; i < script.scenes.length; i++) {
     const scene = script.scenes[i];
 
-    // Auto-insert navigate when path changes (and action isn't already navigate)
-    if (scene.path !== lastPath && scene.action !== 'navigate') {
+    // Auto-insert navigate when path changes, unless:
+    // - This scene IS a navigate action (it handles its own navigation)
+    // - The previous scene was a click/expand (clicks detect URL changes
+    //   and handle navigation in the step executor — adding a goto here
+    //   would cause a redundant full page reload after the SPA transition)
+    const prevAction = i > 0 ? script.scenes[i - 1].action : null;
+    const clickAlreadyNavigated =
+      prevAction === 'click' || prevAction === 'expand';
+    if (
+      scene.path !== lastPath &&
+      scene.action !== 'navigate' &&
+      !clickAlreadyNavigated
+    ) {
       steps.push({
         type: 'navigate',
         url: scene.path,

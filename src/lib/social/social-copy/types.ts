@@ -13,7 +13,9 @@ export type SocialPostType =
   | 'closing_statement'
   | 'persona'
   | 'question'
-  | 'video_caption';
+  | 'video_caption'
+  | 'threads_question'
+  | 'threads_beta_cta';
 
 export type SourcePack = {
   topic: string;

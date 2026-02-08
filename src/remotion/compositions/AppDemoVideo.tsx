@@ -1,0 +1,151 @@
+import React from 'react';
+import {
+  AbsoluteFill,
+  Video,
+  Audio,
+  useVideoConfig,
+  staticFile,
+} from 'remotion';
+import { HookIntro } from '../components/HookIntro';
+import { TextOverlays, type Overlay } from '../components/TextOverlays';
+import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
+import { TransitionEffect } from '../components/TransitionEffect';
+import { ProgressIndicator } from '../components/ProgressIndicator';
+import type { AudioSegment } from '../utils/timing';
+import type { CategoryVisualConfig } from '../config/category-visuals';
+import { COLORS } from '../styles/theme';
+
+export interface AppDemoVideoProps {
+  /** Path to the screen recording (relative to public/, used with staticFile) */
+  videoSrc: string;
+  /** Hook text + timing */
+  hookText: string;
+  hookStartTime: number;
+  hookEndTime: number;
+  /** Mid-video text overlays */
+  overlays: Overlay[];
+  /** Outro CTA text + timing */
+  outroText: string;
+  outroStartTime: number;
+  outroEndTime: number;
+  /** TTS audio URL (relative to public/, used with staticFile) */
+  audioUrl?: string;
+  /** Subtitle segments synced to TTS */
+  segments?: AudioSegment[];
+  /** Category accent colors */
+  categoryVisuals?: CategoryVisualConfig;
+  /** Highlight terms for subtitles */
+  highlightTerms?: string[];
+  /** Show progress bar */
+  showProgress?: boolean;
+}
+
+/**
+ * App Demo Video Composition
+ *
+ * Uses a screen recording as the background with text overlays on top.
+ * Designed for TikTok app demo videos (9:16 @ 1080x1920).
+ *
+ * Layer order:
+ * 1. <Video> — screen recording fills the frame
+ * 2. HookIntro — animated word-by-word hook text
+ * 3. TextOverlays — outro CTA
+ * 4. AnimatedSubtitles — word-level karaoke at bottom
+ * 5. <Audio> — TTS voiceover
+ * 6. ProgressIndicator — thin bar at bottom
+ * 7. TransitionEffect — fade out to black
+ */
+export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
+  videoSrc,
+  hookText,
+  hookStartTime,
+  hookEndTime,
+  overlays,
+  outroText,
+  outroStartTime,
+  outroEndTime,
+  audioUrl,
+  segments,
+  categoryVisuals,
+  highlightTerms = [],
+  showProgress = true,
+}) => {
+  const { fps, durationInFrames } = useVideoConfig();
+
+  // Build outro as a CTA-style overlay (only CTA, no mid-video overlays)
+  const outroOverlay: Overlay = {
+    text: outroText,
+    startTime: outroStartTime,
+    endTime: outroEndTime,
+    style: 'cta',
+  };
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: COLORS.cosmicBlack }}>
+      {/* 1. Screen recording background */}
+      <AbsoluteFill style={{ zIndex: 1 }}>
+        <Video
+          src={staticFile(videoSrc)}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+      </AbsoluteFill>
+
+      {/* No fade-in — TikTok needs visible content on frame 0 for previews */}
+
+      {/* 3. Animated hook intro with background bar */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 16 }}>
+        <HookIntro
+          text={hookText}
+          startTime={hookStartTime}
+          endTime={hookEndTime}
+          accentColor={categoryVisuals?.accentColor}
+          highlightTerms={highlightTerms}
+        />
+      </div>
+
+      {/* 4. Outro CTA only (mid-video overlays removed — TTS + subtitles cover it) */}
+      <TextOverlays
+        overlays={[outroOverlay]}
+        accentColor={categoryVisuals?.accentColor}
+      />
+
+      {/* 5. Animated subtitles with transparent background */}
+      {segments && segments.length > 0 && (
+        <AnimatedSubtitles
+          segments={segments}
+          highlightTerms={highlightTerms}
+          highlightColor={categoryVisuals?.highlightColor}
+          fontSize={44}
+          bottomPosition={12}
+          fps={fps}
+        />
+      )}
+
+      {/* 6. TTS voiceover audio track */}
+      {audioUrl && <Audio src={staticFile(audioUrl)} />}
+
+      {/* 7. Progress indicator */}
+      {showProgress && (
+        <ProgressIndicator
+          position='bottom'
+          height={2}
+          color={categoryVisuals?.accentColor}
+        />
+      )}
+
+      {/* 8. Fade out at end (0.8s = 24 frames) */}
+      <TransitionEffect
+        type='fade'
+        startFrame={durationInFrames - 24}
+        durationFrames={24}
+        direction='out'
+      />
+    </AbsoluteFill>
+  );
+};
+
+export default AppDemoVideo;

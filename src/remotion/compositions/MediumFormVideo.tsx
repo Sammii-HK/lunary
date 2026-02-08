@@ -1,30 +1,20 @@
 import React from 'react';
-import { AbsoluteFill, Audio, Img, Sequence, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Audio, useVideoConfig } from 'remotion';
 import { AnimatedBackground } from '../components/AnimatedBackground';
 import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
-import { TextOverlays } from '../components/TextOverlays';
+import { TextOverlays, type Overlay } from '../components/TextOverlays';
+import { HookIntro } from '../components/HookIntro';
 import { ProgressIndicator } from '../components/ProgressIndicator';
-import { TransitionEffect } from '../components/TransitionEffect';
 import type { AudioSegment } from '../utils/timing';
+import type { CategoryVisualConfig } from '../config/category-visuals';
 import { COLORS } from '../styles/theme';
-
-// Helper to convert seconds to frames
-const secondsToFrames = (seconds: number, fps: number) =>
-  Math.round(seconds * fps);
-
-interface Overlay {
-  text: string;
-  startTime: number;
-  endTime: number;
-  style?: 'hook' | 'cta' | 'stamp' | 'chapter';
-}
 
 export interface MediumFormVideoProps {
   /** Audio segments for subtitles with topic info */
   segments: AudioSegment[];
   /** Audio file URL */
   audioUrl?: string;
-  /** Background images (with timestamps) */
+  /** Background images (with timestamps) — optional, animated bg used when absent */
   images?: Array<{
     url: string;
     startTime: number;
@@ -40,94 +30,90 @@ export interface MediumFormVideoProps {
   overlays?: Overlay[];
   /** Unique seed for generating different star positions and comet paths */
   seed?: string;
+  /** Category visual configuration for themed backgrounds */
+  categoryVisuals?: CategoryVisualConfig;
 }
 
 /**
  * Medium Form Video Composition (1-3 minutes)
  *
  * Optimized for TikTok, Instagram Reels, YouTube Shorts (longer format)
- * - Hook sequence at start
- * - Topic cards for each section
+ * - Animated hook intro at start
  * - Animated subtitles throughout
- * - Image transitions between segments
+ * - Category-themed animated backgrounds
  * - 9:16 aspect ratio (1080x1920)
  */
 export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
   segments,
   audioUrl,
-  images = [],
   highlightTerms = [],
   showProgress = true,
   overlays = [],
   seed = 'default',
+  categoryVisuals,
 }) => {
   const { fps, durationInFrames } = useVideoConfig();
 
+  // Separate hook overlays from other overlays — hooks are rendered by HookIntro
+  const hookOverlay = overlays.find(
+    (o) => o.style === 'hook' || o.style === 'hook_large',
+  );
+  const otherOverlays = overlays.filter(
+    (o) => o.style !== 'hook' && o.style !== 'hook_large',
+  );
+
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.cosmicBlack }}>
-      {/* Background images first - extend last image to full video duration */}
-      {images.map((image, index) => {
-        const startFrame = secondsToFrames(image.startTime, fps);
-        const isLastImage = index === images.length - 1;
-        // Extend last image to fill entire video duration
-        const endFrame = isLastImage
-          ? durationInFrames
-          : secondsToFrames(image.endTime, fps);
-        const duration = endFrame - startFrame;
-
-        return (
-          <Sequence key={index} from={startFrame} durationInFrames={duration}>
-            <AbsoluteFill>
-              <Img
-                src={image.url}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  opacity: 0.6,
-                }}
-              />
-            </AbsoluteFill>
-          </Sequence>
-        );
-      })}
-
-      {/* Stars render ON TOP of background images */}
-      <AnimatedBackground showStars={true} overlayMode={true} seed={seed} />
-
-      {/* Fade in from black */}
-      <TransitionEffect
-        type='fade'
-        startFrame={0}
-        durationFrames={15}
-        direction='in'
+      {/* Animated background with category gradient — the full visual backdrop */}
+      <AnimatedBackground
+        showStars={true}
+        overlayMode={false}
+        seed={seed}
+        animationType={categoryVisuals?.backgroundAnimation}
+        particleTintColor={categoryVisuals?.particleTintColor}
+        gradientColors={categoryVisuals?.gradientColors}
       />
+
+      {/* Animated hook intro — word-by-word entrance */}
+      {hookOverlay && (
+        <HookIntro
+          text={hookOverlay.text}
+          startTime={hookOverlay.startTime}
+          endTime={hookOverlay.endTime}
+          accentColor={categoryVisuals?.accentColor}
+          highlightTerms={highlightTerms}
+        />
+      )}
 
       {/* Animated subtitles */}
       <AnimatedSubtitles
         segments={segments}
         highlightTerms={highlightTerms}
+        highlightColor={categoryVisuals?.highlightColor}
         fontSize={42}
         bottomPosition={15}
         fps={fps}
       />
 
-      {/* Text overlays (hook, cta, stamps, chapters) - matches FFmpeg drawtext */}
-      {overlays.length > 0 && <TextOverlays overlays={overlays} />}
+      {/* Text overlays (cta, stamps, chapters) — hooks handled above */}
+      {otherOverlays.length > 0 && (
+        <TextOverlays
+          overlays={otherOverlays}
+          accentColor={categoryVisuals?.accentColor}
+        />
+      )}
 
       {/* Audio track */}
       {audioUrl && <Audio src={audioUrl} />}
 
       {/* Progress indicator */}
-      {showProgress && <ProgressIndicator position='bottom' height={2} />}
-
-      {/* Fade out at end */}
-      <TransitionEffect
-        type='fade'
-        startFrame={durationInFrames - 15}
-        durationFrames={15}
-        direction='out'
-      />
+      {showProgress && (
+        <ProgressIndicator
+          position='bottom'
+          height={2}
+          color={categoryVisuals?.accentColor}
+        />
+      )}
     </AbsoluteFill>
   );
 };

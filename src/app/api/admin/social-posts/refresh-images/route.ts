@@ -14,6 +14,14 @@ import { getImageBaseUrl } from '@/lib/urls';
 
 export const runtime = 'nodejs';
 
+/** Post types that are text-first and should never have images */
+const TEXT_ONLY_POST_TYPES = new Set([
+  'threads_question',
+  'threads_beta_cta',
+  'video',
+  'video_caption',
+]);
+
 function getWeekStart(date: Date): Date {
   const d = new Date(date);
   const day = d.getDay();
@@ -61,11 +69,21 @@ export async function POST(request: NextRequest) {
     let updated = 0;
     for (const post of postsResult.rows) {
       const platform = post.platform as string;
-      const platformsWithImages = new Set(['pinterest']);
-      if (!platformsWithImages.has(platform)) {
+      const postType = post.post_type as string;
+
+      // Clear images from text-first posts (fix previously incorrect data)
+      if (TEXT_ONLY_POST_TYPES.has(postType)) {
+        if (post.image_url) {
+          await sql`
+            UPDATE social_posts
+            SET image_url = NULL, updated_at = NOW()
+            WHERE id = ${post.id}
+          `;
+          updated += 1;
+        }
         continue;
       }
-      const postType = post.post_type as string;
+
       const topic = post.topic as string | null;
       const scheduledDate = new Date(post.scheduled_date);
       const postWeekStart = getWeekStart(scheduledDate);

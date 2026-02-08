@@ -210,8 +210,8 @@ export function ShareTarotPattern({
 
   const socialUrls = shareRecord?.shareUrl
     ? {
-        x: `https://twitter.com/intent/tweet?text=${encodeURIComponent('My tarot pattern ✨')}&url=${encodeURIComponent(shareRecord.shareUrl)}`,
-        threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My tarot pattern ✨ ${shareRecord.shareUrl}`)}`,
+        x: `https://twitter.com/intent/tweet?text=${encodeURIComponent('My tarot pattern')}&url=${encodeURIComponent(shareRecord.shareUrl)}`,
+        threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My tarot pattern ${shareRecord.shareUrl}`)}`,
       }
     : undefined;
 

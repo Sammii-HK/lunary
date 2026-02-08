@@ -1,11 +1,24 @@
 import { getThematicImageUrl } from '@/lib/social/educational-images';
 import type { DailyFacet, WeeklyTheme } from '@/lib/social/weekly-themes';
 import { getPaletteHighlightColor } from '../../../utils/og/symbols';
+import { getCategoryVisuals } from '@/remotion/config/category-visuals';
 
 const CHAPTER_LABELS = ['Context', 'Significance', 'Reflection'];
 
-// CTA messages to rotate through
-const CTA_MESSAGES = [
+// Engagement CTAs — designed for TikTok interaction (comments, saves, shares)
+const ENGAGEMENT_CTAS = [
+  'Which part hit different?',
+  'Drop your sign below',
+  'Save this for later',
+  'Tag someone who needs this',
+  'Does this resonate?',
+  'Comment your experience',
+  'Share if this was accurate',
+  'Follow for more like this',
+];
+
+// Brand CTAs — drive traffic to Lunary
+const BRAND_CTAS = [
   'Dive deeper with Lunary',
   'Find more insights on Lunary',
   'Learn more with Lunary',
@@ -13,8 +26,21 @@ const CTA_MESSAGES = [
   'Discover more with Lunary',
 ];
 
+// 70% engagement / 30% brand rotation
 function getRandomCTA(): string {
-  return CTA_MESSAGES[Math.floor(Math.random() * CTA_MESSAGES.length)];
+  const pool = Math.random() < 0.7 ? ENGAGEMENT_CTAS : BRAND_CTAS;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Mid-video micro-CTA for engagement
+function getMicroCTA(): string {
+  const microCTAs = [
+    'Save this',
+    'Watch till the end',
+    'This is important',
+    'Pay attention here',
+  ];
+  return microCTAs[Math.floor(Math.random() * microCTAs.length)];
 }
 
 const ZODIAC_SIGNS = [
@@ -252,6 +278,7 @@ export function buildThematicVideoComposition({
   slug: string;
 }) {
   const category = theme?.category || 'lunar';
+  const categoryVisuals = getCategoryVisuals(category);
   const partNumber = (facet.dayIndex ?? 0) + 1;
   const totalParts = theme?.facets?.length || 7;
   const highlightColor = getPaletteHighlightColor(category) ?? '#5AD7FF';
@@ -270,8 +297,10 @@ export function buildThematicVideoComposition({
     (count) => (durationEstimate * count) / totalSegmentWords,
   );
   const minDurations = [3, 3, 2];
+  // Pacing modifiers: faster start, normal middle, slower close (for reflection)
+  const pacingModifiers = [0.85, 1.0, 1.15];
   const clampedDurations = rawDurations.map((value, index) =>
-    Math.max(minDurations[index], value),
+    Math.max(minDurations[index], value * pacingModifiers[index]),
   );
   clampedDurations[1] += pauseSeconds;
   const clampedTotal = clampedDurations.reduce((sum, value) => sum + value, 0);
@@ -304,24 +333,38 @@ export function buildThematicVideoComposition({
   // Calculate total duration for CTA timing
   const totalDuration = images[images.length - 1]?.endTime || durationEstimate;
 
+  // Use hook_large style for short hooks (better readability on TikTok)
+  const hookStyle =
+    hookText.length <= 50 ? ('hook_large' as const) : ('hook' as const);
+
+  // Mid-video micro-CTA at ~60% duration for engagement
+  const microCtaStart = totalDuration * 0.6;
+
   const overlays = [
-    // Hook text (first sentence) as the first section header
+    // Hook text at 0.1s (was 0.3s — faster hook for TikTok retention)
     ...(hookText.length > 10
       ? [
           {
             text: hookText,
-            startTime: 0.3,
-            endTime: Math.min(4, images[0].endTime), // Show for ~3-4 seconds
-            style: 'hook' as const,
+            startTime: 0.1,
+            endTime: Math.min(4, images[0].endTime),
+            style: hookStyle,
           },
         ]
       : []),
     // "Significance" - delayed by 2-3 seconds into segment 2
     {
       text: CHAPTER_LABELS[1], // "Significance"
-      startTime: images[1].startTime + 2.5, // Delay 2.5 seconds
+      startTime: images[1].startTime + 2.5,
       endTime: images[1].endTime,
       style: 'chapter' as const,
+    },
+    // Mid-video micro-CTA stamp at ~60% duration
+    {
+      text: getMicroCTA(),
+      startTime: microCtaStart,
+      endTime: microCtaStart + 2.0,
+      style: 'stamp' as const,
     },
     // "Reflection" - starts with segment 3
     {
@@ -373,6 +416,7 @@ export function buildThematicVideoComposition({
     overlays: [...overlays, ...stampOverlays],
     highlightTerms: filteredHighlightTerms,
     highlightColor,
+    categoryVisuals,
     segments: [segmentA, segmentB, segmentC],
   };
 }

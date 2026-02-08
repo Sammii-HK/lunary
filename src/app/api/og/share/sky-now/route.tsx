@@ -7,6 +7,13 @@ import {
   generateStarfield,
   getStarCount,
 } from '@/lib/share/og-utils';
+import {
+  loadShareFonts,
+  ShareFooter,
+  SHARE_BASE_URL,
+  SHARE_BORDERS,
+  SHARE_CARDS,
+} from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 import { bodiesSymbols, zodiacSymbol } from '@/constants/symbols';
 
@@ -107,17 +114,16 @@ export async function GET(request: NextRequest) {
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+    const baseUrl = SHARE_BASE_URL;
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 48 : isStory ? 60 : 60;
     const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
     const dateSize = isLandscape ? 22 : isStory ? 36 : 28;
     const labelSize = isLandscape ? 22 : isStory ? 36 : 30;
-    const planetSymbolSize = isLandscape ? 48 : isStory ? 72 : 60;
-    const zodiacSymbolSize = isLandscape ? 38 : isStory ? 56 : 48;
-    const planetNameSize = isLandscape ? 20 : isStory ? 28 : 26;
+    const planetSymbolSize = isLandscape ? 28 : isStory ? 72 : 60;
+    const zodiacSymbolSize = isLandscape ? 24 : isStory ? 56 : 48;
+    const planetNameSize = isLandscape ? 16 : isStory ? 28 : 26;
 
     // Generate unique starfield based on shareId
     const stars = generateStarfield(data.shareId, getStarCount(format));
@@ -201,7 +207,7 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               fontSize: isLandscape ? 18 : labelSize,
-              color: '#f87171',
+              color: OG_COLORS.cosmicRose,
               fontWeight: 500,
               display: 'flex',
             }}
@@ -212,18 +218,107 @@ export async function GET(request: NextRequest) {
         </div>
       ) : null;
 
-    // Planet row component
-    const renderPlanetRow = (planet: string, compact: boolean = false) => {
+    // Landscape planet row - compact single-line format
+    const renderLandscapePlanetRow = (planet: string, index: number) => {
       const position = data.positions[planet];
       const isRetrograde = position?.retrograde || false;
-      const rowPadding = compact
-        ? '10px 14px'
-        : isStory
-          ? '16px 20px'
-          : '14px 18px';
-      const symbolSize = compact ? 36 : planetSymbolSize;
-      const zodiacSize = compact ? 28 : zodiacSymbolSize;
-      const nameSize = compact ? 15 : planetNameSize;
+
+      return (
+        <div
+          key={planet}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '8px 16px',
+            background:
+              index % 2 === 0
+                ? 'rgba(255, 255, 255, 0.03)'
+                : 'rgba(255, 255, 255, 0.01)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'Astronomicon',
+                fontSize: planetSymbolSize,
+                color: isRetrograde
+                  ? OG_COLORS.cosmicRose
+                  : OG_COLORS.textPrimary,
+                display: 'flex',
+                width: 32,
+                justifyContent: 'center',
+              }}
+            >
+              {getPlanetSymbol(planet)}
+            </div>
+            <div
+              style={{
+                fontSize: planetNameSize,
+                color: OG_COLORS.textSecondary,
+                display: 'flex',
+                width: 80,
+              }}
+            >
+              {planet}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            {isRetrograde && (
+              <div
+                style={{
+                  fontSize: 14,
+                  color: OG_COLORS.cosmicRose,
+                  letterSpacing: '0.05em',
+                  display: 'flex',
+                }}
+              >
+                Rx
+              </div>
+            )}
+            <div
+              style={{
+                fontFamily: 'Astronomicon',
+                fontSize: zodiacSymbolSize,
+                color: OG_COLORS.primaryViolet,
+                display: 'flex',
+              }}
+            >
+              {position?.sign ? getZodiacSymbol(position.sign) : '?'}
+            </div>
+            <div
+              style={{
+                fontSize: planetNameSize,
+                color: OG_COLORS.textPrimary,
+                display: 'flex',
+                width: 100,
+              }}
+            >
+              {position?.sign || 'Unknown'}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Square/Story planet row component
+    const renderPlanetRow = (planet: string, index: number) => {
+      const position = data.positions[planet];
+      const isRetrograde = position?.retrograde || false;
+      const rowPadding = isStory ? '14px 18px' : '10px 14px';
 
       return (
         <div
@@ -235,23 +330,25 @@ export async function GET(request: NextRequest) {
             padding: rowPadding,
             background: isRetrograde
               ? 'rgba(248, 113, 113, 0.08)'
-              : 'rgba(255, 255, 255, 0.02)',
-            border: `1px solid ${isRetrograde ? 'rgba(248, 113, 113, 0.2)' : 'rgba(255, 255, 255, 0.06)'}`,
-            borderRadius: 14,
+              : index % 2 === 0
+                ? 'rgba(255, 255, 255, 0.03)'
+                : 'rgba(255, 255, 255, 0.01)',
           }}
         >
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: compact ? 10 : 16,
+              gap: isStory ? 14 : 10,
             }}
           >
             <div
               style={{
                 fontFamily: 'Astronomicon',
-                fontSize: symbolSize,
-                color: isRetrograde ? '#f87171' : OG_COLORS.textPrimary,
+                fontSize: planetSymbolSize,
+                color: isRetrograde
+                  ? OG_COLORS.cosmicRose
+                  : OG_COLORS.textPrimary,
                 display: 'flex',
               }}
             >
@@ -259,7 +356,7 @@ export async function GET(request: NextRequest) {
             </div>
             <div
               style={{
-                fontSize: nameSize,
+                fontSize: planetNameSize,
                 color: OG_COLORS.textSecondary,
                 display: 'flex',
               }}
@@ -272,42 +369,40 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: compact ? 8 : 12,
+              gap: isStory ? 10 : 8,
             }}
           >
             {isRetrograde && (
               <div
                 style={{
-                  fontSize: compact ? 14 : 18,
-                  color: '#f87171',
+                  fontSize: isStory ? 22 : 16,
+                  color: OG_COLORS.cosmicRose,
                   letterSpacing: '0.05em',
                   display: 'flex',
                 }}
               >
-                ℞
+                Rx
               </div>
             )}
             <div
               style={{
                 fontFamily: 'Astronomicon',
-                fontSize: zodiacSize,
+                fontSize: zodiacSymbolSize,
                 color: OG_COLORS.primaryViolet,
                 display: 'flex',
               }}
             >
               {position?.sign ? getZodiacSymbol(position.sign) : '?'}
             </div>
-            {!compact && (
-              <div
-                style={{
-                  fontSize: nameSize,
-                  color: OG_COLORS.textPrimary,
-                  display: 'flex',
-                }}
-              >
-                {position?.sign || 'Unknown'}
-              </div>
-            )}
+            <div
+              style={{
+                fontSize: planetNameSize,
+                color: OG_COLORS.textPrimary,
+                display: 'flex',
+              }}
+            >
+              {position?.sign || 'Unknown'}
+            </div>
           </div>
         </div>
       );
@@ -315,7 +410,7 @@ export async function GET(request: NextRequest) {
 
     // Layout based on format
     const layoutJsx = isLandscape ? (
-      // Landscape Layout - 5x2 grid (horizontal emphasis)
+      // Landscape Layout - Single 10-row list, compact
       <div
         style={{
           width: '100%',
@@ -323,7 +418,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: `${padding}px`,
+          padding: '48px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -337,7 +432,7 @@ export async function GET(request: NextRequest) {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: 20,
+            marginBottom: 16,
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -356,7 +451,7 @@ export async function GET(request: NextRequest) {
               style={{
                 fontSize: dateSize,
                 color: OG_COLORS.textTertiary,
-                marginTop: 6,
+                marginTop: 4,
                 display: 'flex',
               }}
             >
@@ -366,75 +461,48 @@ export async function GET(request: NextRequest) {
           {retrogradeBadge}
         </div>
 
-        {/* Planet Grid - 5x2 */}
+        {/* Planet List - Two columns of 5 rows each */}
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: 10,
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
+            flexDirection: 'row',
+            gap: 16,
+            background: SHARE_CARDS.primary,
+            border: SHARE_BORDERS.card,
             borderRadius: 16,
-            padding: '20px 24px',
+            padding: '12px 16px',
             flex: 1,
           }}
         >
           <div
             style={{
-              fontSize: 14,
-              color: OG_COLORS.textSecondary,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: 8,
               display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
             }}
           >
-            Current Positions
+            {PLANETS.slice(0, 5).map((planet, i) =>
+              renderLandscapePlanetRow(planet, i),
+            )}
           </div>
-
-          {/* Two rows of 5 planets each */}
-          <div style={{ display: 'flex', gap: 10 }}>
-            {PLANETS.slice(0, 5).map((planet) => renderPlanetRow(planet, true))}
-          </div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            {PLANETS.slice(5, 10).map((planet) =>
-              renderPlanetRow(planet, true),
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
+            }}
+          >
+            {PLANETS.slice(5, 10).map((planet, i) =>
+              renderLandscapePlanetRow(planet, i),
             )}
           </div>
         </div>
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            justifyContent: 'center',
-            marginTop: 16,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={24}
-            height={24}
-            style={{ opacity: 0.6 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontSize: 16,
-              opacity: 0.6,
-              letterSpacing: '0.1em',
-              color: OG_COLORS.textPrimary,
-              display: 'flex',
-            }}
-          >
-            Join free at lunary.app
-          </span>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     ) : isStory ? (
-      // Story Layout - 2x5 grid with generous spacing
+      // Story Layout - 2x5 grid with comfortable spacing
       <div
         style={{
           width: '100%',
@@ -442,7 +510,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: '120px 60px 200px 60px',
+          padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -501,10 +569,10 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'row',
             gap: 20,
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
+            background: SHARE_CARDS.primary,
+            border: SHARE_BORDERS.card,
             borderRadius: 24,
-            padding: '36px 40px',
+            padding: '28px 32px',
             flex: 1,
           }}
         >
@@ -517,7 +585,7 @@ export async function GET(request: NextRequest) {
               flex: 1,
             }}
           >
-            {PLANETS.slice(0, 5).map((planet) => renderPlanetRow(planet))}
+            {PLANETS.slice(0, 5).map((planet, i) => renderPlanetRow(planet, i))}
           </div>
 
           {/* Right column - last 5 planets */}
@@ -529,40 +597,14 @@ export async function GET(request: NextRequest) {
               flex: 1,
             }}
           >
-            {PLANETS.slice(5, 10).map((planet) => renderPlanetRow(planet))}
+            {PLANETS.slice(5, 10).map((planet, i) =>
+              renderPlanetRow(planet, i),
+            )}
           </div>
         </div>
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            justifyContent: 'center',
-            marginTop: 'auto',
-            paddingTop: 32,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={28}
-            height={28}
-            style={{ opacity: 0.6 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontSize: 20,
-              opacity: 0.6,
-              letterSpacing: '0.1em',
-              color: OG_COLORS.textPrimary,
-              display: 'flex',
-            }}
-          >
-            Join free at lunary.app
-          </span>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     ) : (
       // Square Layout - 2x5 grid
@@ -573,7 +615,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: `${padding}px`,
+          padding: '60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -631,11 +673,11 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             flexDirection: 'row',
-            gap: 16,
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
+            gap: 12,
+            background: SHARE_CARDS.primary,
+            border: SHARE_BORDERS.card,
             borderRadius: 20,
-            padding: '28px 32px',
+            padding: '20px 24px',
             flex: 1,
           }}
         >
@@ -644,11 +686,11 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 12,
+              gap: 8,
               flex: 1,
             }}
           >
-            {PLANETS.slice(0, 5).map((planet) => renderPlanetRow(planet))}
+            {PLANETS.slice(0, 5).map((planet, i) => renderPlanetRow(planet, i))}
           </div>
 
           {/* Right column - last 5 planets */}
@@ -656,68 +698,27 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 12,
+              gap: 8,
               flex: 1,
             }}
           >
-            {PLANETS.slice(5, 10).map((planet) => renderPlanetRow(planet))}
+            {PLANETS.slice(5, 10).map((planet, i) =>
+              renderPlanetRow(planet, i),
+            )}
           </div>
         </div>
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            justifyContent: 'center',
-            marginTop: 'auto',
-            paddingTop: 28,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={24}
-            height={24}
-            style={{ opacity: 0.6 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontSize: 16,
-              opacity: 0.6,
-              letterSpacing: '0.1em',
-              color: OG_COLORS.textPrimary,
-              display: 'flex',
-            }}
-          >
-            Join free at lunary.app
-          </span>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     );
+
+    const fonts = await loadShareFonts(request, { includeAstronomicon: true });
 
     return new ImageResponse(layoutJsx, {
       width,
       height,
-      fonts: [
-        {
-          name: 'Roboto Mono',
-          data: await fetch(
-            new URL('/fonts/RobotoMono-Regular.ttf', request.url),
-          ).then((res) => res.arrayBuffer()),
-          style: 'normal',
-          weight: 400,
-        },
-        {
-          name: 'Astronomicon',
-          data: await fetch(
-            new URL('/fonts/Astronomicon.ttf', request.url),
-          ).then((res) => res.arrayBuffer()),
-          style: 'normal',
-          weight: 400,
-        },
-      ],
+      fonts,
     });
   } catch (error) {
     console.error('[SkyNowOG] Error:', error);

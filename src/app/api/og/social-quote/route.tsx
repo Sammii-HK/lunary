@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageResponse } from 'next/og';
+import { generateStarfield } from '@/lib/share/og-utils';
 
 export const runtime = 'edge';
-export const revalidate = 3600; // Cache for 1 hour - quotes can change but not that frequently
+export const revalidate = 3600;
 
-// Cache font loading
 let robotoFontP: Promise<ArrayBuffer> | null = null;
 
 async function loadRobotoFont(request: Request) {
@@ -29,6 +29,32 @@ const FORMAT_SIZES: Record<Format, { width: number; height: number }> = {
 
 const DEFAULT_FORMAT: Format = 'square';
 
+// Category-themed gradients for visual variety
+const THEMED_GRADIENTS = [
+  'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // violet/cosmic
+  'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)', // purple
+  'linear-gradient(135deg, #0f1428 0%, #0a0d14 50%, #0a0a0a 100%)', // indigo
+  'linear-gradient(135deg, #28200f 0%, #14100a 50%, #0a0a0a 100%)', // amber
+  'linear-gradient(135deg, #280f1a 0%, #140a0d 50%, #0a0a0a 100%)', // rose
+  'linear-gradient(135deg, #0f2818 0%, #0a140d 50%, #0a0a0a 100%)', // emerald
+  'linear-gradient(135deg, #1f1f2a 0%, #1a1a1a 50%, #0a0a0a 100%)', // slate
+  'linear-gradient(135deg, #252530 0%, #1a1a1a 50%, #0a0a0a 100%)', // steel
+];
+
+// Accent colors that pair with each gradient
+const GRADIENT_ACCENTS = [
+  '#a78bfa',
+  '#c084fc',
+  '#818cf8',
+  '#f59e0b',
+  '#f472b6',
+  '#34d399',
+  '#94a3b8',
+  '#a78bfa',
+];
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -48,19 +74,15 @@ export async function GET(request: NextRequest) {
       ? (rawFormat as Format)
       : DEFAULT_FORMAT;
     const { width, height } = FORMAT_SIZES[format];
-    // Extract author from quote if it contains attribution (e.g., "quote text" - Author Name)
+
     let author = searchParams.get('author') || 'Lunary';
     let quoteText = text;
 
-    // Check if quote contains attribution (format: "quote" - Author or "quote" — Author)
-    // Match the LAST dash/emdash to handle quotes with dashes in the text (e.g., "star-stuff")
-    // Split on the last occurrence of " - " or " — " pattern
     const lastDashIndex = Math.max(
       text.lastIndexOf(' - '),
       text.lastIndexOf(' — '),
     );
     if (lastDashIndex > 0) {
-      // Check if what follows looks like an author name (starts with capital letter)
       const potentialAuthor = text.substring(lastDashIndex + 3).trim();
       if (potentialAuthor && /^[A-Z]/.test(potentialAuthor)) {
         quoteText = text.substring(0, lastDashIndex).trim();
@@ -68,28 +90,26 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Load font (fallback to system font if fails)
     const fontData = await loadRobotoFont(request).catch(() => null);
 
-    const gradients = [
-      'linear-gradient(135deg, #1a1a1a, #0d0d0d, #0a0a0a)',
-      'linear-gradient(135deg, #2d2d3a, #1a1a1a, #0a0a0a)',
-      'linear-gradient(135deg, #24243a, #1a1a1a, #0d0d0d)',
-      'linear-gradient(135deg, #2a2a2a, #1a1a1a, #0a0a0a)',
-      'linear-gradient(135deg, #1f1f2a, #1a1a1a, #0a0a0a)',
-      'linear-gradient(135deg, #2a2a2a, #1f1f1f, #0d0d0d)',
-      'linear-gradient(135deg, #252530, #1a1a1a, #0a0a0a)',
-      'linear-gradient(135deg, #1f1f25, #1a1a1a, #0d0d0d)',
-    ];
+    // Deterministic gradient selection based on quote text
+    const hash = Math.abs(
+      quoteText.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0),
+    );
+    const gradientIndex = hash % THEMED_GRADIENTS.length;
+    const background = THEMED_GRADIENTS[gradientIndex];
+    const accent = GRADIENT_ACCENTS[gradientIndex];
 
-    // Pick gradient based on quote text hash for consistency
-    const gradientIndex =
-      Math.abs(
-        quoteText.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0),
-      ) % gradients.length;
-    const background = gradients[gradientIndex];
+    // Generate subtle starfield
+    const stars = generateStarfield(`quote-${quoteText.slice(0, 20)}`, 40);
 
-    // Render the quote in the requested format (square by default)
+    // Instagram-optimized text sizes (larger for mobile readability)
+    const isSquare = format === 'square';
+    const isStory = format === 'story';
+    const quoteSize = isStory ? 56 : isSquare ? 52 : 44;
+    const authorSize = isStory ? 36 : isSquare ? 34 : 32;
+    const interpSize = isStory ? 30 : isSquare ? 28 : 24;
+
     return new ImageResponse(
       <div
         style={{
@@ -100,16 +120,48 @@ export async function GET(request: NextRequest) {
           alignItems: 'center',
           justifyContent: 'center',
           background,
-          padding:
-            format === 'landscape'
-              ? '60px 120px'
-              : format === 'story'
-                ? '60px 80px'
-                : '80px',
+          padding: isSquare
+            ? '80px 64px'
+            : isStory
+              ? '80px 64px'
+              : '60px 100px',
           fontFamily: fontData ? 'Roboto Mono' : 'system-ui',
           position: 'relative',
         }}
       >
+        {/* Subtle starfield */}
+        {stars.map((star, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${star.x}%`,
+              top: `${star.y}%`,
+              width: star.size,
+              height: star.size,
+              borderRadius: '50%',
+              background: '#fff',
+              opacity: star.opacity * 0.3,
+            }}
+          />
+        ))}
+
+        {/* Decorative quote mark */}
+        <div
+          style={{
+            position: 'absolute',
+            top: isSquare ? 60 : 80,
+            left: isSquare ? 60 : 80,
+            fontSize: 120,
+            color: accent,
+            opacity: 0.1,
+            lineHeight: 1,
+            display: 'flex',
+          }}
+        >
+          {'\u201C'}
+        </div>
+
         <div
           style={{
             display: 'flex',
@@ -118,16 +170,16 @@ export async function GET(request: NextRequest) {
             justifyContent: 'center',
             textAlign: 'center',
             color: 'white',
-            maxWidth: format === 'story' ? '760px' : '900px',
+            maxWidth: isStory ? '760px' : '920px',
           }}
         >
           <div
             style={{
-              fontSize: format === 'story' ? 56 : 48,
+              fontSize: quoteSize,
               fontWeight: 600,
-              lineHeight: 1.3,
-              marginBottom: '40px',
-              color: '#e4e4e7',
+              lineHeight: 1.35,
+              marginBottom: 40,
+              color: '#f0f0f2',
               display: 'flex',
             }}
           >
@@ -135,25 +187,24 @@ export async function GET(request: NextRequest) {
           </div>
           <div
             style={{
-              fontSize: format === 'story' ? 38 : 36,
-              color: '#a78bfa',
+              fontSize: authorSize,
+              color: accent,
               opacity: 0.9,
-              marginTop: '20px',
+              marginTop: 16,
               display: 'flex',
             }}
           >
-            — {author}
+            {'\u2014'} {author}
           </div>
           {interpretation && (
             <div
               style={{
-                fontSize: format === 'story' ? 32 : 28,
+                fontSize: interpSize,
                 fontWeight: 400,
-                lineHeight: 1.4,
-                marginTop: '50px',
-                color: '#c4b5fd',
-                opacity: 0.85,
-                maxWidth: format === 'story' ? '680px' : '850px',
+                lineHeight: 1.5,
+                marginTop: 44,
+                color: `${accent}cc`,
+                maxWidth: isStory ? '680px' : '850px',
                 display: 'flex',
                 textAlign: 'center',
               }}
@@ -162,16 +213,37 @@ export async function GET(request: NextRequest) {
             </div>
           )}
         </div>
+
+        {/* Footer with moon icon */}
         <div
           style={{
-            position: 'absolute',
-            bottom: '40px',
-            fontSize: 24,
-            color: '#71717a',
             display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            justifyContent: 'center',
+            position: 'absolute',
+            bottom: 36,
+            left: 0,
+            right: 0,
           }}
         >
-          lunary.app
+          <img
+            src={`${BASE_URL}/icons/moon-phases/full-moon.png`}
+            width={18}
+            height={18}
+            style={{ opacity: 0.4 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontSize: 20,
+              color: '#71717a',
+              letterSpacing: '0.1em',
+              display: 'flex',
+            }}
+          >
+            lunary.app
+          </span>
         </div>
       </div>,
       {

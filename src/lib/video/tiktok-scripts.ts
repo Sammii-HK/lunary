@@ -10,8 +10,20 @@
  * 3. Timing for each scene
  * 4. What the Playwright recording config needs to do
  *
- * Flow: Script → Playwright config → Recording → Edit → Post
+ * Flow: Script → Playwright config → Recording → Remotion compose → Post
+ *
+ * CONTENT RULES:
+ * - Hooks: 5-8 words max. Must work on mute.
+ * - Text overlays: 6 words max. Pattern interrupts > explanations.
+ * - Voiceover: 3.0-4.0 words/sec. Conversational, not list-y.
+ * - Captions: End with question or challenge. Under 150 chars first line.
+ * - Hashtags: 3-5 max. 1 broad + 1 niche + 1 branded + 1-2 topic.
  */
+
+import { SCRIPT_GENERATORS } from './tiktok-script-generators';
+import type { SkyData } from './tiktok-sky-data';
+
+export type { SkyData } from './tiktok-sky-data';
 
 export interface TikTokScript {
   /** Unique ID - matches recording config ID */
@@ -78,6 +90,8 @@ export interface Scene {
   target?: string;
   /** Scroll distance in px (for scroll action) */
   scrollDistance?: number;
+  /** Selector to scroll into view (alternative to scrollDistance) */
+  scrollTo?: string;
   /** Text to type (for type action) */
   typeText?: string;
   /** What the viewer should notice */
@@ -91,35 +105,9 @@ export interface TextOverlay {
   startSeconds: number;
   /** How long to show */
   durationSeconds: number;
-  /** Position on screen */
+  /** Position metadata (rendering handled by Remotion component positioning) */
   position: 'top' | 'center' | 'bottom';
 }
-
-// ============================================================================
-// TIKTOK BEST PRACTICES APPLIED TO ALL SCRIPTS:
-//
-// HOOKS: Pattern interrupt, open loop, or bold claim. Must work on MUTE
-//        (visual hook + text overlay). Target 70%+ intro retention.
-//
-// PACING: Visual change every 2-3 seconds. No scene > 3s without movement.
-//         Target 70%+ completion rate over raw length.
-//
-// STRUCTURE: Open loop or escalating reveal. Never just "feature, feature,
-//            feature." Plant a tease early, pay it off late.
-//
-// RETENTION HOOKS: At ~10s and ~15s marks to prevent natural drop-off.
-//                  Use text overlays as pattern interrupts at these moments.
-//
-// TEXT OVERLAYS: Upper third of screen. High contrast. Max 6-8 words.
-//               Work as standalone story on mute.
-//
-// LOOPING: Design endings that feel like beginnings. Viewer rewatches
-//          without realizing = algorithm boost.
-//
-// CTA: Soft mid-video or natural end. Never interrupt the story.
-//
-// CAPTIONS: Short, emoji-light, question or bold statement. Drive comments.
-// ============================================================================
 
 // ============================================================================
 // TIER 1: CORE FEATURE DEMOS
@@ -130,122 +118,86 @@ const dashboardOverview: TikTokScript = {
   title: 'POV: Your Morning Cosmic Check-In',
   tier: 1,
   category: 'walkthrough',
-  totalSeconds: 21,
+  totalSeconds: 20,
   hook: {
-    // POV hook - viewer imagines themselves doing this
-    text: 'POV: your astrology app knows which house Mars is in for YOUR chart',
-    durationSeconds: 2,
+    text: "Wait... your app doesn't show houses?",
+    durationSeconds: 2.5,
   },
   scenes: [
-    // ESCALATING REVEAL: each feature more impressive than the last
     {
-      description: 'Dashboard loads - moon phase card with sign + illumination',
+      description:
+        "Dashboard loads — Today's Cosmic Energy section with personalized horoscope + daily ritual",
       path: '/app',
-      durationSeconds: 2,
+      durationSeconds: 2.5,
       action: 'show',
-      focusPoint: 'Moon phase in specific sign - visual hook, looks beautiful',
+      focusPoint:
+        'Personalized horoscope text, daily ritual checkbox, streak counter visible',
     },
     {
-      description: 'Tap Sky Now - planets cascade open',
-      path: '/app',
-      durationSeconds: 3,
-      action: 'expand',
-      target: '[data-testid="sky-now-widget"]',
-      focusPoint: 'All planets with signs, degrees, YOUR houses',
-    },
-    {
-      description: 'Scroll to transit card - this is the escalation',
-      path: '/app',
-      durationSeconds: 2,
-      action: 'scroll',
-      scrollDistance: 300,
-      focusPoint: 'Transit hitting YOUR specific house - career, love, etc.',
-    },
-    // RETENTION HOOK at ~9s: reveal something unexpected
-    {
-      description: 'Daily tarot card with transit connection visible',
+      description: 'Scroll to Moon phase card with sign + illumination',
       path: '/app',
       durationSeconds: 2,
       action: 'scroll',
       scrollDistance: 250,
-      focusPoint: 'Card seeded from Sun/Moon/Rising - not random',
+      focusPoint:
+        'Moon phase name, constellation, illumination percentage visible',
     },
     {
-      description: 'Crystal recommendation - quick flash',
+      description: 'Tap Sky Now — planets cascade open',
+      path: '/app',
+      durationSeconds: 2.5,
+      action: 'expand',
+      target: '[data-testid="sky-now-widget"]',
+      focusPoint: 'Planet list expanding — signs, degrees, houses visible',
+    },
+    {
+      description: 'Scroll through expanded planets showing houses',
       path: '/app',
       durationSeconds: 2,
       action: 'scroll',
       scrollDistance: 200,
-      focusPoint: 'Crystal matched to current moon + chart',
+      focusPoint: 'House numbers next to each planet clearly on screen',
     },
-    // PAYOFF at ~13s: tap crystal for the "wow" moment
     {
-      description: 'Tap crystal - modal opens with full detail',
+      description:
+        "Scroll to Today's Influence + Tarot for Today with transit connection",
       path: '/app',
-      durationSeconds: 3,
-      action: 'click',
-      target: '[data-testid="crystal-card"]',
+      durationSeconds: 2,
+      action: 'scroll',
+      scrollDistance: 300,
       focusPoint:
-        'Full crystal guide from 200+ database with exact correspondences',
+        'Daily insight card and tarot card visible — transit connection on tarot',
+    },
+    {
+      description: 'Scroll to Your Next Transit widget',
+      path: '/app',
+      durationSeconds: 2,
+      action: 'scroll',
+      scrollDistance: 200,
+      focusPoint:
+        'Next transit with planet, house activation, timing, and guidance',
+    },
+    {
+      description: 'Scroll to Crystal Preview — visible on screen',
+      path: '/app',
+      durationSeconds: 1.5,
+      action: 'scroll',
+      scrollDistance: 200,
+      focusPoint: 'Crystal matched to current transits + chart',
     },
   ],
   outro: {
-    // LOOP DESIGN: ends with "every morning" → loops back to the POV start
-    text: 'Every morning. Personalized to your chart.',
+    text: 'Every morning. Your chart.',
     durationSeconds: 2,
   },
   voiceover:
-    "POV it's morning and you open your cosmic dashboard. Moon in Scorpio, 67% illumination. Every planet and which house it's in for my chart specifically. Mars is in my 10th house, career activated for 6 weeks. My tarot card is seeded from my actual placements, not random. Even the crystal changes daily based on the current moon. Every single thing on this screen is personalized to my birth chart. Every morning.",
-  textOverlays: [
-    // Work as standalone mute story
-    {
-      text: 'your chart, not your sun sign',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'every planet + YOUR houses',
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'this transit is hitting your 10th house',
-      startSeconds: 7,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    // Retention hook overlay at 10s
-    {
-      text: "wait - the tarot card isn't random",
-      startSeconds: 10,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'crystal from 200+ database',
-      startSeconds: 13,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    "Okay so. Morning check-in. Personalized horoscope. Daily ritual. Moon phase. Current sign. But look. Every planet. Which house it's in. For YOUR chart. Today's influence. Your tarot card. Connected to your transits. Your next transit. Which house it's hitting. Even the crystal. Everything here... is yours.",
+  textOverlays: [],
   caption:
-    'What does your morning cosmic check-in look like? Moon phase, every planet mapped to your houses, transit activating your career house, tarot seeded from your placements, crystal matched to the current moon. All from your birth chart.',
-  hashtags: [
-    'astrology',
-    'birthchart',
-    'moonphase',
-    'cosmicenergy',
-    'astrologyapp',
-    'lunary',
-    'tarot',
-    'crystals',
-    'witchtok',
-    'pov',
-  ],
+    "Your app doesn't show which house each planet is in. This one does. Horoscope, ritual, moon, planets, tarot with transit connections, crystal — all personalized. What does YOUR morning look like?",
+  hashtags: ['astrology', 'birthchart', 'lunary', 'witchtok', 'cosmicenergy'],
   playwrightNotes:
-    'Start at /app after auth. Dismiss modals (Escape + backdrop click). Fast pace: show dashboard, expand Sky Now, scroll through transit + tarot + crystal, click crystal modal. iPhone viewport. Smooth scrolls but FAST - 2s per section max.',
+    "Start at /app after auth. Dismiss modals. SLOW deliberate scrolls — each section must be FULLY VISIBLE before the next. Today's Cosmic Energy (2.5s), Moon card (2s), expand Sky Now (2.5s), scroll planets (2s), scroll to Today's Influence + Tarot for Today (2s), Your Next Transit (2s), Crystal (1.5s). iPhone 390x844.",
 };
 
 const horoscopeDeepDive: TikTokScript = {
@@ -253,14 +205,12 @@ const horoscopeDeepDive: TikTokScript = {
   title: 'Your Horoscope Is Written for 600 Million People',
   tier: 1,
   category: 'feature-reveal',
-  totalSeconds: 22,
+  totalSeconds: 19,
   hook: {
-    // Bold claim / pattern interrupt - stops the scroll
-    text: 'Your horoscope is written for 600 million people. This one is written for 1.',
+    text: 'Your horoscope: 600 million people. This one: 1.',
     durationSeconds: 2,
   },
   scenes: [
-    // PROBLEM → SOLUTION arc: the "1 person" is immediately shown
     {
       description:
         'Horoscope page - personalized greeting + cosmic highlight card',
@@ -285,7 +235,6 @@ const horoscopeDeepDive: TikTokScript = {
       target: '[data-testid="numerology-day"]',
       focusPoint: 'Full breakdown of YOUR day energy',
     },
-    // RETENTION HOOK at ~9s: pivot from numerology to transits
     {
       description: 'Close modal, scroll to Transit Wisdom - the big reveal',
       path: '/horoscope',
@@ -302,7 +251,6 @@ const horoscopeDeepDive: TikTokScript = {
       scrollDistance: 300,
       focusPoint: 'Exact orbs - real astronomical data, not vibes',
     },
-    // SECOND ESCALATION at ~14s: the 30-day forecast
     {
       description: 'Scroll to 30-day upcoming transits',
       path: '/horoscope',
@@ -313,59 +261,15 @@ const horoscopeDeepDive: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "That's a horoscope" → viewer thinks about their own generic horoscope → rewatches
     text: "That's a horoscope.",
     durationSeconds: 2,
   },
   voiceover:
-    "Your horoscope is written for 600 million people. This one is written for one person. Me. My personal numerology number today versus the universal one. Completely different energies. Transit wisdom showing which of my houses are activated and how intense each one is. Exact aspects forming to my natal planets with real orbs. And a 30-day personal forecast of what's coming for my chart specifically. That's a horoscope.",
-  textOverlays: [
-    {
-      text: '600 million vs 1',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'your number ≠ the universal number',
-      startSeconds: 4,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    // Retention hook at 9s
-    {
-      text: 'now look at which houses are activated',
-      startSeconds: 9,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    {
-      text: 'real orbs, real data',
-      startSeconds: 12,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'your next 30 days',
-      startSeconds: 16,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    "Here's the thing\u2014your horoscope is written for 600 million people. This one? Written for one. Me. My personal number today... completely different from the universal one. Transit wisdom showing which houses are activated... how intense each one is. Exact aspects with real orbs. And a 30-day forecast of what's coming... for my chart. That's a horoscope.",
+  textOverlays: [],
   caption:
-    'How many people share your sun sign horoscope? About 600 million. How many people share this one? One. What does your personal horoscope actually look like?',
-  hashtags: [
-    'horoscope',
-    'astrology',
-    'birthchart',
-    'transits',
-    'numerology',
-    'astrologyapp',
-    'lunary',
-    'zodiac',
-    'witchtok',
-    'personalhoroscope',
-  ],
+    'How many people share your horoscope? About 600 million. How many share this one? One. What does YOUR personal horoscope look like?',
+  hashtags: ['horoscope', 'birthchart', 'lunary', 'witchtok', 'transits'],
   playwrightNotes:
     'Navigate to /horoscope. Fast pace: show greeting, scroll to numerology, click day number modal (3s), close + scroll to transit wisdom, scroll to aspects, scroll to upcoming transits. Each section 2-3s max.',
 };
@@ -377,12 +281,10 @@ const tarotPatterns: TikTokScript = {
   category: 'feature-reveal',
   totalSeconds: 21,
   hook: {
-    // Open loop - show the RESULT first, make them want to know how
-    text: 'I keep pulling The Tower every time Pluto is active. Coincidence?',
+    text: 'Same card. Every Pluto transit. Coincidence?',
     durationSeconds: 2,
   },
   scenes: [
-    // START with the proof (pattern view) then REWIND to show how
     {
       description: 'Jump straight to 30-day pattern view - the proof',
       path: '/tarot',
@@ -399,7 +301,6 @@ const tarotPatterns: TikTokScript = {
       target: '[data-testid="pattern-30days"]',
       focusPoint: 'Themes, frequent cards, recurring suits - visible proof',
     },
-    // REWIND: "Here's how it works"
     {
       description: 'Scroll back up to daily card showing transit connection',
       path: '/tarot',
@@ -416,7 +317,6 @@ const tarotPatterns: TikTokScript = {
       action: 'show',
       focusPoint: 'Card seeded from chart + connected to current transits',
     },
-    // ESCALATION at ~11s: zoom out to bigger timeframes
     {
       description: 'Scroll back to patterns, click 90 days',
       path: '/tarot',
@@ -434,7 +334,6 @@ const tarotPatterns: TikTokScript = {
       focusPoint:
         'Themes shifting over 3 months - your personal textbook forming',
     },
-    // PAYOFF: rituals based on YOUR patterns
     {
       description: 'Scroll to rituals generated from your patterns',
       path: '/tarot',
@@ -445,59 +344,15 @@ const tarotPatterns: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "not a coincidence" echoes the hook → rewatch
     text: 'Not a coincidence.',
     durationSeconds: 2,
   },
   voiceover:
-    "Look at this. I keep pulling The Tower during Pluto transits. Cups dominate every time Venus hits my 7th house. Here's how. Every daily card is connected to the transits in your chart. Over time, the app maps what cards appear during which cosmic conditions. At 30 days you see the first patterns. At 90 days, it's undeniable. Your own cards proved the connection. Not a coincidence.",
-  textOverlays: [
-    {
-      text: 'same cards, same transits',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: "here's how it tracks this",
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'each card is linked to your transits',
-      startSeconds: 7,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    // Retention hook at 11s
-    {
-      text: 'now zoom out to 90 days',
-      startSeconds: 11,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'rituals based on YOUR patterns',
-      startSeconds: 16,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    "Same cards. Same transits. Every time. Here's how. Every daily card is connected to your transits. Over time, it maps what cards appear during which cosmic conditions. At 30 days you see patterns. Suits clustering around specific planets. At 90 days... undeniable. And it generates rituals from YOUR patterns.",
+  textOverlays: [],
   caption:
-    'Same cards keep appearing during the same transits. After 90 days, the pattern is undeniable. What patterns would YOUR cards reveal?',
-  hashtags: [
-    'tarot',
-    'tarotpatterns',
-    'thetower',
-    'pluto',
-    'astrology',
-    'witchtok',
-    'tarottok',
-    'lunary',
-    'patternrecognition',
-    'divination',
-  ],
+    'Same cards keep appearing during the same transits. 90 days of data. What patterns would YOUR cards reveal?',
+  hashtags: ['tarot', 'tarotpatterns', 'lunary', 'witchtok', 'pluto'],
   playwrightNotes:
     'Navigate to /tarot. IMPORTANT: Start at pattern section (scroll down), show 30d patterns first (the hook payoff), then scroll BACK UP to daily card to show how it works, then scroll back down to 90d for escalation, then to rituals. Reverse chronology = open loop structure.',
 };
@@ -507,14 +362,12 @@ const astralGuide: TikTokScript = {
   title: 'Every Answer Is Sourced From 2,000+ Articles',
   tier: 1,
   category: 'feature-reveal',
-  totalSeconds: 23,
+  totalSeconds: 27,
   hook: {
-    // Open loop - show the impressive result FIRST, then reveal the source
-    text: 'I asked about Mars in my 3rd house. It pulled the exact grimoire article.',
+    text: 'I asked about Mars. It quoted the grimoire.',
     durationSeconds: 2,
   },
   scenes: [
-    // Show the guide page
     {
       description: 'Guide page ready - show the input area',
       path: '/guide',
@@ -522,11 +375,10 @@ const astralGuide: TikTokScript = {
       action: 'show',
       focusPoint: 'Clean chat interface ready for questions',
     },
-    // Ask a career timing question
     {
       description: 'Type a career question',
       path: '/guide',
-      durationSeconds: 3,
+      durationSeconds: 5,
       action: 'type',
       target: '[data-testid="guide-input"]',
       typeText: 'When is a good time for my career based on my transits?',
@@ -540,7 +392,6 @@ const astralGuide: TikTokScript = {
       target: '[data-testid="guide-submit"]',
       focusPoint: 'Send the question',
     },
-    // Wait for response to stream in
     {
       description: 'Watch response stream in - career timing analysis',
       path: '/guide',
@@ -549,7 +400,6 @@ const astralGuide: TikTokScript = {
       focusPoint:
         'Response streaming with transit data, house placements, timing windows',
     },
-    // Scroll through the response
     {
       description: 'Scroll through career response showing depth',
       path: '/guide',
@@ -558,11 +408,10 @@ const astralGuide: TikTokScript = {
       scrollDistance: 200,
       focusPoint: 'Detailed transit timing, specific dates, house activations',
     },
-    // Ask a manifestation incantation question
     {
       description: 'Type an incantation request',
       path: '/guide',
-      durationSeconds: 3,
+      durationSeconds: 5,
       action: 'type',
       target: '[data-testid="guide-input"]',
       typeText: 'Give me an incantation for prosperity and abundance',
@@ -576,7 +425,6 @@ const astralGuide: TikTokScript = {
       target: '[data-testid="guide-submit"]',
       focusPoint: 'Send the request',
     },
-    // Wait for incantation response
     {
       description: 'Watch incantation stream in',
       path: '/guide',
@@ -586,60 +434,17 @@ const astralGuide: TikTokScript = {
     },
   ],
   outro: {
-    text: 'Ask it anything. Career. Love. Incantations. Transits.',
+    text: 'Ask it anything.',
     durationSeconds: 2,
   },
   voiceover:
-    "Look at this answer. It pulled the grimoire article on Mars in the 3rd house, found my natal Mercury square Mars, checked my journal from the last time this happened, and recommended a crystal with exact correspondences. All sourced. I ask about today's crystal. It pulls from 200 plus crystals, checks my current transits, and gives me timing. 2,000 plus articles, 200 plus crystals, 112 spells, your chart, your journal. Nothing invented. Everything referenced.",
-  textOverlays: [
-    {
-      text: 'sourced from the grimoire',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'YOUR chart + YOUR journal',
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 9s
-    {
-      text: 'it covers everything',
-      startSeconds: 9,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: '200+ crystals, 112 spells',
-      startSeconds: 12,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    {
-      text: '2,000+ articles backing every answer',
-      startSeconds: 16,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    'When is a good time for my career? Look at this answer. It pulled my current transits... specific timing windows... even the house activations. Now watch. Give me an incantation for abundance. Custom incantation. Lunar timing. Crystal pairing. 2,000 plus articles backing every answer. Ask it anything.',
+  textOverlays: [],
   caption:
-    'Asked about Mars in my 3rd house. It pulled the exact grimoire article, checked my natal aspects, referenced my journal. 2,000+ articles, 200+ crystals, 112 spells. Nothing invented.',
-  hashtags: [
-    'astrology',
-    'birthchart',
-    'grimoire',
-    'witchtok',
-    'spiritualtok',
-    'lunary',
-    'crystals',
-    'spells',
-    'personalizedastrology',
-    'chartreading',
-  ],
+    'I asked about my career timing. It pulled transits, house activations, timing windows. Then I asked for an incantation. What would YOU ask?',
+  hashtags: ['astrology', 'grimoire', 'lunary', 'witchtok', 'birthchart'],
   playwrightNotes:
-    'Navigate to /guide. IMPORTANT: Pre-load a good response first (account needs chat history). Show response FIRST (open loop), scroll through sourced data, scroll back to question, type new question, submit, show response streaming. Reverse chronology = curiosity hook.',
+    'Navigate to /guide. Type career question, submit, watch response stream in. Then type incantation request, submit, watch response. The visual content must match the voiceover - career question first, incantation second.',
 };
 
 const birthChart: TikTokScript = {
@@ -649,12 +454,10 @@ const birthChart: TikTokScript = {
   category: 'feature-reveal',
   totalSeconds: 22,
   hook: {
-    // Bold claim + number contrast - stops scroll
-    text: 'Your astrology app shows 10 planets. This one shows 24.',
+    text: 'Your app shows 10 planets. This shows 24+.',
     durationSeconds: 2,
   },
   scenes: [
-    // ESCALATING REVEAL: each tab more impressive than the last
     {
       description: 'Chart wheel loads - beautiful visual hook',
       path: '/birth-chart',
@@ -688,7 +491,6 @@ const birthChart: TikTokScript = {
       scrollDistance: 200,
       focusPoint: 'Juno, Ceres, Pallas, Vesta - the count keeps going',
     },
-    // RETENTION HOOK at ~9s: switch to aspects tab
     {
       description: 'Click Aspects tab - pattern interrupt',
       path: '/birth-chart',
@@ -713,7 +515,6 @@ const birthChart: TikTokScript = {
       scrollDistance: 250,
       focusPoint: 'Every aspect between every planet - real astronomical data',
     },
-    // SECOND ESCALATION: houses tab
     {
       description: 'Click Houses tab',
       path: '/birth-chart',
@@ -740,68 +541,17 @@ const birthChart: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "Free" makes viewer think "wait, all of THAT is free?" → rewatch
     text: 'Free.',
     durationSeconds: 2,
   },
   voiceover:
-    'Your astrology app shows 10 planets. This one shows 24. Sun through Pluto, sure. But then Chiron, Lilith, North Node, South Node, Juno, Ceres, Pallas, Vesta. Every single placement explained. Aspects tab shows exactly how your planets interact with real orbs. Houses tab maps every area of your life to your specific signs. And the birth chart calculator? Free.',
-  textOverlays: [
-    {
-      text: '10 → 24 celestial bodies',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'Chiron, Lilith, Nodes, asteroids',
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 8s
-    {
-      text: 'now look at the aspects',
-      startSeconds: 8,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'real orbs, real data',
-      startSeconds: 11,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Second escalation at 13s
-    {
-      text: 'every house = every area of your life',
-      startSeconds: 13,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    {
-      text: 'completely free',
-      startSeconds: 18,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    'Your astrology app shows 10 planets. This one? Twenty-four plus. Sun through Pluto, sure. But then Chiron, Lilith, North Node, South Node... Juno, Ceres, Pallas, Vesta. Every placement explained. Aspects tab\u2014how your planets actually interact. Real orbs. Houses tab maps every area of your life. And the birth chart calculator? Free.',
+  textOverlays: [],
   caption:
-    'Your astrology app shows 10 planets. This one shows 24. Chiron, Lilith, Nodes, asteroids. Every aspect with real orbs. All 12 houses mapped. And the birth chart calculator is free.',
-  hashtags: [
-    'birthchart',
-    'astrology',
-    'natalchart',
-    'chiron',
-    'northnode',
-    'astrologychart',
-    'astrologyapp',
-    'lunary',
-    'zodiac',
-    'witchtok',
-  ],
+    "How many planets does YOUR astrology app show? This one shows 24+. Aspects with real orbs. All 12 houses. And it's free. How many does yours show?",
+  hashtags: ['birthchart', 'astrology', 'lunary', 'natalchart', 'witchtok'],
   playwrightNotes:
-    'Navigate to /chart. FAST PACE: Show chart wheel (2s), scroll to planets (2s), scroll to reveal Chiron/Lilith/Nodes (2s), click Aspects tab (2s), scroll aspects (3s), click Houses tab (2s), scroll houses (2s). Escalating reveal - each tab more impressive. The "Free" at the end is the loop trigger.',
+    'Navigate to /birth-chart. FAST PACE: Show chart wheel (2s), scroll to planets (2s), scroll to reveal Chiron/Lilith/Nodes (2s), click Aspects tab (2s), scroll aspects (3s), click Houses tab (2s), scroll houses (2s). Escalating reveal - each tab more impressive. The "Free" at the end is the loop trigger.',
 };
 
 const profileCircle: TikTokScript = {
@@ -809,14 +559,12 @@ const profileCircle: TikTokScript = {
   title: '84% Compatible. But Look at the Timing Tab.',
   tier: 1,
   category: 'walkthrough',
-  totalSeconds: 22,
+  totalSeconds: 20,
   hook: {
-    // Open loop - tease the TIMING tab (the unique feature), make them stay to see it
-    text: '84% compatible with my best friend. But wait until you see the Timing tab.',
+    text: '84% compatible. But the Timing tab...',
     durationSeconds: 2,
   },
   scenes: [
-    // Fast setup: get to the friend profile ASAP
     {
       description: 'Circle tab - tap friend card showing 84% compatibility',
       path: '/profile',
@@ -840,7 +588,6 @@ const profileCircle: TikTokScript = {
       target: '[data-testid="tab-synastry"]',
       focusPoint: 'Fire/Earth/Air/Water bars comparing You vs Them',
     },
-    // RETENTION HOOK at ~8s: scroll to the aspect list
     {
       description: 'Scroll to aspects - every one listed with orbs',
       path: '/profile/friends/[id]',
@@ -857,7 +604,6 @@ const profileCircle: TikTokScript = {
       target: '[data-testid="tab-chart"]',
       focusPoint: "Friend's complete chart wheel - visually impressive",
     },
-    // THE PAYOFF at ~15s: the Timing tab (what the hook promised)
     {
       description: 'Tap Timing tab - the big reveal',
       path: '/profile/friends/[id]',
@@ -877,68 +623,17 @@ const profileCircle: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "Based on both charts" → viewer thinks about their own friendships → rewatch
-    text: 'Based on both charts. Not just yours.',
+    text: 'Both charts. Not just yours.',
     durationSeconds: 2,
   },
   voiceover:
-    "84 percent compatible with my best friend. But that's just the start. Synastry shows our element balance side by side. Every aspect between our charts listed. Harmonious vs challenging. I can see her complete birth chart. But here's what no other app has. Timing. It analyzes BOTH our transits and shows me the best windows to have important conversations. Based on both charts. Not just mine.",
-  textOverlays: [
-    {
-      text: "84% - but that's just the start",
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'element balance: You vs Them',
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 8s
-    {
-      text: 'every aspect between your charts',
-      startSeconds: 8,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'their full birth chart',
-      startSeconds: 12,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Payoff at 15s
-    {
-      text: 'BEST TIMES TO CONNECT',
-      startSeconds: 15,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    {
-      text: 'analyzes BOTH charts',
-      startSeconds: 18,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    "84 percent compatible. But that's just the start. Synastry shows element balance side by side. Every aspect between our charts... harmonious vs challenging. Her complete birth chart. But HERE'S what no other app has. Timing. It analyzes BOTH transits and shows the best windows for important conversations. Both charts. Not just mine.",
+  textOverlays: [],
   caption:
-    '84% compatible. Every aspect between our charts listed with orbs. Element balance. Their full birth chart. And the best times to have important conversations based on BOTH our transits. Not a percentage. A relationship guide.',
-  hashtags: [
-    'synastry',
-    'compatibility',
-    'astrology',
-    'relationshipastrology',
-    'birthchart',
-    'cosmicconnection',
-    'astrologyapp',
-    'lunary',
-    'witchtok',
-    'zodiaccompatibility',
-  ],
+    '84% compatible. Synastry. Aspects. Their full chart. And the best times to talk based on BOTH transits. Not a percentage\u2014a relationship guide. Who would you check?',
+  hashtags: ['synastry', 'compatibility', 'lunary', 'astrology', 'witchtok'],
   playwrightNotes:
-    'IMPORTANT: Navigate to /profile first, click Circle tab (may already be default). Click first friend card. Fast pace through Overview → Synastry → scroll aspects → Their Chart → TIMING (the payoff). The Timing tab is the hook payoff so give it the most screen time. data-testid attributes on all tabs.',
+    'IMPORTANT: Navigate to /profile first, click Circle tab (may already be default). Click first friend card. Fast pace through Overview \u2192 Synastry \u2192 scroll aspects \u2192 Their Chart \u2192 TIMING (the payoff). The Timing tab is the hook payoff so give it the most screen time. data-testid attributes on all tabs.',
 };
 
 // ============================================================================
@@ -947,17 +642,15 @@ const profileCircle: TikTokScript = {
 
 const skyNowDeepDive: TikTokScript = {
   id: 'sky-now-deepdive',
-  title: 'Mercury Retrograde Is in My 6th House. That Explains Work.',
+  title: 'Every Planet Right Now. Mapped to YOUR Houses.',
   tier: 2,
   category: 'deep-dive',
-  totalSeconds: 17,
+  totalSeconds: 15,
   hook: {
-    // Specific example hook - relatable + curiosity about "which house"
-    text: "Mercury retrograde is in my 6th house. That's why work feels chaotic.",
+    text: 'Every planet. YOUR houses. Right now.',
     durationSeconds: 2,
   },
   scenes: [
-    // Start with the collapsed grid - tease the data
     {
       description: 'Sky Now widget collapsed - planet symbols visible',
       path: '/app',
@@ -973,7 +666,6 @@ const skyNowDeepDive: TikTokScript = {
       target: '[data-testid="sky-now-widget"]',
       focusPoint: 'Every planet: sign, degree, YOUR house - satisfying reveal',
     },
-    // Now slowly scroll through the expanded planet list
     {
       description: 'Scroll through Sun, Moon, Mercury - personal planets',
       path: '/app',
@@ -990,7 +682,6 @@ const skyNowDeepDive: TikTokScript = {
       scrollDistance: 120,
       focusPoint: 'Venus in YOUR love house, Mars in YOUR career house',
     },
-    // RETENTION HOOK at ~9s: keep scrolling to outer planets
     {
       description: 'Scroll to Jupiter, Saturn - life themes',
       path: '/app',
@@ -1009,70 +700,30 @@ const skyNowDeepDive: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "your houses" echoes the hook about 6th house → viewer wants to know THEIR houses
-    text: 'Every planet. YOUR houses. Updated live.',
+    text: 'YOUR houses. Updated live.',
     durationSeconds: 2,
   },
   voiceover:
-    "Mercury retrograde in my 6th house. That explains the work chaos. Here's the full sky right now. Every planet, what sign and degree it's at, and which house it's activating in my chart. Not a generic sky map. Mercury retrograde isn't the same for everyone. In my 6th house it hits work and health. In your 7th it hits relationships. Jupiter, Saturn, Neptune, Pluto, all mapped to my houses. Every planet. Your houses. Updated live.",
-  textOverlays: [
-    {
-      text: 'every planet in the sky right now',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'sign + degree + YOUR house',
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 9s
-    {
-      text: 'retrograde hits different houses differently',
-      startSeconds: 9,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    {
-      text: 'outer planets mapped to YOUR chart',
-      startSeconds: 13,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    "Here's the full sky right now. Every planet... what sign it's at... and which house it's hitting in MY chart. Not the same for everyone. My 6th house = work. Your 7th = relationships. Jupiter, Saturn, Pluto... all mapped to my houses. This changes daily. Updated live.",
+  textOverlays: [],
   caption:
-    'Mercury retrograde in your 6th house hits completely different than in your 7th. Every planet in the sky right now mapped to YOUR specific houses. Which house is Mercury retrograde hitting for you?',
-  hashtags: [
-    'astrology',
-    'mercuryretrograde',
-    'transits',
-    'retrograde',
-    'birthchart',
-    'cosmicweather',
-    'astrologyapp',
-    'lunary',
-    'zodiac',
-    'witchtok',
-  ],
+    'Every planet right now mapped to YOUR houses. Not your sign. Your chart. Which house is the Moon hitting for YOU?',
+  hashtags: ['transits', 'skynow', 'lunary', 'astrology', 'witchtok'],
   playwrightNotes:
     'Start at /app. Show Sky Now collapsed, click expand (satisfying cascade animation), scroll through planets. PAUSE on Mercury to show retrograde symbol + house. Continue scrolling through outer planets. House column must be visible.',
 };
 
 const numerologyDeepDive: TikTokScript = {
   id: 'numerology-deepdive',
-  title: 'My Personal Day Is a 7. The Universal Day Is a 3.',
+  title: 'Your Number Is Not the Universal Number.',
   tier: 2,
   category: 'did-you-know',
-  totalSeconds: 20,
+  totalSeconds: 18,
   hook: {
-    // Contrast hook - two numbers side by side creates instant curiosity
-    text: 'My personal day is 7. The universal day is 3. Completely different energies.',
+    text: 'Your number \u2260 universal. Different energy.',
     durationSeconds: 2,
   },
   scenes: [
-    // Show the contrast immediately - visual proof of the hook
     {
       description:
         'Numerology section with Personal and Universal side by side',
@@ -1088,9 +739,8 @@ const numerologyDeepDive: TikTokScript = {
       durationSeconds: 3,
       action: 'click',
       target: '[data-testid="numerology-day"]',
-      focusPoint: 'Modal: "7 = introspection, inner wisdom" - specific to YOU',
+      focusPoint: 'Modal: meaning + energy - specific to YOU',
     },
-    // RETENTION HOOK at ~7s: close and show the universal for contrast
     {
       description: 'Close modal - back to comparison view',
       path: '/horoscope',
@@ -1105,9 +755,8 @@ const numerologyDeepDive: TikTokScript = {
       durationSeconds: 2,
       action: 'show',
       focusPoint:
-        'Universal 3 = communication, social. YOUR 7 = introspection. Opposite.',
+        'Universal number vs YOUR personal number. Different energies.',
     },
-    // ESCALATION at ~11s: reveal there are MORE personal numbers
     {
       description: 'Scroll to month and year numbers',
       path: '/horoscope',
@@ -1126,58 +775,19 @@ const numerologyDeepDive: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "your birthdate" → viewer wonders what THEIR numbers are → rewatch
-    text: 'All from your birthdate. Not the universal year.',
+    text: 'From your birthdate. Not universal.',
     durationSeconds: 2,
   },
   voiceover:
-    'My personal day is a 7. Introspection. The universal day is a 3. Communication. Those are opposite energies. The universal number applies to everyone. Your personal number is calculated from your birthdate. Only yours. And it goes deeper. Personal month number, personal year number. Three nested cycles all unique to your birth date. When you feel out of sync? You might be following the universal energy instead of your own.',
-  textOverlays: [
-    {
-      text: '7 vs 3 — opposite energies',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'calculated from YOUR birthdate',
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 7s
-    {
-      text: 'the universal one applies to everyone',
-      startSeconds: 7,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Escalation at 11s
-    {
-      text: 'wait — there are MORE personal numbers',
-      startSeconds: 11,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    {
-      text: 'day + month + year cycles',
-      startSeconds: 15,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    'My personal day number. Different from the universal day. Different energies. The universal number applies to everyone. Your personal number? Calculated from YOUR birthdate. And it goes deeper... personal month, personal year. Three nested cycles unique to you. Feel out of sync? You might be following the universal energy instead of your own.',
+  textOverlays: [],
   caption:
-    'My personal day is 7 (introspection). The universal day is 3 (communication). Opposite energies. Your personal numbers are calculated from YOUR birthdate. Day, month, year. What are yours?',
+    'Your personal day number is NOT the universal day number. Different energies. Your numbers come from YOUR birthdate. What are yours?',
   hashtags: [
     'numerology',
     'personalnumbers',
-    'lifepath',
-    'personalyear',
-    'astrology',
-    'birthdate',
-    'astrologyapp',
     'lunary',
-    'spirituality',
+    'astrology',
     'witchtok',
   ],
   playwrightNotes:
@@ -1189,14 +799,12 @@ const patternTimeline: TikTokScript = {
   title: '7 Days vs 30 Days vs 90 Days of Tracking Cards',
   tier: 2,
   category: 'feature-reveal',
-  totalSeconds: 21,
+  totalSeconds: 20,
   hook: {
-    // Escalating numbers hook - viewers want to see the 90-day payoff
-    text: '7 days: noise. 30 days: patterns. 90 days: proof.',
+    text: '7 days: noise. 30: patterns. 90: proof.',
     durationSeconds: 2,
   },
   scenes: [
-    // Escalating reveal: 7 → 30 → 90, each more impressive
     {
       description: 'Pattern section - click 7 days',
       path: '/tarot',
@@ -1212,7 +820,6 @@ const patternTimeline: TikTokScript = {
       action: 'show',
       focusPoint: 'A few frequent cards, not much to see yet',
     },
-    // ESCALATION at ~6s: click 30 days
     {
       description: 'Click 30 days - data transforms',
       path: '/tarot',
@@ -1229,7 +836,6 @@ const patternTimeline: TikTokScript = {
       scrollDistance: 250,
       focusPoint: 'Cups dominating, Tower during Pluto, themes forming',
     },
-    // RETENTION HOOK at ~11s: the 90-day payoff
     {
       description: 'Click 90 days - the big reveal',
       path: '/tarot',
@@ -1256,58 +862,20 @@ const patternTimeline: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "Your cards already proved it" → viewer wonders what THEIR cards would show
     text: 'Your cards already proved it.',
     durationSeconds: 2,
   },
   voiceover:
-    "7 days. Just noise. A few frequent cards. 30 days. Now we're talking. Cups dominate every time Venus is active. The Tower keeps showing up during Pluto transits. 90 days. Undeniable. I can see exactly how my themes shifted over months. Same suits during same transits. My own data became my textbook. No astrologer told me this. My cards already proved it.",
-  textOverlays: [
-    {
-      text: '7 days: just noise',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: '30 days: patterns forming',
-      startSeconds: 6,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'Cups dominate during Venus transits',
-      startSeconds: 9,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 11s
-    {
-      text: '90 days: undeniable',
-      startSeconds: 11,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'your data = your textbook',
-      startSeconds: 15,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    "7 days. Just noise. A few frequent cards. Nothing to see yet. 30 days... now we're talking. Suits clustering around specific transits. Patterns you can actually see. 90 days? Undeniable. Themes shifting over months. Same suits during same transits. And it builds rituals from your data. Your cards already proved it.",
+  textOverlays: [],
   caption:
-    '7 days: noise. 30 days: patterns. 90 days: proof. Same suits during same transits. Same cards during same moon phases. My own data proved the cosmic connection. What would YOUR cards reveal?',
+    '7 days: noise. 30 days: patterns. 90 days: proof. Same suits during same transits. What would YOUR cards reveal?',
   hashtags: [
     'tarot',
     'tarotpatterns',
-    'patternrecognition',
-    'astrology',
-    'tarottok',
-    'witchtok',
     'lunary',
-    'tarotreading',
-    'cosmicpatterns',
-    'spiritualjourney',
+    'witchtok',
+    'patternrecognition',
   ],
   playwrightNotes:
     'Navigate to /tarot, scroll to pattern section. ESCALATING PACE: 7d (quick, "meh"), 30d (slower, let patterns sink in), 90d (the payoff, give it the most time). Click through timeframes, scroll insights on 30d and 90d. Account needs rich tarot history.',
@@ -1315,17 +883,15 @@ const patternTimeline: TikTokScript = {
 
 const ritualSystem: TikTokScript = {
   id: 'ritual-system',
-  title: "Why Today's Ritual Is About Home and Family",
+  title: "Today's Ritual Changes Based on the Moon",
   tier: 2,
   category: 'did-you-know',
-  totalSeconds: 19,
+  totalSeconds: 16,
   hook: {
-    // Specific example hook - makes viewer wonder "what would MY ritual be?"
-    text: "Today's ritual focuses on home and family. Because the moon is in my 4th house.",
+    text: "Today's ritual? Moon-based. Changes daily.",
     durationSeconds: 2,
   },
   scenes: [
-    // Show the ritual immediately - proof of the hook
     {
       description: "Dashboard ritual card showing today's ritual",
       path: '/app',
@@ -1342,7 +908,6 @@ const ritualSystem: TikTokScript = {
       target: '/horoscope',
       focusPoint: 'Page transition - fast',
     },
-    // ESCALATION at ~6s: show WHY this ritual was chosen
     {
       description: 'Scroll to ritual section - full personalized details',
       path: '/horoscope',
@@ -1352,7 +917,6 @@ const ritualSystem: TikTokScript = {
       focusPoint:
         'Ritual aligned to moon phase + active transits in YOUR chart',
     },
-    // RETENTION HOOK at ~9s: the "how" behind the personalization
     {
       description: 'Show ritual instructions tied to cosmic energy',
       path: '/horoscope',
@@ -1371,70 +935,30 @@ const ritualSystem: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "Different tomorrow" → viewer wonders what theirs would be → rewatch
-    text: 'Different tomorrow. Because the moon moves.',
+    text: 'Different tomorrow. Moon moves.',
     durationSeconds: 2,
   },
   voiceover:
-    "Today's ritual focuses on home and family. Why? The moon is in my 4th house right now. Yesterday it was about communication because the moon was in my 3rd. Every day, the ritual changes based on which house the moon activates in YOUR chart and which transits are active. The crystal recommendation matches too. Everything connected to your cosmic weather right now. Different tomorrow. Because the moon moves.",
-  textOverlays: [
-    {
-      text: 'moon in 4th house = home + family',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'yesterday: communication (3rd house)',
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 9s
-    {
-      text: 'ritual matched to YOUR transits',
-      startSeconds: 9,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    {
-      text: 'even the crystal recommendation',
-      startSeconds: 13,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    "Today's ritual... changes based on the moon. Yesterday was different. The moon moved. Every day, the ritual changes based on which house the moon activates in YOUR chart. The crystal matches too. Everything connected to your cosmic weather. Different tomorrow. Because the moon moves.",
+  textOverlays: [],
   caption:
-    "Today's ritual: home and family intentions. Why? Moon is in my 4th house. Yesterday it was communication (3rd house). The ritual changes daily based on YOUR chart. What house is the moon activating for you right now?",
-  hashtags: [
-    'ritual',
-    'moonphase',
-    'witchcraft',
-    'dailyritual',
-    'moonmagic',
-    'astrology',
-    'witchtok',
-    'lunary',
-    'spellwork',
-    'cosmicpractice',
-  ],
+    "Today's ritual changes based on the moon. It changes daily based on YOUR chart. What house is the moon in for you?",
+  hashtags: ['ritual', 'moonphase', 'lunary', 'witchtok', 'moonmagic'],
   playwrightNotes:
     'Show dashboard ritual card (fast), navigate to /horoscope, scroll to ritual section. Key: show the connection between moon house and ritual theme. Pause on instructions. Show crystal recommendation. Fast pace - each scene 2-3s.',
 };
 
 const transitWisdomDeepDive: TikTokScript = {
   id: 'transit-wisdom-deepdive',
-  title: 'Venus in Aries Hits My 7th House. Relationships.',
+  title: 'This Transit. 12 Meanings. Yours Is Different.',
   tier: 2,
   category: 'deep-dive',
-  totalSeconds: 21,
+  totalSeconds: 19,
   hook: {
-    // Specific example + "12 different meanings" creates curiosity about THEIR meaning
-    text: "Venus entering Aries. 12 different meanings depending on your chart. Here's mine.",
+    text: 'This transit. 12 meanings. Mine\u2014',
     durationSeconds: 2,
   },
   scenes: [
-    // Show the specific transit immediately - proof of hook
     {
       description:
         'Transit Wisdom section - first transit with house + intensity',
@@ -1442,7 +966,7 @@ const transitWisdomDeepDive: TikTokScript = {
       durationSeconds: 2,
       action: 'scroll',
       scrollDistance: 350,
-      focusPoint: 'Venus in Aries → 7th house → Relationships → High intensity',
+      focusPoint: 'Transit → house → life area → intensity level',
     },
     {
       description: 'Show the intensity badge - this transit matters',
@@ -1451,7 +975,6 @@ const transitWisdomDeepDive: TikTokScript = {
       action: 'show',
       focusPoint: 'Intensity badge - "this one\'s a big deal for you"',
     },
-    // ESCALATION at ~6s: there are MORE transits active
     {
       description: 'Scroll to show multiple active transits',
       path: '/horoscope',
@@ -1460,7 +983,6 @@ const transitWisdomDeepDive: TikTokScript = {
       scrollDistance: 300,
       focusPoint: 'Multiple transits hitting different areas simultaneously',
     },
-    // RETENTION HOOK at ~9s: aspects with real data
     {
       description: 'Scroll to exact aspects - real astronomical data',
       path: '/horoscope',
@@ -1469,7 +991,6 @@ const transitWisdomDeepDive: TikTokScript = {
       scrollDistance: 300,
       focusPoint: 'Aspects forming to YOUR natal planets with real orbs',
     },
-    // SECOND PAYOFF at ~14s: the 30-day forecast
     {
       description: 'Scroll to upcoming transits - your personal forecast',
       path: '/horoscope',
@@ -1488,54 +1009,15 @@ const transitWisdomDeepDive: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "Not for all Leos" → viewer thinks about their generic horoscope → rewatch
     text: 'Not a paragraph for all Leos.',
     durationSeconds: 2,
   },
   voiceover:
-    "Venus entering Aries means something different for every person depending on which house it hits. For me it's my 7th house. Relationships. With a high intensity badge. But that's just one transit. I can see every transit active right now and which areas of my life they're touching. Exact aspects forming to my natal planets with real orbs. And the next 30 days. What's coming, when, and which houses. Not a paragraph for all Leos.",
-  textOverlays: [
-    {
-      text: 'Venus in Aries → my 7th house',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'intensity badge: this one matters',
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 9s
-    {
-      text: 'exact aspects with real orbs',
-      startSeconds: 9,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    // Second payoff at 14s
-    {
-      text: 'your next 30 days mapped out',
-      startSeconds: 14,
-      durationSeconds: 3,
-      position: 'top',
-    },
-  ],
+    "This transit means something different for every person. For me? Hitting a specific house. High intensity. But that's just one transit. Every transit active right now... which areas they're touching. Exact aspects with real orbs. And the next 30 days mapped out. Not a paragraph for all Leos.",
+  textOverlays: [],
   caption:
-    'Venus entering Aries hits my 7th house. Relationships. High intensity. But your 7th house has a different sign. Same transit, 12 different meanings. Which house is Venus hitting for you?',
-  hashtags: [
-    'transits',
-    'astrology',
-    'birthchart',
-    'planetarytransits',
-    'horoscope',
-    'personalized',
-    'astrologyapp',
-    'lunary',
-    'cosmicweather',
-    'witchtok',
-  ],
+    'Same transit, 12 different meanings. Depends on which house it hits in YOUR chart. Which house is it hitting for you?',
+  hashtags: ['transits', 'astrology', 'lunary', 'birthchart', 'witchtok'],
   playwrightNotes:
     'Navigate to /horoscope. Scroll to Transit Wisdom. Show first transit with house + intensity badge (2s). Show next transits (3s). Scroll to aspects (3s). Scroll to 30-day forecast (3s+2s). Fast escalation - each section reveals more depth.',
 };
@@ -1545,14 +1027,12 @@ const streaksAndProgress: TikTokScript = {
   title: "The App Detected 3 Life Themes I Didn't Pick",
   tier: 2,
   category: 'did-you-know',
-  totalSeconds: 20,
+  totalSeconds: 19,
   hook: {
-    // Open loop - "3 life themes" creates curiosity. "I didn't pick" = pattern interrupt
-    text: "After 73 days, the app detected 3 life themes. I didn't choose them.",
+    text: "73 days. 3 life themes. I didn't choose them.",
     durationSeconds: 2,
   },
   scenes: [
-    // Show the streak count first - credibility
     {
       description: 'Profile with streak counter and progress bar',
       path: '/profile',
@@ -1569,7 +1049,6 @@ const streaksAndProgress: TikTokScript = {
       scrollDistance: 200,
       focusPoint: 'Sun, Moon, Rising, personal tarot card - context, move fast',
     },
-    // THE PAYOFF at ~6s: life themes (what the hook promised)
     {
       description: 'Life Themes section - the reveal',
       path: '/profile',
@@ -1588,7 +1067,6 @@ const streaksAndProgress: TikTokScript = {
       focusPoint:
         'Full explanation of how the theme emerged from YOUR patterns',
     },
-    // RETENTION HOOK at ~12s: monthly insights prove the depth
     {
       description: 'Scroll to monthly insights',
       path: '/profile',
@@ -1607,181 +1085,92 @@ const streaksAndProgress: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "your chart comes alive" → viewer imagines their own journey → rewatch
-    text: 'After 2-3 months, your chart comes alive.',
+    text: '2-3 months. Chart comes alive.',
     durationSeconds: 2,
   },
   voiceover:
-    "73 days of daily check-ins. The app detected 3 life themes running through my journey. Creative Emergence. Deepening Connection. Building Foundations. I didn't pick these. They emerged from my tarot patterns, journal entries, and transits. Monthly insights show which cards keep appearing and which transits are hitting hardest. After 2-3 months, your chart comes alive.",
-  textOverlays: [
-    {
-      text: '73 day streak',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Payoff at 6s
-    {
-      text: '3 life themes - detected from YOUR data',
-      startSeconds: 6,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    {
-      text: '"I didn\'t choose them"',
-      startSeconds: 10,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 12s
-    {
-      text: 'monthly insights evolve over time',
-      startSeconds: 12,
-      durationSeconds: 3,
-      position: 'top',
-    },
-  ],
+    "73 days of daily check-ins. The app detected 3 life themes running through my journey. Creative Emergence. Deepening Connection. Building Foundations. I didn't pick these. They emerged from my tarot patterns, journal entries, and transits. Monthly insights show which cards keep appearing... which transits are hitting hardest. After 2-3 months, your chart comes alive.",
+  textOverlays: [],
   caption:
-    "73 days of cosmic check-ins. The app detected 3 life themes I didn't choose. They emerged from my patterns. What themes would emerge from yours?",
-  hashtags: [
-    'astrology',
-    'streak',
-    'dailypractice',
-    'patternrecognition',
-    'spiritualjourney',
-    'astrologyapp',
-    'lunary',
-    'witchtok',
-    'cosmicjourney',
-    'selfgrowth',
-  ],
+    "73 days. 3 life themes I didn't choose. They emerged from my patterns. What themes would emerge from yours?",
+  hashtags: ['astrology', 'dailypractice', 'lunary', 'witchtok', 'streak'],
   playwrightNotes:
     'Navigate to /profile. Show streak counter (2s), flash Big 3 (2s), PAUSE on life themes (3s+3s - this is the hook payoff). Expand one theme for detail. Scroll to monthly insights. Account needs 50+ day streak and enough data for life themes.',
 };
 
 const tarotSpreads: TikTokScript = {
   id: 'tarot-spreads',
-  title: "The Outcome Card Knows What Transit You're In",
+  title: 'Tarot with your birth chart hits different.',
   tier: 2,
   category: 'how-to',
-  totalSeconds: 21,
+  totalSeconds: 20,
   hook: {
-    // Specific surprising detail - outcome card connected to transits = novel
-    text: 'Full Celtic Cross. 10 cards. The outcome card knows your current transits.',
-    durationSeconds: 2,
+    text: 'Tarot with your birth chart hits different.',
+    durationSeconds: 2.5,
   },
   scenes: [
-    // Fast setup: get to the spread
     {
-      description: 'Spread section - tap Celtic Cross',
+      description: 'Pick Past Present Future — fast',
       path: '/tarot',
-      durationSeconds: 2,
+      durationSeconds: 1.5,
       action: 'click',
-      target: 'button:has-text("Celtic Cross")',
-      focusPoint: 'Celtic Cross button selected - anticipation',
-    },
-    // VISUAL PAYOFF: cards drawing - satisfying to watch
-    {
-      description: 'Cards draw into 10 positions - mesmerizing animation',
-      path: '/tarot',
-      durationSeconds: 3,
-      action: 'wait',
-      focusPoint: 'Cards filling Celtic Cross layout - visually satisfying',
+      target: '[data-testid="tarot-spreads-section"] button:has-text("Past")',
+      focusPoint: 'Quick selection — move fast to the pull',
     },
     {
-      description: 'Show completed spread - all 10 cards visible',
+      description: 'Tap Start a reading',
       path: '/tarot',
-      durationSeconds: 2,
-      action: 'show',
-      focusPoint: 'Full spread visible - impressive layout',
+      durationSeconds: 1,
+      action: 'click',
+      target: 'button:has-text("Start a reading")',
+      focusPoint: 'Pull the cards',
     },
-    // RETENTION HOOK at ~9s: scroll to interpretations
     {
-      description: 'Scroll to interpretations - personalized to YOUR chart',
+      description: 'Scroll to first card detail — show the reading',
       path: '/tarot',
-      durationSeconds: 3,
+      durationSeconds: 3.5,
       action: 'scroll',
-      scrollDistance: 300,
-      focusPoint:
-        'Each position interpreted with YOUR transits, not generic meanings',
+      scrollTo: '[data-testid="spread-card-0"]',
+      focusPoint: 'Card name, insight in quotes, keyword tags visible',
     },
-    // ESCALATION at ~12s: the outcome card connection
     {
-      description: 'Scroll to outcome card - transit connection visible',
+      description: 'Scroll to In Your Chart button',
       path: '/tarot',
       durationSeconds: 2,
       action: 'scroll',
-      scrollDistance: 200,
-      focusPoint:
-        "Outcome card linked to what's happening in your sky right now",
+      scrollTo: '[data-testid="spread-transit-toggle-0"]',
+      focusPoint: 'In Your Chart button visible — about to tap',
     },
-    // BONUS: saves feed into patterns
     {
-      description: 'Show save button - feeds into pattern tracking',
+      description: 'Tap In Your Chart — expand transit connections',
       path: '/tarot',
-      durationSeconds: 2,
-      action: 'show',
+      durationSeconds: 1.5,
+      action: 'click',
+      target: '[data-testid="spread-transit-toggle-0"]',
+      focusPoint: 'Collapsible opening — transit connections revealed',
+    },
+    {
+      description: 'Scroll to transit content — HOLD money shot',
+      path: '/tarot',
+      durationSeconds: 6,
+      action: 'scroll',
+      scrollTo: '[data-testid="spread-transit-content-0"]',
       focusPoint:
-        'Save spread → becomes part of your pattern analysis over time',
+        'Transit planet + natal planet, aspect symbols, degrees — HOLD here long',
     },
   ],
   outro: {
-    // LOOP: "What spread should I pull?" → viewer wants to try → rewatch
-    text: 'Relationship guidance. Career decisions. Past/Present/Future.',
+    text: 'Your sky. Every card.',
     durationSeconds: 2,
   },
   voiceover:
-    "Full Celtic Cross. Ten cards drawing into position. Each one interpreted for my chart and current transits. The outcome card isn't a generic meaning. It's connected to what's actually happening in my sky right now. Save it. Come back next month. Watch how your saved spreads become part of your pattern analysis. Relationship guidance. Career decisions. Past Present Future.",
-  textOverlays: [
-    {
-      text: '10 cards drawing in',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'each one reads YOUR chart',
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 9s
-    {
-      text: 'not generic meanings',
-      startSeconds: 9,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Escalation at 12s
-    {
-      text: 'outcome card knows your transits',
-      startSeconds: 12,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'save → track patterns over time',
-      startSeconds: 16,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    'Tarot with your birth chart hits different. Pick a spread. Pull the cards. Every card gets its own reading. Not generic. Written for your chart. Keywords. Insights. But here is where it gets wild. Your transits are woven into every single card. Real planets. Real aspects. Your actual sky right now... inside every pull.',
+  textOverlays: [],
   caption:
-    "Full Celtic Cross. 10 cards. Each position interpreted with YOUR current transits. The outcome card knows what's happening in your sky. What spread would you pull?",
-  hashtags: [
-    'tarot',
-    'celticcross',
-    'tarotspread',
-    'tarotreading',
-    'divination',
-    'witchtok',
-    'tarottok',
-    'lunary',
-    'spirituality',
-    'tarotcards',
-  ],
+    'Most tarot apps give you generic card meanings. This one reads your birth chart into every card you pull. Real transits. Real aspects. Your sky in every spread.',
+  hashtags: ['tarot', 'tarottok', 'lunary', 'birthchart', 'astrology'],
   playwrightNotes:
-    'Navigate to /tarot, scroll to Spreads section. Click Celtic Cross. WAIT for draw animation (this is visually satisfying - give it 3s). Show completed spread. Scroll to interpretations. Highlight outcome card transit connection. Show save button. Account needs Lunary+ access.',
+    'Navigate to /tarot. Click PPF, click Start Reading — move fast. HOLD on cards drawing (3.5s). Scroll to card detail (3s). Click "In Your Chart" then SCROLL DOWN 150px to bring expanded transit content into view. HOLD on transit connections (4s) — this is the money shot. Account needs saved birth chart.',
 };
 
 // ============================================================================
@@ -1795,12 +1184,10 @@ const crystalsOverview: TikTokScript = {
   category: 'feature-reveal',
   totalSeconds: 19,
   hook: {
-    // Challenge hook - dares viewer to try, creates engagement
-    text: 'Name a crystal. Properties, chakras, timing, how to use it. All free.',
+    text: 'Name a crystal. Full guide. Free.',
     durationSeconds: 2,
   },
   scenes: [
-    // Show the categories briefly
     {
       description: 'Crystal categories - 8 visible at once',
       path: '/grimoire/crystals',
@@ -1808,7 +1195,6 @@ const crystalsOverview: TikTokScript = {
       action: 'show',
       focusPoint: 'Protection, Love, Spiritual, Manifestation, Healing...',
     },
-    // Use search to find a crystal
     {
       description: 'Type into crystal search - demo the search',
       path: '/grimoire/crystals',
@@ -1818,7 +1204,6 @@ const crystalsOverview: TikTokScript = {
       typeText: 'amethyst',
       focusPoint: 'Typing crystal name - results filter instantly',
     },
-    // Show filtered results
     {
       description: 'Show search results for amethyst',
       path: '/grimoire/crystals',
@@ -1826,7 +1211,6 @@ const crystalsOverview: TikTokScript = {
       action: 'show',
       focusPoint: 'Amethyst card visible after filtering',
     },
-    // Click the crystal
     {
       description: 'Tap Amethyst - detail page opens',
       path: '/grimoire/crystals',
@@ -1835,7 +1219,6 @@ const crystalsOverview: TikTokScript = {
       target: '[data-crystal-slug="amethyst"], [data-testid="crystal-card"]',
       focusPoint: 'Crystal detail page loading instantly',
     },
-    // Show crystal detail
     {
       description: 'Show crystal detail - meaning, properties',
       path: '/grimoire/crystals/amethyst',
@@ -1869,54 +1252,14 @@ const crystalsOverview: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "Name a crystal" → viewers will comment their crystal → engagement + rewatch
     text: "Name a crystal. It's in here.",
     durationSeconds: 2,
   },
   voiceover:
-    "Name a crystal. Amethyst? Properties, meaning, chakras, how to use it, when to use it. Rose quartz? Same. Black tourmaline? Same. 200 plus crystals. 8 categories. Protection, love, spiritual, manifestation, healing, communication, creativity, balance. Every single one with a full guide. Planetary correspondences. Timing recommendations. Name a crystal. It's in here.",
-  textOverlays: [
-    {
-      text: '8 categories, 200+ crystals',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'tap any crystal for full guide',
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 8s
-    {
-      text: 'properties + chakras + timing',
-      startSeconds: 8,
-      durationSeconds: 3,
-      position: 'top',
-    },
-    {
-      text: 'planetary correspondences',
-      startSeconds: 13,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    { text: 'free', startSeconds: 16, durationSeconds: 2, position: 'top' },
-  ],
-  caption:
-    'Name a crystal. Properties, chakras, how to use it, when to use it. 200+ crystals. 8 categories. Full guides. All free. Drop your crystal in the comments.',
-  hashtags: [
-    'crystals',
-    'crystalhealing',
-    'amethyst',
-    'crystalguide',
-    'witchcraft',
-    'witchtok',
-    'lunary',
-    'spirituality',
-    'chakras',
-    'crystalproperties',
-  ],
+    "Name a crystal. 200 plus. Eight categories. Search any one. Amethyst. Properties. Meaning. Chakra connections. How to use it. When to use it. Planetary correspondences. Timing recommendations. Every crystal. Full guide. Free. Name a crystal. It's in here.",
+  textOverlays: [],
+  caption: "Name a crystal. Drop it in the comments. Bet it's in here.",
+  hashtags: ['crystals', 'crystalhealing', 'lunary', 'witchtok', 'amethyst'],
   playwrightNotes:
     'Navigate to /grimoire/crystals. No auth needed. Show categories (2s), fast scroll through list (2s), click amethyst (2s), show detail page - meaning/properties (3s), scroll to chakras/use (3s), scroll to correspondences (2s). The "Name a crystal" hook drives comments.',
 };
@@ -1928,12 +1271,10 @@ const spellsOverview: TikTokScript = {
   category: 'feature-reveal',
   totalSeconds: 18,
   hook: {
-    // Curiosity + practical value - "which spells work TONIGHT" is immediately useful
-    text: '112 spells. It knows which ones work best tonight based on the moon.',
+    text: "112 spells. Filtered by tonight's moon.",
     durationSeconds: 2,
   },
   scenes: [
-    // Show the spells page with moon phase
     {
       description: 'Spells page with current moon phase visible',
       path: '/grimoire/spells',
@@ -1941,7 +1282,6 @@ const spellsOverview: TikTokScript = {
       action: 'show',
       focusPoint: 'Moon phase indicator at top - "it knows the current moon"',
     },
-    // Use the search bar to find a spell
     {
       description: 'Type into search bar - search for protection spell',
       path: '/grimoire/spells',
@@ -1951,7 +1291,6 @@ const spellsOverview: TikTokScript = {
       typeText: 'protection',
       focusPoint: 'Results filtering as you type',
     },
-    // Show filtered results
     {
       description: 'Show search results - protection spells',
       path: '/grimoire/spells',
@@ -1960,7 +1299,6 @@ const spellsOverview: TikTokScript = {
       focusPoint:
         'Protection spells filtered - cards with difficulty + duration',
     },
-    // Scroll through results
     {
       description: 'Scroll through protection spells',
       path: '/grimoire/spells',
@@ -1969,7 +1307,6 @@ const spellsOverview: TikTokScript = {
       scrollDistance: 300,
       focusPoint: 'Multiple protection spells with different difficulties',
     },
-    // Click a spell to see detail
     {
       description: 'Tap a spell - full guide opens',
       path: '/grimoire/spells',
@@ -1978,7 +1315,6 @@ const spellsOverview: TikTokScript = {
       target: '[data-testid="spell-card"]',
       focusPoint: 'Full spell detail page loads',
     },
-    // Scroll through spell detail
     {
       description: 'Scroll through spell detail - purpose, timing, ingredients',
       path: '/grimoire/spells',
@@ -1989,75 +1325,30 @@ const spellsOverview: TikTokScript = {
     },
   ],
   outro: {
-    text: 'A grimoire that knows the current moon. Free.',
+    text: 'Grimoire + live moon. Free.',
     durationSeconds: 2,
   },
   voiceover:
-    "112 spells and it knows the current moon phase. Filter by tonight's moon and you only see spells that work right now. Protection, love, prosperity, healing, cleansing. Tap any spell. Purpose. Optimal timing. Ingredients with substitutes. Tools. Step by step instructions. A complete grimoire that knows what moon phase you're in right now. Free.",
-  textOverlays: [
-    {
-      text: 'it knows the current moon phase',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: "filter: tonight's best spells",
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'protection, love, prosperity, healing',
-      startSeconds: 8,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 11s
-    {
-      text: 'full guide for every spell',
-      startSeconds: 11,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'ingredients + substitutes + steps',
-      startSeconds: 14,
-      durationSeconds: 3,
-      position: 'top',
-    },
-  ],
+    '112 spells and it knows the current moon phase. Search protection. Results filter instantly. Each one with difficulty and duration. Tap any spell. Purpose. Optimal timing. Ingredients with substitutes. Step by step. A grimoire that knows your moon phase. Free.',
+  textOverlays: [],
   caption:
-    "112 spells. Filter by tonight's moon phase. Full instructions, ingredients with substitutes, optimal timing. A complete grimoire that knows the current moon. Free.",
-  hashtags: [
-    'spells',
-    'witchcraft',
-    'moonphase',
-    'moonmagic',
-    'protectionspell',
-    'grimoire',
-    'witchtok',
-    'lunary',
-    'spellwork',
-    'moonspell',
-  ],
+    "112 spells filtered by tonight's moon. Full instructions. Free. What spell would you cast tonight?",
+  hashtags: ['spells', 'witchcraft', 'lunary', 'witchtok', 'moonmagic'],
   playwrightNotes:
     'Navigate to /grimoire/spells. No auth. Show moon phase indicator (2s), show filters (2s), click Current Moon Phase (satisfying filter animation - 2s), scroll through filtered results (3s), click spell detail (2s), scroll through full guide (3s). The filter activation is the visual payoff.',
 };
 
 const grimoireSearch: TikTokScript = {
   id: 'grimoire-search',
-  title: 'Search Anything. Venus in Scorpio? Here.',
+  title: 'Search Any Placement. Full Article. Free.',
   tier: 3,
   category: 'feature-reveal',
-  totalSeconds: 18,
+  totalSeconds: 17,
   hook: {
-    // Challenge/dare hook - drives comments ("search MY placement!")
-    text: "Search any placement. Venus in Scorpio? Mars in the 10th? It's in here.",
+    text: 'Any placement? Full article. Here.',
     durationSeconds: 2,
   },
   scenes: [
-    // Show volume immediately - fast scroll
     {
       description: 'Grimoire main page - categories cascade',
       path: '/grimoire',
@@ -2074,7 +1365,6 @@ const grimoireSearch: TikTokScript = {
       scrollDistance: 400,
       focusPoint: 'Every planet in every sign, all houses, all aspects - depth',
     },
-    // PAYOFF at ~6s: live search demo
     {
       description: 'Type into search bar - live demo',
       path: '/grimoire',
@@ -2085,7 +1375,6 @@ const grimoireSearch: TikTokScript = {
       typeText: 'Venus in Scorpio',
       focusPoint: 'Results appearing as you type - instant',
     },
-    // RETENTION HOOK at ~9s: results are REAL
     {
       description: 'Show search results - full articles, not snippets',
       path: '/grimoire',
@@ -2093,7 +1382,6 @@ const grimoireSearch: TikTokScript = {
       action: 'show',
       focusPoint: 'Matching articles with rich previews - real depth',
     },
-    // Click on the first search result to show the full article
     {
       description: 'Click first result - full article opens',
       path: '/grimoire',
@@ -2112,53 +1400,15 @@ const grimoireSearch: TikTokScript = {
     },
   ],
   outro: {
-    // LOOP: "Search yours" → comment engagement + viewer comes back
-    text: 'No paywall on education. Search yours.',
+    text: 'No paywall. Search yours.',
     durationSeconds: 2,
   },
   voiceover:
-    'Search any placement. Venus in Scorpio? Full article. Mars in the 10th house? Full article. Mercury retrograde in the 3rd? Full article. Two thousand plus astrology articles. Every planet in every sign. All 12 houses. Every aspect. Tarot. Crystals. Spells. Herbs. No paywall on education. Search yours.',
-  textOverlays: [
-    {
-      text: '2,000+ articles',
-      startSeconds: 2,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'planets, signs, houses, aspects, tarot',
-      startSeconds: 5,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    // Retention hook at 9s
-    {
-      text: 'full articles, not snippets',
-      startSeconds: 9,
-      durationSeconds: 2,
-      position: 'top',
-    },
-    {
-      text: 'no paywall on education',
-      startSeconds: 13,
-      durationSeconds: 2,
-      position: 'top',
-    },
-  ],
+    'Search any placement. Full article. 2,000 plus articles. Every planet in every sign. All 12 houses. Every aspect. Tarot. Crystals. Spells. No paywall on education. Search yours.',
+  textOverlays: [],
   caption:
-    "Search any placement. Venus in Scorpio? Full article. 2,000+ astrology articles. Completely free. Drop your placement in the comments and I'll tell you if it's in there (it is).",
-  hashtags: [
-    'astrology',
-    'learnastrology',
-    'grimoire',
-    'astrologyeducation',
-    'tarot',
-    'crystals',
-    'spells',
-    'witchtok',
-    'lunary',
-    'astrologyapp',
-  ],
+    "Search any placement. Full article. 2,000+ articles. Free. Drop your placement\u2014bet it's in there.",
+  hashtags: ['astrology', 'grimoire', 'lunary', 'learnastrology', 'witchtok'],
   playwrightNotes:
     'Navigate to /grimoire. No auth. Show categories (2s), fast scroll (2s), type "Venus in Scorpio" into search (3s - use slow typing for readability), show results (2s), scroll results (2s). The "Search yours" CTA drives comment engagement.',
 };
@@ -2211,6 +1461,19 @@ export function getTotalDuration(scripts: TikTokScript[]): number {
 }
 
 /**
+ * Get a dynamic script by ID, using real sky data when available.
+ * Falls back to the static script if no generator exists or no sky data provided.
+ */
+export function getDynamicScript(
+  id: string,
+  skyData?: SkyData,
+): TikTokScript | undefined {
+  const generator = SCRIPT_GENERATORS[id];
+  if (generator && skyData) return generator(skyData);
+  return TIKTOK_SCRIPTS.find((s) => s.id === id);
+}
+
+/**
  * Print a script as a human-readable storyboard
  */
 export function printStoryboard(script: TikTokScript): string {
@@ -2234,7 +1497,7 @@ export function printStoryboard(script: TikTokScript): string {
       `SCENE ${i + 1} (${currentTime}s - ${currentTime + scene.durationSeconds}s):`,
     );
     lines.push(
-      `  Action: ${scene.action}${scene.target ? ` → ${scene.target}` : ''}`,
+      `  Action: ${scene.action}${scene.target ? ` \u2192 ${scene.target}` : ''}`,
     );
     lines.push(`  Path: ${scene.path}`);
     lines.push(`  Shows: ${scene.description}`);

@@ -7,6 +7,12 @@ import {
   generateStarfield,
   getStarCount,
 } from '@/lib/share/og-utils';
+import {
+  loadShareFonts,
+  truncateText,
+  ShareFooter,
+  SHARE_BASE_URL,
+} from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
@@ -81,7 +87,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { width, height } = getFormatDimensions(format);
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+    const baseUrl = SHARE_BASE_URL;
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
@@ -111,13 +117,24 @@ export async function GET(request: NextRequest) {
 
     // Determine score color
     const getScoreColor = (score: number) => {
-      if (score >= 80) return '#22C55E'; // green
+      if (score >= 80) return OG_COLORS.cometTrail;
       if (score >= 60) return '#8458D8'; // purple
-      if (score >= 40) return '#EAB308'; // yellow
-      return '#EF4444'; // red
+      if (score >= 40) return OG_COLORS.galaxyHaze;
+      return OG_COLORS.cosmicRose;
     };
 
     const scoreColor = getScoreColor(data.compatibilityScore);
+
+    // Truncation limits
+    const nameLimit = isLandscape ? 40 : 50;
+    const summaryLimit = isLandscape ? 120 : 200;
+    const combinedNames = truncateText(
+      `${data.userName || 'You'} & ${data.friendName}`,
+      nameLimit,
+    );
+    const truncatedSummary = truncateText(data.summary, summaryLimit);
+
+    const fonts = await loadShareFonts(request);
 
     return new ImageResponse(
       <div
@@ -189,7 +206,7 @@ export async function GET(request: NextRequest) {
                 textAlign: 'center',
               }}
             >
-              {data.userName || 'You'} & {data.friendName}
+              {combinedNames}
             </div>
           </div>
 
@@ -241,7 +258,7 @@ export async function GET(request: NextRequest) {
               lineHeight: 1.4,
             }}
           >
-            {data.summary}
+            {truncatedSummary}
           </div>
 
           {/* Aspect counts */}
@@ -267,7 +284,7 @@ export async function GET(request: NextRequest) {
                       display: 'flex',
                       fontSize: isLandscape ? 32 : 48,
                       fontWeight: 600,
-                      color: '#22C55E',
+                      color: OG_COLORS.cometTrail,
                     }}
                   >
                     {data.harmoniousAspects}
@@ -297,7 +314,7 @@ export async function GET(request: NextRequest) {
                       display: 'flex',
                       fontSize: isLandscape ? 32 : 48,
                       fontWeight: 600,
-                      color: '#F59E0B',
+                      color: OG_COLORS.galaxyHaze,
                     }}
                   >
                     {data.challengingAspects}
@@ -318,37 +335,12 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 12,
-            position: 'relative',
-            zIndex: 1,
-          }}
-        >
-          <img
-            src={`${baseUrl}/apple-touch-icon.png`}
-            alt='Lunary'
-            width={isLandscape ? 24 : 32}
-            height={isLandscape ? 24 : 32}
-            style={{ borderRadius: 6 }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              fontSize: isLandscape ? 16 : 20,
-              color: OG_COLORS.textTertiary,
-            }}
-          >
-            lunary.app
-          </div>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>,
       {
         width,
         height,
+        fonts,
       },
     );
   } catch (error) {

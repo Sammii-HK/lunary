@@ -7,6 +7,14 @@ import {
   generateStarfield,
   getStarCount,
 } from '@/lib/share/og-utils';
+import {
+  loadShareFonts,
+  truncateText,
+  ShareFooter,
+  SHARE_BASE_URL,
+  SHARE_BORDERS,
+  SHARE_CARDS,
+} from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 import { zodiacSymbol } from '@/constants/symbols';
 
@@ -106,7 +114,7 @@ export async function GET(request: NextRequest) {
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+    const baseUrl = SHARE_BASE_URL;
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
@@ -118,13 +126,11 @@ export async function GET(request: NextRequest) {
     const overviewSize = isLandscape ? 22 : isStory ? 34 : 30;
     const labelSize = isLandscape ? 18 : isStory ? 28 : 24;
 
-    // Truncation helper for text overflow prevention
-    const truncate = (text: string, limit: number) =>
-      text.length > limit ? text.slice(0, limit - 1) + '…' : text;
+    const truncate = truncateText;
 
-    // Format-specific character limits - increased for better space usage
-    const headlineLimit = isLandscape ? 70 : isStory ? 140 : 100;
-    const overviewLimit = isLandscape ? 160 : isStory ? 280 : 220;
+    // Format-specific character limits
+    const headlineLimit = isLandscape ? 70 : isStory ? 120 : 100;
+    const overviewLimit = isLandscape ? 140 : isStory ? 240 : 180;
 
     // Generate unique starfield based on shareId
     const stars = generateStarfield(data.shareId, getStarCount(format));
@@ -379,6 +385,7 @@ export async function GET(request: NextRequest) {
               gap: 16,
               flex: 1,
               justifyContent: 'center',
+              maxWidth: '60%',
             }}
           >
             {/* Headline */}
@@ -386,8 +393,8 @@ export async function GET(request: NextRequest) {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
+                background: SHARE_CARDS.primary,
+                border: SHARE_BORDERS.card,
                 borderRadius: 16,
                 padding: '20px 24px',
               }}
@@ -421,8 +428,8 @@ export async function GET(request: NextRequest) {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: SHARE_CARDS.secondary,
+                border: SHARE_BORDERS.card,
                 borderRadius: 14,
                 padding: '16px 20px',
               }}
@@ -441,38 +448,7 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            justifyContent: 'center',
-            position: 'absolute',
-            bottom: 40,
-            left: 0,
-            right: 0,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={24}
-            height={24}
-            style={{ opacity: 0.6 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontSize: 16,
-              opacity: 0.6,
-              letterSpacing: '0.1em',
-              color: OG_COLORS.textPrimary,
-              display: 'flex',
-            }}
-          >
-            Join free at lunary.app
-          </span>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     ) : isStory ? (
       // Story Layout - Giant zodiac symbol, full-width cards
@@ -483,7 +459,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: '120px 60px 200px 60px',
+          padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -497,7 +473,7 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 40,
+            marginBottom: 32,
           }}
         >
           <div
@@ -530,7 +506,7 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 48,
+            marginBottom: 32,
           }}
         >
           <div
@@ -564,8 +540,8 @@ export async function GET(request: NextRequest) {
             background: 'rgba(255, 255, 255, 0.03)',
             border: '1px solid rgba(255, 255, 255, 0.12)',
             borderRadius: 24,
-            padding: '36px 40px',
-            marginBottom: 28,
+            padding: '32px 36px',
+            marginBottom: 20,
           }}
         >
           <div
@@ -622,7 +598,7 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             justifyContent: 'center',
             gap: 20,
-            marginTop: 28,
+            marginTop: 20,
           }}
         >
           <div
@@ -691,38 +667,7 @@ export async function GET(request: NextRequest) {
           )}
         </div>
 
-        {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            justifyContent: 'center',
-            position: 'absolute',
-            bottom: 40,
-            left: 0,
-            right: 0,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={28}
-            height={28}
-            style={{ opacity: 0.6 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontSize: 20,
-              opacity: 0.6,
-              letterSpacing: '0.1em',
-              color: OG_COLORS.textPrimary,
-              display: 'flex',
-            }}
-          >
-            Join free at lunary.app
-          </span>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     ) : (
       // Square Layout
@@ -941,62 +886,16 @@ export async function GET(request: NextRequest) {
           )}
         </div>
 
-        {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            justifyContent: 'center',
-            position: 'absolute',
-            bottom: 40,
-            left: 0,
-            right: 0,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={24}
-            height={24}
-            style={{ opacity: 0.6 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontSize: 16,
-              opacity: 0.6,
-              letterSpacing: '0.1em',
-              color: OG_COLORS.textPrimary,
-              display: 'flex',
-            }}
-          >
-            Join free at lunary.app
-          </span>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     );
+
+    const fonts = await loadShareFonts(request, { includeAstronomicon: true });
 
     return new ImageResponse(layoutJsx, {
       width,
       height,
-      fonts: [
-        {
-          name: 'Roboto Mono',
-          data: await fetch(
-            new URL('/fonts/RobotoMono-Regular.ttf', request.url),
-          ).then((res) => res.arrayBuffer()),
-          style: 'normal',
-          weight: 400,
-        },
-        {
-          name: 'Astronomicon',
-          data: await fetch(
-            new URL('/fonts/Astronomicon.ttf', request.url),
-          ).then((res) => res.arrayBuffer()),
-          style: 'normal',
-          weight: 400,
-        },
-      ],
+      fonts,
     });
   } catch (error) {
     console.error('[HoroscopeOG] Error:', error);

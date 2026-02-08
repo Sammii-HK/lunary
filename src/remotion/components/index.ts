@@ -7,3 +7,4 @@ export { LowerThird } from './LowerThird';
 export { ProgressIndicator } from './ProgressIndicator';
 export { TransitionEffect } from './TransitionEffect';
 export { TextOverlays } from './TextOverlays';
+export { TextScrim } from './TextScrim';

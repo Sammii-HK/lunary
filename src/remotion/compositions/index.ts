@@ -7,3 +7,6 @@ export type { MediumFormVideoProps } from './MediumFormVideo';
 
 export { LongFormVideo } from './LongFormVideo';
 export type { LongFormVideoProps } from './LongFormVideo';
+
+export { AppDemoVideo } from './AppDemoVideo';
+export type { AppDemoVideoProps } from './AppDemoVideo';

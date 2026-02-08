@@ -17,6 +17,7 @@ import { tmpdir } from 'os';
 import { constants } from 'fs';
 import { createRequire } from 'module';
 import { generateStarfieldFrames } from './starfield-generator';
+import type { CategoryVisualConfig } from '@/remotion/config/category-visuals';
 
 // Buffer time added at the end of the video for the last subtitle to be readable
 // and for a nice pause before the video ends
@@ -134,12 +135,14 @@ export interface ComposeVideoOptions {
     text: string;
     startTime: number;
     endTime: number;
-    style?: 'chapter' | 'stamp' | 'title' | 'hook' | 'cta';
+    style?: 'chapter' | 'stamp' | 'title' | 'hook' | 'hook_large' | 'cta';
   }>;
   backgroundMusicPath?: string | null;
   hueShiftBase?: number;
   hueShiftMaxDelta?: number;
   lockIntroHue?: boolean;
+  /** Category visual configuration for themed backgrounds */
+  categoryVisuals?: CategoryVisualConfig;
 }
 
 /**
@@ -166,6 +169,7 @@ export async function composeVideo(
     hueShiftBase = 0,
     hueShiftMaxDelta = 12,
     lockIntroHue = false,
+    categoryVisuals,
   } = options;
 
   const dimensions = VIDEO_DIMENSIONS[format] || VIDEO_DIMENSIONS.landscape;
@@ -350,16 +354,75 @@ export async function composeVideo(
       'Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text',
     ];
 
-    const highlightTag = `{\\c${hexToAssColor(highlightColor)}\\b1}`;
-    const resetTag = '{\\c&HFFFFFF&\\b0}';
+    // HookEmphasis style: larger font, positioned higher for the opening hook
+    const hookFontSize = Math.round(fontSize * 1.25);
+    const hookMarginV = Math.round(marginV * 0.8);
+    const hookStyles = [
+      // HookEmphasis: larger, higher, pop-in effect via \t transform
+      `Style: HookEmphasis,RobotoMono-Bold,${hookFontSize},&H00FFFFFF,&H00FFFFFF,&H80000000,&H80000000,1,0,0,0,100,100,1,0,1,4,5,2,50,50,${hookMarginV},0`,
+    ];
+
+    // Insert HookEmphasis style before [Events] section
+    const eventsIdx = header.indexOf('');
+    if (eventsIdx >= 0) {
+      header.splice(eventsIdx, 0, ...hookStyles);
+    }
+
+    const highlightTag = `{\\c${hexToAssColor(highlightColor)}\\b1\\fscx110\\fscy110}`;
+    const resetTag = '{\\c&HFFFFFF&\\b0\\fscx100\\fscy100}';
     const fadeEffect = '{\\fad(200,200)}';
 
-    const lines = chunks.map((chunk) => {
-      const highlighted = highlightAssText(chunk.text, terms);
-      const safeText = escapeAssText(highlighted)
-        .replace(/\[\[HIGHLIGHT_START\]\]/g, highlightTag)
-        .replace(/\[\[HIGHLIGHT_END\]\]/g, resetTag);
-      return `Dialogue: 0,${formatAssTime(chunk.startTime)},${formatAssTime(chunk.endTime)},Default,,0,0,0,,${fadeEffect}${safeText}`;
+    // Build word-level highlight text for a chunk
+    // Full text always visible, but the "active" word gets colored via \t transform
+    const buildWordHighlightText = (
+      chunk: { startTime: number; endTime: number; text: string },
+      chunkTerms: string[],
+    ): string => {
+      const words = chunk.text.split(/\s+/).filter((w) => w.length > 0);
+      if (words.length <= 1) {
+        // Single word - just highlight it
+        const highlighted = highlightAssText(chunk.text, chunkTerms);
+        return escapeAssText(highlighted)
+          .replace(/\[\[HIGHLIGHT_START\]\]/g, highlightTag)
+          .replace(/\[\[HIGHLIGHT_END\]\]/g, resetTag);
+      }
+
+      const chunkDuration = chunk.endTime - chunk.startTime;
+      const wordDuration = chunkDuration / words.length;
+      const assColor = hexToAssColor(highlightColor);
+
+      return words
+        .map((word, wordIdx) => {
+          const wordStartMs = Math.round(wordIdx * wordDuration * 1000);
+          const wordEndMs = Math.round((wordIdx + 1) * wordDuration * 1000);
+
+          // Check if word is a keyword highlight
+          const cleanWord = word.replace(/[.,!?;:'"]/g, '');
+          const isKeyword = chunkTerms.some(
+            (t) => cleanWord.toLowerCase() === t.toLowerCase(),
+          );
+
+          if (isKeyword) {
+            // Keywords always highlighted
+            return `{\\c${assColor}\\b1}${escapeAssText(word)}{\\r}`;
+          }
+
+          // Word gets highlight color during its active window, then resets
+          // Use \t transform to transition color at the right time
+          return `{\\t(${wordStartMs},${wordStartMs},\\c${assColor}\\b1\\fscx108\\fscy108)\\t(${wordEndMs},${wordEndMs},\\c&HFFFFFF&\\b0\\fscx100\\fscy100)}${escapeAssText(word)}{\\r}`;
+        })
+        .join(' ');
+    };
+
+    const lines = chunks.map((chunk, idx) => {
+      const wordText = buildWordHighlightText(chunk, terms);
+      // First chunk (hook) uses HookEmphasis style with pop-in scale animation
+      if (idx === 0) {
+        const popIn =
+          '{\\fad(150,200)\\fscx80\\fscy80\\t(0,150,\\fscx100\\fscy100)}';
+        return `Dialogue: 1,${formatAssTime(chunk.startTime)},${formatAssTime(chunk.endTime)},HookEmphasis,,0,0,0,,${popIn}${wordText}`;
+      }
+      return `Dialogue: 0,${formatAssTime(chunk.startTime)},${formatAssTime(chunk.endTime)},Default,,0,0,0,,${fadeEffect}${wordText}`;
     });
 
     return [...header, ...lines].join('\n');
@@ -396,6 +459,7 @@ export async function composeVideo(
     overlayItems: ComposeVideoOptions['overlays'],
     size: { width: number; height: number },
     videoFormat: ComposeVideoOptions['format'],
+    overlayAccentColor?: string,
   ) => {
     if (!overlayItems || overlayItems.length === 0) {
       return null;
@@ -423,13 +487,15 @@ export async function composeVideo(
 
       // Font sizes by style
       const fontSize =
-        style === 'hook'
-          ? baseFontSize + 2 // Hook text slightly larger
-          : style === 'cta'
-            ? baseFontSize + 4 // CTA prominent
-            : style === 'stamp'
-              ? baseFontSize - 12 // Stamp much smaller
-              : baseFontSize; // Chapter labels
+        style === 'hook_large'
+          ? baseFontSize + 6 // Large hook for short hooks
+          : style === 'hook'
+            ? baseFontSize + 2 // Hook text slightly larger
+            : style === 'cta'
+              ? baseFontSize + 4 // CTA prominent
+              : style === 'stamp'
+                ? baseFontSize - 12 // Stamp much smaller
+                : baseFontSize; // Chapter labels
 
       // Line height for multi-line text
       const lineHeight = fontSize * 1.4;
@@ -443,13 +509,15 @@ export async function composeVideo(
 
       // Base Y position by style
       const baseYPercent =
-        style === 'hook'
-          ? 0.55 // Hook above subtitles
-          : style === 'cta'
-            ? 0.25 // CTA in upper area
-            : style === 'stamp'
-              ? 0.9 // Stamp 10% from bottom
-              : 0.55; // Chapter labels
+        style === 'hook_large'
+          ? 0.45 // Large hook higher up for prominence
+          : style === 'hook'
+            ? 0.55 // Hook above subtitles
+            : style === 'cta'
+              ? 0.25 // CTA in upper area
+              : style === 'stamp'
+                ? 0.9 // Stamp 10% from bottom
+                : 0.55; // Chapter labels
 
       console.log(
         `  Overlay ${idx}: style=${style}, lines=${lines.length}, text="${overlay.text.substring(0, 50)}...", time=${overlay.startTime}-${overlay.endTime}`,
@@ -463,7 +531,17 @@ export async function composeVideo(
         const startY = baseYPercent * size.height - totalHeight / 2;
         const lineY = Math.round(startY + lineIdx * lineHeight);
 
-        const drawtextFilter = `drawtext=fontfile='${fontFile}':text='${escapedLine}':x=(w-text_w)/2:y=${lineY}:fontsize=${fontSize}:fontcolor=white:alpha=1:box=0:enable='between(t,${overlay.startTime},${overlay.endTime})'`;
+        // Stamps get a background box when accent color is available
+        const boxParam =
+          style === 'stamp' && overlayAccentColor
+            ? `:box=1:boxcolor=black@0.25:boxborderw=6`
+            : `:box=0`;
+        const fontColorParam =
+          style === 'hook' && overlayAccentColor
+            ? `fontcolor=${overlayAccentColor}`
+            : `fontcolor=white`;
+
+        const drawtextFilter = `drawtext=fontfile='${fontFile}':text='${escapedLine}':x=(w-text_w)/2:y=${lineY}:fontsize=${fontSize}:${fontColorParam}:alpha=1${boxParam}:enable='between(t,${overlay.startTime},${overlay.endTime})'`;
         allFilters.push(drawtextFilter);
       });
     });
@@ -732,26 +810,32 @@ export async function composeVideo(
       });
 
       // Crossfade all video segments with varied elegant transitions
-      // Cycle through subtle, premium transition types
+      // Position-based durations: faster early, slower late for reflection
       const transitions = [
         'fade',
         'dissolve',
         'smoothup',
-        'smoothdown',
+        'wiperight',
         'fadeblack',
+        'circlecrop',
+        'smoothdown',
       ];
       let currentLabel = 'v0';
       let cumulativeTime = segmentDurations[0] || 0;
       for (let i = 1; i < adjustedImages.length; i++) {
         const nextLabel = `v${i}`;
         const outLabel = i === adjustedImages.length - 1 ? 'outv' : `xf${i}`;
-        const offset = Math.max(cumulativeTime - crossfadeDuration, 0);
+        // Variable crossfade: 0.5s early, 0.8s middle, 1.2s late
+        const progress = i / Math.max(adjustedImages.length - 1, 1);
+        const variableCrossfade =
+          progress < 0.33 ? 0.5 : progress < 0.66 ? 0.8 : 1.2;
+        const offset = Math.max(cumulativeTime - variableCrossfade, 0);
         // Cycle through transitions for variety
         const transition = transitions[i % transitions.length];
         filterParts.push(
-          `[${currentLabel}][${nextLabel}]xfade=transition=${transition}:duration=${crossfadeDuration}:offset=${offset.toFixed(2)}[${outLabel}]`,
+          `[${currentLabel}][${nextLabel}]xfade=transition=${transition}:duration=${variableCrossfade}:offset=${offset.toFixed(2)}[${outLabel}]`,
         );
-        cumulativeTime += segmentDurations[i] - crossfadeDuration;
+        cumulativeTime += segmentDurations[i] - variableCrossfade;
         currentLabel = outLabel;
       }
 
@@ -760,7 +844,12 @@ export async function composeVideo(
           ? '[outv]'
           : `[v${Math.max(adjustedImages.length - 1, 0)}]`;
       let intermediateLabel = finalVideoLabel;
-      const overlayFilter = buildOverlayFilters(overlays, dimensions, format);
+      const overlayFilter = buildOverlayFilters(
+        overlays,
+        dimensions,
+        format,
+        categoryVisuals?.accentColor,
+      );
       console.log(
         `🎬 Filters - subtitleFilter: ${subtitleFilter ? 'yes' : 'no'}, overlayFilter: ${overlayFilter ? 'yes' : 'no'}, overlays count: ${overlays?.length || 0}`,
       );
@@ -786,11 +875,8 @@ export async function composeVideo(
       filterParts.push(
         `${intermediateLabel}[stars]overlay=0:0:format=auto[vwithstars]`,
       );
-      // Add video fade in/out for smooth transitions (1s fade in, 1.5s fade out)
-      const videoFadeOutStart = Math.max(0, totalVideoDuration - 1.5);
-      filterParts.push(
-        `[vwithstars]fade=t=in:st=0:d=1,fade=t=out:st=${videoFadeOutStart.toFixed(2)}:d=1.5[vfinal]`,
-      );
+      // No fade — clean cut preserves seamless loop on TikTok/Reels
+      filterParts.push(`[vwithstars]null[vfinal]`);
       intermediateLabel = '[vfinal]';
 
       const finalLabel = intermediateLabel;
@@ -915,17 +1001,18 @@ export async function composeVideo(
         `[base][alt]blend=all_expr='A*(1-(0.5+0.5*sin(2*3.1415926*N/360)))+B*(0.5+0.5*sin(2*3.1415926*N/360))'`;
       // Stronger vignette (PI/3), crushed blacks (gamma=0.95), cinematic color balance
       const colorGradingFilter = `colorbalance=rs=-0.05:gs=-0.02:bs=0.08:rm=-0.03:gm=0:bm=0.05,eq=saturation=0.92:contrast=1.06:brightness=-0.04:gamma=0.95,vignette=PI/5`;
-      const overlayFilter = buildOverlayFilters(overlays, dimensions, format);
-      // Add video fade in/out for smooth transitions (1s fade in, 1.5s fade out)
-      const videoFadeOutStart = Math.max(0, totalVideoDuration - 1.5);
-      const videoFadeFilter = `fade=t=in:st=0:d=1,fade=t=out:st=${videoFadeOutStart.toFixed(2)}:d=1.5`;
+      const overlayFilter = buildOverlayFilters(
+        overlays,
+        dimensions,
+        format,
+        categoryVisuals?.accentColor,
+      );
       const videoFilter = [
         zoomFilter,
         gradientBlendFilter,
         colorGradingFilter,
         subtitleFilter,
         overlayFilter,
-        videoFadeFilter,
       ]
         .filter(Boolean)
         .join(',');

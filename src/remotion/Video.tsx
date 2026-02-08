@@ -12,6 +12,7 @@ import {
   LongFormVideo,
   LongFormVideoProps,
 } from './compositions/LongFormVideo';
+import { AppDemoVideo, AppDemoVideoProps } from './compositions/AppDemoVideo';
 import { DIMENSIONS } from './styles/theme';
 
 /**
@@ -105,6 +106,31 @@ const defaultLongFormProps: LongFormVideoProps = {
   },
 };
 
+const defaultAppDemoProps: AppDemoVideoProps = {
+  videoSrc: 'app-demos/dashboard-overview.webm',
+  hookText: "Wait... your app doesn't show houses?",
+  hookStartTime: 0,
+  hookEndTime: 2,
+  overlays: [
+    {
+      text: 'your chart. not your sign.',
+      startTime: 2,
+      endTime: 4,
+      style: 'chapter',
+    },
+    {
+      text: 'every planet + YOUR houses',
+      startTime: 5,
+      endTime: 7,
+      style: 'chapter',
+    },
+  ],
+  outroText: 'Every morning. Your chart.',
+  outroStartTime: 16,
+  outroEndTime: 18,
+  highlightTerms: ['houses', 'chart'],
+};
+
 // Cast components to work around Remotion's strict typing
 const ShortFormVideoComponent = ShortFormVideo as unknown as React.FC<
   Record<string, unknown>
@@ -113,6 +139,9 @@ const MediumFormVideoComponent = MediumFormVideo as unknown as React.FC<
   Record<string, unknown>
 >;
 const LongFormVideoComponent = LongFormVideo as unknown as React.FC<
+  Record<string, unknown>
+>;
+const AppDemoVideoComponent = AppDemoVideo as unknown as React.FC<
   Record<string, unknown>
 >;
 
@@ -150,6 +179,17 @@ export const RemotionVideo: React.FC = () => {
         width={DIMENSIONS.youtube.width}
         height={DIMENSIONS.youtube.height}
         defaultProps={defaultLongFormProps}
+      />
+
+      {/* App Demo - TikTok with screen recording background (9:16) */}
+      <Composition
+        id='AppDemoVideo'
+        component={AppDemoVideoComponent}
+        durationInFrames={540} // 18 seconds default
+        fps={30}
+        width={DIMENSIONS.story.width}
+        height={DIMENSIONS.story.height}
+        defaultProps={defaultAppDemoProps}
       />
     </>
   );

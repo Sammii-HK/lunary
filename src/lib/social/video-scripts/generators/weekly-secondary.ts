@@ -1,231 +1,222 @@
 /**
- * Weekly Secondary Content Generator
+ * Weekly Engagement Content Generators
  *
- * Generates the weekly mix of secondary videos:
- * - 4x App Demos (Mon, Tue, Thu, Sat)
- * - 1x Comparison (Wed)
- * - 1x Numerology Deep-dive (Fri)
- * - 1x Testimonial (Sun)
+ * Two engagement slots per day, complementary formats (no duplicates same day).
+ *
+ * Engagement A (17 UTC — UK evening / US lunch):
+ * - Mon: Sign Check    | Tue: Rankings     | Wed: Quiz
+ * - Thu: Hot Take      | Fri: Myth         | Sat: Transit Alert / Sign Check
+ * - Sun: Rankings (variant)
+ *
+ * Engagement B (20 UTC — UK leisure / US afternoon):
+ * - Mon: Rankings      | Tue: Hot Take     | Wed: Sign Check
+ * - Thu: Myth          | Fri: Quiz         | Sat: Rankings
+ * - Sun: Sign Check
+ *
+ * App demos and comparisons are parked (not deleted) for future use.
  */
 
-import { generateAppDemoScript } from './app-demo';
-import { generateComparisonScript } from './comparison';
+// Parked imports — preserved for future use:
+// import { generateAppDemoScript } from './app-demo';
+// import { generateComparisonScript } from './comparison';
+
+import { generateSignCheckScript } from './sign-check';
+import { generateRankingScript } from './ranking';
+import { generateQuizScript } from './quiz';
+import { generateHotTakeScript } from './hot-take';
+import { generateMythScript } from './myth';
+import { getTodaysTransitVideo } from './transit-integration';
 import type { VideoScript } from '../types';
 import type { ContentType } from '../content-types';
 import { getContentTypeConfig } from '../content-types';
+import {
+  getOptimalPostingHour,
+  getVideoSlotHour,
+  type VideoSlot,
+} from '@/utils/posting-times';
 
-/**
- * Weekly secondary content schedule
- * Optimized for US/UK markets and conversion goals
- */
 interface DayConfig {
   contentType: ContentType;
-  config: string; // Feature ID, comparison ID, or grimoire slug
+  label: string;
 }
 
-const WEEKLY_SECONDARY_SCHEDULE: Record<string, DayConfig> = {
-  monday: {
-    contentType: 'app-demo',
-    config: 'daily-transits', // Show personalized transits feature
-  },
-  tuesday: {
-    contentType: 'app-demo',
-    config: 'synastry-comparison', // Relationship compatibility
-  },
-  wednesday: {
-    contentType: 'comparison',
-    config: 'instant-vs-waiting', // Value prop: instant access
-  },
-  thursday: {
-    contentType: 'app-demo',
-    config: 'pattern-recognition', // Pattern tracking feature
-  },
-  friday: {
-    contentType: 'educational-deepdive',
-    config: 'numerology', // Leverage best-performing topic
-  },
+/**
+ * Engagement A schedule (17 UTC slot)
+ * Optimised for TikTok discovery and engagement
+ */
+const ENGAGEMENT_A_SCHEDULE: Record<string, DayConfig> = {
+  monday: { contentType: 'sign-check', label: 'Sign Check' },
+  tuesday: { contentType: 'ranking', label: 'Rankings' },
+  wednesday: { contentType: 'quiz', label: 'Quiz' },
+  thursday: { contentType: 'hot-take', label: 'Hot Take' },
+  friday: { contentType: 'myth', label: 'Myth/Storytime' },
   saturday: {
-    contentType: 'app-demo',
-    config: 'birth-chart-walkthrough', // Weekend download push
+    contentType: 'transit-alert',
+    label: 'Transit Alert / Sign Check fallback',
   },
-  sunday: {
-    contentType: 'testimonial',
-    config: 'user-story', // Social proof for week ahead
-  },
+  sunday: { contentType: 'ranking', label: 'Rankings (variant)' },
 };
 
 /**
- * Generate all secondary scripts for a week
+ * Engagement B schedule (20 UTC slot)
+ * Complementary formats — no duplicate content type on the same day as Slot A
  */
-export async function generateWeeklySecondaryScripts(
+const ENGAGEMENT_B_SCHEDULE: Record<string, DayConfig> = {
+  monday: { contentType: 'ranking', label: 'Rankings' },
+  tuesday: { contentType: 'hot-take', label: 'Hot Take' },
+  wednesday: { contentType: 'sign-check', label: 'Sign Check' },
+  thursday: { contentType: 'myth', label: 'Myth/Storytime' },
+  friday: { contentType: 'quiz', label: 'Quiz' },
+  saturday: { contentType: 'ranking', label: 'Rankings' },
+  sunday: { contentType: 'sign-check', label: 'Sign Check' },
+};
+
+const DAY_NAMES = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+] as const;
+
+/**
+ * Generate a script from a content type config
+ */
+export async function generateScriptForContentType(
+  contentType: ContentType,
+  date: Date,
+): Promise<VideoScript | null> {
+  switch (contentType) {
+    case 'sign-check':
+      return generateSignCheckScript(date);
+
+    case 'ranking':
+      return generateRankingScript(date);
+
+    case 'quiz':
+      return generateQuizScript('zodiac', date);
+
+    case 'hot-take':
+      return generateHotTakeScript(date);
+
+    case 'myth':
+      return generateMythScript(date);
+
+    case 'transit-alert': {
+      const transitScript = await getTodaysTransitVideo(date);
+      if (transitScript) return transitScript;
+      console.log('    No major transit detected, falling back to sign check');
+      return generateSignCheckScript(date);
+    }
+
+    default:
+      console.error(`  Unknown content type: ${contentType}`);
+      return null;
+  }
+}
+
+/**
+ * Generate engagement scripts for a week from a given schedule + slot
+ */
+async function generateWeeklyEngagementScripts(
   weekStartDate: Date,
-  baseUrl: string = 'https://lunary.app',
+  schedule: Record<string, DayConfig>,
+  slot: VideoSlot,
 ): Promise<VideoScript[]> {
   const scripts: VideoScript[] = [];
-  const days = [
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-    'sunday',
-  ];
+  const slotHour = getVideoSlotHour(slot);
 
-  console.log('📝 Generating weekly secondary scripts...');
+  console.log(`Generating weekly ${slot} scripts (${slotHour}:00 UTC)...`);
 
   for (let i = 0; i < 7; i++) {
     const date = new Date(weekStartDate);
     date.setDate(date.getDate() + i);
 
-    const dayName = days[i];
-    const dayConfig = WEEKLY_SECONDARY_SCHEDULE[dayName];
-    let script: VideoScript;
+    const dayName = DAY_NAMES[i];
+    const dayConfig = schedule[dayName];
 
-    console.log(`  ${dayName}: ${dayConfig.contentType} (${dayConfig.config})`);
+    console.log(`  ${dayName}: ${dayConfig.label} [${slot}]`);
 
     try {
-      switch (dayConfig.contentType) {
-        case 'app-demo':
-          script = await generateAppDemoScript(dayConfig.config, date, baseUrl);
-          break;
+      const script = await generateScriptForContentType(
+        dayConfig.contentType,
+        date,
+      );
 
-        case 'comparison':
-          script = await generateComparisonScript(
-            dayConfig.config,
-            date,
-            baseUrl,
-          );
-          break;
-
-        case 'educational-deepdive':
-          // For now, use a placeholder - you can implement this later
-          // or reuse existing educational script generator
-          script = await generateEducationalDeepDiveScript(
-            dayConfig.config,
-            date,
-            baseUrl,
-          );
-          break;
-
-        case 'testimonial':
-          // Placeholder - implement testimonial generator later
-          script = await generateTestimonialScript(
-            dayConfig.config,
-            date,
-            baseUrl,
-          );
-          break;
-
-        default:
-          throw new Error(`Unknown content type: ${dayConfig.contentType}`);
+      if (!script) {
+        console.error(
+          `  Failed to generate ${dayConfig.label} for ${dayName} (returned null)`,
+        );
+        continue;
       }
 
-      // Set posting time based on content type
-      const config = getContentTypeConfig(script.contentType || 'app-demo');
+      // Set posting time and slot metadata
+      const contentType = script.contentType || dayConfig.contentType;
+      const config = getContentTypeConfig(contentType);
+      const scheduledHour = getOptimalPostingHour({
+        contentType,
+        scheduledDate: date,
+        topic: script.topic || dayConfig.label,
+      });
       if (script.metadata) {
-        script.metadata.scheduledHour = config.idealTime;
+        script.metadata.scheduledHour = scheduledHour;
         script.metadata.targetAudience = config.targetAudience;
+        script.metadata.slot = slot;
       }
 
       scripts.push(script);
     } catch (error) {
       console.error(
-        `  ❌ Failed to generate ${dayConfig.contentType} for ${dayName}:`,
+        `  Failed to generate ${dayConfig.label} for ${dayName}:`,
         error,
       );
-      // Continue with other days even if one fails
     }
   }
 
-  console.log(`✅ Generated ${scripts.length}/7 secondary scripts`);
+  console.log(`Generated ${scripts.length}/7 ${slot} scripts`);
   return scripts;
 }
 
 /**
- * Generate educational deep-dive script (numerology focus)
- * Placeholder - reuse existing educational generator or create new one
+ * Generate Engagement A scripts for the week (17 UTC slot)
  */
-async function generateEducationalDeepDiveScript(
-  topic: string,
-  scheduledDate: Date,
-  baseUrl: string,
-): Promise<VideoScript> {
-  // TODO: Implement or reuse existing educational script generator
-  // For now, return a placeholder
-  return {
-    themeId: 'educational-deepdive',
-    themeName: 'Educational Deep-dive',
-    facetTitle: `${topic} Deep-dive`,
-    topic,
-    angle: 'deepdive',
-    aspect: 'education',
-    platform: 'tiktok',
-    sections: [
-      {
-        name: 'PLACEHOLDER',
-        duration: '0-30s',
-        content: 'Educational deep-dive script (to be implemented)',
-      },
-    ],
-    fullScript: 'Educational deep-dive script (to be implemented)',
-    wordCount: 100,
-    estimatedDuration: '30s',
-    scheduledDate,
-    status: 'draft',
-    coverImageUrl: `${baseUrl}/api/og/grimoire/${topic}`,
-    metadata: {
-      theme: 'EDUCATIONAL',
-      title: `${topic} Deep-dive`,
-      series: 'Educational Deep-dive',
-      summary: 'Deep educational content',
-    },
-  };
+export async function generateWeeklySecondaryScripts(
+  weekStartDate: Date,
+): Promise<VideoScript[]> {
+  return generateWeeklyEngagementScripts(
+    weekStartDate,
+    ENGAGEMENT_A_SCHEDULE,
+    'engagementA',
+  );
 }
 
 /**
- * Generate testimonial script
- * Placeholder - implement later with user testimonial data
+ * Generate Engagement B scripts for the week (20 UTC slot)
  */
-async function generateTestimonialScript(
-  config: string,
-  scheduledDate: Date,
-  baseUrl: string,
-): Promise<VideoScript> {
-  // TODO: Implement testimonial generator with real user stories
-  return {
-    themeId: 'testimonial',
-    themeName: 'Testimonial',
-    facetTitle: 'User Story',
-    topic: 'testimonial',
-    angle: 'social-proof',
-    aspect: 'conversion',
-    platform: 'tiktok',
-    sections: [
-      {
-        name: 'PLACEHOLDER',
-        duration: '0-30s',
-        content: 'Testimonial script (to be implemented)',
-      },
-    ],
-    fullScript: 'Testimonial script (to be implemented)',
-    wordCount: 100,
-    estimatedDuration: '30s',
-    scheduledDate,
-    status: 'draft',
-    coverImageUrl: `${baseUrl}/screenshots/testimonial.png`,
-    metadata: {
-      theme: 'TESTIMONIAL',
-      title: 'User Story',
-      series: 'User Testimonial',
-      summary: 'User testimonial',
-    },
-  };
+export async function generateWeeklyEngagementBScripts(
+  weekStartDate: Date,
+): Promise<VideoScript[]> {
+  return generateWeeklyEngagementScripts(
+    weekStartDate,
+    ENGAGEMENT_B_SCHEDULE,
+    'engagementB',
+  );
 }
 
 /**
- * Get the weekly secondary content schedule
+ * Get the engagement schedules
  */
+export function getEngagementASchedule(): Record<string, DayConfig> {
+  return ENGAGEMENT_A_SCHEDULE;
+}
+
+export function getEngagementBSchedule(): Record<string, DayConfig> {
+  return ENGAGEMENT_B_SCHEDULE;
+}
+
+/** @deprecated Use getEngagementASchedule */
 export function getWeeklySchedule(): Record<string, DayConfig> {
-  return WEEKLY_SECONDARY_SCHEDULE;
+  return ENGAGEMENT_A_SCHEDULE;
 }

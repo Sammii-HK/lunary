@@ -330,6 +330,154 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    // DAILY TASKS (Every day) - Instagram Content Batch
+    console.log('📸 Generating Instagram content batch...');
+    const igStartTime = Date.now();
+    try {
+      const { generateDailyBatch } =
+        await import('@/lib/instagram/content-orchestrator');
+      const igBatch = await generateDailyBatch(dateStr);
+      const igExecutionTime = Date.now() - igStartTime;
+
+      cronResults.instagramBatch = {
+        success: true,
+        postCount: igBatch.posts.length,
+        types: igBatch.posts.map((p: { type: string }) => p.type),
+        executionTimeMs: igExecutionTime,
+      };
+
+      console.log(
+        `📸 Instagram batch: ${igBatch.posts.length} posts generated in ${igExecutionTime}ms`,
+      );
+    } catch (error) {
+      const igExecutionTime = Date.now() - igStartTime;
+      console.error('📸 Instagram batch failed:', error);
+      cronResults.instagramBatch = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        executionTimeMs: igExecutionTime,
+      };
+    }
+
+    // DAILY TASKS (Every day) - Threads Content Batch
+    console.log('🧵 Generating Threads content batch...');
+    const threadsStartTime = Date.now();
+    try {
+      const { generateThreadsBatch } =
+        await import('@/lib/threads/content-orchestrator');
+      const threadsBatch = await generateThreadsBatch(dateStr);
+      const threadsExecutionTime = Date.now() - threadsStartTime;
+
+      // Send each Threads post to Succulent as standalone threads-only posts
+      const succulentApiUrl = 'https://app.succulent.social/api/posts';
+      const apiKey = process.env.SUCCULENT_SECRET_KEY;
+      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+      const threadsSentResults: Array<{
+        scheduledTime: string;
+        pillar: string;
+        source: string;
+        status: string;
+        error?: string;
+      }> = [];
+
+      if (apiKey && accountGroupId) {
+        for (const post of threadsBatch.posts) {
+          try {
+            const readableDate = new Date(
+              post.scheduledTime,
+            ).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            });
+
+            const content = [post.hook, post.body, post.prompt]
+              .filter(Boolean)
+              .join('\n\n');
+
+            const postData = {
+              accountGroupId,
+              name: `Threads - ${readableDate} - ${post.pillar}`,
+              content,
+              platforms: ['threads'],
+              scheduledDate: post.scheduledTime,
+              media:
+                post.hasImage && post.imageUrl
+                  ? [
+                      {
+                        type: 'image',
+                        url: post.imageUrl,
+                        alt: `${post.topicTag} content from Lunary`,
+                      },
+                    ]
+                  : [],
+            };
+
+            const response = await fetch(succulentApiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': apiKey,
+              },
+              body: JSON.stringify(postData),
+            });
+
+            if (response.ok) {
+              threadsSentResults.push({
+                scheduledTime: post.scheduledTime,
+                pillar: post.pillar,
+                source: post.source,
+                status: 'success',
+              });
+            } else {
+              const errorText = await response.text();
+              threadsSentResults.push({
+                scheduledTime: post.scheduledTime,
+                pillar: post.pillar,
+                source: post.source,
+                status: 'error',
+                error: `HTTP ${response.status}: ${errorText.slice(0, 200)}`,
+              });
+            }
+          } catch (postError) {
+            threadsSentResults.push({
+              scheduledTime: post.scheduledTime,
+              pillar: post.pillar,
+              source: post.source,
+              status: 'error',
+              error:
+                postError instanceof Error
+                  ? postError.message
+                  : 'Unknown error',
+            });
+          }
+        }
+      }
+
+      const successCount = threadsSentResults.filter(
+        (r) => r.status === 'success',
+      ).length;
+      console.log(
+        `🧵 Threads batch: ${threadsBatch.posts.length} posts generated, ${successCount} sent in ${threadsExecutionTime}ms`,
+      );
+
+      cronResults.threadsBatch = {
+        success: true,
+        postCount: threadsBatch.posts.length,
+        sentCount: successCount,
+        posts: threadsSentResults,
+        executionTimeMs: threadsExecutionTime,
+      };
+    } catch (error) {
+      const threadsExecutionTime = Date.now() - threadsStartTime;
+      console.error('🧵 Threads batch failed:', error);
+      cronResults.threadsBatch = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        executionTimeMs: threadsExecutionTime,
+      };
+    }
+
     // DAILY TASKS (Every day) - Push Notifications for Cosmic Events
     console.log('🔔 Checking for notification-worthy cosmic events...');
     const notificationStartTime = Date.now();

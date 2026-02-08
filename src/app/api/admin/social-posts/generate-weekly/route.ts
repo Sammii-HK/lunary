@@ -4,7 +4,9 @@ import { join } from 'path';
 import {
   PLATFORM_POSTING_TIMES,
   getDefaultPostingTime,
-  getVideoPostingHour,
+  getVideoSlotHour,
+  getInstagramReelsHour,
+  type VideoSlot,
 } from '@/utils/posting-times';
 import { getImageBaseUrl } from '@/lib/urls';
 import type { SocialPostType } from '@/lib/social/social-copy-generator';
@@ -770,8 +772,43 @@ async function generateThematicWeeklyPosts(
         tiktokScripts: refreshedScripts,
       };
     }
+
+    // Generate engagement scripts (Slot A at 17 UTC, Slot B at 20 UTC)
+    const { generateWeeklySecondaryScripts, generateWeeklyEngagementBScripts } =
+      await import('@/lib/social/video-scripts/generators/weekly-secondary');
+    const { saveVideoScript } =
+      await import('@/lib/social/video-scripts/database');
+
+    console.log('🎬 [VIDEO] Generating engagement slot A scripts...');
+    const engagementAScripts =
+      await generateWeeklySecondaryScripts(weekStartDate);
+
+    console.log('🎬 [VIDEO] Generating engagement slot B scripts...');
+    const engagementBScripts =
+      await generateWeeklyEngagementBScripts(weekStartDate);
+
+    // Save engagement scripts to DB so they have IDs for video jobs + queue
+    const allEngagementScripts = [...engagementAScripts, ...engagementBScripts];
+    for (const script of allEngagementScripts) {
+      try {
+        const id = await saveVideoScript(script);
+        script.id = id;
+      } catch (saveError) {
+        console.error(
+          `🎬 [VIDEO] Failed to save engagement script: ${script.facetTitle}`,
+          saveError,
+        );
+      }
+    }
+
+    // Merge engagement scripts into tiktokScripts for downstream processing
+    videoScripts = {
+      ...videoScripts,
+      tiktokScripts: [...videoScripts.tiktokScripts, ...allEngagementScripts],
+    };
+
     console.log(
-      `🎬 [VIDEO] Generated ${videoScripts.tiktokScripts.length} daily shorts + 1 YouTube script`,
+      `🎬 [VIDEO] Generated ${videoScripts.tiktokScripts.length} total scripts (primary + ${engagementAScripts.length} engA + ${engagementBScripts.length} engB) + 1 YouTube`,
     );
 
     if (videoScripts?.tiktokScripts?.length) {
@@ -894,7 +931,11 @@ async function generateThematicWeeklyPosts(
         : (post.postType as SocialPostType);
     let postContent = post.content;
     let hashtags: string[] = [];
-    if (facet && theme) {
+    // Threads question/beta CTA posts have pre-generated content — skip AI copy generation
+    const isPreGenerated =
+      post.postType === 'threads_question' ||
+      post.postType === 'threads_beta_cta';
+    if (facet && theme && !isPreGenerated) {
       const sourcePack = buildSourcePack({
         topic: post.topic || facet.title,
         theme,
@@ -1245,6 +1286,34 @@ async function generateThematicWeeklyPosts(
         }
       }
 
+      // Ensure engagement scripts have dayInfo entries (always, regardless of includeSecondaryThemes)
+      for (const script of uniqueScripts) {
+        const scriptSlotMeta = script.metadata?.slot;
+        if (
+          scriptSlotMeta !== 'engagementA' &&
+          scriptSlotMeta !== 'engagementB'
+        )
+          continue;
+        const dateKey = script.scheduledDate.toISOString().split('T')[0];
+        const key = `${dateKey}|${script.facetTitle}`;
+        if (dayInfoByKey.has(key)) continue;
+        activeDates.add(dateKey);
+        const scriptTheme = resolveThemeForScript(script);
+        const scriptFacet =
+          resolveFacetForTheme(scriptTheme, script.facetTitle) ||
+          buildFallbackFacet(script.facetTitle);
+        const slug =
+          scriptFacet.grimoireSlug.split('/').pop() ||
+          script.facetTitle.toLowerCase().replace(/\s+/g, '-');
+        dayInfoByKey.set(key, {
+          facetTitle: script.facetTitle,
+          category: scriptTheme.category,
+          slug,
+          facet: scriptFacet,
+          theme: scriptTheme,
+        });
+      }
+
       const existingVideoByKey = new Map<string, string>();
       const existingVideoResult = await sql`
         SELECT topic, scheduled_date::date AS date_key, video_url
@@ -1278,11 +1347,35 @@ async function generateThematicWeeklyPosts(
           const existingVideoKey = `${dateKey}|${dayInfo.facetTitle}`;
           const existingVideoUrl = existingVideoByKey.get(existingVideoKey);
 
-          for (const platform of videoPlatforms) {
-            const isSecondaryVideo = script.secondaryThemeId != null;
-            const videoHour = getVideoPostingHour(isSecondaryVideo);
+          // Determine video slot from metadata or fallback to legacy detection
+          const scriptSlot: VideoSlot =
+            script.metadata?.slot === 'engagementA'
+              ? 'engagementA'
+              : script.metadata?.slot === 'engagementB'
+                ? 'engagementB'
+                : script.secondaryThemeId != null
+                  ? 'engagementB'
+                  : 'primary';
+          const isEngagement =
+            scriptSlot === 'engagementA' || scriptSlot === 'engagementB';
+
+          // Engagement videos cross-post to Instagram Reels; primary stays TikTok-only
+          const platforms = isEngagement
+            ? [...videoPlatforms, 'instagram-reels']
+            : videoPlatforms;
+
+          for (const platform of platforms) {
+            // Use Instagram Reels staggered hours for IG cross-posts
+            const isReelsCrossPost = platform === 'instagram-reels';
+            const videoHour = isReelsCrossPost
+              ? getInstagramReelsHour(
+                  scriptSlot as 'engagementA' | 'engagementB',
+                )
+              : getVideoSlotHour(scriptSlot);
             const videoScheduledDate = new Date(`${dateKey}T00:00:00.000Z`);
             videoScheduledDate.setUTCHours(videoHour, 0, 0, 0);
+            // Store as 'instagram' platform in DB for Reels cross-posts
+            const dbPlatform = isReelsCrossPost ? 'instagram' : platform;
             const baseGroupKey = buildGroupKey(
               dateKey,
               'video',
@@ -1296,7 +1389,7 @@ async function generateThematicWeeklyPosts(
               const sourcePack = buildSourcePack({
                 topic: dayInfo.facetTitle,
                 theme: dayInfo.theme,
-                platform,
+                platform: dbPlatform,
                 postType: 'video_caption',
                 facet: dayInfo.facet,
               });
@@ -1340,13 +1433,12 @@ async function generateThematicWeeklyPosts(
               videoCaption = normalizeGeneratedContent(videoCaption, {
                 topicLabel: dayInfo.facetTitle,
               });
-              videoCaption = applyPlatformFormatting(videoCaption, platform);
+              videoCaption = applyPlatformFormatting(videoCaption, dbPlatform);
               postContentByKey.set(
                 `${dateKey}|${dayInfo.facetTitle}|video|${platform}`,
                 videoCaption,
               );
             }
-            const imageUrl: string | null = null;
 
             await sql`
               INSERT INTO social_posts (
@@ -1354,13 +1446,13 @@ async function generateThematicWeeklyPosts(
                 scheduled_date, week_theme, week_start, source_type, source_id,
                 source_title, base_group_key, created_at
               )
-              SELECT ${videoCaption}, ${platform}, 'video', ${dayInfo.facetTitle}, 'pending', ${imageUrl}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${dayInfo.theme.name}, ${weekStartDate.toISOString().split('T')[0]}, 'video_script', ${script.id || null}, ${script.facetTitle}, ${baseGroupKey}, NOW()
+              SELECT ${videoCaption}, ${dbPlatform}, 'video', ${dayInfo.facetTitle}, 'pending', ${null}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${dayInfo.theme.name}, ${weekStartDate.toISOString().split('T')[0]}, 'video_script', ${script.id || null}, ${script.facetTitle}, ${baseGroupKey}, NOW()
               WHERE NOT EXISTS (
                 SELECT 1 FROM social_posts
-                WHERE platform = ${platform}
+                WHERE platform = ${dbPlatform}
                   AND post_type = 'video'
                   AND topic = ${dayInfo.facetTitle}
-                  AND scheduled_date::date = ${dateKey}
+                  AND scheduled_date = ${videoScheduledDate.toISOString()}
               )
             `;
 
@@ -1368,7 +1460,7 @@ async function generateThematicWeeklyPosts(
               await sql`
                 UPDATE social_posts
                 SET video_url = ${existingVideoUrl}
-                WHERE platform = ${platform}
+                WHERE platform = ${dbPlatform}
                   AND post_type = 'video'
                   AND topic = ${dayInfo.facetTitle}
                   AND scheduled_date::date = ${dateKey}
@@ -1382,13 +1474,17 @@ async function generateThematicWeeklyPosts(
             continue;
           }
 
-          await sql`
-            INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
-            VALUES (${script.id}, ${weekStartKey}, ${dateKey}, ${dayInfo.facetTitle}, 'pending', NOW(), NOW())
-            ON CONFLICT (script_id)
-            DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
-          `;
-          dailyShortVideosQueued += 1;
+          // Only queue video render jobs for scripts saved to the DB (have an id)
+          // Engagement scripts without IDs get their social_posts entry but skip rendering
+          if (script.id) {
+            await sql`
+              INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
+              VALUES (${script.id}, ${weekStartKey}, ${dateKey}, ${dayInfo.facetTitle}, 'pending', NOW(), NOW())
+              ON CONFLICT (script_id)
+              DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
+            `;
+            dailyShortVideosQueued += 1;
+          }
           dailyShortVideosGenerated += 1;
         } catch (error) {
           console.error('❌ Failed to generate daily short:', {
@@ -1916,10 +2012,7 @@ export async function POST(request: NextRequest) {
         days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         count: 5,
       },
-      tiktok: {
-        days: [],
-        count: 0,
-      },
+      tiktok: { days: ['Tuesday', 'Thursday', 'Saturday'], count: 3 },
     };
 
     // Build comprehensive weekly post plan

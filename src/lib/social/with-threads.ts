@@ -81,7 +81,7 @@ function categoryDefaultKeyword(category: ThemeCategory) {
   }
 }
 
-function categoryAngleTemplates(category: ThemeCategory): Array<{
+export function categoryAngleTemplates(category: ThemeCategory): Array<{
   intent: ThreadIntent;
   opener: string;
   payload?: string;
@@ -532,6 +532,238 @@ export function withThreads(themes: WeeklyTheme[]): WeeklyTheme[] {
       ? ensureFacetArray(theme, theme.facetPool)
       : undefined,
   }));
+}
+
+/**
+ * Angle templates for Threads-specific intents (hot_take, identity_callout, cosmic_now, ranking).
+ * Used by the Threads content pipeline for original text-first posts.
+ */
+export function threadsAngleTemplates(category: ThemeCategory): Array<{
+  intent: ThreadIntent;
+  opener: string;
+  closerType: 'question' | 'try_this';
+  closer: string;
+}> {
+  switch (category) {
+    case 'zodiac':
+      return [
+        {
+          intent: 'hot_take',
+          opener:
+            'Your rising sign matters more than your sun sign and I will die on this hill',
+          closerType: 'question',
+          closer: 'Fight me or agree?',
+        },
+        {
+          intent: 'identity_callout',
+          opener:
+            'If you are a Scorpio you already know why people come to you with secrets',
+          closerType: 'question',
+          closer: 'What sign are you and does this track?',
+        },
+        {
+          intent: 'cosmic_now',
+          opener: 'The sky is loud today and your chart is feeling it',
+          closerType: 'question',
+          closer: 'Drop your sign, what are you noticing?',
+        },
+        {
+          intent: 'ranking',
+          opener:
+            'Ranking the signs by how well they handle unsolicited advice',
+          closerType: 'question',
+          closer: 'Where did your sign land?',
+        },
+      ];
+
+    case 'tarot':
+      return [
+        {
+          intent: 'hot_take',
+          opener:
+            'Reversed cards are not negative, they are the whisper version of the upright',
+          closerType: 'question',
+          closer: 'Agree or disagree?',
+        },
+        {
+          intent: 'identity_callout',
+          opener:
+            'If The Tower keeps showing up for you, your life is clearing space for something better',
+          closerType: 'question',
+          closer: 'What card keeps stalking you?',
+        },
+        {
+          intent: 'cosmic_now',
+          opener:
+            "Today's energy is pure Wheel of Fortune - expect the unexpected",
+          closerType: 'question',
+          closer: 'What just shifted for you?',
+        },
+        {
+          intent: 'ranking',
+          opener:
+            'Ranking tarot cards by how much they make people panic in readings',
+          closerType: 'question',
+          closer: 'Which card scares you most?',
+        },
+      ];
+
+    case 'lunar':
+      return [
+        {
+          intent: 'hot_take',
+          opener:
+            'Full moons do not make people crazy, they just expose what was already brewing',
+          closerType: 'question',
+          closer: 'What did the last full moon reveal for you?',
+        },
+        {
+          intent: 'identity_callout',
+          opener:
+            'If you were born during a new moon you are wired for fresh starts',
+          closerType: 'question',
+          closer: 'New moon babies, where are you?',
+        },
+        {
+          intent: 'cosmic_now',
+          opener:
+            'The moon is shifting energy tonight and you might feel restless',
+          closerType: 'question',
+          closer: 'What is keeping you up tonight?',
+        },
+        {
+          intent: 'ranking',
+          opener: 'Ranking moon phases by how much they mess with your sleep',
+          closerType: 'question',
+          closer: 'Which phase hits you hardest?',
+        },
+      ];
+
+    case 'planetary':
+      return [
+        {
+          intent: 'hot_take',
+          opener:
+            'Mercury retrograde gets blamed for everything but Saturn return is the real test',
+          closerType: 'question',
+          closer: 'What planet energy do you feel most?',
+        },
+        {
+          intent: 'identity_callout',
+          opener:
+            'If your Venus is in Capricorn you love hard but you love practical',
+          closerType: 'question',
+          closer: 'Where is your Venus?',
+        },
+        {
+          intent: 'cosmic_now',
+          opener:
+            'Venus is making moves today and your relationships are the target',
+          closerType: 'question',
+          closer: 'What came up in your connections today?',
+        },
+        {
+          intent: 'ranking',
+          opener: 'Ranking planets by how dramatic their retrogrades feel',
+          closerType: 'question',
+          closer: 'Which retrograde wrecks you most?',
+        },
+      ];
+
+    case 'crystals':
+      return [
+        {
+          intent: 'hot_take',
+          opener:
+            'Amethyst is the most overhyped crystal and clear quartz does the same job better',
+          closerType: 'question',
+          closer: 'Defend your favourite crystal below',
+        },
+        {
+          intent: 'identity_callout',
+          opener:
+            'If you sleep with black tourmaline under your pillow you already know the difference',
+          closerType: 'question',
+          closer: 'What crystal do you keep closest?',
+        },
+        {
+          intent: 'cosmic_now',
+          opener:
+            'Today is a good day to cleanse your crystals, the energy feels heavy',
+          closerType: 'try_this',
+          closer: 'Run them under moonlight tonight and notice what shifts.',
+        },
+        {
+          intent: 'ranking',
+          opener:
+            'Ranking crystals by how fast they change your energy when you hold them',
+          closerType: 'question',
+          closer: 'Which crystal hits you instantly?',
+        },
+      ];
+
+    case 'numerology':
+      return [
+        {
+          intent: 'hot_take',
+          opener:
+            'Seeing 11:11 means nothing unless you act on the thought you had in that moment',
+          closerType: 'question',
+          closer: 'What number keeps finding you?',
+        },
+        {
+          intent: 'identity_callout',
+          opener:
+            'If your life path is 7 you have always felt like the observer in the room',
+          closerType: 'question',
+          closer: 'What is your life path number?',
+        },
+        {
+          intent: 'cosmic_now',
+          opener:
+            "Today's universal number is pulling focus to your inner world",
+          closerType: 'question',
+          closer: 'What keeps replaying in your mind today?',
+        },
+        {
+          intent: 'ranking',
+          opener:
+            'Ranking life path numbers by how stubborn they are about their goals',
+          closerType: 'question',
+          closer: 'Does your number match your stubbornness?',
+        },
+      ];
+
+    default:
+      return [
+        {
+          intent: 'hot_take',
+          opener:
+            'Spiritual growth is not about being calm all the time, it is about choosing your response',
+          closerType: 'question',
+          closer: 'What is your unpopular spiritual opinion?',
+        },
+        {
+          intent: 'identity_callout',
+          opener:
+            'If you check your horoscope first thing in the morning, you are my people',
+          closerType: 'question',
+          closer: 'When do you check yours?',
+        },
+        {
+          intent: 'cosmic_now',
+          opener: 'The energy today is asking you to slow down and listen',
+          closerType: 'question',
+          closer: 'What message are you ignoring right now?',
+        },
+        {
+          intent: 'ranking',
+          opener: 'Ranking the best cosmic tools for self-discovery',
+          closerType: 'question',
+          closer: 'What is your go-to: astrology, tarot, or numerology?',
+        },
+      ];
+  }
 }
 
 export function withSabbatThreads(themes: SabbatTheme[]): SabbatTheme[] {

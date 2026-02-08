@@ -7,6 +7,12 @@ import {
   generateStarfield,
   getStarCount,
 } from '@/lib/share/og-utils';
+import {
+  ShareFooter,
+  SHARE_BASE_URL,
+  SHARE_BORDERS,
+  SHARE_CARDS,
+} from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
@@ -177,13 +183,13 @@ export async function GET(request: NextRequest) {
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+    const baseUrl = SHARE_BASE_URL;
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
     const padding = isLandscape ? 48 : isStory ? 60 : 60;
     const titleSize = isLandscape ? 44 : isStory ? 84 : 72;
-    const symbolSize = isLandscape ? 140 : isStory ? 280 : 200;
+    const symbolSize = isLandscape ? 120 : isStory ? 200 : 160;
     const signSize = isLandscape ? 52 : isStory ? 96 : 72;
     const badgeSize = isLandscape ? 20 : isStory ? 32 : 28;
     const themeSize = isLandscape ? 18 : isStory ? 32 : 30;
@@ -396,36 +402,7 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            marginTop: 16,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={24}
-            height={24}
-            style={{ opacity: 0.6 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontFamily: 'Roboto Mono',
-              fontWeight: 300,
-              fontSize: 16,
-              opacity: 0.6,
-              letterSpacing: '0.1em',
-              color: OG_COLORS.textPrimary,
-              display: 'flex',
-            }}
-          >
-            Join free at lunary.app
-          </span>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     ) : isStory ? (
       // Story Layout - Giant symbol, fill vertical space
@@ -436,7 +413,7 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: '120px 60px 200px 60px',
+          padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -550,8 +527,8 @@ export async function GET(request: NextRequest) {
               flexDirection: 'column',
               gap: 16,
               alignItems: 'center',
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
+              background: SHARE_CARDS.primary,
+              border: SHARE_BORDERS.card,
               borderRadius: 20,
               padding: '28px 48px',
             }}
@@ -585,37 +562,7 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            marginTop: 'auto',
-            paddingTop: 32,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={28}
-            height={28}
-            style={{ opacity: 0.6 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontFamily: 'Roboto Mono',
-              fontWeight: 300,
-              fontSize: 20,
-              opacity: 0.6,
-              letterSpacing: '0.1em',
-              color: OG_COLORS.textPrimary,
-              display: 'flex',
-            }}
-          >
-            Join free at lunary.app
-          </span>
-        </div>
+        <ShareFooter baseUrl={baseUrl} format={format} />
       </div>
     ) : (
       // Square Layout
@@ -747,6 +694,7 @@ export async function GET(request: NextRequest) {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
+                flexWrap: 'wrap',
                 gap: 12,
                 alignItems: 'center',
               }}
@@ -768,37 +716,7 @@ export async function GET(request: NextRequest) {
           </div>
 
           {/* Footer */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 12,
-              marginTop: 'auto',
-              paddingTop: 24,
-            }}
-          >
-            <img
-              src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-              width={24}
-              height={24}
-              style={{ opacity: 0.6 }}
-              alt=''
-            />
-            <span
-              style={{
-                fontFamily: 'Roboto Mono',
-                fontWeight: 300,
-                fontSize: 16,
-                opacity: 0.6,
-                letterSpacing: '0.1em',
-                color: OG_COLORS.textPrimary,
-                display: 'flex',
-              }}
-            >
-              Join free at lunary.app
-            </span>
-          </div>
+          <ShareFooter baseUrl={baseUrl} format={format} />
         </div>
       </div>
     );

@@ -162,8 +162,8 @@ export function ShareDailyTarotCard({
     typeof navigator.canShare === 'function';
 
   const socialUrls = {
-    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My daily tarot card is ${cardName} ✨`)}&url=${encodeURIComponent('https://lunary.app/tarot')}`,
-    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My daily tarot card is ${cardName} ✨ lunary.app/tarot`)}`,
+    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My daily tarot card is ${cardName}`)}&url=${encodeURIComponent('https://lunary.app/tarot')}`,
+    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My daily tarot card is ${cardName} lunary.app/tarot`)}`,
   };
 
   return (

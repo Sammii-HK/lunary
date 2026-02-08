@@ -11,6 +11,9 @@ import {
   OGCategoryLabel,
   OGAttributeLine,
   OGMinimalFooter,
+  OGStarfield,
+  OGGlowOrbs,
+  OGSymbolBackdrop,
   createOGResponse,
   getThematicSizes,
   createThematicTheme,
@@ -20,7 +23,6 @@ import {
   getCategoryTheme,
   getSymbolForContent,
   getAttributeString,
-  chakraColors,
   usesAstronomiconFont,
   usesImageForSymbol,
   getMoonPhaseImage,
@@ -30,7 +32,12 @@ import {
   needsRunicFont,
   usesMoonImages,
 } from '../../../../../utils/og/grimoire-og-data';
-import { createSubtleGradient } from '../../../../../utils/og/gradients';
+import {
+  createSubtleGradient,
+  createVibrantGradient,
+  hexToRgba,
+} from '../../../../../utils/og/gradients';
+import { thematicPaletteConfig } from '@/constants/seo/thematic-palette-config';
 import { capitalizeThematicTitle } from '../../../../../utils/og/text';
 
 export const runtime = 'nodejs';
@@ -206,23 +213,40 @@ export async function GET(request: NextRequest): Promise<Response> {
       runicFont = await loadRunicFont();
     }
 
-    // Get theme - prefer dynamic data if available
+    // Get theme - ALWAYS prefer vibrant 3-color palette over legacy 2-color gradients
+    // Priority: palette config > dynamic single color > dynamic 2-color gradient > category fallback
+    const paletteKey =
+      category.toLowerCase() as keyof typeof thematicPaletteConfig.palettesByTopLevelCategory;
+    const paletteEntry =
+      thematicPaletteConfig.palettesByTopLevelCategory[paletteKey];
+
     let themeData;
-    if (dynamicData?.gradient) {
+    if (paletteEntry) {
+      // Use vibrant 3-color palette (new system)
       themeData = {
-        gradient: createSubtleGradient(dynamicData.gradient),
-        accentColor: dynamicData.color || '#A78BFA',
+        gradient: createVibrantGradient(paletteEntry.backgrounds),
+        accentColor: dynamicData?.color || paletteEntry.highlight,
         textColor: '#F1F5F9',
         subtleTextColor: 'rgba(148, 163, 184, 0.6)',
       };
     } else if (dynamicData?.color) {
+      // Single color with default gradient (used by crystals, chakras)
       themeData = {
         gradient: createSubtleGradient(['#1e293b', '#0f172a']),
         accentColor: dynamicData.color,
         textColor: '#F1F5F9',
         subtleTextColor: 'rgba(148, 163, 184, 0.6)',
       };
+    } else if (dynamicData?.gradient) {
+      // Legacy 2-color gradient fallback (old tarot suits, etc.)
+      themeData = {
+        gradient: createSubtleGradient(dynamicData.gradient),
+        accentColor: dynamicData.color || '#A78BFA',
+        textColor: '#F1F5F9',
+        subtleTextColor: 'rgba(148, 163, 184, 0.6)',
+      };
     } else {
+      // getCategoryTheme fallback (for categories not in palette config)
       themeData = getCategoryTheme(category, slug);
     }
     const theme = createThematicTheme(themeData);
@@ -296,16 +320,9 @@ export async function GET(request: NextRequest): Promise<Response> {
         ? rawAttributeText
         : null;
 
-    // Get glow color for chakras - use dynamic color or fallback
-    const chakraColor =
-      category === 'chakras'
-        ? dynamicData?.color || chakraColors[slug]?.primary
-        : null;
-    const glowColor = chakraColor
-      ? `${chakraColor}50`
-      : category === 'chakras' && slug
-        ? chakraColors[slug]?.glow
-        : undefined;
+    // Universal glow color - all categories get a glow from their accent color
+    const accentColor = themeData.accentColor;
+    const glowColor = hexToRgba(accentColor, 0.3);
 
     // Poetic category label - prefer dynamic data
     const categoryLabel =
@@ -355,8 +372,16 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     const contentOffsetY = isCoverImage ? -140 : format === 'story' ? -88 : 0;
 
-    return createOGResponse(
+    const ogResponse = createOGResponse(
       <OGWrapper theme={theme} padding={sizes.padding}>
+        {/* Atmospheric layers */}
+        <OGStarfield
+          seed={`${category}-${slug}`}
+          count={format === 'story' ? 80 : 60}
+          accentColor={accentColor}
+        />
+        <OGGlowOrbs accentColor={accentColor} />
+
         {/* Category label at top */}
         <div
           style={{
@@ -364,11 +389,12 @@ export async function GET(request: NextRequest): Promise<Response> {
             justifyContent: 'center',
             alignItems: 'center',
             paddingTop: format === 'story' ? '40px' : '20px',
+            zIndex: 1,
           }}
         >
           <OGCategoryLabel
             label={categoryLabel}
-            color={themeData.subtleTextColor}
+            color={hexToRgba(accentColor, 0.7)}
             size={sizes.labelSize}
           />
         </div>
@@ -381,18 +407,31 @@ export async function GET(request: NextRequest): Promise<Response> {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              zIndex: 1,
             }}
           >
             {/* Moon phase image */}
             {moonImage && (
-              <div style={{ display: 'flex', marginBottom: '50px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  marginBottom: '50px',
+                  position: 'relative',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <OGSymbolBackdrop
+                  accentColor={accentColor}
+                  size={sizes.symbolSize * 2}
+                />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`${baseUrl}${moonImage}`}
                   width={sizes.symbolSize}
                   height={sizes.symbolSize}
                   alt={formattedTitle}
-                  style={{ opacity: 0.95 }}
+                  style={{ opacity: 0.95, position: 'relative' }}
                 />
               </div>
             )}
@@ -403,20 +442,32 @@ export async function GET(request: NextRequest): Promise<Response> {
                 style={{
                   display: 'flex',
                   marginBottom: '50px',
-                  fontFamily: needsAstromicon
-                    ? 'Astronomicon'
-                    : needsRunic
-                      ? 'Noto Sans Runic'
-                      : 'Roboto Mono',
-                  fontSize: `${sizes.symbolSize}px`,
-                  color: themeData.textColor,
-                  textShadow: glowColor
-                    ? `0 0 40px ${glowColor}, 0 0 80px ${glowColor}`
-                    : 'none',
-                  lineHeight: 1,
+                  position: 'relative',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                {displaySymbol}
+                <OGSymbolBackdrop
+                  accentColor={accentColor}
+                  size={sizes.symbolSize * 2.5}
+                />
+                <div
+                  style={{
+                    display: 'flex',
+                    fontFamily: needsAstromicon
+                      ? 'Astronomicon'
+                      : needsRunic
+                        ? 'Noto Sans Runic'
+                        : 'Roboto Mono',
+                    fontSize: `${sizes.symbolSize}px`,
+                    color: accentColor,
+                    textShadow: `0 0 40px ${glowColor}, 0 0 80px ${glowColor}`,
+                    lineHeight: 1,
+                    position: 'relative',
+                  }}
+                >
+                  {displaySymbol}
+                </div>
               </div>
             )}
 
@@ -455,13 +506,31 @@ export async function GET(request: NextRequest): Promise<Response> {
         </OGContentCenter>
 
         {/* Minimal footer */}
-        <OGMinimalFooter opacity={0.35} />
+        <OGMinimalFooter opacity={0.5} />
       </OGWrapper>,
       {
         size: format as OGImageSize,
         fonts,
       },
     );
+
+    // Add cache headers that respect the v param for proper cache busting
+    const headers = new Headers(ogResponse.headers);
+    headers.set(
+      'Cache-Control',
+      'public, s-maxage=2592000, stale-while-revalidate=86400, immutable',
+    );
+    headers.set('CDN-Cache-Control', 'public, s-maxage=2592000, immutable');
+    headers.set(
+      'Vercel-CDN-Cache-Control',
+      'public, s-maxage=2592000, immutable',
+    );
+
+    return new Response(ogResponse.body, {
+      status: ogResponse.status,
+      statusText: ogResponse.statusText,
+      headers,
+    });
   } catch (error) {
     console.error('Error generating thematic image:', error);
     return new NextResponse('Error generating image', { status: 500 });

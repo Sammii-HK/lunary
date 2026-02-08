@@ -3,6 +3,12 @@
  * Based on POSTING_STRATEGY.md
  */
 
+import {
+  CONTENT_TYPE_CONFIGS,
+  POSTING_TIME_WINDOWS,
+} from '@/lib/social/video-scripts/content-types';
+import type { ContentType } from '@/lib/social/video-scripts/content-types';
+
 export interface RecommendedTime {
   hour: number;
   label: string;
@@ -138,19 +144,84 @@ export function getPlatformPostingInfo(
 }
 
 /**
- * Video posting times (UTC)
- * Primary videos post at 12:00 UTC (UK lunch, US morning)
- * Secondary videos post at 20:00 UTC (UK evening, US afternoon)
+ * Video posting times (UTC) — 3-slot daily schedule
+ *
+ * | Slot         | UTC  | Purpose                                  |
+ * |--------------|------|------------------------------------------|
+ * | primary      | 12   | Educational (grimoire themes)            |
+ * | engagementA  | 17   | Engagement format (UK evening / US lunch)|
+ * | engagementB  | 20   | Engagement format (UK leisure / US peak) |
  */
 export const VIDEO_POSTING_HOURS = {
   primary: 12,
+  engagementA: 17,
+  engagementB: 20,
+  /** @deprecated Use engagementB — kept for backward compatibility */
   secondary: 20,
 } as const;
 
+export type VideoSlot = 'primary' | 'engagementA' | 'engagementB';
+
+export function getVideoSlotHour(slot: VideoSlot): number {
+  return VIDEO_POSTING_HOURS[slot];
+}
+
+/** @deprecated Use getVideoSlotHour — kept for backward compatibility */
 export function getVideoPostingHour(isSecondary: boolean): number {
   return isSecondary
-    ? VIDEO_POSTING_HOURS.secondary
+    ? VIDEO_POSTING_HOURS.engagementB
     : VIDEO_POSTING_HOURS.primary;
+}
+
+/**
+ * Instagram Reels posting times for engagement video cross-posts (UTC)
+ * Staggered from TikTok times to hit Instagram's optimal hours.
+ */
+export const INSTAGRAM_REELS_HOURS = {
+  engagementA: 15,
+  engagementB: 19,
+} as const;
+
+export function getInstagramReelsHour(
+  slot: 'engagementA' | 'engagementB',
+): number {
+  return INSTAGRAM_REELS_HOURS[slot];
+}
+
+/**
+ * Get optimal posting hour using deterministic rotation through time windows.
+ *
+ * Same inputs always produce the same output (reproducible for debugging),
+ * but different dates naturally rotate through the window hours, providing
+ * built-in A/B comparison data.
+ */
+export function getOptimalPostingHour(params: {
+  contentType: ContentType;
+  scheduledDate: Date;
+  topic?: string;
+}): number {
+  const config = CONTENT_TYPE_CONFIGS[params.contentType];
+  const window = POSTING_TIME_WINDOWS[config.targetAudience];
+
+  const dateStr = params.scheduledDate.toISOString().split('T')[0];
+  const seed = simplePostingHash(
+    `posting-${params.contentType}-${dateStr}-${params.topic || ''}`,
+  );
+
+  const isWeekend = [0, 6].includes(params.scheduledDate.getDay());
+  const adjust = isWeekend ? window.weekendAdjust : 0;
+  const hour = window.windowHours[seed % window.windowHours.length] + adjust;
+
+  return Math.max(0, Math.min(23, hour));
+}
+
+function simplePostingHash(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash + char) | 0;
+  }
+  return Math.abs(hash);
 }
 
 /**

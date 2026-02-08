@@ -145,44 +145,53 @@ export async function generateTransitVideosFromCosmicData(
 }
 
 /**
- * Get today's transit video if one should be posted
+ * Get a transit video for a given date if a major transit is nearby.
+ * Looks up to 10 days ahead from `fromDate` to catch upcoming ingresses/stations.
  */
-export async function getTodaysTransitVideo(): Promise<VideoScript | null> {
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
+export async function getTodaysTransitVideo(
+  fromDate?: Date,
+): Promise<VideoScript | null> {
+  const today = fromDate ?? new Date();
 
-  // Check for transits happening in 7 days
-  const targetDate = new Date(today);
-  targetDate.setDate(today.getDate() + 7);
+  // Scan a 10-day window ahead to catch nearby major transits
+  for (const daysAhead of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + daysAhead);
 
-  const nextDay = new Date(targetDate);
-  nextDay.setDate(targetDate.getDate() + 1);
+    const nextDay = new Date(targetDate);
+    nextDay.setDate(targetDate.getDate() + 1);
 
-  const { ingresses } = await detectUpcomingSignChanges(targetDate, nextDay);
-  const stations = await detectUpcomingRetrogradeStations(targetDate, nextDay);
-
-  // Find the most significant event
-  const significantIngress = ingresses.find(
-    (i) => !['Sun', 'Moon', 'Mercury'].includes(i.planet) && i.priority >= 8,
-  );
-
-  if (significantIngress) {
-    const transitEvent = signChangeToTransitEvent(significantIngress, nextDay);
-    return await generateTransitAlertScript(
-      transitEvent,
-      today,
-      'https://lunary.app',
+    const { ingresses } = await detectUpcomingSignChanges(targetDate, nextDay);
+    const stations = await detectUpcomingRetrogradeStations(
+      targetDate,
+      nextDay,
     );
-  }
 
-  if (stations.length > 0) {
-    const transitEvent = retrogradeToTransitEvent(stations[0], nextDay);
-    return await generateTransitAlertScript(
-      transitEvent,
-      today,
-      'https://lunary.app',
+    // Find the most significant event
+    const significantIngress = ingresses.find(
+      (i) => !['Sun', 'Moon', 'Mercury'].includes(i.planet) && i.priority >= 8,
     );
+
+    if (significantIngress) {
+      const transitEvent = signChangeToTransitEvent(
+        significantIngress,
+        nextDay,
+      );
+      return await generateTransitAlertScript(
+        transitEvent,
+        today,
+        'https://lunary.app',
+      );
+    }
+
+    if (stations.length > 0) {
+      const transitEvent = retrogradeToTransitEvent(stations[0], nextDay);
+      return await generateTransitAlertScript(
+        transitEvent,
+        today,
+        'https://lunary.app',
+      );
+    }
   }
 
   return null;

@@ -30,11 +30,26 @@ import {
   getSoftIssuesAsFeedback,
   hasOnlySoftIssues,
 } from '../validation';
-import { buildHookForTopic } from '../hooks';
+import {
+  buildHookForTopic,
+  selectHookStyle,
+  buildCommentBaitHook,
+} from '../hooks';
 import { sanitizeVideoScriptLines } from '../sanitization';
+import {
+  getContentTypeFromCategory,
+  getPerformanceBiasedStructure,
+} from '../content-type-voices';
+import type { HookIntroVariant } from '../types';
 import { buildTikTokPrompt } from './prompts';
 import { buildFallbackShortScript } from './fallback';
-import { generateTikTokMetadata, generateCoverImageUrl } from './metadata';
+import {
+  generateTikTokMetadata,
+  generateCoverImageUrl,
+  generateTikTokCaption,
+  shouldIncludeCta,
+} from './metadata';
+import { getOptimalPostingHour } from '@/utils/posting-times';
 
 /**
  * Parse script into sections for metadata
@@ -108,10 +123,10 @@ async function generateTikTokScriptContent(
       schema: VideoScriptSchema,
       schemaName: 'video_script',
       systemPrompt:
-        'You are an educational content creator writing concise, spoken video scripts for TikTok. Each script should feel unique and engaging while maintaining educational value. Vary your approach, sentence structures, and narrative flow.',
+        'You write TikTok scripts that teach without feeling like a lecture. Your scripts sound like a smart friend explaining something fascinating at a party — confident, specific, slightly provocative. Every line earns the next second of watch time. You never sound like a textbook, a motivational poster, or a horoscope app. You sound like someone who actually knows this topic and has a take on it.',
       model: 'quality',
-      temperature: 0.5,
-      maxTokens: 600,
+      temperature: 0.7,
+      maxTokens: 700,
       retryNote,
     });
 
@@ -309,6 +324,49 @@ export async function generateTikTokScript(
   });
   const hookVersion = 1;
 
+  // Funnel tier: secondary content is consideration, primary is discovery
+  // (conversion is set by app-demo/comparison generators, not here)
+  const targetAudience = (
+    options?.secondaryThemeId ? 'consideration' : 'discovery'
+  ) as 'discovery' | 'consideration' | 'conversion';
+
+  // Performance tracking attributes
+  const contentTypeKey = getContentTypeFromCategory(theme.category);
+  const hookStyle = selectHookStyle(aspect as ContentAspect, targetAudience);
+  const {
+    name: scriptStructureName,
+    isLoop: hasLoopStructure,
+    isStitchBait: hasStitchBait,
+  } = await getPerformanceBiasedStructure(contentTypeKey);
+
+  // Hook intro animation variant (#7)
+  const hookIntroVariants: HookIntroVariant[] = [
+    'slide_up',
+    'typewriter',
+    'scale_pop',
+  ];
+  const hookIntroVariant: HookIntroVariant =
+    hookIntroVariants[Math.floor(Math.random() * hookIntroVariants.length)];
+
+  // Optimal posting hour from audience-based time window rotation
+  const scheduledContentType =
+    targetAudience === 'consideration'
+      ? 'educational-deepdive'
+      : 'primary-educational';
+  const scheduledHour = getOptimalPostingHour({
+    contentType: scheduledContentType,
+    scheduledDate,
+    topic: facet.title,
+  });
+
+  // CTA type: brand when CTA is included, engagement otherwise
+  const ctaType: 'engagement' | 'brand' = shouldIncludeCta(
+    targetAudience,
+    scheduledDate,
+  )
+    ? 'brand'
+    : 'engagement';
+
   const wordCount = countWords(fullScript);
   const sections = parseScriptIntoSections(fullScript);
   const metadata = generateTikTokMetadata(
@@ -320,6 +378,13 @@ export async function generateTikTokScript(
   metadata.angle = angle;
   metadata.topic = facet.title;
   metadata.aspect = aspect;
+  // Store tracking fields on metadata for video_performance auto-population
+  metadata.hookStyle = hookStyle;
+  metadata.scriptStructureName = scriptStructureName;
+  metadata.contentTypeKey = contentTypeKey;
+  metadata.hasLoopStructure = hasLoopStructure;
+  metadata.hasStitchBait = hasStitchBait;
+  metadata.hookIntroVariant = hookIntroVariant;
   const coverImageUrl = generateCoverImageUrl(
     facet,
     theme,
@@ -327,6 +392,54 @@ export async function generateTikTokScript(
     baseUrl,
     safeTotalParts,
   );
+
+  // Build overlays for Remotion renderer
+  const overlays: Array<{
+    text: string;
+    startTime: number;
+    endTime: number;
+    style: string;
+  }> = [];
+
+  // Series badge overlay (#6) — show for first 5 seconds when multi-part
+  if (safePartNumber && safeTotalParts > 1) {
+    overlays.push({
+      text: `Part ${safePartNumber}/${safeTotalParts}`,
+      startTime: 0,
+      endTime: 5,
+      style: 'series_badge',
+    });
+  }
+
+  // "Save this" closing overlay (#8) — last 3 seconds, non-conversion only
+  if (targetAudience !== 'conversion') {
+    const savePrompts = [
+      'Save this for later',
+      'Bookmark this one',
+      'Save for when you need it',
+      'Pin this',
+    ];
+    const saveSeed =
+      scheduledDate.getFullYear() * 10000 +
+      (scheduledDate.getMonth() + 1) * 100 +
+      scheduledDate.getDate();
+    const estimatedSeconds = wordCount / 2.6;
+    overlays.push({
+      text: savePrompts[saveSeed % savePrompts.length],
+      startTime: Math.max(estimatedSeconds - 3, 0),
+      endTime: estimatedSeconds,
+      style: 'stamp',
+    });
+  }
+
+  // Comment-bait identity trigger (#9) — stored on metadata for prompt injection
+  const commentBait = buildCommentBaitHook(facet.title, contentTypeKey);
+  if (commentBait) {
+    metadata.commentBait = commentBait;
+  }
+
+  // Store overlays on metadata for Remotion renderer
+  metadata.overlays = overlays;
 
   return {
     themeId: theme.id,
@@ -347,11 +460,25 @@ export async function generateTikTokScript(
     estimatedDuration: estimateDuration(wordCount),
     scheduledDate,
     status: 'draft',
-    metadata,
+    metadata: { ...metadata, targetAudience, scheduledHour },
     coverImageUrl,
     partNumber: safePartNumber,
-    writtenPostContent: undefined,
+    writtenPostContent: generateTikTokCaption(facet, theme, generatedHook, {
+      targetAudience,
+      partNumber: safePartNumber,
+      totalParts: safeTotalParts,
+      scheduledDate,
+      contentTypeKey,
+      grimoireSlug: facet.grimoireSlug,
+    }),
     hookText: generatedHook,
     hookVersion,
+    ctaType,
+    // Performance tracking
+    hookStyle,
+    scriptStructureName,
+    hasLoopStructure,
+    hasStitchBait,
+    hookIntroVariant,
   };
 }

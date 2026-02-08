@@ -3,6 +3,7 @@ import { readFile, unlink, mkdtemp } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import type { AudioSegment } from '@/remotion/utils/timing';
+import type { CategoryVisualConfig } from '@/remotion/config/category-visuals';
 
 // Note: @remotion/bundler and @remotion/renderer are dynamically imported
 // to avoid Next.js trying to parse the esbuild binary at compile time
@@ -71,17 +72,29 @@ export function scriptToAudioSegments(
 /**
  * Props for Remotion video rendering
  */
+import type { HookIntroVariant } from '@/lib/social/video-scripts/types';
+
 /** Overlay text element */
 interface Overlay {
   text: string;
   startTime: number;
   endTime: number;
-  style?: 'hook' | 'cta' | 'stamp' | 'chapter';
+  style?: 'hook' | 'hook_large' | 'cta' | 'stamp' | 'chapter' | 'series_badge';
+}
+
+/** SFX timing entry */
+interface SfxTiming {
+  time: number;
+  type: 'whoosh' | 'pop' | 'chime';
 }
 
 export interface RemotionVideoProps {
   /** Video format/composition ID */
-  format: 'ShortFormVideo' | 'MediumFormVideo' | 'LongFormVideo';
+  format:
+    | 'ShortFormVideo'
+    | 'MediumFormVideo'
+    | 'LongFormVideo'
+    | 'AppDemoVideo';
   /** Output file path */
   outputPath: string;
   /** Hook/title text */
@@ -117,6 +130,32 @@ export interface RemotionVideoProps {
   };
   /** Text overlays (hook, cta, stamps, chapters) */
   overlays?: Overlay[];
+  /** Category visual configuration for themed backgrounds */
+  categoryVisuals?: CategoryVisualConfig;
+  /** Unique seed for deterministic but varied backgrounds per render */
+  seed?: string;
+  /** AppDemoVideo-specific: screen recording source path (relative to public/) */
+  videoSrc?: string;
+  /** AppDemoVideo-specific: hook text */
+  hookTextForDemo?: string;
+  /** AppDemoVideo-specific: hook start time */
+  hookStartTime?: number;
+  /** AppDemoVideo-specific: hook end time */
+  hookEndTime?: number;
+  /** AppDemoVideo-specific: outro text */
+  outroText?: string;
+  /** AppDemoVideo-specific: outro start time */
+  outroStartTime?: number;
+  /** AppDemoVideo-specific: outro end time */
+  outroEndTime?: number;
+  /** CRF quality setting override */
+  crf?: number;
+  /** Hook intro animation variant (#7) */
+  hookIntroVariant?: HookIntroVariant;
+  /** SFX timings for pattern interrupts (#12) */
+  sfxTimings?: SfxTiming[];
+  /** Subtitle background opacity (#14) */
+  subtitleBackgroundOpacity?: number;
 }
 
 /**
@@ -156,7 +195,26 @@ export async function renderRemotionVideo(
   // Prepare input props based on format
   let inputProps: Record<string, unknown>;
 
-  if (props.format === 'ShortFormVideo') {
+  // Generate a fallback seed if none provided
+  const seed = props.seed || `video-${Date.now()}`;
+
+  if (props.format === 'AppDemoVideo') {
+    inputProps = {
+      videoSrc: props.videoSrc,
+      hookText: props.hookTextForDemo || props.hookText || '',
+      hookStartTime: props.hookStartTime ?? 0,
+      hookEndTime: props.hookEndTime ?? 2,
+      overlays: props.overlays || [],
+      outroText: props.outroText || '',
+      outroStartTime: props.outroStartTime ?? props.durationSeconds - 2,
+      outroEndTime: props.outroEndTime ?? props.durationSeconds,
+      audioUrl: props.audioUrl,
+      segments: props.segments,
+      categoryVisuals: props.categoryVisuals,
+      highlightTerms: props.highlightTerms || [],
+      showProgress: true,
+    };
+  } else if (props.format === 'ShortFormVideo') {
     inputProps = {
       hookText: props.hookText || props.title,
       hookSubtitle: props.hookSubtitle || props.subtitle,
@@ -167,6 +225,16 @@ export async function renderRemotionVideo(
       highlightTerms: props.highlightTerms || [],
       showProgress: true,
       overlays: props.overlays || [],
+      categoryVisuals: props.categoryVisuals,
+      seed,
+      hookIntroVariant: props.hookIntroVariant,
+      sfxTimings: props.sfxTimings || [
+        { time: 3, type: 'whoosh' as const },
+        { time: 6, type: 'pop' as const },
+      ],
+      subtitleBackgroundOpacity:
+        props.subtitleBackgroundOpacity ??
+        props.categoryVisuals?.subtitleBackgroundOpacity,
     };
   } else if (props.format === 'MediumFormVideo') {
     inputProps = {
@@ -178,6 +246,8 @@ export async function renderRemotionVideo(
       highlightTerms: props.highlightTerms || [],
       showProgress: true,
       overlays: props.overlays || [],
+      categoryVisuals: props.categoryVisuals,
+      seed,
     };
   } else {
     // LongFormVideo
@@ -194,6 +264,8 @@ export async function renderRemotionVideo(
         title: 'Lunary',
         subtitle: 'Your Cosmic Guide',
       },
+      categoryVisuals: props.categoryVisuals,
+      seed,
     };
   }
 
@@ -222,7 +294,7 @@ export async function renderRemotionVideo(
     outputLocation: outputPath,
     inputProps,
     // Quality settings
-    crf: 20, // Good balance of quality and file size
+    crf: props.crf ?? 20, // Good balance of quality and file size
     pixelFormat: 'yuv420p', // Web-compatible
     // Progress logging
     onProgress: ({ progress }) => {
