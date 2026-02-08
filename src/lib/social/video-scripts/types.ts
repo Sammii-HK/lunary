@@ -4,6 +4,7 @@
 
 import { ContentAspect } from '../shared/types';
 import type { ContentType } from './content-types';
+import type { VideoSlot } from '@/utils/posting-times';
 
 export interface ScriptSection {
   name: string;
@@ -19,7 +20,26 @@ export interface TikTokMetadata {
   angle?: string;
   topic?: string;
   aspect?: string;
+  // Performance tracking fields (auto-populated on video_performance)
+  hookStyle?: string;
+  scriptStructureName?: string;
+  contentTypeKey?: string;
+  hasLoopStructure?: boolean;
+  hasStitchBait?: boolean;
+  hookIntroVariant?: HookIntroVariant;
+  ctaType?: string;
+  commentBait?: string;
+  overlays?: Array<{
+    text: string;
+    startTime: number;
+    endTime: number;
+    style: string;
+  }>;
+  slot?: VideoSlot;
 }
+
+/** Hook intro animation variant */
+export type HookIntroVariant = 'slide_up' | 'typewriter' | 'scale_pop';
 
 export interface VideoScript {
   id?: number;
@@ -53,6 +73,13 @@ export interface VideoScript {
   coverImageUrl?: string;
   partNumber?: number; // 1, 2, or 3
   writtenPostContent?: string; // Social media post content for this video
+  // Performance tracking attributes
+  hookStyle?: string;
+  scriptStructureName?: string;
+  ctaType?: 'engagement' | 'brand';
+  hasLoopStructure?: boolean;
+  hasStitchBait?: boolean;
+  hookIntroVariant?: HookIntroVariant;
 }
 
 export interface WeeklyVideoScripts {
