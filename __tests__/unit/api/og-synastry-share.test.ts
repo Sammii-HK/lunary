@@ -22,6 +22,16 @@ jest.mock('next/og', () => ({
   }),
 }));
 
+// Mock loadShareFonts to avoid real font loading in tests
+jest.mock('@/lib/share/og-share-utils', () => ({
+  loadShareFonts: jest.fn().mockResolvedValue([]),
+  truncateText: jest.requireActual('@/lib/share/og-share-utils').truncateText,
+  ShareFooter: jest.requireActual('@/lib/share/og-share-utils').ShareFooter,
+  SHARE_BASE_URL: 'https://lunary.app',
+  generateStarfield: jest.requireActual('@/lib/share/og-share-utils')
+    .generateStarfield,
+}));
+
 import { GET } from '@/app/api/og/share/synastry/route';
 import { kvGet } from '@/lib/cloudflare/kv';
 import { ImageResponse } from 'next/og';
@@ -124,7 +134,7 @@ describe('OG Synastry Share Route', () => {
       await GET(request);
 
       const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
-      expect(call[1]).toEqual({ width: 1080, height: 1080 });
+      expect(call[1]).toMatchObject({ width: 1080, height: 1080 });
     });
 
     it('handles landscape format (1200x630)', async () => {
@@ -140,7 +150,7 @@ describe('OG Synastry Share Route', () => {
       await GET(request);
 
       const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
-      expect(call[1]).toEqual({ width: 1200, height: 630 });
+      expect(call[1]).toMatchObject({ width: 1200, height: 630 });
     });
 
     it('handles story format (1080x1920)', async () => {
@@ -156,7 +166,7 @@ describe('OG Synastry Share Route', () => {
       await GET(request);
 
       const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
-      expect(call[1]).toEqual({ width: 1080, height: 1920 });
+      expect(call[1]).toMatchObject({ width: 1080, height: 1920 });
     });
   });
 
@@ -214,41 +224,9 @@ describe('OG Synastry Share Route', () => {
       expect(element.props.style.display).toBe('flex');
     });
 
-    it('uses correct icon path (apple-touch-icon.png)', async () => {
-      const params = new URLSearchParams({
-        friendName: 'Jane',
-        compatibilityScore: '80',
-      });
-      const request = new NextRequest(
-        `https://lunary.app/api/og/share/synastry?${params.toString()}`,
-      );
-
-      await GET(request);
-
-      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
-      const element = call[0];
-
-      // Recursively find img element
-      const findImg = (el: any): any => {
-        if (!el || typeof el !== 'object') return null;
-        if (el.type === 'img') return el;
-        if (el.props?.children) {
-          const children = el.props.children;
-          if (Array.isArray(children)) {
-            for (const child of children) {
-              const found = findImg(child);
-              if (found) return found;
-            }
-          }
-          return findImg(children);
-        }
-        return null;
-      };
-
-      const imgElement = findImg(element);
-      expect(imgElement).toBeTruthy();
-      expect(imgElement.props.src).toContain('apple-touch-icon.png');
-      expect(imgElement.props.alt).toBe('Lunary');
+    it.skip('uses correct icon path (apple-touch-icon.png)', async () => {
+      // This test is obsolete - the synastry OG image no longer includes an icon
+      // It now uses a starfield background with text-based layout
     });
 
     it('displays user names in the title', async () => {
@@ -329,8 +307,8 @@ describe('OG Synastry Share Route', () => {
       const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const elementString = JSON.stringify(call[0]);
 
-      // Green color for high scores
-      expect(elementString).toContain('#22C55E');
+      // Blue-purple color for high scores (comet trail)
+      expect(elementString).toContain('#7B7BE8');
     });
 
     it('uses purple color for medium-high scores (60-79)', async () => {
@@ -365,8 +343,8 @@ describe('OG Synastry Share Route', () => {
       const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const elementString = JSON.stringify(call[0]);
 
-      // Yellow color for medium scores
-      expect(elementString).toContain('#EAB308');
+      // Light purple color for medium scores (galaxy haze)
+      expect(elementString).toContain('#C77DFF');
     });
 
     it('uses red color for low scores (< 40)', async () => {
@@ -383,8 +361,8 @@ describe('OG Synastry Share Route', () => {
       const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const elementString = JSON.stringify(call[0]);
 
-      // Red color for low scores
-      expect(elementString).toContain('#EF4444');
+      // Rose color for low scores (cosmic rose)
+      expect(elementString).toContain('#EE789E');
     });
   });
 
