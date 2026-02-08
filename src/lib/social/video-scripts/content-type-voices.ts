@@ -786,8 +786,9 @@ export const CONTENT_TYPE_VOICES: Record<
       'and its not close',
       'bottom tier',
       'top tier',
-      'fight me on this',
+      'prove me wrong',
       'comment if you disagree',
+      'tell me where I went wrong',
     ],
   },
 
@@ -816,9 +817,10 @@ export const CONTENT_TYPE_VOICES: Record<
       'unpopular opinion',
       'hot take',
       'nobody talks about this',
-      'fight me',
-      'I said what I said',
       'prove me wrong',
+      'I said what I said',
+      'tell me I am wrong',
+      'change my mind',
     ],
   },
 

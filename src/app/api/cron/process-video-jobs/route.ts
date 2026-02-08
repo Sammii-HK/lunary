@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { head, put } from '@vercel/blob';
 import { composeVideo } from '@/lib/video/compose-video';
+import {
+  renderRemotionVideo,
+  isRemotionAvailable,
+  scriptToAudioSegments,
+} from '@/lib/video/remotion-renderer';
 import { generateVoiceover } from '@/lib/tts';
 import { TTS_PRESETS } from '@/lib/tts/presets';
 import { buildThematicVideoComposition } from '@/lib/video/thematic-video';
@@ -9,6 +14,24 @@ import { buildVideoCaption } from '@/lib/social/video-captions';
 import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
 import { getImageBaseUrl } from '@/lib/urls';
 import { createHash } from 'crypto';
+import { writeFile, unlink, mkdtemp } from 'fs/promises';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import ffmpeg from 'fluent-ffmpeg';
+
+function getAudioDurationFromBuffer(buffer: Buffer): Promise<number> {
+  return new Promise(async (resolve, reject) => {
+    const tempDir = await mkdtemp(join(tmpdir(), 'audio-dur-'));
+    const tempPath = join(tempDir, 'audio.mp3');
+    await writeFile(tempPath, buffer);
+    ffmpeg.ffprobe(tempPath, async (err, metadata) => {
+      await unlink(tempPath).catch(() => {});
+      if (err) reject(err);
+      else if (metadata.format.duration) resolve(metadata.format.duration);
+      else reject(new Error('Could not determine audio duration'));
+    });
+  });
+}
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes for video processing
@@ -136,6 +159,8 @@ export async function POST(request: NextRequest) {
 
   try {
     await ensureVideoJobsTable();
+    // Clean up orphaned jobs — but don't require week_theme match
+    // (engagement scripts may have different theme names than their social_posts)
     await sql`
       DELETE FROM video_jobs vj
       WHERE vj.status IN ('pending', 'failed')
@@ -145,7 +170,7 @@ export async function POST(request: NextRequest) {
           JOIN social_posts sp
             ON sp.topic = vs.facet_title
            AND sp.scheduled_date::date = vs.scheduled_date
-           AND sp.week_theme = vs.theme_name
+           AND sp.post_type = 'video'
            AND sp.status IN ('pending', 'approved')
           WHERE vs.id = vj.script_id
         )
@@ -230,6 +255,7 @@ export async function POST(request: NextRequest) {
           FROM social_posts
           WHERE topic = ${script.facet_title}
             AND scheduled_date::date = ${dateKey}
+            AND post_type = 'video'
           ORDER BY created_at DESC
           LIMIT 1
         `;
@@ -263,24 +289,29 @@ export async function POST(request: NextRequest) {
         const force = url.searchParams.get('force') === 'true';
         let videoUrl = force ? undefined : existingVideoUrl;
         if (!videoUrl) {
-          const { images, overlays, highlightTerms, highlightColor } =
-            buildThematicVideoComposition({
-              script: script.full_script,
-              facet: facet || {
-                dayIndex: 0,
-                title: script.facet_title,
-                grimoireSlug: slug,
-                focus: script.facet_title,
-                shortFormHook: script.facet_title,
-                threads: {
-                  keyword: script.facetTitle,
-                  angles: [],
-                },
+          const {
+            images,
+            overlays,
+            highlightTerms,
+            highlightColor,
+            categoryVisuals,
+          } = buildThematicVideoComposition({
+            script: script.full_script,
+            facet: facet || {
+              dayIndex: 0,
+              title: script.facet_title,
+              grimoireSlug: slug,
+              focus: script.facet_title,
+              shortFormHook: script.facet_title,
+              threads: {
+                keyword: script.facetTitle,
+                angles: [],
               },
-              theme,
-              baseUrl,
-              slug,
-            });
+            },
+            theme,
+            baseUrl,
+            slug,
+          });
 
           if (!script.full_script) {
             throw new Error('Script text missing');
@@ -329,16 +360,93 @@ export async function POST(request: NextRequest) {
           }
 
           const safeSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '-');
-          const videoBuffer = await composeVideo({
-            images,
-            audioBuffer,
-            format: 'story',
-            outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
-            subtitlesText: script.full_script,
-            subtitlesHighlightTerms: highlightTerms,
-            subtitlesHighlightColor: highlightColor,
-            overlays,
-          });
+
+          // Get audio duration for Remotion timing
+          const audioNodeBuffer = Buffer.from(audioBuffer);
+          const audioDuration =
+            await getAudioDurationFromBuffer(audioNodeBuffer);
+          console.log(`🎵 Audio duration: ${audioDuration}s`);
+
+          let videoBuffer: Buffer | undefined;
+
+          // Try Remotion first
+          const remotionAvailable = await isRemotionAvailable();
+          let useFFmpegFallback = !remotionAvailable || !audioDuration;
+
+          console.log(
+            `🎥 Remotion available: ${remotionAvailable}, audio duration: ${audioDuration}s`,
+          );
+
+          if (!useFFmpegFallback) {
+            try {
+              console.log(
+                `🎬 Using Remotion for video generation (script ${script.id})...`,
+              );
+
+              // Upload audio to a temporary URL for Remotion
+              const audioBlob = await put(
+                `temp/audio-${Date.now()}.mp3`,
+                audioNodeBuffer,
+                { access: 'public', addRandomSuffix: true },
+              );
+
+              const segments = scriptToAudioSegments(
+                script.full_script,
+                audioDuration,
+                2.6,
+              );
+
+              const remotionFormat =
+                audioDuration > 45 ? 'MediumFormVideo' : 'ShortFormVideo';
+              const videoSeed = `${safeSlug}-${script.id}-${Date.now()}`;
+              const symbolContent = `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`;
+
+              videoBuffer = await renderRemotionVideo({
+                format: remotionFormat,
+                outputPath: '',
+                segments,
+                audioUrl: audioBlob.url,
+                backgroundMusicUrl: '/audio/series/lunary-bed-v1.mp3',
+                highlightTerms: highlightTerms || [],
+                durationSeconds: audioDuration + 2,
+                overlays: overlays || [],
+                categoryVisuals,
+                seed: videoSeed,
+                zodiacSign: symbolContent,
+              });
+
+              console.log(
+                `✅ Remotion: Video rendered for script ${script.id}`,
+              );
+            } catch (remotionError) {
+              const errMsg =
+                remotionError instanceof Error
+                  ? remotionError.message
+                  : String(remotionError);
+              console.error(
+                `❌ Remotion render failed for script ${script.id}, falling back to FFmpeg: ${errMsg}`,
+              );
+              useFFmpegFallback = true;
+            }
+          }
+
+          if (useFFmpegFallback) {
+            console.log(`⚠️ Using FFmpeg fallback for script ${script.id}...`);
+            videoBuffer = await composeVideo({
+              images,
+              audioBuffer,
+              format: 'story',
+              outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
+              subtitlesText: script.full_script,
+              subtitlesHighlightTerms: highlightTerms,
+              subtitlesHighlightColor: highlightColor,
+              overlays,
+            });
+          }
+
+          if (!videoBuffer) {
+            throw new Error('Video generation failed - no buffer produced');
+          }
 
           const blobKey = `videos/shorts/daily/${dateKey}-${safeSlug}-${Date.now()}.mp4`;
           const uploadResult = await put(blobKey, videoBuffer, {

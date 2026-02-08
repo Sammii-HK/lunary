@@ -79,7 +79,7 @@ RANKING-SPECIFIC REQUIREMENTS:
 - Rank ALL 12 signs or focus on top 3/bottom 3 (depending on structure)
 - Each ranking must have a punchy, specific reason (not generic)
 - At least one placement should be genuinely surprising
-- End with a comment prompt: "Fight me" or "Where did your sign land?"
+- End with a comment prompt: "Prove me wrong", "Where did your sign land?", or "Tell me I'm wrong"
 - Keep it 80-100 words, ~30 seconds spoken
 - DO NOT be nice about it — the controversy drives engagement
 

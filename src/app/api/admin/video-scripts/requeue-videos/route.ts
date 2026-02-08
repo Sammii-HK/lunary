@@ -27,23 +27,36 @@ export async function POST(request: NextRequest) {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
 
+    // When forceThemeName is set, only apply to primary scripts (not engagement slots).
+    // Engagement scripts (metadata->>'slot' IN ('engagementA','engagementB')) keep their own theme.
     if (forceThemeName) {
+      // Update primary posts' week_theme, leave engagement posts unchanged
       await sql`
         UPDATE social_posts
         SET week_theme = ${forceThemeName}
         WHERE scheduled_date >= ${weekStart.toISOString()}
           AND scheduled_date < ${weekEnd.toISOString()}
+          AND NOT EXISTS (
+            SELECT 1 FROM video_scripts vs
+            WHERE vs.facet_title = social_posts.topic
+              AND vs.scheduled_date = social_posts.scheduled_date::date
+              AND vs.platform = 'tiktok'
+              AND vs.metadata->>'slot' IN ('engagementA', 'engagementB')
+          )
       `;
     }
 
     if (forceThemeName) {
+      // Delete stale PRIMARY scripts with wrong theme (preserve engagement scripts)
       await sql`
         DELETE FROM video_scripts
         WHERE platform = 'tiktok'
           AND theme_name <> ${forceThemeName}
           AND scheduled_date >= ${weekStart.toISOString()}
           AND scheduled_date < ${weekEnd.toISOString()}
+          AND (metadata->>'slot' IS NULL OR metadata->>'slot' NOT IN ('engagementA', 'engagementB'))
       `;
+      // Dedupe primary scripts (keep latest per facet+date)
       await sql`
         WITH keep AS (
           SELECT MAX(id) AS id
@@ -61,23 +74,23 @@ export async function POST(request: NextRequest) {
           AND scheduled_date < ${weekEnd.toISOString()}
           AND id NOT IN (SELECT id FROM keep)
       `;
-    }
-
-    if (forceThemeName) {
+      // Also dedupe engagement scripts (keep latest per facet+date+theme)
       await sql`
-        UPDATE social_posts sp
-        SET video_url = NULL, updated_at = NOW()
-        WHERE sp.week_theme = ${forceThemeName}
-          AND sp.scheduled_date >= ${weekStart.toISOString()}
-          AND sp.scheduled_date < ${weekEnd.toISOString()}
-          AND EXISTS (
-            SELECT 1
-            FROM video_scripts vs
-            WHERE vs.platform = 'tiktok'
-              AND vs.scheduled_date = sp.scheduled_date::date
-              AND vs.facet_title = sp.topic
-              AND vs.theme_name <> ${forceThemeName}
-          )
+        WITH keep AS (
+          SELECT MAX(id) AS id
+          FROM video_scripts
+          WHERE platform = 'tiktok'
+            AND scheduled_date >= ${weekStart.toISOString()}
+            AND scheduled_date < ${weekEnd.toISOString()}
+            AND metadata->>'slot' IN ('engagementA', 'engagementB')
+          GROUP BY facet_title, scheduled_date, theme_name
+        )
+        DELETE FROM video_scripts
+        WHERE platform = 'tiktok'
+          AND scheduled_date >= ${weekStart.toISOString()}
+          AND scheduled_date < ${weekEnd.toISOString()}
+          AND metadata->>'slot' IN ('engagementA', 'engagementB')
+          AND id NOT IN (SELECT id FROM keep)
       `;
     }
 
@@ -104,6 +117,9 @@ export async function POST(request: NextRequest) {
          )
     `;
 
+    // Queue ALL scripts for the week (primary + engagement)
+    // Primary scripts: filter by forceThemeName if set
+    // Engagement scripts: always include regardless of forceThemeName
     await sql`
       WITH latest_scripts AS (
         SELECT MAX(id) AS id
@@ -127,11 +143,15 @@ export async function POST(request: NextRequest) {
       JOIN social_posts sp
         ON sp.topic = vs.facet_title
        AND sp.scheduled_date::date = vs.scheduled_date
+       AND sp.post_type = 'video'
       WHERE vs.platform = 'tiktok'
         AND vs.scheduled_date >= ${weekStart.toISOString()}
         AND vs.scheduled_date < ${weekEnd.toISOString()}
-        AND sp.week_theme = vs.theme_name
-        AND (${forceThemeName}::text IS NULL OR vs.theme_name = ${forceThemeName})
+        AND (
+          ${forceThemeName}::text IS NULL
+          OR vs.theme_name = ${forceThemeName}
+          OR vs.metadata->>'slot' IN ('engagementA', 'engagementB')
+        )
         AND (${forceRebuild} OR sp.video_url IS NULL OR sp.video_url = '')
       ON CONFLICT (script_id)
       DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()

@@ -5,8 +5,6 @@ import {
   ensureVideoScriptsTable,
   getVideoScripts,
 } from '@/lib/social/video-script-generator';
-import { getImageBaseUrl } from '@/lib/urls';
-
 export const runtime = 'nodejs';
 
 function getWeekStart(date: Date): Date {
@@ -74,8 +72,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const weekStartParam = body?.weekStart as string | undefined;
 
-    const baseUrl = getImageBaseUrl();
-
     const weekStart = weekStartParam
       ? getWeekStart(new Date(weekStartParam))
       : getWeekStart(new Date());
@@ -88,34 +84,14 @@ export async function POST(request: NextRequest) {
       weekStart,
     });
 
-    const weekThemeResult = await sql`
-      SELECT week_theme, COUNT(*) AS count
-      FROM social_posts
-      WHERE scheduled_date >= ${weekStart.toISOString()}
-        AND scheduled_date < ${weekEnd.toISOString()}
-        AND week_theme IS NOT NULL
-      GROUP BY week_theme
-      ORDER BY count DESC
-      LIMIT 1
-    `;
-    const weekTheme =
-      (weekThemeResult.rows[0]?.week_theme as string | undefined) || null;
-
-    const filteredScripts = weekTheme
-      ? scripts.filter((script) => script.themeName === weekTheme)
-      : scripts;
-
-    if (filteredScripts.length === 0) {
+    // Include ALL scripts for the week (primary + engagement slots)
+    // Don't filter by weekTheme — engagement scripts have different theme names
+    if (scripts.length === 0) {
       return NextResponse.json({
         success: false,
-        message: weekTheme
-          ? `No daily short scripts found for this week and theme: ${weekTheme}`
-          : 'No daily short scripts found for this week',
+        message: 'No daily short scripts found for this week',
       });
     }
-
-    const themeName = filteredScripts[0]?.themeName;
-    const theme = categoryThemes.find((t) => t.name === themeName);
 
     const videoPlatforms = [
       'instagram',
@@ -130,15 +106,8 @@ export async function POST(request: NextRequest) {
        WHERE scheduled_date >= $1
          AND scheduled_date < $2
          AND platform = ANY($3::text[])
-         AND post_type = $4
-         AND ($5::text IS NULL OR week_theme = $5)`,
-      [
-        weekStart.toISOString(),
-        weekEnd.toISOString(),
-        videoPlatforms,
-        'educational',
-        weekTheme,
-      ],
+         AND post_type IN ('educational', 'video')`,
+      [weekStart.toISOString(), weekEnd.toISOString(), videoPlatforms],
     );
 
     const postContentByKey = new Map<string, string>();
@@ -150,16 +119,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const uniqueScripts = dedupeScriptsByDate(filteredScripts);
+    const uniqueScripts = dedupeScriptsByDate(scripts);
     const existingVideoByKey = new Map<string, string>();
     const existingVideoResult = await sql.query(
       `SELECT topic, scheduled_date::date AS date_key, video_url
        FROM social_posts
        WHERE scheduled_date >= $1
          AND scheduled_date < $2
-         AND video_url IS NOT NULL
-         AND ($3::text IS NULL OR week_theme = $3)`,
-      [weekStart.toISOString(), weekEnd.toISOString(), weekTheme],
+         AND video_url IS NOT NULL`,
+      [weekStart.toISOString(), weekEnd.toISOString()],
     );
     for (const row of existingVideoResult.rows) {
       if (!row.topic || !row.video_url) continue;
@@ -186,18 +154,10 @@ export async function POST(request: NextRequest) {
             `UPDATE social_posts
              SET video_url = $1
              WHERE platform = ANY($2::text[])
-               AND post_type = $3
-               AND topic = $4
-               AND scheduled_date::date = $5
-               AND ($6::text IS NULL OR week_theme = $6)`,
-            [
-              existingVideoUrl,
-              videoPlatforms,
-              'educational',
-              script.facetTitle,
-              dateKey,
-              weekTheme,
-            ],
+               AND post_type IN ('educational', 'video')
+               AND topic = $3
+               AND scheduled_date::date = $4`,
+            [existingVideoUrl, videoPlatforms, script.facetTitle, dateKey],
           );
           reused += 1;
           continue;
@@ -229,7 +189,11 @@ export async function POST(request: NextRequest) {
           return tag ? `#${tag}` : null;
         };
 
-        const resolvedThemeName = theme?.name || themeName || 'Lunary';
+        const scriptThemeName = script.themeName || 'Lunary';
+        const scriptTheme = categoryThemes.find(
+          (t) => t.name === scriptThemeName,
+        );
+        const resolvedThemeName = scriptTheme?.name || scriptThemeName;
         const themeTag = toHashtag(resolvedThemeName);
         const topicTag = toHashtag(script.facetTitle);
         const titleTags = ['#astrology', themeTag, '#universe']
@@ -250,7 +214,7 @@ export async function POST(request: NextRequest) {
         const postContent =
           postContentByKey.get(contentKey) ||
           script.writtenPostContent ||
-          `This is part ${partNumber} of ${totalParts} in our weekly theme series: ${theme?.name || themeName || 'Lunary'}.`;
+          `This is part ${partNumber} of ${totalParts} in our weekly theme series: ${resolvedThemeName}.`;
         const descriptionTags = Array.from(
           new Set(['#Lunary', '#astrology', '#universe', themeTag, topicTag]),
         )
