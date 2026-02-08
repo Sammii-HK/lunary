@@ -24,9 +24,22 @@ export async function POST(request: NextRequest) {
     try {
       data = await response.json();
     } catch (parseError) {
-      console.warn(
-        'Video job processor responded without JSON, returning raw status',
-        parseError,
+      const text = await response.text();
+      console.error(
+        'Video job processor responded with non-JSON (likely an error page):',
+        {
+          status: response.status,
+          statusText: response.statusText,
+          contentType: response.headers.get('content-type'),
+          bodyPreview: text.substring(0, 500),
+        },
+      );
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Video processor returned ${response.status} ${response.statusText}. Check server logs for details.`,
+        },
+        { status: 502 },
       );
     }
 
