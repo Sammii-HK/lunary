@@ -150,14 +150,6 @@ export const LongFormVideo: React.FC<LongFormVideoProps> = ({
         );
       })}
 
-      {/* Fade in from black */}
-      <TransitionEffect
-        type='dissolve'
-        startFrame={0}
-        durationFrames={30}
-        direction='in'
-      />
-
       {/* Intro/Hook sequence */}
       {showIntro && (
         <HookSequence

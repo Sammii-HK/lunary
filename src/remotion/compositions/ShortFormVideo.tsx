@@ -5,7 +5,6 @@ import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
 import { TextOverlays, type Overlay } from '../components/TextOverlays';
 import { HookIntro } from '../components/HookIntro';
 import { ProgressIndicator } from '../components/ProgressIndicator';
-import { TransitionEffect } from '../components/TransitionEffect';
 import type { AudioSegment } from '../utils/timing';
 import type { CategoryVisualConfig } from '../config/category-visuals';
 import { COLORS } from '../styles/theme';
@@ -95,14 +94,6 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
         gradientColors={categoryVisuals?.gradientColors}
       />
 
-      {/* Fade in from black */}
-      <TransitionEffect
-        type='fade'
-        startFrame={0}
-        durationFrames={30}
-        direction='in'
-      />
-
       {/* Animated hook intro — word-by-word entrance (#7: variant support) */}
       {hookOverlay && (
         <HookIntro
@@ -157,14 +148,6 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
           color={categoryVisuals?.accentColor}
         />
       )}
-
-      {/* Fade out at end */}
-      <TransitionEffect
-        type='fade'
-        startFrame={durationInFrames - 45}
-        durationFrames={45}
-        direction='out'
-      />
     </AbsoluteFill>
   );
 };

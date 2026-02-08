@@ -875,11 +875,8 @@ export async function composeVideo(
       filterParts.push(
         `${intermediateLabel}[stars]overlay=0:0:format=auto[vwithstars]`,
       );
-      // Add video fade in/out for smooth transitions (1s fade in, 1.5s fade out)
-      const videoFadeOutStart = Math.max(0, totalVideoDuration - 1.5);
-      filterParts.push(
-        `[vwithstars]fade=t=in:st=0:d=1,fade=t=out:st=${videoFadeOutStart.toFixed(2)}:d=1.5[vfinal]`,
-      );
+      // No fade — clean cut preserves seamless loop on TikTok/Reels
+      filterParts.push(`[vwithstars]null[vfinal]`);
       intermediateLabel = '[vfinal]';
 
       const finalLabel = intermediateLabel;
@@ -1010,16 +1007,12 @@ export async function composeVideo(
         format,
         categoryVisuals?.accentColor,
       );
-      // Add video fade in/out for smooth transitions (1s fade in, 1.5s fade out)
-      const videoFadeOutStart = Math.max(0, totalVideoDuration - 1.5);
-      const videoFadeFilter = `fade=t=in:st=0:d=1,fade=t=out:st=${videoFadeOutStart.toFixed(2)}:d=1.5`;
       const videoFilter = [
         zoomFilter,
         gradientBlendFilter,
         colorGradingFilter,
         subtitleFilter,
         overlayFilter,
-        videoFadeFilter,
       ]
         .filter(Boolean)
         .join(',');
