@@ -105,7 +105,7 @@ async function generateScriptForContentType(
       return generateMythScript(date);
 
     case 'transit-alert': {
-      const transitScript = await getTodaysTransitVideo();
+      const transitScript = await getTodaysTransitVideo(date);
       if (transitScript) return transitScript;
       console.log('    No major transit detected, falling back to sign check');
       return generateSignCheckScript(date);
