@@ -10,7 +10,7 @@ import type { CategoryVisualConfig } from '@/remotion/config/category-visuals';
 
 /**
  * Convert script text to AudioSegments for Remotion subtitles
- * Similar to FFmpeg's buildSubtitleChunks but returns AudioSegment[]
+ * Accounts for word length, character count, and natural pauses
  */
 export function scriptToAudioSegments(
   text: string,
@@ -27,34 +27,79 @@ export function scriptToAudioSegments(
   const segments: AudioSegment[] = [];
   const maxWordsPerChunk = 6; // TikTok-style pacing
 
-  // First pass: create chunks
-  const chunks: { words: string[]; text: string }[] = [];
+  // First pass: create chunks with complexity scores
+  interface Chunk {
+    words: string[];
+    text: string;
+    pauseAfter: number;
+    complexity: number; // Based on character count
+  }
+
+  const chunks: Chunk[] = [];
+
   for (const sentence of sentences) {
     const trimmed = sentence.trim();
     if (!trimmed) continue;
 
     const words = trimmed.split(' ').filter((w) => w.length > 0);
 
+    // Determine pause duration based on punctuation
+    let pauseAfter = 0;
+    if (
+      trimmed.endsWith('.') ||
+      trimmed.endsWith('!') ||
+      trimmed.endsWith('?')
+    ) {
+      pauseAfter = 0.5; // 500ms pause after sentence
+    } else if (
+      trimmed.endsWith(',') ||
+      trimmed.endsWith(';') ||
+      trimmed.endsWith(':')
+    ) {
+      pauseAfter = 0.3; // 300ms pause after clause
+    }
+
     if (words.length <= maxWordsPerChunk) {
-      chunks.push({ words, text: trimmed });
+      chunks.push({
+        words,
+        text: trimmed,
+        pauseAfter,
+        complexity: trimmed.length, // Use character count for complexity
+      });
     } else {
       let i = 0;
       while (i < words.length) {
         const phraseWords = words.slice(i, i + maxWordsPerChunk);
-        chunks.push({ words: phraseWords, text: phraseWords.join(' ') });
+        const phraseText = phraseWords.join(' ');
+        const isLastChunk = i + maxWordsPerChunk >= words.length;
+        chunks.push({
+          words: phraseWords,
+          text: phraseText,
+          pauseAfter: isLastChunk ? pauseAfter : 0.2, // Small pause between chunks
+          complexity: phraseText.length,
+        });
         i += maxWordsPerChunk;
       }
     }
   }
 
-  // Second pass: calculate timing
-  const totalWords = chunks.reduce((sum, c) => sum + c.words.length, 0);
+  // Second pass: calculate timing based on complexity (character count) and pauses
+  const totalComplexity = chunks.reduce((sum, c) => sum + c.complexity, 0);
+  const totalPauses = chunks.reduce((sum, c) => sum + c.pauseAfter, 0);
+
+  // Reserve time for pauses, rest for speaking
   const startOffset = 0.1;
-  const usableDuration = Math.max(audioDuration - startOffset, 1);
+  const speakingTime = Math.max(
+    audioDuration - totalPauses - startOffset,
+    audioDuration * 0.7,
+  );
   let currentTime = startOffset;
 
-  for (const chunk of chunks) {
-    const chunkDuration = (chunk.words.length / totalWords) * usableDuration;
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
+
+    // Duration based on text complexity (longer words = more time)
+    const chunkDuration = (chunk.complexity / totalComplexity) * speakingTime;
     const endTime = Math.min(currentTime + chunkDuration, audioDuration);
 
     segments.push({
@@ -63,7 +108,8 @@ export function scriptToAudioSegments(
       endTime: endTime,
     });
 
-    currentTime = endTime;
+    // Add pause gap before next segment
+    currentTime = Math.min(endTime + chunk.pauseAfter, audioDuration);
   }
 
   return segments;
@@ -158,6 +204,10 @@ export interface RemotionVideoProps {
   subtitleBackgroundOpacity?: number;
   /** Zodiac sign for symbol overlay */
   zodiacSign?: string;
+  /** Content for symbol detection (for LongFormVideo) */
+  symbolContent?: string;
+  /** Show branded cosmic forecast intro (for blog videos) */
+  showBrandedIntro?: boolean;
 }
 
 /**
@@ -230,6 +280,8 @@ export async function renderRemotionVideo(
     inputProps = {
       hookText: props.hookText || props.title,
       hookSubtitle: props.hookSubtitle || props.subtitle,
+      title: props.title,
+      subtitle: props.subtitle,
       segments: props.segments,
       audioUrl: props.audioUrl,
       images: props.images,
@@ -246,11 +298,14 @@ export async function renderRemotionVideo(
         props.categoryVisuals?.subtitleBackgroundOpacity,
       zodiacSign: props.zodiacSign,
       backgroundMusicUrl: props.backgroundMusicUrl,
+      showBrandedIntro: props.showBrandedIntro,
     };
   } else if (props.format === 'MediumFormVideo') {
     inputProps = {
       hookText: props.hookText || props.title,
       hookSubtitle: props.hookSubtitle || props.subtitle,
+      title: props.title,
+      subtitle: props.subtitle,
       segments: props.segments,
       audioUrl: props.audioUrl,
       images: props.images,
@@ -261,6 +316,7 @@ export async function renderRemotionVideo(
       seed,
       zodiacSign: props.zodiacSign,
       backgroundMusicUrl: props.backgroundMusicUrl,
+      showBrandedIntro: props.showBrandedIntro,
     };
   } else {
     // LongFormVideo
@@ -279,6 +335,7 @@ export async function renderRemotionVideo(
       },
       categoryVisuals: props.categoryVisuals,
       seed,
+      symbolContent: props.symbolContent,
     };
   }
 

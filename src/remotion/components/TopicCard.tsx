@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCurrentFrame, interpolate, Easing } from 'remotion';
-import { COLORS, FONTS, STYLES } from '../styles/theme';
+import { COLORS, STYLES } from '../styles/theme';
 
 interface TopicCardProps {
   /** Topic title (e.g., "Moon Phase", "Planetary Transit") */
@@ -113,12 +113,12 @@ export const TopicCard: React.FC<TopicCardProps> = ({
           )}
           <h2
             style={{
-              fontFamily: FONTS.title,
-              fontWeight: FONTS.titleWeight,
+              fontFamily: 'Roboto Mono, monospace',
+              fontWeight: 500,
               fontSize: 36,
               color: COLORS.primaryText,
               margin: 0,
-              letterSpacing: 1,
+              letterSpacing: '-0.01em',
             }}
           >
             {title}
@@ -139,8 +139,8 @@ export const TopicCard: React.FC<TopicCardProps> = ({
         {item && (
           <p
             style={{
-              fontFamily: FONTS.body,
-              fontWeight: FONTS.bodyWeight,
+              fontFamily: 'Roboto Mono, monospace',
+              fontWeight: 300,
               fontSize: 24,
               color: COLORS.secondaryText,
               margin: 0,

@@ -278,6 +278,23 @@ export async function POST(request: NextRequest) {
     // Check if any platform succeeded
     const anySuccess = Object.values(results).some((r) => r?.success);
 
+    // Update video status if any platform succeeded
+    if (anySuccess) {
+      try {
+        await sql`
+          UPDATE videos
+          SET status = 'scheduled'
+          WHERE id = ${videoId}
+        `;
+        console.log(
+          `✅ Updated video ${sanitizedVideoId} status to 'scheduled'`,
+        );
+      } catch (updateError) {
+        console.error('Failed to update video status:', updateError);
+        // Don't fail the request if status update fails
+      }
+    }
+
     return NextResponse.json({
       success: anySuccess,
       results,

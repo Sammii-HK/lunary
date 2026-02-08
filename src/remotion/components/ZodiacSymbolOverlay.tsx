@@ -47,14 +47,53 @@ const TAROT_SYMBOLS: Record<string, string> = {
   pentacles: '🜃',
 };
 
+// Moon phases (using custom SVG icons from /public/icons/moon-phases/)
+const MOON_PHASE_ICONS: Record<string, string> = {
+  'new moon': '/icons/moon-phases/new-moon.svg',
+  'waxing crescent': '/icons/moon-phases/waxing-cresent-moon.svg', // Note: filename has typo "cresent"
+  'first quarter': '/icons/moon-phases/first-quarter.svg',
+  'waxing gibbous': '/icons/moon-phases/waxing-gibbous-moon.svg',
+  'full moon': '/icons/moon-phases/full-moon.svg',
+  'waning gibbous': '/icons/moon-phases/waning-gibbous-moon.svg',
+  'last quarter': '/icons/moon-phases/last-quarter.svg',
+  'waning crescent': '/icons/moon-phases/waning-cresent-moon.svg', // Note: filename has typo "cresent"
+};
+
 interface SymbolResult {
   letters: string[];
-  type: 'astronomicon' | 'unicode' | 'number';
+  type: 'astronomicon' | 'unicode' | 'number' | 'moon-icon';
 }
 
 // Context phrases that indicate the video topic — checked first (highest priority)
 // [phrase, letters[], type]
 const TOPIC_CONTEXT_PHRASES: [string, string[], SymbolResult['type']][] = [
+  // Moon phase topics (highest priority for Lunary brand) - using icon paths
+  ['full moon in', ['/icons/moon-phases/full-moon.svg'], 'moon-icon'],
+  ['new moon in', ['/icons/moon-phases/new-moon.svg'], 'moon-icon'],
+  ['full moon', ['/icons/moon-phases/full-moon.svg'], 'moon-icon'],
+  ['new moon', ['/icons/moon-phases/new-moon.svg'], 'moon-icon'],
+  [
+    'waxing crescent',
+    ['/icons/moon-phases/waxing-cresent-moon.svg'],
+    'moon-icon',
+  ],
+  ['first quarter', ['/icons/moon-phases/first-quarter.svg'], 'moon-icon'],
+  [
+    'waxing gibbous',
+    ['/icons/moon-phases/waxing-gibbous-moon.svg'],
+    'moon-icon',
+  ],
+  [
+    'waning gibbous',
+    ['/icons/moon-phases/waning-gibbous-moon.svg'],
+    'moon-icon',
+  ],
+  ['last quarter', ['/icons/moon-phases/last-quarter.svg'], 'moon-icon'],
+  [
+    'waning crescent',
+    ['/icons/moon-phases/waning-cresent-moon.svg'],
+    'moon-icon',
+  ],
   // Ranking/List content (show zodiac wheel or list icon)
   ['ranking signs', ['A', 'E', 'I'], 'astronomicon'], // Aries, Leo, Sagittarius (fire signs in triangle)
   ['ranking the signs', ['A', 'E', 'I'], 'astronomicon'],
@@ -154,7 +193,20 @@ function extractSymbols(content: string): SymbolResult | null {
     }
   }
 
-  // Priority 3-4: Check zodiac signs (but limit to 3 max to avoid clutter)
+  // Priority 3: Check individual planets FIRST (before zodiac signs)
+  const matchedPlanets: string[] = [];
+  for (const [planet, letter] of Object.entries(PLANET_LETTERS)) {
+    if (lower.includes(planet)) {
+      matchedPlanets.push(letter);
+    }
+  }
+
+  // Use planets if any are found
+  if (matchedPlanets.length > 0) {
+    return { letters: matchedPlanets, type: 'astronomicon' };
+  }
+
+  // Priority 4: Check zodiac signs (only if no planets matched)
   const matchedSigns: string[] = [];
   for (const [sign, letter] of Object.entries(ZODIAC_LETTERS)) {
     if (lower.includes(sign)) {
@@ -168,18 +220,6 @@ function extractSymbols(content: string): SymbolResult | null {
     return { letters: matchedSigns, type: 'astronomicon' };
   }
 
-  // Priority 4: Check individual planets (only if no zodiac signs or topic phrases matched)
-  const matchedPlanets: string[] = [];
-  for (const [planet, letter] of Object.entries(PLANET_LETTERS)) {
-    if (lower.includes(planet)) {
-      matchedPlanets.push(letter);
-    }
-  }
-
-  if (matchedPlanets.length > 0) {
-    return { letters: matchedPlanets, type: 'astronomicon' };
-  }
-
   // Priority 5: Check numerology (Life Path, Angel Number, etc.)
   const numerologyMatch = content.match(
     /(?:Life Path|Angel Number|Master Number)\s+(\d+)/i,
@@ -188,7 +228,14 @@ function extractSymbols(content: string): SymbolResult | null {
     return { letters: [numerologyMatch[1]], type: 'number' };
   }
 
-  // Priority 6: Check tarot suits
+  // Priority 6: Check moon phases (using custom icons)
+  for (const [phase, iconPath] of Object.entries(MOON_PHASE_ICONS)) {
+    if (lower.includes(phase)) {
+      return { letters: [iconPath], type: 'moon-icon' };
+    }
+  }
+
+  // Priority 7: Check tarot suits
   for (const [suit, symbol] of Object.entries(TAROT_SYMBOLS)) {
     if (lower.includes(suit)) {
       return { letters: [symbol], type: 'unicode' };
@@ -219,6 +266,16 @@ export const SymbolOverlay: React.FC<SymbolOverlayProps> = ({
   if (!symbolData) return null;
 
   const count = symbolData.letters.length;
+
+  // Smooth fade in/out (30 frames = 1 second)
+  const fadeInDuration = 30;
+  const fadeIn = interpolate(frame, [0, fadeInDuration], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+    easing: Easing.inOut(Easing.ease),
+  });
+
+  const finalOpacity = opacity * fadeIn;
 
   // Gentle pulse (12 second cycle)
   const pulsePeriod = 12 * fps;
@@ -277,7 +334,7 @@ export const SymbolOverlay: React.FC<SymbolOverlayProps> = ({
         ? 'Roboto Mono, monospace'
         : 'system-ui, sans-serif';
 
-  // Scale font size based on count
+  // Scale font size based on count (for text-based symbols)
   const baseFontSize = symbolData.type === 'number' ? 400 : 600;
   const fontSize =
     count === 1
@@ -285,6 +342,15 @@ export const SymbolOverlay: React.FC<SymbolOverlayProps> = ({
       : count <= 3
         ? Math.round(baseFontSize * 0.5) // 300px for 2-3 symbols
         : Math.round(baseFontSize * 0.35); // 210px for 4+ symbols
+
+  // Icon size for moon phase icons
+  const baseIconSize = 400;
+  const iconSize =
+    count === 1
+      ? baseIconSize
+      : count <= 3
+        ? Math.round(baseIconSize * 0.6) // 240px for 2-3 icons
+        : Math.round(baseIconSize * 0.4); // 160px for 4+ icons
 
   // Layout: row for 2-3, grid for 4+
   const useGrid = count > 3;
@@ -317,26 +383,40 @@ export const SymbolOverlay: React.FC<SymbolOverlayProps> = ({
           width: useGrid ? `${fontSize * 2.5}px` : undefined,
           zIndex: 3,
           pointerEvents: 'none',
-          opacity,
+          opacity: finalOpacity,
         }}
       >
-        {symbolData.letters.map((letter, i) => (
-          <div
-            key={i}
-            style={{
-              fontSize: `${fontSize}px`,
-              fontFamily,
-              fontWeight: symbolData.type === 'number' ? 300 : 400,
-              color: currentColor,
-              textAlign: 'center',
-              lineHeight: 1,
-              filter: 'blur(1px)',
-              textShadow: `0 0 80px ${currentColor}, 0 0 160px ${currentColor}`,
-            }}
-          >
-            {letter}
-          </div>
-        ))}
+        {symbolData.letters.map((letter, i) =>
+          symbolData.type === 'moon-icon' ? (
+            <img
+              key={i}
+              src={staticFile(letter)}
+              alt='Moon phase'
+              style={{
+                width: `${iconSize}px`,
+                height: `${iconSize}px`,
+                filter: `blur(1px) drop-shadow(0 0 80px ${currentColor}) drop-shadow(0 0 160px ${currentColor})`,
+                opacity: 0.9,
+              }}
+            />
+          ) : (
+            <div
+              key={i}
+              style={{
+                fontSize: `${fontSize}px`,
+                fontFamily,
+                fontWeight: symbolData.type === 'number' ? 300 : 400,
+                color: currentColor,
+                textAlign: 'center',
+                lineHeight: 1,
+                filter: 'blur(1px)',
+                textShadow: `0 0 80px ${currentColor}, 0 0 160px ${currentColor}`,
+              }}
+            >
+              {letter}
+            </div>
+          ),
+        )}
       </div>
     </>
   );

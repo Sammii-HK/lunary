@@ -588,10 +588,11 @@ export async function POST(request: NextRequest) {
 
       weekNumber = week;
       const weekRange = getWeekDates(week);
-      imageUrl = `${baseUrl}/api/social/images?week=${week}&format=story`;
       videoFormat = 'story';
+      // Title and description will be updated from weeklyData after generation
       title = `Week of ${weekRange}`;
       description = 'Your weekly cosmic forecast from Lunary';
+      imageUrl = ''; // Will be set from weeklyData
     } else if (type === 'medium') {
       // Medium-form video: use story format (vertical for Reels/TikTok/YouTube Shorts)
       if (week === undefined) {
@@ -665,6 +666,19 @@ export async function POST(request: NextRequest) {
       // weekOffset represents weeks from current week's Monday
       // week=0 = current week, week=1 = next week, etc.
       weeklyData = await generateWeeklyContent(weekStart);
+
+      // Update title and description from weeklyData
+      if (weeklyData?.title) {
+        title = weeklyData.title;
+      }
+      if (weeklyData?.subtitle) {
+        description = weeklyData.subtitle;
+      }
+
+      // Set imageUrl from weekly data
+      if (weeklyData) {
+        imageUrl = `${baseUrl}/api/social/images?format=story&title=${encodeURIComponent(weeklyData.title)}&subtitle=${encodeURIComponent(weeklyData.subtitle || '')}`;
+      }
     } else if (type === 'medium') {
       // Medium-form: cache by week number + version
       if (week === undefined) {
@@ -1286,13 +1300,23 @@ export async function POST(request: NextRequest) {
               2.6,
             );
 
+            // Add background music for all blog video types (long, medium, short)
+            const backgroundMusicUrl = `${baseUrl}/audio/series/lunary-bed-v1.mp3`;
+
+            // Create symbol content for overlay detection (title + key topics)
+            const symbolContent = weeklyData
+              ? `${title} ${description} ${topicImages.map((img) => img.topic).join(' ')}`
+              : undefined;
+
             videoBuffer = await renderRemotionVideo({
               format: remotionFormat,
               outputPath: '',
-              hookText: hookText || title,
+              title: title,
               subtitle: description,
+              hookText: hookText || title,
               segments,
               audioUrl: audioUrl!,
+              backgroundMusicUrl,
               images: topicImages.map((img) => ({
                 url: img.imageUrl,
                 startTime: img.startTime,
@@ -1302,6 +1326,9 @@ export async function POST(request: NextRequest) {
               highlightTerms: [],
               durationSeconds: actualAudioDuration! + 2, // Add buffer at end
               seed: `${weekKey}-${type}-${Date.now()}`,
+              symbolContent,
+              zodiacSign: symbolContent,
+              showBrandedIntro: type === 'medium', // Enable branded intro for medium-form cosmic forecast videos
             });
             console.log(
               `✅ Remotion: Video rendered with ${topicImages.length} images, shooting stars, animated subtitles`,
@@ -1404,17 +1431,26 @@ export async function POST(request: NextRequest) {
             2.6,
           );
 
+          // Create symbol content for short-form (title + description)
+          const shortSymbolContent = weeklyData
+            ? `${title} ${description}`
+            : undefined;
+
           videoBuffer = await renderRemotionVideo({
             format: 'ShortFormVideo',
             outputPath: '',
-            hookText: hookText || title,
+            title: title,
             subtitle: description,
+            hookText: hookText || title,
             segments,
             audioUrl: audioUrl!,
             backgroundImage: imageUrl,
+            backgroundMusicUrl: `${baseUrl}/audio/series/lunary-bed-v1.mp3`,
             highlightTerms: [],
             durationSeconds: actualAudioDuration! + 2,
             seed: `${weekKey}-short-${Date.now()}`,
+            zodiacSign: shortSymbolContent,
+            showBrandedIntro: true, // Enable branded intro for cosmic forecast videos
           });
           console.log(
             `✅ Remotion: Short-form video rendered with shooting stars, animated subtitles`,
