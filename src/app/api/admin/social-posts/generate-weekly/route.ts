@@ -776,6 +776,8 @@ async function generateThematicWeeklyPosts(
     // Generate engagement scripts (Slot A at 17 UTC, Slot B at 20 UTC)
     const { generateWeeklySecondaryScripts, generateWeeklyEngagementBScripts } =
       await import('@/lib/social/video-scripts/generators/weekly-secondary');
+    const { saveVideoScript } =
+      await import('@/lib/social/video-scripts/database');
 
     console.log('🎬 [VIDEO] Generating engagement slot A scripts...');
     const engagementAScripts =
@@ -785,14 +787,24 @@ async function generateThematicWeeklyPosts(
     const engagementBScripts =
       await generateWeeklyEngagementBScripts(weekStartDate);
 
+    // Save engagement scripts to DB so they have IDs for video jobs + queue
+    const allEngagementScripts = [...engagementAScripts, ...engagementBScripts];
+    for (const script of allEngagementScripts) {
+      try {
+        const id = await saveVideoScript(script);
+        script.id = id;
+      } catch (saveError) {
+        console.error(
+          `🎬 [VIDEO] Failed to save engagement script: ${script.facetTitle}`,
+          saveError,
+        );
+      }
+    }
+
     // Merge engagement scripts into tiktokScripts for downstream processing
     videoScripts = {
       ...videoScripts,
-      tiktokScripts: [
-        ...videoScripts.tiktokScripts,
-        ...engagementAScripts,
-        ...engagementBScripts,
-      ],
+      tiktokScripts: [...videoScripts.tiktokScripts, ...allEngagementScripts],
     };
 
     console.log(
