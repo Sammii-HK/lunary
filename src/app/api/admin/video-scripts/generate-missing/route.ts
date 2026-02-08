@@ -189,8 +189,8 @@ export async function POST(request: NextRequest) {
         await sql`
           INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
           VALUES (${scriptId}, ${weekStartKey}, ${dateKey}, ${topic}, 'pending', NOW(), NOW())
-          ON CONFLICT (script_id)
-          DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
+          ON CONFLICT (week_start, date_key, topic)
+          DO UPDATE SET script_id = ${scriptId}, status = 'pending', last_error = NULL, updated_at = NOW()
         `;
 
         generated++;
