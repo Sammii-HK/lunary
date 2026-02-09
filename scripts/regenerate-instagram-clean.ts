@@ -101,10 +101,11 @@ async function cleanRegenerate() {
       for (const post of batch.posts) {
         try {
           // Create Instagram version
-          // Append hashtags to caption for discoverability
+          // Append hashtags to caption for discoverability (limit to 5 for best practice)
           const hashtagString = post.hashtags?.length
             ? '\n\n' +
               post.hashtags
+                .slice(0, 5)
                 .map((h) => (h.startsWith('#') ? h : `#${h}`))
                 .join(' ')
             : '';
