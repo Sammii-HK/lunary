@@ -101,9 +101,18 @@ async function cleanRegenerate() {
       for (const post of batch.posts) {
         try {
           // Create Instagram version
+          // Append hashtags to caption for discoverability
+          const hashtagString = post.hashtags?.length
+            ? '\n\n' +
+              post.hashtags
+                .map((h) => (h.startsWith('#') ? h : `#${h}`))
+                .join(' ')
+            : '';
+          const fullCaption = post.caption + hashtagString;
+
           const igPost = await prisma.socialPost.create({
             data: {
-              content: post.caption,
+              content: fullCaption,
               platform: 'instagram',
               postType: post.type,
               scheduledDate: new Date(post.scheduledTime),
@@ -131,7 +140,7 @@ async function cleanRegenerate() {
 
           await prisma.socialPost.create({
             data: {
-              content: post.caption,
+              content: fullCaption, // TikTok also gets hashtags
               platform: 'tiktok',
               postType: post.type,
               scheduledDate: new Date(post.scheduledTime),
