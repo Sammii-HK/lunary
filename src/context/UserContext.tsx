@@ -12,6 +12,8 @@ import {
 import { useAuthStatus } from '@/components/AuthStatus';
 import { createBirthChartWithMetadata } from 'utils/astrology/birthChartService';
 import { CURRENT_BIRTH_CHART_VERSION } from 'utils/astrology/chart-version';
+import { DailyCache } from '@/lib/cache/dailyCache';
+import { ClientCache } from '@/lib/patterns/snapshot/cache';
 
 export interface BirthChartPlacement {
   body: string;
@@ -64,7 +66,7 @@ interface UserContextValue {
   user: UserData | null;
   loading: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
+  refetch: (bustCache?: boolean) => Promise<void>;
   updateProfile: (
     data: Partial<
       Pick<UserData, 'name' | 'birthday' | 'location' | 'intention'>
@@ -113,12 +115,14 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
         }
         setError(null);
 
-        const url = bustCache
-          ? `/api/profile?_t=${Date.now()}`
-          : '/api/profile';
-        const response = await fetch(url, {
+        // Always bypass browser HTTP cache for profile data.
+        // The server response has max-age=300 for proxy caches, but client-side
+        // we must always get fresh data — stale birth charts, subscriptions, or
+        // location data cause downstream bugs across the entire app.
+        const response = await fetch('/api/profile', {
           method: 'GET',
           credentials: 'include',
+          cache: 'no-store',
         });
 
         if (!response.ok) {
@@ -292,10 +296,9 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
       const birthChartVersion = location?.birthChartVersion;
 
       if (!user.birthday || !user.birthChart?.length) return;
-      if (!birthLocation) return;
 
       const needsVersionUpdate = birthChartVersion !== BIRTH_CHART_VERSION;
-      const needsTimezoneUpdate = !birthTimezone;
+      const needsTimezoneUpdate = birthLocation && !birthTimezone;
 
       if (!needsVersionUpdate && !needsTimezoneUpdate) return;
 
@@ -314,12 +317,16 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
         const resolvedTimezone =
           timezoneSource === 'location' ? timezone : birthTimezone;
 
-        await fetch('/api/profile/birth-chart', {
+        const chartResponse = await fetch('/api/profile/birth-chart', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify({ birthChart }),
         });
+
+        if (!chartResponse.ok) {
+          throw new Error('Birth chart PUT failed');
+        }
 
         await fetch('/api/profile', {
           method: 'PUT',
@@ -336,6 +343,9 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
 
         // Reset attempt ref on success so future version bumps work
         birthChartRefreshAttemptRef.current = 0;
+        // Clear all client-side caches so stale horoscopes/insights aren't displayed
+        DailyCache.clear();
+        if (user?.id) ClientCache.clearAll(user.id);
         // Fetch fresh profile data, bypassing browser cache after regeneration
         await fetchUserData(true);
       } catch (err) {

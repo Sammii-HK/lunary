@@ -21,6 +21,9 @@ import { useModal } from '@/hooks/useModal';
 import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/button';
 import { formatIsoDateOnly } from '@/lib/date-only';
+import { CURRENT_BIRTH_CHART_VERSION } from '../../../../utils/astrology/chart-version';
+import { DailyCache } from '@/lib/cache/dailyCache';
+import { ClientCache } from '@/lib/patterns/snapshot/cache';
 
 // Profile components
 import { ProfileTabs, type ProfileTab } from '@/components/profile/ProfileTabs';
@@ -239,18 +242,22 @@ export default function ProfilePage() {
                 fallbackTimezone:
                   Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
               });
-            await fetch('/api/profile/birth-chart', {
+            const autoGenResponse = await fetch('/api/profile/birth-chart', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
               body: JSON.stringify({ birthChart }),
             });
 
-            if (
-              profileBirthLocation &&
-              timezoneSource === 'location' &&
-              timezone
-            ) {
+            if (autoGenResponse.ok) {
+              // Update location with version + timezone in one call
+              const resolvedTz =
+                profileBirthLocation &&
+                timezoneSource === 'location' &&
+                timezone
+                  ? timezone
+                  : undefined;
+
               await fetch('/api/profile', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -258,16 +265,22 @@ export default function ProfilePage() {
                 body: JSON.stringify({
                   location: {
                     ...location,
-                    birthTime: profileBirthTime || undefined,
-                    birthLocation: profileBirthLocation || undefined,
-                    birthTimezone: timezone,
+                    ...(profileBirthTime
+                      ? { birthTime: profileBirthTime }
+                      : {}),
+                    ...(profileBirthLocation
+                      ? { birthLocation: profileBirthLocation }
+                      : {}),
+                    ...(resolvedTz ? { birthTimezone: resolvedTz } : {}),
+                    birthChartVersion: CURRENT_BIRTH_CHART_VERSION,
                   },
                 }),
               });
+
+              DailyCache.clear();
+              if (user?.id) ClientCache.clearAll(user.id);
             }
-            if (typeof window !== 'undefined') {
-              window.location.reload();
-            }
+            await refetchUser(true);
           })();
         }
 
@@ -408,19 +421,20 @@ export default function ProfilePage() {
                 Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
             });
 
-          await fetch('/api/profile/birth-chart', {
+          const chartResponse = await fetch('/api/profile/birth-chart', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ birthChart }),
           });
 
-          if (
-            birthLocation &&
-            timezoneSource === 'location' &&
-            timezone &&
-            timezone !== existingLocation?.birthTimezone
-          ) {
+          // Only set birthChartVersion if the chart was actually saved
+          if (chartResponse.ok) {
+            const resolvedTimezone =
+              birthLocation && timezoneSource === 'location' && timezone
+                ? timezone
+                : existingLocation?.birthTimezone;
+
             await fetch('/api/profile', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
@@ -429,11 +443,18 @@ export default function ProfilePage() {
                 location: {
                   ...existingLocation,
                   ...(birthTime ? { birthTime } : {}),
-                  birthLocation,
-                  birthTimezone: timezone,
+                  ...(birthLocation ? { birthLocation } : {}),
+                  ...(resolvedTimezone
+                    ? { birthTimezone: resolvedTimezone }
+                    : {}),
+                  birthChartVersion: CURRENT_BIRTH_CHART_VERSION,
                 },
               }),
             });
+
+            // Clear all client-side caches so stale horoscopes/insights aren't displayed
+            DailyCache.clear();
+            if (user?.id) ClientCache.clearAll(user.id);
           }
         }
 
@@ -451,7 +472,7 @@ export default function ProfilePage() {
         }
       }
 
-      await refetchUser();
+      await refetchUser(true);
       setIsEditing(false);
 
       if (birthday) {

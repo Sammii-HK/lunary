@@ -49,11 +49,23 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const locationWithTimestamp = {
+    // Read existing location to preserve birth-related fields
+    // (birthTime, birthLocation, birthTimezone, birthChartVersion)
+    // that would otherwise be wiped by a full replacement.
+    const existing = await sql`
+      SELECT location FROM user_profiles
+      WHERE user_id = ${user.id} LIMIT 1
+    `;
+    const existingLocation = existing.rows[0]?.location
+      ? decryptLocation(existing.rows[0].location)
+      : {};
+
+    const mergedLocation = {
+      ...existingLocation,
       ...location,
       lastUpdated: new Date().toISOString(),
     };
-    const encryptedLocation = encryptLocation(locationWithTimestamp);
+    const encryptedLocation = encryptLocation(mergedLocation);
 
     await sql`
       INSERT INTO user_profiles (user_id, location)
