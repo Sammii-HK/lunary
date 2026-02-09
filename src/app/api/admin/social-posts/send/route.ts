@@ -27,7 +27,7 @@ type PlatformPayload = {
   media: Array<{ type: 'image' | 'video'; url: string; alt: string }>;
   reddit?: { title?: string; subreddit?: string };
   pinterestOptions?: { boardId: string; boardName: string };
-  tiktokOptions?: { type: string; coverUrl?: string };
+  tiktokOptions?: { type: string; coverUrl?: string; autoAddMusic?: boolean };
   instagramOptions?: { type: string; coverUrl?: string };
 };
 
