@@ -1,3 +1,6 @@
+import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
+import { auth } from '@/lib/auth';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -76,7 +79,24 @@ const comparisonFeatures = [
   { feature: 'Whole Sign Houses', lunary: true, others: true },
 ];
 
-export default function BirthChartLandingPage() {
+export default async function BirthChartLandingPage() {
+  // Redirect authenticated users to their own birth chart
+  try {
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore
+      .getAll()
+      .map((cookie) => `${cookie.name}=${cookie.value}`)
+      .join('; ');
+    const sessionResponse = await auth.api.getSession({
+      headers: new Headers({ cookie: cookieHeader }),
+    });
+    if (sessionResponse?.user?.id) {
+      redirect('/app/birth-chart');
+    }
+  } catch {
+    // Not authenticated, show marketing page
+  }
+
   const celesteData = getCelesteChart();
 
   const chartData = celesteData

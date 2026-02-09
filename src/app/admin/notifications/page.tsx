@@ -683,7 +683,7 @@ export default function NotificationAdminPage() {
         {
           name: 'Rising Activation',
           type: 'rising_activation',
-          url: '/birth-chart',
+          url: '/app/birth-chart',
           description: 'Birth chart page',
         },
       ],

@@ -46,7 +46,7 @@ const EMPTY_STATE_CONTENT: Record<
     heading: 'Your archetype is emerging',
     message:
       'As you engage with Lunary, we will identify the archetype guiding your current journey.',
-    action: { label: 'Explore your chart', href: '/birth-chart' },
+    action: { label: 'Explore your chart', href: '/app/birth-chart' },
   },
   tarot: {
     icon: <Stars className='w-6 h-6 text-lunary-primary-400' />,

@@ -48,7 +48,7 @@ const withNavParam = (href: string) => {
 // Section 2: Your Cosmic Tools - Personalized features using birth chart data
 const cosmicTools: ExploreItem[] = [
   {
-    href: '/birth-chart',
+    href: '/app/birth-chart',
     label: 'Birth Chart',
     description: 'Your cosmic blueprint',
     icon: Stars,
