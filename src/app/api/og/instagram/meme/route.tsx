@@ -84,10 +84,18 @@ export async function GET(request: NextRequest) {
                   textAlign: 'center',
                   lineHeight: 1.3,
                   display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
                   maxWidth: '90%',
                 }}
               >
-                {truncateIG(setup || topText, 120)}
+                {truncateIG(setup || topText, 120)
+                  .split('\n')
+                  .map((line, i) => (
+                    <div key={i} style={{ display: 'flex' }}>
+                      {line}
+                    </div>
+                  ))}
               </div>
             </div>
             {/* Zodiac glyph divider */}
@@ -137,10 +145,18 @@ export async function GET(request: NextRequest) {
                   lineHeight: 1.4,
                   fontWeight: 600,
                   display: 'flex',
+                  flexDirection: 'column',
+                  gap: 12,
                   maxWidth: '90%',
                 }}
               >
-                {truncateIG(punchline || bottomText, 140)}
+                {truncateIG(punchline || bottomText, 140)
+                  .split('\n')
+                  .map((line, i) => (
+                    <div key={i} style={{ display: 'flex' }}>
+                      {line}
+                    </div>
+                  ))}
               </div>
             </div>
             <IGBrandTag baseUrl={SHARE_BASE_URL} />
@@ -215,9 +231,17 @@ export async function GET(request: NextRequest) {
                 lineHeight: 1.4,
                 maxWidth: '85%',
                 display: 'flex',
+                flexDirection: 'column',
+                gap: 12,
               }}
             >
-              {truncateIG(fullText, 200)}
+              {truncateIG(fullText, 200)
+                .split('\n')
+                .map((line, i) => (
+                  <div key={i} style={{ display: 'flex' }}>
+                    {line}
+                  </div>
+                ))}
             </div>
 
             <IGBrandTag baseUrl={SHARE_BASE_URL} />
@@ -254,9 +278,17 @@ export async function GET(request: NextRequest) {
                 lineHeight: 1.3,
                 maxWidth: '85%',
                 display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
               }}
             >
-              {truncateIG(setup, 120)}
+              {truncateIG(setup, 120)
+                .split('\n')
+                .map((line, i) => (
+                  <div key={i} style={{ display: 'flex' }}>
+                    {line}
+                  </div>
+                ))}
             </div>
 
             {/* Zodiac glyph */}
@@ -281,9 +313,17 @@ export async function GET(request: NextRequest) {
                 fontWeight: 600,
                 maxWidth: '85%',
                 display: 'flex',
+                flexDirection: 'column',
+                gap: 12,
               }}
             >
-              {truncateIG(punchline, 160)}
+              {truncateIG(punchline, 160)
+                .split('\n')
+                .map((line, i) => (
+                  <div key={i} style={{ display: 'flex' }}>
+                    {line}
+                  </div>
+                ))}
             </div>
 
             <IGBrandTag baseUrl={SHARE_BASE_URL} />

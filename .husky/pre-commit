@@ -1,1 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Add common paths where pnpm might be installed
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 pnpm lint-staged

@@ -178,13 +178,17 @@ const CALLOUT_TEMPLATES = [
 
 const HOT_TAKE_TEMPLATES = [
   (sign: string, traits: SignTraits) =>
-    `Unpopular opinion: ${sign}s get judged for ${traits.energy} but it's their superpower`,
+    `Unpopular opinion: ${sign} gets judged for ${traits.energy} but it's actually their superpower`,
   (sign: string, traits: SignTraits) =>
     `${sign} isn't difficult. They're just ${traits.vibe}.`,
   (sign: string, traits: SignTraits) =>
-    `The real reason ${sign}s are like this?\n\n${traits.weakness}`,
+    `The real reason ${sign} is like this?\n\n${traits.weakness}`,
   (sign: string, traits: SignTraits) =>
-    `Hot take: ${sign} is misunderstood because ${traits.mood}`,
+    `Hot take: ${sign} is misunderstood because they're ${traits.mood}`,
+  (sign: string, traits: SignTraits) =>
+    `Everyone thinks ${sign} is being dramatic but honestly they're ${traits.mood}`,
+  (sign: string, traits: SignTraits) =>
+    `${sign} isn't complicated, you just need to understand they're ${traits.vibe}`,
 ];
 
 const SIGNS = [

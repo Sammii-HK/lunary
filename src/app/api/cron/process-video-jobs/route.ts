@@ -21,6 +21,19 @@ import ffmpeg from 'fluent-ffmpeg';
 
 function getAudioDurationFromBuffer(buffer: Buffer): Promise<number> {
   return new Promise(async (resolve, reject) => {
+    // Validate buffer size (max 50MB for audio)
+    const MAX_AUDIO_SIZE = 50 * 1024 * 1024;
+    if (buffer.length > MAX_AUDIO_SIZE) {
+      reject(new Error('Audio buffer too large'));
+      return;
+    }
+
+    // Validate buffer is not empty
+    if (buffer.length === 0) {
+      reject(new Error('Audio buffer is empty'));
+      return;
+    }
+
     const tempDir = await mkdtemp(join(tmpdir(), 'audio-dur-'));
     const tempPath = join(tempDir, 'audio.mp3');
     await writeFile(tempPath, buffer);

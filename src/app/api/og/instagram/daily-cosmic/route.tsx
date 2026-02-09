@@ -51,6 +51,13 @@ export async function GET(request: NextRequest) {
     const variant = (searchParams.get('variant') ||
       'daily_energy') as CosmicCardVariant;
 
+    // Debug logging
+    console.log('[Daily Cosmic OG] Moon Phase Debug:', {
+      receivedPhase: moonPhase,
+      phaseLength: moonPhase.length,
+      iconUrl: getMoonPhaseIcon(moonPhase),
+    });
+
     const date = new Date(dateStr);
     const dateText = date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -60,7 +67,7 @@ export async function GET(request: NextRequest) {
 
     const gradient = VARIANT_GRADIENTS[variant];
     const accent = VARIANT_ACCENTS[variant];
-    const moonIconUrl = getMoonPhaseIcon(moonPhase);
+    const moonIconUrl = getMoonPhaseIcon(moonPhase); // SVG icon URL
     const { width, height } = IG_SIZES.square;
 
     const fonts = await loadIGFonts(request);
@@ -83,7 +90,7 @@ export async function GET(request: NextRequest) {
           fontFamily: 'Roboto Mono',
         }}
       >
-        {/* Starfield */}
+        {/* Starfield - more visible with glow */}
         {stars.map((star, i) => (
           <div
             key={i}
@@ -95,7 +102,8 @@ export async function GET(request: NextRequest) {
               height: star.size,
               borderRadius: '50%',
               background: '#fff',
-              opacity: star.opacity * 0.4,
+              opacity: star.opacity * 0.85, // Increased from 0.4 to 0.85
+              boxShadow: `0 0 ${star.size * 2}px rgba(255, 255, 255, ${star.opacity * 0.5})`, // Glow effect
             }}
           />
         ))}
@@ -114,13 +122,18 @@ export async function GET(request: NextRequest) {
           {dateText}
         </div>
 
-        {/* Moon phase icon */}
+        {/* Moon phase icon - your brand SVG */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={moonIconUrl}
           width={180}
           height={180}
-          style={{ marginBottom: 40, opacity: 0.9 }}
-          alt=''
+          style={{
+            marginBottom: 40,
+            opacity: 0.9,
+            filter: 'drop-shadow(0 0 20px rgba(123, 123, 232, 0.3))',
+          }}
+          alt={moonPhase}
         />
 
         {/* Moon phase name */}

@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 import { calculateSynastry } from '@/lib/astrology/synastry';
 import type { BirthChartData } from '../../../../../../utils/astrology/birthChart';
+import { ensureRelationshipChartFresh } from '../../../../../../utils/astrology/regenerateRelationshipChart';
 
 export async function GET(
   request: NextRequest,
@@ -30,11 +31,20 @@ export async function GET(
 
     const userBirthChart = userResult.rows[0].birth_chart as BirthChartData[];
 
-    // Get relationship profile's birth chart
-    const profileResult = await sql`
-      SELECT birth_chart, name FROM relationship_profiles
-      WHERE id = ${profileId}::uuid AND user_id = ${user.id}
-    `;
+    // Get relationship profile's birth chart (with version column fallback)
+    let profileResult;
+    try {
+      profileResult = await sql`
+        SELECT id, birthday, birth_time, birth_location, birth_chart, birth_chart_version, name FROM relationship_profiles
+        WHERE id = ${profileId}::uuid AND user_id = ${user.id}
+      `;
+    } catch {
+      // birth_chart_version column may not exist yet
+      profileResult = await sql`
+        SELECT id, birthday, birth_time, birth_location, birth_chart, name FROM relationship_profiles
+        WHERE id = ${profileId}::uuid AND user_id = ${user.id}
+      `;
+    }
 
     if (profileResult.rows.length === 0) {
       return NextResponse.json(
@@ -44,7 +54,41 @@ export async function GET(
     }
 
     const profile = profileResult.rows[0];
-    if (!profile.birth_chart) {
+
+    // Regenerate chart if stale, and invalidate synastry cache if chart changed
+    let freshChart: BirthChartData[] | null = null;
+    let regenerated = false;
+    try {
+      const regenResult = await ensureRelationshipChartFresh({
+        id: profile.id,
+        birthday: profile.birthday,
+        birth_time: profile.birth_time,
+        birth_location: profile.birth_location,
+        birth_chart: profile.birth_chart as BirthChartData[] | null,
+        birth_chart_version: profile.birth_chart_version ?? undefined,
+      });
+      freshChart = regenResult.chart;
+      regenerated = regenResult.regenerated;
+    } catch {
+      // Regeneration failed entirely — use existing chart
+    }
+
+    if (regenerated) {
+      // Chart was regenerated — cached synastry is invalid
+      try {
+        await sql`DELETE FROM synastry_reports WHERE relationship_profile_id = ${profileId}::uuid`;
+      } catch (cacheError) {
+        console.warn(
+          '[Synastry] Failed to invalidate stale cache:',
+          cacheError,
+        );
+      }
+    }
+
+    const profileBirthChart =
+      freshChart ?? (profile.birth_chart as BirthChartData[] | null);
+
+    if (!profileBirthChart) {
       return NextResponse.json(
         {
           error:
@@ -53,8 +97,6 @@ export async function GET(
         { status: 400 },
       );
     }
-
-    const profileBirthChart = profile.birth_chart as BirthChartData[];
 
     // Check for cached synastry report
     const cachedResult = await sql`

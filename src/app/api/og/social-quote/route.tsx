@@ -30,27 +30,28 @@ const FORMAT_SIZES: Record<Format, { width: number; height: number }> = {
 const DEFAULT_FORMAT: Format = 'square';
 
 // Category-themed gradients for visual variety
+// ALL brand violet/purple/cosmic - NO green or orange!
 const THEMED_GRADIENTS = [
-  'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // violet/cosmic
+  'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // violet
   'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)', // purple
   'linear-gradient(135deg, #0f1428 0%, #0a0d14 50%, #0a0a0a 100%)', // indigo
-  'linear-gradient(135deg, #28200f 0%, #14100a 50%, #0a0a0a 100%)', // amber
-  'linear-gradient(135deg, #280f1a 0%, #140a0d 50%, #0a0a0a 100%)', // rose
-  'linear-gradient(135deg, #0f2818 0%, #0a140d 50%, #0a0a0a 100%)', // emerald
-  'linear-gradient(135deg, #1f1f2a 0%, #1a1a1a 50%, #0a0a0a 100%)', // slate
-  'linear-gradient(135deg, #252530 0%, #1a1a1a 50%, #0a0a0a 100%)', // steel
+  'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // cosmic violet
+  'linear-gradient(135deg, #280f1a 0%, #140a0d 50%, #0a0a0a 100%)', // rose-violet
+  'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)', // deep purple
+  'linear-gradient(135deg, #0f1428 0%, #0a0d14 50%, #0a0a0a 100%)', // midnight violet
+  'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // nebula
 ];
 
-// Accent colors that pair with each gradient
+// Accent colors that pair with each gradient - Lunary brand colors only
 const GRADIENT_ACCENTS = [
-  '#a78bfa',
-  '#c084fc',
-  '#818cf8',
-  '#f59e0b',
-  '#f472b6',
-  '#34d399',
-  '#94a3b8',
-  '#a78bfa',
+  '#8458d8', // Nebula Violet
+  '#c77dff', // Galaxy Haze
+  '#7b7be8', // Comet Trail
+  '#d070e8', // Supernova
+  '#ee789e', // Cosmic Rose
+  '#a78bfa', // Soft violet
+  '#818cf8', // Soft indigo
+  '#c77dff', // Galaxy Haze
 ];
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
@@ -129,7 +130,7 @@ export async function GET(request: NextRequest) {
           position: 'relative',
         }}
       >
-        {/* Subtle starfield */}
+        {/* Starfield - more visible */}
         {stars.map((star, i) => (
           <div
             key={i}
@@ -141,7 +142,8 @@ export async function GET(request: NextRequest) {
               height: star.size,
               borderRadius: '50%',
               background: '#fff',
-              opacity: star.opacity * 0.3,
+              opacity: star.opacity * 0.85, // Increased from 0.3
+              boxShadow: `0 0 ${star.size * 2}px rgba(255, 255, 255, ${star.opacity * 0.5})`, // Glow
             }}
           />
         ))}

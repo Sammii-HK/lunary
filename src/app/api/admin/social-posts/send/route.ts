@@ -4,6 +4,7 @@ import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import { recordThemeUsage } from '@/lib/social/thematic-generator';
 import { getImageBaseUrl } from '@/lib/urls';
+import { sanitizeForLog } from '@/lib/security/log-sanitize';
 
 type DbPostRow = {
   id: number;
@@ -26,7 +27,7 @@ type PlatformPayload = {
   media: Array<{ type: 'image' | 'video'; url: string; alt: string }>;
   reddit?: { title?: string; subreddit?: string };
   pinterestOptions?: { boardId: string; boardName: string };
-  tiktokOptions?: { type: string; coverUrl?: string };
+  tiktokOptions?: { type: string; coverUrl?: string; autoAddMusic?: boolean };
   instagramOptions?: { type: string; coverUrl?: string };
 };
 
@@ -173,17 +174,26 @@ const buildPlatformPayload = (
   if (platformStr === 'tiktok' && media.length > 0) {
     payload.tiktokOptions = {
       type: 'post',
+      // Only add music to image posts, not videos (videos have audio already)
+      autoAddMusic: !shouldUseVideo,
       ...(shouldUseVideo && imageUrlForPlatform
         ? { coverUrl: imageUrlForPlatform }
         : {}),
     };
   }
 
-  if (platformStr === 'instagram' && shouldUseVideo) {
-    payload.instagramOptions = {
-      type: 'reel',
-      ...(imageUrlForPlatform ? { coverUrl: imageUrlForPlatform } : {}),
-    };
+  if (platformStr === 'instagram') {
+    if (shouldUseVideo) {
+      payload.instagramOptions = {
+        type: 'reel',
+        ...(imageUrlForPlatform ? { coverUrl: imageUrlForPlatform } : {}),
+      };
+    } else {
+      // Static Instagram post (meme, carousel, daily cosmic, etc.)
+      payload.instagramOptions = {
+        type: 'post',
+      };
+    }
   }
 
   return payload;
@@ -529,7 +539,9 @@ export async function POST(request: NextRequest) {
 
       try {
         if (groupKey && approvedGroupPosts.length > 0) {
-          console.log(`Updating group posts with base_group_key = ${groupKey}`);
+          console.log(
+            `Updating group posts with base_group_key = ${sanitizeForLog(groupKey)}`,
+          );
           const updateResult = await sql`
             UPDATE social_posts
             SET status = 'sent', updated_at = NOW()
@@ -537,7 +549,7 @@ export async function POST(request: NextRequest) {
               AND status IN ('pending', 'approved')
           `;
           console.log(
-            `✅ Updated ${updateResult.rowCount} posts in group ${groupKey} to 'sent'`,
+            `✅ Updated ${updateResult.rowCount} posts in group ${sanitizeForLog(groupKey)} to 'sent'`,
           );
 
           if (updateResult.rowCount === 0) {
@@ -550,14 +562,16 @@ export async function POST(request: NextRequest) {
             console.log('Posts with this group key:', checkResult.rows);
           }
         } else {
-          console.log(`Updating single post with id = ${postId}`);
+          console.log(
+            `Updating single post with id = ${sanitizeForLog(postId)}`,
+          );
           const updateResult = await sql`
             UPDATE social_posts
             SET status = 'sent', updated_at = NOW()
             WHERE id = ${Number(postId)}
           `;
           console.log(
-            `✅ Updated post ${postId} to 'sent' (rows affected: ${updateResult.rowCount})`,
+            `✅ Updated post ${sanitizeForLog(postId)} to 'sent' (rows affected: ${updateResult.rowCount})`,
           );
 
           if (updateResult.rowCount === 0) {

@@ -117,6 +117,7 @@ type BirthChartProps = {
   showAspects?: boolean;
   aspectFilter?: 'all' | 'harmonious' | 'challenging';
   showAsteroids?: boolean;
+  clockwise?: boolean;
   onAspectsToggle?: (show: boolean) => void;
 };
 
@@ -128,6 +129,7 @@ export const BirthChart = ({
   showAspects = false,
   aspectFilter = 'all',
   showAsteroids = true,
+  clockwise = false,
   onAspectsToggle,
 }: BirthChartProps) => {
   const [hoveredBody, setHoveredBody] = useState<string | null>(null);
@@ -136,6 +138,8 @@ export const BirthChart = ({
   );
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   const ascendantAngle = ascendant ? ascendant.eclipticLongitude : 0;
+
+  const yf = clockwise ? -1 : 1;
 
   const chartData = useMemo(() => {
     return birthChart.map((planet) => {
@@ -146,7 +150,7 @@ export const BirthChart = ({
 
       const radius = 65;
       const x = r6(Math.cos(radian) * radius);
-      const y = r6(Math.sin(radian) * radius);
+      const y = r6(Math.sin(radian) * radius * yf);
 
       return {
         ...planet,
@@ -156,7 +160,7 @@ export const BirthChart = ({
         y,
       };
     });
-  }, [birthChart, ascendantAngle]);
+  }, [birthChart, ascendantAngle, yf]);
 
   const zodiacSigns = useMemo(() => {
     const signs = [
@@ -182,11 +186,11 @@ export const BirthChart = ({
       const radian = (angle * Math.PI) / 180;
       const radius = 100;
       const x = r6(Math.cos(radian) * radius);
-      const y = r6(Math.sin(radian) * radius);
+      const y = r6(Math.sin(radian) * radius * yf);
 
       return { sign, angle, x, y };
     });
-  }, [ascendantAngle]);
+  }, [ascendantAngle, yf]);
 
   const houseData = useMemo(() => {
     if (houses && houses.length > 0) {
@@ -211,6 +215,7 @@ export const BirthChart = ({
         radian,
       };
     });
+    // houseData stores radians — yf flip is applied at render time
   }, [houses, ascendantAngle]);
 
   const mainPlanets = chartData.filter((p) => MAIN_PLANETS.includes(p.body));
@@ -359,9 +364,9 @@ export const BirthChart = ({
           {houseData.map((house, i) => {
             const radian = house.radian;
             const x1 = r6(Math.cos(radian) * 50);
-            const y1 = r6(Math.sin(radian) * 50);
+            const y1 = r6(Math.sin(radian) * 50 * yf);
             const x2 = r6(Math.cos(radian) * 85);
-            const y2 = r6(Math.sin(radian) * 85);
+            const y2 = r6(Math.sin(radian) * 85 * yf);
 
             const isAngular = [1, 4, 7, 10].includes(house.house);
 
@@ -389,7 +394,7 @@ export const BirthChart = ({
             const radian = (adjustedMid * Math.PI) / 180;
             const radius = 38;
             const x = r6(Math.cos(radian) * radius);
-            const y = r6(Math.sin(radian) * radius);
+            const y = r6(Math.sin(radian) * radius * yf);
 
             return (
               <text
@@ -412,9 +417,9 @@ export const BirthChart = ({
             const angle = (180 + adjustedStart) % 360;
             const radian = (angle * Math.PI) / 180;
             const x1 = r6(Math.cos(radian) * 85);
-            const y1 = r6(Math.sin(radian) * 85);
+            const y1 = r6(Math.sin(radian) * 85 * yf);
             const x2 = r6(Math.cos(radian) * 120);
-            const y2 = r6(Math.sin(radian) * 120);
+            const y2 = r6(Math.sin(radian) * 120 * yf);
 
             return (
               <line

@@ -75,6 +75,30 @@ html {
     line-height: 1.5rem;
   }
 
+  /* Iframe Scroll Isolation Utilities */
+  .iframe-scroll-isolate {
+    overscroll-behavior: contain;
+    touch-action: pan-y pan-x;
+    -webkit-overflow-scrolling: touch;
+    isolation: isolate;
+  }
+
+  .no-scroll-chaining {
+    overscroll-behavior: none;
+  }
+
+  /* Instagram Brand Gradient */
+  .bg-instagram-gradient {
+    background: linear-gradient(
+      45deg,
+      #f09433 0%,
+      #e6683c 25%,
+      #dc2743 50%,
+      #cc2366 75%,
+      #bc1888 100%
+    );
+  }
+
   /* Locked Preview Styles */
   .locked-preview {
     position: relative;

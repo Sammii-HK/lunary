@@ -1,120 +1,125 @@
 import type { ThemeCategory } from '@/lib/social/types';
 import { seededRandom } from './ig-utils';
+import { crystalDatabase } from '@/constants/grimoire/crystals';
+import spellsData from '@/data/spells.json';
+import tarotData from '@/data/tarot-cards.json';
 
-// Grimoire slug pools by category (representative samples that rotate)
-const CATEGORY_SLUGS: Partial<Record<ThemeCategory, string[]>> = {
-  tarot: [
-    'tarot/the-fool',
-    'tarot/the-magician',
-    'tarot/the-high-priestess',
-    'tarot/the-empress',
-    'tarot/the-emperor',
-    'tarot/the-hierophant',
-    'tarot/the-lovers',
-    'tarot/the-chariot',
-    'tarot/strength',
-    'tarot/the-hermit',
-    'tarot/wheel-of-fortune',
-    'tarot/justice',
-    'tarot/the-hanged-man',
-    'tarot/death',
-    'tarot/temperance',
-    'tarot/the-devil',
-    'tarot/the-tower',
-    'tarot/the-star',
-    'tarot/the-moon',
-    'tarot/the-sun',
-    'tarot/judgement',
-    'tarot/the-world',
-  ],
-  zodiac: [
-    'zodiac/aries',
-    'zodiac/taurus',
-    'zodiac/gemini',
-    'zodiac/cancer',
-    'zodiac/leo',
-    'zodiac/virgo',
-    'zodiac/libra',
-    'zodiac/scorpio',
-    'zodiac/sagittarius',
-    'zodiac/capricorn',
-    'zodiac/aquarius',
-    'zodiac/pisces',
-  ],
-  spells: [
-    'spells/salt-circle-protection',
-    'spells/mirror-spell',
-    'spells/candle-spell',
-    'spells/money-jar',
-    'spells/love-spell',
-    'spells/moon-water',
-    'spells/banishing-spell',
-    'spells/cord-cutting',
-    'spells/cleansing-ritual',
-    'spells/prosperity-spell',
-    'spells/dream-spell',
-    'spells/healing-spell',
-  ],
-  crystals: [
-    'crystals/amethyst',
-    'crystals/rose-quartz',
-    'crystals/citrine',
-    'crystals/obsidian',
-    'crystals/moonstone',
-    'crystals/clear-quartz',
-    'crystals/labradorite',
-    'crystals/selenite',
-    'crystals/tigers-eye',
-    'crystals/lapis-lazuli',
-    'crystals/malachite',
-    'crystals/turquoise',
-  ],
-  numerology: [
-    'numerology/angel-numbers/111',
-    'numerology/angel-numbers/222',
-    'numerology/angel-numbers/333',
-    'numerology/angel-numbers/444',
-    'numerology/angel-numbers/555',
-    'numerology/angel-numbers/777',
-    'numerology/life-path/1',
-    'numerology/life-path/7',
-    'numerology/life-path/11',
-    'numerology/life-path/22',
-  ],
-  runes: [
-    'runes/fehu',
-    'runes/uruz',
-    'runes/thurisaz',
-    'runes/ansuz',
-    'runes/raido',
-    'runes/kenaz',
-    'runes/gebo',
-    'runes/wunjo',
-    'runes/hagalaz',
-    'runes/nauthiz',
-    'runes/isa',
-    'runes/jera',
-  ],
-  chakras: [
-    'chakras/root',
-    'chakras/sacral',
-    'chakras/solar-plexus',
-    'chakras/heart',
-    'chakras/throat',
-    'chakras/third-eye',
-    'chakras/crown',
-  ],
-  sabbat: [
-    'sabbats/samhain',
-    'sabbats/yule',
-    'sabbats/imbolc',
-    'sabbats/ostara',
-    'sabbats/beltane',
-    'sabbats/litha',
-    'sabbats/lughnasadh',
-    'sabbats/mabon',
-  ],
-};
+// Dynamically load ALL grimoire content from your databases
+function getCategorySlugs(category: ThemeCategory): string[] {
+  switch (category) {
+    case 'crystals':
+      // Use ALL 200+ crystals!
+      return crystalDatabase.map((crystal) => `crystals/${crystal.id}`);
+
+    case 'spells':
+      // Use ALL 200+ spells!
+      return (spellsData as any[]).map(
+        (spell) =>
+          `spells/${spell.id || spell.slug || spell.name.toLowerCase().replace(/\s+/g, '-')}`,
+      );
+
+    case 'tarot':
+      // Use ALL tarot cards (Major + Minor Arcana)
+      return (tarotData as any[]).map(
+        (card) => `tarot/${card.slug || card.id}`,
+      );
+
+    case 'zodiac':
+      return [
+        'zodiac/aries',
+        'zodiac/taurus',
+        'zodiac/gemini',
+        'zodiac/cancer',
+        'zodiac/leo',
+        'zodiac/virgo',
+        'zodiac/libra',
+        'zodiac/scorpio',
+        'zodiac/sagittarius',
+        'zodiac/capricorn',
+        'zodiac/aquarius',
+        'zodiac/pisces',
+      ];
+
+    case 'numerology':
+      return [
+        'numerology/angel-numbers/111',
+        'numerology/angel-numbers/222',
+        'numerology/angel-numbers/333',
+        'numerology/angel-numbers/444',
+        'numerology/angel-numbers/555',
+        'numerology/angel-numbers/666',
+        'numerology/angel-numbers/777',
+        'numerology/angel-numbers/888',
+        'numerology/angel-numbers/999',
+        'numerology/life-path/1',
+        'numerology/life-path/2',
+        'numerology/life-path/3',
+        'numerology/life-path/4',
+        'numerology/life-path/5',
+        'numerology/life-path/6',
+        'numerology/life-path/7',
+        'numerology/life-path/8',
+        'numerology/life-path/9',
+        'numerology/life-path/11',
+        'numerology/life-path/22',
+        'numerology/life-path/33',
+      ];
+
+    case 'runes':
+      return [
+        'runes/fehu',
+        'runes/uruz',
+        'runes/thurisaz',
+        'runes/ansuz',
+        'runes/raido',
+        'runes/kenaz',
+        'runes/gebo',
+        'runes/wunjo',
+        'runes/hagalaz',
+        'runes/nauthiz',
+        'runes/isa',
+        'runes/jera',
+        'runes/eihwaz',
+        'runes/perthro',
+        'runes/algiz',
+        'runes/sowilo',
+        'runes/tiwaz',
+        'runes/berkano',
+        'runes/ehwaz',
+        'runes/mannaz',
+        'runes/laguz',
+        'runes/ingwaz',
+        'runes/dagaz',
+        'runes/othala',
+      ];
+
+    case 'chakras':
+      return [
+        'chakras/root',
+        'chakras/sacral',
+        'chakras/solar-plexus',
+        'chakras/heart',
+        'chakras/throat',
+        'chakras/third-eye',
+        'chakras/crown',
+      ];
+
+    case 'sabbat':
+      return [
+        'sabbats/samhain',
+        'sabbats/yule',
+        'sabbats/imbolc',
+        'sabbats/ostara',
+        'sabbats/beltane',
+        'sabbats/litha',
+        'sabbats/lughnasadh',
+        'sabbats/mabon',
+      ];
+
+    default:
+      return [];
+  }
+}
 
 // Weights for carousel category selection (reuses existing weights but
 // includes lower-weight categories that still make great carousels)
@@ -132,6 +137,7 @@ const CAROUSEL_WEIGHTS: Record<string, number> = {
 /**
  * Select a carousel category and slug for a given date.
  * Deterministic: same date = same selection.
+ * Now using FULL grimoire databases (200+ crystals, 200+ spells, all tarot)
  */
 export function selectCarouselForDate(date: string): {
   category: ThemeCategory;
@@ -150,13 +156,18 @@ export function selectCarouselForDate(date: string): {
   // Select category
   const category = pool[Math.floor(rng() * pool.length)];
 
-  // Select slug within category
-  const slugs = CATEGORY_SLUGS[category] || [];
+  // Get ALL slugs for this category from full databases
+  const slugs = getCategorySlugs(category);
   if (slugs.length === 0) {
-    return { category: 'tarot', slug: 'tarot/the-fool' };
+    console.warn(
+      `[Carousel Scheduler] No slugs found for category: ${category}`,
+    );
+    return { category: 'crystals', slug: 'crystals/amethyst' };
   }
 
+  // Select slug deterministically from FULL pool (200+ options!)
   const slug = slugs[Math.floor(rng() * slugs.length)];
+
   return { category, slug };
 }
 

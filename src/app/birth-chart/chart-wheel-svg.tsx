@@ -95,15 +95,17 @@ function polarFromLongitude(
   longitude: number,
   ascendantAngle: number,
   radius: number,
+  clockwise = false,
 ) {
   const adjustedLong = (longitude - ascendantAngle + 360) % 360;
   const angle = (180 + adjustedLong) % 360;
   const radian = (angle * Math.PI) / 180;
+  const rawY = Math.sin(radian) * radius;
   return {
     angle,
     radian,
     x: Math.round(Math.cos(radian) * radius * 1000) / 1000,
-    y: Math.round(Math.sin(radian) * radius * 1000) / 1000,
+    y: Math.round((clockwise ? -rawY : rawY) * 1000) / 1000,
   };
 }
 
@@ -132,6 +134,7 @@ export function ChartWheelSvg({
   showAspects = false,
   aspectFilter = 'all',
   showAsteroids = true,
+  clockwise = false,
   colours = {
     ring: '#3f3f46',
     ringInner: '#27272a',
@@ -154,6 +157,7 @@ export function ChartWheelSvg({
   showAspects?: boolean;
   aspectFilter?: 'all' | 'harmonious' | 'challenging';
   showAsteroids?: boolean;
+  clockwise?: boolean;
   colours?: Partial<{
     ring: string;
     ringInner: string;
@@ -177,7 +181,12 @@ export function ChartWheelSvg({
   );
 
   const chartData = birthChart.map((p) => {
-    const pos = polarFromLongitude(p.eclipticLongitude, ascendantAngle, 65);
+    const pos = polarFromLongitude(
+      p.eclipticLongitude,
+      ascendantAngle,
+      65,
+      clockwise,
+    );
     return { ...p, ...pos };
   });
 
@@ -196,7 +205,7 @@ export function ChartWheelSvg({
     'Pisces',
   ].map((sign, index) => {
     const signMid = index * 30 + 15;
-    const pos = polarFromLongitude(signMid, ascendantAngle, 100);
+    const pos = polarFromLongitude(signMid, ascendantAngle, 100, clockwise);
     return { sign, ...pos };
   });
 
@@ -207,6 +216,7 @@ export function ChartWheelSvg({
           h.eclipticLongitude || 0,
           ascendantAngle,
           0,
+          clockwise,
         );
         return { ...h, ...pos };
       });
@@ -215,7 +225,7 @@ export function ChartWheelSvg({
     return Array.from({ length: 12 }, (_, i) => {
       const houseStart = i * 30;
       const longitude = (ascendantAngle + houseStart) % 360;
-      const pos = polarFromLongitude(longitude, ascendantAngle, 0);
+      const pos = polarFromLongitude(longitude, ascendantAngle, 0, clockwise);
       return {
         house: i + 1,
         eclipticLongitude: longitude,
@@ -327,10 +337,11 @@ export function ChartWheelSvg({
 
       {/* Houses */}
       {houseData.map((h, i) => {
+        const yf = clockwise ? -1 : 1;
         const x1 = Math.cos(h.radian) * 50;
-        const y1 = Math.sin(h.radian) * 50;
+        const y1 = Math.sin(h.radian) * 50 * yf;
         const x2 = Math.cos(h.radian) * 85;
-        const y2 = Math.sin(h.radian) * 85;
+        const y2 = Math.sin(h.radian) * 85 * yf;
 
         const isAngular = [1, 4, 7, 10].includes(h.house || 0);
 
@@ -351,6 +362,7 @@ export function ChartWheelSvg({
       {/* House numbers */}
       {showHouseNumbers &&
         houseData.map((h, i) => {
+          const yf = clockwise ? -1 : 1;
           const next = houseData[(i + 1) % 12];
           const midAngle =
             h.angle > next.angle
@@ -359,7 +371,7 @@ export function ChartWheelSvg({
           const rad = (midAngle * Math.PI) / 180;
           const r = 38;
           const x = Math.cos(rad) * r;
-          const y = Math.sin(rad) * r;
+          const y = Math.sin(rad) * r * yf;
 
           return (
             <text
@@ -378,12 +390,13 @@ export function ChartWheelSvg({
 
       {/* Sign divider lines */}
       {Array.from({ length: 12 }, (_, i) => {
+        const yf = clockwise ? -1 : 1;
         const start = i * 30;
-        const pos = polarFromLongitude(start, ascendantAngle, 0);
+        const pos = polarFromLongitude(start, ascendantAngle, 0, clockwise);
         const x1 = Math.cos(pos.radian) * 85;
-        const y1 = Math.sin(pos.radian) * 85;
+        const y1 = Math.sin(pos.radian) * 85 * yf;
         const x2 = Math.cos(pos.radian) * 120;
-        const y2 = Math.sin(pos.radian) * 120;
+        const y2 = Math.sin(pos.radian) * 120 * yf;
 
         return (
           <line

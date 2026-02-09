@@ -40,7 +40,10 @@ export async function getRecycleCandidates(limit = 5) {
 
     return candidates;
   } catch (error) {
-    console.error('[Content Recycler] Failed to fetch candidates:', error);
+    // Table doesn't exist yet or no data - gracefully skip recycling
+    console.log(
+      '[Content Recycler] Performance table not ready or no data available. Skipping recycled content.',
+    );
     return [];
   }
 }

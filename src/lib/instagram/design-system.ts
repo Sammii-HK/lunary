@@ -60,31 +60,33 @@ export const IG_COLORS = {
 } as const;
 
 // Category → accent color mapping (used for badges, borders, highlights)
+// Using Lunary brand colors: violets, purples, cosmic hues
 export const CATEGORY_ACCENT: Record<ThemeCategory, string> = {
-  zodiac: '#8B5CF6', // violet
-  tarot: '#C084FC', // purple
-  lunar: '#818CF8', // indigo
-  planetary: '#60A5FA', // blue
-  crystals: '#34D399', // emerald
-  numerology: '#F59E0B', // amber
-  chakras: '#F472B6', // pink
-  sabbat: '#65A30D', // lime
-  runes: '#9CA3AF', // gray
-  spells: '#A78BFA', // violet
+  zodiac: '#8458d8', // Nebula Violet (primary brand)
+  tarot: '#c77dff', // Galaxy Haze (accent brand)
+  lunar: '#7b7be8', // Comet Trail (secondary brand)
+  planetary: '#818CF8', // Soft indigo
+  crystals: '#d070e8', // Supernova (highlight brand)
+  numerology: '#c77dff', // Galaxy Haze
+  chakras: '#ee789e', // Cosmic Rose (brand)
+  sabbat: '#8458d8', // Nebula Violet
+  runes: '#9CA3AF', // Neutral gray (keeps mystical feel)
+  spells: '#d070e8', // Supernova
 };
 
 // Category → gradient for dark mode backgrounds
+// Cosmic violet/purple tones matching Lunary brand
 export const CATEGORY_GRADIENT: Record<ThemeCategory, string> = {
-  zodiac: 'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)',
-  tarot: 'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)',
-  lunar: 'linear-gradient(135deg, #0f1428 0%, #0a0d14 50%, #0a0a0a 100%)',
-  planetary: 'linear-gradient(135deg, #0f1a28 0%, #0a0d14 50%, #0a0a0a 100%)',
-  crystals: 'linear-gradient(135deg, #0f2818 0%, #0a140d 50%, #0a0a0a 100%)',
-  numerology: 'linear-gradient(135deg, #28200f 0%, #14100a 50%, #0a0a0a 100%)',
-  chakras: 'linear-gradient(135deg, #280f1a 0%, #140a0d 50%, #0a0a0a 100%)',
-  sabbat: 'linear-gradient(135deg, #1a280f 0%, #0d140a 50%, #0a0a0a 100%)',
-  runes: 'linear-gradient(135deg, #1a1a1f 0%, #0d0d10 50%, #0a0a0a 100%)',
-  spells: 'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)',
+  zodiac: 'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // Deep violet
+  tarot: 'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)', // Purple
+  lunar: 'linear-gradient(135deg, #0f1428 0%, #0a0d14 50%, #0a0a0a 100%)', // Indigo
+  planetary: 'linear-gradient(135deg, #0f1a28 0%, #0a0d14 50%, #0a0a0a 100%)', // Blue-violet
+  crystals: 'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)', // Violet (was green)
+  numerology: 'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // Cosmic violet (was orange)
+  chakras: 'linear-gradient(135deg, #280f1a 0%, #140a0d 50%, #0a0a0a 100%)', // Rose-violet
+  sabbat: 'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // Violet (was lime)
+  runes: 'linear-gradient(135deg, #1a1a1f 0%, #0d0d10 50%, #0a0a0a 100%)', // Neutral gray
+  spells: 'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)', // Deep purple
 };
 
 // Dark cosmic backgrounds for memes (sign-tinted gradients matching brand)

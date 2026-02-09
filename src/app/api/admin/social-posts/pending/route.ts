@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await sql`
-      SELECT 
+      SELECT
         sp.id,
         sp.content,
         sp.platform,
@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
         sp.status,
         sp.image_url as "imageUrl",
         sp.video_url as "videoUrl",
+        sp.video_metadata as "videoMetadata",
         sp.week_theme as "weekTheme",
         sp.week_start as "weekStart",
         sp.base_group_key as "baseGroupKey",

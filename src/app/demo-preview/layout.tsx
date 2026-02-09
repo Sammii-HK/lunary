@@ -7,8 +7,10 @@ export const metadata: Metadata = {
   title: 'Demo Preview',
   robots: 'noindex',
   other: {
-    // Edge caching for fast global delivery
-    'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+    // Reduced cache TTL during scroll isolation rollout
+    // TODO: After 24-48 hours, restore to: 'public, s-maxage=3600, stale-while-revalidate=86400'
+    'Cache-Control':
+      'public, s-maxage=60, stale-while-revalidate=300, must-revalidate',
   },
 };
 
@@ -42,7 +44,14 @@ export default function DemoPreviewLayout({
         `}
       </Script>
 
-      <div className='h-screen w-screen overflow-hidden bg-zinc-950'>
+      <div
+        className='h-screen w-screen overflow-hidden bg-zinc-950'
+        style={{
+          position: 'fixed',
+          overscrollBehavior: 'none',
+          touchAction: 'pan-y pan-x',
+        }}
+      >
         {children}
       </div>
     </>

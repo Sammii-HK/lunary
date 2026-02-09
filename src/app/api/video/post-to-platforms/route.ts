@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { sanitizeForLog as sanitize } from '@/lib/security/log-sanitize';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -15,8 +16,7 @@ interface PlatformResult {
 }
 
 function sanitizeForLog(value: unknown, maxLength = 200) {
-  const str = String(value ?? '');
-  const sanitized = str.replace(/[\r\n]+/g, ' ');
+  const sanitized = sanitize(value);
   return sanitized.length > maxLength
     ? `${sanitized.slice(0, maxLength)}…`
     : sanitized;
