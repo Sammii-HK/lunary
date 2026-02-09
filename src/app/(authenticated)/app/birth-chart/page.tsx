@@ -24,6 +24,7 @@ const BirthChartPage = () => {
     'all' | 'harmonious' | 'challenging'
   >('all');
   const [showAsteroids, setShowAsteroids] = useState(true);
+  const [clockwise, setClockwise] = useState(false);
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const originalBirthChartData = user?.birthChart || null;
@@ -213,6 +214,8 @@ const BirthChartPage = () => {
             onAspectFilterChange={setAspectFilter}
             showAsteroids={showAsteroids}
             onToggleAsteroids={() => setShowAsteroids(!showAsteroids)}
+            clockwise={clockwise}
+            onToggleClockwise={() => setClockwise(!clockwise)}
           />
 
           <div data-testid='chart-visualization'>
@@ -223,6 +226,7 @@ const BirthChartPage = () => {
               showAspects={showAspects}
               aspectFilter={aspectFilter}
               showAsteroids={showAsteroids}
+              clockwise={clockwise}
             />
           </div>
         </div>

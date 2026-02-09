@@ -9,6 +9,8 @@ interface ChartControlsProps {
   onAspectFilterChange: (filter: 'all' | 'harmonious' | 'challenging') => void;
   showAsteroids: boolean;
   onToggleAsteroids: () => void;
+  clockwise?: boolean;
+  onToggleClockwise?: () => void;
 }
 
 export function ChartControls({
@@ -18,6 +20,8 @@ export function ChartControls({
   onAspectFilterChange,
   showAsteroids,
   onToggleAsteroids,
+  clockwise = false,
+  onToggleClockwise,
 }: ChartControlsProps) {
   return (
     <div className='flex flex-col items-center gap-2'>
@@ -28,6 +32,11 @@ export function ChartControls({
         <Button onClick={onToggleAsteroids} variant='lunary-soft' size='sm'>
           {showAsteroids ? 'Hide Asteroids' : 'Show Asteroids'}
         </Button>
+        {onToggleClockwise && (
+          <Button onClick={onToggleClockwise} variant='lunary-soft' size='sm'>
+            {clockwise ? 'Counter-Clockwise' : 'Clockwise'}
+          </Button>
+        )}
       </div>
       {showAspects && (
         <div className='flex gap-2 items-center'>

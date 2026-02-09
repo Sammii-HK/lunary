@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { createBirthChartWithMetadata } from 'utils/astrology/birthChartService';
+import { CURRENT_BIRTH_CHART_VERSION } from 'utils/astrology/chart-version';
 
 export interface BirthChartPlacement {
   body: string;
@@ -95,7 +96,8 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
   const birthChartRefreshAttemptRef = useRef<number>(0);
   const subscriptionSyncAttemptRef = useRef(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-  const BIRTH_CHART_VERSION = 7; // Incremented to include Part of Fortune and Vertex
+  // Version is defined in utils/astrology/chart-version.ts — bump there to trigger regeneration
+  const BIRTH_CHART_VERSION = CURRENT_BIRTH_CHART_VERSION;
 
   const fetchUserData = useCallback(async () => {
     if (!isAuthenticated || !userId) {

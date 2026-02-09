@@ -56,6 +56,16 @@ export async function PUT(request: NextRequest) {
         updated_at = NOW()
     `;
 
+    // Invalidate cached synastry reports so they recalculate with the new chart
+    try {
+      await sql`DELETE FROM synastry_reports WHERE user_id = ${user.id}`;
+    } catch (synastryError) {
+      console.warn(
+        '[Birth Chart] Failed to invalidate synastry cache:',
+        synastryError,
+      );
+    }
+
     // Track explorer progress - birth chart saved (Level 1 threshold = 1)
     try {
       const { setExplorerProgress } = await import('@/lib/progress/server');

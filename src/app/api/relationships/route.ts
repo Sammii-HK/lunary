@@ -5,6 +5,7 @@ import {
   generateBirthChart,
   parseLocationToCoordinates,
 } from '../../../../utils/astrology/birthChart';
+import { CURRENT_BIRTH_CHART_VERSION } from '../../../../utils/astrology/chart-version';
 import tzLookup from 'tz-lookup';
 
 export async function GET(request: NextRequest) {
@@ -83,22 +84,45 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const result = await sql`
-      INSERT INTO relationship_profiles (
-        user_id, name, relationship_type, birthday, birth_time, birth_location, birth_chart, notes
-      )
-      VALUES (
-        ${user.id},
-        ${name},
-        ${relationshipType || null},
-        ${birthday},
-        ${birthTime || null},
-        ${birthLocation || null},
-        ${birthChart ? JSON.stringify(birthChart) : null}::jsonb,
-        ${notes || null}
-      )
-      RETURNING id, name, relationship_type, birthday, birth_time, birth_location, notes, created_at
-    `;
+    // Try with birth_chart_version; fall back without it if migration hasn't run
+    let result;
+    try {
+      result = await sql`
+        INSERT INTO relationship_profiles (
+          user_id, name, relationship_type, birthday, birth_time, birth_location, birth_chart, birth_chart_version, notes
+        )
+        VALUES (
+          ${user.id},
+          ${name},
+          ${relationshipType || null},
+          ${birthday},
+          ${birthTime || null},
+          ${birthLocation || null},
+          ${birthChart ? JSON.stringify(birthChart) : null}::jsonb,
+          ${birthChart ? CURRENT_BIRTH_CHART_VERSION : 0},
+          ${notes || null}
+        )
+        RETURNING id, name, relationship_type, birthday, birth_time, birth_location, notes, created_at
+      `;
+    } catch {
+      // birth_chart_version column may not exist yet — insert without it
+      result = await sql`
+        INSERT INTO relationship_profiles (
+          user_id, name, relationship_type, birthday, birth_time, birth_location, birth_chart, notes
+        )
+        VALUES (
+          ${user.id},
+          ${name},
+          ${relationshipType || null},
+          ${birthday},
+          ${birthTime || null},
+          ${birthLocation || null},
+          ${birthChart ? JSON.stringify(birthChart) : null}::jsonb,
+          ${notes || null}
+        )
+        RETURNING id, name, relationship_type, birthday, birth_time, birth_location, notes, created_at
+      `;
+    }
 
     return NextResponse.json({
       profile: result.rows[0],

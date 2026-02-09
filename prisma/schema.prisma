@@ -1178,17 +1178,18 @@ model user_progress {
 }
 
 model relationship_profiles {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id           String
-  name              String
-  relationship_type String?
-  birthday          String
-  birth_time        String?
-  birth_location    String?
-  birth_chart       Json?
-  notes             String?
-  created_at        DateTime @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id             String
+  name                String
+  relationship_type   String?
+  birthday            String
+  birth_time          String?
+  birth_location      String?
+  birth_chart         Json?
+  birth_chart_version Int?     @default(0)
+  notes               String?
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime @default(now()) @updatedAt @db.Timestamptz(6)
 
   synastry_reports synastry_reports[]
 
