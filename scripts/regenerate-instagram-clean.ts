@@ -12,8 +12,8 @@ import { resolve } from 'path';
 // Load .env.local FIRST - before any other imports
 config({ path: resolve(process.cwd(), '.env.local') });
 
-// Force localhost for local testing
-process.env.NEXT_PUBLIC_BASE_URL = 'http://localhost:3000';
+// Use PRODUCTION URLs for shareable content (so Succulent can access images)
+process.env.NEXT_PUBLIC_BASE_URL = 'https://lunary.app';
 
 import { PrismaClient } from '@prisma/client';
 
