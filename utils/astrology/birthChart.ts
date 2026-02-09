@@ -31,7 +31,6 @@ import {
   NextLunarApsis,
   ApsisKind,
 } from 'astronomy-engine';
-import dayjs from 'dayjs';
 
 export type BirthChartData = {
   body: string;
@@ -314,11 +313,13 @@ function getTimeZoneOffsetMs(date: Date, timeZone: string): number {
       .filter((part) => part.type !== 'literal')
       .map((part) => [part.type, part.value]),
   );
+  // Some environments return "24" for midnight with hour12:false — normalize to 0
+  const hourNum = Number(values.hour) % 24;
   const formattedUtc = Date.UTC(
     Number(values.year),
     Number(values.month) - 1,
     Number(values.day),
-    Number(values.hour),
+    hourNum,
     Number(values.minute),
     Number(values.second),
   );
@@ -333,9 +334,19 @@ function toUtcFromTimeZone(
   minute: number,
   timeZone: string,
 ): Date {
+  // Start with a UTC date that has the local time values
   const utcGuess = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
   const offsetMs = getTimeZoneOffsetMs(utcGuess, timeZone);
-  return new Date(utcGuess.getTime() - offsetMs);
+  const firstResult = new Date(utcGuess.getTime() - offsetMs);
+
+  // Re-check: the offset at the computed UTC time may differ from our initial
+  // guess near DST boundaries. Iterate once to converge.
+  const offsetMs2 = getTimeZoneOffsetMs(firstResult, timeZone);
+  if (offsetMs2 !== offsetMs) {
+    return new Date(utcGuess.getTime() - offsetMs2);
+  }
+
+  return firstResult;
 }
 
 function calculateWholeSigHouses(ascendantLongitude: number): HouseCusp[] {
@@ -511,6 +522,30 @@ export const generateBirthChart = async (
   birthTimezone?: string,
   observer?: Observer,
 ): Promise<BirthChartData[]> => {
+  // Validate birthDate format (YYYY-MM-DD)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
+    throw new Error(
+      `Invalid birthDate format: "${birthDate}". Expected YYYY-MM-DD.`,
+    );
+  }
+
+  // Validate birthTime format and range if provided
+  if (birthTime) {
+    const timeMatch = birthTime.match(/^(\d{1,2}):(\d{2})$/);
+    if (!timeMatch) {
+      throw new Error(
+        `Invalid birthTime format: "${birthTime}". Expected HH:MM.`,
+      );
+    }
+    const h = Number(timeMatch[1]);
+    const m = Number(timeMatch[2]);
+    if (h < 0 || h > 23 || m < 0 || m > 59) {
+      throw new Error(
+        `Invalid birthTime format: "${birthTime}". Expected HH:MM (00-23:00-59).`,
+      );
+    }
+  }
+
   let birthDateTime: Date;
   if (birthTimezone) {
     const [year, month, day] = birthDate.split('-').map(Number);
@@ -531,14 +566,29 @@ export const generateBirthChart = async (
         birthTimezone,
       );
     } catch {
-      birthDateTime = birthTime
-        ? dayjs(`${birthDate} ${birthTime}`).toDate()
-        : dayjs(`${birthDate} 12:00`).toDate();
+      // Fallback: treat as UTC explicitly (not runtime-local)
+      console.warn(
+        `[BirthChart] Timezone conversion failed for "${birthTimezone}", falling back to UTC`,
+      );
+      birthDateTime = new Date(
+        Date.UTC(year, month - 1, day, hours, minutes, 0),
+      );
     }
-  } else if (birthTime) {
-    birthDateTime = dayjs(`${birthDate} ${birthTime}`).toDate();
   } else {
-    birthDateTime = dayjs(`${birthDate} 12:00`).toDate();
+    // No timezone available — use UTC explicitly to ensure consistent behavior
+    // across server (Vercel/UTC) and client environments
+    const [year, month, day] = birthDate.split('-').map(Number);
+    let hours = 12;
+    let minutes = 0;
+    if (birthTime) {
+      const [h, m] = birthTime.split(':').map(Number);
+      hours = h;
+      minutes = m || 0;
+    }
+    console.warn(
+      '[BirthChart] No timezone provided, using UTC. Chart may be inaccurate — provide birth location for timezone resolution.',
+    );
+    birthDateTime = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
   }
 
   let finalObserver: Observer;
@@ -667,8 +717,11 @@ export const generateBirthChart = async (
       eclipticLongitude: vertexLong,
       retrograde: false,
     });
-  } catch {
-    // If angle calculations fail, continue without them
+  } catch (error) {
+    console.warn(
+      '[BirthChart] Angle calculations failed (Ascendant/MC/Vertex):',
+      error,
+    );
   }
 
   try {
@@ -711,8 +764,8 @@ export const generateBirthChart = async (
       eclipticLongitude: southNodeLong,
       retrograde: isRetrograde(southNodeLong, southNodePrevLong),
     });
-  } catch {
-    // If node calculations fail, continue without them
+  } catch (error) {
+    console.warn('[BirthChart] Lunar node calculations failed:', error);
   }
 
   try {
@@ -731,8 +784,8 @@ export const generateBirthChart = async (
       eclipticLongitude: chironLong,
       retrograde: isRetrograde(chironLong, chironPrevLong),
     });
-  } catch {
-    // If Chiron calculation fails, continue without it
+  } catch (error) {
+    console.warn('[BirthChart] Chiron calculation failed:', error);
   }
 
   try {
@@ -751,8 +804,8 @@ export const generateBirthChart = async (
       eclipticLongitude: lilithLong,
       retrograde: isRetrograde(lilithLong, lilithPrevLong),
     });
-  } catch {
-    // If Lilith calculation fails, continue without it
+  } catch (error) {
+    console.warn('[BirthChart] Lilith calculation failed:', error);
   }
 
   // Add asteroids
@@ -784,8 +837,8 @@ export const generateBirthChart = async (
         eclipticLongitude: asteroidLong,
         retrograde: isRetrograde(asteroidLong, asteroidPrevLong),
       });
-    } catch {
-      // If asteroid calculation fails, continue without it
+    } catch (error) {
+      console.warn(`[BirthChart] ${asteroid.name} calculation failed:`, error);
     }
   }
 

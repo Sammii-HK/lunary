@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
-import { generateBirthChart } from '../../../../utils/astrology/birthChart';
+import {
+  generateBirthChart,
+  parseLocationToCoordinates,
+} from '../../../../utils/astrology/birthChart';
+import tzLookup from 'tz-lookup';
 
 export async function GET(request: NextRequest) {
   try {
@@ -50,14 +54,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate birth chart if we have enough info
+    // Resolve timezone from birth location for accurate chart generation
     let birthChart = null;
     if (birthday) {
       try {
+        let birthTimezone: string | undefined;
+        if (birthLocation) {
+          const coords = await parseLocationToCoordinates(birthLocation);
+          if (coords) {
+            try {
+              birthTimezone = tzLookup(coords.latitude, coords.longitude);
+            } catch {
+              // tz-lookup failed, will proceed without timezone
+            }
+          }
+        }
         birthChart = await generateBirthChart(
           birthday,
           birthTime || undefined,
           birthLocation || undefined,
+          birthTimezone,
         );
       } catch (chartError) {
         console.error(

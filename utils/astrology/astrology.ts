@@ -54,7 +54,8 @@ export function getZodiacSign(longitude: number): string {
 }
 
 export function formatDegree(longitude: number): FormattedDegree {
-  const degreesInSign = longitude % 30;
+  const normalized = ((longitude % 360) + 360) % 360;
+  const degreesInSign = normalized % 30;
   const degree = Math.floor(degreesInSign);
   const minute = Math.floor((degreesInSign - degree) * 60);
   return { degree, minute };
@@ -98,15 +99,11 @@ export function planetaryPositions(
     const eclipticLongitudeNow = Ecliptic(vectorNow).elon;
     const eclipticLongitudePast = Ecliptic(vectorPast).elon;
 
-    const retrograde = eclipticLongitudeNow < eclipticLongitudePast;
-
-    // console.log(body, {
-    //   astroTime,
-    //   eclipticLongitudeNow,
-    //   vectorNow,
-    //   equatorial: EquatorFromVector(vectorNow),
-    //   retrograde
-    // });
+    // Wraparound-safe retrograde detection: if forward motion > 180°,
+    // the planet actually moved backward (handles 0°/360° Aries boundary)
+    const forwardMotion =
+      (((eclipticLongitudeNow - eclipticLongitudePast) % 360) + 360) % 360;
+    const retrograde = forwardMotion > 180;
 
     positions[Body[body]] = {
       longitude: eclipticLongitudeNow,
