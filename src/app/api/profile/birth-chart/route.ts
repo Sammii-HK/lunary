@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getCurrentUser } from '@/lib/get-user-session';
+import { invalidateSnapshot } from '@/lib/cosmic-snapshot/cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -69,13 +70,51 @@ export async function PUT(request: NextRequest) {
         updated_at = NOW()
     `;
 
-    // Invalidate cached synastry reports so they recalculate with the new chart
+    // Invalidate ALL cached data derived from the birth chart.
+    // Each deletion is wrapped in try/catch so missing tables don't break the flow.
+    const tablesToInvalidate = [
+      'synastry_reports',
+      'daily_horoscopes',
+      'monthly_insights',
+      'cosmic_snapshots',
+      'cosmic_reports',
+      'journal_patterns',
+      'pattern_analysis',
+      'year_analysis',
+    ];
+
+    for (const table of tablesToInvalidate) {
+      try {
+        await sql.query(`DELETE FROM ${table} WHERE user_id = $1`, [user.id]);
+      } catch (tableError) {
+        console.warn(
+          `[Birth Chart] Failed to invalidate ${table}:`,
+          tableError,
+        );
+      }
+    }
+
+    // Invalidate friend connection synastry caches (different column name)
     try {
-      await sql`DELETE FROM synastry_reports WHERE user_id = ${user.id}`;
-    } catch (synastryError) {
+      await sql`
+        UPDATE friend_connections
+        SET synastry_score = NULL, synastry_data = NULL, last_synastry_calc = NULL
+        WHERE user_id = ${user.id} OR friend_id = ${user.id}
+      `;
+    } catch (friendError) {
       console.warn(
-        '[Birth Chart] Failed to invalidate synastry cache:',
-        synastryError,
+        '[Birth Chart] Failed to invalidate friend synastry:',
+        friendError,
+      );
+    }
+
+    // Invalidate Next.js server-side cache tags for cosmic snapshots
+    try {
+      invalidateSnapshot(user.id);
+    } catch (tagError) {
+      console.warn(
+        '[Birth Chart] Failed to invalidate snapshot cache tags:',
+        tagError,
       );
     }
 

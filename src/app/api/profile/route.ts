@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       },
       {
         headers: {
-          'Cache-Control': 'private, max-age=300, stale-while-revalidate=3600',
+          'Cache-Control': 'no-store',
         },
       },
     );
@@ -92,10 +92,14 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    // birthChart must go through PUT /api/profile/birth-chart which handles
+    // cache invalidation (8 DB tables + friend synastry + Next.js cache tags).
+    // Silently ignore birthChart here to prevent accidental cache bypass.
     const {
       name,
       birthday,
-      birthChart,
+      birthChart: _ignoredBirthChart,
       personalCard,
       location,
       intention,
@@ -103,6 +107,7 @@ export async function PUT(request: NextRequest) {
       stripeSubscriptionId,
       userEmail,
     } = body;
+    const birthChart = null;
 
     const normalizedBirthday = normalizeIsoDateOnly(birthday);
 

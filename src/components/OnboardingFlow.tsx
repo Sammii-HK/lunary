@@ -16,6 +16,9 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createBirthChartWithMetadata } from '../../utils/astrology/birthChartService';
+import { CURRENT_BIRTH_CHART_VERSION } from '../../utils/astrology/chart-version';
+import { DailyCache } from '@/lib/cache/dailyCache';
+import { ClientCache } from '@/lib/patterns/snapshot/cache';
 import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from './ui/birthday-input';
 import {
@@ -692,18 +695,20 @@ export function OnboardingFlow({
               Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
           });
         if (birthChart) {
-          await fetch('/api/profile/birth-chart', {
+          const chartResponse = await fetch('/api/profile/birth-chart', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ birthChart }),
           });
-          if (
-            birthLocation &&
-            timezoneSource === 'location' &&
-            timezone &&
-            timezone !== existingLocation?.birthTimezone
-          ) {
+
+          if (chartResponse.ok) {
+            // Only set version + clear caches if chart was actually saved
+            const resolvedTz =
+              birthLocation && timezoneSource === 'location' && timezone
+                ? timezone
+                : existingLocation?.birthTimezone;
+
             await fetch('/api/profile', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
@@ -712,11 +717,15 @@ export function OnboardingFlow({
                 location: {
                   ...existingLocation,
                   ...(birthTime ? { birthTime } : {}),
-                  birthLocation,
-                  birthTimezone: timezone,
+                  ...(birthLocation ? { birthLocation } : {}),
+                  ...(resolvedTz ? { birthTimezone: resolvedTz } : {}),
+                  birthChartVersion: CURRENT_BIRTH_CHART_VERSION,
                 },
               }),
             });
+
+            DailyCache.clear();
+            if (user?.id) ClientCache.clearAll(user.id);
           }
           console.log('✅ Birth chart generated and saved to Postgres');
         }
@@ -744,8 +753,8 @@ export function OnboardingFlow({
         );
       }
 
-      // Refresh user data in context so widgets update immediately
-      await refetch();
+      // Refresh user data in context, busting browser cache
+      await refetch(true);
       setShowBirthChartConfirmation(true);
 
       setCurrentStep('complete');
