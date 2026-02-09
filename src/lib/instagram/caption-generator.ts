@@ -113,8 +113,15 @@ export function generateCaption(
       caption = 'Explore the cosmos with Lunary \u2728';
   }
 
-  // Build hashtags (category + post type + core)
-  const hashtags = buildHashtags(postType, options.category);
+  // Build hashtags (category + post type + core) with rotation
+  // Use a seed based on content for deterministic but varied selection
+  const seed =
+    options.title ||
+    options.headline ||
+    options.fact ||
+    options.sign ||
+    postType;
+  const hashtags = buildHashtags(postType, options.category, seed);
 
   return { caption, hashtags };
 }
@@ -263,33 +270,41 @@ function generateStoryCaption(options: {
 }
 
 /**
- * Build combined hashtag list.
- * Returns ~15-20 hashtags (Instagram sweet spot).
+ * Build combined hashtag list with rotation for variety.
+ * Returns best 15-20 hashtags, rotated to avoid repetition.
  */
 function buildHashtags(
   postType: IGPostType,
   category?: ThemeCategory,
+  seed?: string,
 ): string[] {
-  const tags = new Set<string>();
+  const allTags: string[] = [];
 
-  // Post type hashtags first (most relevant)
-  for (const tag of POST_TYPE_HASHTAGS[postType] || []) {
-    tags.add(tag);
-  }
-
-  // Category hashtags
+  // Collect all relevant hashtags
+  allTags.push(...(POST_TYPE_HASHTAGS[postType] || []));
   if (category && CATEGORY_HASHTAGS[category]) {
-    for (const tag of CATEGORY_HASHTAGS[category]) {
-      tags.add(tag);
-    }
+    allTags.push(...CATEGORY_HASHTAGS[category]);
+  }
+  allTags.push(...CORE_HASHTAGS);
+
+  // Remove duplicates
+  const uniqueTags = Array.from(new Set(allTags));
+
+  // Rotate selection based on seed for variety
+  if (seed && uniqueTags.length > 12) {
+    const hash = hashString(seed);
+    const startIndex = hash % Math.max(1, uniqueTags.length - 12);
+
+    // Take a sliding window of tags starting from rotated position
+    const rotated = [
+      ...uniqueTags.slice(startIndex),
+      ...uniqueTags.slice(0, startIndex),
+    ];
+
+    return rotated.slice(0, 20);
   }
 
-  // Core brand hashtags
-  for (const tag of CORE_HASHTAGS) {
-    tags.add(tag);
-  }
-
-  return Array.from(tags).slice(0, 20);
+  return uniqueTags.slice(0, 20);
 }
 
 /**
