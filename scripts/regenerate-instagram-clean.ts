@@ -97,10 +97,11 @@ async function cleanRegenerate() {
         throw new Error('No posts generated');
       }
 
-      // Save to social_posts table
+      // Save to social_posts table (Instagram + TikTok)
       for (const post of batch.posts) {
         try {
-          const created = await prisma.socialPost.create({
+          // Create Instagram version
+          const igPost = await prisma.socialPost.create({
             data: {
               content: post.caption,
               platform: 'instagram',
@@ -117,11 +118,40 @@ async function cleanRegenerate() {
             },
           });
 
+          // Create TikTok version with vertical format
+          const tiktokImageUrls = (post.imageUrls || []).map((url) => {
+            try {
+              const urlObj = new URL(url);
+              urlObj.searchParams.set('format', 'story'); // Vertical 1080x1920
+              return urlObj.toString();
+            } catch {
+              return url;
+            }
+          });
+
+          await prisma.socialPost.create({
+            data: {
+              content: post.caption,
+              platform: 'tiktok',
+              postType: post.type,
+              scheduledDate: new Date(post.scheduledTime),
+              status: 'pending',
+              image_url: tiktokImageUrls[0] || null,
+              base_group_key: `tiktok-${dateStr}-${post.type}`,
+              video_metadata: {
+                hashtags: post.hashtags || [],
+                metadata: post.metadata || {},
+                imageUrls: tiktokImageUrls,
+                originalPlatform: 'instagram',
+              },
+            },
+          });
+
           // Log image URL to verify timestamp
           const imageUrl = post.imageUrls?.[0] || '';
           const hasTimestamp = imageUrl.includes('&t=');
           console.log(
-            `      ✓ ${post.type} (ID: ${created.id}) ${hasTimestamp ? '✓ Fresh URL' : '✗ Missing timestamp!'}`,
+            `      ✓ ${post.type} (IG: ${igPost.id}, TT: created) ${hasTimestamp ? '✓ Fresh URL' : '✗ Missing timestamp!'}`,
           );
         } catch (dbError) {
           console.warn(

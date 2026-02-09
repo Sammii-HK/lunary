@@ -174,6 +174,7 @@ const buildPlatformPayload = (
   if (platformStr === 'tiktok' && media.length > 0) {
     payload.tiktokOptions = {
       type: 'post',
+      autoAddMusic: true, // Enable auto music for TikTok posts
       ...(shouldUseVideo && imageUrlForPlatform
         ? { coverUrl: imageUrlForPlatform }
         : {}),
