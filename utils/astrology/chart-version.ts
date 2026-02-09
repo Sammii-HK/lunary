@@ -5,5 +5,6 @@
  * Version history:
  *   7 – Added Part of Fortune and Vertex
  *   8 – Fixed retrograde detection, timezone handling, DST edge cases, input validation
+ *   9 – Astronomical accuracy improvements, verified against multiple astrology sources
  */
-export const CURRENT_BIRTH_CHART_VERSION = 8;
+export const CURRENT_BIRTH_CHART_VERSION = 9;

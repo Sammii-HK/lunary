@@ -32,41 +32,48 @@ export async function GET(request: NextRequest) {
       : null;
     const decryptedBirthday = normalizeIsoDateOnly(decryptedBirthdayRaw);
 
-    return NextResponse.json({
-      profile: profile
-        ? {
-            id: profile.id,
-            userId: profile.user_id,
-            name: decryptedName,
-            birthday: decryptedBirthday,
-            birthChart: profile.birth_chart,
-            personalCard: profile.personal_card,
-            location: decryptLocation(profile.location),
-            stripeCustomerId: profile.stripe_customer_id,
-            intention: profile.intention,
-            createdAt: profile.created_at,
-            updatedAt: profile.updated_at,
-          }
-        : null,
-      subscription: subscription
-        ? {
-            status: subscription.status || 'free',
-            planType: subscription.plan_type,
-            stripeCustomerId: subscription.stripe_customer_id,
-            stripeSubscriptionId: subscription.stripe_subscription_id,
-            trialEndsAt: subscription.trial_ends_at,
-            currentPeriodEnd: subscription.current_period_end,
-          }
-        : { status: 'free' },
-    });
+    return NextResponse.json(
+      {
+        profile: profile
+          ? {
+              id: profile.id,
+              userId: profile.user_id,
+              name: decryptedName,
+              birthday: decryptedBirthday,
+              birthChart: profile.birth_chart,
+              personalCard: profile.personal_card,
+              location: decryptLocation(profile.location),
+              stripeCustomerId: profile.stripe_customer_id,
+              intention: profile.intention,
+              createdAt: profile.created_at,
+              updatedAt: profile.updated_at,
+            }
+          : null,
+        subscription: subscription
+          ? {
+              status: subscription.status || 'free',
+              planType: subscription.plan_type,
+              stripeCustomerId: subscription.stripe_customer_id,
+              stripeSubscriptionId: subscription.stripe_subscription_id,
+              trialEndsAt: subscription.trial_ends_at,
+              currentPeriodEnd: subscription.current_period_end,
+            }
+          : { status: 'free' },
+      },
+      {
+        headers: {
+          'Cache-Control': 'private, max-age=300, stale-while-revalidate=3600',
+        },
+      },
+    );
   } catch (error: any) {
     // Handle missing table gracefully
     if (error?.code === '42P01') {
       console.error('[Profile] Table does not exist:', error.message);
-      return NextResponse.json({
-        profile: null,
-        subscription: { status: 'free' },
-      });
+      return NextResponse.json(
+        { profile: null, subscription: { status: 'free' } },
+        { headers: { 'Cache-Control': 'no-store' } },
+      );
     }
 
     console.error('Error fetching profile:', error);
