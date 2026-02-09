@@ -12,8 +12,8 @@ import { resolve } from 'path';
 // Load .env.local FIRST - before any other imports
 config({ path: resolve(process.cwd(), '.env.local') });
 
-// Force localhost for local testing
-process.env.NEXT_PUBLIC_BASE_URL = 'http://localhost:3000';
+// Use PRODUCTION URLs for shareable content (so Succulent can access images)
+process.env.NEXT_PUBLIC_BASE_URL = 'https://lunary.app';
 
 import { PrismaClient } from '@prisma/client';
 
@@ -101,9 +101,19 @@ async function cleanRegenerate() {
       for (const post of batch.posts) {
         try {
           // Create Instagram version
+          // Append hashtags to caption for discoverability (limit to 5 for best practice)
+          const hashtagString = post.hashtags?.length
+            ? '\n\n' +
+              post.hashtags
+                .slice(0, 5)
+                .map((h) => (h.startsWith('#') ? h : `#${h}`))
+                .join(' ')
+            : '';
+          const fullCaption = post.caption + hashtagString;
+
           const igPost = await prisma.socialPost.create({
             data: {
-              content: post.caption,
+              content: fullCaption,
               platform: 'instagram',
               postType: post.type,
               scheduledDate: new Date(post.scheduledTime),
@@ -131,7 +141,7 @@ async function cleanRegenerate() {
 
           await prisma.socialPost.create({
             data: {
-              content: post.caption,
+              content: fullCaption, // TikTok also gets hashtags
               platform: 'tiktok',
               postType: post.type,
               scheduledDate: new Date(post.scheduledTime),

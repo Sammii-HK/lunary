@@ -142,6 +142,7 @@ export async function sendTrialReminders(): Promise<TrialReminderResult> {
         OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
       )
     )
+    AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
   `;
 
   const oneDayReminders = await sql`
@@ -163,6 +164,7 @@ export async function sendTrialReminders(): Promise<TrialReminderResult> {
         OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
       )
     )
+    AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
   `;
 
   let sent3Day = 0;

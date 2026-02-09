@@ -2445,6 +2445,7 @@ async function runNotificationCheck(dateStr: string) {
             OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
           )
         )
+        AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
       `;
 
       // Get trials ending in 1 day (final reminder)
@@ -2467,6 +2468,7 @@ async function runNotificationCheck(dateStr: string) {
             OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
           )
         )
+        AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
       `;
 
       let sent3Day = 0;
@@ -2597,6 +2599,14 @@ async function runNotificationCheck(dateStr: string) {
         AND s.trial_ends_at::date = ${formatDate(yesterday)}
         AND (s.trial_expired_email_sent = false OR s.trial_expired_email_sent IS NULL)
         AND s.user_email IS NOT NULL
+        AND NOT (
+          s.has_discount = true
+          AND (
+            COALESCE(s.discount_percent, 0) >= 100
+            OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
+          )
+        )
+        AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
       `;
 
       let sentExpired = 0;

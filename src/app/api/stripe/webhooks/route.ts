@@ -78,6 +78,7 @@ function extractDiscountInfo(subscription: Stripe.Subscription) {
       discountPercent: 0,
       monthlyAmountDue: interval === 'year' ? unitAmount / 12 : unitAmount,
       couponId: null,
+      promotionCodeId: null,
       discountEndsAt: null,
     };
   }
@@ -89,6 +90,7 @@ function extractDiscountInfo(subscription: Stripe.Subscription) {
       discountPercent: 0,
       monthlyAmountDue: 0,
       couponId: null,
+      promotionCodeId: null,
       discountEndsAt: null,
     };
   }
@@ -125,11 +127,18 @@ function extractDiscountInfo(subscription: Stripe.Subscription) {
     }
   }
 
+  // Extract promotion code ID if available (for resolving the human-readable code)
+  const promotionCodeId =
+    typeof discount.promotion_code === 'string'
+      ? discount.promotion_code
+      : discount.promotion_code?.id || null;
+
   return {
     hasDiscount: true,
     discountPercent: discount.coupon.percent_off || 0,
     monthlyAmountDue: monthlyAmount,
     couponId: discount.coupon.id,
+    promotionCodeId,
     discountEndsAt,
   };
 }
@@ -251,15 +260,59 @@ async function handleSubscriptionChange(
 ) {
   const stripe = getStripe();
   const customerId = subscription.customer as string;
-  const status = mapStripeStatus(subscription.status);
+  const rawStatus = mapStripeStatus(subscription.status);
   const planType = getPlanTypeFromSubscription(subscription);
   const discountInfo = extractDiscountInfo(subscription);
+
+  // If 100% off coupon, treat as active (not trial) to prevent misleading trial emails
+  const is100PercentOff =
+    rawStatus === 'trial' &&
+    discountInfo.hasDiscount &&
+    (discountInfo.discountPercent >= 100 || discountInfo.monthlyAmountDue <= 0);
+  const status = is100PercentOff ? 'active' : rawStatus;
+
+  // Also update Stripe itself so billing portal and Stripe emails reflect active status
+  if (is100PercentOff && subscription.trial_end) {
+    try {
+      await stripe.subscriptions.update(subscription.id, {
+        trial_end: 'now',
+      });
+      console.log(
+        `[Webhook] Removed trial for 100% off subscription ${subscription.id}`,
+      );
+    } catch (error) {
+      console.error(
+        `[Webhook] Failed to remove trial for subscription ${subscription.id}:`,
+        error,
+      );
+      // Non-critical: DB status is already correct, Stripe will self-correct when trial ends
+    }
+  }
+
   const promoCodeRaw =
     subscription.metadata?.promoCode || subscription.metadata?.discountCode;
-  const promoCode =
+  let promoCode =
     typeof promoCodeRaw === 'string' && promoCodeRaw.trim().length > 0
       ? promoCodeRaw.trim().toUpperCase()
       : null;
+
+  // Fallback: resolve promo code from Stripe if not in metadata
+  // (handles Journey 2: user entered code in Stripe Checkout UI)
+  if (!promoCode && discountInfo.promotionCodeId) {
+    try {
+      const promoCodeObj = await stripe.promotionCodes.retrieve(
+        discountInfo.promotionCodeId,
+      );
+      if (promoCodeObj.code) {
+        promoCode = promoCodeObj.code.toUpperCase();
+      }
+    } catch (error) {
+      console.error(
+        '[Webhook] Failed to resolve promotion code from Stripe:',
+        error,
+      );
+    }
+  }
 
   // Get userId from customer or subscription metadata
   let userId = subscription.metadata?.userId || null;
