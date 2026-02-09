@@ -85,8 +85,17 @@ export function DemoClient() {
     const style = document.createElement('style');
     style.id = 'demo-scroll-contain';
     style.textContent = `
+      html, body {
+        overscroll-behavior: contain !important;
+        touch-action: pan-y pan-x !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
       * {
         overscroll-behavior: contain !important;
+      }
+      #demo-preview-container {
+        overscroll-behavior: contain !important;
+        touch-action: pan-y pan-x !important;
       }
     `;
     document.head.appendChild(style);

@@ -75,6 +75,18 @@ html {
     line-height: 1.5rem;
   }
 
+  /* Iframe Scroll Isolation Utilities */
+  .iframe-scroll-isolate {
+    overscroll-behavior: contain;
+    touch-action: pan-y pan-x;
+    -webkit-overflow-scrolling: touch;
+    isolation: isolate;
+  }
+
+  .no-scroll-chaining {
+    overscroll-behavior: none;
+  }
+
   /* Locked Preview Styles */
   .locked-preview {
     position: relative;

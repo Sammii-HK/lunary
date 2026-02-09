@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { useIframeScrollIsolation } from '@/hooks/useIframeScrollIsolation';
 
 interface OptimizedDemoIframeProps {
   /**
@@ -33,6 +34,23 @@ export function OptimizedDemoIframe({
     triggerOnce: true,
     rootMargin: '200px', // Start loading 200px before visible
   });
+
+  // Scroll isolation for iframe
+  const { containerRef: scrollIsolationRef, isInteracting } =
+    useIframeScrollIsolation(true);
+
+  // Merge refs (intersection observer + scroll isolation)
+  const mergedRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      observerRef(node);
+      if (scrollIsolationRef) {
+        (
+          scrollIsolationRef as React.MutableRefObject<HTMLDivElement | null>
+        ).current = node;
+      }
+    },
+    [observerRef, scrollIsolationRef],
+  );
 
   // Preload the iframe page for instant load
   useEffect(() => {
@@ -107,9 +125,14 @@ export function OptimizedDemoIframe({
 
   return (
     <div
-      ref={observerRef}
+      ref={mergedRef}
       className='relative w-full max-w-[393px] mx-auto'
-      style={{ height: '750px' }}
+      style={{
+        height: '750px',
+        touchAction: 'pan-y pan-x',
+        overscrollBehavior: 'contain',
+        isolation: 'isolate',
+      }}
     >
       {/* iPhone frame */}
       <div
@@ -117,12 +140,15 @@ export function OptimizedDemoIframe({
         style={{
           boxShadow:
             '0 18px 28px rgba(0, 0, 0, 0.28), 0 0 22px rgba(178, 126, 255, 0.18)',
+          contain: 'layout style paint',
+          overscrollBehavior: 'contain',
+          touchAction: 'pan-y pan-x',
         }}
       >
         {shouldLoad ? (
           <iframe
             ref={iframeRef}
-            src='/demo-preview'
+            src='/demo-preview?v=2'
             title='Lunary Demo'
             width='393'
             height='750'
@@ -134,6 +160,8 @@ export function OptimizedDemoIframe({
               width: '100%',
               height: '100%',
               display: 'block',
+              pointerEvents: 'auto',
+              touchAction: 'pan-y pan-x',
             }}
             referrerPolicy='no-referrer'
             {...({ importance: 'high' } as any)}
