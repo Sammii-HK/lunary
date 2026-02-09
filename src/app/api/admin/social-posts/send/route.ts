@@ -4,6 +4,7 @@ import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import { recordThemeUsage } from '@/lib/social/thematic-generator';
 import { getImageBaseUrl } from '@/lib/urls';
+import { sanitizeForLog } from '@/lib/security/log-sanitize';
 
 type DbPostRow = {
   id: number;
@@ -529,7 +530,9 @@ export async function POST(request: NextRequest) {
 
       try {
         if (groupKey && approvedGroupPosts.length > 0) {
-          console.log(`Updating group posts with base_group_key = ${groupKey}`);
+          console.log(
+            `Updating group posts with base_group_key = ${sanitizeForLog(groupKey)}`,
+          );
           const updateResult = await sql`
             UPDATE social_posts
             SET status = 'sent', updated_at = NOW()
@@ -537,7 +540,7 @@ export async function POST(request: NextRequest) {
               AND status IN ('pending', 'approved')
           `;
           console.log(
-            `✅ Updated ${updateResult.rowCount} posts in group ${groupKey} to 'sent'`,
+            `✅ Updated ${updateResult.rowCount} posts in group ${sanitizeForLog(groupKey)} to 'sent'`,
           );
 
           if (updateResult.rowCount === 0) {
@@ -550,14 +553,16 @@ export async function POST(request: NextRequest) {
             console.log('Posts with this group key:', checkResult.rows);
           }
         } else {
-          console.log(`Updating single post with id = ${postId}`);
+          console.log(
+            `Updating single post with id = ${sanitizeForLog(postId)}`,
+          );
           const updateResult = await sql`
             UPDATE social_posts
             SET status = 'sent', updated_at = NOW()
             WHERE id = ${Number(postId)}
           `;
           console.log(
-            `✅ Updated post ${postId} to 'sent' (rows affected: ${updateResult.rowCount})`,
+            `✅ Updated post ${sanitizeForLog(postId)} to 'sent' (rows affected: ${updateResult.rowCount})`,
           );
 
           if (updateResult.rowCount === 0) {

@@ -17,7 +17,7 @@ config({ path: resolve(process.cwd(), '.env.local') });
 import { sql } from '@vercel/postgres';
 import { put } from '@vercel/blob';
 import { execFileSync } from 'child_process';
-import { writeFile, unlink, mkdir } from 'fs/promises';
+import { writeFile, unlink, mkdtemp, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 
 const MUSIC_PATH = join(
@@ -63,8 +63,8 @@ async function main() {
     return;
   }
 
-  const tmpDir = join(tmpdir(), 'lunary-music-mux');
-  await mkdir(tmpDir, { recursive: true });
+  // Create secure temporary directory with unique name
+  const tmpDir = await mkdtemp(join(tmpdir(), 'lunary-music-mux-'));
 
   let processed = 0;
   let skipped = 0;
@@ -90,7 +90,26 @@ async function main() {
         continue;
       }
 
+      // Validate content type
+      const contentType = videoResponse.headers.get('content-type');
+      if (!contentType?.startsWith('video/')) {
+        console.log(`  ⚠️  Skipped (invalid content type: ${contentType})`);
+        skipped++;
+        continue;
+      }
+
       const videoData = Buffer.from(await videoResponse.arrayBuffer());
+
+      // Validate file size (max 500MB)
+      const MAX_SIZE = 500 * 1024 * 1024;
+      if (videoData.length > MAX_SIZE) {
+        console.log(
+          `  ⚠️  Skipped (file too large: ${(videoData.length / 1024 / 1024).toFixed(1)}MB)`,
+        );
+        skipped++;
+        continue;
+      }
+
       const inputPath = join(tmpDir, `input-${post.id}.mp4`);
       const outputPath = join(tmpDir, `output-${post.id}.mp4`);
 
@@ -187,6 +206,13 @@ async function main() {
   console.log(
     `\n🎵 Done: ${processed} processed, ${skipped} skipped, ${failed} failed`,
   );
+
+  // Cleanup temporary directory
+  try {
+    await rm(tmpDir, { recursive: true, force: true });
+  } catch (err) {
+    console.warn('Failed to cleanup temp directory:', err);
+  }
 }
 
 main()
