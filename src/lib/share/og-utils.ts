@@ -36,7 +36,8 @@ export function getMoonPhaseIcon(phase: string): string {
   };
 
   const iconName = phaseMap[phase] || 'full-moon';
-  return `${baseUrl}/icons/moon-phases/${iconName}.svg`;
+  // Use PNG - SVG masks don't render in OG images
+  return `${baseUrl}/icons/moon-phases/${iconName}.png`;
 }
 
 export function getStoryContentArea() {

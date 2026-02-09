@@ -62,6 +62,7 @@ interface PendingPost {
   videoJobStatus?: string;
   videoJobAttempts?: number;
   videoJobError?: string;
+  videoMetadata?: any; // Instagram carousels, hashtags, etc.
   createdAt: string;
   status: 'pending' | 'approved' | 'rejected' | 'sent';
 }
@@ -1894,32 +1895,101 @@ export default function SocialPostsPage() {
                                 </p>
                               </details>
                             )}
-                          {basePost.imageUrl && (
-                            <div className='relative w-full max-w-md mx-auto'>
-                              <Image
-                                src={basePost.imageUrl}
-                                alt='Post image'
-                                width={800}
-                                height={800}
-                                className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90'
-                                onClick={() =>
-                                  window.open(basePost.imageUrl, '_blank')
-                                }
-                                unoptimized
-                              />
-                              <div className='absolute top-2 right-2 flex gap-2'>
-                                <button
-                                  onClick={() =>
-                                    handleDownloadImage(basePost.imageUrl || '')
-                                  }
-                                  className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
-                                >
-                                  <Download className='h-3 w-3' />
-                                  Save
-                                </button>
-                              </div>
-                            </div>
-                          )}
+                          {basePost.imageUrl &&
+                            (() => {
+                              // Check if this is an Instagram carousel with multiple images
+                              const metadata = basePost.videoMetadata as any;
+                              const carouselImages = metadata?.imageUrls || [];
+                              const isCarousel = carouselImages.length > 1;
+
+                              // Enhanced debug logging for ALL Instagram posts
+                              if (basePost.platform === 'instagram') {
+                                console.log('🔍 Instagram Post Debug:', {
+                                  id: basePost.id,
+                                  postType: basePost.postType,
+                                  hasImageUrl: !!basePost.imageUrl,
+                                  hasMetadata: !!metadata,
+                                  metadataType: typeof metadata,
+                                  metadataKeys: metadata
+                                    ? Object.keys(metadata)
+                                    : [],
+                                  hasImageUrls: !!metadata?.imageUrls,
+                                  imageUrlsLength: carouselImages.length,
+                                  isCarousel,
+                                  firstImageUrl: carouselImages[0]?.substring(
+                                    0,
+                                    60,
+                                  ),
+                                });
+                              }
+
+                              if (isCarousel) {
+                                // Display carousel with all slides
+                                return (
+                                  <div className='space-y-2'>
+                                    <Badge className='bg-instagram-gradient text-white border-0 w-fit'>
+                                      Instagram Carousel -{' '}
+                                      {carouselImages.length} slides
+                                    </Badge>
+                                    <div className='grid grid-cols-2 gap-2 max-w-2xl mx-auto'>
+                                      {carouselImages.map(
+                                        (imgUrl: string, idx: number) => (
+                                          <div key={idx} className='relative'>
+                                            <Image
+                                              src={imgUrl}
+                                              alt={`Slide ${idx + 1}`}
+                                              width={400}
+                                              height={400}
+                                              className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90'
+                                              onClick={() =>
+                                                window.open(imgUrl, '_blank')
+                                              }
+                                              unoptimized
+                                            />
+                                            <div className='absolute top-2 left-2'>
+                                              <Badge className='bg-black/70 text-white text-xs'>
+                                                {idx + 1}/
+                                                {carouselImages.length}
+                                              </Badge>
+                                            </div>
+                                          </div>
+                                        ),
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              // Single image (non-carousel)
+                              return (
+                                <div className='relative w-full max-w-md mx-auto'>
+                                  <Image
+                                    src={basePost.imageUrl}
+                                    alt='Post image'
+                                    width={800}
+                                    height={800}
+                                    className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90'
+                                    onClick={() =>
+                                      window.open(basePost.imageUrl, '_blank')
+                                    }
+                                    unoptimized
+                                  />
+                                  <div className='absolute top-2 right-2 flex gap-2'>
+                                    <button
+                                      onClick={() =>
+                                        handleDownloadImage(
+                                          basePost.imageUrl || '',
+                                        )
+                                      }
+                                      className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                                    >
+                                      <Download className='h-3 w-3' />
+                                      Save
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })()}
 
                           <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
                             <div className='flex items-center justify-between mb-3'>

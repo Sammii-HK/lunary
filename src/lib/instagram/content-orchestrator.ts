@@ -1,4 +1,3 @@
-import { getAvailableQuote } from '@/lib/social/quote-generator';
 import { generateMemeContent } from './meme-content';
 import {
   buildCarouselFromSlug,
@@ -11,6 +10,7 @@ import { generateSignRanking } from './ranking-content';
 import { generateCompatibility } from './compatibility-content';
 import { generateRecycledPost } from './content-recycler';
 import { seededRandom } from './ig-utils';
+import { getMoonPhase } from '../../../utils/moon/moonPhases';
 import type { IGScheduledPost, IGPostBatch, IGPostType } from './types';
 
 const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
@@ -127,6 +127,8 @@ async function generateMemePost(
     punchline: meme.punchline,
     template: meme.template,
     category: meme.category,
+    v: '4', // Design version
+    t: Date.now().toString(), // Timestamp cache bust
   });
 
   return {
@@ -180,37 +182,101 @@ async function generateDailyCosmicPost(
   dateStr: string,
   scheduledTime: string,
 ): Promise<IGScheduledPost> {
-  // Simple cosmic card with moon phase focus
-  const rng = seededRandom(`cosmic-${dateStr}`);
-  const moonPhases = [
-    'New Moon',
-    'Waxing Crescent',
-    'First Quarter',
-    'Waxing Gibbous',
-    'Full Moon',
-    'Waning Gibbous',
-    'Last Quarter',
-    'Waning Crescent',
-  ];
-  const headlines = [
-    'Trust the process unfolding around you',
-    'Your intuition is especially strong today',
-    'A day for creative breakthroughs',
-    'Set intentions with clarity and purpose',
-    'Release what no longer serves your growth',
-    'New connections bring unexpected insights',
-    'The cosmos aligns in your favour today',
-    'Take time to reflect on your journey',
-  ];
+  // Get ACTUAL moon phase for the date using real astronomical data
+  const date = new Date(dateStr);
+  const moonPhase = getMoonPhase(date);
 
-  const moonPhase = moonPhases[Math.floor(rng() * moonPhases.length)];
-  const headline = headlines[Math.floor(rng() * headlines.length)];
+  // Headlines matched to moon phase energy
+  // Waxing phases (New → Full): Growth, manifestation, building
+  // Waning phases (Full → New): Release, reflection, letting go
+  const headlinesByPhase: Record<string, string[]> = {
+    'New Moon': [
+      'Set intentions with clarity and purpose',
+      'New beginnings await you today',
+      'Plant seeds for what you wish to manifest',
+      'A blank canvas for your cosmic dreams',
+      'Fresh starts are written in the stars',
+      'Embrace the power of starting anew',
+      'The universe supports your new chapter',
+    ],
+    'Waxing Crescent': [
+      'Trust the process unfolding around you',
+      'Your plans are taking root',
+      'Take action toward your goals',
+      'Small steps lead to cosmic transformations',
+      'Your intentions are gaining momentum',
+      'Nurture the seeds you have planted',
+      'Growth happens in the in-between moments',
+    ],
+    'First Quarter': [
+      'A day for creative breakthroughs',
+      'Push through challenges with determination',
+      'Your momentum is building',
+      'Obstacles are opportunities in disguise',
+      'The universe rewards bold action',
+      'Your courage is your superpower today',
+      'Break through limitations with confidence',
+    ],
+    'Waxing Gibbous': [
+      'Refinement leads to perfection',
+      'Fine-tune your approach',
+      'Success is within reach',
+      'Polish your vision until it shines',
+      'The final touches make all the difference',
+      'Trust in the culmination of your efforts',
+      'Your hard work is about to pay off',
+    ],
+    'Full Moon': [
+      'Your intuition is especially strong today',
+      'The cosmos aligns in your favour today',
+      'Celebrate your achievements',
+      'Bask in the glow of your manifestations',
+      'Your inner wisdom is illuminated',
+      'Everything you need is already within you',
+      'The peak of your power is now',
+    ],
+    'Waning Gibbous': [
+      'Share your wisdom with others',
+      'Gratitude opens new doors',
+      'Take time to reflect on your journey',
+      'Give thanks for all you have received',
+      'Your experiences are gifts to share',
+      'Abundance flows through appreciation',
+      'Wisdom ripens in the afterglow',
+    ],
+    'Last Quarter': [
+      'Release what no longer serves your growth',
+      'Let go of old patterns',
+      'Make space for transformation',
+      'Surrender to create space for miracles',
+      'What you release makes room for blessings',
+      'Trust the cosmic process of letting go',
+      'Freedom comes from releasing control',
+    ],
+    'Waning Crescent': [
+      'Rest and restore your energy',
+      'Quiet reflection brings clarity',
+      'Prepare for new beginnings',
+      'Embrace the sacred pause before rebirth',
+      'In stillness, you find your power',
+      'The darkness holds wisdom and healing',
+      'Rest deeply before the next chapter begins',
+    ],
+  };
+
+  // Select headline deterministically based on date
+  const rng = seededRandom(`cosmic-${dateStr}`);
+  const phaseHeadlines =
+    headlinesByPhase[moonPhase] || headlinesByPhase['Full Moon'];
+  const headline = phaseHeadlines[Math.floor(rng() * phaseHeadlines.length)];
 
   const params = new URLSearchParams({
     date: dateStr,
     headline,
     moonPhase,
     variant: 'daily_energy',
+    v: '5', // Cache-busting version (using PNGs now!)
+    t: Date.now().toString(), // Timestamp to force fresh generation
   });
 
   const { caption, hashtags } = generateCaption('daily_cosmic', {
@@ -227,7 +293,9 @@ async function generateDailyCosmicPost(
     caption,
     hashtags,
     scheduledTime,
-    metadata: {},
+    metadata: {
+      moonPhase, // Store actual moon phase for reference
+    },
   };
 }
 
@@ -239,18 +307,45 @@ async function generateQuotePost(
   let author = 'Carl Sagan';
 
   try {
-    const quote = await getAvailableQuote();
-    if (quote) {
-      quoteText = quote.quoteText;
+    // Get ALL available quotes and select one deterministically based on date
+    // This ensures: different quotes for different dates, same quote for same date
+    const { sql } = await import('@vercel/postgres');
+    const result = await sql`
+      SELECT id, quote_text, author
+      FROM social_quotes
+      WHERE status = 'available'
+      ORDER BY use_count ASC, created_at ASC
+      LIMIT 50
+    `;
+
+    if (result.rows.length > 0) {
+      // Select quote deterministically based on date
+      const rng = seededRandom(`quote-${dateStr}`);
+      const index = Math.floor(rng() * result.rows.length);
+      const quote = result.rows[index];
+
+      quoteText = quote.quote_text;
       author = quote.author || 'Lunary';
+
+      // Mark as used (increment use_count)
+      await sql`
+        UPDATE social_quotes
+        SET use_count = use_count + 1,
+            used_at = NOW(),
+            updated_at = NOW()
+        WHERE id = ${quote.id}
+      `;
     }
-  } catch {
-    // Use fallback
+  } catch (error) {
+    console.warn('[Quote] Failed to fetch quote, using fallback:', error);
+    // Use fallback quote
   }
 
   const params = new URLSearchParams({
     text: author !== 'Lunary' ? `${quoteText} - ${author}` : quoteText,
     format: 'square',
+    v: '4',
+    t: Date.now().toString(),
   });
 
   const { caption, hashtags } = generateCaption('quote', {
@@ -264,7 +359,7 @@ async function generateQuotePost(
     caption,
     hashtags,
     scheduledTime,
-    metadata: {},
+    metadata: { quoteText, author },
   };
 }
 
@@ -278,6 +373,8 @@ async function generateDidYouKnowPost(
     fact: content.fact,
     category: content.category,
     source: content.source,
+    v: '4',
+    t: Date.now().toString(),
   });
 
   const { caption, hashtags } = generateCaption('did_you_know', {
@@ -310,6 +407,8 @@ async function generateSignRankingPost(
   const params = new URLSearchParams({
     trait: content.trait,
     rankings: JSON.stringify(content.rankings),
+    v: '4',
+    t: Date.now().toString(),
   });
 
   const { caption, hashtags } = generateCaption('sign_ranking', {
@@ -342,6 +441,8 @@ async function generateCompatibilityPost(
     element1: content.element1,
     element2: content.element2,
     headline: content.headline,
+    v: '4',
+    t: Date.now().toString(),
   });
 
   const { caption, hashtags } = generateCaption('compatibility', {

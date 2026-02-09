@@ -1,4 +1,5 @@
 import { getGrimoireSnippetBySlug } from '@/lib/social/grimoire-content';
+import { getCrystalById } from '@/constants/grimoire/crystals';
 import type { ThemeCategory } from '@/lib/social/types';
 import type { IGCarouselSlide, IGCarouselContent } from './types';
 
@@ -15,7 +16,66 @@ export async function buildCarouselFromSlug(
   if (!snippet) return null;
 
   const category = mapCategory(snippet.category);
-  const slides = buildSlides(snippet, category);
+
+  // Enrich with full database data (not just grimoire snippets)
+  let enrichedSnippet = snippet;
+
+  if (category === 'crystals') {
+    const crystalId = slug.replace('crystals/', '');
+    const fullCrystalData = getCrystalById(crystalId);
+
+    if (fullCrystalData) {
+      enrichedSnippet = {
+        ...snippet,
+        fullContent: {
+          ...snippet.fullContent,
+          // Merge in full crystal data from database
+          chakras: fullCrystalData.chakras,
+          primaryChakra: fullCrystalData.primaryChakra,
+          zodiacSigns: fullCrystalData.zodiacSigns,
+          planets: fullCrystalData.planets,
+          elements: fullCrystalData.elements,
+          workingWith: fullCrystalData.workingWith,
+          careInstructions: fullCrystalData.careInstructions,
+          combinations: fullCrystalData.combinations,
+          intentions: fullCrystalData.intentions,
+          colors: fullCrystalData.colors,
+          description: fullCrystalData.description,
+          metaphysicalProperties: fullCrystalData.metaphysicalProperties,
+        },
+      };
+    }
+  } else if (category === 'spells') {
+    // Load full spell data from JSON
+    const spellsData = await import('@/data/spells.json');
+    const spellId = slug.replace('spells/', '');
+    const fullSpellData = (spellsData.default as any[]).find(
+      (s) =>
+        s.id === spellId ||
+        s.slug === spellId ||
+        s.name?.toLowerCase().replace(/\s+/g, '-') === spellId,
+    );
+
+    if (fullSpellData) {
+      enrichedSnippet = {
+        ...snippet,
+        fullContent: {
+          ...snippet.fullContent,
+          description: fullSpellData.description || fullSpellData.purpose,
+          ingredients: fullSpellData.ingredients,
+          herbs: fullSpellData.herbs,
+          crystals: fullSpellData.crystals,
+          colors: fullSpellData.colors,
+          moonPhases: fullSpellData.moonPhases,
+          timing: fullSpellData.timing,
+          instructions: fullSpellData.instructions || fullSpellData.steps,
+          intention: fullSpellData.intention,
+        },
+      };
+    }
+  }
+
+  const slides = buildSlides(enrichedSnippet, category);
 
   return {
     title: snippet.title,
@@ -122,6 +182,7 @@ function buildSlides(
       break;
 
     case 'crystals':
+      // Slide 1: Metaphysical Properties
       if (fc.metaphysicalProperties) {
         slides.push(
           makeSlide(
@@ -131,41 +192,140 @@ function buildSlides(
             fc.metaphysicalProperties,
             category,
             'body',
-            'Properties',
+            'Metaphysical Properties',
           ),
         );
       }
-      if (fc.element || fc.planet) {
-        const assoc = [
-          fc.element && `Element: ${fc.element}`,
-          fc.planet && `Planet: ${fc.planet}`,
+
+      // Slide 2: Chakra & Energy
+      if (fc.chakras?.length || fc.primaryChakra) {
+        const chakraText = fc.primaryChakra
+          ? `Primary: ${fc.primaryChakra}${fc.chakras?.length > 1 ? `\n\nAlso works with: ${fc.chakras.filter((c: string) => c !== fc.primaryChakra).join(', ')}` : ''}`
+          : fc.chakras?.join(', ');
+
+        if (chakraText) {
+          slides.push(
+            makeSlide(
+              slides.length,
+              0,
+              snippet.title,
+              chakraText,
+              category,
+              'body',
+              'Chakra Connections',
+            ),
+          );
+        }
+      }
+
+      // Slide 3: Zodiac & Planetary
+      if (fc.zodiacSigns?.length || fc.planets?.length) {
+        const cosmicAssoc = [
+          fc.zodiacSigns?.length &&
+            `Zodiac: ${fc.zodiacSigns.slice(0, 3).join(', ')}`,
+          fc.planets?.length && `Planets: ${fc.planets.join(', ')}`,
+          fc.elements?.length && `Element: ${fc.elements.join(', ')}`,
         ]
           .filter(Boolean)
-          .join('\n');
+          .join('\n\n');
+
         slides.push(
           makeSlide(
             slides.length,
             0,
             snippet.title,
-            assoc,
+            cosmicAssoc,
             category,
             'body',
-            'Associations',
+            'Cosmic Alignments',
           ),
         );
       }
-      if (fc.healingPractices?.length) {
-        slides.push(
-          makeSlide(
-            slides.length,
-            0,
-            snippet.title,
-            fc.healingPractices.join('\n'),
-            category,
-            'body',
-            'How to Use',
-          ),
-        );
+
+      // Slide 4: How to Work With It
+      if (fc.workingWith) {
+        const practices = [
+          fc.workingWith.meditation &&
+            `Meditation: ${fc.workingWith.meditation}`,
+          fc.workingWith.healing && `Healing: ${fc.workingWith.healing}`,
+          fc.workingWith.manifestation &&
+            `Manifestation: ${fc.workingWith.manifestation}`,
+        ]
+          .filter(Boolean)
+          .slice(0, 2) // Take top 2 to avoid overcrowding
+          .join('\n\n');
+
+        if (practices) {
+          slides.push(
+            makeSlide(
+              slides.length,
+              0,
+              snippet.title,
+              practices,
+              category,
+              'body',
+              'How to Use',
+            ),
+          );
+        }
+      }
+
+      // Slide 5: Cleansing & Charging
+      if (
+        fc.careInstructions?.cleansing?.length ||
+        fc.careInstructions?.charging?.length
+      ) {
+        const careText = [
+          fc.careInstructions.cleansing?.length &&
+            `Cleanse: ${fc.careInstructions.cleansing.slice(0, 2).join(', ')}`,
+          fc.careInstructions.charging?.length &&
+            `Charge: ${fc.careInstructions.charging.slice(0, 2).join(', ')}`,
+        ]
+          .filter(Boolean)
+          .join('\n\n');
+
+        if (careText) {
+          slides.push(
+            makeSlide(
+              slides.length,
+              0,
+              snippet.title,
+              careText,
+              category,
+              'body',
+              'Crystal Care',
+            ),
+          );
+        }
+      }
+
+      // Slide 6: Crystal Combinations (if available)
+      if (
+        fc.combinations?.enhances?.length ||
+        fc.combinations?.complements?.length
+      ) {
+        const combos = [
+          fc.combinations.enhances?.length &&
+            `Pairs well with: ${fc.combinations.enhances.slice(0, 3).join(', ')}`,
+          fc.combinations.complements?.length &&
+            `Complements: ${fc.combinations.complements.slice(0, 2).join(', ')}`,
+        ]
+          .filter(Boolean)
+          .join('\n\n');
+
+        if (combos) {
+          slides.push(
+            makeSlide(
+              slides.length,
+              0,
+              snippet.title,
+              combos,
+              category,
+              'body',
+              'Crystal Pairings',
+            ),
+          );
+        }
       }
       break;
 
@@ -565,6 +725,7 @@ export function getCarouselImageUrls(
   baseUrl?: string,
 ): string[] {
   const base = baseUrl || SHARE_BASE_URL;
+  const cacheBust = Date.now().toString(); // Timestamp for cache busting
   return carousel.slides.map((slide) => {
     const params = new URLSearchParams({
       title: slide.title,
@@ -573,6 +734,8 @@ export function getCarouselImageUrls(
       content: slide.content,
       category: slide.category,
       variant: slide.variant,
+      v: '4', // Version for design changes
+      t: cacheBust, // Timestamp to force fresh generation
     });
     if (slide.subtitle) params.set('subtitle', slide.subtitle);
     if (slide.symbol) params.set('symbol', slide.symbol);
