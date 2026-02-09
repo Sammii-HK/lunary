@@ -16,12 +16,25 @@ export async function GET(request: NextRequest) {
     `;
 
     if (result.rows.length === 0 || !result.rows[0].birth_chart) {
-      return NextResponse.json({ birthChart: null });
+      return NextResponse.json(
+        { birthChart: null },
+        {
+          headers: {
+            'Cache-Control':
+              'private, max-age=300, stale-while-revalidate=3600',
+          },
+        },
+      );
     }
 
-    return NextResponse.json({
-      birthChart: result.rows[0].birth_chart,
-    });
+    return NextResponse.json(
+      { birthChart: result.rows[0].birth_chart },
+      {
+        headers: {
+          'Cache-Control': 'private, max-age=300, stale-while-revalidate=3600',
+        },
+      },
+    );
   } catch (error) {
     console.error('Error fetching birth chart:', error);
     return NextResponse.json(

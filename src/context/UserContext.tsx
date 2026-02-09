@@ -99,79 +99,85 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
   // Version is defined in utils/astrology/chart-version.ts — bump there to trigger regeneration
   const BIRTH_CHART_VERSION = CURRENT_BIRTH_CHART_VERSION;
 
-  const fetchUserData = useCallback(async () => {
-    if (!isAuthenticated || !userId) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      if (!hasLoadedOnce) {
-        setLoading(true);
-      }
-      setError(null);
-
-      const response = await fetch('/api/profile', {
-        method: 'GET',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch profile');
-      }
-
-      const data = await response.json();
-      const profile = data.profile;
-      const subscription = data.subscription;
-
-      const birthChart = profile?.birthChart as
-        | BirthChartPlacement[]
-        | undefined;
-      const personalCard = profile?.personalCard as PersonalCard | undefined;
-      const status = subscription?.status || 'free';
-
-      setUser({
-        id: userId,
-        name: profile?.name || userName || undefined,
-        email: userEmail || undefined,
-        birthday: profile?.birthday || undefined,
-        birthChart,
-        personalCard,
-        location: profile?.location || undefined,
-        intention: profile?.intention || undefined,
-        stripeCustomerId: subscription?.stripeCustomerId || undefined,
-        subscriptionStatus: status,
-        subscriptionPlan: subscription?.planType || undefined,
-        trialEndsAt: subscription?.trialEndsAt || undefined,
-        hasBirthChart: !!(birthChart && birthChart.length > 0),
-        hasPersonalCard: !!personalCard,
-        isPaid: ['active', 'trial', 'trialing'].includes(status),
-      });
-      if (!hasLoadedOnce) {
-        setHasLoadedOnce(true);
-      }
-    } catch (err) {
-      console.error('Error fetching user data:', err);
-      setError(err instanceof Error ? err : new Error('Unknown error'));
-      // Still set basic user info even if profile fetch fails
-      setUser({
-        id: userId,
-        name: userName || undefined,
-        email: userEmail || undefined,
-        hasBirthChart: false,
-        hasPersonalCard: false,
-        isPaid: false,
-      });
-      if (!hasLoadedOnce) {
-        setHasLoadedOnce(true);
-      }
-    } finally {
-      if (!hasLoadedOnce) {
+  const fetchUserData = useCallback(
+    async (bustCache?: boolean) => {
+      if (!isAuthenticated || !userId) {
+        setUser(null);
         setLoading(false);
+        return;
       }
-    }
-  }, [isAuthenticated, userId, userEmail, userName, hasLoadedOnce]);
+
+      try {
+        if (!hasLoadedOnce) {
+          setLoading(true);
+        }
+        setError(null);
+
+        const url = bustCache
+          ? `/api/profile?_t=${Date.now()}`
+          : '/api/profile';
+        const response = await fetch(url, {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile');
+        }
+
+        const data = await response.json();
+        const profile = data.profile;
+        const subscription = data.subscription;
+
+        const birthChart = profile?.birthChart as
+          | BirthChartPlacement[]
+          | undefined;
+        const personalCard = profile?.personalCard as PersonalCard | undefined;
+        const status = subscription?.status || 'free';
+
+        setUser({
+          id: userId,
+          name: profile?.name || userName || undefined,
+          email: userEmail || undefined,
+          birthday: profile?.birthday || undefined,
+          birthChart,
+          personalCard,
+          location: profile?.location || undefined,
+          intention: profile?.intention || undefined,
+          stripeCustomerId: subscription?.stripeCustomerId || undefined,
+          subscriptionStatus: status,
+          subscriptionPlan: subscription?.planType || undefined,
+          trialEndsAt: subscription?.trialEndsAt || undefined,
+          hasBirthChart: !!(birthChart && birthChart.length > 0),
+          hasPersonalCard: !!personalCard,
+          isPaid: ['active', 'trial', 'trialing'].includes(status),
+        });
+        if (!hasLoadedOnce) {
+          setHasLoadedOnce(true);
+        }
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        setError(err instanceof Error ? err : new Error('Unknown error'));
+        // Still set basic user info even if profile fetch fails
+        setUser({
+          id: userId,
+          name: userName || undefined,
+          email: userEmail || undefined,
+          hasBirthChart: false,
+          hasPersonalCard: false,
+          isPaid: false,
+        });
+        if (!hasLoadedOnce) {
+          setHasLoadedOnce(true);
+        }
+      } finally {
+        if (!hasLoadedOnce) {
+          setLoading(false);
+        }
+      }
+    },
+    [isAuthenticated, userId, userEmail, userName, hasLoadedOnce],
+  );
 
   useEffect(() => {
     if (isDemoMode) return; // Skip fetching in demo mode
@@ -274,7 +280,10 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
     if (isDemoMode) return; // Skip refresh in demo mode
     const refreshBirthChart = async () => {
       if (!user || birthChartRefreshRef.current) return;
-      if (birthChartRefreshAttemptRef.current > 0) return;
+
+      // Allow retry after failure with a 30-second cooldown
+      const lastAttempt = birthChartRefreshAttemptRef.current;
+      if (lastAttempt > 0 && Date.now() - lastAttempt < 30000) return;
 
       const location = (user.location || {}) as Record<string, any>;
       const birthLocation = location?.birthLocation;
@@ -325,9 +334,13 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
           }),
         });
 
-        await fetchUserData();
+        // Reset attempt ref on success so future version bumps work
+        birthChartRefreshAttemptRef.current = 0;
+        // Fetch fresh profile data, bypassing browser cache after regeneration
+        await fetchUserData(true);
       } catch (err) {
         console.warn('Failed to refresh birth chart:', err);
+        // Leave attemptRef set so cooldown applies before retry
       } finally {
         birthChartRefreshRef.current = false;
       }
