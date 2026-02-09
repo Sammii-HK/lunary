@@ -19,7 +19,6 @@ import {
   segmentScriptIntoItems,
   segmentScriptIntoMediumItems,
 } from '@/lib/video/narrative-generator';
-import { generateTopicImages } from '@/lib/video/image-generator';
 import { resolveThemeCategory } from '@/lib/video/theme-category';
 import { BRAND_COLORS, getThemePalette } from '@/lib/video/theme-palette';
 import { clampHueShift, getThemeHueBase } from '@/lib/video/hue';
@@ -588,10 +587,11 @@ export async function POST(request: NextRequest) {
 
       weekNumber = week;
       const weekRange = getWeekDates(week);
-      imageUrl = `${baseUrl}/api/social/images?week=${week}&format=story`;
       videoFormat = 'story';
+      // Title and description will be updated from weeklyData after generation
       title = `Week of ${weekRange}`;
       description = 'Your weekly cosmic forecast from Lunary';
+      imageUrl = ''; // Will be set from weeklyData
     } else if (type === 'medium') {
       // Medium-form video: use story format (vertical for Reels/TikTok/YouTube Shorts)
       if (week === undefined) {
@@ -665,6 +665,19 @@ export async function POST(request: NextRequest) {
       // weekOffset represents weeks from current week's Monday
       // week=0 = current week, week=1 = next week, etc.
       weeklyData = await generateWeeklyContent(weekStart);
+
+      // Update title and description from weeklyData
+      if (weeklyData?.title) {
+        title = weeklyData.title;
+      }
+      if (weeklyData?.subtitle) {
+        description = weeklyData.subtitle;
+      }
+
+      // Set imageUrl from weekly data
+      if (weeklyData) {
+        imageUrl = `${baseUrl}/api/social/images?format=story&title=${encodeURIComponent(weeklyData.title)}&subtitle=${encodeURIComponent(weeklyData.subtitle || '')}`;
+      }
     } else if (type === 'medium') {
       // Medium-form: cache by week number + version
       if (week === undefined) {
@@ -1207,59 +1220,20 @@ export async function POST(request: NextRequest) {
         // No proportional scaling needed - timestamps are already accurate based on actual audio
         const scaledItems = items;
 
-        console.log(`🎨 Generating images for ${scaledItems.length} items...`);
-        const topicImages = await generateTopicImages(
-          scaledItems,
-          weeklyData,
-          baseUrl,
-          videoFormat,
-          {
-            palette: resolvedThemePalette || undefined,
-            introBg: BRAND_COLORS.cosmicBlack,
-            lockIntroHue: true,
-          },
+        console.log(
+          `🎨 Creating topic metadata for ${scaledItems.length} items (no images needed for Remotion)...`,
         );
 
-        console.log(`✅ Generated ${topicImages.length} topic images`);
+        // Create topic metadata without generating image URLs (Remotion renders everything)
+        const topicImages = scaledItems.map((item) => ({
+          topic: item.topic,
+          item: item.item,
+          imageUrl: '', // Not needed - Remotion generates visuals
+          startTime: item.startTime,
+          endTime: item.endTime,
+        }));
 
-        if (topicImages.length > 0) {
-          const firstImage = topicImages[0];
-          const parsed = new URL(firstImage.imageUrl);
-          const bgParam = parsed.searchParams.get('bg');
-          if (
-            !bgParam ||
-            bgParam.toLowerCase() !== BRAND_COLORS.cosmicBlack.toLowerCase()
-          ) {
-            console.warn(
-              '[Intro Frame] Enforcing cosmic black background for first frame',
-            );
-            parsed.searchParams.set('bg', BRAND_COLORS.cosmicBlack);
-            parsed.searchParams.set('lockHue', '1');
-            if (resolvedThemePalette) {
-              parsed.searchParams.set('fg', resolvedThemePalette.foreground);
-              parsed.searchParams.set('accent', resolvedThemePalette.accent);
-              parsed.searchParams.set(
-                'highlight',
-                resolvedThemePalette.highlight,
-              );
-            }
-            firstImage.imageUrl = parsed.toString();
-            await sendDiscordNotification({
-              title: 'Intro hue lock enforced',
-              description: 'First frame was rebuilt with cosmic black.',
-              fields: [
-                { name: 'Week', value: weekKey || 'unknown', inline: true },
-                {
-                  name: 'Category',
-                  value: themeCategory || 'unknown',
-                  inline: true,
-                },
-              ],
-              category: 'general',
-              dedupeKey: `intro-hue-lock-${weekKey || 'unknown'}`,
-            });
-          }
-        }
+        console.log(`✅ Created ${topicImages.length} topic segments`);
 
         // Compose video with multiple images using Remotion
         // Extract hook (first sentence) for overlay
@@ -1286,15 +1260,25 @@ export async function POST(request: NextRequest) {
               2.6,
             );
 
+            // Add background music for all blog video types (long, medium, short)
+            const backgroundMusicUrl = `${baseUrl}/audio/series/lunary-bed-v1.mp3`;
+
+            // Create symbol content for overlay detection (title + key topics)
+            const symbolContent = weeklyData
+              ? `${title} ${description} ${topicImages.map((img) => img.topic).join(' ')}`
+              : undefined;
+
             videoBuffer = await renderRemotionVideo({
               format: remotionFormat,
               outputPath: '',
-              hookText: hookText || title,
+              title: title,
               subtitle: description,
+              hookText: hookText || title,
               segments,
               audioUrl: audioUrl!,
+              backgroundMusicUrl,
               images: topicImages.map((img) => ({
-                url: img.imageUrl,
+                url: '', // No image URLs needed - Remotion generates visuals
                 startTime: img.startTime,
                 endTime: img.endTime,
                 topic: img.topic,
@@ -1302,6 +1286,9 @@ export async function POST(request: NextRequest) {
               highlightTerms: [],
               durationSeconds: actualAudioDuration! + 2, // Add buffer at end
               seed: `${weekKey}-${type}-${Date.now()}`,
+              symbolContent,
+              zodiacSign: symbolContent,
+              showBrandedIntro: type === 'medium', // Enable branded intro for medium-form cosmic forecast videos
             });
             console.log(
               `✅ Remotion: Video rendered with ${topicImages.length} images, shooting stars, animated subtitles`,
@@ -1369,14 +1356,23 @@ export async function POST(request: NextRequest) {
         }
       } catch (error) {
         console.error(
-          '❌ Failed to generate topic-based images:',
+          '❌ Failed to create topic segments:',
           error instanceof Error ? error.message : error,
           error instanceof Error ? error.stack : '',
         );
-        // Don't silently fall back - throw the error so we can see what's wrong
-        throw new Error(
-          `Failed to generate topic-based images for long-form video: ${error instanceof Error ? error.message : 'Unknown error'}. This is required for long-form videos.`,
+        // Fall back to simple intro-only video
+        console.log(
+          '⚠️ Falling back to intro-only video without topic segments',
         );
+        const topicImages = [
+          {
+            topic: 'intro',
+            item: title,
+            imageUrl: '',
+            startTime: 0,
+            endTime: actualAudioDuration || 60,
+          },
+        ];
       }
     } else {
       // Short-form or fallback: single image
@@ -1404,17 +1400,26 @@ export async function POST(request: NextRequest) {
             2.6,
           );
 
+          // Create symbol content for short-form (title + description)
+          const shortSymbolContent = weeklyData
+            ? `${title} ${description}`
+            : undefined;
+
           videoBuffer = await renderRemotionVideo({
             format: 'ShortFormVideo',
             outputPath: '',
-            hookText: hookText || title,
+            title: title,
             subtitle: description,
+            hookText: hookText || title,
             segments,
             audioUrl: audioUrl!,
             backgroundImage: imageUrl,
+            backgroundMusicUrl: `${baseUrl}/audio/series/lunary-bed-v1.mp3`,
             highlightTerms: [],
             durationSeconds: actualAudioDuration! + 2,
             seed: `${weekKey}-short-${Date.now()}`,
+            zodiacSign: shortSymbolContent,
+            showBrandedIntro: true, // Enable branded intro for cosmic forecast videos
           });
           console.log(
             `✅ Remotion: Short-form video rendered with shooting stars, animated subtitles`,

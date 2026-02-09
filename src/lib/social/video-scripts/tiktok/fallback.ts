@@ -1230,7 +1230,7 @@ const FALLBACK_TEMPLATES: Record<
     },
     closing: [
       'Comment your sign. Let the debate begin.',
-      'Fight me on this. Comments are open.',
+      'Prove me wrong. Comments are open.',
       'Where did your sign land? Be honest.',
       'Share this and tag the sign at the bottom.',
     ],
@@ -1286,7 +1286,7 @@ const FALLBACK_TEMPLATES: Record<
     closing: [
       'I said what I said.',
       'Comment if you agree. Stitch if you do not.',
-      'This take stands. Fight me.',
+      'This take stands. Change my mind.',
       'Share this with someone who needs to hear it.',
     ],
   },

@@ -520,19 +520,62 @@ export async function POST(request: NextRequest) {
     });
 
     if (response.ok) {
-      if (groupKey && approvedGroupPosts.length > 0) {
-        await sql`
-          UPDATE social_posts
-          SET status = 'sent', updated_at = NOW()
-          WHERE base_group_key = ${groupKey}
-            AND status = 'approved'
-        `;
-      } else {
-        await sql`
-          UPDATE social_posts
-          SET status = 'sent', updated_at = NOW()
-          WHERE id = ${postId}
-        `;
+      // Update status to 'sent' for all posts in the group (or just the single post)
+      console.log('🔄 Updating post status to sent...', {
+        postId,
+        groupKey,
+        approvedGroupPostsCount: approvedGroupPosts.length,
+      });
+
+      try {
+        if (groupKey && approvedGroupPosts.length > 0) {
+          console.log(`Updating group posts with base_group_key = ${groupKey}`);
+          const updateResult = await sql`
+            UPDATE social_posts
+            SET status = 'sent', updated_at = NOW()
+            WHERE base_group_key = ${groupKey}
+              AND status IN ('pending', 'approved')
+          `;
+          console.log(
+            `✅ Updated ${updateResult.rowCount} posts in group ${groupKey} to 'sent'`,
+          );
+
+          if (updateResult.rowCount === 0) {
+            console.warn(
+              `⚠️ No posts updated! Checking what posts exist with this group key...`,
+            );
+            const checkResult = await sql`
+              SELECT id, status, base_group_key FROM social_posts WHERE base_group_key = ${groupKey}
+            `;
+            console.log('Posts with this group key:', checkResult.rows);
+          }
+        } else {
+          console.log(`Updating single post with id = ${postId}`);
+          const updateResult = await sql`
+            UPDATE social_posts
+            SET status = 'sent', updated_at = NOW()
+            WHERE id = ${Number(postId)}
+          `;
+          console.log(
+            `✅ Updated post ${postId} to 'sent' (rows affected: ${updateResult.rowCount})`,
+          );
+
+          if (updateResult.rowCount === 0) {
+            console.warn(`⚠️ No posts updated! Checking if post exists...`);
+            const checkResult = await sql`
+              SELECT id, status FROM social_posts WHERE id = ${Number(postId)}
+            `;
+            console.log('Post status:', checkResult.rows);
+          }
+        }
+      } catch (updateError) {
+        console.error('❌ Failed to update post status to sent:', updateError);
+        console.error('Update error details:', {
+          message:
+            updateError instanceof Error ? updateError.message : 'Unknown',
+          stack: updateError instanceof Error ? updateError.stack : undefined,
+        });
+        // Continue - don't fail the request if status update fails
       }
 
       const weekTheme = selectedBasePost?.week_theme as string | undefined;

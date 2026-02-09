@@ -12,12 +12,13 @@ import {
   rm,
 } from 'fs/promises';
 import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { join } from 'path';
 import { tmpdir } from 'os';
 import { constants } from 'fs';
-import { createRequire } from 'module';
 import { generateStarfieldFrames } from './starfield-generator';
 import type { CategoryVisualConfig } from '@/remotion/config/category-visuals';
+// @ts-ignore - ffmpeg-static provides a path string
+import ffmpegStatic from 'ffmpeg-static';
 
 // Buffer time added at the end of the video for the last subtitle to be readable
 // and for a nice pause before the video ends
@@ -54,13 +55,6 @@ let ffmpegPath: string | null = null;
 async function getFfmpegPath(): Promise<string> {
   if (ffmpegPath) return ffmpegPath;
 
-  // Use createRequire to get require in ESM context, and make it dynamic
-  // to prevent Turbopack from analyzing it statically
-  const require = createRequire(import.meta.url);
-  // Use a variable to make the require path dynamic (Turbopack can't analyze it)
-  const packageName = 'ffmpeg-static';
-  const ffmpegStatic = require(packageName);
-
   if (!ffmpegStatic) {
     throw new Error(
       'ffmpeg-static package not found. Install it with: pnpm add ffmpeg-static',
@@ -71,33 +65,18 @@ async function getFfmpegPath(): Promise<string> {
   const tempFfmpegPath = join(tempDir, `ffmpeg-${Date.now()}`);
 
   try {
-    let binaryContent: Buffer;
+    // ffmpegStatic is the full path to the binary (string)
+    const ffmpegBinaryPath =
+      typeof ffmpegStatic === 'string' ? ffmpegStatic : String(ffmpegStatic);
 
-    // Read directly from the path - ffmpegStatic is already the full path to the binary
-    // DO NOT use require.resolve on the binary file itself - it causes Next.js to try to parse it
-    try {
-      binaryContent = readFileSync(ffmpegStatic);
-      console.log(
-        `✅ Read FFmpeg binary from path: ${ffmpegStatic} (${binaryContent.length} bytes)`,
-      );
-    } catch (readError) {
-      // Fallback: Try to resolve package.json and construct path (safer than resolving binary)
-      try {
-        const packagePath = require.resolve('ffmpeg-static/package.json');
-        const packageDir = dirname(packagePath);
-        const possiblePath = join(packageDir, 'ffmpeg');
-        binaryContent = readFileSync(possiblePath);
-        console.log(
-          `✅ Read FFmpeg binary from package dir: ${possiblePath} (${binaryContent.length} bytes)`,
-        );
-      } catch (packageError) {
-        throw new Error(
-          `Could not read FFmpeg binary. Tried: ${ffmpegStatic} and package dir. ` +
-            `Errors: ${readError instanceof Error ? readError.message : 'unknown'}, ` +
-            `${packageError instanceof Error ? packageError.message : 'unknown'}`,
-        );
-      }
+    if (!ffmpegBinaryPath) {
+      throw new Error('ffmpeg-static did not provide a valid binary path');
     }
+
+    console.log(`📦 FFmpeg binary path: ${ffmpegBinaryPath}`);
+
+    const binaryContent = readFileSync(ffmpegBinaryPath);
+    console.log(`✅ Read FFmpeg binary (${binaryContent.length} bytes)`);
 
     // Write binary to /tmp (writable in serverless)
     await writeFile(tempFfmpegPath, binaryContent);

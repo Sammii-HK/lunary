@@ -93,7 +93,7 @@ export const STYLES = {
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     padding: '8px 16px',
     borderRadius: 4,
-    fontSize: 48,
+    fontSize: 56, // Increased from 48 for more prominence
     lineHeight: 1.4,
   },
 } as const;

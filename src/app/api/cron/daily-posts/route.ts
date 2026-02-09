@@ -59,10 +59,12 @@ import {
   detectUpcomingSignChanges,
   detectUpcomingRetrogradeStations,
   detectTransitMilestones,
+  detectMajorEventCountdowns,
   getGlobalCosmicData,
   type SignChangeEvent,
   type RetrogradeStationEvent,
   type TransitMilestoneEvent,
+  type CountdownEvent,
 } from '@/lib/cosmic-snapshot/global-cache';
 import {
   getUpcomingEclipses,
@@ -1016,6 +1018,14 @@ async function runDailyPosts(dateStr: string) {
     getSchedule: getTransitSchedule,
   });
 
+  // Build micromoon posts (same day is fine for visual events)
+  const micromoonTextPosts = buildMicromoonTextPosts({
+    dateStr,
+    moonPhase: cosmicContent.astronomicalData?.moonPhase ?? {},
+    platformHashtags,
+    getSchedule: getTransitSchedule,
+  });
+
   // Build eclipse posts (day BEFORE the eclipse)
   const upcomingEclipses = getUpcomingEclipses(today, 1); // Check next month
   const eclipseTextPosts = buildEclipseTextPosts({
@@ -1043,6 +1053,15 @@ async function runDailyPosts(dateStr: string) {
     getSchedule: getTransitSchedule,
   });
 
+  // Build countdown posts (3 days and 7 days before major retrogrades/sign changes)
+  const countdownEvents = await detectMajorEventCountdowns(today);
+  const countdownTextPosts = buildCountdownTextPosts({
+    dateStr,
+    countdowns: countdownEvents,
+    platformHashtags,
+    getSchedule: getTransitSchedule,
+  });
+
   // Build separate focused posts for significant aspects
   const aspectSource = Array.isArray(cosmicContent.dailyAspects)
     ? cosmicContent.dailyAspects
@@ -1058,9 +1077,11 @@ async function runDailyPosts(dateStr: string) {
   posts.push(...ingressTextPosts);
   posts.push(...egressTextPosts);
   posts.push(...supermoonTextPosts);
+  posts.push(...micromoonTextPosts);
   posts.push(...eclipseTextPosts);
   posts.push(...moonPhaseTextPosts);
   posts.push(...transitMilestoneTextPosts);
+  posts.push(...countdownTextPosts);
   posts.push(...aspectTextPosts);
 
   const pinterestQuoteSlot = await getPinterestQuoteForDate(dateStr);
@@ -3924,17 +3945,16 @@ function buildAspectTextPosts({
 
   // Filter valid aspects
   const validAspects = (aspects || []).filter(
-    (aspect: any) =>
-      aspect?.planetA?.name && aspect?.planetB?.name && aspect?.aspect,
+    (aspect: any) => aspect?.planetA && aspect?.planetB && aspect?.aspect,
   );
 
   if (validAspects.length === 0) return posts;
 
-  // Sort by priority (higher first), take top 1-2 aspects
+  // Sort by priority (higher first), take top 4 aspects
   const sortedAspects = [...validAspects].sort(
     (a, b) => (b.priority || 5) - (a.priority || 5),
   );
-  const selectedAspects = sortedAspects.slice(0, 2);
+  const selectedAspects = sortedAspects.slice(0, 4);
 
   for (const aspect of selectedAspects) {
     const planetA = aspect.planetA?.name || aspect.planetA;
@@ -4204,6 +4224,81 @@ function buildSupermoonTextPosts({
 }
 
 /**
+ * Build posts for micromoon events
+ * Posts on the day of micromoon Full Moons (moon at apogee)
+ */
+function buildMicromoonTextPosts({
+  dateStr,
+  moonPhase,
+  platformHashtags,
+  getSchedule,
+}: {
+  dateStr: string;
+  moonPhase: { name: string; isMicroMoon?: boolean; energy?: string };
+  platformHashtags: Record<string, string>;
+  getSchedule: () => string;
+}): DailySocialPost[] {
+  const posts: DailySocialPost[] = [];
+
+  // Only post for Full Moon micromoons (parallel to supermoon logic)
+  if (!moonPhase?.isMicroMoon) return posts;
+  const isFullMoon = moonPhase.name?.toLowerCase().includes('full');
+  if (!isFullMoon) return posts;
+
+  const seed = `micromoon-${dateStr}`;
+  const engagementHook = getEngagementHook('micromoon', seed);
+
+  // Threads: emotional and conversational
+  const threadsBody = [
+    'Micromoon Full Moon tonight.',
+    'The moon is at its farthest point, appearing smaller—distant perspective reveals hidden truths.',
+    '',
+    engagementHook,
+  ].join('\n');
+  const threadsContent = addTransitHashtags(
+    threadsBody,
+    platformHashtags.threads,
+  );
+
+  // X/Twitter: compact with CTA
+  const xBody = [
+    'Micromoon Full Moon tonight.',
+    'The moon is at apogee—small but significant. What truths emerge from distance?',
+    '',
+    'lunary.app',
+  ].join('\n');
+  const xContent = addTransitHashtags(xBody, platformHashtags.twitter);
+
+  // Bluesky: informational with CTA
+  const blueskyBody = [
+    'Micromoon Full Moon tonight.',
+    'The moon is at its farthest point (apogee), appearing smaller and providing a different perspective.',
+    '',
+    'Track lunar events at lunary.app',
+  ].join('\n');
+  const blueskyContent = addTransitHashtags(
+    blueskyBody,
+    platformHashtags.bluesky,
+  );
+
+  posts.push({
+    name: `Micromoon • Full Moon`,
+    content: xContent,
+    platforms: ['x', 'threads', 'bluesky'],
+    imageUrls: [],
+    alt: 'Micromoon Full Moon',
+    scheduledDate: getSchedule(),
+    variants: {
+      threads: { content: threadsContent },
+      bluesky: { content: blueskyContent },
+      twitter: { content: xContent },
+    },
+  });
+
+  return posts;
+}
+
+/**
  * Build posts for eclipse events
  * Posts the DAY BEFORE the eclipse (when daysAway is between 0.5 and 1.5)
  */
@@ -4418,6 +4513,9 @@ function buildTransitMilestoneTextPosts({
   const posts: DailySocialPost[] = [];
 
   const planetThemes: Record<string, string> = {
+    Mercury: 'communication, thinking, and connection',
+    Venus: 'love, beauty, and values',
+    Mars: 'action, drive, and desire',
     Jupiter: 'expansion, growth, and opportunity',
     Saturn: 'structure, discipline, and mastery',
     Uranus: 'innovation, awakening, and liberation',
@@ -4589,6 +4687,94 @@ function buildTransitMilestoneTextPosts({
       platforms: ['x', 'threads', 'bluesky'],
       imageUrls: [],
       alt: `${planet} in ${sign} - ${milestoneLabel}`,
+      scheduledDate: getSchedule(),
+      variants: {
+        threads: { content: threadsContent },
+        bluesky: { content: blueskyContent },
+        twitter: { content: xContent },
+      },
+    });
+  }
+
+  return posts;
+}
+
+/**
+ * Build posts for major transit countdowns
+ * Posts 3 days and 7 days before major retrogrades and sign changes
+ */
+function buildCountdownTextPosts({
+  dateStr,
+  countdowns,
+  platformHashtags,
+  getSchedule,
+}: {
+  dateStr: string;
+  countdowns: CountdownEvent[];
+  platformHashtags: Record<string, string>;
+  getSchedule: () => string;
+}): DailySocialPost[] {
+  const posts: DailySocialPost[] = [];
+
+  for (const countdown of countdowns) {
+    const { planet, sign, daysUntil, event, type } = countdown;
+    const seed = `countdown-${type}-${planet}-${sign}-${daysUntil}-${dateStr}`;
+    const engagementHook = getEngagementHook(
+      type === 'retrograde_countdown' ? 'retrograde' : 'ingress',
+      seed,
+    );
+
+    let actionAdvice = '';
+    if (event === 'retrograde_start') {
+      actionAdvice =
+        daysUntil === 7
+          ? 'Start backing up files and reviewing plans.'
+          : 'Final preparations—back up tech, confirm travel, wrap up contracts.';
+    } else if (event === 'retrograde_end') {
+      actionAdvice =
+        daysUntil === 7
+          ? 'Forward momentum resumes soon.'
+          : 'Direct motion in 3 days—prepare to move forward.';
+    } else if (event === 'sign_ingress') {
+      actionAdvice =
+        daysUntil === 7
+          ? 'This generational transit begins soon.'
+          : 'Major energy shift in 3 days.';
+    }
+
+    // Threads: urgent + conversational
+    const threadsBody = [countdown.name, actionAdvice, '', engagementHook]
+      .filter(Boolean)
+      .join('\n');
+    const threadsContent = addTransitHashtags(
+      threadsBody,
+      platformHashtags.threads,
+    );
+
+    // X: compact
+    const xBody = [countdown.name, actionAdvice, '', 'lunary.app']
+      .filter(Boolean)
+      .join('\n');
+    const xContent = addTransitHashtags(xBody, platformHashtags.twitter);
+
+    // Bluesky: informational
+    const blueskyBody = [
+      countdown.name,
+      countdown.energy,
+      '',
+      'Track upcoming transits at lunary.app',
+    ].join('\n');
+    const blueskyContent = addTransitHashtags(
+      blueskyBody,
+      platformHashtags.bluesky,
+    );
+
+    posts.push({
+      name: `Countdown • ${countdown.name}`,
+      content: xContent,
+      platforms: ['x', 'threads', 'bluesky'],
+      imageUrls: [],
+      alt: countdown.name,
       scheduledDate: getSchedule(),
       variants: {
         threads: { content: threadsContent },

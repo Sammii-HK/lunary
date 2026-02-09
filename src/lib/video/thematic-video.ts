@@ -352,26 +352,12 @@ export function buildThematicVideoComposition({
           },
         ]
       : []),
-    // "Significance" - delayed by 2-3 seconds into segment 2
-    {
-      text: CHAPTER_LABELS[1], // "Significance"
-      startTime: images[1].startTime + 2.5,
-      endTime: images[1].endTime,
-      style: 'chapter' as const,
-    },
     // Mid-video micro-CTA stamp at ~60% duration
     {
       text: getMicroCTA(),
       startTime: microCtaStart,
       endTime: microCtaStart + 2.0,
       style: 'stamp' as const,
-    },
-    // "Reflection" - starts with segment 3
-    {
-      text: CHAPTER_LABELS[2], // "Reflection"
-      startTime: images[2].startTime,
-      endTime: images[2].endTime,
-      style: 'chapter' as const,
     },
     // CTA appears later, fades out near video end
     {
@@ -392,9 +378,9 @@ export function buildThematicVideoComposition({
   const stamps = extractDataStamps(script);
   const stampOverlays = stamps.map((text, index) => ({
     text,
-    startTime: images[1].startTime + index * 1.4,
-    endTime: images[1].startTime + index * 1.4 + 2.4,
-    style: 'stamp' as const,
+    startTime: images[0].startTime + 0.5, // Show early, throughout first segment
+    endTime: images[1].endTime, // Persist through segment 2
+    style: 'series_badge' as const, // Use badge style (pill-shaped, at top)
   }));
 
   // Extract highlight terms (hookText used for fallback detection)

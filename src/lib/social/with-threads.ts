@@ -552,7 +552,7 @@ export function threadsAngleTemplates(category: ThemeCategory): Array<{
           opener:
             'Your rising sign matters more than your sun sign and I will die on this hill',
           closerType: 'question',
-          closer: 'Fight me or agree?',
+          closer: 'Prove me wrong or agree?',
         },
         {
           intent: 'identity_callout',

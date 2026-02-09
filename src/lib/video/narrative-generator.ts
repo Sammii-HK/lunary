@@ -207,7 +207,7 @@ export async function generateNarrativeFromWeeklyData(
 CRITICAL: You MUST follow the structure below IN THIS ORDER. All sections must be present, but the narration should feel continuous and spoken, not segmented or lecture-like. Do not announce sections.
 
 OPENING (30–60 seconds)
-Open by describing how the key planetary aspects this week create an overall energetic tone. Introduce the main theme of the week and briefly name the most important movements or alignments that shape it. The opening should feel grounded, reflective, and orienting rather than promotional.
+Start with a compelling hook that captures attention immediately. Open by describing how the key planetary aspects this week create an overall energetic tone. Introduce the main theme of the week and briefly name the most important movements or alignments that shape it. The opening should feel grounded, reflective, and orienting rather than promotional. Example hooks: "This week brings a rare cosmic alignment that..." or "If you've been feeling pulled in two directions, the planets explain why..."
 
 ${
   seasonalEvents
@@ -254,7 +254,7 @@ Named full moons are FULL MOONS and must be described as such.
 If no major phase occurs, describe the current lunar phase and its influence.
 
 CONCLUSION (30–60 seconds)
-Close by summarizing the overall rhythm of the week. Reinforce that astrology offers perspective rather than prediction. End calmly by noting that deeper personal insight comes from understanding how these transits interact with an individual birth chart, and that further context is available on Lunary.
+Close by summarizing the overall rhythm of the week. Reinforce that astrology offers perspective rather than prediction. End with a clear call-to-action: encourage viewers to subscribe for weekly cosmic guidance, like if the forecast resonates, and leave a comment sharing which transit they're most excited (or nervous) about. Note that deeper personal insight comes from understanding how these transits interact with an individual birth chart, and that further context is available on Lunary.
 
 Weekly Data:
 Title: ${weeklyData.title}
@@ -296,7 +296,7 @@ Return ONLY the voiceover script text. No headings, no formatting, no section la
         {
           role: 'system',
           content:
-            'You are a cosmic storyteller creating engaging voiceover scripts for astrology videos. Write in a natural, conversational tone that flows smoothly when spoken aloud. Make it engaging and accessible. This is Lunary - a moon-focused astrology app. Moon phases are core to the brand and MUST always be included in every script.',
+            'You are a cosmic storyteller creating engaging voiceover scripts for YouTube astrology videos. Write in a natural, conversational tone that flows smoothly when spoken aloud. Start with a compelling hook that captures attention in the first 5 seconds. Use vivid, relatable language. Include transitions between topics that maintain engagement. This is Lunary - a moon-focused astrology app. Moon phases are core to the brand and MUST always be included in every script. End with clear YouTube CTAs (subscribe, like, comment).',
         },
         { role: 'user', content: prompt },
       ],

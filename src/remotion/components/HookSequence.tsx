@@ -1,6 +1,6 @@
 import React from 'react';
-import { useCurrentFrame, interpolate, Easing } from 'remotion';
-import { COLORS, FONTS } from '../styles/theme';
+import { useCurrentFrame, interpolate, Easing, staticFile } from 'remotion';
+import { COLORS } from '../styles/theme';
 import { letterSpacingAnimation } from '../utils/animations';
 
 interface HookSequenceProps {
@@ -8,6 +8,8 @@ interface HookSequenceProps {
   hookText: string;
   /** Optional subtitle/context */
   subtitle?: string;
+  /** Date range (e.g., "Feb 9 - Feb 15") */
+  dateRange?: string;
   /** Start frame for the sequence */
   startFrame?: number;
   /** Total duration in frames */
@@ -26,11 +28,13 @@ interface HookSequenceProps {
 export const HookSequence: React.FC<HookSequenceProps> = ({
   hookText,
   subtitle,
+  dateRange,
   startFrame = 0,
-  durationFrames = 90, // 3 seconds at 30fps
+  durationFrames = 150, // 5 seconds at 30fps for long-form
 }) => {
   const frame = useCurrentFrame();
   const relativeFrame = frame - startFrame;
+  const logoUrl = staticFile('/logo.svg');
 
   if (relativeFrame < 0) return null;
 
@@ -76,6 +80,29 @@ export const HookSequence: React.FC<HookSequenceProps> = ({
   const finalOpacity = Math.min(textOpacity, fadeOut);
   const subtitleFinalOpacity = Math.min(subtitleOpacity, fadeOut);
 
+  // Logo fade in (earlier than text)
+  const logoOpacity = interpolate(relativeFrame, [0, 20], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
+
+  // Date range fade in (after subtitle)
+  const dateRangeOpacity = dateRange
+    ? interpolate(relativeFrame, [30, 45], [0, 1], {
+        extrapolateLeft: 'clamp',
+        extrapolateRight: 'clamp',
+        easing: Easing.out(Easing.cubic),
+      })
+    : 0;
+
+  // Brand URL fade in (last)
+  const brandOpacity = interpolate(relativeFrame, [45, 60], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
+
   return (
     <div
       style={{
@@ -88,45 +115,105 @@ export const HookSequence: React.FC<HookSequenceProps> = ({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '10%',
+        padding: '8%',
+        gap: '32px',
       }}
     >
-      {/* Main hook text */}
-      <h1
+      {/* Moon logo */}
+      <img
+        src={logoUrl}
+        alt='Lunary'
         style={{
-          fontFamily: FONTS.title,
-          fontWeight: FONTS.titleWeight,
-          fontSize: 64,
-          color: COLORS.primaryText,
-          textAlign: 'center',
-          opacity: finalOpacity,
-          transform: `scale(${scale})`,
-          letterSpacing,
-          margin: 0,
-          lineHeight: 1.2,
-          textShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+          width: '120px',
+          height: '120px',
+          opacity: Math.min(logoOpacity, fadeOut),
+          filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5))',
+        }}
+      />
+
+      {/* Main title text with date on new line */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '8px',
         }}
       >
-        {hookText}
-      </h1>
+        <h1
+          style={{
+            fontFamily: 'Roboto Mono, monospace',
+            fontWeight: 400,
+            fontSize: 72,
+            color: COLORS.primaryText,
+            textAlign: 'center',
+            opacity: finalOpacity,
+            transform: `scale(${scale})`,
+            letterSpacing: '-0.02em',
+            margin: 0,
+            lineHeight: 1.2,
+            textShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+          }}
+        >
+          {hookText}
+        </h1>
 
-      {/* Subtitle */}
+        {/* Date range as part of title */}
+        {dateRange && (
+          <p
+            style={{
+              fontFamily: 'Roboto Mono, monospace',
+              fontWeight: 300,
+              fontSize: 32,
+              color: COLORS.primaryText,
+              textAlign: 'center',
+              opacity: finalOpacity,
+              margin: 0,
+              letterSpacing: '-0.01em',
+              textShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            {dateRange}
+          </p>
+        )}
+      </div>
+
+      {/* Subtitle with accent color */}
       {subtitle && (
         <p
           style={{
-            fontFamily: FONTS.body,
-            fontWeight: FONTS.bodyWeight,
+            fontFamily: 'Roboto Mono, monospace',
+            fontWeight: 300,
             fontSize: 28,
-            color: COLORS.secondaryText,
+            color: '#8B7DFF', // Accent purple/blue from screenshot
             textAlign: 'center',
             opacity: subtitleFinalOpacity,
-            marginTop: 24,
-            letterSpacing: 1,
+            margin: 0,
+            letterSpacing: '-0.01em',
+            textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
           }}
         >
           {subtitle}
         </p>
       )}
+
+      {/* Brand URL at bottom */}
+      <p
+        style={{
+          fontFamily: 'Roboto Mono, monospace',
+          fontWeight: 300,
+          fontSize: 18,
+          color: COLORS.secondaryText,
+          textAlign: 'center',
+          opacity: Math.min(brandOpacity, fadeOut),
+          margin: 0,
+          letterSpacing: 0,
+          position: 'absolute',
+          bottom: '12%',
+        }}
+      >
+        lunary.app
+      </p>
     </div>
   );
 };

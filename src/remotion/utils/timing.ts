@@ -105,14 +105,17 @@ export function splitTextWithTiming(
   const totalDuration = endTime - startTime;
   const durationPerWord = totalDuration / words.length;
 
+  // Lead time: highlight appears slightly before word is spoken (100ms)
+  const leadTime = 0.1;
+
   return words.map((word, index) => {
-    const wordStart = startTime + index * durationPerWord;
-    const wordEnd = wordStart + durationPerWord;
+    const wordStart = startTime + index * durationPerWord - leadTime;
+    const wordEnd = wordStart + durationPerWord + leadTime * 0.5; // Extended slightly
 
     return {
       word,
-      startFrame: secondsToFrames(wordStart, fps),
-      endFrame: secondsToFrames(wordEnd, fps),
+      startFrame: secondsToFrames(Math.max(startTime, wordStart), fps),
+      endFrame: secondsToFrames(Math.min(endTime, wordEnd), fps),
     };
   });
 }
