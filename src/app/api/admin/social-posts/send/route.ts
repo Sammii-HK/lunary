@@ -180,11 +180,18 @@ const buildPlatformPayload = (
     };
   }
 
-  if (platformStr === 'instagram' && shouldUseVideo) {
-    payload.instagramOptions = {
-      type: 'reel',
-      ...(imageUrlForPlatform ? { coverUrl: imageUrlForPlatform } : {}),
-    };
+  if (platformStr === 'instagram') {
+    if (shouldUseVideo) {
+      payload.instagramOptions = {
+        type: 'reel',
+        ...(imageUrlForPlatform ? { coverUrl: imageUrlForPlatform } : {}),
+      };
+    } else {
+      // Static Instagram post (meme, carousel, daily cosmic, etc.)
+      payload.instagramOptions = {
+        type: 'post',
+      };
+    }
   }
 
   return payload;

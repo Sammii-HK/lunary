@@ -147,6 +147,8 @@ export function useIframeScrollIsolation(enabled: boolean = true) {
       }
       unlockBodyScroll();
     };
+    // isInteracting is intentionally excluded - we don't want to re-run on state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
   return {
