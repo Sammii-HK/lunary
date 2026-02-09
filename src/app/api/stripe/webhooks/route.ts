@@ -256,12 +256,29 @@ async function handleSubscriptionChange(
   const discountInfo = extractDiscountInfo(subscription);
 
   // If 100% off coupon, treat as active (not trial) to prevent misleading trial emails
-  const status =
+  const is100PercentOff =
     rawStatus === 'trial' &&
     discountInfo.hasDiscount &&
-    (discountInfo.discountPercent >= 100 || discountInfo.monthlyAmountDue <= 0)
-      ? 'active'
-      : rawStatus;
+    (discountInfo.discountPercent >= 100 || discountInfo.monthlyAmountDue <= 0);
+  const status = is100PercentOff ? 'active' : rawStatus;
+
+  // Also update Stripe itself so billing portal and Stripe emails reflect active status
+  if (is100PercentOff && subscription.trial_end) {
+    try {
+      await stripe.subscriptions.update(subscription.id, {
+        trial_end: 'now',
+      });
+      console.log(
+        `[Webhook] Removed trial for 100% off subscription ${subscription.id}`,
+      );
+    } catch (error) {
+      console.error(
+        `[Webhook] Failed to remove trial for subscription ${subscription.id}:`,
+        error,
+      );
+      // Non-critical: DB status is already correct, Stripe will self-correct when trial ends
+    }
+  }
 
   const promoCodeRaw =
     subscription.metadata?.promoCode || subscription.metadata?.discountCode;
