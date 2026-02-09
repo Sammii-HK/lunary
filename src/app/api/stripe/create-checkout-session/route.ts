@@ -637,6 +637,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // If a discount was applied from the app, remove allow_promotion_codes
+    // to avoid Stripe conflicts and prevent double-discounting
+    if (sessionConfig.discounts && sessionConfig.discounts.length > 0) {
+      delete sessionConfig.allow_promotion_codes;
+    }
+
     // Handle referral code
     if (referralCode) {
       try {

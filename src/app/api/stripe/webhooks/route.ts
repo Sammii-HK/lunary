@@ -251,9 +251,18 @@ async function handleSubscriptionChange(
 ) {
   const stripe = getStripe();
   const customerId = subscription.customer as string;
-  const status = mapStripeStatus(subscription.status);
+  const rawStatus = mapStripeStatus(subscription.status);
   const planType = getPlanTypeFromSubscription(subscription);
   const discountInfo = extractDiscountInfo(subscription);
+
+  // If 100% off coupon, treat as active (not trial) to prevent misleading trial emails
+  const status =
+    rawStatus === 'trial' &&
+    discountInfo.hasDiscount &&
+    (discountInfo.discountPercent >= 100 || discountInfo.monthlyAmountDue <= 0)
+      ? 'active'
+      : rawStatus;
+
   const promoCodeRaw =
     subscription.metadata?.promoCode || subscription.metadata?.discountCode;
   const promoCode =

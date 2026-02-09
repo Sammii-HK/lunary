@@ -55,6 +55,14 @@ export async function GET(request: NextRequest) {
       AND DATE(s.created_at) = ${formatDate(day2Date)}
       AND (s.trial_nurture_day2_sent = false OR s.trial_nurture_day2_sent IS NULL)
       AND s.user_email IS NOT NULL
+      AND NOT (
+        s.has_discount = true
+        AND (
+          COALESCE(s.discount_percent, 0) >= 100
+          OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
+        )
+      )
+      AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
     `;
 
     for (const user of day2Trials.rows) {
@@ -120,6 +128,14 @@ export async function GET(request: NextRequest) {
       AND DATE(s.created_at) = ${formatDate(day3Date)}
       AND (s.trial_nurture_day3_sent = false OR s.trial_nurture_day3_sent IS NULL)
       AND s.user_email IS NOT NULL
+      AND NOT (
+        s.has_discount = true
+        AND (
+          COALESCE(s.discount_percent, 0) >= 100
+          OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
+        )
+      )
+      AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
     `;
 
     for (const user of day3Trials.rows) {
@@ -185,6 +201,14 @@ export async function GET(request: NextRequest) {
       AND DATE(s.created_at) = ${formatDate(day5Date)}
       AND (s.trial_nurture_day5_sent = false OR s.trial_nurture_day5_sent IS NULL)
       AND s.user_email IS NOT NULL
+      AND NOT (
+        s.has_discount = true
+        AND (
+          COALESCE(s.discount_percent, 0) >= 100
+          OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
+        )
+      )
+      AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
     `;
 
     for (const user of day5Trials.rows) {
