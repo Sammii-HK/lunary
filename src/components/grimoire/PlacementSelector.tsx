@@ -111,7 +111,7 @@ export function PlacementSelector({ signName }: PlacementSelectorProps) {
             {info.explanation}
           </p>
           <Link
-            href='/birth-chart'
+            href='/app/birth-chart'
             className='inline-block mt-2 text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
           >
             {info.cta} &rarr;

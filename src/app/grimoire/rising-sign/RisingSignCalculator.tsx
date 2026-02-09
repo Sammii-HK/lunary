@@ -33,7 +33,7 @@ export function RisingSignCalculator() {
   useEffect(() => {
     if (showAuthModal && authState.isAuthenticated) {
       setShowAuthModal(false);
-      router.push('/birth-chart');
+      router.push('/app/birth-chart');
     }
   }, [authState.isAuthenticated, router, showAuthModal]);
 
@@ -68,7 +68,7 @@ export function RisingSignCalculator() {
     });
 
     if (authState.isAuthenticated) {
-      router.push('/birth-chart');
+      router.push('/app/birth-chart');
       return;
     }
 
@@ -164,7 +164,7 @@ export function RisingSignCalculator() {
               defaultToSignUp={true}
               onSuccess={() => {
                 setShowAuthModal(false);
-                router.push('/birth-chart');
+                router.push('/app/birth-chart');
               }}
             />
           </div>

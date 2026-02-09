@@ -378,7 +378,7 @@ export function ShareBirthChartLayout({
                 </p>
                 <div className='mt-4 flex flex-col items-center gap-4 sm:flex-row sm:justify-center'>
                   <Button asChild variant='lunary'>
-                    <Link href='/auth?signup=true&redirect=/birth-chart'>
+                    <Link href='/auth?signup=true&redirect=/app/birth-chart'>
                       <Sparkles className='w-4 h-4' />
                       Get Your Free Birth Chart
                     </Link>
