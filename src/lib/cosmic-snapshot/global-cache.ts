@@ -122,7 +122,7 @@ export async function getGlobalCosmicData(
   date: Date = new Date(),
 ): Promise<GlobalCosmicData | null> {
   if (!hasPostgres) {
-    return await buildGlobalCosmicData(date);
+    return await buildGlobalCosmicData(new Date());
   }
 
   const dateStr = date.toISOString().split('T')[0];
@@ -159,12 +159,26 @@ export async function getGlobalCosmicData(
 
   const data = await cached();
 
-  // Recompute durations from current time using cached position data.
-  // The DB/cache stores static remainingDays that go stale, but longitude
-  // and sign are still valid — recalculate duration from those + current date.
+  // Freshen fast-moving planet positions with current time.
+  // The DB/day-cache stores positions from the first request (midnight UTC),
+  // but Moon moves ~13°/day — stale by afternoon. getRealPlanetaryPositions
+  // has its own per-planet cache (Moon: 15min TTL) so this is efficient.
   if (data?.planetaryPositions) {
     const now = new Date();
-    for (const [planet, pos] of Object.entries(data.planetaryPositions)) {
+    const FAST = ['Moon', 'Sun', 'Mercury', 'Venus', 'Mars'];
+    const freshPositions = getRealPlanetaryPositions(now, DEFAULT_OBSERVER);
+
+    for (const planet of FAST) {
+      if (freshPositions[planet]) {
+        data.planetaryPositions[planet] = freshPositions[planet];
+      }
+    }
+
+    // Slow planets: just refresh duration from stored longitude + current time
+    const SLOW = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+    for (const planet of SLOW) {
+      const pos = data.planetaryPositions[planet];
+      if (!pos) continue;
       const fresh = calculateTransitDuration(
         planet,
         pos.sign,
@@ -181,6 +195,9 @@ export async function getGlobalCosmicData(
           }
         : undefined;
     }
+
+    // Refresh moon phase (illumination drifts throughout the day)
+    data.moonPhase = getAccurateMoonPhase(now);
   }
 
   return data;
