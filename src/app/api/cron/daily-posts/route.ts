@@ -17,10 +17,7 @@ import {
   generateTrialExpiredEmailHTML,
   generateTrialExpiredEmailText,
 } from '@/lib/email-templates/trial-expired';
-import {
-  generateCatchyQuote,
-  getQuoteImageUrl,
-} from '@/lib/social/quote-generator';
+import { getQuoteImageUrl } from '@/lib/social/quote-generator';
 import {
   ensurePinterestQuoteQueue,
   getPinterestQuoteForDate,
@@ -806,23 +803,6 @@ async function runDailyPosts(dateStr: string) {
 
   const cosmicContent = await cosmicResponse.json();
 
-  // Calculate proper scheduling times
-  // Cron runs at 8 AM UTC, schedule posts for 12 PM UTC on target date
-  const scheduleBase = new Date(dateStr + 'T12:00:00Z'); // Start at 12 PM UTC on target date
-
-  // Always post to our own subreddit r/lunary_insights
-  const subreddit = { name: 'lunary_insights' };
-
-  // Generate Reddit title from cosmic content
-  const redditTitle = `Daily Cosmic Guidance - ${dateStr}: ${cosmicContent.primaryEvent.name}`;
-
-  // Generate post content
-  const { snippet: postContent, snippetShort: postSnippetShort } =
-    generateCosmicPost(cosmicContent);
-
-  // Generate AI quote for Pinterest/TikTok using shared utility
-  const quote = await generateCatchyQuote(postContent, 'cosmic');
-
   // Build cosmic context for dynamic hashtags
   const cosmicContext: CosmicContext = {
     moonPhase: cosmicContent.astronomicalData?.moonPhase?.name,
@@ -845,102 +825,7 @@ async function runDailyPosts(dateStr: string) {
   };
   const getCosmicFormat = (platform: string): ImageFormat =>
     getPlatformImageFormat(platform === 'x' ? 'twitter' : platform);
-  const buildCosmicMediaUrls = (format: ImageFormat) => [
-    `${productionUrl}/api/og/cosmic/${dateStr}?format=${format}`,
-    `${productionUrl}/api/og/crystal?date=${dateStr}&size=${format}`,
-    `${productionUrl}/api/og/tarot?date=${dateStr}&size=${format}`,
-    `${productionUrl}/api/og/moon?date=${dateStr}&size=${format}`,
-    // `${productionUrl}/api/og/horoscope?date=${dateStr}`,
-  ];
-
-  const astroLeadFull = `Current astrology: ${postContent}`;
-  const astroSynopsis = (postSnippetShort || '').replace(/\n/g, ' ').trim();
-  const astroLeadShort = `Current astrology: ${astroSynopsis}`;
-  const instagramContent = addAstrologyHashtags(
-    astroLeadFull,
-    platformHashtags.instagram,
-  );
-  const pinterestContent = addAstrologyHashtags(
-    astroLeadFull,
-    platformHashtags.pinterest,
-  );
-  const facebookContent = addAstrologyHashtags(
-    astroLeadFull,
-    platformHashtags.facebook,
-  );
-
-  // Generate posts with dynamic content
-  const posts: DailySocialPost[] = [
-    {
-      name: `Cosmic Post - ${new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
-      content: instagramContent,
-      platforms: ['pinterest', 'facebook', 'instagram', 'threads'],
-      imageUrls: buildCosmicMediaUrls(getCosmicFormat('instagram')),
-      alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.`,
-      scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
-      // redditOptions: {
-      //   title: redditTitle,
-      //   subreddit: subreddit.name,
-      // },
-      pinterestOptions: {
-        boardId: process.env.SUCCULENT_PINTEREST_BOARD_ID,
-      },
-      tiktokOptions: {
-        type: 'post',
-        autoAddMusic: true,
-        visibility: 'public',
-      },
-      variants: {
-        pinterest: {
-          content: pinterestContent,
-          media: buildCosmicMediaUrls(getCosmicFormat('pinterest')),
-        },
-        facebook: {
-          content: facebookContent,
-          media: buildCosmicMediaUrls(getCosmicFormat('facebook')),
-        },
-        threads: {
-          content: addAstrologyHashtags(
-            astroLeadFull,
-            platformHashtags.threads,
-          ),
-          media: buildCosmicMediaUrls(getCosmicFormat('threads')),
-        },
-        tiktok: {
-          content: addAstrologyHashtags(
-            astroLeadShort,
-            platformHashtags.tiktok,
-          ),
-          media: buildCosmicMediaUrls(getCosmicFormat('tiktok')),
-        },
-        twitter: {
-          content: addAstrologyHashtags(
-            astroLeadShort,
-            platformHashtags.twitter,
-          ),
-          media: buildCosmicMediaUrls(getCosmicFormat('twitter')),
-          twitterOptions: {
-            thread: false,
-            threadNumber: false,
-          },
-        },
-        bluesky: {
-          content: addAstrologyHashtags(
-            astroLeadShort,
-            platformHashtags.bluesky,
-          ),
-          media: buildCosmicMediaUrls(getCosmicFormat('bluesky')),
-        },
-        linkedin: {
-          content: addAstrologyHashtags(
-            astroLeadFull,
-            platformHashtags.linkedin,
-          ),
-          media: buildCosmicMediaUrls(getCosmicFormat('linkedin')),
-        },
-      },
-    },
-  ];
+  const posts: DailySocialPost[] = [];
 
   // Transit post scheduling - avoid existing content slots at 12:00, 17:00, 20:00 UTC
   // Use 07:00, 09:00, 14:00, 15:00 UTC for transit posts
@@ -1364,7 +1249,9 @@ async function runDailyPosts(dateStr: string) {
 
       // Get post content snippet
       const postContent =
-        posts[0]?.content || generateCosmicPost(cosmicContent).snippet;
+        posts[0]?.content ||
+        cosmicContent?.primaryEvent?.name ||
+        'Daily cosmic posts';
 
       // Send one notification for daily posts with all images and content
       const dailyPreview = NotificationTemplates.dailyPreview(
@@ -4814,16 +4701,4 @@ function formatTransitAspectLine(aspect: any): string {
   if (constellation) parts.push(constellation);
   if (separation) parts.push(separation);
   return `${parts.filter(Boolean).join(' ')}.`;
-}
-
-// Dynamic content generators
-function generateCosmicPost(
-  cosmicContent: any,
-  // crystalContent: any,
-  // tarotContent: any,
-): { snippet: string; snippetShort: string } {
-  return {
-    snippet: cosmicContent.snippet,
-    snippetShort: cosmicContent.snippetShort,
-  } as { snippet: string; snippetShort: string };
 }
