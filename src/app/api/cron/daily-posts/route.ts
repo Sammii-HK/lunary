@@ -174,15 +174,13 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ Auth check passed - proceeding with cron execution');
 
-    // Calculate target date: create posts for tomorrow (run the day before at 2 PM)
+    // Calculate target date: create posts for today
     const now = new Date();
     const targetDateStr = (() => {
       if (overrideDate && /^\d{4}-\d{2}-\d{2}$/.test(overrideDate)) {
         return overrideDate;
       }
-      const tomorrowDate = new Date(now);
-      tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
-      return tomorrowDate.toISOString().split('T')[0];
+      return now.toISOString().split('T')[0];
     })();
     const dailyPostsKey = `daily-posts-${targetDateStr}`;
 
@@ -246,13 +244,13 @@ export async function GET(request: NextRequest) {
 
     console.log('🕐 Master cron job started at:', new Date().toISOString());
     console.log('🔐 Auth check passed - proceeding with cron execution');
-    console.log(`📅 Creating posts for tomorrow: ${targetDateStr}`);
+    console.log(`📅 Creating posts for today: ${targetDateStr}`);
 
     const todayDate = new Date();
     const dayOfWeek = todayDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
     const dayOfMonth = todayDate.getDate();
     const month = todayDate.getMonth() + 1;
-    const dateStr = targetDateStr; // Use tomorrow's date for post creation
+    const dateStr = targetDateStr;
 
     console.log('📅 Cron execution context:', {
       date: dateStr,
@@ -989,20 +987,14 @@ async function runDailyPosts(dateStr: string) {
   const tomorrowData = await getGlobalCosmicData(tomorrow);
   const tomorrowPositions = tomorrowData?.planetaryPositions;
 
-  // Build ingress posts for sign changes happening TOMORROW (posted TODAY)
   const ingressTextPosts = buildIngressTextPosts({
     dateStr,
-    ingressEvents: ingresses.map((event) => ({
-      ...event,
-      // Adjust messaging for "tomorrow" framing
-      name: event.name, // Already includes "tomorrow" from detectUpcomingSignChanges
-    })),
+    ingressEvents: ingresses,
     platformHashtags,
     getSchedule: getTransitSchedule,
     tomorrowPositions,
   });
 
-  // Build egress posts (final day in sign) for sign changes happening TOMORROW
   const egressTextPosts = buildEgressTextPosts({
     dateStr,
     egressEvents: egresses,
@@ -3714,6 +3706,14 @@ function addAstrologyHashtags(text: string, baseHashtags?: string): string {
   return addFocusedHashtags(text, baseHashtags, astrologyHashtagPriority, 3);
 }
 
+/** Format eventTime as relative hours from now */
+function formatRelativeTime(eventTime?: Date): string {
+  if (!eventTime) return 'later today';
+  const hoursAway = (eventTime.getTime() - Date.now()) / (1000 * 60 * 60);
+  if (hoursAway < 1) return 'in <1h';
+  return `in ~${Math.round(hoursAway)}h`;
+}
+
 function buildRetrogradeTextPosts({
   dateStr,
   events,
@@ -3751,21 +3751,22 @@ function buildRetrogradeTextPosts({
 
     const focus = focusMap[planet] || `${planet.toLowerCase()} energy`;
     const isRetrograde = event.type === 'retrograde_start';
+    const timeStr = formatRelativeTime(event.eventTime);
 
     // Create seed for deterministic hook selection
     const seed = `retrograde-${planet}-${event.type}-${dateStr}`;
     const engagementHook = getEngagementHook('retrograde', seed);
 
-    // Threads: conversational with engagement hook, "tomorrow" framing
+    // Threads: conversational with engagement hook
     const threadsBody = isRetrograde
       ? [
-          `${planet} stations retrograde tomorrow in ${event.sign}.`,
+          `${planet} stations retrograde ${timeStr} in ${event.sign}.`,
           `Time to slow down and review ${focus}.`,
           '',
           engagementHook,
         ].join('\n')
       : [
-          `${planet} stations direct tomorrow in ${event.sign}.`,
+          `${planet} stations direct ${timeStr} in ${event.sign}.`,
           `Momentum returns to ${focus}.`,
           '',
           engagementHook,
@@ -3775,16 +3776,16 @@ function buildRetrogradeTextPosts({
       platformHashtags.threads,
     );
 
-    // X/Twitter: compact with CTA, "tomorrow" framing
+    // X/Twitter: compact with CTA
     const xBody = isRetrograde
       ? [
-          `${planet} stations retrograde tomorrow.`,
+          `${planet} stations retrograde ${timeStr}.`,
           `Time to slow down and review ${focus}.`,
           '',
           'lunary.app',
         ].join('\n')
       : [
-          `${planet} stations direct tomorrow.`,
+          `${planet} stations direct ${timeStr}.`,
           `Momentum returns to ${focus}.`,
           '',
           'lunary.app',
@@ -3794,13 +3795,13 @@ function buildRetrogradeTextPosts({
     // Bluesky: informational with CTA
     const blueskyBody = isRetrograde
       ? [
-          `${planet} stations retrograde tomorrow in ${event.sign}.`,
+          `${planet} stations retrograde ${timeStr} in ${event.sign}.`,
           `Time to slow down and review ${focus}.`,
           '',
           'Track retrogrades at lunary.app',
         ].join('\n')
       : [
-          `${planet} stations direct tomorrow in ${event.sign}.`,
+          `${planet} stations direct ${timeStr} in ${event.sign}.`,
           `Momentum returns to ${focus}.`,
           '',
           'Track retrogrades at lunary.app',
@@ -3811,11 +3812,11 @@ function buildRetrogradeTextPosts({
     );
 
     posts.push({
-      name: `Retrograde • ${planet} ${isRetrograde ? 'Retrograde' : 'Direct'} tomorrow`,
+      name: `Retrograde • ${planet} ${isRetrograde ? 'Retrograde' : 'Direct'} ${timeStr}`,
       content: xContent,
       platforms: ['x', 'threads', 'bluesky'],
       imageUrls: [],
-      alt: `${planet} ${isRetrograde ? 'retrograde' : 'direct'} station tomorrow`,
+      alt: `${planet} ${isRetrograde ? 'retrograde' : 'direct'} station ${timeStr}`,
       scheduledDate: getSchedule(),
       variants: {
         threads: { content: threadsContent },
@@ -3858,6 +3859,7 @@ function buildIngressTextPosts({
     const sign = event.sign;
     const energy = event.energy || 'fresh';
     const previousSign = event.previousSign;
+    const timeStr = formatRelativeTime(event.eventTime);
 
     // Get duration info for slow planets from tomorrow's positions
     let durationText = '';
@@ -3878,10 +3880,9 @@ function buildIngressTextPosts({
     const seed = `ingress-${planet}-${sign}-${dateStr}`;
     const engagementHook = getEngagementHook('ingress', seed);
 
-    // Threads: conversational with engagement hook, no CTA
-    // Posts BEFORE the event - "tomorrow" framing
+    // Threads: conversational with engagement hook
     const threadsBodyParts = [
-      `${planet} enters ${sign} tomorrow.`,
+      `${planet} enters ${sign} ${timeStr}.`,
       durationText || `A shift toward ${energy} energy begins.`,
       '',
       engagementHook,
@@ -3893,7 +3894,7 @@ function buildIngressTextPosts({
     );
 
     // X/Twitter: compact with CTA
-    const xBodyParts = [`${planet} enters ${sign} tomorrow.`];
+    const xBodyParts = [`${planet} enters ${sign} ${timeStr}.`];
     if (durationText) {
       xBodyParts.push(durationText);
     } else if (previousSign) {
@@ -3907,7 +3908,7 @@ function buildIngressTextPosts({
 
     // Bluesky: informational with CTA
     const blueskyBodyParts = [
-      `${planet} enters ${sign} tomorrow.`,
+      `${planet} enters ${sign} ${timeStr}.`,
       durationText || `A shift toward ${energy} energy begins.`,
       '',
       'Track cosmic shifts at lunary.app',
@@ -3919,11 +3920,11 @@ function buildIngressTextPosts({
     );
 
     posts.push({
-      name: `Ingress • ${planet} enters ${sign} tomorrow`,
+      name: `Ingress • ${planet} enters ${sign} ${timeStr}`,
       content: xContent,
       platforms: ['x', 'threads', 'bluesky'],
       imageUrls: [],
-      alt: `${planet} enters ${sign} tomorrow`,
+      alt: `${planet} enters ${sign} ${timeStr}`,
       scheduledDate: getSchedule(),
       variants: {
         threads: { content: threadsContent },
@@ -4098,6 +4099,7 @@ function buildEgressTextPosts({
     const sign = event.sign;
     const nextSign = event.nextSign || 'a new sign';
     const energy = event.energy || 'transitional';
+    const timeStr = formatRelativeTime(event.eventTime);
 
     // Create seed for deterministic hook selection
     const seed = `egress-${planet}-${sign}-${dateStr}`;
@@ -4105,8 +4107,8 @@ function buildEgressTextPosts({
 
     // Threads: conversational with engagement hook
     const threadsBody = [
-      `${planet}'s final day in ${sign}.`,
-      `A chapter of ${energy} energy is closing.`,
+      `${planet}'s last hours in ${sign}.`,
+      `${planet} enters ${nextSign} ${timeStr}.`,
       '',
       engagementHook,
     ].join('\n');
@@ -4117,8 +4119,8 @@ function buildEgressTextPosts({
 
     // X/Twitter: compact with CTA
     const xBody = [
-      `${planet}'s final day in ${sign}.`,
-      `Tomorrow: ${planet} enters ${nextSign}.`,
+      `${planet}'s last hours in ${sign}.`,
+      `${planet} enters ${nextSign} ${timeStr}.`,
       '',
       'lunary.app',
     ].join('\n');
@@ -4126,8 +4128,8 @@ function buildEgressTextPosts({
 
     // Bluesky: informational with CTA
     const blueskyBody = [
-      `${planet}'s final day in ${sign}.`,
-      `A chapter of ${energy} energy is closing.`,
+      `${planet}'s last hours in ${sign}.`,
+      `${planet} enters ${nextSign} ${timeStr}.`,
       '',
       'Track cosmic shifts at lunary.app',
     ].join('\n');
@@ -4137,11 +4139,11 @@ function buildEgressTextPosts({
     );
 
     posts.push({
-      name: `Egress • ${planet}'s final day in ${sign}`,
+      name: `Egress • ${planet}'s last hours in ${sign}`,
       content: xContent,
       platforms: ['x', 'threads', 'bluesky'],
       imageUrls: [],
-      alt: `${planet}'s final day in ${sign}`,
+      alt: `${planet}'s last hours in ${sign}`,
       scheduledDate: getSchedule(),
       variants: {
         threads: { content: threadsContent },

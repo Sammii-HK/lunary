@@ -297,7 +297,7 @@ export const DailyInsightCard = () => {
     if (!authStatus.isAuthenticated || !birthChart) return [];
     const todayStart = selectedDay.startOf('day');
     const todayEnd = todayStart.add(1, 'day');
-    const upcomingTransits = getUpcomingTransits(todayStart);
+    const upcomingTransits = getUpcomingTransits(selectedDay);
     const impacts = getPersonalTransitImpacts(upcomingTransits, birthChart, 60);
 
     const significanceOrder: Record<
@@ -360,7 +360,7 @@ export const DailyInsightCard = () => {
   const generalTransitText = useMemo(() => {
     const todayStart = selectedDay.startOf('day');
     const todayEnd = todayStart.add(1, 'day');
-    const transits = getUpcomingTransits(todayStart);
+    const transits = getUpcomingTransits(selectedDay);
 
     const significanceOrder: Record<string, number> = {
       high: 3,
