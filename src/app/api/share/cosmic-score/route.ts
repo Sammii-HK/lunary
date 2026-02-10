@@ -1,44 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { kvGet, kvPut } from '@/lib/cloudflare/kv';
 
-const SHARE_TTL_SECONDS = 60 * 60 * 24 * 90; // 90 days
+const SHARE_TTL_SECONDS = 60 * 60 * 24; // 24 hours (daily refresh)
 
-export type BigThree = {
-  sun?: string;
-  moon?: string;
-  rising?: string;
-};
-
-export type TopAspect = {
-  person1Planet: string;
-  person2Planet: string;
-  aspectType: string;
-  isHarmonious: boolean;
-};
-
-export type ShareSynastryPayload = {
-  userName?: string;
-  friendName: string;
-  compatibilityScore: number;
-  summary: string;
-  elementCompatibility?: string;
-  modalityCompatibility?: string;
-  harmoniousAspects?: number;
-  challengingAspects?: number;
-  person1BigThree?: BigThree;
-  person2BigThree?: BigThree;
-  topAspects?: TopAspect[];
-  elementBalance?: {
-    fire: number;
-    earth: number;
-    air: number;
-    water: number;
-  };
-  archetype?: string;
+export type ShareCosmicScorePayload = {
+  overall: number;
+  headline: string;
+  dominantEnergy: string;
+  sunSign?: string;
+  date: string;
   format?: string;
 };
 
-export type ShareSynastryRecord = ShareSynastryPayload & {
+export type ShareCosmicScoreRecord = ShareCosmicScorePayload & {
   shareId: string;
   createdAt: string;
 };
@@ -67,54 +41,38 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      userName,
-      friendName,
-      compatibilityScore,
-      summary,
-      elementCompatibility,
-      modalityCompatibility,
-      harmoniousAspects,
-      challengingAspects,
-      person1BigThree,
-      person2BigThree,
-      topAspects,
-      elementBalance,
-      archetype,
-      format = 'square',
-    } = body as ShareSynastryPayload;
+      overall,
+      headline,
+      dominantEnergy,
+      sunSign,
+      date,
+      format = 'story',
+    } = body as ShareCosmicScorePayload;
 
-    if (!friendName || compatibilityScore === undefined) {
+    if (overall === undefined || !headline || !dominantEnergy || !date) {
       return NextResponse.json(
-        { error: 'Missing required synastry data' },
+        { error: 'Missing required cosmic score data' },
         { status: 400 },
       );
     }
 
     const shareId = createShareId();
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-    const shareUrl = `${baseUrl}/share/synastry/${shareId}`;
+    const shareUrl = `${baseUrl}/share/cosmic-score/${shareId}`;
 
-    const record: ShareSynastryRecord = {
+    const record: ShareCosmicScoreRecord = {
       shareId,
       createdAt: new Date().toISOString(),
-      userName,
-      friendName,
-      compatibilityScore,
-      summary,
-      elementCompatibility,
-      modalityCompatibility,
-      harmoniousAspects,
-      challengingAspects,
-      person1BigThree,
-      person2BigThree,
-      topAspects,
-      elementBalance,
-      archetype,
+      overall,
+      headline,
+      dominantEnergy,
+      sunSign,
+      date,
       format,
     };
 
     const stored = await kvPut(
-      `synastry:${shareId}`,
+      `cosmic-score:${shareId}`,
       JSON.stringify(record),
       SHARE_TTL_SECONDS,
     );
@@ -131,7 +89,7 @@ export async function POST(request: NextRequest) {
       shareUrl,
     });
   } catch (error) {
-    console.error('[ShareSynastry] Failed to create share:', error);
+    console.error('[ShareCosmicScore] Failed to create share:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },
@@ -148,15 +106,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const raw = await kvGet(`synastry:${shareId}`);
+    const raw = await kvGet(`cosmic-score:${shareId}`);
     if (!raw) {
       return NextResponse.json({ error: 'Share not found' }, { status: 404 });
     }
 
-    const record = JSON.parse(raw) as ShareSynastryRecord;
+    const record = JSON.parse(raw) as ShareCosmicScoreRecord;
     return NextResponse.json(record);
   } catch (error) {
-    console.error('[ShareSynastry] Failed to retrieve share:', error);
+    console.error('[ShareCosmicScore] Failed to retrieve share:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },

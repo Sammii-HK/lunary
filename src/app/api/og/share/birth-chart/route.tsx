@@ -7,13 +7,8 @@ import {
   getFormatDimensions,
   generateStarfield,
   getStarCount,
-  OG_COLORS,
 } from '@/lib/share/og-utils';
-import {
-  ShareFooter,
-  SHARE_BASE_URL,
-  SHARE_BORDERS,
-} from '@/lib/share/og-share-utils';
+import { ShareFooter, SHARE_BASE_URL } from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 import {
   elementAstro,
@@ -121,21 +116,6 @@ const SIGN_KEYS = [
   'pisces',
 ] as const;
 type SignKey = (typeof SIGN_KEYS)[number];
-
-const SIGN_LABELS: Record<SignKey, string> = {
-  aries: 'Aries',
-  taurus: 'Taurus',
-  gemini: 'Gemini',
-  cancer: 'Cancer',
-  leo: 'Leo',
-  virgo: 'Virgo',
-  libra: 'Libra',
-  scorpio: 'Scorpio',
-  sagittarius: 'Sagittarius',
-  capricorn: 'Capricorn',
-  aquarius: 'Aquarius',
-  pisces: 'Pisces',
-};
 
 const SIGN_TO_ELEMENT: Record<SignKey, ElementType> = {
   aries: 'Fire',
@@ -303,13 +283,11 @@ export async function GET(request: NextRequest) {
   const isStory = format === 'story';
   const isSquare = format === 'square';
   const padding = isLandscape ? 40 : isStory ? 100 : 48;
-  const titleSize = isLandscape ? 36 : isStory ? 72 : 56;
-  const subtitleSize = isLandscape ? 14 : isStory ? 24 : 18;
-  const bigThreeSize = isLandscape ? 18 : isStory ? 32 : 26;
-  const bigThreeGlyphSize = isLandscape ? 22 : isStory ? 42 : 32;
-  const chartSize = isLandscape ? 360 : isStory ? 600 : 480;
-  const badgeTextSize = isLandscape ? 16 : isStory ? 26 : 20;
-  const elementCountSize = isLandscape ? 28 : isStory ? 60 : 42;
+  const titleSize = isLandscape ? 40 : isStory ? 80 : 62;
+  const subtitleSize = isLandscape ? 15 : isStory ? 26 : 20;
+  const bigThreeSize = isLandscape ? 20 : isStory ? 36 : 28;
+  const bigThreeGlyphSize = isLandscape ? 24 : isStory ? 46 : 36;
+  const chartSize = isLandscape ? 420 : isStory ? 700 : 560;
 
   const elementCounts = ELEMENT_ORDER.reduce(
     (acc, label) => {
@@ -327,15 +305,6 @@ export async function GET(request: NextRequest) {
     {} as Record<ModalityType, number>,
   );
 
-  const signCounts: Record<SignKey, number> = SIGN_KEYS.reduce(
-    (acc, sign) => {
-      acc[sign] = 0;
-      return acc;
-    },
-    {} as Record<SignKey, number>,
-  );
-  const houseCounts: Record<number, number> = {};
-
   birthChart.forEach((planet) => {
     const normalizedSign = normalizeSignKey(planet.sign);
 
@@ -349,65 +318,31 @@ export async function GET(request: NextRequest) {
       if (modalityLabel) {
         modalityCounts[modalityLabel] += 1;
       }
-
-      signCounts[normalizedSign] += 1;
-    }
-
-    if (
-      typeof planet.house === 'number' &&
-      planet.house >= 1 &&
-      planet.house <= 12
-    ) {
-      houseCounts[planet.house] = (houseCounts[planet.house] ?? 0) + 1;
     }
   });
 
-  const elementSummary = ELEMENT_ORDER.map((label) => ({
-    label,
-    count: elementCounts[label],
-  }));
-
-  const modalitySummary = MODALITY_ORDER.map((label) => ({
-    label,
-    count: modalityCounts[label],
-  }));
-
-  const modalityLine = modalitySummary
-    .map((entry) => `${entry.label} ${entry.count}`)
-    .join(' · ');
-
-  const retrogradeCount = birthChart.filter((p) => p.retrograde).length;
-  const uniqueSigns = new Set(
-    birthChart
-      .map((planet) => normalizeSignKey(planet.sign))
-      .filter((key): key is SignKey => Boolean(key)),
-  ).size;
-
-  const sortedHouseEntries = Object.entries(houseCounts).sort(
-    (a, b) => b[1] - a[1],
-  );
-  const primaryHouseEntry = sortedHouseEntries[0];
-
-  const houseFocusLabel = primaryHouseEntry
-    ? `House ${primaryHouseEntry[0]}`
-    : 'House focus';
-  const houseFocusCount = primaryHouseEntry ? primaryHouseEntry[1] : 0;
-
-  const sortedSignEntries = Object.entries(signCounts).sort(
-    (a, b) => b[1] - a[1],
-  );
-  const primarySignEntry = sortedSignEntries[0];
-  let signFocusText = 'Sign focus shaping';
-  if (primarySignEntry) {
-    const primarySignKey = primarySignEntry[0] as SignKey;
-    const signLabel = SIGN_LABELS[primarySignKey];
-    if (signLabel) {
-      signFocusText = `${signLabel} focus · ${primarySignEntry[1]} placements`;
-    }
-  }
-
   const insightText =
     insight ?? 'A balanced cosmic profile with diverse energies.';
+
+  // Compute archetype subtitle from dominant element + modality
+  const dominantElement = ELEMENT_ORDER.reduce((best, label) =>
+    elementCounts[label] > elementCounts[best] ? label : best,
+  );
+  const dominantModality = MODALITY_ORDER.reduce((best, label) =>
+    modalityCounts[label] > modalityCounts[best] ? label : best,
+  );
+  const archetypeSubtitle = `A ${dominantModality} ${dominantElement} Chart`;
+
+  // Element-specific decorative gradient overlays
+  const elementDecorativeGradient: Record<string, string> = {
+    Fire: 'radial-gradient(ellipse at 50% 0%, rgba(251, 191, 36, 0.08) 0%, transparent 60%)',
+    Earth:
+      'radial-gradient(ellipse at 50% 100%, rgba(34, 197, 94, 0.08) 0%, transparent 60%)',
+    Air: 'radial-gradient(ellipse at 80% 20%, rgba(147, 197, 253, 0.08) 0%, transparent 60%)',
+    Water:
+      'radial-gradient(ellipse at 50% 100%, rgba(99, 102, 241, 0.08) 0%, transparent 60%)',
+  };
+  const decorativeGradient = elementDecorativeGradient[dominantElement] ?? '';
 
   const bigThree = [
     { glyph: bodiesSymbols.sun, value: sun, label: 'Sun' },
@@ -464,6 +399,17 @@ export async function GET(request: NextRequest) {
       />
       {/* Unique starfield background */}
       {starfieldJsx}
+      {/* Element decorative gradient */}
+      {decorativeGradient && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: decorativeGradient,
+            display: 'flex',
+          }}
+        />
+      )}
 
       {/* Header - spans full width */}
       <div
@@ -486,7 +432,7 @@ export async function GET(request: NextRequest) {
             opacity: 0.6,
           }}
         >
-          Cosmic preview
+          {archetypeSubtitle}
         </div>
         <div
           style={{
@@ -547,7 +493,7 @@ export async function GET(request: NextRequest) {
         {/* Left column: Chart */}
         <div
           style={{
-            width: 360,
+            width: 420,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -590,79 +536,6 @@ export async function GET(request: NextRequest) {
             />
           </div>
 
-          {/* Element counts - 2x2 grid */}
-          <div
-            style={{
-              display: 'flex',
-              gap: 12,
-              flexWrap: 'wrap',
-            }}
-          >
-            {elementSummary.map((entry) => (
-              <div
-                key={entry.label}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 4,
-                  padding: '10px 14px',
-                  borderRadius: 12,
-                  border: SHARE_BORDERS.card,
-                  background: 'rgba(0,0,0,0.15)',
-                  minWidth: 90,
-                  alignItems: 'center',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 12,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
-                    opacity: 0.6,
-                    display: 'flex',
-                  }}
-                >
-                  {entry.label}
-                </span>
-                <span
-                  style={{
-                    fontSize: 24,
-                    fontWeight: 500,
-                    display: 'flex',
-                  }}
-                >
-                  {entry.count}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Modality line */}
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 8,
-              fontSize: 13,
-              letterSpacing: 1,
-              opacity: 0.78,
-              alignItems: 'center',
-            }}
-          >
-            <span
-              style={{
-                fontSize: 12,
-                letterSpacing: 2,
-                textTransform: 'uppercase',
-                opacity: 0.8,
-                display: 'flex',
-              }}
-            >
-              Modality
-            </span>
-            <span style={{ display: 'flex' }}>{modalityLine}</span>
-          </div>
-
           {/* Insight box - compact */}
           <div
             style={{
@@ -702,6 +575,21 @@ export async function GET(request: NextRequest) {
         </div>
       </div>
 
+      {/* Watermark */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 14,
+          left: padding,
+          fontSize: 11,
+          opacity: 0.3,
+          letterSpacing: 1,
+          display: 'flex',
+        }}
+      >
+        lunary.app/chart
+      </div>
+
       {/* Branded Footer */}
       <ShareFooter baseUrl={baseUrl} format={format} />
     </div>
@@ -733,6 +621,17 @@ export async function GET(request: NextRequest) {
 
       {/* Unique starfield background */}
       {starfieldJsx}
+      {/* Element decorative gradient */}
+      {decorativeGradient && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: decorativeGradient,
+            display: 'flex',
+          }}
+        />
+      )}
 
       <div
         style={{
@@ -764,7 +663,7 @@ export async function GET(request: NextRequest) {
               opacity: 0.6,
             }}
           >
-            Cosmic preview
+            {archetypeSubtitle}
           </div>
           <div
             style={{
@@ -861,187 +760,12 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               display: 'flex',
-              gap: 20,
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-            }}
-          >
-            {elementSummary.map((entry) => (
-              <div
-                key={entry.label}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 6,
-                  padding: isLandscape ? '12px 16px' : '16px 20px',
-                  borderRadius: 14,
-                  border: SHARE_BORDERS.card,
-                  background: 'rgba(0,0,0,0.15)',
-                  minWidth: isLandscape ? 100 : 130,
-                  alignItems: 'center',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: isLandscape ? 14 : 16,
-                    letterSpacing: 2,
-                    textTransform: 'uppercase',
-                    opacity: 0.6,
-                    display: 'flex',
-                  }}
-                >
-                  {entry.label}
-                </span>
-                <span
-                  style={{
-                    fontSize: elementCountSize,
-                    fontWeight: 500,
-                    display: 'flex',
-                  }}
-                >
-                  {entry.count}
-                </span>
-                <span
-                  style={{
-                    fontSize: isLandscape ? 14 : 16,
-                    opacity: 0.6,
-                    display: 'flex',
-                  }}
-                >
-                  {entry.count === 1 ? 'planet' : 'planets'}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 24,
-              fontSize: 18,
-              opacity: 0.78,
-              justifyContent: 'space-between',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                gap: 8,
-                alignItems: 'center',
-              }}
-            >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: 999,
-                  background: theme.accent,
-                  display: 'flex',
-                }}
-              />
-              <span style={{ display: 'flex' }}>
-                {retrogradeCount} retrograde{' '}
-                {retrogradeCount === 1 ? 'planet' : 'planets'}
-              </span>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                gap: 8,
-                alignItems: 'center',
-              }}
-            >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: 999,
-                  background: '#fff',
-                  display: 'flex',
-                }}
-              />
-              <span style={{ display: 'flex' }}>
-                {houseFocusCount > 0
-                  ? `${houseFocusLabel} · ${houseFocusCount} placements`
-                  : 'House focus charging'}
-              </span>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                gap: 8,
-                alignItems: 'center',
-              }}
-            >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: 999,
-                  background: OG_COLORS.cometTrail,
-                  display: 'flex',
-                }}
-              />
-              <span style={{ display: 'flex' }}>
-                {uniqueSigns} unique signs activated
-              </span>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                gap: 6,
-                alignItems: 'center',
-              }}
-            >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: 999,
-                  background: OG_COLORS.galaxyHaze,
-                  display: 'flex',
-                }}
-              />
-              <span style={{ display: 'flex' }}>{signFocusText}</span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 12,
-              fontSize: 15,
-              letterSpacing: 1,
-              opacity: 0.78,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 16,
-                letterSpacing: 2,
-                textTransform: 'uppercase',
-                justifyContent: 'center',
-                opacity: 0.8,
-                marginRight: 10,
-                display: 'flex',
-              }}
-            >
-              Modality balance
-            </span>
-            <span style={{ display: 'flex' }}>{modalityLine}</span>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
               flexDirection: 'column',
               gap: 10,
               borderRadius: 20,
               border: '1px solid rgba(255,255,255,0.16)',
               background: theme.soft,
-              padding: isLandscape ? '16px 18px' : '20px 22px',
+              padding: '20px 22px',
             }}
           >
             <div
@@ -1053,7 +777,7 @@ export async function GET(request: NextRequest) {
             >
               <span
                 style={{
-                  fontSize: isLandscape ? 14 : 16,
+                  fontSize: 16,
                   letterSpacing: 4,
                   textTransform: 'uppercase',
                   opacity: 0.75,
@@ -1065,7 +789,7 @@ export async function GET(request: NextRequest) {
             </div>
             <div
               style={{
-                fontSize: isLandscape ? 18 : 24,
+                fontSize: 24,
                 lineHeight: 1.4,
                 opacity: 0.95,
                 display: 'flex',
@@ -1076,6 +800,21 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
       </div>
+      {/* Watermark */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: isStory ? 20 : 14,
+          left: padding,
+          fontSize: isStory ? 14 : 12,
+          opacity: 0.3,
+          letterSpacing: 1,
+          display: 'flex',
+        }}
+      >
+        lunary.app/chart
+      </div>
+
       {/* Branded Footer */}
       <ShareFooter baseUrl={baseUrl} format={format} />
     </div>

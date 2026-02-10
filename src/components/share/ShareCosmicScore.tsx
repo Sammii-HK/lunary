@@ -12,53 +12,19 @@ import { shareTracking } from '@/lib/analytics/share-tracking';
 import { isInDemoMode } from '@/lib/demo-mode';
 import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
 
-interface BigThree {
-  sun?: string;
-  moon?: string;
-  rising?: string;
+interface ShareCosmicScoreProps {
+  overall: number;
+  headline: string;
+  dominantEnergy: string;
+  sunSign?: string;
 }
 
-interface TopAspect {
-  person1Planet: string;
-  person2Planet: string;
-  aspectType: string;
-  isHarmonious: boolean;
-}
-
-interface ShareSynastryProps {
-  userName?: string;
-  friendName: string;
-  compatibilityScore: number;
-  summary: string;
-  harmoniousAspects?: number;
-  challengingAspects?: number;
-  person1BigThree?: BigThree;
-  person2BigThree?: BigThree;
-  topAspects?: TopAspect[];
-  elementBalance?: {
-    fire: number;
-    earth: number;
-    air: number;
-    water: number;
-  };
-  archetype?: string;
-  buttonVariant?: 'default' | 'small' | 'icon';
-}
-
-export function ShareSynastry({
-  userName,
-  friendName,
-  compatibilityScore,
-  summary,
-  harmoniousAspects,
-  challengingAspects,
-  person1BigThree,
-  person2BigThree,
-  topAspects,
-  elementBalance,
-  archetype,
-  buttonVariant = 'default',
-}: ShareSynastryProps) {
+export function ShareCosmicScore({
+  overall,
+  headline,
+  dominantEnergy,
+  sunSign,
+}: ShareCosmicScoreProps) {
   const { user } = useUser();
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -77,7 +43,7 @@ export function ShareSynastry({
     setFormat,
     setLoading,
     setError,
-  } = useShareModal('square');
+  } = useShareModal('story');
 
   const generateCard = useCallback(async () => {
     setLoading(true);
@@ -88,21 +54,15 @@ export function ShareSynastry({
       let currentShareUrl = shareRecord?.shareUrl ?? '';
 
       if (!currentShareId || !currentShareUrl) {
-        const response = await fetch('/api/share/synastry', {
+        const response = await fetch('/api/share/cosmic-score', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userName,
-            friendName,
-            compatibilityScore,
-            summary,
-            harmoniousAspects,
-            challengingAspects,
-            person1BigThree,
-            person2BigThree,
-            topAspects,
-            elementBalance,
-            archetype,
+            overall,
+            headline,
+            dominantEnergy,
+            sunSign,
+            date: new Date().toISOString().split('T')[0],
             format,
           }),
         });
@@ -125,7 +85,7 @@ export function ShareSynastry({
         setLinkCopied(false);
       }
 
-      const ogImageUrl = `/api/og/share/synastry?shareId=${encodeURIComponent(
+      const ogImageUrl = `/api/og/share/cosmic-score?shareId=${encodeURIComponent(
         currentShareId,
       )}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
@@ -143,12 +103,10 @@ export function ShareSynastry({
       setLoading(false);
     }
   }, [
-    userName,
-    friendName,
-    compatibilityScore,
-    summary,
-    harmoniousAspects,
-    challengingAspects,
+    overall,
+    headline,
+    dominantEnergy,
+    sunSign,
     shareRecord,
     format,
     setLoading,
@@ -165,7 +123,7 @@ export function ShareSynastry({
       return;
     }
     openModal();
-    shareTracking.shareInitiated(user?.id, 'synastry');
+    shareTracking.shareInitiated(user?.id, 'cosmic-score');
     if (!imageBlob) {
       await generateCard();
     }
@@ -179,10 +137,10 @@ export function ShareSynastry({
       shareInfo = (await generateCard()) ?? null;
     }
 
-    const file = new File([imageBlob], 'synastry-compatibility.png', {
+    const file = new File([imageBlob], 'cosmic-score.png', {
       type: 'image/png',
     });
-    const shareText = `${compatibilityScore}% compatible with ${friendName}`;
+    const shareText = `My cosmic score today: ${overall}/100`;
     const shareMessage = shareInfo?.shareUrl
       ? `${shareText}\n${shareInfo.shareUrl}`
       : shareText;
@@ -191,10 +149,10 @@ export function ShareSynastry({
       try {
         await navigator.share({
           files: [file],
-          title: `Synastry with ${friendName}`,
+          title: "Today's Cosmic Score",
           text: shareMessage,
         });
-        shareTracking.shareCompleted(user?.id, 'synastry', 'native');
+        shareTracking.shareCompleted(user?.id, 'cosmic-score', 'native');
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
           console.error('Share failed:', err);
@@ -211,13 +169,13 @@ export function ShareSynastry({
     const url = URL.createObjectURL(imageBlob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'synastry-compatibility.png';
+    a.download = 'cosmic-score.png';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    shareTracking.shareCompleted(user?.id, 'synastry', 'download');
+    shareTracking.shareCompleted(user?.id, 'cosmic-score', 'download');
   };
 
   const handleCopyLink = async () => {
@@ -233,7 +191,7 @@ export function ShareSynastry({
       await navigator.clipboard.writeText(urlToCopy);
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
-      shareTracking.shareCompleted(user?.id, 'synastry', 'clipboard');
+      shareTracking.shareCompleted(user?.id, 'cosmic-score', 'clipboard');
     } catch (err) {
       console.error('Copy failed:', err);
     }
@@ -246,35 +204,30 @@ export function ShareSynastry({
 
   const socialShareUrl = shareRecord?.shareUrl || 'https://lunary.app';
   const socialUrls = {
-    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${compatibilityScore}% compatible with ${friendName} according to our synastry!`)}&url=${encodeURIComponent(socialShareUrl)}`,
-    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`${compatibilityScore}% compatible with ${friendName} according to our synastry! ${socialShareUrl}`)}`,
-  };
-
-  const buttonClasses = {
-    default:
-      'inline-flex items-center gap-2 rounded-full border border-lunary-primary-700 bg-lunary-primary-900/10 px-4 py-2 text-xs font-medium text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-lunary-primary-900/20 transition-colors',
-    small:
-      'inline-flex items-center gap-1.5 rounded-full border border-zinc-600 bg-zinc-800/50 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors',
-    icon: 'p-2 rounded-full border border-zinc-600 bg-zinc-800/50 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors',
+    x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My cosmic score today: ${overall}/100`)}&url=${encodeURIComponent(socialShareUrl)}`,
+    threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My cosmic score today: ${overall}/100 ${socialShareUrl}`)}`,
   };
 
   return (
-    <div className='flex flex-col items-center justify-center'>
-      <button onClick={handleOpen} className={buttonClasses[buttonVariant]}>
-        <Share2 className='w-4 h-4' />
-        {buttonVariant !== 'icon' && 'Share'}
+    <div className='flex items-center'>
+      <button
+        onClick={handleOpen}
+        className='p-1 rounded-md text-zinc-500 hover:text-zinc-300 transition-colors'
+        title='Share your cosmic score'
+      >
+        <Share2 className='w-3.5 h-3.5' />
       </button>
 
       <ShareModal
         isOpen={isOpen}
         onClose={closeModal}
-        title='Share Your Compatibility'
+        title='Share Your Cosmic Score'
       >
         <SharePreview
           imageBlob={imageBlob}
           loading={loading}
           format={format}
-          alt='Synastry Compatibility'
+          alt='Cosmic Score'
         />
 
         {!loading && !error && imageBlob && (
@@ -283,7 +236,7 @@ export function ShareSynastry({
               <ShareFormatSelector
                 selected={format}
                 onChange={setFormat}
-                options={['square', 'landscape', 'story']}
+                options={['story', 'square', 'landscape']}
               />
             </div>
 
@@ -298,7 +251,7 @@ export function ShareSynastry({
             />
 
             <p className='mt-4 text-xs text-zinc-400 text-center'>
-              Discover your cosmic compatibility at lunary.app
+              Track your cosmic energy at lunary.app
             </p>
           </>
         )}

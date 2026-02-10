@@ -6,11 +6,17 @@ import {
   markEventAsSent,
   cleanupOldDates,
 } from '@/app/api/cron/shared-notification-tracker';
-import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
+import {
+  getGlobalCosmicData,
+  detectMajorEventCountdowns,
+  detectUpcomingSignChanges,
+  detectUpcomingRetrogradeStations,
+} from '@/lib/cosmic-snapshot/global-cache';
 import {
   getNotificationCopy,
   PersonalizedContext,
 } from '@/lib/notifications/copy-library';
+import { getPredictiveNotifications } from '@/lib/notifications/predictive';
 
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
@@ -46,10 +52,10 @@ async function getPaidUsersWithBirthCharts(): Promise<
       ps.user_id,
       ps.preferences->>'name' as name,
       ps.preferences->>'birthday' as birthday,
-      a.birth_chart
+      up.birth_chart
     FROM push_subscriptions ps
     JOIN subscriptions s ON ps.user_id = s.user_id
-    LEFT JOIN accounts a ON ps.user_id = a.id
+    LEFT JOIN user_profiles up ON ps.user_id = up.user_id
     WHERE ps.is_active = true
     AND s.status IN ('active', 'trial', 'trialing')
     AND ps.preferences->>'birthday' IS NOT NULL
@@ -222,6 +228,9 @@ export async function GET(request: NextRequest) {
     let failed = 0;
     const activations: string[] = [];
 
+    // Track which users already received a chart activation notification
+    const usersNotified = new Set<string>();
+
     for (const user of paidUsers) {
       const activation = detectChartActivation(user, cosmicData);
 
@@ -268,21 +277,22 @@ export async function GET(request: NextRequest) {
           );
 
           await sql`
-            UPDATE push_subscriptions 
-            SET last_notification_sent = NOW() 
+            UPDATE push_subscriptions
+            SET last_notification_sent = NOW()
             WHERE endpoint = ${user.endpoint}
           `;
 
           successful++;
           activations.push(activation.type);
+          usersNotified.add(user.userId);
         } catch (error) {
           console.error(`Failed to send to user ${user.userId}:`, error);
 
           const errorObj = error as any;
           if (errorObj?.statusCode === 410 || errorObj?.statusCode === 404) {
             await sql`
-              UPDATE push_subscriptions 
-              SET is_active = false 
+              UPDATE push_subscriptions
+              SET is_active = false
               WHERE endpoint = ${user.endpoint}
             `;
           }
@@ -290,6 +300,122 @@ export async function GET(request: NextRequest) {
           failed++;
         }
       }
+    }
+
+    // --- Predictive notification pass ---
+    // For users who didn't receive a chart activation, check for upcoming events
+    let predictiveSent = 0;
+    try {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const [countdowns, signChanges, retroStations] = await Promise.all([
+        detectMajorEventCountdowns(now),
+        detectUpcomingSignChanges(now, tomorrow),
+        detectUpcomingRetrogradeStations(now, tomorrow),
+      ]);
+
+      for (const user of paidUsers) {
+        // Skip users who already got a chart activation notification today
+        if (usersNotified.has(user.userId)) continue;
+
+        const predictiveEvents = getPredictiveNotifications(
+          {
+            name: user.name,
+            sunSign: user.sunSign,
+            moonSign: user.moonSign,
+            risingSign: user.risingSign,
+          },
+          countdowns,
+          signChanges,
+          retroStations,
+        );
+
+        if (predictiveEvents.length === 0) continue;
+
+        const event = predictiveEvents[0];
+
+        // Deduplicate: check if this specific predictive event was already sent
+        if (sentEvents.has(event.eventKey)) continue;
+
+        try {
+          const notification = {
+            title: event.title,
+            body: event.body,
+            icon: '/icons/icon-192x192.png',
+            badge: '/icons/icon-72x72.png',
+            tag: 'lunary-predictive-transit',
+            data: {
+              url: '/',
+              type: 'predictive_transit',
+              planet: event.planet,
+              daysUntil: event.daysUntil,
+              personalized: event.priority === 'high',
+            },
+            actions: [
+              {
+                action: 'view',
+                title: 'View',
+                icon: '/icons/icon-72x72.png',
+              },
+            ],
+            vibrate: [200, 100, 200],
+          };
+
+          await webpush.sendNotification(
+            {
+              endpoint: user.endpoint,
+              keys: {
+                p256dh: user.p256dh,
+                auth: user.auth,
+              },
+            },
+            JSON.stringify(notification),
+          );
+
+          await sql`
+            UPDATE push_subscriptions
+            SET last_notification_sent = NOW()
+            WHERE endpoint = ${user.endpoint}
+          `;
+
+          predictiveSent++;
+          successful++;
+          activations.push('predictive_transit');
+
+          // Mark this event key as sent to avoid duplicate delivery
+          await markEventAsSent(
+            dateStr,
+            event.eventKey,
+            'event',
+            'predictive_transit',
+            event.priority === 'high' ? 8 : 5,
+            'daily',
+          );
+        } catch (error) {
+          console.error(
+            `Failed to send predictive notification to user ${user.userId}:`,
+            error,
+          );
+
+          const errorObj = error as any;
+          if (errorObj?.statusCode === 410 || errorObj?.statusCode === 404) {
+            await sql`
+              UPDATE push_subscriptions
+              SET is_active = false
+              WHERE endpoint = ${user.endpoint}
+            `;
+          }
+
+          failed++;
+        }
+      }
+
+      if (predictiveSent > 0) {
+        console.log(`🔮 Predictive notifications sent: ${predictiveSent}`);
+      }
+    } catch (error) {
+      console.error('Failed to process predictive notifications:', error);
     }
 
     await markEventAsSent(
@@ -302,7 +428,7 @@ export async function GET(request: NextRequest) {
     );
 
     console.log(
-      `✅ Personal Transit check completed: ${successful} notifications sent, ${failed} failed`,
+      `✅ Personal Transit check completed: ${successful} notifications sent (${predictiveSent} predictive), ${failed} failed`,
     );
 
     return NextResponse.json({
@@ -310,6 +436,7 @@ export async function GET(request: NextRequest) {
       date: dateStr,
       usersChecked: paidUsers.length,
       notificationsSent: successful,
+      predictiveSent,
       failed,
       activationTypes: [...new Set(activations)],
     });

@@ -140,6 +140,19 @@ const PostTrialMessaging = dynamic(
   },
 );
 
+const CosmicScore = dynamic(
+  () =>
+    import('@/components/CosmicScore').then((m) => ({
+      default: m.CosmicScore,
+    })),
+  {
+    loading: () => (
+      <div className='h-24 bg-zinc-900/50 rounded-2xl animate-pulse' />
+    ),
+    ssr: false,
+  },
+);
+
 const ConditionalWheel = dynamic(
   () => import('@/components/ConditionalWheel'),
   {
@@ -379,6 +392,8 @@ export default function AppDashboardClient() {
 
         {/* Zodiac Season Banner */}
         <ShareZodiacSeason />
+
+        <CosmicScore />
 
         {showHoroscope && <PersonalizedHoroscopePreview />}
 

@@ -108,6 +108,7 @@ function getPreferenceKey(eventType: string): string | null {
     aspect: 'majorAspects',
     ingress: 'planetaryTransits',
     planetary_transit: 'planetaryTransits',
+    predictive_transit: 'planetaryTransits',
     retrograde: 'retrogrades',
     seasonal: 'sabbats',
     sabbat: 'sabbats',

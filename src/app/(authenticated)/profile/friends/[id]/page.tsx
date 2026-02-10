@@ -23,9 +23,19 @@ import {
   astroPointSymbols,
 } from '@/constants/symbols';
 import { ShareSynastry } from '@/components/share/ShareSynastry';
+import { getSynastryArchetype } from '@/utils/astrology/synastry-archetype';
 import { useUser } from '@/context/UserContext';
 import { BirthChart } from '@/components/BirthChart';
 import type { BirthChartData } from '../../../../../../utils/astrology/birthChart';
+
+function extractBigThree(chart?: BirthChartData[]) {
+  if (!chart) return undefined;
+  const sun = chart.find((p) => p.body === 'Sun')?.sign;
+  const moon = chart.find((p) => p.body === 'Moon')?.sign;
+  const rising = chart.find((p) => p.body === 'Ascendant')?.sign;
+  if (!sun && !moon && !rising) return undefined;
+  return { sun, moon, rising };
+}
 
 type FriendProfile = {
   id: string;
@@ -237,6 +247,28 @@ export default function FriendProfilePage() {
                 challengingAspects={
                   friend.synastry.aspects?.filter((a) => !a.isHarmonious).length
                 }
+                person1BigThree={extractBigThree(
+                  user?.birthChart as BirthChartData[] | undefined,
+                )}
+                person2BigThree={extractBigThree(friend.birthChart)}
+                topAspects={friend.synastry.aspects?.slice(0, 3).map((a) => ({
+                  person1Planet: a.person1Planet,
+                  person2Planet: a.person2Planet,
+                  aspectType: a.aspectType,
+                  isHarmonious: a.isHarmonious,
+                }))}
+                elementBalance={{
+                  fire: friend.synastry.elementBalance.fire.combined,
+                  earth: friend.synastry.elementBalance.earth.combined,
+                  air: friend.synastry.elementBalance.air.combined,
+                  water: friend.synastry.elementBalance.water.combined,
+                }}
+                archetype={getSynastryArchetype(
+                  extractBigThree(
+                    user?.birthChart as BirthChartData[] | undefined,
+                  )?.sun,
+                  extractBigThree(friend.birthChart)?.sun,
+                )}
                 buttonVariant='small'
               />
             </div>
