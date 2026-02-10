@@ -52,11 +52,12 @@ const MAIN_PLANETS = [
   'Neptune',
   'Pluto',
 ];
-const ANGLES = ['Ascendant', 'Descendant', 'Midheaven'];
+const ANGLES = ['Ascendant', 'Descendant', 'Midheaven', 'Imum Coeli'];
 const ANGLE_DISPLAY: Record<string, string> = {
   Ascendant: 'Rising',
   Descendant: 'Descendant',
   Midheaven: 'Midheaven',
+  'Imum Coeli': 'Imum Coeli',
 };
 const POINTS = [
   'North Node',
@@ -64,7 +65,10 @@ const POINTS = [
   'Chiron',
   'Lilith',
   'Part of Fortune',
+  'Part of Spirit',
   'Vertex',
+  'Anti-Vertex',
+  'East Point',
 ];
 const ASTEROIDS = [
   'Ceres',
@@ -78,15 +82,12 @@ const ASTEROIDS = [
 ];
 
 function getSymbolForBody(body: string): string {
-  const key = body
-    .toLowerCase()
-    .replace(/\s+/g, '') as keyof typeof bodiesSymbols;
+  const normalize = (s: string) => s.toLowerCase().replace(/[\s-]+/g, '');
+  const key = normalize(body) as keyof typeof bodiesSymbols;
   if (bodiesSymbols[key]) {
     return bodiesSymbols[key];
   }
-  const pointKey = body
-    .toLowerCase()
-    .replace(/\s+/g, '') as keyof typeof astroPointSymbols;
+  const pointKey = normalize(body) as keyof typeof astroPointSymbols;
   if (astroPointSymbols[pointKey]) {
     return astroPointSymbols[pointKey];
   }

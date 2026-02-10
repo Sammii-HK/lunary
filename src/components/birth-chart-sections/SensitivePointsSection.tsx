@@ -27,6 +27,7 @@ export function SensitivePointsSection({
   birthChartData,
 }: SensitivePointsSectionProps) {
   const midheaven = birthChartData.find((p) => p.body === 'Midheaven');
+  const imumCoeli = birthChartData.find((p) => p.body === 'Imum Coeli');
   const northNode = birthChartData.find((p) => p.body === 'North Node');
   const southNode = birthChartData.find((p) => p.body === 'South Node');
   const chiron = birthChartData.find((p) => p.body === 'Chiron');
@@ -35,20 +36,27 @@ export function SensitivePointsSection({
   const partOfFortune = birthChartData.find(
     (p) => p.body === 'Part of Fortune',
   );
+  const partOfSpirit = birthChartData.find((p) => p.body === 'Part of Spirit');
   const vertex = birthChartData.find((p) => p.body === 'Vertex');
+  const antiVertex = birthChartData.find((p) => p.body === 'Anti-Vertex');
+  const eastPoint = birthChartData.find((p) => p.body === 'East Point');
   const asteroidsData = birthChartData.filter((p) =>
     ASTEROIDS_LIST.includes(p.body),
   );
 
   const hasPoints =
     midheaven ||
+    imumCoeli ||
     descendant ||
     northNode ||
     southNode ||
     chiron ||
     lilith ||
     partOfFortune ||
+    partOfSpirit ||
     vertex ||
+    antiVertex ||
+    eastPoint ||
     asteroidsData.length > 0;
 
   if (!hasPoints) return null;
@@ -78,6 +86,26 @@ export function SensitivePointsSection({
               </h5>
               <p className='text-xs text-zinc-300 mt-1'>
                 {astrologicalPoints.midheaven.mysticalProperties}
+              </p>
+            </div>
+          )}
+          {imumCoeli && (
+            <div className='border-l-2 border-lunary-highlight pl-3'>
+              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                <span className='font-astro text-lg text-lunary-highlight'>
+                  {astroPointSymbols.imumcoeli}
+                </span>
+                Imum Coeli in {imumCoeli.sign}
+                <span className='font-astro text-zinc-400'>
+                  {
+                    zodiacSymbol[
+                      imumCoeli.sign.toLowerCase() as keyof typeof zodiacSymbol
+                    ]
+                  }
+                </span>
+              </h5>
+              <p className='text-xs text-zinc-300 mt-1'>
+                {astrologicalPoints.imumcoeli.mysticalProperties}
               </p>
             </div>
           )}
@@ -201,6 +229,26 @@ export function SensitivePointsSection({
               </p>
             </div>
           )}
+          {partOfSpirit && (
+            <div className='border-l-2 border-lunary-accent pl-3'>
+              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                <span className='font-astro text-lg text-lunary-accent'>
+                  {astroPointSymbols.partofspirit}
+                </span>
+                Part of Spirit in {partOfSpirit.sign}
+                <span className='font-astro text-zinc-400'>
+                  {
+                    zodiacSymbol[
+                      partOfSpirit.sign.toLowerCase() as keyof typeof zodiacSymbol
+                    ]
+                  }
+                </span>
+              </h5>
+              <p className='text-xs text-zinc-300 mt-1'>
+                {astrologicalPoints.partofspirit.mysticalProperties}
+              </p>
+            </div>
+          )}
           {vertex && (
             <div className='border-l-2 border-cyan-500 pl-3'>
               <h5 className='text-sm font-medium text-white flex items-center gap-2'>
@@ -218,6 +266,46 @@ export function SensitivePointsSection({
               </h5>
               <p className='text-xs text-zinc-300 mt-1'>
                 {astrologicalPoints.vertex.mysticalProperties}
+              </p>
+            </div>
+          )}
+          {antiVertex && (
+            <div className='border-l-2 border-cyan-500 pl-3'>
+              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                <span className='font-astro text-lg text-cyan-400'>
+                  {astroPointSymbols.antivertex}
+                </span>
+                Anti-Vertex in {antiVertex.sign}
+                <span className='font-astro text-zinc-400'>
+                  {
+                    zodiacSymbol[
+                      antiVertex.sign.toLowerCase() as keyof typeof zodiacSymbol
+                    ]
+                  }
+                </span>
+              </h5>
+              <p className='text-xs text-zinc-300 mt-1'>
+                {astrologicalPoints.antivertex.mysticalProperties}
+              </p>
+            </div>
+          )}
+          {eastPoint && (
+            <div className='border-l-2 border-cyan-500 pl-3'>
+              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                <span className='font-astro text-lg text-cyan-400'>
+                  {astroPointSymbols.eastpoint}
+                </span>
+                East Point in {eastPoint.sign}
+                <span className='font-astro text-zinc-400'>
+                  {
+                    zodiacSymbol[
+                      eastPoint.sign.toLowerCase() as keyof typeof zodiacSymbol
+                    ]
+                  }
+                </span>
+              </h5>
+              <p className='text-xs text-zinc-300 mt-1'>
+                {astrologicalPoints.eastpoint.mysticalProperties}
               </p>
             </div>
           )}
