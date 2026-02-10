@@ -96,8 +96,13 @@ export function NewsletterSignupForm({
       return;
     }
 
-    setStatus('loading');
-    setMessage(null);
+    // Save email for rollback before clearing
+    const submittedEmail = email.trim();
+
+    // Optimistically show success immediately
+    setStatus('success');
+    setMessage(successMessage);
+    setEmail('');
 
     try {
       const response = await fetch('/api/newsletter/subscribers', {
@@ -106,7 +111,7 @@ export function NewsletterSignupForm({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: email.trim(),
+          email: submittedEmail,
           source,
           preferences: {
             weeklyNewsletter: true,
@@ -126,17 +131,17 @@ export function NewsletterSignupForm({
         );
       }
 
-      setStatus('success');
-      setMessage(successMessage);
-      setEmail('');
+      // Success confirmed – UI already in the right state
     } catch (error) {
       console.error('Newsletter signup failed:', error);
+      // Revert: restore email and show error
       setStatus('error');
       setMessage(
         error instanceof Error
           ? error.message
           : 'Something went wrong. Please try again.',
       );
+      setEmail(submittedEmail);
     } finally {
       if (resetStatusTimeoutRef.current !== null) {
         clearTimeout(resetStatusTimeoutRef.current);

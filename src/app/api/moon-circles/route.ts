@@ -37,10 +37,17 @@ export async function GET(request: NextRequest) {
       content: row.content,
     };
 
-    return NextResponse.json({
-      success: true,
-      moonCircle,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        moonCircle,
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+        },
+      },
+    );
   } catch (error) {
     console.error('Error fetching moon circle:', error);
     return NextResponse.json(

@@ -12,17 +12,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get profile from user_profiles
-    let profileResult = await sql`
-      SELECT * FROM user_profiles WHERE user_id = ${user.id} LIMIT 1
-    `;
+    // Fetch profile and subscription in parallel
+    const [profileResult, subscriptionResult] = await Promise.all([
+      sql`
+        SELECT id, user_id, name, birthday, birth_chart, personal_card,
+               location, stripe_customer_id, intention, created_at, updated_at
+        FROM user_profiles WHERE user_id = ${user.id} LIMIT 1
+      `,
+      sql`
+        SELECT status, plan_type, stripe_customer_id, stripe_subscription_id,
+               trial_ends_at, current_period_end
+        FROM subscriptions WHERE user_id = ${user.id} LIMIT 1
+      `,
+    ]);
 
-    let profile = profileResult.rows[0] || null;
-
-    // Get subscription from subscriptions table
-    const subscriptionResult = await sql`
-      SELECT * FROM subscriptions WHERE user_id = ${user.id} LIMIT 1
-    `;
+    const profile = profileResult.rows[0] || null;
     const subscription = subscriptionResult.rows[0] || null;
 
     // Decrypt sensitive PII fields (name and birthday are encrypted)

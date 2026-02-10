@@ -83,16 +83,20 @@ export async function PUT(request: NextRequest) {
       'year_analysis',
     ];
 
-    for (const table of tablesToInvalidate) {
-      try {
-        await sql.query(`DELETE FROM ${table} WHERE user_id = $1`, [user.id]);
-      } catch (tableError) {
+    const deletionResults = await Promise.allSettled(
+      tablesToInvalidate.map((table) =>
+        sql.query(`DELETE FROM ${table} WHERE user_id = $1`, [user.id]),
+      ),
+    );
+
+    deletionResults.forEach((result, index) => {
+      if (result.status === 'rejected') {
         console.warn(
-          `[Birth Chart] Failed to invalidate ${table}:`,
-          tableError,
+          `[Birth Chart] Failed to invalidate ${tablesToInvalidate[index]}:`,
+          result.reason,
         );
       }
-    }
+    });
 
     // Invalidate friend connection synastry caches (different column name)
     try {

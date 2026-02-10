@@ -7,6 +7,7 @@ import { grimoire, grimoireItems } from '@/constants/grimoire';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug } from '@/utils/grimoire';
 import { Spell } from '@/lib/spells/index';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 type SearchDataType = {
   runesList: any;
@@ -48,6 +49,7 @@ export function GrimoireSearch({
   onResultClick,
 }: GrimoireSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedQuery = useDebouncedValue(searchQuery, 200);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchData, setSearchData] = useState<SearchDataType>(null);
   const [searchDataLoading, setSearchDataLoading] = useState(false);
@@ -141,9 +143,9 @@ export function GrimoireSearch({
   }, [searchData]);
 
   const searchResults = useMemo(() => {
-    if (!searchQuery.trim() || !searchData) return [];
+    if (!debouncedQuery.trim() || !searchData) return [];
 
-    const queryWords = searchQuery
+    const queryWords = debouncedQuery
       .toLowerCase()
       .split(/\s+/)
       .filter((w) => w.length >= 2);
@@ -903,7 +905,7 @@ export function GrimoireSearch({
 
     // Smart deduplication: prefer full pages over hash links
     return deduplicateResults(scoredResults);
-  }, [searchQuery, searchData]);
+  }, [debouncedQuery, searchData]);
 
   return (
     <div

@@ -170,7 +170,13 @@ export function SaveToCollection({
       return;
     }
 
-    setIsSaving(true);
+    // Optimistically update UI immediately
+    setIsSavedInternal(true);
+    haptic.success();
+    conversionTracking.upgradeClicked('save_to_collection', item.category);
+    onSaved?.();
+    closeDialog();
+
     try {
       const response = await fetch('/api/collections', {
         method: 'POST',
@@ -182,18 +188,16 @@ export function SaveToCollection({
       });
 
       const data = await response.json();
-      if (data.success) {
-        haptic.success();
-        setIsSavedInternal(true);
-        conversionTracking.upgradeClicked('save_to_collection', item.category);
-        onSaved?.();
-        closeDialog();
+      if (!data.success) {
+        // Revert on failure response
+        setIsSavedInternal(false);
+        haptic.error();
       }
     } catch (error) {
       console.error('Error saving to collection:', error);
+      // Revert on error
+      setIsSavedInternal(false);
       haptic.error();
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -381,19 +385,9 @@ export function SaveToCollection({
                 onClick={handleSave}
                 variant='ghost'
                 className='flex-1 bg-lunary-primary-600/20 hover:bg-lunary-primary-600/30 text-lunary-primary-300 hover:text-lunary-primary-200 border border-lunary-primary-600/30'
-                disabled={isSaving}
               >
-                {isSaving ? (
-                  <>
-                    <Loader2 className='w-4 h-4 animate-spin mr-2' />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <BookmarkCheck className='w-4 h-4 mr-2' />
-                    Save to Collection
-                  </>
-                )}
+                <BookmarkCheck className='w-4 h-4 mr-2' />
+                Save to Collection
               </Button>
               <Button
                 onClick={closeDialog}

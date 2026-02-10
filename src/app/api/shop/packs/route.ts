@@ -11,25 +11,25 @@ export async function GET(request: NextRequest) {
 
     if (isActive && category) {
       result = await sql`
-        SELECT * FROM shop_packs
+        SELECT id, name, description, category, subcategory, price, stripe_product_id, stripe_price_id, image_url, download_url, file_size, is_active, metadata, created_at, updated_at FROM shop_packs
         WHERE is_active = true AND category = ${category}
         ORDER BY created_at DESC
       `;
     } else if (isActive) {
       result = await sql`
-        SELECT * FROM shop_packs
+        SELECT id, name, description, category, subcategory, price, stripe_product_id, stripe_price_id, image_url, download_url, file_size, is_active, metadata, created_at, updated_at FROM shop_packs
         WHERE is_active = true
         ORDER BY created_at DESC
       `;
     } else if (category) {
       result = await sql`
-        SELECT * FROM shop_packs
+        SELECT id, name, description, category, subcategory, price, stripe_product_id, stripe_price_id, image_url, download_url, file_size, is_active, metadata, created_at, updated_at FROM shop_packs
         WHERE category = ${category}
         ORDER BY created_at DESC
       `;
     } else {
       result = await sql`
-        SELECT * FROM shop_packs
+        SELECT id, name, description, category, subcategory, price, stripe_product_id, stripe_price_id, image_url, download_url, file_size, is_active, metadata, created_at, updated_at FROM shop_packs
         ORDER BY created_at DESC
       `;
     }

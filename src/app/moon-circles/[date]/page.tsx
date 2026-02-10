@@ -146,24 +146,34 @@ export default async function MoonCircleDetailPage({
     notFound();
   }
 
-  const circleResult = await sql`
-    SELECT
-      id,
-      moon_phase,
-      event_date,
-      title,
-      theme,
-      description,
-      focus_points,
-      rituals,
-      journal_prompts,
-      astrology_highlights,
-      resource_links,
-      insight_count
-    FROM moon_circles
-    WHERE event_date = ${dateParam}::date
-    LIMIT 1
-  `;
+  // Fire both queries in parallel for better performance
+  const [circleResult, relatedResult] = await Promise.all([
+    sql`
+      SELECT
+        id,
+        moon_phase,
+        event_date,
+        title,
+        theme,
+        description,
+        focus_points,
+        rituals,
+        journal_prompts,
+        astrology_highlights,
+        resource_links,
+        insight_count
+      FROM moon_circles
+      WHERE event_date = ${dateParam}::date
+      LIMIT 1
+    `,
+    sql`
+      SELECT id, moon_phase, event_date, theme, insight_count
+      FROM moon_circles
+      WHERE event_date <> ${dateParam}::date
+      ORDER BY event_date DESC
+      LIMIT 4
+    `,
+  ]);
 
   if (circleResult.rows.length === 0) {
     notFound();
@@ -172,14 +182,6 @@ export default async function MoonCircleDetailPage({
   const circle = mapCircleDetail(
     circleResult.rows[0] as MoonCircleDetailRecord,
   );
-
-  const relatedResult = await sql`
-    SELECT id, moon_phase, event_date, theme, insight_count
-    FROM moon_circles
-    WHERE event_date <> ${dateParam}::date
-    ORDER BY event_date DESC
-    LIMIT 4
-  `;
 
   const related = relatedResult.rows.map((row) => {
     const record = row as MoonCircleSummaryRecord;

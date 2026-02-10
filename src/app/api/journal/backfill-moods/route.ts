@@ -49,6 +49,8 @@ export async function POST(request: NextRequest) {
       text: string;
     }> = [];
 
+    const pendingUpdates: Array<{ id: string; content: string }> = [];
+
     let processed = 0;
     let updated = 0;
     let skipped = 0;
@@ -95,15 +97,13 @@ export async function POST(request: NextRequest) {
         text: text.substring(0, 100),
       });
 
-      // Apply update (unless dry run)
+      // Collect update for batch execution (unless dry run)
       if (!dryRun) {
         const updatedContent = { ...content, moodTags: mergedMoods };
-        await sql`
-          UPDATE collections
-          SET content = ${JSON.stringify(updatedContent)}::jsonb
-          WHERE id = ${row.id}
-        `;
-        updated++;
+        pendingUpdates.push({
+          id: row.id,
+          content: JSON.stringify(updatedContent),
+        });
       }
 
       // Progress logging
@@ -112,6 +112,30 @@ export async function POST(request: NextRequest) {
           `⏳ Processed ${processed}/${entriesResult.rows.length} entries...`,
         );
       }
+    }
+
+    // Batch update all entries at once
+    if (pendingUpdates.length > 0) {
+      const ids = pendingUpdates.map((u) => u.id);
+      const contents = pendingUpdates.map((u) => u.content);
+
+      // Chunk into groups of 50 to avoid query size limits
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < pendingUpdates.length; i += BATCH_SIZE) {
+        const batchIds = ids.slice(i, i + BATCH_SIZE);
+        const batchContents = contents.slice(i, i + BATCH_SIZE);
+        // @vercel/postgres handles arrays at runtime; cast to satisfy Primitive type
+        await sql`
+          UPDATE collections AS c
+          SET content = data.new_content::jsonb
+          FROM (
+            SELECT unnest(${batchIds as unknown as string}::text[]) AS id,
+                   unnest(${batchContents as unknown as string}::text[]) AS new_content
+          ) AS data
+          WHERE c.id = data.id
+        `;
+      }
+      updated = pendingUpdates.length;
     }
 
     console.log(

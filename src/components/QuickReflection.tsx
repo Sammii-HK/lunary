@@ -55,18 +55,24 @@ export function QuickReflection({
     e.preventDefault();
     if (!content.trim() || isSubmitting) return;
 
-    setIsSubmitting(true);
+    // Store content for rollback before clearing
+    const savedContent = content.trim();
+    const savedMoods = [...selectedMoods];
+
+    // Optimistically clear form and close modal
+    haptic.success();
+    setContent('');
+    setSelectedMoods([]);
+    onClose();
+
     try {
-      await onSubmit(content.trim(), selectedMoods);
-      haptic.success();
-      setContent('');
-      setSelectedMoods([]);
-      onClose();
+      await onSubmit(savedContent, savedMoods);
     } catch (error) {
       console.error('Failed to save reflection:', error);
       haptic.error();
-    } finally {
-      setIsSubmitting(false);
+      // Revert: restore form content
+      setContent(savedContent);
+      setSelectedMoods(savedMoods);
     }
   };
 

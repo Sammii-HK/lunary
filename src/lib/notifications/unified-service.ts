@@ -6,7 +6,7 @@ import {
   cleanupOldDates,
 } from '@/app/api/cron/shared-notification-tracker';
 import {
-  getUserProfile,
+  batchGetUserProfiles,
   personalizeNotificationTitle,
   personalizeNotificationBody,
   shouldPersonalize,
@@ -643,12 +643,22 @@ export async function sendUnifiedNotification(
       `📱 Sending notification to ${subscriptions.rows.length} subscribers`,
     );
 
+    // Batch fetch all user profiles to avoid N+1 queries
+    const userIds = subscriptions.rows
+      .map((sub: any) => sub.user_id)
+      .filter(Boolean);
+    const uniqueUserIds = [...new Set(userIds)] as string[];
+    const profileMap =
+      uniqueUserIds.length > 0
+        ? await batchGetUserProfiles(uniqueUserIds)
+        : new Map();
+
     const sendPromises = subscriptions.rows.map(async (sub: any) => {
       try {
         let personalizedNotification = notification;
 
         if (sub.user_id) {
-          const userProfile = await getUserProfile(sub.user_id);
+          const userProfile = profileMap.get(sub.user_id) ?? null;
           if (userProfile && shouldPersonalize(userProfile, event.type)) {
             personalizedNotification = await createPersonalizedNotification(
               event,

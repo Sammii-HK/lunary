@@ -6,6 +6,35 @@ const EMBEDDING_DIMENSIONS = 1536;
 
 let openaiClient: OpenAI | null = null;
 
+// LRU cache for query embeddings to avoid duplicate OpenAI API calls.
+// Embeddings are deterministic for the same input, so safe to cache.
+const EMBEDDING_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const EMBEDDING_CACHE_MAX_SIZE = 200;
+const embeddingCache = new Map<
+  string,
+  { embedding: number[]; timestamp: number }
+>();
+
+function getCachedEmbedding(text: string): number[] | null {
+  const cached = embeddingCache.get(text);
+  if (cached && Date.now() - cached.timestamp < EMBEDDING_CACHE_TTL) {
+    return cached.embedding;
+  }
+  if (cached) {
+    embeddingCache.delete(text);
+  }
+  return null;
+}
+
+function setCachedEmbedding(text: string, embedding: number[]): void {
+  // Evict oldest entries if at capacity
+  if (embeddingCache.size >= EMBEDDING_CACHE_MAX_SIZE) {
+    const firstKey = embeddingCache.keys().next().value;
+    if (firstKey) embeddingCache.delete(firstKey);
+  }
+  embeddingCache.set(text, { embedding, timestamp: Date.now() });
+}
+
 // Check if we're in test/CI mode without database access
 function isTestMode(): boolean {
   return (
@@ -57,6 +86,10 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     return new Array(EMBEDDING_DIMENSIONS).fill(0);
   }
 
+  // Check cache first to avoid duplicate OpenAI API calls
+  const cached = getCachedEmbedding(text);
+  if (cached) return cached;
+
   const openai = getOpenAI();
   const response = await openai.embeddings.create({
     model: EMBEDDING_MODEL,
@@ -64,7 +97,9 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     dimensions: EMBEDDING_DIMENSIONS,
   });
 
-  return response.data[0].embedding;
+  const embedding = response.data[0].embedding;
+  setCachedEmbedding(text, embedding);
+  return embedding;
 }
 
 export async function storeEmbedding(entry: GrimoireEntry): Promise<void> {

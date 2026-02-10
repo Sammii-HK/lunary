@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Flame, Sunrise, Sunset, CheckCircle2, Circle } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStatus } from './AuthStatus';
@@ -16,6 +16,7 @@ export function RitualTracker() {
   const authState = useAuthStatus();
   const [status, setStatus] = useState<RitualStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const pendingRef = useRef<Record<string, boolean>>({});
 
   const fetchStatus = useCallback(async () => {
     if (!authState.isAuthenticated) {
@@ -97,6 +98,23 @@ export function RitualTracker() {
         <Link
           href={`/book-of-shadows?prompt=${encodeURIComponent('Set your intention for today')}`}
           onClick={async () => {
+            if (pendingRef.current['morning']) return;
+            pendingRef.current['morning'] = true;
+
+            // Save previous state for rollback
+            const previousStatus = status ? { ...status } : null;
+
+            // Optimistically update UI
+            setStatus((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    morning: true,
+                    ritualStreak: prev.ritualStreak + 1,
+                  }
+                : prev,
+            );
+
             try {
               const res = await fetch('/api/ritual/complete', {
                 method: 'POST',
@@ -120,9 +138,16 @@ export function RitualTracker() {
                       : prev,
                   );
                 }
+              } else {
+                // Revert on non-ok response
+                if (previousStatus) setStatus(previousStatus);
               }
             } catch (error) {
               console.error('[RitualTracker] Failed to track ritual:', error);
+              // Revert on error
+              if (previousStatus) setStatus(previousStatus);
+            } finally {
+              pendingRef.current['morning'] = false;
             }
           }}
           className='flex items-center justify-between p-3 rounded-lg border border-zinc-800/40 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
@@ -141,6 +166,23 @@ export function RitualTracker() {
         <Link
           href={`/book-of-shadows?prompt=${encodeURIComponent('Reflect on your day')}`}
           onClick={async () => {
+            if (pendingRef.current['evening']) return;
+            pendingRef.current['evening'] = true;
+
+            // Save previous state for rollback
+            const previousStatus = status ? { ...status } : null;
+
+            // Optimistically update UI
+            setStatus((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    evening: true,
+                    ritualStreak: prev.ritualStreak + 1,
+                  }
+                : prev,
+            );
+
             try {
               const res = await fetch('/api/ritual/complete', {
                 method: 'POST',
@@ -164,9 +206,16 @@ export function RitualTracker() {
                       : prev,
                   );
                 }
+              } else {
+                // Revert on non-ok response
+                if (previousStatus) setStatus(previousStatus);
               }
             } catch (error) {
               console.error('[RitualTracker] Failed to track ritual:', error);
+              // Revert on error
+              if (previousStatus) setStatus(previousStatus);
+            } finally {
+              pendingRef.current['evening'] = false;
             }
           }}
           className='flex items-center justify-between p-3 rounded-lg border border-zinc-800/40 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
