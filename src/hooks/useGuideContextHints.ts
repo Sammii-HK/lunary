@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
-import { useAstronomyContext } from '@/context/AstronomyContext';
+import { useMoonData } from '@/context/AstronomyContext';
 import { useSubscription } from './useSubscription';
 import { hasFeatureAccess } from '../../utils/pricing';
 
@@ -120,7 +120,7 @@ export function useGuideContextHints(
 ): GuideContextHint | null {
   const { user } = useUser();
   const subscription = useSubscription();
-  const { currentMoonPhase } = useAstronomyContext();
+  const { currentMoonPhase } = useMoonData();
 
   const hasPersonalizedHoroscopeAccess = hasFeatureAccess(
     subscription.status,
@@ -180,7 +180,7 @@ export function useGuideContextHintsMultiple(
 ): GuideContextHint[] {
   const { user } = useUser();
   const subscription = useSubscription();
-  const { currentMoonPhase } = useAstronomyContext();
+  const { currentMoonPhase } = useMoonData();
 
   const hasPersonalizedHoroscopeAccess = hasFeatureAccess(
     subscription.status,

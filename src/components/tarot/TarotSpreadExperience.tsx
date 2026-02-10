@@ -21,7 +21,7 @@ import {
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { TarotTransitConnection } from './TarotTransitConnection';
 import type { BirthChartPlacement } from '@/context/UserContext';
-import { useAstronomyContext } from '@/context/AstronomyContext';
+import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { isInDemoMode } from '@/lib/demo-mode';
 import { useHaptic } from '@/hooks/useHaptic';
 
@@ -158,7 +158,7 @@ export function TarotSpreadExperience({
   onCardPreview,
   onShareReading,
 }: TarotSpreadExperienceProps) {
-  const { currentAstrologicalChart } = useAstronomyContext();
+  const { currentAstrologicalChart } = usePlanetaryChart();
   const haptic = useHaptic();
   const [selectedSpreadSlug, setSelectedSpreadSlug] = useState<string | null>(
     null,

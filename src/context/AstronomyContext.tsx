@@ -50,6 +50,49 @@ function refreshClientDuration(duration: {
   };
 }
 
+// =============================================================================
+// Granular context types
+// =============================================================================
+
+type CosmicDateContextValue = {
+  currentDateTime: Date;
+  setCurrentDateTime: (date: Date) => void;
+  currentDate: string;
+  writtenDate: string;
+};
+
+type MoonContextValue = {
+  currentMoonPhase: MoonPhaseLabels;
+  moonIllumination: number;
+  moonAge: number;
+  currentMoonPosition: AstroChartInformation | undefined;
+  currentMoonConstellationPosition: ZodiacSign | undefined;
+  currentMoonConstellation:
+    | (typeof constellations)[keyof typeof constellations]
+    | undefined;
+  symbol: string;
+};
+
+type PlanetaryContextValue = {
+  currentAstrologicalChart: AstroChartInformation[];
+  generalTransits: GlobalCosmicData['generalTransits'];
+  refreshCosmicData: () => void;
+};
+
+type TarotContextValue = {
+  currentTarotCard: any;
+};
+
+// =============================================================================
+// Context creation
+// =============================================================================
+
+const CosmicDateContext = createContext<CosmicDateContextValue | null>(null);
+const MoonContext = createContext<MoonContextValue | null>(null);
+const PlanetaryContext = createContext<PlanetaryContextValue | null>(null);
+const TarotContext = createContext<TarotContextValue | null>(null);
+
+// Legacy combined context — kept for backwards compat
 export const AstronomyContext = createContext<{
   currentAstrologicalChart: AstroChartInformation[];
   currentMoonPosition: AstroChartInformation | undefined;
@@ -70,90 +113,151 @@ export const AstronomyContext = createContext<{
   generalTransits: GlobalCosmicData['generalTransits'];
 } | null>(null);
 
-export function useAstronomyContext() {
-  const context = useContext(AstronomyContext);
-  if (!context) {
-    // Emergency fallback - this should RARELY happen in production
-    // Collect diagnostic information
-    const errorInfo = {
-      timestamp: new Date().toISOString(),
-      url: typeof window !== 'undefined' ? window.location.href : 'SSR',
-      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
-      componentStack:
-        process.env.NODE_ENV === 'development' ? new Error().stack : undefined,
-    };
+// =============================================================================
+// Fallback error reporting (shared by all hooks)
+// =============================================================================
 
-    // In development, show a very visible error to help developers fix the issue
-    if (process.env.NODE_ENV === 'development') {
-      console.error(
-        '🚨 ASTRONOMY CONTEXT ERROR: Component is not wrapped in AstronomyContextProvider!',
-        '\n📍 Location:',
-        errorInfo.url,
-        '\n⏰ Time:',
-        errorInfo.timestamp,
-        '\n\n💡 Fix: Ensure this component is rendered inside <AstronomyContextProvider>',
-      );
-      console.trace('📋 Component stack trace:');
-    } else {
-      // In production, log quietly for monitoring systems
-      console.warn('AstronomyContext: Missing provider, using fallback', {
+function reportMissingProvider(contextName: string) {
+  const errorInfo = {
+    timestamp: new Date().toISOString(),
+    url: typeof window !== 'undefined' ? window.location.href : 'SSR',
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
+    componentStack:
+      process.env.NODE_ENV === 'development' ? new Error().stack : undefined,
+  };
+
+  if (process.env.NODE_ENV === 'development') {
+    console.error(
+      `AstronomyContext (${contextName}): Component is not wrapped in AstronomyContextProvider!`,
+      '\nLocation:',
+      errorInfo.url,
+    );
+  } else {
+    console.warn(
+      `AstronomyContext (${contextName}): Missing provider, using fallback`,
+      {
         url: errorInfo.url,
         timestamp: errorInfo.timestamp,
+      },
+    );
+  }
+
+  if (typeof window !== 'undefined') {
+    if ((window as any).Sentry) {
+      (window as any).Sentry.captureMessage(
+        `${contextName} used without provider`,
+        {
+          level: 'warning',
+          extra: errorInfo,
+          tags: { context: 'astronomy', fallback: 'active' },
+        },
+      );
+    }
+    if ((window as any).posthog) {
+      (window as any).posthog.capture('astronomy_context_fallback_used', {
+        ...errorInfo,
+        contextName,
+        environment: process.env.NODE_ENV,
       });
     }
+  }
+}
 
-    // Send to error monitoring service if available
-    if (typeof window !== 'undefined') {
-      // Sentry integration
-      if ((window as any).Sentry) {
-        (window as any).Sentry.captureMessage(
-          'AstronomyContext used without provider',
-          {
-            level: 'warning',
-            extra: errorInfo,
-            tags: {
-              context: 'astronomy',
-              fallback: 'active',
-            },
-          },
-        );
-      }
+// =============================================================================
+// Granular hooks
+// =============================================================================
 
-      // PostHog integration for analytics
-      if ((window as any).posthog) {
-        (window as any).posthog.capture('astronomy_context_fallback_used', {
-          ...errorInfo,
-          environment: process.env.NODE_ENV,
-        });
-      }
-    }
-
-    // Return safe defaults as absolute last resort
-    // This keeps the app running but we'll know about it via monitoring
+export function useCosmicDate(): CosmicDateContextValue {
+  const context = useContext(CosmicDateContext);
+  if (!context) {
+    reportMissingProvider('CosmicDate');
     return {
-      currentAstrologicalChart: [],
-      currentMoonPosition: undefined,
-      currentMoonConstellationPosition: undefined,
-      currentMoonConstellation: undefined,
       currentDateTime: new Date(),
-      setCurrentDateTime: () => {
-        console.warn('AstronomyContext fallback: setCurrentDateTime called');
-      },
-      currentMoonPhase: 'New Moon' as MoonPhaseLabels,
-      moonIllumination: 0,
-      moonAge: 0,
+      setCurrentDateTime: () => {},
+      currentDate: getLocalDateString(),
       writtenDate: '',
-      currentTarotCard: null,
-      symbol: '',
-      currentDate: getLocalDateString(), // User's local date, not UTC
-      refreshCosmicData: () => {
-        console.warn('AstronomyContext fallback: refreshCosmicData called');
-      },
-      generalTransits: undefined,
     };
   }
   return context;
 }
+
+export function useMoonData(): MoonContextValue {
+  const context = useContext(MoonContext);
+  if (!context) {
+    reportMissingProvider('Moon');
+    return {
+      currentMoonPhase: 'New Moon' as MoonPhaseLabels,
+      moonIllumination: 0,
+      moonAge: 0,
+      currentMoonPosition: undefined,
+      currentMoonConstellationPosition: undefined,
+      currentMoonConstellation: undefined,
+      symbol: '',
+    };
+  }
+  return context;
+}
+
+export function usePlanetaryChart(): PlanetaryContextValue {
+  const context = useContext(PlanetaryContext);
+  if (!context) {
+    reportMissingProvider('Planetary');
+    return {
+      currentAstrologicalChart: [],
+      generalTransits:
+        undefined as unknown as GlobalCosmicData['generalTransits'],
+      refreshCosmicData: () => {},
+    };
+  }
+  return context;
+}
+
+export function useTarotCard(): TarotContextValue {
+  const context = useContext(TarotContext);
+  if (!context) {
+    reportMissingProvider('Tarot');
+    return { currentTarotCard: null };
+  }
+  return context;
+}
+
+// =============================================================================
+// Composed backwards-compatible hook
+// =============================================================================
+
+export function useAstronomyContext() {
+  const legacyContext = useContext(AstronomyContext);
+  if (legacyContext) return legacyContext;
+
+  // Fallback: not inside provider — return safe defaults with error reporting
+  reportMissingProvider('AstronomyContext');
+  return {
+    currentAstrologicalChart: [],
+    currentMoonPosition: undefined,
+    currentMoonConstellationPosition: undefined,
+    currentMoonConstellation: undefined,
+    currentDateTime: new Date(),
+    setCurrentDateTime: () => {
+      console.warn('AstronomyContext fallback: setCurrentDateTime called');
+    },
+    currentMoonPhase: 'New Moon' as MoonPhaseLabels,
+    moonIllumination: 0,
+    moonAge: 0,
+    writtenDate: '',
+    currentTarotCard: null,
+    symbol: '',
+    currentDate: getLocalDateString(),
+    refreshCosmicData: () => {
+      console.warn('AstronomyContext fallback: refreshCosmicData called');
+    },
+    generalTransits:
+      undefined as unknown as GlobalCosmicData['generalTransits'],
+  };
+}
+
+// =============================================================================
+// Provider
+// =============================================================================
 
 export const AstronomyContextProvider = ({
   children,
@@ -331,36 +435,87 @@ export const AstronomyContextProvider = ({
     setCurrentDate(dayjs(currentDateTime).format('YYYY-MM-DD'));
   }, [currentDateTime]);
 
+  const refreshCosmicData = useMemo(
+    () => () => setRefreshKey((prev) => prev + 1),
+    [],
+  );
+
+  // Granular context values — memoized individually
+  const cosmicDateValue = useMemo<CosmicDateContextValue>(
+    () => ({ currentDateTime, setCurrentDateTime, currentDate, writtenDate }),
+    [currentDateTime, currentDate, writtenDate],
+  );
+
+  const moonValue = useMemo<MoonContextValue>(
+    () => ({
+      currentMoonPhase: isDemoMode
+        ? demoData!.currentMoonPhase || currentMoonPhase
+        : currentMoonPhase,
+      moonIllumination: isDemoMode
+        ? (demoData!.moonIllumination ?? moonIllumination)
+        : moonIllumination,
+      moonAge: isDemoMode ? (demoData!.moonAge ?? moonAge) : moonAge,
+      currentMoonPosition,
+      currentMoonConstellationPosition: isDemoMode
+        ? demoData!.currentMoonConstellationPosition ||
+          currentMoonConstellationPosition
+        : currentMoonConstellationPosition,
+      currentMoonConstellation,
+      symbol,
+    }),
+    [
+      isDemoMode,
+      demoData,
+      currentMoonPhase,
+      moonIllumination,
+      moonAge,
+      currentMoonPosition,
+      currentMoonConstellationPosition,
+      currentMoonConstellation,
+      symbol,
+    ],
+  );
+
+  const planetaryValue = useMemo<PlanetaryContextValue>(
+    () => ({
+      currentAstrologicalChart,
+      generalTransits,
+      refreshCosmicData,
+    }),
+    [currentAstrologicalChart, generalTransits, refreshCosmicData],
+  );
+
+  const tarotValue = useMemo<TarotContextValue>(
+    () => ({
+      currentTarotCard: isDemoMode
+        ? demoData!.currentTarotCard || currentTarotCard
+        : currentTarotCard,
+    }),
+    [isDemoMode, demoData, currentTarotCard],
+  );
+
+  // Legacy combined value for AstronomyContext backwards compat
+  const legacyValue = useMemo(
+    () => ({
+      ...cosmicDateValue,
+      ...moonValue,
+      ...planetaryValue,
+      ...tarotValue,
+    }),
+    [cosmicDateValue, moonValue, planetaryValue, tarotValue],
+  );
+
   return (
-    <AstronomyContext.Provider
-      value={{
-        currentAstrologicalChart,
-        currentMoonPosition,
-        currentMoonConstellationPosition: isDemoMode
-          ? demoData!.currentMoonConstellationPosition ||
-            currentMoonConstellationPosition
-          : currentMoonConstellationPosition,
-        currentMoonConstellation,
-        currentDateTime,
-        setCurrentDateTime,
-        currentMoonPhase: isDemoMode
-          ? demoData!.currentMoonPhase || currentMoonPhase
-          : currentMoonPhase,
-        moonIllumination: isDemoMode
-          ? (demoData!.moonIllumination ?? moonIllumination)
-          : moonIllumination,
-        moonAge: isDemoMode ? (demoData!.moonAge ?? moonAge) : moonAge,
-        writtenDate,
-        currentTarotCard: isDemoMode
-          ? demoData!.currentTarotCard || currentTarotCard
-          : currentTarotCard,
-        symbol,
-        currentDate,
-        refreshCosmicData: () => setRefreshKey((prev) => prev + 1),
-        generalTransits,
-      }}
-    >
-      {children}
+    <AstronomyContext.Provider value={legacyValue}>
+      <CosmicDateContext.Provider value={cosmicDateValue}>
+        <MoonContext.Provider value={moonValue}>
+          <PlanetaryContext.Provider value={planetaryValue}>
+            <TarotContext.Provider value={tarotValue}>
+              {children}
+            </TarotContext.Provider>
+          </PlanetaryContext.Provider>
+        </MoonContext.Provider>
+      </CosmicDateContext.Provider>
     </AstronomyContext.Provider>
   );
 };

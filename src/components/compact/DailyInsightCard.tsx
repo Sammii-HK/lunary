@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
-import { useAstronomyContext } from '@/context/AstronomyContext';
+import { useCosmicDate } from '@/context/AstronomyContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Sparkles, ArrowRight } from 'lucide-react';
@@ -161,7 +161,7 @@ export const DailyInsightCard = () => {
   const { user } = useUser();
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
-  const { currentDate } = useAstronomyContext();
+  const { currentDate } = useCosmicDate();
   const selectedDay = useMemo(
     () => (currentDate ? dayjs(currentDate) : dayjs()),
     [currentDate],

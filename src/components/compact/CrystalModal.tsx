@@ -13,7 +13,7 @@ import {
 } from '../../../utils/crystals/personalizedCrystals';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
-import { useAstronomyContext } from '../../context/AstronomyContext';
+import { useCosmicDate } from '../../context/AstronomyContext';
 import dayjs from 'dayjs';
 import { Button } from '../ui/button';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
@@ -26,7 +26,7 @@ export const CrystalPreview = () => {
   const authStatus = useAuthStatus();
   const router = useRouter();
   const subscription = useSubscription();
-  const { currentDateTime } = useAstronomyContext();
+  const { currentDateTime } = useCosmicDate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [observer, setObserver] = useState<any>(null);
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');

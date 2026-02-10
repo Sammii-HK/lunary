@@ -12,7 +12,7 @@ import {
 } from '../../utils/crystals/personalizedCrystals';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasFeatureAccess, hasDateAccess } from '../../utils/pricing';
-import { useAstronomyContext } from '../context/AstronomyContext';
+import { useCosmicDate } from '../context/AstronomyContext';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 import { Info, X, Lock } from 'lucide-react';
@@ -21,7 +21,7 @@ import { Paywall } from './Paywall';
 export const CrystalWidget = () => {
   const { user } = useUser();
   const subscription = useSubscription();
-  const { currentDateTime } = useAstronomyContext();
+  const { currentDateTime } = useCosmicDate();
   const userBirthday = user?.birthday;
   const birthChart = user?.birthChart;
   const [observer, setObserver] = useState<any>(null);

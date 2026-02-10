@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
-import { useAstronomyContext } from '@/context/AstronomyContext';
+import { useCosmicDate, usePlanetaryChart } from '@/context/AstronomyContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, Layers, Sparkles } from 'lucide-react';
@@ -30,12 +30,8 @@ export const DailyCardPreview = () => {
   const authStatus = useAuthStatus();
   const router = useRouter();
   const subscription = useSubscription();
-  const astronomyContext = useAstronomyContext();
-  // CRITICAL: Use user's LOCAL date, not UTC, so tarot changes at their midnight
-  const currentDate = astronomyContext?.currentDate || getLocalDateString();
-  const currentAstrologicalChart = useMemo(() => {
-    return astronomyContext?.currentAstrologicalChart || [];
-  }, [astronomyContext]);
+  const { currentDate } = useCosmicDate();
+  const { currentAstrologicalChart } = usePlanetaryChart();
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');

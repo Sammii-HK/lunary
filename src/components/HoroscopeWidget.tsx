@@ -8,7 +8,7 @@ import { getAstrologicalChart } from '../../utils/astrology/astrology';
 import { getGeneralHoroscope } from '../../utils/astrology/generalHoroscope';
 import { useSubscription } from '../hooks/useSubscription';
 import { hasFeatureAccess, hasDateAccess } from '../../utils/pricing';
-import { useAstronomyContext } from '../context/AstronomyContext';
+import { useCosmicDate } from '../context/AstronomyContext';
 import { Paywall } from './Paywall';
 import dayjs from 'dayjs';
 import { parseIsoDateOnly } from '@/lib/date-only';
@@ -642,7 +642,7 @@ const getAspectInterpretation = (aspect: any): string => {
 export const HoroscopeWidget = () => {
   const { user } = useUser();
   const subscription = useSubscription();
-  const { currentDateTime } = useAstronomyContext();
+  const { currentDateTime } = useCosmicDate();
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const birthChart = user?.birthChart;

@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Map, Telescope, X, Check, MapPin } from 'lucide-react';
 import { useLocation } from '@/hooks/useLocation';
-import { useAstronomyContext } from '@/context/AstronomyContext';
+import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { BirthChartPlacement, useUser } from '@/context/UserContext';
 import { ChartWheelSvg } from '@/app/birth-chart/chart-wheel-svg';
 import {
@@ -254,7 +254,7 @@ interface SkyNowCardProps {
 
 export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
   const { user } = useUser();
-  const { currentAstrologicalChart } = useAstronomyContext();
+  const { currentAstrologicalChart } = usePlanetaryChart();
   const {
     requestLocation,
     loading: locationLoading,
