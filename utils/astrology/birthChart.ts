@@ -672,6 +672,20 @@ export const generateBirthChart = async (
       retrograde: false,
     });
 
+    // Imum Coeli (IC) — directly opposite the Midheaven
+    const icLongitude = normalizeDegrees(mcLongitude + 180);
+    const icSign = getZodiacSign(icLongitude);
+    const icFormatted = formatDegree(icLongitude);
+
+    birthChartData.push({
+      body: 'Imum Coeli',
+      sign: icSign,
+      degree: icFormatted.degree,
+      minute: icFormatted.minute,
+      eclipticLongitude: icLongitude,
+      retrograde: false,
+    });
+
     // Part of Fortune calculation
     const sunData = birthChartData.find((p) => p.body === 'Sun');
     const moonData = birthChartData.find((p) => p.body === 'Moon');
@@ -692,6 +706,22 @@ export const generateBirthChart = async (
         degree: pofFormatted.degree,
         minute: pofFormatted.minute,
         eclipticLongitude: pofLong,
+        retrograde: false,
+      });
+
+      // Part of Spirit — inverse formula of Part of Fortune
+      const posLong = isNight
+        ? normalizeDegrees(ascendantLongitudeDeg + moonLong - sunLong)
+        : normalizeDegrees(ascendantLongitudeDeg + sunLong - moonLong);
+      const posSign = getZodiacSign(posLong);
+      const posFormatted = formatDegree(posLong);
+
+      birthChartData.push({
+        body: 'Part of Spirit',
+        sign: posSign,
+        degree: posFormatted.degree,
+        minute: posFormatted.minute,
+        eclipticLongitude: posLong,
         retrograde: false,
       });
     }
@@ -717,9 +747,37 @@ export const generateBirthChart = async (
       eclipticLongitude: vertexLong,
       retrograde: false,
     });
+
+    // Anti-Vertex — directly opposite the Vertex
+    const antiVertexLong = normalizeDegrees(vertexLong + 180);
+    const antiVertexSign = getZodiacSign(antiVertexLong);
+    const antiVertexFormatted = formatDegree(antiVertexLong);
+
+    birthChartData.push({
+      body: 'Anti-Vertex',
+      sign: antiVertexSign,
+      degree: antiVertexFormatted.degree,
+      minute: antiVertexFormatted.minute,
+      eclipticLongitude: antiVertexLong,
+      retrograde: false,
+    });
+
+    // East Point (Equatorial Ascendant) — Ascendant calculated at 0° latitude
+    const eastPointLong = calculateAscendant(lstDeg, 0, obliquity);
+    const eastPointSign = getZodiacSign(eastPointLong);
+    const eastPointFormatted = formatDegree(eastPointLong);
+
+    birthChartData.push({
+      body: 'East Point',
+      sign: eastPointSign,
+      degree: eastPointFormatted.degree,
+      minute: eastPointFormatted.minute,
+      eclipticLongitude: eastPointLong,
+      retrograde: false,
+    });
   } catch (error) {
     console.warn(
-      '[BirthChart] Angle calculations failed (Ascendant/MC/Vertex):',
+      '[BirthChart] Angle calculations failed (Ascendant/MC/IC/Vertex):',
       error,
     );
   }

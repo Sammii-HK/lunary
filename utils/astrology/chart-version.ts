@@ -7,5 +7,6 @@
  *   8 – Fixed retrograde detection, timezone handling, DST edge cases, input validation
  *   9 – Astronomical accuracy improvements, verified against multiple astrology sources
  *  10 – Full cache invalidation on regeneration (8 DB tables, client caches, HTTP cache)
+ *  11 – Server-side generation: reliable geocoding + timezone resolution
  */
-export const CURRENT_BIRTH_CHART_VERSION = 10;
+export const CURRENT_BIRTH_CHART_VERSION = 11;
