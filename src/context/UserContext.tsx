@@ -10,7 +10,6 @@ import {
   ReactNode,
 } from 'react';
 import { useAuthStatus } from '@/components/AuthStatus';
-import { createBirthChartWithMetadata } from 'utils/astrology/birthChartService';
 import { CURRENT_BIRTH_CHART_VERSION } from 'utils/astrology/chart-version';
 import { DailyCache } from '@/lib/cache/dailyCache';
 import { ClientCache } from '@/lib/patterns/snapshot/cache';
@@ -305,41 +304,22 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
       birthChartRefreshRef.current = true;
       birthChartRefreshAttemptRef.current = Date.now();
       try {
-        const { birthChart, timezone, timezoneSource } =
-          await createBirthChartWithMetadata({
-            birthDate: user.birthday,
-            birthTime: birthTime || undefined,
-            birthLocation,
-            fallbackTimezone:
-              Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
-          });
-
-        const resolvedTimezone =
-          timezoneSource === 'location' ? timezone : birthTimezone;
-
-        const chartResponse = await fetch('/api/profile/birth-chart', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ birthChart }),
-        });
-
-        if (!chartResponse.ok) {
-          throw new Error('Birth chart PUT failed');
-        }
-
-        await fetch('/api/profile', {
-          method: 'PUT',
+        const response = await fetch('/api/profile/birth-chart/generate', {
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify({
-            location: {
-              ...location,
-              birthTimezone: resolvedTimezone,
-              birthChartVersion: BIRTH_CHART_VERSION,
-            },
+            birthDate: user.birthday,
+            birthTime: birthTime || undefined,
+            birthLocation: birthLocation || undefined,
+            fallbackTimezone:
+              Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
           }),
         });
+
+        if (!response.ok) {
+          throw new Error('Birth chart generation failed');
+        }
 
         // Reset attempt ref on success so future version bumps work
         birthChartRefreshAttemptRef.current = 0;

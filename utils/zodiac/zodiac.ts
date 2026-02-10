@@ -50,7 +50,10 @@ export const astroPointSymbols = {
   chiron: 'q', // Chiron is 'q' not 'c'
   lilith: 'z', // Lilith
   partoffortune: '?', // Part of Fortune
+  partofspirit: '?', // Part of Spirit (same glyph family as Fortune)
   vertex: 'k', // Vertex - Astronomicon official mapping
+  antivertex: 'k', // Anti-Vertex (uses Vertex glyph)
+  eastpoint: 'c', // East Point (uses Ascendant glyph)
   // Asteroids - Official Astronomicon mappings (v1.1)
   ceres: 'l',
   pallas: 'm',
@@ -74,7 +77,10 @@ export const astroPointUnicode = {
   chiron: '⚷',
   lilith: '⚸',
   partoffortune: '⊗',
+  partofspirit: '⊕',
   vertex: 'Vx', // No standard Unicode for Vertex
+  antivertex: 'aVx',
+  eastpoint: 'EP',
 };
 
 // Astromicon zodiac characters (use with font-astro class)
@@ -1040,6 +1046,12 @@ export const astrologicalPoints = {
     mysticalProperties:
       'Your career path, public image, and life direction. How you want to be seen by the world.',
   },
+  imumcoeli: {
+    name: 'Imum Coeli',
+    alias: 'IC',
+    mysticalProperties:
+      'Your roots, home, and innermost self. The foundation of your being and your sense of emotional security.',
+  },
   northnode: {
     name: 'North Node',
     alias: "Dragon's Head",
@@ -1118,11 +1130,29 @@ export const astrologicalPoints = {
     mysticalProperties:
       'An Arabic Part combining Sun, Moon, and Ascendant. Reveals where you find greatest joy, prosperity, and natural flow in life.',
   },
+  partofspirit: {
+    name: 'Part of Spirit',
+    alias: 'Lot of Spirit',
+    mysticalProperties:
+      'The complement to the Part of Fortune. Reveals where your conscious will and purposeful action create meaning, spiritual growth, and fulfilment.',
+  },
   vertex: {
     name: 'Vertex',
     alias: 'The Fated Encounter',
     mysticalProperties:
       'A sensitive point linked to fated encounters and destined relationships. Shows where pivotal people and events enter your life beyond your control.',
+  },
+  antivertex: {
+    name: 'Anti-Vertex',
+    alias: 'The Self-Initiated',
+    mysticalProperties:
+      'Opposite the Vertex, representing encounters and turning points you actively seek out. Shows where your own choices draw transformative experiences.',
+  },
+  eastpoint: {
+    name: 'East Point',
+    alias: 'Equatorial Ascendant',
+    mysticalProperties:
+      'Your true self as expressed through worldly interaction. Reveals how you naturally present yourself in public and social settings, independent of birth latitude.',
   },
 };
 

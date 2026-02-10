@@ -395,8 +395,57 @@ describe('birth-chart route.ts source verification', () => {
 });
 
 // ===========================================================================
-// 7. Verify ALL 4 client-side write paths set birthChartVersion and bust cache
-//    Reads actual source files so tests break if someone removes the fix.
+// 6b. Verify the generate endpoint contains the same invalidation code
+//     The new server-side generate endpoint must invalidate all derived tables.
+// ===========================================================================
+describe('birth-chart generate route.ts source verification', () => {
+  const fs = require('fs');
+  const routeSource = fs.readFileSync(
+    'src/app/api/profile/birth-chart/generate/route.ts',
+    'utf-8',
+  );
+
+  it.each([
+    'synastry_reports',
+    'daily_horoscopes',
+    'monthly_insights',
+    'cosmic_snapshots',
+    'cosmic_reports',
+    'journal_patterns',
+    'pattern_analysis',
+    'year_analysis',
+  ])('generate route source contains DELETE for %s', (table) => {
+    expect(routeSource).toContain(table);
+  });
+
+  it('generate route invalidates friend_connections synastry', () => {
+    expect(routeSource).toContain('friend_connections');
+    expect(routeSource).toContain('synastry_score = NULL');
+    expect(routeSource).toContain('synastry_data = NULL');
+  });
+
+  it('generate route calls invalidateSnapshot', () => {
+    expect(routeSource).toContain('invalidateSnapshot');
+  });
+
+  it('generate route uses parseLocationToCoordinates (server-side geocoding)', () => {
+    expect(routeSource).toContain('parseLocationToCoordinates');
+  });
+
+  it('generate route uses tzLookup (server-side timezone resolution)', () => {
+    expect(routeSource).toContain('tzLookup');
+  });
+
+  it('generate route sets birthChartVersion', () => {
+    expect(routeSource).toContain(
+      'birthChartVersion: CURRENT_BIRTH_CHART_VERSION',
+    );
+  });
+});
+
+// ===========================================================================
+// 7. Verify all client-side callers use the server-side generate endpoint
+//    and still bust client caches after generation.
 // ===========================================================================
 describe('client-side write paths source verification', () => {
   const fs = require('fs');
@@ -411,11 +460,9 @@ describe('client-side write paths source verification', () => {
     'utf-8',
   );
 
-  describe('profile page (handleSave)', () => {
-    it('sets birthChartVersion in location payload', () => {
-      expect(profilePage).toContain(
-        'birthChartVersion: CURRENT_BIRTH_CHART_VERSION',
-      );
+  describe('profile page', () => {
+    it('calls server-side generate endpoint', () => {
+      expect(profilePage).toContain('/api/profile/birth-chart/generate');
     });
 
     it('calls refetchUser(true) to bust browser cache', () => {
@@ -429,32 +476,15 @@ describe('client-side write paths source verification', () => {
     it('clears ClientCache', () => {
       expect(profilePage).toContain('ClientCache.clearAll(');
     });
-  });
 
-  describe('profile page (auto-generate)', () => {
-    // The auto-generate path also needs version + cache clearing
-    it('sets birthChartVersion in auto-generate path', () => {
-      // There should be at least 2 occurrences of birthChartVersion
-      const matches = profilePage.match(
-        /birthChartVersion: CURRENT_BIRTH_CHART_VERSION/g,
-      );
-      expect(matches?.length).toBeGreaterThanOrEqual(2);
-    });
-
-    it('clears DailyCache in auto-generate path', () => {
-      const matches = profilePage.match(/DailyCache\.clear\(\)/g);
-      expect(matches?.length).toBeGreaterThanOrEqual(2);
-    });
-
-    it('clears ClientCache in auto-generate path', () => {
-      const matches = profilePage.match(/ClientCache\.clearAll\(/g);
-      expect(matches?.length).toBeGreaterThanOrEqual(2);
+    it('does NOT use createBirthChartWithMetadata (moved server-side)', () => {
+      expect(profilePage).not.toContain('createBirthChartWithMetadata');
     });
   });
 
   describe('UserContext (version bump regeneration)', () => {
-    it('sets birthChartVersion in location update', () => {
-      expect(userContext).toContain('birthChartVersion: BIRTH_CHART_VERSION');
+    it('calls server-side generate endpoint', () => {
+      expect(userContext).toContain('/api/profile/birth-chart/generate');
     });
 
     it('calls fetchUserData(true) to bust cache', () => {
@@ -468,13 +498,15 @@ describe('client-side write paths source verification', () => {
     it('clears ClientCache', () => {
       expect(userContext).toContain('ClientCache.clearAll(');
     });
+
+    it('does NOT use createBirthChartWithMetadata (moved server-side)', () => {
+      expect(userContext).not.toContain('createBirthChartWithMetadata');
+    });
   });
 
   describe('OnboardingFlow', () => {
-    it('sets birthChartVersion in location payload', () => {
-      expect(onboarding).toContain(
-        'birthChartVersion: CURRENT_BIRTH_CHART_VERSION',
-      );
+    it('calls server-side generate endpoint', () => {
+      expect(onboarding).toContain('/api/profile/birth-chart/generate');
     });
 
     it('calls refetch(true) to bust browser cache', () => {
@@ -487,6 +519,10 @@ describe('client-side write paths source verification', () => {
 
     it('clears ClientCache', () => {
       expect(onboarding).toContain('ClientCache.clearAll(');
+    });
+
+    it('does NOT use createBirthChartWithMetadata (moved server-side)', () => {
+      expect(onboarding).not.toContain('createBirthChartWithMetadata');
     });
   });
 });
@@ -533,10 +569,10 @@ describe('UserContext: no birthLocation guard on version check', () => {
 });
 
 // ===========================================================================
-// 10. All write paths check chartResponse.ok before setting birthChartVersion
-//     If the birth chart PUT fails, we must NOT mark the version as current.
+// 10. All write paths check response.ok before clearing caches
+//     If the server-side generate endpoint fails, caches must NOT be cleared.
 // ===========================================================================
-describe('chartResponse.ok guard on all write paths', () => {
+describe('response.ok guard on all write paths', () => {
   const fs = require('fs');
 
   const profilePage = fs.readFileSync(
@@ -549,20 +585,20 @@ describe('chartResponse.ok guard on all write paths', () => {
     'utf-8',
   );
 
-  it('profile page handleSave checks chartResponse.ok', () => {
-    expect(profilePage).toContain('if (chartResponse.ok)');
+  it('profile page handleSave checks generateResponse.ok', () => {
+    expect(profilePage).toContain('if (generateResponse.ok)');
   });
 
-  it('profile page auto-generate checks autoGenResponse.ok', () => {
-    expect(profilePage).toContain('if (autoGenResponse.ok)');
+  it('profile page auto-generate checks response.ok', () => {
+    expect(profilePage).toContain('if (response.ok)');
   });
 
-  it('UserContext throws on failed chart PUT', () => {
-    expect(userContext).toContain('if (!chartResponse.ok)');
+  it('UserContext throws on failed generate', () => {
+    expect(userContext).toContain('if (!response.ok)');
   });
 
-  it('OnboardingFlow checks chartResponse.ok', () => {
-    expect(onboarding).toContain('if (chartResponse.ok)');
+  it('OnboardingFlow checks generateResponse.ok', () => {
+    expect(onboarding).toContain('if (generateResponse.ok)');
   });
 });
 

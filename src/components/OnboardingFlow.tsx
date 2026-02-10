@@ -15,8 +15,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createBirthChartWithMetadata } from '../../utils/astrology/birthChartService';
-import { CURRENT_BIRTH_CHART_VERSION } from '../../utils/astrology/chart-version';
 import { DailyCache } from '@/lib/cache/dailyCache';
 import { ClientCache } from '@/lib/patterns/snapshot/cache';
 import { conversionTracking } from '@/lib/analytics';
@@ -684,50 +682,28 @@ export function OnboardingFlow({
         conversionTracking.birthDataSubmitted(user.id);
       }
 
-      // Generate birth chart immediately after birthday is saved
+      // Generate birth chart server-side (reliable geocoding + timezone)
       try {
-        const { birthChart, timezone, timezoneSource } =
-          await createBirthChartWithMetadata({
-            birthDate: birthday,
-            birthTime: birthTime || undefined,
-            birthLocation: birthLocation || undefined,
-            fallbackTimezone:
-              Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
-          });
-        if (birthChart) {
-          const chartResponse = await fetch('/api/profile/birth-chart', {
-            method: 'PUT',
+        const generateResponse = await fetch(
+          '/api/profile/birth-chart/generate',
+          {
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ birthChart }),
-          });
+            body: JSON.stringify({
+              birthDate: birthday,
+              birthTime: birthTime || undefined,
+              birthLocation: birthLocation || undefined,
+              fallbackTimezone:
+                Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+            }),
+          },
+        );
 
-          if (chartResponse.ok) {
-            // Only set version + clear caches if chart was actually saved
-            const resolvedTz =
-              birthLocation && timezoneSource === 'location' && timezone
-                ? timezone
-                : existingLocation?.birthTimezone;
-
-            await fetch('/api/profile', {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({
-                location: {
-                  ...existingLocation,
-                  ...(birthTime ? { birthTime } : {}),
-                  ...(birthLocation ? { birthLocation } : {}),
-                  ...(resolvedTz ? { birthTimezone: resolvedTz } : {}),
-                  birthChartVersion: CURRENT_BIRTH_CHART_VERSION,
-                },
-              }),
-            });
-
-            DailyCache.clear();
-            if (user?.id) ClientCache.clearAll(user.id);
-          }
-          console.log('✅ Birth chart generated and saved to Postgres');
+        if (generateResponse.ok) {
+          DailyCache.clear();
+          if (user?.id) ClientCache.clearAll(user.id);
+          console.log('Birth chart generated and saved server-side');
         }
       } catch (chartError) {
         console.error('Failed to generate birth chart:', chartError);
