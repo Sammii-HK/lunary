@@ -62,8 +62,7 @@ export function ShareMoonPhase({
         params.set('illumination', illumination.toString());
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-      const ogImageUrl = `${baseUrl}/api/og/moon?${params.toString()}`;
+      const ogImageUrl = `/api/og/moon?${params.toString()}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) {

@@ -56,8 +56,8 @@ export function ShareSynastry({
     setError(null);
 
     try {
-      let currentShareId = shareRecord?.shareId;
-      let currentShareUrl = shareRecord?.shareUrl;
+      let currentShareId = shareRecord?.shareId ?? '';
+      let currentShareUrl = shareRecord?.shareUrl ?? '';
 
       if (!currentShareId || !currentShareUrl) {
         const response = await fetch('/api/share/synastry', {

@@ -63,8 +63,8 @@ export function ShareTarotSpread({
     setError(null);
 
     try {
-      let currentShareId = shareRecord?.shareId;
-      let currentShareUrl = shareRecord?.shareUrl;
+      let currentShareId = shareRecord?.shareId ?? '';
+      let currentShareUrl = shareRecord?.shareUrl ?? '';
 
       if (!currentShareId || !currentShareUrl) {
         const response = await fetch('/api/share/tarot-spread', {
@@ -99,8 +99,7 @@ export function ShareTarotSpread({
         });
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-      const ogImageUrl = `${baseUrl}/api/og/share/tarot-spread?shareId=${currentShareId}&format=${format}&v=${OG_IMAGE_VERSION}`;
+      const ogImageUrl = `/api/og/share/tarot-spread?shareId=${encodeURIComponent(currentShareId)}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) {
@@ -110,7 +109,11 @@ export function ShareTarotSpread({
       const blob = await imageResponse.blob();
       setImageBlob(blob);
 
-      shareTracking.shareViewed(user?.id, 'tarot-spread', format);
+      shareTracking.shareViewed(
+        user?.id || 'anonymous',
+        'tarot-spread',
+        format,
+      );
     } catch (err) {
       console.error('Generate card error:', err);
       setError(

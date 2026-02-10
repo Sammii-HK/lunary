@@ -343,8 +343,8 @@ export function ShareZodiacSeason({
     setError(null);
 
     try {
-      let currentShareId = shareRecord?.shareId;
-      let currentShareUrl = shareRecord?.shareUrl;
+      let currentShareId = shareRecord?.shareId ?? '';
+      let currentShareUrl = shareRecord?.shareUrl ?? '';
 
       if (!currentShareId || !currentShareUrl) {
         const response = await fetch('/api/share/zodiac-season', {
@@ -501,7 +501,7 @@ export function ShareZodiacSeason({
   };
 
   // Don't show button if not in season transition window (unless in demo mode)
-  if (!seasonData && !demo) {
+  if (!seasonData) {
     return null;
   }
 
