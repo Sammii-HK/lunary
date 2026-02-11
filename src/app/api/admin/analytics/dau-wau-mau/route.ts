@@ -538,7 +538,10 @@ export async function GET(request: NextRequest) {
                   ((signedInProductWau / signedInProductMau) * 100).toFixed(2),
                 )
               : 0,
-          signed_in_product_returning_users: returningMau,
+          signed_in_product_returning_users: Math.min(
+            Number(latest.signed_in_product_returning_users || returningMau),
+            signedInProductMau,
+          ),
           signed_in_product_users: signedInProductMau,
           signed_in_product_avg_sessions_per_user: Number(
             latest.avg_active_days_per_week || 0,

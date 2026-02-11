@@ -505,7 +505,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
         <div>
           <h2 className='text-sm font-medium text-zinc-200'>Activation Rate</h2>
           <p className='text-xs text-zinc-500'>
-            Users who completed 1+ key action within 24 hours of signup.
+            Users who completed 1+ key action within 7 days of signup.
           </p>
         </div>
         <Card className='border-zinc-800/30 bg-zinc-900/10'>
@@ -558,7 +558,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               Tier is resolved at the time of the activation event.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className='overflow-x-auto'>
             <MetricTable
               columns={[
                 { label: 'Feature', key: 'feature', type: 'text' },
@@ -1093,7 +1093,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               Retention by signup week/month (first `app_opened`).
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className='overflow-x-auto'>
             <div className='mb-4 text-xs text-zinc-400'>
               Keeps cohort size, Day 1/7/30 retention, and maturity notes in
               view.

@@ -164,7 +164,7 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className='mx-auto max-w-7xl space-y-8 px-4 py-6'>
+    <div className='mx-auto max-w-7xl space-y-8 overflow-x-hidden px-4 py-6'>
       {/* Header */}
       <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
         <div>
@@ -178,20 +178,20 @@ export default function AnalyticsPage() {
 
         <div className='flex flex-wrap items-center gap-2'>
           {/* Date Range Picker */}
-          <div className='flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2'>
-            <CalendarRange className='h-4 w-4 text-zinc-400' />
+          <div className='flex w-full flex-col gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2 sm:w-auto sm:flex-row sm:items-center'>
+            <CalendarRange className='hidden h-4 w-4 text-zinc-400 sm:block' />
             <input
               type='date'
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className='bg-transparent text-sm text-zinc-200 outline-none'
+              className='min-w-0 flex-1 bg-transparent text-sm text-zinc-200 outline-none sm:flex-none'
             />
-            <span className='text-zinc-500'>to</span>
+            <span className='hidden text-zinc-500 sm:inline'>to</span>
             <input
               type='date'
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className='bg-transparent text-sm text-zinc-200 outline-none'
+              className='min-w-0 flex-1 bg-transparent text-sm text-zinc-200 outline-none sm:flex-none'
             />
           </div>
 
@@ -201,7 +201,7 @@ export default function AnalyticsPage() {
             onChange={(e) =>
               setGranularity(e.target.value as 'day' | 'week' | 'month')
             }
-            className='rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-sm text-zinc-200 outline-none'
+            className='w-full rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-sm text-zinc-200 outline-none sm:w-auto'
           >
             <option value='day'>Daily</option>
             <option value='week'>Weekly</option>
@@ -221,7 +221,7 @@ export default function AnalyticsPage() {
             {showExportMenu && (
               <div
                 ref={exportMenuRef}
-                className='absolute right-0 top-full z-10 mt-2 w-48 rounded-lg border border-zinc-800 bg-zinc-900 p-2 shadow-lg'
+                className='absolute right-0 top-full z-10 mt-2 w-44 max-w-[calc(100vw-2rem)] rounded-lg border border-zinc-800 bg-zinc-900 p-2 shadow-lg sm:w-48'
               >
                 <button
                   onClick={handleExportCsv}
@@ -301,16 +301,16 @@ export default function AnalyticsPage() {
           onValueChange={(v) => setActiveTab(v as Tab)}
           className='space-y-6'
         >
-          <TabsList className='rounded-xl border border-zinc-800/40 bg-zinc-900/20 p-1'>
+          <TabsList className='w-full rounded-xl border border-zinc-800/40 bg-zinc-900/20 p-1'>
             <TabsTrigger
               value='snapshot'
-              className='rounded-lg px-4 py-2 text-sm'
+              className='rounded-lg px-4 py-2 text-xs sm:text-sm'
             >
               Investor Snapshot
             </TabsTrigger>
             <TabsTrigger
               value='details'
-              className='rounded-lg px-4 py-2 text-sm'
+              className='rounded-lg px-4 py-2 text-xs sm:text-sm'
             >
               Operational Details
             </TabsTrigger>

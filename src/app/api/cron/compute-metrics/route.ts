@@ -121,6 +121,7 @@ export async function GET(request: NextRequest) {
       conversionsResult,
       featureAdoptionResult,
       returningReferrerResult,
+      signedInProductReturningResult,
     ] = await Promise.all([
       // DAU - all users active on target date (includes anonymous)
       sql.query(
@@ -667,7 +668,7 @@ export async function GET(request: NextRequest) {
                  WHERE (ce.user_id = u.id OR ail.user_id = u.id)
                    AND ce.event_type = ANY($5::text[])
                    AND ce.created_at >= u."createdAt"
-                   AND ce.created_at <= u."createdAt" + INTERVAL '24 hours'
+                   AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
                )`
           : `SELECT COUNT(DISTINCT u.id) as count
              FROM "user" u
@@ -675,7 +676,7 @@ export async function GET(request: NextRequest) {
              WHERE u."createdAt" >= $1 AND u."createdAt" <= $2
                AND ce.event_type = ANY($5::text[])
                AND ce.created_at >= u."createdAt"
-               AND ce.created_at <= u."createdAt" + INTERVAL '24 hours'
+               AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
                AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))`,
         [
           dayStart.toISOString(),
@@ -797,6 +798,33 @@ export async function GET(request: NextRequest) {
           TEST_EMAIL_EXACT,
         ],
       ),
+
+      // Signed-in product returning users (2+ active days with product events in MAU window)
+      // Matches live path logic: productUsageSummaryResult.rows.filter(r => active_days > 1)
+      sql.query(
+        `WITH resolved AS (
+           SELECT ${signedInId} as resolved_id, DATE(ce.created_at) as event_date
+           FROM conversion_events ce
+           ${idJoin}
+           WHERE ce.created_at >= $1 AND ce.created_at <= $2
+             AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+             AND ${whereBase}
+         )
+         SELECT COUNT(DISTINCT resolved_id) as count
+         FROM (
+           SELECT resolved_id
+           FROM resolved
+           WHERE resolved_id IS NOT NULL
+           GROUP BY resolved_id
+           HAVING COUNT(DISTINCT event_date) >= 2
+         ) returning_product_users`,
+        [
+          mauStart.toISOString(),
+          dayEnd.toISOString(),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      ),
     ]);
 
     // Extract values
@@ -819,6 +847,9 @@ export async function GET(request: NextRequest) {
     const returningDau = Number(returningDauResult.rows[0]?.count || 0);
     const returningWau = Number(returningWauResult.rows[0]?.count || 0);
     const returningMau = Number(returningMauResult.rows[0]?.count || 0);
+    const signedInProductReturningUsers = Number(
+      signedInProductReturningResult.rows[0]?.count || 0,
+    );
     const activeDays = activeDaysResult.rows[0] || {};
     const activeDays1 = Number(activeDays.days_1 || 0);
     const activeDays2_3 = Number(activeDays.days_2_3 || 0);
@@ -904,6 +935,7 @@ export async function GET(request: NextRequest) {
         dashboard_adoption, horoscope_adoption, tarot_adoption,
         chart_adoption, guide_adoption, ritual_adoption,
         returning_referrer_organic, returning_referrer_direct, returning_referrer_internal,
+        signed_in_product_returning_users,
         computed_at, computation_duration_ms
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
@@ -911,7 +943,7 @@ export async function GET(request: NextRequest) {
         $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
         $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
         $41, $42, $43, $44, $45, $46, $47, $48, $49, $50,
-        NOW(), $51
+        $51, NOW(), $52
       )
       ON CONFLICT (metric_date)
       DO UPDATE SET
@@ -964,6 +996,7 @@ export async function GET(request: NextRequest) {
         returning_referrer_organic = EXCLUDED.returning_referrer_organic,
         returning_referrer_direct = EXCLUDED.returning_referrer_direct,
         returning_referrer_internal = EXCLUDED.returning_referrer_internal,
+        signed_in_product_returning_users = EXCLUDED.signed_in_product_returning_users,
         computed_at = NOW(),
         computation_duration_ms = EXCLUDED.computation_duration_ms`,
       [
@@ -1017,7 +1050,8 @@ export async function GET(request: NextRequest) {
         returningReferrerOrganic, // $48
         returningReferrerDirect, // $49
         returningReferrerInternal, // $50
-        computationDuration, // $51
+        signedInProductReturningUsers, // $51
+        computationDuration, // $52
       ],
     );
 

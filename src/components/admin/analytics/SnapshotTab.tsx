@@ -218,7 +218,7 @@ export function SnapshotTab({
               status={
                 (activation?.activationRate ?? 0) > 30 ? 'excellent' : 'good'
               }
-              description='24h activation'
+              description='7-day activation'
             />
           </div>
         </CardContent>
@@ -515,7 +515,7 @@ export function SnapshotTab({
           eyebrow='Core App Usage'
           title='App Active Users'
           description='Measures who opened the app in the selected window.'
-          footerText='App Active Users (DAU/WAU/MAU) are deduplicated by canonical identity per UTC window.'
+          footerText='App Active Users (DAU/WAU/MAU) are deduplicated by canonical identity per UTC window. Counts may differ from Vercel analytics due to bot filtering and PWA activity.'
         >
           <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
             <MiniStat
@@ -577,7 +577,7 @@ export function SnapshotTab({
           description='Uses the most recent app_opened metadata for returning users.'
           footerText='Segments use the most recent app_opened metadata (referrer, UTM source, or origin type) for returning users (2+ active days).'
         >
-          <div className='grid gap-4 md:grid-cols-3'>
+          <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
             <MiniStat
               label='Organic returning'
               value={returningReferrerBreakdown?.organic_returning ?? 0}
@@ -604,7 +604,7 @@ export function SnapshotTab({
           title='Distinct active days per user'
           description='Users grouped by distinct active days in the selected range.'
         >
-          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
+          <div className='grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5'>
             <MiniStat
               label='1 day'
               value={engagementOverview?.active_days_distribution?.['1'] ?? 0}
@@ -784,40 +784,25 @@ export function SnapshotTab({
 
       {/* Momentum */}
       <section className='space-y-3'>
-        <div>
-          <h2 className='text-sm font-medium text-zinc-200'>Momentum</h2>
-          <p className='text-xs text-zinc-500'>
-            Rolling 7-day averages plus week-over-week deltas for site and
-            signed-in product usage.
-          </p>
-        </div>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>Momentum</CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
-              Site momentum uses app_opened. Product momentum uses signed-in
-              product events. Activation uses signup activation rate.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='space-y-3'>
-            <MomentumSection
-              title='Site momentum (app_opened)'
-              rows={siteMomentumRows}
-            />
-            <MomentumSection
-              title='Product momentum (signed-in)'
-              rows={productMomentumRows}
-            />
-            <MomentumSection
-              title='Activation momentum'
-              rows={activationMomentumRows}
-            />
-            <p className='text-xs text-zinc-400'>
-              Activation momentum is expressed as the rolling rate plus its
-              change vs. the previous 7-day window.
-            </p>
-          </CardContent>
-        </Card>
+        <StatSection
+          eyebrow='Momentum'
+          title='Rolling Averages & Deltas'
+          description='Site uses app_opened. Product uses signed-in events. Activation uses signup rate.'
+          footerText='Activation momentum is expressed as the rolling rate plus its change vs. the previous 7-day window.'
+        >
+          <MomentumSection
+            title='Site momentum (app_opened)'
+            rows={siteMomentumRows}
+          />
+          <MomentumSection
+            title='Product momentum (signed-in)'
+            rows={productMomentumRows}
+          />
+          <MomentumSection
+            title='Activation momentum'
+            rows={activationMomentumRows}
+          />
+        </StatSection>
       </section>
 
       {/* Growth History */}
@@ -845,7 +830,7 @@ function MomentumSection({
       {rows.map((row) => (
         <div
           key={row.id}
-          className='flex items-start justify-between gap-4 rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-4 py-3'
+          className='flex flex-wrap items-start justify-between gap-2 rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-4 py-3 sm:gap-4'
         >
           <div>
             <p className='text-xs uppercase tracking-wider text-zinc-500'>
