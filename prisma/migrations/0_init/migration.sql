@@ -1,5 +1,8 @@
--- Enable required extensions
-CREATE EXTENSION IF NOT EXISTS vector;
+-- CreateExtension
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- CreateExtension
+CREATE EXTENSION IF NOT EXISTS "vector";
 
 -- CreateEnum
 CREATE TYPE "tour_status" AS ENUM ('ACTIVE', 'COMPLETED', 'DISMISSED');
@@ -31,6 +34,12 @@ CREATE TABLE "social_posts" (
     "source_type" TEXT,
     "source_id" TEXT,
     "source_title" TEXT,
+    "app_feature" TEXT,
+    "content_type" TEXT,
+    "grimoire_slug" TEXT,
+    "starfield_seed" TEXT,
+    "video_metadata" JSONB,
+    "video_script" JSONB,
 
     CONSTRAINT "social_posts_pkey" PRIMARY KEY ("id")
 );
@@ -549,14 +558,14 @@ CREATE TABLE "journal_patterns" (
     "id" SERIAL NOT NULL,
     "user_id" TEXT NOT NULL,
     "pattern_type" TEXT NOT NULL,
-    "pattern_category" TEXT,
     "pattern_data" JSONB NOT NULL,
-    "confidence" DOUBLE PRECISION,
     "generated_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
     "expires_at" TIMESTAMPTZ(6),
+    "confidence" DOUBLE PRECISION,
     "first_detected" TIMESTAMPTZ(6),
     "last_observed" TIMESTAMPTZ(6),
     "metadata" JSONB,
+    "pattern_category" TEXT,
     "source_snapshot" TEXT,
 
     CONSTRAINT "journal_patterns_pkey" PRIMARY KEY ("id")
@@ -888,13 +897,13 @@ CREATE TABLE "subscriptions" (
     "discount_percent" DECIMAL(5,2),
     "monthly_amount_due" DECIMAL(10,2),
     "coupon_id" TEXT,
-    "is_paying" BOOLEAN DEFAULT (COALESCE(monthly_amount_due, (0)::numeric) > (0)::numeric),
-    "trial_used" BOOLEAN DEFAULT false,
-    "promo_code" TEXT,
+    "is_paying" BOOLEAN DEFAULT false,
     "discount_ends_at" TIMESTAMPTZ(6),
-    "sync_error_count" INTEGER DEFAULT 0,
     "last_sync_error" TEXT,
     "last_sync_error_at" TIMESTAMPTZ(6),
+    "promo_code" TEXT,
+    "sync_error_count" INTEGER DEFAULT 0,
+    "trial_used" BOOLEAN DEFAULT false,
     "cancel_at_period_end" BOOLEAN DEFAULT false,
 
     CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id")
@@ -1026,6 +1035,9 @@ CREATE TABLE "user_referrals" (
     "created_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
     "reward_granted" BOOLEAN DEFAULT false,
     "reward_granted_at" TIMESTAMPTZ(6),
+    "activated" BOOLEAN DEFAULT false,
+    "activated_at" TIMESTAMPTZ(6),
+    "activation_event" VARCHAR(100),
 
     CONSTRAINT "user_referrals_pkey" PRIMARY KEY ("id")
 );
@@ -1034,7 +1046,7 @@ CREATE TABLE "user_referrals" (
 CREATE TABLE "user_sessions" (
     "id" SERIAL NOT NULL,
     "user_id" TEXT NOT NULL,
-    "session_date" DATE NOT NULL DEFAULT CURRENT_DATE,
+    "session_date" DATE NOT NULL DEFAULT (CURRENT_DATE),
     "session_timestamp" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
     "page_path" TEXT,
     "feature_name" TEXT,
@@ -1058,6 +1070,98 @@ CREATE TABLE "user_streaks" (
     "last_ritual_date" DATE,
 
     CONSTRAINT "user_streaks_pkey" PRIMARY KEY ("user_id")
+);
+
+-- CreateTable
+CREATE TABLE "user_progress" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "user_id" TEXT NOT NULL,
+    "skill_tree" VARCHAR(50) NOT NULL,
+    "current_level" INTEGER NOT NULL DEFAULT 1,
+    "total_actions" INTEGER NOT NULL DEFAULT 0,
+    "unlocked_features" JSONB DEFAULT '[]',
+    "last_level_up_at" TIMESTAMPTZ(6),
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_progress_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "relationship_profiles" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "user_id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "relationship_type" TEXT,
+    "birthday" TEXT NOT NULL,
+    "birth_time" TEXT,
+    "birth_location" TEXT,
+    "birth_chart" JSONB,
+    "notes" TEXT,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "birth_chart_version" INTEGER DEFAULT 0,
+
+    CONSTRAINT "relationship_profiles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "synastry_reports" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "user_id" TEXT NOT NULL,
+    "relationship_profile_id" UUID NOT NULL,
+    "compatibility_score" INTEGER,
+    "synastry_aspects" JSONB,
+    "composite_chart" JSONB,
+    "element_balance" JSONB,
+    "modality_balance" JSONB,
+    "analysis_summary" TEXT,
+    "calculated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "synastry_reports_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "friend_invites" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "inviter_id" TEXT NOT NULL,
+    "invite_code" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "accepted_by_id" TEXT,
+    "expires_at" TIMESTAMPTZ(6) NOT NULL,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "accepted_at" TIMESTAMPTZ(6),
+
+    CONSTRAINT "friend_invites_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "friend_connections" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "user_id" TEXT NOT NULL,
+    "friend_id" TEXT NOT NULL,
+    "nickname" TEXT,
+    "relationship_type" TEXT,
+    "synastry_score" INTEGER,
+    "synastry_data" JSONB,
+    "last_synastry_calc" TIMESTAMPTZ(6),
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "friend_connections_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "friend_celebrations" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "sender_id" TEXT NOT NULL,
+    "receiver_id" TEXT NOT NULL,
+    "milestone" INTEGER NOT NULL,
+    "message" TEXT,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "friend_celebrations_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -1199,6 +1303,33 @@ CREATE TABLE "youtube_uploads" (
 );
 
 -- CreateTable
+CREATE TABLE "feature_announcements" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "icon" TEXT NOT NULL DEFAULT 'Sparkles',
+    "cta_label" TEXT,
+    "cta_href" TEXT,
+    "required_tier" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "released_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "feature_announcements_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "feature_announcements_seen" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "user_id" TEXT NOT NULL,
+    "announcement_id" TEXT NOT NULL,
+    "seen_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "feature_announcements_seen_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "orphaned_subscriptions" (
     "id" SERIAL NOT NULL,
     "stripe_subscription_id" TEXT NOT NULL,
@@ -1266,6 +1397,167 @@ CREATE TABLE "pending_checkouts" (
     CONSTRAINT "pending_checkouts_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "metric_snapshots" (
+    "period_type" VARCHAR(20) NOT NULL,
+    "period_key" VARCHAR(50) NOT NULL,
+    "period_start" DATE NOT NULL,
+    "period_end" DATE NOT NULL,
+    "new_signups" INTEGER NOT NULL,
+    "new_trials" INTEGER NOT NULL,
+    "new_paying_subscribers" INTEGER NOT NULL,
+    "wau" INTEGER NOT NULL,
+    "activation_rate" REAL NOT NULL,
+    "trial_to_paid_conversion_rate" REAL NOT NULL,
+    "mrr" REAL NOT NULL,
+    "active_subscribers" INTEGER NOT NULL,
+    "churn_rate" REAL NOT NULL,
+    "d7_retention" REAL,
+    "extras" JSONB,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "metric_snapshots_pkey" PRIMARY KEY ("period_type","period_key")
+);
+
+-- CreateTable
+CREATE TABLE "native_push_tokens" (
+    "id" SERIAL NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "platform" TEXT NOT NULL,
+    "timezone" TEXT,
+    "is_active" BOOLEAN DEFAULT true,
+    "preferences" JSONB DEFAULT '{}',
+    "last_notification_sent" TIMESTAMPTZ(6),
+    "created_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "native_push_tokens_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "community_spaces" (
+    "id" SERIAL NOT NULL,
+    "space_type" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT,
+    "sign" TEXT,
+    "planet" TEXT,
+    "metadata" JSONB DEFAULT '{}',
+    "is_active" BOOLEAN DEFAULT true,
+    "starts_at" TIMESTAMPTZ(6),
+    "ends_at" TIMESTAMPTZ(6),
+    "post_count" INTEGER DEFAULT 0,
+    "member_count" INTEGER DEFAULT 0,
+    "created_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "community_spaces_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "community_posts" (
+    "id" SERIAL NOT NULL,
+    "space_id" INTEGER NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "post_text" TEXT NOT NULL,
+    "is_anonymous" BOOLEAN DEFAULT true,
+    "is_approved" BOOLEAN DEFAULT true,
+    "created_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "community_posts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "community_memberships" (
+    "id" SERIAL NOT NULL,
+    "space_id" INTEGER NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "joined_at" TIMESTAMPTZ(6) DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "community_memberships_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "instagram_scheduled_posts" (
+    "id" SERIAL NOT NULL,
+    "date" DATE NOT NULL,
+    "type" VARCHAR(50) NOT NULL,
+    "scheduled_time" TIMESTAMPTZ(6) NOT NULL,
+    "caption" TEXT NOT NULL,
+    "image_url" TEXT,
+    "hashtags" TEXT[],
+    "metadata" JSONB DEFAULT '{}',
+    "posted" BOOLEAN DEFAULT false,
+    "posted_at" TIMESTAMPTZ(6),
+    "post_id" VARCHAR(255),
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "instagram_scheduled_posts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "daily_metrics" (
+    "metric_date" DATE NOT NULL,
+    "dau" INTEGER NOT NULL DEFAULT 0,
+    "wau" INTEGER NOT NULL DEFAULT 0,
+    "mau" INTEGER NOT NULL DEFAULT 0,
+    "signed_in_product_dau" INTEGER NOT NULL DEFAULT 0,
+    "signed_in_product_wau" INTEGER NOT NULL DEFAULT 0,
+    "signed_in_product_mau" INTEGER NOT NULL DEFAULT 0,
+    "app_opened_mau" INTEGER NOT NULL DEFAULT 0,
+    "new_signups" INTEGER NOT NULL DEFAULT 0,
+    "activated_users" INTEGER NOT NULL DEFAULT 0,
+    "activation_rate" DECIMAL(5,2) DEFAULT 0,
+    "mrr" DECIMAL(10,2) DEFAULT 0,
+    "active_subscriptions" INTEGER DEFAULT 0,
+    "trial_subscriptions" INTEGER DEFAULT 0,
+    "new_conversions" INTEGER DEFAULT 0,
+    "stickiness" DECIMAL(5,2) DEFAULT 0,
+    "avg_active_days_per_week" DECIMAL(5,2) DEFAULT 0,
+    "dashboard_adoption" DECIMAL(5,2) DEFAULT 0,
+    "horoscope_adoption" DECIMAL(5,2) DEFAULT 0,
+    "tarot_adoption" DECIMAL(5,2) DEFAULT 0,
+    "chart_adoption" DECIMAL(5,2) DEFAULT 0,
+    "guide_adoption" DECIMAL(5,2) DEFAULT 0,
+    "ritual_adoption" DECIMAL(5,2) DEFAULT 0,
+    "computed_at" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
+    "computation_duration_ms" INTEGER,
+    "created_at" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
+    "app_opened_dau" INTEGER NOT NULL DEFAULT 0,
+    "app_opened_wau" INTEGER NOT NULL DEFAULT 0,
+    "returning_dau" INTEGER NOT NULL DEFAULT 0,
+    "returning_wau" INTEGER NOT NULL DEFAULT 0,
+    "returning_mau" INTEGER NOT NULL DEFAULT 0,
+    "reach_dau" INTEGER NOT NULL DEFAULT 0,
+    "reach_wau" INTEGER NOT NULL DEFAULT 0,
+    "reach_mau" INTEGER NOT NULL DEFAULT 0,
+    "grimoire_dau" INTEGER NOT NULL DEFAULT 0,
+    "grimoire_wau" INTEGER NOT NULL DEFAULT 0,
+    "grimoire_mau" INTEGER NOT NULL DEFAULT 0,
+    "grimoire_only_mau" INTEGER NOT NULL DEFAULT 0,
+    "d1_retention" DECIMAL(5,2) DEFAULT 0,
+    "d7_retention" DECIMAL(5,2) DEFAULT 0,
+    "d30_retention" DECIMAL(5,2) DEFAULT 0,
+    "active_days_1" INTEGER NOT NULL DEFAULT 0,
+    "active_days_2_3" INTEGER NOT NULL DEFAULT 0,
+    "active_days_4_7" INTEGER NOT NULL DEFAULT 0,
+    "active_days_8_14" INTEGER NOT NULL DEFAULT 0,
+    "active_days_15_plus" INTEGER NOT NULL DEFAULT 0,
+    "stickiness_wau_mau" DECIMAL(5,2) DEFAULT 0,
+    "total_accounts" INTEGER NOT NULL DEFAULT 0,
+    "grimoire_to_app_rate" DECIMAL(5,2) DEFAULT 0,
+    "grimoire_to_app_users" INTEGER NOT NULL DEFAULT 0,
+    "returning_referrer_organic" INTEGER DEFAULT 0,
+    "returning_referrer_direct" INTEGER DEFAULT 0,
+    "returning_referrer_internal" INTEGER DEFAULT 0,
+
+    CONSTRAINT "daily_metrics_pkey" PRIMARY KEY ("metric_date")
+);
+
 -- CreateIndex
 CREATE INDEX "idx_social_posts_status" ON "social_posts"("status");
 
@@ -1277,6 +1569,12 @@ CREATE INDEX "idx_social_posts_created_at" ON "social_posts"("created_at");
 
 -- CreateIndex
 CREATE INDEX "idx_social_posts_scheduled_date" ON "social_posts"("scheduled_date");
+
+-- CreateIndex
+CREATE INDEX "idx_social_posts_content_type" ON "social_posts"("content_type");
+
+-- CreateIndex
+CREATE INDEX "idx_social_posts_grimoire_slug" ON "social_posts"("grimoire_slug");
 
 -- CreateIndex
 CREATE INDEX "idx_ai_threads_user_id" ON "ai_threads"("user_id");
@@ -1915,6 +2213,54 @@ CREATE INDEX "idx_user_sessions_user_timestamp" ON "user_sessions"("user_id", "s
 CREATE INDEX "idx_user_streaks_last_check_in" ON "user_streaks"("last_check_in");
 
 -- CreateIndex
+CREATE INDEX "idx_user_progress_user_id" ON "user_progress"("user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_user_progress_skill_tree" ON "user_progress"("skill_tree");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "idx_user_progress_user_skill_unique" ON "user_progress"("user_id", "skill_tree");
+
+-- CreateIndex
+CREATE INDEX "idx_relationship_profiles_user_id" ON "relationship_profiles"("user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_relationship_profiles_type" ON "relationship_profiles"("relationship_type");
+
+-- CreateIndex
+CREATE INDEX "idx_synastry_reports_user_id" ON "synastry_reports"("user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_synastry_reports_profile_id" ON "synastry_reports"("relationship_profile_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "friend_invites_invite_code_key" ON "friend_invites"("invite_code");
+
+-- CreateIndex
+CREATE INDEX "idx_friend_invites_inviter" ON "friend_invites"("inviter_id");
+
+-- CreateIndex
+CREATE INDEX "idx_friend_invites_code" ON "friend_invites"("invite_code");
+
+-- CreateIndex
+CREATE INDEX "idx_friend_invites_status" ON "friend_invites"("status");
+
+-- CreateIndex
+CREATE INDEX "idx_friend_connections_user" ON "friend_connections"("user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_friend_connections_friend" ON "friend_connections"("friend_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "idx_friend_connections_unique" ON "friend_connections"("user_id", "friend_id");
+
+-- CreateIndex
+CREATE INDEX "idx_celebrations_receiver" ON "friend_celebrations"("receiver_id", "created_at" DESC);
+
+-- CreateIndex
+CREATE INDEX "idx_celebrations_sender" ON "friend_celebrations"("sender_id", "receiver_id", "milestone");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "idx_video_jobs_script_id" ON "video_jobs"("script_id");
 
 -- CreateIndex
@@ -1964,6 +2310,18 @@ CREATE INDEX "idx_yearly_forecasts_updated_at" ON "yearly_forecasts"("updated_at
 
 -- CreateIndex
 CREATE UNIQUE INDEX "youtube_uploads_topic_scheduled_date_key" ON "youtube_uploads"("topic", "scheduled_date");
+
+-- CreateIndex
+CREATE INDEX "idx_feature_announcements_active" ON "feature_announcements"("is_active");
+
+-- CreateIndex
+CREATE INDEX "idx_feature_announcements_released" ON "feature_announcements"("released_at");
+
+-- CreateIndex
+CREATE INDEX "idx_feature_announcements_seen_user_id" ON "feature_announcements_seen"("user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "feature_announcements_seen_user_id_announcement_id_key" ON "feature_announcements_seen"("user_id", "announcement_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "orphaned_subscriptions_stripe_subscription_id_key" ON "orphaned_subscriptions"("stripe_subscription_id");
@@ -2022,6 +2380,78 @@ CREATE INDEX "idx_pending_checkouts_status" ON "pending_checkouts"("status");
 -- CreateIndex
 CREATE INDEX "idx_pending_checkouts_expires_at" ON "pending_checkouts"("expires_at");
 
+-- CreateIndex
+CREATE INDEX "idx_metric_snapshots_period_type" ON "metric_snapshots"("period_type");
+
+-- CreateIndex
+CREATE INDEX "idx_metric_snapshots_period_start" ON "metric_snapshots"("period_start");
+
+-- CreateIndex
+CREATE INDEX "idx_native_push_active" ON "native_push_tokens"("is_active");
+
+-- CreateIndex
+CREATE INDEX "idx_native_push_user" ON "native_push_tokens"("user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_native_push_platform" ON "native_push_tokens"("platform");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "native_push_tokens_user_id_platform_key" ON "native_push_tokens"("user_id", "platform");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "community_spaces_slug_key" ON "community_spaces"("slug");
+
+-- CreateIndex
+CREATE INDEX "idx_community_spaces_type" ON "community_spaces"("space_type");
+
+-- CreateIndex
+CREATE INDEX "idx_community_spaces_slug" ON "community_spaces"("slug");
+
+-- CreateIndex
+CREATE INDEX "idx_community_spaces_active" ON "community_spaces"("is_active");
+
+-- CreateIndex
+CREATE INDEX "idx_community_posts_space" ON "community_posts"("space_id", "created_at" DESC);
+
+-- CreateIndex
+CREATE INDEX "idx_community_posts_user" ON "community_posts"("user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_community_posts_approved" ON "community_posts"("space_id", "is_approved", "created_at" DESC);
+
+-- CreateIndex
+CREATE INDEX "idx_community_memberships_user" ON "community_memberships"("user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_community_memberships_space" ON "community_memberships"("space_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "community_memberships_space_id_user_id_key" ON "community_memberships"("space_id", "user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_instagram_scheduled_posts_date" ON "instagram_scheduled_posts"("date");
+
+-- CreateIndex
+CREATE INDEX "idx_instagram_scheduled_posts_scheduled_time" ON "instagram_scheduled_posts"("scheduled_time");
+
+-- CreateIndex
+CREATE INDEX "idx_instagram_scheduled_posts_posted" ON "instagram_scheduled_posts"("posted");
+
+-- CreateIndex
+CREATE INDEX "idx_instagram_scheduled_posts_type" ON "instagram_scheduled_posts"("type");
+
+-- CreateIndex
+CREATE INDEX "idx_instagram_scheduled_posts_date_type" ON "instagram_scheduled_posts"("date", "type");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "instagram_scheduled_posts_unique" ON "instagram_scheduled_posts"("date", "type", "scheduled_time");
+
+-- CreateIndex
+CREATE INDEX "idx_daily_metrics_date" ON "daily_metrics"("metric_date" DESC);
+
+-- CreateIndex
+CREATE INDEX "idx_daily_metrics_date_computed" ON "daily_metrics"("metric_date" DESC, "computed_at" DESC);
+
 -- AddForeignKey
 ALTER TABLE "account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
@@ -2033,4 +2463,13 @@ ALTER TABLE "moon_circle_insights" ADD CONSTRAINT "moon_circle_insights_moon_cir
 
 -- AddForeignKey
 ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "synastry_reports" ADD CONSTRAINT "synastry_reports_relationship_profile_id_fkey" FOREIGN KEY ("relationship_profile_id") REFERENCES "relationship_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "community_posts" ADD CONSTRAINT "community_posts_space_id_fkey" FOREIGN KEY ("space_id") REFERENCES "community_spaces"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "community_memberships" ADD CONSTRAINT "community_memberships_space_id_fkey" FOREIGN KEY ("space_id") REFERENCES "community_spaces"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
