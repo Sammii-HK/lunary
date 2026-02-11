@@ -1040,7 +1040,15 @@ export function GrimoireSearch({
             ? 'Disable personalized search'
             : 'Enable personalized search'
         }
-        title={isPersonalized ? 'Personalized mode on' : 'Personalize search'}
+        title={
+          isPersonalized
+            ? 'Personalized mode on'
+            : personalizationAvailable
+              ? 'Personalize search'
+              : user
+                ? 'Add birth details to personalize'
+                : 'Sign in to personalize results'
+        }
       >
         <Sparkles className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
       </button>
