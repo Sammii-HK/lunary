@@ -13,6 +13,7 @@ import {
   Trash2,
   Feather,
   MessageCircle,
+  Target,
 } from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
 import {
@@ -34,6 +35,7 @@ import { PatternSnapshotsSection } from '@/components/patterns/PatternSnapshotsS
 import { ShareWeeklyPattern } from '@/components/share/ShareWeeklyPattern';
 import { ThisTimeLastYear } from '@/components/patterns/ThisTimeLastYear';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
+import { IntentionsTab } from '@/components/book-of-shadows/IntentionsTab';
 
 interface JournalEntry {
   id: number;
@@ -220,7 +222,13 @@ function MemoryCard({
   );
 }
 
-type TabId = 'patterns' | 'journal' | 'dreams' | 'memories' | 'ritual';
+type TabId =
+  | 'patterns'
+  | 'journal'
+  | 'dreams'
+  | 'memories'
+  | 'ritual'
+  | 'intentions';
 
 const VALID_TAB_IDS: TabId[] = [
   'patterns',
@@ -228,6 +236,7 @@ const VALID_TAB_IDS: TabId[] = [
   'dreams',
   'memories',
   'ritual',
+  'intentions',
 ];
 
 const normalizeTab = (tab: string | null): TabId =>
@@ -474,6 +483,11 @@ export default function BookOfShadowsPage() {
       label: 'Memories',
       icon: <Brain className='w-4 h-4' />,
       count: memories.length,
+    },
+    {
+      id: 'intentions',
+      label: 'Intentions',
+      icon: <Target className='w-4 h-4' />,
     },
   ];
 
@@ -742,6 +756,8 @@ export default function BookOfShadowsPage() {
             <PremiumPathway variant='shadow' className='mt-6' />
           </div>
         )}
+
+        {activeTab === 'intentions' && <IntentionsTab />}
       </div>
     </div>
   );
