@@ -4,6 +4,8 @@ import { requireUser } from '@/lib/ai/auth';
 import { hasFeatureAccess } from '../../../../../utils/pricing';
 import { decrypt } from '@/lib/encryption';
 import { STREAK_MILESTONES } from '@/lib/notifications/streak-notifications';
+import { getDailyCompatibilityTip } from '@/lib/friends/compatibility-tips';
+import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 
 /**
  * GET /api/friends/activity
@@ -173,11 +175,63 @@ export async function GET(request: NextRequest) {
       // Table might not exist yet
     }
 
+    // Get user's own sun sign for compatibility tips
+    let userSunSign: string | null = null;
+    try {
+      const userProfileResult = await sql`
+        SELECT birthday FROM user_profiles WHERE user_id = ${user.id} LIMIT 1
+      `;
+      if (userProfileResult.rows[0]?.birthday) {
+        const birthdayStr = decrypt(userProfileResult.rows[0].birthday);
+        if (birthdayStr) {
+          const date = new Date(birthdayStr);
+          if (!isNaN(date.getTime())) {
+            userSunSign = getSunSign(date.getMonth() + 1, date.getDate());
+          }
+        }
+      }
+    } catch {
+      // Silent fail
+    }
+
+    // Generate daily compatibility tip with top friend
+    let dailyTip: { friendName: string; tip: string; pairType: string } | null =
+      null;
+    if (friends.length > 0 && userSunSign) {
+      const topFriend = friends[0];
+      const { tip, pairType } = getDailyCompatibilityTip(
+        user.id,
+        topFriend.friendId,
+        topFriend.sunSign,
+        userSunSign,
+      );
+      dailyTip = {
+        friendName: topFriend.name,
+        tip,
+        pairType,
+      };
+    }
+
+    // Get all retrograde planets from cosmic data
+    let retrogradePlanets: string[] = [];
+    try {
+      const cosmicData = await getGlobalCosmicData();
+      if (cosmicData?.planetaryPositions) {
+        retrogradePlanets = Object.entries(cosmicData.planetaryPositions)
+          .filter(([, pos]) => pos.retrograde)
+          .map(([planet]) => planet);
+      }
+    } catch {
+      // Silent fail — no transit badges
+    }
+
     return NextResponse.json({
       friends,
       milestones,
       celebrationsSent,
       celebrationsReceived,
+      dailyTip,
+      retrogradePlanets,
     });
   } catch (error: any) {
     if (error?.code === '42P01') {
