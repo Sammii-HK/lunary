@@ -63,6 +63,12 @@ const quickActions: QuickAction[] = [
     prompt: 'Turn this into a journal entry',
     icon: <PenTool className='w-4 h-4' />,
   },
+  {
+    id: 'grimoire-lookup',
+    label: 'Grimoire Lookup',
+    prompt: 'Look up something in the Grimoire based on my current transits',
+    icon: <BookOpen className='w-4 h-4' />,
+  },
 ];
 
 interface CopilotQuickActionsProps {
