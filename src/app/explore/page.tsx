@@ -15,6 +15,7 @@ import {
   ChevronRight,
   NotebookPen,
   HelpCircle,
+  Gift,
 } from 'lucide-react';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { HappeningNowSection } from '@/components/explore/HappeningNowSection';
@@ -94,6 +95,12 @@ const cosmicTools: ExploreItem[] = [
     label: 'Your Circle',
     description: 'Friends & compatibility',
     icon: Users,
+  },
+  {
+    href: '/gifts',
+    label: 'Gifts',
+    description: 'Send cosmic gifts to friends',
+    icon: Gift,
   },
 ];
 

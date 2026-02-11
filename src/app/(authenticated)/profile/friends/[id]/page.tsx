@@ -14,6 +14,7 @@ import {
   Moon,
   TrendingUp,
   Clock,
+  Gift,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
@@ -26,6 +27,7 @@ import { ShareSynastry } from '@/components/share/ShareSynastry';
 import { getSynastryArchetype } from '@/utils/astrology/synastry-archetype';
 import { useUser } from '@/context/UserContext';
 import { BirthChart } from '@/components/BirthChart';
+import { SendGiftModal } from '@/components/gifts/SendGiftModal';
 import type { BirthChartData } from '../../../../../../utils/astrology/birthChart';
 
 function extractBigThree(chart?: BirthChartData[]) {
@@ -120,6 +122,7 @@ export default function FriendProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<FriendTab>('overview');
+  const [showGiftModal, setShowGiftModal] = useState(false);
 
   useEffect(() => {
     async function fetchFriend() {
@@ -274,6 +277,17 @@ export default function FriendProfilePage() {
             </div>
           )}
         </div>
+
+        {/* Send Cosmic Gift */}
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => setShowGiftModal(true)}
+          className='mt-3'
+        >
+          <Gift className='w-4 h-4 mr-1.5' />
+          Send Cosmic Gift
+        </Button>
       </div>
 
       {/* Tabs */}
@@ -319,6 +333,14 @@ export default function FriendProfilePage() {
         )}
         {activeTab === 'timing' && <TimingTab friend={friend} />}
       </div>
+
+      {/* Send Gift Modal */}
+      <SendGiftModal
+        isOpen={showGiftModal}
+        onClose={() => setShowGiftModal(false)}
+        recipientId={friend.friendId}
+        recipientName={friend.name}
+      />
     </div>
   );
 }

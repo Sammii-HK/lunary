@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Flame, Sparkles, Users, Heart, Trash2 } from 'lucide-react';
+import { Flame, Sparkles, Users, Heart, Trash2, Gift } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { FriendTransitBadge } from './FriendTransitBadge';
@@ -197,6 +197,7 @@ export function FriendActivityFeed() {
   const [data, setData] = useState<ActivityData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [unopenedGiftCount, setUnopenedGiftCount] = useState(0);
   const [celebratingSent, setCelebratingSent] = useState<Set<string>>(
     new Set(),
   );
@@ -220,6 +221,19 @@ export function FriendActivityFeed() {
     };
 
     fetchActivity();
+
+    // Fetch unopened gift count
+    fetch('/api/gifts?type=received', { credentials: 'include' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((d) => {
+        if (d?.gifts) {
+          setUnopenedGiftCount(
+            d.gifts.filter((g: { openedAt: string | null }) => !g.openedAt)
+              .length,
+          );
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleRemoveFriend = async (connectionId: string) => {
@@ -376,6 +390,28 @@ export function FriendActivityFeed() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Unopened Gifts */}
+      {unopenedGiftCount > 0 && (
+        <Link
+          href='/gifts?nav=app'
+          className='flex items-center gap-3 p-4 rounded-xl border border-lunary-primary-500/30 bg-lunary-primary-900/10 hover:bg-lunary-primary-900/20 transition-colors'
+        >
+          <div className='w-8 h-8 rounded-full bg-lunary-primary-500/20 flex items-center justify-center'>
+            <Gift className='w-4 h-4 text-lunary-primary-400' />
+          </div>
+          <div className='flex-1'>
+            <p className='text-sm font-medium text-white'>
+              {unopenedGiftCount} unopened{' '}
+              {unopenedGiftCount === 1 ? 'gift' : 'gifts'}
+            </p>
+            <p className='text-xs text-zinc-400'>
+              Tap to open your cosmic gifts
+            </p>
+          </div>
+          <span className='w-2 h-2 rounded-full bg-lunary-primary-400 animate-pulse' />
+        </Link>
       )}
 
       {/* Your Circle Today */}
