@@ -2,8 +2,8 @@
 
 > Comprehensive plan for making Lunary a top-tier astrology app that people use religiously.
 
-**Last updated**: 2026-02-10
-**Status**: Phase 1 Complete, Phase 2 Next
+**Last updated**: 2026-02-11
+**Status**: Phase 1 Complete, Phase 2 Implemented (pending smoke tests + deploy)
 
 ---
 
@@ -1038,17 +1038,30 @@ These create the daily loop and viral growth simultaneously.
 | 4   | Birth chart share card polish     | 2-3 days | Better share conversion   | DONE   |
 | 5   | Predictive notifications          | 3-4 days | Anticipation-driven opens | DONE   |
 
-### Phase 2: Community Foundation (Weeks 4-6)
+### Phase 2: Community Foundation (Weeks 4-6) -- IMPLEMENTED
 
 Build the social infrastructure that makes leaving costly.
 
-| #   | Feature                           | Effort   | Impact              | Section |
-| --- | --------------------------------- | -------- | ------------------- | ------- |
-| 6   | Saturn Return circles             | 5-7 days | Deep retention      | 3.1     |
-| 7   | Sign-based spaces                 | 2-3 days | Identity attachment | 3.2     |
-| 8   | Mercury retrograde check-in       | 1-2 days | Seasonal engagement | 3.1     |
-| 9   | Retrograde survival mode          | 3-4 days | Seasonal spike      | 2.3     |
-| 10  | Friend activity feed improvements | 2-3 days | Circle stickiness   | 4.2     |
+| #   | Feature                             | Effort   | Impact              | Status |
+| --- | ----------------------------------- | -------- | ------------------- | ------ |
+| 6   | Saturn Return circles               | 5-7 days | Deep retention      | Done   |
+| 7   | Sign-based spaces (rising/sun/moon) | 2-3 days | Identity attachment | Done   |
+| 8   | Mercury retrograde check-in         | 1-2 days | Seasonal engagement | Done   |
+| 9   | Retrograde survival mode            | 3-4 days | Seasonal spike      | Done   |
+| 10  | Friend activity feed improvements   | 2-3 days | Circle stickiness   | Done   |
+
+#### Smoke Tests (pre-deploy)
+
+- [ ] `/community` — See Rising Sign, Sun Sign, Moon Sign groups with Astronomicon symbols
+- [ ] Tap into a space — Header with zodiac symbol, member/post counts, post feed
+- [ ] Post in a space — Text validation (10-1000 chars), anonymous toggle, appears in feed
+- [ ] Saturn Return — Set test birthday age 27-30, circle appears in hub
+- [ ] Dashboard — Retrograde banner visible when any planet is Rx
+- [ ] Retrograde survival kit — Expand to see dos/don'ts, journal prompt, practical tip
+- [ ] Friend activity — Transit badges and daily compatibility tip render
+- [ ] New user (no birth chart) — "Generate your birth chart" prompt on `/community`
+- [ ] Free user in a space — Upgrade prompt instead of post form
+- [ ] Auto-join — Clear `community_auto_joined` from sessionStorage, reload dashboard, verify memberships created
 
 ### Phase 3: Depth & Stickiness (Weeks 7-10)
 

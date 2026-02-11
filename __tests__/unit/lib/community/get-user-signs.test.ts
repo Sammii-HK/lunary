@@ -2,7 +2,7 @@ import { describe, it, expect } from '@jest/globals';
 import { getUserSigns, signToSpaceSlug } from '@/lib/community/get-user-signs';
 
 describe('getUserSigns', () => {
-  it('extracts rising sign and sun sign from birth chart', () => {
+  it('extracts rising, sun, and moon signs from birth chart', () => {
     const birthChart = [
       { body: 'Sun', sign: 'Aries', degree: 15 },
       { body: 'Moon', sign: 'Cancer', degree: 10 },
@@ -12,6 +12,7 @@ describe('getUserSigns', () => {
     const result = getUserSigns(birthChart);
     expect(result.risingSign).toBe('Leo');
     expect(result.sunSign).toBe('Aries');
+    expect(result.moonSign).toBe('Cancer');
   });
 
   it('handles "Rising" body name as alias for Ascendant', () => {
@@ -37,6 +38,7 @@ describe('getUserSigns', () => {
     expect(getUserSigns(null)).toEqual({
       risingSign: null,
       sunSign: null,
+      moonSign: null,
     });
   });
 
@@ -44,6 +46,7 @@ describe('getUserSigns', () => {
     expect(getUserSigns(undefined)).toEqual({
       risingSign: null,
       sunSign: null,
+      moonSign: null,
     });
   });
 
@@ -51,6 +54,7 @@ describe('getUserSigns', () => {
     expect(getUserSigns('not an array' as any)).toEqual({
       risingSign: null,
       sunSign: null,
+      moonSign: null,
     });
   });
 
@@ -79,10 +83,14 @@ describe('getUserSigns', () => {
 });
 
 describe('signToSpaceSlug', () => {
-  it('converts sign to lowercase slug with -rising suffix', () => {
+  it('defaults to -rising suffix', () => {
     expect(signToSpaceSlug('Aries')).toBe('aries-rising');
     expect(signToSpaceSlug('Leo')).toBe('leo-rising');
-    expect(signToSpaceSlug('Sagittarius')).toBe('sagittarius-rising');
+  });
+
+  it('supports sun and moon placements', () => {
+    expect(signToSpaceSlug('Aries', 'sun')).toBe('aries-sun');
+    expect(signToSpaceSlug('Cancer', 'moon')).toBe('cancer-moon');
   });
 
   it('handles already lowercase input', () => {
