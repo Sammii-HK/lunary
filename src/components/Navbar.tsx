@@ -41,6 +41,7 @@ export const Navbar = () => {
     '/collections',
     '/forecast',
     '/explore',
+    '/community',
   ];
 
   const coreMarketingRoutes = ['/', '/welcome', '/help', '/auth'];
@@ -123,6 +124,7 @@ const isActive = (pathname: string | null, href: string) => {
       '/forecast',
       '/cosmic-report-generator',
       '/cosmic-state',
+      '/community',
     ];
     return explorePages.some(
       (page) => pathname === page || pathname.startsWith(`${page}/`),

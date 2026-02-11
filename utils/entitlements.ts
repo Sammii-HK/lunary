@@ -68,6 +68,7 @@ const FEATURE_ACCESS_BASE = {
     'keyword_mood_detection', // Free keyword-based mood tagging (70% coverage)
     'friend_connections', // Friend invites, synastry analysis (basic tier)
     'cosmic_score_detailed', // Full cosmic score categories + best window
+    'community_spaces', // Community posting in sign spaces, Saturn Return, retrogrades
   ],
   lunary_plus_ai: [
     'birth_chart',
@@ -110,6 +111,7 @@ const FEATURE_ACCESS_BASE = {
     'relationship_timing', // Best Times to Connect - Pro only
     'shared_cosmic_events', // Shared Cosmic Events - Pro only
     'cosmic_score_detailed', // Full cosmic score categories + best window
+    'community_spaces', // Community posting in sign spaces, Saturn Return, retrogrades
   ],
   lunary_plus_ai_annual: [
     'birth_chart',
@@ -160,6 +162,7 @@ const FEATURE_ACCESS_BASE = {
     'relationship_timing', // Best Times to Connect - Pro only
     'shared_cosmic_events', // Shared Cosmic Events - Pro only
     'cosmic_score_detailed', // Full cosmic score categories + best window
+    'community_spaces', // Community posting in sign spaces, Saturn Return, retrogrades
   ],
 } as const satisfies Record<PlanKey, readonly string[]>;
 

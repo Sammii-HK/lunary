@@ -3,7 +3,7 @@
 > Comprehensive plan for making Lunary a top-tier astrology app that people use religiously.
 
 **Last updated**: 2026-02-10
-**Status**: Planning
+**Status**: Phase 1 Complete, Phase 2 Next
 
 ---
 
@@ -27,65 +27,48 @@
 
 ### 1.1 Synastry Share Card Redesign
 
-**Status**: Needs significant improvement
+**Status**: DONE (Phase 1)
 **Effort**: Medium (3-5 days)
 **Impact**: HIGH - compatibility sharing is the #1 viral astrology content
 **Current file**: `src/app/api/og/share/synastry/route.tsx`
 
-#### Current State
+#### What Was Implemented
 
-- Single score circle with percentage
-- Two names, summary text, aspect counts
-- No chart visuals, no planetary glyphs, no element comparison
-- Feels bare compared to the birth chart card
+- Story: vertically stacked layout (Person A -> Score circle -> Person B)
+- Square/landscape: side-by-side profiles with score circle in center
+- Archetype headline from element pair table (`src/utils/astrology/synastry-archetype.ts`)
+- Big Three per person with Astronomicon font glyphs
+- Top 3 aspects with colored glyphs (harmonious=cometTrail, challenging=galaxyHaze)
+- Element balance horizontal bar with gradient accent from dominant element
+- Extended `ShareSynastry` props with `BigThree`, `TopAspect`, element balance, archetype
+- Extended `/api/share/synastry/route.ts` payload to store richer data in KV
 
-#### Proposed Improvements
+#### Files Changed
 
-**Visual Overhaul:**
-
-- Dual mini chart wheels or zodiac glyphs for each person's big three side-by-side
-- Venn diagram / intertwined circles visual instead of a single lonely score circle
-- Element compatibility bar showing how the two charts' elements complement each other
-- Relationship archetype headline (e.g., "The Healer & The Visionary") based on dominant energies
-
-**Data Enrichment:**
-
-- Show 2-3 key aspects with actual astrological glyphs (e.g., "Venus trine Moon")
-- Element balance comparison (their fire vs yours)
-- Shared placements highlight ("You both have Moon in Pisces")
-- Strongest connection point callout
-
-**Technical Requirements:**
-
-- Extend `ShareSynastry` component props to accept big three data for both people
-- Update `/api/share/synastry/route.ts` to store richer data in KV
-- Redesign `/api/og/share/synastry/route.tsx` with new layout
-- Add `ChartWheelOg` mini versions or sign glyph rows for both people
-- New color palette based on combined element dominance (not just score threshold)
-
-**Format-Specific Layouts:**
-
-- **Square (1080x1080)**: Side-by-side profiles with overlapping score in center
-- **Story (1080x1920)**: Stacked - Person A top, compatibility center, Person B bottom
-- **Landscape (1200x630)**: Compact dual-profile with key aspects row
+- `src/app/api/og/share/synastry/route.tsx` — Complete layout redesign
+- `src/app/api/share/synastry/route.ts` — Extended payload types
+- `src/components/share/ShareSynastry.tsx` — Extended props
+- `src/utils/astrology/synastry-archetype.ts` — New: deterministic archetype lookup
+- `src/app/(authenticated)/profile/friends/[id]/page.tsx` — Passes new data to share component
 
 ---
 
 ### 1.2 Birth Chart Share Card Polish
 
-**Status**: Good, needs refinement
+**Status**: DONE (Phase 1)
 **Effort**: Low-Medium (2-3 days)
 **Impact**: Medium - better conversion from shares
 **Current file**: `src/app/api/og/share/birth-chart/route.tsx`
 
-#### Proposed Improvements
+#### What Was Implemented
 
-- **Reduce data density on square/story** - Chart wheel + big three + one insight line is the hero layout. Move element counts, modality, retrogrades etc to the share landing page only
-- **Replace generic subtitle** - "Cosmic preview" is bland. Use the person's birth date or dominant archetype instead
-- **Give chart wheel more breathing room** - It's the most visually distinctive element, let it be the centerpiece
-- **Add subtle CTA on image** - Small "lunary.app/chart" watermark. People screenshot rather than share links
-- **Element-specific decorative touches** - Fire charts get subtle ember particles, Water gets flowing wave lines, etc.
-- **Typography pass** - The Roboto Mono is functional but not beautiful. Consider a display font for the name/title line
+- Removed data clutter: element counts grid, modality line, retrograde/house/sign focus stats removed
+- Increased chart wheel sizes: landscape 360->420, story 600->700, square 480->560
+- Increased name font sizes: landscape 36->40, story 72->80, square 56->62
+- Replaced subtitle: "Cosmic preview" -> computed archetype string "A {dominantModality} {dominantElement} Chart"
+- Added element-specific decorative gradient overlays (Fire=amber, Earth=green, Air=blue, Water=indigo)
+- Added `lunary.app/chart` watermark at bottom-left with 0.3 opacity
+- Clean card: name (hero), archetype subtitle, chart wheel (prominent), Big Three + glyphs, element/modality badges, one insight line, watermark
 
 ---
 
@@ -94,14 +77,16 @@
 **Effort**: Medium (1-2 days each)
 **Impact**: HIGH cumulative - more share surfaces = more viral loops
 
-#### Daily Cosmic Score Card
+#### Daily Cosmic Score Card — DONE (Phase 1)
 
-- Single number (1-100) with color-coded energy meter
-- Today's dominant transit in one line
-- "Best time for..." recommendation
-- User's sun sign glyph
-- Designed for Instagram Stories (story format primary)
-- **Files**: `src/components/share/ShareCosmicScore.tsx`, `src/app/api/og/share/cosmic-score/route.tsx`
+- Score number with color-coded glow circle + 8-segment energy arc
+- Headline card with dominant energy badge
+- Sun sign glyph via Astronomicon font
+- Story/square: centered vertical layout. Landscape: horizontal with info column
+- Score color coding: 80+ green, 60+ accent, 40+ primary, <40 rose
+- KV-backed share API with 24h TTL (`src/app/api/share/cosmic-score/route.ts`)
+- Supports native share, download, clipboard, social URLs (X, Threads)
+- **Files**: `src/components/share/ShareCosmicScore.tsx`, `src/app/api/og/share/cosmic-score/route.tsx`, `src/app/api/share/cosmic-score/route.ts`
 
 #### Tarot Pull Card
 
@@ -140,39 +125,34 @@
 
 ### 2.1 Daily Cosmic Score
 
+**Status**: DONE (Phase 1)
 **Effort**: Medium (4-5 days)
 **Impact**: CRITICAL - this becomes the reason people open the app every morning
 **Tier**: Free (basic), Pro (detailed breakdown)
 
-#### Concept
+#### What Was Implemented
 
-A single 1-100 score for each day based on the user's personal transits. Like checking the weather, but for your cosmic energy.
+- **Scoring algorithm** (`src/utils/cosmic-score.ts`): Deterministic for same date + birth chart. Base score 50, adjusted by transit harmony, moon phase affinity, retrograde penalties, date-seeded variety. Returns `{ overall: 1-100, categories, bestWindowDescription, dominantEnergy, headline }`.
+- **API** (`src/app/api/cosmic-score/route.ts`): Authenticated GET. Caches in `daily_horoscopes` JSON column. Free: `{ overall, headline, dominantEnergy }`. Paid (`cosmic_score_detailed`): full categories + bestWindowDescription.
+- **Dashboard widget** (`src/components/CosmicScore.tsx`): Animated CSS conic-gradient circular score meter with brand color wheel (blue->green->gold->rose->pink->purple). 1.2s counter animation. Collapsible category bars dropdown. Per-category colored tags. Share button.
+- **Entitlement**: `cosmic_score_detailed` added to `lunary_plus`, `lunary_plus_ai`, `lunary_plus_ai_annual` tiers.
+- **Unit tests**: 10 tests in `__tests__/unit/utils/cosmic-score.test.ts` — all passing.
 
-#### Features
+#### Free vs Pro (as implemented)
 
-- **Cosmic Score**: 1-100 overall alignment number calculated from personal transits
-- **Energy Breakdown**: Communication, creativity, love, career, rest (5 categories)
-- **Best Windows**: "Best time for important conversations: 2-4pm" based on moon/mercury transits
-- **Historical Tracking**: "Last time you had this energy, you journaled about feeling inspired"
-- **Shareable Card**: One-tap share to Stories (ties into 1.3 above)
+| Feature             | Free             | Pro              |
+| ------------------- | ---------------- | ---------------- |
+| Overall score       | Yes              | Yes              |
+| Energy breakdown    | Top 2 categories | All 5 categories |
+| Best windows        | No               | Yes              |
+| Dominant energy tag | Yes              | Yes              |
+| Shareable card      | Yes              | Yes              |
 
-#### Free vs Pro
+#### Still TODO
 
-| Feature               | Free                          | Pro              |
-| --------------------- | ----------------------------- | ---------------- |
-| Overall score         | Yes                           | Yes              |
-| Energy breakdown      | Top 2 categories              | All 5 categories |
-| Best windows          | General ("afternoon is best") | Specific times   |
-| Historical comparison | No                            | Yes              |
-| Personalized tips     | Generic                       | Transit-specific |
-
-#### Technical Requirements
-
-- New utility: `src/utils/cosmic-score.ts` - scoring algorithm based on personal transits
-- API: `src/app/api/cosmic-score/route.ts` - daily score generation + caching
-- Component: `src/components/CosmicScore.tsx` - score display with animated meter
-- DB: Cache scores in `daily_horoscopes` or new `daily_scores` table
-- Push notification: "Your cosmic score today: 87 - it's a great day for bold moves"
+- **Historical Tracking**: "Last time you had this energy..." — not yet implemented
+- **Personalized tips**: Transit-specific guidance beyond the headline
+- **Push notification**: "Your cosmic score today: 87" — not yet wired into daily cron
 
 ---
 
@@ -658,30 +638,49 @@ Go beyond daily streaks. Celebrate astrological milestones and app milestones wi
 
 ### 5.4 Predictive Forward-Looking Notifications
 
+**Status**: DONE (Phase 1)
 **Effort**: Medium (3-4 days)
 **Impact**: HIGH - transforms notifications from reactive to anticipatory
 
-#### Current State
+#### What Was Implemented
 
-Notifications are mostly "the full moon is today". Reactive.
+Integrated into the existing `personal-transit-notification` cron as a second pass after chart activations. For paid users who didn't receive a chart activation notification, generates max 1 predictive notification per user per day.
 
-#### Proposed Improvements
+**Notification flow:**
 
-Shift to forward-looking alerts:
+1. Cron fires `GET /api/cron/personal-transit-notification`
+2. Fetches `getGlobalCosmicData(now)` + paid users with birth charts
+3. **Pass 1 — Chart Activation**: Sun/Moon/Rising activations -> personalized copy via `getNotificationCopy()`
+4. **Pass 2 — Predictive**: For non-notified users, calls `getPredictiveNotifications()` -> max 1 predictive notification
+5. Deduplication via `notification_sent_events` using event keys like `predictive-retrograde_start-Mercury-3-2026-02-10`
 
-- "In 3 days, Venus enters your 7th house - relationships will be in focus"
-- "Next week's Mars-Saturn square may bring frustration - here's how to prepare"
-- "Your luckiest day this month is March 14th (Jupiter trine your natal Venus)"
-- "Mercury goes retrograde in 5 days - time to back up and wrap up loose ends"
-- "This weekend's moon enters your sign - you'll feel extra in tune with yourself"
+**Three event types supported:**
 
-#### Technical Requirements
+- `retrograde_start` — "Mercury retrograde begins in [sign] — time to slow down and review"
+- `retrograde_end` — "[Planet] stations direct in [sign] — momentum returns"
+- `sign_ingress` — "[Planet] enters your sign — [sign-specific theme]"
 
-- Extend notification system to calculate future transits per user
-- New notification type: `predictive_transit`
-- Configurable lookahead: 3 days, 1 week, 1 month
-- User preferences: Which transits to be alerted about
-- API: Extend `src/app/api/notifications/cosmic-pulse/route.ts`
+**Personalization levels:**
+
+- **High priority (personal)**: Planet entering user's Sun/Moon/Rising sign. Includes user name + "your sign/your chart" language.
+- **Medium priority (general)**: Important events (Mercury retrograde always notable) without personal relevance.
+
+**Sign-specific copy**: All 12 zodiac signs have unique `personal` and `general` theme strings in `predictive-copy.ts`.
+
+**Preference mapping**: `predictive_transit` maps to existing `planetaryTransits` toggle — no new user preference needed.
+
+#### Files
+
+- `src/lib/notifications/predictive.ts` — Event detection + priority sorting
+- `src/lib/notifications/predictive-copy.ts` — Copy templates for all event types + 12 sign themes
+- `src/app/api/cron/personal-transit-notification/route.ts` — Added predictive pass
+- `src/lib/notifications/unified-service.ts` — Added `predictive_transit: 'planetaryTransits'` mapping
+
+#### Still TODO
+
+- Configurable lookahead beyond 3/7 days (currently hardcoded)
+- "Your luckiest day this month" type notifications (requires deeper transit scoring)
+- User-facing preference toggle for predictive vs reactive notifications
 
 ---
 
@@ -1027,17 +1026,17 @@ Referral system exists (`referral_codes`, `user_referrals` tables). Needs themat
 
 ## 11. Priority Matrix
 
-### Phase 1: Daily Habit + Viral Sharing (Weeks 1-3)
+### Phase 1: Daily Habit + Viral Sharing — COMPLETE
 
 These create the daily loop and viral growth simultaneously.
 
-| #   | Feature                           | Effort   | Impact                    | Section |
-| --- | --------------------------------- | -------- | ------------------------- | ------- |
-| 1   | Synastry share card redesign      | 3-5 days | Viral growth              | 1.1     |
-| 2   | Daily cosmic score                | 4-5 days | Daily retention           | 2.1     |
-| 3   | Daily cosmic score shareable card | 1-2 days | Daily viral loop          | 1.3     |
-| 4   | Birth chart share card polish     | 2-3 days | Better share conversion   | 1.2     |
-| 5   | Predictive notifications          | 3-4 days | Anticipation-driven opens | 5.4     |
+| #   | Feature                           | Effort   | Impact                    | Status |
+| --- | --------------------------------- | -------- | ------------------------- | ------ |
+| 1   | Synastry share card redesign      | 3-5 days | Viral growth              | DONE   |
+| 2   | Daily cosmic score                | 4-5 days | Daily retention           | DONE   |
+| 3   | Daily cosmic score shareable card | 1-2 days | Daily viral loop          | DONE   |
+| 4   | Birth chart share card polish     | 2-3 days | Better share conversion   | DONE   |
+| 5   | Predictive notifications          | 3-4 days | Anticipation-driven opens | DONE   |
 
 ### Phase 2: Community Foundation (Weeks 4-6)
 
@@ -1133,3 +1132,94 @@ Each feature should move at least one of these:
 | **Free → Paid conversion** | >5%    | Gated community features, deeper AI, learning paths |
 | **Session length**         | >4 min | Morning ritual, learning paths, community feed      |
 | **Sessions per day**       | >1.5   | Morning + evening ritual, challenge check-ins       |
+
+---
+
+## Appendix: Implemented Notification Types
+
+> As of Phase 1 completion (Feb 2026). Covers all notification types currently in production.
+
+### Delivery Channels
+
+| Channel         | Implementation            | Notes                                        |
+| --------------- | ------------------------- | -------------------------------------------- |
+| **Web Push**    | VAPID keys via `web-push` | Primary channel. Table: `push_subscriptions` |
+| **Native Push** | Firebase Admin SDK        | iOS/Android. Table: `native_push_tokens`     |
+| **Email**       | Resend + React Email      | Alongside push for major events              |
+| **Discord**     | Webhooks                  | Admin alerts for failures/successes          |
+
+### Cron-Driven Notification Types
+
+| Cron Route                      | Cadence          | What It Sends                                                    | Audience                              |
+| ------------------------------- | ---------------- | ---------------------------------------------------------------- | ------------------------------------- |
+| `daily-insight-notification`    | Daily            | Tiered insight (generic free / personalized paid)                | All with push                         |
+| `daily-cosmic-pulse`            | Daily            | Personalized AI cosmic pulse email + push                        | Paid with birthday                    |
+| `weekly-notifications`          | Mon/Fri/Sun      | Mon: week ahead, Fri: tarot, Sun: cosmic reset                   | All with push                         |
+| `moon-events`                   | On New/Full Moon | Moon event email                                                 | Users with `moonEvents` pref          |
+| `moon-circles`                  | On New/Full Moon | Moon circle open/milestone push + email                          | Users with `moonCircles` pref         |
+| `personal-transit-notification` | Daily            | Chart activations + predictive transits (see below)              | Paid with birth chart                 |
+| `cosmic-changes-notification`   | Daily            | Cosmic state changes (element shifts, retrogrades)               | Users with `cosmicChanges` pref       |
+| `check-notifications-hourly`    | Hourly           | Time-sensitive: moon phases (p10), major aspects (p9+), eclipses | All with push                         |
+| `engagement-notifications`      | Daily            | Streak-at-risk + general re-engagement                           | Users with `engagementReminders` pref |
+| `trial-reminders`               | Daily            | Trial ending emails (3-day, 1-day)                               | Trial users                           |
+
+### Personal Transit Notification — Two-Pass System
+
+**Pass 1 — Chart Activation** (reactive, same-day):
+
+| Event Type                 | Trigger                                             | Copy Source       |
+| -------------------------- | --------------------------------------------------- | ----------------- |
+| `sun_activation`           | Transiting Sun in user's Sun sign                   | `copy-library.ts` |
+| `rising_activation`        | Transiting Sun in user's Rising sign                | `copy-library.ts` |
+| `transit_change` (moon)    | Transiting Moon in user's Moon sign                 | `copy-library.ts` |
+| `transit_change` (general) | Priority 9+ transit touching user's Sun/Moon/Rising | `copy-library.ts` |
+
+**Pass 2 — Predictive** (forward-looking, 1-7 days ahead):
+
+| Event Type         | Trigger                      | Lookahead   | Priority                             |
+| ------------------ | ---------------------------- | ----------- | ------------------------------------ |
+| `retrograde_start` | Planet stationing retrograde | 3 or 7 days | High if personal, Medium if Mercury  |
+| `retrograde_end`   | Planet stationing direct     | 3 or 7 days | High if personal, Medium if Mercury  |
+| `sign_ingress`     | Planet entering new sign     | Tomorrow    | High if user's sign, skip if general |
+
+**Deduplication**: Both passes use `notification_sent_events` table. Event keys follow pattern `predictive-{type}-{planet}-{daysUntil}-{date}` for predictive, `personal-transit-{date}` for the daily guard.
+
+### Copy Library Event Types (`copy-library.ts`)
+
+All types support free/paid variants with `PersonalizedContext` (name, sunSign, moonSign, risingSign, transit):
+
+| Category | Event Type          | Free Copy Example                    | Paid Copy Example                      |
+| -------- | ------------------- | ------------------------------------ | -------------------------------------- |
+| Daily    | `insight`           | "Your daily cosmic insight is ready" | "Sam, your cosmic energy today..."     |
+| Daily    | `tarot`             | "Today's tarot pattern is emerging"  | "Sam, your personal card today..."     |
+| Daily    | `moon_phase`        | "The moon shifts energy today"       | "Sam, tonight's moon in Pisces..."     |
+| Daily    | `sky_shift`         | "A major cosmic shift is happening"  | "Sam, today's transit activates..."    |
+| Weekly   | `monday_week_ahead` | "Your week ahead is ready"           | "Sam, your personal week ahead..."     |
+| Weekly   | `friday_tarot`      | "Weekly tarot pattern emerging"      | "Sam, your weekly personal tarot..."   |
+| Weekly   | `sunday_reset`      | "Cosmic reset available"             | "Sam, your personal cosmic reset..."   |
+| Monthly  | `new_moon`          | "New Moon energy is here"            | "Sam, this New Moon in your..."        |
+| Monthly  | `full_moon`         | "Full Moon energy peaks tonight"     | "Sam, tonight's Full Moon in your..."  |
+| Event    | `transit_change`    | "A cosmic shift is unfolding"        | "Sam, [transit] is activating..."      |
+| Event    | `sun_activation`    | "Solar energy is heightened"         | "Sam, the Sun illuminates your..."     |
+| Event    | `rising_activation` | "Your rising energy is activated"    | "Sam, cosmic energy activates your..." |
+
+### User Preference Keys (`push_subscriptions.preferences`)
+
+| Key                   | Default   | Controls                                          |
+| --------------------- | --------- | ------------------------------------------------- |
+| `moonPhases`          | true      | Moon phase hourly notifications                   |
+| `majorAspects`        | true      | Major aspect hourly notifications                 |
+| `planetaryTransits`   | true      | Planet ingress + predictive transit notifications |
+| `retrogrades`         | true      | Retrograde start/end notifications                |
+| `sabbats`             | true      | Seasonal/sabbat notifications                     |
+| `eclipses`            | true      | Eclipse notifications                             |
+| `cosmicPulse`         | true      | Daily AI cosmic pulse (requires birthday)         |
+| `cosmicPulseTime`     | 'morning' | Morning or evening delivery                       |
+| `moonEvents`          | true      | New/Full Moon event emails                        |
+| `moonCircles`         | true      | Moon circle push + email                          |
+| `cosmicChanges`       | true      | Cosmic state change notifications                 |
+| `engagementReminders` | true      | Streak risk + general re-engagement               |
+
+### Quiet Hours
+
+Several cron jobs skip sending during 22:00-08:00 UTC: `daily-cosmic-pulse`, `cosmic-changes-notification`, `moon-circles`.

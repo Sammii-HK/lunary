@@ -153,6 +153,17 @@ const CosmicScore = dynamic(
   },
 );
 
+const RetrogradeBanner = dynamic(
+  () =>
+    import('@/components/retrograde/RetrogradeBanner').then((m) => ({
+      default: m.RetrogradeBanner,
+    })),
+  {
+    loading: () => <div className='min-h-0' />,
+    ssr: false,
+  },
+);
+
 const ConditionalWheel = dynamic(
   () => import('@/components/ConditionalWheel'),
   {
@@ -240,6 +251,12 @@ export default function AppDashboardClient() {
   useEffect(() => {
     if (authState.isAuthenticated && !authState.loading) {
       recordCheckIn();
+      // Auto-join community spaces (fire-and-forget, once per session)
+      const joined = sessionStorage.getItem('community_auto_joined');
+      if (!joined) {
+        fetch('/api/community/auto-join', { method: 'POST' }).catch(() => {});
+        sessionStorage.setItem('community_auto_joined', '1');
+      }
     }
   }, [authState.isAuthenticated, authState.loading]);
 
@@ -394,6 +411,8 @@ export default function AppDashboardClient() {
         <ShareZodiacSeason />
 
         <CosmicScore />
+
+        <RetrogradeBanner />
 
         {showHoroscope && <PersonalizedHoroscopePreview />}
 

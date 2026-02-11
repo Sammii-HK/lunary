@@ -100,12 +100,18 @@ const cosmicTools: ExploreItem[] = [
 // Section 3: Learn & Connect - Educational content and community
 const learnConnectItems: ExploreItem[] = [
   {
+    href: '/community',
+    label: 'Community',
+    description: 'Sign spaces, Saturn Return circles, and retrograde check-ins',
+    icon: Users,
+    highlighted: true,
+    badge: 'New',
+  },
+  {
     href: '/moon-circles',
     label: 'Moon Circles',
     description: 'Share insights with the community',
     icon: CircleDot,
-    highlighted: true,
-    badge: 'Community',
   },
   {
     href: '/grimoire',

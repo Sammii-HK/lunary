@@ -11,113 +11,15 @@ import { ShareFormatSelector } from './ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
 import { isInDemoMode } from '@/lib/demo-mode';
 import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
-
-interface RetrogradePeriod {
-  planet: string;
-  startDate: string;
-  endDate: string;
-  sign: string;
-}
-
-interface RetrogradeStatus {
-  isActive: boolean;
-  period?: RetrogradePeriod;
-  survivalDays: number;
-  isCompleted: boolean;
-  badgeLevel: 'bronze' | 'silver' | 'gold' | 'diamond' | null;
-}
+import {
+  getCurrentRetrogradeStatus,
+  type RetrogradeStatus,
+} from '@/lib/retrograde/mercury-periods';
 
 interface ShareRetrogradeBadgeProps {
   retrogradeStatus?: RetrogradeStatus;
   onStatusFetch?: () => Promise<RetrogradeStatus | null>;
   compact?: boolean; // Icon-only mode for header integration
-}
-
-// Helper function to check if currently in Mercury retrograde
-function getCurrentRetrogradeStatus(): RetrogradeStatus {
-  const today = new Date();
-
-  // 2026 Mercury Retrograde periods
-  const retrogradePeriods: RetrogradePeriod[] = [
-    {
-      planet: 'Mercury',
-      startDate: '2026-01-15',
-      endDate: '2026-02-04',
-      sign: 'Aquarius',
-    },
-    {
-      planet: 'Mercury',
-      startDate: '2026-05-10',
-      endDate: '2026-06-03',
-      sign: 'Gemini',
-    },
-    {
-      planet: 'Mercury',
-      startDate: '2026-09-09',
-      endDate: '2026-09-30',
-      sign: 'Virgo',
-    },
-    {
-      planet: 'Mercury',
-      startDate: '2026-12-29',
-      endDate: '2027-01-18',
-      sign: 'Capricorn',
-    },
-  ];
-
-  // Check if in any retrograde period
-  for (const period of retrogradePeriods) {
-    const start = new Date(period.startDate);
-    const end = new Date(period.endDate);
-
-    if (today >= start && today <= end) {
-      const daysDiff = Math.floor(
-        (today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
-      );
-      const survivalDays = daysDiff + 1; // Include start day
-
-      // Determine badge level
-      let badgeLevel: 'bronze' | 'silver' | 'gold' | 'diamond' | null = null;
-      if (survivalDays >= 3 && survivalDays < 10) {
-        badgeLevel = 'bronze';
-      } else if (survivalDays >= 10) {
-        badgeLevel = 'silver';
-      }
-
-      return {
-        isActive: true,
-        period,
-        survivalDays,
-        isCompleted: false,
-        badgeLevel,
-      };
-    }
-
-    // Check if just completed (within 3 days after end)
-    const threeDaysAfter = new Date(end);
-    threeDaysAfter.setDate(threeDaysAfter.getDate() + 3);
-
-    if (today > end && today <= threeDaysAfter) {
-      const totalDays =
-        Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) +
-        1;
-
-      return {
-        isActive: false,
-        period,
-        survivalDays: totalDays,
-        isCompleted: true,
-        badgeLevel: 'gold',
-      };
-    }
-  }
-
-  return {
-    isActive: false,
-    survivalDays: 0,
-    isCompleted: false,
-    badgeLevel: null,
-  };
 }
 
 export function ShareRetrogradeBadge({
