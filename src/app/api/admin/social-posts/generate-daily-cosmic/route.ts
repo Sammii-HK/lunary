@@ -3,6 +3,7 @@ import { getImageBaseUrl } from '@/lib/urls';
 import { getPlatformImageFormat } from '@/lib/social/educational-images';
 import { normalizeHashtagsForPlatform } from '@/lib/social/social-copy-generator';
 import { normalizeGeneratedContent } from '@/lib/social/content-normalizer';
+import { getPlatformHashtags } from '../../../../../../utils/hashtags';
 
 export const runtime = 'nodejs';
 
@@ -84,6 +85,24 @@ function formatTwitterContent(content: PostContent, date: string): string {
   return normalizeHashtagsForPlatform(
     normalizeGeneratedContent(`${truncated}${hashtagSegment}`.trim()),
     'twitter',
+  );
+}
+
+function formatTikTokPost(content: PostContent, date: string): string {
+  const tiktokHashtags = getPlatformHashtags('tiktok', date);
+
+  const sections = [
+    content.highlights?.[0],
+    content.horoscopeSnippet,
+    content.callToAction,
+    tiktokHashtags,
+  ]
+    .map((section) => section?.trim())
+    .filter(Boolean);
+
+  return normalizeHashtagsForPlatform(
+    normalizeGeneratedContent(sections.join('\n\n')),
+    'tiktok',
   );
 }
 
@@ -180,6 +199,7 @@ export async function POST(request: NextRequest) {
     const baseContent = formatCosmicPost(cosmicContent, dateStr);
     const twitterContent = formatTwitterContent(cosmicContent, dateStr);
     const linkedinContent = formatLinkedInContent(cosmicContent, dateStr);
+    const tiktokContent = formatTikTokPost(cosmicContent, dateStr);
 
     const variants: Record<string, { content: string; media?: string[] }> = {
       facebook: {
@@ -197,6 +217,10 @@ export async function POST(request: NextRequest) {
       linkedin: {
         content: linkedinContent || baseContent,
         media: [buildCosmicImageUrl('linkedin')],
+      },
+      tiktok: {
+        content: tiktokContent,
+        media: [buildCosmicImageUrl('tiktok')],
       },
     };
 

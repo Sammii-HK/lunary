@@ -432,7 +432,11 @@ export async function detectMajorEventCountdowns(
     }
 
     // 7 days countdown (only for Mercury, Venus, Mars - high interest)
+    // Skip if the 3-day countdown already covers this event
+    const retro3DayFired =
+      in3DaysPos && todayPos.retrograde !== in3DaysPos.retrograde;
     if (
+      !retro3DayFired &&
       in7DaysPos &&
       ['Mercury', 'Venus', 'Mars'].includes(planet) &&
       todayPos.retrograde !== in7DaysPos.retrograde
@@ -479,8 +483,9 @@ export async function detectMajorEventCountdowns(
       });
     }
 
-    // 7 days countdown for sign change
-    if (in7DaysPos && todayPos.sign !== in7DaysPos.sign) {
+    // 7 days countdown for sign change — skip if 3-day already covers it
+    const sign3DayFired = in3DaysPos && todayPos.sign !== in3DaysPos.sign;
+    if (!sign3DayFired && in7DaysPos && todayPos.sign !== in7DaysPos.sign) {
       countdowns.push({
         name: `${planet} enters ${in7DaysPos.sign} in 1 week`,
         energy: `Generational shift ahead: ${getSignDescription(in7DaysPos.sign)}`,

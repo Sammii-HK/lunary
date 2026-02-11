@@ -16,7 +16,7 @@ export const MAX_CHARS: Record<string, number> = {
 };
 
 export const PLATFORM_HASHTAG_LIMITS: Record<string, number> = {
-  tiktok: 4,
+  tiktok: 5,
   instagram: 4,
   threads: 0,
   twitter: 2,
