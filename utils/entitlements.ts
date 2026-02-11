@@ -42,6 +42,9 @@ const FEATURE_ACCESS_BASE = {
     'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
     'keyword_mood_detection', // Free keyword-based mood tagging (70% coverage)
     'friend_connections_basic', // Free users can add up to 5 friends with basic compatibility %
+    'intentions', // Free users can set up to 3 active intentions
+    'weekly_challenges', // Free users can check in to weekly challenges
+    'milestones_basic', // Solar Return, app anniversary, streak milestones
   ],
   lunary_plus: [
     'birth_chart',
@@ -69,6 +72,12 @@ const FEATURE_ACCESS_BASE = {
     'friend_connections', // Friend invites, synastry analysis (basic tier)
     'cosmic_score_detailed', // Full cosmic score categories + best window
     'community_spaces', // Community posting in sign spaces, Saturn Return, retrogrades
+    'intentions', // Unlimited active intentions
+    'daily_rituals_full', // Full morning + evening ritual experience
+    'weekly_challenges', // Check-in + reflections
+    'milestones_basic', // All milestone types
+    'milestones_advanced', // Lunar Return, Saturn Return
+    'cosmic_gifting', // Unlimited gifts
   ],
   lunary_plus_ai: [
     'birth_chart',
@@ -112,6 +121,12 @@ const FEATURE_ACCESS_BASE = {
     'shared_cosmic_events', // Shared Cosmic Events - Pro only
     'cosmic_score_detailed', // Full cosmic score categories + best window
     'community_spaces', // Community posting in sign spaces, Saturn Return, retrogrades
+    'intentions', // Unlimited active intentions
+    'daily_rituals_full', // Full morning + evening ritual experience
+    'weekly_challenges', // Check-in + reflections
+    'milestones_basic', // All milestone types
+    'milestones_advanced', // Lunar Return, Saturn Return
+    'cosmic_gifting', // Unlimited gifts
   ],
   lunary_plus_ai_annual: [
     'birth_chart',
@@ -163,6 +178,12 @@ const FEATURE_ACCESS_BASE = {
     'shared_cosmic_events', // Shared Cosmic Events - Pro only
     'cosmic_score_detailed', // Full cosmic score categories + best window
     'community_spaces', // Community posting in sign spaces, Saturn Return, retrogrades
+    'intentions', // Unlimited active intentions
+    'daily_rituals_full', // Full morning + evening ritual experience
+    'weekly_challenges', // Check-in + reflections
+    'milestones_basic', // All milestone types
+    'milestones_advanced', // Lunar Return, Saturn Return
+    'cosmic_gifting', // Unlimited gifts
   ],
 } as const satisfies Record<PlanKey, readonly string[]>;
 
@@ -189,6 +210,14 @@ export const FREE_DAILY_TAROT_TRUNCATE_LENGTH = 120;
 
 export const JOURNAL_LIMITS = {
   freeMonthlyEntries: 3,
+} as const;
+
+export const INTENTION_LIMITS = {
+  freeActiveMax: 3,
+} as const;
+
+export const GIFT_LIMITS = {
+  freePerWeek: 1,
 } as const;
 
 export const JOURNAL_PROMPT_LIMITS: Record<PlanKey, number> = {

@@ -18,7 +18,12 @@
  * Archetype detection requires 3 of 4 data sources + min score 3
  */
 
-export type SkillTreeId = 'tarot' | 'journal' | 'explorer' | 'ritual';
+export type SkillTreeId =
+  | 'tarot'
+  | 'journal'
+  | 'explorer'
+  | 'ritual'
+  | 'manifestation';
 
 export interface LevelConfig {
   level: number;
@@ -31,7 +36,12 @@ export interface LevelConfig {
   featureRoute?: string;
 }
 
-export type SkillIconId = 'square-star' | 'pen-tool' | 'moon-star' | 'shell';
+export type SkillIconId =
+  | 'square-star'
+  | 'pen-tool'
+  | 'moon-star'
+  | 'shell'
+  | 'target';
 
 export interface SkillTreeConfig {
   id: SkillTreeId;
@@ -480,6 +490,115 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
         proUnlock: null,
         unlockDescription: '',
         unlockMessage: 'Ritual Grandmaster! 500 rituals completed.',
+        proRequired: false,
+      },
+    ],
+  },
+
+  manifestation: {
+    id: 'manifestation',
+    name: 'Manifestation',
+    icon: 'target',
+    description: 'Set intentions and manifest your dreams',
+    actionVerb: 'manifestation actions',
+    defaultRoute: '/book-of-shadows?tab=intentions',
+    levels: [
+      {
+        level: 1,
+        threshold: 3,
+        freeUnlock: 'intention_tracking',
+        proUnlock: null,
+        unlockDescription: 'Intention tracking with cosmic context',
+        unlockMessage:
+          'Intention tracking active! Your manifestations are gaining cosmic momentum.',
+        proRequired: false,
+        featureRoute: '/book-of-shadows?tab=intentions',
+      },
+      {
+        level: 2,
+        threshold: 10,
+        freeUnlock: 'intention_moon_alignment',
+        proUnlock: null,
+        unlockDescription: 'Moon phase alignment for intentions',
+        unlockMessage:
+          '10 manifestation actions! Your intentions now show moon phase alignment.',
+        proRequired: false,
+        featureRoute: '/book-of-shadows?tab=intentions',
+      },
+      {
+        level: 3,
+        threshold: 25,
+        freeUnlock: null,
+        proUnlock: 'intention_transit_context',
+        unlockDescription: 'Transit context for manifestation timing',
+        unlockMessage:
+          'Transit context unlocked! See the best cosmic timing for your intentions.',
+        proRequired: true,
+        featureRoute: '/book-of-shadows?tab=intentions',
+      },
+      {
+        level: 4,
+        threshold: 50,
+        freeUnlock: null,
+        proUnlock: 'manifestation_patterns',
+        unlockDescription: 'Manifestation pattern analysis',
+        unlockMessage:
+          'Manifestation patterns unlocked! See trends in what you manifest.',
+        proRequired: true,
+        featureRoute: '/book-of-shadows?tab=intentions',
+      },
+      {
+        level: 5,
+        threshold: 75,
+        freeUnlock: null,
+        proUnlock: null,
+        unlockDescription: '',
+        unlockMessage: 'Intention Weaver! 75 manifestation actions.',
+        proRequired: false,
+      },
+      {
+        level: 6,
+        threshold: 100,
+        freeUnlock: null,
+        proUnlock: null,
+        unlockDescription: '',
+        unlockMessage: 'Dream Architect! 100 manifestation actions.',
+        proRequired: false,
+      },
+      {
+        level: 7,
+        threshold: 150,
+        freeUnlock: null,
+        proUnlock: null,
+        unlockDescription: '',
+        unlockMessage: 'Reality Shaper! 150 manifestation actions.',
+        proRequired: false,
+      },
+      {
+        level: 8,
+        threshold: 200,
+        freeUnlock: null,
+        proUnlock: null,
+        unlockDescription: '',
+        unlockMessage: 'Manifestation Sage! 200 manifestation actions.',
+        proRequired: false,
+      },
+      {
+        level: 9,
+        threshold: 300,
+        freeUnlock: null,
+        proUnlock: null,
+        unlockDescription: '',
+        unlockMessage: 'Cosmic Alchemist! 300 manifestation actions.',
+        proRequired: false,
+      },
+      {
+        level: 10,
+        threshold: 500,
+        freeUnlock: null,
+        proUnlock: null,
+        unlockDescription: '',
+        unlockMessage: 'Manifestation Grandmaster! 500 manifestation actions.',
         proRequired: false,
       },
     ],
