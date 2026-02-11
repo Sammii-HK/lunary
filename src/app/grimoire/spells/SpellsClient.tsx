@@ -19,6 +19,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/SearchInput';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 interface Spell {
   id: string;
@@ -113,17 +114,6 @@ function getPageNumbers(current: number, total: number, max = 7) {
   pages.push(total);
 
   return pages;
-}
-
-function useDebouncedValue<T>(value: T, delay = 300) {
-  const [debounced, setDebounced] = useState(value);
-
-  useEffect(() => {
-    const id = window.setTimeout(() => setDebounced(value), delay);
-    return () => window.clearTimeout(id);
-  }, [value, delay]);
-
-  return debounced;
 }
 
 export function SpellsClient({

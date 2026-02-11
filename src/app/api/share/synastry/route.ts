@@ -3,6 +3,19 @@ import { kvGet, kvPut } from '@/lib/cloudflare/kv';
 
 const SHARE_TTL_SECONDS = 60 * 60 * 24 * 90; // 90 days
 
+export type BigThree = {
+  sun?: string;
+  moon?: string;
+  rising?: string;
+};
+
+export type TopAspect = {
+  person1Planet: string;
+  person2Planet: string;
+  aspectType: string;
+  isHarmonious: boolean;
+};
+
 export type ShareSynastryPayload = {
   userName?: string;
   friendName: string;
@@ -12,6 +25,16 @@ export type ShareSynastryPayload = {
   modalityCompatibility?: string;
   harmoniousAspects?: number;
   challengingAspects?: number;
+  person1BigThree?: BigThree;
+  person2BigThree?: BigThree;
+  topAspects?: TopAspect[];
+  elementBalance?: {
+    fire: number;
+    earth: number;
+    air: number;
+    water: number;
+  };
+  archetype?: string;
   format?: string;
 };
 
@@ -52,6 +75,11 @@ export async function POST(request: NextRequest) {
       modalityCompatibility,
       harmoniousAspects,
       challengingAspects,
+      person1BigThree,
+      person2BigThree,
+      topAspects,
+      elementBalance,
+      archetype,
       format = 'square',
     } = body as ShareSynastryPayload;
 
@@ -77,6 +105,11 @@ export async function POST(request: NextRequest) {
       modalityCompatibility,
       harmoniousAspects,
       challengingAspects,
+      person1BigThree,
+      person2BigThree,
+      topAspects,
+      elementBalance,
+      archetype,
       format,
     };
 

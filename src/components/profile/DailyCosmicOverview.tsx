@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
-import { useAstronomyContext } from '@/context/AstronomyContext';
+import { useMoonData } from '@/context/AstronomyContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
 import { Star } from 'lucide-react';
@@ -23,8 +23,7 @@ export function DailyCosmicOverview({
 }: DailyCosmicOverviewProps) {
   const { user } = useUser();
   const subscription = useSubscription();
-  const { currentMoonPhase, currentMoonConstellationPosition } =
-    useAstronomyContext();
+  const { currentMoonPhase, currentMoonConstellationPosition } = useMoonData();
 
   const hasPersonalTarotAccess = hasFeatureAccess(
     subscription.status,

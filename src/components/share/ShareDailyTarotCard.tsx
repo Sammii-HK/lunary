@@ -61,8 +61,7 @@ export function ShareDailyTarotCard({
         params.set('name', firstName);
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-      const ogImageUrl = `${baseUrl}/api/og/share/tarot?${params.toString()}`;
+      const ogImageUrl = `/api/og/share/tarot?${params.toString()}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) {

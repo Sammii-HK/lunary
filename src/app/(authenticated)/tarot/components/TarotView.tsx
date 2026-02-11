@@ -37,7 +37,7 @@ import { getImprovedTarotReading } from '../../../../../utils/tarot/improvedTaro
 import { getGeneralTarotReading } from '../../../../../utils/tarot/generalTarot';
 import { useSubscription } from '../../../../hooks/useSubscription';
 import { useTarotShare } from '@/hooks/useTarotShare';
-import { useAstronomyContext } from '@/context/AstronomyContext';
+import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { TarotTransitConnection } from '@/components/tarot/TarotTransitConnection';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { useCTACopy } from '@/hooks/useCTACopy';
@@ -78,9 +78,7 @@ export function TarotView({
 }: TarotViewProps) {
   const router = useRouter();
   const authStatus = useAuthStatus();
-  const astronomyContext = useAstronomyContext();
-  const currentAstrologicalChart =
-    astronomyContext?.currentAstrologicalChart || [];
+  const { currentAstrologicalChart } = usePlanetaryChart();
   const subscription = useSubscription();
   const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');
   const variant = variantRaw || 'blur';

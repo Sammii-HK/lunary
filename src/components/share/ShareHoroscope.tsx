@@ -57,8 +57,8 @@ export function ShareHoroscope({
     setError(null);
 
     try {
-      let currentShareId = shareRecord?.shareId;
-      let currentShareUrl = shareRecord?.shareUrl;
+      let currentShareId = shareRecord?.shareId ?? '';
+      let currentShareUrl = shareRecord?.shareUrl ?? '';
 
       if (!currentShareId || !currentShareUrl) {
         const today = new Date();
@@ -97,8 +97,7 @@ export function ShareHoroscope({
         });
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-      const ogImageUrl = `${baseUrl}/api/og/share/horoscope?shareId=${currentShareId}&format=${format}&v=${OG_IMAGE_VERSION}`;
+      const ogImageUrl = `/api/og/share/horoscope?shareId=${encodeURIComponent(currentShareId)}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) {
@@ -108,7 +107,7 @@ export function ShareHoroscope({
       const blob = await imageResponse.blob();
       setImageBlob(blob);
 
-      shareTracking.shareViewed(user?.id, 'horoscope', format);
+      shareTracking.shareViewed(user?.id || 'anonymous', 'horoscope', format);
     } catch (err) {
       console.error('Generate card error:', err);
       setError(

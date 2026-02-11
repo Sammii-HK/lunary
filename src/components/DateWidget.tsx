@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useAstronomyContext } from '@/context/AstronomyContext';
+import { useCosmicDate } from '@/context/AstronomyContext';
 import { Calendar } from '@/components/ui/calendar';
 import { RotateCcw, Calendar as CalendarIcon } from 'lucide-react';
 import dayjs from 'dayjs';
@@ -9,8 +9,7 @@ import dayjs from 'dayjs';
 export const DateWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const { writtenDate, setCurrentDateTime, currentDate } =
-    useAstronomyContext();
+  const { writtenDate, setCurrentDateTime, currentDate } = useCosmicDate();
 
   const isViewingDifferentDate = useMemo(() => {
     const today = dayjs().format('YYYY-MM-DD');

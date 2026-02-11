@@ -12,6 +12,19 @@ import { shareTracking } from '@/lib/analytics/share-tracking';
 import { isInDemoMode } from '@/lib/demo-mode';
 import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
 
+interface BigThree {
+  sun?: string;
+  moon?: string;
+  rising?: string;
+}
+
+interface TopAspect {
+  person1Planet: string;
+  person2Planet: string;
+  aspectType: string;
+  isHarmonious: boolean;
+}
+
 interface ShareSynastryProps {
   userName?: string;
   friendName: string;
@@ -19,6 +32,16 @@ interface ShareSynastryProps {
   summary: string;
   harmoniousAspects?: number;
   challengingAspects?: number;
+  person1BigThree?: BigThree;
+  person2BigThree?: BigThree;
+  topAspects?: TopAspect[];
+  elementBalance?: {
+    fire: number;
+    earth: number;
+    air: number;
+    water: number;
+  };
+  archetype?: string;
   buttonVariant?: 'default' | 'small' | 'icon';
 }
 
@@ -29,6 +52,11 @@ export function ShareSynastry({
   summary,
   harmoniousAspects,
   challengingAspects,
+  person1BigThree,
+  person2BigThree,
+  topAspects,
+  elementBalance,
+  archetype,
   buttonVariant = 'default',
 }: ShareSynastryProps) {
   const { user } = useUser();
@@ -56,8 +84,8 @@ export function ShareSynastry({
     setError(null);
 
     try {
-      let currentShareId = shareRecord?.shareId;
-      let currentShareUrl = shareRecord?.shareUrl;
+      let currentShareId = shareRecord?.shareId ?? '';
+      let currentShareUrl = shareRecord?.shareUrl ?? '';
 
       if (!currentShareId || !currentShareUrl) {
         const response = await fetch('/api/share/synastry', {
@@ -70,6 +98,11 @@ export function ShareSynastry({
             summary,
             harmoniousAspects,
             challengingAspects,
+            person1BigThree,
+            person2BigThree,
+            topAspects,
+            elementBalance,
+            archetype,
             format,
           }),
         });

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAstronomyContext } from '@/context/AstronomyContext';
+import { useMoonData } from '@/context/AstronomyContext';
 import { MoonPhaseLabels } from '../../../utils/moon/moonPhases';
 import { bodiesSymbols, zodiacSymbol } from '@/constants/symbols';
 import {
@@ -250,7 +250,7 @@ export const MoonPreview = ({
     currentMoonConstellationPosition,
     moonIllumination,
     moonAge,
-  } = useAstronomyContext();
+  } = useMoonData();
   const iconPath = getMoonPhaseIconPath(currentMoonPhase);
   const [spells, setSpells] = useState<Spell[]>([]);
   const [loading, setLoading] = useState(true);

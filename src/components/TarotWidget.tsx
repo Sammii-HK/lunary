@@ -1,6 +1,6 @@
 'use client';
 import { SmartTrialButton } from './SmartTrialButton';
-import { useAstronomyContext } from '@/context/AstronomyContext';
+import { useTarotCard, usePlanetaryChart } from '@/context/AstronomyContext';
 import { useSubscription } from '../hooks/useSubscription';
 import { useUser } from '@/context/UserContext';
 import { hasFeatureAccess } from '../../utils/pricing';
@@ -12,7 +12,8 @@ import { generateTarotTransitConnection } from '@/lib/tarot/generate-transit-con
 export const TarotWidget = () => {
   const subscription = useSubscription();
   const { user } = useUser();
-  const { currentTarotCard, currentAstrologicalChart } = useAstronomyContext();
+  const { currentTarotCard } = useTarotCard();
+  const { currentAstrologicalChart } = usePlanetaryChart();
   const [generalTarot, setGeneralTarot] = useState<GeneralTarotReading | null>(
     null,
   );

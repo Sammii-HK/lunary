@@ -125,6 +125,122 @@ function parseBirthChart(
   return { sun, moon, rising };
 }
 
+export async function batchGetUserProfiles(
+  userIds: string[],
+): Promise<Map<string, UserProfile>> {
+  const profileMap = new Map<string, UserProfile>();
+
+  if (userIds.length === 0) {
+    return profileMap;
+  }
+
+  try {
+    // Single query to fetch all profiles + subscription data
+    const result = await sql`
+      SELECT DISTINCT ON (ps.user_id)
+        ps.user_id,
+        ps.preferences->>'name' as name,
+        ps.preferences->>'birthday' as birthday,
+        ps.preferences->>'timezone' as timezone,
+        COALESCE(s.status, 'free') as subscription_status,
+        COALESCE(s.plan_type, 'free') as plan_type
+      FROM push_subscriptions ps
+      LEFT JOIN subscriptions s ON ps.user_id = s.user_id
+      WHERE ps.user_id = ANY(${userIds as any})
+    `;
+
+    // Build initial profiles and collect paid user IDs that need birth charts
+    const paidUserIdsWithBirthday: string[] = [];
+
+    for (const row of result.rows) {
+      const isPaid =
+        row.subscription_status === 'active' ||
+        row.subscription_status === 'trial' ||
+        row.subscription_status === 'trialing';
+
+      const profile: UserProfile = {
+        userId: row.user_id,
+        name: row.name || undefined,
+        birthday: row.birthday || undefined,
+        timezone: row.timezone || undefined,
+        subscription: {
+          status: row.subscription_status,
+          planType: row.plan_type,
+          isPaid,
+        },
+      };
+
+      profileMap.set(row.user_id, profile);
+
+      if (isPaid && row.birthday) {
+        paidUserIdsWithBirthday.push(row.user_id);
+      }
+    }
+
+    // Batch fetch birth charts for paid users with birthdays
+    if (paidUserIdsWithBirthday.length > 0) {
+      try {
+        // First try user_profiles table
+        const birthChartResult = await sql`
+          SELECT user_id, birth_chart
+          FROM user_profiles
+          WHERE user_id = ANY(${paidUserIdsWithBirthday as any})
+        `;
+
+        const foundUserIds = new Set<string>();
+        for (const row of birthChartResult.rows) {
+          if (row.birth_chart) {
+            const parsed = parseBirthChart(row.birth_chart);
+            if (parsed) {
+              const profile = profileMap.get(row.user_id);
+              if (profile) {
+                profile.birthChart = parsed;
+              }
+              foundUserIds.add(row.user_id);
+            }
+          }
+        }
+
+        // Fallback: fetch from push_subscriptions for users not found in user_profiles
+        const missingUserIds = paidUserIdsWithBirthday.filter(
+          (id) => !foundUserIds.has(id),
+        );
+        if (missingUserIds.length > 0) {
+          const fallbackResult = await sql`
+            SELECT user_id, preferences->>'birthChart' as birth_chart
+            FROM push_subscriptions
+            WHERE user_id = ANY(${missingUserIds as any})
+          `;
+
+          for (const row of fallbackResult.rows) {
+            if (row.birth_chart) {
+              const parsed = parseBirthChart(row.birth_chart);
+              if (parsed) {
+                const profile = profileMap.get(row.user_id);
+                if (profile) {
+                  profile.birthChart = parsed;
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn(
+          '[Notifications] Failed to batch fetch birth charts:',
+          err,
+        );
+      }
+    }
+  } catch (error) {
+    console.error(
+      '[Notifications] Failed to batch fetch user profiles:',
+      error,
+    );
+  }
+
+  return profileMap;
+}
+
 export function personalizeNotificationTitle(
   title: string,
   userName?: string,

@@ -99,8 +99,8 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
     setError(null);
 
     try {
-      let currentShareId = shareRecord?.shareId;
-      let currentShareUrl = shareRecord?.shareUrl;
+      let currentShareId = shareRecord?.shareId ?? '';
+      let currentShareUrl = shareRecord?.shareUrl ?? '';
 
       if (!currentShareId || !currentShareUrl) {
         const response = await fetch('/api/share/sky-now', {
@@ -135,8 +135,7 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
         });
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-      const ogImageUrl = `${baseUrl}/api/og/share/sky-now?shareId=${currentShareId}&format=${format}&v=${OG_IMAGE_VERSION}`;
+      const ogImageUrl = `/api/og/share/sky-now?shareId=${encodeURIComponent(currentShareId)}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) {
@@ -146,7 +145,7 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
       const blob = await imageResponse.blob();
       setImageBlob(blob);
 
-      shareTracking.shareViewed(user?.id, 'sky-now', format);
+      shareTracking.shareViewed(user?.id || 'anonymous', 'sky-now', format);
     } catch (err) {
       console.error('Generate card error:', err);
       setError(

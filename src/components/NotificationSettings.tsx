@@ -76,9 +76,12 @@ export function NotificationSettings() {
       return;
     }
 
-    setWeeklyReportLoading(true);
+    // Optimistically flip the toggle immediately
+    const previousValue = weeklyReportEnabled;
+    const newStatus = !weeklyReportEnabled;
+    setWeeklyReportEnabled(newStatus);
+
     try {
-      const newStatus = !weeklyReportEnabled;
       const response = await fetch('/api/notifications/weekly-report', {
         method: 'POST',
         headers: {
@@ -90,15 +93,15 @@ export function NotificationSettings() {
         }),
       });
 
-      if (response.ok) {
-        setWeeklyReportEnabled(newStatus);
-      } else {
+      if (!response.ok) {
+        // Revert on failure
+        setWeeklyReportEnabled(previousValue);
         console.error('Failed to toggle weekly report');
       }
     } catch (error) {
+      // Revert on error
+      setWeeklyReportEnabled(previousValue);
       console.error('Error toggling weekly report:', error);
-    } finally {
-      setWeeklyReportLoading(false);
     }
   }, [subscription, weeklyReportEnabled]);
 
@@ -196,12 +199,15 @@ export function NotificationSettings() {
       return;
     }
 
-    setTarotLoading(true);
+    // Optimistically flip the toggle immediately
+    const previousValue = tarotEnabled;
+    setTarotEnabled(!tarotEnabled);
+
     try {
       const endpoint = subscription.endpoint;
       const userName = user?.name || undefined;
 
-      if (tarotEnabled) {
+      if (previousValue) {
         // Disable
         const response = await fetch('/api/notifications/enable-tarot', {
           method: 'DELETE',
@@ -211,9 +217,7 @@ export function NotificationSettings() {
           body: JSON.stringify({ endpoint }),
         });
 
-        if (response.ok) {
-          setTarotEnabled(false);
-        } else {
+        if (!response.ok) {
           throw new Error('Failed to disable tarot notifications');
         }
       } else {
@@ -232,9 +236,7 @@ export function NotificationSettings() {
           }),
         });
 
-        if (response.ok) {
-          setTarotEnabled(true);
-        } else {
+        if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           if (response.status === 404) {
             throw new Error(
@@ -248,13 +250,13 @@ export function NotificationSettings() {
       }
     } catch (error) {
       console.error('Error toggling tarot notifications:', error);
+      // Revert on failure
+      setTarotEnabled(previousValue);
       alert(
         error instanceof Error
           ? error.message
           : 'Failed to update tarot notification settings',
       );
-    } finally {
-      setTarotLoading(false);
     }
   };
 

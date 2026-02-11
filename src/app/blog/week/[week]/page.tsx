@@ -123,9 +123,6 @@ function getPlanetBgColor(planet: string): string {
   return colors[planet] || 'bg-zinc-800/50';
 }
 
-// Cache for blog data to avoid regenerating for the same week
-const blogDataCache = new Map<string, Promise<any>>();
-
 const BLOG_SECTION_LIMITS = {
   planetaryHighlights: 3,
   retrogradeChanges: 2,
@@ -315,72 +312,39 @@ function buildTimelineEvents(
 }
 
 async function getBlogData(weekInfo: WeekInfo) {
-  const cacheKey = weekInfo.slug;
-
-  // Check cache first
-  if (blogDataCache.has(cacheKey)) {
-    const cached = await blogDataCache.get(cacheKey)!;
-    console.log(
-      '[getBlogData] Using cached data for week:',
-      cacheKey,
-      'crystal count:',
-      cached.crystalRecommendations?.length || 0,
-    );
-    return cached;
-  }
-
-  // Create promise for this week
-  const promise = (async () => {
-    const startOfYear = new Date(weekInfo.year, 0, 1);
-    const weekStartDate = new Date(startOfYear);
-    weekStartDate.setDate(
-      weekStartDate.getDate() + (weekInfo.weekNumber - 1) * 7,
-    );
-
-    try {
-      console.log(
-        '[getBlogData] Generating weekly content for:',
-        cacheKey,
-        weekStartDate.toISOString(),
-      );
-      const startTime = Date.now();
-      // Call the function directly instead of making an HTTP request
-      const weeklyData = await generateWeeklyContent(weekStartDate);
-      const duration = Date.now() - startTime;
-      console.log(
-        `[getBlogData] Weekly content generated for ${cacheKey} in ${duration}ms`,
-      );
-      // Serialize any Date instances so React never receives raw Date objects
-      return serializeDates(weeklyData);
-    } catch (error) {
-      console.error(
-        `[getBlogData] Error generating blog data for ${cacheKey}:`,
-        error,
-      );
-      console.error(
-        '[getBlogData] Error stack:',
-        error instanceof Error ? error.stack : 'No stack',
-      );
-      // Remove from cache on error
-      blogDataCache.delete(cacheKey);
-      throw new Error(
-        `Failed to generate blog data: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
-  })();
-
-  // Store in cache
-  blogDataCache.set(cacheKey, promise);
-
-  // Clean up cache after 1 hour to prevent memory leaks
-  setTimeout(
-    () => {
-      blogDataCache.delete(cacheKey);
-    },
-    60 * 60 * 1000,
+  const startOfYear = new Date(weekInfo.year, 0, 1);
+  const weekStartDate = new Date(startOfYear);
+  weekStartDate.setDate(
+    weekStartDate.getDate() + (weekInfo.weekNumber - 1) * 7,
   );
 
-  return promise;
+  try {
+    console.log(
+      '[getBlogData] Generating weekly content for:',
+      weekInfo.slug,
+      weekStartDate.toISOString(),
+    );
+    const startTime = Date.now();
+    const weeklyData = await generateWeeklyContent(weekStartDate);
+    const duration = Date.now() - startTime;
+    console.log(
+      `[getBlogData] Weekly content generated for ${weekInfo.slug} in ${duration}ms`,
+    );
+    // Serialize any Date instances so React never receives raw Date objects
+    return serializeDates(weeklyData);
+  } catch (error) {
+    console.error(
+      `[getBlogData] Error generating blog data for ${weekInfo.slug}:`,
+      error,
+    );
+    console.error(
+      '[getBlogData] Error stack:',
+      error instanceof Error ? error.stack : 'No stack',
+    );
+    throw new Error(
+      `Failed to generate blog data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
 }
 
 export default async function BlogPostPage({

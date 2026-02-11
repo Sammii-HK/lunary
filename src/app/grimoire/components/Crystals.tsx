@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Heading } from '@/components/ui/Heading';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { stringToKebabCase } from 'utils/string';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 interface Crystal {
   name: string;
@@ -25,17 +26,6 @@ type CrystalsProps = {
   totalCount: number;
   initialQuery?: string;
 };
-
-function useDebouncedValue<T>(value: T, delay = 300) {
-  const [debounced, setDebounced] = useState(value);
-
-  useEffect(() => {
-    const id = window.setTimeout(() => setDebounced(value), delay);
-    return () => window.clearTimeout(id);
-  }, [value, delay]);
-
-  return debounced;
-}
 
 const Crystals = ({
   categories,

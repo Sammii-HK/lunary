@@ -113,9 +113,12 @@ export function EmailSubscriptionSettings() {
       return;
     }
 
-    setUpdating(true);
+    // Optimistically flip the toggle immediately
+    const previousValue = isSubscribed;
+    const newStatus = !isSubscribed;
+    setIsSubscribed(newStatus);
+
     try {
-      const newStatus = !isSubscribed;
       const resolvedUserId = userId || authUserId || null;
 
       if (newStatus) {
@@ -137,9 +140,7 @@ export function EmailSubscriptionSettings() {
           body: JSON.stringify(payload),
         });
 
-        if (response.ok) {
-          setIsSubscribed(true);
-        } else {
+        if (!response.ok) {
           throw new Error('Failed to subscribe');
         }
       } else {
@@ -152,17 +153,15 @@ export function EmailSubscriptionSettings() {
           },
         );
 
-        if (response.ok) {
-          setIsSubscribed(false);
-        } else {
+        if (!response.ok) {
           throw new Error('Failed to unsubscribe');
         }
       }
     } catch (error) {
       console.error('Error toggling subscription:', error);
+      // Revert on failure
+      setIsSubscribed(previousValue);
       alert('Failed to update subscription. Please try again.');
-    } finally {
-      setUpdating(false);
     }
   };
 

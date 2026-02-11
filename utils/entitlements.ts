@@ -67,6 +67,7 @@ const FEATURE_ACCESS_BASE = {
     'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
     'keyword_mood_detection', // Free keyword-based mood tagging (70% coverage)
     'friend_connections', // Friend invites, synastry analysis (basic tier)
+    'cosmic_score_detailed', // Full cosmic score categories + best window
   ],
   lunary_plus_ai: [
     'birth_chart',
@@ -108,6 +109,7 @@ const FEATURE_ACCESS_BASE = {
     'friend_connections', // Friend invites, synastry analysis
     'relationship_timing', // Best Times to Connect - Pro only
     'shared_cosmic_events', // Shared Cosmic Events - Pro only
+    'cosmic_score_detailed', // Full cosmic score categories + best window
   ],
   lunary_plus_ai_annual: [
     'birth_chart',
@@ -157,6 +159,7 @@ const FEATURE_ACCESS_BASE = {
     'friend_connections', // Friend invites, synastry analysis
     'relationship_timing', // Best Times to Connect - Pro only
     'shared_cosmic_events', // Shared Cosmic Events - Pro only
+    'cosmic_score_detailed', // Full cosmic score categories + best window
   ],
 } as const satisfies Record<PlanKey, readonly string[]>;
 

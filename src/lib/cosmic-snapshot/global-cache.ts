@@ -122,7 +122,7 @@ export async function getGlobalCosmicData(
   date: Date = new Date(),
 ): Promise<GlobalCosmicData | null> {
   if (!hasPostgres) {
-    return await buildGlobalCosmicData(date);
+    return await buildGlobalCosmicData(new Date());
   }
 
   const dateStr = date.toISOString().split('T')[0];
@@ -159,12 +159,26 @@ export async function getGlobalCosmicData(
 
   const data = await cached();
 
-  // Recompute durations from current time using cached position data.
-  // The DB/cache stores static remainingDays that go stale, but longitude
-  // and sign are still valid — recalculate duration from those + current date.
+  // Freshen fast-moving planet positions with current time.
+  // The DB/day-cache stores positions from the first request (midnight UTC),
+  // but Moon moves ~13°/day — stale by afternoon. getRealPlanetaryPositions
+  // has its own per-planet cache (Moon: 15min TTL) so this is efficient.
   if (data?.planetaryPositions) {
     const now = new Date();
-    for (const [planet, pos] of Object.entries(data.planetaryPositions)) {
+    const FAST = ['Moon', 'Sun', 'Mercury', 'Venus', 'Mars'];
+    const freshPositions = getRealPlanetaryPositions(now, DEFAULT_OBSERVER);
+
+    for (const planet of FAST) {
+      if (freshPositions[planet]) {
+        data.planetaryPositions[planet] = freshPositions[planet];
+      }
+    }
+
+    // Slow planets: just refresh duration from stored longitude + current time
+    const SLOW = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+    for (const planet of SLOW) {
+      const pos = data.planetaryPositions[planet];
+      if (!pos) continue;
       const fresh = calculateTransitDuration(
         planet,
         pos.sign,
@@ -181,6 +195,9 @@ export async function getGlobalCosmicData(
           }
         : undefined;
     }
+
+    // Refresh moon phase (illumination drifts throughout the day)
+    data.moonPhase = getAccurateMoonPhase(now);
   }
 
   return data;
@@ -221,11 +238,12 @@ export type SignChangeEvent = {
   sign: string;
   previousSign?: string;
   nextSign?: string;
+  eventTime?: Date;
 };
 
 /**
  * Detect upcoming planet sign changes by comparing today vs tomorrow.
- * Returns ingress/egress events for changes happening TOMORROW so we can post TODAY.
+ * Returns ingress/egress events for sign changes detected between the two dates.
  * This eliminates the problem of slow planets (like Neptune) generating
  * duplicate ingress posts for months when using degree-based detection.
  */
@@ -245,7 +263,6 @@ export async function detectUpcomingSignChanges(
     return { ingresses, egresses };
   }
 
-  // Compare today vs tomorrow - post TODAY about TOMORROW's changes
   for (const [planet, todayPos] of Object.entries(
     todayData.planetaryPositions,
   )) {
@@ -255,26 +272,32 @@ export async function detectUpcomingSignChanges(
     const todaySign = todayPos.sign;
     const tomorrowSign = tomorrowPos.sign;
 
-    // Sign changes TOMORROW = post TODAY
     if (todaySign !== tomorrowSign) {
+      // endDate = when planet leaves todaySign = when it enters tomorrowSign
+      const eventTime = todayPos.duration?.endDate
+        ? new Date(todayPos.duration.endDate)
+        : undefined;
+
       ingresses.push({
-        name: `${planet} enters ${tomorrowSign} tomorrow`,
+        name: `${planet} enters ${tomorrowSign}`,
         energy: getSignDescription(tomorrowSign),
         priority: 8,
         type: 'ingress',
         planet,
         sign: tomorrowSign,
         previousSign: todaySign,
+        eventTime,
       });
 
       egresses.push({
-        name: `${planet}'s final day in ${todaySign}`,
+        name: `${planet}'s last hours in ${todaySign}`,
         energy: getSignDescription(todaySign),
         priority: 7,
         type: 'egress',
         planet,
         sign: todaySign,
         nextSign: tomorrowSign,
+        eventTime,
       });
     }
   }
@@ -289,11 +312,12 @@ export type RetrogradeStationEvent = {
   type: 'retrograde_start' | 'retrograde_end';
   planet: string;
   sign: string;
+  eventTime?: Date;
 };
 
 /**
  * Detect upcoming retrograde stations by comparing today vs tomorrow.
- * Returns retrograde/direct station events happening TOMORROW so we can post TODAY.
+ * Returns retrograde/direct station events detected between the two dates.
  * This provides a heads-up before the station rather than posting after.
  */
 export async function detectUpcomingRetrogradeStations(
@@ -311,7 +335,6 @@ export async function detectUpcomingRetrogradeStations(
     return stations;
   }
 
-  // Compare today vs tomorrow - post TODAY about TOMORROW's stations
   for (const [planet, todayPos] of Object.entries(
     todayData.planetaryPositions,
   )) {
@@ -321,10 +344,9 @@ export async function detectUpcomingRetrogradeStations(
     const todayRetrograde = todayPos.retrograde;
     const tomorrowRetrograde = tomorrowPos.retrograde;
 
-    // Planet goes retrograde TOMORROW = post TODAY
     if (!todayRetrograde && tomorrowRetrograde) {
       stations.push({
-        name: `${planet} stations retrograde tomorrow`,
+        name: `${planet} stations retrograde`,
         energy: `Time to slow down and review ${planet.toLowerCase()} themes`,
         priority: 9,
         type: 'retrograde_start',
@@ -333,10 +355,9 @@ export async function detectUpcomingRetrogradeStations(
       });
     }
 
-    // Planet goes direct TOMORROW = post TODAY
     if (todayRetrograde && !tomorrowRetrograde) {
       stations.push({
-        name: `${planet} stations direct tomorrow`,
+        name: `${planet} stations direct`,
         energy: `Momentum returns to ${planet.toLowerCase()} themes`,
         priority: 9,
         type: 'retrograde_end',
