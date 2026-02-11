@@ -18,6 +18,7 @@ import { ShareDailyInsight } from '@/components/ShareDailyInsight';
 import { ShareDailyCosmicState } from '@/components/share/ShareDailyCosmicState';
 import { ShareZodiacSeason } from '@/components/share/ShareZodiacSeason';
 import { TourTrigger } from '@/components/feature-tour/tour-trigger';
+import { useMilestones } from '@/hooks/useMilestones';
 
 const DateWidget = dynamic(
   () =>
@@ -164,10 +165,45 @@ const RetrogradeBanner = dynamic(
   },
 );
 
+const EveningRitualSheet = dynamic(
+  () =>
+    import('@/components/rituals/EveningRitualSheet').then((m) => ({
+      default: m.EveningRitualSheet,
+    })),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
+
 const ConditionalWheel = dynamic(
   () => import('@/components/ConditionalWheel'),
   {
     loading: () => <div className='min-h-0' />,
+    ssr: false,
+  },
+);
+
+const MilestoneCelebration = dynamic(
+  () =>
+    import('@/components/milestones/MilestoneCelebration').then((m) => ({
+      default: m.MilestoneCelebration,
+    })),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
+
+const WeeklyChallengeCard = dynamic(
+  () =>
+    import('@/components/challenges/WeeklyChallengeCard').then((m) => ({
+      default: m.WeeklyChallengeCard,
+    })),
+  {
+    loading: () => (
+      <div className='h-24 bg-zinc-900/50 rounded-xl animate-pulse' />
+    ),
     ssr: false,
   },
 );
@@ -197,6 +233,10 @@ export default function AppDashboardClient() {
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [moonExpanded, setMoonExpanded] = useState<boolean>(false);
   const [skyNowExpanded, setSkyNowExpanded] = useState<boolean>(false);
+  const [showEveningRitual, setShowEveningRitual] = useState(false);
+  const isEvening = new Date().getHours() >= 18;
+  const { uncelebrated: uncelebratedMilestone, celebrate: celebrateMilestone } =
+    useMilestones();
 
   // Defer heavy components for faster initial render
   const [showHoroscope, setShowHoroscope] = useState(false);
@@ -414,6 +454,21 @@ export default function AppDashboardClient() {
 
         <RetrogradeBanner />
 
+        {authState.isAuthenticated && isEvening && (
+          <button
+            onClick={() => setShowEveningRitual(true)}
+            className='w-full bg-gradient-to-r from-lunary-primary-900/40 to-indigo-900/30 border border-lunary-primary-800/30 rounded-xl p-3 flex items-center gap-3 hover:border-lunary-primary-700/50 transition-colors'
+          >
+            <span className='text-lg'>🌙</span>
+            <div className='text-left flex-1'>
+              <p className='text-sm text-white font-medium'>Evening Ritual</p>
+              <p className='text-xs text-zinc-400'>
+                Reflect on your day with a quick mood check-in
+              </p>
+            </div>
+          </button>
+        )}
+
         {showHoroscope && <PersonalizedHoroscopePreview />}
 
         <div
@@ -440,6 +495,8 @@ export default function AppDashboardClient() {
           </div>
           <CrystalPreview />
 
+          {authState.isAuthenticated && <WeeklyChallengeCard />}
+
           <div className={isDemoMode ? '' : 'md:col-span-2'}>
             <ConditionalWheel />
           </div>
@@ -457,6 +514,20 @@ export default function AppDashboardClient() {
           </p>
         )}
       </div>
+
+      {authState.isAuthenticated && (
+        <EveningRitualSheet
+          isOpen={showEveningRitual}
+          onClose={() => setShowEveningRitual(false)}
+        />
+      )}
+
+      {authState.isAuthenticated && uncelebratedMilestone && (
+        <MilestoneCelebration
+          milestone={uncelebratedMilestone}
+          onCelebrate={celebrateMilestone}
+        />
+      )}
     </div>
   );
 }
