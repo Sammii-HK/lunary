@@ -3,7 +3,7 @@
 > Comprehensive plan for making Lunary a top-tier astrology app that people use religiously.
 
 **Last updated**: 2026-02-11
-**Status**: Phase 1 Complete, Phase 2 Implemented (pending smoke tests + deploy), Phase 3 Implemented (pending smoke tests + deploy)
+**Status**: Phase 1 Complete, Phase 2 Implemented (pending smoke tests + deploy), Phase 3 Implemented (pending smoke tests + deploy), Phase 4 Implemented (pending smoke tests + deploy)
 
 ---
 
@@ -1132,17 +1132,277 @@ Features that create emotional investment and long-term habit.
 - [ ] FriendActivityFeed — shows unopened gift count + link to `/gifts`
 - [ ] Explore page — Gifts entry visible in cosmic tools grid
 
-### Phase 4: Growth & Conversion (Weeks 11-14)
+### Phase 4: Growth & Conversion (Weeks 11-14) -- IMPLEMENTED
 
 Viral loops and upgrade pressure.
 
-| #   | Feature                       | Effort   | Impact                  | Section |
-| --- | ----------------------------- | -------- | ----------------------- | ------- |
-| 16  | Compatibility widget (public) | 3-4 days | Massive viral potential | 7.1     |
-| 17  | Anonymous Q&A                 | 4-5 days | Community activation    | 3.3     |
-| 18  | Collaborative interpretations | 4-5 days | Solo → social bridge    | 3.4     |
-| 19  | Referral rewards revamp       | 2-3 days | Organic growth          | 7.3     |
-| 20  | New shareable card types      | 5-8 days | More share surfaces     | 1.3     |
+| #   | Feature                       | Effort   | Impact                  | Section | Status |
+| --- | ----------------------------- | -------- | ----------------------- | ------- | ------ |
+| 16  | Compatibility widget (public) | 3-4 days | Massive viral potential | 7.1     | Done   |
+| 17  | Anonymous Q&A                 | 4-5 days | Community activation    | 3.3     | Done   |
+| 18  | Collaborative interpretations | 4-5 days | Solo → social bridge    | 3.4     | Parked |
+| 19  | Referral rewards revamp       | 2-3 days | Organic growth          | 7.3     | Done   |
+| 20  | New shareable card types      | 5-8 days | More share surfaces     | 1.3     | Done   |
+
+#### Notes
+
+- Feature 18 (Collaborative Interpretations) parked — Astral Chat already covers AI interpretation
+- Feature 17 includes public SEO-optimized pages with JSON-LD structured data
+- Feature 19 has 7 referral tiers (1/3/5/10/15/25/50) with 2 exclusive referral-locked spreads
+- Feature 20: 2 new card types (Streak Milestone, Compatibility Invite) — Tarot/Transit/Retrograde shares already existed
+- 6 new tarot spreads added (Chakra Alignment, Horseshoe, Elemental Balance, Solar Return + 2 referral-exclusive)
+- Prisma migration: `20260211222405_phase4_growth_conversion`
+
+#### Pre-deploy: Run Prisma Migration
+
+- [ ] Run `npx prisma migrate deploy` against the production database
+
+#### Smoke Tests (pre-deploy)
+
+---
+
+**A. Streak Milestone Share Card**
+
+1. Trigger a streak milestone (or use a test user with an existing uncelebrated streak milestone)
+   - The milestone celebration modal should appear on dashboard load
+2. In the celebration modal, look for a **"Share"** button alongside "Celebrate"
+   - Only appears for `type === 'streak'` milestones
+3. Tap Share → `ShareStreakMilestone` modal opens
+   - Preview should show OG image with flame icon, streak count, stats (readings/entries/rituals)
+4. Toggle format selector: **Square**, **Landscape**, **Story**
+   - Each format should render correctly — verify the OG image updates
+   - Direct OG check: visit `/api/og/share/streak?streakDays=30&totalReadings=50&totalEntries=20&totalRituals=10&userName=Test&format=square`
+   - Try `format=landscape` and `format=story` too
+5. Tap "Share" or "Download" — image should save/share correctly
+6. Verify the share link works — it should POST to `/api/share/streak` and create a KV entry (90-day TTL)
+
+---
+
+**B. Compatibility Invite Share Card**
+
+1. Go to **Profile** page → scroll to bottom → find **"Compatibility Invite"** button
+2. Tap it → `ShareCompatibilityInvite` modal opens
+   - Preview shows your name, sun sign, Big Three glyphs, "Check our compatibility!" CTA
+3. Toggle all 3 formats — each should render
+   - Direct OG check: `/api/og/share/compat-invite?inviterName=Sam&inviterSign=Scorpio&sun=Scorpio&moon=Cancer&rising=Leo&format=square`
+4. Share/download works — creates KV entry via POST `/api/share/compat-invite` (30-day TTL)
+
+---
+
+**C. Existing Share Cards (regression check)**
+
+1. Go to dashboard → share cosmic score → verify `ShareCosmicScore` still works
+2. Go to tarot reading → share → verify `ShareDailyTarotCard` still works
+3. Check retrograde badge share if retrograde is active → verify `ShareRetrogradeBadge` still works
+4. Check sky now share → verify `ShareSkyNow` still works
+
+---
+
+**D. Anonymous Q&A — Navigation & Feed**
+
+1. Go to `/explore` → find **"Ask the Circle"** entry (should have a "New" badge) → tap it
+   - Should navigate to `/community/questions`
+2. Also check: `/community` page should have an "Ask the Circle" tab/link
+3. The questions feed loads with topic filter tabs: **All**, **Transits**, **Relationships**, **Tarot**, **Career**, **General**
+4. Sort toggle: **Top** (sorted by vote_count DESC) vs **New** (sorted by created_at DESC)
+5. Each question card shows: topic badge, question text, vote count, answer count, author name (or "Anonymous"), timestamp
+
+---
+
+**E. Anonymous Q&A — Posting Questions**
+
+1. Tap **"Ask a Question"** button → `AskQuestionModal` opens
+2. Select a topic tag from the dropdown (e.g. "Relationships")
+3. Toggle **"Post anonymously"** — should be on by default
+4. Enter question text (must be 10-2000 chars) → tap Submit
+   - POST `/api/community/questions` with `{ post_text, is_anonymous: true, topic_tag: "relationships" }`
+   - Should return 201 with question data
+5. Question appears in feed with the topic badge, anonymous attribution
+6. Post another question with anonymous OFF → should show your display name
+7. **Free user rate limit**: Post 2 questions, then try a 3rd → should get 429 error: "Free users can ask up to 2 questions per week"
+   - To test: ensure test user is on free plan, post 2 questions, attempt 3rd
+8. **Paid user**: Should have no rate limit
+
+---
+
+**F. Anonymous Q&A — Answering & Voting**
+
+1. Open a question → `/community/questions/[id]`
+2. Type an answer in the answer form (10-2000 chars) → Submit
+   - POST `/api/community/questions/[id]/answers` with `{ post_text }`
+   - Answer appears under the question
+3. **Upvote** an answer → tap the upvote arrow
+   - POST `/api/community/votes` with `{ post_id: answerId }`
+   - Vote count increments by 1, arrow highlights
+4. **Un-vote** → tap the upvote arrow again on the same answer
+   - Same POST endpoint — toggles the vote off
+   - Vote count decrements back, arrow un-highlights
+5. **Best Answer** (only if you're the question author):
+   - Tap "Mark as Best Answer" on one of the answers
+   - PATCH `/api/community/questions/[id]` with `{ answerId }`
+   - Green "Best Answer" badge appears on that answer
+   - Marking a different answer as best should unset the previous one
+
+---
+
+**G. Anonymous Q&A — Public Access & SEO**
+
+1. Open an **incognito/private window** (no auth)
+2. Navigate to `/community/questions` → page loads, questions are visible
+   - Non-auth visitors see a **signup CTA banner**: "Join the circle to ask questions"
+   - "Ask a Question" button should be hidden or redirect to signup
+3. Navigate to `/community/questions/[id]` for a specific question → question + answers visible
+4. **SEO check** — View Page Source on the question detail page:
+   - `<title>` should contain the question text + "- Lunary Ask the Circle"
+   - `<meta name="description">` should have a summary
+   - Look for `<script type="application/ld+json">` with `QAPage` schema
+   - No `<meta name="robots" content="noindex">` — page should be indexable
+5. **Canonical URL** should be set to `/community/questions/[id]`
+
+---
+
+**H. Compatibility Widget — Invite Flow (User A)**
+
+1. Log in as User A (must have birth chart with Big Three)
+2. Go to **Profile** → scroll to bottom → tap **"Compatibility Invite"** button
+   - This creates an invite via POST `/api/compatibility/invite`
+   - Returns `{ inviteCode, inviteUrl, inviterName, inviterSign }`
+3. Copy the invite URL — it should be `https://lunary.app/compatibility/[inviteCode]`
+4. The share modal should also let you share via native share / copy link
+
+---
+
+**I. Compatibility Widget — Recipient Flow (User B, no account)**
+
+1. Open the invite link in an **incognito window**: `/compatibility/[inviteCode]`
+2. **Step 1 — See inviter info**: Page shows User A's name + sun sign + "wants to check your cosmic compatibility"
+   - The OG meta image should use the compat-invite OG route
+3. **Step 2 — Enter birth data**: `BirthDataForm` appears with fields:
+   - Name (required)
+   - Date of birth (required)
+   - Time of birth (optional)
+   - Location (optional)
+4. Fill in birth data → tap "See Our Compatibility"
+5. **Step 3 — Signup Gate** (this is the conversion hook!):
+   - Instead of results, see `SignupGate` component:
+   - Pulsing score circle with "?" instead of a number
+   - Blurred/teaser aspect list
+   - "Your results are ready!" text
+   - "Create a free account to reveal your compatibility" CTA button
+   - Check: birth data should be stored in `sessionStorage` (DevTools → Application → Session Storage)
+6. Tap "Create account" → redirected to signup page
+   - URL should include `?ref=[referralCode]&redirect=/compatibility/[inviteCode]`
+7. **After signup** → redirected back to `/compatibility/[inviteCode]`
+   - Now authenticated → birth data restored from sessionStorage
+   - POST `/api/compatibility/calculate` fires automatically
+   - **Step 4 — Results**: Score circle (number), score label (e.g. "Strong Connection"), top aspects, element balance chart
+8. Verify User A's referral credit: check `user_referrals` table — new row with `referred_user_id = User B`
+
+---
+
+**J. Referral Dashboard**
+
+1. Go to `/explore` → find **"Referrals"** entry → tap → navigates to `/referrals`
+   - Also accessible via Profile → **"Your Referrals"** button
+2. Dashboard shows:
+   - Your referral code (copy button works)
+   - Share buttons (native share, copy link)
+   - Stats grid: total referrals, activated referrals
+   - Current tier name + description (or "No tier yet" if 0 referrals)
+   - Next tier with "X more referrals to go"
+3. **Tier progress bar**: Shows all 7 milestone markers (1, 3, 5, 10, 15, 25, 50)
+   - Current progress highlighted
+   - Reached tiers show checkmarks
+   - Unreached tiers are dimmed
+
+---
+
+**K. Referral Tier Rewards — Verification**
+
+Test each tier by manually setting activated referral counts in the DB (or using test referrals):
+
+| Referrals | Tier             | Reward                               | How to Verify                                                                                                                            |
+| --------- | ---------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 1         | Cosmic Seed      | Badge                                | Check `milestones_achieved` for `milestone_type = 'referral_badge'`, `milestone_key = 'cosmic_seed'`                                     |
+| 3         | Star Weaver      | 1 week Pro                           | Check user's subscription — should be extended by 7 days                                                                                 |
+| 5         | Cosmic Connector | Astrological Houses spread + badge   | Check `milestones_achieved` for `milestone_key = 'spread_houses'`. Open tarot spread selector — "Astrological Houses" should be unlocked |
+| 10        | Celestial Guide  | 1 month Pro + glow                   | Subscription extended 30 days. Check `milestones_achieved` for profile glow cosmetic                                                     |
+| 15        | Star Architect   | Shadow Work spread                   | Check `milestones_achieved` for `milestone_key = 'spread_shadow'`. Open spread selector — "Shadow Work" should be unlocked               |
+| 25        | Galaxy Keeper    | 3 months Pro + title                 | Subscription extended 90 days. Title visible on profile                                                                                  |
+| 50        | Founding Star    | 6 months Pro + title + all cosmetics | Subscription extended 180 days. All cosmetics unlocked                                                                                   |
+
+Reward processing is triggered via `processReferralTierReward()` which runs after `checkInviteActivation()` in `src/lib/referrals/check-activation.ts`.
+
+---
+
+**L. Referral-Locked Spreads in Spread Selector**
+
+1. Open the tarot spread selector (start a new reading)
+2. Look for **"Astrological Houses"** (12 cards) and **"Shadow Work"** (7 cards)
+   - Both should be **visible but locked** — grayed out with a lock icon
+   - Badge text: "Refer 5 friends to unlock" / "Refer 15 friends to unlock"
+3. Tapping a locked spread should show the referral requirement, not start a reading
+4. With a user who has 5+ activated referrals: "Astrological Houses" should be unlocked and usable
+5. With a user who has 15+ activated referrals: "Shadow Work" should also be unlocked
+
+---
+
+**M. New Paid Tarot Spreads**
+
+1. Log in as a **paid user** (monthly/yearly plan)
+2. Open tarot spread selector → look for these 4 new spreads:
+
+| Spread                | Cards | Category      | Verify Positions                                                                                                             |
+| --------------------- | ----- | ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Chakra Alignment**  | 7     | Wellness      | Root, Sacral, Solar Plexus, Heart, Throat, Third Eye, Crown                                                                  |
+| **Horseshoe**         | 7     | Classic       | Past, Present, Hidden Influences, Obstacle, External Influences, Advice, Outcome                                             |
+| **Elemental Balance** | 5     | Quick Insight | Fire (Passion), Earth (Stability), Air (Mind), Water (Emotion), Spirit (Integration)                                         |
+| **Solar Return**      | 12    | Deep Dive     | Theme, Self, Resources, Communication, Home, Creativity, Health, Relationships, Transformation, Expansion, Career, Community |
+
+3. Start a reading with each spread → verify correct number of cards dealt and position labels shown
+4. Log in as a **free user** → these 4 spreads should show as locked with "Upgrade to Pro" prompt
+
+---
+
+**N. OG Image Spot Checks**
+
+Test OG images render without 500 errors by visiting directly in the browser:
+
+```
+/api/og/share/streak?streakDays=30&totalReadings=100&totalEntries=50&totalRituals=30&userName=TestUser&format=square
+/api/og/share/streak?streakDays=365&totalReadings=500&totalEntries=200&totalRituals=100&userName=TestUser&format=story
+/api/og/share/compat-invite?inviterName=Sam&inviterSign=Scorpio&sun=Scorpio&moon=Cancer&rising=Leo&format=square
+/api/og/share/compat-invite?inviterName=Sam&inviterSign=Scorpio&format=landscape
+/api/og/share/referral?name=Sam&sign=Scorpio&format=square
+```
+
+Each should return a PNG image (not a 500 error). Check that text is legible and layout looks correct in all 3 formats.
+
+---
+
+**O. API Quick Checks (curl or browser DevTools)**
+
+```bash
+# Public: list questions
+curl 'http://localhost:3000/api/community/questions?limit=5&sort=new'
+# Should return { questions: [...], total: N }
+
+# Public: single question with answers
+curl 'http://localhost:3000/api/community/questions/1'
+# Should return question + answers array
+
+# Public: get compatibility invite data
+curl 'http://localhost:3000/api/compatibility/invite?code=YOUR_INVITE_CODE'
+# Should return { inviterName, inviterSign, referralCode }
+
+# Auth: get referral stats (need auth cookie)
+curl 'http://localhost:3000/api/referrals' -H 'Cookie: ...'
+# Should return { totalReferrals, activatedReferrals, currentTier, nextTier, tiers: [...] }
+
+# Auth: get referral rewards
+curl 'http://localhost:3000/api/referrals/rewards' -H 'Cookie: ...'
+# Should return { rewards: [...] }
+```
 
 ### Phase 5: Content & Education (Weeks 15-18)
 

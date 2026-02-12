@@ -907,6 +907,22 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* Quick links: Referrals & Compatibility */}
+      <div className='flex gap-3 pt-3 border-t border-zinc-800/50'>
+        <Link
+          href='/referrals'
+          className='flex-1 text-center px-3 py-2 text-xs text-zinc-400 hover:text-zinc-200 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors'
+        >
+          Your Referrals
+        </Link>
+        <Link
+          href='/compatibility'
+          className='flex-1 text-center px-3 py-2 text-xs text-zinc-400 hover:text-zinc-200 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors'
+        >
+          Compatibility Invite
+        </Link>
+      </div>
+
       {/* Help Link */}
       <div className='pt-3 border-t border-zinc-800/50'>
         <div className='flex justify-center'>
