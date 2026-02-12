@@ -52,11 +52,9 @@ export default function TermsOfServicePage() {
               1.1 Age Requirement
             </h3>
             <p className='text-zinc-300 leading-relaxed'>
-              You must be at least 13 years of age to use the Service. If you
-              are under 18, you represent that you have your parent or
-              guardian&apos;s permission to use the Service. By using the
-              Service, you represent and warrant that you meet these eligibility
-              requirements.
+              You must be at least 16 years of age to use the Service. By using
+              the Service, you represent and warrant that you meet this
+              eligibility requirement.
             </p>
 
             <h3 className='text-xl font-medium text-white mb-3 mt-6'>
