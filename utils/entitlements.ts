@@ -45,6 +45,9 @@ const FEATURE_ACCESS_BASE = {
     'intentions', // Free users can set up to 3 active intentions
     'weekly_challenges', // Free users can check in to weekly challenges
     'milestones_basic', // Solar Return, app anniversary, streak milestones
+    'ask_questions', // Free users can ask 2 questions/week (limit enforced in API)
+    'compatibility_widget', // Gated behind signup, available to all tiers
+    'referral_rewards', // All tiers can participate in referral program
   ],
   lunary_plus: [
     'birth_chart',
@@ -78,6 +81,9 @@ const FEATURE_ACCESS_BASE = {
     'milestones_basic', // All milestone types
     'milestones_advanced', // Lunar Return, Saturn Return
     'cosmic_gifting', // Unlimited gifts
+    'ask_questions', // Unlimited questions
+    'compatibility_widget', // Gated behind signup
+    'referral_rewards', // Referral program + bonus tiers
   ],
   lunary_plus_ai: [
     'birth_chart',
@@ -127,6 +133,9 @@ const FEATURE_ACCESS_BASE = {
     'milestones_basic', // All milestone types
     'milestones_advanced', // Lunar Return, Saturn Return
     'cosmic_gifting', // Unlimited gifts
+    'ask_questions', // Unlimited questions
+    'compatibility_widget', // Gated behind signup
+    'referral_rewards', // Referral program + bonus tiers
   ],
   lunary_plus_ai_annual: [
     'birth_chart',
@@ -184,6 +193,9 @@ const FEATURE_ACCESS_BASE = {
     'milestones_basic', // All milestone types
     'milestones_advanced', // Lunar Return, Saturn Return
     'cosmic_gifting', // Unlimited gifts
+    'ask_questions', // Unlimited questions
+    'compatibility_widget', // Gated behind signup
+    'referral_rewards', // Referral program + bonus tiers
   ],
 } as const satisfies Record<PlanKey, readonly string[]>;
 
@@ -218,6 +230,10 @@ export const INTENTION_LIMITS = {
 
 export const GIFT_LIMITS = {
   freePerWeek: 1,
+} as const;
+
+export const QUESTION_LIMITS = {
+  freePerWeek: 2,
 } as const;
 
 export const JOURNAL_PROMPT_LIMITS: Record<PlanKey, number> = {

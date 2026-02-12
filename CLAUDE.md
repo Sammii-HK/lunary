@@ -4,7 +4,7 @@
 
 - **Framework**: Next.js 15 with App Router (not Pages Router)
 - **Styling**: Tailwind CSS (not CSS modules)
-- **Database**: Prisma with PostgreSQL (Neon)
+- **Database**: Prisma with PostgreSQL (Neon) — always use Prisma migrations
 - **Auth**: better-auth
 - **Payments**: Stripe
 - **Email**: Resend + React Email
@@ -160,6 +160,24 @@ const seed = simpleHash(`${type}-${id}-${date}`);
 2. Run `/typecheck` to catch type errors
 3. Run `/test` for any changed logic
 4. Use `/commit-clean` for the full workflow
+
+## Database & Prisma
+
+**Always use Prisma for database schema changes — never write raw SQL migration files.**
+
+- **Schema changes**: Edit `prisma/schema.prisma` first, then run `npx prisma migrate dev --name descriptive_name` to generate a migration
+- **Migration files** live in `prisma/migrations/` and are tracked by Prisma — never edit them manually
+- **Generate client**: After schema changes, run `npx prisma generate` (or use `/db-sync`)
+- **Raw SQL files** in `sql/` are legacy — do not add new ones. Use Prisma migrations instead
+- **Query patterns**: Use `@vercel/postgres` `sql` template tag for queries (existing pattern), Prisma Client for complex relations if needed
+
+```bash
+# Correct workflow for schema changes:
+# 1. Edit prisma/schema.prisma
+# 2. Generate migration:
+npx prisma migrate dev --name add_community_votes
+# 3. Prisma auto-generates the client after migrate
+```
 
 ## Security: SSRF Prevention
 
