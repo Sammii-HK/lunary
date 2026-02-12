@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { decrypt } from '@/lib/encryption';
@@ -16,26 +16,56 @@ export async function GET() {
     const userId = session.user.id;
     const userEmail = session.user.email;
 
-    // Gather all user data
+    // Gather all user data in parallel
     const [
-      profileResult,
-      subscriptionResult,
-      tarotReadingsResult,
-      notesResult,
-      aiThreadsResult,
-      streaksResult,
-      pushSubscriptionsResult,
+      profile,
+      subscription,
+      tarotReadings,
+      notes,
+      aiThreads,
+      streaks,
+      pushSubscriptions,
+      collections,
+      collectionFolders,
+      relationshipProfiles,
+      synastryReports,
+      cosmicReports,
+      ritualHabits,
+      weeklyRitualUsage,
+      emailPreferences,
+      friendConnections,
+      moonCircleInsights,
+      communityPosts,
+      userMemory,
+      userProgress,
+      consentLog,
+      analyticsActivity,
     ] = await Promise.all([
-      sql`SELECT * FROM user_profiles WHERE user_id = ${userId}`,
-      sql`SELECT * FROM subscriptions WHERE user_id = ${userId}`,
-      sql`SELECT * FROM tarot_readings WHERE user_id = ${userId}`,
-      sql`SELECT * FROM user_notes WHERE user_id = ${userId}`,
-      sql`SELECT * FROM ai_threads WHERE user_id = ${userId}`,
-      sql`SELECT * FROM user_streaks WHERE user_id = ${userId}`,
-      sql`SELECT * FROM push_subscriptions WHERE user_id = ${userId}`,
+      prisma.user_profiles.findFirst({ where: { user_id: userId } }),
+      prisma.subscriptions.findUnique({ where: { user_id: userId } }),
+      prisma.tarot_readings.findMany({ where: { user_id: userId } }),
+      prisma.user_notes.findMany({ where: { user_id: userId } }),
+      prisma.aiThread.findMany({ where: { userId: userId } }),
+      prisma.user_streaks.findFirst({ where: { user_id: userId } }),
+      prisma.push_subscriptions.findMany({ where: { user_id: userId } }),
+      prisma.collections.findMany({ where: { user_id: userId } }),
+      prisma.collection_folders.findMany({ where: { user_id: userId } }),
+      prisma.relationship_profiles.findMany({ where: { user_id: userId } }),
+      prisma.synastry_reports.findMany({ where: { user_id: userId } }),
+      prisma.cosmic_reports.findMany({ where: { user_id: userId } }),
+      prisma.ritual_habits.findMany({ where: { user_id: userId } }),
+      prisma.weekly_ritual_usage.findMany({ where: { user_id: userId } }),
+      prisma.email_preferences.findFirst({ where: { user_id: userId } }),
+      prisma.friend_connections.findMany({ where: { user_id: userId } }),
+      prisma.moon_circle_insights.findMany({ where: { user_id: userId } }),
+      prisma.community_posts.findMany({ where: { user_id: userId } }),
+      prisma.user_memory.findMany({ where: { user_id: userId } }),
+      prisma.user_progress.findMany({ where: { user_id: userId } }),
+      prisma.consent_log.findMany({ where: { user_id: userId } }),
+      prisma.analytics_user_activity.findMany({
+        where: { user_id: userId },
+      }),
     ]);
-
-    const profile = profileResult.rows[0];
 
     // Decrypt sensitive fields
     const decryptedProfile = profile
@@ -46,20 +76,44 @@ export async function GET() {
         }
       : null;
 
+    // Decrypt user_memory fact_encrypted fields
+    const decryptedMemory = userMemory.map((memory) => ({
+      ...memory,
+      fact: memory.fact_encrypted ? decrypt(memory.fact_encrypted) : null,
+      fact_encrypted: undefined,
+    }));
+
     const exportData = {
       exportedAt: new Date().toISOString(),
       userId,
       email: userEmail,
       profile: decryptedProfile,
-      subscription: subscriptionResult.rows[0] || null,
-      tarotReadings: tarotReadingsResult.rows,
-      notes: notesResult.rows,
-      aiConversations: aiThreadsResult.rows.map((thread) => ({
+      subscription: subscription || null,
+      tarotReadings,
+      notes,
+      aiConversations: aiThreads.map((thread) => ({
         ...thread,
-        messageCount: thread.messages?.length || 0,
+        messageCount: Array.isArray(thread.messages)
+          ? thread.messages.length
+          : 0,
       })),
-      streaks: streaksResult.rows[0] || null,
-      pushSubscriptions: pushSubscriptionsResult.rows.length,
+      streaks: streaks || null,
+      pushSubscriptions: pushSubscriptions.length,
+      collections,
+      collectionFolders,
+      relationshipProfiles,
+      synastryReports,
+      cosmicReports,
+      ritualHabits,
+      weeklyRitualUsage,
+      emailPreferences: emailPreferences || null,
+      friendConnections,
+      moonCircleInsights,
+      communityPosts,
+      userMemory: decryptedMemory,
+      userProgress,
+      consentLog,
+      analyticsActivity,
       dataRetentionInfo: {
         description:
           'Your data is retained as long as your account is active. You can request deletion at any time.',
