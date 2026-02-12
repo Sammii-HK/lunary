@@ -552,10 +552,14 @@ describe('UserContext: no birthLocation guard on version check', () => {
     // The old code had: if (!birthLocation) return;
     // right after: if (!user.birthday || !user.birthChart?.length) return;
     // Ensure that pattern is gone.
+    // Note: the birthday guard and chart check may be on separate lines now:
+    //   if (!user.birthday) return;
+    //   const needsChartGeneration = !user.birthChart?.length;
     const lines = source.split('\n');
     const birthdayGuardIndex = lines.findIndex(
       (l: string) =>
-        l.includes('!user.birthday') && l.includes('!user.birthChart'),
+        l.includes('!user.birthday') &&
+        (l.includes('!user.birthChart') || l.includes('return')),
     );
     expect(birthdayGuardIndex).toBeGreaterThan(-1);
 
