@@ -43,6 +43,7 @@ import {
   ShieldCheck,
   Key,
   Quote,
+  User,
 } from 'lucide-react';
 
 interface AdminTool {
@@ -790,6 +791,14 @@ export default function AdminDashboard() {
       href: '/admin/social-preview',
       icon: <Smartphone className='h-5 w-5' />,
       category: 'tools',
+    },
+    {
+      title: 'Birth Chart Tool',
+      description: 'Look up and regenerate user birth charts',
+      href: '/admin/birth-chart',
+      icon: <User className='h-5 w-5' />,
+      category: 'tools',
+      status: 'new',
     },
   ];
 
