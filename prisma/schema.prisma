@@ -1632,6 +1632,36 @@ model community_memberships {
   @@index([space_id], map: "idx_community_memberships_space")
 }
 
+/// User blocks for hiding content from specific users
+model blocked_users {
+  id          Int       @id @default(autoincrement())
+  blocker_id  String
+  blocked_id  String
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([blocker_id, blocked_id])
+  @@index([blocker_id], map: "idx_blocked_users_blocker")
+  @@index([blocked_id], map: "idx_blocked_users_blocked")
+}
+
+/// Content reports for community UGC (posts, questions, answers)
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model content_reports {
+  id           Int       @id @default(autoincrement())
+  reporter_id  String
+  content_type String
+  content_id   Int
+  reason       String
+  details      String?
+  status       String    @default("pending")
+  reviewed_at  DateTime? @db.Timestamptz(6)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([reporter_id, content_type, content_id])
+  @@index([status, created_at(sort: Desc)], map: "idx_content_reports_status")
+  @@index([content_type, content_id], map: "idx_content_reports_content")
+}
+
 model instagram_scheduled_posts {
   id             Int       @id @default(autoincrement())
   date           DateTime  @db.Date

@@ -2,17 +2,21 @@
 
 import { formatDistanceToNow } from 'date-fns';
 import { User } from 'lucide-react';
+import { ReportButton } from '@/components/community/ReportButton';
 
 interface CommunityPostCardProps {
   id: number;
   postText: string;
   isAnonymous: boolean;
+  userId?: string;
   createdAt: string | null;
 }
 
 export function CommunityPostCard({
+  id,
   postText,
   isAnonymous,
+  userId,
   createdAt,
 }: CommunityPostCardProps) {
   return (
@@ -38,6 +42,13 @@ export function CommunityPostCard({
             {postText}
           </p>
         </div>
+
+        <ReportButton
+          contentType='post'
+          contentId={id}
+          authorId={userId}
+          className='flex-shrink-0 self-start'
+        />
       </div>
     </div>
   );

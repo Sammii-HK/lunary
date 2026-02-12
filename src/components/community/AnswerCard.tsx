@@ -2,6 +2,7 @@
 
 import { ChevronUp, Award } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { ReportButton } from '@/components/community/ReportButton';
 
 interface AnswerCardProps {
   id: number;
@@ -98,6 +99,8 @@ export function AnswerCard({
               Mark as best
             </button>
           )}
+
+          <ReportButton contentType='answer' contentId={id} authorId={userId} />
         </div>
       </div>
     </div>

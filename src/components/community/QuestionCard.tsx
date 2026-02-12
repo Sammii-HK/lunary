@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { MessageCircle, ChevronUp } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { ReportButton } from '@/components/community/ReportButton';
 
 const TOPIC_COLORS: Record<string, string> = {
   transits: 'bg-blue-900/40 text-blue-300 border-blue-700/50',
@@ -86,6 +87,8 @@ export function QuestionCard({
               {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
             </span>
           )}
+
+          <ReportButton contentType='question' contentId={id} />
         </div>
       </div>
     </div>
