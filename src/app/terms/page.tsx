@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default function TermsOfServicePage() {
-  const lastUpdated = 'December 6, 2025';
+  const lastUpdated = 'February 12, 2026';
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
@@ -287,7 +287,117 @@ export default function TermsOfServicePage() {
             </ul>
 
             <h3 className='text-xl font-medium text-white mb-3 mt-6'>
-              4.4 Feedback
+              4.4 Community Q&amp;A
+            </h3>
+            <p className='text-zinc-300 leading-relaxed mb-4'>
+              Lunary provides a Q&amp;A feature where users can ask and answer
+              astrology-related questions. By using this feature, you
+              acknowledge and agree that:
+            </p>
+            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+              <li>
+                Questions and answers are publicly visible and may be viewed by
+                anyone, including users who are not signed in
+              </li>
+              <li>
+                You may post questions or answers anonymously; however,
+                anonymous content is still linked to your account internally for
+                moderation purposes
+              </li>
+              <li>
+                Other users may vote on questions and answers, and vote counts
+                are publicly displayed
+              </li>
+              <li>
+                We may use AI to generate suggested answers to questions; these
+                are clearly marked as AI-generated
+              </li>
+              <li>
+                Content is subject to moderation and may be removed without
+                notice if it violates our{' '}
+                <Link
+                  href='/acceptable-use'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                >
+                  Acceptable Use Policy
+                </Link>
+              </li>
+              <li>
+                Free users are limited in the number of questions they may post
+                per week
+              </li>
+            </ul>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              4.5 Social and Interactive Features
+            </h3>
+            <p className='text-zinc-300 leading-relaxed mb-4'>
+              Lunary offers social features that enable interaction between
+              users. By using these features, you acknowledge and agree that:
+            </p>
+            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+              <li>
+                <strong>Cosmic Gifts:</strong> You may send virtual gifts (such
+                as tarot pulls or encouragement messages) to friends on Lunary.
+                When you send or receive a gift, the sender and recipient can
+                see each other&apos;s name, avatar, and sun sign. Optional
+                messages attached to gifts are limited to 500 characters. Gifts
+                are only available between users who have an established friend
+                connection.
+              </li>
+              <li>
+                <strong>Compatibility Invites:</strong> You may generate a
+                compatibility invite link to share with another person. When you
+                create an invite, your name, sun sign, and birth chart data are
+                used to calculate synastry. The invited person must provide
+                their own birth data to complete the comparison. Invite links
+                expire after 30 days.
+              </li>
+              <li>
+                <strong>Friend Activity:</strong> When you add friends on
+                Lunary, certain activity is visible between connected friends,
+                including streaks, last check-in times, milestone celebrations,
+                and astrological compatibility tips. Friends can see your name,
+                avatar, and sun sign.
+              </li>
+              <li>
+                <strong>Share Cards:</strong> You may generate shareable image
+                cards (cosmic score, streak milestones, compatibility results)
+                to share outside the app. These cards contain the data you
+                choose to share and may include your name or astrological
+                information.
+              </li>
+            </ul>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              4.6 Referral Program
+            </h3>
+            <p className='text-zinc-300 leading-relaxed mb-4'>
+              Lunary may offer a referral program that rewards you for inviting
+              new users. By participating, you agree that:
+            </p>
+            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+              <li>
+                Referral rewards (such as badges, subscription time, or
+                exclusive content) are earned when referred users activate their
+                accounts
+              </li>
+              <li>
+                You will not create fake accounts, use bots, or employ deceptive
+                means to artificially inflate referral counts
+              </li>
+              <li>
+                Referral rewards are non-transferable and have no cash value
+              </li>
+              <li>
+                We reserve the right to modify, suspend, or terminate the
+                referral program at any time, and to revoke rewards obtained
+                through fraudulent means
+              </li>
+            </ul>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              4.7 Feedback
             </h3>
             <p className='text-zinc-300 leading-relaxed'>
               If you provide us with any feedback, suggestions, or ideas about
