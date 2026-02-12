@@ -6,11 +6,10 @@ const config: CapacitorConfig = {
 
   // Load from your live site - no static export needed
   server: {
-    // Production:
-    // url: 'https://lunary.app/app',
-    // For local dev, use your Mac's IP:
-    url: 'http://192.168.68.107:3000/app',
-    cleartext: true,
+    url: 'https://lunary.app/app',
+    // For local dev, uncomment below and comment out production URL:
+    // url: 'http://192.168.68.107:3000/app',
+    // cleartext: true,
   },
 
   ios: {
@@ -22,7 +21,7 @@ const config: CapacitorConfig = {
 
   android: {
     backgroundColor: '#0a0a0f',
-    allowMixedContent: true, // Allow HTTP for local dev
+    allowMixedContent: false,
   },
 
   plugins: {

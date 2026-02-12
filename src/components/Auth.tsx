@@ -11,11 +11,13 @@ import {
 } from '@/lib/attribution';
 import { captureEvent } from '@/lib/posthog-client';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { BirthdayInput } from '@/components/ui/birthday-input';
 
 interface AuthFormData {
   email: string;
   password: string;
   name?: string;
+  birthday?: string;
 }
 
 let cachedAuthFormData: AuthFormData | null = null;
@@ -46,6 +48,7 @@ export function AuthComponent({
         email: '',
         password: '',
         name: '',
+        birthday: '',
       },
   );
 
@@ -99,11 +102,29 @@ export function AuthComponent({
         );
         setMode('signIn');
         cachedAuthFormData = null;
-        setFormData({ email: '', password: '', name: '' });
+        setFormData({ email: '', password: '', name: '', birthday: '' });
         return;
       }
 
       if (isSignUp) {
+        // Age gate validation
+        if (!formData.birthday) {
+          throw new Error('Date of birth is required to create your account.');
+        }
+        const birthDate = new Date(formData.birthday);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const hasHadBirthdayThisYear =
+          today.getMonth() > birthDate.getMonth() ||
+          (today.getMonth() === birthDate.getMonth() &&
+            today.getDate() >= birthDate.getDate());
+        if (!hasHadBirthdayThisYear) {
+          age -= 1;
+        }
+        if (age < 16) {
+          throw new Error('You must be at least 16 years old to use Lunary.');
+        }
+
         // No timeout - let the request complete naturally
         const result = await betterAuthClient.signUp.email({
           email: formData.email.toLowerCase().trim(),
@@ -142,11 +163,21 @@ export function AuthComponent({
               }),
             }).catch(() => {});
           }
+
+          // Save birthday from signup (fire-and-forget)
+          if (formData.birthday) {
+            fetch('/api/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ birthday: formData.birthday }),
+            }).catch(() => {});
+          }
         }
 
         setSuccess('Account created successfully! You are now signed in.');
         cachedAuthFormData = null;
-        setFormData({ email: '', password: '', name: '' });
+        setFormData({ email: '', password: '', name: '', birthday: '' });
 
         await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -209,7 +240,7 @@ export function AuthComponent({
 
         setSuccess('Signed in successfully!');
         cachedAuthFormData = null;
-        setFormData({ email: '', password: '', name: '' });
+        setFormData({ email: '', password: '', name: '', birthday: '' });
 
         await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -365,6 +396,28 @@ export function AuthComponent({
               className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
               placeholder='Enter your name'
             />
+          </div>
+        )}
+
+        {isSignUp && (
+          <div>
+            <label
+              htmlFor='birthday'
+              className='block text-sm font-medium text-zinc-300 mb-2'
+            >
+              Birthday
+            </label>
+            <BirthdayInput
+              id='birthday'
+              name='birthday'
+              value={formData.birthday || ''}
+              onChange={(isoDate) =>
+                setFormData((prev) => ({ ...prev, birthday: isoDate }))
+              }
+            />
+            <p className='mt-1 text-xs text-zinc-400'>
+              Used to create your birth chart
+            </p>
           </div>
         )}
 

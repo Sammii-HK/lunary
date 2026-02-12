@@ -154,17 +154,6 @@ const CosmicScore = dynamic(
   },
 );
 
-const RetrogradeBanner = dynamic(
-  () =>
-    import('@/components/retrograde/RetrogradeBanner').then((m) => ({
-      default: m.RetrogradeBanner,
-    })),
-  {
-    loading: () => <div className='min-h-0' />,
-    ssr: false,
-  },
-);
-
 const EveningRitualSheet = dynamic(
   () =>
     import('@/components/rituals/EveningRitualSheet').then((m) => ({
@@ -451,8 +440,6 @@ export default function AppDashboardClient() {
         <ShareZodiacSeason />
 
         <CosmicScore />
-
-        <RetrogradeBanner />
 
         {authState.isAuthenticated && isEvening && (
           <button

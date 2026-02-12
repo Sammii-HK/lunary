@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPolicyPage() {
-  const lastUpdated = 'December 6, 2025';
+  const lastUpdated = 'February 11, 2026';
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
@@ -590,10 +590,10 @@ export default function PrivacyPolicyPage() {
               12. Children&apos;s Privacy
             </h2>
             <p className='text-zinc-300 leading-relaxed'>
-              The Service is not intended for children under the age of 13. We
-              do not knowingly collect personal information from children under
-              13. If you are a parent or guardian and believe your child has
-              provided us with personal information, please contact us at{' '}
+              The Service is not intended for individuals under the age of 16.
+              We do not knowingly collect personal information from individuals
+              under 16. If you are a parent or guardian and believe your child
+              has provided us with personal information, please contact us at{' '}
               <a
                 href='mailto:privacy@lunary.app'
                 className='text-lunary-primary-400 hover:text-lunary-primary-300'
