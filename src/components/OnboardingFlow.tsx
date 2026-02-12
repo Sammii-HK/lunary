@@ -528,9 +528,18 @@ export function OnboardingFlow({
     }
   }, [previewMode, previewStep]);
 
+  // Pre-fill birthday from user data (collected at signup)
+  const hasBirthdayFromSignup = !!user?.birthday && !previewMode;
+
   useEffect(() => {
     if (!showOnboarding || prefillLoaded || previewMode) {
       return;
+    }
+
+    // Pre-fill from user profile (signup birthday)
+    if (user?.birthday && !birthday) {
+      setBirthday(user.birthday);
+      setShowOptionalDetails(true);
     }
 
     const prefill = getOnboardingPrefill();
@@ -554,7 +563,7 @@ export function OnboardingFlow({
       clearOnboardingPrefill();
     }
     setPrefillLoaded(true);
-  }, [showOnboarding, prefillLoaded, previewMode]);
+  }, [showOnboarding, prefillLoaded, previewMode, user?.birthday, birthday]);
 
   const cancelLocationSuggestionBlur = useCallback(() => {
     if (locationSuggestionBlurTimeoutRef.current !== null) {
@@ -1052,11 +1061,14 @@ export function OnboardingFlow({
           <div className='space-y-6'>
             <div className='text-center'>
               <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
-                When Were You Born?
+                {hasBirthdayFromSignup
+                  ? 'Refine Your Birth Chart'
+                  : 'When Were You Born?'}
               </h2>
               <p className='text-zinc-300 text-sm'>
-                Your birthday lets us calculate your birth chart and personalise
-                your daily guidance.
+                {hasBirthdayFromSignup
+                  ? 'Add your birth time and location for a more accurate chart.'
+                  : 'Your birthday lets us calculate your birth chart and personalise your daily guidance.'}
               </p>
             </div>
 

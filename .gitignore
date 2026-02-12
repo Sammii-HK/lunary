@@ -71,6 +71,11 @@ PRESS-KIT-TODO.md
 # Sentry Config File
 .env.sentry-build-plugin
 
+# Android signing
+*.keystore
+*.jks
+android/key.properties
+
 # Claude plans
 .claude/plans
 ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/

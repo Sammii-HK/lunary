@@ -52,11 +52,9 @@ export default function TermsOfServicePage() {
               1.1 Age Requirement
             </h3>
             <p className='text-zinc-300 leading-relaxed'>
-              You must be at least 13 years of age to use the Service. If you
-              are under 18, you represent that you have your parent or
-              guardian&apos;s permission to use the Service. By using the
-              Service, you represent and warrant that you meet these eligibility
-              requirements.
+              You must be at least 16 years of age to use the Service. By using
+              the Service, you represent and warrant that you meet this
+              eligibility requirement.
             </p>
 
             <h3 className='text-xl font-medium text-white mb-3 mt-6'>
@@ -251,7 +249,45 @@ export default function TermsOfServicePage() {
             </p>
 
             <h3 className='text-xl font-medium text-white mb-3 mt-6'>
-              4.3 Feedback
+              4.3 Community Spaces
+            </h3>
+            <p className='text-zinc-300 leading-relaxed mb-4'>
+              Lunary offers community spaces where you can share posts with
+              other users. By posting in a community space, you acknowledge and
+              agree that:
+            </p>
+            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+              <li>
+                Your posts are visible to other members of that space and may be
+                viewed by any authenticated user
+              </li>
+              <li>
+                You may post anonymously; however, anonymous posts are still
+                linked to your account internally for moderation and safety
+                purposes
+              </li>
+              <li>
+                Posts are subject to automated content moderation and may be
+                removed without notice if they violate our{' '}
+                <Link
+                  href='/acceptable-use'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                >
+                  Acceptable Use Policy
+                </Link>
+              </li>
+              <li>
+                We reserve the right to limit the number of posts you can make
+                in any space to maintain community quality
+              </li>
+              <li>
+                Community posts are not private — do not share sensitive
+                personal information in community spaces
+              </li>
+            </ul>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              4.4 Feedback
             </h3>
             <p className='text-zinc-300 leading-relaxed'>
               If you provide us with any feedback, suggestions, or ideas about

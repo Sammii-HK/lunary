@@ -11,6 +11,23 @@ interface ErrorBoundaryState {
 
 const isDev = process.env.NODE_ENV === 'development';
 
+/** Detect stale chunk / code-splitting errors that happen after a new deploy */
+function isChunkLoadError(error: Error): boolean {
+  const msg = error.message || '';
+  return (
+    msg.includes('Loading chunk') ||
+    msg.includes('ChunkLoadError') ||
+    msg.includes('Loading CSS chunk') ||
+    msg.includes('Minified React error #130') ||
+    msg.includes('Minified React error #423') ||
+    msg.includes('Failed to fetch dynamically imported module') ||
+    msg.includes('Element type is invalid') ||
+    error.name === 'ChunkLoadError'
+  );
+}
+
+const RELOAD_KEY = 'lunary_error_reload';
+
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode; fallback?: React.ReactNode },
   ErrorBoundaryState
@@ -32,7 +49,27 @@ class ErrorBoundary extends React.Component<
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
     console.error('Component stack:', errorInfo.componentStack);
+
+    // Auto-recover from stale chunk errors by doing a hard reload (once)
+    if (isChunkLoadError(error) && typeof window !== 'undefined') {
+      const lastReload = sessionStorage.getItem(RELOAD_KEY);
+      const now = Date.now();
+      // Only auto-reload if we haven't reloaded in the last 10 seconds
+      // (prevents infinite reload loops)
+      if (!lastReload || now - parseInt(lastReload, 10) > 10_000) {
+        sessionStorage.setItem(RELOAD_KEY, String(now));
+        window.location.reload();
+        return;
+      }
+    }
   }
+
+  handleRefresh = () => {
+    // Always do a hard reload — soft re-render won't fix stale chunks
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
+  };
 
   render() {
     if (this.state.hasError) {
@@ -63,13 +100,17 @@ class ErrorBoundary extends React.Component<
               </p>
               <div className='flex gap-3 justify-center'>
                 <button
-                  onClick={() => this.setState({ hasError: false })}
+                  onClick={this.handleRefresh}
                   className='px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors text-sm'
                 >
-                  Try Again
+                  Refresh Page
                 </button>
                 <Link
                   href='/'
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.href = '/';
+                  }}
                   className='px-5 py-2.5 bg-lunary-primary-600 hover:bg-lunary-primary-500 rounded-lg transition-colors text-sm'
                 >
                   Return Home
@@ -84,7 +125,7 @@ class ErrorBoundary extends React.Component<
       return (
         <div className='min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4'>
           <div className='text-center max-w-md'>
-            <h2 className='text-xl font-bold mb-4'>🌙 Something went wrong</h2>
+            <h2 className='text-xl font-bold mb-4'>Something went wrong</h2>
             <p className='text-zinc-400 mb-2'>
               Don't worry - the cosmic energy is still flowing
             </p>
@@ -105,10 +146,10 @@ class ErrorBoundary extends React.Component<
               </details>
             )}
             <button
-              onClick={() => this.setState({ hasError: false })}
+              onClick={this.handleRefresh}
               className='px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded transition-colors'
             >
-              Try Again
+              Refresh Page
             </button>
             <p className='text-xs text-zinc-400 mt-4'>
               Check browser console for more details

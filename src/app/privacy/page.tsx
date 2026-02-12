@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPolicyPage() {
-  const lastUpdated = 'December 6, 2025';
+  const lastUpdated = 'February 11, 2026';
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
@@ -67,7 +67,8 @@ export default function PrivacyPolicyPage() {
               </li>
               <li>
                 <strong>User Content:</strong> Journal entries, notes, saved
-                tarot readings, and collections you create
+                tarot readings, collections you create, and posts submitted to
+                community spaces
               </li>
               <li>
                 <strong>Communication Data:</strong> Messages sent through our
@@ -83,6 +84,14 @@ export default function PrivacyPolicyPage() {
               user-generated content stored privately within your account. This
               content is not reviewed manually and is not shared publicly unless
               you explicitly choose to do so.
+            </p>
+            <p className='text-zinc-300 leading-relaxed mt-4'>
+              <strong>Community spaces:</strong> Posts you submit to community
+              spaces are visible to other authenticated users of that space. You
+              may choose to post anonymously; however, anonymous posts remain
+              linked to your account internally for moderation and safety
+              purposes. Community posts are subject to automated content
+              filtering and may be removed if they violate our policies.
             </p>
 
             <h3 className='text-xl font-medium text-white mb-3 mt-6'>
@@ -590,10 +599,10 @@ export default function PrivacyPolicyPage() {
               12. Children&apos;s Privacy
             </h2>
             <p className='text-zinc-300 leading-relaxed'>
-              The Service is not intended for children under the age of 13. We
-              do not knowingly collect personal information from children under
-              13. If you are a parent or guardian and believe your child has
-              provided us with personal information, please contact us at{' '}
+              The Service is not intended for individuals under the age of 16.
+              We do not knowingly collect personal information from individuals
+              under 16. If you are a parent or guardian and believe your child
+              has provided us with personal information, please contact us at{' '}
               <a
                 href='mailto:privacy@lunary.app'
                 className='text-lunary-primary-400 hover:text-lunary-primary-300'

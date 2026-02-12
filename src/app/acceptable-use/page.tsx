@@ -186,7 +186,42 @@ export default function AcceptableUsePolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              3. Account Sharing and Access
+              3. Community Spaces
+            </h2>
+            <p className='text-zinc-300 leading-relaxed mb-4'>
+              When participating in Lunary&apos;s community spaces, you agree
+              to:
+            </p>
+            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+              <li>Treat other community members with respect and kindness</li>
+              <li>
+                Not post content that harasses, bullies, intimidates, or targets
+                other users
+              </li>
+              <li>
+                Not share personal information about yourself or others (real
+                names, addresses, contact details) in community posts
+              </li>
+              <li>
+                Not use community spaces to advertise, promote external
+                services, or solicit other users
+              </li>
+              <li>
+                Not spam or flood spaces with repetitive or low-effort posts
+              </li>
+              <li>Respect the topic and purpose of each community space</li>
+            </ul>
+            <p className='text-zinc-300 leading-relaxed mt-4'>
+              Community posts are subject to automated content moderation. Posts
+              that violate these guidelines or our content policies may be
+              removed without notice, and repeat violations may result in
+              account suspension.
+            </p>
+          </section>
+
+          <section>
+            <h2 className='text-2xl font-semibold text-white mb-4'>
+              4. Account Sharing and Access
             </h2>
             <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
               <li>
@@ -214,7 +249,7 @@ export default function AcceptableUsePolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              4. Content You Create
+              5. Content You Create
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               You retain ownership of content you create using the Service (such
@@ -237,7 +272,7 @@ export default function AcceptableUsePolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              5. Enforcement
+              6. Enforcement
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               We reserve the right to investigate and take appropriate action
@@ -263,7 +298,7 @@ export default function AcceptableUsePolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              6. Reporting Violations
+              7. Reporting Violations
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               If you become aware of any violation of this AUP, please report it
@@ -292,7 +327,7 @@ export default function AcceptableUsePolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              7. Contact Us
+              8. Contact Us
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               If you have questions about this Acceptable Use Policy, please
