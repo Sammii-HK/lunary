@@ -31,6 +31,11 @@ const faqs = [
     answer:
       'Birth times are converted to UTC using historical timezone data. We account for daylight saving time changes throughout history to ensure accurate chart calculation.',
   },
+  {
+    question: 'Why does my Part of Fortune differ from other apps?',
+    answer:
+      'Lunary uses the traditional Hellenistic day/night sect formula for the Part of Fortune. For night charts (Sun below the horizon), this produces a different result than apps using the simplified modern formula. Both approaches are valid — ours follows the original Hellenistic system used by astrologers for over 2,000 years.',
+  },
 ];
 
 const sections = [
@@ -69,6 +74,20 @@ We use the tropical zodiac (season-based) as standard in Western astrology, wher
 6. Identify planetary dignity/debility states
 
 Each calculation is performed in real-time, ensuring you always see accurate current sky positions.`,
+  },
+  {
+    title: 'Traditional Hellenistic Approach',
+    content: `Lunary follows the traditional Hellenistic framework for calculated points in your birth chart.
+
+• Part of Fortune uses the day/night sect formula:
+  — Day charts (Sun above horizon): Ascendant + Moon − Sun
+  — Night charts (Sun below horizon): Ascendant + Sun − Moon
+• Part of Spirit uses the complementary formula (reversed from Part of Fortune)
+• Vertex is calculated using the co-latitude Ascendant method (standard Western approach)
+
+This differs from some modern apps that use a single formula (Asc + Moon − Sun) regardless of whether you were born during the day or night. Both approaches are astronomically valid. Lunary uses the original Hellenistic system, practiced by astrologers for over 2,000 years, because it honours the distinction between day and night charts (sect).
+
+All calculated points are validated against Swiss Ephemeris data to ensure accuracy.`,
   },
   {
     title: 'Transit Calculations',

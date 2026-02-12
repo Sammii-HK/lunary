@@ -1063,22 +1063,18 @@ async function runDailyPosts(dateStr: string) {
             }
           : undefined;
 
-        const mediaItems = (post.imageUrls || []).map((imageUrl: string) => ({
-          type: 'image',
-          url: imageUrl,
-          alt: post.alt,
-        }));
-
         const postData: any = {
           accountGroupId,
           name: post.name || `Cosmic Post - ${readableDate}`,
           content: post.content,
           platforms: post.platforms,
           scheduledDate: post.scheduledDate,
-          media: mediaItems,
+          media: (post.imageUrls || []).map((imageUrl: string) => ({
+            type: 'image',
+            url: imageUrl,
+            alt: post.alt,
+          })),
           variants: post.variants,
-          // Flag carousel posts so Succulent/Instagram creates a multi-slide album
-          ...(mediaItems.length > 1 && { isCarousel: true }),
         };
 
         if (pinterestOptions) {

@@ -140,43 +140,63 @@ export async function generateAndSaveWeeklyScripts(
   // Record secondary theme usage once for the week
   await recordSecondaryThemeUsage(secondaryTheme.id, weekStartDate);
 
-  // Guarantee at least 1 numerology video per week
-  const hasNumerology =
-    scripts.theme.category === 'numerology' ||
-    secondaryTheme.category === 'numerology';
-  if (!hasNumerology) {
-    const numerologyThemes = categoryThemes.filter(
-      (t) => t.category === 'numerology',
-    );
-    if (numerologyThemes.length > 0) {
-      const numTheme =
-        numerologyThemes[Math.floor(Math.random() * numerologyThemes.length)];
-      const numFacet = numTheme.facets[0];
-      const numDate = new Date(weekStartDate);
-      // Schedule on Wednesday (day offset 2) to space it mid-week
-      numDate.setDate(numDate.getDate() + 2);
-      const numAngle = await getAngleForTopic(numFacet.title, numDate);
-      const numAspect = await selectSecondaryAspect(numTheme.id);
-      const numScript = await generateTikTokScript(
-        numFacet,
-        numTheme,
-        numDate,
-        1,
-        numTheme.facets.length,
+  // Category quotas — guarantee minimum representation per week
+  const CATEGORY_QUOTAS: Record<string, { min: number; maxBonus: number }> = {
+    numerology: { min: 2, maxBonus: 3 },
+    spells: { min: 1, maxBonus: 2 },
+  };
+
+  // Count how many scripts already cover each quota category
+  // Primary = 7 scripts, secondary = 7 scripts
+  const categoryCount: Record<string, number> = {};
+  const primaryCat = scripts.theme.category;
+  const secondaryCat = secondaryTheme.category;
+  if (primaryCat in CATEGORY_QUOTAS)
+    categoryCount[primaryCat] = (categoryCount[primaryCat] || 0) + 7;
+  if (secondaryCat in CATEGORY_QUOTAS)
+    categoryCount[secondaryCat] = (categoryCount[secondaryCat] || 0) + 7;
+
+  // Best TikTok engagement days: Tue(1), Thu(3), Mon(0), Wed(2)
+  const TIKTOK_PEAK_DAYS = [1, 3, 0, 2];
+
+  for (const [category, quota] of Object.entries(CATEGORY_QUOTAS)) {
+    const current = categoryCount[category] || 0;
+    if (current >= quota.min) continue;
+
+    const needed = Math.min(quota.min, quota.maxBonus) - current;
+    const themes = categoryThemes.filter((t) => t.category === category);
+    if (themes.length === 0) continue;
+
+    for (let i = 0; i < needed; i++) {
+      const theme = themes[Math.floor(Math.random() * themes.length)];
+      const facet = theme.facets[i % theme.facets.length];
+      const bonusDate = new Date(weekStartDate);
+      bonusDate.setDate(
+        bonusDate.getDate() + TIKTOK_PEAK_DAYS[i % TIKTOK_PEAK_DAYS.length],
+      );
+
+      const bonusAngle = await getAngleForTopic(facet.title, bonusDate);
+      const bonusAspect = await selectSecondaryAspect(theme.id);
+      const bonusScript = await generateTikTokScript(
+        facet,
+        theme,
+        bonusDate,
+        i + 1,
+        theme.facets.length,
         baseUrl,
         {
           primaryThemeId: scripts.theme.id,
-          secondaryThemeId: numTheme.id,
-          secondaryFacetSlug: numFacet.grimoireSlug,
-          secondaryAngleKey: numAngle,
-          secondaryAspectKey: numAspect,
-          angleOverride: numAngle,
-          aspectOverride: numAspect,
+          secondaryThemeId: theme.id,
+          secondaryFacetSlug: facet.grimoireSlug,
+          secondaryAngleKey: bonusAngle,
+          secondaryAspectKey: bonusAspect,
+          angleOverride: bonusAngle,
+          aspectOverride: bonusAspect,
         },
       );
-      const numId = await saveVideoScript(numScript);
-      numScript.id = numId;
-      scripts.tiktokScripts.push(numScript);
+      const bonusId = await saveVideoScript(bonusScript);
+      bonusScript.id = bonusId;
+      scripts.tiktokScripts.push(bonusScript);
     }
   }
 

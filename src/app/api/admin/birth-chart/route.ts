@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
+import { decrypt } from '@/lib/encryption';
+import { normalizeIsoDateOnly } from '@/lib/date-only';
 import { decryptLocation, encryptLocation } from '@/lib/location-encryption';
 import { invalidateSnapshot } from '@/lib/cosmic-snapshot/cache';
 import {
@@ -87,12 +89,15 @@ export async function GET(request: NextRequest) {
     const locationData = profile.location
       ? decryptLocation(profile.location)
       : null;
+    const decryptedBirthday = normalizeIsoDateOnly(
+      profile.birthday ? decrypt(profile.birthday) : null,
+    );
 
     return NextResponse.json({
       userId: user.id,
       email: user.email,
       name: user.name,
-      birthday: profile.birthday,
+      birthday: decryptedBirthday,
       birthTime: locationData?.birthTime ?? null,
       birthLocation: locationData?.birthLocation ?? null,
       birthTimezone: locationData?.birthTimezone ?? null,
@@ -157,7 +162,9 @@ export async function POST(request: NextRequest) {
       ? decryptLocation(profile.location)
       : null;
 
-    const birthday = profile.birthday;
+    const birthday = normalizeIsoDateOnly(
+      profile.birthday ? decrypt(profile.birthday) : null,
+    );
     const birthTime = locationData?.birthTime;
     const birthLocation = locationData?.birthLocation;
 

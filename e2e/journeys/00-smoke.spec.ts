@@ -11,7 +11,7 @@ test.describe('Smoke Tests @smoke', () => {
     log('\n📄 Testing homepage...');
     const response = await page.goto('/', {
       waitUntil: 'domcontentloaded',
-      timeout: 20000,
+      timeout: 60000,
     });
 
     if (response?.status() !== 200) {

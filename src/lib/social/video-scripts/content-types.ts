@@ -15,7 +15,8 @@ export type ContentType =
   | 'hot-take' // "Unpopular opinion: [take]" debate format (12:00 UTC)
   | 'sign-check' // "If you're a [sign], stop scrolling" callout (12:00 UTC)
   | 'myth' // "The real reason [sign] is..." storytime (12:00 UTC)
-  | 'transit-alert'; // Timely transit content when major transits detected (12:00 UTC)
+  | 'transit-alert' // Timely transit content when major transits detected (12:00 UTC)
+  | 'did-you-know'; // Surprising facts from grimoire content (17:00 UTC)
 
 export type TargetAudience = 'discovery' | 'consideration' | 'conversion';
 
@@ -146,6 +147,16 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
     platforms: ['tiktok', 'instagram'],
     description:
       'Auto-generated alerts for major transits within 14 days. Timely but meaning-focused for evergreen value.',
+  },
+
+  'did-you-know': {
+    type: 'did-you-know',
+    purpose: 'Surprising facts from grimoire content',
+    idealTime: 17, // UK evening, US lunch — consideration window
+    targetAudience: 'discovery',
+    platforms: ['tiktok'],
+    description:
+      'Save-worthy facts that educate and surprise. Hook-driven "Did you know...?" format designed for saves and shares.',
   },
 };
 
