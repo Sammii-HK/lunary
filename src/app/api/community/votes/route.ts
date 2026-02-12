@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/api/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -31,6 +32,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Missing or invalid post_id' },
         { status: 400 },
+      );
+    }
+
+    // Per-post cooldown: max 1 vote toggle per post per 5 seconds
+    const cooldown = checkRateLimit(
+      `vote:${session.user.id}:${postId}`,
+      1,
+      5_000,
+    );
+    if (!cooldown.allowed) {
+      return NextResponse.json(
+        { error: 'Please wait a moment before voting on this post again' },
+        { status: 429 },
+      );
+    }
+
+    // Velocity limit: max 30 vote actions per 5 minutes
+    const velocity = checkRateLimit(
+      `vote-velocity:${session.user.id}`,
+      30,
+      5 * 60_000,
+    );
+    if (!velocity.allowed) {
+      return NextResponse.json(
+        { error: 'You are voting too quickly. Please slow down.' },
+        { status: 429 },
       );
     }
 
