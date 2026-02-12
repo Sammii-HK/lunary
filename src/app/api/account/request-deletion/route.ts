@@ -6,11 +6,25 @@ import {
   generateDeletionVerifyEmailHTML,
   generateDeletionVerifyEmailText,
 } from '@/lib/email-components/ComplianceEmails';
+import { checkRateLimit } from '@/lib/api/rate-limit';
 
 const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit by IP: max 3 requests per 15 minutes
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+    const ipLimit = checkRateLimit(`deletion-req:${ip}`, 3, 15 * 60_000);
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
     const email = body?.email;
 
@@ -19,6 +33,21 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
+
+    // Rate limit by email: max 2 requests per hour
+    const emailLimit = checkRateLimit(
+      `deletion-req:${normalizedEmail}`,
+      2,
+      60 * 60_000,
+    );
+    if (!emailLimit.allowed) {
+      // Return generic success to avoid leaking account existence
+      return NextResponse.json({
+        success: true,
+        message:
+          'If an account exists with that email, a verification link has been sent.',
+      });
+    }
 
     // Always return success to avoid leaking account existence
     const successResponse = NextResponse.json({
