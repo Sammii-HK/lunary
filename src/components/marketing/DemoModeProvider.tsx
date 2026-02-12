@@ -34,6 +34,11 @@ export function useDemoMode() {
 //    - /api/horoscope/daily - personalized horoscope preview
 // ✅ ALLOWED (session-only, no persistence):
 //    - POST /api/ritual/complete - marks ritual complete (UI only, resets on refresh)
+// ✅ MOCKED (returns realistic demo data):
+//    - GET /api/cosmic-score - returns score of 72 with category breakdown
+//    - POST/GET /api/streak/check-in - returns 14-day streak
+//    - GET /api/progress - returns skill tree progress for all 4 trees
+//    - POST /api/community/auto-join - returns success
 // 🚫 BLOCKED (with user alerts):
 //    - POST /api/journal - reflection/dream submissions
 //    - POST /api/tarot/readings - pulling new tarot spreads
@@ -182,6 +187,145 @@ if (typeof window !== 'undefined') {
       // Note: /api/tarot/readings GET is handled above to show pre-pulled demo spreads
       if (url.includes('/api/journal') || url.includes('/api/patterns')) {
         return new Response(JSON.stringify([]), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // MOCK cosmic score with realistic demo data
+      if (url.includes('/api/cosmic-score')) {
+        return new Response(
+          JSON.stringify({
+            overall: 72,
+            headline:
+              'Creative momentum is building — trust your intuition today',
+            dominantEnergy: 'creativity',
+            categories: {
+              communication: 14,
+              creativity: 17,
+              love: 13,
+              career: 15,
+              rest: 13,
+            },
+            bestWindowDescription: 'creative projects between 2-5pm',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+
+      // MOCK streak check-in with 14-day streak
+      if (url.includes('/api/streak/check-in')) {
+        const today = new Date().toISOString().split('T')[0];
+        return new Response(
+          JSON.stringify({
+            success: true,
+            streak: {
+              current: 14,
+              longest: 30,
+              lastCheckIn: today,
+              totalCheckIns: 142,
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+
+      // MOCK skill tree progress for all 4 trees
+      if (url.includes('/api/progress')) {
+        return new Response(
+          JSON.stringify({
+            progress: [
+              {
+                skillTree: 'tarot',
+                name: 'Tarot Mastery',
+                icon: 'square-star',
+                currentLevel: 3,
+                totalActions: 28,
+                nextLevel: 4,
+                progressToNext: 12,
+                actionsToNext: 22,
+                nextThreshold: 50,
+                unlockedFeatures: [
+                  'tarot_moon_phase_patterns',
+                  'archetype_detection_tarot',
+                  'planetary_tarot_patterns',
+                ],
+                nextUnlock: 'natal_transit_tarot_patterns',
+                nextUnlockDescription:
+                  'Natal transit tarot patterns (requires birth chart)',
+                actionVerb: 'spreads completed',
+                featureRoute: '/tarot#spreads',
+              },
+              {
+                skillTree: 'journal',
+                name: 'Journal Keeper',
+                icon: 'pen-tool',
+                currentLevel: 2,
+                totalActions: 18,
+                nextLevel: 3,
+                progressToNext: 15,
+                actionsToNext: 17,
+                nextThreshold: 35,
+                unlockedFeatures: [
+                  'emotion_moon_phase_patterns',
+                  'daily_thread_level_2',
+                ],
+                nextUnlock: 'archetype_detection_journal',
+                nextUnlockDescription:
+                  'Archetype detection from journal + planetary emotion patterns',
+                actionVerb: 'entries written',
+                featureRoute: '/guide?journal=1',
+              },
+              {
+                skillTree: 'explorer',
+                name: 'Cosmic Explorer',
+                icon: 'moon-star',
+                currentLevel: 3,
+                totalActions: 14,
+                nextLevel: 4,
+                progressToNext: 0,
+                actionsToNext: 16,
+                nextThreshold: 30,
+                unlockedFeatures: [
+                  'cosmic_profile',
+                  'streak_milestones',
+                  'pattern_insights_daily_thread',
+                ],
+                nextUnlock: 'daily_thread_level_3',
+                nextUnlockDescription:
+                  'Full integrative daily thread with memories and milestones',
+                actionVerb: 'day streak',
+                featureRoute: '/horoscope',
+              },
+              {
+                skillTree: 'ritual',
+                name: 'Ritual Keeper',
+                icon: 'shell',
+                currentLevel: 2,
+                totalActions: 12,
+                nextLevel: 3,
+                progressToNext: 13,
+                actionsToNext: 13,
+                nextThreshold: 25,
+                unlockedFeatures: [
+                  'ritual_tracking',
+                  'ritual_streak_milestones',
+                ],
+                nextUnlock: 'moon_phase_rituals',
+                nextUnlockDescription: 'Moon-phase-aligned ritual suggestions',
+                actionVerb: 'rituals completed',
+                featureRoute: '/app',
+              },
+            ],
+            isPro: true,
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+
+      // MOCK community auto-join
+      if (url.includes('/api/community/auto-join')) {
+        return new Response(JSON.stringify({ success: true }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
         });
