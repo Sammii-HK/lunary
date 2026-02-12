@@ -1401,6 +1401,61 @@ const FALLBACK_TEMPLATES: Record<
     ],
   },
 
+  did_you_know: {
+    context: [
+      'Did you know this about {topic}?',
+      'Most people have no idea about {topic}.',
+      'Here is something surprising about {topic}.',
+      '{topic} has a detail most people miss.',
+    ],
+    middle: [
+      'The reason this matters is simpler than you think.',
+      'This changes how you look at {topic}.',
+      'Once you know this, you cannot unsee it.',
+      'The history behind this is fascinating.',
+    ],
+    action: {
+      [ContentAspect.CORE_MEANING]: [
+        'Now you know something most people do not about {topic}.',
+        'Save this for next time {topic} comes up.',
+      ],
+      [ContentAspect.COMMON_MISCONCEPTION]: [
+        'What most people think about {topic} is only half the story.',
+        'The common belief about {topic} misses this completely.',
+      ],
+      [ContentAspect.EMOTIONAL_IMPACT]: [
+        'Does knowing this change how you feel about {topic}?',
+        'This fact about {topic} hits differently when you think about it.',
+      ],
+      [ContentAspect.REAL_LIFE_EXPRESSION]: [
+        'You will notice this about {topic} everywhere now.',
+        'Next time you encounter {topic}, remember this.',
+      ],
+      [ContentAspect.TIMING_AND_CONTEXT]: [
+        'This fact becomes relevant every time {topic} comes up.',
+        'Knowing this about {topic} changes the timing of everything.',
+      ],
+      [ContentAspect.PRACTICAL_APPLICATION]: [
+        'Save this and share it next time someone asks about {topic}.',
+        'Use this knowledge about {topic} wisely.',
+      ],
+      [ContentAspect.WHEN_TO_AVOID]: [
+        'Not everyone is ready to hear this about {topic}.',
+        'This might change your relationship with {topic}.',
+      ],
+      [ContentAspect.SUBTLE_INSIGHT]: [
+        'The part about {topic} nobody mentions is the most important.',
+        'The subtle detail about {topic} changes everything.',
+      ],
+    },
+    closing: [
+      'Now you know. Save this.',
+      'Share this with someone who needs to hear it.',
+      'The more you learn about {topic}, the more there is to discover.',
+      'Did you know? Now you do.',
+    ],
+  },
+
   default: {
     context: [
       '{topic} has patterns worth noticing.',

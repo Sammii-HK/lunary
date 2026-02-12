@@ -29,6 +29,7 @@ export type ContentTypeKey =
   | 'hot_take'
   | 'sign_check'
   | 'myth'
+  | 'did_you_know'
   | 'default';
 
 /**
@@ -915,6 +916,37 @@ export const CONTENT_TYPE_VOICES: Record<
     ],
   },
 
+  did_you_know: {
+    tone: 'Curious, informative, slightly conspiratorial',
+    voiceDescription: `DID YOU KNOW VOICE:
+- Open with genuine surprise — "Did you know...?"
+- Speak like you just discovered something fascinating and can't wait to share it
+- Deliver the fact with context that makes it stick
+- Explain WHY it matters, not just WHAT it is
+- End with a reframe or closer that makes people want to save the video
+- The viewer should feel smarter after watching`,
+    exampleEnergy: `Example energy:
+"Did you know the Death card doesn't mean death? It's actually one of the most misunderstood cards in tarot. It represents transformation. Endings that make space for new beginnings. Next time you pull it, don't panic."
+"Did you know 11:11 isn't a coincidence? In numerology, 11 is a master number. It represents spiritual awakening. You're not randomly noticing. You're at a threshold."
+"Did you know salt circles have been used for protection across almost every culture in history? From Ancient Rome to medieval Europe to Japanese Shinto. The practice is thousands of years old."`,
+    specificBans: [
+      'fun fact',
+      'interesting trivia',
+      'here is a cool fact',
+      'random fact',
+      'bet you didnt know',
+      'mind blown',
+    ],
+    keyPhrases: [
+      'did you know',
+      'most people dont realise',
+      'the reason is',
+      'next time you see this',
+      'save this',
+      'now you know',
+    ],
+  },
+
   default: {
     tone: 'Clear, grounded, educational',
     voiceDescription: `DEFAULT VOICE:
@@ -1153,6 +1185,13 @@ export const SCRIPT_STRUCTURES: Record<ContentTypeKey, string[]> = {
     `RANKING: "Rank these [topic] traits from most to least you." - List 4-5 specific traits or habits - Each must be immediately recognizable - Ask: "What's your order?" - Drive comments by making each ranking feel personal`,
     `SCENARIO: "[Scenario]. What do you do?" - Paint a specific, relatable situation - Give 3 options, each tied to a sign/number/type - Reveal what each choice says about them - "Comment your answer and I'll tell you what it means"`,
     `PAIR_TEST: "These two [types] either love or hate each other." - Name a specific pairing - Describe why they click or clash - Ask: "Is this your dynamic?" - "Tag who this is about"`,
+  ],
+
+  did_you_know: [
+    `HOOK_FACT_CONTEXT: "Did you know [surprising fact]?" - Open with the hook question - Deliver the fact with one line of proof - Explain why it matters or what it changes - Close with a save-worthy reframe`,
+    `MISCONCEPTION_REVEAL: "Most people think [common belief]. Here's what's actually true." - Open with what people assume - Reveal the real fact - Add context that makes it stick - Close with "Now you know"`,
+    `FACT_THEN_WHY: "Did you know [fact]? Here's why that matters." - Open with the surprising fact - Explain the mechanism or history - Connect it to something the viewer does or believes - Close with practical takeaway`,
+    `CHAIN_FACTS: "Did you know [fact 1]? It gets better." - Open with an interesting fact - Layer a second related fact on top - Build to the most surprising detail - Close with "Save this for later"`,
   ],
 
   default: [
