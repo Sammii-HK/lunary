@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { validateInsightText } from '@/lib/community/moderation';
+import { checkRateLimit } from '@/lib/api/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -36,6 +37,19 @@ export async function POST(request: NextRequest, context: any) {
       return NextResponse.json(
         { error: 'Sign in to answer questions' },
         { status: 401 },
+      );
+    }
+
+    // Rate limit: max 10 answers per 10 minutes per user
+    const rateCheck = checkRateLimit(
+      `community-answer:${session.user.id}`,
+      10,
+      10 * 60_000,
+    );
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: 'You are posting too quickly. Please wait a few minutes.' },
+        { status: 429 },
       );
     }
 
