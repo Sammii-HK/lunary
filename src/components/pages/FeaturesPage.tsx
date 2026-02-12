@@ -16,6 +16,12 @@ import {
   Clock,
   Moon,
   Hash,
+  Flame,
+  Sunrise,
+  Trophy,
+  Target,
+  MessageSquare,
+  Gift,
 } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -244,6 +250,42 @@ export default function FeaturesPage() {
             cta='Draw your daily card'
             ctaHref='/auth?signup=true'
           />
+
+          {/* Cosmic Score & Streaks */}
+          <FeatureCard
+            icon={<Flame className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Cosmic Score & Streaks'
+            description='Your daily alignment score tracks how in tune you are with the cosmos — build streaks and unlock milestones'
+            features={[
+              'Daily score based on your chart, transits, and moon phase',
+              'Build streaks by checking in every day',
+              'Milestone celebrations at 7, 30, 60, 90, 180, and 365 days',
+              'Share your achievements as beautiful social cards',
+              'Leaderboard with your Cosmic Circle friends',
+            ]}
+            freeTier='Daily cosmic score + basic streaks'
+            paidTier='Full score breakdown + milestone rewards'
+            cta='Start your streak'
+            ctaHref='/auth?signup=true'
+          />
+
+          {/* Morning & Evening Rituals */}
+          <FeatureCard
+            icon={<Sunrise className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Morning & Evening Rituals'
+            description='Guided cosmic rituals to bookend your day — set intentions in the morning, reflect in the evening'
+            features={[
+              'Morning: set your daily intention aligned to current transits',
+              'Morning: pull a guidance card + crystal color for the day',
+              'Evening: gratitude reflection + mood tracking by moon phase',
+              'Evening: review how your intention played out',
+              'Dream intention setting for lunar dream work',
+            ]}
+            freeTier='Basic morning ritual'
+            paidTier='Full morning + evening rituals with all features'
+            cta='Try a ritual'
+            ctaHref='/auth?signup=true'
+          />
         </section>
 
         {/* Section 3: Weekly Guidance */}
@@ -295,6 +337,24 @@ export default function FeaturesPage() {
             paidTier='All daily transits + Sky Now durations + 30-day calendar'
             proTier='90-day view + weekly email reports'
             cta="See what's ahead"
+            ctaHref='/auth?signup=true'
+          />
+
+          {/* Weekly Cosmic Challenge */}
+          <FeatureCard
+            icon={<Trophy className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Weekly Cosmic Challenge'
+            description='A new challenge every Monday based on current planetary transits — grow through cosmic practice'
+            features={[
+              'New challenge generated from active transits each week',
+              'Daily check-ins with reflection prompts',
+              'Earn XP for each day completed + bonus for a full week',
+              'Build challenge streaks across weeks',
+              'Community participation counter — practice together',
+            ]}
+            freeTier='Join weekly challenges + daily check-ins'
+            paidTier='Full reflections + streak bonuses + XP rewards'
+            cta="See this week's challenge"
             ctaHref='/auth?signup=true'
           />
         </section>
@@ -396,6 +456,24 @@ export default function FeaturesPage() {
             cta='Start journaling'
             ctaHref='/auth?signup=true'
           />
+
+          {/* Manifestation Tracker */}
+          <FeatureCard
+            icon={<Target className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Manifestation Tracker'
+            description='Set cosmic intentions aligned to planetary energy and track their progress through moon cycles'
+            features={[
+              'Set intentions with planetary alignment suggestions',
+              'Track progress through new moon → full moon cycles',
+              'Review intentions during your evening ritual',
+              'Mark outcomes: manifested, in progress, released, or transformed',
+              'See which cosmic conditions support your manifestations',
+            ]}
+            freeTier='Up to 3 active intentions'
+            paidTier='Unlimited intentions + cosmic timing suggestions'
+            cta='Set an intention'
+            ctaHref='/auth?signup=true'
+          />
         </section>
 
         {/* Section 5: Connect & Compare */}
@@ -405,7 +483,7 @@ export default function FeaturesPage() {
               Connect & Compare
             </Heading>
             <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
-              See how your charts interact with friends
+              Friends, community spaces, and cosmic gifts
             </p>
           </div>
 
@@ -466,6 +544,42 @@ export default function FeaturesPage() {
             proTier='Full access to shared cosmic events'
             cta='Explore shared timing'
             ctaHref='/pricing'
+          />
+
+          {/* Community Spaces */}
+          <FeatureCard
+            icon={<MessageSquare className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Community Spaces'
+            description='Anonymous discussion spaces that activate based on moon phases, retrogrades, and cosmic events'
+            features={[
+              'Moon phase circles — share during new moon, full moon, and more',
+              'Retrograde survival spaces — tips and shared experiences',
+              'Post anonymously or with your display name',
+              'Share insights with others experiencing the same transits',
+              'Auto-activated spaces based on current cosmic events',
+            ]}
+            freeTier='Join spaces + post insights'
+            paidTier='All spaces + full community access'
+            cta='Join the community'
+            ctaHref='/auth?signup=true'
+          />
+
+          {/* Cosmic Gifting */}
+          <FeatureCard
+            icon={<Gift className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Cosmic Gifting'
+            description='Send cosmic gifts to friends — tarot cards, crystal blessings, and celestial messages with a magical unwrap experience'
+            features={[
+              'Send tarot cards with personal messages',
+              'Crystal energy blessings aligned to their chart',
+              'Celestial messages with cosmic context',
+              'Beautiful animated unwrap experience',
+              'Gift history tracked in your Cosmic Circle',
+            ]}
+            freeTier='1 gift per week'
+            paidTier='Unlimited gifting + exclusive gift types'
+            cta='Send a gift'
+            ctaHref='/auth?signup=true'
           />
         </section>
 
