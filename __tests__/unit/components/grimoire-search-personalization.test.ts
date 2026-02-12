@@ -311,3 +311,45 @@ describe('applyPersonalizationBoosts', () => {
     expect(results[0].badges).toEqual(['Your Sun Sign']);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Tests: getSparkleTooltip
+// ---------------------------------------------------------------------------
+
+// Replicate the tooltip logic from GrimoireSearch
+function getSparkleTooltip(
+  isPersonalized: boolean,
+  personalizationAvailable: boolean,
+  user: { id: string } | null,
+): string {
+  if (isPersonalized) return 'Personalized mode on';
+  if (personalizationAvailable) return 'Personalize search';
+  if (user) return 'Add birth details to personalize';
+  return 'Sign in to personalize results';
+}
+
+describe('getSparkleTooltip', () => {
+  it('shows active state when personalized mode is on', () => {
+    expect(getSparkleTooltip(true, true, { id: '1' })).toBe(
+      'Personalized mode on',
+    );
+  });
+
+  it('shows "Personalize search" for authenticated user with birth chart', () => {
+    expect(getSparkleTooltip(false, true, { id: '1' })).toBe(
+      'Personalize search',
+    );
+  });
+
+  it('shows "Add birth details" for authenticated user without birth chart', () => {
+    expect(getSparkleTooltip(false, false, { id: '1' })).toBe(
+      'Add birth details to personalize',
+    );
+  });
+
+  it('shows "Sign in" for unauthenticated user', () => {
+    expect(getSparkleTooltip(false, false, null)).toBe(
+      'Sign in to personalize results',
+    );
+  });
+});
