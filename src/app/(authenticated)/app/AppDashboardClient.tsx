@@ -153,17 +153,6 @@ const CosmicScore = dynamic(
   },
 );
 
-const RetrogradeBanner = dynamic(
-  () =>
-    import('@/components/retrograde/RetrogradeBanner').then((m) => ({
-      default: m.RetrogradeBanner,
-    })),
-  {
-    loading: () => <div className='min-h-0' />,
-    ssr: false,
-  },
-);
-
 const ConditionalWheel = dynamic(
   () => import('@/components/ConditionalWheel'),
   {
@@ -411,8 +400,6 @@ export default function AppDashboardClient() {
         <ShareZodiacSeason />
 
         <CosmicScore />
-
-        <RetrogradeBanner />
 
         {showHoroscope && <PersonalizedHoroscopePreview />}
 
