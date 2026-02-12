@@ -161,6 +161,30 @@ export default function RootLayout({
         className={`${roboto.className} ${astronomicon.variable} flex flex-col w-full h-dvh bg-zinc-950 text-white overflow-hidden`}
         suppressHydrationWarning
       >
+        {/* Auto-recover from stale chunk errors after deploys */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('error', function(e) {
+                var msg = (e.message || '') + (e.filename || '');
+                if (
+                  msg.indexOf('ChunkLoadError') !== -1 ||
+                  msg.indexOf('Loading chunk') !== -1 ||
+                  msg.indexOf('Failed to fetch dynamically imported module') !== -1 ||
+                  (e.filename && e.filename.indexOf('/_next/') !== -1 && e.message && e.message.indexOf('is not a function') !== -1)
+                ) {
+                  var key = 'lunary_chunk_reload';
+                  var last = sessionStorage.getItem(key);
+                  var now = Date.now();
+                  if (!last || now - parseInt(last, 10) > 10000) {
+                    sessionStorage.setItem(key, String(now));
+                    window.location.reload();
+                  }
+                }
+              });
+            `,
+          }}
+        />
         <StructuredData />
         <Suspense fallback={null}>
           <AttributionCapture />

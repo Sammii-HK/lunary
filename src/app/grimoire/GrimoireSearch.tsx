@@ -3,6 +3,9 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { NavParamLink } from '@/components/NavParamLink';
 import { Search, Sparkles } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
+import { useMoonData, usePlanetaryChart } from '@/context/AstronomyContext';
+import { cn } from '@/lib/utils';
 import { grimoire, grimoireItems } from '@/constants/grimoire';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug } from '@/utils/grimoire';
@@ -35,6 +38,7 @@ interface SearchResult {
   section?: string;
   href: string;
   match?: string;
+  badges?: string[];
 }
 
 interface GrimoireSearchProps {
@@ -55,6 +59,29 @@ export function GrimoireSearch({
   const [searchDataLoading, setSearchDataLoading] = useState(false);
   const loadingStarted = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isPersonalized, setIsPersonalized] = useState(false);
+
+  const { user } = useUser();
+  const { currentMoonConstellationPosition } = useMoonData();
+  const { currentAstrologicalChart } = usePlanetaryChart();
+
+  const userSigns = useMemo(() => {
+    if (!user?.birthChart?.length) return null;
+    const sun = user.birthChart.find((p) => p.body === 'Sun');
+    const moon = user.birthChart.find((p) => p.body === 'Moon');
+    const rising = user.birthChart.find((p) => p.body === 'Ascendant');
+    return { sun: sun?.sign, moon: moon?.sign, rising: rising?.sign };
+  }, [user?.birthChart]);
+
+  const currentMoonSign = currentMoonConstellationPosition || null;
+
+  const activeRetrogrades = useMemo(() => {
+    return currentAstrologicalChart
+      .filter((p) => p.retrograde)
+      .map((p) => p.body);
+  }, [currentAstrologicalChart]);
+
+  const personalizationAvailable = !!userSigns?.sun;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -903,9 +930,66 @@ export function GrimoireSearch({
       });
     }
 
+    // Apply personalization boosts and badges
+    if (isPersonalized && userSigns) {
+      for (const result of scoredResults) {
+        const titleLower = result.title.toLowerCase();
+        const badges: string[] = [];
+
+        if (userSigns.sun && titleLower.includes(userSigns.sun.toLowerCase())) {
+          result.score += 3;
+          badges.push('Your Sun Sign');
+        }
+        if (
+          userSigns.moon &&
+          titleLower.includes(userSigns.moon.toLowerCase())
+        ) {
+          result.score += 3;
+          badges.push('Your Moon Sign');
+        }
+        if (
+          userSigns.rising &&
+          titleLower.includes(userSigns.rising.toLowerCase())
+        ) {
+          result.score += 3;
+          badges.push('Your Rising');
+        }
+        if (
+          currentMoonSign &&
+          titleLower.includes(currentMoonSign.toLowerCase()) &&
+          !badges.some((b) => b.startsWith('Your'))
+        ) {
+          result.score += 2;
+          badges.push('Current Moon');
+        }
+        for (const planet of activeRetrogrades) {
+          if (
+            titleLower.includes(planet.toLowerCase()) &&
+            (titleLower.includes('retrograde') ||
+              result.section === 'retrogrades')
+          ) {
+            result.score += 2;
+            badges.push('Active Now');
+            break;
+          }
+        }
+
+        if (badges.length > 0) {
+          result.badges = badges;
+        }
+      }
+    }
+
     // Smart deduplication: prefer full pages over hash links
     return deduplicateResults(scoredResults);
-  }, [debouncedQuery, searchData]);
+  }, [
+    debouncedQuery,
+    searchData,
+    isPersonalized,
+    userSigns,
+    currentMoonSign,
+    activeRetrogrades,
+  ]);
 
   return (
     <div
@@ -925,17 +1009,49 @@ export function GrimoireSearch({
           setShowSearchResults(e.target.value.length > 0);
         }}
         onFocus={() => {
-          if (searchQuery.length > 0) setShowSearchResults(true);
+          if (searchQuery.length > 0 || isPersonalized)
+            setShowSearchResults(true);
         }}
         name='grimoire-search'
         data-testid='grimoire-search'
         aria-label='Search grimoire'
-        className={`w-full bg-zinc-800/80 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent ${
+        className={cn(
+          'w-full bg-zinc-800/80 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent',
           compact
-            ? 'pl-9 pr-3 py-1 text-xs'
-            : 'pl-10 md:pl-12 pr-4 py-2 md:py-2.5 text-sm md:text-base'
-        }`}
+            ? 'pl-9 pr-9 py-1 text-xs'
+            : 'pl-10 md:pl-12 pr-10 md:pr-12 py-2 md:py-2.5 text-sm md:text-base',
+        )}
       />
+      <button
+        type='button'
+        onClick={() => {
+          const next = !isPersonalized;
+          setIsPersonalized(next);
+          if (next) setShowSearchResults(true);
+        }}
+        className={cn(
+          'absolute right-3 top-1/2 -translate-y-1/2 transition-colors',
+          isPersonalized
+            ? 'text-lunary-accent'
+            : 'text-zinc-500 hover:text-zinc-300',
+        )}
+        aria-label={
+          isPersonalized
+            ? 'Disable personalized search'
+            : 'Enable personalized search'
+        }
+        title={
+          isPersonalized
+            ? 'Personalized mode on'
+            : personalizationAvailable
+              ? 'Personalize search'
+              : user
+                ? 'Add birth details to personalize'
+                : 'Sign in to personalize results'
+        }
+      >
+        <Sparkles className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
+      </button>
 
       {/* Search Results Dropdown */}
       {showSearchResults && searchDataLoading && searchQuery.trim() && (
@@ -946,6 +1062,114 @@ export function GrimoireSearch({
           </div>
         </div>
       )}
+
+      {/* Personalized suggestions when sparkle on + empty search */}
+      {showSearchResults &&
+        isPersonalized &&
+        !searchQuery.trim() &&
+        (personalizationAvailable ? (
+          <div className='absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg z-50 p-3 space-y-3'>
+            <div>
+              <p className='text-[10px] font-medium uppercase tracking-wider text-zinc-500 mb-1.5'>
+                Based on your chart
+              </p>
+              <div className='space-y-0.5'>
+                {userSigns?.sun && (
+                  <NavParamLink
+                    href={`/grimoire/zodiac/${userSigns.sun.toLowerCase()}`}
+                    onClick={() => {
+                      setShowSearchResults(false);
+                      onResultClick?.();
+                    }}
+                    className='block px-2 py-1.5 rounded text-sm text-zinc-200 hover:bg-zinc-800 transition-colors'
+                  >
+                    Sun in {userSigns.sun}
+                  </NavParamLink>
+                )}
+                {userSigns?.moon && (
+                  <NavParamLink
+                    href={`/grimoire/zodiac/${userSigns.moon.toLowerCase()}`}
+                    onClick={() => {
+                      setShowSearchResults(false);
+                      onResultClick?.();
+                    }}
+                    className='block px-2 py-1.5 rounded text-sm text-zinc-200 hover:bg-zinc-800 transition-colors'
+                  >
+                    Moon in {userSigns.moon}
+                  </NavParamLink>
+                )}
+                {userSigns?.rising && (
+                  <NavParamLink
+                    href={`/grimoire/zodiac/${userSigns.rising.toLowerCase()}`}
+                    onClick={() => {
+                      setShowSearchResults(false);
+                      onResultClick?.();
+                    }}
+                    className='block px-2 py-1.5 rounded text-sm text-zinc-200 hover:bg-zinc-800 transition-colors'
+                  >
+                    Rising in {userSigns.rising}
+                  </NavParamLink>
+                )}
+              </div>
+            </div>
+            {(currentMoonSign || activeRetrogrades.length > 0) && (
+              <div>
+                <p className='text-[10px] font-medium uppercase tracking-wider text-zinc-500 mb-1.5'>
+                  Current sky
+                </p>
+                <div className='space-y-0.5'>
+                  {currentMoonSign && (
+                    <NavParamLink
+                      href={`/grimoire/zodiac/${currentMoonSign.toLowerCase()}`}
+                      onClick={() => {
+                        setShowSearchResults(false);
+                        onResultClick?.();
+                      }}
+                      className='block px-2 py-1.5 rounded text-sm text-zinc-200 hover:bg-zinc-800 transition-colors'
+                    >
+                      Moon in {currentMoonSign} — explore {currentMoonSign}{' '}
+                      magic
+                    </NavParamLink>
+                  )}
+                  {activeRetrogrades.map((planet) => (
+                    <NavParamLink
+                      key={planet}
+                      href={`/grimoire/astronomy/retrogrades/${planet.toLowerCase()}`}
+                      onClick={() => {
+                        setShowSearchResults(false);
+                        onResultClick?.();
+                      }}
+                      className='block px-2 py-1.5 rounded text-sm text-zinc-200 hover:bg-zinc-800 transition-colors'
+                    >
+                      {planet} is retrograde — survival guide
+                    </NavParamLink>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className='border-t border-zinc-800 pt-2'>
+              <NavParamLink
+                href='/guide'
+                onClick={() => {
+                  setShowSearchResults(false);
+                  onResultClick?.();
+                }}
+                className='inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-lunary-primary-300 transition-colors'
+              >
+                <Sparkles className='w-3 h-3' />
+                For full chart guidance, ask the Astral Guide
+              </NavParamLink>
+            </div>
+          </div>
+        ) : (
+          <div className='absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg z-50 p-3'>
+            <p className='text-sm text-zinc-400'>
+              {user
+                ? 'Add your birth details in settings to personalize your Grimoire search'
+                : 'Sign in to personalize your Grimoire search'}
+            </p>
+          </div>
+        ))}
 
       {showSearchResults &&
         !searchDataLoading &&
@@ -964,8 +1188,18 @@ export function GrimoireSearch({
                   }}
                   className='block px-3 py-2 rounded hover:bg-zinc-800 transition-colors'
                 >
-                  <div className='text-sm font-medium text-zinc-100 truncate'>
-                    {result.title}
+                  <div className='flex items-center gap-1.5'>
+                    <span className='text-sm font-medium text-zinc-100 truncate'>
+                      {result.title}
+                    </span>
+                    {result.badges?.map((badge) => (
+                      <span
+                        key={badge}
+                        className='shrink-0 inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-lunary-accent/20 text-lunary-accent'
+                      >
+                        {badge}
+                      </span>
+                    ))}
                   </div>
                   {result.match && (
                     <div className='text-xs text-zinc-400 mt-0.5 truncate'>
@@ -978,6 +1212,20 @@ export function GrimoireSearch({
                 </NavParamLink>
               ))}
             </div>
+            <div className='border-t border-zinc-800 px-3 py-2'>
+              <NavParamLink
+                href='/guide'
+                onClick={() => {
+                  setShowSearchResults(false);
+                  setSearchQuery('');
+                  onResultClick?.();
+                }}
+                className='inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-lunary-primary-300 transition-colors'
+              >
+                <Sparkles className='w-3 h-3' />
+                For personalized guidance, ask the Astral Guide
+              </NavParamLink>
+            </div>
           </div>
         )}
 
@@ -987,11 +1235,15 @@ export function GrimoireSearch({
         searchQuery.trim() &&
         searchResults.length === 0 && (
           <div className='absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg p-3 z-50'>
-            <p className='text-zinc-400 text-sm mb-2'>
-              No results for "{searchQuery}"
+            <p className='text-zinc-400 text-sm mb-1'>
+              No results for &ldquo;{searchQuery}&rdquo;
+            </p>
+            <p className='text-zinc-500 text-xs mb-2'>
+              The Astral Guide knows the entire Grimoire and has your birth
+              chart, transits, and moon phase. Ask it anything.
             </p>
             <NavParamLink
-              href='/guide'
+              href={`/guide?prompt=${encodeURIComponent(searchQuery)}`}
               onClick={() => {
                 setShowSearchResults(false);
                 setSearchQuery('');

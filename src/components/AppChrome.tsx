@@ -61,6 +61,7 @@ export function AppChrome() {
       '/cosmic-state',
       '/cosmic-report-generator',
       '/guide',
+      '/community',
     ];
 
     const isCurrentAppPage = appPagesForContext.some(
@@ -152,6 +153,7 @@ export function AppChrome() {
     '/guide',
     '/blog',
     '/explore', // Explore is always app-only
+    '/community',
   ];
 
   // Define core marketing pages (always show marketing nav)

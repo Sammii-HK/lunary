@@ -82,6 +82,7 @@ export function ConditionalMainWrapper({
       '/blog',
       '/explore',
       '/guide',
+      '/community',
     ];
 
     // Explore pages: contextual, show app nav if coming from app
@@ -125,6 +126,7 @@ export function ConditionalMainWrapper({
       '/cosmic-report-generator',
       '/explore',
       '/guide',
+      '/community',
     ];
 
     // Check if referrer is an app page (must be same origin to be reliable)

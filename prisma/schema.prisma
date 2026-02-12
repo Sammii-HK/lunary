@@ -1,11 +1,13 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_URL")
-  directUrl = env("POSTGRES_URL")
+  provider   = "postgresql"
+  url        = env("POSTGRES_URL")
+  directUrl  = env("POSTGRES_URL")
+  extensions = [vector, pgcrypto(map: "pgcrypto")]
 }
 
 model SocialPost {
@@ -34,13 +36,12 @@ model SocialPost {
   source_type       String?
   source_id         String?
   source_title      String?
-  // New content generation fields
-  content_type      String?   // app-demo, comparison, transit-alert, educational-deepdive, testimonial
-  grimoire_slug     String?   // Link to grimoire content (e.g. "numerology/life-path-5")
-  app_feature       String?   // Which app feature to demo (e.g. "daily-transits")
-  video_script      Json?     // Full VideoScript object with sections
-  starfield_seed    String?   // Unique seed for starfield generation
-  video_metadata    Json?     // Additional metadata (angle, aspect, facetTitle, etc.)
+  app_feature       String?
+  content_type      String?
+  grimoire_slug     String?
+  starfield_seed    String?
+  video_metadata    Json?
+  video_script      Json?
 
   @@index([status], map: "idx_social_posts_status")
   @@index([platform], map: "idx_social_posts_platform")
@@ -601,14 +602,14 @@ model journal_patterns {
   id               Int       @id @default(autoincrement())
   user_id          String
   pattern_type     String
-  pattern_category String? // 'transient', 'natal', 'cyclical', 'progression'
   pattern_data     Json
-  confidence       Float? // 0-1 confidence score
   generated_at     DateTime? @default(now()) @db.Timestamptz(6)
   expires_at       DateTime? @db.Timestamptz(6)
+  confidence       Float?
   first_detected   DateTime? @db.Timestamptz(6)
   last_observed    DateTime? @db.Timestamptz(6)
   metadata         Json?
+  pattern_category String?
   source_snapshot  String?
 
   @@index([user_id, pattern_type], map: "idx_journal_patterns_user_type")
@@ -966,15 +967,13 @@ model subscriptions {
   discount_percent         Decimal?  @db.Decimal(5, 2)
   monthly_amount_due       Decimal?  @db.Decimal(10, 2)
   coupon_id                String?
-  is_paying                Boolean?  @default(dbgenerated("(COALESCE(monthly_amount_due, (0)::numeric) > (0)::numeric)"))
-  // New fields for improved subscription tracking
-  trial_used               Boolean?  @default(false)
-  promo_code               String?
+  is_paying                Boolean?  @default(false)
   discount_ends_at         DateTime? @db.Timestamptz(6)
-  sync_error_count         Int?      @default(0)
   last_sync_error          String?
   last_sync_error_at       DateTime? @db.Timestamptz(6)
-  // CRITICAL: Track if subscription is set to cancel at period end
+  promo_code               String?
+  sync_error_count         Int?      @default(0)
+  trial_used               Boolean?  @default(false)
   cancel_at_period_end     Boolean?  @default(false)
 
   @@index([status], map: "idx_subscriptions_status")
@@ -1164,10 +1163,10 @@ model user_streaks {
 model user_progress {
   id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id           String
-  skill_tree        String    @db.VarChar(50) // 'tarot', 'journal', 'explorer', 'ritual'
+  skill_tree        String    @db.VarChar(50)
   current_level     Int       @default(1)
   total_actions     Int       @default(0)
-  unlocked_features Json?     @default("[]") // Array of feature IDs unlocked
+  unlocked_features Json?     @default("[]")
   last_level_up_at  DateTime? @db.Timestamptz(6)
   created_at        DateTime  @default(now()) @db.Timestamptz(6)
   updated_at        DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
@@ -1178,7 +1177,7 @@ model user_progress {
 }
 
 model relationship_profiles {
-  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id             String
   name                String
   relationship_type   String?
@@ -1186,45 +1185,43 @@ model relationship_profiles {
   birth_time          String?
   birth_location      String?
   birth_chart         Json?
-  birth_chart_version Int?     @default(0)
   notes               String?
-  created_at          DateTime @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-
-  synastry_reports synastry_reports[]
+  created_at          DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime           @default(now()) @updatedAt @db.Timestamptz(6)
+  birth_chart_version Int?               @default(0)
+  synastry_reports    synastry_reports[]
 
   @@index([user_id], map: "idx_relationship_profiles_user_id")
   @@index([relationship_type], map: "idx_relationship_profiles_type")
 }
 
 model synastry_reports {
-  id                      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                      String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id                 String
-  relationship_profile_id String   @db.Uuid
+  relationship_profile_id String                @db.Uuid
   compatibility_score     Int?
   synastry_aspects        Json?
   composite_chart         Json?
   element_balance         Json?
   modality_balance        Json?
   analysis_summary        String?
-  calculated_at           DateTime @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-
-  relationship_profile relationship_profiles @relation(fields: [relationship_profile_id], references: [id], onDelete: Cascade)
+  calculated_at           DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime              @default(now()) @updatedAt @db.Timestamptz(6)
+  relationship_profile    relationship_profiles @relation(fields: [relationship_profile_id], references: [id], onDelete: Cascade)
 
   @@index([user_id], map: "idx_synastry_reports_user_id")
   @@index([relationship_profile_id], map: "idx_synastry_reports_profile_id")
 }
 
 model friend_invites {
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  inviter_id      String
-  invite_code     String    @unique // Encrypted unique code
-  status          String    @default("pending") // pending, accepted, expired
-  accepted_by_id  String?   // User who accepted the invite
-  expires_at      DateTime  @db.Timestamptz(6)
-  created_at      DateTime  @default(now()) @db.Timestamptz(6)
-  accepted_at     DateTime? @db.Timestamptz(6)
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  inviter_id     String
+  invite_code    String    @unique
+  status         String    @default("pending")
+  accepted_by_id String?
+  expires_at     DateTime  @db.Timestamptz(6)
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+  accepted_at    DateTime? @db.Timestamptz(6)
 
   @@index([inviter_id], map: "idx_friend_invites_inviter")
   @@index([invite_code], map: "idx_friend_invites_code")
@@ -1232,16 +1229,16 @@ model friend_invites {
 }
 
 model friend_connections {
-  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id             String    // The user who owns this connection view
-  friend_id           String    // The connected friend's user ID
-  nickname            String?   // Optional nickname for the friend
-  relationship_type   String?   // partner, friend, family, etc
-  synastry_score      Int?      // Cached compatibility score
-  synastry_data       Json?     // Cached synastry analysis (encrypted)
-  last_synastry_calc  DateTime? @db.Timestamptz(6)
-  created_at          DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id            String
+  friend_id          String
+  nickname           String?
+  relationship_type  String?
+  synastry_score     Int?
+  synastry_data      Json?
+  last_synastry_calc DateTime? @db.Timestamptz(6)
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
   @@unique([user_id, friend_id], map: "idx_friend_connections_unique")
   @@index([user_id], map: "idx_friend_connections_user")
@@ -1399,17 +1396,17 @@ model youtube_uploads {
 }
 
 model feature_announcements {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title         String
   description   String
-  icon          String    @default("Sparkles") // Lucide icon name
+  icon          String   @default("Sparkles")
   cta_label     String?
   cta_href      String?
-  required_tier String[]  @default([]) // Empty = all users, otherwise filter by plan
-  is_active     Boolean   @default(true)
-  released_at   DateTime  @default(now()) @db.Timestamptz(6)
-  created_at    DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  required_tier String[] @default([])
+  is_active     Boolean  @default(true)
+  released_at   DateTime @default(now()) @db.Timestamptz(6)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @default(now()) @updatedAt @db.Timestamptz(6)
 
   @@index([is_active], map: "idx_feature_announcements_active")
   @@index([released_at], map: "idx_feature_announcements_released")
@@ -1425,14 +1422,6 @@ model feature_announcements_seen {
   @@index([user_id], map: "idx_feature_announcements_seen_user_id")
 }
 
-enum tour_status {
-  ACTIVE
-  COMPLETED
-  DISMISSED
-}
-
-// Orphaned subscriptions - stores subscriptions where userId couldn't be automatically resolved
-// This prevents webhook failures and allows manual linking or auto-recovery later
 model orphaned_subscriptions {
   id                     Int       @id @default(autoincrement())
   stripe_subscription_id String    @unique
@@ -1444,7 +1433,7 @@ model orphaned_subscriptions {
   resolved               Boolean?  @default(false)
   resolved_user_id       String?
   resolved_at            DateTime? @db.Timestamptz(6)
-  resolved_by            String? // 'auto_recovery', 'admin', 'health_check'
+  resolved_by            String?
   notes                  String?
   created_at             DateTime? @default(now()) @db.Timestamptz(6)
   updated_at             DateTime? @default(now()) @db.Timestamptz(6)
@@ -1455,12 +1444,11 @@ model orphaned_subscriptions {
   @@index([created_at], map: "idx_orphaned_subscriptions_created_at")
 }
 
-// Stripe webhook event tracking for idempotency and debugging
 model stripe_webhook_events {
   id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  event_id               String    @unique // Stripe event ID
+  event_id               String    @unique
   event_type             String
-  processing_status      String    @default("pending") // 'pending', 'processing', 'completed', 'failed'
+  processing_status      String    @default("pending")
   user_id                String?
   stripe_customer_id     String?
   stripe_subscription_id String?
@@ -1478,14 +1466,13 @@ model stripe_webhook_events {
   @@index([created_at], map: "idx_stripe_webhook_events_created_at")
 }
 
-// Audit log for subscription changes
 model subscription_audit_log {
   id              Int       @id @default(autoincrement())
   user_id         String
-  event_type      String // 'subscription_created', 'subscription_updated', 'subscription_cancelled'
+  event_type      String
   old_state       Json?
   new_state       Json?
-  source          String // 'webhook', 'api', 'admin', 'user'
+  source          String
   stripe_event_id String?
   created_by      String?
   created_at      DateTime? @default(now()) @db.Timestamptz(6)
@@ -1500,12 +1487,12 @@ model subscription_audit_log {
 /// This is a critical safeguard against race conditions
 model pending_checkouts {
   id                  Int       @id @default(autoincrement())
-  user_id             String    @unique // UNIQUE constraint - only one pending checkout per user
+  user_id             String    @unique
   checkout_session_id String?
   price_id            String
-  status              String    @default("pending") // pending, completed, expired, cancelled
+  status              String    @default("pending")
   created_at          DateTime  @default(now()) @db.Timestamptz(6)
-  expires_at          DateTime  @db.Timestamptz(6) // Checkout sessions expire after 24 hours
+  expires_at          DateTime  @db.Timestamptz(6)
   completed_at        DateTime? @db.Timestamptz(6)
 
   @@index([user_id], map: "idx_pending_checkouts_user_id")
@@ -1515,23 +1502,23 @@ model pending_checkouts {
 
 /// Metric snapshots for analytics - stores weekly and monthly aggregated metrics
 model metric_snapshots {
-  period_type                    String   @db.VarChar(20) // 'weekly' or 'monthly'
-  period_key                     String   @db.VarChar(50) // e.g. '2024-W01' or '2024-01'
-  period_start                   DateTime @db.Date
-  period_end                     DateTime @db.Date
-  new_signups                    Int
-  new_trials                     Int
-  new_paying_subscribers         Int
-  wau                            Int // Weekly Active Users
-  activation_rate                Float    @db.Real
-  trial_to_paid_conversion_rate  Float    @db.Real
-  mrr                            Float    @db.Real // Monthly Recurring Revenue
-  active_subscribers             Int
-  churn_rate                     Float    @db.Real
-  d7_retention                   Float?   @db.Real // Day 7 retention
-  extras                         Json?
-  created_at                     DateTime @default(now()) @db.Timestamptz(6)
-  updated_at                     DateTime @default(now()) @db.Timestamptz(6)
+  period_type                   String   @db.VarChar(20)
+  period_key                    String   @db.VarChar(50)
+  period_start                  DateTime @db.Date
+  period_end                    DateTime @db.Date
+  new_signups                   Int
+  new_trials                    Int
+  new_paying_subscribers        Int
+  wau                           Int
+  activation_rate               Float    @db.Real
+  trial_to_paid_conversion_rate Float    @db.Real
+  mrr                           Float    @db.Real
+  active_subscribers            Int
+  churn_rate                    Float    @db.Real
+  d7_retention                  Float?   @db.Real
+  extras                        Json?
+  created_at                    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                    DateTime @default(now()) @db.Timestamptz(6)
 
   @@id([period_type, period_key])
   @@index([period_type], map: "idx_metric_snapshots_period_type")
@@ -1556,46 +1543,76 @@ model native_push_tokens {
   @@index([platform], map: "idx_native_push_platform")
 }
 
-model instagram_performance {
-  id               Int       @id @default(autoincrement())
-  post_type        String    // meme, carousel, quote, daily_cosmic, did_you_know, sign_ranking, compatibility, story
-  content_category String?   // tarot, zodiac, crystals, etc.
-  post_url         String?
-  image_url        String?
-  impressions      Int?      @default(0)
-  reach            Int?      @default(0)
-  likes            Int?      @default(0)
-  comments         Int?      @default(0)
-  saves            Int?      @default(0)
-  shares           Int?      @default(0)
-  engagement_rate  Float?    @default(0) @db.Real
-  save_rate        Float?    @default(0) @db.Real
-  posted_at        DateTime? @db.Timestamptz(6)
-  metadata         Json?     // Additional fields like sign, trait, slug, etc.
-  created_at       DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
-
-  @@index([post_type], map: "idx_ig_performance_post_type")
-  @@index([content_category], map: "idx_ig_performance_category")
-  @@index([posted_at], map: "idx_ig_performance_posted_at")
-  @@index([engagement_rate], map: "idx_ig_performance_engagement")
-  @@index([save_rate], map: "idx_ig_performance_save_rate")
-}
-
 /// Stores scheduled Instagram content generated by the content orchestrator
 /// Each post includes caption, image URL, and metadata for publishing
+/// Community spaces: transit-based support groups, sign lounges, retrograde check-ins
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model community_spaces {
+  id                    Int                     @id @default(autoincrement())
+  space_type            String
+  slug                  String                  @unique
+  title                 String
+  description           String?
+  sign                  String?
+  planet                String?
+  metadata              Json?                   @default("{}")
+  is_active             Boolean?                @default(true)
+  starts_at             DateTime?               @db.Timestamptz(6)
+  ends_at               DateTime?               @db.Timestamptz(6)
+  post_count            Int?                    @default(0)
+  member_count          Int?                    @default(0)
+  created_at            DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime?               @default(now()) @db.Timestamptz(6)
+  community_memberships community_memberships[]
+  community_posts       community_posts[]
+
+  @@index([space_type], map: "idx_community_spaces_type")
+  @@index([slug], map: "idx_community_spaces_slug")
+  @@index([is_active], map: "idx_community_spaces_active")
+}
+
+/// Community posts within spaces
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model community_posts {
+  id               Int              @id @default(autoincrement())
+  space_id         Int
+  user_id          String
+  post_text        String
+  is_anonymous     Boolean?         @default(true)
+  is_approved      Boolean?         @default(true)
+  created_at       DateTime?        @default(now()) @db.Timestamptz(6)
+  community_spaces community_spaces @relation(fields: [space_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([space_id, created_at(sort: Desc)], map: "idx_community_posts_space")
+  @@index([user_id], map: "idx_community_posts_user")
+  @@index([space_id, is_approved, created_at(sort: Desc)], map: "idx_community_posts_approved")
+}
+
+/// Community space memberships
+model community_memberships {
+  id               Int              @id @default(autoincrement())
+  space_id         Int
+  user_id          String
+  joined_at        DateTime?        @default(now()) @db.Timestamptz(6)
+  community_spaces community_spaces @relation(fields: [space_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([space_id, user_id])
+  @@index([user_id], map: "idx_community_memberships_user")
+  @@index([space_id], map: "idx_community_memberships_space")
+}
+
 model instagram_scheduled_posts {
   id             Int       @id @default(autoincrement())
   date           DateTime  @db.Date
-  type           String    @db.VarChar(50) // 'meme', 'carousel', 'daily_cosmic', 'did_you_know', 'sign_ranking', 'compatibility', 'quote', 'story'
+  type           String    @db.VarChar(50)
   scheduled_time DateTime  @db.Timestamptz(6)
   caption        String
   image_url      String?
-  hashtags       String[]  // Array of hashtags without # symbol
-  metadata       Json?     @default("{}") // Additional data - carousel slides, meme template info, etc.
+  hashtags       String[]
+  metadata       Json?     @default("{}")
   posted         Boolean?  @default(false)
   posted_at      DateTime? @db.Timestamptz(6)
-  post_id        String?   @db.VarChar(255) // Instagram post ID after posting
+  post_id        String?   @db.VarChar(255)
   created_at     DateTime  @default(now()) @db.Timestamptz(6)
   updated_at     DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
@@ -1605,4 +1622,70 @@ model instagram_scheduled_posts {
   @@index([posted], map: "idx_instagram_scheduled_posts_posted")
   @@index([type], map: "idx_instagram_scheduled_posts_type")
   @@index([date, type], map: "idx_instagram_scheduled_posts_date_type")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model daily_metrics {
+  metric_date                 DateTime  @id @db.Date
+  dau                         Int       @default(0)
+  wau                         Int       @default(0)
+  mau                         Int       @default(0)
+  signed_in_product_dau       Int       @default(0)
+  signed_in_product_wau       Int       @default(0)
+  signed_in_product_mau       Int       @default(0)
+  app_opened_mau              Int       @default(0)
+  new_signups                 Int       @default(0)
+  activated_users             Int       @default(0)
+  activation_rate             Decimal?  @default(0) @db.Decimal(5, 2)
+  mrr                         Decimal?  @default(0) @db.Decimal(10, 2)
+  active_subscriptions        Int?      @default(0)
+  trial_subscriptions         Int?      @default(0)
+  new_conversions             Int?      @default(0)
+  stickiness                  Decimal?  @default(0) @db.Decimal(5, 2)
+  avg_active_days_per_week    Decimal?  @default(0) @db.Decimal(5, 2)
+  dashboard_adoption          Decimal?  @default(0) @db.Decimal(5, 2)
+  horoscope_adoption          Decimal?  @default(0) @db.Decimal(5, 2)
+  tarot_adoption              Decimal?  @default(0) @db.Decimal(5, 2)
+  chart_adoption              Decimal?  @default(0) @db.Decimal(5, 2)
+  guide_adoption              Decimal?  @default(0) @db.Decimal(5, 2)
+  ritual_adoption             Decimal?  @default(0) @db.Decimal(5, 2)
+  computed_at                 DateTime? @default(now()) @db.Timestamp(6)
+  computation_duration_ms     Int?
+  created_at                  DateTime? @default(now()) @db.Timestamp(6)
+  app_opened_dau              Int       @default(0)
+  app_opened_wau              Int       @default(0)
+  returning_dau               Int       @default(0)
+  returning_wau               Int       @default(0)
+  returning_mau               Int       @default(0)
+  reach_dau                   Int       @default(0)
+  reach_wau                   Int       @default(0)
+  reach_mau                   Int       @default(0)
+  grimoire_dau                Int       @default(0)
+  grimoire_wau                Int       @default(0)
+  grimoire_mau                Int       @default(0)
+  grimoire_only_mau           Int       @default(0)
+  d1_retention                Decimal?  @default(0) @db.Decimal(5, 2)
+  d7_retention                Decimal?  @default(0) @db.Decimal(5, 2)
+  d30_retention               Decimal?  @default(0) @db.Decimal(5, 2)
+  active_days_1               Int       @default(0)
+  active_days_2_3             Int       @default(0)
+  active_days_4_7             Int       @default(0)
+  active_days_8_14            Int       @default(0)
+  active_days_15_plus         Int       @default(0)
+  stickiness_wau_mau          Decimal?  @default(0) @db.Decimal(5, 2)
+  total_accounts              Int       @default(0)
+  grimoire_to_app_rate        Decimal?  @default(0) @db.Decimal(5, 2)
+  grimoire_to_app_users       Int       @default(0)
+  returning_referrer_organic  Int?      @default(0)
+  returning_referrer_direct   Int?      @default(0)
+  returning_referrer_internal Int?      @default(0)
+
+  @@index([metric_date(sort: Desc)], map: "idx_daily_metrics_date")
+  @@index([metric_date(sort: Desc), computed_at(sort: Desc)], map: "idx_daily_metrics_date_computed")
+}
+
+enum tour_status {
+  ACTIVE
+  COMPLETED
+  DISMISSED
 }

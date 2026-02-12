@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { Flame, Sparkles, Users, Heart, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { FriendTransitBadge } from './FriendTransitBadge';
+import { CompatibilityTipCard } from './CompatibilityTipCard';
 
 interface FriendActivity {
   connectionId: string;
@@ -38,11 +40,19 @@ interface CelebrationReceived {
   createdAt: string;
 }
 
+interface DailyTip {
+  friendName: string;
+  tip: string;
+  pairType: string;
+}
+
 interface ActivityData {
   friends: FriendActivity[];
   milestones: Milestone[];
   celebrationsSent: CelebrationSent[];
   celebrationsReceived: CelebrationReceived[];
+  dailyTip: DailyTip | null;
+  retrogradePlanets: string[];
 }
 
 function getMatchColor(score: number): string {
@@ -56,9 +66,11 @@ function getMatchColor(score: number): string {
 function FriendRow({
   friend,
   onRemove,
+  retrogradePlanets,
 }: {
   friend: FriendActivity;
   onRemove: (connectionId: string) => void;
+  retrogradePlanets?: string[];
 }) {
   const [showDelete, setShowDelete] = useState(false);
   const [swiped, setSwiped] = useState(false);
@@ -117,6 +129,16 @@ function FriendRow({
                 <span className='text-[10px] text-zinc-500'>
                   {friend.sunSign}
                 </span>
+              )}
+              {retrogradePlanets && retrogradePlanets.length > 0 && (
+                <FriendTransitBadge
+                  label={
+                    retrogradePlanets.length === 1
+                      ? `${retrogradePlanets[0]} Rx`
+                      : `${retrogradePlanets.length} Rx`
+                  }
+                  variant='retrograde'
+                />
               )}
             </div>
             <div className='flex items-center gap-2 text-[11px] text-zinc-500'>
@@ -303,6 +325,15 @@ export function FriendActivityFeed() {
 
   return (
     <div className='space-y-3'>
+      {/* Daily Compatibility Tip */}
+      {data.dailyTip && (
+        <CompatibilityTipCard
+          friendName={data.dailyTip.friendName}
+          tip={data.dailyTip.tip}
+          pairType={data.dailyTip.pairType}
+        />
+      )}
+
       {/* Cosmic Support Received */}
       {data.celebrationsReceived.length > 0 && (
         <div className='bg-gradient-to-r from-lunary-accent-900/20 to-lunary-primary-900/20 border border-lunary-accent-800/30 rounded-xl p-4'>
@@ -362,6 +393,7 @@ export function FriendActivityFeed() {
                 key={friend.friendId}
                 friend={friend}
                 onRemove={handleRemoveFriend}
+                retrogradePlanets={data.retrogradePlanets}
               />
             ))}
           </div>

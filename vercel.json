@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm run build",
+  "buildCommand": "pnpm run build:deploy",
   "framework": "nextjs",
   "ignoreCommand": "if [[ \"$VERCEL_GIT_COMMIT_AUTHOR_LOGIN\" == \"dependabot[bot]\" ]]; then exit 0; else exit 1; fi",
   "crons": [
@@ -66,6 +66,10 @@
     {
       "path": "/api/cron/pattern-snapshots",
       "schedule": "0 4 * * 0"
+    },
+    {
+      "path": "/api/cron/activate-retrograde-spaces",
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/cron/weekly-subscription-sync",

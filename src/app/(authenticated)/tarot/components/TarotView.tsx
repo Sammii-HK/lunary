@@ -855,7 +855,18 @@ export function TarotView({
                   <p className='text-xs text-zinc-400 text-center max-w-[200px]'>
                     Deeper weekly guidance, written just for you
                   </p>
-                  <span className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
+                  <span
+                    role='button'
+                    tabIndex={0}
+                    onClick={() => router.push('/pricing')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        router.push('/pricing');
+                      }
+                    }}
+                    className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300 cursor-pointer hover:bg-lunary-primary-800/50 transition-colors'
+                  >
                     <Sparkles className='w-2.5 h-2.5' />
                     Lunary+ Feature
                   </span>
@@ -915,7 +926,18 @@ export function TarotView({
                   <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300'>
                     Weekly Energy
                   </h3>
-                  <span className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded text-lunary-primary-300'>
+                  <span
+                    role='button'
+                    tabIndex={0}
+                    onClick={() => router.push('/pricing')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        router.push('/pricing');
+                      }
+                    }}
+                    className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded text-lunary-primary-300 cursor-pointer hover:bg-lunary-primary-800/50 transition-colors'
+                  >
                     <Sparkles className='w-2.5 h-2.5' />
                     Lunary+
                   </span>

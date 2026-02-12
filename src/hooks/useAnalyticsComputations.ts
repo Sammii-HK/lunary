@@ -270,10 +270,10 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
   const appWau = activity?.app_opened_wau ?? 0;
   const appMau = activity?.app_opened_mau ?? 0;
 
-  // Engaged metrics (total events — shows usage intensity)
-  const engagedDau = activity?.dau ?? 0;
-  const engagedWau = activity?.wau ?? 0;
-  const engagedMau = activity?.mau ?? 0;
+  // Engaged metrics (distinct users with key-action events)
+  const engagedDau = activity?.engaged_users_dau ?? 0;
+  const engagedWau = activity?.engaged_users_wau ?? 0;
+  const engagedMau = activity?.engaged_users_mau ?? 0;
 
   const engagementRate = appMau > 0 ? (engagedMau / appMau) * 100 : null;
 
@@ -331,6 +331,14 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
 
   const conversionDropOff = conversions?.funnel?.drop_off_points ?? [];
 
+  // Cap returning product users at total product users (fast-path can have stale data)
+  const rawProductReturning = activity?.signed_in_product_returning_users ?? 0;
+  const productUsers = activity?.signed_in_product_users ?? 0;
+  const productReturningCapped =
+    productUsers > 0
+      ? Math.min(rawProductReturning, productUsers)
+      : rawProductReturning;
+
   // Integrity warnings
   const productMaError = (activity?.signed_in_product_mau ?? 0) > appMau;
   const integrityWarnings: string[] = useMemo(() => {
@@ -348,8 +356,20 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
         'Signed-in Product MAU exceeds App MAU; review the canonical `app_opened` audit.',
       );
     }
+    if (rawProductReturning > productUsers && productUsers > 0) {
+      warnings.push(
+        `Returning product users (${rawProductReturning}) exceeds total product users (${productUsers}); capped to total.`,
+      );
+    }
     return warnings;
-  }, [appMau, appWau, appDau, productMaError]);
+  }, [
+    appMau,
+    appWau,
+    appDau,
+    productMaError,
+    rawProductReturning,
+    productUsers,
+  ]);
 
   // Pageviews per reach user
   const pageviewFeature = featureUsage?.features?.find(
@@ -469,7 +489,7 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
       {
         title: 'Activation Rate',
         value: formatPercent(activation?.activationRate, 2),
-        subtitle: 'Activated within 24h',
+        subtitle: 'Activated within 7 days',
       },
       {
         title: 'Growth Rate',

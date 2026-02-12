@@ -141,8 +141,8 @@ export function BirthdayInput({
           if (!hasHadBirthdayThisYear) {
             age -= 1;
           }
-          if (age < 13) {
-            setWarning('Please double-check this birthday (under 13).');
+          if (age < 16) {
+            setWarning('You must be at least 16 to use Lunary.');
           } else if (age > 120) {
             setWarning('Please double-check this birthday (over 120).');
           }
@@ -173,8 +173,8 @@ export function BirthdayInput({
       if (!hasHadBirthdayThisYear) {
         age -= 1;
       }
-      if (age < 13) {
-        setWarning('Please double-check this birthday (under 13).');
+      if (age < 16) {
+        setWarning('You must be at least 16 to use Lunary.');
       } else if (age > 120) {
         setWarning('Please double-check this birthday (over 120).');
       } else {

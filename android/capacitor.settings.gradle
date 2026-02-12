@@ -2,6 +2,9 @@
 include ':capacitor-android'
 project(':capacitor-android').projectDir = new File('../node_modules/.pnpm/@capacitor+android@8.0.2_@capacitor+core@8.0.2/node_modules/@capacitor/android/capacitor')
 
+include ':capacitor-firebase-messaging'
+project(':capacitor-firebase-messaging').projectDir = new File('../node_modules/.pnpm/@capacitor-firebase+messaging@8.0.1_@capacitor+core@8.0.2_firebase@12.8.0/node_modules/@capacitor-firebase/messaging/android')
+
 include ':capacitor-haptics'
 project(':capacitor-haptics').projectDir = new File('../node_modules/.pnpm/@capacitor+haptics@8.0.0_@capacitor+core@8.0.2/node_modules/@capacitor/haptics/android')
 

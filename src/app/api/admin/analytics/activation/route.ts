@@ -6,7 +6,7 @@ import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
-// Activation events - users who complete these within 24h are considered "activated"
+// Activation events - users who complete these within 7 days are considered "activated"
 const ACTIVATION_EVENTS = [
   'grimoire_save',
   'tarot_pull',
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
           JOIN signups s ON ce.user_id = s.user_id
           WHERE ce.event_type = ANY($5::text[])
             AND ce.created_at >= s.signup_at
-            AND ce.created_at <= s.signup_at + INTERVAL '24 hours'
+            AND ce.created_at <= s.signup_at + INTERVAL '7 days'
           GROUP BY ce.user_id, ce.event_type
         ),
         plan_snapshots AS (
@@ -169,7 +169,7 @@ export async function GET(request: NextRequest) {
             AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
             AND ce.event_type = ANY($5::text[])
             AND ce.created_at >= u."createdAt"
-            AND ce.created_at <= u."createdAt" + INTERVAL '24 hours'
+            AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
           GROUP BY DATE(u."createdAt")
         )
         SELECT

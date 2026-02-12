@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getImageBaseUrl } from '@/lib/urls';
 import { getPlatformImageFormat } from '@/lib/social/educational-images';
+import { getPlatformHashtags } from '../../../../../utils/hashtags';
 
 interface PostContent {
   date: string;
@@ -127,6 +128,7 @@ export async function POST(request: NextRequest) {
         cosmicContent,
         dateStr,
       );
+      const tiktokContent = formatTikTokPost(cosmicContent, dateStr);
 
       const variants: Record<string, { content: string; media?: string[] }> =
         {};
@@ -148,6 +150,10 @@ export async function POST(request: NextRequest) {
         {
           platform: 'linkedin',
           content: linkedinVariantContent || baseContent,
+        },
+        {
+          platform: 'tiktok',
+          content: tiktokContent,
         },
       ];
 
@@ -305,6 +311,21 @@ function formatCosmicPost(content: PostContent, date: string): string {
   }
 
   return post;
+}
+
+function formatTikTokPost(content: PostContent, date: string): string {
+  const tiktokHashtags = getPlatformHashtags('tiktok', date);
+
+  const sections = [
+    content.highlights?.[0],
+    content.horoscopeSnippet,
+    content.callToAction,
+    tiktokHashtags,
+  ]
+    .map((section) => section?.trim())
+    .filter(Boolean);
+
+  return sections.join('\n\n');
 }
 
 function formatWeeklyTwitterContent(

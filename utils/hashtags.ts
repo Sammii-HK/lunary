@@ -237,7 +237,7 @@ export function getPlatformHashtags(
     return '';
   }
 
-  const hashtags: string[] = [brandHashtag];
+  const hashtags: string[] = platform === 'tiktok' ? [] : [brandHashtag];
 
   if (context) {
     const contextual = getContextualHashtags(context);
