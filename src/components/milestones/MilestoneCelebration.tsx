@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Modal, ModalBody } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
+import { ShareStreakMilestone } from '@/components/share/ShareStreakMilestone';
 
 interface MilestoneCelebrationProps {
   milestone: {
@@ -91,9 +92,21 @@ export function MilestoneCelebration({
               {description}
             </p>
 
-            <Button onClick={handleClose} className='mt-6'>
-              Celebrate
-            </Button>
+            <div className='flex items-center gap-3 mt-6'>
+              {milestone.type === 'streak' && (
+                <ShareStreakMilestone
+                  streakDays={
+                    (milestone.data.streakDays as number) ||
+                    parseInt(milestone.key.replace(/\D/g, '')) ||
+                    7
+                  }
+                  totalReadings={(milestone.data.totalReadings as number) || 0}
+                  totalEntries={(milestone.data.totalEntries as number) || 0}
+                  totalRituals={(milestone.data.totalRituals as number) || 0}
+                />
+              )}
+              <Button onClick={handleClose}>Celebrate</Button>
+            </div>
           </div>
         </div>
 
