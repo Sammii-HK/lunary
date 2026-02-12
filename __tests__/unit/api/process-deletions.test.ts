@@ -189,6 +189,9 @@ describe('process-deletions cron', () => {
     await GET(makeRequest(TEST_CRON_SECRET));
 
     const tables = [
+      'daily_rituals',
+      'challenge_completions',
+      'milestones_achieved',
       'ritual_habits',
       'weekly_ritual_usage',
       'user_progress',
@@ -208,6 +211,7 @@ describe('process-deletions cron', () => {
     await GET(makeRequest(TEST_CRON_SECRET));
 
     const tables = [
+      'cosmic_gifts',
       'friend_celebrations',
       'friend_connections',
       'friend_invites',

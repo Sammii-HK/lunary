@@ -78,6 +78,13 @@ export async function GET(request: Request) {
           prisma.year_analysis.deleteMany({ where: { user_id: userId } }),
 
           // --- Engagement & gamification ---
+          prisma.daily_rituals.deleteMany({ where: { user_id: userId } }),
+          prisma.challenge_completions.deleteMany({
+            where: { user_id: userId },
+          }),
+          prisma.milestones_achieved.deleteMany({
+            where: { user_id: userId },
+          }),
           prisma.ritual_habits.deleteMany({ where: { user_id: userId } }),
           prisma.weekly_ritual_usage.deleteMany({
             where: { user_id: userId },
@@ -92,6 +99,11 @@ export async function GET(request: Request) {
           }),
 
           // --- Social & community ---
+          prisma.cosmic_gifts.deleteMany({
+            where: {
+              OR: [{ sender_id: userId }, { recipient_id: userId }],
+            },
+          }),
           prisma.friend_celebrations.deleteMany({
             where: {
               OR: [{ sender_id: userId }, { receiver_id: userId }],

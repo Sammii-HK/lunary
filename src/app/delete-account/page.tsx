@@ -125,8 +125,8 @@ export default function DeleteAccountPage() {
                 and yearly personalized content
               </li>
               <li>
-                <strong>Rituals and habits:</strong> Ritual tracking, weekly
-                usage, and progress data
+                <strong>Rituals and habits:</strong> Daily rituals, ritual
+                tracking, weekly usage, and progress data
               </li>
               <li>
                 <strong>Community content:</strong> Posts, moon circle insights,
@@ -134,11 +134,11 @@ export default function DeleteAccountPage() {
               </li>
               <li>
                 <strong>Social connections:</strong> Friend connections,
-                invites, and celebrations
+                invites, celebrations, and cosmic gifts
               </li>
               <li>
                 <strong>Streaks and progress:</strong> Usage streaks,
-                gamification data, and onboarding completion
+                challenges, milestones, and onboarding completion
               </li>
               <li>
                 <strong>Notification settings:</strong> Push tokens, email

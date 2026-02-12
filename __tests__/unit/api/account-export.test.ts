@@ -185,6 +185,10 @@ describe('Account data export', () => {
       'userProgress',
       'consentLog',
       'analyticsActivity',
+      'dailyRituals',
+      'challengeCompletions',
+      'milestonesAchieved',
+      'cosmicGifts',
       'dataRetentionInfo',
     ];
 
@@ -253,6 +257,10 @@ describe('Account data export', () => {
       'user_progress',
       'consent_log',
       'analytics_user_activity',
+      'daily_rituals',
+      'challenge_completions',
+      'milestones_achieved',
+      'cosmic_gifts',
     ];
 
     for (const model of queriedModels) {
