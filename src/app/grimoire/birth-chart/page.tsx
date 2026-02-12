@@ -154,6 +154,12 @@ Understanding your birth chart helps you recognize your natural talents, work wi
           answer:
             'Yes. The Birth Chart Guide explains planets, houses, and aspects for anyone to explore freely. Signing in simply unlocks your personal chart data for deeper insight.',
         },
+        {
+          question:
+            'Why might my Part of Fortune placement differ from other astrology apps?',
+          answer:
+            'Lunary uses the traditional Hellenistic sect-based formula which reverses the Part of Fortune calculation for night charts (when the Sun was below the horizon at birth). Many modern apps use a simplified single formula. Both are valid approaches — ours is the historically original method.',
+        },
       ]}
       additionalSchemas={[qaSchema, webAppSchema]}
       cosmicConnections={
