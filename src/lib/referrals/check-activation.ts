@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { sendToUser } from '@/lib/notifications/native-push-sender';
+import { processReferralTierReward } from '@/utils/referrals/reward-processor';
 
 /**
  * Activation events that trigger referral rewards.
@@ -70,6 +71,9 @@ export async function checkInviteActivation(
       body: "You've earned 30 days of Lunary+ for starting your cosmic practice!",
       data: { type: 'referral_activated', action: '/app' },
     }).catch(() => {});
+
+    // Process tiered referral rewards for the referrer
+    processReferralTierReward(referral.referrer_user_id).catch(() => {});
 
     console.log(
       `[Referral] Activation reward granted: referrer=${referral.referrer_user_id}, referred=${userId}, event=${eventType}`,
