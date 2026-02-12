@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { sendEmail } from '@/lib/email';
+import {
+  generateDeletionCompleteEmailHTML,
+  generateDeletionCompleteEmailText,
+} from '@/lib/email-components/ComplianceEmails';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
@@ -213,6 +218,28 @@ export async function GET(request: Request) {
             data: { status: 'completed', processed_at: new Date() },
           }),
         ]);
+
+        // Send deletion complete email
+        if (deletion.user_email) {
+          try {
+            const html = await generateDeletionCompleteEmailHTML(
+              deletion.user_email,
+            );
+            const text = generateDeletionCompleteEmailText(deletion.user_email);
+
+            await sendEmail({
+              to: deletion.user_email,
+              subject: 'Account Deleted - Lunary',
+              html,
+              text,
+            });
+          } catch (emailError) {
+            console.error(
+              'Failed to send deletion complete email:',
+              emailError,
+            );
+          }
+        }
 
         results.processed++;
         results.details.push({ userId, success: true });
