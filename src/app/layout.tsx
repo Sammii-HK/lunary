@@ -141,8 +141,6 @@ export default function RootLayout({
           }}
         />
         {/* Preconnect to critical external services */}
-        <link rel='preconnect' href='https://api.stripe.com' />
-        <link rel='preconnect' href='https://js.stripe.com' />
         <link
           rel='preconnect'
           href='https://fonts.gstatic.com'
