@@ -124,6 +124,7 @@ export async function GET(request: Request) {
               OR: [{ inviter_id: userId }, { accepted_by_id: userId }],
             },
           }),
+          prisma.community_votes.deleteMany({ where: { user_id: userId } }),
           prisma.community_posts.deleteMany({ where: { user_id: userId } }),
           prisma.community_memberships.deleteMany({
             where: { user_id: userId },
