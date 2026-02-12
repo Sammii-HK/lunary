@@ -294,12 +294,14 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
       const birthTime = location?.birthTime;
       const birthChartVersion = location?.birthChartVersion;
 
-      if (!user.birthday || !user.birthChart?.length) return;
+      if (!user.birthday) return;
 
+      const needsChartGeneration = !user.birthChart?.length;
       const needsVersionUpdate = birthChartVersion !== BIRTH_CHART_VERSION;
       const needsTimezoneUpdate = birthLocation && !birthTimezone;
 
-      if (!needsVersionUpdate && !needsTimezoneUpdate) return;
+      if (!needsChartGeneration && !needsVersionUpdate && !needsTimezoneUpdate)
+        return;
 
       birthChartRefreshRef.current = true;
       birthChartRefreshAttemptRef.current = Date.now();

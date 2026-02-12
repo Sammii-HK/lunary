@@ -431,7 +431,9 @@ export function OnboardingFlow({
       return;
     }
 
-    if (user?.birthday) {
+    // If user has birthday but no birth chart (e.g. collected at signup),
+    // still show onboarding so they can enter birth time + location
+    if (user?.birthday && user?.birthChart?.length) {
       setOnboardingStatus({ loading: false, completed: true });
       return;
     }
@@ -472,7 +474,7 @@ export function OnboardingFlow({
   }, [authState.isAuthenticated, user?.id, user?.birthday, previewMode]);
 
   useEffect(() => {
-    const needsBirthDetails = !user?.birthday;
+    const needsBirthDetails = !user?.birthday || !user?.birthChart?.length;
     const isDemoMode =
       typeof window !== 'undefined' && (window as any).__LUNARY_DEMO_MODE__;
 
@@ -511,6 +513,7 @@ export function OnboardingFlow({
     onboardingStatus.completed,
     onboardingStatus.loading,
     user?.birthday,
+    user?.birthChart?.length,
     userLoading,
     forceOpen,
     previewMode,
