@@ -140,6 +140,46 @@ export async function generateAndSaveWeeklyScripts(
   // Record secondary theme usage once for the week
   await recordSecondaryThemeUsage(secondaryTheme.id, weekStartDate);
 
+  // Guarantee at least 1 numerology video per week
+  const hasNumerology =
+    scripts.theme.category === 'numerology' ||
+    secondaryTheme.category === 'numerology';
+  if (!hasNumerology) {
+    const numerologyThemes = categoryThemes.filter(
+      (t) => t.category === 'numerology',
+    );
+    if (numerologyThemes.length > 0) {
+      const numTheme =
+        numerologyThemes[Math.floor(Math.random() * numerologyThemes.length)];
+      const numFacet = numTheme.facets[0];
+      const numDate = new Date(weekStartDate);
+      // Schedule on Wednesday (day offset 2) to space it mid-week
+      numDate.setDate(numDate.getDate() + 2);
+      const numAngle = await getAngleForTopic(numFacet.title, numDate);
+      const numAspect = await selectSecondaryAspect(numTheme.id);
+      const numScript = await generateTikTokScript(
+        numFacet,
+        numTheme,
+        numDate,
+        1,
+        numTheme.facets.length,
+        baseUrl,
+        {
+          primaryThemeId: scripts.theme.id,
+          secondaryThemeId: numTheme.id,
+          secondaryFacetSlug: numFacet.grimoireSlug,
+          secondaryAngleKey: numAngle,
+          secondaryAspectKey: numAspect,
+          angleOverride: numAngle,
+          aspectOverride: numAspect,
+        },
+      );
+      const numId = await saveVideoScript(numScript);
+      numScript.id = numId;
+      scripts.tiktokScripts.push(numScript);
+    }
+  }
+
   // Save YouTube script and capture ID
   const youtubeId = await saveVideoScript(scripts.youtubeScript);
   scripts.youtubeScript.id = youtubeId;

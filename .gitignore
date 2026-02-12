@@ -28,6 +28,7 @@ logs/
 /data/
 scripts/output/
 public/app-demos/
+play-store-assets/
 
 # production
 /build
