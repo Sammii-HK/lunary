@@ -32,7 +32,14 @@ export async function generateMetadata({
   params: Promise<{ year: string }>;
 }): Promise<Metadata> {
   const { year } = await params;
-  const yearNum = parseInt(year);
+  const yearNum = parseInt(year, 10);
+
+  if (isNaN(yearNum) || yearNum < START_YEAR || yearNum > END_YEAR) {
+    return {
+      title: 'Year Not Found | Lunary',
+      description: 'The requested year could not be found.',
+    };
+  }
 
   // Generate dynamic highlight from actual forecast data
   const forecast = await generateYearlyForecast(yearNum);
@@ -431,12 +438,10 @@ export default async function EventsYearPage({
   params: Promise<{ year: string }>;
 }) {
   const { year } = await params;
-  const yearNum = parseInt(year);
+  const yearNum = parseInt(year, 10);
   const nextYear = yearNum + 1;
 
-  const minYear = START_YEAR;
-  const maxYear = END_YEAR;
-  if (yearNum < minYear || yearNum > maxYear) {
+  if (isNaN(yearNum) || yearNum < START_YEAR || yearNum > END_YEAR) {
     notFound();
   }
 
