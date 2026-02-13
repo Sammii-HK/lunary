@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { validateInsightText } from '@/lib/community/moderation';
 import { checkRateLimit } from '@/lib/api/rate-limit';
 import { QUESTION_LIMITS } from '@utils/entitlements';
+import { stripHtmlTags } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,10 +23,7 @@ const VALID_TOPICS = [
 type TopicTag = (typeof VALID_TOPICS)[number];
 
 const sanitizeText = (input: string): string =>
-  input
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  stripHtmlTags(input).replace(/\s+/g, ' ').trim();
 
 /**
  * GET /api/community/questions
