@@ -29,7 +29,6 @@ export type PlatformPayload = {
 export const videoPlatforms = ['instagram', 'tiktok'];
 const noMediaVariantMode: Record<string, 'noImage' | 'mediaNull'> = {
   bluesky: 'noImage',
-  threads: 'noImage',
 };
 export const validPlatforms = [
   'twitter',
