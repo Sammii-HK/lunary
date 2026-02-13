@@ -61,6 +61,11 @@ const faqs = [
     answer:
       "A stellium occurs when three or more planets cluster in the same zodiac sign. This creates a powerful concentration of energy in that sign's themes. Lunary automatically detects and interprets stelliums in your chart.",
   },
+  {
+    question: 'Why does my Part of Fortune differ from Co-Star or other apps?',
+    answer:
+      'Lunary uses the traditional Hellenistic day/night sect formula for the Part of Fortune. If you were born at night, your Part of Fortune will differ from apps that use a single formula regardless. This is the original calculation method, used by astrologers for over 2,000 years. Learn more on our methodology page.',
+  },
 ];
 
 const comparisonFeatures = [

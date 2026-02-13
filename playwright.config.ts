@@ -43,7 +43,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     actionTimeout: 15000, // Increased for Jazz sync
-    navigationTimeout: 20000, // Increased for Jazz sync
+    navigationTimeout: 60000, // Match test timeout — first load needs compilation time
     // Optimize browser performance
     viewport: { width: 1280, height: 720 },
     // Disable unnecessary resources for faster tests

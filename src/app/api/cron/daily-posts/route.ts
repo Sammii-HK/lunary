@@ -1075,7 +1075,6 @@ async function runDailyPosts(dateStr: string) {
             alt: post.alt,
           })),
           variants: post.variants,
-          // redditOptions: post.redditOptions,
         };
 
         if (pinterestOptions) {
@@ -4620,9 +4619,15 @@ function buildTransitMilestoneTextPosts({
       // For halfway, 6_months, 3_months: traditional milestone format
       let durationContext = '';
       if (milestone.milestone === 'halfway') {
-        const yearsOrMonths =
-          transitYears >= 1 ? `${transitYears}-year` : `${transitMonths}-month`;
-        durationContext = `This ${yearsOrMonths} transit is at the midpoint.`;
+        const durationLabel =
+          transitYears >= 1
+            ? `${transitYears}-year`
+            : transitMonths >= 2
+              ? `${transitMonths}-month`
+              : totalDays >= 14
+                ? `${Math.round(totalDays / 7)}-week`
+                : `${totalDays}-day`;
+        durationContext = `This ${durationLabel} transit is at the midpoint.`;
       } else {
         durationContext = `${milestoneLabel} in this transit.`;
       }

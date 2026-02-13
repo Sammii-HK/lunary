@@ -10,7 +10,7 @@ import {
   getPricingPlansWithStripeData,
   type PricingPlan,
 } from '../../../utils/pricing';
-import { createCheckoutSession, getStripePromise } from '../../../utils/stripe';
+import { createCheckoutSession } from '../../../utils/stripe';
 import {
   Check,
   Sparkles,
@@ -228,22 +228,12 @@ export default function PricingPage() {
         return;
       }
 
-      const sessionId = checkout.sessionId;
-      if (!sessionId) {
-        throw new Error('Missing sessionId from checkout response');
+      if (checkout.url) {
+        window.location.href = checkout.url;
+        return;
       }
 
-      const stripePromise = getStripePromise();
-      if (!stripePromise) {
-        throw new Error('Stripe is not configured');
-      }
-
-      const stripe = await stripePromise;
-      if (!stripe) {
-        throw new Error('Stripe failed to initialize');
-      }
-
-      await stripe.redirectToCheckout({ sessionId });
+      throw new Error('Missing checkout URL from response');
     } catch (error) {
       console.error('Error creating checkout session:', error);
       alert('Something went wrong. Please try again.');

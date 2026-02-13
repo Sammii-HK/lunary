@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
@@ -27,6 +27,14 @@ export default function AuthenticatedLayout({
   const authStatus = useAuthStatus();
   const router = useRouter();
   const pathname = usePathname() ?? '/app';
+
+  // Ensure first client render matches server render to prevent hydration mismatch.
+  // The server always renders loading state; the client must do the same on hydration
+  // before switching to the real auth-dependent content after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Track if product_opened has been fired this session to avoid wasteful API calls
   const productOpenedFired = useRef(false);
@@ -76,7 +84,7 @@ export default function AuthenticatedLayout({
     }
   }, [authStatus.loading, authStatus.isAuthenticated, authStatus.user?.id]);
 
-  if (authStatus.loading) {
+  if (!mounted || authStatus.loading) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <span className='text-zinc-400 text-sm'>Checking authentication…</span>

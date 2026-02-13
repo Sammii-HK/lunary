@@ -10,7 +10,7 @@
  *
  * Engagement B (20 UTC — UK leisure / US afternoon):
  * - Mon: Rankings      | Tue: Hot Take     | Wed: Sign Check
- * - Thu: Myth          | Fri: Quiz         | Sat: Rankings
+ * - Thu: Myth          | Fri: Quiz         | Sat: Did You Know
  * - Sun: Sign Check
  *
  * App demos and comparisons are parked (not deleted) for future use.
@@ -25,6 +25,7 @@ import { generateRankingScript } from './ranking';
 import { generateQuizScript } from './quiz';
 import { generateHotTakeScript } from './hot-take';
 import { generateMythScript } from './myth';
+import { generateDidYouKnowScript } from './did-you-know';
 import { getTodaysTransitVideo } from './transit-integration';
 import type { VideoScript } from '../types';
 import type { ContentType } from '../content-types';
@@ -67,7 +68,7 @@ const ENGAGEMENT_B_SCHEDULE: Record<string, DayConfig> = {
   wednesday: { contentType: 'sign-check', label: 'Sign Check' },
   thursday: { contentType: 'myth', label: 'Myth/Storytime' },
   friday: { contentType: 'quiz', label: 'Quiz' },
-  saturday: { contentType: 'ranking', label: 'Rankings' },
+  saturday: { contentType: 'did-you-know', label: 'Did You Know' },
   sunday: { contentType: 'sign-check', label: 'Sign Check' },
 };
 
@@ -110,6 +111,9 @@ export async function generateScriptForContentType(
       console.log('    No major transit detected, falling back to sign check');
       return generateSignCheckScript(date);
     }
+
+    case 'did-you-know':
+      return generateDidYouKnowScript(date);
 
     default:
       console.error(`  Unknown content type: ${contentType}`);

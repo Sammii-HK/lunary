@@ -253,7 +253,9 @@ export async function GET(request: NextRequest) {
 
     // Check for cached horoscope first
     const cached = await getCachedHoroscope(userId, dateStr);
-    if (cached) {
+    const isCacheComplete =
+      cached?.headline && cached?.overview && cached?.tinyAction;
+    if (cached && isCacheComplete) {
       const response = NextResponse.json(
         {
           ...cached,

@@ -42,9 +42,25 @@ const generatedThemesWithThreads = withThreads(
   generatedCategoryThemes as WeeklyTheme[],
 );
 
+/**
+ * Prefixes for generated themes that are too granular for social media.
+ * These are SEO grimoire topics (e.g. "Chiron in Cancer", "Sun in 3rd House")
+ * that produce generic, unhelpful social posts. Keep them for SEO but exclude
+ * from the social content theme pool.
+ */
+const SOCIAL_EXCLUDED_THEME_PREFIXES = [
+  'placements-',
+  'houses-',
+  'decans-',
+  'cusps-',
+];
+
+const isSocialSuitableTheme = (theme: WeeklyTheme): boolean =>
+  !SOCIAL_EXCLUDED_THEME_PREFIXES.some((prefix) => theme.id.startsWith(prefix));
+
 export const categoryThemes: WeeklyTheme[] = [
   ...baseCategoryThemesWithThreads,
-  ...generatedThemesWithThreads,
+  ...generatedThemesWithThreads.filter(isSocialSuitableTheme),
 ];
 
 export const sabbatThemes: SabbatTheme[] = withSabbatThreads(
@@ -63,7 +79,7 @@ export const sabbatThemes: SabbatTheme[] = withSabbatThreads(
 export const THEME_CATEGORY_WEIGHTS: Record<string, number> = {
   tarot: 4, // 73.9B views — massively underserved
   zodiac: 3, // 84.2B views — largest audience
-  numerology: 3, // Fast-growing, high per-video engagement
+  numerology: 4, // Fast-growing, high per-video engagement
   spells: 3, // 201 spells, #witchtok growing, practical 'how to' content
   planetary: 2, // Feeds into #astrology, transit content
   lunar: 2, // Dedicated audience

@@ -128,8 +128,6 @@ export async function POST(request: NextRequest) {
         cosmicContent,
         dateStr,
       );
-      const tiktokContent = formatTikTokPost(cosmicContent, dateStr);
-
       const variants: Record<string, { content: string; media?: string[] }> =
         {};
       const twitterVariantContent = twitterContent.trim();
@@ -151,10 +149,6 @@ export async function POST(request: NextRequest) {
           platform: 'linkedin',
           content: linkedinVariantContent || baseContent,
         },
-        {
-          platform: 'tiktok',
-          content: tiktokContent,
-        },
       ];
 
       for (const entry of variantEntries) {
@@ -169,7 +163,7 @@ export async function POST(request: NextRequest) {
         accountGroupId,
         name: `Cosmic Post - ${readableDate}`,
         content: baseContent,
-        platforms: ['instagram', 'tiktok'],
+        platforms: ['instagram'],
         scheduledDate: scheduledDateTime.toISOString(),
         media: [
           {

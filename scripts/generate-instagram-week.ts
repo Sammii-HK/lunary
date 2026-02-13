@@ -60,6 +60,14 @@ async function generateInstagramWeek() {
             where: { base_group_key: groupKey },
           });
 
+          // For carousels, store all image URLs pipe-delimited so
+          // buildPlatformPayload can split them into multiple media items.
+          const imageUrls = post.imageUrls || [];
+          const imageUrlValue =
+            post.type === 'carousel' && imageUrls.length > 1
+              ? imageUrls.join('|')
+              : imageUrls[0] || null;
+
           if (existingPost) {
             // Update existing post
             await prisma.socialPost.update({
@@ -67,11 +75,15 @@ async function generateInstagramWeek() {
               data: {
                 content: post.caption,
                 scheduledDate: new Date(post.scheduledTime),
-                image_url: post.imageUrls?.[0] || null, // Use first image from array
+                image_url: imageUrlValue,
+                postType:
+                  post.type === 'carousel'
+                    ? 'instagram_carousel'
+                    : existingPost.postType,
                 video_metadata: {
                   hashtags: post.hashtags || [],
                   metadata: post.metadata || {},
-                  imageUrls: post.imageUrls || [], // Store all images for carousels
+                  imageUrls: imageUrls,
                 },
               },
             });
@@ -81,15 +93,16 @@ async function generateInstagramWeek() {
               data: {
                 content: post.caption,
                 platform: 'instagram',
-                postType: post.type,
+                postType:
+                  post.type === 'carousel' ? 'instagram_carousel' : post.type,
                 scheduledDate: new Date(post.scheduledTime),
                 status: 'pending',
-                image_url: post.imageUrls?.[0] || null, // Use first image from array
+                image_url: imageUrlValue,
                 base_group_key: groupKey,
                 video_metadata: {
                   hashtags: post.hashtags || [],
                   metadata: post.metadata || {},
-                  imageUrls: post.imageUrls || [], // Store all images for carousels
+                  imageUrls: imageUrls,
                 },
               },
             });
