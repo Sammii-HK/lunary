@@ -2,7 +2,7 @@ import {
   generateConversationPost,
   generateCosmicTimingPost,
 } from './original-content';
-import { getDearStyleBetaPost } from '@/lib/social/shared/constants/persona-templates';
+import { getDearStyleReferralPost } from '@/lib/social/shared/constants/persona-templates';
 import {
   WEEKDAY_SLOTS_UTC,
   WEEKEND_SLOTS_UTC,
@@ -14,12 +14,12 @@ import {
 /**
  * Weekday schedule (3 slots — UK/US crossover window):
  * Slot 0 (14:00 UTC) - Original: cosmic timing / transit text — 9am EST morning
- * Slot 1 (17:00 UTC) - Dear-style beta CTA — peak 12pm EST engagement
+ * Slot 1 (17:00 UTC) - Dear-style referral CTA — peak 12pm EST engagement
  * Slot 2 (21:00 UTC) - Original: conversation / question — 4pm EST all timezones active
  *
  * Weekend schedule (2 slots):
  * Slot 0 (14:00 UTC) - Original: cosmic timing / conversation
- * Slot 1 (20:00 UTC) - Dear-style beta CTA — weekend evening leisure
+ * Slot 1 (20:00 UTC) - Dear-style referral CTA — weekend evening leisure
  */
 
 /**
@@ -49,7 +49,7 @@ function buildWeekdayBatch(dateStr: string): ThreadsPost[] {
   // Slot 0 (14:00 UTC) - Cosmic timing / transit content
   posts.push(generateCosmicTimingPost(dateStr, slots[0]));
 
-  // Slot 1 (17:00 UTC) - Dear-style beta CTA (best performer, peak slot)
+  // Slot 1 (17:00 UTC) - Dear-style referral CTA (best performer, peak slot)
   posts.push(buildDearStylePost(dateStr, slots[1], seed));
 
   // Slot 2 (21:00 UTC) - Conversation / question (drives replies)
@@ -67,21 +67,21 @@ function buildWeekendBatch(dateStr: string): ThreadsPost[] {
   // Slot 0 (14:00 UTC) - Cosmic timing / conversation
   posts.push(generateCosmicTimingPost(dateStr, slots[0]));
 
-  // Slot 1 (20:00 UTC) - Dear-style beta CTA (weekend evening leisure)
+  // Slot 1 (20:00 UTC) - Dear-style referral CTA (weekend evening leisure)
   posts.push(buildDearStylePost(dateStr, slots[1], seed));
 
   return posts;
 }
 
 /**
- * Build a dear-style beta CTA post for the orchestrator.
+ * Build a dear-style referral CTA post for the orchestrator.
  */
 function buildDearStylePost(
   dateStr: string,
   slotHour: number,
   seed: number,
 ): ThreadsPost {
-  const content = getDearStyleBetaPost(seed);
+  const content = getDearStyleReferralPost(seed);
 
   const scheduledDate = new Date(dateStr);
   scheduledDate.setUTCHours(slotHour, 0, 0, 0);
