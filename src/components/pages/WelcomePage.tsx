@@ -74,16 +74,16 @@ export default function WelcomePage() {
     <>
       {renderJsonLd(structuredData)}
       <div className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
-        {/* Promo Banner */}
+        {/* Referral Banner */}
         <div className='bg-gradient-to-r from-lunary-primary-900/40 to-lunary-primary-800/40 border-b border-lunary-primary-700/30 py-2 px-4'>
           <div className='flex items-center justify-center gap-2'>
-            <Sparkles className='w-4 h-4 text-lunary-primary-200' />
+            <Users className='w-4 h-4 text-lunary-primary-200' />
             <p className='text-xs md:text-sm text-lunary-primary-100'>
-              Limited time: Use code{' '}
-              <span className='font-mono font-semibold text-lunary-primary-200'>
-                STARGAZER
+              Give a friend{' '}
+              <span className='font-semibold text-lunary-primary-200'>
+                30 days of Pro free
               </span>{' '}
-              for 3 months free of Lunary+
+              — earn a bonus week for every referral
             </p>
           </div>
         </div>
@@ -133,11 +133,7 @@ export default function WelcomePage() {
                 </Link>
               </p>
               <p className='text-xs text-zinc-500 mt-2'>
-                Start free • Use code{' '}
-                <span className='font-mono text-lunary-primary-400'>
-                  STARGAZER
-                </span>{' '}
-                for 3 months of Lunary+
+                Start free • Give a friend 30 days of Pro, earn a bonus week
               </p>
             </div>
           </div>
@@ -257,6 +253,31 @@ export default function WelcomePage() {
               scale."
             </p>
             <p className='text-xs text-zinc-500'>Sammii, Founder</p>
+          </div>
+        </section>
+
+        {/* Section 3b: Technical Trust */}
+        <section className='py-12 md:py-16 px-4 md:px-6 border-t border-zinc-800/30'>
+          <div className='max-w-3xl mx-auto text-center space-y-6'>
+            <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-800 mb-4'>
+              <Telescope
+                className='w-8 h-8 text-lunary-primary-400'
+                strokeWidth={1.5}
+              />
+            </div>
+            <Heading as='h2' variant='h2' className='text-zinc-100'>
+              Real astronomy, not guesswork
+            </Heading>
+            <p className='text-sm text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+              Lunary&apos;s calculations are powered by Astronomy Engine — the
+              same models (VSOP87) used by NASA&apos;s JPL Horizons, tested to
+              within ±1 arcminute of the US Naval Observatory&apos;s data.
+            </p>
+            <p className='text-sm text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+              No AI-generated predictions. No simplified sun-sign algorithms.
+              Real astronomical calculations, applied to your complete birth
+              chart.
+            </p>
           </div>
         </section>
 
@@ -703,23 +724,7 @@ export default function WelcomePage() {
                       strokeWidth={2}
                     />
                     <span className='text-sm text-zinc-400'>
-                      Generic horoscopes
-                    </span>
-                  </li>
-                  <li className='flex items-start gap-3'>
-                    <X
-                      className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
-                      strokeWidth={2}
-                    />
-                    <span className='text-sm text-zinc-400'>Sun sign only</span>
-                  </li>
-                  <li className='flex items-start gap-3'>
-                    <X
-                      className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
-                      strokeWidth={2}
-                    />
-                    <span className='text-sm text-zinc-400'>
-                      Drama and predictions
+                      AI-generated or simplified calculations
                     </span>
                   </li>
                   <li className='flex items-start gap-3'>
@@ -728,7 +733,25 @@ export default function WelcomePage() {
                       strokeWidth={2}
                     />
                     <span className='text-sm text-zinc-400'>
-                      Notification spam
+                      Sun sign horoscopes for millions
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-3'>
+                    <X
+                      className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
+                      strokeWidth={2}
+                    />
+                    <span className='text-sm text-zinc-400'>
+                      Paywalled basics, limited free content
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-3'>
+                    <X
+                      className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0'
+                      strokeWidth={2}
+                    />
+                    <span className='text-sm text-zinc-400'>
+                      Notification spam and aggressive upsells
                     </span>
                   </li>
                 </ul>
@@ -746,7 +769,7 @@ export default function WelcomePage() {
                       strokeWidth={2}
                     />
                     <span className='text-sm text-zinc-200'>
-                      Interpreted through your complete birth chart
+                      Accurate calculations, not AI guesswork
                     </span>
                   </li>
                   <li className='flex items-start gap-3'>
@@ -755,7 +778,7 @@ export default function WelcomePage() {
                       strokeWidth={2}
                     />
                     <span className='text-sm text-zinc-200'>
-                      Connected tarot and lunar insights
+                      Your complete birth chart, not just your sun sign
                     </span>
                   </li>
                   <li className='flex items-start gap-3'>
@@ -764,7 +787,7 @@ export default function WelcomePage() {
                       strokeWidth={2}
                     />
                     <span className='text-sm text-zinc-200'>
-                      Calm and reflective
+                      2,000+ free educational articles
                     </span>
                   </li>
                   <li className='flex items-start gap-3'>
@@ -773,7 +796,7 @@ export default function WelcomePage() {
                       strokeWidth={2}
                     />
                     <span className='text-sm text-zinc-200'>
-                      A daily practice, not a feed
+                      A daily practice, not a notification machine
                     </span>
                   </li>
                 </ul>

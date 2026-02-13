@@ -7,6 +7,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { JournalEntry } from '@/app/api/journal/route';
 import { JournalPattern } from '@/lib/journal/pattern-analyzer';
 import { RecurringThemesCard } from '@/components/RecurringThemesCard';
+import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 
 interface PatternCardProps {
   pattern: JournalPattern;
@@ -265,6 +266,11 @@ export default function JournalPage() {
             ))}
           </div>
         )}
+
+        <ReferralShareCTA
+          compact
+          message='Know someone who journals? They get 30 days of Pro free when they join Lunary.'
+        />
 
         <div className='space-y-4'>
           <h2 className='text-sm font-medium text-zinc-400 uppercase tracking-wide'>

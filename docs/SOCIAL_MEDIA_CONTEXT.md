@@ -6,9 +6,9 @@ This file contains essential context for generating authentic, varied social med
 
 **Lunary** is a cosmic/spiritual astrology app that provides personalized astrological insights, birth chart analysis, tarot readings, and daily cosmic guidance.
 
-## Beta Launch Promo
+## Referral Program
 
-**STARGAZER** - Use code STARGAZER for 12 months of Lunary+ free during our beta launch. This is our way of thanking early adopters who join during beta.
+Lunary has a referral program: users share a unique link, and when the referred person signs up and completes their first action (tarot spread, journal entry, or daily ritual), the new user gets 30 days of Pro free and the referrer earns a bonus week of Pro. Referrers also unlock tiered rewards at milestones (1, 3, 5, 10, 15, 25, 50 referrals). Use this as a CTA in social content where appropriate — lead with "Give a friend 30 days of Pro free".
 
 ## Discord Community
 
@@ -303,7 +303,7 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
 
 - "discover at lunary.app"
 - "try Lunary"
-- For promotional posts during beta: mention code STARGAZER for 12 months free
+- Mention the referral program: "Refer a friend, you both get 30 days of Pro free"
 - Outside of dedicated promo posts, avoid pricing/trial mentions
 
 ## Content Archetypes (Rotate Between These)
@@ -415,14 +415,14 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
 - "Your Book of Shadows isn't just a journal. It tracks patterns across entries - recurring moods, card references, moon phases. Over time, you see your own cosmic story emerge."
 - "Moon Circles guide you through new moon intentions and full moon releases. Each lunation has a theme, focus points, and community insights."
 
-**Beta Launch Promo (use sparingly):**
+**Referral Program (use naturally in community posts):**
 
-- "We're in beta and inviting early adopters to join. Use code STARGAZER for 12 months of Lunary+ free. Real astronomical data, personalized insights, an AI that remembers your journey."
-- "Building Lunary has been a two-year journey. For our beta launch, we're giving early adopters 12 months free with code STARGAZER. Come grow with us."
+- "Know someone who'd love personalized astrology? Share your Lunary referral link — you both get 30 days of Pro free. Real astronomical data, personalized insights, an AI that remembers your journey."
+- "The best way to experience Lunary is with a friend. Refer someone, and when they complete their first reading, you both unlock 30 days of Pro."
 
 **Discord Community (encourage joining):**
 
-- "We're building a community of stargazers. Join us on Discord for daily cosmic insights, beta access, and real conversations about what the stars reveal. discord.gg/yatwZTf7"
+- "We're building a community of cosmic explorers. Join us on Discord for daily cosmic insights, early access, and real conversations about what the stars reveal. discord.gg/yatwZTf7"
 - "The best part of building Lunary? The community. Join our Discord - we share daily cosmic weather, discuss transits, and genuinely want to hear what features you'd love. discord.gg/yatwZTf7"
 - "Want to shape the future of Lunary? Join our Discord. Beta testers get early access to new features and direct input on what we build next. discord.gg/yatwZTf7"
 

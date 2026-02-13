@@ -2,7 +2,7 @@
 
 ## Overview
 
-Users share a unique referral code. When a new user signs up with that code and completes their first meaningful action, both the referrer and the referred user receive 30 days of Pro access. Referrers earn additional tiered rewards as they accumulate activated referrals.
+Users share a unique referral code. When a new user signs up with that code and completes their first meaningful action, the referred user receives 30 days of Pro access and the referrer earns 7 days of Pro. Referrers also unlock tiered milestone rewards as they accumulate activated referrals.
 
 ## How It Works
 
@@ -24,12 +24,19 @@ Activation is checked by calling `checkInviteActivation(userId)` from the respec
 
 ## Rewards
 
-### Immediate Reward (Both Users)
+### Immediate Rewards (Asymmetric)
 
-Both the referrer and referred user receive **30 days of Pro access** (`REFERRAL_TRIAL_DAYS = 30`).
+Rewards are granted on activation via `grantActivationReward(userId, days)`:
 
-- If the user has an active Stripe subscription, a coupon is applied
-- If no subscription exists, a trial subscription is created
+| Recipient     | Reward             | Constant                 |
+| ------------- | ------------------ | ------------------------ |
+| Referred user | **30 days of Pro** | `REFERRAL_DAYS_REFERRED` |
+| Referrer      | **7 days of Pro**  | `REFERRAL_DAYS_REFERRER` |
+
+How Pro time is applied:
+
+- **Subscribed users** — `current_period_end` is extended by the reward interval (e.g. `+ '7 days'::interval`)
+- **Unsubscribed users** — A new trial subscription is created with the reward interval
 
 ### Tiered Rewards (Referrer Only)
 
@@ -100,12 +107,14 @@ Located in `src/lib/referrals/check-activation.ts`:
 
 ## UI Components
 
-| Component              | Location                                            | Purpose                                        |
-| ---------------------- | --------------------------------------------------- | ---------------------------------------------- |
-| `ReferralDashboard`    | `src/components/referrals/ReferralDashboard.tsx`    | Full dashboard with stats, code, tier progress |
-| `ReferralProgram`      | `src/components/ReferralProgram.tsx`                | Marketing component for pricing/homepage       |
-| `ReferralTierProgress` | `src/components/referrals/ReferralTierProgress.tsx` | Tier milestone progress bar                    |
-| Referral page          | `src/app/(authenticated)/referrals/page.tsx`        | `/referrals` dashboard page                    |
+| Component              | Location                                            | Purpose                                          |
+| ---------------------- | --------------------------------------------------- | ------------------------------------------------ |
+| `ReferralDashboard`    | `src/components/referrals/ReferralDashboard.tsx`    | Full dashboard with stats, code, tier progress   |
+| `ReferralProgram`      | `src/components/ReferralProgram.tsx`                | Marketing component for pricing/homepage         |
+| `ReferralShareCTA`     | `src/components/referrals/ReferralShareCTA.tsx`     | Inline share prompt placed at engagement moments |
+| `ReferralTierProgress` | `src/components/referrals/ReferralTierProgress.tsx` | Tier milestone progress bar                      |
+| `CircleInviteCTA`      | `src/components/CircleInviteCTA.tsx`                | Circle invite CTA with share/copy buttons        |
+| Referral page          | `src/app/(authenticated)/referrals/page.tsx`        | `/referrals` dashboard page                      |
 
 ## Key Files
 

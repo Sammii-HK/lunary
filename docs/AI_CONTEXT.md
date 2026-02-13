@@ -6,9 +6,9 @@ This file contains essential context about Lunary for AI-powered conversion opti
 
 **Lunary** is a cosmic/spiritual astrology app that provides personalized astrological insights, birth chart analysis, tarot readings, and daily cosmic guidance.
 
-## Beta Launch Promo
+## Referral Program
 
-**STARGAZER** - Use code STARGAZER for 12 months of Lunary+ free during our beta launch. This is our way of thanking early adopters who join during beta.
+Lunary has a referral program: users share a unique link, and when the referred person signs up and completes their first action (tarot spread, journal entry, or daily ritual), the new user gets 30 days of Pro free and the referrer earns a bonus week of Pro. Referrers also unlock tiered rewards at milestones (1, 3, 5, 10, 15, 25, 50 referrals).
 
 ## Discord Community
 
@@ -298,7 +298,7 @@ Tertiary: Reduce churn, increase retention
 - "Yearly Forecast - your personalized cosmic roadmap"
 - "500+ pages of grimoire knowledge"
 - "Cosmic Report Generator - shareable PDF reports"
-- "Beta launch: STARGAZER code for 12 months free"
+- "Refer a friend — you both get 30 days of Pro free"
 - "Join our Discord community - discord.gg/yatwZTf7"
 
 ## Competitive Positioning vs Arcarae
@@ -339,13 +339,13 @@ Tertiary: Reduce churn, increase retention
 5. **Feature Discovery** - Help users find personalized features (Astral Guide, Book of Shadows, Moon Circles, tarot patterns, personal transits, grimoire)
 6. **AI Feature Education** - Educate users about AI capabilities (assist commands, memory system, deeper readings)
 7. **Pattern Recognition** - Show value of tarot pattern analysis and personal transits
-8. **Beta Promo** - Promote STARGAZER code for 12 months free during beta launch
+8. **Referral Program** - Encourage sharing via referral link (both users get 30 days Pro free)
 
 ## Common Objections
 
-- "Is this accurate?" → Emphasize real astronomical calculations, personal transits show exact house positions
-- "Too expensive" → Beta launch: STARGAZER code for 12 months free. Otherwise, frame as less than a coffee, emphasize value (Astral Guide, tarot patterns, personal transits, 500+ page grimoire)
-- "Not sure if it's for me" → Free trial, or use STARGAZER for 12 months free during beta. Highlight Astral Guide and educational grimoire
+- "Is this accurate?" → Emphasize real astronomical calculations (Astronomy Engine, VSOP87, ±1 arcminute accuracy), personal transits show exact house positions
+- "Too expensive" → Frame as less than a coffee, emphasize value (Astral Guide, tarot patterns, personal transits, 2,000+ grimoire articles). Referral program gives 30 days Pro free.
+- "Not sure if it's for me" → Free trial to experience it. Referral program lets friends try Pro together. Highlight Astral Guide and educational grimoire
 - "Generic astrology" → Highlight personalization to exact birth chart, tarot pattern analysis, personal transits
 - "What makes Astral Guide different?" → Context-aware responses using birth chart, memory system, assist commands - it actually knows your cosmic story
 - "Why do I need tarot patterns?" → Identifies recurring themes you might miss, shows deeper insights over time

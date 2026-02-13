@@ -819,11 +819,33 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
   if (userId) {
     try {
-      await sql`
-        UPDATE subscriptions
-        SET status = 'cancelled', plan_type = 'free', updated_at = NOW()
+      // Check if the user has a referral extension beyond Stripe's period end.
+      // If current_period_end is still in the future (e.g. from referral bonus days),
+      // convert to a trial so the extension is honored instead of killed.
+      const existing = await sql`
+        SELECT current_period_end FROM subscriptions
         WHERE user_id = ${userId}
+        AND status IN ('active', 'trial')
+        AND current_period_end > NOW()
+        LIMIT 1
       `;
+
+      if (existing.rows.length > 0) {
+        // Referral extension exists — preserve as trial until it expires
+        await sql`
+          UPDATE subscriptions
+          SET status = 'trial',
+              stripe_subscription_id = NULL,
+              updated_at = NOW()
+          WHERE user_id = ${userId}
+        `;
+      } else {
+        await sql`
+          UPDATE subscriptions
+          SET status = 'cancelled', plan_type = 'free', updated_at = NOW()
+          WHERE user_id = ${userId}
+        `;
+      }
     } catch (error) {
       console.error('DB update failed:', error);
     }
