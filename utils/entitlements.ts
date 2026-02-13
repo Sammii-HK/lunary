@@ -1,4 +1,6 @@
 import type { PlanId } from './stripe-prices';
+export { getTrialLevel } from '@/lib/stripe/subscription-utils';
+export type { TrialLevel } from '@/lib/stripe/subscription-utils';
 
 export type { PlanId } from './stripe-prices';
 

@@ -5,6 +5,10 @@ import {
   generateTrialReminderEmailHTML,
   generateTrialReminderEmailText,
 } from '@/lib/email-templates/trial-nurture';
+import {
+  generateTrialExpiredEmailHTML,
+  generateTrialExpiredEmailText,
+} from '@/lib/email-components/TrialExpiredEmail';
 
 export const dynamic = 'force-dynamic';
 
@@ -176,12 +180,91 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // === TRIAL EXPIRED EMAILS ===
+    // Find users whose trial ended (past) and haven't received the expired email
+    let sentExpired = 0;
+    const expiredTrials = await sql`
+      SELECT DISTINCT
+        s.user_id,
+        s.user_email as email,
+        s.user_name as name,
+        s.trial_ends_at,
+        s.plan_type
+      FROM subscriptions s
+      WHERE s.status = 'trial'
+      AND s.trial_ends_at < NOW()
+      AND (s.trial_expired_email_sent = false OR s.trial_expired_email_sent IS NULL)
+      AND s.user_email IS NOT NULL
+      AND NOT (
+        s.has_discount = true
+        AND (
+          COALESCE(s.discount_percent, 0) >= 100
+          OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
+        )
+      )
+      AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
+      LIMIT 100
+    `;
+
+    for (const user of expiredTrials.rows) {
+      try {
+        const trialEnd = new Date(user.trial_ends_at);
+        const daysSinceExpiry = Math.floor(
+          (Date.now() - trialEnd.getTime()) / (1000 * 60 * 60 * 24),
+        );
+        // Approximate missed insights: ~1 per day since expiry
+        const missedInsights = Math.max(1, daysSinceExpiry);
+
+        const html = await generateTrialExpiredEmailHTML(
+          user.name || 'there',
+          missedInsights,
+          user.email,
+        );
+        const text = generateTrialExpiredEmailText(
+          user.name || 'there',
+          missedInsights,
+          user.email,
+        );
+
+        await sendEmail({
+          to: user.email,
+          subject: 'Your trial has ended — Lunary',
+          html,
+          text,
+          tracking: {
+            userId: user.user_id,
+            notificationType: 'trial_expired',
+            notificationId: `trial-expired-${user.user_id}`,
+            utm: {
+              source: 'email',
+              medium: 'lifecycle',
+              campaign: 'trial_expired',
+            },
+          },
+        });
+
+        // Mark as sent
+        await sql`
+          UPDATE subscriptions
+          SET trial_expired_email_sent = true
+          WHERE user_id = ${user.user_id}
+        `;
+
+        sentExpired++;
+      } catch (error) {
+        errors.push(
+          `Failed to send trial expired email to ${user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+    }
+
     return NextResponse.json({
       success: true,
       sent: {
         threeDayReminders: sent3Day,
         oneDayReminders: sent1Day,
-        total: sent3Day + sent1Day,
+        trialExpired: sentExpired,
+        total: sent3Day + sent1Day + sentExpired,
       },
       errors: errors.length > 0 ? errors : undefined,
     });

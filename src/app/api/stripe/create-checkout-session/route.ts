@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { sql } from '@vercel/postgres';
 import { getPlanIdFromPriceId } from '../../../../../utils/pricing';
+import { getTrialLevel } from '@/lib/stripe/subscription-utils';
 
 function getStripe(secretKey?: string) {
   const key = secretKey || process.env.STRIPE_SECRET_KEY;
@@ -537,7 +538,7 @@ export async function POST(request: NextRequest) {
       Boolean(normalizedPromoCode) || Boolean(normalizedDiscountCode);
 
     // Fetch trial period from Stripe product/price metadata
-    const trialDays = skipTrialFromCoupon
+    let trialDays = skipTrialFromCoupon
       ? 0
       : await getTrialPeriodForPrice(priceId, priceStripe);
 
@@ -547,6 +548,22 @@ export async function POST(request: NextRequest) {
       price.metadata?.plan_id ||
       getPlanIdFromPriceId(priceId) ||
       (isMonthly ? 'lunary_plus' : 'lunary_plus_ai_annual');
+
+    // Per-level trial check: skip trial if user already trialed this tier
+    if (trialDays > 0 && typeof userId === 'string') {
+      try {
+        const trialCheck = await sql`
+          SELECT trialed_plans FROM subscriptions WHERE user_id = ${userId} LIMIT 1
+        `;
+        const trialedPlans: string[] = trialCheck.rows[0]?.trialed_plans || [];
+        const level = getTrialLevel(planId);
+        if (trialedPlans.includes(level)) {
+          trialDays = 0;
+        }
+      } catch (error) {
+        console.error('Failed to check trialed plans:', error);
+      }
+    }
 
     const metadata: Record<string, string> = {
       plan_id: planId,

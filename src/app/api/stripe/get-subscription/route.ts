@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import Stripe from 'stripe';
+import { pickBestSubscription } from '@/lib/stripe/subscription-utils';
 
 export const revalidate = 300;
 
@@ -235,6 +236,20 @@ export async function POST(request: NextRequest) {
   }
 }
 
+function getPlanTypeFromSub(sub: Stripe.Subscription): string {
+  const price = sub.items.data[0]?.price;
+  const planId = sub.metadata?.plan_id || price?.metadata?.plan_id || null;
+  if (planId) return planId;
+  if (price?.id) {
+    const { getPlanIdFromPriceId } = require('../../../../../utils/pricing');
+    const mapped = getPlanIdFromPriceId(price.id);
+    if (mapped) return mapped;
+  }
+  return price?.recurring?.interval === 'year'
+    ? 'lunary_plus_ai_annual'
+    : 'lunary_plus';
+}
+
 async function checkStripeForSubscription(
   customerId: string,
   userId?: string,
@@ -245,15 +260,15 @@ async function checkStripeForSubscription(
 
   let subscription: Stripe.Subscription | null = null;
 
-  // Try new Stripe account
+  // Try new Stripe account — fetch multiple subs to pick the best one
   try {
     const subs = await stripe.subscriptions.list({
       customer: customerId,
       status: 'all',
-      limit: 1,
+      limit: 10,
     });
     if (subs.data.length > 0) {
-      subscription = subs.data[0];
+      subscription = pickBestSubscription(subs.data, getPlanTypeFromSub);
     }
   } catch {
     // Keep going; fallback below may find customer by email
@@ -266,10 +281,10 @@ async function checkStripeForSubscription(
         const subs = await stripe.subscriptions.list({
           customer: resolvedCustomerId,
           status: 'all',
-          limit: 1,
+          limit: 10,
         });
         if (subs.data.length > 0) {
-          subscription = subs.data[0];
+          subscription = pickBestSubscription(subs.data, getPlanTypeFromSub);
           customerId = resolvedCustomerId;
         }
       } catch {
