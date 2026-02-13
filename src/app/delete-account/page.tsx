@@ -1,6 +1,8 @@
+import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { MarketingBreadcrumbs } from '@/components/MarketingBreadcrumbs';
+import { DeletionRequestForm } from '@/components/DeletionRequestForm';
 
 export const metadata: Metadata = {
   title: 'Delete Your Account | Lunary',
@@ -48,17 +50,13 @@ export default function DeleteAccountPage() {
               <li>Confirm your decision when prompted</li>
             </ol>
             <p className='text-zinc-300 leading-relaxed mt-4'>
-              If you cannot access the app, you can request account deletion by
-              emailing{' '}
-              <a
-                href='mailto:privacy@lunary.app'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
-              >
-                privacy@lunary.app
-              </a>{' '}
-              with the subject line &quot;Account Deletion Request&quot; and the
-              email address associated with your account.
+              If you cannot access the app, use the form below to request
+              deletion. We&apos;ll send a verification link to your email.
             </p>
+
+            <Suspense fallback={null}>
+              <DeletionRequestForm />
+            </Suspense>
           </section>
 
           <section>
@@ -73,8 +71,8 @@ export default function DeleteAccountPage() {
               </li>
               <li>
                 You can <strong>cancel the deletion</strong> at any time during
-                the grace period by logging back in and choosing to restore your
-                account.
+                the grace period using the link in your confirmation email — no
+                login required.
               </li>
               <li>
                 You will receive an <strong>email confirmation</strong> when
@@ -125,8 +123,8 @@ export default function DeleteAccountPage() {
                 and yearly personalized content
               </li>
               <li>
-                <strong>Rituals and habits:</strong> Ritual tracking, weekly
-                usage, and progress data
+                <strong>Rituals and habits:</strong> Daily rituals, ritual
+                tracking, weekly usage, and progress data
               </li>
               <li>
                 <strong>Community content:</strong> Posts, moon circle insights,
@@ -134,11 +132,11 @@ export default function DeleteAccountPage() {
               </li>
               <li>
                 <strong>Social connections:</strong> Friend connections,
-                invites, and celebrations
+                invites, celebrations, and cosmic gifts
               </li>
               <li>
                 <strong>Streaks and progress:</strong> Usage streaks,
-                gamification data, and onboarding completion
+                challenges, milestones, and onboarding completion
               </li>
               <li>
                 <strong>Notification settings:</strong> Push tokens, email

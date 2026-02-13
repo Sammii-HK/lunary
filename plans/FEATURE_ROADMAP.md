@@ -3,7 +3,7 @@
 > Comprehensive plan for making Lunary a top-tier astrology app that people use religiously.
 
 **Last updated**: 2026-02-11
-**Status**: Phase 1 Complete, Phase 2 Implemented (pending smoke tests + deploy)
+**Status**: Phase 1 Complete, Phase 2 Implemented (pending smoke tests + deploy), Phase 3 Implemented (pending smoke tests + deploy)
 
 ---
 
@@ -1067,13 +1067,70 @@ Build the social infrastructure that makes leaving costly.
 
 Features that create emotional investment and long-term habit.
 
-| #   | Feature                   | Effort   | Impact               | Section |
-| --- | ------------------------- | -------- | -------------------- | ------- |
-| 11  | Manifestation tracker     | 4-5 days | Emotional investment | 5.1     |
-| 12  | Morning & evening rituals | 3-4 days | Bookend daily habits | 2.2     |
-| 13  | Weekly cosmic challenges  | 3-4 days | Recurring engagement | 5.2     |
-| 14  | Cosmic milestones         | 2-3 days | Delight moments      | 5.3     |
-| 15  | Cosmic gifting            | 3-4 days | Re-engagement        | 4.1     |
+| #   | Feature                   | Effort   | Impact               | Section | Status |
+| --- | ------------------------- | -------- | -------------------- | ------- | ------ |
+| 11  | Manifestation tracker     | 4-5 days | Emotional investment | 5.1     | Done   |
+| 12  | Morning & evening rituals | 3-4 days | Bookend daily habits | 2.2     | Done   |
+| 13  | Weekly cosmic challenges  | 3-4 days | Recurring engagement | 5.2     | Done   |
+| 14  | Cosmic milestones         | 2-3 days | Delight moments      | 5.3     | Done   |
+| 15  | Cosmic gifting            | 3-4 days | Re-engagement        | 4.1     | Done   |
+
+#### Pre-deploy: Run SQL Migration
+
+- [ ] Run `sql/phase3_depth_stickiness.sql` against the database
+
+#### Smoke Tests (pre-deploy)
+
+**Intentions (Book of Shadows)**
+
+- [ ] Open Book of Shadows — "Intentions" tab visible
+- [ ] Create intention — verify moon phase + transit context captured in content JSONB
+- [ ] View active intention on dashboard horoscope card after ritual completion
+- [ ] Set intention from inline prompt on dashboard — appears in BoS Intentions tab
+- [ ] Mark intention "Manifested!" — status updates, Manifestation skill tree XP awarded
+- [ ] Mark intention "Released" — status updates
+- [ ] Free user — cannot create more than 3 active intentions
+
+**Evening Ritual (Bottom Sheet)**
+
+- [ ] Dashboard shows evening CTA after 6 PM local time
+- [ ] Evening ritual opens — mood grid — select mood — captures current moon phase
+- [ ] Enter gratitude — saved to `daily_rituals` table
+- [ ] Review intention step — shows active intention, status buttons work
+- [ ] Ritual Keeper XP awarded on completion
+- [ ] `ritual_habits` row created with `ritual_type: 'evening'`
+
+**Weekly Challenges**
+
+- [ ] Trigger `generate-weekly-challenge` cron manually — challenge created with transit key + 7 daily prompts
+- [ ] Dashboard `WeeklyChallengeCard` shows current challenge + today's prompt
+- [ ] Check-in button — records completion, dot fills in, XP awarded
+- [ ] Participant count increments
+- [ ] Complete all 7 days — bonus XP awarded
+
+**Cosmic Milestones**
+
+- [ ] Trigger `detect-milestones` cron manually — milestones detected for test user (set birthday for upcoming Solar Return)
+- [ ] Uncelebrated milestone triggers celebration modal on dashboard load
+- [ ] Dismiss celebration — marks `celebrated = true`
+- [ ] Push notification sent for newly detected milestones
+- [ ] Free user — sees basic milestones (Solar Return, app anniversary, streak)
+- [ ] Paid user — sees advanced milestones (Lunar Return, Saturn Return)
+- [ ] Profile milestones timeline renders with correct icons and dates
+
+**Cosmic Gifting**
+
+- [ ] Friend profile — "Send Cosmic Gift" button visible
+- [ ] Choose Tarot Pull — preview shows card details
+- [ ] Choose Cosmic Encouragement — preview shows sign-based affirmation
+- [ ] Add personal message — send — gift created in DB
+- [ ] Recipient gets push notification
+- [ ] Recipient opens `/gifts` — sees unopened gift with glow indicator
+- [ ] Tap to open — unwrap animation — full content revealed
+- [ ] Free user — rate limited to 1 gift/week
+- [ ] Non-friend — cannot send gift (rejected)
+- [ ] FriendActivityFeed — shows unopened gift count + link to `/gifts`
+- [ ] Explore page — Gifts entry visible in cosmic tools grid
 
 ### Phase 4: Growth & Conversion (Weeks 11-14)
 

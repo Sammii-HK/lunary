@@ -25,6 +25,15 @@ interface DeletionCancelledEmailProps {
   userEmail: string;
 }
 
+interface DeletionVerifyEmailProps {
+  userEmail: string;
+  confirmUrl: string;
+}
+
+interface DeletionCompleteEmailProps {
+  userEmail: string;
+}
+
 interface RefundRequestedEmailProps {
   userEmail: string;
   requestId: string;
@@ -562,6 +571,312 @@ export function WelcomeEmail({ userEmail, userName }: WelcomeEmailProps) {
       </Body>
     </Html>
   );
+}
+
+export function DeletionVerifyEmail({
+  userEmail,
+  confirmUrl,
+}: DeletionVerifyEmailProps) {
+  const baseUrl = getBaseUrl();
+
+  return (
+    <Html>
+      <Head>
+        <title>Confirm Account Deletion - Lunary</title>
+      </Head>
+      <Preview>Confirm your Lunary account deletion request</Preview>
+      <Body
+        style={{
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          lineHeight: '1.6',
+          color: '#f1f1ff',
+          maxWidth: '600px',
+          margin: '0 auto',
+          padding: '20px',
+          backgroundColor: '#0b0b12',
+        }}
+      >
+        <Container
+          style={{
+            background: '#101020',
+            padding: '40px',
+            borderRadius: '16px',
+            boxShadow: '0 20px 45px rgba(106, 90, 205, 0.25)',
+            border: '1px solid rgba(147, 112, 219, 0.2)',
+            color: '#f1f1ff',
+          }}
+        >
+          <Section
+            style={{ textAlign: 'center' as const, marginBottom: '32px' }}
+          >
+            <Img
+              src={`${baseUrl}/logo.png`}
+              alt='Lunary'
+              width='80'
+              height='80'
+              style={{ margin: '0 auto 16px', display: 'block' }}
+            />
+            <Heading
+              as='h1'
+              style={{ color: '#ef4444', fontSize: '28px', margin: 0 }}
+            >
+              Confirm Account Deletion
+            </Heading>
+          </Section>
+
+          <Text style={{ color: '#d1c4ff', margin: '16px 0' }}>
+            We received a request to delete your Lunary account for{' '}
+            <strong style={{ color: '#f9fafb' }}>{userEmail}</strong>.
+          </Text>
+
+          <Text style={{ color: '#d1c4ff', margin: '16px 0' }}>
+            If you made this request, click the button below to confirm. Your
+            account will then be scheduled for deletion with a 30-day grace
+            period.
+          </Text>
+
+          <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
+            <Link
+              href={confirmUrl}
+              style={{
+                display: 'inline-block',
+                background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                color: '#ffffff',
+                padding: '16px 32px',
+                textDecoration: 'none',
+                borderRadius: '999px',
+                fontWeight: '600',
+                fontSize: '16px',
+              }}
+            >
+              Confirm Deletion
+            </Link>
+          </Section>
+
+          <Text
+            style={{ color: '#9ca3af', margin: '16px 0', fontSize: '14px' }}
+          >
+            If you didn&apos;t request this, you can safely ignore this email.
+            Your account will not be affected.
+          </Text>
+
+          <Text
+            style={{ color: '#9ca3af', margin: '16px 0', fontSize: '13px' }}
+          >
+            This link expires in 7 days.
+          </Text>
+
+          <Section
+            style={{
+              textAlign: 'center' as const,
+              marginTop: '32px',
+              fontSize: '13px',
+              color: '#9ca3af',
+              borderTop: '1px solid rgba(147, 112, 219, 0.2)',
+              paddingTop: '20px',
+            }}
+          >
+            <Text style={{ margin: 0 }}>
+              Questions? Reply to this email or contact support.
+            </Text>
+            <Text style={{ marginTop: '15px' }}>
+              © {new Date().getFullYear()} Lunar Computing, Inc.
+            </Text>
+          </Section>
+        </Container>
+      </Body>
+    </Html>
+  );
+}
+
+export function DeletionCompleteEmail({
+  userEmail,
+}: DeletionCompleteEmailProps) {
+  const baseUrl = getBaseUrl();
+
+  return (
+    <Html>
+      <Head>
+        <title>Account Deleted - Lunary</title>
+      </Head>
+      <Preview>Your Lunary account has been permanently deleted</Preview>
+      <Body
+        style={{
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          lineHeight: '1.6',
+          color: '#f1f1ff',
+          maxWidth: '600px',
+          margin: '0 auto',
+          padding: '20px',
+          backgroundColor: '#0b0b12',
+        }}
+      >
+        <Container
+          style={{
+            background: '#101020',
+            padding: '40px',
+            borderRadius: '16px',
+            boxShadow: '0 20px 45px rgba(106, 90, 205, 0.25)',
+            border: '1px solid rgba(147, 112, 219, 0.2)',
+            color: '#f1f1ff',
+          }}
+        >
+          <Section
+            style={{ textAlign: 'center' as const, marginBottom: '32px' }}
+          >
+            <Img
+              src={`${baseUrl}/logo.png`}
+              alt='Lunary'
+              width='80'
+              height='80'
+              style={{ margin: '0 auto 16px', display: 'block' }}
+            />
+            <Heading
+              as='h1'
+              style={{ color: '#9ca3af', fontSize: '28px', margin: 0 }}
+            >
+              Account Deleted
+            </Heading>
+          </Section>
+
+          <Text style={{ color: '#d1c4ff', margin: '16px 0' }}>
+            Your Lunary account for{' '}
+            <strong style={{ color: '#f9fafb' }}>{userEmail}</strong> has been
+            permanently deleted.
+          </Text>
+
+          <Section
+            style={{
+              background: 'rgba(99, 102, 241, 0.1)',
+              padding: '20px',
+              borderRadius: '12px',
+              margin: '24px 0',
+              border: '1px solid rgba(167, 139, 250, 0.35)',
+            }}
+          >
+            <Text
+              style={{
+                color: '#a78bfa',
+                margin: '0 0 12px',
+                fontWeight: '600',
+              }}
+            >
+              What was deleted:
+            </Text>
+            <Text style={{ color: '#d1c4ff', margin: '4px 0' }}>
+              • Profile and birth chart data
+            </Text>
+            <Text style={{ color: '#d1c4ff', margin: '4px 0' }}>
+              • Tarot readings and journal entries
+            </Text>
+            <Text style={{ color: '#d1c4ff', margin: '4px 0' }}>
+              • AI conversations and memory
+            </Text>
+            <Text style={{ color: '#d1c4ff', margin: '4px 0' }}>
+              • Collections, rituals, and progress
+            </Text>
+            <Text style={{ color: '#d1c4ff', margin: '4px 0' }}>
+              • Subscriptions and payment records
+            </Text>
+          </Section>
+
+          <Text
+            style={{ color: '#9ca3af', margin: '16px 0', fontSize: '14px' }}
+          >
+            Certain records (consent logs and deletion audit trail) are retained
+            for legal compliance. These contain no personal content.
+          </Text>
+
+          <Text
+            style={{ color: '#9ca3af', margin: '16px 0', fontSize: '14px' }}
+          >
+            If you have any questions, contact us at{' '}
+            <Link href='mailto:privacy@lunary.app' style={{ color: '#a78bfa' }}>
+              privacy@lunary.app
+            </Link>
+            .
+          </Text>
+
+          <Section
+            style={{
+              textAlign: 'center' as const,
+              marginTop: '32px',
+              fontSize: '13px',
+              color: '#9ca3af',
+              borderTop: '1px solid rgba(147, 112, 219, 0.2)',
+              paddingTop: '20px',
+            }}
+          >
+            <Text style={{ marginTop: '15px' }}>
+              © {new Date().getFullYear()} Lunar Computing, Inc.
+            </Text>
+          </Section>
+        </Container>
+      </Body>
+    </Html>
+  );
+}
+
+export async function generateDeletionVerifyEmailHTML(
+  userEmail: string,
+  confirmUrl: string,
+): Promise<string> {
+  return await render(
+    <DeletionVerifyEmail userEmail={userEmail} confirmUrl={confirmUrl} />,
+  );
+}
+
+export function generateDeletionVerifyEmailText(
+  userEmail: string,
+  confirmUrl: string,
+): string {
+  return `
+Confirm Account Deletion - Lunary
+
+We received a request to delete your Lunary account for ${userEmail}.
+
+If you made this request, click the link below to confirm:
+${confirmUrl}
+
+Your account will then be scheduled for deletion with a 30-day grace period.
+
+If you didn't request this, you can safely ignore this email. Your account will not be affected.
+
+This link expires in 7 days.
+
+Questions? Reply to this email or contact support.
+
+© ${new Date().getFullYear()} Lunar Computing, Inc.
+  `.trim();
+}
+
+export async function generateDeletionCompleteEmailHTML(
+  userEmail: string,
+): Promise<string> {
+  return await render(<DeletionCompleteEmail userEmail={userEmail} />);
+}
+
+export function generateDeletionCompleteEmailText(userEmail: string): string {
+  return `
+Account Deleted - Lunary
+
+Your Lunary account for ${userEmail} has been permanently deleted.
+
+What was deleted:
+• Profile and birth chart data
+• Tarot readings and journal entries
+• AI conversations and memory
+• Collections, rituals, and progress
+• Subscriptions and payment records
+
+Certain records (consent logs and deletion audit trail) are retained for legal compliance. These contain no personal content.
+
+If you have any questions, contact us at privacy@lunary.app.
+
+© ${new Date().getFullYear()} Lunar Computing, Inc.
+  `.trim();
 }
 
 export async function generateDeletionScheduledEmailHTML(

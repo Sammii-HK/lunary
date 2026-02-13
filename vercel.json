@@ -74,6 +74,14 @@
     {
       "path": "/api/cron/weekly-subscription-sync",
       "schedule": "0 2 * * 0"
+    },
+    {
+      "path": "/api/cron/generate-weekly-challenge",
+      "schedule": "0 7 * * 1"
+    },
+    {
+      "path": "/api/cron/detect-milestones",
+      "schedule": "30 6 * * *"
     }
   ]
 }

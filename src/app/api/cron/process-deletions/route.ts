@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { sendEmail } from '@/lib/email';
+import {
+  generateDeletionCompleteEmailHTML,
+  generateDeletionCompleteEmailText,
+} from '@/lib/email-components/ComplianceEmails';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
@@ -78,6 +83,13 @@ export async function GET(request: Request) {
           prisma.year_analysis.deleteMany({ where: { user_id: userId } }),
 
           // --- Engagement & gamification ---
+          prisma.daily_rituals.deleteMany({ where: { user_id: userId } }),
+          prisma.challenge_completions.deleteMany({
+            where: { user_id: userId },
+          }),
+          prisma.milestones_achieved.deleteMany({
+            where: { user_id: userId },
+          }),
           prisma.ritual_habits.deleteMany({ where: { user_id: userId } }),
           prisma.weekly_ritual_usage.deleteMany({
             where: { user_id: userId },
@@ -92,6 +104,11 @@ export async function GET(request: Request) {
           }),
 
           // --- Social & community ---
+          prisma.cosmic_gifts.deleteMany({
+            where: {
+              OR: [{ sender_id: userId }, { recipient_id: userId }],
+            },
+          }),
           prisma.friend_celebrations.deleteMany({
             where: {
               OR: [{ sender_id: userId }, { receiver_id: userId }],
@@ -201,6 +218,28 @@ export async function GET(request: Request) {
             data: { status: 'completed', processed_at: new Date() },
           }),
         ]);
+
+        // Send deletion complete email
+        if (deletion.user_email) {
+          try {
+            const html = await generateDeletionCompleteEmailHTML(
+              deletion.user_email,
+            );
+            const text = generateDeletionCompleteEmailText(deletion.user_email);
+
+            await sendEmail({
+              to: deletion.user_email,
+              subject: 'Account Deleted - Lunary',
+              html,
+              text,
+            });
+          } catch (emailError) {
+            console.error(
+              'Failed to send deletion complete email:',
+              emailError,
+            );
+          }
+        }
 
         results.processed++;
         results.details.push({ userId, success: true });

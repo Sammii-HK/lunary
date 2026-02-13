@@ -12,6 +12,7 @@ import {
   BarChart3,
   Calendar,
   MessageCircle,
+  Gift,
 } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -74,14 +75,14 @@ export default function CirclePage() {
         <div className='max-w-6xl mx-auto'>
           <div className='text-center mb-12 md:mb-16'>
             <Heading as='h2' variant='h2'>
-              Three Ways to Connect
+              Four Ways to Connect
             </Heading>
             <p className='text-sm md:text-base text-zinc-400'>
               From basic compatibility to knowing exactly when to reach out
             </p>
           </div>
 
-          <div className='grid md:grid-cols-3 gap-6 md:gap-8'>
+          <div className='grid md:grid-cols-2 gap-6 md:gap-8'>
             {/* Pillar 1: Synastry */}
             <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-6 md:p-8 space-y-4'>
               <div className='flex items-center gap-2 align-middle'>
@@ -220,6 +221,52 @@ export default function CirclePage() {
                 </p>
               </div>
             </div>
+
+            {/* Pillar 4: Cosmic Gifting */}
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-6 md:p-8 space-y-4'>
+              <div className='flex items-center gap-2 align-middle'>
+                <div className='p-3 rounded-full bg-lunary-primary-900/50 text-lunary-primary-300 w-fit'>
+                  <Gift className='w-6 h-6' />
+                </div>
+                <Heading
+                  as='h3'
+                  variant='h3'
+                  className='mb-0 ml-2 text-lunary-primary-300'
+                >
+                  Cosmic Gifting
+                </Heading>
+              </div>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Send tarot cards, crystal blessings, and celestial messages to
+                friends with a magical unwrap animation.
+              </p>
+              <ul className='space-y-2 text-sm text-zinc-400'>
+                <li className='flex items-start gap-2'>
+                  <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                  <span>Send tarot cards with personal messages</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                  <span>Crystal blessings aligned to their chart</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                  <span>Beautiful animated unwrap experience</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                  <span>Gift history in your Circle</span>
+                </li>
+              </ul>
+              <div className='pt-4 border-t border-zinc-800/50'>
+                <p className='text-xs text-zinc-500'>
+                  <span className='text-lunary-primary-400'>Free:</span> 1
+                  gift/week{' '}
+                  <span className='text-lunary-primary-400 ml-2'>Lunary+:</span>{' '}
+                  Unlimited
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -259,7 +306,7 @@ export default function CirclePage() {
               number={4}
               icon={<MessageCircle className='w-5 h-5' />}
               title='Grow Together'
-              description='See when friends check in, celebrate milestones, and stay consistent together. Astrology practice is more fun with friends.'
+              description='Send cosmic gifts, celebrate milestones, and stay consistent together. Astrology practice is more fun with friends.'
             />
           </div>
         </div>

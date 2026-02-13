@@ -131,6 +131,12 @@ export function SharePostForm({
         </Button>
       </div>
 
+      {charCount > 0 && charCount < MIN_LENGTH && (
+        <p className='text-xs text-zinc-500 mt-2'>
+          {MIN_LENGTH - charCount} more characters needed
+        </p>
+      )}
+
       {error && <p className='text-xs text-red-400 mt-2'>{error}</p>}
 
       {success && (

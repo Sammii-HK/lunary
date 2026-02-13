@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { sendEmail } from '@/lib/email';
+import { generateDeletionToken } from '@/lib/deletion-tokens';
 import {
   generateDeletionScheduledEmailHTML,
   generateDeletionScheduledEmailText,
@@ -30,17 +31,16 @@ export async function POST(request: Request) {
     const { reason } = await request.json();
 
     // Check for existing pending deletion request
-    const existingRequest = await sql`
-      SELECT id, scheduled_for FROM deletion_requests 
-      WHERE user_id = ${userId} AND status = 'pending'
-      LIMIT 1
-    `;
+    const existingRequest = await prisma.deletion_requests.findFirst({
+      where: { user_id: userId, status: 'pending' },
+      select: { id: true, scheduled_for: true },
+    });
 
-    if (existingRequest.rows.length > 0) {
+    if (existingRequest) {
       return NextResponse.json({
         success: false,
         error: 'You already have a pending deletion request',
-        scheduledFor: existingRequest.rows[0].scheduled_for,
+        scheduledFor: existingRequest.scheduled_for,
       });
     }
 
@@ -49,20 +49,18 @@ export async function POST(request: Request) {
     scheduledFor.setDate(scheduledFor.getDate() + 30);
 
     const requestId = generateId();
-    await sql`
-      INSERT INTO deletion_requests (
-        id, user_id, user_email, reason, status, scheduled_for
-      ) VALUES (
-        ${requestId},
-        ${userId},
-        ${userEmail},
-        ${reason || null},
-        'pending',
-        ${scheduledFor.toISOString()}
-      )
-    `;
+    await prisma.deletion_requests.create({
+      data: {
+        id: requestId,
+        user_id: userId,
+        user_email: userEmail ?? '',
+        reason: reason || null,
+        status: 'pending',
+        scheduled_for: scheduledFor,
+      },
+    });
 
-    // Send deletion scheduled email
+    // Send deletion scheduled email with token-based cancel URL
     if (userEmail) {
       try {
         const scheduledDateStr = scheduledFor.toLocaleDateString('en-US', {
@@ -71,7 +69,9 @@ export async function POST(request: Request) {
           month: 'long',
           day: 'numeric',
         });
-        const cancelUrl = `${APP_BASE_URL}/profile?cancelDeletion=true`;
+
+        const cancelToken = generateDeletionToken(userEmail, 'cancel');
+        const cancelUrl = `${APP_BASE_URL}/api/account/cancel-deletion?token=${encodeURIComponent(cancelToken)}&email=${encodeURIComponent(userEmail)}`;
 
         const html = await generateDeletionScheduledEmailHTML(
           userEmail,
@@ -126,14 +126,12 @@ export async function DELETE() {
     }
 
     // Cancel the deletion request
-    const result = await sql`
-      UPDATE deletion_requests
-      SET status = 'cancelled', cancelled_at = NOW()
-      WHERE user_id = ${session.user.id} AND status = 'pending'
-      RETURNING id
-    `;
+    const updated = await prisma.deletion_requests.updateMany({
+      where: { user_id: session.user.id, status: 'pending' },
+      data: { status: 'cancelled', cancelled_at: new Date() },
+    });
 
-    if (result.rows.length === 0) {
+    if (updated.count === 0) {
       return NextResponse.json(
         { error: 'No pending deletion request found' },
         { status: 404 },
@@ -182,16 +180,21 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const request = await sql`
-      SELECT id, status, scheduled_for, reason, created_at, cancelled_at
-      FROM deletion_requests
-      WHERE user_id = ${session.user.id}
-      ORDER BY created_at DESC
-      LIMIT 1
-    `;
+    const deletionRequest = await prisma.deletion_requests.findFirst({
+      where: { user_id: session.user.id },
+      select: {
+        id: true,
+        status: true,
+        scheduled_for: true,
+        reason: true,
+        created_at: true,
+        cancelled_at: true,
+      },
+      orderBy: { created_at: 'desc' },
+    });
 
     return NextResponse.json({
-      deletionRequest: request.rows[0] || null,
+      deletionRequest: deletionRequest || null,
     });
   } catch (error) {
     console.error('Get deletion request error:', error);

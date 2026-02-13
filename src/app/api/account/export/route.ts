@@ -40,6 +40,10 @@ export async function GET() {
       userProgress,
       consentLog,
       analyticsActivity,
+      dailyRituals,
+      challengeCompletions,
+      milestonesAchieved,
+      cosmicGifts,
     ] = await Promise.all([
       prisma.user_profiles.findFirst({ where: { user_id: userId } }),
       prisma.subscriptions.findUnique({ where: { user_id: userId } }),
@@ -64,6 +68,14 @@ export async function GET() {
       prisma.consent_log.findMany({ where: { user_id: userId } }),
       prisma.analytics_user_activity.findMany({
         where: { user_id: userId },
+      }),
+      prisma.daily_rituals.findMany({ where: { user_id: userId } }),
+      prisma.challenge_completions.findMany({ where: { user_id: userId } }),
+      prisma.milestones_achieved.findMany({ where: { user_id: userId } }),
+      prisma.cosmic_gifts.findMany({
+        where: {
+          OR: [{ sender_id: userId }, { recipient_id: userId }],
+        },
       }),
     ]);
 
@@ -114,6 +126,10 @@ export async function GET() {
       userProgress,
       consentLog,
       analyticsActivity,
+      dailyRituals,
+      challengeCompletions,
+      milestonesAchieved,
+      cosmicGifts,
       dataRetentionInfo: {
         description:
           'Your data is retained as long as your account is active. You can request deletion at any time.',

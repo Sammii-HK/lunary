@@ -291,12 +291,38 @@ export async function POST(request: NextRequest) {
       'moon_circle',
       'tarot',
       'journal',
+      'intention',
     ];
     if (!validCategories.includes(category)) {
       return NextResponse.json(
         { success: false, error: 'Invalid category' },
         { status: 400 },
       );
+    }
+
+    // Enforce free-tier intention limit (max 3 active)
+    if (category === 'intention') {
+      const isFree = !subscription || subscription.status === 'free';
+      if (isFree) {
+        const activeCount = await sql`
+          SELECT COUNT(*) as count FROM collections
+          WHERE user_id = ${user.id}
+          AND category = 'intention'
+          AND content->>'status' = 'active'
+        `;
+        const count = parseInt(activeCount.rows[0]?.count || '0', 10);
+        if (count >= 3) {
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                'Free users can have up to 3 active intentions. Upgrade for unlimited.',
+              upgradeRequired: true,
+            },
+            { status: 403 },
+          );
+        }
+      }
     }
 
     // AUTO-TAG MOODS for journal entries
@@ -362,8 +388,12 @@ export async function POST(request: NextRequest) {
 
     const collection = result.rows[0];
 
-    // Track journal progress for skill tree
-    if (category === 'journal' || category === 'ritual') {
+    // Track progress for skill trees
+    if (
+      category === 'journal' ||
+      category === 'ritual' ||
+      category === 'intention'
+    ) {
       try {
         const { incrementProgress } = await import('@/lib/progress/server');
         const isPro =
@@ -372,6 +402,9 @@ export async function POST(request: NextRequest) {
           await incrementProgress(user.id, 'journal', 1, isPro);
         } else if (category === 'ritual') {
           await incrementProgress(user.id, 'ritual', 1, isPro);
+        } else if (category === 'intention') {
+          // Set intention: +5 XP (1 action)
+          await incrementProgress(user.id, 'manifestation', 1, isPro);
         }
       } catch (progressError) {
         console.warn('[Collections] Failed to track progress:', progressError);

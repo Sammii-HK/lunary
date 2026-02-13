@@ -1151,9 +1151,12 @@ model user_streaks {
   total_check_ins       Int?      @default(0)
   created_at            DateTime? @default(now()) @db.Timestamptz(6)
   updated_at            DateTime? @default(now()) @db.Timestamptz(6)
-  ritual_streak         Int?      @default(0)
-  longest_ritual_streak Int?      @default(0)
-  last_ritual_date      DateTime? @db.Date
+  ritual_streak             Int?      @default(0)
+  longest_ritual_streak     Int?      @default(0)
+  last_ritual_date          DateTime? @db.Date
+  challenge_streak          Int?      @default(0)
+  longest_challenge_streak  Int?      @default(0)
+  last_challenge_week       DateTime? @db.Date
 
   @@index([last_check_in], map: "idx_user_streaks_last_check_in")
 }
@@ -1682,6 +1685,99 @@ model daily_metrics {
 
   @@index([metric_date(sort: Desc)], map: "idx_daily_metrics_date")
   @@index([metric_date(sort: Desc), computed_at(sort: Desc)], map: "idx_daily_metrics_date_computed")
+}
+
+/// Phase 3: Daily ritual tracking (morning + evening)
+model daily_rituals {
+  id                 Int       @id @default(autoincrement())
+  user_id            String
+  ritual_date        DateTime  @db.Date
+  ritual_type        String    @db.VarChar(20)
+
+  // Morning fields
+  cosmic_score       Int?
+  card_pulled        Json?
+  intention_id       String?   @db.Uuid
+  crystal_color      Json?
+
+  // Evening fields
+  mood               String?   @db.VarChar(50)
+  mood_moon_phase    String?
+  gratitude          String?
+  intention_reviewed Boolean?  @default(false)
+  intention_outcome  String?   @db.VarChar(30)
+  dream_intention    String?
+
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, ritual_date, ritual_type])
+  @@index([user_id], map: "idx_daily_rituals_user")
+  @@index([ritual_date], map: "idx_daily_rituals_date")
+}
+
+/// Phase 3: Weekly transit-based challenges
+model weekly_challenges {
+  id                    Int                     @id @default(autoincrement())
+  week_start            DateTime                @unique @db.Date
+  transit_key           String                  @db.VarChar(100)
+  challenge_title       String                  @db.VarChar(200)
+  challenge_description String
+  daily_prompts         Json                    @default("[]")
+  xp_per_day            Int                     @default(1)
+  xp_bonus_week         Int                     @default(5)
+  participant_count     Int                     @default(0)
+  created_at            DateTime?               @default(now()) @db.Timestamptz(6)
+  challenge_completions challenge_completions[]
+
+  @@index([week_start], map: "idx_weekly_challenges_week")
+}
+
+/// Phase 3: User check-ins for weekly challenges
+model challenge_completions {
+  id               Int               @id @default(autoincrement())
+  user_id          String
+  challenge_id     Int
+  check_in_date    DateTime          @db.Date
+  completed        Boolean?          @default(false)
+  reflection       String?
+  created_at       DateTime?         @default(now()) @db.Timestamptz(6)
+  weekly_challenge weekly_challenges @relation(fields: [challenge_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, challenge_id, check_in_date])
+  @@index([user_id, challenge_id], map: "idx_challenge_completions_user_challenge")
+}
+
+/// Phase 3: Cosmic milestone achievements (solar return, app anniversary, streaks, etc.)
+model milestones_achieved {
+  id             Int       @id @default(autoincrement())
+  user_id        String
+  milestone_type String    @db.VarChar(50)
+  milestone_key  String    @db.VarChar(100)
+  milestone_data Json?     @default("{}")
+  achieved_at    DateTime? @db.Timestamptz(6)
+  notified_at    DateTime? @db.Timestamptz(6)
+  celebrated     Boolean?  @default(false)
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, milestone_key])
+  @@index([user_id], map: "idx_milestones_user")
+  @@index([celebrated], map: "idx_milestones_celebrated")
+}
+
+/// Phase 3: Cosmic gifts between friends
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model cosmic_gifts {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sender_id    String
+  recipient_id String
+  gift_type    String
+  content      Json      @default("{}")
+  message      String?
+  opened_at    DateTime? @db.Timestamptz(6)
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([sender_id, created_at(sort: Desc)], map: "idx_cosmic_gifts_sender")
+  @@index([recipient_id, created_at(sort: Desc)], map: "idx_cosmic_gifts_recipient")
 }
 
 enum tour_status {

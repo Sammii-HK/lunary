@@ -19,6 +19,7 @@ import { ProgressBar } from '@/components/progress/ProgressBar';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { shouldRedactWord } from '@/constants/redactedWords';
 import { isInDemoMode } from '@/lib/demo-mode';
+import { IntentionPrompt } from '@/components/rituals/IntentionPrompt';
 
 type FocusArea = {
   area: 'love' | 'work' | 'inner';
@@ -427,22 +428,25 @@ export const PersonalizedHoroscopePreview = () => {
             )}
 
             {ritualComplete && (
-              <p className='text-[0.65rem] text-zinc-400 flex flex-wrap items-center gap-2'>
-                <span className='whitespace-nowrap'>
-                  Capture this ritual inside your Book of Shadows.
-                </span>
-                <button
-                  type='button'
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    handleJournalClick(event);
-                  }}
-                  className='text-[0.65rem] text-lunary-accent hover:text-lunary-accent-100 transition-colors'
-                >
-                  Journal about it
-                </button>
-              </p>
+              <>
+                <p className='text-[0.65rem] text-zinc-400 flex flex-wrap items-center gap-2'>
+                  <span className='whitespace-nowrap'>
+                    Capture this ritual inside your Book of Shadows.
+                  </span>
+                  <button
+                    type='button'
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      handleJournalClick(event);
+                    }}
+                    className='text-[0.65rem] text-lunary-accent hover:text-lunary-accent-100 transition-colors'
+                  >
+                    Journal about it
+                  </button>
+                </p>
+                <IntentionPrompt />
+              </>
             )}
 
             {ritualComplete && ritualSkill ? (

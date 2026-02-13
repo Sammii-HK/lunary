@@ -59,6 +59,18 @@ jest.mock('stripe', () => {
   }));
 });
 
+const mockSendEmail = jest.fn().mockResolvedValue({ id: 'test-msg-id' });
+jest.mock('@/lib/email', () => ({
+  sendEmail: (...args: any[]) => mockSendEmail(...args),
+}));
+
+jest.mock('@/lib/email-components/ComplianceEmails', () => ({
+  generateDeletionCompleteEmailHTML: jest
+    .fn()
+    .mockResolvedValue('<html>deleted</html>'),
+  generateDeletionCompleteEmailText: jest.fn().mockReturnValue('deleted'),
+}));
+
 // ---------------------------------------------------------------------------
 // Import (after mocks)
 // ---------------------------------------------------------------------------
@@ -125,6 +137,7 @@ describe('process-deletions cron', () => {
       {
         id: 'del-1',
         user_id: 'user-123',
+        user_email: 'test@example.com',
         status: 'pending',
         scheduled_for: new Date('2020-01-01'),
       },
@@ -189,6 +202,9 @@ describe('process-deletions cron', () => {
     await GET(makeRequest(TEST_CRON_SECRET));
 
     const tables = [
+      'daily_rituals',
+      'challenge_completions',
+      'milestones_achieved',
       'ritual_habits',
       'weekly_ritual_usage',
       'user_progress',
@@ -208,6 +224,7 @@ describe('process-deletions cron', () => {
     await GET(makeRequest(TEST_CRON_SECRET));
 
     const tables = [
+      'cosmic_gifts',
       'friend_celebrations',
       'friend_connections',
       'friend_invites',
@@ -354,6 +371,17 @@ describe('process-deletions cron', () => {
       errors: 0,
       details: [{ userId: 'user-123', success: true }],
     });
+  });
+
+  it('sends deletion complete email after processing', async () => {
+    await GET(makeRequest(TEST_CRON_SECRET));
+
+    expect(mockSendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'test@example.com',
+        subject: 'Account Deleted - Lunary',
+      }),
+    );
   });
 
   it('processes no deletions when none are pending', async () => {
