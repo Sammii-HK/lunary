@@ -71,6 +71,7 @@ import {
   aspectNatures,
   planetKeywords,
 } from '../../../../../utils/blog/aspectInterpretations';
+import { getSlowPlanetSignTotalDays } from '../../../../../utils/astrology/transit-duration';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -3704,12 +3705,11 @@ function buildRetrogradeTextPosts({
     posts.push({
       name: `Retrograde • ${planet} ${isRetrograde ? 'Retrograde' : 'Direct'} ${timeStr}`,
       content: xContent,
-      platforms: ['x', 'threads', 'bluesky'],
+      platforms: ['x', 'bluesky'],
       imageUrls: [],
       alt: `${planet} ${isRetrograde ? 'retrograde' : 'direct'} station ${timeStr}`,
       scheduledDate: getSchedule(),
       variants: {
-        threads: { content: threadsContent },
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
       },
@@ -3823,12 +3823,11 @@ function buildIngressTextPosts({
     posts.push({
       name: `Ingress • ${planet} enters ${sign} ${timeStr}`,
       content: xContent,
-      platforms: ['x', 'threads', 'bluesky'],
+      platforms: ['x', 'bluesky'],
       imageUrls: [],
       alt: `${planet} enters ${sign} ${timeStr}`,
       scheduledDate: getSchedule(),
       variants: {
-        threads: { content: threadsContent },
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
       },
@@ -3975,12 +3974,11 @@ function buildAspectTextPosts({
     posts.push({
       name: `Aspect • ${planetA} ${aspectLabel} ${planetB}`,
       content: xContent,
-      platforms: ['x', 'threads', 'bluesky'],
+      platforms: [],
       imageUrls: [],
       alt: `${planetA} ${aspectLabel} ${planetB}`,
       scheduledDate: getSchedule(),
       variants: {
-        threads: { content: threadsContent },
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
       },
@@ -4068,12 +4066,11 @@ function buildEgressTextPosts({
     posts.push({
       name: `Egress • ${planet}'s last hours in ${sign}`,
       content: xContent,
-      platforms: ['x', 'threads', 'bluesky'],
+      platforms: [],
       imageUrls: [],
       alt: `${planet}'s last hours in ${sign}`,
       scheduledDate: getSchedule(),
       variants: {
-        threads: { content: threadsContent },
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
       },
@@ -4159,12 +4156,11 @@ function buildSupermoonTextPosts({
   posts.push({
     name: `Supermoon • Full Moon`,
     content: xContent,
-    platforms: ['x', 'threads', 'bluesky'],
+    platforms: ['x', 'bluesky'],
     imageUrls: [],
     alt: 'Supermoon Full Moon',
     scheduledDate: getSchedule(),
     variants: {
-      threads: { content: threadsContent },
       bluesky: { content: blueskyContent },
       twitter: { content: xContent },
     },
@@ -4245,12 +4241,11 @@ function buildMicromoonTextPosts({
   posts.push({
     name: `Micromoon • Full Moon`,
     content: xContent,
-    platforms: ['x', 'threads', 'bluesky'],
+    platforms: [],
     imageUrls: [],
     alt: 'Micromoon Full Moon',
     scheduledDate: getSchedule(),
     variants: {
-      threads: { content: threadsContent },
       bluesky: { content: blueskyContent },
       twitter: { content: xContent },
     },
@@ -4289,24 +4284,12 @@ function buildEclipseTextPosts({
       eclipse.type === 'solar' ? 'Solar Eclipse' : 'Lunar Eclipse';
     const kindLabel = eclipse.kind || '';
 
-    // Threads: portal/transformation framing
-    const threadsBody = [
-      `${kindLabel} ${eclipseLabel} in ${eclipse.sign} tomorrow.`,
-      'A powerful reset point approaches.',
-      '',
-      engagementHook,
-    ].join('\n');
+    const hoursAway = `~${Math.round(eclipse.daysAway * 24)} hours`;
     const eclipseCtx = { sign: eclipse.sign, dateStr };
-    const threadsContent = addEventHashtags(
-      threadsBody,
-      platformHashtags.threads,
-      'eclipse',
-      eclipseCtx,
-    );
 
     // X/Twitter: compact with CTA
     const xBody = [
-      `${kindLabel} ${eclipseLabel} in ${eclipse.sign} tomorrow.`,
+      `${kindLabel} ${eclipseLabel} in ${eclipse.sign} in ${hoursAway}.`,
       'Major cosmic portal opening.',
       '',
       'lunary.app',
@@ -4321,7 +4304,7 @@ function buildEclipseTextPosts({
 
     // Bluesky: informational with CTA
     const blueskyBody = [
-      `${kindLabel} ${eclipseLabel} in ${eclipse.sign} tomorrow.`,
+      `${kindLabel} ${eclipseLabel} in ${eclipse.sign} in ${hoursAway}.`,
       'Eclipse season brings fate-level shifts and new beginnings.',
       '',
       'Track eclipse impact at lunary.app',
@@ -4336,12 +4319,11 @@ function buildEclipseTextPosts({
     posts.push({
       name: `Eclipse • ${kindLabel} ${eclipseLabel} in ${eclipse.sign}`,
       content: xContent,
-      platforms: ['x', 'threads', 'bluesky'],
+      platforms: ['x', 'bluesky'],
       imageUrls: [],
-      alt: `${kindLabel} ${eclipseLabel} in ${eclipse.sign} tomorrow`,
+      alt: `${kindLabel} ${eclipseLabel} in ${eclipse.sign} in ${hoursAway}`,
       scheduledDate: getSchedule(),
       variants: {
-        threads: { content: threadsContent },
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
       },
@@ -4464,12 +4446,11 @@ function buildMoonPhaseTextPosts({
   posts.push({
     name: `Moon Phase • ${phaseName}`,
     content: xContent,
-    platforms: ['x', 'threads', 'bluesky'],
+    platforms: [],
     imageUrls: [],
     alt: `${phaseName}${signText}`,
     scheduledDate: getSchedule(),
     variants: {
-      threads: { content: threadsContent },
       bluesky: { content: blueskyContent },
       twitter: { content: xContent },
     },
@@ -4551,16 +4532,22 @@ function buildTransitMilestoneTextPosts({
       'tomorrow',
     ].includes(milestone.milestone);
 
-    // Calculate duration display for next sign
+    // Current transit duration (totalDays is now cumulative across retrograde segments)
     const transitYears = Math.round(totalDays / 365);
     const transitMonths = Math.round(totalDays / 30);
+
+    // Duration in the NEXT sign (look up its actual segments, not reuse current)
+    const nextSignTotalDays =
+      getSlowPlanetSignTotalDays(planet, nextSign) ?? totalDays;
+    const nextSignYears = Math.round(nextSignTotalDays / 365);
+    const nextSignMonths = Math.round(nextSignTotalDays / 30);
     let durationInNextSign = '';
-    if (transitYears >= 1) {
-      durationInNextSign = `~${transitYears} ${transitYears === 1 ? 'year' : 'years'} in ${nextSign}`;
-    } else if (transitMonths >= 2) {
-      durationInNextSign = `~${transitMonths} months in ${nextSign}`;
+    if (nextSignYears >= 1) {
+      durationInNextSign = `~${nextSignYears} ${nextSignYears === 1 ? 'year' : 'years'} in ${nextSign}`;
+    } else if (nextSignMonths >= 2) {
+      durationInNextSign = `~${nextSignMonths} months in ${nextSign}`;
     } else {
-      durationInNextSign = `~${totalDays} days in ${nextSign}`;
+      durationInNextSign = `~${Math.round(nextSignTotalDays)} days in ${nextSign}`;
     }
 
     let threadsBody = '';
@@ -4575,7 +4562,7 @@ function buildTransitMilestoneTextPosts({
 
       const timeframe =
         milestone.milestone === 'tomorrow'
-          ? 'tomorrow'
+          ? `~${Math.round(remainingDays * 24)} hours`
           : milestone.milestone === '3_days'
             ? '~3 days'
             : milestone.milestone === '1_week'
@@ -4626,7 +4613,7 @@ function buildTransitMilestoneTextPosts({
               ? `${transitMonths}-month`
               : totalDays >= 14
                 ? `${Math.round(totalDays / 7)}-week`
-                : `${totalDays}-day`;
+                : `${Math.round(totalDays)}-day`;
         durationContext = `This ${durationLabel} transit is at the midpoint.`;
       } else {
         durationContext = `${milestoneLabel} in this transit.`;
@@ -4684,12 +4671,11 @@ function buildTransitMilestoneTextPosts({
     posts.push({
       name: postName,
       content: xContent,
-      platforms: ['x', 'threads', 'bluesky'],
+      platforms: [],
       imageUrls: [],
       alt: `${planet} in ${sign} - ${milestoneLabel}`,
       scheduledDate: getSchedule(),
       variants: {
-        threads: { content: threadsContent },
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
       },
@@ -4785,12 +4771,11 @@ function buildCountdownTextPosts({
     posts.push({
       name: `Countdown • ${countdown.name}`,
       content: xContent,
-      platforms: ['x', 'threads', 'bluesky'],
+      platforms: [],
       imageUrls: [],
       alt: countdown.name,
       scheduledDate: getSchedule(),
       variants: {
-        threads: { content: threadsContent },
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
       },

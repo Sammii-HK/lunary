@@ -45,7 +45,15 @@ export function calculateTransitDuration(
 /**
  * Slow planets (Jupiter-Pluto): lookup from ephemeris-computed sign segments.
  * Each planet+sign has an array of segments (multiple for retrograde re-entries).
- * Finds the segment containing the current date.
+ *
+ * Aggregates across ALL segments so that totalDays reflects the full cumulative
+ * time the planet spends in the sign (e.g. Saturn in Aries = ~2.4 years total,
+ * not the ~3 months of the first brief entry before retrograde).
+ *
+ * - totalDays: cumulative days across all segments
+ * - remainingDays: remaining in current segment + all future segments
+ * - startDate: first segment start (initial ingress)
+ * - endDate: last segment end (final egress)
  */
 function calculateSlowPlanetDuration(
   planet: string,
@@ -59,29 +67,61 @@ function calculateSlowPlanetDuration(
   if (!segments || segments.length === 0) return null;
 
   const now = date.getTime();
+  const msPerDay = 1000 * 60 * 60 * 24;
 
   // Find the segment that contains the current date
-  const activeSegment = segments.find(
+  const activeIndex = segments.findIndex(
     (seg) => now >= seg.start.getTime() && now <= seg.end.getTime(),
   );
 
-  if (!activeSegment) return null;
+  if (activeIndex === -1) return null;
 
-  const startTime = activeSegment.start.getTime();
-  const endTime = activeSegment.end.getTime();
-  const totalMs = endTime - startTime;
-  const remainingMs = endTime - now;
+  // Total cumulative days across ALL segments for this planet+sign
+  const totalCumulativeDays = segments.reduce(
+    (sum, seg) => sum + (seg.end.getTime() - seg.start.getTime()) / msPerDay,
+    0,
+  );
 
-  const totalDays = Math.ceil(totalMs / (1000 * 60 * 60 * 24));
-  const remainingDays = remainingMs / (1000 * 60 * 60 * 24);
+  // Remaining: rest of current segment + all future segments
+  const activeSegment = segments[activeIndex];
+  let remainingCumulativeDays = (activeSegment.end.getTime() - now) / msPerDay;
+
+  for (let i = activeIndex + 1; i < segments.length; i++) {
+    remainingCumulativeDays +=
+      (segments[i].end.getTime() - segments[i].start.getTime()) / msPerDay;
+  }
 
   return {
-    totalDays,
-    remainingDays,
-    displayText: formatDuration(remainingDays),
-    startDate: activeSegment.start,
-    endDate: activeSegment.end,
+    totalDays: Math.ceil(totalCumulativeDays),
+    remainingDays: remainingCumulativeDays,
+    displayText: formatDuration(remainingCumulativeDays),
+    startDate: segments[0].start,
+    endDate: segments[segments.length - 1].end,
   };
+}
+
+/**
+ * Look up the total cumulative days a slow planet spends in a given sign.
+ * Useful for posts that reference the NEXT sign's duration (e.g. "~3 years in Taurus").
+ * Returns null if no data exists for the planet+sign combo.
+ */
+export function getSlowPlanetSignTotalDays(
+  planet: string,
+  sign: string,
+): number | null {
+  const planetData = SLOW_PLANET_SIGN_CHANGES[planet];
+  if (!planetData) return null;
+
+  const segments = planetData[sign];
+  if (!segments || segments.length === 0) return null;
+
+  const msPerDay = 1000 * 60 * 60 * 24;
+  return Math.ceil(
+    segments.reduce(
+      (sum, seg) => sum + (seg.end.getTime() - seg.start.getTime()) / msPerDay,
+      0,
+    ),
+  );
 }
 
 /**
