@@ -123,10 +123,10 @@ async function generateTikTokScriptContent(
       schema: VideoScriptSchema,
       schemaName: 'video_script',
       systemPrompt:
-        'You write TikTok scripts that teach without feeling like a lecture. Your scripts sound like a smart friend explaining something fascinating at a party — confident, specific, slightly provocative. Every line earns the next second of watch time. You never sound like a textbook, a motivational poster, or a horoscope app. You sound like someone who actually knows this topic and has a take on it.',
+        'You write TikTok scripts that are exactly 50-65 words total. Every word must earn its place — if you can say it in 5 words, never use 10. Your scripts sound like a smart friend explaining something fascinating at a party — confident, specific, slightly provocative. Every line earns the next second of watch time. You never sound like a textbook, a motivational poster, or a horoscope app.',
       model: 'quality',
       temperature: 0.7,
-      maxTokens: 700,
+      maxTokens: 350,
       retryNote,
     });
 
@@ -226,12 +226,26 @@ async function generateTikTokScriptContent(
       );
     }
 
-    const scriptBody = fallbackScript
+    let scriptBody = fallbackScript
       ? fallbackScript.split('\n\n')[1] || ''
       : scriptBodyLines
           .map((line) => line.replace(/[—–]/g, '-').replace(/\s+/g, ' ').trim())
           .filter(Boolean)
           .join('\n');
+
+    // Hard trim safety net: if script body is still over 65 words, trim middle lines
+    if (!fallbackScript) {
+      let bodyLines = scriptBody.split('\n').filter(Boolean);
+      const hookForCount = String(video.hook || '').trim();
+      while (
+        countWords(hookForCount + ' ' + bodyLines.join(' ')) > 65 &&
+        bodyLines.length > 3
+      ) {
+        bodyLines.splice(Math.max(1, bodyLines.length - 2), 1);
+      }
+      scriptBody = bodyLines.join('\n');
+    }
+
     let hookLine: string;
     if (fallbackScript) {
       hookLine =

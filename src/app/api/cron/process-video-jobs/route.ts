@@ -479,14 +479,19 @@ export async function POST(request: NextRequest) {
           ];
           const shortPlatformSet = new Set(['twitter']);
           const scheduledDate = new Date(script.scheduled_date);
+          // Use the engagement-optimized caption from generateTikTokCaption()
+          // (stored in written_post_content) when available. Fall back to
+          // buildVideoCaption() only for legacy scripts without it.
           const baseVideoCaption = normalizeLineBreaks(
-            buildVideoCaption({
-              themeName: postWeekTheme || themeName || undefined,
-              facetTitle: script.facet_title,
-              partNumber,
-              totalParts,
-              scriptText: script.full_script || script.written_post_content,
-            }),
+            script.written_post_content
+              ? script.written_post_content
+              : buildVideoCaption({
+                  themeName: postWeekTheme || themeName || undefined,
+                  facetTitle: script.facet_title,
+                  partNumber,
+                  totalParts,
+                  scriptText: script.full_script,
+                }),
           );
           const tagsByPlatform = new Map<string, string>();
           if (theme && facet) {

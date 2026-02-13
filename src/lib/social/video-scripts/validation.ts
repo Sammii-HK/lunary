@@ -264,8 +264,8 @@ export const validateScriptBody = (
   const reasons: string[] = [];
 
   // CRITICAL: Line count
-  if (lines.length < 6 || lines.length > 10) {
-    reasons.push(`Script body must be 6-10 lines (got ${lines.length})`);
+  if (lines.length < 4 || lines.length > 7) {
+    reasons.push(`Script body must be 4-7 lines (got ${lines.length})`);
   }
 
   const combined = lines.join(' ').trim();
@@ -303,6 +303,19 @@ export const validateScriptBody = (
     countOccurrences(combined, searchPhrase) > 3
   ) {
     reasons.push('Script repeats keyword too often');
+  }
+
+  // CRITICAL: Word count - analytics-driven hard limit
+  const totalWords = lines.reduce((sum, line) => sum + countWords(line), 0);
+  if (totalWords > 65) {
+    reasons.push(
+      `Script is ${totalWords} words - must be under 65. Cut lines from the middle.`,
+    );
+  }
+  if (totalWords < 35) {
+    reasons.push(
+      `Script is only ${totalWords} words - needs at least 35 for substance`,
+    );
   }
 
   // SOFT ISSUES - Only add if no critical issues (to allow retry with feedback)
@@ -344,16 +357,11 @@ export const validateScriptBody = (
       );
     }
 
-    // Soft: Duration sweet-spot — flag scripts outside 25-40 second range
-    const totalWords = lines.reduce((sum, line) => sum + countWords(line), 0);
-    if (totalWords < 80) {
+    // Soft: Closing line length check
+    const closingWordCount = countWords(lines[lines.length - 1] || '');
+    if (closingWordCount > 12) {
       reasons.push(
-        'SOFT: Script is under 80 words - may be too short for educational TikTok',
-      );
-    }
-    if (totalWords > 120) {
-      reasons.push(
-        'SOFT: Script is over 120 words - may lose viewers before completion',
+        'SOFT: Closing line is too long - best performers use 3-8 word closings or short questions',
       );
     }
 

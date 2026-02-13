@@ -49,10 +49,15 @@ If YES: DELETE IT AND WRITE SOMETHING SPECIFIC.
 BAD (works for anything): "Pay attention to how [X] shows up in your daily life"
 BAD (works for anything): "[X] often appears when you need it most"
 BAD (works for anything): "There's wisdom in understanding [X]"
+BAD: "It's all about tapping into your true essence" -> 62.6 algo score (FAILED)
 
 GOOD (specific to 222): "222 appears when you're about to quit something. Job feels stuck. Relationship feels off. Then: 222."
 GOOD (specific to The Tower): "The Tower doesn't destroy what's working. It destroys what you've been pretending works."
-GOOD (specific to Mercury retrograde): "Mercury retrograde doesn't break technology. It exposes communication you've been avoiding."`;
+GOOD (specific to Mercury retrograde): "Mercury retrograde doesn't break technology. It exposes communication you've been avoiding."
+GOOD: "These changes aren't just random events." -> 175.6 algo score (BEST)
+GOOD: "Seeing 111 means they could be taking shape sooner than you think." -> 6,442 views
+
+Analytics summary: Specific numerology scripts -> avg 2,117 views. Generic zodiac -> avg 693 views.`;
 
 /**
  * Content types with natural time-sensitivity (retrogrades, eclipses, moon phases)
@@ -175,6 +180,14 @@ ${buildScopeGuard(facet.title)}
 
 TONE: ${voiceConfig.tone}
 
+WORD BUDGET (NON-NEGOTIABLE):
+Total: 50-65 words. This is a hard limit, not a suggestion.
+- Hook: 8-14 words
+- Body: 4-5 lines of 8-12 words each = 32-60 words
+- Closing line: 3-8 words (question or punchy statement)
+Analytics: 52 words -> 12.1% completion (best). 84 words -> 7.7% (worst). Every extra word costs viewers.
+Count your words before returning. If over 65, delete lines until you're under.
+
 HOOK REQUIREMENTS (FIRST LINE):
 - Single sentence, 8-14 words, grammatically correct
 - Must include "${facet.title}" or "${searchPhrase}" exactly once
@@ -187,7 +200,20 @@ HOOK REQUIREMENTS (FIRST LINE):
   * "Ever notice...?"
   * "What if I told you..."
 
-SCRIPT BODY (6-10 lines after hook):
+HOOKS THAT WORKED (from analytics):
+- "Ever had 111 pop up everywhere?" -> 6,442 views
+- "Imagine waking up to a world about to flip upside down." -> best algo score (175.6)
+Pattern: Conversational, assumes shared experience, creates curiosity
+
+HOOKS THAT FAILED:
+- "Curious about the Sun in Sagittarius?" -> 62.6 algo score
+- "Feeling a bit restless, Aries?" -> 44.4 algo score
+Pattern: Generic questions, no identity trigger
+
+SCRIPT BODY (4-7 lines after hook, target 50-65 total words):
+- TARGET: 50-65 total words (hook + body). This produces 21-24 second videos.
+- Analytics proof: 52 words -> 12.1% completion. 84 words -> 7.7%. Every extra word costs viewers.
+- When in doubt, CUT. A tight 55-word script outperforms a padded 90-word script every time.
 - Follow the script structure above
 - PACING IS EVERYTHING:
   * Mix sentence lengths: short (3-7 words), medium (8-12 words), occasional long (13-18 words)
@@ -210,7 +236,18 @@ SCRIPT BODY (6-10 lines after hook):
       ? `\n  * COMMENT BAIT PREFIX to weave into lines 3-5: "${bait}"`
       : '';
   })()}
-- Include ONE recognition cue (real-world sign someone would notice)
+${
+  contentType.startsWith('zodiac_')
+    ? `
+ZODIAC IDENTITY MANDATE (NON-NEGOTIABLE):
+- This script MUST include a direct identity callout in lines 1-3
+- Use: "If you're a [sign]..." / "[Sign]s, stop scrolling." / "Every [sign] reading this..."
+- Analytics: Zodiac WITHOUT identity callouts -> 0.4% comments. WITH -> 7%+.
+- BAD: "Sagittarius energy is about freedom" (informational, no trigger)
+- GOOD: "If you're a Sag, you already know this feeling." (personal, identity-triggering)
+`
+    : ''
+}- Include ONE recognition cue (real-world sign someone would notice)
 - Include ONE contrast/clarification (what it's NOT or how it differs)
 - SHARE TRIGGER (makes someone send this to a friend):
   * Include ONE hyper-specific, relatable observation people recognize in someone they know
@@ -225,18 +262,15 @@ SCRIPT BODY (6-10 lines after hook):
   * Must be SPECIFIC enough to be useful on its own, out of context
 - Near the end: practical observation someone can notice or try this week
 
-CLOSING LINE (drives saves - the most valuable algorithm signal):
-- Must work as a STANDALONE piece of content someone would screenshot
-- Formats that drive saves:
-  * One-sentence reframe: "[Topic] isn't [expected]. It's [unexpected]."
-  * Cheat sheet closer: "[Topic] in one line: [dense, specific summary]."
-  * Callback reframe: repeat hook but it means something different now
-  * Stitch bait: end with a claim others want to respond to
-- The test: if someone ONLY saw this line in a screenshot, would they save it?
-- Also works as: provocative observation someone comments "say that again"
+CLOSING LINE (drives comments AND saves):
+- MUST end with either:
+  * A direct question ("Ready for the ride?" / "What are you thinking right now?" / "Sound familiar?")
+  * OR a punchy 3-8 word statement that provokes reaction ("That's the pattern." / "Not even close.")
+- CLOSINGS THAT WORKED: "Ready for the ride?" -> 175.6 algo score. "What are you thinking right now?" -> 672 comments.
+- CLOSINGS THAT FAILED: "Trust your instincts when it comes to decision-making." -> 44.4 algo score.
+- Keep under 10 words. The test: Would someone COMMENT after hearing this?
 - NOT: inspirational, motivational, "embrace your", generic wisdom
 - NOT: "so next time you see X, remember Y" (too generic)
-- TEST: Would someone quote this line to a friend? If not, rewrite it.
 
 ANTI-MONOTONY:
 - Do NOT start 3+ lines with the same word or pattern
@@ -257,17 +291,18 @@ ${guardrailNote}
 ${urgencyGuidance}
 ${dataContext ? `\nGrimoire Data (reference only):\n${dataContext}` : ''}
 
+FINAL CHECK: Count total words (hook + all body lines). Must be 50-65. Over 65 = cut lines.
+
 Return strict JSON only:
 {
   "video": {
     "hook": "Single hook sentence about ${facet.title}",
     "scriptBody": [
       "Observation specific to ${facet.title}",
-      "Recognition cue - when/where someone notices this",
-      "Contrast or clarification",
-      "Deeper insight",
+      "Recognition cue or identity trigger",
+      "Contrast, clarification, or unexpected detail",
       "Practical moment to notice this week",
-      "Save-worthy closing line someone would quote"
+      "Interactive closing - question or punchy statement"
     ]
   }
 }`;
