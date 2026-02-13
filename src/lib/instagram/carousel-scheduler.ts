@@ -138,23 +138,33 @@ const CAROUSEL_WEIGHTS: Record<string, number> = {
  * Select a carousel category and slug for a given date.
  * Deterministic: same date = same selection.
  * Now using FULL grimoire databases (200+ crystals, 200+ spells, all tarot)
+ *
+ * @param forcedCategory - If provided, forces the carousel to this category
+ *   (used by cadence plan: Mon=zodiac, Sat=tarot, Sun=crystals)
  */
-export function selectCarouselForDate(date: string): {
+export function selectCarouselForDate(
+  date: string,
+  forcedCategory?: ThemeCategory,
+): {
   category: ThemeCategory;
   slug: string;
 } {
   const rng = seededRandom(`carousel-${date}`);
 
-  // Build weighted pool
-  const pool: ThemeCategory[] = [];
-  for (const [cat, weight] of Object.entries(CAROUSEL_WEIGHTS)) {
-    for (let i = 0; i < weight; i++) {
-      pool.push(cat as ThemeCategory);
-    }
-  }
+  let category: ThemeCategory;
 
-  // Select category
-  const category = pool[Math.floor(rng() * pool.length)];
+  if (forcedCategory) {
+    category = forcedCategory;
+  } else {
+    // Build weighted pool
+    const pool: ThemeCategory[] = [];
+    for (const [cat, weight] of Object.entries(CAROUSEL_WEIGHTS)) {
+      for (let i = 0; i < weight; i++) {
+        pool.push(cat as ThemeCategory);
+      }
+    }
+    category = pool[Math.floor(rng() * pool.length)];
+  }
 
   // Get ALL slugs for this category from full databases
   const slugs = getCategorySlugs(category);
@@ -172,8 +182,30 @@ export function selectCarouselForDate(date: string): {
 }
 
 /**
+ * Cadence plan: day-of-week → forced carousel category.
+ * Mon=zodiac, Sat=tarot, Sun=crystals.
+ * Tue uses angel_number_carousel (separate generator, not here).
+ */
+const DAY_CAROUSEL_CATEGORY: Partial<Record<number, ThemeCategory>> = {
+  0: 'zodiac', // Monday
+  5: 'tarot', // Saturday
+  6: 'crystals', // Sunday
+};
+
+/**
+ * Get the forced carousel category for a day of week (Mon=0).
+ * Returns undefined if no forced category for that day.
+ */
+export function getCarouselCategoryForDay(
+  dayOfWeek: number,
+): ThemeCategory | undefined {
+  return DAY_CAROUSEL_CATEGORY[dayOfWeek];
+}
+
+/**
  * Get the carousel posting schedule for a week.
- * Returns dates (Tue/Thu/Sat) with their carousel selections.
+ * Cadence plan: Mon=zodiac, Sat=tarot, Sun=crystals.
+ * (Tue=angel number carousel is handled separately by the orchestrator.)
  */
 export function getWeeklyCarouselSchedule(
   weekStartDate: string,
@@ -185,14 +217,15 @@ export function getWeeklyCarouselSchedule(
     slug: string;
   }> = [];
 
-  // Tue (day 2), Thu (day 4), Sat (day 6) from week start (Monday = day 0)
-  const carouselDays = [1, 3, 5]; // 0-indexed offsets from Monday
+  // Mon (0), Sat (5), Sun (6) from week start (Monday = day 0)
+  const carouselDays = [0, 5, 6];
 
   for (const offset of carouselDays) {
     const d = new Date(start);
     d.setDate(d.getDate() + offset);
     const dateStr = d.toISOString().split('T')[0];
-    const selection = selectCarouselForDate(dateStr);
+    const forcedCategory = DAY_CAROUSEL_CATEGORY[offset];
+    const selection = selectCarouselForDate(dateStr, forcedCategory);
     schedule.push({ date: dateStr, ...selection });
   }
 

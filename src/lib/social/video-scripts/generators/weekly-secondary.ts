@@ -2,16 +2,25 @@
  * Weekly Engagement Content Generators
  *
  * Two engagement slots per day, complementary formats (no duplicates same day).
+ * Reweighted for algorithm signal value: saves (10) + shares (7) + comments (5).
  *
  * Engagement A (17 UTC — UK evening / US lunch):
- * - Mon: Sign Check    | Tue: Rankings     | Wed: Quiz
- * - Thu: Hot Take      | Fri: Myth         | Sat: Transit Alert / Sign Check
- * - Sun: Rankings (variant)
+ * - Mon: Sign Check    | Tue: Rankings     | Wed: Hot Take
+ * - Thu: Quiz          | Fri: Rankings     | Sat: Transit Alert
+ * - Sun: Quiz
  *
  * Engagement B (20 UTC — UK leisure / US afternoon):
- * - Mon: Rankings      | Tue: Hot Take     | Wed: Sign Check
- * - Thu: Myth          | Fri: Quiz         | Sat: Did You Know
- * - Sun: Sign Check
+ * - Mon: Rankings      | Tue: Hot Take     | Wed: Quiz
+ * - Thu: Rankings      | Fri: Myth         | Sat: Did You Know
+ * - Sun: Hot Take
+ *
+ * Rankings 4x/week (highest multi-signal: saves + comments + shares)
+ * Hot Take 3x/week (comments + stitches)
+ * Quiz 3x/week (interactive = comments + shares)
+ * Sign Check 2x/week (identity = comments + shares)
+ * Myth 1x/week (save-only)
+ * Transit Alert 1x/week (time-sensitive saves)
+ * Did You Know 1x/week (Saturday saves)
  *
  * App demos and comparisons are parked (not deleted) for future use.
  */
@@ -43,19 +52,19 @@ interface DayConfig {
 
 /**
  * Engagement A schedule (17 UTC slot)
- * Optimised for TikTok discovery and engagement
+ * Reweighted for high-signal content types (rankings, hot takes, quizzes)
  */
 const ENGAGEMENT_A_SCHEDULE: Record<string, DayConfig> = {
   monday: { contentType: 'sign-check', label: 'Sign Check' },
   tuesday: { contentType: 'ranking', label: 'Rankings' },
-  wednesday: { contentType: 'quiz', label: 'Quiz' },
-  thursday: { contentType: 'hot-take', label: 'Hot Take' },
-  friday: { contentType: 'myth', label: 'Myth/Storytime' },
+  wednesday: { contentType: 'hot-take', label: 'Hot Take' },
+  thursday: { contentType: 'quiz', label: 'Quiz' },
+  friday: { contentType: 'ranking', label: 'Rankings' },
   saturday: {
     contentType: 'transit-alert',
     label: 'Transit Alert / Sign Check fallback',
   },
-  sunday: { contentType: 'ranking', label: 'Rankings (variant)' },
+  sunday: { contentType: 'quiz', label: 'Quiz' },
 };
 
 /**
@@ -65,11 +74,11 @@ const ENGAGEMENT_A_SCHEDULE: Record<string, DayConfig> = {
 const ENGAGEMENT_B_SCHEDULE: Record<string, DayConfig> = {
   monday: { contentType: 'ranking', label: 'Rankings' },
   tuesday: { contentType: 'hot-take', label: 'Hot Take' },
-  wednesday: { contentType: 'sign-check', label: 'Sign Check' },
-  thursday: { contentType: 'myth', label: 'Myth/Storytime' },
-  friday: { contentType: 'quiz', label: 'Quiz' },
+  wednesday: { contentType: 'quiz', label: 'Quiz' },
+  thursday: { contentType: 'ranking', label: 'Rankings' },
+  friday: { contentType: 'myth', label: 'Myth/Storytime' },
   saturday: { contentType: 'did-you-know', label: 'Did You Know' },
-  sunday: { contentType: 'sign-check', label: 'Sign Check' },
+  sunday: { contentType: 'hot-take', label: 'Hot Take' },
 };
 
 const DAY_NAMES = [

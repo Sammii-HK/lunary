@@ -3,7 +3,6 @@ import { NextRequest } from 'next/server';
 import { zodiacSymbol } from '@/constants/symbols';
 import {
   loadIGFonts,
-  IGBrandTag,
   truncateIG,
   renderIGStarfield,
 } from '@/lib/instagram/ig-utils';
@@ -21,6 +20,42 @@ export const runtime = 'edge';
 
 const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
 
+// Category colour tints for grid variety (Fix 6)
+const CATEGORY_TINTS: Record<string, string> = {
+  zodiac: 'linear-gradient(135deg, #14081a 0%, #0d0a14 50%, #0a0a0a 100%)',
+  tarot: 'linear-gradient(135deg, #081420 0%, #0a0d18 50%, #0a0a0a 100%)',
+  crystals: 'linear-gradient(135deg, #1a081a 0%, #14081a 50%, #0a0a0a 100%)',
+  numerology: 'linear-gradient(135deg, #081a14 0%, #0a140d 50%, #0a0a0a 100%)',
+};
+
+function MemeBrandFooter() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        justifyContent: 'center',
+        position: 'absolute',
+        bottom: 32,
+        left: 0,
+        right: 0,
+      }}
+    >
+      <span
+        style={{
+          fontSize: 20,
+          color: 'rgba(255,255,255,0.4)',
+          letterSpacing: '0.08em',
+          display: 'flex',
+        }}
+      >
+        Free birth chart {'\u2192'} lunary.app
+      </span>
+    </div>
+  );
+}
+
 function getZodiacGlyph(sign: string): string {
   const key = sign.toLowerCase() as keyof typeof zodiacSymbol;
   return zodiacSymbol[key] || '\u2648';
@@ -34,11 +69,15 @@ export async function GET(request: NextRequest) {
     const punchline = searchParams.get('punchline') || '';
     const template = (searchParams.get('template') ||
       'classic') as MemeTemplate;
+    const category = searchParams.get('category') || 'zodiac';
 
     const signName = sign.charAt(0).toUpperCase() + sign.slice(1);
     const accent = SIGN_ACCENT[sign] || SIGN_ACCENT.aries;
-    const bg = MEME_BACKGROUNDS[sign] || MEME_BACKGROUNDS.aries;
-    const { width, height } = IG_SIZES.square;
+    const bg =
+      CATEGORY_TINTS[category] ||
+      MEME_BACKGROUNDS[sign] ||
+      MEME_BACKGROUNDS.aries;
+    const { width, height } = IG_SIZES.portrait;
 
     const fonts = await loadIGFonts(request, { includeAstronomicon: true });
 
@@ -159,7 +198,7 @@ export async function GET(request: NextRequest) {
                   ))}
               </div>
             </div>
-            <IGBrandTag baseUrl={SHARE_BASE_URL} />
+            <MemeBrandFooter />
           </div>
         );
         break;
@@ -244,7 +283,7 @@ export async function GET(request: NextRequest) {
                 ))}
             </div>
 
-            <IGBrandTag baseUrl={SHARE_BASE_URL} />
+            <MemeBrandFooter />
           </div>
         );
         break;
@@ -326,7 +365,7 @@ export async function GET(request: NextRequest) {
                 ))}
             </div>
 
-            <IGBrandTag baseUrl={SHARE_BASE_URL} />
+            <MemeBrandFooter />
           </div>
         );
         break;

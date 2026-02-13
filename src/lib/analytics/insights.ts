@@ -314,7 +314,7 @@ export function detectTrackingIssues(
   }
 
   // Check for zero adoption on features that should exist
-  const criticalFeatures = ['ritual_started', 'chart_viewed'];
+  const criticalFeatures = ['ritual_completed', 'chart_viewed'];
   criticalFeatures.forEach((event) => {
     const metric = featureMetrics[event];
     if (metric && metric.count === 0 && productMAU > 20) {

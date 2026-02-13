@@ -144,22 +144,17 @@ export function renderStarfield(shareId: string, format: ShareFormat) {
   ));
 }
 
-// --- Footer ---
+// --- Footer (viral CTA) ---
 
-export function ShareFooter({
-  baseUrl,
-  format,
-}: {
-  baseUrl: string;
-  format: ShareFormat;
-}) {
+export function ShareFooter({ format }: { format: ShareFormat }) {
   const sizes = getShareSizes(format);
   return (
     <div
       style={{
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        gap: 12,
+        gap: 4,
         justifyContent: 'center',
         position: 'absolute',
         bottom: 40,
@@ -167,35 +162,62 @@ export function ShareFooter({
         right: 0,
       }}
     >
-      <img
-        src={`${baseUrl}/icons/moon-phases/full-moon.png`}
-        width={sizes.footerIconSize}
-        height={sizes.footerIconSize}
-        style={{ opacity: 0.6 }}
-        alt=''
-      />
       <span
         style={{
-          fontSize: sizes.footerTextSize,
-          opacity: 0.6,
-          letterSpacing: '0.1em',
-          color: OG_COLORS.textPrimary,
+          fontSize: Math.max(12, sizes.footerTextSize - 4),
+          color: 'rgba(255,255,255,0.5)',
+          letterSpacing: '0.05em',
           display: 'flex',
         }}
       >
-        lunary.app
+        What does yours say?
+      </span>
+      <span
+        style={{
+          fontSize: Math.max(14, sizes.footerTextSize),
+          color: '#A78BFA',
+          letterSpacing: '0.05em',
+          display: 'flex',
+        }}
+      >
+        Get yours free → lunary.app
       </span>
     </div>
   );
 }
 
-// --- Text Truncation ---
+// --- Text Truncation (word-boundary aware) ---
 
 export function truncateText(text: string, limit: number): string {
-  return text.length > limit ? text.slice(0, limit - 1) + '\u2026' : text;
+  if (text.length <= limit) return text;
+
+  const slice = text.slice(0, limit);
+
+  // Try to find sentence-ending punctuation for a clean break
+  const sentenceEnd = Math.max(
+    slice.lastIndexOf('.'),
+    slice.lastIndexOf('!'),
+    slice.lastIndexOf('?'),
+  );
+  if (sentenceEnd > 40) {
+    return slice.slice(0, sentenceEnd + 1);
+  }
+
+  // Otherwise break at last space
+  const lastSpace = slice.lastIndexOf(' ');
+  if (lastSpace > 40) {
+    return slice.slice(0, lastSpace) + '\u2026';
+  }
+
+  // Fallback: hard cut (very short limits)
+  return slice.slice(0, limit - 1) + '\u2026';
 }
 
 // --- Constants ---
+
+export const SHARE_IMAGE_BORDER = '1px solid rgba(167, 139, 250, 0.3)';
+
+export const SHARE_TITLE_GLOW = '0 0 20px rgba(167, 139, 250, 0.3)';
 
 export const SHARE_BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';

@@ -78,7 +78,7 @@ export function CircleInviteCTA() {
       try {
         await navigator.share({
           title: 'Join me on Lunary',
-          text: `Track the moon together! Join my circle on Lunary and we'll both get ${REFERRAL_TRIAL_DAYS} days of Pro free.`,
+          text: `Track the moon together! Join my circle on Lunary and get ${REFERRAL_TRIAL_DAYS} days of Pro free.`,
           url: referralUrl,
         });
         conversionTracking.referralLinkShared(user?.id, 'native');
@@ -144,7 +144,8 @@ export function CircleInviteCTA() {
             Lunary is better with friends
           </h3>
           <p className='text-sm text-zinc-400 mt-0.5'>
-            Invite friends and you both get {REFERRAL_TRIAL_DAYS} days Pro free
+            Give friends {REFERRAL_TRIAL_DAYS} days Pro free — earn a bonus week
+            per referral
           </p>
         </div>
       </div>

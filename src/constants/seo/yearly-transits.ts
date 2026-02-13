@@ -437,7 +437,7 @@ const RAW_TRANSITS: YearlyTransit[] = [
     year: 2026,
     planet: 'Neptune',
     transitType: 'Neptune Transit',
-    title: 'Neptune in Aries 2026',
+    title: 'Neptune Enters Aries 2026',
     dates: 'January 26, 2026 - March 2039',
     signs: ['Aries'],
     description:
@@ -558,6 +558,31 @@ const RAW_TRANSITS: YearlyTransit[] = [
       'resistance to change',
     ],
     tone: 'Grounding and reality-based. It is time to stabilise money, values, and long-term security through patience and structure.',
+  },
+  {
+    id: 'jupiter-libra-2028',
+    year: 2028,
+    planet: 'Jupiter',
+    transitType: 'Jupiter Transit',
+    title: 'Jupiter Enters Libra 2028',
+    dates: 'August 24, 2028 - September 24, 2029',
+    signs: ['Libra'],
+    description:
+      'Jupiter enters Libra on August 24, 2028, expanding relationships, partnerships, and the pursuit of justice and harmony. This transit favors marriage, legal matters, diplomacy, and collaborative ventures.',
+    themes: ['relationships', 'partnership', 'justice', 'harmony'],
+    doList: [
+      'invest in partnerships',
+      'seek balance and fairness',
+      'pursue legal matters',
+      'beautify your environment',
+    ],
+    avoidList: [
+      'codependency',
+      'indecision',
+      'people-pleasing',
+      'superficiality',
+    ],
+    tone: 'Harmonising and partnership-focused. Expansion comes through collaboration, commitment, and choosing relationships that feel balanced.',
   },
   // 2029
   {

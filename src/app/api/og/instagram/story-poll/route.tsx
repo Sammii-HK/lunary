@@ -12,11 +12,11 @@ import type { ThemeCategory } from '@/lib/social/types';
 
 export const runtime = 'edge';
 
-const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const requestUrl = new URL(request.url);
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const { searchParams } = requestUrl;
     const question = searchParams.get('question') || 'Crystal or candle?';
     const option1 = searchParams.get('option1') || 'Crystal';
     const option2 = searchParams.get('option2') || 'Candle';
@@ -206,7 +206,7 @@ export async function GET(request: NextRequest) {
           }}
         >
           <img
-            src={`${SHARE_BASE_URL}/icons/moon-phases/full-moon.svg`}
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
             width={18}
             height={18}
             style={{ opacity: 0.4 }}

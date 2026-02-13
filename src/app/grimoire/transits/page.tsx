@@ -3,7 +3,9 @@ import Link from 'next/link';
 import {
   YEARLY_TRANSITS,
   getTransitsForYear,
+  YearlyTransit,
 } from '@/constants/seo/yearly-transits';
+import { format } from 'date-fns';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { createItemListSchema } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
@@ -226,13 +228,55 @@ export default function TransitsIndexPage() {
         </div>
       </section>
 
+      {/* Popular Upcoming Transits — strong internal links to individual pages */}
+      <section className='mb-12'>
+        <h2 className='text-2xl font-semibold text-zinc-100 mb-4'>
+          Popular Upcoming Transits
+        </h2>
+        <p className='text-sm text-zinc-400 mb-5'>
+          These major transits are generating the most interest right now. Each
+          page includes exact dates, meaning, and practical guidance.
+        </p>
+        <div className='grid gap-3 md:grid-cols-2'>
+          {YEARLY_TRANSITS.filter(
+            (t): t is YearlyTransit & { startDate: Date } =>
+              !!t.startDate &&
+              t.startDate.getTime() > Date.now() - 365 * 86400000 &&
+              ['Saturn', 'Jupiter', 'Neptune', 'Uranus', 'Pluto'].includes(
+                t.planet,
+              ),
+          )
+            .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+            .slice(0, 6)
+            .map((transit) => (
+              <Link
+                key={`popular-${transit.id}`}
+                href={`/grimoire/transits/${transit.id}`}
+                className='flex items-baseline gap-3 rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm hover:border-lunary-primary-500 transition-colors'
+              >
+                <span className='shrink-0 text-xs text-zinc-500'>
+                  {format(transit.startDate, 'MMM d, yyyy')}
+                </span>
+                <span>
+                  <span className='block font-medium text-zinc-100'>
+                    {transit.title}
+                  </span>
+                  <span className='text-zinc-400'>
+                    {transit.themes.slice(0, 2).join(', ')}
+                  </span>
+                </span>
+              </Link>
+            ))}
+        </div>
+      </section>
+
       <section className='mb-12'>
         <h2 className='text-2xl text-zinc-100 mb-4'>Transit timing by year</h2>
         <div className='grid gap-4 grid-cols-4 md:grid-cols-8'>
           {years.map((year) => (
             <Link
               key={year}
-              href={`/grimoire/transits#year-${year}-transits`}
+              href={`/grimoire/transits/year/${year}`}
               className='p-2 rounded-lg border border-zinc-800 bg-zinc-900/40 text-sm text-center text-zinc-300 transition hover:border-lunary-primary-600'
             >
               {year}

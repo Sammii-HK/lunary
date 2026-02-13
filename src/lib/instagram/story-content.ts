@@ -1,8 +1,7 @@
 import type { ThemeCategory } from '@/lib/social/types';
-import type { IGStoryContent } from './types';
+import type { IGStoryContent, IGStoryData } from './types';
 import { seededRandom } from './ig-utils';
-
-const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+import tarotData from '@/data/tarot-cards.json';
 
 // Moon phase headlines for daily story
 const MOON_STORY_DATA = [
@@ -48,119 +47,48 @@ const MOON_STORY_DATA = [
   },
 ] as const;
 
-// Tarot pull data for daily tarot story
-const TAROT_PULLS = [
-  {
-    card: 'The Fool',
-    keywords: 'New beginnings, faith, adventure',
-    message: 'Take the leap. The universe will catch you.',
-  },
-  {
-    card: 'The Magician',
-    keywords: 'Manifestation, power, creation',
-    message: 'Everything you need is already within you.',
-  },
-  {
-    card: 'The High Priestess',
-    keywords: 'Intuition, mystery, inner knowing',
-    message: 'Trust what you feel, not just what you see.',
-  },
-  {
-    card: 'The Empress',
-    keywords: 'Abundance, nurturing, creativity',
-    message: 'Create something beautiful today.',
-  },
-  {
-    card: 'The Emperor',
-    keywords: 'Structure, authority, stability',
-    message: 'Build foundations that last.',
-  },
-  {
-    card: 'The Hierophant',
-    keywords: 'Tradition, wisdom, guidance',
-    message: 'Seek the teacher within.',
-  },
-  {
-    card: 'The Lovers',
-    keywords: 'Choice, alignment, partnership',
-    message: 'Choose what aligns with your truth.',
-  },
-  {
-    card: 'The Chariot',
-    keywords: 'Willpower, determination, victory',
-    message: 'You have the strength to overcome this.',
-  },
-  {
-    card: 'Strength',
-    keywords: 'Courage, patience, inner power',
-    message: 'Gentle strength moves mountains.',
-  },
-  {
-    card: 'The Hermit',
-    keywords: 'Solitude, reflection, inner light',
-    message: 'The answers are found in stillness.',
-  },
-  {
-    card: 'Wheel of Fortune',
-    keywords: 'Cycles, fate, turning point',
-    message: 'Change is the only constant. Embrace it.',
-  },
-  {
-    card: 'Justice',
-    keywords: 'Truth, fairness, balance',
-    message: 'What you put out comes back to you.',
-  },
-  {
-    card: 'The Hanged Man',
-    keywords: 'Surrender, new perspective, pause',
-    message: 'Sometimes the best move is no move.',
-  },
-  {
-    card: 'Death',
-    keywords: 'Transformation, endings, rebirth',
-    message: 'Let the old die so the new can be born.',
-  },
-  {
-    card: 'Temperance',
-    keywords: 'Balance, patience, moderation',
-    message: 'Find the middle path.',
-  },
-  {
-    card: 'The Devil',
-    keywords: 'Shadow, attachment, liberation',
-    message: 'Name your chains to break them.',
-  },
-  {
-    card: 'The Tower',
-    keywords: 'Sudden change, revelation, truth',
-    message: 'What crumbles was never meant to last.',
-  },
-  {
-    card: 'The Star',
-    keywords: 'Hope, healing, inspiration',
-    message: 'After the storm, the stars return.',
-  },
-  {
-    card: 'The Moon',
-    keywords: 'Illusion, intuition, the unconscious',
-    message: 'Not everything is as it seems. Trust your gut.',
-  },
-  {
-    card: 'The Sun',
-    keywords: 'Joy, success, vitality',
-    message: 'Shine without apology today.',
-  },
-  {
-    card: 'Judgement',
-    keywords: 'Awakening, calling, renewal',
-    message: 'Answer the call that keeps whispering.',
-  },
-  {
-    card: 'The World',
-    keywords: 'Completion, fulfilment, wholeness',
-    message: 'You are exactly where you need to be.',
-  },
-];
+// Build tarot pulls from the full 78-card grimoire deck
+interface TarotPull {
+  card: string;
+  keywords: string;
+  message: string;
+}
+
+function buildTarotPulls(): TarotPull[] {
+  const pulls: TarotPull[] = [];
+
+  // Major Arcana (22 cards)
+  const majorArcana = tarotData.majorArcana as Record<
+    string,
+    { name: string; keywords: string[]; affirmation: string }
+  >;
+  for (const card of Object.values(majorArcana)) {
+    pulls.push({
+      card: card.name,
+      keywords: card.keywords.slice(0, 3).join(', '),
+      message: card.affirmation,
+    });
+  }
+
+  // Minor Arcana (56 cards)
+  const minorArcana = tarotData.minorArcana as Record<
+    string,
+    Record<string, { name: string; keywords: string[]; affirmation: string }>
+  >;
+  for (const suit of Object.values(minorArcana)) {
+    for (const card of Object.values(suit)) {
+      pulls.push({
+        card: card.name,
+        keywords: card.keywords.slice(0, 3).join(', '),
+        message: card.affirmation,
+      });
+    }
+  }
+
+  return pulls;
+}
+
+const TAROT_PULLS = buildTarotPulls();
 
 // Poll questions for "This or That" story
 const POLL_QUESTIONS = [
@@ -236,63 +164,246 @@ const POLL_QUESTIONS = [
     option2: 'Tarot cards',
     category: 'numerology' as ThemeCategory,
   },
+  // --- Extended poll pool for daily cadence ---
+  {
+    question: 'Which element rules your vibe?',
+    option1: 'Fire/Air',
+    option2: 'Earth/Water',
+    category: 'zodiac' as ThemeCategory,
+  },
+  {
+    question: 'Manifestation or shadow work?',
+    option1: 'Manifestation',
+    option2: 'Shadow work',
+    category: 'spells' as ThemeCategory,
+  },
+  {
+    question: 'Do you read your horoscope daily?',
+    option1: 'Every day',
+    option2: 'Sometimes',
+    category: 'zodiac' as ThemeCategory,
+  },
+  {
+    question: 'Moonstone or labradorite?',
+    option1: 'Moonstone',
+    option2: 'Labradorite',
+    category: 'crystals' as ThemeCategory,
+  },
+  {
+    question: 'Rising sign or Moon sign?',
+    option1: 'Rising sign',
+    option2: 'Moon sign',
+    category: 'zodiac' as ThemeCategory,
+  },
+  {
+    question: 'Protection spell or love spell?',
+    option1: 'Protection',
+    option2: 'Love',
+    category: 'spells' as ThemeCategory,
+  },
+  {
+    question: 'Do you believe in Mercury retrograde?',
+    option1: 'Absolutely',
+    option2: 'It is real and terrifying',
+    category: 'planetary' as ThemeCategory,
+  },
+  {
+    question: '111 or 444?',
+    option1: '111',
+    option2: '444',
+    category: 'numerology' as ThemeCategory,
+  },
+  {
+    question: 'Crystals or herbs for healing?',
+    option1: 'Crystals',
+    option2: 'Herbs',
+    category: 'crystals' as ThemeCategory,
+  },
+  {
+    question: 'Major Arcana or Minor Arcana?',
+    option1: 'Major',
+    option2: 'Minor',
+    category: 'tarot' as ThemeCategory,
+  },
+  {
+    question: 'New Moon intentions or Full Moon release?',
+    option1: 'Intentions',
+    option2: 'Release',
+    category: 'lunar' as ThemeCategory,
+  },
+  {
+    question: 'Scorpio energy or Pisces energy?',
+    option1: 'Scorpio',
+    option2: 'Pisces',
+    category: 'zodiac' as ThemeCategory,
+  },
+  {
+    question: 'Aries confidence or Capricorn discipline?',
+    option1: 'Aries fire',
+    option2: 'Cap grind',
+    category: 'zodiac' as ThemeCategory,
+  },
+  {
+    question: 'Would you date your opposite sign?',
+    option1: 'Yes, opposites attract',
+    option2: 'No, too risky',
+    category: 'zodiac' as ThemeCategory,
+  },
+  {
+    question: 'Third eye chakra or heart chakra?',
+    option1: 'Third eye',
+    option2: 'Heart',
+    category: 'chakras' as ThemeCategory,
+  },
+  {
+    question: 'Sage cleansing or sound bath?',
+    option1: 'Sage',
+    option2: 'Sound bath',
+    category: 'spells' as ThemeCategory,
+  },
+  {
+    question: 'Do you check compatibility before dating?',
+    option1: 'Always',
+    option2: 'After the first date',
+    category: 'zodiac' as ThemeCategory,
+  },
+  {
+    question: 'Citrine for abundance or black tourmaline for protection?',
+    option1: 'Citrine',
+    option2: 'Black tourmaline',
+    category: 'crystals' as ThemeCategory,
+  },
+  {
+    question: 'The Tower or Death card?',
+    option1: 'The Tower',
+    option2: 'Death',
+    category: 'tarot' as ThemeCategory,
+  },
+  {
+    question: 'Leo drama or Gemini chaos?',
+    option1: 'Leo drama',
+    option2: 'Gemini chaos',
+    category: 'zodiac' as ThemeCategory,
+  },
+  {
+    question: 'Life path number or zodiac sign?',
+    option1: 'Life path',
+    option2: 'Zodiac sign',
+    category: 'numerology' as ThemeCategory,
+  },
+  {
+    question: 'Waning Moon rest or Waxing Moon hustle?',
+    option1: 'Waning rest',
+    option2: 'Waxing hustle',
+    category: 'lunar' as ThemeCategory,
+  },
+  {
+    question: 'Astrology app or tarot deck?',
+    option1: 'Astrology app',
+    option2: 'Tarot deck',
+    category: 'tarot' as ThemeCategory,
+  },
+  {
+    question: 'Venus placement or Mars placement?',
+    option1: 'Venus (love)',
+    option2: 'Mars (drive)',
+    category: 'planetary' as ThemeCategory,
+  },
+  {
+    question: 'Selenite or clear quartz?',
+    option1: 'Selenite',
+    option2: 'Clear quartz',
+    category: 'crystals' as ThemeCategory,
+  },
+  {
+    question: 'Fixed signs or cardinal signs?',
+    option1: 'Fixed',
+    option2: 'Cardinal',
+    category: 'zodiac' as ThemeCategory,
+  },
+  {
+    question: 'Rune reading or tarot spread?',
+    option1: 'Runes',
+    option2: 'Tarot',
+    category: 'tarot' as ThemeCategory,
+  },
+  {
+    question: 'Eclipse season or retrograde season?',
+    option1: 'Eclipse',
+    option2: 'Retrograde',
+    category: 'planetary' as ThemeCategory,
+  },
 ];
 
 /**
- * Generate daily stories for a given date.
- * Returns 2-3 story items depending on day.
+ * Generate daily story data for a given date.
+ * Returns 2-3 story data items depending on day.
+ * URLs are NOT included — the consumer constructs them.
  */
-export function generateDailyStories(dateStr: string): IGStoryContent[] {
+export function generateDailyStoryData(dateStr: string): IGStoryData[] {
   const rng = seededRandom(`story-${dateStr}`);
   const date = new Date(dateStr);
   const dayOfWeek = (date.getDay() + 6) % 7; // Mon=0
 
-  const stories: IGStoryContent[] = [];
+  const stories: IGStoryData[] = [];
 
   // 1. Daily moon phase story (every day)
   const moonData = MOON_STORY_DATA[Math.floor(rng() * MOON_STORY_DATA.length)];
-  const moonParams = new URLSearchParams({
-    phase: moonData.phase,
-    energy: moonData.energy,
-    date: dateStr,
-  });
   stories.push({
     variant: 'daily_moon',
     title: moonData.phase,
     subtitle: moonData.energy,
-    imageUrl: `${SHARE_BASE_URL}/api/og/instagram/story-daily?${moonParams.toString()}`,
+    params: { phase: moonData.phase, energy: moonData.energy, date: dateStr },
+    endpoint: '/api/og/instagram/story-daily',
   });
 
   // 2. Tarot pull of the day (every day)
   const tarot = TAROT_PULLS[Math.floor(rng() * TAROT_PULLS.length)];
-  const tarotParams = new URLSearchParams({
-    card: tarot.card,
-    keywords: tarot.keywords,
-    message: tarot.message,
-  });
   stories.push({
     variant: 'tarot_pull',
     title: tarot.card,
     subtitle: tarot.message,
-    imageUrl: `${SHARE_BASE_URL}/api/og/instagram/story-tarot?${tarotParams.toString()}`,
+    params: {
+      card: tarot.card,
+      keywords: tarot.keywords,
+      message: tarot.message,
+    },
+    endpoint: '/api/og/instagram/story-tarot',
   });
 
-  // 3. "This or That" poll (Mon, Wed, Fri = days 0, 2, 4)
-  if (dayOfWeek === 0 || dayOfWeek === 2 || dayOfWeek === 4) {
+  // 3. "This or That" poll (daily — cadence plan Frame 3)
+  {
     const poll = POLL_QUESTIONS[Math.floor(rng() * POLL_QUESTIONS.length)];
-    const pollParams = new URLSearchParams({
-      question: poll.question,
-      option1: poll.option1,
-      option2: poll.option2,
-      category: poll.category,
-    });
     stories.push({
       variant: 'poll',
       title: poll.question,
       subtitle: `${poll.option1} vs ${poll.option2}`,
-      imageUrl: `${SHARE_BASE_URL}/api/og/instagram/story-poll?${pollParams.toString()}`,
+      params: {
+        question: poll.question,
+        option1: poll.option1,
+        option2: poll.option2,
+        category: poll.category,
+      },
+      endpoint: '/api/og/instagram/story-poll',
     });
   }
 
   return stories;
+}
+
+/**
+ * Legacy: Generate daily stories with absolute imageUrl.
+ * @deprecated Use generateDailyStoryData for preview pages.
+ */
+export function generateDailyStories(dateStr: string): IGStoryContent[] {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+  return generateDailyStoryData(dateStr).map((data) => {
+    const params = new URLSearchParams(data.params);
+    return {
+      variant: data.variant,
+      title: data.title,
+      subtitle: data.subtitle,
+      imageUrl: `${baseUrl}${data.endpoint}?${params.toString()}`,
+    };
+  });
 }

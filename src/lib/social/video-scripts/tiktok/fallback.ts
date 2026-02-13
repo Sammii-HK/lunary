@@ -1590,7 +1590,7 @@ export function buildFallbackShortScript(
     .map((line) => line.replace(/[—–]/g, '-').replace(/\s+/g, ' ').trim())
     .filter(Boolean);
 
-  const scriptBody = lines.slice(0, 8).join('\n');
+  const scriptBody = lines.slice(0, 6).join('\n');
   return `${hook}\n\n${scriptBody}`.trim();
 }
 

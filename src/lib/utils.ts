@@ -9,6 +9,27 @@ export function cn(...inputs: ClassValue[]) {
  * Generate a UUID with fallback for older browsers/WebViews
  * that don't support crypto.randomUUID()
  */
+/**
+ * Strip HTML tags from a string in O(n) without regex.
+ * Replaces tags with the given substitute (default: space).
+ */
+export function stripHtmlTags(str: string, substitute = ' '): string {
+  let result = '';
+  let depth = 0;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (ch === '<') {
+      if (depth === 0) result += substitute;
+      depth++;
+    } else if (ch === '>') {
+      if (depth > 0) depth--;
+    } else if (depth === 0) {
+      result += ch;
+    }
+  }
+  return result;
+}
+
 export function generateUUID(): string {
   if (
     typeof crypto !== 'undefined' &&

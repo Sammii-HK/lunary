@@ -9,7 +9,6 @@ import {
 } from '@/lib/share/og-utils';
 import {
   ShareFooter,
-  SHARE_BASE_URL,
   SHARE_BORDERS,
   SHARE_CARDS,
 } from '@/lib/share/og-share-utils';
@@ -125,7 +124,6 @@ export async function GET(request: NextRequest) {
     }
 
     const { width, height } = getFormatDimensions(format);
-    const baseUrl = SHARE_BASE_URL;
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
@@ -309,7 +307,7 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : (
       // Story & Square layout
@@ -474,7 +472,7 @@ export async function GET(request: NextRequest) {
           </div>
         )}
 
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     );
 

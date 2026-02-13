@@ -6,6 +6,19 @@ import { sql } from '@vercel/postgres';
 import { trackConversionEvent } from '@/lib/analytics/tracking';
 import { captureEvent } from '@/lib/posthog-server';
 import { conversionTracking } from '@/lib/analytics';
+import { sendEmail } from '@/lib/email';
+import {
+  generateCancellationWinBackEmailHTML,
+  generateCancellationWinBackEmailText,
+} from '@/lib/email-components/CancellationWinBackEmail';
+import {
+  generateOverdueInvoiceEmailHTML,
+  generateOverdueInvoiceEmailText,
+} from '@/lib/email-components/OverdueInvoiceEmail';
+import {
+  pickBestSubscription,
+  getTrialLevel,
+} from '@/lib/stripe/subscription-utils';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -518,14 +531,58 @@ async function handleSubscriptionChange(
 
   // Write to database
   if (userId) {
-    const trialEndsAt = subscription.trial_end
+    let effectiveStatus = status;
+    let effectivePlanType = planType;
+    let effectiveSubId = subscription.id;
+    let effectiveTrialEndsAt = subscription.trial_end
       ? new Date(subscription.trial_end * 1000).toISOString()
       : null;
-    const currentPeriodEnd = (subscription as any).current_period_end
+    let effectiveCurrentPeriodEnd = (subscription as any).current_period_end
       ? new Date((subscription as any).current_period_end * 1000).toISOString()
       : null;
-    // CRITICAL: Track cancel_at_period_end so users can see if subscription will cancel
-    const cancelAtPeriodEnd = subscription.cancel_at_period_end || false;
+    let effectiveCancelAtPeriodEnd = subscription.cancel_at_period_end || false;
+
+    // MULTI-SUB GUARD: Before writing past_due or cancelled, check if user
+    // has another subscription in better shape
+    if (status === 'past_due' || status === 'cancelled') {
+      try {
+        const allSubs = await stripe.subscriptions.list({
+          customer: customerId,
+          status: 'all',
+          limit: 10,
+        });
+        const best = pickBestSubscription(
+          allSubs.data,
+          getPlanTypeFromSubscription,
+        );
+        if (best && best.id !== subscription.id) {
+          const bestStatus = mapStripeStatus(best.status);
+          if (bestStatus === 'active' || bestStatus === 'trial') {
+            console.log(
+              `[Webhook] Multi-sub guard: sub ${subscription.id} is ${status}, but sub ${best.id} is ${bestStatus}. Using better subscription.`,
+            );
+            effectiveStatus = bestStatus;
+            effectivePlanType = getPlanTypeFromSubscription(best);
+            effectiveSubId = best.id;
+            effectiveTrialEndsAt = best.trial_end
+              ? new Date(best.trial_end * 1000).toISOString()
+              : null;
+            effectiveCurrentPeriodEnd = (best as any).current_period_end
+              ? new Date((best as any).current_period_end * 1000).toISOString()
+              : null;
+            effectiveCancelAtPeriodEnd = best.cancel_at_period_end || false;
+          }
+        }
+      } catch (error) {
+        console.error(
+          '[Webhook] Multi-sub guard check failed, proceeding with original status:',
+          error,
+        );
+      }
+    }
+
+    // Track trial level in trialed_plans when status is trial or active
+    const trialLevel = getTrialLevel(effectivePlanType);
 
     try {
       await sql`
@@ -536,12 +593,12 @@ async function handleSubscriptionChange(
           has_discount, discount_percent, monthly_amount_due, coupon_id,
           promo_code, discount_ends_at, trial_used, cancel_at_period_end
         ) VALUES (
-          ${userId}, ${userEmail}, ${status}, ${planType},
-          ${customerId}, ${subscription.id},
-          ${trialEndsAt}, ${currentPeriodEnd},
+          ${userId}, ${userEmail}, ${effectiveStatus}, ${effectivePlanType},
+          ${customerId}, ${effectiveSubId},
+          ${effectiveTrialEndsAt}, ${effectiveCurrentPeriodEnd},
           ${discountInfo.hasDiscount}, ${discountInfo.discountPercent || null},
           ${discountInfo.monthlyAmountDue || null}, ${discountInfo.couponId || null},
-          ${promoCode}, ${discountInfo.discountEndsAt || null}, true, ${cancelAtPeriodEnd}
+          ${promoCode}, ${discountInfo.discountEndsAt || null}, true, ${effectiveCancelAtPeriodEnd}
         )
         ON CONFLICT (user_id) DO UPDATE SET
           status = EXCLUDED.status,
@@ -558,6 +615,13 @@ async function handleSubscriptionChange(
           discount_ends_at = EXCLUDED.discount_ends_at,
           user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
           trial_used = true,
+          trialed_plans = (
+            SELECT CASE
+              WHEN ${trialLevel} = ANY(COALESCE(subscriptions.trialed_plans, ARRAY[]::text[]))
+              THEN COALESCE(subscriptions.trialed_plans, ARRAY[]::text[])
+              ELSE array_append(COALESCE(subscriptions.trialed_plans, ARRAY[]::text[]), ${trialLevel})
+            END
+          ),
           cancel_at_period_end = EXCLUDED.cancel_at_period_end,
           updated_at = NOW()
       `;
@@ -814,11 +878,33 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
   if (userId) {
     try {
-      await sql`
-        UPDATE subscriptions
-        SET status = 'cancelled', plan_type = 'free', updated_at = NOW()
+      // Check if the user has a referral extension beyond Stripe's period end.
+      // If current_period_end is still in the future (e.g. from referral bonus days),
+      // convert to a trial so the extension is honored instead of killed.
+      const existing = await sql`
+        SELECT current_period_end FROM subscriptions
         WHERE user_id = ${userId}
+        AND status IN ('active', 'trial')
+        AND current_period_end > NOW()
+        LIMIT 1
       `;
+
+      if (existing.rows.length > 0) {
+        // Referral extension exists — preserve as trial until it expires
+        await sql`
+          UPDATE subscriptions
+          SET status = 'trial',
+              stripe_subscription_id = NULL,
+              updated_at = NOW()
+          WHERE user_id = ${userId}
+        `;
+      } else {
+        await sql`
+          UPDATE subscriptions
+          SET status = 'cancelled', plan_type = 'free', updated_at = NOW()
+          WHERE user_id = ${userId}
+        `;
+      }
     } catch (error) {
       console.error('DB update failed:', error);
     }
@@ -834,6 +920,35 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
         subscription.metadata.cancellation_reason,
         subscription.metadata.cancellation_category || undefined,
       );
+    }
+
+    // Send cancellation win-back email
+    try {
+      const customer = await stripe.customers.retrieve(customerId);
+      if (customer && !customer.deleted && customer.email) {
+        const userName = customer.name || customer.email.split('@')[0];
+        const html = await generateCancellationWinBackEmailHTML(
+          userName,
+          customer.email,
+        );
+        const text = generateCancellationWinBackEmailText(
+          userName,
+          customer.email,
+        );
+        await sendEmail({
+          to: customer.email,
+          subject: "We'll miss you — here's a gift if you change your mind",
+          html,
+          text,
+          tracking: {
+            userId,
+            notificationType: 'cancellation_winback',
+          },
+        });
+        console.log(`Cancellation win-back email sent to ${customer.email}`);
+      }
+    } catch (emailError) {
+      console.error('Failed to send cancellation win-back email:', emailError);
     }
   }
 }
@@ -953,6 +1068,62 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     // Track retry if this is not the first attempt
     if (attemptCount > 1) {
       conversionTracking.paymentRetryAttempted(userId, attemptCount);
+    }
+
+    // Send overdue invoice email on first failure
+    if (attemptCount === 1) {
+      try {
+        const customer = await stripe.customers.retrieve(customerId);
+        if (customer && !customer.deleted && customer.email) {
+          const userName = customer.name || customer.email.split('@')[0];
+
+          // Create billing portal link for updating payment method
+          const baseUrl =
+            process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
+          let billingPortalUrl = `${baseUrl}/pricing`;
+          try {
+            const portalSession = await stripe.billingPortal.sessions.create({
+              customer: customerId,
+              return_url: baseUrl,
+            });
+            billingPortalUrl = portalSession.url;
+          } catch (portalError) {
+            console.error(
+              'Failed to create billing portal session:',
+              portalError,
+            );
+          }
+
+          const html = await generateOverdueInvoiceEmailHTML(
+            userName,
+            billingPortalUrl,
+            customer.email,
+          );
+          const text = generateOverdueInvoiceEmailText(
+            userName,
+            billingPortalUrl,
+            customer.email,
+          );
+          await sendEmail({
+            to: customer.email,
+            subject: 'Action required: Your payment failed — Lunary',
+            html,
+            text,
+            tracking: {
+              userId,
+              notificationType: 'overdue_invoice',
+            },
+          });
+          console.log(
+            `[Webhook] Overdue invoice email sent to ${customer.email}`,
+          );
+        }
+      } catch (emailError) {
+        console.error(
+          '[Webhook] Failed to send overdue invoice email:',
+          emailError,
+        );
+      }
     }
   }
 }

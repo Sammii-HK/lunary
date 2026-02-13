@@ -289,6 +289,7 @@ export default function SocialPostsPage() {
           alert(`Generated ${data.generated} videos for the week.`);
         }
       } else {
+        // 1. Generate social posts (Threads/TikTok/cross-platform)
         const response = await fetch(
           '/api/admin/social-posts/generate-weekly',
           {
@@ -305,10 +306,31 @@ export default function SocialPostsPage() {
           },
         );
         const data = await response.json();
+
+        // 2. Generate Instagram content (carousels, memes, rankings, etc.)
+        const weekStart = getWeekStartForOffset(weekOffset);
+        let igResult = null;
+        try {
+          const igResponse = await fetch(
+            '/api/admin/instagram/generate-weekly',
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ startDate: weekStart }),
+            },
+          );
+          igResult = await igResponse.json();
+        } catch (igError) {
+          console.error('Instagram generation failed:', igError);
+        }
+
         if (data.success) {
           const themeInfo = data.theme ? ` Theme: ${data.theme}` : '';
+          const igInfo = igResult?.success
+            ? ` + ${igResult.totalPosts} Instagram posts`
+            : '';
           alert(
-            `Generated ${data.savedIds.length} posts for the week!${themeInfo}`,
+            `Generated ${data.savedIds.length} social posts${igInfo} for the week!${themeInfo}`,
           );
           loadPendingPosts();
           setActiveTab('approve');

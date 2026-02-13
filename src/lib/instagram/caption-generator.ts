@@ -41,6 +41,15 @@ const POST_TYPE_HASHTAGS: Record<IGPostType, string[]> = {
     '#signcheck',
     '#astrologytok',
   ],
+  angel_number_carousel: [
+    '#angelnumbers',
+    '#numerology',
+    '#111',
+    '#444',
+    '#manifestation',
+    '#spiritualawakening',
+    '#savethis',
+  ],
   compatibility: [
     '#zodiaccompatibility',
     '#astrolove',
@@ -87,6 +96,9 @@ export function generateCaption(
       break;
     case 'carousel':
       caption = generateCarouselCaption(options);
+      break;
+    case 'angel_number_carousel':
+      caption = generateAngelNumberCaption(options);
       break;
     case 'quote':
       caption = generateQuoteCaption(options);
@@ -267,6 +279,22 @@ function generateStoryCaption(options: {
   moonPhase?: string;
 }): string {
   return options.headline || 'Your daily cosmic guidance';
+}
+
+function generateAngelNumberCaption(options: { title?: string }): string {
+  const title = options.title || 'this angel number';
+
+  const hooks = [
+    `You keep seeing ${title}. Here's why.`,
+    `${title} keeps showing up? The universe is trying to tell you something.`,
+    `Stop what you're doing if you keep seeing ${title}.`,
+    `${title} isn't a coincidence. Read this.`,
+  ];
+
+  const hookIndex = hashString(title) % hooks.length;
+  const hook = hooks[hookIndex];
+
+  return `${hook}\n\nSave this for next time it appears.\nWhat number do YOU keep seeing? Comment below.\n\nExplore all angel numbers at lunary.app`;
 }
 
 /**

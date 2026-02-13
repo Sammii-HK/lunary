@@ -44,11 +44,7 @@ import {
   PERSONA_BODY_TEMPLATES,
   QUESTION_POOL,
   CLOSING_STATEMENTS,
-  getThreadsQuestion,
-  getDearStyleBetaPost,
-  getConversationalDeepDive,
 } from './shared/constants/persona-templates';
-import { THREADS_POST_HOURS } from '@/utils/posting-times';
 import { isAllowedSlugForCategory } from './shared/constants/category-slugs';
 
 // Import data sources
@@ -428,7 +424,7 @@ const getInlineHashtags = (
 ): string[] => {
   if (!hashtags) return [];
   if (platform === 'threads') {
-    return [hashtags.domain, hashtags.topic, hashtags.brand].slice(0, 2);
+    return [hashtags.domain, hashtags.topic].filter(Boolean).slice(0, 2);
   }
   if (platform === 'bluesky') {
     return [hashtags.topic].filter(Boolean).slice(0, 1);
@@ -1725,7 +1721,7 @@ export async function generateThematicPostsForWeek(
   // Long-form platforms (educational depth, images)
   const longFormPlatforms = ['linkedin', 'pinterest'];
   // Short-form platforms (1-2 sentences, optional hashtags)
-  const shortFormPlatforms = ['twitter', 'bluesky', 'threads'];
+  const shortFormPlatforms = ['twitter', 'bluesky'];
 
   for (const dayContent of weekContent) {
     const sourceInfo = resolveSourceForFacet(
@@ -1858,161 +1854,6 @@ export async function generateThematicPostsForWeek(
               ? (dayContent.theme as SabbatTheme).leadUpFacets.length
               : 7,
           ...sourceMeta,
-        });
-
-        if (platform !== 'threads') {
-          continue;
-        }
-
-        const deepDiveCandidates = buildDeepDiveShortForms(
-          dayContent.facet,
-          data,
-          dayContent.theme.category,
-        );
-        const deepDiveTargets = 1; // Keep 1 educational deep-dive per day
-        const usedTexts: string[] = [safeIntro];
-        const deep1Candidate = pickDeepDiveCandidate(
-          deepDiveCandidates,
-          ['structure', 'meaning', 'keywords'],
-          usedTexts,
-        );
-        const deep1Text = deep1Candidate?.text || '';
-        if (deep1Text) usedTexts.push(deep1Text);
-        const deep2Candidate = pickDeepDiveCandidate(
-          deepDiveCandidates,
-          ['practice', 'keywords', 'meaning'],
-          usedTexts,
-        );
-        const deep2Text = deep2Candidate?.text || '';
-        if (deep2Text) usedTexts.push(deep2Text);
-        const deep3Candidate =
-          deepDiveTargets > 2
-            ? pickDeepDiveCandidate(
-                deepDiveCandidates,
-                ['meaning', 'practice', 'keywords'],
-                usedTexts,
-              )
-            : null;
-        const deepDives = [deep1Text, deep2Text, deep3Candidate?.text]
-          .filter(Boolean)
-          .slice(0, deepDiveTargets);
-
-        const uniqueDeepDives: string[] = [];
-        for (const deepDive of deepDives) {
-          if (deepDive && hasTruncationArtifact(deepDive)) continue;
-          if (deepDive && isTooSimilar(deepDive, dayContent.shortForm))
-            continue;
-          if (
-            deepDive &&
-            uniqueDeepDives.some((entry) => isTooSimilar(entry, deepDive))
-          )
-            continue;
-          if (deepDive) uniqueDeepDives.push(deepDive);
-        }
-
-        let attempts = 0;
-        while (uniqueDeepDives.length < deepDiveTargets && attempts < 3) {
-          const fallback = buildFallbackDeepDive(
-            dayContent.facet,
-            data,
-            dayContent.theme.category,
-          );
-          if (
-            !hasTruncationArtifact(fallback) &&
-            !isTooSimilar(fallback, dayContent.shortForm) &&
-            !uniqueDeepDives.some((entry) => isTooSimilar(entry, fallback))
-          ) {
-            uniqueDeepDives.push(fallback);
-          }
-          attempts += 1;
-        }
-
-        // Generate conversational deep-dive for Threads (replaces formal educational copy)
-        const conversationalSeed = dayOffset + dayContent.facet.title.length;
-        const deepDiveContent = getConversationalDeepDive(
-          dayContent.facet.title,
-          conversationalSeed,
-        );
-        // Schedule deep-dive at 17:00 UTC for Threads
-        const deepDiveDate = new Date(dayContent.date);
-        deepDiveDate.setUTCHours(THREADS_POST_HOURS.deepDive, 0, 0, 0);
-        posts.push({
-          content: deepDiveContent,
-          platform,
-          postType: 'educational_deep_1',
-          topic: dayContent.facet.title,
-          scheduledDate: deepDiveDate,
-          hashtags: dayContent.hashtags.topic,
-          category: dayContent.theme.category,
-          dayOffset,
-          slug:
-            dayContent.facet.grimoireSlug.split('/').pop() ||
-            dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
-          themeName: dayContent.theme.name,
-          partNumber: dayOffset + 1,
-          totalParts:
-            dayContent.theme.category === 'sabbat'
-              ? (dayContent.theme as SabbatTheme).leadUpFacets.length
-              : 7,
-          ...sourceMeta,
-        });
-
-        // Add Threads-specific posts: question (12:00 UTC) and beta CTA (20:00 UTC)
-        // Question post for engagement at 12:00 UTC
-        const questionSeed = dayOffset + dayContent.facet.title.length;
-        const questionContent = getThreadsQuestion(
-          dayContent.facet.title,
-          questionSeed,
-        );
-        const questionDate = new Date(dayContent.date);
-        questionDate.setUTCHours(THREADS_POST_HOURS.question, 0, 0, 0);
-        posts.push({
-          content: questionContent,
-          platform,
-          postType: 'threads_question',
-          topic: dayContent.facet.title,
-          scheduledDate: questionDate,
-          hashtags: dayContent.hashtags.topic,
-          category: dayContent.theme.category,
-          dayOffset,
-          slug:
-            dayContent.facet.grimoireSlug.split('/').pop() ||
-            dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
-          themeName: dayContent.theme.name,
-          partNumber: dayOffset + 1,
-          totalParts:
-            dayContent.theme.category === 'sabbat'
-              ? (dayContent.theme as SabbatTheme).leadUpFacets.length
-              : 7,
-          ...sourceMeta,
-        });
-
-        // Beta CTA post at 20:00 UTC
-        const betaCtaSeed = dayOffset;
-        const betaCtaContent = getDearStyleBetaPost(betaCtaSeed);
-        const betaCtaDate = new Date(dayContent.date);
-        betaCtaDate.setUTCHours(THREADS_POST_HOURS.betaCta, 0, 0, 0);
-        posts.push({
-          content: betaCtaContent,
-          platform,
-          postType: 'threads_beta_cta',
-          topic: dayContent.facet.title,
-          scheduledDate: betaCtaDate,
-          hashtags: '',
-          category: dayContent.theme.category,
-          dayOffset,
-          slug:
-            dayContent.facet.grimoireSlug.split('/').pop() ||
-            dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
-          themeName: dayContent.theme.name,
-          partNumber: dayOffset + 1,
-          totalParts:
-            dayContent.theme.category === 'sabbat'
-              ? (dayContent.theme as SabbatTheme).leadUpFacets.length
-              : 7,
-          sourceType: 'fallback' as const,
-          sourceId: 'beta-cta',
-          sourceTitle: 'Beta CTA',
         });
 
         if (override) {

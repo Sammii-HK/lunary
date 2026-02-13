@@ -10,8 +10,9 @@ import {
 import {
   loadShareFonts,
   ShareFooter,
-  SHARE_BASE_URL,
   SHARE_BORDERS,
+  SHARE_IMAGE_BORDER,
+  SHARE_TITLE_GLOW,
 } from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
@@ -102,13 +103,11 @@ export async function GET(request: NextRequest) {
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
-    const baseUrl = SHARE_BASE_URL;
-
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
     const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
     const subtitleSize = isLandscape ? 18 : isStory ? 28 : 24;
-    const numberSize = isLandscape ? 64 : isStory ? 120 : 100;
+    const numberSize = isLandscape ? 80 : isStory ? 140 : 120;
     const labelSize = isLandscape ? 14 : isStory ? 24 : 20;
     const meaningSize = isLandscape ? 16 : isStory ? 24 : 22;
 
@@ -138,6 +137,7 @@ export async function GET(request: NextRequest) {
       label: string,
       meaning: string,
       color: string,
+      isLifePath: boolean = false,
     ) => {
       return (
         <div
@@ -151,6 +151,7 @@ export async function GET(request: NextRequest) {
             borderRadius: isLandscape ? 16 : 20,
             flex: 1,
             gap: isLandscape ? 8 : 12,
+            ...(isLifePath ? { borderLeft: '4px solid #8458D8' } : {}),
           }}
         >
           <div
@@ -202,6 +203,7 @@ export async function GET(request: NextRequest) {
           padding: '48px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -223,6 +225,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s Numbers` : 'Your Numbers'}
@@ -254,6 +257,7 @@ export async function GET(request: NextRequest) {
             'Life Path',
             data.lifePathMeaning,
             NUMBER_COLORS.lifePath,
+            true,
           )}
           {renderNumberCard(
             data.expression,
@@ -270,7 +274,7 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : isStory ? (
       // Story Layout - Cards stacked vertically with breathing room
@@ -280,10 +284,12 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
           background: OG_COLORS.background,
           padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -305,6 +311,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s Numbers` : 'Your Numbers'}
@@ -336,6 +343,7 @@ export async function GET(request: NextRequest) {
             'Life Path',
             data.lifePathMeaning,
             NUMBER_COLORS.lifePath,
+            true,
           )}
           {renderNumberCard(
             data.expression,
@@ -352,7 +360,7 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : (
       // Square Layout - Cards stacked vertically
@@ -366,6 +374,7 @@ export async function GET(request: NextRequest) {
           padding: '60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -387,6 +396,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s Numbers` : 'Your Numbers'}
@@ -418,6 +428,7 @@ export async function GET(request: NextRequest) {
             'Life Path',
             data.lifePathMeaning,
             NUMBER_COLORS.lifePath,
+            true,
           )}
           {renderNumberCard(
             data.expression,
@@ -434,7 +445,7 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     );
 

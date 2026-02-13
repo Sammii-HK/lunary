@@ -12,6 +12,7 @@ import { ShareBirthChart } from '@/components/ShareBirthChart';
 import { ChartControls } from '@/components/ChartControls';
 import { BirthChart } from '@/components/BirthChart';
 import { BirthChartShowcase } from '@/components/birth-chart-sections/BirthChartShowcase';
+import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { Sparkles, Moon, Star, Home } from 'lucide-react';
 import { ensureDescendantInChart } from '@/utils/astrology/birth-chart-analysis';
 
@@ -247,6 +248,8 @@ const BirthChartPage = () => {
             <BirthChartShowcase birthChart={birthChartData} />
           </div>
         )}
+
+        <ReferralShareCTA message="Know someone who'd love their birth chart? They get 30 days of Pro free when they join." />
       </div>
     </div>
   );

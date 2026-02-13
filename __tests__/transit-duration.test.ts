@@ -1,6 +1,7 @@
 import {
   calculateTransitDuration,
   formatDuration,
+  getSlowPlanetSignTotalDays,
 } from '../utils/astrology/transit-duration';
 import { PLANET_DAILY_MOTION } from '../utils/astrology/transit-duration-constants';
 
@@ -116,6 +117,88 @@ describe('Transit Duration Calculation', () => {
       );
 
       expect(duration).toBeNull();
+    });
+
+    it('aggregates Saturn in Aries across retrograde segments', () => {
+      // Saturn in Aries has 2 segments:
+      //   Segment 1: 2025-05-25 → 2025-09-01 (~99 days, brief entry before retrograde)
+      //   Segment 2: 2026-02-14 → 2028-04-13 (~789 days, main transit)
+      // Total cumulative: ~888 days ≈ 2.4 years
+
+      // Test during segment 1 (brief first entry)
+      const seg1 = calculateTransitDuration(
+        'Saturn',
+        'Aries',
+        0,
+        new Date('2025-07-01'),
+      );
+
+      expect(seg1).not.toBeNull();
+      // totalDays should be the FULL cumulative duration, not just 99 days
+      expect(seg1!.totalDays).toBeGreaterThan(800);
+      expect(seg1!.totalDays).toBeLessThan(920);
+      // remainingDays should include rest of seg1 + all of seg2
+      expect(seg1!.remainingDays).toBeGreaterThan(750);
+      // startDate should be first segment start
+      expect(seg1!.startDate.getFullYear()).toBe(2025);
+      // endDate should be last segment end (2028)
+      expect(seg1!.endDate.getFullYear()).toBe(2028);
+
+      // Test during segment 2 (main transit)
+      const seg2 = calculateTransitDuration(
+        'Saturn',
+        'Aries',
+        0,
+        new Date('2027-01-15'),
+      );
+
+      expect(seg2).not.toBeNull();
+      // totalDays should still be the full cumulative duration
+      expect(seg2!.totalDays).toBe(seg1!.totalDays);
+      // remainingDays should only cover rest of segment 2
+      expect(seg2!.remainingDays).toBeGreaterThan(400);
+      expect(seg2!.remainingDays).toBeLessThan(500);
+      // Same start/end dates as seg1
+      expect(seg2!.startDate.getTime()).toBe(seg1!.startDate.getTime());
+      expect(seg2!.endDate.getTime()).toBe(seg1!.endDate.getTime());
+    });
+
+    it('calculates correct halfway point for multi-segment transits', () => {
+      // For Saturn in Aries (totalDays ≈ 888), halfway is at ~444 cumulative days
+      // Segment 1 is 99 days, so halfway falls in segment 2:
+      // 444 - 99 = 345 days into segment 2 (starting 2026-02-14)
+      // → approximately 2027-01-25
+
+      const halfway = calculateTransitDuration(
+        'Saturn',
+        'Aries',
+        0,
+        new Date('2027-01-25'),
+      );
+
+      expect(halfway).not.toBeNull();
+      // At the halfway point, remainingDays should be approximately half of totalDays
+      const ratio = halfway!.remainingDays / halfway!.totalDays;
+      expect(ratio).toBeGreaterThan(0.4);
+      expect(ratio).toBeLessThan(0.6);
+    });
+  });
+
+  describe('getSlowPlanetSignTotalDays', () => {
+    it('returns cumulative days for Saturn in Aries', () => {
+      const days = getSlowPlanetSignTotalDays('Saturn', 'Aries');
+      expect(days).not.toBeNull();
+      // ~888 days across 2 retrograde segments
+      expect(days!).toBeGreaterThan(800);
+      expect(days!).toBeLessThan(920);
+    });
+
+    it('returns null for unknown planet', () => {
+      expect(getSlowPlanetSignTotalDays('Ceres', 'Aries')).toBeNull();
+    });
+
+    it('returns null for sign with no data', () => {
+      expect(getSlowPlanetSignTotalDays('Saturn', 'FakeSign')).toBeNull();
     });
   });
 

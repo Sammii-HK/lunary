@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       rankings = signs.map((sign, i) => ({ sign, rank: i + 1 }));
     }
 
-    const { width, height } = IG_SIZES.square;
+    const { width, height } = IG_SIZES.portrait;
     const fonts = await loadIGFonts(request, { includeAstronomicon: true });
     const starfield = renderIGStarfield(`rank-${trait}`);
 

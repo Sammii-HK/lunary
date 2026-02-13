@@ -2,7 +2,7 @@ import type { ShareFormat } from '@/hooks/useShareModal';
 import { FORMAT_SIZES, STORY_SAFE_ZONES } from './types';
 
 // Increment this to bust OG image caches when designs change
-export const OG_IMAGE_VERSION = 10;
+export const OG_IMAGE_VERSION = 11;
 
 export function getFormatDimensions(format: ShareFormat = 'square') {
   return FORMAT_SIZES[format];
@@ -122,17 +122,27 @@ export function generateStarfield(shareId: string, count: number = 80): Star[] {
     });
   }
 
+  // Add 3 bright accent stars
+  for (let i = 0; i < 3; i++) {
+    stars.push({
+      x: random() * 100,
+      y: random() * 100,
+      size: 3 + random(),
+      opacity: 0.85 + random() * 0.1,
+    });
+  }
+
   return stars;
 }
 
 export function getStarCount(format: ShareFormat): number {
   switch (format) {
     case 'story':
-      return 120;
+      return 180;
     case 'landscape':
-      return 60;
+      return 90;
     default:
-      return 80;
+      return 120;
   }
 }
 

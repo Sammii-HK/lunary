@@ -9,7 +9,7 @@ const FEATURE_EVENTS = [
   'grimoire_viewed',
   'astral_chat_used',
   'tarot_drawn',
-  'ritual_started',
+  'ritual_completed',
   'chart_viewed',
   'signup_completed',
   'trial_started',

@@ -737,7 +737,7 @@ export async function GET(request: NextRequest) {
              'tarot_drawn',
              'chart_viewed',
              'astral_chat_used',
-             'ritual_started'
+             'ritual_completed'
            )
            AND ${whereBase}
          GROUP BY ce.event_type`,
@@ -1046,7 +1046,7 @@ export async function GET(request: NextRequest) {
         featureAdoption['tarot_drawn'] || 0, // $44
         featureAdoption['chart_viewed'] || 0, // $45
         featureAdoption['astral_chat_used'] || 0, // $46
-        featureAdoption['ritual_started'] || 0, // $47
+        featureAdoption['ritual_completed'] || 0, // $47
         returningReferrerOrganic, // $48
         returningReferrerDirect, // $49
         returningReferrerInternal, // $50

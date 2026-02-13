@@ -51,6 +51,7 @@ export type ConversionEvent =
   | 'daily_dashboard_viewed'
   | 'astral_chat_used'
   | 'ritual_started'
+  | 'ritual_completed'
   | 'content_shared'
   | 'horoscope_shared'
   | 'tarot_reading_shared'
@@ -833,6 +834,18 @@ export const conversionTracking = {
     metadata?: Record<string, any>,
   ) =>
     trackConversion('ritual_started', {
+      userId,
+      userEmail: email,
+      planType,
+      metadata,
+    }),
+  ritualCompleted: (
+    userId?: string,
+    email?: string,
+    planType?: 'monthly' | 'yearly' | 'free',
+    metadata?: Record<string, any>,
+  ) =>
+    trackConversion('ritual_completed', {
       userId,
       userEmail: email,
       planType,

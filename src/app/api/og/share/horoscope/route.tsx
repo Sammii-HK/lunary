@@ -11,9 +11,10 @@ import {
   loadShareFonts,
   truncateText,
   ShareFooter,
-  SHARE_BASE_URL,
   SHARE_BORDERS,
   SHARE_CARDS,
+  SHARE_IMAGE_BORDER,
+  SHARE_TITLE_GLOW,
 } from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 import { zodiacSymbol } from '@/constants/symbols';
@@ -114,15 +115,13 @@ export async function GET(request: NextRequest) {
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
-    const baseUrl = SHARE_BASE_URL;
-
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
     const padding = isLandscape ? 48 : isStory ? 60 : 60;
     const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
     const signSize = isLandscape ? 100 : isStory ? 220 : 160;
     const signNameSize = isLandscape ? 40 : isStory ? 64 : 52;
-    const headlineSize = isLandscape ? 30 : isStory ? 52 : 44;
+    const headlineSize = isLandscape ? 36 : isStory ? 60 : 52;
     const overviewSize = isLandscape ? 22 : isStory ? 34 : 30;
     const labelSize = isLandscape ? 18 : isStory ? 28 : 24;
 
@@ -130,7 +129,7 @@ export async function GET(request: NextRequest) {
 
     // Format-specific character limits
     const headlineLimit = isLandscape ? 70 : isStory ? 120 : 100;
-    const overviewLimit = isLandscape ? 140 : isStory ? 240 : 180;
+    const overviewLimit = isLandscape ? 100 : isStory ? 180 : 130;
 
     // Generate unique starfield based on shareId
     const stars = generateStarfield(data.shareId, getStarCount(format));
@@ -224,6 +223,7 @@ export async function GET(request: NextRequest) {
           padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {gradientOverlay}
@@ -246,6 +246,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s Horoscope` : 'Your Horoscope'}
@@ -448,7 +449,7 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : isStory ? (
       // Story Layout - Giant zodiac symbol, full-width cards
@@ -458,10 +459,12 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
           background: OG_COLORS.background,
           padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {gradientOverlay}
@@ -484,6 +487,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s Horoscope` : 'Your Horoscope'}
@@ -667,7 +671,7 @@ export async function GET(request: NextRequest) {
           )}
         </div>
 
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : (
       // Square Layout
@@ -681,6 +685,7 @@ export async function GET(request: NextRequest) {
           padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {gradientOverlay}
@@ -703,6 +708,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s Horoscope` : 'Your Horoscope'}
@@ -886,7 +892,7 @@ export async function GET(request: NextRequest) {
           )}
         </div>
 
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     );
 

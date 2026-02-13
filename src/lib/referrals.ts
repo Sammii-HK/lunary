@@ -115,8 +115,14 @@ export async function applyReferralCouponToSubscription(
 /** Maximum successful referrals per user (generous for beta) */
 export const MAX_REFERRALS_PER_USER = 50;
 
-/** Days of Pro trial granted for referrals (both parties) */
-export const REFERRAL_TRIAL_DAYS = 30;
+/** Days of Pro granted to the referred user (new user welcome bonus) */
+export const REFERRAL_DAYS_REFERRED = 30;
+
+/** Days of Pro granted to the referrer per activation */
+export const REFERRAL_DAYS_REFERRER = 7;
+
+/** @deprecated Use REFERRAL_DAYS_REFERRED instead */
+export const REFERRAL_TRIAL_DAYS = REFERRAL_DAYS_REFERRED;
 
 export async function generateReferralCode(userId: string): Promise<string> {
   const existingCode = await getReferralCode(userId);

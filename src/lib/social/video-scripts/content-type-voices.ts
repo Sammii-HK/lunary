@@ -453,7 +453,10 @@ export const CONTENT_TYPE_VOICES: Record<
 - Focus on BEHAVIORS and TENDENCIES
 - Be specific about how this sign shows up in real life
 - Slight humor is okay - signs have quirks
-- This is personality observation, not destiny`,
+- This is personality observation, not destiny
+- CRITICAL: Every script MUST include a direct identity callout in lines 1-3
+- Use "If you're a [sign]..." / "[Sign]s already know..." / "Every [sign] reading this..."
+- Analytics: zodiac WITH identity callouts -> 20x more comments than without`,
     exampleEnergy: `Example energy:
 "Sagittarius overshares within 5 minutes of meeting someone. It's not nervous energy. They genuinely think the story's too good not to tell."
 "Capricorns don't rest. They schedule rest like it's a meeting. Then often cancel that meeting for actual work."
@@ -480,7 +483,10 @@ export const CONTENT_TYPE_VOICES: Record<
 - Focus on private behaviors, not public ones
 - How someone processes feelings
 - What comforts them when stressed
-- More intimate than sun sign content`,
+- More intimate than sun sign content
+- CRITICAL: Every script MUST include a direct identity callout in lines 1-3
+- Use "If you're a [sign]..." / "[Sign]s already know..." / "Every [sign] reading this..."
+- Analytics: zodiac WITH identity callouts -> 20x more comments than without`,
     exampleEnergy: `Example energy:
 "Capricorn moons don't do emotional chaos. They schedule their breakdowns. Tuesday at 3pm, feelings. Then back to work."
 "Cancer moons need home base. Not a building. A feeling of belonging. Without it, nothing else lands right."
@@ -506,7 +512,10 @@ export const CONTENT_TYPE_VOICES: Record<
 - How others perceive them before knowing them
 - The lens through which life is approached
 - Often different from the sun sign self
-- Focus on appearance, vibe, first meetings`,
+- Focus on appearance, vibe, first meetings
+- CRITICAL: Every script MUST include a direct identity callout in lines 1-3
+- Use "If you're a [sign]..." / "[Sign]s already know..." / "Every [sign] reading this..."
+- Analytics: zodiac WITH identity callouts -> 20x more comments than without`,
     exampleEnergy: `Example energy:
 "Scorpio risings enter a room and everyone notices. They didn't do anything. The intensity is automatic. It reads as power or threat."
 "Libra risings are immediately likeable. Almost suspiciously likeable. People wonder what they're not showing."

@@ -5,6 +5,7 @@ import {
   getTrialDaysFromStripe,
   FREE_TRIAL_DAYS,
 } from '../../../../../utils/pricing';
+import { getTrialLevel } from '@/lib/stripe/subscription-utils';
 import dayjs from 'dayjs';
 
 export async function POST(request: NextRequest) {
@@ -17,12 +18,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { planType = 'monthly' } = body;
 
+    // Determine the trial level for this plan
+    const level = getTrialLevel(planType);
+
+    // Check per-level trial usage instead of single boolean
     const existing = await sql`
-      SELECT trial_used FROM subscriptions WHERE user_id = ${user.id} LIMIT 1
+      SELECT trial_used, trialed_plans FROM subscriptions WHERE user_id = ${user.id} LIMIT 1
     `;
-    if (existing.rows[0]?.trial_used) {
+    const trialedPlans: string[] = existing.rows[0]?.trialed_plans || [];
+    if (trialedPlans.includes(level)) {
       return NextResponse.json(
-        { error: 'Trial already used for this account' },
+        { error: `Trial already used for ${level} plan` },
         { status: 403 },
       );
     }
@@ -43,16 +49,20 @@ export async function POST(request: NextRequest) {
 
     await sql`
       INSERT INTO subscriptions (
-        user_id, user_email, status, plan_type, trial_ends_at, trial_used
+        user_id, user_email, status, plan_type, trial_ends_at, trial_used, trialed_plans
       )
       VALUES (
-        ${user.id}, ${user.email || null}, 'trial', ${planType}, ${trialEndsAt}, true
+        ${user.id}, ${user.email || null}, 'trial', ${planType}, ${trialEndsAt}, true, ARRAY[${level}]
       )
       ON CONFLICT (user_id) DO UPDATE SET
         status = 'trial',
         plan_type = EXCLUDED.plan_type,
         trial_ends_at = EXCLUDED.trial_ends_at,
         trial_used = true,
+        trialed_plans = array_append(
+          COALESCE(subscriptions.trialed_plans, ARRAY[]::text[]),
+          ${level}
+        ),
         updated_at = NOW()
     `;
 

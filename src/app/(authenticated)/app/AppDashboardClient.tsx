@@ -19,6 +19,7 @@ import { ShareDailyCosmicState } from '@/components/share/ShareDailyCosmicState'
 import { ShareZodiacSeason } from '@/components/share/ShareZodiacSeason';
 import { TourTrigger } from '@/components/feature-tour/tour-trigger';
 import { useMilestones } from '@/hooks/useMilestones';
+import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 
 const DateWidget = dynamic(
   () =>
@@ -488,6 +489,8 @@ export default function AppDashboardClient() {
             <ConditionalWheel />
           </div>
         </div>
+        {authState.isAuthenticated && <ReferralShareCTA compact />}
+
         {authState.isAuthenticated && (
           <p className='text-xs text-zinc-500 text-center mt-4'>
             {focusHonoured

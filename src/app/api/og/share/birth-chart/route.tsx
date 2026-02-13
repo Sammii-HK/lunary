@@ -8,7 +8,12 @@ import {
   generateStarfield,
   getStarCount,
 } from '@/lib/share/og-utils';
-import { ShareFooter, SHARE_BASE_URL } from '@/lib/share/og-share-utils';
+import {
+  ShareFooter,
+  SHARE_IMAGE_BORDER,
+  SHARE_TITLE_GLOW,
+  truncateText,
+} from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 import {
   elementAstro,
@@ -145,6 +150,29 @@ const SIGN_TO_MODALITY: Record<SignKey, ModalityType> = {
   capricorn: 'Cardinal',
   aquarius: 'Fixed',
   pisces: 'Mutable',
+};
+
+const ARCHETYPE_TAGLINES: Record<string, Record<string, string>> = {
+  Fire: {
+    Cardinal: 'Bold. Restless. Born to lead.',
+    Fixed: 'Fierce loyalty. Unshakable presence.',
+    Mutable: 'Visionary spark. Always evolving.',
+  },
+  Earth: {
+    Cardinal: 'Driven builder. Quiet ambition.',
+    Fixed: 'Steady roots. Deep endurance.',
+    Mutable: 'Practical grace. Gentle precision.',
+  },
+  Air: {
+    Cardinal: 'Sharp mind. Social architect.',
+    Fixed: 'Original thinker. Ahead of the curve.',
+    Mutable: 'Curious connector. Endless ideas.',
+  },
+  Water: {
+    Cardinal: 'Intuitive protector. Emotional depth.',
+    Fixed: 'Magnetic intensity. Transformative power.',
+    Mutable: 'Empathic dreamer. Boundless compassion.',
+  },
 };
 
 function normaliseKey(value?: string) {
@@ -287,7 +315,7 @@ export async function GET(request: NextRequest) {
   const subtitleSize = isLandscape ? 15 : isStory ? 26 : 20;
   const bigThreeSize = isLandscape ? 20 : isStory ? 36 : 28;
   const bigThreeGlyphSize = isLandscape ? 24 : isStory ? 46 : 36;
-  const chartSize = isLandscape ? 420 : isStory ? 700 : 560;
+  const chartSize = isLandscape ? 480 : isStory ? 800 : 500;
 
   const elementCounts = ELEMENT_ORDER.reduce(
     (acc, label) => {
@@ -321,8 +349,9 @@ export async function GET(request: NextRequest) {
     }
   });
 
-  const insightText =
+  const rawInsight =
     insight ?? 'A balanced cosmic profile with diverse energies.';
+  const insightText = rawInsight.replace(/\.([A-Z])/g, '. $1');
 
   // Compute archetype subtitle from dominant element + modality
   const dominantElement = ELEMENT_ORDER.reduce((best, label) =>
@@ -332,6 +361,8 @@ export async function GET(request: NextRequest) {
     modalityCounts[label] > modalityCounts[best] ? label : best,
   );
   const archetypeSubtitle = `A ${dominantModality} ${dominantElement} Chart`;
+  const archetypeTagline =
+    ARCHETYPE_TAGLINES[dominantElement]?.[dominantModality] ?? '';
 
   // Element-specific decorative gradient overlays
   const elementDecorativeGradient: Record<string, string> = {
@@ -353,7 +384,6 @@ export async function GET(request: NextRequest) {
   // Generate unique starfield based on shareId
   const starfieldId = shareId || 'default-birth-chart';
   const stars = generateStarfield(starfieldId, getStarCount(format));
-  const baseUrl = SHARE_BASE_URL;
 
   // Starfield component - increased opacity for better visibility
   const starfieldJsx = stars.map((star, i) => (
@@ -386,6 +416,7 @@ export async function GET(request: NextRequest) {
         padding,
         fontFamily: 'Roboto Mono',
         position: 'relative',
+        border: SHARE_IMAGE_BORDER,
       }}
     >
       {/* Gradient overlay */}
@@ -440,10 +471,24 @@ export async function GET(request: NextRequest) {
             fontSize: titleSize,
             fontWeight: 500,
             lineHeight: 1.05,
+            textShadow: SHARE_TITLE_GLOW,
           }}
         >
           {name ? `${name}'s birth chart` : 'Birth chart highlights'}
         </div>
+        {archetypeTagline && (
+          <div
+            style={{
+              display: 'flex',
+              fontSize: 14,
+              fontStyle: 'italic',
+              color: '#A78BFA',
+              marginTop: 4,
+            }}
+          >
+            {archetypeTagline}
+          </div>
+        )}
         <div
           style={{
             display: 'flex',
@@ -493,7 +538,7 @@ export async function GET(request: NextRequest) {
         {/* Left column: Chart */}
         <div
           style={{
-            width: 420,
+            width: 480,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -567,9 +612,7 @@ export async function GET(request: NextRequest) {
                 display: 'flex',
               }}
             >
-              {insightText.length > 100
-                ? insightText.slice(0, 97) + '...'
-                : insightText}
+              {truncateText(insightText, 100)}
             </div>
           </div>
         </div>
@@ -591,7 +634,7 @@ export async function GET(request: NextRequest) {
       </div>
 
       {/* Branded Footer */}
-      <ShareFooter baseUrl={baseUrl} format={format} />
+      <ShareFooter format={format} />
     </div>
   ) : (
     // Square/Story Layout
@@ -602,11 +645,13 @@ export async function GET(request: NextRequest) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        justifyContent: isStory ? 'center' : undefined,
         background: '#0A0A0A',
         color: '#fff',
         padding,
         fontFamily: 'Roboto Mono',
         position: 'relative',
+        border: SHARE_IMAGE_BORDER,
       }}
     >
       {/* Gradient overlay */}
@@ -671,10 +716,24 @@ export async function GET(request: NextRequest) {
               fontSize: titleSize,
               fontWeight: 500,
               lineHeight: 1.05,
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {name ? `${name}'s birth chart` : 'Birth chart highlights'}
           </div>
+          {archetypeTagline && (
+            <div
+              style={{
+                display: 'flex',
+                fontSize: isStory ? 24 : 18,
+                fontStyle: 'italic',
+                color: '#A78BFA',
+                marginTop: 4,
+              }}
+            >
+              {archetypeTagline}
+            </div>
+          )}
           <div
             style={{
               display: 'flex',
@@ -795,7 +854,7 @@ export async function GET(request: NextRequest) {
                 display: 'flex',
               }}
             >
-              {insightText}
+              {isSquare ? truncateText(insightText, 120) : insightText}
             </div>
           </div>
         </div>
@@ -816,7 +875,7 @@ export async function GET(request: NextRequest) {
       </div>
 
       {/* Branded Footer */}
-      <ShareFooter baseUrl={baseUrl} format={format} />
+      <ShareFooter format={format} />
     </div>
   );
 

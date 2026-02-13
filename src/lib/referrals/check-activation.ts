@@ -1,6 +1,11 @@
 import { sql } from '@vercel/postgres';
 import { sendToUser } from '@/lib/notifications/native-push-sender';
 import { processReferralTierReward } from '@/utils/referrals/reward-processor';
+import { getNextTier } from '@/utils/referrals/reward-tiers';
+import {
+  REFERRAL_DAYS_REFERRED,
+  REFERRAL_DAYS_REFERRER,
+} from '@/lib/referrals';
 
 /**
  * Activation events that trigger referral rewards.
@@ -104,9 +109,12 @@ export async function checkInviteActivation(
       }
     }
 
-    // Grant reward to both users
-    await grantActivationReward(referral.referrer_user_id);
-    await grantActivationReward(userId);
+    // Grant reward to both users (referrer gets 7 days, referred gets 30 days)
+    await grantActivationReward(
+      referral.referrer_user_id,
+      REFERRAL_DAYS_REFERRER,
+    );
+    await grantActivationReward(userId, REFERRAL_DAYS_REFERRED);
 
     // Mark as activated
     await sql`
@@ -119,16 +127,28 @@ export async function checkInviteActivation(
       WHERE id = ${referral.id}
     `;
 
+    // Count activated referrals for tier progress notification
+    const activatedResult = await sql`
+      SELECT COUNT(*)::int AS count FROM user_referrals
+      WHERE referrer_user_id = ${referral.referrer_user_id}
+        AND activated = true
+    `;
+    const activatedCount = activatedResult.rows[0]?.count ?? 0;
+    const nextTier = getNextTier(activatedCount);
+
     // Send notifications (best-effort)
+    const tierTeaser = nextTier
+      ? ` ${nextTier.threshold - activatedCount} more to unlock ${nextTier.label}.`
+      : '';
     sendToUser(referral.referrer_user_id, {
       title: 'Your referral is active!',
-      body: "Your friend started their cosmic journey. You've both earned 30 days of Lunary+!",
-      data: { type: 'referral_activated', action: '/profile' },
+      body: `Your friend joined Lunary — you've earned a bonus week of Pro!${tierTeaser}`,
+      data: { type: 'referral_activated', action: '/referrals' },
     }).catch(() => {});
 
     sendToUser(userId, {
       title: 'Welcome bonus unlocked!',
-      body: "You've earned 30 days of Lunary+ for starting your cosmic practice!",
+      body: `You've earned ${REFERRAL_DAYS_REFERRED} days of Pro for starting your cosmic practice!`,
       data: { type: 'referral_activated', action: '/app' },
     }).catch(() => {});
 
@@ -145,11 +165,16 @@ export async function checkInviteActivation(
 }
 
 /**
- * Grant 30-day Pro trial/extension to a user as a referral reward.
- * Mirrors the logic from src/lib/referrals.ts grantReferralReward().
+ * Grant Pro trial/extension to a user as a referral reward.
+ * Referred users get 30 days, referrers get 7 days per activation.
  */
-async function grantActivationReward(userId: string): Promise<void> {
+async function grantActivationReward(
+  userId: string,
+  days: number,
+): Promise<void> {
   try {
+    const interval = `${days} days`;
+
     // Check for existing subscription
     const subscription = await sql`
       SELECT status, stripe_subscription_id
@@ -163,12 +188,12 @@ async function grantActivationReward(userId: string): Promise<void> {
       | { status: string; stripe_subscription_id: string | null }
       | undefined;
 
-    // If already has active subscription, extend by 30 days
+    // If already has active subscription, extend
     if (subscriptionRow) {
       await sql`
         UPDATE subscriptions
         SET
-          current_period_end = current_period_end + INTERVAL '30 days',
+          current_period_end = current_period_end + ${interval}::interval,
           updated_at = NOW()
         WHERE user_id = ${userId}
         AND status IN ('active', 'trial')
@@ -176,7 +201,7 @@ async function grantActivationReward(userId: string): Promise<void> {
       return;
     }
 
-    // Grant new 30-day trial
+    // Grant new trial
     await sql`
       INSERT INTO subscriptions (
         user_id, status, plan_type, trial_ends_at,
@@ -184,13 +209,13 @@ async function grantActivationReward(userId: string): Promise<void> {
       )
       VALUES (
         ${userId}, 'trial', 'monthly',
-        NOW() + INTERVAL '30 days', NOW() + INTERVAL '30 days',
+        NOW() + ${interval}::interval, NOW() + ${interval}::interval,
         NULL, NULL, true
       )
       ON CONFLICT (user_id) DO UPDATE SET
         status = 'trial',
-        trial_ends_at = NOW() + INTERVAL '30 days',
-        current_period_end = NOW() + INTERVAL '30 days',
+        trial_ends_at = NOW() + ${interval}::interval,
+        current_period_end = NOW() + ${interval}::interval,
         trial_used = true,
         updated_at = NOW()
     `;

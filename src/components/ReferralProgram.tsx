@@ -112,7 +112,7 @@ export function ReferralProgram() {
       try {
         await nav.share({
           title: 'Join Lunary',
-          text: `Unlock personalized astrology with Lunary. Use my link and we both get ${REFERRAL_TRIAL_DAYS} days Pro free!`,
+          text: `Unlock personalized astrology with Lunary. Use my link and get ${REFERRAL_TRIAL_DAYS} days of Pro free!`,
           url: referralUrl,
         });
         setError(null);
@@ -201,12 +201,12 @@ export function ReferralProgram() {
         <div className='flex-1 space-y-4'>
           <div>
             <h3 className='mb-1 text-lg font-semibold text-white'>
-              Refer friends, unlock a free month
+              Give a friend {REFERRAL_TRIAL_DAYS} days of Pro
             </h3>
             <p className='text-sm text-zinc-200/80'>
-              Share your link. When a friend starts their Lunary trial through
-              it, you both receive {REFERRAL_TRIAL_DAYS} days of premium access
-              automatically.
+              Share your link. When a friend joins and completes their first
+              action, they get {REFERRAL_TRIAL_DAYS} days of Pro and you earn a
+              bonus week.
             </p>
           </div>
 
@@ -287,12 +287,10 @@ export function ReferralProgram() {
                 </p>
                 <ol className='space-y-1 text-xs text-zinc-300'>
                   <li>1. Send your unique link to a friend.</li>
+                  <li>2. They join Lunary and complete their first action.</li>
                   <li>
-                    2. They create their Lunary account and start a trial.
-                  </li>
-                  <li>
-                    3. Both accounts receive {REFERRAL_TRIAL_DAYS} days Pro
-                    automatically.
+                    3. They get {REFERRAL_TRIAL_DAYS} days Pro, you earn a bonus
+                    week.
                   </li>
                 </ol>
               </div>

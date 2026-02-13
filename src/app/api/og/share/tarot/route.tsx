@@ -386,7 +386,7 @@ export async function GET(request: NextRequest) {
           ))}
         </div>
 
-        <ShareFooter baseUrl='https://lunary.app' format='landscape' />
+        <ShareFooter format='landscape' />
       </div>,
       {
         width: 1200,
@@ -480,7 +480,7 @@ export async function GET(request: NextRequest) {
         )}
       </div>
 
-      <ShareFooter baseUrl='https://lunary.app' format='landscape' />
+      <ShareFooter format='landscape' />
     </div>,
     {
       width: WIDTH,

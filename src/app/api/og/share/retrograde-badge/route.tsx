@@ -10,7 +10,8 @@ import {
 import {
   truncateText,
   ShareFooter,
-  SHARE_BASE_URL,
+  SHARE_IMAGE_BORDER,
+  SHARE_TITLE_GLOW,
 } from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
@@ -79,12 +80,12 @@ const BADGE_LABELS: Record<string, string> = {
   diamond: 'Diamond',
 };
 
-// Badge text icons (replacing emoji that may not render correctly)
+// Badge tier indicators (Roboto Mono safe - no Unicode stars)
 const BADGE_ICONS: Record<string, string> = {
-  bronze: '★',
-  silver: '★★',
-  gold: '★★★',
-  diamond: '◆',
+  bronze: 'I',
+  silver: 'II',
+  gold: 'III',
+  diamond: 'IV',
 };
 
 export async function GET(request: NextRequest) {
@@ -151,7 +152,6 @@ export async function GET(request: NextRequest) {
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
-    const baseUrl = SHARE_BASE_URL;
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
@@ -190,8 +190,23 @@ export async function GET(request: NextRequest) {
     const humorLimit = isLandscape ? 80 : 120;
     const rawHumor = data.isCompleted
       ? 'Mercury went direct. I made it through.'
-      : 'Still standing, still surviving';
+      : 'Thriving through the chaos';
     const humorLine = truncateText(rawHumor, humorLimit);
+
+    // Progress calculation
+    const totalDays =
+      startDate && endDate
+        ? Math.max(
+            1,
+            Math.ceil(
+              (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+            ),
+          )
+        : 0;
+    const progressPercent =
+      totalDays > 0
+        ? Math.min(100, Math.round((data.survivalDays / totalDays) * 100))
+        : 0;
 
     // Starfield component
     const starfieldJsx = stars.map((star, i) => (
@@ -211,6 +226,51 @@ export async function GET(request: NextRequest) {
     ));
 
     // Inline JSX directly based on format
+    // Progress bar JSX (shared across formats)
+    const progressBarJsx =
+      totalDays > 0 && !data.isCompleted ? (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 8,
+            width: '100%',
+            maxWidth: isLandscape ? 300 : isStory ? 600 : 500,
+          }}
+        >
+          <div
+            style={{
+              fontSize: isLandscape ? 14 : isStory ? 24 : 20,
+              color: OG_COLORS.textTertiary,
+              display: 'flex',
+            }}
+          >
+            Day {data.survivalDays} of {totalDays}
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              width: '100%',
+              height: isLandscape ? 8 : 12,
+              borderRadius: 999,
+              background: 'rgba(255,255,255,0.1)',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                width: `${progressPercent}%`,
+                height: '100%',
+                borderRadius: 999,
+                background: badgeColors.border,
+              }}
+            />
+          </div>
+        </div>
+      ) : null;
+
     const layoutJsx = isLandscape ? (
       // Landscape Layout - horizontal layout
       <div
@@ -223,6 +283,7 @@ export async function GET(request: NextRequest) {
           padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {/* Unique starfield background */}
@@ -297,6 +358,7 @@ export async function GET(request: NextRequest) {
                 letterSpacing: '0.05em',
                 display: 'flex',
                 lineHeight: 1.1,
+                textShadow: SHARE_TITLE_GLOW,
               }}
             >
               {mainText}
@@ -339,11 +401,12 @@ export async function GET(request: NextRequest) {
             >
               {humorLine}
             </div>
+            {progressBarJsx}
           </div>
         </div>
 
         {/* Branded Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : isStory ? (
       // Story Layout - vertical with large badge
@@ -353,10 +416,12 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
           background: OG_COLORS.background,
           padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {/* Unique starfield background */}
@@ -380,6 +445,7 @@ export async function GET(request: NextRequest) {
               textAlign: 'center',
               display: 'flex',
               lineHeight: 1.1,
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {mainText}
@@ -478,10 +544,11 @@ export async function GET(request: NextRequest) {
           >
             {humorLine}
           </div>
+          {progressBarJsx}
         </div>
 
         {/* Footer Branding */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : (
       // Square Layout
@@ -495,6 +562,7 @@ export async function GET(request: NextRequest) {
           padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {/* Unique starfield background */}
@@ -518,6 +586,7 @@ export async function GET(request: NextRequest) {
               textAlign: 'center',
               display: 'flex',
               lineHeight: 1.1,
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {mainText}
@@ -616,10 +685,11 @@ export async function GET(request: NextRequest) {
           >
             {humorLine}
           </div>
+          {progressBarJsx}
         </div>
 
         {/* Footer Branding */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     );
 

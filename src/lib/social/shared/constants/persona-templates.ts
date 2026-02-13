@@ -95,7 +95,7 @@ export const PERSONA_BODY_TEMPLATES = [
   'Lunary goes beyond your sun sign.\nYour full natal chart shapes everything: horoscopes, transits, tarot pulls, crystal guidance. All personalised to you.',
   'Lunary is where I put everything I wish I had when I started.\nEverything based on your full birth chart. Horoscopes, transits, tarot, crystals.',
   'I made Lunary for moments like this.\nPersonalised to your full natal chart. Not generic sun sign content. Horoscopes, transits, tarot, crystals.',
-  "I'm opening Lunary's beta and gifting you a free year.\nEverything personalised to your full birth chart. Horoscopes, transits, tarot, crystals.",
+  'Share Lunary with a friend and you both get rewarded.\nThey get 30 days of Pro. You unlock badges, exclusive spreads, and more as you refer.',
   'Lunary is live.\nDaily horoscopes, transits, tarot readings, crystal guidance. All based on your complete natal chart, not just your sun sign.',
 ];
 
@@ -138,63 +138,61 @@ export const THREADS_QUESTION_TEMPLATES = [
 ];
 
 /**
- * Dear-style beta CTA templates for Threads
- * These drive signups during peak app usage times (evening)
- * Always includes FULLORBIT beta code
+ * Dear-style referral CTA templates for Threads
+ * These drive referral signups during peak app usage times (evening)
+ * No hardcoded promo codes — referral links are per-user, generated in-app
  * Moon phase emojis: 🌑🌒🌓🌔🌕🌖🌗🌘
  */
-export const DEAR_STYLE_BETA_TEMPLATES = [
-  `dear tarot readers, witches, astrologers, and moon lovers 🌕
-i'm gifting a free year of lunary during the beta.
-code: FULLORBIT
-let me know what you think`,
+export const DEAR_STYLE_REFERRAL_TEMPLATES = [
+  `Dear tarot readers, witches, astrologers, and moon lovers 🌕
+Share Lunary with a friend and you both get rewarded.
+They get 30 days of Pro. You unlock exclusive spreads, badges, and more.
+Find your referral link in the app.`,
 
-  `for astrology lovers, moon watchers, and chart nerds 🌔
-lunary is in beta and i'm giving away a free year.
-code: FULLORBIT
-feedback welcome`,
+  `For astrology lovers, moon watchers, and chart nerds 🌔
+Know someone who would love Lunary? Send them your referral link.
+They get 30 days of Pro free. You earn rewards with every friend who joins.
+Your link is waiting in the app.`,
 
-  `dear moon gazers and cosmic seekers 🌓
-trying something new with lunary.
-free year with code: FULLORBIT
-curious what you notice`,
+  `Dear moon gazers and cosmic seekers 🌓
+Lunary is better with friends.
+Share your referral link and they get 30 days of Pro. You unlock badges, exclusive spreads, and more the more friends you refer.
+Find your link in the app.`,
 
-  `to the witches, the chart readers, the crystal collectors 🌖
-lunary is finally in beta.
-i'm giving away a free year to early supporters.
-code: FULLORBIT
-tell me what's missing`,
+  `To the witches, the chart readers, the crystal collectors 🌖
+I built a referral program to say thank you.
+Share Lunary with a friend. They get 30 days of Pro. You earn tiered rewards as you refer more people.
+Your referral link is in the app.`,
 
-  `dear cosmic wanderers and horoscope checkers 🌗
-if you've ever wished your astrology app actually knew your chart...
-lunary does. gifting a free year during beta.
-code: FULLORBIT`,
+  `Dear cosmic wanderers and horoscope checkers 🌗
+If you love Lunary, share it with someone who would too.
+They get 30 days of Pro. You unlock exclusive spreads and badges along the way.
+Your referral link is in the app.`,
 
-  `for the transit trackers and birth chart obsessives 🌕
-lunary is live and i want you to try it.
-free year with code: FULLORBIT
-let me know what you think`,
+  `For the transit trackers and birth chart obsessives 🌕
+Share Lunary with someone who gets it.
+They get 30 days of Pro. You get rewarded for every friend who signs up.
+Unlock badges, exclusive spreads, and more. Your link is in the app.`,
 
-  `dear tarot pullers, moon trackers, and star gazers 🌒
-i built lunary for you.
-gifting a free year during beta.
-code: FULLORBIT
-feedback welcome`,
+  `Dear tarot pullers, moon trackers, and star gazers 🌒
+I built Lunary for you. Now I want to make it easy to share it.
+Refer a friend and they get 30 days of Pro. You earn rewards for every sign-up.
+Find your referral link in the app.`,
 
-  `to the astrologers and the astro-curious 🌘
-lunary goes beyond your sun sign.
-free year with code: FULLORBIT
-curious what you notice`,
+  `To the astrologers and the astro-curious 🌘
+Lunary goes beyond your sun sign. Know someone who would love that?
+Share your referral link. They get 30 days of Pro. You unlock rewards as you refer.
+Your link is in the app.`,
 
-  `dear crystal hoarders and horoscope readers 🌑
-opening lunary beta to early supporters.
-free year with code: FULLORBIT
-tell me what's missing`,
+  `Dear crystal hoarders and horoscope readers 🌑
+I wanted to give back to this community.
+Share Lunary with a friend. They get 30 days of Pro. You earn badges, exclusive spreads, and months of Pro as you refer more.
+Your referral link is in the app.`,
 
-  `for moon lovers and chart nerds 🌔
-lunary is ready for you.
-free year during beta.
-code: FULLORBIT`,
+  `For moon lovers and chart nerds 🌔
+The best way to grow Lunary is through you.
+Refer a friend. They get 30 days of Pro. You unlock tiered rewards the more you share.
+Find your referral link in the app.`,
 ];
 
 /**
@@ -255,14 +253,14 @@ export function getThreadsQuestion(topic: string, seed?: number): string {
 }
 
 /**
- * Get a dear-style beta CTA post
+ * Get a dear-style referral CTA post
  */
-export function getDearStyleBetaPost(seed?: number): string {
+export function getDearStyleReferralPost(seed?: number): string {
   const index =
     seed !== undefined
-      ? seed % DEAR_STYLE_BETA_TEMPLATES.length
-      : Math.floor(Math.random() * DEAR_STYLE_BETA_TEMPLATES.length);
-  return DEAR_STYLE_BETA_TEMPLATES[index];
+      ? seed % DEAR_STYLE_REFERRAL_TEMPLATES.length
+      : Math.floor(Math.random() * DEAR_STYLE_REFERRAL_TEMPLATES.length);
+  return DEAR_STYLE_REFERRAL_TEMPLATES[index];
 }
 
 /**

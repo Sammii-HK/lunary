@@ -42,11 +42,11 @@ export const THREADS_TOPIC_TAGS: Record<ThemeCategory, string> = {
   spells: 'Spirituality',
 };
 
-/** Weekday posting slots (5 posts/day) in UTC hours */
-export const WEEKDAY_SLOTS_UTC = [7, 11, 15, 19, 22];
+/** Weekday posting slots (3 posts/day) in UTC hours — UK/US crossover window */
+export const WEEKDAY_SLOTS_UTC = [14, 17, 21];
 
-/** Weekend posting slots (3 posts/day) in UTC hours */
-export const WEEKEND_SLOTS_UTC = [11, 15, 19];
+/** Weekend posting slots (2 posts/day) in UTC hours — UK/US crossover window */
+export const WEEKEND_SLOTS_UTC = [14, 20];
 
 /** Character limits for Threads posts */
 export const THREADS_CHAR_LIMITS = {

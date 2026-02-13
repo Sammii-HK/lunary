@@ -6,6 +6,7 @@ import type { IGFormat } from './design-system';
 export type IGPostType =
   | 'meme'
   | 'carousel'
+  | 'angel_number_carousel'
   | 'quote'
   | 'daily_cosmic'
   | 'app_feature'
@@ -97,6 +98,14 @@ export interface IGStoryContent {
   imageUrl: string;
 }
 
+export interface IGStoryData {
+  variant: StoryVariant;
+  title: string;
+  subtitle: string;
+  params: Record<string, string>;
+  endpoint: string;
+}
+
 // --- Post Batch ---
 
 export interface IGPostBatch {
@@ -116,5 +125,8 @@ export interface IGScheduledPost {
     sign?: string;
     slug?: string;
     template?: MemeTemplate;
+    moonPhase?: string;
+    quoteText?: string;
+    author?: string;
   };
 }

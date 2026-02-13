@@ -780,7 +780,7 @@ export async function getFeatureAdoption(
     'grimoire_viewed',
     'astral_chat_used',
     'tarot_drawn',
-    'ritual_started',
+    'ritual_completed',
     'chart_viewed',
   ];
 

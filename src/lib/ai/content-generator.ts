@@ -252,7 +252,7 @@ export async function generateVideoScriptContent({
 export const VideoScriptSchema = z.object({
   video: z.object({
     hook: z.string().describe('Spoken hook line (8-14 words)'),
-    scriptBody: z.array(z.string()).describe('Script body lines (6-10 lines)'),
+    scriptBody: z.array(z.string()).describe('Script body lines (4-7 lines)'),
   }),
 });
 

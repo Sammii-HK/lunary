@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/api/rate-limit';
+import { stripHtmlTags } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -95,10 +96,7 @@ export async function POST(request: NextRequest) {
     }
 
     const sanitizedDetails = details
-      ? details
-          .replace(/<[^>]*>/g, '')
-          .trim()
-          .slice(0, MAX_DETAILS_LENGTH)
+      ? stripHtmlTags(details, '').trim().slice(0, MAX_DETAILS_LENGTH)
       : null;
 
     // Verify the content exists

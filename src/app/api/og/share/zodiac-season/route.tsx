@@ -9,9 +9,8 @@ import {
 } from '@/lib/share/og-utils';
 import {
   ShareFooter,
-  SHARE_BASE_URL,
-  SHARE_BORDERS,
-  SHARE_CARDS,
+  SHARE_IMAGE_BORDER,
+  SHARE_TITLE_GLOW,
 } from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
@@ -183,8 +182,6 @@ export async function GET(request: NextRequest) {
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
-    const baseUrl = SHARE_BASE_URL;
-
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
     const padding = isLandscape ? 48 : isStory ? 60 : 60;
@@ -255,6 +252,7 @@ export async function GET(request: NextRequest) {
           padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {gradientOverlay}
@@ -277,9 +275,10 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
-            {firstName ? `${firstName} Welcomes` : 'Welcome to'}
+            {firstName ? `${firstName} enters` : 'Welcome to'}
           </div>
         </div>
 
@@ -379,30 +378,22 @@ export async function GET(request: NextRequest) {
             {/* Themes */}
             <div
               style={{
+                fontSize: themeSize,
+                color: OG_COLORS.textSecondary,
+                letterSpacing: '0.05em',
                 display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                gap: 8,
               }}
             >
-              {data.themes.map((theme, index) => (
-                <div
-                  key={index}
-                  style={{
-                    fontSize: themeSize,
-                    color: OG_COLORS.textSecondary,
-                    letterSpacing: '0.05em',
-                    display: 'flex',
-                  }}
-                >
-                  • {theme}
-                </div>
-              ))}
+              {data.themes.join(' · ')}
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : isStory ? (
       // Story Layout - Giant symbol, fill vertical space
@@ -412,10 +403,12 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
           background: OG_COLORS.background,
           padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {gradientOverlay}
@@ -438,9 +431,10 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
-            {firstName ? `${firstName} Welcomes` : 'Welcome to'}
+            {firstName ? `${firstName} enters` : 'Welcome to'}
           </div>
         </div>
 
@@ -520,49 +514,24 @@ export async function GET(request: NextRequest) {
             {dateRangeText}
           </div>
 
-          {/* Themes as styled list */}
+          {/* Themes */}
           <div
             style={{
+              fontSize: themeSize,
+              color: OG_COLORS.textSecondary,
+              letterSpacing: '0.05em',
               display: 'flex',
-              flexDirection: 'column',
-              gap: 16,
-              alignItems: 'center',
-              background: SHARE_CARDS.primary,
-              border: SHARE_BORDERS.card,
-              borderRadius: 20,
-              padding: '28px 48px',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              gap: 8,
             }}
           >
-            <div
-              style={{
-                fontSize: 20,
-                color: OG_COLORS.textSecondary,
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                marginBottom: 8,
-                display: 'flex',
-              }}
-            >
-              Season Themes
-            </div>
-            {data.themes.map((theme, index) => (
-              <div
-                key={index}
-                style={{
-                  fontSize: themeSize,
-                  color: OG_COLORS.textPrimary,
-                  letterSpacing: '0.05em',
-                  display: 'flex',
-                }}
-              >
-                {theme}
-              </div>
-            ))}
+            {data.themes.join(' · ')}
           </div>
         </div>
 
         {/* Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : (
       // Square Layout
@@ -576,6 +545,7 @@ export async function GET(request: NextRequest) {
           padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {gradientOverlay}
@@ -607,9 +577,10 @@ export async function GET(request: NextRequest) {
                 letterSpacing: '0.05em',
                 textAlign: 'center',
                 display: 'flex',
+                textShadow: SHARE_TITLE_GLOW,
               }}
             >
-              {firstName ? `${firstName} Welcomes` : 'Welcome to'}
+              {firstName ? `${firstName} enters` : 'Welcome to'}
             </div>
           </div>
 
@@ -692,31 +663,21 @@ export async function GET(request: NextRequest) {
             {/* Themes */}
             <div
               style={{
+                fontSize: themeSize,
+                color: OG_COLORS.textSecondary,
+                letterSpacing: '0.05em',
                 display: 'flex',
-                flexDirection: 'column',
                 flexWrap: 'wrap',
-                gap: 12,
-                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
               }}
             >
-              {data.themes.map((theme, index) => (
-                <div
-                  key={index}
-                  style={{
-                    fontSize: themeSize,
-                    color: OG_COLORS.textSecondary,
-                    letterSpacing: '0.05em',
-                    display: 'flex',
-                  }}
-                >
-                  {theme}
-                </div>
-              ))}
+              {data.themes.join(' · ')}
             </div>
           </div>
 
           {/* Footer */}
-          <ShareFooter baseUrl={baseUrl} format={format} />
+          <ShareFooter format={format} />
         </div>
       </div>
     );

@@ -31,7 +31,7 @@ type PlatformPayload = {
   instagramOptions?: { type: string; coverUrl?: string };
 };
 
-const videoPlatforms = ['instagram', 'tiktok'];
+const videoPlatforms = ['instagram', 'tiktok', 'youtube'];
 const noMediaVariantMode: Record<string, 'noImage' | 'mediaNull'> = {
   bluesky: 'noImage',
   threads: 'noImage',

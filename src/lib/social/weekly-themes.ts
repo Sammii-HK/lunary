@@ -90,7 +90,9 @@ export const THEME_CATEGORY_WEIGHTS: Record<string, number> = {
 };
 
 /**
- * Select a theme for a given week with weighted preference for numerology
+ * Select a theme for a given week.
+ * Primary block is always numerology (the #1 performer).
+ * Falls back to weighted selection if no numerology themes exist.
  */
 export function selectWeeklyTheme(
   weekNumber: number,
@@ -100,17 +102,22 @@ export function selectWeeklyTheme(
     return categoryThemes[customThemeIndex % categoryThemes.length];
   }
 
-  // Create weighted theme pool
+  // Primary block is always numerology
+  const numerologyThemes = categoryThemes.filter(
+    (t) => t.category === 'numerology',
+  );
+  if (numerologyThemes.length > 0) {
+    return numerologyThemes[weekNumber % numerologyThemes.length];
+  }
+
+  // Fallback: weighted selection if no numerology themes
   const weightedThemes: WeeklyTheme[] = [];
   for (const theme of categoryThemes) {
     const weight = THEME_CATEGORY_WEIGHTS[theme.category] || 1;
-    // Add theme multiple times based on weight
     for (let i = 0; i < weight; i++) {
       weightedThemes.push(theme);
     }
   }
-
-  // Select from weighted pool using week number as seed
   return weightedThemes[weekNumber % weightedThemes.length];
 }
 
@@ -156,6 +163,7 @@ export function getTransitThemeForDate(date: Date): {
   toSign: string;
   ingressDate: Date;
   daysUntil: number;
+  hoursUntil: number;
 } | null {
   try {
     // Dynamic import to keep this lightweight when not needed
@@ -214,9 +222,10 @@ export function getTransitThemeForDate(date: Date): {
           }
         }
         const ingressDate = new Date((lo + hi) / 2);
-        const daysUntil = Math.ceil(
-          (ingressDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
-        );
+        const diffMs = ingressDate.getTime() - date.getTime();
+        const hoursUntil = Math.round(diffMs / (1000 * 60 * 60));
+        const daysUntil =
+          hoursUntil < 24 ? 0 : Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
         return {
           planet: planet.name,
@@ -224,6 +233,7 @@ export function getTransitThemeForDate(date: Date): {
           toSign: signAfter,
           ingressDate,
           daysUntil,
+          hoursUntil,
         };
       }
     }

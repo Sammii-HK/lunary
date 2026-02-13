@@ -359,6 +359,26 @@ export default async function TransitsYearPage({
         />
       }
     >
+      {/* Quick-nav links to individual transit pages — helps Google prefer individual pages over this year page */}
+      <nav className='mb-8 rounded-xl border border-zinc-800 bg-zinc-900/50 p-5'>
+        <p className='text-sm font-medium text-zinc-300 mb-3'>
+          Looking for a specific transit? Jump to:
+        </p>
+        <ul className='space-y-1.5'>
+          {transits.map((transit) => (
+            <li key={`nav-${transit.id}`}>
+              <Link
+                href={`/grimoire/transits/${transit.id}`}
+                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+              >
+                {transit.title}{' '}
+                <span className='text-zinc-500'>— {transit.dates}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
       <section className='mb-10 grid gap-4 md:grid-cols-2'>
         {transits.map((transit) => (
           <Link
