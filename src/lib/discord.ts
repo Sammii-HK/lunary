@@ -1,3 +1,5 @@
+import { stripHtmlTags } from '@/lib/utils';
+
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || '';
 const DISCORD_WEBHOOK_ANALYTICS = process.env.DISCORD_WEBHOOK_ANALYTICS || '';
 const DISCORD_WEBHOOK_URGENT = process.env.DISCORD_WEBHOOK_URGENT || '';
@@ -431,14 +433,16 @@ export async function sendDiscordAdminNotification(
 
   // Convert HTML to Discord markdown - this is display formatting for Discord embeds,
   // not security sanitization. The output goes to Discord's API, not rendered as HTML.
-  const description = input.message
-    .replace(/<b>/g, '**')
-    .replace(/<\/b>/g, '**')
-    .replace(/<i>/g, '*')
-    .replace(/<\/i>/g, '*')
-    .replace(/<br\s*\/?>/g, '\n')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/<[^>]+>/g, ''); // Strip remaining HTML tags for plain text
+  const description = stripHtmlTags(
+    input.message
+      .replace(/<b>/g, '**')
+      .replace(/<\/b>/g, '**')
+      .replace(/<i>/g, '*')
+      .replace(/<\/i>/g, '*')
+      .replace(/<br\s*\/?>/g, '\n')
+      .replace(/&nbsp;/g, ' '),
+    '',
+  );
 
   // Default to 'todo' for admin notifications (content generation needs action)
   // Only 'emergency'/'high' priority get 'urgent' for bypassing all filters
