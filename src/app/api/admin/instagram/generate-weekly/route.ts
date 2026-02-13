@@ -66,19 +66,20 @@ export async function POST(request: NextRequest) {
               where: { base_group_key: groupKey },
             });
 
-            // For carousels, store all image URLs pipe-delimited so
-            // buildPlatformPayload can split them into multiple media items.
-            // For other post types, use the first image URL.
+            // For carousels (including angel number carousels), store all
+            // image URLs pipe-delimited so buildPlatformPayload can split
+            // them into multiple media items.
+            const isCarousel =
+              post.type === 'carousel' || post.type === 'angel_number_carousel';
             const imageUrls = post.imageUrls || [];
             const imageUrlValue =
-              post.type === 'carousel' && imageUrls.length > 1
+              isCarousel && imageUrls.length > 1
                 ? imageUrls.join('|')
                 : imageUrls[0] || null;
 
             const postData = {
               content: post.caption,
-              postType:
-                post.type === 'carousel' ? 'instagram_carousel' : post.type,
+              postType: isCarousel ? 'instagram_carousel' : post.type,
               scheduledDate: new Date(post.scheduledTime),
               image_url: imageUrlValue,
               video_metadata: {

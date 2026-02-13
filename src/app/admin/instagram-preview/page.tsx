@@ -1,11 +1,33 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { buildCarouselFromSlug } from '@/lib/instagram/carousel-content';
 import { generateDidYouKnowBatch } from '@/lib/instagram/did-you-know-content';
 import { generateRankingBatch } from '@/lib/instagram/ranking-content';
 import { generateCompatibilityBatch } from '@/lib/instagram/compatibility-content';
-import { generateDailyStories } from '@/lib/instagram/story-content';
+import { generateRankingCarousel } from '@/lib/instagram/ranking-content';
+import { generateCompatibilityCarousel } from '@/lib/instagram/compatibility-content';
+import { generateAngelNumberBatch } from '@/lib/instagram/angel-number-content';
+import { generateOneWordBatch } from '@/lib/instagram/one-word-content';
+import { generateDailyStoryData } from '@/lib/instagram/story-content';
+import {
+  generateZodiacCaption,
+  generateTarotCaption,
+  generateCrystalCaption,
+  generateCompatibilityCaption,
+  generateRankingCaption,
+  generateMemeCaption,
+  generateAngelNumberCaption,
+  generateGenericCaption,
+} from '@/lib/instagram/caption-content';
+import {
+  generateMemeAltText,
+  generateCompatibilityAltText,
+  generateRankingAltText,
+  generateStoryAltText,
+  generateCarouselAltText,
+  generateAngelNumberAltText,
+} from '@/lib/instagram/alt-text';
 import type { IGCarouselContent } from '@/lib/instagram/types';
 import { sanitizeImageUrl } from '@/utils/url-security';
 
@@ -17,7 +39,26 @@ type Tab =
   | 'did_you_know'
   | 'rankings'
   | 'compatibility'
-  | 'stories';
+  | 'stories'
+  | 'angel_numbers'
+  | 'one_word';
+
+function CopyButton({ text, label }: { text: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [text]);
+  return (
+    <button
+      onClick={handleCopy}
+      className='px-3 py-1.5 text-xs bg-zinc-800 hover:bg-zinc-700 rounded-md text-zinc-300 transition-colors border border-zinc-600'
+    >
+      {copied ? 'Copied!' : label}
+    </button>
+  );
+}
 
 const SIGNS = [
   'aries',
@@ -174,9 +215,38 @@ const SIGN_MEMES: Record<
 };
 
 const SAMPLE_QUOTES = [
+  // Famous quotes
   'We are all in the gutter, but some of us are looking at the stars. - Oscar Wilde',
   'The cosmos is within us. We are made of star-stuff. - Carl Sagan',
-  'As above, so below. As within, so without.',
+  'There is no better boat than a horoscope to help a man cross over the sea of life. - Varahamihira',
+  'We need not feel ashamed of flirting with the zodiac. The zodiac is well worth flirting with. - D.H. Lawrence',
+  'A physician without a knowledge of astrology has no right to call himself a physician. - Hippocrates',
+  'The stars in the heavens sing a music, if only we had ears to hear. - Pythagoras',
+  // Lunary-branded quotes
+  'As above, so below. As within, so without. ~ Lunary',
+  "Mercury's going direct, but are you? ~ Lunary",
+  'Your birth chart is a map. You still have to walk the path. ~ Lunary',
+  "The stars don't control you. They explain you. ~ Lunary",
+  "Not everything is Mercury Retrograde's fault. But a lot of things are. ~ Lunary",
+  'Your rising sign is who they think you are. Your moon sign is who you actually are. ~ Lunary',
+  "The universe doesn't give you what you can't handle. Your chart proves it. ~ Lunary",
+  "Astrology isn't about prediction. It's about understanding. ~ Lunary",
+  "You're not 'just a [sign].' You're a whole chart. ~ Lunary",
+  'Your Saturn return is not a punishment. It is a promotion. ~ Lunary',
+  'Stop blaming retrogrades and start reading your transits. ~ Lunary',
+  'The Moon changes signs every 2.5 days. Give yourself permission to change too. ~ Lunary',
+  'Your North Node is where your soul is headed. Stop looking backward. ~ Lunary',
+  "Compatibility isn't about matching signs. It's about understanding differences. ~ Lunary",
+  'Every full moon is a chance to release what no longer serves your chart. ~ Lunary',
+  "Your Venus sign knows what you need in love. Maybe it's time you listened. ~ Lunary",
+  'Void of course Moon? Not the time to start. The perfect time to rest. ~ Lunary',
+  'The 12th house holds your secrets. Your birth chart holds them gently. ~ Lunary',
+  'A square aspect is not a problem. It is a push to grow. ~ Lunary',
+  'You were born at exactly the right time. The sky that night proves it. ~ Lunary',
+  "Your Mars sign is your fight song. Learn it. Live it. Don't apologise for it. ~ Lunary",
+  'Eclipse season: when the universe rewrites the script you thought you knew. ~ Lunary',
+  'The zodiac wheel turns for everyone. Your season is always coming. ~ Lunary',
+  'A trine is a gift. A square is a lesson. An opposition is a mirror. ~ Lunary',
 ];
 
 interface CarouselPreview {
@@ -205,6 +275,8 @@ export default function InstagramPreviewPage() {
     { key: 'rankings', label: 'Rankings' },
     { key: 'compatibility', label: 'Compatibility' },
     { key: 'stories', label: 'Stories' },
+    { key: 'angel_numbers', label: 'Angel Numbers' },
+    { key: 'one_word', label: 'One Word' },
   ];
 
   const signData = SIGN_MEMES[selectedSign] || SIGN_MEMES.aries;
@@ -330,14 +402,94 @@ export default function InstagramPreviewPage() {
     }));
   }, [selectedDate, cacheBuster]);
 
-  // Story previews
+  // Ranking carousel previews (Fix 7)
+  const rankingCarouselPreviews = useMemo(() => {
+    const result = generateRankingCarousel(selectedDate);
+    const imageUrls = result.slides.map((slide) => {
+      const params = new URLSearchParams({
+        title: slide.title,
+        slideIndex: String(slide.slideIndex),
+        totalSlides: String(slide.totalSlides),
+        content: slide.content,
+        category: slide.category,
+        variant: slide.variant,
+      });
+      if (slide.subtitle) params.set('subtitle', slide.subtitle);
+      if (slide.symbol) params.set('symbol', slide.symbol);
+      return `/api/og/instagram/carousel?${params.toString()}&t=${cacheBuster}`;
+    });
+    return { ...result, imageUrls };
+  }, [selectedDate, cacheBuster]);
+
+  // Compatibility carousel previews (Fix 8)
+  const compatCarouselPreviews = useMemo(() => {
+    const result = generateCompatibilityCarousel(selectedDate);
+    const imageUrls = result.slides.map((slide) => {
+      const params = new URLSearchParams({
+        title: slide.title,
+        slideIndex: String(slide.slideIndex),
+        totalSlides: String(slide.totalSlides),
+        content: slide.content,
+        category: slide.category,
+        variant: slide.variant,
+      });
+      if (slide.subtitle) params.set('subtitle', slide.subtitle);
+      if (slide.symbol) params.set('symbol', slide.symbol);
+      return `/api/og/instagram/carousel?${params.toString()}&t=${cacheBuster}`;
+    });
+    return { ...result, imageUrls };
+  }, [selectedDate, cacheBuster]);
+
+  // Angel number carousel previews (Fix 9)
+  const angelNumberPreviews = useMemo(() => {
+    const batch = generateAngelNumberBatch(selectedDate, 3);
+    return batch.map((item) => {
+      const imageUrls = item.slides.map((slide) => {
+        const params = new URLSearchParams({
+          title: slide.title,
+          slideIndex: String(slide.slideIndex),
+          totalSlides: String(slide.totalSlides),
+          content: slide.content,
+          category: slide.category,
+          variant: slide.variant,
+        });
+        if (slide.subtitle) params.set('subtitle', slide.subtitle);
+        return `/api/og/instagram/carousel?${params.toString()}&t=${cacheBuster}`;
+      });
+      return { ...item, imageUrls };
+    });
+  }, [selectedDate, cacheBuster]);
+
+  // One word carousel previews (Fix 10)
+  const oneWordPreviews = useMemo(() => {
+    const batch = generateOneWordBatch(selectedDate, 2);
+    return batch.map((item) => {
+      const imageUrls = item.slides.map((slide) => {
+        const params = new URLSearchParams({
+          title: slide.title,
+          slideIndex: String(slide.slideIndex),
+          totalSlides: String(slide.totalSlides),
+          content: slide.content,
+          category: slide.category,
+          variant: slide.variant,
+        });
+        if (slide.subtitle) params.set('subtitle', slide.subtitle);
+        if (slide.symbol) params.set('symbol', slide.symbol);
+        return `/api/og/instagram/carousel?${params.toString()}&t=${cacheBuster}`;
+      });
+      return { ...item, imageUrls };
+    });
+  }, [selectedDate, cacheBuster]);
+
+  // Story previews — construct URLs directly (no absolute URL parsing)
   const storyPreviews = useMemo(() => {
-    const stories = generateDailyStories(selectedDate);
+    const stories = generateDailyStoryData(selectedDate);
     return stories.map((story) => {
-      // Build local URL instead of absolute
-      const absoluteUrl = new URL(story.imageUrl);
-      const localUrl = `${absoluteUrl.pathname}?${absoluteUrl.searchParams.toString()}&t=${cacheBuster}`;
-      return { ...story, url: localUrl };
+      const params = new URLSearchParams({
+        ...story.params,
+        t: String(cacheBuster),
+      });
+      return { ...story, url: `${story.endpoint}?${params.toString()}` };
     });
   }, [selectedDate, cacheBuster]);
 
@@ -410,28 +562,43 @@ export default function InstagramPreviewPage() {
               Meme Templates &mdash; {signName}
             </h2>
             <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6'>
-              {memeUrls.map(({ template, url }) => (
-                <div
-                  key={template}
-                  className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
-                >
-                  <div className='p-4 border-b border-zinc-700'>
-                    <h3 className='font-bold capitalize'>
-                      {template.replace('_', ' ')}
-                    </h3>
-                  </div>
-                  <div className='p-4'>
-                    <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={sanitizeImageUrl(url)}
-                        alt={`${template} meme for ${selectedSign}`}
-                        className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
-                      />
+              {memeUrls.map(({ template, url }) => {
+                const caption = generateMemeCaption(
+                  selectedSign,
+                  template,
+                  `${selectedDate}-${template}`,
+                );
+                const altText = generateMemeAltText(selectedSign, template);
+                return (
+                  <div
+                    key={template}
+                    className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                  >
+                    <div className='p-4 border-b border-zinc-700'>
+                      <h3 className='font-bold capitalize'>
+                        {template.replace('_', ' ')}
+                      </h3>
+                    </div>
+                    <div className='p-4'>
+                      <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600'>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={sanitizeImageUrl(url)}
+                          alt={altText}
+                          className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
+                        />
+                      </div>
+                      <div className='flex gap-2 mt-3'>
+                        <CopyButton
+                          text={caption.fullCaption}
+                          label='Copy Caption'
+                        />
+                        <CopyButton text={altText} label='Copy Alt Text' />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -460,11 +627,43 @@ export default function InstagramPreviewPage() {
                       <span className='text-xs text-zinc-500'>
                         {carousel.slides.length} slides
                       </span>
+                      <CopyButton
+                        text={
+                          carousel.category === 'zodiac'
+                            ? generateZodiacCaption(
+                                carousel.title.toLowerCase(),
+                                `carousel-${carousel.slug}`,
+                              ).fullCaption
+                            : carousel.category === 'tarot'
+                              ? generateTarotCaption(
+                                  carousel.title,
+                                  `carousel-${carousel.slug}`,
+                                ).fullCaption
+                              : carousel.category === 'crystals'
+                                ? generateCrystalCaption(
+                                    carousel.title,
+                                    `carousel-${carousel.slug}`,
+                                  ).fullCaption
+                                : generateGenericCaption(
+                                    carousel.title,
+                                    carousel.category,
+                                    `carousel-${carousel.slug}`,
+                                  ).fullCaption
+                        }
+                        label='Copy Caption'
+                      />
+                      <CopyButton
+                        text={generateCarouselAltText(
+                          carousel.title,
+                          carousel.category,
+                        )}
+                        label='Copy Alt Text'
+                      />
                     </div>
                     <div className='grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3'>
                       {carousel.slides.map((slide, i) => (
                         <div key={i}>
-                          <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
+                          <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={sanitizeImageUrl(imageUrls[i])}
@@ -494,6 +693,10 @@ export default function InstagramPreviewPage() {
             <h2 className='text-xl font-bold mb-4'>
               Daily Cosmic Cards &mdash; {selectedDate}
             </h2>
+            <p className='text-sm text-amber-400 mb-4 flex items-center gap-2'>
+              <span className='text-lg'>&#128241;</span> Best for: Instagram
+              Stories
+            </p>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
               {dailyCosmicUrls.map(({ variant, url }) => (
                 <div
@@ -504,6 +707,9 @@ export default function InstagramPreviewPage() {
                     <h3 className='font-bold capitalize'>
                       {variant.replace(/_/g, ' ')}
                     </h3>
+                    <span className='text-xs text-amber-400 mt-1 block'>
+                      Stories only
+                    </span>
                   </div>
                   <div className='p-4'>
                     <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
@@ -591,36 +797,106 @@ export default function InstagramPreviewPage() {
             <h2 className='text-xl font-bold mb-4'>
               Sign Rankings &mdash; {selectedDate}
             </h2>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-              {rankingPreviews.map((item, i) => (
-                <div
-                  key={i}
-                  className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
-                >
-                  <div className='p-4 border-b border-zinc-700'>
-                    <h3 className='font-bold capitalize'>
-                      Ranked by: {item.trait}
-                    </h3>
-                    <p className='text-xs text-zinc-400 mt-1'>
-                      Top 3:{' '}
-                      {item.rankings
-                        .slice(0, 3)
-                        .map((r) => r.sign)
-                        .join(', ')}
-                    </p>
-                  </div>
-                  <div className='p-4'>
-                    <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
+
+            {/* Ranking Carousel Variant (Fix 7) */}
+            <div className='bg-zinc-900 rounded-lg border border-zinc-700 p-6 mb-8'>
+              <div className='flex items-center gap-3 mb-4'>
+                <h3 className='font-bold text-lg'>
+                  Carousel: Ranked by {rankingCarouselPreviews.trait}
+                </h3>
+                <span className='text-xs px-2 py-1 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                  carousel
+                </span>
+                <span className='text-xs text-zinc-500'>
+                  {rankingCarouselPreviews.slides.length} slides
+                </span>
+                <CopyButton
+                  text={
+                    generateRankingCaption(
+                      rankingCarouselPreviews.trait,
+                      rankingCarouselPreviews.rankings[0]?.sign || 'aries',
+                      selectedDate,
+                    ).fullCaption
+                  }
+                  label='Copy Caption'
+                />
+                <CopyButton
+                  text={generateRankingAltText(rankingCarouselPreviews.trait)}
+                  label='Copy Alt Text'
+                />
+              </div>
+              <div className='grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3'>
+                {rankingCarouselPreviews.slides.map((slide, i) => (
+                  <div key={i}>
+                    <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={sanitizeImageUrl(item.url)}
-                        alt={`Signs ranked by ${item.trait}`}
-                        className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
+                        src={sanitizeImageUrl(
+                          rankingCarouselPreviews.imageUrls[i],
+                        )}
+                        alt={`Ranking slide ${i + 1}`}
+                        className='w-full h-full object-cover'
                       />
                     </div>
+                    <p className='text-xs text-zinc-400 mt-1 text-center truncate'>
+                      {slide.variant === 'cover'
+                        ? 'Cover'
+                        : slide.variant === 'cta'
+                          ? 'CTA'
+                          : slide.subtitle || `Slide ${i + 1}`}
+                    </p>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            {/* Static Rankings */}
+            <h3 className='font-bold mb-3'>Static Rankings</h3>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+              {rankingPreviews.map((item, i) => {
+                const caption = generateRankingCaption(
+                  item.trait,
+                  item.rankings[0]?.sign || 'aries',
+                  `${selectedDate}-${i}`,
+                );
+                const altText = generateRankingAltText(item.trait);
+                return (
+                  <div
+                    key={i}
+                    className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                  >
+                    <div className='p-4 border-b border-zinc-700'>
+                      <h3 className='font-bold capitalize'>
+                        Ranked by: {item.trait}
+                      </h3>
+                      <p className='text-xs text-zinc-400 mt-1'>
+                        Top 3:{' '}
+                        {item.rankings
+                          .slice(0, 3)
+                          .map((r) => r.sign)
+                          .join(', ')}
+                      </p>
+                    </div>
+                    <div className='p-4'>
+                      <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600'>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={sanitizeImageUrl(item.url)}
+                          alt={altText}
+                          className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
+                        />
+                      </div>
+                      <div className='flex gap-2 mt-3'>
+                        <CopyButton
+                          text={caption.fullCaption}
+                          label='Copy Caption'
+                        />
+                        <CopyButton text={altText} label='Copy Alt Text' />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -628,36 +904,117 @@ export default function InstagramPreviewPage() {
         {activeTab === 'compatibility' && (
           <div>
             <h2 className='text-xl font-bold mb-4'>
-              Compatibility Cards &mdash; {selectedDate}
+              Compatibility &mdash; {selectedDate}
             </h2>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-              {compatibilityPreviews.map((item, i) => (
-                <div
-                  key={i}
-                  className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
-                >
-                  <div className='p-4 border-b border-zinc-700'>
-                    <h3 className='font-bold capitalize'>
-                      {item.sign1.charAt(0).toUpperCase() + item.sign1.slice(1)}{' '}
-                      +{' '}
-                      {item.sign2.charAt(0).toUpperCase() + item.sign2.slice(1)}
-                    </h3>
-                    <p className='text-xs text-zinc-400 mt-1'>
-                      Score: {item.score}% &middot; {item.headline}
-                    </p>
-                  </div>
-                  <div className='p-4'>
-                    <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
+
+            {/* Compatibility Carousel Variant (Fix 8) */}
+            <div className='bg-zinc-900 rounded-lg border border-zinc-700 p-6 mb-8'>
+              <div className='flex items-center gap-3 mb-4'>
+                <h3 className='font-bold text-lg capitalize'>
+                  Carousel: {compatCarouselPreviews.sign1} +{' '}
+                  {compatCarouselPreviews.sign2} ({compatCarouselPreviews.score}
+                  %)
+                </h3>
+                <span className='text-xs px-2 py-1 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                  carousel
+                </span>
+                <CopyButton
+                  text={
+                    generateCompatibilityCaption(
+                      compatCarouselPreviews.sign1,
+                      compatCarouselPreviews.sign2,
+                      compatCarouselPreviews.score,
+                      selectedDate,
+                    ).fullCaption
+                  }
+                  label='Copy Caption'
+                />
+                <CopyButton
+                  text={generateCompatibilityAltText(
+                    compatCarouselPreviews.sign1,
+                    compatCarouselPreviews.sign2,
+                    compatCarouselPreviews.score,
+                  )}
+                  label='Copy Alt Text'
+                />
+              </div>
+              <div className='grid grid-cols-3 md:grid-cols-5 gap-3'>
+                {compatCarouselPreviews.slides.map((slide, i) => (
+                  <div key={i}>
+                    <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={sanitizeImageUrl(item.url)}
-                        alt={`${item.sign1} + ${item.sign2} compatibility`}
-                        className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
+                        src={sanitizeImageUrl(
+                          compatCarouselPreviews.imageUrls[i],
+                        )}
+                        alt={`Compatibility slide ${i + 1}`}
+                        className='w-full h-full object-cover'
                       />
                     </div>
+                    <p className='text-xs text-zinc-400 mt-1 text-center truncate'>
+                      {slide.variant === 'cover'
+                        ? 'Cover'
+                        : slide.variant === 'cta'
+                          ? 'CTA'
+                          : slide.subtitle || `Slide ${i + 1}`}
+                    </p>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            {/* Static Compatibility Cards */}
+            <h3 className='font-bold mb-3'>Static Cards</h3>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+              {compatibilityPreviews.map((item, i) => {
+                const caption = generateCompatibilityCaption(
+                  item.sign1,
+                  item.sign2,
+                  item.score,
+                  `${selectedDate}-${i}`,
+                );
+                const altText = generateCompatibilityAltText(
+                  item.sign1,
+                  item.sign2,
+                  item.score,
+                );
+                return (
+                  <div
+                    key={i}
+                    className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                  >
+                    <div className='p-4 border-b border-zinc-700'>
+                      <h3 className='font-bold capitalize'>
+                        {item.sign1.charAt(0).toUpperCase() +
+                          item.sign1.slice(1)}{' '}
+                        +{' '}
+                        {item.sign2.charAt(0).toUpperCase() +
+                          item.sign2.slice(1)}
+                      </h3>
+                      <p className='text-xs text-zinc-400 mt-1'>
+                        Score: {item.score}% &middot; {item.headline}
+                      </p>
+                    </div>
+                    <div className='p-4'>
+                      <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={sanitizeImageUrl(item.url)}
+                          alt={altText}
+                          className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
+                        />
+                      </div>
+                      <div className='flex gap-2 mt-3'>
+                        <CopyButton
+                          text={caption.fullCaption}
+                          label='Copy Caption'
+                        />
+                        <CopyButton text={altText} label='Copy Alt Text' />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -687,13 +1044,143 @@ export default function InstagramPreviewPage() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={sanitizeImageUrl(item.url)}
-                        alt={`Story - ${item.variant}`}
+                        alt={generateStoryAltText(item.variant, item.title)}
                         className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
+                      />
+                    </div>
+                    <div className='flex gap-2 mt-3 justify-center'>
+                      <CopyButton
+                        text={generateStoryAltText(item.variant, item.title)}
+                        label='Copy Alt Text'
                       />
                     </div>
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Angel Numbers (Fix 9) */}
+        {activeTab === 'angel_numbers' && (
+          <div>
+            <h2 className='text-xl font-bold mb-4'>
+              Angel Number Carousels &mdash; {selectedDate}
+            </h2>
+            <div className='space-y-8'>
+              {angelNumberPreviews.map((item) => {
+                const caption = generateAngelNumberCaption(
+                  item.number,
+                  `angel-${item.number}-${selectedDate}`,
+                );
+                const altText = generateAngelNumberAltText(item.number);
+                return (
+                  <div
+                    key={item.number}
+                    className='bg-zinc-900 rounded-lg border border-zinc-700 p-6'
+                  >
+                    <div className='flex items-center gap-3 mb-4'>
+                      <h3 className='font-bold text-lg'>
+                        Angel Number {item.number}
+                      </h3>
+                      <span className='text-xs px-2 py-1 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                        numerology
+                      </span>
+                      <span className='text-xs text-zinc-500'>
+                        {item.slides.length} slides
+                      </span>
+                      <CopyButton
+                        text={caption.fullCaption}
+                        label='Copy Caption'
+                      />
+                      <CopyButton text={altText} label='Copy Alt Text' />
+                    </div>
+                    <div className='grid grid-cols-3 md:grid-cols-5 gap-3'>
+                      {item.slides.map((slide, i) => (
+                        <div key={i}>
+                          <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={sanitizeImageUrl(item.imageUrls[i])}
+                              alt={`Angel number ${item.number} slide ${i + 1}`}
+                              className='w-full h-full object-cover'
+                            />
+                          </div>
+                          <p className='text-xs text-zinc-400 mt-1 text-center truncate'>
+                            {slide.variant === 'cover'
+                              ? 'Cover'
+                              : slide.variant === 'cta'
+                                ? 'CTA'
+                                : slide.subtitle || `Slide ${i + 1}`}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* One Word Carousels (Fix 10) */}
+        {activeTab === 'one_word' && (
+          <div>
+            <h2 className='text-xl font-bold mb-4'>
+              &quot;Your Sign&apos;s [Trait] in One Word&quot; &mdash;{' '}
+              {selectedDate}
+            </h2>
+            <div className='space-y-8'>
+              {oneWordPreviews.map((item) => {
+                const caption = generateGenericCaption(
+                  `Your sign's ${item.traitLabel} in one word`,
+                  'zodiac',
+                  `oneword-${item.traitKey}-${selectedDate}`,
+                );
+                return (
+                  <div
+                    key={item.traitKey}
+                    className='bg-zinc-900 rounded-lg border border-zinc-700 p-6'
+                  >
+                    <div className='flex items-center gap-3 mb-4'>
+                      <h3 className='font-bold text-lg'>
+                        Your Sign&apos;s {item.traitLabel} in One Word
+                      </h3>
+                      <span className='text-xs px-2 py-1 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                        zodiac
+                      </span>
+                      <span className='text-xs text-zinc-500'>
+                        {item.slides.length} slides
+                      </span>
+                      <CopyButton
+                        text={caption.fullCaption}
+                        label='Copy Caption'
+                      />
+                    </div>
+                    <div className='grid grid-cols-4 md:grid-cols-7 gap-2'>
+                      {item.slides.map((slide, i) => (
+                        <div key={i}>
+                          <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={sanitizeImageUrl(item.imageUrls[i])}
+                              alt={`${item.traitLabel} one word slide ${i + 1}`}
+                              className='w-full h-full object-cover'
+                            />
+                          </div>
+                          <p className='text-xs text-zinc-400 mt-1 text-center truncate'>
+                            {slide.variant === 'cover'
+                              ? 'Cover'
+                              : slide.variant === 'cta'
+                                ? 'CTA'
+                                : slide.subtitle || `Slide ${i + 1}`}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

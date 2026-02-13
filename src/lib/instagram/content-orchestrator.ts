@@ -3,12 +3,15 @@ import {
   buildCarouselFromSlug,
   getCarouselImageUrls,
 } from './carousel-content';
-import { selectCarouselForDate } from './carousel-scheduler';
+import {
+  selectCarouselForDate,
+  getCarouselCategoryForDay,
+} from './carousel-scheduler';
 import { generateCaption } from './caption-generator';
 import { generateDidYouKnow } from './did-you-know-content';
 import { generateSignRanking } from './ranking-content';
 import { generateCompatibility } from './compatibility-content';
-import { generateRecycledPost } from './content-recycler';
+import { generateAngelNumberBatch } from './angel-number-content';
 import { seededRandom } from './ig-utils';
 import { getMoonPhase } from '../../../utils/moon/moonPhases';
 import type { IGScheduledPost, IGPostBatch, IGPostType } from './types';
@@ -17,31 +20,36 @@ const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
 
 // Daily posting schedule (UTC hours)
 const POSTING_TIMES: Record<IGPostType, number> = {
-  daily_cosmic: 8, // 8am UTC (morning engagement)
-  did_you_know: 10, // 10am UTC (late morning education)
+  carousel: 10, // 10am UTC (primary content slot)
+  angel_number_carousel: 10, // 10am UTC (primary content slot)
   meme: 12, // noon UTC (lunch scroll)
-  carousel: 12, // noon UTC (when no meme)
+  did_you_know: 14, // 2pm UTC (afternoon education)
+  sign_ranking: 12, // noon UTC (engagement slot)
+  compatibility: 12, // noon UTC (engagement slot)
+  daily_cosmic: 8, // 8am UTC (morning engagement — stories/bonus)
+  quote: 19, // 7pm UTC (evening reflection — stories/bonus)
   app_feature: 14, // 2pm UTC (when scheduled)
-  sign_ranking: 15, // 3pm UTC (afternoon engagement)
-  compatibility: 15, // 3pm UTC (afternoon engagement)
-  quote: 19, // 7pm UTC (evening reflection)
   story: 9, // 9am UTC (morning stories)
 };
 
-// Day-of-week content schedule - no light days
+// Weekly cadence plan — maps to .claude/plans/28.instagram-cadence.md
+// Each day has specific themed content. Reels (Thu/Sat/Sun) are manual.
 // 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
 const DAILY_CONTENT_MIX: Record<number, IGPostType[]> = {
-  0: ['daily_cosmic', 'did_you_know', 'meme', 'quote'], // Monday
-  1: ['daily_cosmic', 'carousel', 'sign_ranking', 'quote'], // Tuesday
-  2: ['daily_cosmic', 'did_you_know', 'meme', 'quote'], // Wednesday
-  3: ['daily_cosmic', 'carousel', 'compatibility', 'quote'], // Thursday
-  4: ['daily_cosmic', 'did_you_know', 'meme', 'quote'], // Friday
-  5: ['daily_cosmic', 'carousel', 'sign_ranking', 'quote'], // Saturday
-  6: ['daily_cosmic', 'meme', 'quote'], // Sunday (3 posts min)
+  0: ['carousel'], // Monday: zodiac carousel (forced via getCarouselCategoryForDay)
+  1: ['angel_number_carousel', 'meme'], // Tuesday: angel number carousel + numerology meme
+  2: ['compatibility'], // Wednesday: compatibility card/carousel
+  3: ['sign_ranking'], // Thursday: ranking post (Reel #1 is manual)
+  4: ['meme', 'did_you_know'], // Friday: spell meme + DYK fact
+  5: ['carousel'], // Saturday: tarot carousel (Reel #2 is manual)
+  6: ['carousel'], // Sunday: crystal carousel (Reel #3 is manual)
 };
 
 /**
  * Generate a full day's Instagram content batch.
+ * Follows the weekly cadence plan:
+ * Mon=zodiac carousel, Tue=angel number+meme, Wed=compatibility,
+ * Thu=ranking, Fri=meme+DYK, Sat=tarot carousel, Sun=crystal carousel
  */
 export async function generateDailyBatch(
   dateStr: string,
@@ -49,12 +57,12 @@ export async function generateDailyBatch(
   const date = new Date(dateStr);
   const dayOfWeek = (date.getDay() + 6) % 7; // Convert to Mon=0
 
-  const contentMix = DAILY_CONTENT_MIX[dayOfWeek] || ['daily_cosmic', 'quote'];
+  const contentMix = DAILY_CONTENT_MIX[dayOfWeek] || ['carousel'];
   const posts: IGScheduledPost[] = [];
 
   for (const postType of contentMix) {
     try {
-      const post = await generatePost(postType, dateStr);
+      const post = await generatePost(postType, dateStr, dayOfWeek);
       if (post) {
         posts.push(post);
       }
@@ -63,30 +71,17 @@ export async function generateDailyBatch(
     }
   }
 
-  // Sunday bonus slot: recycle a top-performing evergreen post
-  if (dayOfWeek === 6) {
-    try {
-      const recycled = await generateRecycledPost(dateStr);
-      if (recycled) {
-        posts.push(recycled);
-      }
-    } catch (error) {
-      console.error(
-        '[IG Orchestrator] Failed to generate recycled post:',
-        error,
-      );
-    }
-  }
-
   return { date: dateStr, posts };
 }
 
 /**
  * Generate a single Instagram post by type.
+ * dayOfWeek (Mon=0) is used to determine forced carousel category.
  */
 async function generatePost(
   type: IGPostType,
   dateStr: string,
+  dayOfWeek: number,
 ): Promise<IGScheduledPost | null> {
   const scheduledTime = buildScheduleTime(dateStr, POSTING_TIMES[type]);
 
@@ -94,7 +89,9 @@ async function generatePost(
     case 'meme':
       return generateMemePost(dateStr, scheduledTime);
     case 'carousel':
-      return generateCarouselPost(dateStr, scheduledTime);
+      return generateCarouselPost(dateStr, scheduledTime, dayOfWeek);
+    case 'angel_number_carousel':
+      return generateAngelNumberPost(dateStr, scheduledTime);
     case 'daily_cosmic':
       return generateDailyCosmicPost(dateStr, scheduledTime);
     case 'quote':
@@ -148,8 +145,12 @@ async function generateMemePost(
 async function generateCarouselPost(
   dateStr: string,
   scheduledTime: string,
+  dayOfWeek?: number,
 ): Promise<IGScheduledPost | null> {
-  const { category, slug } = selectCarouselForDate(dateStr);
+  // Cadence plan forces specific categories per day: Mon=zodiac, Sat=tarot, Sun=crystals
+  const forcedCategory =
+    dayOfWeek !== undefined ? getCarouselCategoryForDay(dayOfWeek) : undefined;
+  const { category, slug } = selectCarouselForDate(dateStr, forcedCategory);
   const carousel = await buildCarouselFromSlug(slug);
 
   if (!carousel) {
@@ -174,6 +175,51 @@ async function generateCarouselPost(
     metadata: {
       category: carousel.category,
       slug: carousel.slug,
+    },
+  };
+}
+
+async function generateAngelNumberPost(
+  dateStr: string,
+  scheduledTime: string,
+): Promise<IGScheduledPost | null> {
+  const batch = generateAngelNumberBatch(dateStr, 1);
+  if (batch.length === 0) return null;
+
+  const { number, slides } = batch[0];
+  const cacheBust = Date.now().toString();
+
+  const imageUrls = slides.map((slide) => {
+    const params = new URLSearchParams({
+      title: slide.title,
+      slideIndex: String(slide.slideIndex),
+      totalSlides: String(slide.totalSlides),
+      content: slide.content,
+      category: slide.category,
+      variant: slide.variant,
+      v: '4',
+      t: cacheBust,
+    });
+    if (slide.subtitle) params.set('subtitle', slide.subtitle);
+    if (slide.symbol) params.set('symbol', slide.symbol);
+    return `${SHARE_BASE_URL}/api/og/instagram/carousel?${params.toString()}`;
+  });
+
+  const { caption, hashtags } = generateCaption('angel_number_carousel', {
+    title: number,
+    category: 'numerology',
+  });
+
+  return {
+    type: 'angel_number_carousel',
+    format: 'square',
+    imageUrls,
+    caption,
+    hashtags,
+    scheduledTime,
+    metadata: {
+      category: 'numerology',
+      slug: `angel-number-${number}`,
     },
   };
 }

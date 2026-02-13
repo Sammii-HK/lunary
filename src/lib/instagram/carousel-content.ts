@@ -2,8 +2,111 @@ import { getGrimoireSnippetBySlug } from '@/lib/social/grimoire-content';
 import { getCrystalById } from '@/constants/grimoire/crystals';
 import type { ThemeCategory } from '@/lib/social/types';
 import type { IGCarouselSlide, IGCarouselContent } from './types';
+import { seededPick } from './ig-utils';
 
 const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+
+// --- Hook text for cover slides (Fix 3) ---
+
+const ZODIAC_HOOKS: Record<string, string[]> = {
+  aries: [
+    "The sign that's always 10 steps ahead",
+    'Born to lead, not to follow',
+    'First in everything \u2014 including chaos',
+  ],
+  taurus: [
+    'Stubborn? Or just knows exactly what they want?',
+    'The sign that turns comfort into an art form',
+    'Slow to trust, impossible to forget',
+  ],
+  gemini: [
+    "Two-faced? You don't know the half of it",
+    'The sign that lives three lives at once',
+    'Never boring. Always evolving.',
+  ],
+  cancer: [
+    'The emotional genius nobody gives credit to',
+    'Feels everything at 10x volume',
+    'The sign that remembers every detail',
+  ],
+  leo: [
+    "Main character energy isn't a choice \u2014 it's destiny",
+    'The sign that lights up every room',
+    "Born to shine. Can't help it.",
+  ],
+  virgo: [
+    'The most misunderstood sign in the zodiac',
+    'Quietly fixing everything around them',
+    'Higher standards than everyone else',
+  ],
+  libra: [
+    'Pretty face, ruthless mind',
+    'The sign that makes everyone feel special',
+    'Charming and calculating in equal measure',
+  ],
+  scorpio: [
+    'The truth about Scorpio nobody talks about',
+    'Already knows your secrets before you told them',
+    'Intense? They prefer \"deeply invested\"',
+  ],
+  sagittarius: [
+    "Can't be tamed. Shouldn't be.",
+    'The sign that chose freedom over everything',
+    'Born to explore. Allergic to routine.',
+  ],
+  capricorn: [
+    'Cold? No. Playing chess while you play checkers.',
+    "Building empires while you're sleeping",
+    'The most underrated sign in the zodiac',
+  ],
+  aquarius: [
+    'The alien of the zodiac \u2014 and proud of it',
+    'Thinking 10 years ahead of everyone',
+    'Different by design. Revolutionary by nature.',
+  ],
+  pisces: [
+    "Too sensitive? Or seeing things you can't?",
+    'The sign that lives between worlds',
+    'Dreams so vivid they become reality',
+  ],
+};
+
+const TAROT_HOOK_TEMPLATES = [
+  "[Card] appeared in your reading. Here's what it really means.",
+  "Pulled [Card]? Don't panic \u2014 read this first.",
+  'What [Card] is trying to tell you right now',
+  '[Card]: the card nobody wants to see (but everyone needs)',
+];
+
+const CRYSTAL_HOOK_TEMPLATES = [
+  'Why every empath needs [Crystal]',
+  'The crystal that changes everything',
+  '[Crystal]: the stone your collection is missing',
+  'Stop scrolling \u2014 you need [Crystal] in your life',
+];
+
+function getHookText(category: ThemeCategory, title: string): string {
+  const signKey = title.toLowerCase();
+
+  if (category === 'zodiac' && ZODIAC_HOOKS[signKey]) {
+    return seededPick(ZODIAC_HOOKS[signKey], `hook-${signKey}-${Date.now()}`);
+  }
+
+  if (category === 'tarot') {
+    const template = seededPick(TAROT_HOOK_TEMPLATES, `hook-tarot-${title}`);
+    return template.replace('[Card]', title);
+  }
+
+  if (category === 'crystals') {
+    const template = seededPick(
+      CRYSTAL_HOOK_TEMPLATES,
+      `hook-crystal-${title}`,
+    );
+    return template.replace('[Crystal]', title);
+  }
+
+  return '';
+}
 
 /**
  * Build an array of carousel slides from a grimoire snippet.
@@ -126,9 +229,17 @@ function buildSlides(
   const fc = snippet.fullContent || {};
   const slides: IGCarouselSlide[] = [];
 
-  // Cover slide (always first)
+  // Cover slide (always first) — hook text goes in content field
+  const hookText = getHookText(category, snippet.title);
   slides.push(
-    makeSlide(0, 0, snippet.title, snippet.summary, category, 'cover'),
+    makeSlide(
+      0,
+      0,
+      snippet.title,
+      hookText || snippet.summary,
+      category,
+      'cover',
+    ),
   );
 
   // Category-specific body slides
@@ -666,14 +777,14 @@ function buildSlides(
 
   // CTA slide (always last)
   const ctaMessages: Record<string, string> = {
-    spells: 'Explore 200+ spells in the Grimoire',
-    crystals: 'Discover 100+ crystals and their properties',
-    tarot: 'Get your personalized tarot reading',
-    runes: 'Explore the Elder Futhark rune system',
-    zodiac: 'Explore your full cosmic profile',
-    numerology: 'Calculate your personal numbers',
-    chakras: 'Explore all 7 chakras and healing guides',
-    sabbat: 'Follow the Wheel of the Year',
+    spells: 'Cast your first spell today',
+    crystals: 'Explore the crystal grimoire',
+    tarot: 'Pull your daily tarot card',
+    runes: 'Read the Elder Futhark runes',
+    zodiac: 'Get your free birth chart reading',
+    numerology: 'Calculate your life path number',
+    chakras: 'Heal and balance your chakras',
+    sabbat: 'Celebrate the Wheel of the Year',
   };
 
   slides.push(

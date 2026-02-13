@@ -1,4 +1,4 @@
-import type { IGCompatibilityContent } from './types';
+import type { IGCompatibilityContent, IGCarouselSlide } from './types';
 import { seededRandom } from './ig-utils';
 
 const SIGNS = [
@@ -72,23 +72,168 @@ const HEADLINES: Record<string, string[]> = {
     'Fire and magic',
   ],
   medium: [
-    'Opposites attract (sometimes)',
-    'A cosmic work in progress',
-    'Growth through challenge',
+    'This pairing is... complicated',
+    "It'll take work, but the sparks are real",
+    'Chaos. Beautiful chaos.',
     'Different energies, shared spark',
-    'The universe says: try harder',
+    'Growth through challenge',
   ],
   low: [
-    'Cosmic friction ahead',
+    'Not for the faint-hearted',
+    "The universe said 'good luck'",
+    'Different wavelengths, beautiful friction',
     'A challenging but transformative pairing',
     'The universe is testing you',
-    'Different wavelengths, different worlds',
-    'Growth through friction',
   ],
+};
+
+// Element combination details for carousel deep-dives
+const PAIR_DETAILS: Record<
+  string,
+  {
+    vibe: string;
+    strengths: string[];
+    challenges: string[];
+  }
+> = {
+  'Fire-Fire': {
+    vibe: 'Electric, passionate, and endlessly adventurous. Two flames that either ignite a wildfire or burn each other out.',
+    strengths: [
+      'Mutual understanding of independence needs',
+      'Shared love for spontaneity and adventure',
+      'Natural chemistry and passion',
+    ],
+    challenges: [
+      'Both want to lead—who follows?',
+      'Impulsive decisions without grounding',
+      'Competitive energy can turn combative',
+    ],
+  },
+  'Fire-Earth': {
+    vibe: 'Fire wants to soar, Earth wants to build. One dreams in motion, the other in foundations. The friction can forge something solid—or smother the spark.',
+    strengths: [
+      "Fire's enthusiasm inspires Earth's ambitions",
+      "Earth's stability grounds Fire's chaos",
+      'Complementary energy when aligned on goals',
+    ],
+    challenges: [
+      'Different paces—Fire rushes, Earth deliberates',
+      'Fire feels restrained, Earth feels overwhelmed',
+      'Conflicting priorities: freedom vs. security',
+    ],
+  },
+  'Fire-Air': {
+    vibe: 'A match that feels effortless. Air fans the flames, Fire gives Air purpose. Together they create movement, ideas, and endless possibility.',
+    strengths: [
+      'Natural flow of ideas and action',
+      'Mutual respect for independence',
+      'Exciting, dynamic connection',
+    ],
+    challenges: [
+      'Both avoid emotional depth',
+      'Air overthinks, Fire acts without thinking',
+      'Commitment can feel restrictive',
+    ],
+  },
+  'Fire-Water': {
+    vibe: "Fire craves intensity, Water craves intimacy. One burns bright, the other runs deep. When it works, it's transformative. When it doesn't, it's exhausting.",
+    strengths: [
+      'Fire teaches Water to take risks',
+      'Water teaches Fire emotional depth',
+      'Passionate, transformative connection',
+    ],
+    challenges: [
+      'Fire is too direct, Water too sensitive',
+      'Emotional needs often clash',
+      'Fire withdraws, Water clings',
+    ],
+  },
+  'Earth-Earth': {
+    vibe: 'Steady, loyal, and built to last. Two Earth signs create a fortress of stability, comfort, and shared values. The challenge? Not getting too comfortable.',
+    strengths: [
+      'Shared values and long-term vision',
+      'Mutual reliability and trust',
+      'Practical partnership that endures',
+    ],
+    challenges: [
+      'Risk of stagnation and routine',
+      'Both stubborn—no one budges first',
+      'Lack of spontaneity can breed boredom',
+    ],
+  },
+  'Earth-Air': {
+    vibe: 'Earth builds, Air explores. One needs roots, the other needs wings. Respect and curiosity can bridge the gap, but fundamentally different worldviews create tension.',
+    strengths: [
+      'Air brings fresh perspectives to Earth',
+      "Earth gives structure to Air's ideas",
+      'Intellectual respect when balanced',
+    ],
+    challenges: [
+      'Earth sees Air as flighty, Air sees Earth as rigid',
+      'Different communication styles clash',
+      'Air craves novelty, Earth craves consistency',
+    ],
+  },
+  'Earth-Water': {
+    vibe: 'A natural, nurturing pairing. Earth provides the container, Water fills it with emotion. Together they grow something deeply rooted and beautifully alive.',
+    strengths: [
+      'Deep emotional and physical connection',
+      'Mutual care and devotion',
+      'Build a stable, nurturing home together',
+    ],
+    challenges: [
+      "Water's moods can overwhelm Earth's logic",
+      "Earth's practicality can seem cold to Water",
+      'Both hold grudges—resentment lingers',
+    ],
+  },
+  'Air-Air': {
+    vibe: "Intellectually stimulating, endlessly curious, and always in motion. Two Air signs vibe on ideas, conversation, and freedom. Emotional depth? That's optional.",
+    strengths: [
+      'Endless mental stimulation',
+      'Mutual respect for independence',
+      'Shared love of exploration and novelty',
+    ],
+    challenges: [
+      'Avoidance of emotional vulnerability',
+      'Commitment feels like a trap',
+      'No grounding force—decisions drift',
+    ],
+  },
+  'Air-Water': {
+    vibe: 'Air seeks logic, Water seeks feeling. One lives in the mind, the other in the heart. Bridging these worlds requires effort, patience, and genuine curiosity.',
+    strengths: [
+      'Air helps Water articulate emotions',
+      'Water helps Air access deeper feelings',
+      'Balance of mind and heart when aligned',
+    ],
+    challenges: [
+      "Water's intensity overwhelms Air's detachment",
+      "Air's rationality invalidates Water's emotions",
+      'Fundamentally different processing styles',
+    ],
+  },
+  'Water-Water': {
+    vibe: 'Deeply intuitive, profoundly emotional, and almost psychic. Two Water signs understand each other without words—but can also drown in shared intensity.',
+    strengths: [
+      'Unspoken understanding and empathy',
+      'Deeply intimate emotional connection',
+      'Shared intuition and spiritual bond',
+    ],
+    challenges: [
+      'Emotions amplify—no one provides grounding',
+      'Codependency and boundary issues',
+      'Shared moods spiral without external perspective',
+    ],
+  },
 };
 
 function getPairKey(sign1: string, sign2: string): string {
   return [sign1, sign2].sort().join('-');
+}
+
+function getElementPairKey(element1: string, element2: string): string {
+  return [element1, element2].sort().join('-');
 }
 
 function getCompatibilityScore(sign1: string, sign2: string): number {
@@ -163,4 +308,78 @@ export function generateCompatibilityBatch(
   }
 
   return results;
+}
+
+/**
+ * Generate a 5-slide compatibility carousel for a given date.
+ * Returns sign pair, score, and formatted slides for Instagram.
+ */
+export function generateCompatibilityCarousel(dateStr: string): {
+  sign1: string;
+  sign2: string;
+  score: number;
+  slides: IGCarouselSlide[];
+} {
+  // Get compatibility data
+  const compat = generateCompatibility(dateStr);
+  const { sign1, sign2, score, element1, element2 } = compat;
+
+  // Get pair details based on element combination
+  const pairKey = getElementPairKey(element1, element2);
+  const details = PAIR_DETAILS[pairKey];
+
+  // Format sign names for display
+  const sign1Cap = sign1.charAt(0).toUpperCase() + sign1.slice(1);
+  const sign2Cap = sign2.charAt(0).toUpperCase() + sign2.slice(1);
+
+  const slides: IGCarouselSlide[] = [
+    // Slide 1: Cover
+    {
+      slideIndex: 0,
+      totalSlides: 5,
+      title: `${sign1Cap} + ${sign2Cap}`,
+      content: `${score}%`,
+      subtitle: 'Destined or doomed? Swipe to find out',
+      category: 'zodiac',
+      variant: 'cover',
+    },
+    // Slide 2: Overall vibe
+    {
+      slideIndex: 1,
+      totalSlides: 5,
+      title: 'The Vibe',
+      content: details.vibe,
+      category: 'zodiac',
+      variant: 'body',
+    },
+    // Slide 3: Strengths
+    {
+      slideIndex: 2,
+      totalSlides: 5,
+      title: 'What Works',
+      content: details.strengths.map((s) => `• ${s}`).join('\n\n'),
+      category: 'zodiac',
+      variant: 'body',
+    },
+    // Slide 4: Challenges
+    {
+      slideIndex: 3,
+      totalSlides: 5,
+      title: 'The Friction',
+      content: details.challenges.map((c) => `• ${c}`).join('\n\n'),
+      category: 'zodiac',
+      variant: 'body',
+    },
+    // Slide 5: CTA
+    {
+      slideIndex: 4,
+      totalSlides: 5,
+      title: 'Tag your person',
+      content: 'Check your compatibility free → lunary.app',
+      category: 'zodiac',
+      variant: 'cta',
+    },
+  ];
+
+  return { sign1, sign2, score, slides };
 }

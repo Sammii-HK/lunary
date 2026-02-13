@@ -11,11 +11,11 @@ import {
 
 export const runtime = 'edge';
 
-const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const requestUrl = new URL(request.url);
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const { searchParams } = requestUrl;
     const card = searchParams.get('card') || 'The Star';
     const keywords =
       searchParams.get('keywords') || 'Hope, healing, inspiration';
@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
           }}
         >
           <img
-            src={`${SHARE_BASE_URL}/icons/moon-phases/full-moon.svg`}
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
             width={18}
             height={18}
             style={{ opacity: 0.4 }}
