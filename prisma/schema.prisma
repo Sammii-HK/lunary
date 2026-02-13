@@ -807,6 +807,7 @@ model referral_codes {
   created_at DateTime? @default(now()) @db.Timestamptz(6)
   uses       Int?      @default(0)
   max_uses   Int?
+  campaign   String?   @db.VarChar(50)
 
   @@index([user_id], map: "idx_referral_codes_user_id")
 }
@@ -1120,6 +1121,7 @@ model user_referrals {
   activated         Boolean?  @default(false)
   activated_at      DateTime? @db.Timestamptz(6)
   activation_event  String?   @db.VarChar(100)
+  reward_tier       Int?      @default(0)
 
   @@index([referral_code], map: "idx_user_referrals_code")
   @@index([referred_user_id], map: "idx_user_referrals_referred")
@@ -1583,12 +1585,38 @@ model community_posts {
   post_text        String
   is_anonymous     Boolean?         @default(true)
   is_approved      Boolean?         @default(true)
+  post_type        String?          @default("insight") @db.VarChar(30)
+  parent_id        Int?
+  vote_count       Int?             @default(0)
+  best_answer      Boolean?         @default(false)
+  topic_tag        String?          @db.VarChar(30)
+  attachment       Json?
   created_at       DateTime?        @default(now()) @db.Timestamptz(6)
   community_spaces community_spaces @relation(fields: [space_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  parent           community_posts? @relation("PostReplies", fields: [parent_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  replies          community_posts[] @relation("PostReplies")
+  community_votes  community_votes[]
 
   @@index([space_id, created_at(sort: Desc)], map: "idx_community_posts_space")
   @@index([user_id], map: "idx_community_posts_user")
   @@index([space_id, is_approved, created_at(sort: Desc)], map: "idx_community_posts_approved")
+  @@index([post_type], map: "idx_community_posts_type")
+  @@index([parent_id], map: "idx_community_posts_parent")
+  @@index([vote_count(sort: Desc)], map: "idx_community_posts_votes")
+}
+
+/// Community post votes (upvotes for Q&A)
+model community_votes {
+  id         Int              @id @default(autoincrement())
+  post_id    Int
+  user_id    String
+  vote       Int              @default(1) @db.SmallInt
+  created_at DateTime?        @default(now()) @db.Timestamptz(6)
+  post       community_posts  @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([post_id, user_id])
+  @@index([post_id], map: "idx_community_votes_post")
+  @@index([user_id], map: "idx_community_votes_user")
 }
 
 /// Community space memberships
@@ -1602,6 +1630,36 @@ model community_memberships {
   @@unique([space_id, user_id])
   @@index([user_id], map: "idx_community_memberships_user")
   @@index([space_id], map: "idx_community_memberships_space")
+}
+
+/// User blocks for hiding content from specific users
+model blocked_users {
+  id          Int       @id @default(autoincrement())
+  blocker_id  String
+  blocked_id  String
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([blocker_id, blocked_id])
+  @@index([blocker_id], map: "idx_blocked_users_blocker")
+  @@index([blocked_id], map: "idx_blocked_users_blocked")
+}
+
+/// Content reports for community UGC (posts, questions, answers)
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model content_reports {
+  id           Int       @id @default(autoincrement())
+  reporter_id  String
+  content_type String
+  content_id   Int
+  reason       String
+  details      String?
+  status       String    @default("pending")
+  reviewed_at  DateTime? @db.Timestamptz(6)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([reporter_id, content_type, content_id])
+  @@index([status, created_at(sort: Desc)], map: "idx_content_reports_status")
+  @@index([content_type, content_id], map: "idx_content_reports_content")
 }
 
 model instagram_scheduled_posts {

@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { sendToUser } from '@/lib/notifications/native-push-sender';
+import { processReferralTierReward } from '@/utils/referrals/reward-processor';
 
 /**
  * Activation events that trigger referral rewards.
@@ -43,6 +44,66 @@ export async function checkInviteActivation(
       return;
     }
 
+    // Account age gate: skip activation for accounts less than 1 hour old
+    const userResult = await sql`
+      SELECT "createdAt" FROM "user" WHERE id = ${userId} LIMIT 1
+    `;
+    if (userResult.rows.length > 0) {
+      const createdAt = new Date(userResult.rows[0].createdAt);
+      const ageMs = Date.now() - createdAt.getTime();
+      if (ageMs < 60 * 60 * 1000) {
+        return; // Account too new
+      }
+    }
+
+    // Activation velocity cap: max 3 activations per referrer per 24 hours
+    const velocityResult = await sql`
+      SELECT COUNT(*) as count FROM user_referrals
+      WHERE referrer_user_id = ${referral.referrer_user_id}
+        AND activated = true
+        AND activated_at > NOW() - INTERVAL '24 hours'
+    `;
+    if (Number(velocityResult.rows[0]?.count ?? 0) >= 3) {
+      // Mark as activated but skip reward
+      await sql`
+        UPDATE user_referrals
+        SET activated = true, activated_at = NOW(), activation_event = ${eventType}
+        WHERE id = ${referral.id}
+      `;
+      return;
+    }
+
+    // IP deduplication: check if another referral from the same referrer
+    // was activated from the same IP in the last 24 hours
+    const sessionResult = await sql`
+      SELECT "ipAddress" FROM "session"
+      WHERE "userId" = ${userId}
+      ORDER BY "createdAt" DESC
+      LIMIT 1
+    `;
+    const activatingIp = sessionResult.rows[0]?.ipAddress;
+    if (activatingIp) {
+      const ipDupResult = await sql`
+        SELECT COUNT(*) as count FROM user_referrals ur
+        JOIN "session" s ON s."userId" = ur.referred_user_id
+        WHERE ur.referrer_user_id = ${referral.referrer_user_id}
+          AND ur.activated = true
+          AND ur.activated_at > NOW() - INTERVAL '24 hours'
+          AND ur.referred_user_id != ${userId}
+          AND s."ipAddress" = ${activatingIp}
+        LIMIT 1
+      `;
+      if (Number(ipDupResult.rows[0]?.count ?? 0) > 0) {
+        // Same IP already activated a referral for this referrer — skip reward
+        await sql`
+          UPDATE user_referrals
+          SET activated = true, activated_at = NOW(), activation_event = ${eventType}
+          WHERE id = ${referral.id}
+        `;
+        return;
+      }
+    }
+
     // Grant reward to both users
     await grantActivationReward(referral.referrer_user_id);
     await grantActivationReward(userId);
@@ -70,6 +131,9 @@ export async function checkInviteActivation(
       body: "You've earned 30 days of Lunary+ for starting your cosmic practice!",
       data: { type: 'referral_activated', action: '/app' },
     }).catch(() => {});
+
+    // Process tiered referral rewards for the referrer
+    processReferralTierReward(referral.referrer_user_id).catch(() => {});
 
     console.log(
       `[Referral] Activation reward granted: referrer=${referral.referrer_user_id}, referred=${userId}, event=${eventType}`,

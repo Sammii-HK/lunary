@@ -16,6 +16,8 @@ import {
   NotebookPen,
   HelpCircle,
   Gift,
+  MessageCircleQuestion,
+  Share2,
 } from 'lucide-react';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { HappeningNowSection } from '@/components/explore/HappeningNowSection';
@@ -113,6 +115,20 @@ const learnConnectItems: ExploreItem[] = [
     icon: Users,
     highlighted: true,
     badge: 'New',
+  },
+  {
+    href: '/community/questions',
+    label: 'Ask the Circle',
+    description: 'Ask astrology questions, get community wisdom',
+    icon: MessageCircleQuestion,
+    highlighted: true,
+    badge: 'New',
+  },
+  {
+    href: '/referrals',
+    label: 'Referrals',
+    description: 'Invite friends, earn cosmic rewards',
+    icon: Share2,
   },
   {
     href: '/moon-circles',

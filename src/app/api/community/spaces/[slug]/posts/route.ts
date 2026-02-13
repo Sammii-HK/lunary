@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { validateInsightText } from '@/lib/community/moderation';
+import { checkRateLimit } from '@/lib/api/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -86,29 +87,48 @@ export async function GET(request: NextRequest, context: any) {
     `;
     const total = totalResult.rows[0]?.count ?? 0;
 
+    // Get blocked user IDs for the current viewer
+    const viewerSession = await auth.api.getSession({
+      headers: request.headers,
+    });
+    const viewerId = viewerSession?.user?.id;
+
+    let blockedIds: string[] = [];
+    if (viewerId) {
+      const blockedResult = await sql`
+        SELECT blocked_id FROM blocked_users WHERE blocker_id = ${viewerId}
+      `;
+      blockedIds = blockedResult.rows.map((r) => r.blocked_id);
+    }
+
     const postsResult =
       sort === 'oldest'
         ? await sql`
-            SELECT id, post_text, is_anonymous, created_at
+            SELECT id, post_text, is_anonymous, user_id, created_at
             FROM community_posts
             WHERE space_id = ${spaceId} AND is_approved = true
             ORDER BY created_at ASC
             LIMIT ${limit} OFFSET ${offset}
           `
         : await sql`
-            SELECT id, post_text, is_anonymous, created_at
+            SELECT id, post_text, is_anonymous, user_id, created_at
             FROM community_posts
             WHERE space_id = ${spaceId} AND is_approved = true
             ORDER BY created_at DESC
             LIMIT ${limit} OFFSET ${offset}
           `;
 
+    const filteredPosts = postsResult.rows.filter(
+      (row) => !blockedIds.includes(row.user_id),
+    );
+
     return NextResponse.json(
       {
-        posts: postsResult.rows.map((row) => ({
+        posts: filteredPosts.map((row) => ({
           id: row.id,
           postText: row.post_text,
           isAnonymous: row.is_anonymous,
+          userId: row.user_id,
           createdAt: toISODate(row.created_at),
         })),
         total,
@@ -155,6 +175,19 @@ export async function POST(request: NextRequest, context: any) {
       return NextResponse.json(
         { error: 'Authentication required to post' },
         { status: 401 },
+      );
+    }
+
+    // Rate limit: max 5 posts per 10 minutes per user
+    const rateCheck = checkRateLimit(
+      `community-post:${session.user.id}`,
+      5,
+      10 * 60_000,
+    );
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: 'You are posting too quickly. Please wait a few minutes.' },
+        { status: 429 },
       );
     }
 

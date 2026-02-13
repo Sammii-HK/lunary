@@ -36,6 +36,10 @@ jest.mock('@/lib/deletion-tokens', () => ({
   generateDeletionToken: jest.fn().mockReturnValue('123.abc'),
 }));
 
+jest.mock('@/lib/api/rate-limit', () => ({
+  checkRateLimit: jest.fn().mockReturnValue({ allowed: true }),
+}));
+
 jest.mock('@/lib/email-components/ComplianceEmails', () => ({
   generateDeletionVerifyEmailHTML: jest
     .fn()

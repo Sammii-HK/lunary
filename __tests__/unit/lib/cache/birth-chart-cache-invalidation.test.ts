@@ -158,27 +158,57 @@ describe('UserContext: auto-regeneration trigger', () => {
   /**
    * EXACT logic from UserContext refreshBirthChart effect.
    * Returns true when regeneration should fire.
+   *
+   * Updated to match the new code: birthday-only users (no chart) now
+   * trigger generation. Previously this returned false for empty charts.
    */
   function needsAutoRegeneration(user: {
     birthday?: string;
     birthChart?: any[];
     location?: Record<string, any>;
   }): boolean {
-    if (!user.birthday || !user.birthChart?.length) return false;
+    if (!user.birthday) return false;
 
-    const location = user.location || {};
+    const location = (user.location || {}) as Record<string, any>;
     const birthLocation = location.birthLocation;
     const birthTimezone = location.birthTimezone;
     const birthChartVersion = location.birthChartVersion;
 
+    const needsChartGeneration = !user.birthChart?.length;
     const needsVersionUpdate =
       birthChartVersion !== CURRENT_BIRTH_CHART_VERSION;
     const needsTimezoneUpdate = birthLocation && !birthTimezone;
 
-    return !!(needsVersionUpdate || needsTimezoneUpdate);
+    return !!(
+      needsChartGeneration ||
+      needsVersionUpdate ||
+      needsTimezoneUpdate
+    );
   }
 
   const chart = [{ body: 'Sun', sign: 'Aries' }];
+
+  // --- Birthday-only (age gate signup) scenarios ---
+
+  it('triggers when user has birthday but NO chart (age gate signup)', () => {
+    expect(
+      needsAutoRegeneration({
+        birthday: '1973-05-18',
+        birthChart: [],
+        location: {},
+      }),
+    ).toBe(true);
+  });
+
+  it('triggers when user has birthday but chart is undefined', () => {
+    expect(
+      needsAutoRegeneration({
+        birthday: '1973-05-18',
+        birthChart: undefined,
+        location: {},
+      }),
+    ).toBe(true);
+  });
 
   // --- Version bump scenarios ---
 
@@ -256,16 +286,6 @@ describe('UserContext: auto-regeneration trigger', () => {
     expect(needsAutoRegeneration({ birthChart: chart, location: {} })).toBe(
       false,
     );
-  });
-
-  it('does NOT trigger without birth chart', () => {
-    expect(
-      needsAutoRegeneration({
-        birthday: '1990-05-15',
-        birthChart: [],
-        location: {},
-      }),
-    ).toBe(false);
   });
 
   // --- Timezone-only update ---

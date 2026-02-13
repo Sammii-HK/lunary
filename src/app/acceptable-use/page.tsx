@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default function AcceptableUsePolicyPage() {
-  const lastUpdated = 'December 6, 2025';
+  const lastUpdated = 'February 12, 2026';
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
@@ -189,8 +189,8 @@ export default function AcceptableUsePolicyPage() {
               3. Community Spaces
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
-              When participating in Lunary&apos;s community spaces, you agree
-              to:
+              When participating in Lunary&apos;s community spaces and Q&amp;A
+              features, you agree to:
             </p>
             <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
               <li>Treat other community members with respect and kindness</li>
@@ -200,28 +200,79 @@ export default function AcceptableUsePolicyPage() {
               </li>
               <li>
                 Not share personal information about yourself or others (real
-                names, addresses, contact details) in community posts
+                names, addresses, contact details) in community posts or Q&amp;A
+                answers
               </li>
               <li>
-                Not use community spaces to advertise, promote external
-                services, or solicit other users
+                Not use community spaces or Q&amp;A to advertise, promote
+                external services, or solicit other users
               </li>
               <li>
                 Not spam or flood spaces with repetitive or low-effort posts
               </li>
               <li>Respect the topic and purpose of each community space</li>
+              <li>
+                Not post misleading or deliberately harmful astrological advice
+                in Q&amp;A answers
+              </li>
+              <li>
+                Not manipulate voting by using multiple accounts or coordinating
+                votes
+              </li>
             </ul>
             <p className='text-zinc-300 leading-relaxed mt-4'>
-              Community posts are subject to automated content moderation. Posts
-              that violate these guidelines or our content policies may be
-              removed without notice, and repeat violations may result in
-              account suspension.
+              Community posts and Q&amp;A content are subject to automated
+              content moderation. Questions and answers in Q&amp;A are publicly
+              visible. Content that violates these guidelines may be removed
+              without notice, and repeat violations may result in account
+              suspension.
             </p>
           </section>
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              4. Account Sharing and Access
+              4. Social and Interactive Features
+            </h2>
+            <p className='text-zinc-300 leading-relaxed mb-4'>
+              When using Lunary&apos;s social features (gifting, compatibility
+              invites, friend connections, referrals), you agree to:
+            </p>
+            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+              <li>
+                Not use gifting to send harassing, threatening, or inappropriate
+                messages to other users
+              </li>
+              <li>
+                Not generate compatibility invite links for the purpose of
+                harvesting personal data from others
+              </li>
+              <li>
+                Not create fake accounts or use deceptive means to artificially
+                inflate referral counts or earn fraudulent rewards
+              </li>
+              <li>
+                Not abuse friend activity features to stalk, monitor, or harass
+                other users
+              </li>
+              <li>
+                Not share compatibility invite links publicly with the intent to
+                collect birth data from unsuspecting individuals
+              </li>
+              <li>
+                Respect that social features are designed for genuine personal
+                connections, not commercial exploitation
+              </li>
+            </ul>
+            <p className='text-zinc-300 leading-relaxed mt-4'>
+              We use automated systems to detect abuse of voting, referral, and
+              reward features. Accounts engaging in manipulation may have
+              rewards revoked and may be suspended without notice.
+            </p>
+          </section>
+
+          <section>
+            <h2 className='text-2xl font-semibold text-white mb-4'>
+              5. Account Sharing and Access
             </h2>
             <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
               <li>
@@ -249,7 +300,7 @@ export default function AcceptableUsePolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              5. Content You Create
+              6. Content You Create
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               You retain ownership of content you create using the Service (such
@@ -272,7 +323,7 @@ export default function AcceptableUsePolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              6. Enforcement
+              7. Enforcement
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               We reserve the right to investigate and take appropriate action
@@ -298,7 +349,7 @@ export default function AcceptableUsePolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              7. Reporting Violations
+              8. Reporting Violations
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               If you become aware of any violation of this AUP, please report it
@@ -327,7 +378,7 @@ export default function AcceptableUsePolicyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              8. Contact Us
+              9. Contact Us
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               If you have questions about this Acceptable Use Policy, please

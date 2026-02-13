@@ -183,6 +183,32 @@ export function withPublicRateLimit(
   });
 }
 
+/**
+ * Reusable rate limit check against the in-memory cache.
+ * Returns whether the request is allowed and how long to wait if not.
+ */
+export function checkRateLimit(
+  key: string,
+  maxRequests: number,
+  windowMs: number,
+): { allowed: boolean; retryAfterMs: number } {
+  const now = Date.now();
+  let rateData = rateLimitCache.get(key);
+
+  if (!rateData || rateData.resetAt < now) {
+    rateData = { count: 0, resetAt: now + windowMs };
+    rateLimitCache.set(key, rateData);
+  }
+
+  rateData.count++;
+
+  if (rateData.count > maxRequests) {
+    return { allowed: false, retryAfterMs: rateData.resetAt - now };
+  }
+
+  return { allowed: true, retryAfterMs: 0 };
+}
+
 setInterval(() => {
   const now = Date.now();
   for (const [key, value] of rateLimitCache.entries()) {

@@ -22,6 +22,10 @@ jest.mock('@/lib/community/moderation', () => ({
   validateInsightText: jest.fn().mockReturnValue({ isValid: true }),
 }));
 
+jest.mock('@/lib/api/rate-limit', () => ({
+  checkRateLimit: jest.fn().mockReturnValue({ allowed: true, retryAfterMs: 0 }),
+}));
+
 import { GET, POST } from '@/app/api/community/spaces/[slug]/posts/route';
 import { auth } from '@/lib/auth';
 import { validateInsightText } from '@/lib/community/moderation';

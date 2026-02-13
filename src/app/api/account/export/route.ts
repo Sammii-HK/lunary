@@ -44,6 +44,12 @@ export async function GET() {
       challengeCompletions,
       milestonesAchieved,
       cosmicGifts,
+      communityVotes,
+      friendInvites,
+      friendCelebrations,
+      shopPurchases,
+      referralCodes,
+      userReferrals,
     ] = await Promise.all([
       prisma.user_profiles.findFirst({ where: { user_id: userId } }),
       prisma.subscriptions.findUnique({ where: { user_id: userId } }),
@@ -75,6 +81,24 @@ export async function GET() {
       prisma.cosmic_gifts.findMany({
         where: {
           OR: [{ sender_id: userId }, { recipient_id: userId }],
+        },
+      }),
+      prisma.community_votes.findMany({ where: { user_id: userId } }),
+      prisma.friend_invites.findMany({
+        where: {
+          OR: [{ inviter_id: userId }, { accepted_by_id: userId }],
+        },
+      }),
+      prisma.friend_celebrations.findMany({
+        where: {
+          OR: [{ sender_id: userId }, { receiver_id: userId }],
+        },
+      }),
+      prisma.shop_purchases.findMany({ where: { user_id: userId } }),
+      prisma.referral_codes.findMany({ where: { user_id: userId } }),
+      prisma.user_referrals.findMany({
+        where: {
+          OR: [{ referrer_user_id: userId }, { referred_user_id: userId }],
         },
       }),
     ]);
@@ -130,6 +154,12 @@ export async function GET() {
       challengeCompletions,
       milestonesAchieved,
       cosmicGifts,
+      communityVotes,
+      friendInvites,
+      friendCelebrations,
+      shopPurchases,
+      referralCodes,
+      userReferrals,
       dataRetentionInfo: {
         description:
           'Your data is retained as long as your account is active. You can request deletion at any time.',

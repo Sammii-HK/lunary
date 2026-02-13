@@ -18,6 +18,7 @@ interface Post {
   id: number;
   postText: string;
   isAnonymous: boolean;
+  userId?: string;
   createdAt: string | null;
 }
 
@@ -153,6 +154,7 @@ export function CommunityPostFeed({
             id={post.id}
             postText={post.postText}
             isAnonymous={post.isAnonymous}
+            userId={post.userId}
             createdAt={post.createdAt}
           />
         ))

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPolicyPage() {
-  const lastUpdated = 'February 11, 2026';
+  const lastUpdated = 'February 12, 2026';
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
@@ -67,8 +67,11 @@ export default function PrivacyPolicyPage() {
               </li>
               <li>
                 <strong>User Content:</strong> Journal entries, notes, saved
-                tarot readings, collections you create, and posts submitted to
-                community spaces
+                tarot readings, collections you create, posts submitted to
+                community spaces, questions and answers posted in Q&amp;A,
+                intentions and manifestation goals, daily mood and gratitude
+                entries, dream intentions, ritual reflections, challenge
+                check-in notes, and messages attached to gifts
               </li>
               <li>
                 <strong>Communication Data:</strong> Messages sent through our
@@ -86,12 +89,33 @@ export default function PrivacyPolicyPage() {
               you explicitly choose to do so.
             </p>
             <p className='text-zinc-300 leading-relaxed mt-4'>
-              <strong>Community spaces:</strong> Posts you submit to community
-              spaces are visible to other authenticated users of that space. You
-              may choose to post anonymously; however, anonymous posts remain
-              linked to your account internally for moderation and safety
-              purposes. Community posts are subject to automated content
-              filtering and may be removed if they violate our policies.
+              <strong>Community spaces and Q&amp;A:</strong> Posts you submit to
+              community spaces are visible to other authenticated users of that
+              space. Questions and answers posted in Q&amp;A are publicly
+              visible and may be viewed by anyone, including unauthenticated
+              visitors. You may choose to post anonymously; however, anonymous
+              content remains linked to your account internally for moderation
+              and safety purposes. Community content is subject to automated
+              content filtering and may be removed if it violates our policies.
+            </p>
+            <p className='text-zinc-300 leading-relaxed mt-4'>
+              <strong>Social features:</strong> When you use Lunary&apos;s
+              social features (gifting, compatibility invites, friend
+              connections), certain information is shared with other users. Gift
+              recipients and senders can see each other&apos;s name, avatar, and
+              sun sign. Compatibility invites use your birth chart data to
+              calculate synastry scores with the invited person. Friends can see
+              your name, avatar, sun sign, streaks, last check-in time, and
+              milestone celebrations. Referral codes are anonymous identifiers
+              and do not reveal your identity to referred users.
+            </p>
+            <p className='text-zinc-300 leading-relaxed mt-4'>
+              <strong>Rituals and intentions:</strong> Mood entries, gratitude
+              reflections, dream intentions, and manifestation goals are private
+              to your account and are not shared with other users. This content
+              may be sensitive in nature and is stored securely. We use
+              aggregated, non-identifying engagement data from ritual features
+              to improve the service.
             </p>
 
             <h3 className='text-xl font-medium text-white mb-3 mt-6'>
@@ -180,6 +204,18 @@ export default function PrivacyPolicyPage() {
                 other illegal activities
               </li>
               <li>Personalize and improve your experience</li>
+              <li>
+                Generate personalized push notifications based on your birth
+                chart and current transits (with your notification consent)
+              </li>
+              <li>
+                Facilitate social features including gifting, compatibility
+                calculations, friend activity, and referral tracking
+              </li>
+              <li>
+                Use IP addresses and session data to detect referral fraud and
+                voting abuse
+              </li>
               <li>
                 Send promotional communications (with your consent, where
                 required)
@@ -413,10 +449,11 @@ export default function PrivacyPolicyPage() {
               <li>Resolve disputes and enforce our agreements</li>
             </ul>
             <p className='text-zinc-300 leading-relaxed mt-4'>
-              When you delete your account, we will delete or anonymize your
-              personal information within 30 days, except where we are required
-              to retain certain information for legal or legitimate business
-              purposes.
+              Compatibility invite data is stored temporarily and automatically
+              expires after 30 days. When you delete your account, we will
+              delete or anonymize your personal information within 30 days,
+              except where we are required to retain certain information for
+              legal or legitimate business purposes.
             </p>
           </section>
 

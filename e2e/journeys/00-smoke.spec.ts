@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures/auth';
+import { TEST_USERS } from '../fixtures/test-users';
 
 const isCI = !!process.env.CI;
 const log = (message: string) => {
@@ -173,5 +174,161 @@ test.describe('Smoke Tests @smoke', () => {
     }
 
     console.log('✅ Pricing page loaded successfully');
+  });
+
+  // Critical regression test: users who signed up with age gate (birthday
+  // collected at signup) but have no birth chart yet must NOT have onboarding
+  // silently skipped. The app must either show onboarding or trigger
+  // auto-generation via UserContext.
+  test('authenticated user with birthday but no chart triggers generation', async ({
+    browser,
+    baseURL,
+  }) => {
+    log('\n📄 Testing birthday-only user chart generation...');
+    const testBaseURL = baseURL || 'http://localhost:3000';
+
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 720 },
+      ignoreHTTPSErrors: true,
+    });
+
+    // Track whether the generate endpoint was called
+    let generateCalled = false;
+
+    await context.route('**/api/auth/get-session', (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          session: {
+            id: 'test-session-birthday-only',
+            userId: 'test-user-birthday-only',
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          },
+          user: {
+            id: 'test-user-birthday-only',
+            email: TEST_USERS.regular.email,
+            name: TEST_USERS.regular.name,
+            emailVerified: true,
+          },
+        }),
+      });
+    });
+
+    await context.route('**/api/subscription', (route) => {
+      if (route.request().method() === 'GET') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            status: 'trial',
+            plan: 'monthly',
+            planType: 'monthly',
+          }),
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    // Profile returns birthday but NO birth chart — simulates age gate signup
+    await context.route('**/api/profile', (route) => {
+      if (route.request().method() === 'GET') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            profile: {
+              userId: 'test-user-birthday-only',
+              name: TEST_USERS.regular.name,
+              email: TEST_USERS.regular.email,
+              birthday: '1990-01-15',
+              birthChart: null,
+              location: {},
+            },
+            subscription: {
+              status: 'trial',
+              planType: 'monthly',
+            },
+          }),
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    // Intercept birth chart generation endpoint
+    await context.route('**/api/profile/birth-chart/generate', (route) => {
+      generateCalled = true;
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true }),
+      });
+    });
+
+    // Mock onboarding status as not completed
+    await context.route('**/api/onboarding/complete', (route) => {
+      if (route.request().method() === 'GET') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ completed: false, skipped: false }),
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    // Block heavy resources for speed
+    await context.route('**/*', (route) => {
+      const resourceType = route.request().resourceType();
+      if (['image', 'font', 'media'].includes(resourceType)) {
+        route.abort();
+        return;
+      }
+      route.continue();
+    });
+
+    const page = await context.newPage();
+
+    await page.addInitScript(() => {
+      (window as any).__PLAYWRIGHT_AUTHENTICATED__ = true;
+    });
+
+    await page.goto(`${testBaseURL}/`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    });
+
+    // Wait for React hydration and UserContext to process
+    await page
+      .waitForLoadState('networkidle', { timeout: 10000 })
+      .catch(() => {});
+
+    // Either onboarding should show OR UserContext auto-generation should fire.
+    // Check for onboarding visibility first.
+    const onboardingVisible = await page
+      .locator('text=/When Were You Born|Refine Your Birth Chart|Get Started/i')
+      .first()
+      .isVisible({ timeout: 5000 })
+      .catch(() => false);
+
+    // At least one must be true: onboarding shown or generate endpoint called
+    const chartGenerationTriggered = onboardingVisible || generateCalled;
+
+    if (!chartGenerationTriggered) {
+      throw new Error(
+        'CRITICAL: User with birthday but no birth chart did not trigger onboarding or chart generation. ' +
+          'This means the age gate signup bug has regressed.',
+      );
+    }
+
+    log(
+      `✅ Birthday-only user handled correctly (onboarding: ${onboardingVisible}, generate called: ${generateCalled})`,
+    );
+
+    await page.close();
+    await context.close();
   });
 });

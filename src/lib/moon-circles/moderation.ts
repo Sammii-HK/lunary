@@ -60,8 +60,30 @@ const BLOCKED_PHRASES = [
   'incestuous',
 ];
 
+/**
+ * Normalize leetspeak and common evasion characters to plain text.
+ * e.g. "k1ll" → "kill", "su!c!de" → "suicide", "r@pe" → "rape"
+ */
+function normalizeLeetspeak(text: string): string {
+  return text
+    .replace(/1/g, 'i')
+    .replace(/!/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/4/g, 'a')
+    .replace(/0/g, 'o')
+    .replace(/@/g, 'a')
+    .replace(/\$/g, 's')
+    .replace(/5/g, 's')
+    .replace(/7/g, 't')
+    .replace(/\+/g, 't')
+    .replace(/8/g, 'b')
+    .replace(/9/g, 'g')
+    .replace(/\|/g, 'l')
+    .replace(/[_\-.*~]+/g, ''); // Strip separator chars used to break up words
+}
+
 export function containsBlockedContent(text: string): boolean {
-  const normalizedText = text.toLowerCase().trim();
+  const normalizedText = normalizeLeetspeak(text.toLowerCase().trim());
 
   for (const phrase of BLOCKED_PHRASES) {
     if (normalizedText.includes(phrase.toLowerCase())) {
@@ -73,11 +95,11 @@ export function containsBlockedContent(text: string): boolean {
 }
 
 export function getBlockedReason(text: string): string | null {
-  const normalizedText = text.toLowerCase().trim();
+  const normalizedText = normalizeLeetspeak(text.toLowerCase().trim());
 
   for (const phrase of BLOCKED_PHRASES) {
     if (normalizedText.includes(phrase.toLowerCase())) {
-      return `Content contains inappropriate language. Please share positive reflections about your Moon Circle experience.`;
+      return 'Your post was not submitted because it contains content that violates our community guidelines.';
     }
   }
 
