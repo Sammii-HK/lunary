@@ -6,6 +6,11 @@ import { sql } from '@vercel/postgres';
 import { trackConversionEvent } from '@/lib/analytics/tracking';
 import { captureEvent } from '@/lib/posthog-server';
 import { conversionTracking } from '@/lib/analytics';
+import { sendEmail } from '@/lib/email';
+import {
+  generateCancellationWinBackEmailHTML,
+  generateCancellationWinBackEmailText,
+} from '@/lib/email-components/CancellationWinBackEmail';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -834,6 +839,35 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
         subscription.metadata.cancellation_reason,
         subscription.metadata.cancellation_category || undefined,
       );
+    }
+
+    // Send cancellation win-back email
+    try {
+      const customer = await stripe.customers.retrieve(customerId);
+      if (customer && !customer.deleted && customer.email) {
+        const userName = customer.name || customer.email.split('@')[0];
+        const html = await generateCancellationWinBackEmailHTML(
+          userName,
+          customer.email,
+        );
+        const text = generateCancellationWinBackEmailText(
+          userName,
+          customer.email,
+        );
+        await sendEmail({
+          to: customer.email,
+          subject: "We'll miss you — here's a gift if you change your mind",
+          html,
+          text,
+          tracking: {
+            userId,
+            notificationType: 'cancellation_winback',
+          },
+        });
+        console.log(`Cancellation win-back email sent to ${customer.email}`);
+      }
+    } catch (emailError) {
+      console.error('Failed to send cancellation win-back email:', emailError);
     }
   }
 }
