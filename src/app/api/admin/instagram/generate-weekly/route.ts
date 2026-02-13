@@ -75,42 +75,53 @@ export async function POST(request: NextRequest) {
                 ? imageUrls.join('|')
                 : imageUrls[0] || null;
 
+            const postData = {
+              content: post.caption,
+              postType:
+                post.type === 'carousel' ? 'instagram_carousel' : post.type,
+              scheduledDate: new Date(post.scheduledTime),
+              image_url: imageUrlValue,
+              video_metadata: {
+                hashtags: post.hashtags || [],
+                metadata: post.metadata || {},
+                imageUrls: imageUrls,
+              },
+            };
+
             if (existingPost) {
-              // Update existing post
               await prisma.socialPost.update({
                 where: { id: existingPost.id },
-                data: {
-                  content: post.caption,
-                  scheduledDate: new Date(post.scheduledTime),
-                  image_url: imageUrlValue,
-                  postType:
-                    post.type === 'carousel'
-                      ? 'instagram_carousel'
-                      : existingPost.postType,
-                  video_metadata: {
-                    hashtags: post.hashtags || [],
-                    metadata: post.metadata || {},
-                    imageUrls: imageUrls,
-                  },
-                },
+                data: postData,
               });
             } else {
-              // Create new post
               await prisma.socialPost.create({
                 data: {
-                  content: post.caption,
+                  ...postData,
                   platform: 'instagram',
-                  postType:
-                    post.type === 'carousel' ? 'instagram_carousel' : post.type,
-                  scheduledDate: new Date(post.scheduledTime),
                   status: 'pending',
-                  image_url: imageUrlValue,
                   base_group_key: groupKey,
-                  video_metadata: {
-                    hashtags: post.hashtags || [],
-                    metadata: post.metadata || {},
-                    imageUrls: imageUrls,
-                  },
+                },
+              });
+            }
+
+            // Cross-post to Facebook with the same content
+            const fbGroupKey = `facebook-${dateStr}-${post.type}`;
+            const existingFbPost = await prisma.socialPost.findFirst({
+              where: { base_group_key: fbGroupKey },
+            });
+
+            if (existingFbPost) {
+              await prisma.socialPost.update({
+                where: { id: existingFbPost.id },
+                data: postData,
+              });
+            } else {
+              await prisma.socialPost.create({
+                data: {
+                  ...postData,
+                  platform: 'facebook',
+                  status: 'pending',
+                  base_group_key: fbGroupKey,
                 },
               });
             }
