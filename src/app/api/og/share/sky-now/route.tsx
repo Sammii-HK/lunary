@@ -10,7 +10,8 @@ import {
 import {
   loadShareFonts,
   ShareFooter,
-  SHARE_BASE_URL,
+  SHARE_IMAGE_BORDER,
+  SHARE_TITLE_GLOW,
   SHARE_BORDERS,
   SHARE_CARDS,
 } from '@/lib/share/og-share-utils';
@@ -114,8 +115,6 @@ export async function GET(request: NextRequest) {
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
-    const baseUrl = SHARE_BASE_URL;
-
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
     const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
@@ -231,8 +230,9 @@ export async function GET(request: NextRequest) {
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '8px 16px',
-            background:
-              index % 2 === 0
+            background: isRetrograde
+              ? 'rgba(248, 113, 113, 0.08)'
+              : index % 2 === 0
                 ? 'rgba(255, 255, 255, 0.03)'
                 : 'rgba(255, 255, 255, 0.01)',
           }}
@@ -421,6 +421,7 @@ export async function GET(request: NextRequest) {
           padding: '48px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -443,6 +444,7 @@ export async function GET(request: NextRequest) {
                 color: OG_COLORS.textPrimary,
                 letterSpacing: '0.05em',
                 display: 'flex',
+                textShadow: SHARE_TITLE_GLOW,
               }}
             >
               {firstName ? `${firstName}'s Sky Now` : 'Sky Now'}
@@ -456,6 +458,21 @@ export async function GET(request: NextRequest) {
               }}
             >
               {dateText}
+            </div>
+            <div
+              style={{
+                fontSize: 16,
+                color:
+                  data.retrogradeCount > 0
+                    ? OG_COLORS.cosmicRose
+                    : OG_COLORS.textSecondary,
+                marginTop: 8,
+                display: 'flex',
+              }}
+            >
+              {data.retrogradeCount > 0
+                ? `${data.retrogradeCount} planet${data.retrogradeCount > 1 ? 's' : ''} in retrograde`
+                : 'All planets direct'}
             </div>
           </div>
           {retrogradeBadge}
@@ -499,7 +516,7 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : isStory ? (
       // Story Layout - 2x5 grid with comfortable spacing
@@ -509,10 +526,12 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
           background: OG_COLORS.background,
           padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -534,6 +553,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s Sky Now` : 'Sky Now'}
@@ -547,6 +567,21 @@ export async function GET(request: NextRequest) {
             }}
           >
             {dateText}
+          </div>
+          <div
+            style={{
+              fontSize: 28,
+              color:
+                data.retrogradeCount > 0
+                  ? OG_COLORS.cosmicRose
+                  : OG_COLORS.textSecondary,
+              marginTop: 8,
+              display: 'flex',
+            }}
+          >
+            {data.retrogradeCount > 0
+              ? `${data.retrogradeCount} planet${data.retrogradeCount > 1 ? 's' : ''} in retrograde`
+              : 'All planets direct'}
           </div>
         </div>
 
@@ -604,7 +639,7 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : (
       // Square Layout - 2x5 grid
@@ -618,6 +653,7 @@ export async function GET(request: NextRequest) {
           padding: '60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -639,6 +675,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s Sky Now` : 'Sky Now'}
@@ -652,6 +689,21 @@ export async function GET(request: NextRequest) {
             }}
           >
             {dateText}
+          </div>
+          <div
+            style={{
+              fontSize: 22,
+              color:
+                data.retrogradeCount > 0
+                  ? OG_COLORS.cosmicRose
+                  : OG_COLORS.textSecondary,
+              marginTop: 8,
+              display: 'flex',
+            }}
+          >
+            {data.retrogradeCount > 0
+              ? `${data.retrogradeCount} planet${data.retrogradeCount > 1 ? 's' : ''} in retrograde`
+              : 'All planets direct'}
           </div>
         </div>
 
@@ -709,7 +761,7 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     );
 

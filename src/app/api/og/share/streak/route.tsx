@@ -7,11 +7,7 @@ import {
   generateStarfield,
   getStarCount,
 } from '@/lib/share/og-utils';
-import {
-  ShareFooter,
-  SHARE_BASE_URL,
-  getShareSizes,
-} from '@/lib/share/og-share-utils';
+import { ShareFooter, getShareSizes } from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
@@ -100,7 +96,6 @@ export async function GET(request: NextRequest) {
 
     const { width, height } = getFormatDimensions(format);
     const sizes = getShareSizes(format);
-    const baseUrl = SHARE_BASE_URL;
 
     const stars = generateStarfield(data.shareId, getStarCount(format));
     const starfieldJsx = stars.map((star, i) => (
@@ -293,7 +288,7 @@ export async function GET(request: NextRequest) {
           )}
         </div>
 
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     );
 

@@ -13,6 +13,8 @@ import {
   SHARE_BASE_URL,
   SHARE_BORDERS,
   SHARE_CARDS,
+  SHARE_IMAGE_BORDER,
+  SHARE_TITLE_GLOW,
 } from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
@@ -150,7 +152,7 @@ export async function GET(request: NextRequest) {
     const phaseSize = isLandscape ? 40 : isStory ? 72 : 56;
     const labelSize = isLandscape ? 22 : isStory ? 36 : 32;
     const insightSize = isLandscape ? 22 : isStory ? 36 : 32;
-    const moonIconSize = isLandscape ? 140 : isStory ? 180 : 140;
+    const moonIconSize = isLandscape ? 175 : isStory ? 225 : 175;
 
     const truncate = truncateText;
 
@@ -205,6 +207,7 @@ export async function GET(request: NextRequest) {
           padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -226,6 +229,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s` : "Today's"} Cosmic State
@@ -386,7 +390,7 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : isStory ? (
       // Story Layout - Large moon, vertical stacking
@@ -396,10 +400,12 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
           background: OG_COLORS.background,
           padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -421,6 +427,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s` : "Today's"} Cosmic State
@@ -562,7 +569,7 @@ export async function GET(request: NextRequest) {
         )}
 
         {/* Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : (
       // Square Layout
@@ -576,6 +583,7 @@ export async function GET(request: NextRequest) {
           padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -597,6 +605,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s` : "Today's"} Cosmic State
@@ -742,7 +751,7 @@ export async function GET(request: NextRequest) {
         )}
 
         {/* Footer */}
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     );
 

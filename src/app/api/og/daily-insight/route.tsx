@@ -13,6 +13,7 @@ import {
   generateStarfield,
   getStarCount,
 } from '@/lib/share/og-utils';
+import { truncateText } from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'nodejs';
@@ -176,7 +177,11 @@ export async function GET(request: NextRequest): Promise<Response> {
       searchParams.get('insight') ||
       'Mars in Sagittarius brings adventurous and direct energy to your 11th house, your social life becomes active and you may take leadership in groups.';
     const isPersonalized = searchParams.get('personalized') === 'true';
-    const transitDate = searchParams.get('transitDate') || 'DEC 5';
+    const transitDate =
+      searchParams.get('transitDate') ||
+      new Date()
+        .toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        .toUpperCase();
     const transitPlanet = searchParams.get('transitPlanet') || 'Moon';
     const transitTitle =
       searchParams.get('transitTitle') || 'Full Moon → your 5th house';
@@ -301,6 +306,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           color: 'white',
           padding: '48px',
           position: 'relative',
+          border: '1px solid rgba(167, 139, 250, 0.3)',
         }}
       >
         {/* Starfield background */}
@@ -321,6 +327,7 @@ export async function GET(request: NextRequest): Promise<Response> {
               fontSize: '52px',
               display: 'flex',
               color: firstName ? '#d8b4fe' : '#e4e4e7',
+              textShadow: '0 0 20px rgba(167, 139, 250, 0.3)',
             }}
           >
             {titleContent}
@@ -506,6 +513,7 @@ export async function GET(request: NextRequest): Promise<Response> {
               display: 'flex',
               flexDirection: 'column',
               border: '1px solid #27272a',
+              borderLeft: '3px solid #A78BFA',
               borderRadius: '14px',
               padding: '20px 24px',
               background: 'rgba(24, 24, 27, 0.9)',
@@ -534,7 +542,7 @@ export async function GET(request: NextRequest): Promise<Response> {
               {isPersonalized && (
                 <div
                   style={{
-                    fontSize: '14px',
+                    fontSize: '18px',
                     color: '#d8b4fe',
                     background: 'rgba(216, 180, 254, 0.15)',
                     padding: '4px 10px',
@@ -745,23 +753,33 @@ export async function GET(request: NextRequest): Promise<Response> {
         <div
           style={{
             display: 'flex',
-            justifyContent: 'center',
+            flexDirection: 'column',
             alignItems: 'center',
-            gap: '12px',
-            marginTop: '14px',
-            position: 'relative',
+            gap: '4px',
+            marginTop: 'auto',
+            paddingTop: '20px',
           }}
         >
-          <LunaryLogo size={28} />
-          <div
+          <span
             style={{
-              fontSize: '20px',
-              color: '#d8b4fe',
+              fontSize: '12px',
+              color: 'rgba(255,255,255,0.5)',
+              letterSpacing: '0.05em',
               display: 'flex',
             }}
           >
-            lunary.app
-          </div>
+            What does yours say?
+          </span>
+          <span
+            style={{
+              fontSize: '20px',
+              color: '#A78BFA',
+              letterSpacing: '0.05em',
+              display: 'flex',
+            }}
+          >
+            Get yours free → lunary.app
+          </span>
         </div>
       </div>
     ) : isLandscape ? (
@@ -777,6 +795,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           color: 'white',
           padding: '48px',
           position: 'relative',
+          border: '1px solid rgba(167, 139, 250, 0.3)',
         }}
       >
         {/* Starfield background */}
@@ -797,6 +816,7 @@ export async function GET(request: NextRequest): Promise<Response> {
               fontSize: '44px',
               display: 'flex',
               color: firstName ? '#d8b4fe' : '#e4e4e7',
+              textShadow: '0 0 20px rgba(167, 139, 250, 0.3)',
             }}
           >
             {titleContent}
@@ -1005,6 +1025,7 @@ export async function GET(request: NextRequest): Promise<Response> {
               display: 'flex',
               flexDirection: 'column',
               border: '1px solid #27272a',
+              borderLeft: '3px solid #A78BFA',
               borderRadius: '12px',
               padding: '14px 16px',
               background: 'rgba(24, 24, 27, 0.9)',
@@ -1030,6 +1051,20 @@ export async function GET(request: NextRequest): Promise<Response> {
               >
                 Your Day
               </div>
+              {isPersonalized && (
+                <div
+                  style={{
+                    fontSize: '14px',
+                    color: '#d8b4fe',
+                    background: 'rgba(216, 180, 254, 0.15)',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                  }}
+                >
+                  Personal
+                </div>
+              )}
             </div>
             <div
               style={{
@@ -1039,7 +1074,7 @@ export async function GET(request: NextRequest): Promise<Response> {
                 display: 'flex',
               }}
             >
-              {insight.length > 90 ? insight.substring(0, 90) + '...' : insight}
+              {truncateText(insight, 90)}
             </div>
           </div>
 
@@ -1132,6 +1167,18 @@ export async function GET(request: NextRequest): Promise<Response> {
               >
                 {transitDate}
               </div>
+              <div
+                style={{
+                  fontSize: '14px',
+                  color: '#fbbf24',
+                  background: 'rgba(251, 191, 36, 0.15)',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                }}
+              >
+                Major
+              </div>
             </div>
             <div
               style={{
@@ -1158,24 +1205,34 @@ export async function GET(request: NextRequest): Promise<Response> {
         {/* Footer */}
         <div
           style={{
-            marginTop: '16px',
             display: 'flex',
-            justifyContent: 'center',
+            flexDirection: 'column',
             alignItems: 'center',
-            gap: '12px',
-            position: 'relative',
+            gap: '4px',
+            marginTop: 'auto',
+            paddingTop: '16px',
           }}
         >
-          <LunaryLogo size={24} />
-          <div
+          <span
             style={{
-              fontSize: '18px',
-              color: '#d8b4fe',
+              fontSize: '12px',
+              color: 'rgba(255,255,255,0.5)',
+              letterSpacing: '0.05em',
               display: 'flex',
             }}
           >
-            lunary.app
-          </div>
+            What does yours say?
+          </span>
+          <span
+            style={{
+              fontSize: '16px',
+              color: '#A78BFA',
+              letterSpacing: '0.05em',
+              display: 'flex',
+            }}
+          >
+            Get yours free → lunary.app
+          </span>
         </div>
       </div>
     ) : (
@@ -1186,11 +1243,13 @@ export async function GET(request: NextRequest): Promise<Response> {
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
           background: '#09090b',
           fontFamily: 'Roboto Mono, monospace',
           color: 'white',
           padding,
           position: 'relative',
+          border: '1px solid rgba(167, 139, 250, 0.3)',
         }}
       >
         {/* Starfield background */}
@@ -1210,6 +1269,7 @@ export async function GET(request: NextRequest): Promise<Response> {
               fontSize: titleSize,
               display: 'flex',
               color: firstName ? '#d8b4fe' : '#e4e4e7',
+              textShadow: '0 0 20px rgba(167, 139, 250, 0.3)',
             }}
           >
             {titleContent}
@@ -1387,6 +1447,7 @@ export async function GET(request: NextRequest): Promise<Response> {
             display: 'flex',
             flexDirection: 'column',
             border: '1px solid #27272a',
+            borderLeft: '3px solid #A78BFA',
             borderRadius: '16px',
             padding: cardPadding,
             marginBottom: cardMargin,
@@ -1629,24 +1690,34 @@ export async function GET(request: NextRequest): Promise<Response> {
 
         <div
           style={{
-            marginTop: 'auto',
             display: 'flex',
-            justifyContent: 'center',
+            flexDirection: 'column',
             alignItems: 'center',
+            gap: '4px',
+            marginTop: 'auto',
             paddingTop: isLandscape ? '16px' : '20px',
-            gap: '14px',
           }}
         >
-          <LunaryLogo size={isLandscape ? 32 : 40} />
-          <div
+          <span
             style={{
-              fontSize: largeTextSize,
-              color: '#d8b4fe',
+              fontSize: '12px',
+              color: 'rgba(255,255,255,0.5)',
+              letterSpacing: '0.05em',
               display: 'flex',
             }}
           >
-            lunary.app
-          </div>
+            What does yours say?
+          </span>
+          <span
+            style={{
+              fontSize: isLandscape ? '16px' : '20px',
+              color: '#A78BFA',
+              letterSpacing: '0.05em',
+              display: 'flex',
+            }}
+          >
+            Get yours free → lunary.app
+          </span>
         </div>
       </div>
     );

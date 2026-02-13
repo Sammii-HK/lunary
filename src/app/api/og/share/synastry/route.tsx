@@ -11,7 +11,6 @@ import {
   loadShareFonts,
   truncateText,
   ShareFooter,
-  SHARE_BASE_URL,
 } from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
@@ -152,7 +151,6 @@ export async function GET(request: NextRequest) {
     }
 
     const { width, height } = getFormatDimensions(format);
-    const baseUrl = SHARE_BASE_URL;
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
@@ -529,7 +527,7 @@ export async function GET(request: NextRequest) {
           {renderElementBar()}
         </div>
 
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     );
 
@@ -701,7 +699,7 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     );
 

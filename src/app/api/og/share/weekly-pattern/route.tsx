@@ -10,7 +10,8 @@ import {
 import {
   truncateText,
   ShareFooter,
-  SHARE_BASE_URL,
+  SHARE_IMAGE_BORDER,
+  SHARE_TITLE_GLOW,
   SHARE_BORDERS,
   SHARE_CARDS,
 } from '@/lib/share/og-share-utils';
@@ -67,7 +68,21 @@ const SUIT_COLORS: Record<string, string> = {
   'Major Arcana': OG_COLORS.galaxyHaze,
 };
 
-// Suit symbols removed - using colored circles instead
+const SUIT_KEYWORDS: Record<string, string> = {
+  Cups: 'emotion',
+  Wands: 'action',
+  Swords: 'thought',
+  Pentacles: 'material',
+  'Major Arcana': 'destiny',
+};
+
+function getSuitKeyword(cardName: string): string {
+  if (cardName.includes('Cups')) return SUIT_KEYWORDS.Cups;
+  if (cardName.includes('Wands')) return SUIT_KEYWORDS.Wands;
+  if (cardName.includes('Swords')) return SUIT_KEYWORDS.Swords;
+  if (cardName.includes('Pentacles')) return SUIT_KEYWORDS.Pentacles;
+  return SUIT_KEYWORDS['Major Arcana'];
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -180,8 +195,6 @@ export async function GET(request: NextRequest) {
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
-    const baseUrl = SHARE_BASE_URL;
-
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
     const padding = isLandscape ? 48 : isStory ? 60 : 60;
@@ -189,7 +202,7 @@ export async function GET(request: NextRequest) {
     const subtitleSize = isLandscape ? 22 : isStory ? 36 : 32;
     const cardNameSize = isLandscape ? 22 : isStory ? 36 : 32;
     const labelSize = isLandscape ? 20 : isStory ? 32 : 28;
-    const seasonTitleSize = isLandscape ? 36 : isStory ? 56 : 52;
+    const seasonTitleSize = isLandscape ? 36 : isStory ? 64 : 56;
     const truncate = truncateText;
 
     // Limit top cards to prevent overflow (max 3 for landscape/square)
@@ -239,6 +252,7 @@ export async function GET(request: NextRequest) {
           padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -260,6 +274,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s` : 'My'} Week in Tarot
@@ -382,7 +397,10 @@ export async function GET(request: NextRequest) {
                     display: 'flex',
                   }}
                 >
-                  {truncate(card.name, 25)}
+                  {truncate(card.name, 22)}
+                  {getSuitKeyword(card.name)
+                    ? ` \u2014 ${getSuitKeyword(card.name)}`
+                    : ''}
                 </div>
                 <div
                   style={{
@@ -399,7 +417,7 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : isStory ? (
       // Story Layout - Large season card with big symbol
@@ -409,10 +427,12 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
           background: OG_COLORS.background,
           padding: '80px 60px 140px 60px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -434,6 +454,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s` : 'My'} Week in Tarot
@@ -545,7 +566,10 @@ export async function GET(request: NextRequest) {
                   display: 'flex',
                 }}
               >
-                {truncate(card.name, 30)}
+                {truncate(card.name, 22)}
+                {getSuitKeyword(card.name)
+                  ? ` \u2014 ${getSuitKeyword(card.name)}`
+                  : ''}
               </div>
               <div
                 style={{
@@ -561,7 +585,7 @@ export async function GET(request: NextRequest) {
           ))}
         </div>
 
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     ) : (
       // Square Layout
@@ -575,6 +599,7 @@ export async function GET(request: NextRequest) {
           padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
@@ -596,6 +621,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {firstName ? `${firstName}'s` : 'My'} Week in Tarot
@@ -707,7 +733,10 @@ export async function GET(request: NextRequest) {
                   display: 'flex',
                 }}
               >
-                {truncate(card.name, 28)}
+                {truncate(card.name, 22)}
+                {getSuitKeyword(card.name)
+                  ? ` \u2014 ${getSuitKeyword(card.name)}`
+                  : ''}
               </div>
               <div
                 style={{
@@ -723,7 +752,7 @@ export async function GET(request: NextRequest) {
           ))}
         </div>
 
-        <ShareFooter baseUrl={baseUrl} format={format} />
+        <ShareFooter format={format} />
       </div>
     );
 
