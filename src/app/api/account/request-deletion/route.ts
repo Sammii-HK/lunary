@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email';
 import { generateDeletionToken } from '@/lib/deletion-tokens';
@@ -25,14 +26,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
-    const email = body?.email;
+    // If authenticated, use the session email (prevents user-controlled bypass).
+    // If not authenticated, fall back to body email for the "can't access app"
+    // compliance flow — the email verification link is the security check.
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
 
-    if (!email || typeof email !== 'string') {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    let normalizedEmail: string;
+
+    if (session?.user?.email) {
+      normalizedEmail = session.user.email.trim().toLowerCase();
+    } else {
+      const body = await request.json();
+      const email = body?.email;
+
+      if (!email || typeof email !== 'string') {
+        return NextResponse.json(
+          { error: 'Email is required' },
+          { status: 400 },
+        );
+      }
+
+      normalizedEmail = email.trim().toLowerCase();
     }
-
-    const normalizedEmail = email.trim().toLowerCase();
 
     // Rate limit by email: max 2 requests per hour
     const emailLimit = checkRateLimit(

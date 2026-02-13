@@ -3,7 +3,10 @@ import type { IGDidYouKnowContent } from './types';
 import { seededRandom } from './ig-utils';
 
 // Fact pools by grimoire category - surprising, shareable, save-worthy facts
-const FACT_POOLS: Record<string, Array<{ fact: string; source: string }>> = {
+export const FACT_POOLS: Record<
+  string,
+  Array<{ fact: string; source: string }>
+> = {
   tarot: [
     {
       fact: "The Death card doesn't mean literal death. It represents transformation, endings, and powerful new beginnings.",
@@ -36,6 +39,42 @@ const FACT_POOLS: Record<string, Array<{ fact: string; source: string }>> = {
     {
       fact: 'The Major Arcana tells a complete story called "The Fool\'s Journey" from innocence to enlightenment.',
       source: 'tarot/the-fool',
+    },
+    {
+      fact: "The Hanged Man isn't suffering. He chose to hang upside down. It represents surrender and seeing the world from a new perspective.",
+      source: 'tarot/the-hanged-man',
+    },
+    {
+      fact: 'The Moon card represents illusion and the subconscious. When it appears, things are not as they seem.',
+      source: 'tarot/the-moon',
+    },
+    {
+      fact: 'Temperance is the card of alchemy. It appears when opposing forces in your life need to be blended, not chosen between.',
+      source: 'tarot/temperance',
+    },
+    {
+      fact: 'The Empress and Emperor sit side by side in the Major Arcana. Together they represent the balance of nurture and structure.',
+      source: 'tarot/the-empress',
+    },
+    {
+      fact: 'The Devil card shows chains loose enough to remove. The bondage it represents is always self-imposed.',
+      source: 'tarot/the-devil',
+    },
+    {
+      fact: 'Judgement is the second-to-last card in the Major Arcana. It represents the moment of reckoning before wholeness.',
+      source: 'tarot/judgement',
+    },
+    {
+      fact: 'The Magician has all four suit symbols on his table: wand, cup, sword, pentacle. He has every tool he needs.',
+      source: 'tarot/the-magician',
+    },
+    {
+      fact: 'The Chariot moves forward through willpower alone. It appears when determination matters more than strategy.',
+      source: 'tarot/the-chariot',
+    },
+    {
+      fact: "Strength shows a woman gently closing a lion's mouth. True strength in tarot is patience, not force.",
+      source: 'tarot/strength',
     },
   ],
   crystals: [
@@ -71,6 +110,38 @@ const FACT_POOLS: Record<string, Array<{ fact: string; source: string }>> = {
       fact: 'Selenite is named after Selene, the Greek moon goddess. It dissolves in water, so never cleanse it with liquid.',
       source: 'crystals/selenite',
     },
+    {
+      fact: "Black tourmaline is piezoelectric: it generates an electric charge under pressure. It's been used for protection for thousands of years.",
+      source: 'crystals/black-tourmaline',
+    },
+    {
+      fact: "Tiger's Eye was carried by Roman soldiers into battle for courage. Its chatoyancy (cat's eye effect) comes from parallel fibres of crocidolite.",
+      source: 'crystals/tigers-eye',
+    },
+    {
+      fact: 'Fluorite comes in almost every colour and was called "the most colourful mineral in the world". It\'s known as the genius stone for mental clarity.',
+      source: 'crystals/fluorite',
+    },
+    {
+      fact: "Carnelian was placed in Egyptian tombs to protect the dead on their journey. It's one of the oldest known healing stones.",
+      source: 'crystals/carnelian',
+    },
+    {
+      fact: 'Lapis Lazuli was ground into powder to create ultramarine, the most expensive pigment in Renaissance painting.',
+      source: 'crystals/lapis-lazuli',
+    },
+    {
+      fact: "Smoky Quartz gets its colour from natural radiation in the earth. It's one of the most effective grounding stones.",
+      source: 'crystals/smoky-quartz',
+    },
+    {
+      fact: "Jade has been revered in Chinese culture for over 5,000 years. It's harder than steel and symbolises purity and moral integrity.",
+      source: 'crystals/jade',
+    },
+    {
+      fact: 'Malachite contains copper, which is toxic when ingested. Always use polished malachite and never put raw malachite in water.',
+      source: 'crystals/malachite',
+    },
   ],
   spells: [
     {
@@ -96,6 +167,46 @@ const FACT_POOLS: Record<string, Array<{ fact: string; source: string }>> = {
     {
       fact: 'Money jars combine the magic of herbs, coins, and intention. They work through sympathetic magic: like attracts like.',
       source: 'spells/money-jar',
+    },
+    {
+      fact: 'Bay leaves have been used in manifestation for centuries. Write your wish on one, burn it, and release the intention with the smoke.',
+      source: 'spells/bay-leaf-manifestation',
+    },
+    {
+      fact: 'The word "glamour" originally meant a spell cast to change how someone appears. Glamour magic is one of the oldest forms of spellwork.',
+      source: 'spells/glamour-spell',
+    },
+    {
+      fact: 'Rosemary was burned in hospitals during plagues for purification. In spellwork, it substitutes for almost any herb, like white candles substitute for any colour.',
+      source: 'spells/herb-substitution',
+    },
+    {
+      fact: 'Freezer spells work by literally freezing a situation in place. Write what you want to stop on paper, put it in water, and freeze it.',
+      source: 'spells/freezer-spell',
+    },
+    {
+      fact: 'Knot magic is one of the simplest spells: tie your intention into a cord. Each knot seals a layer of focus. Untie to release.',
+      source: 'spells/knot-magic',
+    },
+    {
+      fact: 'Egg cleansing (limpia) is a Mesoamerican practice that absorbs negative energy. The egg is passed over the body then cracked into water to read.',
+      source: 'spells/egg-cleansing',
+    },
+    {
+      fact: "Honey jars sweeten someone's disposition toward you. They're slow magic: the longer they sit, the stronger they work.",
+      source: 'spells/honey-jar',
+    },
+    {
+      fact: 'Sigils are symbols charged with intention. You design one, activate it, then forget it. The forgetting is the magic: it releases attachment to the outcome.',
+      source: 'spells/sigil-creation',
+    },
+    {
+      fact: 'Smoke cleansing has been practised by nearly every culture. Sage, palo santo, cedar, and incense all work differently depending on the intention.',
+      source: 'spells/smoke-cleansing',
+    },
+    {
+      fact: 'Waning moon is the best phase for banishing and letting go. Spells cast during this phase align with the energy of release.',
+      source: 'spells/lunar-timing',
     },
   ],
   numerology: [
@@ -127,6 +238,46 @@ const FACT_POOLS: Record<string, Array<{ fact: string; source: string }>> = {
       fact: '777 is the luckiest angel number. It means you are exactly where you are meant to be on your spiritual path.',
       source: 'numerology/angel-numbers/777',
     },
+    {
+      fact: '888 is the number of abundance and financial flow. It signals that rewards for past effort are arriving.',
+      source: 'numerology/angel-numbers/888',
+    },
+    {
+      fact: '999 marks completion. When you see it, a major chapter is ending. Let it close so the next one can begin.',
+      source: 'numerology/angel-numbers/999',
+    },
+    {
+      fact: 'Master numbers 11, 22, and 33 are never reduced in numerology. They carry amplified spiritual significance.',
+      source: 'numerology/life-path/11',
+    },
+    {
+      fact: 'Your Expression number is calculated from your full birth name. It reveals natural talents and abilities you came into this life with.',
+      source: 'numerology/expression/1',
+    },
+    {
+      fact: 'Pythagoras, the father of mathematics, believed that numbers were the language of the universe. He founded Western numerology in the 6th century BC.',
+      source: 'numerology/life-path/1',
+    },
+    {
+      fact: "Your Soul Urge number comes from the vowels in your name. It reveals your heart's deepest desires and what truly motivates you.",
+      source: 'numerology/soul-urge/1',
+    },
+    {
+      fact: 'The number 0 in numerology represents infinite potential and the void before creation. It amplifies any number it appears with.',
+      source: 'numerology/angel-numbers/000',
+    },
+    {
+      fact: '1010 is a portal number. It appears when you are at the threshold of a major spiritual upgrade or quantum leap.',
+      source: 'numerology/angel-numbers/1010',
+    },
+    {
+      fact: "Personal Year cycles run from birthday to birthday, not January to January. Your current Personal Year number shapes your year's themes.",
+      source: 'numerology/personal-year/1',
+    },
+    {
+      fact: "666 is not evil in numerology. It's a message to rebalance your focus between material concerns and spiritual growth.",
+      source: 'numerology/angel-numbers/666',
+    },
   ],
   runes: [
     {
@@ -149,6 +300,26 @@ const FACT_POOLS: Record<string, Array<{ fact: string; source: string }>> = {
       fact: "The rune Gebo (ᚷ) means 'gift' and represents equal exchange. It's the origin of the X we use for kisses.",
       source: 'runes/gebo',
     },
+    {
+      fact: 'Vikings carved runes into their weapons believing it imbued them with power. The rune Tiwaz (ᛏ) was marked on swords for victory.',
+      source: 'runes/tiwaz',
+    },
+    {
+      fact: 'The rune Algiz (ᛉ) is the most recognisable protection symbol. Its shape — a person with arms raised — represents the shield of the divine.',
+      source: 'runes/algiz',
+    },
+    {
+      fact: "The blank rune (Wyrd) isn't historically authentic. It was added in the 1980s. Traditional Elder Futhark has exactly 24 runes.",
+      source: 'runes/fehu',
+    },
+    {
+      fact: 'Runes were never written left-to-right exclusively. They could be carved in any direction, even in spirals, and were read by context.',
+      source: 'runes/ansuz',
+    },
+    {
+      fact: "The rune Isa (ᛁ) is a single vertical line meaning 'ice'. It represents stillness, patience, and the power of doing nothing.",
+      source: 'runes/isa',
+    },
   ],
   chakras: [
     {
@@ -170,6 +341,26 @@ const FACT_POOLS: Record<string, Array<{ fact: string; source: string }>> = {
     {
       fact: 'The Crown Chakra is associated with the colour violet or white. When open, it connects you to universal consciousness and your highest self.',
       source: 'chakras/crown',
+    },
+    {
+      fact: 'The Sacral Chakra governs creativity, pleasure, and emotional flow. When blocked, both creative expression and intimacy suffer.',
+      source: 'chakras/sacral',
+    },
+    {
+      fact: 'The Solar Plexus Chakra is your personal power centre. A weak solar plexus shows up as people-pleasing and difficulty saying no.',
+      source: 'chakras/solar-plexus',
+    },
+    {
+      fact: "The Throat Chakra doesn't just govern speech. It governs all authentic expression: writing, art, singing, and honest communication.",
+      source: 'chakras/throat',
+    },
+    {
+      fact: 'Each chakra spins at a different frequency corresponding to a colour of the rainbow, from red (root) to violet (crown).',
+      source: 'chakras/root',
+    },
+    {
+      fact: 'Chakras can be overactive, not just blocked. An overactive Third Eye can cause overthinking, headaches, and difficulty staying grounded.',
+      source: 'chakras/third-eye',
     },
   ],
   zodiac: [
@@ -196,6 +387,30 @@ const FACT_POOLS: Record<string, Array<{ fact: string; source: string }>> = {
     {
       fact: "Leo is ruled by the Sun, the only sign ruled by a star rather than a planet. That's why Leos naturally radiate main character energy.",
       source: 'zodiac/leo',
+    },
+    {
+      fact: 'Each zodiac sign rules a body part, from Aries (head) to Pisces (feet). Stress often shows up in the body part your sign governs.',
+      source: 'zodiac/aries',
+    },
+    {
+      fact: "Ophiuchus, the 'thirteenth sign', has been known since ancient times. Astronomers acknowledge it but astrologers intentionally exclude it from the zodiac.",
+      source: 'zodiac/scorpio',
+    },
+    {
+      fact: "Taurus is the only sign that can match Scorpio's stubbornness. They're opposite signs and share an unshakeable determination.",
+      source: 'zodiac/taurus',
+    },
+    {
+      fact: "Virgo's symbol isn't just a maiden. The M with the crossed loop represents the intestines, connecting Virgo to digestion, analysis, and breaking things down.",
+      source: 'zodiac/virgo',
+    },
+    {
+      fact: "Aquarius is an air sign, not water. The water bearer pours knowledge and innovation, not emotion. It's the sign of collective progress.",
+      source: 'zodiac/aquarius',
+    },
+    {
+      fact: "Cancer is ruled by the Moon, the fastest-moving celestial body. That's why Cancers' moods shift so rapidly: their ruler changes signs every 2.5 days.",
+      source: 'zodiac/cancer',
     },
   ],
 };

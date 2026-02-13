@@ -180,6 +180,11 @@
           "id": "data-updates",
           "question": "How often is cosmic data updated?",
           "answer": "**Real-time (always current):**\n- Current planetary positions\n- Moon phase\n- Today's date and season\n\n**Calculated for YOU (updates when transits change):**\n- Which houses planets occupy in YOUR chart\n- Aspects to YOUR natal planets\n- Personalized interpretations\n\n**Your data (updates as you use the app):**\n- Tarot readings\n- Journal entries\n- Pattern insights (recalculated nightly)\n\nEverything astronomical is accurate to the minute. Pattern analysis runs nightly for all users."
+        },
+        {
+          "id": "calculation-differences",
+          "question": "Why do some of my placements differ from other astrology apps?",
+          "answer": "Lunary uses the traditional Hellenistic framework for calculated points like the Part of Fortune. For night charts, we use the day/night sect formula (the original 2,000-year-old method) rather than the simplified modern formula some apps use. Planetary positions use the same astronomy-engine calculations and will match across apps. Differences only appear in calculated points like the Part of Fortune and Part of Spirit. Visit our [methodology page](/about/methodology) for full technical details."
         }
       ]
     },

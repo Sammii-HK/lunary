@@ -111,25 +111,34 @@ async function cleanRegenerate() {
             : '';
           const fullCaption = post.caption + hashtagString;
 
+          // For carousels, store all image URLs pipe-delimited so
+          // buildPlatformPayload can split them into multiple media items.
+          const imageUrls = post.imageUrls || [];
+          const imageUrlValue =
+            post.type === 'carousel' && imageUrls.length > 1
+              ? imageUrls.join('|')
+              : imageUrls[0] || null;
+
           const igPost = await prisma.socialPost.create({
             data: {
               content: fullCaption,
               platform: 'instagram',
-              postType: post.type,
+              postType:
+                post.type === 'carousel' ? 'instagram_carousel' : post.type,
               scheduledDate: new Date(post.scheduledTime),
               status: 'pending',
-              image_url: post.imageUrls?.[0] || null,
+              image_url: imageUrlValue,
               base_group_key: `instagram-${dateStr}-${post.type}`,
               video_metadata: {
                 hashtags: post.hashtags || [],
                 metadata: post.metadata || {},
-                imageUrls: post.imageUrls || [],
+                imageUrls: imageUrls,
               },
             },
           });
 
           // Create TikTok version with vertical format
-          const tiktokImageUrls = (post.imageUrls || []).map((url) => {
+          const tiktokImageUrls = imageUrls.map((url) => {
             try {
               const urlObj = new URL(url);
               urlObj.searchParams.set('format', 'story'); // Vertical 1080x1920
@@ -138,15 +147,20 @@ async function cleanRegenerate() {
               return url;
             }
           });
+          const tiktokImageUrlValue =
+            post.type === 'carousel' && tiktokImageUrls.length > 1
+              ? tiktokImageUrls.join('|')
+              : tiktokImageUrls[0] || null;
 
           await prisma.socialPost.create({
             data: {
-              content: fullCaption, // TikTok also gets hashtags
+              content: fullCaption,
               platform: 'tiktok',
-              postType: post.type,
+              postType:
+                post.type === 'carousel' ? 'instagram_carousel' : post.type,
               scheduledDate: new Date(post.scheduledTime),
               status: 'pending',
-              image_url: tiktokImageUrls[0] || null,
+              image_url: tiktokImageUrlValue,
               base_group_key: `tiktok-${dateStr}-${post.type}`,
               video_metadata: {
                 hashtags: post.hashtags || [],
