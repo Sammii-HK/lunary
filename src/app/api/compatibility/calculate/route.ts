@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { kvGet } from '@/lib/cloudflare/kv';
 import { calculateSynastry } from '@/lib/astrology/synastry';
-import { getRealPlanetaryPositions } from '@/utils/astrology/astronomical-data';
+import { getRealPlanetaryPositions } from '@utils/astrology/astronomical-data';
 import type { CompatInviteData } from '@/app/api/compatibility/invite/route';
 
 /**

@@ -3,7 +3,7 @@ import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { validateInsightText } from '@/lib/community/moderation';
 import { checkRateLimit } from '@/lib/api/rate-limit';
-import { QUESTION_LIMITS } from '@/utils/entitlements';
+import { QUESTION_LIMITS } from '@utils/entitlements';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
