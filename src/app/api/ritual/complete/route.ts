@@ -30,12 +30,17 @@ export async function POST(request: NextRequest) {
       const { incrementProgress } = await import('@/lib/progress/server');
       await incrementProgress(userId, 'ritual', 1);
 
-      // Track ritual completion in canonical analytics
-      const { conversionTracking } = await import('@/lib/analytics');
-      conversionTracking.ritualStarted(userId, user.email, undefined, {
-        context: 'ritual_complete',
-        ritualType,
-        ...metadata,
+      // Track ritual completion server-side via /api/ether/cv
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
+      await fetch(`${baseUrl}/api/ether/cv`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'ritual_completed',
+          userId,
+          userEmail: user.email,
+          metadata: { ritualType, ...metadata },
+        }),
       });
     } catch (progressError) {
       console.warn(
