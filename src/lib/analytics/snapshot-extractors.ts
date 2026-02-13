@@ -315,7 +315,7 @@ export function extractFeatureAdoption(
         adoption_rate: fa.guide,
       },
       {
-        event_type: 'ritual_started',
+        event_type: 'ritual_completed',
         users: Math.round((fa.ritual / 100) * productMau),
         adoption_rate: fa.ritual,
       },
@@ -389,7 +389,7 @@ export function computeInsights(s: ConsolidatedSnapshot): InsightData[] {
       count: Math.round((fa.guide / 100) * productMau),
       adoption: fa.guide,
     },
-    ritual_started: {
+    ritual_completed: {
       count: Math.round((fa.ritual / 100) * productMau),
       adoption: fa.ritual,
     },

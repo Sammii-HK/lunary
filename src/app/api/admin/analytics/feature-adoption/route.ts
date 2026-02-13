@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
           adoption_rate: Number(row.guide_adoption || 0),
         },
         {
-          event_type: 'ritual_started',
+          event_type: 'ritual_completed',
           users: Math.round((Number(row.ritual_adoption || 0) / 100) * mau),
           adoption_rate: Number(row.ritual_adoption || 0),
         },

@@ -14,7 +14,7 @@ const ENGAGEMENT_EVENTS = [
   'personalized_horoscope_viewed',
   'personalized_tarot_viewed',
   'astral_chat_used',
-  'ritual_started',
+  'ritual_completed',
   'horoscope_viewed',
   'daily_dashboard_viewed',
   'journal_entry_created',

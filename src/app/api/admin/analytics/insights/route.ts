@@ -150,7 +150,7 @@ export async function GET(request: NextRequest) {
       tarotAdoption: pct(getAdoption('tarot_drawn')),
       guideAdoption: pct(getAdoption('astral_chat_used')),
       chartAdoption: pct(getAdoption('chart_viewed')),
-      ritualAdoption: pct(getAdoption('ritual_started')),
+      ritualAdoption: pct(getAdoption('ritual_completed')),
 
       // Revenue (API returns 0-100)
       mrr: revenue.mrr || 0,
