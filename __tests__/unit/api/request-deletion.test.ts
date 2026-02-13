@@ -6,6 +6,15 @@ import { NextResponse } from 'next/server';
 
 // --- Mocks ---
 
+const mockGetSession = jest.fn().mockResolvedValue(null);
+jest.mock('@/lib/auth', () => ({
+  auth: {
+    api: {
+      getSession: (...args: any[]) => mockGetSession(...args),
+    },
+  },
+}));
+
 const mockUserFindFirst = jest.fn();
 const mockDeletionFindFirst = jest.fn().mockResolvedValue(null);
 
@@ -41,7 +50,7 @@ import { POST } from '@/app/api/account/request-deletion/route';
 // --- Helpers ---
 
 function makeRequest(body: object) {
-  return { json: () => Promise.resolve(body) } as any;
+  return { json: () => Promise.resolve(body), headers: new Headers() } as any;
 }
 
 let jsonSpy: jest.SpyInstance;
@@ -62,6 +71,7 @@ function installJsonSpy() {
 describe('POST /api/account/request-deletion', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetSession.mockResolvedValue(null); // Default: unauthenticated
     mockDeletionFindFirst.mockResolvedValue(null);
     installJsonSpy();
   });
@@ -112,6 +122,28 @@ describe('POST /api/account/request-deletion', () => {
       expect.objectContaining({
         where: { email: 'user@example.com' },
       }),
+    );
+  });
+
+  it('uses session email when authenticated (ignores body email)', async () => {
+    mockGetSession.mockResolvedValue({
+      user: { id: 'user-1', email: 'real@example.com' },
+    });
+    mockUserFindFirst.mockResolvedValue({
+      id: 'user-1',
+      email: 'real@example.com',
+    });
+
+    await POST(makeRequest({ email: 'attacker@evil.com' }));
+
+    // Should look up by session email, not the body email
+    expect(mockUserFindFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { email: 'real@example.com' },
+      }),
+    );
+    expect(mockSendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: 'real@example.com' }),
     );
   });
 
