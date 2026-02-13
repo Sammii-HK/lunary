@@ -216,15 +216,24 @@ SCRIPT BODY (6-10 lines after hook):
   * Include ONE hyper-specific, relatable observation people recognize in someone they know
   * Examples: "The friend who answers every question with another question" / "The person who goes silent for three days then comes back like nothing happened"
   * Specificity drives shares — vague observations get skipped, precise ones get sent
+- SAVE TRIGGER (drives the #1 algorithm signal - saves = 10 points):
+  * Include ONE line that works as standalone reference content
+  * This is the line someone screenshots, notes down, or saves the video for
+  * Formats: a specific list, a counter-intuitive fact, a "cheat sheet" moment
+  * Examples: "Three signs: [specific], [specific], [specific]." / "[Topic] at its core: [one-sentence reframe]."
+  * Place near the END - the save decision happens in the final seconds
+  * Must be SPECIFIC enough to be useful on its own, out of context
 - Near the end: practical observation someone can notice or try this week
 
-CLOSING LINE (most important line after hook):
-- Must be SAVE-WORTHY - the line someone screenshots or quotes
-- Formats that work:
-  * Reframe in a single sentence: "[Topic] isn't [expected]. It's [unexpected]."
-  * Provocative observation: the kind of line that makes someone comment "say that again"
-  * Callback to hook that lands differently now (if using bookend structure)
-  * Stitch bait: end with an open question or provocative claim others want to respond to ("But that's only the surface read." / "Unless you look at it from [other angle].")
+CLOSING LINE (drives saves - the most valuable algorithm signal):
+- Must work as a STANDALONE piece of content someone would screenshot
+- Formats that drive saves:
+  * One-sentence reframe: "[Topic] isn't [expected]. It's [unexpected]."
+  * Cheat sheet closer: "[Topic] in one line: [dense, specific summary]."
+  * Callback reframe: repeat hook but it means something different now
+  * Stitch bait: end with a claim others want to respond to
+- The test: if someone ONLY saw this line in a screenshot, would they save it?
+- Also works as: provocative observation someone comments "say that again"
 - NOT: inspirational, motivational, "embrace your", generic wisdom
 - NOT: "so next time you see X, remember Y" (too generic)
 - TEST: Would someone quote this line to a friend? If not, rewrite it.

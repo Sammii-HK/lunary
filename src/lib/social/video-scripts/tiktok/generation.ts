@@ -299,7 +299,7 @@ export async function generateTikTokScript(
   },
 ): Promise<VideoScript> {
   const safePartNumber = Number.isFinite(partNumber) ? partNumber : 1;
-  const safeTotalParts = Number.isFinite(totalParts) ? totalParts : 7;
+  const safeTotalParts = Number.isFinite(totalParts) ? totalParts : 4;
   const grimoireData = getSafeGrimoireDataForFacet(facet, theme.category);
   const angle =
     options?.angleOverride ||
@@ -411,13 +411,16 @@ export async function generateTikTokScript(
     });
   }
 
-  // "Save this" closing overlay (#8) — last 3 seconds, non-conversion only
+  // "Save this" closing overlay (#8) — last 5 seconds, non-conversion only
+  // Extended from 3s to 5s: save decision happens in the final 5 seconds
   if (targetAudience !== 'conversion') {
     const savePrompts = [
       'Save this for later',
       'Bookmark this one',
       'Save for when you need it',
       'Pin this',
+      'Screenshot this',
+      'Save this reference',
     ];
     const saveSeed =
       scheduledDate.getFullYear() * 10000 +
@@ -426,7 +429,7 @@ export async function generateTikTokScript(
     const estimatedSeconds = wordCount / 2.6;
     overlays.push({
       text: savePrompts[saveSeed % savePrompts.length],
-      startTime: Math.max(estimatedSeconds - 3, 0),
+      startTime: Math.max(estimatedSeconds - 5, 0),
       endTime: estimatedSeconds,
       style: 'stamp',
     });

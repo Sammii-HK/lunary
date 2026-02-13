@@ -259,24 +259,145 @@ export function selectHookStyle(
 }
 
 /**
- * Identity trigger templates for zodiac content types (#9)
- * {sign} is replaced with the extracted sign name
+ * Identity trigger templates for ALL content types
+ * {sign} is replaced with the extracted sign name (zodiac types)
+ * {topic} is replaced with the facet title (all types)
  */
 const IDENTITY_TRIGGERS: Record<string, string[]> = {
+  // Zodiac triggers (expanded to 6-8 each)
   zodiac_sun: [
     '{sign}s already know this.',
     'If you are a {sign}, pay attention.',
     '{sign}s felt this before they read it.',
+    '{sign}s - be honest. This is you.',
+    'Every {sign} reading this just nodded.',
+    'If you are a {sign}, you already felt called out.',
+    '{sign} energy is doing this right now.',
+    'The {sign}s in the comments already know.',
   ],
   zodiac_moon: [
     '{sign} moons, this is yours.',
     '{sign} moon? This explains a lot.',
     '{sign} moons process this differently.',
+    'If your moon is in {sign}, this hits different.',
+    '{sign} moons - you already know why this hurts.',
+    '{sign} moon people felt this in their chest.',
   ],
   zodiac_rising: [
     '{sign} risings, you felt this.',
     'If your rising is {sign}, read that again.',
     '{sign} risings project this without trying.',
+    '{sign} risings - everyone sees this but you.',
+    'If your ascendant is {sign}, this is your default setting.',
+    '{sign} risings walk into rooms and this happens.',
+  ],
+
+  // Tarot triggers
+  tarot_major: [
+    'If you have pulled {topic} recently, pay attention.',
+    'People who keep seeing {topic} already know this.',
+    '{topic} people - this one hits.',
+    'If {topic} followed you into this video, there is a reason.',
+    'The people who fear {topic} need this most.',
+    'If {topic} keeps appearing in your spreads, read this twice.',
+    '{topic} showed up for you today. Not random.',
+    'Tell me {topic} has not been haunting your readings.',
+  ],
+  tarot_minor: [
+    'If {topic} keeps showing up in your readings, read this twice.',
+    '{topic} has been following you for a reason.',
+    'The people pulling {topic} this week - this is for you.',
+    'If {topic} appeared in your last spread, stop scrolling.',
+    '{topic} readers know exactly what I mean.',
+    '{topic} has been trying to tell you something.',
+  ],
+
+  // Numerology triggers
+  angel_numbers: [
+    'If you keep seeing {topic}, this is for you.',
+    '{topic} has been appearing for a reason. You know it.',
+    'The people who see {topic} everywhere already felt this.',
+    'If {topic} showed up today, you were meant to see this.',
+    '{topic} people - you are not imagining it.',
+    'The ones who keep seeing {topic} already know.',
+    'If {topic} has been following you, this explains why.',
+    'Tell me you have not been seeing {topic} everywhere.',
+  ],
+  numerology_life_path: [
+    '{topic}s - this is specifically about you.',
+    'If your life path is {topic}, stop scrolling.',
+    '{topic} life paths - you already live this.',
+    'Life path {topic}? This is your pattern.',
+    'The {topic}s in the comments already know this is accurate.',
+    'If you calculated {topic}, you felt this immediately.',
+  ],
+
+  // Lunar/planetary triggers
+  moon_phases: [
+    'If you felt this shift, you already know.',
+    'The people who track moon phases felt this one.',
+    'Moon trackers - you noticed this already.',
+    'If the moon has been hitting different, this is why.',
+    'The ones who felt off this week - this explains it.',
+    'If you check the moon before making decisions, this is for you.',
+  ],
+  planets: [
+    'If you have been feeling {topic} energy, now you know why.',
+    'The people tracking transits already saw this coming.',
+    'If things have felt different this week, blame {topic}.',
+    'Transit trackers - you called it.',
+    '{topic} has been working on you. You felt it.',
+    'If you check your transits, you already knew.',
+  ],
+  retrogrades: [
+    'If this retrograde has been hitting you, this explains why.',
+    'The people blaming the retrograde are right this time.',
+    'If old things keep resurfacing, this is why.',
+    'Retrograde survivors - you know exactly what this feels like.',
+    'If your phone has been acting up, check the sky.',
+    'The ones feeling stuck right now - this retrograde is the reason.',
+  ],
+
+  // Crystal triggers
+  crystals: [
+    'If {topic} is in your collection, you already felt this.',
+    '{topic} people know exactly what I mean.',
+    'Crystal collectors - you felt this one.',
+    'If you carry {topic}, you already know.',
+    '{topic} has been calling to you for a reason.',
+    'The ones who work with {topic} felt this immediately.',
+  ],
+
+  // Spell/ritual triggers
+  spells: [
+    'Practitioners - you already know this ingredient.',
+    'If you have been doing spell work this week, this applies.',
+    'The witches in the comments already knew.',
+    'If this ingredient is in your cabinet, you felt it.',
+    'Baby witches - save this one.',
+    'Experienced practitioners know this changes everything.',
+  ],
+
+  // Chakra triggers
+  chakras: [
+    'If this chakra has been blocked, you felt it.',
+    'Energy workers - you already sensed this.',
+    'If you have been working on {topic}, this explains the resistance.',
+    'The ones with {topic} issues already knew.',
+    'If your body has been telling you something, this is it.',
+    'Healers in the comments already know.',
+  ],
+
+  // Generic fallback for any content type
+  default: [
+    'If this resonated, you already know why.',
+    'The people who needed to see this found it.',
+    'Comment if this hit.',
+    'If you made it this far, this was meant for you.',
+    'The ones who felt this - you are not alone.',
+    'If this changed something, comment what.',
+    'The people who get this, get this.',
+    'If you paused on this video, there is a reason.',
   ],
 };
 
@@ -305,21 +426,27 @@ function extractSignFromTopic(topic: string): string | null {
 }
 
 /**
- * Build a comment-bait identity trigger line for zodiac content (#9)
- * Returns null for non-zodiac or unrecognized topics
+ * Build a comment-bait identity trigger line for any content type
+ * Falls back to default triggers when no exact match exists
  */
 export function buildCommentBaitHook(
   topic: string,
   contentTypeKey: string,
 ): string | null {
-  const triggers = IDENTITY_TRIGGERS[contentTypeKey];
+  // Try exact content type first, then fall back to default
+  let triggers = IDENTITY_TRIGGERS[contentTypeKey];
+  if (!triggers) {
+    triggers = IDENTITY_TRIGGERS.default;
+  }
   if (!triggers) return null;
 
+  // For zodiac types, extract sign and replace {sign}
   const sign = extractSignFromTopic(topic);
-  if (!sign) return null;
-
   const template = triggers[Math.floor(Math.random() * triggers.length)];
-  return template.replace(/\{sign\}/g, sign);
+
+  return template
+    .replace(/\{sign\}/g, sign || topic)
+    .replace(/\{topic\}/g, topic);
 }
 
 /**

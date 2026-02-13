@@ -35,7 +35,7 @@ export function generateCoverImageUrl(
   totalParts: number,
 ): string {
   const safePartNumber = Number.isFinite(partNumber) ? partNumber : 1;
-  const safeTotalParts = Number.isFinite(totalParts) ? totalParts : 7;
+  const safeTotalParts = Number.isFinite(totalParts) ? totalParts : 4;
   const slug =
     facet.grimoireSlug.split('/').pop() ||
     facet.title.toLowerCase().replace(/\s+/g, '-');
@@ -222,6 +222,10 @@ const ENGAGEMENT_QUESTIONS: Record<string, string[]> = {
     'Which sign is this hitting different for?',
     'Agree or disagree for your sign?',
     'Save this for when {topic} comes up again.',
+    'Save this for your next chart reading.',
+    'Bookmark this. You will need it for {topic}.',
+    'Pin this. Come back when {topic} makes sense.',
+    'Save this breakdown. It changes everything.',
   ],
   tarot: [
     'Have you pulled this card recently?',
@@ -232,6 +236,10 @@ const ENGAGEMENT_QUESTIONS: Record<string, string[]> = {
     'Has {topic} ever shown up for you at the worst time?',
     'What do you think this card is really about?',
     'Save this for your next reading.',
+    'Save this for the next time {topic} appears.',
+    'Pin this for your tarot journal.',
+    'Bookmark this. The card will return.',
+    'Save this reading guide.',
   ],
   lunar: [
     'How are you feeling this moon phase?',
@@ -242,6 +250,10 @@ const ENGAGEMENT_QUESTIONS: Record<string, string[]> = {
     'Drop what you noticed during {topic}.',
     'Is your energy different right now?',
     'Who else tracks moon phases?',
+    'Bookmark this moon phase guide.',
+    'Pin this lunar breakdown.',
+    'Save this for when the energy shifts again.',
+    'Save this for the next lunar cycle.',
   ],
   numerology: [
     'Drop your life path number.',
@@ -252,6 +264,10 @@ const ENGAGEMENT_QUESTIONS: Record<string, string[]> = {
     'Save this if {topic} keeps appearing.',
     'Tag someone who needs to see this.',
     'When did {topic} first show up for you?',
+    'Save this number guide.',
+    'Bookmark this for when {topic} appears again.',
+    'Pin this. You will see the number again.',
+    'Save this breakdown. The pattern will repeat.',
   ],
   default: [
     'Who else noticed this pattern?',
@@ -262,6 +278,10 @@ const ENGAGEMENT_QUESTIONS: Record<string, string[]> = {
     'When did you first notice this about {topic}?',
     'Who needs to hear this right now?',
     'Bookmark this one.',
+    'Save this for later.',
+    'Pin this one.',
+    'Bookmark this reference.',
+    'Save this. You will come back to it.',
   ],
 };
 
@@ -303,23 +323,226 @@ const SOFT_CTA_LINES: Record<string, string[]> = {
 };
 
 /**
- * Series follow triggers for mid-series parts
- * {next} is replaced with the next part number
+ * Save CTA lines for caption rotation (8+ items per category for variety)
+ * {topic} placeholder is replaced with the facet title
  */
-const SERIES_FOLLOW_LINES = [
-  'Follow for part {next}',
-  "Part {next} drops tomorrow — follow so you don't miss it",
-  'Follow for the rest of this series',
+const SAVE_CTA_LINES: Record<string, string[]> = {
+  zodiac: [
+    'Save this for when your chart makes no sense.',
+    'Bookmark this before you forget.',
+    'Save this. You will need it later.',
+    'Pin this for your next chart reading.',
+    'Save this. Come back when the transit hits.',
+    'Bookmark this for when someone asks about {topic}.',
+    'Save this reference. You will use it.',
+    'Pin this. You will thank yourself later.',
+  ],
+  tarot: [
+    'Save this for your next reading.',
+    'Bookmark this one. It will click later.',
+    'Save this for when this card appears.',
+    'Pin this for your tarot journal.',
+    'Save this breakdown. It changes the reading.',
+    'Bookmark this for when someone pulls {topic}.',
+    'Save this. The card will show up again.',
+    'Pin this for the next time {topic} appears.',
+  ],
+  lunar: [
+    'Save this for the next {topic}.',
+    'Pin this for your moon phase tracker.',
+    'Bookmark this. The phase comes around again.',
+    'Save this for the next lunar cycle.',
+    'Pin this moon phase guide.',
+    'Save this for when the energy shifts.',
+    'Bookmark this for the next {topic}.',
+    'Save this. You will feel this phase again.',
+  ],
+  planetary: [
+    'Save this for the next transit.',
+    'Bookmark this for when {topic} activates.',
+    'Pin this transit guide.',
+    'Save this. The cycle will repeat.',
+    'Bookmark this for when you feel the shift.',
+    'Save this reference for {topic}.',
+  ],
+  numerology: [
+    'Save this. The number will appear again.',
+    'Bookmark this for when {topic} shows up.',
+    'Pin this number guide.',
+    'Save this for the next time you see {topic}.',
+    'Bookmark this breakdown.',
+    'Save this. You will see it everywhere now.',
+    'Pin this for your numerology notes.',
+    'Save this reference.',
+  ],
+  crystals: [
+    'Save this for your crystal toolkit.',
+    'Bookmark this for your next crystal session.',
+    'Pin this. You will need it.',
+    'Save this crystal guide.',
+    'Bookmark this for when you need {topic}.',
+    'Save this for your collection notes.',
+  ],
+  default: [
+    'Save this for later.',
+    'Bookmark this one.',
+    'Pin this for when you need it.',
+    'Save this reference.',
+    'Bookmark this. You will come back to it.',
+    'Save this. Seriously.',
+    'Pin this for when it clicks.',
+    'Save this for the person who needs it.',
+  ],
+};
+
+/**
+ * Follow CTA lines for caption rotation (12 items for variety across 3x/week)
+ */
+const FOLLOW_CTA_LINES: string[] = [
+  'Follow for more like this.',
+  'Follow if this hit different.',
+  'Follow - tomorrow is even better.',
+  'Follow for the one nobody talks about.',
+  'Follow. This is just the start.',
+  'Follow for daily drops like this.',
+  'Follow if you made it to the end.',
+  'Follow - the next one goes deeper.',
+  'Follow for the content nobody else makes.',
+  'Follow if this changed how you see it.',
+  'Follow. The best one drops this week.',
+  'Follow for the version your friends will send you.',
 ];
 
 /**
+ * Share CTA lines for caption rotation (category-specific)
+ * {topic} placeholder is replaced with the facet title
+ */
+const SHARE_CTA_LINES: Record<string, string[]> = {
+  zodiac: [
+    'Send this to the {topic} in your life.',
+    'Tag someone who needs to hear this.',
+    'Send this to your friend without context.',
+    'DM this to the person you thought of.',
+    'Share this with someone who will feel attacked.',
+    'Send this to your group chat. Watch the chaos.',
+    'Tag the friend who is exactly like this.',
+    'Send this. No caption needed.',
+  ],
+  tarot: [
+    'Send this to someone who just pulled this card.',
+    'Share this with someone who needs it today.',
+    'Send this to your tarot friend.',
+    'Share this with someone who keeps pulling {topic}.',
+    'DM this to the reader in your life.',
+    'Send this to someone who will understand.',
+  ],
+  lunar: [
+    'Send this to someone who felt the shift.',
+    'Share this with someone tracking the moon.',
+    'Send this to the person blaming the moon right now.',
+    'Share this with your moon-tracking friend.',
+    'DM this to the person who felt off today.',
+    'Send this to someone who needs the explanation.',
+  ],
+  default: [
+    'Send this to someone who needs to hear it.',
+    'Share this with a friend.',
+    'Someone you know needs this right now.',
+    'DM this to the first person you thought of.',
+    'Share this with someone who will get it.',
+    'Send this to someone. You already know who.',
+    'Tag someone who needs this today.',
+    'Send this to the person you were just thinking about.',
+  ],
+};
+
+/**
+ * Content types that naturally drive shares (rankings, hot takes, zodiac identity)
+ */
+const SHARE_OPTIMIZED_TYPES = new Set<string>([
+  'ranking',
+  'hot_take',
+  'sign_check',
+  'quiz',
+  'zodiac_sun',
+  'zodiac_moon',
+  'zodiac_rising',
+]);
+
+/**
+ * CTA rotation by day-of-week: save, follow, brand, and share spread across the week
+ * Mon+Fri = save (10 pts), Tue+Sat+Sun = follow, Wed = brand, Thu = share (7 pts)
+ */
+const CTA_ROTATION: Array<'save' | 'follow' | 'brand' | 'share'> = [
+  'follow', // Sun=0
+  'save', // Mon=1
+  'follow', // Tue=2
+  'brand', // Wed=3
+  'share', // Thu=4
+  'save', // Fri=5
+  'follow', // Sat=6
+];
+
+/**
+ * Series follow triggers for mid-series parts (category-aware)
+ * {next} is replaced with the next part number
+ */
+const SERIES_FOLLOW_LINES: Record<string, string[]> = {
+  zodiac: [
+    'Follow - your sign is coming up next.',
+    'Part {next} covers the sign everyone asks about. Follow.',
+    'Follow for part {next}. It gets more specific.',
+    'Your sign might be in part {next}. Follow to find out.',
+    'Follow - part {next} is the one that starts arguments.',
+    'Part {next} is the callout nobody is ready for. Follow.',
+  ],
+  tarot: [
+    'Part {next} is the card nobody expects. Follow.',
+    'Follow for the reading that changes everything.',
+    'Part {next} goes deeper. Follow for the full series.',
+    'Follow - part {next} is the card everyone fears.',
+    'Part {next} flips the meaning. Follow.',
+    'Follow for the card that will follow you home.',
+  ],
+  lunar: [
+    'Part {next} covers the phase you are in now. Follow.',
+    'Follow for the phase that changes everything.',
+    'Part {next} is the one everyone skips. Follow.',
+    'Follow - the next phase explains what you are feeling.',
+    'Part {next} is the energy shift. Follow.',
+    'Follow for the moon phase nobody talks about.',
+  ],
+  numerology: [
+    'Part {next} is the number you keep seeing. Follow.',
+    'Follow for part {next}. Your number is coming.',
+    'Part {next} is the one that makes people screenshot. Follow.',
+    'Follow - your number might be next.',
+    'Part {next} changes the whole pattern. Follow.',
+    'Follow for the number that explains everything.',
+  ],
+  default: [
+    'Part {next} is the one nobody talks about. Follow.',
+    'Follow for part {next} - it hits harder.',
+    "Follow so you don't miss part {next}.",
+    'Part {next} is where it gets interesting. Follow.',
+    'Follow - part {next} changes the meaning of this one.',
+    'Part {next} is the one people save. Follow.',
+    'Follow for the part that makes this all click.',
+    'Part {next} drops tomorrow. Follow.',
+  ],
+};
+
+/**
  * Series completion triggers for the final part
- * Tease next week's theme to retain followers across series
+ * Tease next topic to retain followers across series
  */
 const SERIES_COMPLETE_LINES = [
-  "That's the full series — follow to see what's next week",
-  "New series starts next week — follow so you don't miss it",
-  "Follow to find out next week's theme",
+  'Full series done. Follow - next topic starts tomorrow.',
+  'Series complete. Follow for what drops next.',
+  'That was the full breakdown. Follow for the next one.',
+  'End of the series. Follow - the next one starts soon.',
+  'Series complete. The next one is the one people have been requesting. Follow.',
+  "That's the full breakdown. Follow for the next deep dive.",
 ];
 
 /**
@@ -411,26 +634,22 @@ export function generateTikTokHashtags(
     tags.push(topicTag);
   }
 
-  // Category tags — rotate 3 from expanded pool
+  // Category tags — rotate 2 (optimal: 3-5 total hashtags per 2026 research)
   const categoryTags = CATEGORY_HASHTAGS[theme.category] || [];
   if (categoryTags.length > 0) {
     const catStart = dayIndex % categoryTags.length;
-    for (let i = 0; i < 3 && i < categoryTags.length; i++) {
+    for (let i = 0; i < 2 && i < categoryTags.length; i++) {
       tags.push(categoryTags[(catStart + i) % categoryTags.length]);
     }
   }
 
-  // Community tags — rotate 2 from expanded pool
+  // Community tags — rotate 1
   const comStart = (dayIndex + 3) % COMMUNITY_HASHTAGS.length;
-  for (let i = 0; i < 2 && i < COMMUNITY_HASHTAGS.length; i++) {
-    tags.push(COMMUNITY_HASHTAGS[(comStart + i) % COMMUNITY_HASHTAGS.length]);
-  }
+  tags.push(COMMUNITY_HASHTAGS[comStart % COMMUNITY_HASHTAGS.length]);
 
-  // Format tags — rotate 2
+  // Format tags — rotate 1
   const fmtStart = (dayIndex + 5) % FORMAT_HASHTAGS.length;
-  for (let i = 0; i < 2 && i < FORMAT_HASHTAGS.length; i++) {
-    tags.push(FORMAT_HASHTAGS[(fmtStart + i) % FORMAT_HASHTAGS.length]);
-  }
+  tags.push(FORMAT_HASHTAGS[fmtStart % FORMAT_HASHTAGS.length]);
 
   // Deduplicate (no brand tag — stunts TikTok reach)
   return [...new Set(tags)];
@@ -494,35 +713,70 @@ export function generateTikTokCaption(
   parts.push('');
   parts.push(question);
 
-  // Series follow trigger
+  // Series follow trigger (category-aware)
   if (options?.partNumber && options?.totalParts && options.totalParts > 1) {
     if (options.partNumber < options.totalParts) {
-      // Mid-series: tease next part
-      const line = pickByDate(SERIES_FOLLOW_LINES, date).replace(
+      // Mid-series: tease next part with category-specific line
+      const followCategory =
+        theme.category in SERIES_FOLLOW_LINES ? theme.category : 'default';
+      const followPool = SERIES_FOLLOW_LINES[followCategory];
+      const line = pickByDate(followPool, date).replace(
         '{next}',
         String(options.partNumber + 1),
       );
       parts.push('');
       parts.push(line);
     } else if (options.partNumber === options.totalParts) {
-      // End-of-series: tease next week
+      // End-of-series: tease next topic
       const line = pickByDate(SERIES_COMPLETE_LINES, date);
       parts.push('');
       parts.push(line);
     }
   }
 
-  // Soft CTA line (gated by audience tier + day-of-week)
+  // Share trigger for high-share content types (before CTA)
+  if (
+    options?.contentTypeKey &&
+    SHARE_OPTIMIZED_TYPES.has(options.contentTypeKey)
+  ) {
+    const shareCategory =
+      questionCategory in SHARE_CTA_LINES ? questionCategory : 'default';
+    const sharePool = SHARE_CTA_LINES[shareCategory];
+    const shareLine = pickByDate(sharePool, shiftedDate).replace(
+      /\{topic\}/g,
+      facet.title,
+    );
+    parts.push('');
+    parts.push(shareLine);
+  }
+
+  // CTA rotation by day-of-week (gated by audience tier)
   const audience = options?.targetAudience || 'discovery';
   if (shouldIncludeCta(audience, date)) {
-    // Prefer deep-link CTA when grimoire slug is available
-    const slug = options?.grimoireSlug;
+    const ctaKind = CTA_ROTATION[date.getDay()];
     let ctaLine: string;
-    if (slug) {
-      ctaLine = `Explore this deeper: lunary.app/grimoire/${slug.split('/').pop()}`;
+
+    if (ctaKind === 'save') {
+      const saveCategory =
+        theme.category in SAVE_CTA_LINES ? theme.category : 'default';
+      const savePool = SAVE_CTA_LINES[saveCategory];
+      ctaLine = pickByDate(savePool, date).replace(/\{topic\}/g, facet.title);
+    } else if (ctaKind === 'follow') {
+      ctaLine = pickByDate(FOLLOW_CTA_LINES, date);
+    } else if (ctaKind === 'share') {
+      const shareCategory =
+        theme.category in SHARE_CTA_LINES ? theme.category : 'default';
+      const sharePool = SHARE_CTA_LINES[shareCategory];
+      ctaLine = pickByDate(sharePool, date).replace(/\{topic\}/g, facet.title);
     } else {
-      const pool = SOFT_CTA_LINES[theme.category] || SOFT_CTA_LINES.default;
-      ctaLine = pickByDate(pool, date);
+      // Brand CTA (existing behavior)
+      const slug = options?.grimoireSlug;
+      if (slug) {
+        ctaLine = `Explore this deeper: lunary.app/grimoire/${slug.split('/').pop()}`;
+      } else {
+        const pool = SOFT_CTA_LINES[theme.category] || SOFT_CTA_LINES.default;
+        ctaLine = pickByDate(pool, date);
+      }
     }
     parts.push('');
     parts.push(ctaLine);
