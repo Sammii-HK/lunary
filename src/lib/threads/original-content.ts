@@ -38,9 +38,11 @@ export function generateCosmicTimingPost(
   dateStr: string,
   slotHour: number,
 ): ThreadsPost {
-  const date = new Date(dateStr);
-  const moonPhase = getAccurateMoonPhase(date);
-  const transit = getTransitThemeForDate(date);
+  // Use the actual slot time, not midnight, for accurate time-until calculations
+  const postDate = new Date(dateStr);
+  postDate.setUTCHours(slotHour, 0, 0, 0);
+  const moonPhase = getAccurateMoonPhase(postDate);
+  const transit = getTransitThemeForDate(postDate);
 
   let hook: string;
   let body: string;
@@ -49,10 +51,14 @@ export function generateCosmicTimingPost(
 
   if (transit) {
     hook = `${transit.planet} is moving into ${transit.toSign}`;
-    body =
-      transit.daysUntil === 0
-        ? 'this shift is happening right now, pay attention to what surfaces'
-        : `${transit.daysUntil} day${transit.daysUntil !== 1 ? 's' : ''} away and you might already feel it building`;
+    if (transit.hoursUntil <= 0) {
+      body =
+        'this shift is happening right now, pay attention to what surfaces';
+    } else if (transit.hoursUntil < 24) {
+      body = `${transit.hoursUntil} hour${transit.hoursUntil !== 1 ? 's' : ''} away and you might already feel it building`;
+    } else {
+      body = `${transit.daysUntil} day${transit.daysUntil !== 1 ? 's' : ''} away and you might already feel it building`;
+    }
     prompt = `how is ${transit.planet} energy showing up for you?`;
   } else {
     hook = `${moonPhase.name} energy is running the show today`;

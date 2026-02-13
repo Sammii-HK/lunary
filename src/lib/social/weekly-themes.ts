@@ -163,6 +163,7 @@ export function getTransitThemeForDate(date: Date): {
   toSign: string;
   ingressDate: Date;
   daysUntil: number;
+  hoursUntil: number;
 } | null {
   try {
     // Dynamic import to keep this lightweight when not needed
@@ -221,9 +222,10 @@ export function getTransitThemeForDate(date: Date): {
           }
         }
         const ingressDate = new Date((lo + hi) / 2);
-        const daysUntil = Math.ceil(
-          (ingressDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
-        );
+        const diffMs = ingressDate.getTime() - date.getTime();
+        const hoursUntil = Math.round(diffMs / (1000 * 60 * 60));
+        const daysUntil =
+          hoursUntil < 24 ? 0 : Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
         return {
           planet: planet.name,
@@ -231,6 +233,7 @@ export function getTransitThemeForDate(date: Date): {
           toSign: signAfter,
           ingressDate,
           daysUntil,
+          hoursUntil,
         };
       }
     }
