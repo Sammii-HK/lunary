@@ -1842,6 +1842,9 @@ model PodcastEpisode {
   grimoireSlugs String[] @map("grimoire_slugs")
   status        String   @default("published") @db.VarChar(20)
   podifyJobId   String?  @map("podify_job_id")
+  youtubeVideoId  String?  @map("youtube_video_id")
+  youtubeVideoUrl String?  @map("youtube_video_url")
+  videoUrl        String?  @map("video_url")
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 

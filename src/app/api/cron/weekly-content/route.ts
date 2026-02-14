@@ -404,6 +404,66 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // 7. Upload podcast episode to YouTube
+    let youtubeResult = null;
+    if (podcastResult?.episode?.id) {
+      console.log('🎬 Uploading podcast episode to YouTube...');
+      try {
+        const ytResponse = await fetch(
+          `${baseUrl}/api/youtube/podcast-upload`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'User-Agent': 'Lunary-Weekly-Content-Cron/1.0',
+            },
+            body: JSON.stringify({ episodeId: podcastResult.episode.id }),
+          },
+        );
+
+        if (ytResponse.ok) {
+          youtubeResult = await ytResponse.json();
+          console.log(
+            `✅ Podcast uploaded to YouTube: ${youtubeResult.videoId || 'skipped'}`,
+          );
+          await logActivity({
+            activityType: 'content_creation',
+            activityCategory: 'content',
+            status: 'success',
+            message: youtubeResult.skipped
+              ? `YouTube upload skipped (already exists): ${youtubeResult.videoId}`
+              : `Podcast Episode ${youtubeResult.episodeNumber} uploaded to YouTube: ${youtubeResult.videoId}`,
+            metadata: {
+              videoId: youtubeResult.videoId,
+              youtubeUrl: youtubeResult.youtubeUrl,
+              skipped: youtubeResult.skipped || false,
+            },
+          });
+        } else {
+          console.error('❌ YouTube upload failed:', ytResponse.status);
+          await logActivity({
+            activityType: 'content_creation',
+            activityCategory: 'content',
+            status: 'failed',
+            message: 'YouTube podcast upload failed',
+            errorMessage: `HTTP ${ytResponse.status}`,
+          });
+        }
+      } catch (youtubeError) {
+        console.error('❌ YouTube upload error:', youtubeError);
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status: 'failed',
+          message: 'YouTube podcast upload error',
+          errorMessage:
+            youtubeError instanceof Error
+              ? youtubeError.message
+              : 'Unknown error',
+        });
+      }
+    }
+
     // Generate blog preview image URL (use first day of the week)
     const blogWeekStartDate = blogData.data?.weekStart
       ? new Date(blogData.data.weekStart).toISOString().split('T')[0]
@@ -442,6 +502,15 @@ export async function GET(request: NextRequest) {
           value: podcastResult?.episode
             ? `Ep ${podcastResult.episode.episodeNumber} ready`
             : 'Skipped',
+          inline: true,
+        },
+        {
+          name: 'YouTube',
+          value: youtubeResult?.videoId
+            ? `Uploaded: ${youtubeResult.videoId}`
+            : youtubeResult?.skipped
+              ? 'Already uploaded'
+              : 'Skipped',
           inline: true,
         },
         {
@@ -492,6 +561,7 @@ export async function GET(request: NextRequest) {
         socialPostsGenerated: socialPostsResult?.savedIds?.length || 0,
         instagramPostsGenerated: instagramResult?.totalPosts || 0,
         podcastEpisode: podcastResult?.episode?.episodeNumber || null,
+        youtubeVideoId: youtubeResult?.videoId || null,
         substackPublished:
           substackResult?.results?.free?.success ||
           substackResult?.results?.paid?.success ||
@@ -536,6 +606,13 @@ export async function GET(request: NextRequest) {
             episodeNumber: podcastResult.episode.episodeNumber,
             title: podcastResult.episode.title,
             slug: podcastResult.episode.slug,
+          }
+        : null,
+      youtube: youtubeResult?.videoId
+        ? {
+            videoId: youtubeResult.videoId,
+            url: youtubeResult.youtubeUrl,
+            skipped: youtubeResult.skipped || false,
           }
         : null,
     });

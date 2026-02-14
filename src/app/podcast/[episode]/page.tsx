@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { Heading } from '@/components/ui/Heading';
 import {
   createPodcastEpisodeSchema,
+  createVideoObjectSchema,
   createBreadcrumbSchema,
   renderJsonLdMulti,
 } from '@/lib/schema/index';
@@ -112,9 +113,21 @@ export default async function PodcastEpisodePage({
     { name: episode.title, url: `/podcast/${episode.slug}` },
   ]);
 
+  const videoSchema = episode.youtubeVideoId
+    ? createVideoObjectSchema({
+        name: episode.title,
+        description: episode.description.slice(0, 300),
+        uploadDate: new Date(episode.publishedAt).toISOString(),
+        embedUrl: `https://www.youtube.com/embed/${episode.youtubeVideoId}`,
+        contentUrl: episode.youtubeVideoUrl || undefined,
+        durationSecs: episode.durationSecs,
+        episodeUrl: `/podcast/${episode.slug}`,
+      })
+    : null;
+
   return (
     <>
-      {renderJsonLdMulti([episodeSchema, breadcrumbSchema])}
+      {renderJsonLdMulti([episodeSchema, breadcrumbSchema, videoSchema])}
 
       <div className='mx-auto max-w-3xl px-4 py-12'>
         {/* Breadcrumbs */}
@@ -169,6 +182,24 @@ export default async function PodcastEpisodePage({
             Your browser does not support the audio element.
           </audio>
         </section>
+
+        {/* YouTube Video */}
+        {episode.youtubeVideoId && (
+          <section className='mb-10'>
+            <Heading as='h2' variant='h2'>
+              Watch on YouTube
+            </Heading>
+            <div className='mt-4 aspect-video w-full overflow-hidden rounded-xl'>
+              <iframe
+                src={`https://www.youtube.com/embed/${episode.youtubeVideoId}`}
+                title={episode.title}
+                allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+                allowFullScreen
+                className='h-full w-full'
+              />
+            </div>
+          </section>
+        )}
 
         {/* Show Notes */}
         {showNotes?.sections && showNotes.sections.length > 0 && (

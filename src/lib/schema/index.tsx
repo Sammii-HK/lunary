@@ -1441,6 +1441,47 @@ export function createPodcastEpisodeSchema({
   };
 }
 
+interface VideoObjectSchemaProps {
+  name: string;
+  description: string;
+  thumbnailUrl?: string;
+  uploadDate: string;
+  contentUrl?: string;
+  embedUrl: string;
+  durationSecs: number;
+  episodeUrl: string;
+}
+
+export function createVideoObjectSchema({
+  name,
+  description,
+  thumbnailUrl,
+  uploadDate,
+  contentUrl,
+  embedUrl,
+  durationSecs,
+  episodeUrl,
+}: VideoObjectSchemaProps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name,
+    description,
+    ...(thumbnailUrl && { thumbnailUrl }),
+    uploadDate,
+    ...(contentUrl && { contentUrl }),
+    embedUrl,
+    duration: formatIsoDuration(durationSecs),
+    publisher: { '@id': `${BASE_URL}/#organization` },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': episodeUrl.startsWith('http')
+        ? episodeUrl
+        : `${BASE_URL}${episodeUrl}`,
+    },
+  };
+}
+
 export function createPodcastSeriesSchema() {
   return {
     '@context': 'https://schema.org',
