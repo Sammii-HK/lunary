@@ -479,6 +479,13 @@ async function scheduleVideoToPlatforms(
       platforms: ['youtube'],
       media: [{ type: 'video' as const, url: videoUrl, alt: title }],
       scheduledDate: scheduledDate.toISOString(),
+      youtubeOptions: {
+        title,
+        visibility: 'public',
+        isShort: true,
+        madeForKids: false,
+        playlistId: process.env.YOUTUBE_WEEKLY_SERIES_PLAYLIST_ID,
+      },
     };
 
     // Post to TikTok

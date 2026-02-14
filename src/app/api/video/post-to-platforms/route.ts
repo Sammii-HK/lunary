@@ -204,6 +204,16 @@ export async function POST(request: NextRequest) {
               platforms: ['youtube'],
               media: [{ type: 'video' as const, url: videoUrl, alt: title }],
               scheduledDate: scheduledDateIso,
+              youtubeOptions: {
+                title,
+                visibility: 'public',
+                isShort: true,
+                madeForKids: false,
+                playlistId:
+                  videoType === 'short'
+                    ? process.env.YOUTUBE_SHORTS_PLAYLIST_ID
+                    : process.env.YOUTUBE_WEEKLY_SERIES_PLAYLIST_ID,
+              },
             };
 
             const response = await fetch(succulentApiUrl, {
