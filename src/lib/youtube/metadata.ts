@@ -77,7 +77,7 @@ export function buildPodcastYouTubeMetadata(episode: PodcastMetadataInput): {
   tags: string[];
 } {
   // Title: max 100 chars for YouTube
-  const rawTitle = `Lunary Astrology Podcast — Episode ${episode.episodeNumber}: ${episode.title}`;
+  const rawTitle = `The Grimoire by Lunary — Episode ${episode.episodeNumber}: ${episode.title}`;
   const title =
     rawTitle.length > 100 ? rawTitle.slice(0, 97) + '...' : rawTitle;
 
@@ -144,7 +144,7 @@ export function buildPodcastYouTubeMetadata(episode: PodcastMetadataInput): {
 
   // 5. Channel subscribe CTA
   descParts.push(
-    'Subscribe to Lunary for weekly cosmic insights, astrology forecasts, and spiritual guidance.',
+    'Subscribe to The Grimoire by Lunary for weekly astrology, tarot, crystals, and cosmic wisdom.',
   );
   descParts.push(`${BASE_URL} — Your Cosmic Guide`);
 

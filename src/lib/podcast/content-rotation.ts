@@ -299,15 +299,15 @@ export function selectPodcastTopics(
  * Build episode title from selected topics.
  */
 export function buildEpisodeTitle(topics: GrimoireSnippet[]): string {
-  if (topics.length === 0) return 'Cosmic Insights';
+  if (topics.length === 0) return 'The Grimoire';
 
   const primary = topics[0];
   if (topics.length === 1) {
-    return `Cosmic Insights: ${primary.title}`;
+    return `The Grimoire: ${primary.title}`;
   }
 
   const secondary = topics[1];
-  return `Cosmic Insights: ${primary.title} & ${secondary.title}`;
+  return `The Grimoire: ${primary.title} & ${secondary.title}`;
 }
 
 /**

@@ -1433,7 +1433,7 @@ export function createPodcastEpisodeSchema({
     },
     partOfSeries: {
       '@type': 'PodcastSeries',
-      name: 'Lunary Cosmic Insights',
+      name: 'The Grimoire by Lunary',
       url: `${BASE_URL}/podcast`,
     },
     ...(transcript && { transcript }),
@@ -1486,7 +1486,7 @@ export function createPodcastSeriesSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'PodcastSeries',
-    name: 'Lunary Cosmic Insights',
+    name: 'The Grimoire by Lunary',
     description:
       'Weekly explorations of astrology, tarot, crystals, numerology, and cosmic wisdom from the Lunary grimoire.',
     url: `${BASE_URL}/podcast`,

@@ -35,10 +35,10 @@ export async function generateMetadata({
     return { title: 'Episode Not Found | Lunary Podcast' };
   }
 
-  const title = `${episode.title} | Lunary Cosmic Insights Podcast`;
+  const title = `${episode.title} | The Grimoire by Lunary`;
   const description =
     episode.description.slice(0, 160) ||
-    `Listen to episode ${episode.episodeNumber} of the Lunary Cosmic Insights podcast.`;
+    `Listen to episode ${episode.episodeNumber} of The Grimoire by Lunary.`;
 
   return {
     title,

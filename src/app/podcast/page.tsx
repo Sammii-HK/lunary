@@ -13,11 +13,11 @@ import { Clock, Headphones } from 'lucide-react';
 export const revalidate = 3600; // 1 hour ISR
 
 export const metadata: Metadata = {
-  title: 'Cosmic Insights Podcast | Lunary',
+  title: 'The Grimoire Podcast | Lunary',
   description:
-    'Weekly explorations of astrology, tarot, crystals, numerology, and cosmic wisdom. Listen to the Lunary Cosmic Insights podcast.',
+    'Weekly explorations of astrology, tarot, crystals, numerology, and cosmic wisdom. Listen to The Grimoire by Lunary.',
   openGraph: {
-    title: 'Cosmic Insights Podcast | Lunary',
+    title: 'The Grimoire Podcast | Lunary',
     description:
       'Weekly explorations of astrology, tarot, crystals, numerology, and cosmic wisdom.',
     url: 'https://lunary.app/podcast',
@@ -78,7 +78,7 @@ export default async function PodcastIndexPage() {
 
         <header className='mb-10'>
           <Heading as='h1' variant='h1'>
-            Cosmic Insights Podcast
+            The Grimoire Podcast
           </Heading>
           <p className='mt-4 text-lg text-lunary-primary-300/70'>
             Weekly explorations of astrology, tarot, crystals, numerology, and

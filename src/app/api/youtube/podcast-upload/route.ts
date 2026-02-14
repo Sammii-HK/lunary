@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
           .replace(/\b\w/g, (c) => c.toUpperCase()),
       ),
       lowerThirdInfo: {
-        title: 'Lunary Cosmic Insights',
+        title: 'The Grimoire by Lunary',
         subtitle: 'Weekly Astrology Podcast',
       },
       seed: `podcast-ep-${episode.episodeNumber}`,
