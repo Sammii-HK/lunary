@@ -13,6 +13,16 @@ import { getISOWeek, getISOWeekYear } from 'date-fns';
 
 const PODIFY_API_URL = process.env.PODIFY_API_URL || 'http://localhost:3000';
 
+function podifyHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (process.env.PODIFY_API_KEY) {
+    headers['x-api-key'] = process.env.PODIFY_API_KEY;
+  }
+  return headers;
+}
+
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes — podcast generation can be slow
 
@@ -97,12 +107,7 @@ export async function POST(request: NextRequest) {
       `${PODIFY_API_URL}/api/podcast/generate`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(process.env.PODIFY_API_KEY && {
-            'x-api-key': process.env.PODIFY_API_KEY,
-          }),
-        },
+        headers: podifyHeaders(),
         body: JSON.stringify({
           content,
           title,
@@ -132,14 +137,12 @@ export async function POST(request: NextRequest) {
 
       const statusResponse = await fetch(
         `${PODIFY_API_URL}/api/podcast/status/${jobId}`,
-        {
-          headers: {
-            ...(process.env.PODIFY_API_KEY && {
-              Authorization: `Bearer ${process.env.PODIFY_API_KEY}`,
-            }),
-          },
-        },
+        { headers: podifyHeaders() },
       );
+      if (statusResponse.status === 404) {
+        // Job may not be registered yet, keep polling
+        continue;
+      }
       if (!statusResponse.ok) {
         throw new Error(`Podify status check failed: ${statusResponse.status}`);
       }
@@ -175,13 +178,7 @@ export async function POST(request: NextRequest) {
     // 5. Download audio & upload to Vercel Blob
     const audioResponse = await fetch(
       `${PODIFY_API_URL}/api/podcast/${jobId}/audio`,
-      {
-        headers: {
-          ...(process.env.PODIFY_API_KEY && {
-            'x-api-key': process.env.PODIFY_API_KEY,
-          }),
-        },
-      },
+      { headers: podifyHeaders() },
     );
     if (!audioResponse.ok) {
       throw new Error(`Failed to download audio: ${audioResponse.status}`);
