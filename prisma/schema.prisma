@@ -402,15 +402,6 @@ model content_rotation {
   @@unique([rotation_type, item_id])
 }
 
-model content_rotation_secondary {
-  theme_id               String    @id
-  secondary_usage_count  Int       @default(0)
-  last_secondary_used_at DateTime? @db.Timestamptz(6)
-  updated_at             DateTime? @default(now()) @db.Timestamptz(6)
-
-  @@index([last_secondary_used_at], map: "idx_content_rotation_secondary_last_used")
-}
-
 model conversation_snippets {
   id                Int       @id @default(autoincrement())
   user_id           String
@@ -1309,10 +1300,6 @@ model video_scripts {
   angle                String?
   aspect               String?
   primary_theme_id     String?
-  secondary_theme_id   String?
-  secondary_facet_slug String?
-  secondary_angle_key  String?
-  secondary_aspect_key String?
   hook_text            String?
   hook_version         Int?      @default(1)
 

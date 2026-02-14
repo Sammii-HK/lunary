@@ -11,7 +11,6 @@ export * from './types';
 // Constants
 export {
   VIDEO_ANGLE_OPTIONS,
-  SECONDARY_THEME_COOLDOWN_DAYS,
   mapAngleToAspect,
   aspectLabel,
   CATEGORY_SLUG_PREFIXES,
@@ -29,13 +28,7 @@ export {
 } from './database';
 
 // Rotation
-export {
-  ensureContentRotationSecondaryTable,
-  getAngleForTopic,
-  selectSecondaryTheme,
-  selectSecondaryAspect,
-  recordSecondaryThemeUsage,
-} from './rotation';
+export { getAngleForTopic } from './rotation';
 
 // Grimoire helpers
 export {
@@ -96,5 +89,4 @@ export { generateYouTubeScript } from './youtube';
 export {
   generateWeeklyVideoScripts,
   generateAndSaveWeeklyScripts,
-  generateSecondaryScriptsOnly,
 } from './generation';

@@ -203,6 +203,26 @@ fetch(`${API_BASE}/api/admin/analytics`);
 - Never incorporate request headers (like `host` or `origin`) into fetch URLs
 - Validate/whitelist any external URLs before fetching
 
+## Security: ReDoS Prevention
+
+**Never use regex to strip HTML tags from user-controlled strings.** Patterns like `/<[^>]*>/g` are O(n^2) on adversarial input (e.g. `<<<<...`) and get flagged by CodeQL as `js/polynomial-redos`.
+
+```tsx
+// BAD - ReDoS vulnerability (CodeQL: js/polynomial-redos)
+const clean = userInput.replace(/<[^>]*>/g, '');
+
+// GOOD - Use the shared O(n) utility
+import { stripHtmlTags } from '@/lib/utils';
+const clean = stripHtmlTags(userInput); // tags → space (default)
+const clean = stripHtmlTags(userInput, ''); // tags → removed
+```
+
+**Rules:**
+
+- Use `stripHtmlTags()` from `@/lib/utils` for all HTML tag removal
+- Never write `/<[^>]*>/` or `/<[^>]+>/` patterns against user input
+- When processing untrusted strings, prefer iterative O(n) approaches over regex with unbounded quantifiers
+
 ## API Routes
 
 ```

@@ -11,6 +11,7 @@ import { generateVoiceover } from '@/lib/tts';
 import { generateVoiceoverScriptFromWeeklyData } from '@/lib/video/composition';
 import { TTS_PRESETS } from '@/lib/tts/presets';
 import { normalizeScriptForTTS } from '@/lib/tts/normalize-script';
+import { stripHtmlTags } from '@/lib/utils';
 import {
   generateNarrativeFromWeeklyData,
   generateShortFormNarrative,
@@ -1032,8 +1033,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Remove HTML, format for voiceover
-          let formattedText = blogText
-            .replace(/<[^>]*>/g, '') // Remove HTML
+          let formattedText = stripHtmlTags(blogText, '')
             .replace(/\n{3,}/g, '\n\n') // Normalize line breaks
             .replace(/#{1,6}\s+/g, '') // Remove markdown headers
             .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold

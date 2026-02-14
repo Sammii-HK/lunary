@@ -46,10 +46,6 @@ export interface VideoScript {
   themeId: string;
   themeName: string;
   primaryThemeId?: string;
-  secondaryThemeId?: string;
-  secondaryFacetSlug?: string;
-  secondaryAngleKey?: string;
-  secondaryAspectKey?: string;
   facetTitle: string;
   topic?: string;
   angle?: string;

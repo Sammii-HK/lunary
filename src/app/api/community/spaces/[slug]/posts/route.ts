@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { validateInsightText } from '@/lib/community/moderation';
 import { checkRateLimit } from '@/lib/api/rate-limit';
+import { stripHtmlTags } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -26,10 +27,7 @@ const toISODate = (value: string | Date | null | undefined): string | null => {
 };
 
 const sanitizeText = (input: string): string => {
-  return input
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return stripHtmlTags(input).replace(/\s+/g, ' ').trim();
 };
 
 const parseInteger = (

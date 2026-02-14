@@ -8,6 +8,7 @@ import {
   generateShortFormNarrative,
   generateMediumFormNarrative,
 } from '@/lib/video/narrative-generator';
+import { stripHtmlTags } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -120,8 +121,7 @@ export async function POST(request: NextRequest) {
         }
       } else if (blogContent?.body) {
         // Fallback to blog content
-        const blogText = blogContent.body
-          .replace(/<[^>]*>/g, '')
+        const blogText = stripHtmlTags(blogContent.body, '')
           .replace(/\n{3,}/g, '\n\n')
           .replace(/#{1,6}\s+/g, '')
           .replace(/\*\*(.*?)\*\*/g, '$1')

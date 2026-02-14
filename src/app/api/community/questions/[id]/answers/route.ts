@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { validateInsightText } from '@/lib/community/moderation';
 import { checkRateLimit } from '@/lib/api/rate-limit';
+import { stripHtmlTags } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,10 +12,7 @@ const MIN_ANSWER_LENGTH = 10;
 const MAX_ANSWER_LENGTH = 2000;
 
 const sanitizeText = (input: string): string =>
-  input
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  stripHtmlTags(input).replace(/\s+/g, ' ').trim();
 
 /**
  * POST /api/community/questions/[id]/answers

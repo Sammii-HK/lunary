@@ -10,15 +10,8 @@
  */
 
 import { categoryThemes } from '../weekly-themes';
-import type { WeeklyVideoScripts, VideoScript } from './types';
+import type { WeeklyVideoScripts } from './types';
 import { ensureVideoScriptsTable, saveVideoScript } from './database';
-import {
-  ensureContentRotationSecondaryTable,
-  getAngleForTopic,
-  selectSecondaryTheme,
-  selectSecondaryAspect,
-  recordSecondaryThemeUsage,
-} from './rotation';
 import { VIDEO_ANGLE_OPTIONS, mapAngleToAspect } from './constants';
 import { generateTikTokScript } from './tiktok/generation';
 import { generateYouTubeScript } from './youtube/generation';
@@ -140,27 +133,9 @@ export async function generateWeeklyVideoScripts(
 }
 
 /**
- * Select a secondary theme from a different category than the given ones.
- * Used to ensure secondary slot has different categories than primary.
- */
-function selectDifferentCategoryTheme(
-  excludeCategories: string[],
-  themeIndex: number,
-): (typeof categoryThemes)[number] {
-  const candidates = categoryThemes.filter(
-    (t) => !excludeCategories.includes(t.category),
-  );
-  if (candidates.length === 0) {
-    return categoryThemes[themeIndex % categoryThemes.length];
-  }
-  return candidates[themeIndex % candidates.length];
-}
-
-/**
  * Generate and save scripts to database
  *
  * Primary slot: Block A (4 numerology) + Block B (3 witchtok)
- * Secondary slot: mirrors the dual block pattern with different categories
  */
 export async function generateAndSaveWeeklyScripts(
   weekStartDate: Date,
@@ -168,7 +143,6 @@ export async function generateAndSaveWeeklyScripts(
   baseUrl: string = 'https://lunary.app',
 ): Promise<WeeklyVideoScripts> {
   await ensureVideoScriptsTable();
-  await ensureContentRotationSecondaryTable();
 
   const scripts = await generateWeeklyVideoScripts(
     weekStartDate,
@@ -182,187 +156,9 @@ export async function generateAndSaveWeeklyScripts(
     script.id = id;
   }
 
-  // Determine primary categories used (numerology for Block A, witchtok for Block B)
-  const primaryBlockACategory = scripts.theme.category;
-  const primaryBlockBCategory =
-    WITCHTOK_ROTATION_CATEGORIES[
-      themeIndex % WITCHTOK_ROTATION_CATEGORIES.length
-    ];
-
-  // Secondary Block A (Mon-Thu): different category from primary Block B
-  const secondaryThemeA = selectDifferentCategoryTheme(
-    [primaryBlockACategory, primaryBlockBCategory],
-    themeIndex,
-  );
-  const secondaryFacetsA = secondaryThemeA.facets.slice(0, 4);
-
-  // Secondary Block B (Fri-Sun): different category again
-  const secondaryThemeB = selectDifferentCategoryTheme(
-    [primaryBlockACategory, primaryBlockBCategory, secondaryThemeA.category],
-    themeIndex + 1,
-  );
-  const secondaryFacetsB = secondaryThemeB.facets.slice(0, 3);
-
-  // Generate secondary Block A scripts (Mon-Thu, parts 1-4)
-  for (const [i, facet] of secondaryFacetsA.entries()) {
-    const scriptDate = new Date(weekStartDate);
-    scriptDate.setDate(scriptDate.getDate() + i);
-    const secondaryAngle = await getAngleForTopic(facet.title, scriptDate);
-    const secondaryAspect = await selectSecondaryAspect(secondaryThemeA.id);
-    const secondaryScript = await generateTikTokScript(
-      facet,
-      secondaryThemeA,
-      scriptDate,
-      i + 1,
-      4, // totalParts=4 for Block A
-      baseUrl,
-      {
-        primaryThemeId: scripts.theme.id,
-        secondaryThemeId: secondaryThemeA.id,
-        secondaryFacetSlug: facet.grimoireSlug,
-        secondaryAngleKey: secondaryAngle,
-        secondaryAspectKey: secondaryAspect,
-        angleOverride: secondaryAngle,
-        aspectOverride: secondaryAspect,
-      },
-    );
-    const secondaryId = await saveVideoScript(secondaryScript);
-    secondaryScript.id = secondaryId;
-  }
-
-  // Generate secondary Block B scripts (Fri-Sun, parts 1-3)
-  for (const [i, facet] of secondaryFacetsB.entries()) {
-    const scriptDate = new Date(weekStartDate);
-    scriptDate.setDate(scriptDate.getDate() + 4 + i);
-    const secondaryAngle = await getAngleForTopic(facet.title, scriptDate);
-    const secondaryAspect = await selectSecondaryAspect(secondaryThemeB.id);
-    const secondaryScript = await generateTikTokScript(
-      facet,
-      secondaryThemeB,
-      scriptDate,
-      i + 1,
-      3, // totalParts=3 for Block B
-      baseUrl,
-      {
-        primaryThemeId: scripts.theme.id,
-        secondaryThemeId: secondaryThemeB.id,
-        secondaryFacetSlug: facet.grimoireSlug,
-        secondaryAngleKey: secondaryAngle,
-        secondaryAspectKey: secondaryAspect,
-        angleOverride: secondaryAngle,
-        aspectOverride: secondaryAspect,
-      },
-    );
-    const secondaryId = await saveVideoScript(secondaryScript);
-    secondaryScript.id = secondaryId;
-  }
-
-  // Record secondary theme usage for both blocks
-  await recordSecondaryThemeUsage(secondaryThemeA.id, weekStartDate);
-  await recordSecondaryThemeUsage(secondaryThemeB.id, weekStartDate);
-
   // Save YouTube script and capture ID
   const youtubeId = await saveVideoScript(scripts.youtubeScript);
   scripts.youtubeScript.id = youtubeId;
 
   return scripts;
-}
-
-/**
- * Generate only secondary scripts for existing primary scripts
- * Use this when primary scripts already exist but secondary don't.
- * Uses dual block pattern: Block A (first 4) + Block B (last 3).
- */
-export async function generateSecondaryScriptsOnly(
-  primaryTheme: (typeof categoryThemes)[number],
-  primaryScripts: VideoScript[],
-  baseUrl: string = 'https://lunary.app',
-): Promise<VideoScript[]> {
-  await ensureVideoScriptsTable();
-  await ensureContentRotationSecondaryTable();
-
-  const weekStartDate = primaryScripts[0]?.scheduledDate || new Date();
-
-  // Select two different secondary themes for Block A and Block B
-  const secondaryThemeA = await selectSecondaryTheme(
-    primaryTheme.id,
-    weekStartDate,
-  );
-  const secondaryFacetsA = secondaryThemeA.facets.slice(0, 4);
-  const secondaryFacetsB = secondaryThemeA.facets.slice(4, 7);
-
-  // If the theme has enough facets, use them for both blocks
-  // Otherwise fall back to using the same theme with wrapping
-  const secondaryScripts: VideoScript[] = [];
-  const blockACount = Math.min(primaryScripts.length, 4);
-  const blockBCount = Math.max(primaryScripts.length - 4, 0);
-
-  // Block A scripts (first 4 primary scripts)
-  for (let i = 0; i < blockACount; i++) {
-    const scriptDate = primaryScripts[i].scheduledDate;
-    const secondaryFacet = secondaryFacetsA[i % secondaryFacetsA.length];
-    const secondaryAngle = await getAngleForTopic(
-      secondaryFacet.title,
-      scriptDate,
-    );
-    const secondaryAspect = await selectSecondaryAspect(secondaryThemeA.id);
-    const secondaryScript = await generateTikTokScript(
-      secondaryFacet,
-      secondaryThemeA,
-      scriptDate,
-      i + 1,
-      4,
-      baseUrl,
-      {
-        primaryThemeId: primaryTheme.id,
-        secondaryThemeId: secondaryThemeA.id,
-        secondaryFacetSlug: secondaryFacet.grimoireSlug,
-        secondaryAngleKey: secondaryAngle,
-        secondaryAspectKey: secondaryAspect,
-        angleOverride: secondaryAngle,
-        aspectOverride: secondaryAspect,
-      },
-    );
-    const id = await saveVideoScript(secondaryScript);
-    secondaryScript.id = id;
-    secondaryScripts.push(secondaryScript);
-  }
-
-  // Block B scripts (remaining primary scripts)
-  for (let i = 0; i < blockBCount; i++) {
-    const scriptDate = primaryScripts[4 + i].scheduledDate;
-    const facetPool =
-      secondaryFacetsB.length > 0 ? secondaryFacetsB : secondaryThemeA.facets;
-    const secondaryFacet = facetPool[i % facetPool.length];
-    const secondaryAngle = await getAngleForTopic(
-      secondaryFacet.title,
-      scriptDate,
-    );
-    const secondaryAspect = await selectSecondaryAspect(secondaryThemeA.id);
-    const secondaryScript = await generateTikTokScript(
-      secondaryFacet,
-      secondaryThemeA,
-      scriptDate,
-      i + 1,
-      3,
-      baseUrl,
-      {
-        primaryThemeId: primaryTheme.id,
-        secondaryThemeId: secondaryThemeA.id,
-        secondaryFacetSlug: secondaryFacet.grimoireSlug,
-        secondaryAngleKey: secondaryAngle,
-        secondaryAspectKey: secondaryAspect,
-        angleOverride: secondaryAngle,
-        aspectOverride: secondaryAspect,
-      },
-    );
-    const id = await saveVideoScript(secondaryScript);
-    secondaryScript.id = id;
-    secondaryScripts.push(secondaryScript);
-  }
-
-  // Record secondary theme usage once for the week
-  await recordSecondaryThemeUsage(secondaryThemeA.id, weekStartDate);
-
-  return secondaryScripts;
 }

@@ -12,8 +12,6 @@ export const VIDEO_ANGLE_OPTIONS = [
   'Practical observation',
 ];
 
-export const SECONDARY_THEME_COOLDOWN_DAYS = 10;
-
 export const DEBUG_VIDEO_HOOK = process.env.DEBUG_VIDEO_HOOK === '1';
 
 /**

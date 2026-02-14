@@ -22,10 +22,6 @@ export async function ensureVideoScriptsTable(): Promise<void> {
       theme_id TEXT NOT NULL,
       theme_name TEXT NOT NULL,
       primary_theme_id TEXT,
-      secondary_theme_id TEXT,
-      secondary_facet_slug TEXT,
-      secondary_angle_key TEXT,
-      secondary_aspect_key TEXT,
       facet_title TEXT NOT NULL,
       topic TEXT,
       angle TEXT,
@@ -72,10 +68,6 @@ export async function ensureVideoScriptsTable(): Promise<void> {
     await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS angle TEXT`;
     await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS aspect TEXT`;
     await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS primary_theme_id TEXT`;
-    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS secondary_theme_id TEXT`;
-    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS secondary_facet_slug TEXT`;
-    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS secondary_angle_key TEXT`;
-    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS secondary_aspect_key TEXT`;
   } catch {
     // Columns may already exist
   }
@@ -89,8 +81,7 @@ export async function saveVideoScript(script: VideoScript): Promise<number> {
 
   const result = await sql`
     INSERT INTO video_scripts (
-      theme_id, theme_name, primary_theme_id, secondary_theme_id,
-      secondary_facet_slug, secondary_angle_key, secondary_aspect_key,
+      theme_id, theme_name, primary_theme_id,
       facet_title, topic, angle, aspect, platform, sections,
       full_script, word_count, estimated_duration, scheduled_date, status,
       metadata, cover_image_url, part_number, written_post_content, hook_text, hook_version
@@ -99,10 +90,6 @@ export async function saveVideoScript(script: VideoScript): Promise<number> {
       ${script.themeId},
       ${script.themeName},
       ${script.primaryThemeId || null},
-      ${script.secondaryThemeId || null},
-      ${script.secondaryFacetSlug || null},
-      ${script.secondaryAngleKey || null},
-      ${script.secondaryAspectKey || null},
       ${script.facetTitle},
       ${script.topic || null},
       ${script.angle || null},
@@ -231,10 +218,6 @@ export async function getVideoScripts(filters?: {
       themeId: row.theme_id,
       themeName: row.theme_name,
       primaryThemeId: row.primary_theme_id || undefined,
-      secondaryThemeId: row.secondary_theme_id || undefined,
-      secondaryFacetSlug: row.secondary_facet_slug || undefined,
-      secondaryAngleKey: row.secondary_angle_key || undefined,
-      secondaryAspectKey: row.secondary_aspect_key || undefined,
       facetTitle: row.facet_title,
       topic: row.topic || undefined,
       angle: row.angle || undefined,

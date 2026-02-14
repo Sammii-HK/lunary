@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { validateInsightText } from '@/lib/moon-circles/moderation';
+import { stripHtmlTags } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic'; // Required because route uses searchParams
@@ -31,10 +32,7 @@ const toISODate = (value: string | Date | null | undefined): string | null => {
 };
 
 const sanitizeInsightText = (input: string): string => {
-  return input
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return stripHtmlTags(input).replace(/\s+/g, ' ').trim();
 };
 
 const parseInteger = (
