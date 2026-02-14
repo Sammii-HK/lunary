@@ -164,10 +164,23 @@ export async function POST(request: NextRequest) {
     }
 
     const successfulDays = results.filter((r) => r.success).length;
+    const failedDays = results.filter((r) => !r.success);
 
     console.log(
       `[Instagram Weekly] Generated ${totalPosts} posts across ${successfulDays}/7 days`,
     );
+
+    if (totalPosts === 0) {
+      const errors = failedDays.map((r) => `${r.date}: ${r.error}`).join('; ');
+      return NextResponse.json({
+        success: false,
+        totalPosts: 0,
+        daysGenerated: 0,
+        weekStart: startDate,
+        error: `No Instagram posts generated. Errors: ${errors}`,
+        results,
+      });
+    }
 
     return NextResponse.json({
       success: true,

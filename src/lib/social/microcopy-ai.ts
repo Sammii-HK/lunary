@@ -223,10 +223,6 @@ ${FACTUAL_GUARDRAIL_INSTRUCTION}`;
 
 export const generatePersonaPost = async ({
   seed,
-  themeName,
-  category,
-  dayTopic,
-  sourceSnippet,
   personaList,
   personaBodies,
 }: PersonaInput): Promise<string> => {
@@ -240,11 +236,12 @@ export const generatePersonaPost = async ({
     ', ',
   )} with a single line break before the body.
 
-IMPORTANT: Do NOT mention any specific topic, theme, or category (like "${themeName}", "${category}", or "${dayTopic}"). Keep it general about Lunary.
+This is a BRAND post. It must be entirely about the Lunary app in general. Do NOT mention any specific topic, theme, category, number, angel number, numerology concept, tarot card name, crystal name, zodiac sign, spell, or any other specific subject. Keep it completely general about Lunary as an app.
 
-The body should be 1-2 sentences focusing on Lunary's key USP: everything is personalised to your FULL BIRTH CHART (or "full natal chart"), not just your sun sign. List features briefly (horoscopes, transits, tarot, crystals) but do NOT explain or describe any single feature in detail. No card names, no crystal names, no sign names, no specific readings. Use "full birth chart" or "full natal chart" instead of just "chart".
+The body should be 1-2 sentences focusing on Lunary's key USP: everything is personalised to your FULL BIRTH CHART (or "full natal chart"), not just your sun sign. List features briefly (horoscopes, transits, tarot, crystals) but do NOT explain or describe any single feature in detail. Use "full birth chart" or "full natal chart" instead of just "chart".
 
 BAD example (NEVER do this): "Let's talk about the Emperor card. A symbol of authority..." — expanding on one feature like this is forbidden.
+BAD example (NEVER do this): "Ever feel like numbers are just numbers? Think again." — this references numerology which is a specific topic.
 GOOD example: "Personalised horoscopes, transits, tarot, and crystals. All based on your full birth chart, not just your sun sign."
 
 FORMATTING RULES:
@@ -252,6 +249,7 @@ FORMATTING RULES:
 - NEVER use em dashes or hyphens to join clauses. Use full stops, commas, or colons instead.
 - Keep it calm and inclusive, avoiding promo codes.
 - NEVER expand on, describe, or explain any single feature. Only list them briefly.
+- Do NOT include any hashtags.
 
 ${FACTUAL_GUARDRAIL_INSTRUCTION}
 ${CLOSING_PARTICIPATION_INSTRUCTION}

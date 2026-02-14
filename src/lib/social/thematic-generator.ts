@@ -1867,12 +1867,22 @@ export async function generateThematicPostsForWeek(
             (override.postType === 'question'
               ? buildQuestionPost(dayContent.facet.title, data)
               : '');
+          // Persona posts should NOT get theme-specific hashtags — they're
+          // brand-level posts that must stay topic-agnostic.
+          const overrideHashtags =
+            override.postType === 'persona'
+              ? {
+                  domain: dayContent.hashtags.brand,
+                  topic: '',
+                  brand: dayContent.hashtags.brand,
+                }
+              : dayContent.hashtags;
           const optionalContent = applyPlatformFormatting(
             normalizeGeneratedContent(optionalBase, {
               topicLabel: dayContent.facet.title,
             }),
             platform,
-            dayContent.hashtags,
+            overrideHashtags,
           );
           const optionalSource =
             override.postType === 'question'
@@ -1888,7 +1898,10 @@ export async function generateThematicPostsForWeek(
             postType: override.postType,
             topic: dayContent.facet.title,
             scheduledDate: dayContent.date,
-            hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
+            hashtags:
+              override.postType === 'persona'
+                ? dayContent.hashtags.brand
+                : `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
             category: dayContent.theme.category,
             dayOffset,
             slug:
