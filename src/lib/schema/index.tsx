@@ -1381,3 +1381,80 @@ export function createCollectionPageSchema({
     },
   };
 }
+
+// ============================================================================
+// PODCAST SCHEMAS - For Podcast Episode and Series SEO
+// ============================================================================
+
+interface PodcastEpisodeSchemaProps {
+  name: string;
+  description: string;
+  url: string;
+  audioUrl: string;
+  datePublished: string;
+  durationSecs: number;
+  episodeNumber: number;
+  transcript?: string;
+}
+
+/**
+ * Convert duration in seconds to ISO 8601 duration format (PT10M30S)
+ */
+function formatIsoDuration(secs: number): string {
+  const minutes = Math.floor(secs / 60);
+  const seconds = secs % 60;
+  if (seconds === 0) return `PT${minutes}M`;
+  return `PT${minutes}M${seconds}S`;
+}
+
+export function createPodcastEpisodeSchema({
+  name,
+  description,
+  url,
+  audioUrl,
+  datePublished,
+  durationSecs,
+  episodeNumber,
+  transcript,
+}: PodcastEpisodeSchemaProps) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'PodcastEpisode',
+    name,
+    description,
+    url: url.startsWith('http') ? url : `${BASE_URL}${url}`,
+    datePublished,
+    duration: formatIsoDuration(durationSecs),
+    episodeNumber,
+    associatedMedia: {
+      '@type': 'MediaObject',
+      contentUrl: audioUrl,
+      encodingFormat: 'audio/mpeg',
+    },
+    partOfSeries: {
+      '@type': 'PodcastSeries',
+      name: 'Lunary Cosmic Insights',
+      url: `${BASE_URL}/podcast`,
+    },
+    ...(transcript && { transcript }),
+    publisher: { '@id': `${BASE_URL}/#organization` },
+  };
+}
+
+export function createPodcastSeriesSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'PodcastSeries',
+    name: 'Lunary Cosmic Insights',
+    description:
+      'Weekly explorations of astrology, tarot, crystals, numerology, and cosmic wisdom from the Lunary grimoire.',
+    url: `${BASE_URL}/podcast`,
+    webFeed: `${BASE_URL}/podcast`,
+    author: {
+      '@type': 'Organization',
+      name: 'Lunary',
+      url: BASE_URL,
+    },
+    publisher: { '@id': `${BASE_URL}/#organization` },
+  };
+}

@@ -1826,6 +1826,30 @@ model cosmic_gifts {
   @@index([recipient_id, created_at(sort: Desc)], map: "idx_cosmic_gifts_recipient")
 }
 
+model PodcastEpisode {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  episodeNumber Int      @unique @map("episode_number")
+  slug          String   @unique
+  title         String
+  description   String
+  audioUrl      String   @map("audio_url")
+  durationSecs  Int      @map("duration_secs")
+  publishedAt   DateTime @map("published_at") @db.Timestamptz(6)
+  weekNumber    Int?     @map("week_number")
+  year          Int?
+  transcript    Json?
+  showNotes     Json?    @map("show_notes")
+  grimoireSlugs String[] @map("grimoire_slugs")
+  status        String   @default("published") @db.VarChar(20)
+  podifyJobId   String?  @map("podify_job_id")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([weekNumber, year])
+  @@map("podcast_episodes")
+}
+
 enum tour_status {
   ACTIVE
   COMPLETED

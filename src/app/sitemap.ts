@@ -36,6 +36,7 @@ import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getAllProducts } from '@/lib/shop/generators';
+import { prisma } from '@/lib/prisma';
 
 dayjs.extend(isoWeek);
 import { getAllSynastryAspectSlugs } from '@/constants/seo/synastry-aspects';
@@ -149,7 +150,7 @@ function getLastModifiedFromPaths(paths?: string[]): Date | null {
   return new Date(Math.max(...dates));
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Use canonical domain (non-www)
   const baseUrl = 'https://lunary.app';
   const date =
@@ -1425,6 +1426,38 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
   );
 
+  // Fetch published podcast episodes from DB
+  let podcastEpisodeRoutes: MetadataRoute.Sitemap = [];
+  const podcastIndexRoute: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/podcast`,
+      lastModified: date,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+  ];
+  try {
+    const podcastEpisodes = await prisma.podcastEpisode.findMany({
+      where: { status: 'published' },
+      select: { slug: true, publishedAt: true },
+      orderBy: { publishedAt: 'desc' },
+    });
+
+    if (podcastEpisodes.length > 0) {
+      // Update index page lastModified to latest episode
+      podcastIndexRoute[0].lastModified = podcastEpisodes[0].publishedAt;
+    }
+
+    podcastEpisodeRoutes = podcastEpisodes.map((ep) => ({
+      url: `${baseUrl}/podcast/${ep.slug}`,
+      lastModified: ep.publishedAt,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }));
+  } catch {
+    // DB unavailable during build — skip podcast routes gracefully
+  }
+
   const allRoutes: MetadataRoute.Sitemap = [
     ...routes,
     ...blogRoutes,
@@ -1498,6 +1531,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...tarotSuitRoutes,
     ...shopProductRoutes,
     ...shopPaginationRoutes,
+    ...podcastIndexRoute,
+    ...podcastEpisodeRoutes,
   ];
 
   return dedupeRoutes(allRoutes);

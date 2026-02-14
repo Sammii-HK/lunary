@@ -346,6 +346,64 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // 6. Generate weekly podcast episode
+    console.log('🎙️ Generating weekly podcast episode...');
+    let podcastResult = null;
+    try {
+      const podcastResponse = await fetch(
+        `${baseUrl}/api/podcast/generate-weekly`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Lunary-Weekly-Content-Cron/1.0',
+          },
+          body: JSON.stringify({
+            weekStart: weekStartDate.toISOString(),
+          }),
+        },
+      );
+
+      if (podcastResponse.ok) {
+        podcastResult = await podcastResponse.json();
+        console.log(
+          `✅ Podcast episode generated: ${podcastResult.episode?.title || 'episode ready'}`,
+        );
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status: 'success',
+          message: `Podcast episode generated: ${podcastResult.episode?.title || 'ready'}`,
+          metadata: {
+            episodeNumber: podcastResult.episode?.episodeNumber,
+            slug: podcastResult.episode?.slug,
+            durationSecs: podcastResult.episode?.durationSecs,
+          },
+        });
+      } else {
+        console.error('❌ Podcast generation failed:', podcastResponse.status);
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status: 'failed',
+          message: 'Podcast generation failed',
+          errorMessage: `HTTP ${podcastResponse.status}`,
+        });
+      }
+    } catch (podcastError) {
+      console.error('❌ Podcast generation error:', podcastError);
+      await logActivity({
+        activityType: 'content_creation',
+        activityCategory: 'content',
+        status: 'failed',
+        message: 'Podcast generation error',
+        errorMessage:
+          podcastError instanceof Error
+            ? podcastError.message
+            : 'Unknown error',
+      });
+    }
+
     // Generate blog preview image URL (use first day of the week)
     const blogWeekStartDate = blogData.data?.weekStart
       ? new Date(blogData.data.weekStart).toISOString().split('T')[0]
@@ -377,6 +435,13 @@ export async function GET(request: NextRequest) {
         {
           name: 'Instagram',
           value: `${instagramResult?.totalPosts || 0} posts ready`,
+          inline: true,
+        },
+        {
+          name: 'Podcast',
+          value: podcastResult?.episode
+            ? `Ep ${podcastResult.episode.episodeNumber} ready`
+            : 'Skipped',
           inline: true,
         },
         {
@@ -426,6 +491,7 @@ export async function GET(request: NextRequest) {
         newsletterSent: newsletterData.success,
         socialPostsGenerated: socialPostsResult?.savedIds?.length || 0,
         instagramPostsGenerated: instagramResult?.totalPosts || 0,
+        podcastEpisode: podcastResult?.episode?.episodeNumber || null,
         substackPublished:
           substackResult?.results?.free?.success ||
           substackResult?.results?.paid?.success ||
@@ -463,6 +529,13 @@ export async function GET(request: NextRequest) {
             paid: substackResult.results?.paid?.success || false,
             freeUrl: substackResult.results?.free?.postUrl,
             paidUrl: substackResult.results?.paid?.postUrl,
+          }
+        : null,
+      podcast: podcastResult?.episode
+        ? {
+            episodeNumber: podcastResult.episode.episodeNumber,
+            title: podcastResult.episode.title,
+            slug: podcastResult.episode.slug,
           }
         : null,
     });
