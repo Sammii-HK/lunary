@@ -114,7 +114,6 @@ async function generateThematicWeeklyPosts(
   weekStart: string | null,
   currentWeek: boolean,
   replaceExisting: boolean,
-  includeSecondaryThemes: boolean,
 ): Promise<NextResponse> {
   const { sql } = await import('@vercel/postgres');
   const {
@@ -148,11 +147,8 @@ async function generateThematicWeeklyPosts(
   } = await import('@/lib/social/weekly-themes');
   const { getEducationalImageUrl } =
     await import('@/lib/social/educational-images');
-  const {
-    generateAndSaveWeeklyScripts,
-    getVideoScripts,
-    generateSecondaryScriptsOnly,
-  } = await import('@/lib/social/video-script-generator');
+  const { generateAndSaveWeeklyScripts, getVideoScripts } =
+    await import('@/lib/social/video-script-generator');
 
   const ensureVideoJobsTable = async () => {
     await sql`
@@ -696,12 +692,7 @@ async function generateThematicWeeklyPosts(
         weekStart: weekStartDate,
       })) || [],
     );
-    const primaryTikTokScripts = allTikTokScripts.filter(
-      (script) => script.themeName === currentTheme.name,
-    );
-    const existingTikTokScripts = includeSecondaryThemes
-      ? allTikTokScripts
-      : primaryTikTokScripts;
+    const existingTikTokScripts = allTikTokScripts;
 
     const existingYouTubeScripts = (
       await getVideoScripts({
@@ -713,14 +704,6 @@ async function generateThematicWeeklyPosts(
       existingYouTubeScripts.sort(
         (a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0),
       )[0] || null;
-
-    // Check if secondary scripts exist when includeSecondaryThemes is enabled
-    const secondaryTikTokScripts = allTikTokScripts.filter(
-      (script) => script.secondaryThemeId != null,
-    );
-    const needsSecondaryScripts =
-      includeSecondaryThemes &&
-      secondaryTikTokScripts.length < currentTheme.facets.length;
 
     // ALWAYS regenerate video scripts fresh to avoid stale/outdated content
     // Delete any existing scripts, jobs, and video posts for this week first
@@ -753,25 +736,12 @@ async function generateThematicWeeklyPosts(
         AND scheduled_date::date < ${weekEndKeyVideo}
     `;
 
-    // Generate all scripts fresh (primary + secondary + YouTube)
+    // Generate all scripts fresh (primary + YouTube)
     videoScripts = await generateAndSaveWeeklyScripts(
       weekStartDate,
       themeIndex,
     );
     videoScriptsGenerated = true;
-
-    if (includeSecondaryThemes) {
-      const refreshedScripts = dedupeScriptsByDate(
-        (await getVideoScripts({
-          platform: 'tiktok',
-          weekStart: weekStartDate,
-        })) || [],
-      );
-      videoScripts = {
-        ...videoScripts,
-        tiktokScripts: refreshedScripts,
-      };
-    }
 
     // Generate engagement scripts (Slot A at 17 UTC, Slot B at 20 UTC)
     const { generateWeeklySecondaryScripts, generateWeeklyEngagementBScripts } =
@@ -1252,41 +1222,21 @@ async function generateThematicWeeklyPosts(
           (post) => post.scheduledDate.toISOString().split('T')[0],
         ),
       );
-      if (includeSecondaryThemes) {
-        for (const script of uniqueScripts) {
-          const dateKey = script.scheduledDate.toISOString().split('T')[0];
-          const scriptTheme = resolveThemeForScript(script);
-          const scriptFacet =
-            resolveFacetForTheme(scriptTheme, script.facetTitle) ||
-            buildFallbackFacet(script.facetTitle);
-          const slug =
-            scriptFacet.grimoireSlug.split('/').pop() ||
-            script.facetTitle.toLowerCase().replace(/\s+/g, '-');
-          dayInfoByKey.set(`${dateKey}|${script.facetTitle}`, {
-            facetTitle: script.facetTitle,
-            category: scriptTheme.category,
-            slug,
-            facet: scriptFacet,
-            theme: scriptTheme,
-          });
-        }
-      } else {
-        for (const day of weekPlan) {
-          const dateKey = day.date.toISOString().split('T')[0];
-          const slug =
-            day.facet.grimoireSlug.split('/').pop() ||
-            day.facet.title.toLowerCase().replace(/\s+/g, '-');
-          dayInfoByKey.set(`${dateKey}|${day.facet.title}`, {
-            facetTitle: day.facet.title,
-            category: day.theme.category,
-            slug,
-            facet: day.facet,
-            theme: day.theme,
-          });
-        }
+      for (const day of weekPlan) {
+        const dateKey = day.date.toISOString().split('T')[0];
+        const slug =
+          day.facet.grimoireSlug.split('/').pop() ||
+          day.facet.title.toLowerCase().replace(/\s+/g, '-');
+        dayInfoByKey.set(`${dateKey}|${day.facet.title}`, {
+          facetTitle: day.facet.title,
+          category: day.theme.category,
+          slug,
+          facet: day.facet,
+          theme: day.theme,
+        });
       }
 
-      // Ensure engagement scripts have dayInfo entries (always, regardless of includeSecondaryThemes)
+      // Ensure engagement scripts have dayInfo entries
       for (const script of uniqueScripts) {
         const scriptSlotMeta = script.metadata?.slot;
         if (
@@ -1353,9 +1303,7 @@ async function generateThematicWeeklyPosts(
               ? 'engagementA'
               : script.metadata?.slot === 'engagementB'
                 ? 'engagementB'
-                : script.secondaryThemeId != null
-                  ? 'engagementB'
-                  : 'primary';
+                : 'primary';
           const isEngagement =
             scriptSlot === 'engagementA' || scriptSlot === 'engagementB';
 
@@ -1594,7 +1542,6 @@ export async function POST(request: NextRequest) {
       currentWeek,
       mode = 'thematic',
       replaceExisting = false,
-      includeSecondaryThemes = false,
     } = await request.json().catch(() => ({}));
 
     console.log('📥 Generate weekly posts request:', {
@@ -1611,7 +1558,6 @@ export async function POST(request: NextRequest) {
         weekStart,
         currentWeek,
         replaceExisting,
-        includeSecondaryThemes,
       );
     }
 

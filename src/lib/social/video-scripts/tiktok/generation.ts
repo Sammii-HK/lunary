@@ -304,10 +304,6 @@ export async function generateTikTokScript(
   baseUrl: string = '',
   options?: {
     primaryThemeId?: string;
-    secondaryThemeId?: string;
-    secondaryFacetSlug?: string;
-    secondaryAngleKey?: string;
-    secondaryAspectKey?: string;
     angleOverride?: string;
     aspectOverride?: ContentAspect;
   },
@@ -318,10 +314,7 @@ export async function generateTikTokScript(
   const angle =
     options?.angleOverride ||
     (await getAngleForTopic(facet.title, scheduledDate));
-  const aspect =
-    options?.aspectOverride ||
-    options?.secondaryAspectKey ||
-    mapAngleToAspect(angle);
+  const aspect = options?.aspectOverride || mapAngleToAspect(angle);
 
   const { script: rawScript, hook: generatedHook } =
     await generateTikTokScriptContent(
@@ -338,11 +331,8 @@ export async function generateTikTokScript(
   });
   const hookVersion = 1;
 
-  // Funnel tier: secondary content is consideration, primary is discovery
-  // (conversion is set by app-demo/comparison generators, not here)
-  const targetAudience = (
-    options?.secondaryThemeId ? 'consideration' : 'discovery'
-  ) as 'discovery' | 'consideration' | 'conversion';
+  const targetAudience: 'discovery' | 'consideration' | 'conversion' =
+    'discovery';
 
   // Performance tracking attributes
   const contentTypeKey = getContentTypeFromCategory(theme.category);
@@ -462,10 +452,6 @@ export async function generateTikTokScript(
     themeId: theme.id,
     themeName: theme.name,
     primaryThemeId: options?.primaryThemeId || theme.id,
-    secondaryThemeId: options?.secondaryThemeId,
-    secondaryFacetSlug: options?.secondaryFacetSlug,
-    secondaryAngleKey: options?.secondaryAngleKey,
-    secondaryAspectKey: options?.secondaryAspectKey,
     facetTitle: facet.title,
     topic: facet.title,
     angle,

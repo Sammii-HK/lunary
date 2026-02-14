@@ -237,10 +237,6 @@ export async function POST(request: NextRequest) {
         theme_id TEXT NOT NULL,
         theme_name TEXT NOT NULL,
         primary_theme_id TEXT,
-        secondary_theme_id TEXT,
-        secondary_facet_slug TEXT,
-        secondary_angle_key TEXT,
-        secondary_aspect_key TEXT,
         facet_title TEXT NOT NULL,
         topic TEXT,
         angle TEXT,
@@ -272,19 +268,6 @@ export async function POST(request: NextRequest) {
     await sql`
       CREATE INDEX IF NOT EXISTS idx_video_scripts_scheduled
       ON video_scripts(scheduled_date)
-    `;
-
-    await sql`
-      CREATE TABLE IF NOT EXISTS content_rotation_secondary (
-        theme_id TEXT PRIMARY KEY,
-        secondary_usage_count INTEGER NOT NULL DEFAULT 0,
-        last_secondary_used_at TIMESTAMP WITH TIME ZONE,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
-    `;
-    await sql`
-      CREATE INDEX IF NOT EXISTS idx_content_rotation_secondary_last_used
-      ON content_rotation_secondary(last_secondary_used_at)
     `;
 
     await sql`

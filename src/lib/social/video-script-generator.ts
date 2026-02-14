@@ -31,12 +31,7 @@ export {
 } from './video-scripts/database';
 
 // Rotation functions
-export {
-  getAngleForTopic,
-  selectSecondaryTheme,
-  selectSecondaryAspect,
-  recordSecondaryThemeUsage,
-} from './video-scripts/rotation';
+export { getAngleForTopic } from './video-scripts/rotation';
 
 // Validation functions
 export {
@@ -67,5 +62,4 @@ export { generateYouTubeScript } from './video-scripts/youtube';
 export {
   generateWeeklyVideoScripts,
   generateAndSaveWeeklyScripts,
-  generateSecondaryScriptsOnly,
 } from './video-scripts/generation';
