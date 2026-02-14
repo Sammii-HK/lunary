@@ -298,7 +298,7 @@ export async function GET(request: NextRequest) {
                 }}
               >
                 <span style={{ color: accent, display: 'flex' }}>
-                  {'\u2726'}
+                  {'\u2022'}
                 </span>
                 <span style={{ display: 'flex' }}>{bullet}</span>
               </div>
@@ -542,7 +542,7 @@ export async function GET(request: NextRequest) {
                       style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: 6,
+                        gap: 12,
                       }}
                     >
                       {value ? (

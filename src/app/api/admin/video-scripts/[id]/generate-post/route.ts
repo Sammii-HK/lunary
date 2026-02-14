@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   getVideoScripts,
   updateVideoScriptWrittenPost,
-  VideoScript,
 } from '@/lib/social/video-script-generator';
-import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
+import { categoryThemes } from '@/lib/social/weekly-themes';
 import {
   applyPlatformFormatting,
   buildFallbackCopy,
@@ -12,68 +11,9 @@ import {
   generateSocialCopy,
   validateSocialCopy,
 } from '@/lib/social/social-copy-generator';
+import { generateTikTokHashtags } from '@/lib/social/video-scripts/tiktok/metadata';
 
 export const dynamic = 'force-dynamic';
-
-function buildThematicHashtags(script: VideoScript): string | null {
-  const theme = categoryThemes.find((item) => item.name === script.themeName);
-  if (!theme) return null;
-  const facet =
-    theme.facets.find((item) => item.title === script.facetTitle) ||
-    theme.facets.find(
-      (item) => item.title.toLowerCase() === script.facetTitle.toLowerCase(),
-    );
-  if (!facet) return null;
-
-  const tags = generateHashtags(theme, facet);
-  const additionalTags = ['#lunary', '#astrology', `#${theme.category}`];
-  const uniqueTags = Array.from(
-    new Set(
-      [tags.domain, tags.topic, tags.brand, ...additionalTags].filter(Boolean),
-    ),
-  );
-  return uniqueTags.slice(0, 3).join(' ');
-}
-
-/**
- * Generate fallback hashtags based on script theme and topic
- */
-function generateFallbackHashtags(script: VideoScript): string {
-  const hashtags: string[] = [];
-
-  // Extract relevant keywords from theme and facet title
-  const themeWords = script.themeName
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((word) => word.length > 3)
-    .slice(0, 1);
-  const facetWords = script.facetTitle
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((word) => word.length > 3)
-    .slice(0, 1);
-
-  // Add theme-based hashtag
-  if (themeWords.length > 0) {
-    const themeTag = themeWords[0].replace(/[^a-z0-9]/g, '');
-    if (themeTag) {
-      hashtags.push(`#${themeTag}`);
-    }
-  }
-
-  // Add facet-based hashtag
-  if (facetWords.length > 0) {
-    const facetTag = facetWords[0].replace(/[^a-z0-9]/g, '');
-    if (facetTag && !hashtags.includes(`#${facetTag}`)) {
-      hashtags.push(`#${facetTag}`);
-    }
-  }
-
-  // Add astrology-related hashtag
-  hashtags.push('#astrology', '#lunary');
-
-  return hashtags.slice(0, 3).join(' ');
-}
 
 /**
  * POST /api/admin/video-scripts/[id]/generate-post
@@ -129,19 +69,17 @@ export async function POST(
       if (issues.length > 0) {
         const fallback = await buildFallbackCopy(pack);
         postContent = fallback.content;
-        hashtags = fallback.hashtags;
       } else {
         postContent = generated.content;
-        hashtags = generated.hashtags || [];
       }
       postContent = applyPlatformFormatting(postContent, script.platform);
+      hashtags = generateTikTokHashtags(facet, theme);
     }
 
-    const shouldAppendHashtags =
-      hashtags.length > 0 && !/#\w+/.test(postContent);
-    const postContentWithHashtags = shouldAppendHashtags
-      ? `${postContent}\n\n${hashtags.slice(0, 3).join(' ')}`
-      : postContent;
+    const postContentWithHashtags =
+      hashtags.length > 0 && !/#\w+/.test(postContent)
+        ? `${postContent}\n\n${hashtags.slice(0, 3).join(' ')}`
+        : postContent;
 
     // Save to database
     await updateVideoScriptWrittenPost(scriptId, postContentWithHashtags);
