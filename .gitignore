@@ -81,3 +81,6 @@ android/key.properties
 .claude/plans
 ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 .temp-sitemaps/
+
+
+voice-samples/

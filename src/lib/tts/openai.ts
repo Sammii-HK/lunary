@@ -1,8 +1,10 @@
 import OpenAI from 'openai';
 import type { TTSProvider, TTSOptions, TTSVoice } from './types';
+import { preprocessTextForTTS, splitTextIntoChunks } from './normalize-script';
 
 export class OpenAITTSProvider implements TTSProvider {
   name = 'openai';
+  contentType = 'audio/mpeg';
   private client: OpenAI;
 
   constructor() {
@@ -11,80 +13,6 @@ export class OpenAITTSProvider implements TTSProvider {
       throw new Error('OPENAI_API_KEY is not configured');
     }
     this.client = new OpenAI({ apiKey });
-  }
-
-  /**
-   * Preprocess text to help TTS with pronunciation of astrological terms
-   * Fixes stuttering issues with duplicate words
-   */
-  private preprocessTextForTTS(text: string): string {
-    const pauseToken = '__LUNARY_PAUSE__';
-    let processed = text.replace(/\n{2,}/g, ` ${pauseToken} `);
-
-    // Remove duplicate consecutive words (TTS stuttering fix)
-    // e.g., "Sagitta-Sagittarius" or "the the" -> single word
-    processed = processed.replace(/\b(\w+)[-\s]+\1\b/gi, '$1');
-
-    // Clean up any double spaces
-    processed = processed.replace(/\s+/g, ' ').trim();
-
-    // Re-insert pause markers as ellipses to encourage a natural break.
-    processed = processed.replace(new RegExp(pauseToken, 'g'), '...');
-
-    return processed;
-  }
-
-  /**
-   * Split text into chunks that fit within OpenAI TTS character limit (4096)
-   * Tries to split at sentence boundaries to avoid cutting mid-sentence
-   */
-  private splitTextIntoChunks(text: string, maxChars: number = 3500): string[] {
-    const chunks: string[] = [];
-
-    if (text.length <= maxChars) {
-      return [text];
-    }
-
-    // Split by sentences first
-    const sentences = text.split(/([.!?]+\s+)/);
-    let currentChunk = '';
-
-    for (let i = 0; i < sentences.length; i++) {
-      const sentence = sentences[i];
-      const testChunk = currentChunk + sentence;
-
-      if (testChunk.length <= maxChars) {
-        currentChunk = testChunk;
-      } else {
-        // Current chunk is full, save it and start new one
-        if (currentChunk.trim().length > 0) {
-          chunks.push(currentChunk.trim());
-        }
-        currentChunk = sentence;
-
-        // If a single sentence is too long, split it by words
-        if (currentChunk.length > maxChars) {
-          const words = currentChunk.split(/\s+/);
-          let wordChunk = '';
-          for (const word of words) {
-            if ((wordChunk + ' ' + word).length <= maxChars) {
-              wordChunk = wordChunk ? wordChunk + ' ' + word : word;
-            } else {
-              if (wordChunk) chunks.push(wordChunk);
-              wordChunk = word;
-            }
-          }
-          if (wordChunk) currentChunk = wordChunk;
-        }
-      }
-    }
-
-    // Add final chunk
-    if (currentChunk.trim().length > 0) {
-      chunks.push(currentChunk.trim());
-    }
-
-    return chunks;
   }
 
   async generateVoiceover(
@@ -114,14 +42,14 @@ export class OpenAITTSProvider implements TTSProvider {
     );
 
     // Preprocess text to help with pronunciation
-    const processedText = this.preprocessTextForTTS(text);
+    const processedText = preprocessTextForTTS(text);
 
     // Check if text exceeds character limit
     if (processedText.length > 4096) {
       console.log(
         `📝 Text is ${processedText.length} characters, splitting into chunks...`,
       );
-      const chunks = this.splitTextIntoChunks(processedText, 3500);
+      const chunks = splitTextIntoChunks(processedText, 3500);
       console.log(`📦 Split into ${chunks.length} chunks`);
 
       // Generate audio for each chunk
