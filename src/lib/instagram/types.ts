@@ -67,7 +67,12 @@ export interface IGDailyCosmicContent {
 }
 
 // Story variants
-export type StoryVariant = 'daily_moon' | 'tarot_pull' | 'poll';
+export type StoryVariant =
+  | 'daily_moon'
+  | 'tarot_pull'
+  | 'quote'
+  | 'did_you_know'
+  | 'cosmic_energy';
 
 // --- New Content Structures ---
 

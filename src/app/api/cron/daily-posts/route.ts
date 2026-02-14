@@ -476,6 +476,175 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    // DAILY TASKS (Every day) - Instagram Stories (5 per day, IG-only)
+    console.log('📖 Generating Instagram stories...');
+    const storiesStartTime = Date.now();
+    try {
+      const { generateDailyStoryData } =
+        await import('@/lib/instagram/story-content');
+      const { seededRandom } = await import('@/lib/instagram/ig-utils');
+
+      const storyItems = generateDailyStoryData(dateStr); // [moon, tarot, dyk, cosmic]
+
+      // Generate quote story from DB (slot 3, separate seed to avoid feed collision)
+      let quoteText = 'The cosmos is within us. We are made of star-stuff.';
+      let quoteAuthor = 'Carl Sagan';
+      try {
+        const quoteResult = await sql`
+          SELECT id, quote_text, author
+          FROM social_quotes
+          WHERE status = 'available'
+          ORDER BY use_count ASC, created_at ASC
+          LIMIT 50
+        `;
+        if (quoteResult.rows.length > 0) {
+          const quoteRng = seededRandom(`story-quote-${dateStr}`);
+          const quoteIndex = Math.floor(quoteRng() * quoteResult.rows.length);
+          const quote = quoteResult.rows[quoteIndex];
+          quoteText = quote.quote_text;
+          quoteAuthor = quote.author || 'Lunary';
+          await sql`
+            UPDATE social_quotes
+            SET use_count = use_count + 1, used_at = NOW(), updated_at = NOW()
+            WHERE id = ${quote.id}
+          `;
+        }
+      } catch (quoteError) {
+        console.warn(
+          '[Stories] Failed to fetch quote, using fallback:',
+          quoteError,
+        );
+      }
+
+      const quoteStory = {
+        variant: 'quote' as const,
+        title: quoteText,
+        subtitle: quoteAuthor,
+        params: {
+          text:
+            quoteAuthor !== 'Lunary'
+              ? `${quoteText} - ${quoteAuthor}`
+              : quoteText,
+          format: 'story',
+          v: '4',
+        },
+        endpoint: '/api/og/social-quote',
+      };
+
+      // Assemble 5 stories: moon, tarot, quote, dyk, cosmic
+      const allStories = [
+        storyItems[0], // moon
+        storyItems[1], // tarot
+        quoteStory, // quote
+        storyItems[2], // dyk
+        storyItems[3], // cosmic
+      ];
+      const storyUtcHours = [9, 11, 13, 16, 19];
+
+      const SHARE_BASE_URL =
+        process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+      const succulentApiUrl = 'https://app.succulent.social/api/posts';
+      const apiKey = process.env.SUCCULENT_SECRET_KEY;
+      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+
+      const storySentResults: Array<{
+        scheduledTime: string;
+        variant: string;
+        status: string;
+        error?: string;
+      }> = [];
+
+      if (apiKey && accountGroupId) {
+        for (let i = 0; i < allStories.length; i++) {
+          const story = allStories[i];
+          const utcHour = storyUtcHours[i];
+          const scheduledTime = new Date(
+            `${dateStr}T${String(utcHour).padStart(2, '0')}:00:00Z`,
+          );
+
+          const imageParams = new URLSearchParams(story.params);
+          const imageUrl = `${SHARE_BASE_URL}${story.endpoint}?${imageParams.toString()}`;
+
+          const readableDate = scheduledTime.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          });
+
+          try {
+            const postData = {
+              accountGroupId,
+              name: `IG Story - ${readableDate} - ${story.variant}`,
+              content: '',
+              platforms: ['instagram'],
+              scheduledDate: scheduledTime.toISOString(),
+              media: [{ type: 'image', url: imageUrl, alt: story.title }],
+              instagramOptions: { isStory: true },
+            };
+
+            const response = await fetch(succulentApiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': apiKey,
+              },
+              body: JSON.stringify(postData),
+            });
+
+            if (response.ok) {
+              storySentResults.push({
+                scheduledTime: scheduledTime.toISOString(),
+                variant: story.variant,
+                status: 'success',
+              });
+            } else {
+              const errorText = await response.text();
+              storySentResults.push({
+                scheduledTime: scheduledTime.toISOString(),
+                variant: story.variant,
+                status: 'error',
+                error: `HTTP ${response.status}: ${errorText.slice(0, 200)}`,
+              });
+            }
+          } catch (postError) {
+            storySentResults.push({
+              scheduledTime: scheduledTime.toISOString(),
+              variant: story.variant,
+              status: 'error',
+              error:
+                postError instanceof Error
+                  ? postError.message
+                  : 'Unknown error',
+            });
+          }
+        }
+      }
+
+      const storySuccessCount = storySentResults.filter(
+        (r) => r.status === 'success',
+      ).length;
+      const storiesExecutionTime = Date.now() - storiesStartTime;
+      console.log(
+        `📖 Instagram stories: ${allStories.length} generated, ${storySuccessCount} sent in ${storiesExecutionTime}ms`,
+      );
+
+      cronResults.instagramStories = {
+        success: true,
+        storyCount: allStories.length,
+        sentCount: storySuccessCount,
+        stories: storySentResults,
+        executionTimeMs: storiesExecutionTime,
+      };
+    } catch (error) {
+      const storiesExecutionTime = Date.now() - storiesStartTime;
+      console.error('📖 Instagram stories failed:', error);
+      cronResults.instagramStories = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        executionTimeMs: storiesExecutionTime,
+      };
+    }
+
     // DAILY TASKS (Every day) - Push Notifications for Cosmic Events
     console.log('🔔 Checking for notification-worthy cosmic events...');
     const notificationStartTime = Date.now();
