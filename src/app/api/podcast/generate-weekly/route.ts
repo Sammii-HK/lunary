@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
         headers: {
           'Content-Type': 'application/json',
           ...(process.env.PODIFY_API_KEY && {
-            Authorization: `Bearer ${process.env.PODIFY_API_KEY}`,
+            'x-api-key': process.env.PODIFY_API_KEY,
           }),
         },
         body: JSON.stringify({
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
       {
         headers: {
           ...(process.env.PODIFY_API_KEY && {
-            Authorization: `Bearer ${process.env.PODIFY_API_KEY}`,
+            'x-api-key': process.env.PODIFY_API_KEY,
           }),
         },
       },
