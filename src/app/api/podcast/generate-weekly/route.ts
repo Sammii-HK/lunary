@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json().catch(() => ({}));
+    const podifyUrl = body.podifyUrl || PODIFY_API_URL;
     const weekStart = body.weekStart ? new Date(body.weekStart) : new Date();
 
     // Determine episode number (count existing + 1)
@@ -103,21 +104,18 @@ export async function POST(request: NextRequest) {
     });
 
     // 3. Call Podify API
-    const generateResponse = await fetch(
-      `${PODIFY_API_URL}/api/podcast/generate`,
-      {
-        method: 'POST',
-        headers: podifyHeaders(),
-        body: JSON.stringify({
-          content,
-          title,
-          format: 'conversation',
-          duration: '10min',
-          tone: 'mystical',
-          voices: 'luna_and_sol',
-        }),
-      },
-    );
+    const generateResponse = await fetch(`${podifyUrl}/api/podcast/generate`, {
+      method: 'POST',
+      headers: podifyHeaders(),
+      body: JSON.stringify({
+        content,
+        title,
+        format: 'conversation',
+        duration: '5min',
+        tone: 'mystical',
+        voices: 'luna_and_sol',
+      }),
+    });
 
     if (!generateResponse.ok) {
       const errorData = await generateResponse.json().catch(() => ({}));
@@ -136,7 +134,7 @@ export async function POST(request: NextRequest) {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const statusResponse = await fetch(
-        `${PODIFY_API_URL}/api/podcast/status/${jobId}`,
+        `${podifyUrl}/api/podcast/status/${jobId}`,
         { headers: podifyHeaders() },
       );
       if (statusResponse.status === 404) {
@@ -177,7 +175,7 @@ export async function POST(request: NextRequest) {
 
     // 5. Download audio & upload to Vercel Blob
     const audioResponse = await fetch(
-      `${PODIFY_API_URL}/api/podcast/${jobId}/audio`,
+      `${podifyUrl}/api/podcast/${jobId}/audio`,
       { headers: podifyHeaders() },
     );
     if (!audioResponse.ok) {
