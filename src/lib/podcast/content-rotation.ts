@@ -39,7 +39,7 @@ const PODCAST_CATEGORIES = [
 type PodcastCategory = (typeof PODCAST_CATEGORIES)[number];
 
 const EXCLUDED_SLUG_PATTERNS = [/^horoscope/, /^daily-/, /^weekly-/];
-const MIN_CONTENT_WORDS = 200;
+const MIN_CONTENT_WORDS = 30;
 
 /**
  * Build a flat list of all grimoire entries suitable for podcasts,
@@ -229,18 +229,23 @@ export function selectPodcastTopics(
   const sabbatCheckAhead = getSabbatForDate(weekAhead);
   const activeSabbat = sabbatCheck || sabbatCheckAhead;
 
-  let primaryCategory: PodcastCategory;
-  let primaryEntry: GrimoireEntry;
+  let primaryCategory: PodcastCategory = PODCAST_CATEGORIES[0];
+  let primaryEntry: GrimoireEntry | undefined;
 
   if (activeSabbat) {
     // Override with sabbat topic
-    primaryCategory = 'sabbats';
     const sabbatEntries = allEntries.get('sabbats') || [];
     const sabbatName = activeSabbat.sabbat.name.toLowerCase();
-    primaryEntry =
+    const sabbatEntry =
       sabbatEntries.find((e) => e.slug.includes(sabbatName)) ||
       sabbatEntries[0];
-  } else {
+    if (sabbatEntry) {
+      primaryCategory = 'sabbats';
+      primaryEntry = sabbatEntry;
+    }
+  }
+
+  if (!primaryEntry) {
     // Deterministic category cycling
     const categoryIndex = (episodeNumber - 1) % PODCAST_CATEGORIES.length;
     primaryCategory = PODCAST_CATEGORIES[categoryIndex];
@@ -261,7 +266,6 @@ export function selectPodcastTopics(
           break;
         }
       }
-      primaryEntry = primaryEntry!;
     } else {
       // Pick specific entry within category (cycle through entries)
       const entryIndex =
@@ -269,6 +273,10 @@ export function selectPodcastTopics(
         categoryEntries.length;
       primaryEntry = categoryEntries[entryIndex];
     }
+  }
+
+  if (!primaryEntry) {
+    return [];
   }
 
   // Skip if recently covered (within last 10 episodes)

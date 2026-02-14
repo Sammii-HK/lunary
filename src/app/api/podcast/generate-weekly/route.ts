@@ -97,7 +97,12 @@ export async function POST(request: NextRequest) {
       `${PODIFY_API_URL}/api/podcast/generate`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(process.env.PODIFY_API_KEY && {
+            Authorization: `Bearer ${process.env.PODIFY_API_KEY}`,
+          }),
+        },
         body: JSON.stringify({
           content,
           title,
@@ -127,6 +132,13 @@ export async function POST(request: NextRequest) {
 
       const statusResponse = await fetch(
         `${PODIFY_API_URL}/api/podcast/status/${jobId}`,
+        {
+          headers: {
+            ...(process.env.PODIFY_API_KEY && {
+              Authorization: `Bearer ${process.env.PODIFY_API_KEY}`,
+            }),
+          },
+        },
       );
       if (!statusResponse.ok) {
         throw new Error(`Podify status check failed: ${statusResponse.status}`);
@@ -163,6 +175,13 @@ export async function POST(request: NextRequest) {
     // 5. Download audio & upload to Vercel Blob
     const audioResponse = await fetch(
       `${PODIFY_API_URL}/api/podcast/${jobId}/audio`,
+      {
+        headers: {
+          ...(process.env.PODIFY_API_KEY && {
+            Authorization: `Bearer ${process.env.PODIFY_API_KEY}`,
+          }),
+        },
+      },
     );
     if (!audioResponse.ok) {
       throw new Error(`Failed to download audio: ${audioResponse.status}`);

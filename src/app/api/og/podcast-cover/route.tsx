@@ -2,6 +2,40 @@ import { ImageResponse } from 'next/og';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
+function seededRandom(seed: string) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return function () {
+    hash = (hash * 1103515245 + 12345) & 0x7fffffff;
+    return hash / 0x7fffffff;
+  };
+}
+
+function generateStarfield(shareId: string, count: number) {
+  const random = seededRandom(shareId);
+  const stars: { x: number; y: number; size: number; opacity: number }[] = [];
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: random() * 100,
+      y: random() * 100,
+      size: 1 + random() * 2,
+      opacity: 0.3 + random() * 0.6,
+    });
+  }
+  for (let i = 0; i < 3; i++) {
+    stars.push({
+      x: random() * 100,
+      y: random() * 100,
+      size: 3 + random(),
+      opacity: 0.85 + random() * 0.1,
+    });
+  }
+  return stars;
+}
+
 export const runtime = 'nodejs';
 
 let astronomicon: ArrayBuffer | null = null;
@@ -102,19 +136,19 @@ export async function GET(): Promise<Response> {
           overflow: 'hidden',
         }}
       >
-        {/* Subtle star dots */}
-        {[...Array(40)].map((_, i) => (
+        {/* Starfield */}
+        {generateStarfield('podcast-cover', 200).map((star, i) => (
           <div
             key={i}
             style={{
               position: 'absolute',
-              width: `${1 + (i % 3)}px`,
-              height: `${1 + (i % 3)}px`,
+              left: `${star.x}%`,
+              top: `${star.y}%`,
+              width: star.size,
+              height: star.size,
               borderRadius: '50%',
-              backgroundColor: `rgba(216, 180, 254, ${0.15 + (i % 5) * 0.08})`,
-              top: `${(i * 97 + 13) % 100}%`,
-              left: `${(i * 73 + 29) % 100}%`,
-              display: 'flex',
+              background: '#fff',
+              opacity: star.opacity * 0.6,
             }}
           />
         ))}
@@ -157,7 +191,6 @@ export async function GET(): Promise<Response> {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '60px',
-            zIndex: 1,
           }}
         >
           {/* Logo */}
@@ -169,10 +202,10 @@ export async function GET(): Promise<Response> {
           {/* Show title */}
           <div
             style={{
-              fontSize: '260px',
-              fontFamily: astronomicon ? 'Astronomicon' : 'serif',
+              fontSize: '220px',
+              fontFamily: 'Roboto Mono',
               color: '#fafafa',
-              letterSpacing: '0.06em',
+              letterSpacing: '0.08em',
               textAlign: 'center',
               lineHeight: 1,
               display: 'flex',
@@ -232,6 +265,7 @@ export async function GET(): Promise<Response> {
           <div
             style={{
               fontSize: '52px',
+              fontFamily: 'Roboto Mono',
               color: 'rgba(216, 180, 254, 0.4)',
               letterSpacing: '0.15em',
               display: 'flex',
@@ -252,10 +286,10 @@ export async function GET(): Promise<Response> {
     const headers = new Headers(response.headers);
     headers.set(
       'Cache-Control',
-      'public, s-maxage=604800, stale-while-revalidate=86400, max-age=604800',
+      'public, s-maxage=86400, stale-while-revalidate=3600, max-age=86400',
     );
-    headers.set('CDN-Cache-Control', 'public, s-maxage=604800');
-    headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=604800');
+    headers.set('CDN-Cache-Control', 'public, s-maxage=86400');
+    headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=86400');
 
     return new Response(response.body, {
       status: response.status,
