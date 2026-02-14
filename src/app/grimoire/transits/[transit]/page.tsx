@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import {
   YEARLY_TRANSITS,
   getTransitsForYear,
+  type YearlyTransit,
 } from '@/constants/seo/yearly-transits';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
@@ -13,6 +14,89 @@ import transitData from '@/data/slow-planet-sign-changes.json';
 export const revalidate = 2592000;
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
+
+/** Planet-sign theme mappings for dynamic transit resolution */
+const PLANET_SIGN_THEMES: Record<string, string[]> = {
+  Jupiter: ['growth', 'expansion', 'opportunity', 'optimism'],
+  Saturn: ['discipline', 'structure', 'responsibility', 'maturity'],
+  Uranus: ['change', 'innovation', 'freedom', 'disruption'],
+  Neptune: ['intuition', 'spirituality', 'dreams', 'compassion'],
+  Pluto: ['transformation', 'power', 'rebirth', 'intensity'],
+};
+
+/**
+ * Resolve a dynamic transit ID (e.g. "jupiter-sagittarius-2030") using the
+ * pre-computed slow-planet-sign-changes.json instead of running the expensive
+ * generateYearlyForecast computation.
+ */
+function resolveDynamicTransit(transitId: string): YearlyTransit | null {
+  // Parse slug: {planet}-{sign}-{year}
+  const yearMatch = transitId.match(/(\d{4})$/);
+  if (!yearMatch) return null;
+
+  const year = Number(yearMatch[1]);
+  if (year < 2020 || year > 2040) return null;
+
+  const prefix = transitId.replace(/-\d{4}$/, '');
+  const parts = prefix.split('-');
+  if (parts.length < 2) return null;
+
+  const planet = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+  const sign = parts
+    .slice(1)
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(' ');
+
+  // Look up from pre-computed JSON
+  const segments = (
+    transitData.segments as Record<
+      string,
+      Record<string, { start: string; end: string }[]>
+    >
+  )[planet]?.[sign];
+
+  if (!segments || segments.length === 0) return null;
+
+  // Find the segment that falls within the requested year
+  const seg = segments.find((s) => {
+    const startYear = new Date(s.start).getFullYear();
+    const endYear = new Date(s.end).getFullYear();
+    return startYear === year || endYear === year;
+  });
+
+  if (!seg) return null;
+
+  const startDate = new Date(seg.start);
+  const endDate = new Date(seg.end);
+  const themes = PLANET_SIGN_THEMES[planet] || ['change', 'growth'];
+
+  return {
+    id: transitId,
+    year,
+    planet,
+    transitType: `${planet} Ingress`,
+    title: `${planet} in ${sign} ${year}`,
+    dates: `From ${format(startDate, 'MMMM d, yyyy')}`,
+    signs: [sign],
+    description: `${planet} enters ${sign} on ${format(startDate, 'MMMM d, yyyy')}, shifting focus toward ${themes.slice(0, 2).join(' and ')} until ${format(endDate, 'MMMM d, yyyy')}.`,
+    themes,
+    startDate,
+    endDate,
+    doList: [
+      `align plans with ${themes[0]} energy`,
+      `use the ${planet.toLowerCase()} shift to review ${themes[1]} in your life`,
+      `journal about what ${sign.toLowerCase()} themes mean for your chart`,
+      `revisit goals set during the last ${planet} transit`,
+    ],
+    avoidList: [
+      `ignoring the shift in energy`,
+      `resisting changes around ${themes[1]}`,
+      `overcommitting before the transit settles`,
+      `comparing your experience to others`,
+    ],
+    tone: `${planet} shifts into ${sign}, bringing fresh energy to ${themes.slice(0, 2).join(' and ')}.`,
+  };
+}
 
 function sentenceCase(value: string) {
   if (!value) return value;
@@ -219,7 +303,9 @@ export async function generateMetadata({
 }) {
   const { transit: transitId } = await params;
 
-  const transit = YEARLY_TRANSITS.find((t) => t.id === transitId);
+  const transit =
+    YEARLY_TRANSITS.find((t) => t.id === transitId) ||
+    resolveDynamicTransit(transitId);
   if (!transit) {
     return { title: 'Transit Not Found | Lunary' };
   }
@@ -269,7 +355,9 @@ export default async function TransitPage({
 }) {
   const { transit: transitId } = await params;
 
-  const transit = YEARLY_TRANSITS.find((t) => t.id === transitId);
+  const transit =
+    YEARLY_TRANSITS.find((t) => t.id === transitId) ||
+    resolveDynamicTransit(transitId);
   if (!transit) {
     notFound();
   }
@@ -438,7 +526,12 @@ export default async function TransitPage({
       ]}
       ctaText={`See how ${transit.title} affects your chart, timing, and next steps`}
       ctaHref='/horoscope'
-      sources={[{ name: 'Ephemeris calculations' }]}
+      sources={[
+        {
+          name: 'astronomy-engine (VSOP87 planetary theory)',
+          url: 'https://github.com/cosinekitty/astronomy',
+        },
+      ]}
       faqs={faqs}
     >
       {sameYearTransits.length > 0 && (
