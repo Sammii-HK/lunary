@@ -1715,13 +1715,13 @@ export async function generateThematicPostsForWeek(
   const overrideByDayOffset = new Map(
     shortFormOverrides.map((override) => [override.dayOffset, override]),
   );
-  const shortFormOverridePlatforms = new Set(['twitter', 'threads', 'bluesky']);
-  const ctaPlatforms = new Set(['threads', 'bluesky']);
+  const shortFormOverridePlatforms = new Set(['threads']);
+  const ctaPlatforms = new Set(['threads']);
 
   // Long-form platforms (educational depth, images)
-  const longFormPlatforms = ['linkedin', 'pinterest'];
+  const longFormPlatforms: string[] = [];
   // Short-form platforms (1-2 sentences, optional hashtags)
-  const shortFormPlatforms = ['twitter', 'bluesky'];
+  const shortFormPlatforms: string[] = [];
 
   for (const dayContent of weekContent) {
     const sourceInfo = resolveSourceForFacet(
