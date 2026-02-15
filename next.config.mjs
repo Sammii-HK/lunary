@@ -31,11 +31,6 @@ const nextConfig = {
         '@remotion/renderer': 'commonjs @remotion/renderer',
         '@remotion/cli': 'commonjs @remotion/cli',
         esbuild: 'commonjs esbuild',
-        // Kokoro TTS stack - native ONNX bindings + transformers pipeline
-        'onnxruntime-node': 'commonjs onnxruntime-node',
-        'kokoro-js': 'commonjs kokoro-js',
-        '@huggingface/transformers': 'commonjs @huggingface/transformers',
-        phonemizer: 'commonjs phonemizer',
       };
 
       // Handle both array and function externals
@@ -55,11 +50,7 @@ const nextConfig = {
             request === '@remotion/renderer' ||
             request === '@remotion/cli' ||
             request === 'esbuild' ||
-            request?.startsWith('@esbuild/') ||
-            request === 'onnxruntime-node' ||
-            request === 'kokoro-js' ||
-            request === '@huggingface/transformers' ||
-            request === 'phonemizer'
+            request?.startsWith('@esbuild/')
           ) {
             return callback(null, `commonjs ${request}`);
           }
@@ -286,10 +277,6 @@ const nextConfig = {
     'chromium',
     'ffmpeg-static',
     'fluent-ffmpeg',
-    'onnxruntime-node',
-    'kokoro-js',
-    '@huggingface/transformers',
-    'phonemizer',
   ],
 
   // Experimental optimizations for faster builds

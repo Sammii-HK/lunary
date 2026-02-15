@@ -12,7 +12,7 @@ import {
 import { format } from 'date-fns';
 import { Clock, Calendar, Headphones, BookOpen } from 'lucide-react';
 
-export const revalidate = 3600; // 1 hour ISR
+export const dynamic = 'force-dynamic';
 
 interface PodcastEpisodePageProps {
   params: Promise<{ episode: string }>;

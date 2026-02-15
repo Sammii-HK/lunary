@@ -10,7 +10,7 @@ import {
 import { format } from 'date-fns';
 import { Clock, Headphones } from 'lucide-react';
 
-export const revalidate = 3600; // 1 hour ISR
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'The Grimoire Podcast | Lunary',
@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: 'https://lunary.app/podcast',
+    types: {
+      'application/rss+xml': 'https://lunary.app/podcast/feed.xml',
+    },
   },
 };
 
