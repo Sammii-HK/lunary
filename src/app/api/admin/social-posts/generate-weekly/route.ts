@@ -144,6 +144,7 @@ async function generateThematicWeeklyPosts(
     getWeeklyContentPlan,
     getWeeklySabbatPlan,
     generateHashtags,
+    selectSecondaryTheme,
   } = await import('@/lib/social/weekly-themes');
   const { getEducationalImageUrl } =
     await import('@/lib/social/educational-images');
@@ -311,20 +312,23 @@ async function generateThematicWeeklyPosts(
   `;
   const themeUseCount = Number(themeUsageResult.rows[0]?.use_count || 0);
   const facetOffset = themeUseCount * 7;
+  // Select secondary theme for Block B (Fri-Sun)
+  const secondaryTheme = selectSecondaryTheme(themeIndex);
   console.log(
-    `📚 [THEMATIC] Using theme: ${currentTheme.name} (index ${themeIndex})`,
+    `📚 [THEMATIC] Using themes: ${currentTheme.name} (Mon-Thu) + ${secondaryTheme.name} (Fri-Sun)`,
   );
 
-  // Get weekly content plan (theme-only; sabbats handled separately)
+  // Get weekly content plan with dual themes (sabbats handled separately)
   const weekPlan = getWeeklyContentPlan(
     weekStartDate,
     themeIndex,
     facetOffset,
     false,
+    themeIndex, // secondaryThemeIndex for Block B
   );
   console.log(
     `📋 [THEMATIC] Week plan:`,
-    weekPlan.map((d) => `${d.dayName}: ${d.facet.title}`),
+    weekPlan.map((d) => `${d.dayName}: ${d.facet.title} (${d.theme.name})`),
   );
 
   const facetSlugByTitle = new Map<string, string>();
@@ -346,6 +350,7 @@ async function generateThematicWeeklyPosts(
     videoScriptContext,
     facetOffset,
     false,
+    themeIndex, // secondaryThemeIndex — getWeeklyContentPlan calls selectSecondaryTheme() internally
   );
 
   const sabbatPlan = getWeeklySabbatPlan(weekStartDate);
@@ -736,26 +741,22 @@ async function generateThematicWeeklyPosts(
         AND scheduled_date::date < ${weekEndKeyVideo}
     `;
 
-    // Generate all scripts fresh (primary + YouTube)
-    videoScripts = await generateAndSaveWeeklyScripts(
-      weekStartDate,
-      themeIndex,
-    );
-    videoScriptsGenerated = true;
-
-    // Generate engagement scripts (Slot A at 17 UTC, Slot B at 20 UTC)
+    // Generate all scripts in parallel (primary + YouTube + engagement A + B)
     const { generateWeeklySecondaryScripts, generateWeeklyEngagementBScripts } =
       await import('@/lib/social/video-scripts/generators/weekly-secondary');
     const { saveVideoScript } =
       await import('@/lib/social/video-scripts/database');
 
-    console.log('🎬 [VIDEO] Generating engagement slot A scripts...');
-    const engagementAScripts =
-      await generateWeeklySecondaryScripts(weekStartDate);
+    console.log('🎬 [VIDEO] Generating all video scripts in parallel...');
+    const [primaryScripts, engagementAScripts, engagementBScripts] =
+      await Promise.all([
+        generateAndSaveWeeklyScripts(weekStartDate, themeIndex),
+        generateWeeklySecondaryScripts(weekStartDate),
+        generateWeeklyEngagementBScripts(weekStartDate),
+      ]);
 
-    console.log('🎬 [VIDEO] Generating engagement slot B scripts...');
-    const engagementBScripts =
-      await generateWeeklyEngagementBScripts(weekStartDate);
+    videoScripts = primaryScripts;
+    videoScriptsGenerated = true;
 
     // Save engagement scripts to DB so they have IDs for video jobs + queue
     const allEngagementScripts = [...engagementAScripts, ...engagementBScripts];
@@ -780,6 +781,59 @@ async function generateThematicWeeklyPosts(
     console.log(
       `🎬 [VIDEO] Generated ${videoScripts.tiktokScripts.length} total scripts (primary + ${engagementAScripts.length} engA + ${engagementBScripts.length} engB) + 1 YouTube`,
     );
+
+    // Generate YouTube thematic deep-dives + cosmic forecast in parallel
+    try {
+      const { generateThematicDeepDive } =
+        await import('@/lib/social/video-scripts/youtube/generation');
+      const { generateCosmicForecast } =
+        await import('@/lib/social/video-scripts/youtube/cosmic-forecast');
+
+      const secondaryThemeForVideo = selectSecondaryTheme(themeIndex);
+      const blockAFacets = currentTheme.facets.slice(0, 4);
+      const blockBFacets = secondaryThemeForVideo.facets.slice(0, 3);
+
+      const wednesdayDate = new Date(weekStartDate);
+      wednesdayDate.setDate(wednesdayDate.getDate() + 2);
+      const sundayDate = new Date(weekStartDate);
+      sundayDate.setDate(sundayDate.getDate() + 6);
+
+      const [deepDiveA, deepDiveB, cosmicForecast] = await Promise.all([
+        generateThematicDeepDive(
+          currentTheme,
+          blockAFacets,
+          wednesdayDate,
+          'https://lunary.app',
+          'A',
+        ),
+        generateThematicDeepDive(
+          secondaryThemeForVideo,
+          blockBFacets,
+          sundayDate,
+          'https://lunary.app',
+          'B',
+        ),
+        generateCosmicForecast(weekStartDate, {}, 'https://lunary.app'),
+      ]);
+
+      // Save the deep-dive and forecast scripts
+      for (const ytScript of [deepDiveA, deepDiveB, cosmicForecast]) {
+        try {
+          const id = await saveVideoScript(ytScript);
+          ytScript.id = id;
+          console.log(
+            `🎬 [VIDEO] Saved YouTube script: ${ytScript.facetTitle} (${ytScript.wordCount} words)`,
+          );
+        } catch (saveError) {
+          console.error(
+            `🎬 [VIDEO] Failed to save YouTube script: ${ytScript.facetTitle}`,
+            saveError,
+          );
+        }
+      }
+    } catch (ytError) {
+      console.error('Failed to generate YouTube long-form videos:', ytError);
+    }
 
     if (videoScripts?.tiktokScripts?.length) {
       const { getThematicImageUrl } =
@@ -884,292 +938,363 @@ async function generateThematicWeeklyPosts(
     }
   }
 
+  // Group posts by platform for parallel processing
+  const postsByPlatform = new Map<string, typeof filteredPosts>();
   for (const post of filteredPosts) {
-    const dateKey = post.scheduledDate.toISOString().split('T')[0];
-    const contentKey = `${dateKey}|${post.topic}`;
-    const baseGroupKey = buildGroupKey(
-      dateKey,
-      post.postType,
-      post.topic,
-      post.themeName,
-    );
-    const facet = post.topic ? facetByTopic.get(post.topic) : null;
-    const theme = themeByName.get(post.themeName) || currentTheme;
-    const normalizedPostType: SocialPostType =
-      post.postType === 'video'
-        ? 'video_caption'
-        : (post.postType as SocialPostType);
-    let postContent = post.content;
-    let hashtags: string[] = [];
-    // Threads question/beta CTA posts have pre-generated content — skip AI copy generation
-    const isPreGenerated =
-      post.postType === 'threads_question' ||
-      post.postType === 'threads_beta_cta';
-    if (facet && theme && !isPreGenerated) {
-      const sourcePack = buildSourcePack({
-        topic: post.topic || facet.title,
-        theme,
-        platform: post.platform,
-        postType: normalizedPostType,
-        facet,
-      });
-      const themePlatformKey = `${post.platform}|${theme.name}`;
-      const dayPlatformKey = `${dateKey}|${post.platform}`;
-      const recentTexts = noveltyByThemePlatform.get(themePlatformKey) || [];
-      const recentOpenings =
-        noveltyOpeningsByThemePlatform.get(themePlatformKey) || [];
-      const avoidBigrams = Array.from(
-        dailyBigramsByPlatform.get(dayPlatformKey) || [],
-      );
-      sourcePack.noveltyContext = {
-        recentTexts: recentTexts.slice(-6),
-        recentOpenings: recentOpenings.slice(-6),
-        avoidBigrams: avoidBigrams.slice(0, 10),
-        dayLabel: dateKey,
-      };
-      let generated = await generateSocialCopy(sourcePack);
-      let issues = validateSocialCopy(generated.content, sourcePack.topic);
-      if (issues.length > 0) {
-        generated = await generateSocialCopy(
-          sourcePack,
-          `Fix: ${issues.join('; ')}`,
-        );
-        issues = validateSocialCopy(generated.content, sourcePack.topic);
-      }
-      if (issues.length > 0) {
-        const fallback = await buildFallbackCopy(sourcePack);
-        postContent = fallback.content;
-        hashtags = fallback.hashtags;
-      } else {
-        postContent = generated.content;
-        hashtags = generated.hashtags || [];
-      }
-      let openingLine: string | null = null;
-      if (normalizedPostType.startsWith('educational')) {
-        const weekKey = `${weekStartDate.toISOString().split('T')[0]}|${sourcePack.topic}`;
-        const usedOpenings = openingUsageByTopic.get(weekKey) || [];
-        const preferredIntent =
-          OPENING_INTENTS[usedOpenings.length % OPENING_INTENTS.length];
-        const opening = await generateOpeningVariation(sourcePack, {
-          preferredIntent,
-          avoidOpenings: usedOpenings,
-        });
-        openingLine = opening.line;
-        postContent = applyOpeningVariation(postContent, opening.line);
-      }
+    const group = postsByPlatform.get(post.platform) || [];
+    group.push(post);
+    postsByPlatform.set(post.platform, group);
+  }
 
-      const existingDayPosts = dailyPostsByPlatform.get(dayPlatformKey) || [];
-      const similarityScores = existingDayPosts.map((existing) =>
-        jaccardSimilarity(existing, postContent),
-      );
-      const maxSimilarity =
-        similarityScores.length > 0 ? Math.max(...similarityScores) : 0;
+  // Process platforms in parallel (posts within each platform stay sequential for novelty tracking)
+  const platformResults = await Promise.all(
+    Array.from(postsByPlatform.entries()).map(
+      async ([platform, platformPosts]) => {
+        // Each platform gets its own novelty Maps
+        const localNovelty = new Map<string, string[]>();
+        const localNoveltyOpenings = new Map<string, string[]>();
+        const localDailyBigrams = new Map<string, Set<string>>();
+        const localDailyPosts = new Map<string, string[]>();
+        const localOpeningUsage = new Map<string, string[]>();
+        const localContentByKey = new Map<string, string>();
+        const results: Array<{
+          post: (typeof platformPosts)[number];
+          postContent: string;
+          normalizedPostType: SocialPostType;
+          hour: number;
+          imageUrl: string | null;
+          baseGroupKey: string;
+        }> = [];
 
-      if (maxSimilarity > 0.35) {
-        generated = await generateSocialCopy(
-          sourcePack,
-          'Too similar to other posts today; vary opening structure and avoid repeated bigrams.',
-        );
-        issues = validateSocialCopy(generated.content, sourcePack.topic);
-        if (issues.length > 0) {
-          const fallback = await buildFallbackCopy(sourcePack);
-          postContent = fallback.content;
-          hashtags = fallback.hashtags;
-        } else {
-          postContent = generated.content;
-          hashtags = generated.hashtags || [];
-        }
-        if (openingLine) {
-          postContent = applyOpeningVariation(postContent, openingLine);
-        }
-      }
-
-      if (openingLine) {
-        const weekKey = `${weekStartDate.toISOString().split('T')[0]}|${sourcePack.topic}`;
-        const usedOpenings = openingUsageByTopic.get(weekKey) || [];
-        openingUsageByTopic.set(weekKey, [...usedOpenings, openingLine]);
-      }
-      if (normalizedPostType !== 'video_caption' && hashtags.length > 0) {
-        const tagText = hashtags.join(' ');
-        postContent = `${postContent}\n\n${tagText}`.trim();
-      }
-      postContent = normalizeGeneratedContent(postContent, {
-        topicLabel: post.topic || facet.title,
-      });
-      postContent = applyPlatformFormatting(postContent, post.platform);
-
-      const normalizedForNovelty = normalizeForSimilarity(postContent);
-      const nextTexts = [
-        ...(noveltyByThemePlatform.get(themePlatformKey) || []),
-        normalizedForNovelty,
-      ].slice(-10);
-      noveltyByThemePlatform.set(themePlatformKey, nextTexts);
-
-      const openingPhrase = getOpeningPhrase(postContent);
-      const nextOpenings = [
-        ...(noveltyOpeningsByThemePlatform.get(themePlatformKey) || []),
-        openingPhrase,
-      ].slice(-10);
-      noveltyOpeningsByThemePlatform.set(themePlatformKey, nextOpenings);
-
-      const dayBigrams =
-        dailyBigramsByPlatform.get(dayPlatformKey) || new Set();
-      getBigrams(postContent).forEach((bigram) => dayBigrams.add(bigram));
-      dailyBigramsByPlatform.set(dayPlatformKey, dayBigrams);
-
-      const dayPosts = dailyPostsByPlatform.get(dayPlatformKey) || [];
-      dailyPostsByPlatform.set(dayPlatformKey, [...dayPosts, postContent]);
-    }
-
-    if (!postContentByKey.has(contentKey)) {
-      postContentByKey.set(contentKey, postContent);
-    }
-    // Get optimal hour for this platform
-    const hours = platformOptimalHours[post.platform] || [12];
-    const getScheduledHour = () => {
-      const fallback = hours[0] || 12;
-      if (normalizedPostType === 'educational_intro') {
-        return hours[0] ?? fallback;
-      }
-      if (normalizedPostType === 'educational_deep_1') {
-        return hours[1] ?? hours[0] ?? fallback;
-      }
-      if (normalizedPostType === 'educational_deep_2') {
-        return hours[2] ?? hours[1] ?? hours[0] ?? fallback;
-      }
-      if (normalizedPostType === 'educational_deep_3') {
-        return hours[3] ?? hours[2] ?? hours[1] ?? hours[0] ?? fallback;
-      }
-      if (normalizedPostType === 'question') {
-        return hours[2] ?? hours[1] ?? hours[0] ?? fallback;
-      }
-      if (normalizedPostType === 'persona') {
-        return hours[3] ?? hours[2] ?? hours[1] ?? hours[0] ?? fallback;
-      }
-      if (
-        normalizedPostType === 'closing_ritual' ||
-        normalizedPostType === 'closing_statement'
-      ) {
-        return hours[3] ?? 20;
-      }
-      return fallback;
-    };
-    const hour = getScheduledHour();
-
-    // Set the time
-    const scheduledDate = new Date(post.scheduledDate);
-    scheduledDate.setHours(hour, 0, 0, 0);
-
-    // Generate image URL for platforms that support images
-    const platformsWithImages = ['pinterest'];
-    let imageUrl: string | null = null;
-
-    if (platformsWithImages.includes(post.platform)) {
-      try {
-        if (normalizedPostType === 'closing_ritual') {
-          const { getPlatformImageFormat } =
-            await import('@/lib/social/educational-images');
-          const platformFormat = getPlatformImageFormat(post.platform);
-          const quoteText =
-            closingRitualQuote?.text ||
-            'The cosmos is within us, we are made of star-stuff.';
-          const author = closingRitualQuote?.author || 'Carl Sagan';
-          const params = new URLSearchParams({ text: quoteText });
-          if (author) params.set('author', author);
-          params.set('format', platformFormat);
-          imageUrl = `${baseUrl}/api/og/social-quote?${params.toString()}`;
-        } else {
-          const { getThematicImageUrl } =
-            await import('@/lib/social/educational-images');
-          let partLabel: string | undefined;
-          if (
-            normalizedPostType.startsWith('educational') &&
-            post.topic !== 'closing ritual'
-          ) {
-            const totalParts =
-              Number.isFinite(post.totalParts) && post.totalParts
-                ? post.totalParts
-                : 7;
-            const rawOffset =
-              Number.isFinite(post.partNumber) && post.partNumber
-                ? post.partNumber - 1
-                : Number.isFinite(post.dayOffset) && post.dayOffset >= 0
-                  ? post.dayOffset
-                  : Math.max(
-                      0,
-                      Math.floor(
-                        (scheduledDate.getTime() - weekStartDate.getTime()) /
-                          (1000 * 60 * 60 * 24),
-                      ),
-                    );
-            partLabel = `Part ${rawOffset + 1} of ${totalParts}`;
-          }
-          imageUrl = getThematicImageUrl(
-            post.category,
+        for (const post of platformPosts) {
+          const dateKey = post.scheduledDate.toISOString().split('T')[0];
+          const contentKey = `${dateKey}|${post.topic}`;
+          const baseGroupKey = buildGroupKey(
+            dateKey,
+            post.postType,
             post.topic,
-            baseUrl,
-            post.platform,
-            post.slug,
-            partLabel || undefined,
+            post.themeName,
           );
+          const facet = post.topic ? facetByTopic.get(post.topic) : null;
+          const theme = themeByName.get(post.themeName) || currentTheme;
+          const normalizedPostType: SocialPostType =
+            post.postType === 'video'
+              ? 'video_caption'
+              : (post.postType as SocialPostType);
+          let postContent = post.content;
+          let hashtags: string[] = [];
+          const isPreGenerated =
+            post.postType === 'threads_question' ||
+            post.postType === 'threads_beta_cta';
+          if (facet && theme && !isPreGenerated) {
+            const sourcePack = buildSourcePack({
+              topic: post.topic || facet.title,
+              theme,
+              platform: post.platform,
+              postType: normalizedPostType,
+              facet,
+            });
+            const themePlatformKey = `${post.platform}|${theme.name}`;
+            const dayPlatformKey = `${dateKey}|${post.platform}`;
+            const recentTexts = localNovelty.get(themePlatformKey) || [];
+            const recentOpenings =
+              localNoveltyOpenings.get(themePlatformKey) || [];
+            const avoidBigrams = Array.from(
+              localDailyBigrams.get(dayPlatformKey) || [],
+            );
+            sourcePack.noveltyContext = {
+              recentTexts: recentTexts.slice(-6),
+              recentOpenings: recentOpenings.slice(-6),
+              avoidBigrams: avoidBigrams.slice(0, 10),
+              dayLabel: dateKey,
+            };
+            let generated = await generateSocialCopy(sourcePack);
+            let issues = validateSocialCopy(
+              generated.content,
+              sourcePack.topic,
+            );
+            if (issues.length > 0) {
+              generated = await generateSocialCopy(
+                sourcePack,
+                `Fix: ${issues.join('; ')}`,
+              );
+              issues = validateSocialCopy(generated.content, sourcePack.topic);
+            }
+            if (issues.length > 0) {
+              const fallback = await buildFallbackCopy(sourcePack);
+              postContent = fallback.content;
+              hashtags = fallback.hashtags;
+            } else {
+              postContent = generated.content;
+              hashtags = generated.hashtags || [];
+            }
+            let openingLine: string | null = null;
+            if (normalizedPostType.startsWith('educational')) {
+              const weekKey = `${weekStartDate.toISOString().split('T')[0]}|${sourcePack.topic}`;
+              const usedOpenings = localOpeningUsage.get(weekKey) || [];
+              const preferredIntent =
+                OPENING_INTENTS[usedOpenings.length % OPENING_INTENTS.length];
+              const opening = await generateOpeningVariation(sourcePack, {
+                preferredIntent,
+                avoidOpenings: usedOpenings,
+              });
+              openingLine = opening.line;
+              postContent = applyOpeningVariation(postContent, opening.line);
+            }
+
+            const existingDayPosts = localDailyPosts.get(dayPlatformKey) || [];
+            const similarityScores = existingDayPosts.map((existing) =>
+              jaccardSimilarity(existing, postContent),
+            );
+            const maxSimilarity =
+              similarityScores.length > 0 ? Math.max(...similarityScores) : 0;
+
+            if (maxSimilarity > 0.35) {
+              generated = await generateSocialCopy(
+                sourcePack,
+                'Too similar to other posts today; vary opening structure and avoid repeated bigrams.',
+              );
+              issues = validateSocialCopy(generated.content, sourcePack.topic);
+              if (issues.length > 0) {
+                const fallback = await buildFallbackCopy(sourcePack);
+                postContent = fallback.content;
+                hashtags = fallback.hashtags;
+              } else {
+                postContent = generated.content;
+                hashtags = generated.hashtags || [];
+              }
+              if (openingLine) {
+                postContent = applyOpeningVariation(postContent, openingLine);
+              }
+            }
+
+            if (openingLine) {
+              const weekKey = `${weekStartDate.toISOString().split('T')[0]}|${sourcePack.topic}`;
+              const usedOpenings = localOpeningUsage.get(weekKey) || [];
+              localOpeningUsage.set(weekKey, [...usedOpenings, openingLine]);
+            }
+            if (normalizedPostType !== 'video_caption' && hashtags.length > 0) {
+              const tagText = hashtags.join(' ');
+              postContent = `${postContent}\n\n${tagText}`.trim();
+            }
+            postContent = normalizeGeneratedContent(postContent, {
+              topicLabel: post.topic || facet.title,
+            });
+            postContent = applyPlatformFormatting(postContent, post.platform);
+
+            const normalizedForNovelty = normalizeForSimilarity(postContent);
+            const nextTexts = [
+              ...(localNovelty.get(themePlatformKey) || []),
+              normalizedForNovelty,
+            ].slice(-10);
+            localNovelty.set(themePlatformKey, nextTexts);
+
+            const openingPhrase = getOpeningPhrase(postContent);
+            const nextOpenings = [
+              ...(localNoveltyOpenings.get(themePlatformKey) || []),
+              openingPhrase,
+            ].slice(-10);
+            localNoveltyOpenings.set(themePlatformKey, nextOpenings);
+
+            const dayBigrams =
+              localDailyBigrams.get(dayPlatformKey) || new Set();
+            getBigrams(postContent).forEach((bigram) => dayBigrams.add(bigram));
+            localDailyBigrams.set(dayPlatformKey, dayBigrams);
+
+            const dayPosts = localDailyPosts.get(dayPlatformKey) || [];
+            localDailyPosts.set(dayPlatformKey, [...dayPosts, postContent]);
+          }
+
+          if (!localContentByKey.has(contentKey)) {
+            localContentByKey.set(contentKey, postContent);
+          }
+
+          // Get optimal hour for this platform
+          const hours = platformOptimalHours[post.platform] || [12];
+          const getScheduledHour = () => {
+            const fallback = hours[0] || 12;
+            if (normalizedPostType === 'educational_intro') {
+              return hours[0] ?? fallback;
+            }
+            if (normalizedPostType === 'educational_deep_1') {
+              return hours[1] ?? hours[0] ?? fallback;
+            }
+            if (normalizedPostType === 'educational_deep_2') {
+              return hours[2] ?? hours[1] ?? hours[0] ?? fallback;
+            }
+            if (normalizedPostType === 'educational_deep_3') {
+              return hours[3] ?? hours[2] ?? hours[1] ?? hours[0] ?? fallback;
+            }
+            if (normalizedPostType === 'question') {
+              return hours[2] ?? hours[1] ?? hours[0] ?? fallback;
+            }
+            if (normalizedPostType === 'persona') {
+              return hours[3] ?? hours[2] ?? hours[1] ?? hours[0] ?? fallback;
+            }
+            if (
+              normalizedPostType === 'closing_ritual' ||
+              normalizedPostType === 'closing_statement'
+            ) {
+              return hours[3] ?? 20;
+            }
+            return fallback;
+          };
+          const hour = getScheduledHour();
+
+          // Set the time
+          const scheduledDate = new Date(post.scheduledDate);
+          scheduledDate.setHours(hour, 0, 0, 0);
+
+          // Generate image URL for platforms that support images
+          const platformsWithImages = ['pinterest'];
+          let imageUrl: string | null = null;
+
+          if (platformsWithImages.includes(post.platform)) {
+            try {
+              if (normalizedPostType === 'closing_ritual') {
+                const { getPlatformImageFormat } =
+                  await import('@/lib/social/educational-images');
+                const platformFormat = getPlatformImageFormat(post.platform);
+                const quoteText =
+                  closingRitualQuote?.text ||
+                  'The cosmos is within us, we are made of star-stuff.';
+                const author = closingRitualQuote?.author || 'Carl Sagan';
+                const params = new URLSearchParams({ text: quoteText });
+                if (author) params.set('author', author);
+                params.set('format', platformFormat);
+                imageUrl = `${baseUrl}/api/og/social-quote?${params.toString()}`;
+              } else {
+                const { getThematicImageUrl } =
+                  await import('@/lib/social/educational-images');
+                let partLabel: string | undefined;
+                if (
+                  normalizedPostType.startsWith('educational') &&
+                  post.topic !== 'closing ritual'
+                ) {
+                  const totalParts =
+                    Number.isFinite(post.totalParts) && post.totalParts
+                      ? post.totalParts
+                      : 7;
+                  const rawOffset =
+                    Number.isFinite(post.partNumber) && post.partNumber
+                      ? post.partNumber - 1
+                      : Number.isFinite(post.dayOffset) && post.dayOffset >= 0
+                        ? post.dayOffset
+                        : Math.max(
+                            0,
+                            Math.floor(
+                              (scheduledDate.getTime() -
+                                weekStartDate.getTime()) /
+                                (1000 * 60 * 60 * 24),
+                            ),
+                          );
+                  partLabel = `Part ${rawOffset + 1} of ${totalParts}`;
+                }
+                imageUrl = getThematicImageUrl(
+                  post.category,
+                  post.topic,
+                  baseUrl,
+                  post.platform,
+                  post.slug,
+                  partLabel || undefined,
+                );
+              }
+            } catch (error) {
+              console.warn('Failed to generate thematic image:', error);
+            }
+          }
+
+          results.push({
+            post,
+            postContent,
+            normalizedPostType,
+            hour,
+            imageUrl,
+            baseGroupKey,
+          });
         }
-      } catch (error) {
-        console.warn('Failed to generate thematic image:', error);
+
+        return { localContentByKey, results };
+      },
+    ),
+  );
+
+  // Flatten results and save to DB sequentially (preserves insert order)
+  for (const {
+    localContentByKey,
+    results: platformResultSet,
+  } of platformResults) {
+    // Merge content keys into shared map for video caption generation
+    for (const [key, value] of localContentByKey) {
+      if (!postContentByKey.has(key)) {
+        postContentByKey.set(key, value);
       }
     }
 
-    try {
-      const result = await sql`
-        INSERT INTO social_posts (
-          content, platform, post_type, topic, status, image_url, scheduled_date,
-          week_theme, week_start, quote_id, quote_text, quote_author,
-          source_type, source_id, source_title, base_group_key, created_at
-        )
-        VALUES (
-          ${postContent},
-          ${post.platform},
-          ${post.postType},
-          ${post.topic},
-          'pending',
-          ${imageUrl},
-          ${scheduledDate.toISOString()},
-          ${post.themeName},
-          ${weekStartDate.toISOString().split('T')[0]},
-          ${post.postType === 'closing_ritual' ? closingRitualQuote?.id || null : null},
-          ${post.postType === 'closing_ritual' ? closingRitualQuote?.text || null : null},
-          ${post.postType === 'closing_ritual' ? closingRitualQuote?.author || null : null},
-          ${post.sourceType || null},
-          ${post.sourceId || null},
-          ${post.sourceTitle || null},
-          ${baseGroupKey},
-          NOW()
-        )
-        RETURNING id
-      `;
-      savedPostIds.push(result.rows[0].id);
+    for (const {
+      post,
+      postContent,
+      normalizedPostType,
+      hour,
+      imageUrl,
+      baseGroupKey,
+    } of platformResultSet) {
+      const scheduledDate = new Date(post.scheduledDate);
+      scheduledDate.setHours(hour, 0, 0, 0);
 
-      const dayOfWeek = scheduledDate.getDay();
-      const dayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      try {
+        const result = await sql`
+          INSERT INTO social_posts (
+            content, platform, post_type, topic, status, image_url, scheduled_date,
+            week_theme, week_start, quote_id, quote_text, quote_author,
+            source_type, source_id, source_title, base_group_key, created_at
+          )
+          VALUES (
+            ${postContent},
+            ${post.platform},
+            ${post.postType},
+            ${post.topic},
+            'pending',
+            ${imageUrl},
+            ${scheduledDate.toISOString()},
+            ${post.themeName},
+            ${weekStartDate.toISOString().split('T')[0]},
+            ${post.postType === 'closing_ritual' ? closingRitualQuote?.id || null : null},
+            ${post.postType === 'closing_ritual' ? closingRitualQuote?.text || null : null},
+            ${post.postType === 'closing_ritual' ? closingRitualQuote?.author || null : null},
+            ${post.sourceType || null},
+            ${post.sourceId || null},
+            ${post.sourceTitle || null},
+            ${baseGroupKey},
+            NOW()
+          )
+          RETURNING id
+        `;
+        savedPostIds.push(result.rows[0].id);
 
-      allGeneratedPosts.push({
-        content: postContent,
-        platform: post.platform,
-        postType: post.postType,
-        topic: post.topic,
-        day: [
-          'Sunday',
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-          'Friday',
-          'Saturday',
-        ][dayOfWeek],
-        dayOffset,
-        hour,
-      });
-    } catch (dbError) {
-      console.error('Error saving thematic post to database:', dbError);
+        const dayOfWeek = scheduledDate.getDay();
+        const dayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+        allGeneratedPosts.push({
+          content: postContent,
+          platform: post.platform,
+          postType: post.postType,
+          topic: post.topic,
+          day: [
+            'Sunday',
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+          ][dayOfWeek],
+          dayOffset,
+          hour,
+        });
+      } catch (dbError) {
+        console.error('Error saving thematic post to database:', dbError);
+      }
     }
   }
 
@@ -1510,7 +1635,7 @@ async function generateThematicWeeklyPosts(
 
   return NextResponse.json({
     success: true,
-    message: `Generated ${savedPostIds.length} thematic posts for the week`,
+    message: `Generated ${allGeneratedPosts.length} thematic posts for the week (${savedPostIds.length} saved)`,
     mode: 'thematic',
     theme: currentTheme.name,
     weekRange: `${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()}`,
