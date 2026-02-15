@@ -13,6 +13,12 @@ export const VOICE_MAP: Record<string, string> = {
 
 export const DEFAULT_KOKORO_VOICE = 'af_heart';
 
+// Allow-list of valid Kokoro voice IDs to prevent SSRF via arbitrary URLs
+const ALLOWED_VOICE_IDS = new Set([
+  ...Object.values(VOICE_MAP),
+  DEFAULT_KOKORO_VOICE,
+]);
+
 const VOICE_BASE_URL =
   'https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main/voices';
 
@@ -20,15 +26,25 @@ const VOICE_BASE_URL =
 const voiceCache = new Map<string, Float32Array>();
 
 /**
+ * Validate that a voice ID is in the allow-list. Returns the ID if valid,
+ * otherwise falls back to DEFAULT_KOKORO_VOICE.
+ */
+function validateVoiceId(voiceId: string): string {
+  if (ALLOWED_VOICE_IDS.has(voiceId)) return voiceId;
+  return DEFAULT_KOKORO_VOICE;
+}
+
+/**
  * Fetch a voice embedding from HuggingFace and cache in memory.
  * Bypasses kokoro-js's broken local file resolution in bundled environments.
+ * voiceId MUST be validated via validateVoiceId() before calling this.
  */
 async function loadVoice(voiceId: string): Promise<Float32Array> {
   const cached = voiceCache.get(voiceId);
   if (cached) return cached;
 
   const url = `${VOICE_BASE_URL}/${voiceId}.bin`;
-  console.log(`📥 Downloading voice: ${voiceId} from HuggingFace...`);
+  console.log(`Downloading voice: ${voiceId} from HuggingFace...`);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to download voice ${voiceId}: ${response.status}`);
@@ -36,7 +52,7 @@ async function loadVoice(voiceId: string): Promise<Float32Array> {
   const buffer = await response.arrayBuffer();
   const voice = new Float32Array(buffer);
   voiceCache.set(voiceId, voice);
-  console.log(`✅ Voice ${voiceId} cached (${voice.length} floats)`);
+  console.log(`Voice ${voiceId} cached (${voice.length} floats)`);
   return voice;
 }
 
@@ -142,7 +158,7 @@ export class KokoroTTSProvider implements TTSProvider {
       .replace(/x/g, 'k')
       .replace(/ɬ/g, 'l')
       .replace(/(?<=[a-zɹː])(?=hˈʌndɹɪd)/g, ' ')
-      .replace(/ z(?=[;:,.!?¡¿—…"«»"" ]|$)/g, 'z');
+      .replace(/ z(?=[;:,.!?¡¿—…"«»" ]|$)/g, 'z');
     if (langCode === 'en-us') {
       ipa = ipa.replace(/(?<=nˈaɪn)ti(?!ː)/g, 'di');
     }
@@ -173,22 +189,23 @@ export class KokoroTTSProvider implements TTSProvider {
   ): Promise<ArrayBuffer> {
     const tts = await this.getTTS();
     const requestedVoice = options.voiceName || 'shimmer';
-    const voice = VOICE_MAP[requestedVoice] || requestedVoice;
+    const voice = validateVoiceId(
+      VOICE_MAP[requestedVoice] || DEFAULT_KOKORO_VOICE,
+    );
 
     const processed = preprocessTextForTTS(text);
 
     // Split long text into chunks for safety
     if (processed.length > 4096) {
-      console.log(
-        `📝 Text is ${processed.length} characters, splitting into chunks...`,
-      );
       const chunks = splitTextIntoChunks(processed, 3500);
-      console.log(`📦 Split into ${chunks.length} chunks`);
+      console.log(
+        `Kokoro: ${processed.length} chars, split into ${chunks.length} chunks`,
+      );
 
       const wavBuffers: ArrayBuffer[] = [];
       for (let i = 0; i < chunks.length; i++) {
         console.log(
-          `🎙️ Generating Kokoro chunk ${i + 1}/${chunks.length} (${chunks[i].length} chars)...`,
+          `Kokoro chunk ${i + 1}/${chunks.length} (${chunks[i].length} chars)`,
         );
         const result = await this.generateWithVoice(tts, chunks[i], voice);
         wavBuffers.push(pcmToWav(result.audio, result.sampling_rate));
@@ -197,7 +214,7 @@ export class KokoroTTSProvider implements TTSProvider {
       return concatenateWavBuffers(wavBuffers);
     }
 
-    console.log(`🎙️ Generating Kokoro voiceover with voice: ${voice}`);
+    console.log(`Kokoro: generating voiceover with voice ${voice}`);
     const result = await this.generateWithVoice(tts, processed, voice);
     return pcmToWav(result.audio, result.sampling_rate);
   }

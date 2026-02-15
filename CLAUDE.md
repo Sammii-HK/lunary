@@ -179,6 +179,27 @@ npx prisma migrate dev --name add_community_votes
 # 3. Prisma auto-generates the client after migrate
 ```
 
+## Security: Allow-List External Resource Access
+
+**Never construct external fetch URLs from user-controlled values.** When fetching from external services (CDNs, APIs, HuggingFace, etc.) using an ID or path from user input, always validate against an allow-list of known-good values first. CodeQL flags this as `js/request-forgery`.
+
+```tsx
+// BAD - SSRF: user-controlled value becomes part of URL
+const voice = options.voiceName || fallback;
+fetch(`${CDN_BASE}/${voice}.bin`); // voice could be "../../secrets"
+
+// GOOD - Validate against allow-list, fall back to safe default
+const ALLOWED_IDS = new Set(['id_a', 'id_b', 'id_c']);
+const safeId = ALLOWED_IDS.has(voice) ? voice : DEFAULT_ID;
+fetch(`${CDN_BASE}/${safeId}.bin`);
+```
+
+**Rules:**
+
+- Define allow-lists (`Set` or `Record`) for any user-selectable resource identifiers
+- Always fall back to a safe default if the value isn't in the allow-list
+- Never pass raw user input through to URL construction, even indirectly via mapping fallbacks like `MAP[key] || key`
+
 ## Security: SSRF Prevention
 
 **Never use user-provided or dynamic base URLs in fetch requests.**
@@ -222,6 +243,30 @@ const clean = stripHtmlTags(userInput, ''); // tags → removed
 - Use `stripHtmlTags()` from `@/lib/utils` for all HTML tag removal
 - Never write `/<[^>]*>/` or `/<[^>]+>/` patterns against user input
 - When processing untrusted strings, prefer iterative O(n) approaches over regex with unbounded quantifiers
+
+## Security: Log Injection Prevention
+
+**Never log user-controlled values directly.** User input containing newlines can forge log entries. CodeQL flags this as `js/log-injection`.
+
+```tsx
+// BAD - Log injection: user input with \n creates fake log lines
+console.log(`Processing voice: ${userVoice}`);
+
+// GOOD - Only log validated/allow-listed values
+const safeVoice = ALLOWED_VOICES.has(userVoice) ? userVoice : 'default';
+console.log(`Processing voice: ${safeVoice}`);
+
+// GOOD - If you must log arbitrary strings, sanitize first
+const safe = String(value).replace(/[\r\n\x00-\x1F\x7F]/g, '');
+console.log(`Input: ${safe}`);
+```
+
+**Rules:**
+
+- Prefer logging only validated/allow-listed values, not raw user input
+- Never interpolate request body fields, query params, or headers directly into logs
+- If logging user-derived values is necessary, strip control characters (`\r`, `\n`, etc.) first
+- Use numeric properties (`.length`, counts) in logs instead of string content where possible
 
 ## API Routes
 
