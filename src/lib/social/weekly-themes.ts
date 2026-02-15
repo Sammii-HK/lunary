@@ -19,10 +19,10 @@ export type { DailyFacet, SabbatTheme, WeeklyTheme } from './types';
 
 // Domain hashtags for 3-layer system
 export const domainHashtags: Record<ThemeCategory, string> = {
-  zodiac: '#astrology',
+  zodiac: '#zodiacsigns',
   tarot: '#tarot',
   lunar: '#moonphases',
-  planetary: '#astrology',
+  planetary: '#zodiac',
   sabbat: '#wheeloftheyear',
   numerology: '#numerology',
   crystals: '#crystalhealing',
@@ -66,6 +66,39 @@ export const categoryThemes: WeeklyTheme[] = [
 export const sabbatThemes: SabbatTheme[] = withSabbatThreads(
   themes.sabbatThemes as SabbatTheme[],
 );
+
+// ============================================================================
+// DUAL-THEME BLOCK STRUCTURE
+// ============================================================================
+
+/** Categories that rotate in the witchtok slot (Block B: Fri-Sun) */
+export const WITCHTOK_ROTATION_CATEGORIES = [
+  'spells',
+  'tarot',
+  'crystals',
+  'zodiac',
+  'lunar',
+  'planetary',
+];
+
+/**
+ * Select a secondary theme (witchtok category) for Block B (Fri-Sun).
+ * Rotates through witchtok categories week by week.
+ */
+export function selectSecondaryTheme(weekNumber: number): WeeklyTheme {
+  const witchtokCategory =
+    WITCHTOK_ROTATION_CATEGORIES[
+      weekNumber % WITCHTOK_ROTATION_CATEGORIES.length
+    ];
+  const witchtokThemes = categoryThemes.filter(
+    (t) => t.category === witchtokCategory,
+  );
+  if (witchtokThemes.length > 0) {
+    return witchtokThemes[weekNumber % witchtokThemes.length];
+  }
+  // Fallback: pick a different theme from the main pool
+  return categoryThemes[(weekNumber + 1) % categoryThemes.length];
+}
 
 // ============================================================================
 // THEME SELECTION LOGIC
@@ -311,8 +344,8 @@ export function generateHashtags(
   const domain = domainHashtags[theme.category] || '#spirituality';
 
   const categoryHashtags: Record<string, string> = {
-    zodiac: '#astrology',
-    planetary: '#astrology',
+    zodiac: '#zodiacsigns',
+    planetary: '#zodiac',
     lunar: '#moonmagic',
     sabbat: '#wheeloftheyear',
     numerology: '#numerology',
@@ -325,7 +358,7 @@ export function generateHashtags(
   return {
     domain,
     topic: categoryHashtags[theme.category] || '#cosmicwisdom',
-    brand: '#lunary',
+    brand: '',
   };
 }
 
@@ -338,6 +371,7 @@ export function getWeeklyContentPlan(
   currentThemeIndex: number = 0,
   facetOffset: number = 0,
   includeSabbats: boolean = true,
+  secondaryThemeIndex?: number,
 ): Array<{
   date: Date;
   dayName: string;
@@ -357,6 +391,12 @@ export function getWeeklyContentPlan(
     'Sunday',
   ];
 
+  // Dual-theme: secondary theme for Block B (Fri-Sun)
+  const secondaryTheme =
+    secondaryThemeIndex !== undefined
+      ? selectSecondaryTheme(secondaryThemeIndex)
+      : undefined;
+
   // Track used facet titles to prevent duplicates within the same week
   const usedFacetTitles = new Set<string>();
 
@@ -364,17 +404,88 @@ export function getWeeklyContentPlan(
     const date = new Date(weekStartDate);
     date.setDate(weekStartDate.getDate() + i);
 
-    const { theme, facet, isSabbat } = getThemeForDate(
-      date,
-      currentThemeIndex,
-      facetOffset,
-      includeSabbats,
-    );
+    // Block B (Fri-Sun, dayIndex 4-6): use secondary theme if available
+    const isBlockB = i >= 4 && secondaryTheme;
 
-    // Skip duplicate facets (can happen when theme has fewer than 7 facets)
-    const facetKey = `${theme.id}-${facet.title}`;
+    let theme: WeeklyTheme | SabbatTheme;
+    let facet: DailyFacet;
+    let isSabbat: boolean;
+
+    if (isBlockB) {
+      // Check sabbat first
+      if (includeSabbats) {
+        const sabbatInfo = getSabbatForDate(date);
+        if (sabbatInfo) {
+          const { sabbat, daysUntil } = sabbatInfo;
+          const facetIndex = 3 - daysUntil;
+          theme = sabbat;
+          facet = sabbat.leadUpFacets[facetIndex];
+          isSabbat = true;
+
+          const facetKey = `${theme.id}-${facet.title}`;
+          if (!usedFacetTitles.has(facetKey)) {
+            usedFacetTitles.add(facetKey);
+            plan.push({
+              date,
+              dayName: dayNames[i],
+              theme,
+              facet,
+              isSabbat,
+              hashtags: generateHashtags(theme, facet),
+            });
+          }
+          continue;
+        }
+      }
+
+      // Use secondary theme for Block B
+      theme = secondaryTheme;
+      const blockBIndex = i - 4; // 0, 1, 2 for Fri, Sat, Sun
+      const facets =
+        theme.facetPool && theme.facetPool.length > 0
+          ? theme.facetPool
+          : theme.facets;
+      // Pick the first unused facet starting from the expected index
+      facet = facets[blockBIndex % facets.length];
+      const candidateKey = `${theme.id}-${facet.title}`;
+      if (usedFacetTitles.has(candidateKey) && facets.length > 1) {
+        const alt = facets.find(
+          (f) => !usedFacetTitles.has(`${theme.id}-${f.title}`),
+        );
+        if (alt) facet = alt;
+      }
+      isSabbat = false;
+    } else {
+      const result = getThemeForDate(
+        date,
+        currentThemeIndex,
+        facetOffset,
+        includeSabbats,
+      );
+      theme = result.theme;
+      facet = result.facet;
+      isSabbat = result.isSabbat;
+    }
+
+    // Try to avoid duplicate facets — pick an alternative if possible, never skip days
+    let facetKey = `${theme.id}-${facet.title}`;
     if (usedFacetTitles.has(facetKey)) {
-      continue;
+      const pool =
+        'facetPool' in theme && theme.facetPool && theme.facetPool.length > 0
+          ? theme.facetPool
+          : 'facets' in theme
+            ? (theme as WeeklyTheme).facets
+            : 'leadUpFacets' in theme
+              ? (theme as SabbatTheme).leadUpFacets
+              : [];
+      const alt = pool.find(
+        (f) => !usedFacetTitles.has(`${theme.id}-${f.title}`),
+      );
+      if (alt) {
+        facet = alt;
+        facetKey = `${theme.id}-${facet.title}`;
+      }
+      // If no alternative found, allow the duplicate rather than skipping the day
     }
     usedFacetTitles.add(facetKey);
 

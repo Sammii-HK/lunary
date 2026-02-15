@@ -1551,12 +1551,14 @@ export function generateWeekContent(
   videoScript?: VideoScriptContext,
   facetOffset: number = 0,
   includeSabbats: boolean = true,
+  secondaryThemeIndex?: number,
 ): ThematicContent[] {
   const plan = getWeeklyContentPlan(
     weekStartDate,
     currentThemeIndex,
     facetOffset,
     includeSabbats,
+    secondaryThemeIndex,
   );
 
   return plan.map(({ date, theme, facet }) =>
@@ -1646,6 +1648,7 @@ export async function generateThematicPostsForWeek(
   videoScript?: VideoScriptContext,
   facetOffset: number = 0,
   includeSabbats: boolean = true,
+  secondaryThemeIndex?: number,
 ): Promise<ThematicPost[]> {
   const weekContent = generateWeekContent(
     weekStartDate,
@@ -1653,6 +1656,7 @@ export async function generateThematicPostsForWeek(
     videoScript,
     facetOffset,
     includeSabbats,
+    secondaryThemeIndex,
   );
   const posts: ThematicPost[] = [];
   const weekTopics = weekContent.map((entry) => entry.facet.title);
@@ -1719,9 +1723,10 @@ export async function generateThematicPostsForWeek(
   const ctaPlatforms = new Set(['threads']);
 
   // Long-form platforms (educational depth, images)
-  const longFormPlatforms: string[] = [];
+  // Pinterest now gets visual content from the Instagram pipeline instead
+  const longFormPlatforms = ['linkedin'];
   // Short-form platforms (1-2 sentences, optional hashtags)
-  const shortFormPlatforms: string[] = [];
+  const shortFormPlatforms = ['twitter', 'bluesky', 'threads'];
 
   for (const dayContent of weekContent) {
     const sourceInfo = resolveSourceForFacet(
@@ -1871,11 +1876,7 @@ export async function generateThematicPostsForWeek(
           // brand-level posts that must stay topic-agnostic.
           const overrideHashtags =
             override.postType === 'persona'
-              ? {
-                  domain: dayContent.hashtags.brand,
-                  topic: '',
-                  brand: dayContent.hashtags.brand,
-                }
+              ? { domain: '#spirituality', topic: '', brand: '' }
               : dayContent.hashtags;
           const optionalContent = applyPlatformFormatting(
             normalizeGeneratedContent(optionalBase, {
@@ -1900,7 +1901,7 @@ export async function generateThematicPostsForWeek(
             scheduledDate: dayContent.date,
             hashtags:
               override.postType === 'persona'
-                ? dayContent.hashtags.brand
+                ? '#spirituality'
                 : `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
             category: dayContent.theme.category,
             dayOffset,
