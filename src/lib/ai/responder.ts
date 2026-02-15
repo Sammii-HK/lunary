@@ -72,20 +72,12 @@ export const composeAssistantReply = async ({
   // Don't include generic cosmic paragraph - let AI generate personalized response
   const cosmicParagraph = null;
 
-  // Check if OpenAI is configured
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) {
-    throw new Error(
-      'AI service is temporarily unavailable. Please try again later.',
-    );
-  }
-
-  // Call OpenAI for personalized response
+  // Call AI for personalized response
   try {
-    const { OpenAI } = await import('openai');
-    const openai = new OpenAI({ apiKey });
+    const { generateText } = await import('ai');
+    const { getDeepInfraModel } = await import('@/lib/ai/content-generator');
 
-    const messages: Array<{
+    const chatMessages: Array<{
       role: 'system' | 'user' | 'assistant';
       content: string;
     }> = [
@@ -96,13 +88,13 @@ export const composeAssistantReply = async ({
     ];
 
     if (promptSections.memory) {
-      messages.push({
+      chatMessages.push({
         role: 'system',
         content: promptSections.memory,
       });
     }
 
-    messages.push({
+    chatMessages.push({
       role: 'system',
       content: promptSections.context,
     });
@@ -110,7 +102,7 @@ export const composeAssistantReply = async ({
     // Don't include conversation history to avoid repetition - each response should be fresh
     // The current user message is enough context
 
-    messages.push({
+    chatMessages.push({
       role: 'user',
       content: userMessage,
     });
@@ -152,8 +144,8 @@ export const composeAssistantReply = async ({
 
           if (recentMessages.length > 0) {
             // Insert history before the current user message
-            messages.splice(
-              messages.length - 1,
+            chatMessages.splice(
+              chatMessages.length - 1,
               0,
               ...(recentMessages as Array<{
                 role: 'user' | 'assistant';
@@ -200,14 +192,26 @@ export const composeAssistantReply = async ({
       maxTokens = 500; // Medium length for rituals and journal entries
     }
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages,
-      max_tokens: maxTokens,
+    // Separate system messages from conversation messages for AI SDK
+    const systemParts = chatMessages
+      .filter((m) => m.role === 'system')
+      .map((m) => m.content);
+    const conversationMessages = chatMessages
+      .filter((m) => m.role !== 'system')
+      .map((m) => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      }));
+
+    const result = await generateText({
+      model: getDeepInfraModel(),
+      system: systemParts.join('\n\n'),
+      messages: conversationMessages,
+      maxOutputTokens: maxTokens,
       temperature: 0.9,
     });
 
-    const aiResponse = completion.choices[0]?.message?.content || '';
+    const aiResponse = result.text || '';
 
     if (!aiResponse || aiResponse.trim().length === 0) {
       throw new Error(
@@ -229,7 +233,7 @@ export const composeAssistantReply = async ({
       promptSections,
     };
   } catch (error) {
-    console.error('[AI Responder] OpenAI error:', error);
+    console.error('[AI Responder] AI generation error:', error);
     const errorMessage =
       error instanceof Error
         ? error.message

@@ -1,4 +1,4 @@
-import { getOpenAI } from '@/lib/openai-client';
+import { generateContent } from '@/lib/ai/content-generator';
 import {
   CLOSING_PARTICIPATION_INSTRUCTION,
   FACTUAL_GUARDRAIL_INSTRUCTION,
@@ -88,25 +88,15 @@ const QUESTION_FOLLOWUPS = [
 const buildQuestionFollowUp = (seed: number) =>
   QUESTION_FOLLOWUPS[seed % QUESTION_FOLLOWUPS.length];
 
-const callOpenAI = async (prompt: string, retryNote?: string) => {
-  const openai = getOpenAI();
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content:
-          'You write concise Lunary social microcopy in UK English. Return plain text only.',
-      },
-      {
-        role: 'user',
-        content: `${prompt}${retryNote ? `\nFix: ${retryNote}` : ''}`,
-      },
-    ],
+const callAI = async (prompt: string, retryNote?: string) => {
+  return generateContent({
+    systemPrompt:
+      'You write concise Lunary social microcopy in UK English. Return plain text only.',
+    prompt,
     temperature: 0.4,
-    max_tokens: 250,
+    maxTokens: 250,
+    retryNote,
   });
-  return completion.choices[0]?.message?.content?.trim() || '';
 };
 
 const ensureDistinct = async (
@@ -114,17 +104,17 @@ const ensureDistinct = async (
   guides: string[],
   retryHint: string,
 ) => {
-  let text = (await callOpenAI(prompt)).trim();
+  let text = (await callAI(prompt)).trim();
   if (!text) {
     text = (
-      await callOpenAI(
+      await callAI(
         prompt,
         'Please produce one calm, single-paragraph response.',
       )
     ).trim();
   }
   if (isTooSimilar(text, guides)) {
-    text = (await callOpenAI(prompt, retryHint)).trim();
+    text = (await callAI(prompt, retryHint)).trim();
   }
   if (!text) {
     throw new Error('AI did not return usable text');
@@ -299,7 +289,7 @@ Use this sample tone as guidance: "${example}". ${FACTUAL_GUARDRAIL_INSTRUCTION}
 
   let { questionLine, followUp } = normalizeQuestionLines(text);
   if (!isQuestionLine(questionLine)) {
-    text = await callOpenAI(
+    text = await callAI(
       prompt,
       'Line 1 must be a direct question ending with "?". Add a short reply prompt on line 2.',
     );
@@ -352,7 +342,7 @@ Use this tone reference: "${styleGuide}".`;
   );
 
   if (isClosingInvalid(text)) {
-    text = await callOpenAI(
+    text = await callAI(
       prompt,
       'Use exactly 2 lines: a strong reflection, then a specific question ending with "?".',
     );
