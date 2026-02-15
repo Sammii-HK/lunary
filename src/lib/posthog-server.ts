@@ -35,6 +35,7 @@ export interface LLMGenerationEvent {
 }
 
 const MODEL_COSTS: Record<string, { input: number; output: number }> = {
+  'meta-llama/Llama-3.3-70B-Instruct': { input: 0.00023, output: 0.0004 },
   'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
   'gpt-4o': { input: 0.0025, output: 0.01 },
   'gpt-4-turbo': { input: 0.01, output: 0.03 },
@@ -46,7 +47,8 @@ function calculateCost(
   inputTokens: number,
   outputTokens: number,
 ): number {
-  const costs = MODEL_COSTS[model] || MODEL_COSTS['gpt-4o-mini'];
+  const costs =
+    MODEL_COSTS[model] || MODEL_COSTS['meta-llama/Llama-3.3-70B-Instruct'];
   return (
     (inputTokens / 1000) * costs.input + (outputTokens / 1000) * costs.output
   );

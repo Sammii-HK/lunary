@@ -558,8 +558,8 @@ export async function POST(request: NextRequest) {
 
     captureAIGeneration({
       distinctId: user.id,
-      model: 'gpt-4o-mini',
-      provider: 'openai',
+      model: 'meta-llama/Llama-3.3-70B-Instruct',
+      provider: 'deepinfra',
       inputTokens: tokensIn,
       outputTokens: tokensOut,
       latencyMs: Date.now() - aiStartTime,
