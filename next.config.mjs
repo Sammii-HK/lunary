@@ -295,9 +295,6 @@ const nextConfig = {
       'date-fns',
       '@react-email/components',
     ],
-    // Use multiple cores for builds (Turbo plan: 30 vCPUs, 60GB)
-    workerThreads: true,
-    cpus: 4,
   },
 
   // Use on-demand ISR instead of generating all pages at build time
