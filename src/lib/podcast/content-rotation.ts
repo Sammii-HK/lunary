@@ -1,5 +1,4 @@
 import {
-  selectGrimoireTopics,
   extractGrimoireSnippet,
   type GrimoireSnippet,
 } from '@/lib/social/grimoire-content';
@@ -206,42 +205,188 @@ function isPodcastWorthy(entry: GrimoireEntry): boolean {
 }
 
 /**
- * Select podcast topics using deterministic category cycling.
+ * Seasonal/holiday overrides for time-relevant podcast topics.
+ * Each entry maps a date range (month/day) to a preferred category + slug keyword.
+ * Checked in order — first match wins.
+ */
+const SEASONAL_OVERRIDES: {
+  name: string;
+  startMonth: number;
+  startDay: number;
+  endMonth: number;
+  endDay: number;
+  category: PodcastCategory;
+  slugKeyword: string;
+}[] = [
+  // Valentine's Day → Venus
+  {
+    name: "Valentine's Day",
+    startMonth: 2,
+    startDay: 12,
+    endMonth: 2,
+    endDay: 16,
+    category: 'planetary',
+    slugKeyword: 'venus',
+  },
+  // Spring Equinox → Aries / Ostara
+  {
+    name: 'Spring Equinox',
+    startMonth: 3,
+    startDay: 18,
+    endMonth: 3,
+    endDay: 22,
+    category: 'zodiac',
+    slugKeyword: 'aries',
+  },
+  // Summer Solstice → Cancer / Litha
+  {
+    name: 'Summer Solstice',
+    startMonth: 6,
+    startDay: 19,
+    endMonth: 6,
+    endDay: 23,
+    category: 'zodiac',
+    slugKeyword: 'cancer',
+  },
+  // Autumn Equinox → Libra / Mabon
+  {
+    name: 'Autumn Equinox',
+    startMonth: 9,
+    startDay: 20,
+    endMonth: 9,
+    endDay: 24,
+    category: 'zodiac',
+    slugKeyword: 'libra',
+  },
+  // Winter Solstice → Capricorn / Yule
+  {
+    name: 'Winter Solstice',
+    startMonth: 12,
+    startDay: 19,
+    endMonth: 12,
+    endDay: 23,
+    category: 'zodiac',
+    slugKeyword: 'capricorn',
+  },
+  // Halloween / Samhain → Scorpio
+  {
+    name: 'Halloween',
+    startMonth: 10,
+    startDay: 29,
+    endMonth: 11,
+    endDay: 1,
+    category: 'zodiac',
+    slugKeyword: 'scorpio',
+  },
+  // New Year → Numerology (111)
+  {
+    name: 'New Year',
+    startMonth: 12,
+    startDay: 30,
+    endMonth: 1,
+    endDay: 2,
+    category: 'numerology',
+    slugKeyword: '111',
+  },
+  // Mercury Retrograde awareness (approximate common periods)
+  {
+    name: 'Mercury Focus',
+    startMonth: 4,
+    startDay: 1,
+    endMonth: 4,
+    endDay: 5,
+    category: 'planetary',
+    slugKeyword: 'mercury',
+  },
+  // Full Moon focus mid-month fallback → Moon
+  {
+    name: 'Lunar Focus',
+    startMonth: 1,
+    startDay: 13,
+    endMonth: 1,
+    endDay: 15,
+    category: 'planetary',
+    slugKeyword: 'moon',
+  },
+];
+
+function getSeasonalOverride(
+  date: Date,
+): (typeof SEASONAL_OVERRIDES)[number] | null {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  for (const override of SEASONAL_OVERRIDES) {
+    // Handle ranges that cross month boundaries (e.g. Dec 30 - Jan 2)
+    if (override.startMonth > override.endMonth) {
+      if (
+        (month === override.startMonth && day >= override.startDay) ||
+        (month === override.endMonth && day <= override.endDay)
+      ) {
+        return override;
+      }
+    } else if (
+      (month === override.startMonth &&
+        day >= override.startDay &&
+        (month < override.endMonth || day <= override.endDay)) ||
+      (month === override.endMonth &&
+        day <= override.endDay &&
+        month > override.startMonth) ||
+      (month > override.startMonth && month < override.endMonth)
+    ) {
+      return override;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Select podcast topics using deterministic category cycling,
+ * with seasonal/holiday and sabbat overrides for time-relevant content.
  *
- * Episode N picks:
- * 1. Primary category = PODCAST_CATEGORIES[(N-1) % 10]
- * 2. Primary entry = category entries[(N-1) / 10 % entries.length]
- * 3. 1-2 seasonal secondary topics from other categories
- *
- * Sabbat override: if a sabbat is within 7 days, override primary with sabbat topic.
+ * Priority: seasonal holidays → sabbats → deterministic rotation.
  */
 export function selectPodcastTopics(
   episodeNumber: number,
   recentGrimoireSlugs: string[] = [],
 ): GrimoireSnippet[] {
   const allEntries = getAllPodcastEntries();
-
-  // Check for sabbat override (within 7 days)
   const now = new Date();
-  const sabbatCheck = getSabbatForDate(now);
-  // getSabbatForDate uses a 4-day window; extend to 7 days by also checking ahead
-  const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const sabbatCheckAhead = getSabbatForDate(weekAhead);
-  const activeSabbat = sabbatCheck || sabbatCheckAhead;
 
   let primaryCategory: PodcastCategory = PODCAST_CATEGORIES[0];
   let primaryEntry: GrimoireEntry | undefined;
 
-  if (activeSabbat) {
-    // Override with sabbat topic
-    const sabbatEntries = allEntries.get('sabbats') || [];
-    const sabbatName = activeSabbat.sabbat.name.toLowerCase();
-    const sabbatEntry =
-      sabbatEntries.find((e) => e.slug.includes(sabbatName)) ||
-      sabbatEntries[0];
-    if (sabbatEntry) {
-      primaryCategory = 'sabbats';
-      primaryEntry = sabbatEntry;
+  // 1. Check for seasonal/holiday override
+  const seasonalOverride = getSeasonalOverride(now);
+  if (seasonalOverride) {
+    const categoryEntries = allEntries.get(seasonalOverride.category) || [];
+    const match = categoryEntries.find((e) =>
+      e.slug.includes(seasonalOverride.slugKeyword),
+    );
+    if (match && !recentGrimoireSlugs.includes(match.slug)) {
+      primaryCategory = seasonalOverride.category;
+      primaryEntry = match;
+    }
+  }
+
+  // 2. Check for sabbat override (within 7 days)
+  if (!primaryEntry) {
+    const sabbatCheck = getSabbatForDate(now);
+    const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const sabbatCheckAhead = getSabbatForDate(weekAhead);
+    const activeSabbat = sabbatCheck || sabbatCheckAhead;
+
+    if (activeSabbat) {
+      const sabbatEntries = allEntries.get('sabbats') || [];
+      const sabbatName = activeSabbat.sabbat.name.toLowerCase();
+      const sabbatEntry =
+        sabbatEntries.find((e) => e.slug.includes(sabbatName)) ||
+        sabbatEntries[0];
+      if (sabbatEntry) {
+        primaryCategory = 'sabbats';
+        primaryEntry = sabbatEntry;
+      }
     }
   }
 
@@ -291,16 +436,7 @@ export function selectPodcastTopics(
 
   const primarySnippet = extractGrimoireSnippet(primaryEntry);
 
-  // Pick 1-2 seasonal secondary topics from OTHER categories
-  const seasonalTopics = selectGrimoireTopics('seasonal', 3)
-    .filter(
-      (t) =>
-        t.slug !== primaryEntry.slug && !recentGrimoireSlugs.includes(t.slug),
-    )
-    .slice(0, 2)
-    .map(extractGrimoireSnippet);
-
-  return [primarySnippet, ...seasonalTopics].slice(0, 3);
+  return [primarySnippet];
 }
 
 /**
@@ -308,14 +444,7 @@ export function selectPodcastTopics(
  */
 export function buildEpisodeTitle(topics: GrimoireSnippet[]): string {
   if (topics.length === 0) return 'The Grimoire';
-
-  const primary = topics[0];
-  if (topics.length === 1) {
-    return `The Grimoire: ${primary.title}`;
-  }
-
-  const secondary = topics[1];
-  return `The Grimoire: ${primary.title} & ${secondary.title}`;
+  return `The Grimoire: ${topics[0].title}`;
 }
 
 /**

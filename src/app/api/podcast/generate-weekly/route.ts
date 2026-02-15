@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { put } from '@vercel/blob';
 import { logActivity } from '@/lib/admin-activity';
 import {
   selectPodcastTopics,
@@ -52,21 +51,22 @@ export async function POST(request: NextRequest) {
     });
     const episodeNumber = (latestEpisode?.episodeNumber ?? 0) + 1;
 
-    // Check for duplicate week (prevent re-generation)
+    // Check weekly limit (max 3 episodes per week)
     const weekNum = getISOWeek(weekStart);
     const yearNum = getISOWeekYear(weekStart);
-    const existing = await prisma.podcastEpisode.findFirst({
+    const existingThisWeek = await prisma.podcastEpisode.findMany({
       where: { weekNumber: weekNum, year: yearNum },
+      select: { id: true, slug: true, title: true, grimoireSlugs: true },
     });
-    if (existing) {
+    if (existingThisWeek.length >= 3) {
       return NextResponse.json({
         success: true,
-        message: 'Episode already exists for this week',
-        episode: {
-          id: existing.id,
-          slug: existing.slug,
-          title: existing.title,
-        },
+        message: 'Weekly limit reached (3 episodes)',
+        episodes: existingThisWeek.map((ep) => ({
+          id: ep.id,
+          slug: ep.slug,
+          title: ep.title,
+        })),
       });
     }
 
@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         content,
         title,
+        source: 'grimoire',
         format: 'conversation',
         duration: '5min',
         tone: 'mystical',
@@ -148,9 +149,10 @@ export async function POST(request: NextRequest) {
       const statusData = await statusResponse.json();
 
       if (statusData.status === 'complete') {
-        podifyResult = statusData.result;
+        podifyResult = statusData.result || statusData;
         console.log(
-          `✅ Podify job complete: ${podifyResult.durationSeconds}s audio`,
+          `✅ Podify job complete:`,
+          JSON.stringify(podifyResult, null, 2),
         );
         break;
       }
@@ -173,25 +175,13 @@ export async function POST(request: NextRequest) {
       throw new Error('Podify generation timed out after 5 minutes');
     }
 
-    // 5. Download audio & upload to Vercel Blob
-    const audioResponse = await fetch(
-      `${podifyUrl}/api/podcast/${jobId}/audio`,
-      { headers: podifyHeaders() },
-    );
-    if (!audioResponse.ok) {
-      throw new Error(`Failed to download audio: ${audioResponse.status}`);
+    // 5. Use audio URL from Podify result (already stored in their Blob)
+    const audioUrl = podifyResult.audioUrl || podifyResult.blobUrl;
+    if (!audioUrl) {
+      throw new Error('Podify result missing audio URL');
     }
 
-    const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
-    const blobKey = `podcast/episode-${episodeNumber}.mp3`;
-
-    const { url: audioUrl } = await put(blobKey, audioBuffer, {
-      access: 'public',
-      addRandomSuffix: false,
-      contentType: 'audio/mpeg',
-    });
-
-    console.log(`✅ Audio uploaded to Blob: ${audioUrl}`);
+    console.log(`✅ Audio ready: ${audioUrl}`);
 
     // 6. Save to DB
     const description = topics

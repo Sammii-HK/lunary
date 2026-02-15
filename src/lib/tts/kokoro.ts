@@ -172,8 +172,8 @@ export class KokoroTTSProvider implements TTSProvider {
     options: TTSOptions = {},
   ): Promise<ArrayBuffer> {
     const tts = await this.getTTS();
-    const voice =
-      VOICE_MAP[options.voiceName || 'shimmer'] || DEFAULT_KOKORO_VOICE;
+    const requestedVoice = options.voiceName || 'shimmer';
+    const voice = VOICE_MAP[requestedVoice] || requestedVoice;
 
     const processed = preprocessTextForTTS(text);
 
