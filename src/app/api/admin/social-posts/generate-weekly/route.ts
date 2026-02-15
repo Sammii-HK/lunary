@@ -1561,76 +1561,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Trim whitespace from API key (common issue with .env files)
-    const apiKey = process.env.OPENAI_API_KEY?.trim();
-    const rawKey = process.env.OPENAI_API_KEY;
-
-    // Check for all OpenAI-related env vars
-    const allOpenAIVars = Object.keys(process.env)
-      .filter((key) => key.toLowerCase().includes('openai'))
-      .map((key) => ({
-        key,
-        exists: !!process.env[key],
-        length: process.env[key]?.length || 0,
-      }));
-
-    // Debug logging (only first 8 chars for security)
-    console.log('🔑 Weekly API Key check:', {
-      exists: !!apiKey,
-      length: apiKey?.length || 0,
-      prefix: apiKey ? `${apiKey.substring(0, 8)}...` : 'missing',
-      startsWithSk: apiKey?.startsWith('sk-') || false,
-      firstChars: apiKey ? apiKey.substring(0, 20) : 'none',
-      originalLength: rawKey?.length || 0,
-      trimmedLength: apiKey?.length || 0,
-      nodeEnv: process.env.NODE_ENV,
-      vercelEnv: process.env.VERCEL_ENV,
-      allOpenAIVars,
-      // Check if raw value exists but is empty/whitespace
-      rawExists: !!rawKey,
-      rawIsEmpty: rawKey === '',
-      rawIsWhitespace: rawKey?.trim() === '',
-    });
-
+    // Check DeepInfra API key
+    const apiKey = process.env.DEEPINFRA_API_KEY?.trim();
     if (!apiKey) {
-      const isProduction =
-        process.env.NODE_ENV === 'production' ||
-        process.env.VERCEL_ENV === 'production';
       return NextResponse.json(
         {
-          error: 'OpenAI API key not configured',
-          hint: isProduction
-            ? 'Set OPENAI_API_KEY in Vercel Dashboard > Settings > Environment Variables > Production. After adding, redeploy the project.'
-            : 'Set OPENAI_API_KEY in your .env.local file and restart your dev server',
-          debug: {
-            nodeEnv: process.env.NODE_ENV,
-            vercelEnv: process.env.VERCEL_ENV,
-            allOpenAIVars,
-            rawKeyExists: !!rawKey,
-            rawKeyLength: rawKey?.length || 0,
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    // Check if it's a placeholder (but allow valid keys that start with sk-)
-    if (
-      apiKey &&
-      !apiKey.startsWith('sk-') &&
-      (apiKey.includes('your-api') ||
-        apiKey.includes('placeholder') ||
-        apiKey.includes('example'))
-    ) {
-      console.error('❌ Invalid API key detected:', {
-        length: apiKey.length,
-        containsPlaceholder: apiKey.includes('your-api'),
-        firstChars: apiKey.substring(0, 30),
-      });
-      return NextResponse.json(
-        {
-          error: 'Invalid API key detected',
-          hint: 'Your OPENAI_API_KEY appears to be a placeholder. Please set a real API key from https://platform.openai.com/account/api-keys',
+          error: 'DeepInfra API key not configured',
+          hint: 'Set DEEPINFRA_API_KEY in your environment variables.',
         },
         { status: 400 },
       );
@@ -1891,12 +1828,9 @@ export async function POST(request: NextRequest) {
 
     const feedbackContext = rejectionContext + improvementContext;
 
-    const { OpenAI } = await import('openai');
-    console.log(
-      '🤖 Creating OpenAI client with key:',
-      apiKey ? `${apiKey.substring(0, 10)}...` : 'missing',
-    );
-    const openai = new OpenAI({ apiKey });
+    const { generateStructuredContent } =
+      await import('@/lib/ai/content-generator');
+    const { z } = await import('zod');
 
     // Available topics for variety
     const topics = [
@@ -2163,38 +2097,29 @@ ${buildScopeGuard(postPlan.topic || '')}
 
 Return JSON: {"posts": ["Post content"]}`;
 
+        const weeklySystemPrompt = `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}\n\nYou are a social media marketing expert for Lunary. Create natural, engaging educational posts. Position Lunary as a library/reference authority. NEVER mention pricing, trials, or "free". NO direct links in content.`;
+
         const requestPost = async (retryNote?: string) => {
-          const retrySuffix = retryNote ? `\nFix: ${retryNote}` : '';
-          return openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: [
-              {
-                role: 'system',
-                content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}\n\nYou are a social media marketing expert for Lunary. Create natural, engaging educational posts. Position Lunary as a library/reference authority. NEVER mention pricing, trials, or "free". NO direct links in content. Return only valid JSON.`,
-              },
-              { role: 'user', content: `${prompt}${retrySuffix}` },
-            ],
-            response_format: { type: 'json_object' },
-            max_tokens: 300,
+          return generateStructuredContent({
+            systemPrompt: weeklySystemPrompt,
+            prompt,
+            schema: z.object({ posts: z.array(z.string()) }),
+            schemaName: 'socialPosts',
+            maxTokens: 300,
             temperature: 0.8,
+            retryNote,
           });
         };
 
-        const completion = await requestPost();
+        const result = await requestPost();
 
-        const result = JSON.parse(
-          completion.choices[0]?.message?.content || '{}',
-        );
-        const posts = result.posts || result.post || [];
+        const posts = result.posts || [];
         postContent = Array.isArray(posts) ? posts[0] : posts;
         if (postContent && hasDeterministicLanguage(postContent)) {
-          const retryCompletion = await requestPost(
+          const retryResult = await requestPost(
             'Remove deterministic claims; use softer language (can, may, tends to, often, influences).',
           );
-          const retryResult = JSON.parse(
-            retryCompletion.choices[0]?.message?.content || '{}',
-          );
-          const retryPosts = retryResult.posts || retryResult.post || [];
+          const retryPosts = retryResult.posts || [];
           postContent = Array.isArray(retryPosts) ? retryPosts[0] : retryPosts;
         }
       }

@@ -62,33 +62,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if OpenAI is configured
-    const apiKey = process.env.OPENAI_API_KEY?.trim();
-    if (!apiKey) {
-      return jsonResponse(
-        {
-          error:
-            'AI service is temporarily unavailable. Please try again later.',
-        },
-        503,
-      );
-    }
+    // Call AI - NO RAG retrieval, minimal tokens
+    const { generateContent } = await import('@/lib/ai/content-generator');
 
-    // Call OpenAI - NO RAG retrieval, minimal tokens
-    const { OpenAI } = await import('openai');
-    const openai = new OpenAI({ apiKey });
-
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: GRIMOIRE_QUICK_PROMPT },
-        { role: 'user', content: body.message },
-      ],
-      max_tokens: 150,
+    const aiResponse = await generateContent({
+      systemPrompt: GRIMOIRE_QUICK_PROMPT,
+      prompt: body.message,
+      maxTokens: 150,
       temperature: 0.7,
     });
-
-    const aiResponse = completion.choices[0]?.message?.content || '';
 
     if (!aiResponse.trim()) {
       return jsonResponse(
