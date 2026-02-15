@@ -510,6 +510,54 @@ async function generateCompatibilityPost(
   };
 }
 
+/**
+ * Generate LinkedIn "Did You Know" image posts for 3 days per week (Mon, Wed, Fri).
+ * Reuses the same DYK content and OG image URLs as the Instagram pipeline.
+ */
+export function generateLinkedInDidYouKnowBatch(
+  weekStartDate: string,
+): IGScheduledPost[] {
+  const posts: IGScheduledPost[] = [];
+  const dykDays = [0, 2, 4]; // Mon, Wed, Fri offsets from week start
+
+  for (const dayOffset of dykDays) {
+    const date = new Date(weekStartDate);
+    date.setDate(date.getDate() + dayOffset);
+    const dateStr = date.toISOString().split('T')[0];
+
+    const content = generateDidYouKnow(dateStr);
+    const params = new URLSearchParams({
+      fact: content.fact,
+      category: content.category,
+      source: content.source,
+      v: '4',
+      t: Date.now().toString(),
+    });
+
+    const { caption, hashtags } = generateCaption('did_you_know', {
+      fact: content.fact,
+      category: content.category,
+    });
+
+    posts.push({
+      type: 'did_you_know',
+      format: 'square',
+      imageUrls: [
+        `${SHARE_BASE_URL}/api/og/instagram/did-you-know?${params.toString()}`,
+      ],
+      caption,
+      hashtags,
+      scheduledTime: `${dateStr}T14:00:00.000Z`,
+      metadata: {
+        category: content.category,
+        slug: content.source,
+      },
+    });
+  }
+
+  return posts;
+}
+
 function buildScheduleTime(dateStr: string, utcHour: number): string {
   const date = new Date(dateStr);
   date.setUTCHours(utcHour, 0, 0, 0);
