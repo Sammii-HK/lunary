@@ -12,8 +12,8 @@ const withBundleAnalyzer =
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { isServer, nextRuntime, dev }) => {
-    // Reduce parallelism to save memory during builds
-    config.parallelism = 1;
+    // Allow webpack to use multiple cores (Turbo plan: 30 vCPUs, 60GB)
+    config.parallelism = 100;
 
     // Exclude Playwright and ffmpeg-static from bundling (server-only, Node.js runtime)
     if (isServer) {
@@ -295,11 +295,9 @@ const nextConfig = {
       'date-fns',
       '@react-email/components',
     ],
-    // Reduce memory usage during builds
-    workerThreads: false,
-    cpus: 1,
-    // Disable memory-intensive caching features during build
-    isrMemoryCacheSize: 0,
+    // Use multiple cores for builds (Turbo plan: 30 vCPUs, 60GB)
+    workerThreads: true,
+    cpus: 4,
   },
 
   // Use on-demand ISR instead of generating all pages at build time
