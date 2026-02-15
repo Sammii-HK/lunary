@@ -6,15 +6,71 @@ import {
   uploadCaptions,
   addVideoToPlaylist,
 } from '@/lib/youtube/client';
-import {
-  renderRemotionVideo,
-  scriptToAudioSegments,
-} from '@/lib/video/remotion-renderer';
 import { buildPodcastYouTubeMetadata } from '@/lib/youtube/metadata';
 import { logActivity } from '@/lib/admin-activity';
+import { getFfmpegPath } from '@/lib/video/compose-video';
+import ffmpeg from 'fluent-ffmpeg';
+import { writeFile, readFile, mkdtemp, rm } from 'fs/promises';
+import { join } from 'path';
+import { tmpdir } from 'os';
 
 export const runtime = 'nodejs';
-export const maxDuration = 300; // 5 minutes — Remotion rendering takes time
+export const maxDuration = 300;
+
+const COVER_IMAGE_URL =
+  process.env.NEXT_PUBLIC_APP_URL + '/api/og/podcast-cover';
+
+/**
+ * Compose a simple podcast video: static cover image + audio → MP4
+ * This is the standard approach for podcast YouTube uploads.
+ */
+async function composePodcastVideo(
+  coverImage: Buffer,
+  audioBuffer: Buffer,
+): Promise<Buffer> {
+  await getFfmpegPath();
+
+  const tempDir = await mkdtemp(join(tmpdir(), 'podcast-video-'));
+  const imagePath = join(tempDir, 'cover.png');
+  const audioPath = join(tempDir, 'audio.mp3');
+  const outputPath = join(tempDir, 'output.mp4');
+
+  try {
+    await writeFile(imagePath, coverImage);
+    await writeFile(audioPath, audioBuffer);
+
+    await new Promise<void>((resolve, reject) => {
+      ffmpeg()
+        .input(imagePath)
+        .inputOptions(['-loop', '1'])
+        .input(audioPath)
+        .outputOptions([
+          '-c:v',
+          'libx264',
+          '-tune',
+          'stillimage',
+          '-c:a',
+          'aac',
+          '-b:a',
+          '192k',
+          '-pix_fmt',
+          'yuv420p',
+          '-shortest',
+          // Scale cover to 1920x1080 (YouTube landscape), pad if needed
+          '-vf',
+          'scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black',
+        ])
+        .output(outputPath)
+        .on('end', () => resolve())
+        .on('error', (err) => reject(err))
+        .run();
+    });
+
+    return await readFile(outputPath);
+  } finally {
+    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
 
 interface PodcastUploadRequest {
   episodeId?: string;
@@ -61,82 +117,35 @@ export async function POST(request: NextRequest) {
       `🎬 Starting YouTube pipeline for Episode ${episode.episodeNumber}: ${episode.title}`,
     );
 
-    // Build full script text from transcript
-    const transcript = episode.transcript as
-      | { speaker: string; text: string }[]
-      | null;
+    // 1. Fetch podcast cover image and audio in parallel
+    console.log(`🖼️ Fetching cover image and audio...`);
+    const [coverResponse, audioResponse] = await Promise.all([
+      fetch(COVER_IMAGE_URL),
+      fetch(episode.audioUrl),
+    ]);
 
-    if (!transcript || transcript.length === 0) {
-      return NextResponse.json(
-        {
-          error: `Episode ${episode.episodeNumber} has no transcript — cannot render video`,
-        },
-        { status: 400 },
-      );
+    if (!coverResponse.ok) {
+      throw new Error(`Failed to fetch podcast cover: ${coverResponse.status}`);
+    }
+    if (!audioResponse.ok) {
+      throw new Error(`Failed to fetch podcast audio: ${audioResponse.status}`);
     }
 
-    const scriptText = transcript
-      .map(
-        (line) => `${line.speaker === 'HOST_A' ? 'Luna' : 'Sol'}: ${line.text}`,
-      )
-      .join('\n');
-
-    // Convert to audio segments for Remotion subtitles
-    const segments = scriptToAudioSegments(
-      scriptText,
-      episode.durationSecs,
-      2.5,
-    );
-
-    // Build topic images from grimoire slugs for LongFormVideo topic cards
-    const images = episode.grimoireSlugs.map((slug, i) => {
-      const totalSlugs = episode.grimoireSlugs.length;
-      const segmentDuration = episode.durationSecs / Math.max(totalSlugs, 1);
-      return {
-        url: `https://lunary.app/api/og/grimoire/${slug}`,
-        startTime: i * segmentDuration,
-        endTime: (i + 1) * segmentDuration,
-        topic: slug
-          .split('/')
-          .pop()!
-          .replace(/-/g, ' ')
-          .replace(/\b\w/g, (c) => c.toUpperCase()),
-      };
-    });
-
-    // Render video via Remotion
-    console.log(
-      `🎥 Rendering LongFormVideo (${episode.durationSecs}s) via Remotion...`,
-    );
-    const videoBuffer = await renderRemotionVideo({
-      format: 'LongFormVideo',
-      outputPath: '',
-      audioUrl: episode.audioUrl,
-      segments,
-      durationSeconds: episode.durationSecs + 2,
-      title: episode.title,
-      subtitle: `Episode ${episode.episodeNumber}`,
-      images: images.length > 0 ? images : undefined,
-      highlightTerms: episode.grimoireSlugs.map((s) =>
-        s
-          .split('/')
-          .pop()!
-          .replace(/-/g, ' ')
-          .replace(/\b\w/g, (c) => c.toUpperCase()),
-      ),
-      lowerThirdInfo: {
-        title: 'The Grimoire by Lunary',
-        subtitle: 'Weekly Astrology Podcast',
-      },
-      seed: `podcast-ep-${episode.episodeNumber}`,
-      symbolContent: scriptText.slice(0, 500),
-    });
+    const coverImage = Buffer.from(await coverResponse.arrayBuffer());
+    const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
 
     console.log(
-      `✅ Video rendered: ${(videoBuffer.length / 1024 / 1024).toFixed(1)} MB`,
+      `✅ Assets ready: cover ${(coverImage.length / 1024).toFixed(0)}KB, audio ${(audioBuffer.length / 1024 / 1024).toFixed(1)}MB`,
     );
 
-    // Upload rendered video to Vercel Blob
+    // 2. Compose video: static cover + audio → MP4
+    console.log(`🎥 Composing video (static cover + audio)...`);
+    const videoBuffer = await composePodcastVideo(coverImage, audioBuffer);
+    console.log(
+      `✅ Video composed: ${(videoBuffer.length / 1024 / 1024).toFixed(1)} MB`,
+    );
+
+    // 3. Upload to Vercel Blob
     const blobResult = await put(
       `podcast/videos/episode-${episode.episodeNumber}.mp4`,
       videoBuffer,
@@ -147,7 +156,11 @@ export async function POST(request: NextRequest) {
     );
     console.log(`☁️ Video uploaded to blob: ${blobResult.url}`);
 
-    // Build YouTube metadata
+    // 4. Build YouTube metadata
+    const transcript = episode.transcript as
+      | { speaker: string; text: string }[]
+      | null;
+
     const metadata = buildPodcastYouTubeMetadata({
       episodeNumber: episode.episodeNumber,
       title: episode.title,
@@ -158,7 +171,7 @@ export async function POST(request: NextRequest) {
       durationSecs: episode.durationSecs,
     });
 
-    // Upload to YouTube
+    // 5. Upload to YouTube
     console.log(`📤 Uploading to YouTube...`);
     const ytResult = await uploadLongForm(videoBuffer, {
       title: metadata.title,
@@ -169,15 +182,24 @@ export async function POST(request: NextRequest) {
     });
     console.log(`✅ YouTube upload complete: ${ytResult.videoId}`);
 
-    // Upload captions for SEO
-    try {
-      await uploadCaptions(ytResult.videoId, scriptText);
-      console.log(`📝 Captions uploaded for ${ytResult.videoId}`);
-    } catch (captionError) {
-      console.warn('⚠️ Caption upload failed (non-fatal):', captionError);
+    // 6. Upload captions from transcript
+    if (transcript && transcript.length > 0) {
+      const scriptText = transcript
+        .map(
+          (line) =>
+            `${line.speaker === 'HOST_A' ? 'Luna' : 'Sol'}: ${line.text}`,
+        )
+        .join('\n');
+
+      try {
+        await uploadCaptions(ytResult.videoId, scriptText);
+        console.log(`📝 Captions uploaded for ${ytResult.videoId}`);
+      } catch (captionError) {
+        console.warn('⚠️ Caption upload failed (non-fatal):', captionError);
+      }
     }
 
-    // Add to podcast playlist
+    // 7. Add to podcast playlist
     const playlistId =
       process.env.YOUTUBE_PODCAST_PLAYLIST_ID ||
       process.env.YOUTUBE_LONG_FORM_PLAYLIST_ID;
@@ -190,7 +212,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update database
+    // 8. Update database
     await prisma.podcastEpisode.update({
       where: { id: episode.id },
       data: {

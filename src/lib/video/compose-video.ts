@@ -52,7 +52,7 @@ async function getAudioDuration(audioPath: string): Promise<number> {
 // Initialize FFmpeg path - copy to /tmp for serverless compatibility
 let ffmpegPath: string | null = null;
 
-async function getFfmpegPath(): Promise<string> {
+export async function getFfmpegPath(): Promise<string> {
   if (ffmpegPath) return ffmpegPath;
 
   if (!ffmpegStatic) {

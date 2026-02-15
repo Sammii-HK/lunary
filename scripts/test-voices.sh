@@ -8,18 +8,17 @@ OUT_DIR="voice-samples"
 
 mkdir -p "$OUT_DIR"
 
-voices=("shimmer:heart:A" "nova:bella:A-" "alloy:nicole:B-" "onyx:emma:B-" "echo:fenrir:C+" "fable:puck:C+")
+voices=("af_heart" "af_bella" "bf_isabella" "am_michael")
 
 echo "Generating voice samples into ${OUT_DIR}/..."
 echo ""
 
-for entry in "${voices[@]}"; do
-  IFS=: read -r voice_key label grade <<< "$entry"
-  file="${OUT_DIR}/${label}.wav"
-  echo "→ ${label} [${grade}] (voice=${voice_key})..."
+for voice in "${voices[@]}"; do
+  file="${OUT_DIR}/${voice}.wav"
+  echo "→ ${voice}..."
   code=$(curl -s -w "%{http_code}" -X POST "$URL" \
     -H "Content-Type: application/json" \
-    -d "{\"text\": \"$TEXT\", \"voice\": \"$voice_key\"}" \
+    -d "{\"text\": \"$TEXT\", \"voice\": \"$voice\"}" \
     --output "$file")
   size=$(wc -c < "$file" 2>/dev/null | tr -d ' ')
   if [ "$code" = "200" ] && [ "$size" -gt 1000 ]; then
@@ -36,4 +35,4 @@ echo "Done! Files:"
 ls -lh "$OUT_DIR"/*.wav 2>/dev/null
 echo ""
 echo "Play all: open ${OUT_DIR}/*.wav"
-echo "Play one: open ${OUT_DIR}/heart.wav"
+echo "Play one: open ${OUT_DIR}/af_heart.wav"
