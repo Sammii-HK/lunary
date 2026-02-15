@@ -173,7 +173,6 @@ export async function POST(request: NextRequest) {
       console.log(`🎙️ Generating new preview audio for ${type}...`);
       audioBuffer = await generateVoiceover(script, {
         voiceName: 'alloy',
-        model: 'gpt-4o-mini-tts',
         speed: 1.0,
       });
 

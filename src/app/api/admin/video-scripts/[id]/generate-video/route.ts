@@ -213,7 +213,6 @@ export async function POST(
 
     const audioBuffer = await generateVoiceover(script.fullScript, {
       voiceName: 'alloy',
-      model: 'gpt-4o-mini-tts',
       speed: 1.0,
     });
 

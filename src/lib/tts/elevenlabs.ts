@@ -47,7 +47,6 @@ export async function generateVoiceover(
   // Map old options to new format
   const newOptions = {
     voiceName: 'alloy',
-    model: 'gpt-4o-mini-tts',
   };
 
   return generateVoiceoverNew(text, newOptions);
@@ -92,7 +91,6 @@ export async function checkQuota(): Promise<{
 }
 
 export function estimateCharacterCost(text: string): number {
-  // OpenAI TTS: check current pricing for gpt-4o-mini-tts.
   return text.length;
 }
 
