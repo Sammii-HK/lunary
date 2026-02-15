@@ -9,8 +9,8 @@
     "cap:ios": "npx cap open ios",
     "cap:android": "npx cap open android",
     "postinstall": "prisma generate",
-    "build": "prisma generate && NODE_OPTIONS='--max-old-space-size=8192' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=8192' next build",
-    "build:deploy": "prisma generate && prisma migrate deploy && NODE_OPTIONS='--max-old-space-size=8192' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=8192' next build",
+    "build": "prisma generate && NODE_OPTIONS='--max-old-space-size=32768' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=32768' next build",
+    "build:deploy": "prisma generate && prisma migrate deploy && NODE_OPTIONS='--max-old-space-size=32768' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=32768' next build",
     "generate:sitemap-last-modified": "node scripts/generate-sitemap-last-modified.js",
     "start": "next start",
     "lint": "eslint . --fix --ext .ts,.tsx",
@@ -131,7 +131,12 @@
     "cron:daily:date:force": "DATE=${DATE:-$(date -u +%F)}; curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"http://localhost:3000/api/cron/daily-posts?force=true&date=$DATE\"",
     "cron:cta-examples": "curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"http://localhost:3000/api/cron/generate-cta-examples\"",
     "oauth:google": "tsx scripts/regenerate-google-token.ts",
-    "check:quick": "pnpm lint && pnpm test"
+    "check:quick": "pnpm lint && pnpm test",
+    "play-store:screenshots": "tsx scripts/generate-play-store-assets.ts screenshots",
+    "play-store:feature-graphic": "tsx scripts/generate-play-store-assets.ts feature-graphic",
+    "play-store:framed": "tsx scripts/generate-play-store-assets.ts framed",
+    "play-store:video": "tsx scripts/generate-play-store-assets.ts video",
+    "play-store:all": "tsx scripts/generate-play-store-assets.ts all"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
@@ -255,6 +260,7 @@
     "postcss": "^8.5.6",
     "prettier": "^3.7.4",
     "prisma": "^6.19.0",
+    "satori": "^0.19.2",
     "tailwindcss": "^3.4.18",
     "tinycolor2": "^1.6.0",
     "ts-jest": "^29.4.6",

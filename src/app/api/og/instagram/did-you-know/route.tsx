@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     const gradient = CATEGORY_GRADIENT[category] || CATEGORY_GRADIENT.tarot;
     const { width, height } = IG_SIZES.square;
 
-    const fonts = await loadIGFonts(request);
+    const fonts = await loadIGFonts(request, { includeRunic: true });
     const starfield = renderIGStarfield(`dyk-${fact.slice(0, 15)}`);
 
     const layoutJsx = (

@@ -222,10 +222,9 @@ export async function generateMetadata({
 
   // Get dynamic data for rich metadata
   const forecast = await generateYearlyForecast(yearNum);
-  const majorIngress = forecast.ingresses.find(
-    (i) =>
-      ['Saturn', 'Uranus', 'Neptune', 'Pluto'].includes(i.planet) &&
-      !i.isRetrograde,
+  const forwardIngresses = forecast.ingresses.filter((i) => !i.isRetrograde);
+  const majorIngress = forwardIngresses.find((i) =>
+    ['Saturn', 'Uranus', 'Neptune', 'Pluto'].includes(i.planet),
   );
   const majorConjunction = forecast.conjunctions.find(
     (c) => c.significance === 'major',
@@ -241,7 +240,14 @@ export async function generateMetadata({
     .join(', ');
 
   const title = `${year} Astrology Transits: ${highlights ? highlights + ', ' : ''}Key Dates | Lunary`;
-  const description = `Track ${year} planetary transits with precise astronomical dates. ${forecast.ingresses.length} major sign changes${forecast.conjunctions.length > 0 ? ` and ${forecast.conjunctions.length} rare planetary conjunction${forecast.conjunctions.length > 1 ? 's' : ''}` : ''}.`;
+
+  // Build a 150-160 char description mentioning specific transits
+  const ingressMentions = forwardIngresses
+    .slice(0, 3)
+    .map((i) => `${i.planet} enters ${i.toSign}`)
+    .join(', ');
+  const retrogradeCount = forecast.retrogrades.length;
+  const description = `Complete ${year} astrology transit calendar with exact dates. ${ingressMentions}${retrogradeCount > 0 ? `, major retrogrades` : ''}, ingresses and sign changes. Plan timing for decisions and commitments with real astronomical data.`;
 
   return {
     title,

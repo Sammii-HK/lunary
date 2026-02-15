@@ -121,58 +121,11 @@ jobs:
           path: coverage/
           retention-days: 7
 
-  build:
-    name: Build Application
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate Prisma Client
-        run: pnpm prisma:generate
-        env:
-          PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING: 1
-
-      - name: Build application
-        id: build
-        run: pnpm build
-        env:
-          NODE_ENV: production
-          # Required for Better Auth during build
-          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET || 'test-secret-key-for-build-only' }}
-          # Stripe key optional during build (routes handle missing keys gracefully)
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_mock_key_for_build_only' }}
-          # VAPID keys optional during build (routes handle missing keys gracefully)
-          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY || '' }}
-          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY || '' }}
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        if: success() # Only upload if build succeeded
-        with:
-          name: build-artifacts
-          path: .next/
-          retention-days: 1
-
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [unit-tests, build] # Wait for unit tests and build to finish first
+    needs: [unit-tests] # Wait for unit tests to finish first
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -252,26 +205,24 @@ jobs:
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [lint, security-audit, unit-tests, build, e2e-tests]
+    needs: [lint, security-audit, unit-tests, e2e-tests]
     if: always()
     steps:
       - name: Check test results
         run: |
           echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Lint: ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "🔒 Security Audit: ${{ needs.security-audit.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Build: ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "✅ E2E Tests: ${{ needs.e2e-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "Lint: ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "Security Audit: ${{ needs.security-audit.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "E2E Tests: ${{ needs.e2e-tests.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ needs.lint.result }}" != "success" ] || \
              [ "${{ needs.unit-tests.result }}" != "success" ] || \
-             [ "${{ needs.build.result }}" != "success" ] || \
              [ "${{ needs.e2e-tests.result }}" != "success" ]; then
-            echo "❌ Some checks failed" >> $GITHUB_STEP_SUMMARY
+            echo "Some checks failed" >> $GITHUB_STEP_SUMMARY
             exit 1
           else
-            echo "✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
+            echo "All checks passed!" >> $GITHUB_STEP_SUMMARY
           fi

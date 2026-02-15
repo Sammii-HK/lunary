@@ -346,6 +346,124 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // 6. Generate weekly podcast episode
+    console.log('🎙️ Generating weekly podcast episode...');
+    let podcastResult = null;
+    try {
+      const podcastResponse = await fetch(
+        `${baseUrl}/api/podcast/generate-weekly`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Lunary-Weekly-Content-Cron/1.0',
+          },
+          body: JSON.stringify({
+            weekStart: weekStartDate.toISOString(),
+          }),
+        },
+      );
+
+      if (podcastResponse.ok) {
+        podcastResult = await podcastResponse.json();
+        console.log(
+          `✅ Podcast episode generated: ${podcastResult.episode?.title || 'episode ready'}`,
+        );
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status: 'success',
+          message: `Podcast episode generated: ${podcastResult.episode?.title || 'ready'}`,
+          metadata: {
+            episodeNumber: podcastResult.episode?.episodeNumber,
+            slug: podcastResult.episode?.slug,
+            durationSecs: podcastResult.episode?.durationSecs,
+          },
+        });
+      } else {
+        console.error('❌ Podcast generation failed:', podcastResponse.status);
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status: 'failed',
+          message: 'Podcast generation failed',
+          errorMessage: `HTTP ${podcastResponse.status}`,
+        });
+      }
+    } catch (podcastError) {
+      console.error('❌ Podcast generation error:', podcastError);
+      await logActivity({
+        activityType: 'content_creation',
+        activityCategory: 'content',
+        status: 'failed',
+        message: 'Podcast generation error',
+        errorMessage:
+          podcastError instanceof Error
+            ? podcastError.message
+            : 'Unknown error',
+      });
+    }
+
+    // 7. Upload podcast episode to YouTube
+    let youtubeResult = null;
+    if (podcastResult?.episode?.id) {
+      console.log('🎬 Uploading podcast episode to YouTube...');
+      try {
+        const ytResponse = await fetch(
+          `${baseUrl}/api/youtube/podcast-upload`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'User-Agent': 'Lunary-Weekly-Content-Cron/1.0',
+            },
+            body: JSON.stringify({ episodeId: podcastResult.episode.id }),
+          },
+        );
+
+        if (ytResponse.ok) {
+          youtubeResult = await ytResponse.json();
+          console.log(
+            `✅ Podcast uploaded to YouTube: ${youtubeResult.videoId || 'skipped'}`,
+          );
+          await logActivity({
+            activityType: 'content_creation',
+            activityCategory: 'content',
+            status: 'success',
+            message: youtubeResult.skipped
+              ? `YouTube upload skipped (already exists): ${youtubeResult.videoId}`
+              : `Podcast Episode ${youtubeResult.episodeNumber} uploaded to YouTube: ${youtubeResult.videoId}`,
+            metadata: {
+              videoId: youtubeResult.videoId,
+              youtubeUrl: youtubeResult.youtubeUrl,
+              skipped: youtubeResult.skipped || false,
+            },
+          });
+        } else {
+          console.error('❌ YouTube upload failed:', ytResponse.status);
+          await logActivity({
+            activityType: 'content_creation',
+            activityCategory: 'content',
+            status: 'failed',
+            message: 'YouTube podcast upload failed',
+            errorMessage: `HTTP ${ytResponse.status}`,
+          });
+        }
+      } catch (youtubeError) {
+        console.error('❌ YouTube upload error:', youtubeError);
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status: 'failed',
+          message: 'YouTube podcast upload error',
+          errorMessage:
+            youtubeError instanceof Error
+              ? youtubeError.message
+              : 'Unknown error',
+        });
+      }
+    }
+
     // Generate blog preview image URL (use first day of the week)
     const blogWeekStartDate = blogData.data?.weekStart
       ? new Date(blogData.data.weekStart).toISOString().split('T')[0]
@@ -377,6 +495,22 @@ export async function GET(request: NextRequest) {
         {
           name: 'Instagram',
           value: `${instagramResult?.totalPosts || 0} posts ready`,
+          inline: true,
+        },
+        {
+          name: 'Podcast',
+          value: podcastResult?.episode
+            ? `Ep ${podcastResult.episode.episodeNumber} ready`
+            : 'Skipped',
+          inline: true,
+        },
+        {
+          name: 'YouTube',
+          value: youtubeResult?.videoId
+            ? `Uploaded: ${youtubeResult.videoId}`
+            : youtubeResult?.skipped
+              ? 'Already uploaded'
+              : 'Skipped',
           inline: true,
         },
         {
@@ -426,6 +560,8 @@ export async function GET(request: NextRequest) {
         newsletterSent: newsletterData.success,
         socialPostsGenerated: socialPostsResult?.savedIds?.length || 0,
         instagramPostsGenerated: instagramResult?.totalPosts || 0,
+        podcastEpisode: podcastResult?.episode?.episodeNumber || null,
+        youtubeVideoId: youtubeResult?.videoId || null,
         substackPublished:
           substackResult?.results?.free?.success ||
           substackResult?.results?.paid?.success ||
@@ -463,6 +599,20 @@ export async function GET(request: NextRequest) {
             paid: substackResult.results?.paid?.success || false,
             freeUrl: substackResult.results?.free?.postUrl,
             paidUrl: substackResult.results?.paid?.postUrl,
+          }
+        : null,
+      podcast: podcastResult?.episode
+        ? {
+            episodeNumber: podcastResult.episode.episodeNumber,
+            title: podcastResult.episode.title,
+            slug: podcastResult.episode.slug,
+          }
+        : null,
+      youtube: youtubeResult?.videoId
+        ? {
+            videoId: youtubeResult.videoId,
+            url: youtubeResult.youtubeUrl,
+            skipped: youtubeResult.skipped || false,
           }
         : null,
     });

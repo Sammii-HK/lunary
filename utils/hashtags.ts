@@ -142,7 +142,7 @@ const platformLimits: Record<Platform, number> = {
   facebook: 2,
   pinterest: 0,
   bluesky: 3,
-  threads: 3,
+  threads: 0,
 };
 
 const brandHashtag = '#LunaryApp';

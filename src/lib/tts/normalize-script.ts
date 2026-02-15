@@ -57,8 +57,11 @@ const splitLongSentence = (sentence: string) => {
 export function normalizeScriptForTTS(text: string): string {
   let output = text;
 
+  // Convert paragraph breaks to ellipsis pause markers before other processing
+  output = output.replace(/\n{2,}/g, ' ... ');
+
   output = output.replace(/[!?]{2,}/g, '.');
-  output = output.replace(/\.{3,}/g, '.');
+  // Preserve ellipses as pause markers (don't collapse to single period)
   output = output.replace(/\s*\/\s*/g, ' and ');
   output = output.replace(/\s{2,}/g, ' ');
 
@@ -83,4 +86,81 @@ export function normalizeScriptForTTS(text: string): string {
     .join(' ')
     .replace(/\s{2,}/g, ' ')
     .trim();
+}
+
+/**
+ * Preprocess text to help TTS with pronunciation.
+ * Converts paragraph breaks to ellipsis pause markers and fixes stuttering.
+ * Shared between OpenAI and Kokoro providers.
+ */
+export function preprocessTextForTTS(text: string): string {
+  const pauseToken = '__LUNARY_PAUSE__';
+  let processed = text.replace(/\n{2,}/g, ` ${pauseToken} `);
+
+  // Remove duplicate consecutive words (TTS stuttering fix)
+  processed = processed.replace(/\b(\w+)[-\s]+\1\b/gi, '$1');
+
+  // Clean up any double spaces
+  processed = processed.replace(/\s+/g, ' ').trim();
+
+  // Re-insert pause markers as ellipses to encourage a natural break
+  processed = processed.replace(new RegExp(pauseToken, 'g'), '...');
+
+  return processed;
+}
+
+/**
+ * Split text into chunks that fit within TTS character limits.
+ * Tries to split at sentence boundaries to avoid cutting mid-sentence.
+ */
+export function splitTextIntoChunks(
+  text: string,
+  maxChars: number = 3500,
+): string[] {
+  const chunks: string[] = [];
+
+  if (text.length <= maxChars) {
+    return [text];
+  }
+
+  // Split by sentences first
+  const sentences = text.split(/([.!?]+\s+)/);
+  let currentChunk = '';
+
+  for (let i = 0; i < sentences.length; i++) {
+    const sentence = sentences[i];
+    const testChunk = currentChunk + sentence;
+
+    if (testChunk.length <= maxChars) {
+      currentChunk = testChunk;
+    } else {
+      // Current chunk is full, save it and start new one
+      if (currentChunk.trim().length > 0) {
+        chunks.push(currentChunk.trim());
+      }
+      currentChunk = sentence;
+
+      // If a single sentence is too long, split it by words
+      if (currentChunk.length > maxChars) {
+        const words = currentChunk.split(/\s+/);
+        let wordChunk = '';
+        for (const word of words) {
+          if ((wordChunk + ' ' + word).length <= maxChars) {
+            wordChunk = wordChunk ? wordChunk + ' ' + word : word;
+          } else {
+            if (wordChunk) chunks.push(wordChunk);
+            wordChunk = word;
+          }
+        }
+        if (wordChunk) currentChunk = wordChunk;
+      }
+    }
+  }
+
+  // Add final chunk
+  if (currentChunk.trim().length > 0) {
+    chunks.push(currentChunk.trim());
+  }
+
+  return chunks;
 }

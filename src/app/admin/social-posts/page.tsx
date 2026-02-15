@@ -307,7 +307,11 @@ export default function SocialPostsPage() {
 
         // 2. Generate Instagram content (carousels, memes, rankings, etc.)
         const weekStart = getWeekStartForOffset(weekOffset);
-        let igResult = null;
+        let igResult: {
+          success?: boolean;
+          totalPosts?: number;
+          error?: string;
+        } | null = null;
         try {
           const igResponse = await fetch(
             '/api/admin/instagram/generate-weekly',
@@ -320,13 +324,19 @@ export default function SocialPostsPage() {
           igResult = await igResponse.json();
         } catch (igError) {
           console.error('Instagram generation failed:', igError);
+          igResult = {
+            success: false,
+            error: igError instanceof Error ? igError.message : 'Network error',
+          };
         }
 
         if (data.success) {
           const themeInfo = data.theme ? ` Theme: ${data.theme}` : '';
           const igInfo = igResult?.success
             ? ` + ${igResult.totalPosts} Instagram posts`
-            : '';
+            : igResult
+              ? ` (Instagram failed: ${igResult.error || 'unknown error'})`
+              : '';
           alert(
             `Generated ${data.savedIds.length} social posts${igInfo} for the week!${themeInfo}`,
           );

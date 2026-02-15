@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateVoiceover, getAvailableVoices } from '@/lib/tts';
+import {
+  generateVoiceover,
+  getAvailableVoices,
+  getTTSContentType,
+} from '@/lib/tts';
 import { checkQuota, MYSTICAL_VOICES } from '@/lib/tts/elevenlabs'; // Deprecated but kept for compatibility
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { text } = await request.json();
+    const { text, voice } = await request.json();
 
     if (!text) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
@@ -20,14 +24,17 @@ export async function POST(request: NextRequest) {
     }
 
     const audioBuffer = await generateVoiceover(text, {
-      voiceName: 'alloy',
+      voiceName: voice || 'shimmer',
       speed: 1.0,
     });
 
+    const contentType = getTTSContentType();
+    const ext = contentType === 'audio/wav' ? 'wav' : 'mp3';
+
     return new NextResponse(audioBuffer, {
       headers: {
-        'Content-Type': 'audio/mpeg',
-        'Content-Disposition': 'attachment; filename="voiceover.mp3"',
+        'Content-Type': contentType,
+        'Content-Disposition': `attachment; filename="voiceover.${ext}"`,
       },
     });
   } catch (error) {

@@ -24,6 +24,13 @@ export type PlatformPayload = {
   pinterestOptions?: { boardId: string; boardName: string };
   tiktokOptions?: { type: string; coverUrl?: string };
   instagramOptions?: { type: string; coverUrl?: string };
+  youtubeOptions?: {
+    title: string;
+    visibility: string;
+    isShort: boolean;
+    madeForKids: boolean;
+    playlistId?: string;
+  };
 };
 
 export const videoPlatforms = ['instagram', 'tiktok', 'youtube'];
@@ -154,7 +161,13 @@ export const buildPlatformPayload = (
     };
   }
 
-  if (platformStr === 'pinterest') {
+  // Prevent video/story/reel content from reaching Pinterest
+  const isVideoOrStory =
+    shouldUseVideo ||
+    post.post_type === 'instagram_story' ||
+    post.post_type === 'instagram_reel';
+
+  if (platformStr === 'pinterest' && !isVideoOrStory) {
     payload.pinterestOptions = {
       boardId: process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary',
       boardName: process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
@@ -218,6 +231,22 @@ export const buildPlatformPayload = (
     payload.instagramOptions = {
       type: 'reel',
       ...(imageUrlForPlatform ? { coverUrl: imageUrlForPlatform } : {}),
+    };
+  }
+
+  // YouTube options for video posts
+  if (platformStr === 'youtube' && shouldUseVideo) {
+    const videoTitle =
+      content.match(/^[^.!?\n]+/)?.[0]?.trim() || 'Lunary Cosmic Insight';
+    payload.youtubeOptions = {
+      title:
+        videoTitle.length > 100 ? videoTitle.slice(0, 97) + '...' : videoTitle,
+      visibility: 'public',
+      isShort: true,
+      madeForKids: false,
+      playlistId:
+        process.env.YOUTUBE_WEEKLY_SERIES_PLAYLIST_ID ||
+        process.env.YOUTUBE_SHORTS_PLAYLIST_ID,
     };
   }
 
@@ -300,6 +329,7 @@ export const buildSucculentPostPayload = ({
   let pinterestOptions: PlatformPayload['pinterestOptions'];
   let tiktokOptions: PlatformPayload['tiktokOptions'];
   let instagramOptions: PlatformPayload['instagramOptions'];
+  let youtubeOptions: PlatformPayload['youtubeOptions'];
   let redditData: PlatformPayload['reddit'];
 
   const baseMediaKey = formatMediaKey(basePayload.media);
@@ -315,6 +345,9 @@ export const buildSucculentPostPayload = ({
     }
     if (payload.instagramOptions) {
       instagramOptions = payload.instagramOptions;
+    }
+    if (payload.youtubeOptions) {
+      youtubeOptions = payload.youtubeOptions;
     }
     if (payload.reddit) {
       redditData = payload.reddit;
@@ -381,6 +414,9 @@ export const buildSucculentPostPayload = ({
   }
   if (instagramOptions) {
     postData.instagramOptions = instagramOptions;
+  }
+  if (youtubeOptions) {
+    postData.youtubeOptions = youtubeOptions;
   }
 
   return {

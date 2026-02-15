@@ -1,392 +1,199 @@
-import type { ThemeCategory } from '@/lib/social/types';
 import type { IGStoryContent, IGStoryData } from './types';
 import { seededRandom } from './ig-utils';
-import tarotData from '@/data/tarot-cards.json';
+import { getTarotCard } from '../../../utils/tarot/tarot';
+import { generateDidYouKnow } from './did-you-know-content';
+import { getMoonPhase } from '../../../utils/moon/moonPhases';
+import { getDayOfYear } from 'date-fns';
 
-// Moon phase headlines for daily story
-const MOON_STORY_DATA = [
-  {
-    phase: 'New Moon',
-    energy: 'Set new intentions. Plant seeds for the cycle ahead.',
-    theme: 'lunar',
-  },
-  {
-    phase: 'Waxing Crescent',
-    energy: 'Take your first steps. Momentum is building.',
-    theme: 'lunar',
-  },
-  {
-    phase: 'First Quarter',
-    energy: 'Push through resistance. Action over hesitation.',
-    theme: 'lunar',
-  },
-  {
-    phase: 'Waxing Gibbous',
-    energy: 'Refine your approach. Trust the process.',
-    theme: 'lunar',
-  },
-  {
-    phase: 'Full Moon',
-    energy: 'Illuminate what was hidden. Release and celebrate.',
-    theme: 'lunar',
-  },
-  {
-    phase: 'Waning Gibbous',
-    energy: 'Share your wisdom. Gratitude opens doors.',
-    theme: 'lunar',
-  },
-  {
-    phase: 'Last Quarter',
-    energy: 'Let go of what no longer serves you.',
-    theme: 'lunar',
-  },
-  {
-    phase: 'Waning Crescent',
-    energy: 'Rest and reflect. The cycle is completing.',
-    theme: 'lunar',
-  },
-] as const;
+// Multiple energy messages per moon phase for variety
+const MOON_ENERGY_MESSAGES: Record<string, string[]> = {
+  'New Moon': [
+    'Set new intentions. Plant seeds for the cycle ahead.',
+    'A blank slate awaits. Dream boldly.',
+    'In the darkness, your vision becomes clear.',
+    'Begin again with cosmic clarity.',
+  ],
+  'Waxing Crescent': [
+    'Take your first steps. Momentum is building.',
+    'Your intentions are taking shape.',
+    'Small steps lead to cosmic transformations.',
+    'Nurture the seeds you have planted.',
+  ],
+  'First Quarter': [
+    'Push through resistance. Action over hesitation.',
+    'Obstacles are opportunities in disguise.',
+    'Your courage is your superpower today.',
+    'Break through limitations with confidence.',
+  ],
+  'Waxing Gibbous': [
+    'Refine your approach. Trust the process.',
+    'Polish your vision until it shines.',
+    'The final touches make all the difference.',
+    'Your hard work is about to pay off.',
+  ],
+  'Full Moon': [
+    'Illuminate what was hidden. Release and celebrate.',
+    'Your intuition is especially strong today.',
+    'Bask in the glow of your manifestations.',
+    'Everything you need is already within you.',
+  ],
+  'Waning Gibbous': [
+    'Share your wisdom. Gratitude opens doors.',
+    'Give thanks for all you have received.',
+    'Your experiences are gifts to share.',
+    'Abundance flows through appreciation.',
+  ],
+  'Last Quarter': [
+    'Let go of what no longer serves you.',
+    'Release old patterns to create space.',
+    'Surrender to create space for miracles.',
+    'Freedom comes from releasing control.',
+  ],
+  'Waning Crescent': [
+    'Rest and reflect. The cycle is completing.',
+    'Embrace the sacred pause before rebirth.',
+    'In stillness, you find your power.',
+    'Rest deeply before the next chapter begins.',
+  ],
+};
 
-// Build tarot pulls from the full 78-card grimoire deck
-interface TarotPull {
-  card: string;
-  keywords: string;
-  message: string;
-}
-
-function buildTarotPulls(): TarotPull[] {
-  const pulls: TarotPull[] = [];
-
-  // Major Arcana (22 cards)
-  const majorArcana = tarotData.majorArcana as Record<
-    string,
-    { name: string; keywords: string[]; affirmation: string }
-  >;
-  for (const card of Object.values(majorArcana)) {
-    pulls.push({
-      card: card.name,
-      keywords: card.keywords.slice(0, 3).join(', '),
-      message: card.affirmation,
-    });
-  }
-
-  // Minor Arcana (56 cards)
-  const minorArcana = tarotData.minorArcana as Record<
-    string,
-    Record<string, { name: string; keywords: string[]; affirmation: string }>
-  >;
-  for (const suit of Object.values(minorArcana)) {
-    for (const card of Object.values(suit)) {
-      pulls.push({
-        card: card.name,
-        keywords: card.keywords.slice(0, 3).join(', '),
-        message: card.affirmation,
-      });
-    }
-  }
-
-  return pulls;
-}
-
-const TAROT_PULLS = buildTarotPulls();
-
-// Poll questions for "This or That" story
-const POLL_QUESTIONS = [
-  {
-    question: 'Crystal or candle for protection?',
-    option1: 'Crystal',
-    option2: 'Candle',
-    category: 'spells' as ThemeCategory,
-  },
-  {
-    question: 'Full Moon or New Moon energy?',
-    option1: 'Full Moon',
-    option2: 'New Moon',
-    category: 'lunar' as ThemeCategory,
-  },
-  {
-    question: 'Tarot or oracle deck?',
-    option1: 'Tarot',
-    option2: 'Oracle',
-    category: 'tarot' as ThemeCategory,
-  },
-  {
-    question: 'Morning ritual or evening ritual?',
-    option1: 'Morning',
-    option2: 'Evening',
-    category: 'spells' as ThemeCategory,
-  },
-  {
-    question: 'Fire signs or water signs?',
-    option1: 'Fire signs',
-    option2: 'Water signs',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Amethyst or rose quartz?',
-    option1: 'Amethyst',
-    option2: 'Rose Quartz',
-    category: 'crystals' as ThemeCategory,
-  },
-  {
-    question: 'Sun sign or Moon sign?',
-    option1: 'Sun sign',
-    option2: 'Moon sign',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Journaling or meditation?',
-    option1: 'Journaling',
-    option2: 'Meditation',
-    category: 'chakras' as ThemeCategory,
-  },
-  {
-    question: 'Mercury retrograde or Venus retrograde?',
-    option1: 'Mercury Rx',
-    option2: 'Venus Rx',
-    category: 'planetary' as ThemeCategory,
-  },
-  {
-    question: 'Spell jars or candle magic?',
-    option1: 'Spell jars',
-    option2: 'Candle magic',
-    category: 'spells' as ThemeCategory,
-  },
-  {
-    question: 'Birth chart or synastry chart?',
-    option1: 'Birth chart',
-    option2: 'Synastry',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Angel numbers or tarot cards?',
-    option1: 'Angel numbers',
-    option2: 'Tarot cards',
-    category: 'numerology' as ThemeCategory,
-  },
-  // --- Extended poll pool for daily cadence ---
-  {
-    question: 'Which element rules your vibe?',
-    option1: 'Fire/Air',
-    option2: 'Earth/Water',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Manifestation or shadow work?',
-    option1: 'Manifestation',
-    option2: 'Shadow work',
-    category: 'spells' as ThemeCategory,
-  },
-  {
-    question: 'Do you read your horoscope daily?',
-    option1: 'Every day',
-    option2: 'Sometimes',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Moonstone or labradorite?',
-    option1: 'Moonstone',
-    option2: 'Labradorite',
-    category: 'crystals' as ThemeCategory,
-  },
-  {
-    question: 'Rising sign or Moon sign?',
-    option1: 'Rising sign',
-    option2: 'Moon sign',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Protection spell or love spell?',
-    option1: 'Protection',
-    option2: 'Love',
-    category: 'spells' as ThemeCategory,
-  },
-  {
-    question: 'Do you believe in Mercury retrograde?',
-    option1: 'Absolutely',
-    option2: 'It is real and terrifying',
-    category: 'planetary' as ThemeCategory,
-  },
-  {
-    question: '111 or 444?',
-    option1: '111',
-    option2: '444',
-    category: 'numerology' as ThemeCategory,
-  },
-  {
-    question: 'Crystals or herbs for healing?',
-    option1: 'Crystals',
-    option2: 'Herbs',
-    category: 'crystals' as ThemeCategory,
-  },
-  {
-    question: 'Major Arcana or Minor Arcana?',
-    option1: 'Major',
-    option2: 'Minor',
-    category: 'tarot' as ThemeCategory,
-  },
-  {
-    question: 'New Moon intentions or Full Moon release?',
-    option1: 'Intentions',
-    option2: 'Release',
-    category: 'lunar' as ThemeCategory,
-  },
-  {
-    question: 'Scorpio energy or Pisces energy?',
-    option1: 'Scorpio',
-    option2: 'Pisces',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Aries confidence or Capricorn discipline?',
-    option1: 'Aries fire',
-    option2: 'Cap grind',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Would you date your opposite sign?',
-    option1: 'Yes, opposites attract',
-    option2: 'No, too risky',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Third eye chakra or heart chakra?',
-    option1: 'Third eye',
-    option2: 'Heart',
-    category: 'chakras' as ThemeCategory,
-  },
-  {
-    question: 'Sage cleansing or sound bath?',
-    option1: 'Sage',
-    option2: 'Sound bath',
-    category: 'spells' as ThemeCategory,
-  },
-  {
-    question: 'Do you check compatibility before dating?',
-    option1: 'Always',
-    option2: 'After the first date',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Citrine for abundance or black tourmaline for protection?',
-    option1: 'Citrine',
-    option2: 'Black tourmaline',
-    category: 'crystals' as ThemeCategory,
-  },
-  {
-    question: 'The Tower or Death card?',
-    option1: 'The Tower',
-    option2: 'Death',
-    category: 'tarot' as ThemeCategory,
-  },
-  {
-    question: 'Leo drama or Gemini chaos?',
-    option1: 'Leo drama',
-    option2: 'Gemini chaos',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Life path number or zodiac sign?',
-    option1: 'Life path',
-    option2: 'Zodiac sign',
-    category: 'numerology' as ThemeCategory,
-  },
-  {
-    question: 'Waning Moon rest or Waxing Moon hustle?',
-    option1: 'Waning rest',
-    option2: 'Waxing hustle',
-    category: 'lunar' as ThemeCategory,
-  },
-  {
-    question: 'Astrology app or tarot deck?',
-    option1: 'Astrology app',
-    option2: 'Tarot deck',
-    category: 'tarot' as ThemeCategory,
-  },
-  {
-    question: 'Venus placement or Mars placement?',
-    option1: 'Venus (love)',
-    option2: 'Mars (drive)',
-    category: 'planetary' as ThemeCategory,
-  },
-  {
-    question: 'Selenite or clear quartz?',
-    option1: 'Selenite',
-    option2: 'Clear quartz',
-    category: 'crystals' as ThemeCategory,
-  },
-  {
-    question: 'Fixed signs or cardinal signs?',
-    option1: 'Fixed',
-    option2: 'Cardinal',
-    category: 'zodiac' as ThemeCategory,
-  },
-  {
-    question: 'Rune reading or tarot spread?',
-    option1: 'Runes',
-    option2: 'Tarot',
-    category: 'tarot' as ThemeCategory,
-  },
-  {
-    question: 'Eclipse season or retrograde season?',
-    option1: 'Eclipse',
-    option2: 'Retrograde',
-    category: 'planetary' as ThemeCategory,
-  },
-];
+// Cosmic energy headlines by moon phase (matching content-orchestrator pattern)
+const COSMIC_HEADLINES: Record<string, string[]> = {
+  'New Moon': [
+    'Set intentions with clarity and purpose',
+    'New beginnings await you today',
+    'Plant seeds for what you wish to manifest',
+    'A blank canvas for your cosmic dreams',
+    'Fresh starts are written in the stars',
+  ],
+  'Waxing Crescent': [
+    'Trust the process unfolding around you',
+    'Your plans are taking root',
+    'Take action toward your goals',
+    'Small steps lead to cosmic transformations',
+    'Your intentions are gaining momentum',
+  ],
+  'First Quarter': [
+    'A day for creative breakthroughs',
+    'Push through challenges with determination',
+    'Your momentum is building',
+    'The universe rewards bold action',
+    'Break through limitations with confidence',
+  ],
+  'Waxing Gibbous': [
+    'Refinement leads to perfection',
+    'Fine-tune your approach',
+    'Success is within reach',
+    'Polish your vision until it shines',
+    'Your hard work is about to pay off',
+  ],
+  'Full Moon': [
+    'Your intuition is especially strong today',
+    'The cosmos aligns in your favour today',
+    'Celebrate your achievements',
+    'Your inner wisdom is illuminated',
+    'The peak of your power is now',
+  ],
+  'Waning Gibbous': [
+    'Share your wisdom with others',
+    'Gratitude opens new doors',
+    'Take time to reflect on your journey',
+    'Abundance flows through appreciation',
+    'Wisdom ripens in the afterglow',
+  ],
+  'Last Quarter': [
+    'Release what no longer serves your growth',
+    'Let go of old patterns',
+    'Make space for transformation',
+    'What you release makes room for blessings',
+    'Freedom comes from releasing control',
+  ],
+  'Waning Crescent': [
+    'Rest and restore your energy',
+    'Quiet reflection brings clarity',
+    'Prepare for new beginnings',
+    'Embrace the sacred pause before rebirth',
+    'In stillness, you find your power',
+  ],
+};
 
 /**
  * Generate daily story data for a given date.
- * Returns 2-3 story data items depending on day.
- * URLs are NOT included — the consumer constructs them.
+ * Returns 4 stories: [moon, tarot, dyk, cosmic].
+ * Quote (slot 3) requires a DB call so it's generated in the cron.
  */
 export function generateDailyStoryData(dateStr: string): IGStoryData[] {
-  const rng = seededRandom(`story-${dateStr}`);
   const date = new Date(dateStr);
-  const dayOfWeek = (date.getDay() + 6) % 7; // Mon=0
+  const dayOfYear = getDayOfYear(date);
 
   const stories: IGStoryData[] = [];
 
-  // 1. Daily moon phase story (every day)
-  const moonData = MOON_STORY_DATA[Math.floor(rng() * MOON_STORY_DATA.length)];
+  // 1. Moon phase story — use real astronomical phase
+  const moonPhase = getMoonPhase(date);
+  const moonRng = seededRandom(`story-moon-${dateStr}`);
+  const energyMessages =
+    MOON_ENERGY_MESSAGES[moonPhase] || MOON_ENERGY_MESSAGES['Full Moon'];
+  const energy = energyMessages[Math.floor(moonRng() * energyMessages.length)];
+
   stories.push({
     variant: 'daily_moon',
-    title: moonData.phase,
-    subtitle: moonData.energy,
-    params: { phase: moonData.phase, energy: moonData.energy, date: dateStr },
+    title: moonPhase,
+    subtitle: energy,
+    params: { phase: moonPhase, energy, date: dateStr },
     endpoint: '/api/og/instagram/story-daily',
   });
 
-  // 2. Tarot pull of the day (every day)
-  const tarot = TAROT_PULLS[Math.floor(rng() * TAROT_PULLS.length)];
+  // 2. Tarot — use the app's actual daily card (same seed as generalTarot.ts)
+  const cosmicSeed = `cosmic-${dateStr}-${dayOfYear}-energy`;
+  const tarotCard = getTarotCard(cosmicSeed);
+  const cardAffirmation =
+    (tarotCard as any).affirmation || tarotCard.information || '';
+
   stories.push({
     variant: 'tarot_pull',
-    title: tarot.card,
-    subtitle: tarot.message,
+    title: tarotCard.name,
+    subtitle: cardAffirmation,
     params: {
-      card: tarot.card,
-      keywords: tarot.keywords,
-      message: tarot.message,
+      card: tarotCard.name,
+      keywords: tarotCard.keywords.slice(0, 3).join(', '),
+      message: cardAffirmation,
     },
     endpoint: '/api/og/instagram/story-tarot',
   });
 
-  // 3. "This or That" poll (daily — cadence plan Frame 3)
-  {
-    const poll = POLL_QUESTIONS[Math.floor(rng() * POLL_QUESTIONS.length)];
-    stories.push({
-      variant: 'poll',
-      title: poll.question,
-      subtitle: `${poll.option1} vs ${poll.option2}`,
-      params: {
-        question: poll.question,
-        option1: poll.option1,
-        option2: poll.option2,
-        category: poll.category,
-      },
-      endpoint: '/api/og/instagram/story-poll',
-    });
-  }
+  // 3. Did You Know fact
+  const dyk = generateDidYouKnow(dateStr);
+  stories.push({
+    variant: 'did_you_know',
+    title: 'Did You Know?',
+    subtitle: dyk.fact,
+    params: {
+      fact: dyk.fact,
+      category: dyk.category,
+      source: dyk.source,
+    },
+    endpoint: '/api/og/instagram/did-you-know',
+  });
+
+  // 4. Cosmic energy story
+  const cosmicRng = seededRandom(`story-cosmic-${dateStr}`);
+  const phaseHeadlines =
+    COSMIC_HEADLINES[moonPhase] || COSMIC_HEADLINES['Full Moon'];
+  const headline =
+    phaseHeadlines[Math.floor(cosmicRng() * phaseHeadlines.length)];
+
+  stories.push({
+    variant: 'cosmic_energy',
+    title: 'Cosmic Energy',
+    subtitle: headline,
+    params: {
+      date: dateStr,
+      headline,
+      moonPhase,
+      variant: 'daily_energy',
+    },
+    endpoint: '/api/og/instagram/daily-cosmic',
+  });
 
   return stories;
 }

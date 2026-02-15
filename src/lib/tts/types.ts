@@ -1,5 +1,6 @@
 export interface TTSProvider {
   name: string;
+  contentType: string;
   generateVoiceover(text: string, options: TTSOptions): Promise<ArrayBuffer>;
   getAvailableVoices?(): Promise<TTSVoice[]>;
 }

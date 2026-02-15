@@ -1,19 +1,17 @@
 import type { TTSProvider, TTSOptions } from './types';
 import { OpenAITTSProvider } from './openai';
-// import { GoogleCloudTTSProvider } from './google'; // For future use
+import { KokoroTTSProvider } from './kokoro';
 
-const TTS_PROVIDER = (process.env.TTS_PROVIDER || 'openai').toLowerCase();
+const TTS_PROVIDER: 'kokoro' | 'openai' = 'kokoro';
 
 function getTTSProvider(): TTSProvider {
   switch (TTS_PROVIDER) {
+    case 'kokoro':
+      return new KokoroTTSProvider();
     case 'openai':
       return new OpenAITTSProvider();
-    // case 'google-cloud':
-    //   return new GoogleCloudTTSProvider();
     default:
-      throw new Error(
-        `Unknown TTS provider: ${TTS_PROVIDER}. Set TTS_PROVIDER env var to 'openai' or 'google-cloud'`,
-      );
+      throw new Error(`Unknown TTS provider: ${TTS_PROVIDER}`);
   }
 }
 
@@ -32,4 +30,9 @@ export async function getAvailableVoices() {
     return provider.getAvailableVoices();
   }
   return [];
+}
+
+export function getTTSContentType(): string {
+  const provider = getTTSProvider();
+  return provider.contentType;
 }

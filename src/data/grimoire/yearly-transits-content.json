@@ -157,12 +157,8 @@
     ],
     "sources": [
       {
-        "name": "NASA JPL Horizons (Ephemeris)",
-        "url": "https://ssd.jpl.nasa.gov/horizons/"
-      },
-      {
-        "name": "Swiss Ephemeris (Reference Ephemeris)",
-        "url": "https://www.astro.com/swisseph/"
+        "name": "astronomy-engine (VSOP87 planetary theory)",
+        "url": "https://github.com/cosinekitty/astronomy"
       }
     ]
   },

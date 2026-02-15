@@ -2,6 +2,7 @@ import type { TTSProvider, TTSOptions, TTSVoice } from './types';
 
 export class GoogleCloudTTSProvider implements TTSProvider {
   name = 'google-cloud';
+  contentType = 'audio/mpeg';
 
   async generateVoiceover(
     text: string,

@@ -476,6 +476,560 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    // DAILY TASKS (Tue/Wed/Thu) - LinkedIn Standalone Posts
+    console.log('💼 Checking LinkedIn posting day...');
+    const linkedinStartTime = Date.now();
+    try {
+      const { isLinkedInPostingDay, generateLinkedInPost } =
+        await import('@/lib/linkedin/content-generator');
+
+      if (isLinkedInPostingDay(dateStr)) {
+        const linkedinPost = generateLinkedInPost(dateStr);
+        const linkedinExecutionTime = Date.now() - linkedinStartTime;
+
+        const succulentApiUrl = 'https://app.succulent.social/api/posts';
+        const apiKey = process.env.SUCCULENT_SECRET_KEY;
+        const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+
+        if (apiKey && accountGroupId) {
+          const scheduledTime = new Date(
+            `${dateStr}T${String(linkedinPost.scheduledHour).padStart(2, '0')}:00:00Z`,
+          );
+          const readableDate = scheduledTime.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          });
+
+          const postData = {
+            accountGroupId,
+            name: `LinkedIn - ${readableDate} - Did You Know (${linkedinPost.category})`,
+            content: linkedinPost.content,
+            platforms: ['linkedin'],
+            scheduledDate: scheduledTime.toISOString(),
+            media: [],
+          };
+
+          const response = await fetch(succulentApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-API-Key': apiKey,
+            },
+            body: JSON.stringify(postData),
+          });
+
+          cronResults.linkedinPost = {
+            success: response.ok,
+            category: linkedinPost.category,
+            scheduledDate: scheduledTime.toISOString(),
+            executionTimeMs: linkedinExecutionTime,
+            ...(response.ok
+              ? {}
+              : {
+                  error: `HTTP ${response.status}: ${(await response.text()).slice(0, 200)}`,
+                }),
+          };
+
+          if (response.ok) {
+            console.log(
+              `💼 LinkedIn post scheduled: ${linkedinPost.category} fact at ${scheduledTime.toISOString()}`,
+            );
+          } else {
+            console.error(`💼 LinkedIn post failed: HTTP ${response.status}`);
+          }
+        } else {
+          cronResults.linkedinPost = {
+            success: false,
+            error: 'Missing Succulent API credentials',
+            executionTimeMs: linkedinExecutionTime,
+          };
+        }
+      } else {
+        const linkedinExecutionTime = Date.now() - linkedinStartTime;
+        console.log('💼 Not a LinkedIn posting day (Tue/Wed/Thu only)');
+        cronResults.linkedinPost = {
+          success: true,
+          skipped: true,
+          reason: 'Not a posting day (Tue/Wed/Thu only)',
+          executionTimeMs: linkedinExecutionTime,
+        };
+      }
+    } catch (error) {
+      const linkedinExecutionTime = Date.now() - linkedinStartTime;
+      console.error('💼 LinkedIn post failed:', error);
+      cronResults.linkedinPost = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        executionTimeMs: linkedinExecutionTime,
+      };
+    }
+
+    // DAILY TASKS (Every day) - Twitter Standalone Posts
+    console.log('🐦 Generating Twitter standalone posts...');
+    const twitterStartTime = Date.now();
+    try {
+      const { generateTwitterPosts } =
+        await import('@/lib/social/standalone-content');
+      const twitterPosts = generateTwitterPosts(dateStr);
+      const twitterExecutionTime = Date.now() - twitterStartTime;
+
+      const succulentApiUrl = 'https://app.succulent.social/api/posts';
+      const apiKey = process.env.SUCCULENT_SECRET_KEY;
+      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+      const twitterResults: Array<{
+        scheduledTime: string;
+        postType: string;
+        category: string;
+        status: string;
+        error?: string;
+      }> = [];
+
+      if (apiKey && accountGroupId) {
+        for (const post of twitterPosts) {
+          try {
+            const scheduledTime = new Date(
+              `${dateStr}T${String(post.scheduledHour).padStart(2, '0')}:00:00Z`,
+            );
+            const readableDate = scheduledTime.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            });
+
+            const postData = {
+              accountGroupId,
+              name: `Twitter - ${readableDate} - ${post.postType} (${post.category})`,
+              content: post.content,
+              platforms: ['x'],
+              scheduledDate: scheduledTime.toISOString(),
+              media: [],
+            };
+
+            const response = await fetch(succulentApiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': apiKey,
+              },
+              body: JSON.stringify(postData),
+            });
+
+            twitterResults.push({
+              scheduledTime: scheduledTime.toISOString(),
+              postType: post.postType,
+              category: post.category,
+              status: response.ok ? 'success' : 'error',
+              ...(response.ok ? {} : { error: `HTTP ${response.status}` }),
+            });
+          } catch (postError) {
+            twitterResults.push({
+              scheduledTime: '',
+              postType: post.postType,
+              category: post.category,
+              status: 'error',
+              error:
+                postError instanceof Error
+                  ? postError.message
+                  : 'Unknown error',
+            });
+          }
+        }
+      }
+
+      const successCount = twitterResults.filter(
+        (r) => r.status === 'success',
+      ).length;
+      console.log(
+        `🐦 Twitter: ${twitterPosts.length} posts generated, ${successCount} sent in ${twitterExecutionTime}ms`,
+      );
+
+      cronResults.twitterStandalone = {
+        success: true,
+        postCount: twitterPosts.length,
+        sentCount: successCount,
+        posts: twitterResults,
+        executionTimeMs: twitterExecutionTime,
+      };
+    } catch (error) {
+      const twitterExecutionTime = Date.now() - twitterStartTime;
+      console.error('🐦 Twitter standalone posts failed:', error);
+      cronResults.twitterStandalone = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        executionTimeMs: twitterExecutionTime,
+      };
+    }
+
+    // DAILY TASKS (Every day) - Bluesky Standalone Posts
+    console.log('🦋 Generating Bluesky standalone posts...');
+    const blueskyStartTime = Date.now();
+    try {
+      const { generateBlueskyPosts } =
+        await import('@/lib/social/standalone-content');
+      const blueskyPosts = generateBlueskyPosts(dateStr);
+      const blueskyExecutionTime = Date.now() - blueskyStartTime;
+
+      const succulentApiUrl = 'https://app.succulent.social/api/posts';
+      const apiKey = process.env.SUCCULENT_SECRET_KEY;
+      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+      const blueskyResults: Array<{
+        scheduledTime: string;
+        postType: string;
+        category: string;
+        status: string;
+        error?: string;
+      }> = [];
+
+      if (apiKey && accountGroupId) {
+        for (const post of blueskyPosts) {
+          try {
+            const scheduledTime = new Date(
+              `${dateStr}T${String(post.scheduledHour).padStart(2, '0')}:00:00Z`,
+            );
+            const readableDate = scheduledTime.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            });
+
+            const postData = {
+              accountGroupId,
+              name: `Bluesky - ${readableDate} - ${post.postType} (${post.category})`,
+              content: post.content,
+              platforms: ['bluesky'],
+              scheduledDate: scheduledTime.toISOString(),
+              media: [],
+            };
+
+            const response = await fetch(succulentApiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': apiKey,
+              },
+              body: JSON.stringify(postData),
+            });
+
+            blueskyResults.push({
+              scheduledTime: scheduledTime.toISOString(),
+              postType: post.postType,
+              category: post.category,
+              status: response.ok ? 'success' : 'error',
+              ...(response.ok ? {} : { error: `HTTP ${response.status}` }),
+            });
+          } catch (postError) {
+            blueskyResults.push({
+              scheduledTime: '',
+              postType: post.postType,
+              category: post.category,
+              status: 'error',
+              error:
+                postError instanceof Error
+                  ? postError.message
+                  : 'Unknown error',
+            });
+          }
+        }
+      }
+
+      const successCount = blueskyResults.filter(
+        (r) => r.status === 'success',
+      ).length;
+      console.log(
+        `🦋 Bluesky: ${blueskyPosts.length} posts generated, ${successCount} sent in ${blueskyExecutionTime}ms`,
+      );
+
+      cronResults.blueskyStandalone = {
+        success: true,
+        postCount: blueskyPosts.length,
+        sentCount: successCount,
+        posts: blueskyResults,
+        executionTimeMs: blueskyExecutionTime,
+      };
+    } catch (error) {
+      const blueskyExecutionTime = Date.now() - blueskyStartTime;
+      console.error('🦋 Bluesky standalone posts failed:', error);
+      cronResults.blueskyStandalone = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        executionTimeMs: blueskyExecutionTime,
+      };
+    }
+
+    // DAILY TASKS (Every day) - Pinterest Evergreen Pins
+    console.log('📌 Generating Pinterest evergreen pins...');
+    const pinterestStartTime = Date.now();
+    try {
+      const { generatePinterestPins } =
+        await import('@/lib/pinterest/evergreen-content');
+      const pinterestPins = generatePinterestPins(dateStr);
+      const pinterestExecutionTime = Date.now() - pinterestStartTime;
+
+      const succulentApiUrl = 'https://app.succulent.social/api/posts';
+      const apiKey = process.env.SUCCULENT_SECRET_KEY;
+      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+      const pinterestResults: Array<{
+        scheduledTime: string;
+        title: string;
+        category: string;
+        status: string;
+        error?: string;
+      }> = [];
+
+      if (apiKey && accountGroupId) {
+        for (const pin of pinterestPins) {
+          try {
+            const scheduledTime = new Date(
+              `${dateStr}T${String(pin.scheduledHour).padStart(2, '0')}:00:00Z`,
+            );
+            const readableDate = scheduledTime.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            });
+
+            const postData = {
+              accountGroupId,
+              name: `Pinterest - ${readableDate} - ${pin.title}`,
+              content: pin.description,
+              platforms: ['pinterest'],
+              scheduledDate: scheduledTime.toISOString(),
+              media: [],
+              pinterestOptions: {
+                boardId:
+                  process.env.SUCCULENT_PINTEREST_BOARD_ID ||
+                  'lunaryapp/lunary',
+                boardName:
+                  process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
+                title: pin.title,
+              },
+            };
+
+            const response = await fetch(succulentApiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': apiKey,
+              },
+              body: JSON.stringify(postData),
+            });
+
+            pinterestResults.push({
+              scheduledTime: scheduledTime.toISOString(),
+              title: pin.title,
+              category: pin.category,
+              status: response.ok ? 'success' : 'error',
+              ...(response.ok ? {} : { error: `HTTP ${response.status}` }),
+            });
+          } catch (postError) {
+            pinterestResults.push({
+              scheduledTime: '',
+              title: pin.title,
+              category: pin.category,
+              status: 'error',
+              error:
+                postError instanceof Error
+                  ? postError.message
+                  : 'Unknown error',
+            });
+          }
+        }
+      }
+
+      const successCount = pinterestResults.filter(
+        (r) => r.status === 'success',
+      ).length;
+      console.log(
+        `📌 Pinterest: ${pinterestPins.length} pins generated, ${successCount} sent in ${pinterestExecutionTime}ms`,
+      );
+
+      cronResults.pinterestEvergreen = {
+        success: true,
+        pinCount: pinterestPins.length,
+        sentCount: successCount,
+        pins: pinterestResults,
+        executionTimeMs: pinterestExecutionTime,
+      };
+    } catch (error) {
+      const pinterestExecutionTime = Date.now() - pinterestStartTime;
+      console.error('📌 Pinterest evergreen pins failed:', error);
+      cronResults.pinterestEvergreen = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        executionTimeMs: pinterestExecutionTime,
+      };
+    }
+
+    // DAILY TASKS (Every day) - Instagram Stories (5 per day, IG-only)
+    console.log('📖 Generating Instagram stories...');
+    const storiesStartTime = Date.now();
+    try {
+      const { generateDailyStoryData } =
+        await import('@/lib/instagram/story-content');
+      const { seededRandom } = await import('@/lib/instagram/ig-utils');
+
+      const storyItems = generateDailyStoryData(dateStr); // [moon, tarot, dyk, cosmic]
+
+      // Generate quote story from DB (slot 3, separate seed to avoid feed collision)
+      let quoteText = 'The cosmos is within us. We are made of star-stuff.';
+      let quoteAuthor = 'Carl Sagan';
+      try {
+        const quoteResult = await sql`
+          SELECT id, quote_text, author
+          FROM social_quotes
+          WHERE status = 'available'
+          ORDER BY use_count ASC, created_at ASC
+          LIMIT 50
+        `;
+        if (quoteResult.rows.length > 0) {
+          const quoteRng = seededRandom(`story-quote-${dateStr}`);
+          const quoteIndex = Math.floor(quoteRng() * quoteResult.rows.length);
+          const quote = quoteResult.rows[quoteIndex];
+          quoteText = quote.quote_text;
+          quoteAuthor = quote.author || 'Lunary';
+          await sql`
+            UPDATE social_quotes
+            SET use_count = use_count + 1, used_at = NOW(), updated_at = NOW()
+            WHERE id = ${quote.id}
+          `;
+        }
+      } catch (quoteError) {
+        console.warn(
+          '[Stories] Failed to fetch quote, using fallback:',
+          quoteError,
+        );
+      }
+
+      const quoteStory = {
+        variant: 'quote' as const,
+        title: quoteText,
+        subtitle: quoteAuthor,
+        params: {
+          text:
+            quoteAuthor !== 'Lunary'
+              ? `${quoteText} - ${quoteAuthor}`
+              : quoteText,
+          format: 'story',
+          v: '4',
+        },
+        endpoint: '/api/og/social-quote',
+      };
+
+      // Assemble 5 stories: moon, tarot, quote, dyk, cosmic
+      const allStories = [
+        storyItems[0], // moon
+        storyItems[1], // tarot
+        quoteStory, // quote
+        storyItems[2], // dyk
+        storyItems[3], // cosmic
+      ];
+      const storyUtcHours = [9, 11, 13, 16, 19];
+
+      const SHARE_BASE_URL =
+        process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+      const succulentApiUrl = 'https://app.succulent.social/api/posts';
+      const apiKey = process.env.SUCCULENT_SECRET_KEY;
+      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+
+      const storySentResults: Array<{
+        scheduledTime: string;
+        variant: string;
+        status: string;
+        error?: string;
+      }> = [];
+
+      if (apiKey && accountGroupId) {
+        for (let i = 0; i < allStories.length; i++) {
+          const story = allStories[i];
+          const utcHour = storyUtcHours[i];
+          const scheduledTime = new Date(
+            `${dateStr}T${String(utcHour).padStart(2, '0')}:00:00Z`,
+          );
+
+          const imageParams = new URLSearchParams(story.params);
+          const imageUrl = `${SHARE_BASE_URL}${story.endpoint}?${imageParams.toString()}`;
+
+          const readableDate = scheduledTime.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          });
+
+          try {
+            const postData = {
+              accountGroupId,
+              name: `IG Story - ${readableDate} - ${story.variant}`,
+              content: '',
+              platforms: ['instagram'],
+              scheduledDate: scheduledTime.toISOString(),
+              media: [{ type: 'image', url: imageUrl, alt: story.title }],
+              instagramOptions: { isStory: true },
+            };
+
+            const response = await fetch(succulentApiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': apiKey,
+              },
+              body: JSON.stringify(postData),
+            });
+
+            if (response.ok) {
+              storySentResults.push({
+                scheduledTime: scheduledTime.toISOString(),
+                variant: story.variant,
+                status: 'success',
+              });
+            } else {
+              const errorText = await response.text();
+              storySentResults.push({
+                scheduledTime: scheduledTime.toISOString(),
+                variant: story.variant,
+                status: 'error',
+                error: `HTTP ${response.status}: ${errorText.slice(0, 200)}`,
+              });
+            }
+          } catch (postError) {
+            storySentResults.push({
+              scheduledTime: scheduledTime.toISOString(),
+              variant: story.variant,
+              status: 'error',
+              error:
+                postError instanceof Error
+                  ? postError.message
+                  : 'Unknown error',
+            });
+          }
+        }
+      }
+
+      const storySuccessCount = storySentResults.filter(
+        (r) => r.status === 'success',
+      ).length;
+      const storiesExecutionTime = Date.now() - storiesStartTime;
+      console.log(
+        `📖 Instagram stories: ${allStories.length} generated, ${storySuccessCount} sent in ${storiesExecutionTime}ms`,
+      );
+
+      cronResults.instagramStories = {
+        success: true,
+        storyCount: allStories.length,
+        sentCount: storySuccessCount,
+        stories: storySentResults,
+        executionTimeMs: storiesExecutionTime,
+      };
+    } catch (error) {
+      const storiesExecutionTime = Date.now() - storiesStartTime;
+      console.error('📖 Instagram stories failed:', error);
+      cronResults.instagramStories = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        executionTimeMs: storiesExecutionTime,
+      };
+    }
+
     // DAILY TASKS (Every day) - Push Notifications for Cosmic Events
     console.log('🔔 Checking for notification-worthy cosmic events...');
     const notificationStartTime = Date.now();
@@ -3657,6 +4211,7 @@ function buildRetrogradeTextPosts({
       platformHashtags.threads,
       'retrograde',
       retroCtx,
+      0,
     );
 
     // X/Twitter: compact with CTA
@@ -3784,6 +4339,7 @@ function buildIngressTextPosts({
       platformHashtags.threads,
       'transit',
       ingressCtx,
+      0,
     );
 
     // X/Twitter: compact with CTA
@@ -3943,6 +4499,7 @@ function buildAspectTextPosts({
       platformHashtags.threads,
       'aspect',
       aspectCtx,
+      0,
     );
 
     // X/Twitter: compact with CTA
@@ -4032,6 +4589,7 @@ function buildEgressTextPosts({
       platformHashtags.threads,
       'transit',
       egressCtx,
+      0,
     );
 
     // X/Twitter: compact with CTA
@@ -4122,6 +4680,7 @@ function buildSupermoonTextPosts({
     platformHashtags.threads,
     'moon',
     moonCtx,
+    0,
   );
 
   // X/Twitter: compact with CTA
@@ -4207,6 +4766,7 @@ function buildMicromoonTextPosts({
     platformHashtags.threads,
     'moon',
     microCtx,
+    0,
   );
 
   // X/Twitter: compact with CTA
@@ -4412,6 +4972,7 @@ function buildMoonPhaseTextPosts({
     platformHashtags.threads,
     'moon',
     phaseCtx,
+    0,
   );
 
   // X/Twitter: compact with CTA
@@ -4653,6 +5214,7 @@ function buildTransitMilestoneTextPosts({
       platformHashtags.threads,
       'transit',
       milestoneCtx,
+      0,
     );
     const xContent = addEventHashtags(
       xBody,
@@ -4740,6 +5302,7 @@ function buildCountdownTextPosts({
       platformHashtags.threads,
       countdownEventType,
       countdownCtx,
+      0,
     );
 
     // X: compact

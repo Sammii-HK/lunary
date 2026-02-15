@@ -14,6 +14,7 @@ import {
 
 let robotoMonoPromise: Promise<ArrayBuffer> | null = null;
 let astronomiconPromise: Promise<ArrayBuffer> | null = null;
+let notoSansRunicPromise: Promise<ArrayBuffer> | null = null;
 
 const loadRobotoMono = async (request: Request) => {
   if (!robotoMonoPromise) {
@@ -43,9 +44,23 @@ const loadAstronomicon = async (request: Request) => {
   return astronomiconPromise;
 };
 
+const loadNotoSansRunic = async (request: Request) => {
+  if (!notoSansRunicPromise) {
+    notoSansRunicPromise = fetch(
+      new URL('/fonts/NotoSansRunic-Regular.ttf', request.url),
+      { cache: 'force-cache' },
+    ).then((res) => {
+      if (!res.ok)
+        throw new Error(`Noto Sans Runic font fetch failed: ${res.status}`);
+      return res.arrayBuffer();
+    });
+  }
+  return notoSansRunicPromise;
+};
+
 export async function loadIGFonts(
   request: Request,
-  options?: { includeAstronomicon?: boolean },
+  options?: { includeAstronomicon?: boolean; includeRunic?: boolean },
 ) {
   const fonts: Array<{
     name: string;
@@ -65,6 +80,15 @@ export async function loadIGFonts(
     fonts.push({
       name: 'Astronomicon',
       data: await loadAstronomicon(request),
+      style: 'normal',
+      weight: 400,
+    });
+  }
+
+  if (options?.includeRunic) {
+    fonts.push({
+      name: 'Noto Sans Runic',
+      data: await loadNotoSansRunic(request),
       style: 'normal',
       weight: 400,
     });
