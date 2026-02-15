@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getImageBaseUrl } from '@/lib/urls';
 import { getPlatformImageFormat } from '@/lib/social/educational-images';
+import { postToSocialMultiPlatform } from '@/lib/social/client';
 
 interface PostContent {
   date: string;
@@ -13,50 +14,12 @@ interface PostContent {
   callToAction: string;
 }
 
-interface SucculentPostData {
-  accountGroupId: string;
-  name?: string;
-  content: string;
-  platforms: string[];
-  scheduledDate: string;
-  media: Array<{
-    type: 'image';
-    url: string;
-    alt: string;
-  }>;
-  variants?: Record<string, { content: string; media?: string[] }>;
-}
-
 export async function POST(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const monthParam = searchParams.get('month'); // Format: 2024-02 for February 2024
-    const testMode = searchParams.get('test') === 'true';
 
-    // Get environment variables
-    const apiKey = process.env.SUCCULENT_SECRET_KEY;
-    const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
-
-    // Get the base URL for the application (dev vs prod)
-    // Use production URL on any Vercel deployment
     const baseUrl = getImageBaseUrl();
-
-    console.log('🔑 Monthly scheduler environment check:', {
-      hasApiKey: !!apiKey,
-      hasAccountGroupId: !!accountGroupId,
-      baseUrl,
-      nodeEnv: process.env.NODE_ENV,
-    });
-
-    if (!apiKey || !accountGroupId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing Succulent API configuration',
-        },
-        { status: 500 },
-      );
-    }
 
     // Parse target month or default to next month
     let targetMonth: Date;
@@ -70,12 +33,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate posts for the entire month
-    const posts: SucculentPostData[] = [];
     const daysInMonth = new Date(
       targetMonth.getFullYear(),
       targetMonth.getMonth() + 1,
       0,
     ).getDate();
+
+    const results = [];
+    let successCount = 0;
+    let errorCount = 0;
 
     for (let day = 1; day <= daysInMonth; day++) {
       const currentDate = new Date(
@@ -95,19 +61,16 @@ export async function POST(request: NextRequest) {
           `Failed to fetch cosmic content for ${dateStr}:`,
           cosmicResponse.status,
         );
-        continue; // Skip this date if cosmic content fails
+        continue;
       }
 
       const cosmicContent: PostContent = await cosmicResponse.json();
-
-      // Format the social media post
       const socialContent = formatCosmicPost(cosmicContent, dateStr);
 
       // Schedule post for 1 PM local time on the target date
       const scheduledDateTime = new Date(currentDate);
       scheduledDateTime.setHours(13, 0, 0, 0);
 
-      // Format readable date
       const formattedDate = scheduledDateTime.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
@@ -120,97 +83,70 @@ export async function POST(request: NextRequest) {
       });
       const readableDate = `${formattedDate} at ${formattedTime}`;
 
-      // Ensure image URL uses the correct base URL
       const getCosmicFormat = (platform: string) =>
         getPlatformImageFormat(platform === 'x' ? 'twitter' : platform);
       const buildCosmicImageUrl = (platform: string) =>
         `${baseUrl}/api/og/cosmic/${dateStr}?format=${getCosmicFormat(platform)}`;
 
-      const postData: SucculentPostData = {
-        accountGroupId,
-        name: `Cosmic Post - ${readableDate}`,
-        content: socialContent,
-        platforms: ['instagram', 'x', 'facebook', 'linkedin'],
-        scheduledDate: scheduledDateTime.toISOString(),
-        media: [
-          {
-            type: 'image',
-            url: buildCosmicImageUrl('instagram'),
-            alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`,
-          },
-        ],
-        variants: {
-          x: {
-            content: socialContent,
-            media: [buildCosmicImageUrl('twitter')],
-          },
-          facebook: {
-            content: socialContent,
-            media: [buildCosmicImageUrl('facebook')],
-          },
-          linkedin: {
-            content: socialContent,
-            media: [buildCosmicImageUrl('linkedin')],
-          },
-        },
-      };
-
-      console.log(`📅 Post prepared for ${dateStr}:`, {
-        contentLength: postData.content.length,
-        imageUrl: postData.media[0].url,
-        scheduledDate: postData.scheduledDate,
-      });
-
-      posts.push(postData);
-    }
-
-    // Send posts to Succulent API
-    const succulentApiUrl = testMode
-      ? 'http://localhost:3001/api/posts'
-      : 'https://app.succulent.social/api/posts';
-
-    const results = [];
-    let successCount = 0;
-    let errorCount = 0;
-
-    for (const post of posts) {
       try {
-        const response = await fetch(succulentApiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-API-Key': apiKey,
+        const { results: platformResults } = await postToSocialMultiPlatform({
+          platforms: ['instagram', 'x', 'facebook', 'linkedin'],
+          content: socialContent,
+          scheduledDate: scheduledDateTime.toISOString(),
+          name: `Cosmic Post - ${readableDate}`,
+          media: [
+            {
+              type: 'image',
+              url: buildCosmicImageUrl('instagram'),
+              alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`,
+            },
+          ],
+          variants: {
+            x: {
+              content: socialContent,
+              media: [buildCosmicImageUrl('twitter')],
+            },
+            facebook: {
+              content: socialContent,
+              media: [buildCosmicImageUrl('facebook')],
+            },
+            linkedin: {
+              content: socialContent,
+              media: [buildCosmicImageUrl('linkedin')],
+            },
           },
-          body: JSON.stringify(post),
         });
 
-        const result = await response.json();
-
-        if (response.ok) {
+        const anySuccess = Object.values(platformResults).some(
+          (r) => r.success,
+        );
+        if (anySuccess) {
           successCount++;
           results.push({
-            date: post.scheduledDate.split('T')[0],
+            date: dateStr,
             status: 'success',
-            postId: result.data?.postId,
           });
         } else {
           errorCount++;
+          const firstError = Object.values(platformResults).find(
+            (r) => r.error,
+          );
           results.push({
-            date: post.scheduledDate.split('T')[0],
+            date: dateStr,
             status: 'error',
-            error: result.error || 'Unknown error',
+            error: firstError?.error || 'Unknown error',
           });
         }
       } catch (error) {
         errorCount++;
         results.push({
-          date: post.scheduledDate.split('T')[0],
+          date: dateStr,
           status: 'error',
           error: error instanceof Error ? error.message : 'Network error',
         });
       }
 
-      // Add small delay between requests to be respectful
+      // Add small delay between requests
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
@@ -218,7 +154,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: `Scheduled ${successCount} posts for ${targetMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
       summary: {
-        totalPosts: posts.length,
+        totalPosts: successCount + errorCount,
         successful: successCount,
         failed: errorCount,
         month: targetMonth.toLocaleDateString('en-US', {

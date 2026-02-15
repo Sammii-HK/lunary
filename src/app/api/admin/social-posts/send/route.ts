@@ -5,6 +5,7 @@ import { categoryThemes } from '@/lib/social/weekly-themes';
 import { recordThemeUsage } from '@/lib/social/thematic-generator';
 import { getImageBaseUrl } from '@/lib/urls';
 import { sanitizeForLog } from '@/lib/security/log-sanitize';
+import { postToSocialMultiPlatform } from '@/lib/social/client';
 
 type DbPostRow = {
   id: number;
@@ -247,26 +248,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.SUCCULENT_SECRET_KEY;
-    const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
-
-    if (!apiKey || !accountGroupId) {
-      return NextResponse.json(
-        { success: false, error: 'Succulent API not configured' },
-        { status: 500 },
-      );
-    }
-
     const baseUrl = getImageBaseUrl();
-
-    // Ensure accountGroupId is a string
-    const accountGroupIdStr = String(accountGroupId).trim();
-    if (!accountGroupIdStr) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid accountGroupId' },
-        { status: 500 },
-      );
-    }
 
     // Parse scheduled date
     let scheduleDate: Date;
@@ -442,94 +424,32 @@ export async function POST(request: NextRequest) {
     }
 
     const readableDate = formatReadableDate(scheduleDate);
-    const postData: any = {
-      accountGroupId: accountGroupIdStr,
-      name: `Lunary Post - ${readableDate}`,
-      content: basePayload.content,
+
+    console.log('📤 Sending via social client:', {
       platforms: Array.from(platformsToSend),
+      contentLength: basePayload.content.length,
+      mediaCount: basePayload.media.length,
+      scheduledDate: scheduleDate.toISOString(),
+    });
+
+    const { results: platformResults } = await postToSocialMultiPlatform({
+      platforms: Array.from(platformsToSend),
+      content: basePayload.content,
       scheduledDate: scheduleDate.toISOString(),
       media: basePayload.media,
-    };
-
-    if (Object.keys(variants).length > 0) {
-      postData.variants = variants;
-    }
-
-    if (redditData) {
-      postData.reddit = redditData;
-    }
-
-    if (pinterestOptions) {
-      postData.pinterestOptions = pinterestOptions;
-    }
-
-    if (tiktokOptions) {
-      postData.tiktokOptions = tiktokOptions;
-    }
-
-    if (instagramOptions) {
-      postData.instagramOptions = instagramOptions;
-    }
-
-    const succulentApiUrl = 'https://app.succulent.social/api/posts';
-
-    // Validate and stringify JSON
-    let jsonBody: string;
-    try {
-      jsonBody = JSON.stringify(postData);
-      console.log('📤 Sending to Succulent:', {
-        url: succulentApiUrl,
-        postData: JSON.parse(jsonBody), // Parse back to log nicely
-        jsonLength: jsonBody.length,
-      });
-    } catch (jsonError) {
-      console.error('❌ Failed to stringify post data:', jsonError);
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Failed to serialize post data: ${jsonError instanceof Error ? jsonError.message : 'Unknown error'}`,
-        },
-        { status: 500 },
-      );
-    }
-
-    const response = await fetch(succulentApiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': apiKey,
-      },
-      body: jsonBody,
+      name: `Lunary Post - ${readableDate}`,
+      variants: Object.keys(variants).length > 0 ? variants : undefined,
+      reddit: redditData,
+      pinterestOptions,
+      tiktokOptions,
+      instagramOptions,
     });
 
-    let responseData;
-    const contentType = response.headers.get('content-type');
-    const responseText = await response.text();
+    const anySuccess = Object.values(platformResults).some((r) => r.success);
 
-    try {
-      responseData = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('❌ Failed to parse Succulent response:', {
-        status: response.status,
-        statusText: response.statusText,
-        contentType,
-        responseText: responseText.substring(0, 500),
-      });
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Invalid JSON response from Succulent: ${responseText.substring(0, 200)}`,
-        },
-        { status: 500 },
-      );
-    }
+    console.log('📥 Social client response:', platformResults);
 
-    console.log('📥 Succulent response:', {
-      status: response.status,
-      data: responseData,
-    });
-
-    if (response.ok) {
+    if (anySuccess) {
       // Update status to 'sent' for all posts in the group (or just the single post)
       console.log('🔄 Updating post status to sent...', {
         postId,
@@ -634,23 +554,22 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'Post sent to Succulent successfully',
-        postId: responseData.data?.postId || responseData.postId,
+        message: 'Post sent successfully',
+        results: platformResults,
       });
     } else {
+      const firstError = Object.values(platformResults).find((r) => r.error);
       return NextResponse.json(
         {
           success: false,
-          error:
-            responseData.error ||
-            responseData.message ||
-            `HTTP ${response.status}: ${response.statusText}`,
+          error: firstError?.error || 'All platforms failed',
+          results: platformResults,
         },
-        { status: response.status },
+        { status: 500 },
       );
     }
   } catch (error) {
-    console.error('Error sending post to Succulent:', error);
+    console.error('Error sending post:', error);
     return NextResponse.json(
       {
         success: false,

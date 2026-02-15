@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { sanitizeForLog as sanitize } from '@/lib/security/log-sanitize';
+import { postToSocial } from '@/lib/social/client';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -75,9 +76,6 @@ export async function POST(request: NextRequest) {
       youtube?: PlatformResult;
     } = {};
 
-    const apiKey = process.env.SUCCULENT_SECRET_KEY;
-    const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
-    const succulentApiUrl = 'https://app.succulent.social/api/posts';
     const dateStr = new Date().toISOString().split('T')[0];
     const now = new Date();
     const scheduledDate = new Date(now);
@@ -89,199 +87,93 @@ export async function POST(request: NextRequest) {
 
     // Post to TikTok
     if (platforms.includes('tiktok')) {
-      if (!apiKey || !accountGroupId) {
+      try {
+        const result = await postToSocial({
+          platform: 'tiktok',
+          content: postContent,
+          scheduledDate: scheduledDateIso,
+          media: [{ type: 'video', url: videoUrl, alt: title }],
+        });
+        results.tiktok = { success: result.success, error: result.error };
+        if (result.success) {
+          console.log(`✅ Posted video ${sanitizedVideoId} to TikTok`);
+        } else {
+          console.error(`❌ Failed to post to TikTok: ${result.error}`);
+        }
+      } catch (error) {
         results.tiktok = {
           success: false,
-          error: 'Succulent API not configured',
+          error: error instanceof Error ? error.message : 'Unknown error',
         };
-      } else {
-        try {
-          const tiktokPost = {
-            accountGroupId,
-            name: `Lunary ${videoType} - TikTok - ${dateStr}`,
-            content: postContent,
-            platforms: ['tiktok'],
-            media: [{ type: 'video' as const, url: videoUrl, alt: title }],
-            scheduledDate: scheduledDateIso,
-          };
-
-          const response = await fetch(succulentApiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-API-Key': apiKey,
-            },
-            body: JSON.stringify(tiktokPost),
-          });
-
-          if (response.ok) {
-            results.tiktok = { success: true };
-            console.log(`✅ Posted video ${sanitizedVideoId} to TikTok`);
-          } else {
-            const error = await response.text();
-            results.tiktok = {
-              success: false,
-              error: `${response.status}: ${error}`,
-            };
-            console.error(`❌ Failed to post to TikTok: ${error}`);
-          }
-        } catch (error) {
-          results.tiktok = {
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
-          };
-        }
       }
     }
 
     // Post to Instagram Reels/Stories
     if (platforms.includes('instagram')) {
-      if (!apiKey || !accountGroupId) {
+      try {
+        const result = await postToSocial({
+          platform: 'instagram',
+          content: postContent,
+          scheduledDate: scheduledDateIso,
+          media: [{ type: 'video', url: videoUrl, alt: title }],
+          platformSettings:
+            videoType === 'short'
+              ? { stories: true }
+              : { type: 'reel' as const },
+        });
+        results.instagram = { success: result.success, error: result.error };
+        if (result.success) {
+          console.log(
+            `✅ Posted video ${sanitizedVideoId} to Instagram ${videoType === 'short' ? 'Stories' : 'Reels'}`,
+          );
+        } else {
+          console.error(`❌ Failed to post to Instagram: ${result.error}`);
+        }
+      } catch (error) {
         results.instagram = {
           success: false,
-          error: 'Succulent API not configured',
+          error: error instanceof Error ? error.message : 'Unknown error',
         };
-      } else {
-        try {
-          const instagramPost = {
-            accountGroupId,
-            name: `Lunary ${videoType} - Instagram ${videoType === 'short' ? 'Story' : 'Reel'} - ${dateStr}`,
-            content: postContent,
-            platforms: ['instagram'],
-            media: [{ type: 'video' as const, url: videoUrl, alt: title }],
-            instagramOptions:
-              videoType === 'short'
-                ? { stories: true }
-                : { type: 'reel' as const },
-            scheduledDate: scheduledDateIso,
-          };
-
-          const response = await fetch(succulentApiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-API-Key': apiKey,
-            },
-            body: JSON.stringify(instagramPost),
-          });
-
-          if (response.ok) {
-            results.instagram = { success: true };
-            console.log(
-              `✅ Posted video ${sanitizedVideoId} to Instagram ${videoType === 'short' ? 'Stories' : 'Reels'}`,
-            );
-          } else {
-            const error = await response.text();
-            results.instagram = {
-              success: false,
-              error: `${response.status}: ${error}`,
-            };
-            console.error(`❌ Failed to post to Instagram: ${error}`);
-          }
-        } catch (error) {
-          results.instagram = {
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
-          };
-        }
       }
     }
 
-    // Upload to YouTube (long form) or schedule Shorts via Succulent
+    // Upload to YouTube via direct API
     if (platforms.includes('youtube')) {
-      if (videoType !== 'long') {
-        if (!apiKey || !accountGroupId) {
-          results.youtube = {
-            success: false,
-            error: 'Succulent API not configured',
-          };
-        } else {
-          try {
-            const youtubeShortPost = {
-              accountGroupId,
-              name: `Lunary ${videoType} - YouTube Short - ${dateStr}`,
-              content: postContent,
-              platforms: ['youtube'],
-              media: [{ type: 'video' as const, url: videoUrl, alt: title }],
-              scheduledDate: scheduledDateIso,
-              youtubeOptions: {
-                title,
-                visibility: 'public',
-                isShort: true,
-                madeForKids: false,
-                playlistId:
-                  videoType === 'short'
-                    ? process.env.YOUTUBE_SHORTS_PLAYLIST_ID
-                    : process.env.YOUTUBE_WEEKLY_SERIES_PLAYLIST_ID,
-              },
-            };
-
-            const response = await fetch(succulentApiUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': apiKey,
-              },
-              body: JSON.stringify(youtubeShortPost),
-            });
-
-            if (response.ok) {
-              results.youtube = { success: true };
-              console.log(
-                `✅ Scheduled video ${sanitizedVideoId} to YouTube Shorts`,
-              );
-            } else {
-              const error = await response.text();
-              results.youtube = {
-                success: false,
-                error: `${response.status}: ${error}`,
-              };
-              console.error(`❌ Failed to schedule YouTube Shorts: ${error}`);
-            }
-          } catch (error) {
-            results.youtube = {
-              success: false,
-              error: error instanceof Error ? error.message : 'Unknown error',
-            };
-          }
-        }
-      } else {
-        try {
-          const youtubeResponse = await fetch('/api/youtube/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              videoUrl,
-              videoId,
-              title,
-              description,
-              type: 'long',
-              publishDate: scheduledDateIso,
-            }),
-          });
-
-          if (youtubeResponse.ok) {
-            results.youtube = { success: true };
-            console.log(`✅ Uploaded video ${sanitizedVideoId} to YouTube`);
-
-            // Update video status to uploaded
+      try {
+        const result = await postToSocial({
+          platform: 'youtube',
+          content: postContent,
+          scheduledDate: scheduledDateIso,
+          media: [{ type: 'video', url: videoUrl, alt: title }],
+          youtubeOptions: {
+            title,
+            visibility: 'public',
+            isShort: videoType !== 'long',
+            madeForKids: false,
+            playlistId:
+              videoType === 'short'
+                ? process.env.YOUTUBE_SHORTS_PLAYLIST_ID
+                : videoType === 'long'
+                  ? process.env.YOUTUBE_LONG_FORM_PLAYLIST_ID
+                  : process.env.YOUTUBE_WEEKLY_SERIES_PLAYLIST_ID,
+          },
+        });
+        results.youtube = { success: result.success, error: result.error };
+        if (result.success) {
+          console.log(`✅ Posted video ${sanitizedVideoId} to YouTube`);
+          if (videoType === 'long') {
             await sql`
               UPDATE videos SET status = 'uploaded' WHERE id = ${videoId}
             `;
-          } else {
-            const error = await youtubeResponse.text();
-            results.youtube = {
-              success: false,
-              error: `${youtubeResponse.status}: ${error}`,
-            };
-            console.error(`❌ Failed to upload to YouTube: ${error}`);
           }
-        } catch (error) {
-          results.youtube = {
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
-          };
+        } else {
+          console.error(`❌ Failed to post to YouTube: ${result.error}`);
         }
+      } catch (error) {
+        results.youtube = {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
       }
     }
 
@@ -301,7 +193,6 @@ export async function POST(request: NextRequest) {
         );
       } catch (updateError) {
         console.error('Failed to update video status:', updateError);
-        // Don't fail the request if status update fails
       }
     }
 

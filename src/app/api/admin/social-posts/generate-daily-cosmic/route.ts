@@ -18,20 +18,6 @@ interface PostContent {
   callToAction: string;
 }
 
-interface SucculentPostData {
-  accountGroupId: string;
-  name?: string;
-  content: string;
-  platforms: string[];
-  scheduledDate: string;
-  media: Array<{
-    type: 'image';
-    url: string;
-    alt: string;
-  }>;
-  variants?: Record<string, { content: string; media?: string[] }>;
-}
-
 function getWeeklyHashtags(date: string): string {
   const themes = [
     ['#weeklyhoroscope', '#astroforecast', '#weeklyastro'],
@@ -153,19 +139,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.SUCCULENT_SECRET_KEY;
-    const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
     const baseUrl = getImageBaseUrl();
-
-    if (!apiKey || !accountGroupId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing Succulent API configuration',
-        },
-        { status: 500 },
-      );
-    }
 
     const cosmicResponse = await fetch(
       `${baseUrl}/api/og/cosmic-post?date=${dateStr}`,
@@ -224,12 +198,13 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    const postData: SucculentPostData = {
-      accountGroupId,
-      name: `Cosmic Post - ${readableDate}`,
-      content: baseContent,
+    const { postToSocialMultiPlatform } = await import('@/lib/social/client');
+
+    const { results: platformResults } = await postToSocialMultiPlatform({
       platforms: ['instagram', 'tiktok'],
+      content: baseContent,
       scheduledDate: scheduledDate.toISOString(),
+      name: `Cosmic Post - ${readableDate}`,
       media: [
         {
           type: 'image',
@@ -238,42 +213,26 @@ export async function POST(request: NextRequest) {
         },
       ],
       variants,
-    };
-
-    const response = await fetch('https://app.succulent.social/api/posts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': apiKey,
-      },
-      body: JSON.stringify(postData),
     });
 
-    const responseText = await response.text();
-    let responseData: any = null;
-    try {
-      responseData = responseText ? JSON.parse(responseText) : null;
-    } catch (error) {
-      responseData = { raw: responseText };
-    }
+    const anySuccess = Object.values(platformResults).some((r) => r.success);
 
-    if (!response.ok) {
+    if (!anySuccess) {
+      const firstError = Object.values(platformResults).find((r) => r.error);
       return NextResponse.json(
         {
           success: false,
-          error:
-            responseData?.error ||
-            responseData?.message ||
-            `HTTP ${response.status}`,
+          error: firstError?.error || 'All platforms failed',
+          results: platformResults,
         },
-        { status: response.status },
+        { status: 500 },
       );
     }
 
     return NextResponse.json({
       success: true,
       message: `Scheduled daily cosmic post for ${dateStr}`,
-      postId: responseData?.data?.postId || responseData?.postId || null,
+      results: platformResults,
     });
   } catch (error) {
     console.error('Failed to generate daily cosmic post:', error);
