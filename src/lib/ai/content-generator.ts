@@ -5,26 +5,28 @@
  * Uses Vercel AI SDK with support for multiple providers.
  */
 
-import { generateText, generateObject, LanguageModel } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { generateText, LanguageModel } from 'ai';
+import { createOpenAI } from '@ai-sdk/openai';
 import { z, ZodSchema } from 'zod';
 
-// Model configurations for different quality/speed tradeoffs
-const createModels = () => ({
-  // High quality content generation (gpt-4o for better writing)
-  quality: openai('gpt-4o'),
-  // Fast, cost-effective generation
-  fast: openai('gpt-4o-mini'),
-  // Premium quality (using gpt-4o for now, can swap to Claude later)
-  premium: openai('gpt-4o'),
-});
+const LLM_MODEL = 'meta-llama/Llama-3.3-70B-Instruct';
 
+/** @deprecated Use default model — tiers removed. Kept for call-site compat. */
 export type AIModelKey = 'quality' | 'fast' | 'premium';
 
-const getModel = (key: AIModelKey): LanguageModel => {
-  const models = createModels();
-  return models[key] as LanguageModel;
-};
+/** Create DeepInfra model (lazy to ensure env vars are loaded at call time) */
+export function getDeepInfraModel(): LanguageModel {
+  const provider = createOpenAI({
+    baseURL: 'https://api.deepinfra.com/v1/openai',
+    apiKey: process.env.DEEPINFRA_API_KEY ?? '',
+  });
+  return provider.chat(LLM_MODEL) as LanguageModel;
+}
+
+/** @deprecated Use getDeepInfraModel() instead */
+export const deepinfraModel = null as unknown as LanguageModel;
+
+const getModel = (): LanguageModel => getDeepInfraModel();
 
 export type ContentGeneratorConfig = {
   /** Model quality tier - defaults to 'quality' */
@@ -71,7 +73,7 @@ export async function generateContent({
     : prompt;
 
   const result = await generateText({
-    model: getModel(model),
+    model: getModel(),
     system: systemPrompt,
     prompt: fullPrompt,
     temperature,
@@ -82,7 +84,21 @@ export async function generateContent({
 }
 
 /**
- * Generate structured content with schema validation using AI SDK
+ * Extract JSON from a response that may be wrapped in markdown code fences.
+ */
+function extractJSON(text: string): string {
+  // Strip markdown code fences (```json ... ``` or ``` ... ```)
+  const fenced = text.match(/```(?:json)?\s*\n?([\s\S]*?)```/);
+  if (fenced) return fenced[1].trim();
+  // Try to find raw JSON object/array
+  const jsonMatch = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+  if (jsonMatch) return jsonMatch[1].trim();
+  return text.trim();
+}
+
+/**
+ * Generate structured content with schema validation using AI SDK.
+ * Uses generateText + JSON parsing (more reliable with open-source models).
  */
 export async function generateStructuredContent<T extends ZodSchema>({
   prompt,
@@ -98,17 +114,21 @@ export async function generateStructuredContent<T extends ZodSchema>({
     ? `${prompt}\n\nFix these issues:\n${retryNote}`
     : prompt;
 
-  const result = await generateObject({
-    model: getModel(model),
-    system: systemPrompt,
-    prompt: fullPrompt,
-    schema,
-    schemaName,
+  // Convert Zod schema to JSON Schema for the prompt
+  const jsonSchema = JSON.stringify(z.toJSONSchema(schema), null, 2);
+  const jsonSystemPrompt = `${systemPrompt}\n\nIMPORTANT: Return ONLY valid JSON matching this exact schema. No markdown, no explanation, no code fences.\n\nJSON Schema:\n${jsonSchema}`;
+
+  const result = await generateText({
+    model: getModel(),
+    system: jsonSystemPrompt,
+    prompt: `${fullPrompt}\n\nReturn valid JSON only, matching the schema exactly.`,
     temperature,
     maxOutputTokens: maxTokens,
   });
 
-  return result.object as z.infer<T>;
+  const raw = extractJSON(result.text);
+  const parsed = JSON.parse(raw);
+  return schema.parse(parsed) as z.infer<T>;
 }
 
 /**
