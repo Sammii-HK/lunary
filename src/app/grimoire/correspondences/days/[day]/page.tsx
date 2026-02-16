@@ -11,45 +11,52 @@ const dayKeys = Object.keys(correspondencesData.days);
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
 
-// Day-specific meta descriptions with use cases
-const dayMetaInfo: Record<
-  string,
-  { titleSuffix: string; description: string }
-> = {
+const dayNumberMapping: Record<string, number> = {
+  Sunday: 1,
+  Monday: 2,
+  Tuesday: 9,
+  Wednesday: 5,
+  Thursday: 3,
+  Friday: 6,
+  Saturday: 8,
+};
+
+// Day-specific meta — informational-intent titles matching "wednesday ruling planet" queries
+const dayMetaInfo: Record<string, { title: string; description: string }> = {
   Sunday: {
-    titleSuffix: 'Sun Day for Success, Vitality & Confidence Spells',
+    title: "Sunday's Planet Is the Sun: Meaning, Energy & Magic",
     description:
-      'Sunday is ruled by the Sun. Best day for success spells, career magic, confidence rituals, healing work, and leadership. Use gold and yellow candles.',
+      'Sunday is ruled by the Sun. What this means for your energy, best activities, spells & rituals. Correspondences, candle colors & timing.',
   },
   Monday: {
-    titleSuffix: 'Moon Day for Intuition, Dreams & Emotional Magic',
+    title: "Monday's Planet Is the Moon: Meaning, Energy & Magic",
     description:
-      'Monday is ruled by the Moon. Best day for intuition, dream work, psychic development, emotional healing, and lunar magic. Use silver and white candles.',
+      'Monday is ruled by the Moon. What this means for your energy, best activities, spells & rituals. Correspondences, candle colors & timing.',
   },
   Tuesday: {
-    titleSuffix: 'Mars Day for Courage, Protection & Strength Spells',
+    title: "Tuesday's Planet Is Mars: Meaning, Energy & Magic",
     description:
-      'Tuesday is ruled by Mars. Best day for courage spells, protection magic, banishing enemies, physical strength, and overcoming obstacles. Use red candles.',
+      'Tuesday is ruled by Mars. What this means for your energy, best activities, spells & rituals. Correspondences, candle colors & timing.',
   },
   Wednesday: {
-    titleSuffix: 'Mercury Day for Communication, Travel & Study Magic',
+    title: "Wednesday's Planet Is Mercury: Meaning, Energy & Magic",
     description:
-      'Wednesday is ruled by Mercury. Best day for communication spells, business magic, travel protection, learning, and divination. Use orange and purple candles.',
+      'Wednesday is ruled by Mercury. What this means for your energy, best activities, spells & rituals. Correspondences, candle colors & timing.',
   },
   Thursday: {
-    titleSuffix: 'Jupiter Day for Money, Abundance & Luck Spells',
+    title: "Thursday's Planet Is Jupiter: Meaning, Energy & Magic",
     description:
-      'Thursday is ruled by Jupiter. Best day for money magic, abundance spells, luck rituals, career growth, and legal success. Use blue and purple candles.',
+      'Thursday is ruled by Jupiter. What this means for your energy, best activities, spells & rituals. Correspondences, candle colors & timing.',
   },
   Friday: {
-    titleSuffix: 'Venus Day for Love Spells, Beauty & Self-Care Rituals',
+    title: "Friday's Planet Is Venus: Meaning, Energy & Magic",
     description:
-      'Friday is ruled by Venus. Best day for love spells, beauty magic, relationship healing, self-care rituals, and artistic creativity. Use green and pink candles.',
+      'Friday is ruled by Venus. What this means for your energy, best activities, spells & rituals. Correspondences, candle colors & timing.',
   },
   Saturday: {
-    titleSuffix: 'Saturn Day for Protection, Banishing & Breaking Bad Habits',
+    title: "Saturday's Planet Is Saturn: Meaning, Energy & Magic",
     description:
-      'Saturday is ruled by Saturn. Best day for protection spells, banishing negativity, breaking bad habits, boundaries, and ancestor work. Use black candles.',
+      'Saturday is ruled by Saturn. What this means for your energy, best activities, spells & rituals. Correspondences, candle colors & timing.',
   },
 };
 
@@ -72,11 +79,11 @@ export async function generateMetadata({
   const dayData =
     correspondencesData.days[dayKey as keyof typeof correspondencesData.days];
   const metaInfo = dayMetaInfo[dayKey] || {
-    titleSuffix: `${dayData.planet} Day Correspondences & Magic`,
-    description: `Learn about ${dayKey}'s magical correspondences. Discover planetary influences, elemental energy, and optimal spellwork.`,
+    title: `${dayKey}'s Planet Is ${dayData.planet}: Meaning, Energy & Magic`,
+    description: `${dayKey} is ruled by ${dayData.planet}. What this means for your energy, best activities, spells & rituals. Correspondences, candle colors & timing.`,
   };
 
-  const title = `${dayKey}: ${metaInfo.titleSuffix}`;
+  const title = metaInfo.title;
   const description = metaInfo.description;
 
   return {
@@ -123,8 +130,13 @@ export default async function DayPage({
 
   const dayData =
     correspondencesData.days[dayKey as keyof typeof correspondencesData.days];
+  const numerologyNumber = dayNumberMapping[dayKey] ?? 0;
 
   const meaning = `${dayData.description}
+
+## Numerology & ${dayKey}
+
+In numerology, ${dayKey} resonates with the number ${numerologyNumber}. This number's energy combines with ${dayData.planet}'s influence to shape the day's vibrational qualities. Working with both the planetary and numerical correspondences deepens your alignment with ${dayKey.toLowerCase()}'s energy.
 
 ## Best Spells for ${dayKey}
 
@@ -173,6 +185,10 @@ Understanding planetary days helps you time your spellwork for maximum effective
     {
       question: `What colors enhance ${dayKey} magic?`,
       answer: `${dayData.element === 'Fire' ? 'Red, orange, and gold colors' : dayData.element === 'Water' ? 'Blue, silver, and white colors' : dayData.element === 'Air' ? 'Yellow, white, and pale blue colors' : 'Green, brown, and black colors'} enhance ${dayKey} magic due to the ${dayData.element.toLowerCase()} elemental correspondence. ${dayData.planet} planetary colors also work well.`,
+    },
+    {
+      question: `What number is associated with ${dayKey}?`,
+      answer: `In numerology, ${dayKey} resonates with the number ${numerologyNumber}. This number's energy combines with ${dayData.planet}'s influence to shape the day's vibrational qualities.`,
     },
     {
       question: `Do I have to do magic on the exact day?`,
@@ -224,10 +240,18 @@ Understanding planetary days helps you time your spellwork for maximum effective
           rows: [
             ['Planet', dayData.planet],
             ['Element', dayData.element],
+            ['Numerology Number', String(numerologyNumber)],
             ['Correspondences', dayData.correspondences.join(', ')],
             ['Uses', dayData.uses.join(', ')],
           ],
         },
+      ]}
+      journalPrompts={[
+        `How does ${dayKey}'s energy feel to me?`,
+        `What ${dayData.uses[0]?.toLowerCase() || ''} activities can I plan for ${dayKey.toLowerCase()}?`,
+        `How can I work with ${dayData.planet} energy?`,
+        `What does number ${numerologyNumber} mean in my life?`,
+        `How can I honor ${dayKey.toLowerCase()}'s planetary influence?`,
       ]}
     />
   );

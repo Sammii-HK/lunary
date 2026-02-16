@@ -15,11 +15,11 @@ import {
 } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
+const currentYear = new Date().getFullYear();
+
 export const metadata: Metadata = {
-  title:
-    'Astrological Transits Hub: Retrogrades, Eclipses, Moon Phases & Ingresses | Lunary',
-  description:
-    'Complete transit calendar hub for astrology. Track retrogrades, eclipses, moon phases, and planetary ingresses from 2025-2030. Free date tables and cosmic event tracking.',
+  title: `Astrology Transit Calendar ${currentYear}: Retrogrades & Eclipses`,
+  description: `Every major transit from 2025–2030 in one place. Mercury retrograde dates, eclipse schedule, moon phases & planetary ingresses. Free tables updated.`,
   keywords: [
     'astrological transits',
     'mercury retrograde dates',
@@ -27,13 +27,12 @@ export const metadata: Metadata = {
     'moon phases',
     'planetary ingress',
     'retrograde schedule',
-    '2025 astrology calendar',
-    '2026 astrology calendar',
+    `${currentYear} astrology calendar`,
+    `${currentYear + 1} astrology calendar`,
   ],
   openGraph: {
-    title: 'Astrological Transits Hub | Lunary',
-    description:
-      'Track retrogrades, eclipses, moon phases, and planetary ingresses.',
+    title: `Astrology Transit Calendar ${currentYear} | Lunary`,
+    description: `Every major transit from 2025–2030. Mercury retrograde dates, eclipse schedule, moon phases & planetary ingresses.`,
     url: 'https://lunary.app/transits',
     type: 'website',
   },

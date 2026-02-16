@@ -70,7 +70,7 @@ const NUMEROLOGY_SECTIONS = [
   {
     title: 'Planetary Days',
     description: 'Each day of the week has planetary energy',
-    href: '/grimoire/numerology/planetary-days/sunday',
+    href: '/grimoire/correspondences/days/sunday',
     icon: <Calendar className='w-6 h-6' />,
     examples: 'Sunday (Sun), Monday (Moon)...',
   },

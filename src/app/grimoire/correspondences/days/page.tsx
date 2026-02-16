@@ -211,8 +211,8 @@ Banishing, protection, boundaries, endings, long-term goals. Use black candles.
             type: 'Astrology',
           },
           {
-            name: 'Planetary Days (Numerology)',
-            href: '/grimoire/numerology/planetary-days',
+            name: 'Numerology',
+            href: '/grimoire/numerology',
             type: 'Numerology',
           },
           {

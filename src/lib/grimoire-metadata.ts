@@ -30,6 +30,8 @@ interface EntityBasedOptions {
   path: string;
   ogImagePath?: string;
   additionalKeywords?: string[];
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
 interface CustomTitleOptions {
@@ -39,6 +41,8 @@ interface CustomTitleOptions {
   url: string;
   ogImagePath?: string;
   ogImageAlt?: string;
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
 type GrimoireMetadataOptions = EntityBasedOptions | CustomTitleOptions;
@@ -85,7 +89,32 @@ export function createGrimoireMetadata(
   opts: GrimoireMetadataOptions,
 ): Metadata {
   if (isCustomTitleOptions(opts)) {
-    const { title, description, keywords, url, ogImagePath, ogImageAlt } = opts;
+    const {
+      title: rawTitle,
+      description: rawDescription,
+      keywords,
+      url,
+      ogImagePath,
+      ogImageAlt,
+      seoTitle,
+      seoDescription,
+    } = opts;
+
+    const title = seoTitle || rawTitle;
+    const description = seoDescription || rawDescription;
+
+    if (process.env.NODE_ENV === 'development') {
+      if (title.length > 60) {
+        console.warn(
+          `[SEO] Title too long (${title.length} chars): "${title}"`,
+        );
+      }
+      if (description.length > 155) {
+        console.warn(
+          `[SEO] Description too long (${description.length} chars): "${description}"`,
+        );
+      }
+    }
 
     const fullDescription =
       description.length > 160
@@ -148,15 +177,34 @@ export function createGrimoireMetadata(
     path,
     ogImagePath,
     additionalKeywords = [],
+    seoTitle,
+    seoDescription,
   } = opts;
 
   const label = entityTypeLabels[entityType];
-  const title = label
-    ? `${entityName} ${label}: ${description.slice(0, 50)}${description.length > 50 ? '...' : ''} - Lunary`
-    : `${entityName}: ${description.slice(0, 50)}${description.length > 50 ? '...' : ''} - Lunary`;
+  const title = seoTitle
+    ? seoTitle
+    : label
+      ? `${entityName} ${label}: Meaning, Uses & Guide | Lunary`
+      : `${entityName}: Meaning, Uses & Guide | Lunary`;
+
+  const resolvedDescription = seoDescription || description;
+
+  if (process.env.NODE_ENV === 'development') {
+    if (title.length > 60) {
+      console.warn(`[SEO] Title too long (${title.length} chars): "${title}"`);
+    }
+    if (resolvedDescription.length > 155) {
+      console.warn(
+        `[SEO] Description too long (${resolvedDescription.length} chars): "${resolvedDescription}"`,
+      );
+    }
+  }
 
   const fullDescription =
-    description.length > 160 ? description.slice(0, 157) + '...' : description;
+    resolvedDescription.length > 160
+      ? resolvedDescription.slice(0, 157) + '...'
+      : resolvedDescription;
 
   const canonicalUrl = `https://lunary.app${path}`;
   const ogImage =
