@@ -93,9 +93,43 @@ export function normalizeScriptForTTS(text: string): string {
  * Converts paragraph breaks to ellipsis pause markers and fixes stuttering.
  * Shared between OpenAI and Kokoro providers.
  */
+/**
+ * Ensure every non-empty line ends with sentence punctuation.
+ * Prevents TTS from running lines together without pauses.
+ * Should be called before preprocessTextForTTS.
+ */
+export function ensureLinePunctuation(text: string): string {
+  return text
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return line;
+      // Already ends with punctuation
+      if (/[.!?,;:\-—]$/.test(trimmed)) return line;
+      // Add a period to force a TTS pause
+      return `${trimmed}.`;
+    })
+    .join('\n');
+}
+
 export function preprocessTextForTTS(text: string): string {
-  const pauseToken = '__LUNARY_PAUSE__';
-  let processed = text.replace(/\n{2,}/g, ` ${pauseToken} `);
+  const longPause = '__LONG_PAUSE__';
+  const shortPause = '__SHORT_PAUSE__';
+
+  let processed = text;
+
+  // Double newlines = long pause (paragraph break)
+  processed = processed.replace(/\n{2,}/g, ` ${longPause} `);
+
+  // Single newline followed by capital letter = short pause (new thought/option)
+  // e.g. "Option A: ...\nOption B: ..."
+  processed = processed.replace(/\n(?=[A-Z])/g, ` ${shortPause} `);
+
+  // Single newline followed by bullet/dash/number = short pause (list item)
+  processed = processed.replace(/\n(?=[-•*\d])/g, ` ${shortPause} `);
+
+  // Remaining single newlines = minimal break
+  processed = processed.replace(/\n/g, ' ');
 
   // Remove duplicate consecutive words (TTS stuttering fix)
   processed = processed.replace(/\b(\w+)[-\s]+\1\b/gi, '$1');
@@ -103,8 +137,14 @@ export function preprocessTextForTTS(text: string): string {
   // Clean up any double spaces
   processed = processed.replace(/\s+/g, ' ').trim();
 
-  // Re-insert pause markers as ellipses to encourage a natural break
-  processed = processed.replace(new RegExp(pauseToken, 'g'), '...');
+  // Insert pause markers — stacked periods + commas force Kokoro to breathe
+  // Long pause: ~1s break (paragraph/section change)
+  processed = processed.replace(new RegExp(longPause, 'g'), '. . . , ,');
+  // Short pause: ~0.5s break (new line/option/thought)
+  processed = processed.replace(new RegExp(shortPause, 'g'), '. . ,');
+
+  // Convert existing ellipses to breathing pauses
+  processed = processed.replace(/\.{2,}/g, '. . ,');
 
   return processed;
 }
