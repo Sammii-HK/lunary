@@ -544,8 +544,21 @@ export async function POST(request: NextRequest) {
             existingPlatformsResult.rows.map((row) => row.platform as string),
           );
 
+          // Cap Instagram reels to avoid flooding the feed (research: 3-4/week optimal)
+          const MAX_INSTAGRAM_REELS_PER_WEEK = 4;
+          const igWeekCountResult = await sql`
+            SELECT COUNT(*) as count
+            FROM social_posts
+            WHERE platform = 'instagram'
+              AND post_type = 'video'
+              AND week_start = ${weekStart.toISOString().split('T')[0]}
+          `;
+          const igReelsThisWeek = Number(igWeekCountResult.rows[0]?.count || 0);
+          const igCapReached = igReelsThisWeek >= MAX_INSTAGRAM_REELS_PER_WEEK;
+
           for (const platform of shortVideoPlatforms) {
             if (existingPlatforms.has(platform)) continue;
+            if (platform === 'instagram' && igCapReached) continue;
             const imageUrl: string | null = null;
             await sql`
               INSERT INTO social_posts (
