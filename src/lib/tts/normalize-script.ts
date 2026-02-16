@@ -62,7 +62,12 @@ export function normalizeScriptForTTS(text: string): string {
 
   output = output.replace(/[!?]{2,}/g, '.');
   // Preserve ellipses as pause markers (don't collapse to single period)
-  output = output.replace(/\s*\/\s*/g, ' and ');
+  // Use split/join instead of /\s*\/\s*/g to avoid ReDoS on repeated whitespace
+  output = output
+    .split('/')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join(' and ');
   output = output.replace(/\s{2,}/g, ' ');
 
   output = output.replace(/(\d+)\s*-\s*(\d+)/g, (_match, a, b) => {

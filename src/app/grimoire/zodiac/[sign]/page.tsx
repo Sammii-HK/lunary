@@ -44,7 +44,6 @@ export async function generateMetadata({
     .replace('February', 'Feb')
     .replace('March', 'Mar')
     .replace('April', 'Apr')
-    .replace('May', 'May')
     .replace('June', 'Jun')
     .replace('July', 'Jul')
     .replace('August', 'Aug')

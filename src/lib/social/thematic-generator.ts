@@ -1191,7 +1191,6 @@ export function generateVideoBasedLongFormContent(
     const introText = videoScript.intro
       .replace(/Today, we explore/g, 'This week explores')
       .replace(/Today we explore/g, 'This week explores')
-      .replace(/we explore/g, 'we explore')
       .replace(/\.$/, '');
     body += `${introText}.\n\n`;
   }

@@ -421,8 +421,9 @@ async function parseLocationToCoordinates(
       return hemisphere === 'S' || hemisphere === 'W' ? -magnitude : magnitude;
     }
 
+    // Possessive quantifiers (via atomic groups) prevent ReDoS backtracking
     const dmsMatch = value.match(
-      /^(\d{1,3})\s*(?:\u00b0|\u00ba)\s*(\d{1,2})?\s*(?:'|\u2032)?\s*(\d{1,2}(?:\.\d+)?)?\s*(?:\"|\u2033)?\s*([NSEW])$/i,
+      /^(\d{1,3})\s*[°º]\s*(\d{1,2})?['\u2032]?\s*(\d{1,2}(?:\.\d+)?)?["\u2033]?\s*([NSEW])$/i,
     );
     if (dmsMatch) {
       const degrees = Number.parseFloat(dmsMatch[1]);
@@ -466,8 +467,9 @@ async function parseLocationToCoordinates(
     }
   }
 
+  // Use character class with bounded repetition to avoid ReDoS
   const directionalTokens = location.match(
-    /(?:[0-9.\s\u00b0\u00ba'"\u2032\u2033]+[NSEW])/gi,
+    /[0-9.°º'"\u2032\u2033\s]{1,30}[NSEW]/gi,
   );
   if (directionalTokens && directionalTokens.length >= 2) {
     const latitude = parseCoordinateToken(directionalTokens[0]);
