@@ -746,141 +746,220 @@ export async function GET(request: NextRequest) {
     console.log('📖 Generating Instagram stories...');
     const storiesStartTime = Date.now();
     try {
-      const { generateDailyStoryData } =
-        await import('@/lib/instagram/story-content');
-      const { seededRandom } = await import('@/lib/instagram/ig-utils');
+      // Dedup guard: skip if stories already posted today
+      const existingStories = await sql`
+        SELECT COUNT(*) as count FROM social_posts
+        WHERE post_type = 'story' AND platform = 'instagram'
+          AND scheduled_date::date = ${dateStr}::date
+      `;
+      if (Number(existingStories.rows[0]?.count || 0) >= 4) {
+        console.log('📖 Stories already generated for today, skipping');
+        cronResults.instagramStories = {
+          success: true,
+          storyCount: 0,
+          sentCount: 0,
+          stories: [],
+          skipped: true,
+          executionTimeMs: Date.now() - storiesStartTime,
+        };
+      } else {
+        const { generateDailyStoryData } =
+          await import('@/lib/instagram/story-content');
+        const { seededRandom } = await import('@/lib/instagram/ig-utils');
 
-      const storyItems = generateDailyStoryData(dateStr); // [moon, tarot, dyk, cosmic]
+        const storyItems = generateDailyStoryData(dateStr); // [moon, tarot, rotating1, rotating2]
 
-      // Generate quote story from DB (slot 3, separate seed to avoid feed collision)
-      let quoteText = 'The cosmos is within us. We are made of star-stuff.';
-      let quoteAuthor = 'Carl Sagan';
-      try {
-        const quoteResult = await sql`
-          SELECT id, quote_text, author
-          FROM social_quotes
-          WHERE status = 'available'
-          ORDER BY use_count ASC, created_at ASC
-          LIMIT 50
-        `;
-        if (quoteResult.rows.length > 0) {
-          const quoteRng = seededRandom(`story-quote-${dateStr}`);
-          const quoteIndex = Math.floor(quoteRng() * quoteResult.rows.length);
-          const quote = quoteResult.rows[quoteIndex];
-          quoteText = quote.quote_text;
-          quoteAuthor = quote.author || 'Lunary';
-          await sql`
-            UPDATE social_quotes
-            SET use_count = use_count + 1, used_at = NOW(), updated_at = NOW()
-            WHERE id = ${quote.id}
+        // Fill quote slots from DB if today's rotation includes a quote
+        const hasQuoteSlot = storyItems.some(
+          (s) => s.variant === 'quote' && !s.title,
+        );
+        if (hasQuoteSlot) {
+          let quoteText = 'The cosmos is within us. We are made of star-stuff.';
+          let quoteAuthor = 'Carl Sagan';
+          try {
+            const quoteResult = await sql`
+            SELECT id, quote_text, author
+            FROM social_quotes
+            WHERE status = 'available'
+            ORDER BY use_count ASC, created_at ASC
+            LIMIT 50
           `;
+            if (quoteResult.rows.length > 0) {
+              const quoteRng = seededRandom(`story-quote-${dateStr}`);
+              const quoteIndex = Math.floor(
+                quoteRng() * quoteResult.rows.length,
+              );
+              const quote = quoteResult.rows[quoteIndex];
+              quoteText = quote.quote_text;
+              quoteAuthor = quote.author || 'Lunary';
+              await sql`
+              UPDATE social_quotes
+              SET use_count = use_count + 1, used_at = NOW(), updated_at = NOW()
+              WHERE id = ${quote.id}
+            `;
+            }
+          } catch (quoteError) {
+            console.warn(
+              '[Stories] Failed to fetch quote, using fallback:',
+              quoteError,
+            );
+          }
+
+          // Replace quote placeholder(s) with actual quote data
+          for (let idx = 0; idx < storyItems.length; idx++) {
+            if (storyItems[idx].variant === 'quote' && !storyItems[idx].title) {
+              storyItems[idx] = {
+                variant: 'quote',
+                title: quoteText,
+                subtitle: quoteAuthor,
+                params: {
+                  text:
+                    quoteAuthor !== 'Lunary'
+                      ? `${quoteText} - ${quoteAuthor}`
+                      : quoteText,
+                  format: 'story',
+                  v: '4',
+                },
+                endpoint: '/api/og/social-quote',
+              };
+            }
+          }
         }
-      } catch (quoteError) {
-        console.warn(
-          '[Stories] Failed to fetch quote, using fallback:',
-          quoteError,
-        );
-      }
 
-      const quoteStory = {
-        variant: 'quote' as const,
-        title: quoteText,
-        subtitle: quoteAuthor,
-        params: {
-          text:
-            quoteAuthor !== 'Lunary'
-              ? `${quoteText} - ${quoteAuthor}`
-              : quoteText,
-          format: 'story',
-          v: '4',
-        },
-        endpoint: '/api/og/social-quote',
-      };
+        // 4 stories: moon, tarot, rotating1, rotating2
+        const allStories = storyItems;
+        const storyUtcHours = [9, 12, 15, 19];
 
-      // Assemble 5 stories: moon, tarot, quote, dyk, cosmic
-      const allStories = [
-        storyItems[0], // moon
-        storyItems[1], // tarot
-        quoteStory, // quote
-        storyItems[2], // dyk
-        storyItems[3], // cosmic
-      ];
-      const storyUtcHours = [9, 11, 13, 16, 19];
+        const SHARE_BASE_URL =
+          process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
 
-      const SHARE_BASE_URL =
-        process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+        const storySentResults: Array<{
+          scheduledTime: string;
+          variant: string;
+          status: string;
+          error?: string;
+        }> = [];
 
-      const storySentResults: Array<{
-        scheduledTime: string;
-        variant: string;
-        status: string;
-        error?: string;
-      }> = [];
+        // Map variant to highlight category for Instagram Highlights
+        const VARIANT_TO_HIGHLIGHT: Record<string, string> = {
+          daily_moon: 'Moon',
+          tarot_pull: 'Tarot',
+          quote: 'Quotes',
+          did_you_know: 'Grimoire',
+          affirmation: 'Affirmations',
+          ritual_tip: 'Rituals',
+          sign_of_the_day: 'Zodiac',
+          transit_alert: 'Cosmic',
+          numerology: 'Numerology',
+        };
 
-      for (let i = 0; i < allStories.length; i++) {
-        const story = allStories[i];
-        const utcHour = storyUtcHours[i];
-        const scheduledTime = new Date(
-          `${dateStr}T${String(utcHour).padStart(2, '0')}:00:00Z`,
-        );
+        for (let i = 0; i < allStories.length; i++) {
+          const story = allStories[i];
+          const utcHour = storyUtcHours[i];
+          const scheduledTime = new Date(
+            `${dateStr}T${String(utcHour).padStart(2, '0')}:00:00Z`,
+          );
 
-        const imageParams = new URLSearchParams(story.params);
-        const imageUrl = `${SHARE_BASE_URL}${story.endpoint}?${imageParams.toString()}`;
+          const imageParams = new URLSearchParams(story.params);
+          const imageUrl = `${SHARE_BASE_URL}${story.endpoint}?${imageParams.toString()}`;
+          const storyCategory = VARIANT_TO_HIGHLIGHT[story.variant] || 'Cosmic';
 
-        try {
-          const result = await postToSocial({
-            platform: 'instagram',
-            content: '',
-            scheduledDate: scheduledTime.toISOString(),
-            media: [{ type: 'image', url: imageUrl, alt: story.title }],
-            platformSettings: {
-              instagramOptions: { isStory: true },
-            },
-          });
+          try {
+            // Persist story to DB for tracking and highlight categorisation
+            await sql`
+            INSERT INTO social_posts (content, platform, post_type, scheduled_date, status, image_url, story_category, content_type)
+            VALUES ('', 'instagram', 'story', ${scheduledTime.toISOString()}, 'sent', ${imageUrl}, ${storyCategory}, ${story.variant})
+          `;
 
-          if (result.success) {
-            storySentResults.push({
-              scheduledTime: scheduledTime.toISOString(),
-              variant: story.variant,
-              status: 'success',
+            const result = await postToSocial({
+              platform: 'instagram',
+              content: '',
+              scheduledDate: scheduledTime.toISOString(),
+              media: [{ type: 'image', url: imageUrl, alt: story.title }],
+              platformSettings: {
+                instagramOptions: { isStory: true },
+              },
             });
-          } else {
+
+            if (result.success) {
+              storySentResults.push({
+                scheduledTime: scheduledTime.toISOString(),
+                variant: story.variant,
+                status: 'success',
+              });
+            } else {
+              storySentResults.push({
+                scheduledTime: scheduledTime.toISOString(),
+                variant: story.variant,
+                status: 'error',
+                error: result.error || 'Unknown error',
+              });
+            }
+          } catch (postError) {
             storySentResults.push({
               scheduledTime: scheduledTime.toISOString(),
               variant: story.variant,
               status: 'error',
-              error: result.error || 'Unknown error',
+              error:
+                postError instanceof Error
+                  ? postError.message
+                  : 'Unknown error',
             });
           }
-        } catch (postError) {
-          storySentResults.push({
-            scheduledTime: scheduledTime.toISOString(),
-            variant: story.variant,
-            status: 'error',
-            error:
-              postError instanceof Error ? postError.message : 'Unknown error',
-          });
         }
-      }
 
-      const storySuccessCount = storySentResults.filter(
-        (r) => r.status === 'success',
-      ).length;
-      const storiesExecutionTime = Date.now() - storiesStartTime;
-      console.log(
-        `📖 Instagram stories: ${allStories.length} generated, ${storySuccessCount} sent in ${storiesExecutionTime}ms`,
-      );
+        const storySuccessCount = storySentResults.filter(
+          (r) => r.status === 'success',
+        ).length;
+        const storiesExecutionTime = Date.now() - storiesStartTime;
+        console.log(
+          `📖 Instagram stories: ${allStories.length} generated, ${storySuccessCount} sent in ${storiesExecutionTime}ms`,
+        );
 
-      cronResults.instagramStories = {
-        success: true,
-        storyCount: allStories.length,
-        sentCount: storySuccessCount,
-        stories: storySentResults,
-        executionTimeMs: storiesExecutionTime,
-      };
+        // Log story pipeline result to admin activity
+        try {
+          const { logActivity } = await import('@/lib/admin-activity');
+          await logActivity({
+            activityType: 'cron_execution',
+            activityCategory: 'content',
+            status:
+              storySuccessCount === allStories.length ? 'success' : 'failed',
+            message: `Stories: ${storySuccessCount}/${allStories.length} sent`,
+            metadata: { stories: storySentResults },
+            executionTimeMs: storiesExecutionTime,
+          });
+        } catch (logError) {
+          console.warn('[Stories] Failed to log activity:', logError);
+        }
+
+        cronResults.instagramStories = {
+          success: true,
+          storyCount: allStories.length,
+          sentCount: storySuccessCount,
+          stories: storySentResults,
+          executionTimeMs: storiesExecutionTime,
+        };
+      } // end of dedup else block
     } catch (error) {
       const storiesExecutionTime = Date.now() - storiesStartTime;
       console.error('📖 Instagram stories failed:', error);
+
+      // Log story pipeline failure to admin activity
+      try {
+        const { logActivity } = await import('@/lib/admin-activity');
+        await logActivity({
+          activityType: 'cron_execution',
+          activityCategory: 'content',
+          status: 'failed',
+          message: `Instagram stories failed for ${dateStr}`,
+          errorMessage:
+            error instanceof Error ? error.message : 'Unknown error',
+          executionTimeMs: storiesExecutionTime,
+        });
+      } catch (logError) {
+        console.warn('[Stories] Failed to log activity:', logError);
+      }
+
       cronResults.instagramStories = {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
