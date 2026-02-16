@@ -544,7 +544,28 @@ export async function POST(request: NextRequest) {
             existingPlatformsResult.rows.map((row) => row.platform as string),
           );
 
-          // Cap Instagram reels to avoid flooding the feed (research: 3-4/week optimal)
+          // Instagram Reel selection: only post high-engagement formats at optimal times.
+          // Research: 3-4 reels/week optimal, DM-shareable content ranks highest.
+          // Best IG Reel types: Hot Takes, Rankings, Sign Checks, Quizzes (drive shares/comments).
+          // Skip: Deep Dives, Mirror Hours, Forecasts, Myths (better for TikTok/YouTube).
+          const IG_REEL_PRIORITY_THEMES = new Set([
+            'Hot Take',
+            'Ranking',
+            'Quiz: zodiac',
+            'Sign Check: Aries',
+            'Sign Check: Taurus',
+            'Sign Check: Gemini',
+            'Sign Check: Cancer',
+            'Sign Check: Leo',
+            'Sign Check: Virgo',
+            'Sign Check: Libra',
+            'Sign Check: Scorpio',
+            'Sign Check: Sagittarius',
+            'Sign Check: Capricorn',
+            'Sign Check: Aquarius',
+            'Sign Check: Pisces',
+            'Did You Know',
+          ]);
           const MAX_INSTAGRAM_REELS_PER_WEEK = 4;
           const igWeekCountResult = await sql`
             SELECT COUNT(*) as count
@@ -555,10 +576,25 @@ export async function POST(request: NextRequest) {
           `;
           const igReelsThisWeek = Number(igWeekCountResult.rows[0]?.count || 0);
           const igCapReached = igReelsThisWeek >= MAX_INSTAGRAM_REELS_PER_WEEK;
+          const isIgWorthy = IG_REEL_PRIORITY_THEMES.has(themeName);
+
+          // Optimal Instagram Reel posting times (UTC): 9, 12, 18
+          // Rotate through these across the week for variety
+          const IG_REEL_HOURS = [9, 12, 18];
+          const igReelHour =
+            IG_REEL_HOURS[igReelsThisWeek % IG_REEL_HOURS.length];
 
           for (const platform of shortVideoPlatforms) {
             if (existingPlatforms.has(platform)) continue;
-            if (platform === 'instagram' && igCapReached) continue;
+            // Only post priority content to Instagram, and respect weekly cap
+            if (platform === 'instagram' && (igCapReached || !isIgWorthy))
+              continue;
+            // Use optimal posting time for Instagram reels
+            let platformScheduledDate = scheduledDate;
+            if (platform === 'instagram') {
+              platformScheduledDate = new Date(scheduledDate);
+              platformScheduledDate.setUTCHours(igReelHour, 0, 0, 0);
+            }
             const imageUrl: string | null = null;
             await sql`
               INSERT INTO social_posts (
@@ -582,7 +618,7 @@ export async function POST(request: NextRequest) {
                 'pending',
                 ${imageUrl ?? null},
                 ${videoUrl},
-                ${scheduledDate.toISOString()},
+                ${platformScheduledDate.toISOString()},
                 ${postWeekTheme || themeName || null},
                 ${weekStart.toISOString().split('T')[0]},
                 NOW()
