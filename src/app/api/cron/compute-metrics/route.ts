@@ -19,8 +19,11 @@ const ACTIVATION_EVENTS = [
  * Compute daily metrics and store in daily_metrics table
  * Runs via Vercel Cron once per day
  *
- * Uses identity resolution (analytics_identity_links) to correctly count
- * anonymous users who later signed in, matching the live dau-wau-mau path.
+ * Uses a two-phase approach for efficiency:
+ * Phase 1: Scan ONE day of conversion_events → store user arrays in daily_unique_users
+ * Phase 2: Derive WAU/MAU from the tiny daily_unique_users snapshot table
+ *
+ * This avoids the expensive 30-day scans that previously dominated CPU usage.
  */
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
@@ -53,13 +56,16 @@ export async function GET(request: NextRequest) {
     const dayEnd = new Date(targetDate);
     dayEnd.setUTCHours(23, 59, 59, 999);
 
-    console.log(`📊 Computing metrics for ${dateStr}...`);
+    console.log(`Computing metrics for ${dateStr}...`);
 
     // Get WAU and MAU date ranges
     const wauStart = new Date(dayEnd);
     wauStart.setUTCDate(wauStart.getUTCDate() - 6); // 7 days including target
     const mauStart = new Date(dayEnd);
     mauStart.setUTCDate(mauStart.getUTCDate() - 29); // 30 days including target
+
+    const wauStartStr = wauStart.toISOString().split('T')[0];
+    const mauStartStr = mauStart.toISOString().split('T')[0];
 
     // Check if analytics_identity_links table exists for identity resolution
     const identityLinksCheck = await sql.query(
@@ -68,431 +74,270 @@ export async function GET(request: NextRequest) {
     const hasIdentityLinks = Boolean(identityLinksCheck.rows[0]?.exists);
 
     // SQL fragments for identity resolution
-    // idJoin: LEFT JOIN to resolve anonymous_id → user_id
     const idJoin = hasIdentityLinks
       ? 'LEFT JOIN analytics_identity_links ail ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id'
       : '';
 
-    // anyId: resolves to any identity (real user, linked anonymous, or raw anonymous)
     const anyId = hasIdentityLinks
       ? `COALESCE(CASE WHEN ce.user_id IS NOT NULL AND ce.user_id <> '' AND ce.user_id NOT LIKE 'anon:%' THEN ce.user_id END, ail.user_id, ce.anonymous_id)`
       : `COALESCE(CASE WHEN ce.user_id IS NOT NULL AND ce.user_id <> '' AND ce.user_id NOT LIKE 'anon:%' THEN ce.user_id END, ce.anonymous_id)`;
 
-    // signedInId: resolves to signed-in users only (real user or linked anonymous → real user)
     const signedInId = hasIdentityLinks
       ? `COALESCE(CASE WHEN ce.user_id IS NOT NULL AND ce.user_id <> '' AND ce.user_id NOT LIKE 'anon:%' THEN ce.user_id END, ail.user_id)`
       : `CASE WHEN ce.user_id IS NOT NULL AND ce.user_id <> '' AND ce.user_id NOT LIKE 'anon:%' THEN ce.user_id ELSE NULL END`;
 
-    // whereBase: filters for valid identities and excludes test emails
-    // Uses $3/$4 for test email params (most queries use $1=start, $2=end, $3=pattern, $4=exact)
     const whereBase = `(ce.user_id IS NOT NULL OR ce.anonymous_id IS NOT NULL)
       AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE $3 AND ce.user_email != $4))`;
 
-    // Execute all queries in parallel for speed
+    // ─── PHASE 1: Populate daily_unique_users snapshots (scan 1 day each) ───
+
+    const snapshotParams = [
+      dayStart.toISOString(),
+      dayEnd.toISOString(),
+      TEST_EMAIL_PATTERN,
+      TEST_EMAIL_EXACT,
+      dateStr,
+    ];
+
+    await Promise.all([
+      // all: any user with any event
+      sql.query(
+        `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
+         SELECT $5::date, 'all',
+           COALESCE(array_agg(DISTINCT resolved_id) FILTER (WHERE resolved_id IS NOT NULL), '{}'),
+           COUNT(DISTINCT resolved_id)
+         FROM (
+           SELECT ${anyId} as resolved_id
+           FROM conversion_events ce ${idJoin}
+           WHERE ce.created_at >= $1 AND ce.created_at <= $2 AND ${whereBase}
+         ) sub
+         ON CONFLICT (metric_date, segment) DO UPDATE SET
+           user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
+        snapshotParams,
+      ),
+
+      // product: signed-in users with product events (not app_opened/page_viewed)
+      sql.query(
+        `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
+         SELECT $5::date, 'product',
+           COALESCE(array_agg(DISTINCT resolved_id) FILTER (WHERE resolved_id IS NOT NULL), '{}'),
+           COUNT(DISTINCT resolved_id)
+         FROM (
+           SELECT ${signedInId} as resolved_id
+           FROM conversion_events ce ${idJoin}
+           WHERE ce.created_at >= $1 AND ce.created_at <= $2
+             AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+             AND ${whereBase}
+         ) sub
+         ON CONFLICT (metric_date, segment) DO UPDATE SET
+           user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
+        snapshotParams,
+      ),
+
+      // app_opened: any user who opened the app
+      sql.query(
+        `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
+         SELECT $5::date, 'app_opened',
+           COALESCE(array_agg(DISTINCT resolved_id) FILTER (WHERE resolved_id IS NOT NULL), '{}'),
+           COUNT(DISTINCT resolved_id)
+         FROM (
+           SELECT ${anyId} as resolved_id
+           FROM conversion_events ce ${idJoin}
+           WHERE ce.created_at >= $1 AND ce.created_at <= $2
+             AND ce.event_type = 'app_opened'
+             AND ${whereBase}
+         ) sub
+         ON CONFLICT (metric_date, segment) DO UPDATE SET
+           user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
+        snapshotParams,
+      ),
+
+      // reach: page_viewed events (any user)
+      sql.query(
+        `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
+         SELECT $5::date, 'reach',
+           COALESCE(array_agg(DISTINCT resolved_id) FILTER (WHERE resolved_id IS NOT NULL), '{}'),
+           COUNT(DISTINCT resolved_id)
+         FROM (
+           SELECT ${anyId} as resolved_id
+           FROM conversion_events ce ${idJoin}
+           WHERE ce.created_at >= $1 AND ce.created_at <= $2
+             AND ce.event_type = 'page_viewed'
+             AND ${whereBase}
+         ) sub
+         ON CONFLICT (metric_date, segment) DO UPDATE SET
+           user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
+        snapshotParams,
+      ),
+
+      // grimoire: grimoire page views
+      sql.query(
+        `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
+         SELECT $5::date, 'grimoire',
+           COALESCE(array_agg(DISTINCT resolved_id) FILTER (WHERE resolved_id IS NOT NULL), '{}'),
+           COUNT(DISTINCT resolved_id)
+         FROM (
+           SELECT ${anyId} as resolved_id
+           FROM conversion_events ce ${idJoin}
+           WHERE ce.created_at >= $1 AND ce.created_at <= $2
+             AND ce.event_type = 'page_viewed'
+             AND ce.page_path LIKE '/grimoire%'
+             AND ${whereBase}
+         ) sub
+         ON CONFLICT (metric_date, segment) DO UPDATE SET
+           user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
+        snapshotParams,
+      ),
+    ]);
+
+    // ─── PHASE 2: Read DAU counts + derive WAU/MAU from snapshots ───
+
+    // Helper: WAU/MAU from daily_unique_users (tiny table, ~30 rows per segment)
+    const wauMauQuery = (segment: string, startDate: string) =>
+      sql.query(
+        `SELECT COUNT(DISTINCT uid) as count
+         FROM daily_unique_users, LATERAL unnest(user_ids) AS uid
+         WHERE segment = $1 AND metric_date >= $2::date AND metric_date <= $3::date`,
+        [segment, startDate, dateStr],
+      );
+
+    // Helper: returning users (2+ active days in window)
+    const returningQuery = (segment: string, startDate: string) =>
+      sql.query(
+        `SELECT COUNT(*) as count FROM (
+           SELECT uid FROM daily_unique_users, LATERAL unnest(user_ids) AS uid
+           WHERE segment = $1 AND metric_date >= $2::date AND metric_date <= $3::date
+           GROUP BY uid HAVING COUNT(DISTINCT metric_date) >= 2
+         ) sub`,
+        [segment, startDate, dateStr],
+      );
+
     const [
+      // DAU from snapshots (just read back the user_count we stored)
       dauResult,
-      wauResult,
-      mauResult,
       productDauResult,
-      productWauResult,
-      productMauResult,
       appOpenedDauResult,
-      appOpenedWauResult,
-      appMauResult,
       reachDauResult,
-      reachWauResult,
-      reachMauResult,
       grimoireDauResult,
+      // WAU from snapshots
+      wauResult,
+      productWauResult,
+      appOpenedWauResult,
+      reachWauResult,
       grimoireWauResult,
+      // MAU from snapshots
+      mauResult,
+      productMauResult,
+      appMauResult,
+      reachMauResult,
       grimoireMauResult,
+      // Grimoire-only MAU (grimoire viewers who never opened app)
       grimoireOnlyMauResult,
+      // Returning users
       returningDauResult,
       returningWauResult,
       returningMauResult,
+      // Active days distribution
       activeDaysResult,
+      // Total accounts
       totalAccountsResult,
+      // Retention
       d1RetentionResult,
       d7RetentionResult,
       d30RetentionResult,
+      // Signups, activation, MRR, subscriptions, conversions
       signupsResult,
       activationResult,
       mrrResult,
       subscriptionsResult,
       conversionsResult,
+      // Feature adoption
       featureAdoptionResult,
+      // Returning referrer breakdown
       returningReferrerResult,
+      // Signed-in product returning
       signedInProductReturningResult,
     ] = await Promise.all([
-      // DAU - all users active on target date (includes anonymous)
+      // ── DAU (read back from snapshots) ──
       sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ${whereBase}`,
-        [
-          dayStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
+        `SELECT user_count as count FROM daily_unique_users WHERE metric_date = $1::date AND segment = 'all'`,
+        [dateStr],
+      ),
+      sql.query(
+        `SELECT user_count as count FROM daily_unique_users WHERE metric_date = $1::date AND segment = 'product'`,
+        [dateStr],
+      ),
+      sql.query(
+        `SELECT user_count as count FROM daily_unique_users WHERE metric_date = $1::date AND segment = 'app_opened'`,
+        [dateStr],
+      ),
+      sql.query(
+        `SELECT user_count as count FROM daily_unique_users WHERE metric_date = $1::date AND segment = 'reach'`,
+        [dateStr],
+      ),
+      sql.query(
+        `SELECT user_count as count FROM daily_unique_users WHERE metric_date = $1::date AND segment = 'grimoire'`,
+        [dateStr],
       ),
 
-      // WAU - all users active in 7-day window
-      sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ${whereBase}`,
-        [
-          wauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
+      // ── WAU (7-day window from snapshots) ──
+      wauMauQuery('all', wauStartStr),
+      wauMauQuery('product', wauStartStr),
+      wauMauQuery('app_opened', wauStartStr),
+      wauMauQuery('reach', wauStartStr),
+      wauMauQuery('grimoire', wauStartStr),
 
-      // MAU - all users active in 30-day window
-      sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ${whereBase}`,
-        [
-          mauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
+      // ── MAU (30-day window from snapshots) ──
+      wauMauQuery('all', mauStartStr),
+      wauMauQuery('product', mauStartStr),
+      wauMauQuery('app_opened', mauStartStr),
+      wauMauQuery('reach', mauStartStr),
+      wauMauQuery('grimoire', mauStartStr),
 
-      // Product DAU - signed-in users who used product features (not app_opened/page_viewed)
+      // ── Grimoire-only MAU ──
       sql.query(
-        `SELECT COUNT(DISTINCT ${signedInId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type NOT IN ('app_opened', 'page_viewed')
-           AND ${whereBase}`,
-        [
-          dayStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // Product WAU
-      sql.query(
-        `SELECT COUNT(DISTINCT ${signedInId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type NOT IN ('app_opened', 'page_viewed')
-           AND ${whereBase}`,
-        [
-          wauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // Product MAU
-      sql.query(
-        `SELECT COUNT(DISTINCT ${signedInId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type NOT IN ('app_opened', 'page_viewed')
-           AND ${whereBase}`,
-        [
-          mauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // App Opened DAU (includes anonymous users)
-      sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type = 'app_opened'
-           AND ${whereBase}`,
-        [
-          dayStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // App Opened WAU
-      sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type = 'app_opened'
-           AND ${whereBase}`,
-        [
-          wauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // App Opened MAU
-      sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type = 'app_opened'
-           AND ${whereBase}`,
-        [
-          mauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // Reach DAU (page_viewed events, includes anonymous)
-      sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type = 'page_viewed'
-           AND ${whereBase}`,
-        [
-          dayStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // Reach WAU
-      sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type = 'page_viewed'
-           AND ${whereBase}`,
-        [
-          wauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // Reach MAU
-      sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type = 'page_viewed'
-           AND ${whereBase}`,
-        [
-          mauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // Grimoire DAU (grimoire page views, includes anonymous)
-      sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type = 'page_viewed'
-           AND ce.page_path LIKE '/grimoire%'
-           AND ${whereBase}`,
-        [
-          dayStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // Grimoire WAU
-      sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type = 'page_viewed'
-           AND ce.page_path LIKE '/grimoire%'
-           AND ${whereBase}`,
-        [
-          wauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // Grimoire MAU
-      sql.query(
-        `SELECT COUNT(DISTINCT ${anyId}) as count
-         FROM conversion_events ce
-         ${idJoin}
-         WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type = 'page_viewed'
-           AND ce.page_path LIKE '/grimoire%'
-           AND ${whereBase}`,
-        [
-          mauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-
-      // Grimoire-only MAU (grimoire viewers who never opened the app as signed-in users)
-      sql.query(
-        `WITH grimoire_viewers AS (
-           SELECT DISTINCT ${anyId} as resolved_id
-           FROM conversion_events ce
-           ${idJoin}
-           WHERE ce.created_at >= $1 AND ce.created_at <= $2
-             AND ce.event_type = 'page_viewed'
-             AND ce.page_path LIKE '/grimoire%'
-             AND ${whereBase}
+        `WITH grimoire_users AS (
+           SELECT DISTINCT uid FROM daily_unique_users, LATERAL unnest(user_ids) AS uid
+           WHERE segment = 'grimoire' AND metric_date >= $1::date AND metric_date <= $2::date
          ),
          app_users AS (
-           SELECT DISTINCT ${signedInId} as resolved_id
-           FROM conversion_events ce
-           ${idJoin}
-           WHERE ce.created_at >= $1 AND ce.created_at <= $2
-             AND ce.event_type = 'app_opened'
-             AND ${whereBase}
+           SELECT DISTINCT uid FROM daily_unique_users, LATERAL unnest(user_ids) AS uid
+           WHERE segment = 'app_opened' AND metric_date >= $1::date AND metric_date <= $2::date
          )
-         SELECT COUNT(*) as count
-         FROM grimoire_viewers gv
-         WHERE gv.resolved_id IS NOT NULL
-           AND NOT EXISTS (
-             SELECT 1 FROM app_users au
-             WHERE au.resolved_id IS NOT NULL AND au.resolved_id = gv.resolved_id
-           )`,
-        [
-          mauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
+         SELECT COUNT(*) as count FROM grimoire_users g
+         WHERE NOT EXISTS (SELECT 1 FROM app_users a WHERE a.uid = g.uid)`,
+        [mauStartStr, dateStr],
       ),
 
-      // Returning DAU (users with 2+ active days in MAU window who were active today)
+      // ── Returning DAU (2+ days in MAU window, active today) ──
       sql.query(
-        `WITH resolved AS (
-           SELECT ${anyId} as resolved_id, DATE(ce.created_at) as event_date
-           FROM conversion_events ce
-           ${idJoin}
-           WHERE ce.created_at >= $1 AND ce.created_at <= $2
-             AND ${whereBase}
+        `WITH multi_day AS (
+           SELECT uid FROM daily_unique_users, LATERAL unnest(user_ids) AS uid
+           WHERE segment = 'all' AND metric_date >= $1::date AND metric_date <= $2::date
+           GROUP BY uid HAVING COUNT(DISTINCT metric_date) >= 2
          ),
-         multi_day_users AS (
-           SELECT resolved_id
-           FROM resolved
-           WHERE resolved_id IS NOT NULL
-           GROUP BY resolved_id
-           HAVING COUNT(DISTINCT event_date) >= 2
+         today_users AS (
+           SELECT unnest(user_ids) AS uid FROM daily_unique_users
+           WHERE segment = 'all' AND metric_date = $2::date
          )
-         SELECT COUNT(*) as count
-         FROM multi_day_users mdu
-         WHERE EXISTS (
-           SELECT 1 FROM resolved r
-           WHERE r.resolved_id = mdu.resolved_id
-             AND r.event_date = $5::date
-         )`,
-        [
-          mauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-          dateStr,
-        ],
+         SELECT COUNT(*) as count FROM multi_day m
+         WHERE EXISTS (SELECT 1 FROM today_users t WHERE t.uid = m.uid)`,
+        [mauStartStr, dateStr],
       ),
 
-      // Returning WAU (users with 2+ active days in WAU window)
-      sql.query(
-        `WITH resolved AS (
-           SELECT ${anyId} as resolved_id, DATE(ce.created_at) as event_date
-           FROM conversion_events ce
-           ${idJoin}
-           WHERE ce.created_at >= $1 AND ce.created_at <= $2
-             AND ${whereBase}
-         )
-         SELECT COUNT(DISTINCT resolved_id) as count
-         FROM (
-           SELECT resolved_id
-           FROM resolved
-           WHERE resolved_id IS NOT NULL
-           GROUP BY resolved_id
-           HAVING COUNT(DISTINCT event_date) >= 2
-         ) returning_users`,
-        [
-          wauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
+      // ── Returning WAU ──
+      returningQuery('all', wauStartStr),
 
-      // Returning MAU (users with 2+ active days in MAU window)
-      sql.query(
-        `WITH resolved AS (
-           SELECT ${anyId} as resolved_id, DATE(ce.created_at) as event_date
-           FROM conversion_events ce
-           ${idJoin}
-           WHERE ce.created_at >= $1 AND ce.created_at <= $2
-             AND ${whereBase}
-         )
-         SELECT COUNT(DISTINCT resolved_id) as count
-         FROM (
-           SELECT resolved_id
-           FROM resolved
-           WHERE resolved_id IS NOT NULL
-           GROUP BY resolved_id
-           HAVING COUNT(DISTINCT event_date) >= 2
-         ) returning_users`,
-        [
-          mauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
+      // ── Returning MAU ──
+      returningQuery('all', mauStartStr),
 
-      // Active days distribution (count users in each bucket for MAU period)
+      // ── Active days distribution (30-day window) ──
       sql.query(
-        `WITH resolved AS (
-           SELECT ${anyId} as resolved_id, DATE(ce.created_at) as event_date
-           FROM conversion_events ce
-           ${idJoin}
-           WHERE ce.created_at >= $1 AND ce.created_at <= $2
-             AND ${whereBase}
-         ),
-         user_days AS (
-           SELECT resolved_id, COUNT(DISTINCT event_date) as active_days
-           FROM resolved
-           WHERE resolved_id IS NOT NULL
-           GROUP BY resolved_id
+        `WITH user_days AS (
+           SELECT uid, COUNT(DISTINCT metric_date) as active_days
+           FROM daily_unique_users, LATERAL unnest(user_ids) AS uid
+           WHERE segment = 'all' AND metric_date >= $1::date AND metric_date <= $2::date
+           GROUP BY uid
          )
          SELECT
            COUNT(*) FILTER (WHERE active_days = 1) as days_1,
@@ -501,24 +346,17 @@ export async function GET(request: NextRequest) {
            COUNT(*) FILTER (WHERE active_days BETWEEN 8 AND 14) as days_8_14,
            COUNT(*) FILTER (WHERE active_days >= 15) as days_15_plus
          FROM user_days`,
-        [
-          mauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
+        [mauStartStr, dateStr],
       ),
 
-      // Total accounts (all-time)
+      // ── Total accounts (all-time) ──
       sql.query(
-        `SELECT COUNT(*) as count
-         FROM "user"
+        `SELECT COUNT(*) as count FROM "user"
          WHERE (email IS NULL OR (email NOT LIKE $1 AND email != $2))`,
         [TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // D1 Retention: rolling cohort (signed up 1-3 days ago), returned day 1+
-      // Uses broader cohort window for stability instead of single-day cohort
+      // ── D1 Retention ──
       sql.query(
         hasIdentityLinks
           ? `WITH cohort AS (
@@ -558,7 +396,7 @@ export async function GET(request: NextRequest) {
         [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // D7 Retention: rolling cohort (signed up 7-14 days ago), returned day 7+
+      // ── D7 Retention ──
       sql.query(
         hasIdentityLinks
           ? `WITH cohort AS (
@@ -598,7 +436,7 @@ export async function GET(request: NextRequest) {
         [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // D30 Retention: rolling cohort (signed up 30-37 days ago), returned day 30+
+      // ── D30 Retention ──
       sql.query(
         hasIdentityLinks
           ? `WITH cohort AS (
@@ -638,10 +476,9 @@ export async function GET(request: NextRequest) {
         [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // New signups on target date
+      // ── New signups ──
       sql.query(
-        `SELECT COUNT(*) as count
-         FROM "user"
+        `SELECT COUNT(*) as count FROM "user"
          WHERE "createdAt" >= $1 AND "createdAt" <= $2
            AND (email IS NULL OR (email NOT LIKE $3 AND email != $4))`,
         [
@@ -652,9 +489,7 @@ export async function GET(request: NextRequest) {
         ],
       ),
 
-      // Activated users (users who completed key action within 24h of signup)
-      // Matches the activation card's logic: same events, same 24h window
-      // With identity resolution: also checks anonymous events linked to the user
+      // ── Activated users ──
       sql.query(
         hasIdentityLinks
           ? `SELECT COUNT(DISTINCT u.id) as count
@@ -687,7 +522,7 @@ export async function GET(request: NextRequest) {
         ],
       ),
 
-      // MRR (Monthly Recurring Revenue)
+      // ── MRR ──
       sql.query(
         `SELECT COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as mrr
          FROM subscriptions
@@ -697,7 +532,7 @@ export async function GET(request: NextRequest) {
         [TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // Active subscriptions count
+      // ── Active subscriptions ──
       sql.query(
         `SELECT
            COUNT(*) FILTER (WHERE status = 'active') as active,
@@ -708,7 +543,7 @@ export async function GET(request: NextRequest) {
         [TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // New conversions on target date
+      // ── New conversions ──
       sql.query(
         `SELECT COUNT(DISTINCT s.user_id) as count
          FROM subscriptions s
@@ -723,7 +558,7 @@ export async function GET(request: NextRequest) {
         ],
       ),
 
-      // Feature adoption (signed-in users who used each feature in MAU window)
+      // ── Feature adoption (MAU window, still scans conversion_events — bounded query) ──
       sql.query(
         `SELECT
            ce.event_type,
@@ -749,7 +584,7 @@ export async function GET(request: NextRequest) {
         ],
       ),
 
-      // Returning referrer breakdown (users with 2+ active days in MAU window)
+      // ── Returning referrer breakdown (MAU window, bounded) ──
       sql.query(
         `WITH resolved AS (
            SELECT ${anyId} as resolved_id,
@@ -799,35 +634,12 @@ export async function GET(request: NextRequest) {
         ],
       ),
 
-      // Signed-in product returning users (2+ active days with product events in MAU window)
-      // Matches live path logic: productUsageSummaryResult.rows.filter(r => active_days > 1)
-      sql.query(
-        `WITH resolved AS (
-           SELECT ${signedInId} as resolved_id, DATE(ce.created_at) as event_date
-           FROM conversion_events ce
-           ${idJoin}
-           WHERE ce.created_at >= $1 AND ce.created_at <= $2
-             AND ce.event_type NOT IN ('app_opened', 'page_viewed')
-             AND ${whereBase}
-         )
-         SELECT COUNT(DISTINCT resolved_id) as count
-         FROM (
-           SELECT resolved_id
-           FROM resolved
-           WHERE resolved_id IS NOT NULL
-           GROUP BY resolved_id
-           HAVING COUNT(DISTINCT event_date) >= 2
-         ) returning_product_users`,
-        [
-          mauStart.toISOString(),
-          dayEnd.toISOString(),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
+      // ── Signed-in product returning users (from snapshots) ──
+      returningQuery('product', mauStartStr),
     ]);
 
-    // Extract values
+    // ─── Extract values ───
+
     const dau = Number(dauResult.rows[0]?.count || 0);
     const wau = Number(wauResult.rows[0]?.count || 0);
     const mau = Number(mauResult.rows[0]?.count || 0);
@@ -882,13 +694,12 @@ export async function GET(request: NextRequest) {
     const d30Retention =
       d30CohortSize > 0 ? (d30Returned / d30CohortSize) * 100 : 0;
 
-    // Calculate derived metrics
+    // Derived metrics
     const stickiness = mau > 0 ? (dau / mau) * 100 : 0;
     const stickinessWauMau = mau > 0 ? (wau / mau) * 100 : 0;
     const activationRate = signups > 0 ? (activatedUsers / signups) * 100 : 0;
     const avgActiveDaysPerWeek = wau > 0 && dau > 0 ? (dau / wau) * 7 : 0;
 
-    // Returning referrer breakdown
     const returningReferrerOrganic = Number(
       returningReferrerResult.rows[0]?.organic || 0,
     );
@@ -899,7 +710,6 @@ export async function GET(request: NextRequest) {
       returningReferrerResult.rows[0]?.internal || 0,
     );
 
-    // Grimoire to app conversion (users who saw grimoire AND used app)
     const grimoireToAppUsers = grimoireMau - grimoireOnlyMau;
     const grimoireToAppRate =
       grimoireMau > 0 ? (grimoireToAppUsers / grimoireMau) * 100 : 0;
@@ -915,7 +725,8 @@ export async function GET(request: NextRequest) {
 
     const computationDuration = Date.now() - startTime;
 
-    // Insert or update daily_metrics
+    // ─── Insert or update daily_metrics ───
+
     await sql.query(
       `INSERT INTO daily_metrics (
         metric_date,
@@ -1056,7 +867,7 @@ export async function GET(request: NextRequest) {
     );
 
     console.log(
-      `✅ Metrics computed for ${dateStr} in ${computationDuration}ms (identity_links: ${hasIdentityLinks})`,
+      `Metrics computed for ${dateStr} in ${computationDuration}ms (identity_links: ${hasIdentityLinks})`,
     );
 
     return NextResponse.json({
