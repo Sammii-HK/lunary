@@ -29,7 +29,7 @@ const defaultFeatures: Feature[] = [
   {
     title: 'Real Astronomical Data',
     description:
-      'Powered by NASA JPL ephemeris and astronomy-engine for to-the-minute transits.',
+      'Powered by Astronomy Engine, accurate to within 1 arcminute of NOVAS for to-the-minute transits.',
     icon: Orbit,
     tag: 'Verified',
   },

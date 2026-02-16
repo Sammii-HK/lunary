@@ -63,7 +63,7 @@ export function ArticleFooter({
           <div>
             <strong className='text-zinc-400'>Reference Sources:</strong>
             <ul className='mt-2 space-y-1'>
-              <li>NASA Ephemeris Data (astronomical calculations)</li>
+              <li>Astronomy Engine (astronomical calculations)</li>
               <li>Traditional astrological texts</li>
               <li>Historical tarot and occult references</li>
             </ul>
