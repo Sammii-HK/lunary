@@ -56,6 +56,10 @@ export const HookIntro: React.FC<HookIntroProps> = ({
 
   const words = text.split(/\s+/).filter(Boolean);
 
+  // Poster frame: on frame 0 with startTime=0, show all words instantly
+  // so the thumbnail/preview has readable text
+  const isPosterFrame = startTime === 0 && frame === 0;
+
   // Animation timing
   const wordEntranceDuration = 4; // frames per word entrance
   const totalEntranceTime = words.length * wordEntranceDuration;
@@ -110,7 +114,7 @@ export const HookIntro: React.FC<HookIntroProps> = ({
             display: 'flex',
             flexWrap: 'wrap',
             justifyContent: 'center',
-            gap: '6px 10px',
+            gap: '6px 14px',
           }}
         >
           {words.map((word, idx) => {
@@ -127,7 +131,11 @@ export const HookIntro: React.FC<HookIntroProps> = ({
             let wordOpacity = 1;
             let transformStyle = '';
 
-            if (variant === 'typewriter') {
+            // Poster frame: all words fully visible, no animation
+            if (isPosterFrame) {
+              wordOpacity = 1;
+              transformStyle = '';
+            } else if (variant === 'typewriter') {
               // Typewriter: left-to-right opacity fade
               wordOpacity = interpolate(
                 localFrame,

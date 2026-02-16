@@ -1,5 +1,11 @@
 import React from 'react';
-import { AbsoluteFill, Audio, useVideoConfig, useCurrentFrame } from 'remotion';
+import {
+  AbsoluteFill,
+  Audio,
+  useVideoConfig,
+  useCurrentFrame,
+  staticFile,
+} from 'remotion';
 import { AnimatedBackground } from '../components/AnimatedBackground';
 import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
 import { TextOverlays, type Overlay } from '../components/TextOverlays';
@@ -84,14 +90,40 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
   const outroStartFrame = durationInFrames - outroDurationFrames;
   const showOutro = showBrandedIntro && frame >= outroStartFrame;
 
-  // Real-time topic detection based on what's actually being spoken
+  // Detect if this is a multi-sign video (ranking, sign check, etc.)
+  const isMultiSign = React.useMemo(() => {
+    const allText = segments
+      .map((s) => s.text)
+      .join(' ')
+      .toLowerCase();
+    const signs = [
+      'aries',
+      'taurus',
+      'gemini',
+      'cancer',
+      'leo',
+      'virgo',
+      'libra',
+      'scorpio',
+      'sagittarius',
+      'capricorn',
+      'aquarius',
+      'pisces',
+    ];
+    const found = signs.filter((s) => allText.includes(s));
+    return found.length >= 3;
+  }, [segments]);
+
+  // Real-time topic detection — disabled for multi-sign videos to prevent erratic jumping
   const currentTime = frame / fps;
-  const detectedTopic = detectCurrentTopic(currentTime, segments);
+  const detectedTopic = !isMultiSign
+    ? detectCurrentTopic(currentTime, segments)
+    : null;
   const isInOutro = isOutroSegment(currentTime, segments);
 
-  // Fallback to image-based topics or zodiacSign prop
+  // Fallback to image-based topics or zodiacSign prop (single-topic only)
   let imageTopic: string | undefined = undefined;
-  if (images.length > 0) {
+  if (!isMultiSign && images.length > 0) {
     for (let i = 0; i < images.length; i++) {
       if (
         currentTime >= images[i].startTime &&
@@ -104,7 +136,8 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
   }
 
   // Use detected topic from subtitles, or fall back to image topic or zodiacSign
-  const currentTopic = detectedTopic || imageTopic || zodiacSign;
+  const currentTopic =
+    detectedTopic || imageTopic || (isMultiSign ? undefined : zodiacSign);
 
   // Only show symbols during specific topic segments (not intro or outro)
   const showSymbols = currentTopic && !showIntro && !showOutro;
@@ -135,36 +168,40 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
         <ZodiacSymbolOverlay content={symbolContent} fps={fps} />
       )}
 
-      {/* Topic title card when topic changes */}
-      {currentTopic && !showIntro && !showOutro && detectedTopic && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '15%',
-            left: '10%',
-            right: '10%',
-            textAlign: 'center',
-            zIndex: 15,
-          }}
-        >
-          <p
+      {/* Topic title card — only for educational single-topic videos without a hook */}
+      {currentTopic &&
+        !showIntro &&
+        !showOutro &&
+        detectedTopic &&
+        !hookOverlay && (
+          <div
             style={{
-              fontFamily: 'Roboto Mono, monospace',
-              fontWeight: 500,
-              fontSize: 36,
-              color: COLORS.primaryText,
-              margin: 0,
-              letterSpacing: '-0.01em',
-              textShadow: '0 4px 12px rgba(0, 0, 0, 0.8)',
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              padding: '12px 20px',
-              borderRadius: '8px',
+              position: 'absolute',
+              top: '15%',
+              left: '10%',
+              right: '10%',
+              textAlign: 'center',
+              zIndex: 15,
             }}
           >
-            {detectedTopic}
-          </p>
-        </div>
-      )}
+            <p
+              style={{
+                fontFamily: 'Roboto Mono, monospace',
+                fontWeight: 500,
+                fontSize: 36,
+                color: COLORS.primaryText,
+                margin: 0,
+                letterSpacing: '-0.01em',
+                textShadow: '0 4px 12px rgba(0, 0, 0, 0.8)',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                padding: '12px 20px',
+                borderRadius: '8px',
+              }}
+            >
+              {detectedTopic}
+            </p>
+          </div>
+        )}
 
       {/* Branded cosmic forecast intro (for blog videos) */}
       {showIntro && title && subtitle && (
@@ -254,7 +291,16 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
       {audioUrl && <Audio src={audioUrl} />}
 
       {/* Background music (low volume under voiceover) */}
-      {backgroundMusicUrl && <Audio src={backgroundMusicUrl} volume={0.12} />}
+      {backgroundMusicUrl && (
+        <Audio
+          src={
+            backgroundMusicUrl.startsWith('/')
+              ? staticFile(backgroundMusicUrl)
+              : backgroundMusicUrl
+          }
+          volume={0.12}
+        />
+      )}
 
       {/* Persistent watermark (TikTok best practice) */}
       <PersistentWatermark

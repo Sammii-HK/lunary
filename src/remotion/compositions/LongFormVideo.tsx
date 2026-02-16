@@ -1,5 +1,11 @@
 import React from 'react';
-import { AbsoluteFill, Audio, useCurrentFrame, useVideoConfig } from 'remotion';
+import {
+  AbsoluteFill,
+  Audio,
+  useCurrentFrame,
+  useVideoConfig,
+  staticFile,
+} from 'remotion';
 import { AnimatedBackground } from '../components/AnimatedBackground';
 import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
 import { HookSequence } from '../components/HookSequence';
@@ -199,7 +205,16 @@ export const LongFormVideo: React.FC<LongFormVideoProps> = ({
       {audioUrl && <Audio src={audioUrl} />}
 
       {/* Background music (lower volume) */}
-      {backgroundMusicUrl && <Audio src={backgroundMusicUrl} volume={0.15} />}
+      {backgroundMusicUrl && (
+        <Audio
+          src={
+            backgroundMusicUrl.startsWith('/')
+              ? staticFile(backgroundMusicUrl)
+              : backgroundMusicUrl
+          }
+          volume={0.15}
+        />
+      )}
 
       {/* Persistent watermark throughout video */}
       <PersistentWatermark
