@@ -20,26 +20,31 @@ export async function GET(request: NextRequest) {
       LIMIT 1
     `;
 
-    return NextResponse.json({
-      success: true,
-      milestones: milestones.rows.map((m) => ({
-        id: m.id,
-        type: m.milestone_type,
-        key: m.milestone_key,
-        data: m.milestone_data,
-        achievedAt: m.achieved_at,
-        celebrated: m.celebrated,
-      })),
-      uncelebrated: uncelebrated.rows[0]
-        ? {
-            id: uncelebrated.rows[0].id,
-            type: uncelebrated.rows[0].milestone_type,
-            key: uncelebrated.rows[0].milestone_key,
-            data: uncelebrated.rows[0].milestone_data,
-            achievedAt: uncelebrated.rows[0].achieved_at,
-          }
-        : null,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        milestones: milestones.rows.map((m) => ({
+          id: m.id,
+          type: m.milestone_type,
+          key: m.milestone_key,
+          data: m.milestone_data,
+          achievedAt: m.achieved_at,
+          celebrated: m.celebrated,
+        })),
+        uncelebrated: uncelebrated.rows[0]
+          ? {
+              id: uncelebrated.rows[0].id,
+              type: uncelebrated.rows[0].milestone_type,
+              key: uncelebrated.rows[0].milestone_key,
+              data: uncelebrated.rows[0].milestone_data,
+              achievedAt: uncelebrated.rows[0].achieved_at,
+            }
+          : null,
+      },
+      {
+        headers: { 'Cache-Control': 'private, max-age=3600' },
+      },
+    );
   } catch (error) {
     console.error('Error fetching milestones:', error);
     return NextResponse.json(
