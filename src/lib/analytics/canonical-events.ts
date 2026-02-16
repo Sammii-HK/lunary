@@ -533,7 +533,7 @@ export async function insertCanonicalEvent(row: CanonicalInsertRow): Promise<{
         COALESCE($12::jsonb, NULL),
         COALESCE($13::timestamptz, NOW())
       )
-      ON CONFLICT DO NOTHING
+      ON CONFLICT (event_id) DO NOTHING
       RETURNING id
     `,
     [
@@ -607,7 +607,7 @@ export async function insertCanonicalEventsBatch(
         created_at
       )
       VALUES ${values.join(',')}
-      ON CONFLICT DO NOTHING
+      ON CONFLICT (event_id) DO NOTHING
       RETURNING 1
     `,
     params,
