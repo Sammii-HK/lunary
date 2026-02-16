@@ -53,8 +53,8 @@ export async function detectCosmicPatterns(
     category,
   } = options;
 
-  const safeUserId = String(userId).replace(/[\r\n\x00-\x1F\x7F]/g, '');
-  console.log(`Detecting cosmic patterns for user ${safeUserId}`, {
+  console.log('Detecting cosmic patterns', {
+    userIdLen: String(userId).length,
     daysBack,
     userTier,
     category,

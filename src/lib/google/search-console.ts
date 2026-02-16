@@ -486,8 +486,10 @@ export async function auditUrlsIndexing(
         await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     } catch (error) {
-      const safeUrl = String(url).replace(/[\r\n\x00-\x1F\x7F]/g, '');
-      console.error(`[Indexing Audit] Error checking ${safeUrl}:`, error);
+      console.error(
+        `[Indexing Audit] Error checking URL ${i + 1}/${urls.length}:`,
+        error,
+      );
       results.push({
         url,
         verdict: 'ERROR',

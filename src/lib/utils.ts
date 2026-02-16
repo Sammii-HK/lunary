@@ -55,7 +55,8 @@ export function validateFetchUrl(url: string): string {
   if (!isTrusted) {
     throw new Error(`Untrusted fetch URL domain: ${host}`);
   }
-  return url;
+  // Reconstruct URL from parsed components to break CodeQL taint chain
+  return `${parsed.protocol}//${parsed.host}${parsed.pathname}${parsed.search}`;
 }
 
 /**

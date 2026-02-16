@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create slug from title
+    // Create slug from title — only allow [a-z0-9-] to prevent path traversal
     const slug = title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
@@ -95,10 +95,9 @@ export async function POST(req: NextRequest) {
     const folder = status === 'publish' ? 'blog' : 'drafts';
     const path = `content/${folder}/${slug}.mdx`;
 
-    // GitHub API request — path uses sanitized slug (alphanumeric + hyphens only)
-    // and server-side env vars (GITHUB_OWNER, GITHUB_REPO), not user input
+    // GitHub API request — encodeURIComponent prevents path traversal
     const githubResponse = await fetch(
-      `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${path}`,
+      `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/content/${encodeURIComponent(folder)}/${encodeURIComponent(slug)}.mdx`,
       {
         method: 'PUT',
         headers: {

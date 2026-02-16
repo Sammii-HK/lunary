@@ -38,16 +38,16 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const VALID_TYPES = new Set<WeeklyNotificationType>([
-      'week_ahead',
-      'weekly_tarot',
-      'cosmic_reset',
-    ]);
+    // Map user input to known-safe values to break CodeQL taint chain
+    const TYPE_MAP: Record<string, WeeklyNotificationType> = {
+      week_ahead: 'week_ahead',
+      weekly_tarot: 'weekly_tarot',
+      cosmic_reset: 'cosmic_reset',
+    };
     const rawType = searchParams.get('type');
-    const forceType =
-      rawType && VALID_TYPES.has(rawType as WeeklyNotificationType)
-        ? (rawType as WeeklyNotificationType)
-        : null;
+    const forceType: WeeklyNotificationType | null = rawType
+      ? (TYPE_MAP[rawType] ?? null)
+      : null;
 
     const now = new Date();
     const dayOfWeek = now.getUTCDay();
@@ -68,8 +68,7 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(
-      `📅 Weekly ${notificationType} notification started for:`,
-      dateStr,
+      `📅 Weekly ${notificationType} notification started for: ${dateStr}`,
     );
 
     let cosmicData = null;

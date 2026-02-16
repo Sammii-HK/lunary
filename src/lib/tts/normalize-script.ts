@@ -70,7 +70,7 @@ export function normalizeScriptForTTS(text: string): string {
     .join(' and ');
   output = output.replace(/\s{2,}/g, ' ');
 
-  output = output.replace(/(\d+)\s*-\s*(\d+)/g, (_match, a, b) => {
+  output = output.replace(/(\d+)\s{0,3}-\s{0,3}(\d+)/g, (_match, a, b) => {
     const left = toWordsUnder100(Number(a));
     const right = toWordsUnder100(Number(b));
     return `${left} to ${right}`;

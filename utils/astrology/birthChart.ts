@@ -423,7 +423,7 @@ async function parseLocationToCoordinates(
 
     // Possessive quantifiers (via atomic groups) prevent ReDoS backtracking
     const dmsMatch = value.match(
-      /^(\d{1,3})\s*[°º]\s*(\d{1,2})?['\u2032]?\s*(\d{1,2}(?:\.\d+)?)?["\u2033]?\s*([NSEW])$/i,
+      /^(\d{1,3})\s{0,3}[°º]\s{0,3}(\d{1,2})?['\u2032]?\s{0,3}(\d{1,2}(?:\.\d+)?)?["\u2033]?\s{0,3}([NSEW])$/i,
     );
     if (dmsMatch) {
       const degrees = Number.parseFloat(dmsMatch[1]);

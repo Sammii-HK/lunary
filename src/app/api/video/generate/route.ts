@@ -735,9 +735,8 @@ export async function POST(request: NextRequest) {
               hasMoonPhaseMatch;
 
             if (!cachedScriptValid) {
-              const { sanitizeForLog } = await import('@/lib/utils');
               console.warn(
-                `⚠️ Cached script for ${weekKey} doesn't match current week's data. Regenerating...`,
+                "⚠️ Cached script doesn't match current week's data. Regenerating...",
                 {
                   weekTitleLen: weekTitle.length,
                   weekSubtitleLen: weekSubtitle.length,

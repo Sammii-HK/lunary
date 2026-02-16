@@ -773,15 +773,11 @@ export async function getOgData(
       case 'cusps':
         return await loadCusp(slug);
       default:
-        console.warn(
-          `Unknown category: ${String(category).replace(/[\r\n\x00-\x1F\x7F]/g, '')}`,
-        );
+        console.warn('Unknown grimoire OG category requested');
         return null;
     }
   } catch (error) {
-    const safeCat = String(category).replace(/[\r\n\x00-\x1F\x7F]/g, '');
-    const safeSlug = String(slug).replace(/[\r\n\x00-\x1F\x7F]/g, '');
-    console.error(`Error loading OG data for ${safeCat}/${safeSlug}:`, error);
+    console.error('Error loading grimoire OG data:', error);
     return null;
   }
 }
