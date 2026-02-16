@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       },
       {
         headers: {
-          'Cache-Control': 'private, max-age=60, stale-while-revalidate=300',
+          'Cache-Control': 'no-store',
         },
       },
     );
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
       console.error('[Profile] Table does not exist:', error.message);
       return NextResponse.json(
         { profile: null, subscription: { status: 'free' } },
-        { headers: { 'Cache-Control': 'private, max-age=60' } },
+        { headers: { 'Cache-Control': 'no-store' } },
       );
     }
 
