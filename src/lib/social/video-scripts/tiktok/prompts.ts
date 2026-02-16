@@ -142,8 +142,11 @@ export function buildTikTokPrompt(
   const dataContext = buildGrimoireContext(grimoireData);
   const guardrailNote = FACTUAL_GUARDRAIL_INSTRUCTION;
 
-  // Get content-type specific configuration
-  const contentType = getContentTypeFromCategory(theme.category);
+  // Get content-type specific configuration — pass theme name + facet title for precise sub-type
+  const contentType = getContentTypeFromCategory(
+    theme.category,
+    `${theme.name} ${facet.title}`,
+  );
   const urgencyGuidance = buildUrgencyGuidance(contentType);
   const voiceConfig = getVoiceConfig(contentType);
   const scriptStructure = getRandomScriptStructure(contentType);
@@ -181,12 +184,12 @@ ${buildScopeGuard(facet.title)}
 TONE: ${voiceConfig.tone}
 
 WORD BUDGET (NON-NEGOTIABLE):
-Total: 50-65 words. This is a hard limit, not a suggestion.
+Total: 50-65 words. MINIMUM 40 words. This is a hard limit, not a suggestion.
 - Hook: 8-14 words
 - Body: 4-5 lines of 8-12 words each = 32-60 words
 - Closing line: 3-8 words (question or punchy statement)
 Analytics: 52 words -> 12.1% completion (best). 84 words -> 7.7% (worst). Every extra word costs viewers.
-Count your words before returning. If over 65, delete lines until you're under.
+Count your words before returning. If over 65, delete lines until you're under. If under 40, add another specific observation.
 
 HOOK REQUIREMENTS (FIRST LINE):
 - Single sentence, 8-14 words, grammatically correct

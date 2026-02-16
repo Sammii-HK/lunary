@@ -1676,7 +1676,10 @@ export function buildTikTokTakeaway(
   partNumber: number,
   totalParts: number,
 ): string {
-  const contentType = getContentTypeFromCategory(theme.category);
+  const contentType = getContentTypeFromCategory(
+    theme.category,
+    `${theme.name} ${facet.title}`,
+  );
   const templates =
     FALLBACK_TEMPLATES[contentType] || FALLBACK_TEMPLATES.default;
 

@@ -145,6 +145,7 @@ async function generateThematicWeeklyPosts(
     getWeeklySabbatPlan,
     generateHashtags,
     selectSecondaryTheme,
+    selectWeeklyTheme,
   } = await import('@/lib/social/weekly-themes');
   const { getEducationalImageUrl } =
     await import('@/lib/social/educational-images');
@@ -174,7 +175,7 @@ async function generateThematicWeeklyPosts(
   // Calculate week dates
   let startDate: Date;
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  today.setUTCHours(0, 0, 0, 0);
 
   if (currentWeek) {
     startDate = new Date(today);
@@ -186,15 +187,15 @@ async function generateThematicWeeklyPosts(
   }
 
   // Find Monday of that week
-  const dayOfWeek = startDate.getDay();
+  const dayOfWeek = startDate.getUTCDay();
   const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
   const weekStartDate = new Date(startDate);
-  weekStartDate.setDate(startDate.getDate() - daysToMonday);
-  weekStartDate.setHours(0, 0, 0, 0);
+  weekStartDate.setUTCDate(startDate.getUTCDate() - daysToMonday);
+  weekStartDate.setUTCHours(0, 0, 0, 0);
 
   const weekEndDate = new Date(weekStartDate);
-  weekEndDate.setDate(weekEndDate.getDate() + 6);
-  weekEndDate.setHours(23, 59, 59, 999);
+  weekEndDate.setUTCDate(weekEndDate.getUTCDate() + 6);
+  weekEndDate.setUTCHours(23, 59, 59, 999);
 
   console.log(
     `📅 [THEMATIC] Generating posts for week: ${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()}`,
@@ -302,7 +303,8 @@ async function generateThematicWeeklyPosts(
   // Get next theme index (tracks rotation to prevent repeats)
   const themeIndex =
     forcedThemeIndex !== null ? forcedThemeIndex : await getNextThemeIndex(sql);
-  const currentTheme = categoryThemes[themeIndex % categoryThemes.length];
+  // Block A (Mon-Thu) always uses a numerology theme — it's the #1 performer
+  const currentTheme = selectWeeklyTheme(themeIndex);
   const themeUsageResult = await sql`
     SELECT use_count
     FROM content_rotation
@@ -750,7 +752,12 @@ async function generateThematicWeeklyPosts(
     console.log('🎬 [VIDEO] Generating all video scripts in parallel...');
     const [primaryScripts, engagementAScripts, engagementBScripts] =
       await Promise.all([
-        generateAndSaveWeeklyScripts(weekStartDate, themeIndex),
+        generateAndSaveWeeklyScripts(
+          weekStartDate,
+          themeIndex,
+          'https://lunary.app',
+          weekPlan,
+        ),
         generateWeeklySecondaryScripts(weekStartDate),
         generateWeeklyEngagementBScripts(weekStartDate),
       ]);
@@ -1141,9 +1148,9 @@ async function generateThematicWeeklyPosts(
           };
           const hour = getScheduledHour();
 
-          // Set the time
+          // Set the time (always UTC to avoid timezone-dependent midnight bugs)
           const scheduledDate = new Date(post.scheduledDate);
-          scheduledDate.setHours(hour, 0, 0, 0);
+          scheduledDate.setUTCHours(hour, 0, 0, 0);
 
           // Generate image URL for platforms that support images
           const platformsWithImages = ['pinterest'];
@@ -1240,7 +1247,7 @@ async function generateThematicWeeklyPosts(
       baseGroupKey,
     } of platformResultSet) {
       const scheduledDate = new Date(post.scheduledDate);
-      scheduledDate.setHours(hour, 0, 0, 0);
+      scheduledDate.setUTCHours(hour, 0, 0, 0);
 
       try {
         const result = await sql`
@@ -1466,44 +1473,85 @@ async function generateThematicWeeklyPosts(
                 postType: 'video_caption',
                 facet: dayInfo.facet,
               });
-              let generated = await generateSocialCopy(sourcePack);
-              let issues = validateSocialCopy(
-                generated.content,
-                sourcePack.topic,
-              );
-              const lineCount = generated.content
-                .split('\n')
-                .filter(Boolean).length;
-              if (lineCount !== 4) {
-                issues.push('Video caption must be 4 lines');
-              }
-              if (issues.length > 0) {
-                generated = await generateSocialCopy(
-                  sourcePack,
-                  `Fix: ${issues.join('; ')}`,
-                );
-                issues = validateSocialCopy(
-                  generated.content,
-                  sourcePack.topic,
-                );
-              }
-              if (issues.length > 0) {
-                const fallback = await buildFallbackCopy(sourcePack);
-                videoCaption = fallback.content;
-                if (fallback.hashtags.length > 0) {
-                  videoCaption = `${videoCaption}\n\n${fallback.hashtags.join(
-                    ' ',
-                  )}`;
+
+              // Retry wrapper for transient "Model busy" errors
+              const MAX_CAPTION_RETRIES = 3;
+              let captionAttempt = 0;
+              let captionSuccess = false;
+              while (captionAttempt < MAX_CAPTION_RETRIES && !captionSuccess) {
+                captionAttempt += 1;
+                try {
+                  let generated = await generateSocialCopy(sourcePack);
+                  let issues = validateSocialCopy(
+                    generated.content,
+                    sourcePack.topic,
+                  );
+                  const lineCount = generated.content
+                    .split('\n')
+                    .filter(Boolean).length;
+                  if (lineCount !== 4) {
+                    issues.push('Video caption must be 4 lines');
+                  }
+                  if (issues.length > 0) {
+                    generated = await generateSocialCopy(
+                      sourcePack,
+                      `Fix: ${issues.join('; ')}`,
+                    );
+                    issues = validateSocialCopy(
+                      generated.content,
+                      sourcePack.topic,
+                    );
+                  }
+                  if (issues.length > 0) {
+                    const fallback = await buildFallbackCopy(sourcePack);
+                    videoCaption = fallback.content;
+                    if (fallback.hashtags.length > 0) {
+                      videoCaption = `${videoCaption}\n\n${fallback.hashtags.join(
+                        ' ',
+                      )}`;
+                    }
+                  } else {
+                    videoCaption = generated.content;
+                    if (generated.hashtags?.length) {
+                      videoCaption = `${videoCaption}\n\n${generated.hashtags.join(
+                        ' ',
+                      )}`;
+                    }
+                  }
+                  captionSuccess = true;
+                } catch (captionError) {
+                  const errMsg =
+                    captionError instanceof Error
+                      ? captionError.message
+                      : String(captionError);
+                  const isRetryable =
+                    errMsg.includes('Model busy') ||
+                    errMsg.includes('retry') ||
+                    errMsg.includes('rate limit') ||
+                    errMsg.includes('429') ||
+                    errMsg.includes('503');
+                  if (isRetryable && captionAttempt < MAX_CAPTION_RETRIES) {
+                    const delay = captionAttempt * 5000;
+                    console.warn(
+                      `⏳ Video caption retry ${captionAttempt}/${MAX_CAPTION_RETRIES} for ${dayInfo.facetTitle} (waiting ${delay}ms): ${errMsg}`,
+                    );
+                    await new Promise((r) => setTimeout(r, delay));
+                  } else {
+                    // Non-retryable or exhausted retries — use fallback
+                    console.warn(
+                      `⚠️ Video caption failed after ${captionAttempt} attempts for ${dayInfo.facetTitle}, using fallback: ${errMsg}`,
+                    );
+                    const fallback = await buildFallbackCopy(sourcePack);
+                    videoCaption = fallback.content;
+                    if (fallback.hashtags.length > 0) {
+                      videoCaption = `${videoCaption}\n\n${fallback.hashtags.join(' ')}`;
+                    }
+                    captionSuccess = true;
+                  }
                 }
-              } else {
-                videoCaption = generated.content;
-                if (generated.hashtags?.length) {
-                  videoCaption = `${videoCaption}\n\n${generated.hashtags.join(
-                    ' ',
-                  )}`;
-                }
               }
-              videoCaption = normalizeGeneratedContent(videoCaption, {
+
+              videoCaption = normalizeGeneratedContent(videoCaption || '', {
                 topicLabel: dayInfo.facetTitle,
               });
               videoCaption = applyPlatformFormatting(videoCaption, dbPlatform);
@@ -1701,7 +1749,7 @@ export async function POST(request: NextRequest) {
     // Calculate week dates
     let startDate: Date;
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
 
     if (currentWeek) {
       // Current week - start from today
@@ -1715,14 +1763,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Find the Monday of that week (week starts on Monday)
-    const dayOfWeek = startDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const dayOfWeek = startDate.getUTCDay(); // 0 = Sunday, 1 = Monday, etc.
     const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Days to get to Monday
     const weekStartDate = new Date(startDate);
-    weekStartDate.setDate(startDate.getDate() - daysToMonday);
-    weekStartDate.setHours(0, 0, 0, 0);
+    weekStartDate.setUTCDate(startDate.getUTCDate() - daysToMonday);
+    weekStartDate.setUTCHours(0, 0, 0, 0);
 
     // For currentWeek, calculate the minimum day offset (today's offset from Monday)
-    const todayDayOfWeek = today.getDay();
+    const todayDayOfWeek = today.getUTCDay();
     const todayOffset = todayDayOfWeek === 0 ? 6 : todayDayOfWeek - 1; // Monday = 0, Sunday = 6
     const minDayOffset = currentWeek ? todayOffset : 0;
 
@@ -1731,8 +1779,8 @@ export async function POST(request: NextRequest) {
     );
 
     const weekEndDate = new Date(weekStartDate);
-    weekEndDate.setDate(weekEndDate.getDate() + 6);
-    weekEndDate.setHours(23, 59, 59, 999);
+    weekEndDate.setUTCDate(weekEndDate.getUTCDate() + 6);
+    weekEndDate.setUTCHours(23, 59, 59, 999);
 
     // Ensure table exists first
     const { sql } = await import('@vercel/postgres');
@@ -2345,7 +2393,7 @@ Return JSON: {"posts": ["Post content"]}`;
       // Calculate the date for this post (weekStartDate + dayOffset + hour)
       const postDate = new Date(weekStartDate);
       postDate.setDate(weekStartDate.getDate() + post.dayOffset);
-      postDate.setHours(post.hour, 0, 0, 0); // Use the optimal hour for this platform
+      postDate.setUTCHours(post.hour, 0, 0, 0); // Use the optimal hour for this platform
 
       // All platforms that accept images
       const platformsNeedingImages = [

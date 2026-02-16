@@ -123,7 +123,7 @@ async function generateTikTokScriptContent(
       schema: VideoScriptSchema,
       schemaName: 'video_script',
       systemPrompt:
-        'You write TikTok scripts that are exactly 50-65 words total. Every word must earn its place — if you can say it in 5 words, never use 10. Your scripts sound like a smart friend explaining something fascinating at a party — confident, specific, slightly provocative. Every line earns the next second of watch time. You never sound like a textbook, a motivational poster, or a horoscope app.',
+        'You write TikTok scripts that are exactly 50-65 words total (MINIMUM 40 words — never under 35). Every word must earn its place — if you can say it in 5 words, never use 10. Your scripts sound like a smart friend explaining something fascinating at a party — confident, specific, slightly provocative. Every line earns the next second of watch time. You never sound like a textbook, a motivational poster, or a horoscope app.',
       model: 'quality',
       temperature: 0.7,
       maxTokens: 350,
@@ -191,6 +191,33 @@ async function generateTikTokScriptContent(
         facet.title,
         searchPhrase,
       );
+    }
+
+    // Word count retry: if script is too short after first retry, try once more
+    // with explicit word count feedback
+    const totalWordCount = countWords(hook + ' ' + scriptBodyLines.join(' '));
+    if (totalWordCount < 35 && scriptBodyLines.length > 0) {
+      const wordRetry = await requestScriptOnce(
+        `Script is only ${totalWordCount} words. Must be 50-65 words total. Expand with one more observation and more specific detail per line. Add 2-3 more lines.`,
+      );
+      const wordRetryVideo = wordRetry.video || {};
+      const retryHook = String(wordRetryVideo.hook || '').trim();
+      const retryLines = Array.isArray(wordRetryVideo.scriptBody)
+        ? wordRetryVideo.scriptBody
+            .map((line) => String(line).trim())
+            .filter(Boolean)
+        : [];
+      const retryWordCount = countWords(retryHook + ' ' + retryLines.join(' '));
+      if (retryWordCount >= 35) {
+        hook = retryHook;
+        scriptBodyLines = sanitizeLines(retryLines);
+        hookIssues = validateVideoHook(hook, facet.title, searchPhrase);
+        bodyIssues = validateScriptBody(
+          scriptBodyLines,
+          facet.title,
+          searchPhrase,
+        );
+      }
     }
 
     // After retry, only fallback on CRITICAL issues
@@ -334,8 +361,11 @@ export async function generateTikTokScript(
   const targetAudience: 'discovery' | 'consideration' | 'conversion' =
     'discovery';
 
-  // Performance tracking attributes
-  const contentTypeKey = getContentTypeFromCategory(theme.category);
+  // Performance tracking attributes — pass theme name + facet title for precise sub-type detection
+  const contentTypeKey = getContentTypeFromCategory(
+    theme.category,
+    `${theme.name} ${facet.title}`,
+  );
   const hookStyle = selectHookStyle(aspect as ContentAspect, targetAudience);
   const {
     name: scriptStructureName,
