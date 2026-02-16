@@ -95,7 +95,8 @@ export async function POST(req: NextRequest) {
     const folder = status === 'publish' ? 'blog' : 'drafts';
     const path = `content/${folder}/${slug}.mdx`;
 
-    // GitHub API request
+    // GitHub API request — path uses sanitized slug (alphanumeric + hyphens only)
+    // and server-side env vars (GITHUB_OWNER, GITHUB_REPO), not user input
     const githubResponse = await fetch(
       `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${path}`,
       {

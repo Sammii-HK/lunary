@@ -735,11 +735,12 @@ export async function POST(request: NextRequest) {
               hasMoonPhaseMatch;
 
             if (!cachedScriptValid) {
+              const { sanitizeForLog } = await import('@/lib/utils');
               console.warn(
                 `⚠️ Cached script for ${weekKey} doesn't match current week's data. Regenerating...`,
                 {
-                  weekTitle: weekTitle.substring(0, 30),
-                  weekSubtitle: weekSubtitle.substring(0, 30),
+                  weekTitleLen: weekTitle.length,
+                  weekSubtitleLen: weekSubtitle.length,
                   expectedDateStr,
                   monthDayStr,
                   hasTitleMatch,
@@ -747,15 +748,14 @@ export async function POST(request: NextRequest) {
                   hasMonthDayMatch,
                   hasPlanetaryMatch,
                   hasMoonPhaseMatch,
-                  scriptPreview: script.substring(0, 200),
+                  scriptLen: script.length,
                 },
               );
               script = undefined; // Force regeneration
             } else {
-              console.log(`♻️ Reusing validated cached script for ${weekKey}`, {
-                weekTitle: weekTitle.substring(0, 30),
-                weekSubtitle: weekSubtitle.substring(0, 30),
-              });
+              console.log(
+                `♻️ Reusing validated cached script for ${weekKey} (title: ${weekTitle.length} chars)`,
+              );
             }
           } else {
             // For short/medium form, just use the cached script

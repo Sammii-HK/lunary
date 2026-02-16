@@ -48,7 +48,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const weekOffset = parseInt(searchParams.get('week') || '0');
 
-    const response = await fetch(request.url.replace('/GET', '/POST'), {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
+    const response = await fetch(`${baseUrl}/api/substack/generate-paid`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ weekOffset }),

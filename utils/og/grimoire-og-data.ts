@@ -773,11 +773,15 @@ export async function getOgData(
       case 'cusps':
         return await loadCusp(slug);
       default:
-        console.warn(`Unknown category: ${category}`);
+        console.warn(
+          `Unknown category: ${String(category).replace(/[\r\n\x00-\x1F\x7F]/g, '')}`,
+        );
         return null;
     }
   } catch (error) {
-    console.error(`Error loading OG data for ${category}/${slug}:`, error);
+    const safeCat = String(category).replace(/[\r\n\x00-\x1F\x7F]/g, '');
+    const safeSlug = String(slug).replace(/[\r\n\x00-\x1F\x7F]/g, '');
+    console.error(`Error loading OG data for ${safeCat}/${safeSlug}:`, error);
     return null;
   }
 }

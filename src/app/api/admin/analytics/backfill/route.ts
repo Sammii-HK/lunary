@@ -65,7 +65,6 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(
-      `[Backfill] Starting backfill from ${startDateStr} to ${endDateStr}`,
       `[Backfill] Starting backfill from ${safeStartDateStr} to ${safeEndDateStr}`,
     );
 

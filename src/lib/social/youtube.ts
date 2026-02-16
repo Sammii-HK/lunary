@@ -40,10 +40,12 @@ export interface YouTubePostResult {
  * Download a video from a URL and return it as a Buffer
  */
 async function downloadVideoBuffer(videoUrl: string): Promise<Buffer> {
-  const response = await fetch(videoUrl);
+  const { validateFetchUrl } = await import('@/lib/utils');
+  const safeUrl = validateFetchUrl(videoUrl);
+  const response = await fetch(safeUrl);
   if (!response.ok) {
     throw new Error(
-      `Failed to download video from ${videoUrl}: ${response.status} ${response.statusText}`,
+      `Failed to download video: ${response.status} ${response.statusText}`,
     );
   }
   return Buffer.from(await response.arrayBuffer());

@@ -38,7 +38,16 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const forceType = searchParams.get('type') as WeeklyNotificationType | null;
+    const VALID_TYPES = new Set<WeeklyNotificationType>([
+      'week_ahead',
+      'weekly_tarot',
+      'cosmic_reset',
+    ]);
+    const rawType = searchParams.get('type');
+    const forceType =
+      rawType && VALID_TYPES.has(rawType as WeeklyNotificationType)
+        ? (rawType as WeeklyNotificationType)
+        : null;
 
     const now = new Date();
     const dayOfWeek = now.getUTCDay();

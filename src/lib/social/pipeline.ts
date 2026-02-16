@@ -40,8 +40,12 @@ export async function generateSocialAssets(
     substackUrl?: string;
   } = {},
 ): Promise<SocialAssets> {
+  // Validate baseUrl is our app to prevent SSRF
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
+  const safeBaseUrl = baseUrl === appUrl ? baseUrl : appUrl;
+
   const contentResponse = await fetch(
-    `${baseUrl}/api/social/content?week=${week}`,
+    `${safeBaseUrl}/api/social/content?week=${week}`,
   );
   if (!contentResponse.ok) {
     throw new Error(`Failed to fetch content: ${contentResponse.status}`);
@@ -51,7 +55,7 @@ export async function generateSocialAssets(
   const images: Record<string, string> = {};
   for (const format of IMAGE_FORMATS) {
     images[format] =
-      `${baseUrl}/api/social/images?week=${week}&format=${format}`;
+      `${safeBaseUrl}/api/social/images?week=${week}&format=${format}`;
   }
 
   let voiceover: SocialAssets['voiceover'] | undefined;
