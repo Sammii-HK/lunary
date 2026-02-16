@@ -223,10 +223,102 @@ export async function postToAyrshareMultiPlatform(params: {
   const headers = getAyrshareHeaders();
   const results: Record<string, AyrshareResult> = {};
 
-  const ayrsharePlatforms = params.platforms
-    .filter((p) => p.toLowerCase() !== 'youtube')
-    .map(toAyrsharePlatform);
+  const allPlatforms = params.platforms.filter(
+    (p) => p.toLowerCase() !== 'youtube',
+  );
 
+  if (allPlatforms.length === 0) {
+    return { results };
+  }
+
+  // Split text-only platforms (noImage variants) into a separate call
+  // so they don't block image platforms with media validation errors
+  const textOnlyPlatforms: string[] = [];
+  const mediaPlatforms: string[] = [];
+  const hasMedia = params.media && params.media.length > 0;
+
+  for (const platform of allPlatforms) {
+    const variant = params.variants?.[platform];
+    if (hasMedia && (variant?.noImage || variant?.media === null)) {
+      textOnlyPlatforms.push(platform);
+    } else {
+      mediaPlatforms.push(platform);
+    }
+  }
+
+  // Send text-only platforms separately (no media)
+  if (textOnlyPlatforms.length > 0) {
+    const textPlatformsMapped = textOnlyPlatforms.map(toAyrsharePlatform);
+    const textContent: string | Record<string, string> =
+      textOnlyPlatforms.length === 1
+        ? params.variants?.[textOnlyPlatforms[0]]?.content || params.content
+        : (() => {
+            const contentMap: Record<string, string> = {
+              default: params.content,
+            };
+            for (const platform of textOnlyPlatforms) {
+              const mapped = toAyrsharePlatform(platform);
+              const variantContent = params.variants?.[platform]?.content;
+              if (variantContent) contentMap[mapped] = variantContent;
+            }
+            return contentMap;
+          })();
+
+    const textPayload: Record<string, unknown> = {
+      post: textContent,
+      platforms: textPlatformsMapped,
+      scheduleDate: params.scheduledDate,
+    };
+
+    try {
+      const response = await fetch(`${AYRSHARE_API_URL}/post`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(textPayload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          `Ayrshare text-only API error (${response.status}):`,
+          errorText,
+        );
+        for (const platform of textOnlyPlatforms) {
+          results[platform] = {
+            success: false,
+            error: `Ayrshare API error (${response.status}): ${errorText}`,
+          };
+        }
+      } else {
+        const data = await response.json();
+        const postId = data.id || data.refId;
+        for (const platform of textOnlyPlatforms) {
+          const mapped = toAyrsharePlatform(platform);
+          const platformResult = data[mapped];
+          if (platformResult?.status === 'error') {
+            results[platform] = {
+              success: false,
+              postId,
+              error: platformResult.message || `${platform} post failed`,
+            };
+          } else {
+            results[platform] = {
+              success: true,
+              postId: platformResult?.id || postId,
+            };
+          }
+        }
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      for (const platform of textOnlyPlatforms) {
+        results[platform] = { success: false, error: errorMsg };
+      }
+    }
+  }
+
+  // If no media platforms left, we're done
+  const ayrsharePlatforms = mediaPlatforms.map(toAyrsharePlatform);
   if (ayrsharePlatforms.length === 0) {
     return { results };
   }
@@ -239,6 +331,7 @@ export async function postToAyrshareMultiPlatform(params: {
   if (hasVariants) {
     const contentMap: Record<string, string> = { default: params.content };
     for (const [platform, variant] of Object.entries(params.variants!)) {
+      if (textOnlyPlatforms.includes(platform)) continue;
       const mapped = toAyrsharePlatform(platform);
       if (variant.content) {
         contentMap[mapped] = variant.content;
@@ -248,24 +341,23 @@ export async function postToAyrshareMultiPlatform(params: {
   }
 
   // Build per-platform mediaUrls if variants have different media
-  const baseMediaUrls =
-    params.media?.map((m) => m.url).filter(Boolean) || undefined;
+  const rawMediaUrls = params.media?.map((m) => m.url).filter(Boolean) || [];
+  const baseMediaUrls = rawMediaUrls.length > 0 ? rawMediaUrls : undefined;
   let mediaUrlsPayload: string[] | Record<string, string[]> | undefined =
     baseMediaUrls;
 
   if (hasVariants) {
     const hasMediaVariants = Object.values(params.variants!).some(
-      (v) => v.noImage || v.media !== undefined,
+      (v) => !v.noImage && v.media !== undefined && v.media !== null,
     );
     if (hasMediaVariants && baseMediaUrls) {
       const mediaMap: Record<string, string[]> = {
         default: baseMediaUrls,
       };
       for (const [platform, variant] of Object.entries(params.variants!)) {
+        if (textOnlyPlatforms.includes(platform)) continue;
         const mapped = toAyrsharePlatform(platform);
-        if (variant.noImage || variant.media === null) {
-          mediaMap[mapped] = [];
-        } else if (variant.media && variant.media.length > 0) {
+        if (variant.media && variant.media.length > 0) {
           mediaMap[mapped] = variant.media;
         }
       }
@@ -346,7 +438,7 @@ export async function postToAyrshareMultiPlatform(params: {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Ayrshare API error (${response.status}):`, errorText);
-      for (const platform of params.platforms) {
+      for (const platform of mediaPlatforms) {
         results[platform] = {
           success: false,
           error: `Ayrshare API error (${response.status}): ${errorText}`,
@@ -359,7 +451,7 @@ export async function postToAyrshareMultiPlatform(params: {
     const postId = data.id || data.refId;
 
     // Ayrshare returns per-platform status in the response
-    for (const platform of params.platforms) {
+    for (const platform of mediaPlatforms) {
       const mapped = toAyrsharePlatform(platform);
       const platformResult = data[mapped];
 
@@ -380,7 +472,7 @@ export async function postToAyrshareMultiPlatform(params: {
     return { results };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-    for (const platform of params.platforms) {
+    for (const platform of mediaPlatforms) {
       results[platform] = { success: false, error: errorMsg };
     }
     return { results };
