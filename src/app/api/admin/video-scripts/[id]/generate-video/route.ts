@@ -212,7 +212,7 @@ export async function POST(
     }
 
     const audioBuffer = await generateVoiceover(script.fullScript, {
-      voiceName: 'alloy',
+      voiceName: 'shimmer',
       speed: 1.0,
     });
 

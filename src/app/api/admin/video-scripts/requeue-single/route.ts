@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
     const postId = body?.postId as string | undefined;
+    const scriptIdParam = body?.scriptId as number | undefined;
     const processNow = Boolean(body?.processNow);
     const forceRebuild = Boolean(body?.forceRebuild);
 
@@ -51,22 +52,26 @@ export async function POST(request: NextRequest) {
     const dateKey = scheduledDate.toISOString().split('T')[0];
     const weekStart = getWeekStart(scheduledDate).toISOString().split('T')[0];
 
-    const scriptResult = await sql`
-      SELECT id
-      FROM video_scripts
-      WHERE platform = 'tiktok'
-        AND facet_title = ${postRow.topic}
-        AND scheduled_date = ${dateKey}
-        AND (${postRow.week_theme}::text IS NULL OR theme_name = ${postRow.week_theme})
-      ORDER BY id DESC
-      LIMIT 1
-    `;
-    const scriptRow = scriptResult.rows[0] as { id: number } | undefined;
-    if (!scriptRow) {
-      return NextResponse.json(
-        { success: false, error: 'No matching video script found' },
-        { status: 404 },
-      );
+    // Use provided scriptId directly, or look up by topic+date
+    let scriptId = scriptIdParam;
+    if (!scriptId) {
+      const scriptResult = await sql`
+        SELECT id
+        FROM video_scripts
+        WHERE platform = 'tiktok'
+          AND facet_title = ${postRow.topic}
+          AND scheduled_date = ${dateKey}
+        ORDER BY id DESC
+        LIMIT 1
+      `;
+      const scriptRow = scriptResult.rows[0] as { id: number } | undefined;
+      if (!scriptRow) {
+        return NextResponse.json(
+          { success: false, error: 'No matching video script found' },
+          { status: 404 },
+        );
+      }
+      scriptId = scriptRow.id;
     }
 
     await sql`
@@ -79,7 +84,7 @@ export async function POST(request: NextRequest) {
 
     await sql`
       INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
-      VALUES (${scriptRow.id}, ${weekStart}, ${dateKey}, ${postRow.topic}, 'pending', NOW(), NOW())
+      VALUES (${scriptId}, ${weekStart}, ${dateKey}, ${postRow.topic}, 'pending', NOW(), NOW())
       ON CONFLICT (script_id)
       DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
     `;
@@ -100,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      scriptId: scriptRow.id,
+      scriptId,
       weekStart,
       dateKey,
       topic: postRow.topic,

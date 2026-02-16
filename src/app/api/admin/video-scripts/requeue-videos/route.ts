@@ -130,7 +130,8 @@ export async function POST(request: NextRequest) {
         GROUP BY facet_title, scheduled_date, theme_name
       )
       INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
-      SELECT vs.id,
+      SELECT DISTINCT ON (vs.id)
+             vs.id,
              ${weekStart.toISOString().split('T')[0]},
              vs.scheduled_date,
              vs.facet_title,
