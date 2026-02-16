@@ -94,8 +94,8 @@ export async function generateMetadata({
       : '';
 
   return {
-    title: `${year} Major Astrological Transits: ${titleHighlight}Eclipses & Retrogrades | Lunary`,
-    description: `Complete ${year} astrology calendar: ${descParts.join(', ')}, equinoxes, solstices & major planetary transits.${highlight ? ` Major event: ${highlight}.` : ''}${nextYearPreview ? ` Plus ${nextYearPreview} preview.` : ''} Exact dates for all cosmic events.`,
+    title: `${year} Astrology Calendar: Eclipses, Retrogrades & Key Dates`,
+    description: `Every major cosmic event in ${year}: ${eclipseCount} eclipses, ${mercuryRxCount} Mercury retrogrades${supermoonsCount > 0 ? `, ${supermoonsCount} supermoons` : ''}, equinoxes & planetary shifts. Exact dates & what they mean.`,
     keywords: [
       `major astrological transits ${year}`,
       `${year} astrology`,
