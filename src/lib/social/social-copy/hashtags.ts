@@ -11,11 +11,11 @@ import { HASHTAG_REGEX } from './constants';
 export const TOPIC_HASHTAG_POOLS: Record<string, string[]> = {
   'new moon': ['#newmoon', '#moonphases', '#lunarcycle'],
   'full moon': ['#fullmoon', '#moonphases', '#lunarcycle'],
-  'lunar nodes': ['#lunarnodes', '#astrology'],
-  'north node': ['#northnode', '#astrology'],
-  'south node': ['#southnode', '#astrology'],
-  'mercury retrograde': ['#mercuryretrograde', '#astrology'],
-  'venus retrograde': ['#venusretrograde', '#astrology'],
+  'lunar nodes': ['#lunarnodes', '#birthchart'],
+  'north node': ['#northnode', '#birthchart'],
+  'south node': ['#southnode', '#birthchart'],
+  'mercury retrograde': ['#mercuryretrograde', '#zodiacsigns'],
+  'venus retrograde': ['#venusretrograde', '#zodiacsigns'],
   tarot: ['#tarot', '#tarotreading'],
   'major arcana': ['#majorarcana', '#tarot'],
   'minor arcana': ['#minorarcana', '#tarot'],
@@ -41,6 +41,26 @@ export const ZODIAC_HASHTAGS: Record<string, string> = {
  * per topic to avoid hashtag stagnation and reach suppression.
  */
 const TIKTOK_CATEGORY_POOLS: Record<string, string[]> = {
+  '#zodiacsigns': [
+    '#zodiac',
+    '#horoscope',
+    '#astrology',
+    '#astrologytiktok',
+    '#zodiacmemes',
+    '#birthchart',
+    '#astrologysigns',
+    '#spiritualtiktok',
+    '#witchtok',
+  ],
+  '#zodiac': [
+    '#zodiacsigns',
+    '#horoscope',
+    '#astrology',
+    '#astrologytiktok',
+    '#birthchart',
+    '#spiritualtiktok',
+    '#witchtok',
+  ],
   '#astrology': [
     '#zodiac',
     '#horoscope',
@@ -144,6 +164,160 @@ const TIKTOK_CATEGORY_POOLS: Record<string, string[]> = {
   ],
 };
 
+const INSTAGRAM_CATEGORY_POOLS: Record<string, string[]> = {
+  '#zodiacsigns': [
+    '#zodiac',
+    '#horoscope',
+    '#astrologyposts',
+    '#zodiacmemes',
+    '#astrologer',
+    '#moonsign',
+    '#birthchart',
+    '#astrologersofinstagram',
+    '#dailyhoroscope',
+  ],
+  '#zodiac': [
+    '#zodiacsigns',
+    '#horoscope',
+    '#astrologyposts',
+    '#astrologer',
+    '#birthchart',
+    '#astrologersofinstagram',
+  ],
+  '#tarot': [
+    '#tarotreading',
+    '#tarotcards',
+    '#tarotreader',
+    '#tarotreadersofinstagram',
+    '#tarotcommunity',
+    '#oraclecards',
+    '#divination',
+    '#psychic',
+  ],
+  '#moonphases': [
+    '#moon',
+    '#fullmoon',
+    '#newmoon',
+    '#lunar',
+    '#moonmagic',
+    '#moonenergy',
+    '#lunareclipse',
+    '#moonritual',
+  ],
+  '#numerology': [
+    '#angelnumbers',
+    '#manifestation',
+    '#manifest',
+    '#numerologyreading',
+    '#spiritualawakening',
+    '#angelnumber',
+  ],
+  '#crystalhealing': [
+    '#crystals',
+    '#healingcrystals',
+    '#crystalenergy',
+    '#crystalcollection',
+    '#gemstones',
+    '#amethyst',
+    '#crystalmagic',
+    '#crystallove',
+  ],
+  '#witchtok': [
+    '#witch',
+    '#witchesofinstagram',
+    '#witchcraft',
+    '#witchyvibes',
+    '#spellcasting',
+    '#witchery',
+    '#magick',
+    '#wicca',
+  ],
+  '#spirituality': [
+    '#spiritual',
+    '#spiritualawakening',
+    '#spiritualjourney',
+    '#spiritualgrowth',
+    '#meditation',
+    '#healing',
+    '#consciousness',
+    '#lightworker',
+    '#chakras',
+  ],
+  '#wheeloftheyear': [
+    '#pagan',
+    '#wicca',
+    '#witchcraft',
+    '#paganism',
+    '#sabbat',
+    '#witchesofinstagram',
+  ],
+};
+
+const TWITTER_CATEGORY_POOLS: Record<string, string[]> = {
+  '#zodiacsigns': ['#zodiac', '#horoscope', '#astrologyposts'],
+  '#tarot': ['#tarotreading', '#tarotcards', '#divination'],
+  '#moonphases': ['#fullmoon', '#newmoon', '#moonmagic'],
+  '#numerology': ['#angelnumbers', '#manifestation'],
+  '#crystalhealing': ['#crystals', '#healingcrystals'],
+  '#witchtok': ['#witchcraft', '#witch', '#spellwork'],
+  '#spirituality': ['#spiritual', '#spiritualawakening', '#meditation'],
+};
+
+const LINKEDIN_CATEGORY_POOLS: Record<string, string[]> = {
+  '#zodiacsigns': ['#wellness', '#mindfulness', '#personaldevelopment'],
+  '#tarot': ['#personaldevelopment', '#mindfulness', '#selfawareness'],
+  '#moonphases': ['#wellness', '#mindfulness', '#naturecycles'],
+  '#numerology': ['#personaldevelopment', '#selfawareness'],
+  '#crystalhealing': ['#holistichealth', '#wellness', '#selfcare'],
+  '#spirituality': [
+    '#wellness',
+    '#mindfulness',
+    '#personalgrowth',
+    '#consciousness',
+  ],
+};
+
+const PINTEREST_CATEGORY_POOLS: Record<string, string[]> = {
+  '#zodiacsigns': [
+    '#zodiac',
+    '#horoscope',
+    '#zodiacaesthetic',
+    '#birthchart',
+    '#astrologyart',
+  ],
+  '#tarot': [
+    '#tarotcards',
+    '#tarotdeck',
+    '#tarotart',
+    '#oraclecards',
+    '#tarotreading',
+  ],
+  '#moonphases': ['#fullmoon', '#newmoon', '#lunarmagic', '#moonaesthetic'],
+  '#numerology': ['#angelnumbers', '#manifestation', '#spiritualaesthetic'],
+  '#crystalhealing': [
+    '#crystals',
+    '#crystalaesthetic',
+    '#gemstones',
+    '#healingcrystals',
+  ],
+  '#witchtok': ['#witchaesthetic', '#witchyvibes', '#witchcraft', '#spells'],
+  '#spirituality': [
+    '#spiritualawakening',
+    '#meditation',
+    '#selfcare',
+    '#manifestation',
+  ],
+};
+
+const PLATFORM_CATEGORY_POOLS: Record<string, Record<string, string[]>> = {
+  tiktok: TIKTOK_CATEGORY_POOLS,
+  instagram: INSTAGRAM_CATEGORY_POOLS,
+  twitter: TWITTER_CATEGORY_POOLS,
+  linkedin: LINKEDIN_CATEGORY_POOLS,
+  pinterest: PINTEREST_CATEGORY_POOLS,
+  bluesky: TWITTER_CATEGORY_POOLS, // Bluesky uses same pools as Twitter
+};
+
 function simpleHash(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -153,6 +327,13 @@ function simpleHash(str: string): number {
   return Math.abs(hash);
 }
 
+const ZODIAC_COMPANION_POOL = [
+  '#zodiacsigns',
+  '#horoscope',
+  '#zodiac',
+  '#birthchart',
+];
+
 export const getTopicHashtagPool = (topicTitle: string): string[] => {
   const normalized = normalise(topicTitle);
   if (TOPIC_HASHTAG_POOLS[normalized]) {
@@ -160,7 +341,10 @@ export const getTopicHashtagPool = (topicTitle: string): string[] => {
   }
   for (const [sign, tag] of Object.entries(ZODIAC_HASHTAGS)) {
     if (normalized.includes(sign)) {
-      return [tag, '#astrology'];
+      return [
+        tag,
+        ZODIAC_COMPANION_POOL[simpleHash(sign) % ZODIAC_COMPANION_POOL.length],
+      ];
     }
   }
   return [];
@@ -213,19 +397,7 @@ export const selectHashtagsForPostType = ({
     return tags;
   }
 
-  const fallback = [hashtagData.topic, hashtagData.domain].filter(Boolean);
-  const baseTags = (pool.length > 0 ? pool : fallback).map((tag) =>
-    tag.startsWith('#') ? tag.toLowerCase() : `#${tag.toLowerCase()}`,
-  );
-  const allowBrand = platform === 'instagram';
-  const brandTag = hashtagData.brand
-    ? hashtagData.brand.startsWith('#')
-      ? hashtagData.brand.toLowerCase()
-      : `#${hashtagData.brand.toLowerCase()}`
-    : '';
-  const withBrand = allowBrand && brandTag ? [...baseTags, brandTag] : baseTags;
-  const unique = Array.from(new Set(withBrand));
-
+  // All other platforms: topic-specific tags first, then fill from platform category pool
   const platformLimit = getHashtagLimit(platform);
   const desiredMax =
     postType === 'question'
@@ -236,8 +408,42 @@ export const selectHashtagsForPostType = ({
           ? 2
           : 4;
   const limit = Math.min(platformLimit, desiredMax);
-  const sliced = unique.slice(0, Math.max(0, limit));
-  return sliced;
+
+  const tags: string[] = [];
+  const seen = new Set<string>();
+
+  const addTag = (tag: string) => {
+    const normalized = tag.startsWith('#')
+      ? tag.toLowerCase()
+      : `#${tag.toLowerCase()}`;
+    if (!seen.has(normalized) && tags.length < limit) {
+      seen.add(normalized);
+      tags.push(normalized);
+    }
+  };
+
+  // Topic-specific tags first
+  for (const tag of pool) addTag(tag);
+
+  // Fill remaining slots from platform-specific category pool, rotated by topic
+  const platformPools = PLATFORM_CATEGORY_POOLS[platform];
+  if (platformPools) {
+    const domainKey = hashtagData.domain?.toLowerCase() || '';
+    const fillerPool = platformPools[domainKey] || [];
+    const seed = simpleHash(topicTitle);
+    const startIndex = seed % Math.max(1, fillerPool.length);
+    for (let i = 0; i < fillerPool.length && tags.length < limit; i++) {
+      addTag(fillerPool[(startIndex + i) % fillerPool.length]);
+    }
+  }
+
+  // Fallback if no platform pool matched
+  if (tags.length === 0) {
+    const fallback = [hashtagData.topic, hashtagData.domain].filter(Boolean);
+    for (const tag of fallback) addTag(tag);
+  }
+
+  return tags;
 };
 
 export const buildCuratedHashtags = (pack: SourcePack): string[] =>

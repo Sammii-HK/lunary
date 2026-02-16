@@ -140,6 +140,11 @@ export default function SocialPostsPage() {
   const [generatingVideoId, setGeneratingVideoId] = useState<string | null>(
     null,
   );
+  const [queuedVideoIds, setQueuedVideoIds] = useState<Set<string>>(new Set());
+  const [toastMessage, setToastMessage] = useState<{
+    text: string;
+    type: 'success' | 'error';
+  } | null>(null);
   const [generatingMissingScripts, setGeneratingMissingScripts] =
     useState(false);
   const [activeVariantByGroup, setActiveVariantByGroup] = useState<
@@ -572,28 +577,61 @@ export default function SocialPostsPage() {
     }
   };
 
+  const showToast = (text: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage({ text, type });
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
   const handleGenerateSingleVideo = async (post: PendingPost) => {
-    if (!post.videoScriptId) {
-      alert('No video script available for this post.');
-      return;
-    }
+    if (!post.id) return;
     setGeneratingVideoId(post.id);
     try {
-      const response = await fetch(
-        `/api/admin/video-scripts/${post.videoScriptId}/generate-video`,
-        { method: 'POST' },
-      );
+      const response = await fetch(`/api/admin/video-scripts/requeue-single`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId: post.id, scriptId: post.videoScriptId }),
+      });
       const data = await response.json();
       if (!data.success) {
-        alert(data.error || 'Failed to generate video');
+        showToast(data.error || 'Failed to queue video', 'error');
       } else {
-        alert('Video generated. Refreshing approval queue.');
-        loadPendingPosts();
+        setQueuedVideoIds((prev) => new Set(prev).add(post.id));
+        showToast(`Queued "${data.topic}" — process videos to render`);
       }
-    } catch (error) {
-      alert('Failed to generate video');
+    } catch {
+      showToast('Failed to queue video', 'error');
     } finally {
       setGeneratingVideoId(null);
+    }
+  };
+
+  const [requeueingAllVideos, setRequeuingAllVideos] = useState(false);
+
+  const handleRequeueAllVideos = async () => {
+    if (!confirm('Requeue all video posts for regeneration?')) return;
+    setRequeuingAllVideos(true);
+    try {
+      const weekTheme = resolveQueueWeekTheme();
+      const response = await fetch('/api/admin/video-scripts/requeue-videos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          weekStart: resolveQueueWeekStart(),
+          forceRebuild: true,
+          forceThemeName: weekTheme,
+        }),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        showToast(data.error || 'Failed to requeue videos', 'error');
+      } else {
+        showToast(`Queued ${data.count ?? 'all'} videos for regeneration`);
+        loadPendingPosts();
+      }
+    } catch {
+      showToast('Failed to requeue videos', 'error');
+    } finally {
+      setRequeuingAllVideos(false);
     }
   };
 
@@ -1196,13 +1234,29 @@ export default function SocialPostsPage() {
     (p) => p.postType === 'video' && p.videoJobStatus === 'failed',
   ).length;
   const missingScriptCount = pendingPosts.filter(
-    (p) => p.postType === 'video' && !p.videoScriptId,
+    (p) =>
+      p.postType === 'video' &&
+      !p.videoScriptId &&
+      !p.videoUrl &&
+      p.platform === 'tiktok',
   ).length;
 
   const queuedPrimaryTheme = resolveQueueWeekTheme();
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 p-6'>
+      {/* Toast notification */}
+      {toastMessage && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium ${
+            toastMessage.type === 'success'
+              ? 'bg-emerald-600/90 text-white'
+              : 'bg-red-600/90 text-white'
+          }`}
+        >
+          {toastMessage.text}
+        </div>
+      )}
       <div className='max-w-6xl mx-auto space-y-6'>
         <div className='flex items-start justify-between'>
           <div>
@@ -1676,6 +1730,14 @@ export default function SocialPostsPage() {
                   {processingAllVideos ? 'Processing...' : 'Process all videos'}
                 </Button>
                 <Button
+                  onClick={handleRequeueAllVideos}
+                  disabled={requeueingAllVideos}
+                  variant='outline'
+                  className='border-lunary-secondary-700 text-lunary-secondary hover:bg-lunary-secondary-950'
+                >
+                  {requeueingAllVideos ? 'Queuing...' : 'Regenerate all videos'}
+                </Button>
+                <Button
                   onClick={handleBumpOgImages}
                   disabled={loading}
                   variant='outline'
@@ -2067,7 +2129,8 @@ export default function SocialPostsPage() {
                                       handleGenerateSingleVideo(activePost)
                                     }
                                     disabled={
-                                      generatingVideoId === activePost.id
+                                      generatingVideoId === activePost.id ||
+                                      queuedVideoIds.has(activePost.id)
                                     }
                                     variant='outline'
                                     className='border-lunary-secondary-700 text-lunary-secondary hover:bg-lunary-secondary-950'
@@ -2077,7 +2140,9 @@ export default function SocialPostsPage() {
                                     ) : (
                                       <Video className='h-4 w-4 mr-2' />
                                     )}
-                                    Generate test video
+                                    {queuedVideoIds.has(activePost.id)
+                                      ? 'Queued'
+                                      : 'Queue video'}
                                   </Button>
                                 )}
 

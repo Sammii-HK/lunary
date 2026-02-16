@@ -19,9 +19,13 @@ function getCategorySlugs(category: ThemeCategory): string[] {
       );
 
     case 'tarot':
-      // Use ALL tarot cards (Major + Minor Arcana)
-      return (tarotData as any[]).map(
-        (card) => `tarot/${card.slug || card.id}`,
+      // Major Arcana only — Minor Arcana aren't indexed in getAllRichEntries()
+      return Object.keys(tarotData.majorArcana).map(
+        (key) =>
+          `tarot/${key
+            .replace(/([A-Z])/g, '-$1')
+            .toLowerCase()
+            .replace(/^-/, '')}`,
       );
 
     case 'zodiac':
