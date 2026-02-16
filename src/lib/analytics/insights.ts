@@ -129,21 +129,7 @@ export function generateInsights(metrics: AnalyticsMetrics): Insight[] {
     });
   }
 
-  // Broken features
-  if (metrics.ritualAdoption === 0 && metrics.productMAU > 20) {
-    insights.push({
-      type: 'critical',
-      category: 'quality',
-      message:
-        'Rituals feature has 0% adoption - either tracking is broken or feature is invisible to users.',
-      priority: 'urgent',
-      action: 'Investigate tracking code + UX visibility',
-      metric: {
-        label: 'Ritual adoption',
-        value: '0%',
-      },
-    });
-  }
+  // (Ritual adoption check removed — no ritual_completed events are tracked)
 
   // High horoscope adoption
   if (metrics.horoscopeAdoption > 0.6) {
@@ -180,7 +166,7 @@ export function generateInsights(metrics: AnalyticsMetrics): Insight[] {
     insights.push({
       type: 'positive',
       category: 'growth',
-      message: `${(metrics.activationRate * 100).toFixed(0)}% of signups activate within 24h. Your onboarding is working - now focus on retention.`,
+      message: `${(metrics.activationRate * 100).toFixed(0)}% of signups activate within 7 days. Your onboarding is working - now focus on retention.`,
       priority: 'low',
       metric: {
         label: 'Activation rate',
@@ -314,7 +300,7 @@ export function detectTrackingIssues(
   }
 
   // Check for zero adoption on features that should exist
-  const criticalFeatures = ['ritual_completed', 'chart_viewed'];
+  const criticalFeatures = ['chart_viewed'];
   criticalFeatures.forEach((event) => {
     const metric = featureMetrics[event];
     if (metric && metric.count === 0 && productMAU > 20) {

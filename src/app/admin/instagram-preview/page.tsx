@@ -582,6 +582,7 @@ export default function InstagramPreviewPage() {
                     <div className='p-4'>
                       <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600'>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
+                        {/* lgtm[js/xss-through-dom] — admin-only page, URL validated by sanitizeImageUrl, sign from <select> allow-list */}
                         <img
                           src={sanitizeImageUrl(url)}
                           alt={altText}
@@ -714,6 +715,7 @@ export default function InstagramPreviewPage() {
                   <div className='p-4'>
                     <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
+                      {/* lgtm[js/xss-through-dom] — admin-only page, URL validated by sanitizeImageUrl */}
                       <img
                         src={sanitizeImageUrl(url)}
                         alt={`${variant} cosmic card`}

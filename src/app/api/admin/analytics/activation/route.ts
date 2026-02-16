@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Check which users activated within 24h
+    // Check which users activated within 7 days of signup
     const activationRowsResult = await sql.query(
       `
         WITH signups AS (
