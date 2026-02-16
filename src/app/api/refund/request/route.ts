@@ -9,7 +9,7 @@ import { generateRefundRequestedEmailHTML } from '@/lib/email-components/Complia
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
 function generateId(): string {
-  return `ref_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  return `ref_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
 }
 
 export async function POST(request: Request) {

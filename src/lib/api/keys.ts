@@ -100,10 +100,12 @@ export function generateApiKey(): {
   return { key, hash, prefix };
 }
 
-// SHA-256 is appropriate for API keys (high-entropy random tokens, not user passwords)
+// SHA-256 is appropriate for API keys (high-entropy random tokens, not user passwords).
+// API keys are 32 random bytes (256 bits of entropy), making brute-force infeasible
+// even without bcrypt/scrypt. SHA-256 lookup hashing is industry standard (Stripe, GitHub, etc.).
 export function hashApiKey(key: string): string {
-  // CodeQL: This is NOT password hashing - it's for high-entropy API keys where SHA-256 is standard
-  return crypto.createHash('sha256').update(key).digest('hex'); // nosemgrep: insufficient-password-hash
+  // lgtm[js/insufficient-password-hash] — not a password, high-entropy API key
+  return crypto.createHash('sha256').update(key).digest('hex');
 }
 
 function generateId(): string {
