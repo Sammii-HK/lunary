@@ -1098,36 +1098,6 @@ export default function SocialPostsPage() {
     }, 2000);
   };
 
-  const handleGenerateDailyCosmicPost = async () => {
-    const dateInput = prompt(
-      'Generate daily cosmic post for which date? (YYYY-MM-DD, leave blank for tomorrow)',
-    );
-    if (dateInput === null) return;
-
-    const date = dateInput.trim();
-    setLoading(true);
-    try {
-      const response = await fetch(
-        '/api/admin/social-posts/generate-daily-cosmic',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ date: date || undefined }),
-        },
-      );
-      const data = await response.json();
-      if (data.success) {
-        alert(data.message || 'Daily cosmic post scheduled.');
-      } else {
-        alert(data.error || data.message || 'Failed to schedule daily post.');
-      }
-    } catch (error) {
-      alert('Failed to schedule daily post.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleOpenInApp = async (post: PendingPost) => {
     try {
       const response = await fetch('/api/admin/social-posts/open-app', {
@@ -1541,14 +1511,6 @@ export default function SocialPostsPage() {
                       Week After Next
                     </Button>
                   </div>
-                  <Button
-                    onClick={handleGenerateDailyCosmicPost}
-                    disabled={loading}
-                    variant='outline'
-                    className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
-                  >
-                    Generate daily cosmic post
-                  </Button>
                 </div>
               </CardContent>
             </Card>
