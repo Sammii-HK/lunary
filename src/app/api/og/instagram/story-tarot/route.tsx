@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
             letterSpacing: '0.05em',
           }}
         >
-          Get your full tarot reading
+          Explore more at lunary.app
         </div>
 
         {/* Brand footer */}

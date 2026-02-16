@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
             letterSpacing: '0.05em',
           }}
         >
-          Tap for your full reading
+          Explore more at lunary.app
         </div>
 
         {/* Brand footer */}

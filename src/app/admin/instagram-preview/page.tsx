@@ -2,7 +2,10 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { buildCarouselFromSlug } from '@/lib/instagram/carousel-content';
-import { generateDidYouKnowBatch } from '@/lib/instagram/did-you-know-content';
+import {
+  generateDidYouKnowBatch,
+  generateDidYouKnow,
+} from '@/lib/instagram/did-you-know-content';
 import { generateRankingBatch } from '@/lib/instagram/ranking-content';
 import { generateCompatibilityBatch } from '@/lib/instagram/compatibility-content';
 import { generateRankingCarousel } from '@/lib/instagram/ranking-content';
@@ -10,6 +13,13 @@ import { generateCompatibilityCarousel } from '@/lib/instagram/compatibility-con
 import { generateAngelNumberBatch } from '@/lib/instagram/angel-number-content';
 import { generateOneWordBatch } from '@/lib/instagram/one-word-content';
 import { generateDailyStoryData } from '@/lib/instagram/story-content';
+import {
+  generateAffirmation,
+  generateRitualTip,
+  generateSignOfTheDay,
+  generateTransitAlert,
+  generateNumerologyStory,
+} from '@/lib/instagram/rotating-story-content';
 import {
   generateZodiacCaption,
   generateTarotCaption,
@@ -34,7 +44,6 @@ import { sanitizeImageUrl } from '@/utils/url-security';
 type Tab =
   | 'memes'
   | 'carousels'
-  | 'daily'
   | 'quotes'
   | 'did_you_know'
   | 'rankings'
@@ -269,7 +278,6 @@ export default function InstagramPreviewPage() {
   const tabs: Array<{ key: Tab; label: string }> = [
     { key: 'memes', label: 'Memes' },
     { key: 'carousels', label: 'Carousels' },
-    { key: 'daily', label: 'Daily Cards' },
     { key: 'quotes', label: 'Quotes' },
     { key: 'did_you_know', label: 'Did You Know' },
     { key: 'rankings', label: 'Rankings' },
@@ -347,26 +355,6 @@ export default function InstagramPreviewPage() {
       )}&t=${cacheBuster}`,
     }));
   }, [selectedSign, signData, cacheBuster]);
-
-  const dailyCosmicUrls = useMemo(() => {
-    const variants = ['moon_phase', 'transit_alert', 'daily_energy'] as const;
-    return variants.map((variant) => ({
-      variant,
-      url: `/api/og/instagram/daily-cosmic?date=${selectedDate}&variant=${variant}&headline=${encodeURIComponent(
-        variant === 'moon_phase'
-          ? 'Release what no longer serves you'
-          : variant === 'transit_alert'
-            ? 'Venus enters Pisces - love deepens'
-            : 'A day for creative breakthroughs',
-      )}&moonPhase=${encodeURIComponent(
-        variant === 'moon_phase'
-          ? 'Full Moon'
-          : variant === 'transit_alert'
-            ? 'Waxing Gibbous'
-            : 'Waxing Crescent',
-      )}&t=${cacheBuster}`,
-    }));
-  }, [selectedDate, cacheBuster]);
 
   const quoteUrls = useMemo(() => {
     return SAMPLE_QUOTES.map((quote) => ({
@@ -491,6 +479,81 @@ export default function InstagramPreviewPage() {
       });
       return { ...story, url: `${story.endpoint}?${params.toString()}` };
     });
+  }, [selectedDate, cacheBuster]);
+
+  // All story types preview — one of each type regardless of rotation
+  const allStoryTypePreviews = useMemo(() => {
+    const t = String(cacheBuster);
+    const stories = generateDailyStoryData(selectedDate);
+    // Moon and Tarot are always first two
+    const moon = stories[0];
+    const tarot = stories[1];
+
+    // Build one of each rotating type
+    const affData = generateAffirmation(selectedDate);
+    const ritualData = generateRitualTip(selectedDate);
+    const signData = generateSignOfTheDay(selectedDate);
+    const transitData = generateTransitAlert(selectedDate);
+    const numData = generateNumerologyStory(selectedDate);
+    const dykData = generateDidYouKnow(selectedDate);
+
+    const items = [
+      {
+        variant: 'daily_moon',
+        title: moon.title,
+        subtitle: moon.subtitle,
+        url: `${moon.endpoint}?${new URLSearchParams({ ...moon.params, t })}`,
+      },
+      {
+        variant: 'tarot_pull',
+        title: tarot.title,
+        subtitle: tarot.subtitle,
+        url: `${tarot.endpoint}?${new URLSearchParams({ ...tarot.params, t })}`,
+      },
+      {
+        variant: 'affirmation',
+        title: 'Daily Affirmation',
+        subtitle: affData.affirmation,
+        url: `/api/og/instagram/story-rotating?${new URLSearchParams({ type: 'affirmation', main: affData.affirmation, secondary: affData.moonPhase, t })}`,
+      },
+      {
+        variant: 'ritual_tip',
+        title: 'Ritual Tip',
+        subtitle: ritualData.tip,
+        url: `/api/og/instagram/story-rotating?${new URLSearchParams({ type: 'ritual_tip', main: ritualData.tip, secondary: ritualData.theme.charAt(0).toUpperCase() + ritualData.theme.slice(1), t })}`,
+      },
+      {
+        variant: 'sign_of_the_day',
+        title: signData.sign,
+        subtitle: signData.message,
+        url: `/api/og/instagram/story-rotating?${new URLSearchParams({ type: 'sign_of_the_day', main: signData.message, secondary: signData.sign, extra: `${signData.element} sign · ${signData.trait}`, t })}`,
+      },
+      {
+        variant: 'transit_alert',
+        title: transitData.headline,
+        subtitle: transitData.message,
+        url: `/api/og/instagram/story-rotating?${new URLSearchParams({ type: 'transit_alert', main: transitData.message, secondary: transitData.headline, extra: transitData.planet, t })}`,
+      },
+      {
+        variant: 'numerology',
+        title: numData.label,
+        subtitle: numData.mainText,
+        url: `/api/og/instagram/story-rotating?${new URLSearchParams({ type: 'numerology', label: numData.label, main: numData.mainText, secondary: numData.secondary, extra: numData.extra, t })}`,
+      },
+      {
+        variant: 'did_you_know',
+        title: 'Did You Know?',
+        subtitle: dykData.fact,
+        url: `/api/og/instagram/did-you-know?${new URLSearchParams({ fact: dykData.fact, category: dykData.category, source: dykData.source, t })}`,
+      },
+      {
+        variant: 'quote',
+        title: 'Quote',
+        subtitle: '(Loaded from DB at post time)',
+        url: `/api/og/social-quote?${new URLSearchParams({ text: 'The cosmos is within us. We are made of star-stuff. - Carl Sagan', format: 'story', v: '4', t })}`,
+      },
+    ];
+    return items;
   }, [selectedDate, cacheBuster]);
 
   return (
@@ -686,46 +749,6 @@ export default function InstagramPreviewPage() {
                 ))}
               </div>
             )}
-          </div>
-        )}
-
-        {activeTab === 'daily' && (
-          <div>
-            <h2 className='text-xl font-bold mb-4'>
-              Daily Cosmic Cards &mdash; {selectedDate}
-            </h2>
-            <p className='text-sm text-amber-400 mb-4 flex items-center gap-2'>
-              <span className='text-lg'>&#128241;</span> Best for: Instagram
-              Stories
-            </p>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-              {dailyCosmicUrls.map(({ variant, url }) => (
-                <div
-                  key={variant}
-                  className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
-                >
-                  <div className='p-4 border-b border-zinc-700'>
-                    <h3 className='font-bold capitalize'>
-                      {variant.replace(/_/g, ' ')}
-                    </h3>
-                    <span className='text-xs text-amber-400 mt-1 block'>
-                      Stories only
-                    </span>
-                  </div>
-                  <div className='p-4'>
-                    <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      {/* lgtm[js/xss-through-dom] — admin-only page, URL validated by sanitizeImageUrl */}
-                      <img
-                        src={sanitizeImageUrl(url)}
-                        alt={`${variant} cosmic card`}
-                        className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         )}
 
@@ -1024,9 +1047,13 @@ export default function InstagramPreviewPage() {
         {activeTab === 'stories' && (
           <div>
             <h2 className='text-xl font-bold mb-4'>
-              Stories &mdash; {selectedDate}
+              Today&apos;s Stories &mdash; {selectedDate}
             </h2>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+            <p className='text-sm text-zinc-400 mb-4'>
+              These 4 stories will be posted today based on the rotation
+              schedule.
+            </p>
+            <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-12'>
               {storyPreviews.map((item, i) => (
                 <div
                   key={i}
@@ -1054,6 +1081,41 @@ export default function InstagramPreviewPage() {
                       <CopyButton
                         text={generateStoryAltText(item.variant, item.title)}
                         label='Copy Alt Text'
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <h2 className='text-xl font-bold mb-4'>
+              All Story Types &mdash; {selectedDate}
+            </h2>
+            <p className='text-sm text-zinc-400 mb-4'>
+              Preview of every story type. Only 4 are posted each day via the
+              weekly rotation.
+            </p>
+            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4'>
+              {allStoryTypePreviews.map((item, i) => (
+                <div
+                  key={i}
+                  className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                >
+                  <div className='p-3 border-b border-zinc-700'>
+                    <span className='text-xs px-2 py-0.5 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                      {item.variant.replace(/_/g, ' ')}
+                    </span>
+                    <h3 className='font-bold text-sm mt-1 truncate'>
+                      {item.title}
+                    </h3>
+                  </div>
+                  <div className='p-3'>
+                    <div className='aspect-[9/16] rounded-lg overflow-hidden border border-zinc-600'>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={sanitizeImageUrl(item.url)}
+                        alt={`${item.variant} story preview`}
+                        className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
                       />
                     </div>
                   </div>
