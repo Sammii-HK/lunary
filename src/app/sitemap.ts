@@ -27,6 +27,7 @@ import {
   mirrorHourKeys,
   doubleHourKeys,
 } from '@/constants/grimoire/clock-numbers-data';
+import { YEARLY_TRANSITS } from '@/constants/seo/yearly-transits';
 import {
   karmicDebtKeys,
   expressionKeys,
@@ -1394,6 +1395,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  // Add individual transit pages (e.g. /grimoire/transits/saturn-taurus-2028)
+  const transitIndividualRoutes = YEARLY_TRANSITS.map((transit) => ({
+    url: `${baseUrl}/grimoire/transits/${transit.id}`,
+    lastModified: date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
   // Add tarot suit pages
   const tarotSuitRoutes = ['cups', 'pentacles', 'swords', 'wands'].map(
     (suit) => ({
@@ -1528,6 +1537,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...eventsYearRoutes,
     ...eventSubpages,
     ...transitsYearRoutes,
+    ...transitIndividualRoutes,
     ...tarotSuitRoutes,
     ...shopProductRoutes,
     ...shopPaginationRoutes,
