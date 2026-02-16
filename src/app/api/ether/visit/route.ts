@@ -4,6 +4,7 @@ import {
   canonicaliseEvent,
   insertCanonicalEvent,
 } from '@/lib/analytics/canonical-events';
+import { deterministicEventId } from '@/lib/analytics/deterministic-event-id';
 import { getCurrentUser } from '@/lib/get-user-session';
 
 export const runtime = 'nodejs';
@@ -42,8 +43,14 @@ export async function POST(request: NextRequest) {
       path,
     });
 
+    // Generate deterministic eventId so DB unique constraint handles dedup
+    const today = new Date().toISOString().split('T')[0];
+    const identity = userId || anonymousId || 'unknown';
+    const eventId = deterministicEventId('page_viewed', identity, path, today);
+
     const canonical = canonicaliseEvent({
       eventType: 'page_viewed',
+      eventId,
       userId,
       anonymousId,
       userEmail,
@@ -89,36 +96,13 @@ export async function POST(request: NextRequest) {
         });
     }
 
-    // Dedup: one event per (identity, path, day)
-    const today = new Date().toISOString().split('T')[0];
-    const existing = userId
-      ? await sql`
-          SELECT 1 FROM conversion_events
-          WHERE event_type = 'page_viewed'
-            AND user_id = ${userId}
-            AND page_path = ${path}
-            AND created_at >= ${today}::date
-            AND created_at < (${today}::date + INTERVAL '1 day')
-          LIMIT 1
-        `
-      : anonymousId
-        ? await sql`
-            SELECT 1 FROM conversion_events
-            WHERE event_type = 'page_viewed'
-              AND anonymous_id = ${anonymousId}
-              AND page_path = ${path}
-              AND created_at >= ${today}::date
-              AND created_at < (${today}::date + INTERVAL '1 day')
-            LIMIT 1
-          `
-        : { rows: [] };
+    // Dedup handled by DB unique constraint on event_id — single INSERT, no SELECT needed
+    const { inserted } = await insertCanonicalEvent(canonical.row);
 
-    if (existing.rows.length > 0) {
-      console.log('[page_viewed] SKIPPED - duplicate');
+    if (!inserted) {
+      console.log('[page_viewed] SKIPPED - duplicate (conflict on event_id)');
       return NextResponse.json({ status: 'skipped', reason: 'duplicate' });
     }
-
-    await insertCanonicalEvent(canonical.row);
 
     console.log('[page_viewed] INSERT success', {
       duration: Date.now() - startTime,
