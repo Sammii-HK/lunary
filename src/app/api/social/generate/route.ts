@@ -13,9 +13,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'week is required' }, { status: 400 });
     }
 
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
     const assets = await generateSocialAssets(week, baseUrl, {
       generateVoiceover: includeVoiceover,
@@ -53,9 +51,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
   try {
     const assets = await generateSocialAssets(parseInt(week), baseUrl, {

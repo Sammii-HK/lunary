@@ -88,10 +88,34 @@ function getMoonPhasePng(weekOffset: number): string {
   return phases[dayOfYear % 8];
 }
 
+// Validate CSS color values to prevent injection
+function sanitizeColor(value: string, fallback: string): string {
+  // Allow hex (#fff, #ffffff, #ffffffff), rgb/rgba, hsl/hsla, and named CSS colors
+  if (/^#[0-9a-f]{3,8}$/i.test(value)) return value;
+  if (/^(rgb|hsl)a?\([0-9.,% ]+\)$/i.test(value)) return value;
+  return fallback;
+}
+
+// Sanitize text for OG image rendering — strip control chars and limit length
+function sanitizeText(value: string, maxLength: number): string {
+  return value.replace(/[\r\n\x00-\x1F\x7F]/g, '').slice(0, maxLength);
+}
+
+const ALLOWED_FORMATS = new Set<Format>([
+  'landscape',
+  'square',
+  'portrait',
+  'story',
+  'youtube',
+]);
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const title = searchParams.get('title') || 'Weekly Cosmic Forecast';
-  const rawSubtitle = searchParams.get('subtitle') || '';
+  const title = sanitizeText(
+    searchParams.get('title') || 'Weekly Cosmic Forecast',
+    200,
+  );
+  const rawSubtitle = sanitizeText(searchParams.get('subtitle') || '', 200);
 
   // Normalize for comparison - remove all non-alphanumeric chars and lowercase
   const normalizeForComparison = (str: string) =>
@@ -105,18 +129,27 @@ export async function GET(request: NextRequest) {
   const weekOffsetParam = searchParams.get('week') || '0';
   const weekOffset = parseInt(weekOffsetParam, 10);
   const weekRange = getWeekDates(weekOffset);
-  const format = (searchParams.get('format') || 'landscape') as Format;
+  const rawFormat = (searchParams.get('format') || 'landscape') as Format;
+  const format = ALLOWED_FORMATS.has(rawFormat)
+    ? rawFormat
+    : ('landscape' as Format);
   const moonPhasePng = getMoonPhasePng(weekOffset);
-  const bg = searchParams.get('bg') || BRAND_COLORS.cosmicBlack;
-  const fg = searchParams.get('fg') || BRAND_COLORS.textPrimary;
-  const accent = searchParams.get('accent') || BRAND_COLORS.accentDefault;
-  const highlight = searchParams.get('highlight') || accent;
+  const bg = sanitizeColor(
+    searchParams.get('bg') || '',
+    BRAND_COLORS.cosmicBlack,
+  );
+  const fg = sanitizeColor(
+    searchParams.get('fg') || '',
+    BRAND_COLORS.textPrimary,
+  );
+  const accent = sanitizeColor(
+    searchParams.get('accent') || '',
+    BRAND_COLORS.accentDefault,
+  );
+  const highlight = sanitizeColor(searchParams.get('highlight') || '', accent);
   const lockHue = searchParams.get('lockHue') === '1';
 
-  const baseUrl =
-    process.env.NODE_ENV === 'production'
-      ? 'https://lunary.app'
-      : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
   const dimensions = FORMATS[format] || FORMATS.landscape;
   const sizes = getResponsiveSizes(format);

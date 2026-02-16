@@ -368,10 +368,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const baseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://lunary.app'
-        : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
     let imageUrl: string;
     let videoFormat: 'story' | 'square' | 'landscape' | 'youtube';
