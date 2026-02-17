@@ -7,6 +7,10 @@ import {
   categoryAngleTemplates,
   threadsAngleTemplates,
 } from '@/lib/social/with-threads';
+import {
+  getAllRichEntries,
+  extractGrimoireSnippet,
+} from '@/lib/social/grimoire-content';
 import { getAccurateMoonPhase } from '../../../utils/astrology/astronomical-data';
 import type { ThemeCategory, ThreadIntent } from '@/lib/social/types';
 import {
@@ -61,11 +65,39 @@ export function generateCosmicTimingPost(
     }
     prompt = `how is ${transit.planet} energy showing up for you?`;
   } else {
+    const moonRng = seededRandom(`moon-${dateStr}-${slotHour}`);
+
+    // Body templates — seeded selection for variety even during same phase
+    const bodyTemplates = [
+      moonPhase.isSignificant
+        ? 'this is a potent phase, your intentions carry extra weight right now'
+        : `${moonPhase.trend === 'waxing' ? 'building momentum' : 'time to release'}, work with it not against it`,
+      `Moon in ${moonPhase.trend === 'waxing' ? 'growth' : 'release'} mode today — ${moonPhase.isSignificant ? 'a powerful window' : 'subtle but steady'}`,
+      `${moonPhase.illumination}% illuminated and ${moonPhase.trend === 'waxing' ? 'building' : 'fading'}`,
+      moonPhase.trend === 'waxing'
+        ? 'momentum is picking up, lean into what you started'
+        : "the pressure is easing, let go of what isn't working",
+      moonPhase.isSignificant
+        ? 'this phase hits different, pay attention to what surfaces'
+        : "quiet shifts are still shifts, don't ignore the subtle ones",
+      `${moonPhase.name} wants you to ${moonPhase.trend === 'waxing' ? 'build' : 'shed'}, not force`,
+      moonPhase.trend === 'waxing'
+        ? 'each day the light grows, so does your clarity'
+        : "as the light thins, so should your grip on what's done",
+    ];
+
+    // Prompt templates — seeded selection for variety
+    const promptTemplates = [
+      'what are you setting into motion this phase?',
+      'what are you working with today?',
+      'how is this energy landing for you?',
+      'what are you releasing this cycle?',
+      'notice anything shifting?',
+    ];
+
     hook = `${moonPhase.name} energy is running the show today`;
-    body = moonPhase.isSignificant
-      ? 'this is a potent phase, your intentions carry extra weight right now'
-      : `${moonPhase.trend === 'waxing' ? 'building momentum' : 'time to release'}, work with it not against it`;
-    prompt = 'what are you setting into motion this phase?';
+    body = bodyTemplates[Math.floor(moonRng() * bodyTemplates.length)];
+    prompt = promptTemplates[Math.floor(moonRng() * promptTemplates.length)];
     topicTag = 'Moon';
   }
 
@@ -179,35 +211,53 @@ export function generateIdentityPost(
 }
 
 /**
- * Generate an educational post based on the day's theme.
+ * Generate an educational post using actual grimoire data.
+ * Uses the existing grimoire content system (getAllRichEntries + extractGrimoireSnippet)
+ * with seeded random for deterministic daily selection.
  */
 export function generateEducationalPost(
   dateStr: string,
   slotHour: number,
 ): ThreadsPost {
-  const date = new Date(dateStr);
-  const { theme } = getThemeForDate(date);
-  const category = theme.category as ThemeCategory;
   const rng = seededRandom(`threads-edu-${dateStr}-${slotHour}`);
 
-  // Use observation/misconception angles from category templates
-  const angles = categoryAngleTemplates(category);
-  const eduAngles = angles.filter(
-    (a) =>
-      a.intent === 'observation' ||
-      a.intent === 'misconception' ||
-      a.intent === 'quick_rule',
+  // Use the grimoire system's full entry pool
+  const allEntries = getAllRichEntries();
+
+  // Weight toward best-performing categories: numerology and zodiac
+  const weighted = allEntries.filter((e) =>
+    ['zodiac', 'numerology', 'tarot', 'crystal'].includes(e.category),
   );
-  const angle =
-    eduAngles.length > 0
-      ? eduAngles[Math.floor(rng() * eduAngles.length)]
-      : angles[0];
+  const pool = weighted.length > 0 ? weighted : allEntries;
+
+  // Seeded pick from pool
+  const entry = pool[Math.floor(rng() * pool.length)];
+  const snippet = extractGrimoireSnippet(entry);
+
+  // Format snippet into a Threads-native educational post
+  const hook = snippet.title;
+  const keyPoints = snippet.keyPoints.filter((p) => p.length > 0);
+  const body =
+    keyPoints.length > 0
+      ? keyPoints.slice(0, 2).join('. ').toLowerCase()
+      : (snippet.summary || '').split('.').slice(0, 2).join('.').toLowerCase();
+
+  // Category → topic tag mapping
+  const categoryTags: Record<string, string> = {
+    zodiac: 'Zodiac',
+    numerology: 'Numerology',
+    tarot: 'Tarot',
+    crystal: 'Crystals',
+    concept: 'Astrology',
+    planet: 'Astrology',
+    season: 'Astrology',
+  };
 
   return buildOriginalPost({
-    hook: angle.opener,
-    body: angle.payload || '',
-    prompt: angle.closer,
-    topicTag: THREADS_TOPIC_TAGS[category] || 'Astrology',
+    hook,
+    body,
+    prompt: '',
+    topicTag: categoryTags[snippet.category] || 'Astrology',
     pillar: 'educational',
     dateStr,
     slotHour,

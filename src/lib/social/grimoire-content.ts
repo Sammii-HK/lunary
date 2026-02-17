@@ -410,7 +410,7 @@ function getRichContentData(
 // DIRECT DATA ACCESS - Get all entries from each data source
 // ============================================================================
 
-function getAllRichEntries(): GrimoireEntry[] {
+export function getAllRichEntries(): GrimoireEntry[] {
   const entries: GrimoireEntry[] = [];
 
   // Zodiac signs
