@@ -106,6 +106,7 @@ export async function POST(request: NextRequest) {
             sp.week_theme as "weekTheme"
           FROM social_posts sp
           WHERE sp.post_type = 'video'
+            AND sp.platform = 'tiktok'
             AND sp.status IN ('pending', 'approved')
             AND NOT EXISTS (
               SELECT 1 FROM video_scripts vs
@@ -126,6 +127,7 @@ export async function POST(request: NextRequest) {
             sp.week_theme as "weekTheme"
           FROM social_posts sp
           WHERE sp.post_type = 'video'
+            AND sp.platform = 'tiktok'
             AND sp.status IN ('pending', 'approved')
             AND NOT EXISTS (
               SELECT 1 FROM video_scripts vs

@@ -662,9 +662,22 @@ function convertHtmlToSubstackFormat(html: string, appUrl: string): string {
     /<div[^>]*class="cta"[^>]*>.*?<a[^>]*href="[^"]*"[^>]*>(.*?)<\/a>.*?<\/div>/gi,
     `\n\n**[$1](${appUrl})**\n\n`,
   );
-  // Strip remaining HTML tags - this converts HTML to plain markdown for Substack,
-  // not for security sanitization. Output is plain text for newsletter content.
-  markdown = markdown.replace(/<[^>]+>/g, '');
+  // Strip remaining HTML tags using O(n) iterative approach to prevent
+  // incomplete sanitization of multi-character sequences like <scr + ipt>
+  {
+    let cleaned = '';
+    let inTag = false;
+    for (let i = 0; i < markdown.length; i++) {
+      if (markdown[i] === '<') {
+        inTag = true;
+      } else if (markdown[i] === '>') {
+        inTag = false;
+      } else if (!inTag) {
+        cleaned += markdown[i];
+      }
+    }
+    markdown = cleaned;
+  }
   markdown = markdown.replace(/\n{3,}/g, '\n\n');
   markdown = markdown.trim();
 

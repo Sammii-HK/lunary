@@ -20,10 +20,28 @@ function getMoonCircleTheme(type: string) {
   }
 }
 
+const ALLOWED_TYPES = new Set(['New Moon', 'Full Moon']);
+const ALLOWED_SIGNS = new Set([
+  'Aries',
+  'Taurus',
+  'Gemini',
+  'Cancer',
+  'Leo',
+  'Virgo',
+  'Libra',
+  'Scorpio',
+  'Sagittarius',
+  'Capricorn',
+  'Aquarius',
+  'Pisces',
+]);
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type') || 'New Moon';
-  const sign = searchParams.get('sign') || 'Aries';
+  const rawType = searchParams.get('type') || 'New Moon';
+  const rawSign = searchParams.get('sign') || 'Aries';
+  const type = ALLOWED_TYPES.has(rawType) ? rawType : 'New Moon';
+  const sign = ALLOWED_SIGNS.has(rawSign) ? rawSign : 'Aries';
   const date = searchParams.get('date') || '';
 
   const formattedDate = date
@@ -36,10 +54,7 @@ export async function GET(request: NextRequest) {
 
   const theme = getMoonCircleTheme(type);
 
-  const baseUrl =
-    process.env.NODE_ENV === 'production'
-      ? 'https://lunary.app'
-      : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
   return new ImageResponse(
     <div

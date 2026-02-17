@@ -70,8 +70,8 @@ export default function ProductHuntPage() {
         </h1>
         <p className='text-lg text-zinc-200'>
           Astronomy-based astrology with optional Astral Guide chat for deeper
-          guidance. We combine NASA-grade ephemeris with tarot archetypes and
-          mood intelligence so you can plan launches, rituals, and creative
+          guidance. We combine Astronomy Engine precision with tarot archetypes
+          and mood intelligence so you can plan launches, rituals, and creative
           sprints with confidence.
         </p>
         <div className='flex flex-wrap gap-3 text-sm text-lunary-rose-100'>

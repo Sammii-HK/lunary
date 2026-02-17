@@ -19,7 +19,7 @@ const faqs = [
   {
     question: 'How accurate are Lunary birth chart calculations?',
     answer:
-      'Lunary uses the Astronomy Engine library, which calculates planetary positions to arcsecond precision. Our charts match professional ephemeris data and astronomical sources.',
+      'Lunary uses the Astronomy Engine library, validated against NOVAS and JPL Horizons to within 1 arcminute. Our charts match the same astronomical sources used by professional observatories.',
   },
   {
     question: 'What house system does Lunary use?',
@@ -41,15 +41,15 @@ const faqs = [
 const sections = [
   {
     title: 'Astronomy Engine',
-    content: `Lunary uses the Astronomy Engine library for all celestial calculations. This open-source library provides:
+    content: `Lunary uses the Astronomy Engine library for all celestial calculations. Astronomy Engine is rigorously unit-tested against NOVAS (the U.S. Naval Observatory's vector astrometry software) and JPL Horizons, achieving accuracy within 1 arcminute.
 
-• Planetary positions accurate to arcseconds
+• Planetary positions accurate to within 1 arcminute of NOVAS
 • Moon phase calculations precise to the minute
 • Retrograde motion detection based on actual orbital mechanics
-• Eclipse predictions matching NASA data
+• Eclipse predictions validated against JPL Horizons
 • Rise/set times accounting for atmospheric refraction
 
-The same algorithms used by planetariums and professional astronomers power Lunary's calculations.`,
+All calculations run in real-time using peer-reviewed astronomical algorithms, not pre-generated lookup tables.`,
   },
   {
     title: 'Coordinate Systems',
@@ -87,7 +87,7 @@ Each calculation is performed in real-time, ensuring you always see accurate cur
 
 This differs from some modern apps that use a single formula (Asc + Moon − Sun) regardless of whether you were born during the day or night. Both approaches are astronomically valid. Lunary uses the original Hellenistic system, practiced by astrologers for over 2,000 years, because it honours the distinction between day and night charts (sect).
 
-All calculated points are validated against Swiss Ephemeris data to ensure accuracy.`,
+All calculated points are cross-referenced against established astronomical sources to ensure accuracy.`,
   },
   {
     title: 'Transit Calculations',

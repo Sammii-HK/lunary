@@ -53,7 +53,8 @@ export async function detectCosmicPatterns(
     category,
   } = options;
 
-  console.log(`Detecting cosmic patterns for user ${userId}`, {
+  console.log('Detecting cosmic patterns', {
+    userIdLen: String(userId).length,
     daysBack,
     userTier,
     category,

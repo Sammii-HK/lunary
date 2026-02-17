@@ -227,3 +227,52 @@ export async function generateYouTubeScript(
     hookVersion,
   };
 }
+
+/**
+ * Generate a thematic deep-dive YouTube video for a specific theme block.
+ * Each block (A=numerology, B=witchtok) gets its own 5-10 minute educational video.
+ */
+export async function generateThematicDeepDive(
+  theme: WeeklyTheme,
+  facets: DailyFacet[],
+  scheduledDate: Date,
+  baseUrl: string = '',
+  blockLabel: string = 'A',
+): Promise<VideoScript> {
+  const allData = facets.map((f) => ({
+    facet: f,
+    data: getSafeGrimoireDataForFacet(f, theme.category),
+  }));
+
+  const rawScript = await generateYouTubeScriptContent(theme, facets, allData);
+  const ensuredHook = ensureVideoHook(rawScript, {
+    topic: theme.name,
+    category: theme.category,
+    source: 'generation',
+    scheduledDate,
+  });
+  const fullScript = ensuredHook.script;
+  const hookVersion = ensuredHook.modified ? 2 : 1;
+
+  const wordCount = countWords(fullScript);
+  const sections = parseScriptIntoSections(fullScript);
+  const coverImageUrl = generateYouTubeCoverUrl(theme, baseUrl);
+
+  return {
+    themeId: theme.id,
+    themeName: theme.name,
+    primaryThemeId: theme.id,
+    facetTitle: `Thematic Deep Dive (Block ${blockLabel}): ${theme.name}`,
+    aspect: ContentAspect.CORE_MEANING,
+    platform: 'youtube',
+    sections,
+    fullScript,
+    wordCount,
+    estimatedDuration: estimateDuration(wordCount),
+    scheduledDate,
+    status: 'draft',
+    coverImageUrl,
+    hookText: ensuredHook.hook,
+    hookVersion,
+  };
+}

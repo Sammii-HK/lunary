@@ -90,15 +90,15 @@ export async function POST(request: NextRequest, context: any) {
       .filter(Boolean)
       .join('\n');
 
-    // Generate response using Vercel AI SDK
+    // Generate response using Vercel AI SDK via DeepInfra
     const { generateText } = await import('ai');
-    const { openai } = await import('@ai-sdk/openai');
+    const { getDeepInfraModel } = await import('@/lib/ai/content-generator');
 
     const { text } = await generateText({
-      model: openai('gpt-4o-mini'),
+      model: getDeepInfraModel(),
       system: COMMUNITY_QA_SYSTEM_PROMPT,
       prompt: userPrompt,
-      maxTokens: 800,
+      maxOutputTokens: 800,
       temperature: 0.7,
     });
 

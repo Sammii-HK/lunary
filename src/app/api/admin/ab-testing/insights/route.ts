@@ -109,14 +109,8 @@ async function generateAIInsights(data: {
   testName: string;
   variants: VariantWithDetails[];
 }): Promise<string> {
-  // If OpenAI is not configured, return basic insights
-  if (!process.env.OPENAI_API_KEY) {
-    return generateBasicInsights(data);
-  }
-
   try {
-    const { OpenAI } = await import('openai');
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const { generateContent } = await import('@/lib/ai/content-generator');
 
     const variantsSummary = data.variants
       .map(
@@ -144,25 +138,17 @@ Provide concise analysis (3-4 paragraphs):
 3. Possible reasons for performance differences
 4. Next steps (more testing, implement winner, etc.)`;
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a data-driven conversion optimization expert. Provide clear, actionable insights for multivariate A/B tests.',
-        },
-        { role: 'user', content: prompt },
-      ],
-      max_tokens: 600,
+    const result = await generateContent({
+      systemPrompt:
+        'You are a data-driven conversion optimization expert. Provide clear, actionable insights for multivariate A/B tests.',
+      prompt,
+      maxTokens: 600,
       temperature: 0.7,
     });
 
-    return (
-      completion.choices[0]?.message?.content || generateBasicInsights(data)
-    );
+    return result || generateBasicInsights(data);
   } catch (error) {
-    console.error('OpenAI API error:', error);
+    console.error('AI insights error:', error);
     return generateBasicInsights(data);
   }
 }

@@ -135,7 +135,7 @@ export function SnapshotTab({
   } = computed;
 
   return (
-    <div className='space-y-10'>
+    <div className='min-w-0 space-y-10'>
       {/* Health Overview */}
       <Card>
         <CardHeader>
@@ -146,7 +146,7 @@ export function SnapshotTab({
           <CardDescription>Last 30 days</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+          <div className='grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4'>
             <HealthMetricCard
               icon={TrendingUp}
               label='User Growth'
@@ -273,7 +273,7 @@ export function SnapshotTab({
             <span className='text-xs font-medium text-zinc-400'>
               Filter by:
             </span>
-            <div className='flex gap-2'>
+            <div className='flex flex-wrap gap-2'>
               <select
                 value={insightTypeFilter}
                 onChange={(e) => data.setInsightTypeFilter(e.target.value)}
@@ -909,7 +909,7 @@ function GrowthHistoryCard({
               </p>
             ) : (
               <div className='overflow-x-auto'>
-                <table className='w-full text-sm'>
+                <table className='min-w-[600px] w-full text-sm'>
                   <thead>
                     <tr className='border-b border-zinc-800'>
                       <th className='py-2 text-left text-zinc-400'>Week</th>
@@ -997,7 +997,7 @@ function GrowthHistoryCard({
               </p>
             ) : (
               <div className='overflow-x-auto'>
-                <table className='w-full text-sm'>
+                <table className='min-w-[600px] w-full text-sm'>
                   <thead>
                     <tr className='border-b border-zinc-800'>
                       <th className='py-2 text-left text-zinc-400'>Month</th>

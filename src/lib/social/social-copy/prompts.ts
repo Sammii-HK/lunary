@@ -12,14 +12,15 @@ import { buildNoveltyInstruction } from './novelty';
  */
 const CRITICAL_RULES = `
 CRITICAL RULES:
-1. NEVER use these overused phrases: "gentle nudge," "cosmic wink/thumbs-up," "like the universe is," "whisper/whispering," "perfect timing to," "curious to see where it leads"
-2. Each post about the same topic MUST use completely different angles - not just rephrased versions
-3. Vary sentence length dramatically - use fragments, short punchy lines, and longer explanations
-4. NEVER use emojis - no emojis in any content
-5. Use concrete, specific details instead of vague metaphors
-6. Questions must sound like genuine human curiosity, not rhetorical fluff
-7. Never use em dashes
-8. ANTI-REPETITION: Before writing, check if your sentence could work for ANY topic by swapping the number/topic. If yes, REWRITE with details that ONLY work for THIS specific topic.
+1. IMPORTANT: Do NOT include any hashtags (#) in your content. Hashtags are added separately by the system.
+2. NEVER use these overused phrases: "gentle nudge," "cosmic wink/thumbs-up," "like the universe is," "whisper/whispering," "perfect timing to," "curious to see where it leads"
+3. Each post about the same topic MUST use completely different angles - not just rephrased versions
+4. Vary sentence length dramatically - use fragments, short punchy lines, and longer explanations
+5. NEVER use emojis - no emojis in any content
+6. Use concrete, specific details instead of vague metaphors
+7. Questions must sound like genuine human curiosity, not rhetorical fluff
+8. Never use em dashes
+9. ANTI-REPETITION: Before writing, check if your sentence could work for ANY topic by swapping the number/topic. If yes, REWRITE with details that ONLY work for THIS specific topic.
    BAD (generic): "Pay attention to how [X] shapes timing or small decisions"
    GOOD (specific): "222 appears most when you're doubting whether to stay - it's telling you to stay"
    GOOD (specific): "The Tower often shows up after you've been ignoring what you already knew"
@@ -108,7 +109,7 @@ ${noveltyNote ? `\n${noveltyNote}` : ''}
 Return JSON:
 {
   "content": "your post text here",
-  "hashtags": ["optional"],
+  "hashtags": [],
   "safetyChecks": []
 }`;
 };

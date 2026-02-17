@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateDailyBatch } from '@/lib/instagram/content-orchestrator';
+import {
+  generateDailyBatch,
+  generateLinkedInDidYouKnowBatch,
+} from '@/lib/instagram/content-orchestrator';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -126,6 +129,28 @@ export async function POST(request: NextRequest) {
                 },
               });
             }
+
+            // Cross-post to Pinterest with the same content
+            const pinGroupKey = `pinterest-${dateStr}-${post.type}`;
+            const existingPinPost = await prisma.socialPost.findFirst({
+              where: { base_group_key: pinGroupKey },
+            });
+
+            if (existingPinPost) {
+              await prisma.socialPost.update({
+                where: { id: existingPinPost.id },
+                data: postData,
+              });
+            } else {
+              await prisma.socialPost.create({
+                data: {
+                  ...postData,
+                  platform: 'pinterest',
+                  status: 'pending',
+                  base_group_key: pinGroupKey,
+                },
+              });
+            }
           } catch (dbError) {
             console.warn(
               `    Failed to save ${post.type} to database:`,
@@ -161,6 +186,61 @@ export async function POST(request: NextRequest) {
       if (i < 6) {
         await new Promise((r) => setTimeout(r, 1000));
       }
+    }
+
+    // Generate LinkedIn "Did You Know" image posts (Mon, Wed, Fri)
+    try {
+      const linkedInDykPosts = generateLinkedInDidYouKnowBatch(startDate);
+      for (const post of linkedInDykPosts) {
+        const dykDateStr = post.scheduledTime.split('T')[0];
+        const groupKey = `linkedin-${dykDateStr}-did_you_know`;
+
+        const isCarousel = false;
+        const imageUrlValue = post.imageUrls[0] || null;
+
+        const postData = {
+          content: post.caption,
+          postType: post.type,
+          scheduledDate: new Date(post.scheduledTime),
+          image_url: imageUrlValue,
+          video_metadata: {
+            hashtags: post.hashtags || [],
+            metadata: post.metadata || {},
+            imageUrls: post.imageUrls,
+          },
+        };
+
+        const existingPost = await prisma.socialPost.findFirst({
+          where: { base_group_key: groupKey },
+        });
+
+        if (existingPost) {
+          await prisma.socialPost.update({
+            where: { id: existingPost.id },
+            data: postData,
+          });
+        } else {
+          await prisma.socialPost.create({
+            data: {
+              ...postData,
+              platform: 'linkedin',
+              status: 'pending',
+              base_group_key: groupKey,
+            },
+          });
+        }
+      }
+      totalPosts += linkedInDykPosts.length;
+      console.log(
+        `  ✅ Generated ${linkedInDykPosts.length} LinkedIn DYK posts`,
+      );
+    } catch (linkedInError) {
+      console.warn(
+        '[Instagram Weekly] Failed to generate LinkedIn DYK posts:',
+        linkedInError instanceof Error
+          ? linkedInError.message
+          : 'Unknown error',
+      );
     }
 
     const successfulDays = results.filter((r) => r.success).length;

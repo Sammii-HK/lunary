@@ -3,7 +3,7 @@ import {
   createUIMessageStream,
   createUIMessageStreamResponse,
 } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { getDeepInfraModel } from '@/lib/ai/content-generator';
 import { detectAssistCommand, runAssistCommand } from './assist';
 import { buildReflectionPrompt } from './reflection';
 import { buildPromptSections } from './prompt';
@@ -150,7 +150,7 @@ export const createStreamingChatResponse = async ({
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
       const result = streamText({
-        model: openai('gpt-4o-mini'),
+        model: getDeepInfraModel(),
         system: systemPrompt,
         messages,
         maxOutputTokens: maxTokens,
@@ -281,8 +281,8 @@ export const createStreamingChatResponse = async ({
 
         captureAIGeneration({
           distinctId: userId,
-          model: 'gpt-4o-mini',
-          provider: 'openai',
+          model: 'meta-llama/Llama-3.3-70B-Instruct',
+          provider: 'deepinfra',
           inputTokens: aiUsage?.inputTokens || tokensIn,
           outputTokens: aiUsage?.outputTokens || tokensOut,
           latencyMs: Date.now() - startTime,

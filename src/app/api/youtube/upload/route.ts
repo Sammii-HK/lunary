@@ -53,9 +53,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Download video from Vercel Blob
-    console.log(`📥 Downloading video from: ${videoUrl}`);
-    const videoResponse = await fetch(videoUrl);
+    // Download video from Vercel Blob — validate URL domain first
+    const { validateFetchUrl, sanitizeForLog } = await import('@/lib/utils');
+    const safeVideoUrl = validateFetchUrl(videoUrl);
+    console.log(
+      `📥 Downloading video (${sanitizeForLog(new URL(safeVideoUrl).pathname)})`,
+    );
+    const videoResponse = await fetch(safeVideoUrl);
     if (!videoResponse.ok) {
       throw new Error(
         `Failed to download video: ${videoResponse.status} ${videoResponse.statusText}`,

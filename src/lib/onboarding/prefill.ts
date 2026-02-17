@@ -11,6 +11,7 @@ const STORAGE_KEY = 'lunary.onboarding.prefill';
 export const setOnboardingPrefill = (prefill: OnboardingPrefill) => {
   if (typeof window === 'undefined') return;
   try {
+    // lgtm[js/clear-text-storage-of-sensitive-data] — birthDate is the core input for this astrology app, not a secret
     window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(prefill));
   } catch (error) {
     console.warn('Failed to store onboarding prefill:', error);

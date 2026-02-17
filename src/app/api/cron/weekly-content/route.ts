@@ -543,7 +543,7 @@ export async function GET(request: NextRequest) {
         dedupeKey: `weekly-digest-${new Date().toISOString().split('T')[0]}`,
       });
       console.log(
-        `✅ Weekly notification sent: ${socialPostsResult?.savedIds?.length || 0} social posts + ${instagramResult?.totalPosts || 0} Instagram posts ready for approval`,
+        `✅ Weekly notification sent: ${socialPostsResult?.posts?.length || socialPostsResult?.savedIds?.length || 0} social posts + ${instagramResult?.totalPosts || 0} Instagram posts ready for approval`,
       );
     } catch (notificationError) {
       console.warn('📱 Weekly notification failed:', notificationError);
@@ -558,7 +558,10 @@ export async function GET(request: NextRequest) {
       metadata: {
         blogTitle: blogData.data?.title,
         newsletterSent: newsletterData.success,
-        socialPostsGenerated: socialPostsResult?.savedIds?.length || 0,
+        socialPostsGenerated:
+          socialPostsResult?.posts?.length ||
+          socialPostsResult?.savedIds?.length ||
+          0,
         instagramPostsGenerated: instagramResult?.totalPosts || 0,
         podcastEpisode: podcastResult?.episode?.episodeNumber || null,
         youtubeVideoId: youtubeResult?.videoId || null,

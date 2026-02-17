@@ -42,10 +42,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
 
-  const baseUrl =
-    process.env.NODE_ENV === 'production'
-      ? 'https://lunary.app'
-      : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
   let targetDate: Date;
   if (dateParam) {

@@ -131,7 +131,11 @@ export async function generateReferralCode(userId: string): Promise<string> {
   }
 
   // Generate a unique referral code (8 characters, alphanumeric)
-  const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+  const code = crypto
+    .randomUUID()
+    .replace(/-/g, '')
+    .substring(0, 8)
+    .toUpperCase();
 
   try {
     const result = await sql`

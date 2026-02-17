@@ -1,10 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { put } from '@vercel/blob';
 import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import { recordThemeUsage } from '@/lib/social/thematic-generator';
 import { getImageBaseUrl } from '@/lib/urls';
 import { sanitizeForLog } from '@/lib/security/log-sanitize';
+import { postToSocialMultiPlatform } from '@/lib/social/client';
+
+/**
+ * Pre-upload a dynamic OG image to Vercel Blob so Ayrshare gets a fast static URL.
+ * Only processes URLs that point to our own /api/og routes.
+ */
+async function preUploadImage(imageUrl: string): Promise<string> {
+  try {
+    const url = new URL(imageUrl);
+    // Only pre-upload our own dynamic OG images
+    if (!url.pathname.startsWith('/api/og')) {
+      return imageUrl;
+    }
+
+    const response = await fetch(imageUrl, {
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!response.ok) {
+      console.warn(
+        `Failed to fetch OG image (${response.status}): ${imageUrl}`,
+      );
+      return imageUrl;
+    }
+
+    const buffer = await response.arrayBuffer();
+    const contentType = response.headers.get('content-type') || 'image/png';
+    const ext =
+      contentType.includes('jpeg') || contentType.includes('jpg')
+        ? 'jpg'
+        : 'png';
+    const hash =
+      Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    const blobKey = `social-images/${hash}.${ext}`;
+
+    const blob = await put(blobKey, buffer, {
+      access: 'public',
+      contentType,
+    });
+
+    console.log(`📸 Pre-uploaded OG image to blob: ${blob.url}`);
+    return blob.url;
+  } catch (error) {
+    console.warn('Failed to pre-upload image, using original URL:', error);
+    return imageUrl;
+  }
+}
 
 type DbPostRow = {
   id: number;
@@ -31,7 +78,9 @@ type PlatformPayload = {
   instagramOptions?: { type: string; coverUrl?: string };
 };
 
-const videoPlatforms = ['instagram', 'tiktok', 'youtube'];
+const videoPlatforms = ['instagram', 'tiktok', 'facebook', 'youtube'];
+/** Platforms that should NEVER receive video media */
+const textOnlyPlatforms = new Set(['twitter', 'threads', 'bluesky']);
 const noMediaVariantMode: Record<string, 'noImage' | 'mediaNull'> = {
   bluesky: 'noImage',
   threads: 'noImage',
@@ -247,26 +296,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.SUCCULENT_SECRET_KEY;
-    const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
-
-    if (!apiKey || !accountGroupId) {
-      return NextResponse.json(
-        { success: false, error: 'Succulent API not configured' },
-        { status: 500 },
-      );
-    }
-
     const baseUrl = getImageBaseUrl();
-
-    // Ensure accountGroupId is a string
-    const accountGroupIdStr = String(accountGroupId).trim();
-    if (!accountGroupIdStr) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid accountGroupId' },
-        { status: 500 },
-      );
-    }
 
     // Parse scheduled date
     let scheduleDate: Date;
@@ -307,8 +337,11 @@ export async function POST(request: NextRequest) {
       groupPosts = groupResult.rows as DbPostRow[];
     }
 
+    // YouTube is posted directly via its own API on approve — skip it here
     const approvedGroupPosts = groupPosts.filter(
-      (post) => post.status === 'approved',
+      (post) =>
+        post.status === 'approved' &&
+        toPlatformStr(post.platform) !== 'youtube',
     );
     const postsToSend =
       approvedGroupPosts.length > 0 ? approvedGroupPosts : [primaryPost];
@@ -426,6 +459,21 @@ export async function POST(request: NextRequest) {
       platformsToSend.add(basePayload.platform);
     }
 
+    // Never send video content to text-only platforms (twitter, threads, bluesky)
+    const hasVideoMedia = basePayload.media.some((m) => m.type === 'video');
+    const isVideoPost = primaryPost.post_type === 'video';
+    if (hasVideoMedia || isVideoPost) {
+      for (const tp of textOnlyPlatforms) {
+        if (platformsToSend.has(tp)) {
+          console.log(
+            `⚠️ Removing text-only platform "${tp}" from video post group`,
+          );
+          platformsToSend.delete(tp);
+          delete variants[tp];
+        }
+      }
+    }
+
     if (
       platformsToSend.has('pinterest') &&
       basePayload.media.length === 0 &&
@@ -442,94 +490,54 @@ export async function POST(request: NextRequest) {
     }
 
     const readableDate = formatReadableDate(scheduleDate);
-    const postData: any = {
-      accountGroupId: accountGroupIdStr,
-      name: `Lunary Post - ${readableDate}`,
-      content: basePayload.content,
+
+    // Pre-upload dynamic OG images to blob storage so Ayrshare gets fast static URLs
+    for (const item of basePayload.media) {
+      if (item.type === 'image') {
+        item.url = await preUploadImage(item.url);
+      }
+    }
+    for (const variant of Object.values(variants)) {
+      if (variant.media && Array.isArray(variant.media)) {
+        for (let i = 0; i < variant.media.length; i++) {
+          variant.media[i] = await preUploadImage(variant.media[i]);
+        }
+      }
+    }
+    if (tiktokOptions?.coverUrl) {
+      tiktokOptions.coverUrl = await preUploadImage(tiktokOptions.coverUrl);
+    }
+    if (instagramOptions?.coverUrl) {
+      instagramOptions.coverUrl = await preUploadImage(
+        instagramOptions.coverUrl,
+      );
+    }
+
+    console.log('📤 Sending via social client:', {
       platforms: Array.from(platformsToSend),
+      contentLength: basePayload.content.length,
+      mediaCount: basePayload.media.length,
+      scheduledDate: scheduleDate.toISOString(),
+    });
+
+    const { results: platformResults } = await postToSocialMultiPlatform({
+      platforms: Array.from(platformsToSend),
+      content: basePayload.content,
       scheduledDate: scheduleDate.toISOString(),
       media: basePayload.media,
-    };
-
-    if (Object.keys(variants).length > 0) {
-      postData.variants = variants;
-    }
-
-    if (redditData) {
-      postData.reddit = redditData;
-    }
-
-    if (pinterestOptions) {
-      postData.pinterestOptions = pinterestOptions;
-    }
-
-    if (tiktokOptions) {
-      postData.tiktokOptions = tiktokOptions;
-    }
-
-    if (instagramOptions) {
-      postData.instagramOptions = instagramOptions;
-    }
-
-    const succulentApiUrl = 'https://app.succulent.social/api/posts';
-
-    // Validate and stringify JSON
-    let jsonBody: string;
-    try {
-      jsonBody = JSON.stringify(postData);
-      console.log('📤 Sending to Succulent:', {
-        url: succulentApiUrl,
-        postData: JSON.parse(jsonBody), // Parse back to log nicely
-        jsonLength: jsonBody.length,
-      });
-    } catch (jsonError) {
-      console.error('❌ Failed to stringify post data:', jsonError);
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Failed to serialize post data: ${jsonError instanceof Error ? jsonError.message : 'Unknown error'}`,
-        },
-        { status: 500 },
-      );
-    }
-
-    const response = await fetch(succulentApiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': apiKey,
-      },
-      body: jsonBody,
+      name: `Lunary Post - ${readableDate}`,
+      variants: Object.keys(variants).length > 0 ? variants : undefined,
+      reddit: redditData,
+      pinterestOptions,
+      tiktokOptions,
+      instagramOptions,
     });
 
-    let responseData;
-    const contentType = response.headers.get('content-type');
-    const responseText = await response.text();
+    const anySuccess = Object.values(platformResults).some((r) => r.success);
 
-    try {
-      responseData = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('❌ Failed to parse Succulent response:', {
-        status: response.status,
-        statusText: response.statusText,
-        contentType,
-        responseText: responseText.substring(0, 500),
-      });
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Invalid JSON response from Succulent: ${responseText.substring(0, 200)}`,
-        },
-        { status: 500 },
-      );
-    }
+    console.log('📥 Social client response:', platformResults);
 
-    console.log('📥 Succulent response:', {
-      status: response.status,
-      data: responseData,
-    });
-
-    if (response.ok) {
+    if (anySuccess) {
       // Update status to 'sent' for all posts in the group (or just the single post)
       console.log('🔄 Updating post status to sent...', {
         postId,
@@ -634,23 +642,22 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'Post sent to Succulent successfully',
-        postId: responseData.data?.postId || responseData.postId,
+        message: 'Post sent successfully',
+        results: platformResults,
       });
     } else {
+      const firstError = Object.values(platformResults).find((r) => r.error);
       return NextResponse.json(
         {
           success: false,
-          error:
-            responseData.error ||
-            responseData.message ||
-            `HTTP ${response.status}: ${response.statusText}`,
+          error: firstError?.error || 'All platforms failed',
+          results: platformResults,
         },
-        { status: response.status },
+        { status: 500 },
       );
     }
   } catch (error) {
-    console.error('Error sending post to Succulent:', error);
+    console.error('Error sending post:', error);
     return NextResponse.json(
       {
         success: false,

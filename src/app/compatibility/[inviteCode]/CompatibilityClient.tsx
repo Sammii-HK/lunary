@@ -144,6 +144,7 @@ export function CompatibilityClient({ inviteCode }: CompatibilityClientProps) {
   }) => {
     if (!isAuthenticated) {
       // Store birth data in sessionStorage for after signup
+      // lgtm[js/clear-text-storage-of-sensitive-data] — birthDate is the core input for this astrology app, not a secret
       sessionStorage.setItem(BIRTH_DATA_KEY, JSON.stringify(data));
       setStep('signup-gate');
       return;

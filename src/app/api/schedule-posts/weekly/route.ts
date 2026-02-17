@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getImageBaseUrl } from '@/lib/urls';
 import { getPlatformImageFormat } from '@/lib/social/educational-images';
 import { getPlatformHashtags } from '../../../../../utils/hashtags';
+import { postToSocialMultiPlatform } from '@/lib/social/client';
 
 interface PostContent {
   date: string;
@@ -14,58 +15,18 @@ interface PostContent {
   callToAction: string;
 }
 
-interface SucculentPostData {
-  accountGroupId: string;
-  name?: string;
-  content: string;
-  platforms: string[];
-  scheduledDate: string;
-  media: Array<{
-    type: 'image';
-    url: string;
-    alt: string;
-  }>;
-  variants?: Record<string, { content: string; media?: string[] }>;
-}
-
 export async function POST(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const startDateParam = searchParams.get('startDate'); // Format: 2024-02-05 for starting date
-    const testMode = searchParams.get('test') === 'true';
+    const startDateParam = searchParams.get('startDate');
 
-    // Get environment variables
-    const apiKey = process.env.SUCCULENT_SECRET_KEY;
-    const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
-
-    // Get the base URL for the application (dev vs prod)
-    // Use production URL on any Vercel deployment
     const baseUrl = getImageBaseUrl();
-
-    console.log('🔑 Weekly scheduler environment check:', {
-      hasApiKey: !!apiKey,
-      hasAccountGroupId: !!accountGroupId,
-      baseUrl,
-      nodeEnv: process.env.NODE_ENV,
-      startDate: startDateParam,
-    });
-
-    if (!apiKey || !accountGroupId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing Succulent API configuration',
-        },
-        { status: 500 },
-      );
-    }
 
     // Parse start date or default to next Monday
     let startDate: Date;
     if (startDateParam) {
       startDate = new Date(startDateParam);
     } else {
-      // Default to next Monday
       const today = new Date();
       const daysUntilMonday = (1 + 7 - today.getDay()) % 7;
       startDate = new Date(today);
@@ -74,15 +35,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate posts for 7 days (one week)
-    const posts: SucculentPostData[] = [];
+    const results = [];
+    let successCount = 0;
+    let errorCount = 0;
 
     for (let day = 0; day < 7; day++) {
       const currentDate = new Date(startDate);
       currentDate.setDate(startDate.getDate() + day);
       const dateStr = currentDate.toISOString().split('T')[0];
 
-      // Fetch cosmic content for this date
       const cosmicResponse = await fetch(
         `${baseUrl}/api/og/cosmic-post?date=${dateStr}`,
       );
@@ -92,16 +53,14 @@ export async function POST(request: NextRequest) {
           `Failed to fetch cosmic content for ${dateStr}:`,
           cosmicResponse.status,
         );
-        continue; // Skip this date if cosmic content fails
+        continue;
       }
 
       const cosmicContent: PostContent = await cosmicResponse.json();
 
-      // Schedule post for 1 PM local time on the target date
       const scheduledDateTime = new Date(currentDate);
       scheduledDateTime.setHours(8, 0, 0, 0); // 8 AM UTC
 
-      // Format readable date
       const formattedDate = scheduledDateTime.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
@@ -114,7 +73,6 @@ export async function POST(request: NextRequest) {
       });
       const readableDate = `${formattedDate} at ${formattedTime}`;
 
-      // Ensure image URL uses the correct base URL
       const getCosmicFormat = (platform: string) =>
         getPlatformImageFormat(platform === 'x' ? 'twitter' : platform);
       const buildCosmicImageUrl = (platform: string) =>
@@ -128,114 +86,82 @@ export async function POST(request: NextRequest) {
         cosmicContent,
         dateStr,
       );
-      const variants: Record<string, { content: string; media?: string[] }> =
-        {};
+
       const twitterVariantContent = twitterContent.trim();
       const linkedinVariantContent = linkedinContent.trim();
-      const variantEntries: Array<{
-        platform: string;
-        content: string;
-      }> = [
-        { platform: 'facebook', content: baseContent },
-        {
-          platform: 'x',
-          content: twitterVariantContent || baseContent,
+
+      const variants: Record<string, { content: string; media?: string[] }> = {
+        facebook: {
+          content: baseContent,
+          media: [buildCosmicImageUrl('facebook')],
         },
-        {
-          platform: 'threads',
+        x: {
           content: twitterVariantContent || baseContent,
+          media: [buildCosmicImageUrl('x')],
         },
-        {
-          platform: 'linkedin',
+        threads: {
+          content: twitterVariantContent || baseContent,
+          media: [buildCosmicImageUrl('threads')],
+        },
+        linkedin: {
           content: linkedinVariantContent || baseContent,
+          media: [buildCosmicImageUrl('linkedin')],
         },
-      ];
-
-      for (const entry of variantEntries) {
-        const platformMediaUrls = [buildCosmicImageUrl(entry.platform)];
-        variants[entry.platform] = {
-          content: entry.content,
-          media: platformMediaUrls,
-        };
-      }
-
-      const postData: SucculentPostData = {
-        accountGroupId,
-        name: `Cosmic Post - ${readableDate}`,
-        content: baseContent,
-        platforms: ['instagram'],
-        scheduledDate: scheduledDateTime.toISOString(),
-        media: [
-          {
-            type: 'image',
-            url: storyImageUrl,
-            alt: altText,
-          },
-        ],
       };
-
-      if (Object.keys(variants).length > 0) {
-        postData.variants = variants;
-      }
 
       console.log(`📅 Weekly post prepared for ${dateStr}:`, {
         contentLength: baseContent.length,
-        imageUrl: postData.media[0].url,
-        scheduledDate: postData.scheduledDate,
+        imageUrl: storyImageUrl,
+        scheduledDate: scheduledDateTime.toISOString(),
         scheduledTime: '8:00 AM',
         variantPlatforms: Object.keys(variants),
       });
 
-      posts.push(postData);
-    }
-
-    // Send posts to Succulent API
-    const succulentApiUrl = testMode
-      ? 'http://localhost:3001/api/posts'
-      : 'https://app.succulent.social/api/posts';
-
-    const results = [];
-    let successCount = 0;
-    let errorCount = 0;
-
-    for (const post of posts) {
       try {
-        const response = await fetch(succulentApiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-API-Key': apiKey,
-          },
-          body: JSON.stringify(post),
+        const { results: platformResults } = await postToSocialMultiPlatform({
+          platforms: ['instagram'],
+          content: baseContent,
+          scheduledDate: scheduledDateTime.toISOString(),
+          name: `Cosmic Post - ${readableDate}`,
+          media: [
+            {
+              type: 'image',
+              url: storyImageUrl,
+              alt: altText,
+            },
+          ],
+          variants,
         });
 
-        const result = await response.json();
-
-        if (response.ok) {
+        const anySuccess = Object.values(platformResults).some(
+          (r) => r.success,
+        );
+        if (anySuccess) {
           successCount++;
           results.push({
-            date: post.scheduledDate.split('T')[0],
+            date: dateStr,
             status: 'success',
-            postId: result.data?.postId,
           });
         } else {
           errorCount++;
+          const firstError = Object.values(platformResults).find(
+            (r) => r.error,
+          );
           results.push({
-            date: post.scheduledDate.split('T')[0],
+            date: dateStr,
             status: 'error',
-            error: result.error || 'Unknown error',
+            error: firstError?.error || 'Unknown error',
           });
         }
       } catch (error) {
         errorCount++;
         results.push({
-          date: post.scheduledDate.split('T')[0],
+          date: dateStr,
           status: 'error',
           error: error instanceof Error ? error.message : 'Network error',
         });
       }
 
-      // Add small delay between requests to be respectful
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 

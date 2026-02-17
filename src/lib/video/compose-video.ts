@@ -52,7 +52,7 @@ async function getAudioDuration(audioPath: string): Promise<number> {
 // Initialize FFmpeg path - copy to /tmp for serverless compatibility
 let ffmpegPath: string | null = null;
 
-async function getFfmpegPath(): Promise<string> {
+export async function getFfmpegPath(): Promise<string> {
   if (ffmpegPath) return ffmpegPath;
 
   if (!ffmpegStatic) {
@@ -949,8 +949,9 @@ export async function composeVideo(
         throw new Error('Either imageUrl or images must be provided');
       }
 
-      // Download image
-      const imageResponse = await fetch(singleImageUrl);
+      // Download image — validate URL domain to prevent SSRF
+      const { validateFetchUrl } = await import('@/lib/utils');
+      const imageResponse = await fetch(validateFetchUrl(singleImageUrl));
       if (!imageResponse.ok) {
         throw new Error(
           `Failed to fetch image: ${imageResponse.status} ${imageResponse.statusText}`,

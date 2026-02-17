@@ -773,11 +773,11 @@ export async function getOgData(
       case 'cusps':
         return await loadCusp(slug);
       default:
-        console.warn(`Unknown category: ${category}`);
+        console.warn('Unknown grimoire OG category requested');
         return null;
     }
   } catch (error) {
-    console.error(`Error loading OG data for ${category}/${slug}:`, error);
+    console.error('Error loading grimoire OG data:', error);
     return null;
   }
 }

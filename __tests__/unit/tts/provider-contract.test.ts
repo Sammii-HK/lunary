@@ -18,6 +18,7 @@ new Uint8Array(mockWavHeader).set(
 
 global.fetch = jest.fn().mockResolvedValue({
   ok: true,
+  arrayBuffer: jest.fn().mockResolvedValue(mockWavHeader),
   json: jest.fn().mockResolvedValue({
     audio: Buffer.from(new Uint8Array(mockWavHeader)).toString('base64'),
   }),

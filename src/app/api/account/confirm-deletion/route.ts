@@ -13,7 +13,7 @@ import {
 const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
 function generateId(): string {
-  return `del_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  return `del_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
 }
 
 export async function GET(request: NextRequest) {

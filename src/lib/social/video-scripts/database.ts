@@ -5,6 +5,7 @@
 import type { VideoScript } from './types';
 import { ensureVideoHook } from './hooks';
 import { categoryThemes } from '../weekly-themes';
+import { ensureLinePunctuation } from '@/lib/tts/normalize-script';
 
 const THEME_CATEGORY_BY_NAME = new Map(
   categoryThemes.map((theme) => [theme.name, theme.category]),
@@ -79,6 +80,9 @@ export async function ensureVideoScriptsTable(): Promise<void> {
 export async function saveVideoScript(script: VideoScript): Promise<number> {
   const { sql } = await import('@vercel/postgres');
 
+  // Ensure every line ends with punctuation for proper TTS pauses
+  const punctuatedScript = ensureLinePunctuation(script.fullScript);
+
   const result = await sql`
     INSERT INTO video_scripts (
       theme_id, theme_name, primary_theme_id,
@@ -96,7 +100,7 @@ export async function saveVideoScript(script: VideoScript): Promise<number> {
       ${script.aspect || null},
       ${script.platform},
       ${JSON.stringify(script.sections)},
-      ${script.fullScript},
+      ${punctuatedScript},
       ${script.wordCount},
       ${script.estimatedDuration},
       ${script.scheduledDate.toISOString()},

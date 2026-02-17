@@ -205,51 +205,21 @@ async function scheduleVideoToPlatforms(
   weeklyData?: any,
   blogSlug?: string,
 ): Promise<void> {
-  const apiKey = process.env.SUCCULENT_SECRET_KEY;
-  const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+  const { postToSocial } = await import('@/lib/social/client');
 
-  if (!apiKey || !accountGroupId) {
-    console.warn('Succulent API not configured, skipping video scheduling');
-    return;
-  }
-
-  const succulentApiUrl = 'https://app.succulent.social/api/posts';
-  const dateStr = new Date().toISOString().split('T')[0];
   const now = new Date();
   const scheduledDate = new Date(now);
   scheduledDate.setHours(21, 30, 0, 0);
   if (scheduledDate < now) {
     scheduledDate.setDate(scheduledDate.getDate() + 1);
   }
+  const scheduledDateIso = scheduledDate.toISOString();
+  const videoMedia = [{ type: 'video' as const, url: videoUrl, alt: title }];
 
   if (videoType === 'short') {
-    // Short form: Schedule to Instagram Stories, Instagram Reels, Threads, Twitter/X, and Bluesky
-    // Use postContent if available (generated from weekly data), otherwise fall back to description
     const content = postContent || description;
 
-    // Instagram Stories
-    const storyPost = {
-      accountGroupId,
-      name: `Lunary Short - Instagram Stories - ${dateStr}`,
-      content: content,
-      platforms: ['instagram'],
-      scheduledDate: scheduledDate.toISOString(),
-      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
-      instagramOptions: { stories: true },
-    };
-
-    // Instagram Reels
-    const reelPost = {
-      accountGroupId,
-      name: `Lunary Short - Instagram Reel - ${dateStr}`,
-      content: content,
-      platforms: ['instagram'],
-      scheduledDate: scheduledDate.toISOString(),
-      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
-      instagramOptions: { type: 'reel' as const },
-    };
-
-    // Threads - generate Threads-specific content with categorizing hashtags
+    // Threads - generate platform-specific content
     let threadsContent = content;
     if (weeklyData) {
       try {
@@ -261,300 +231,126 @@ async function scheduleVideoToPlatforms(
           blogSlug,
           'threads',
         );
-        // Truncate to 300 characters for Threads
         threadsContent = truncateContent(threadsContent, 300);
       } catch (error) {
         console.warn(
           'Failed to generate Threads-specific content, using default:',
           error,
         );
-        // Fallback: use regular content but ensure it's truncated
         threadsContent = truncateContent(content, 300);
       }
     } else {
-      // No weeklyData available, use regular content truncated
       threadsContent = truncateContent(content, 300);
     }
 
-    const threadsPost = {
-      accountGroupId,
-      name: `Lunary Short - Threads - ${dateStr}`,
-      content: threadsContent,
-      platforms: ['threads'],
-      scheduledDate: scheduledDate.toISOString(),
-    };
+    const twitterContent = truncateContent(content.replace(/\n/g, ' '), 280);
+    const blueskyContent = truncateContent(content, 300);
 
-    // Twitter/X - 280 character limit
-    const twitterContent = content.replace(/\n/g, ' '); // Twitter doesn't support line breaks well
-    const twitterPost = {
-      accountGroupId,
-      name: `Lunary Short - Twitter - ${dateStr}`,
-      content: truncateContent(twitterContent, 280),
-      platforms: ['twitter'],
-      scheduledDate: scheduledDate.toISOString(),
-      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
-      twitterOptions: {
-        thread: false,
-        threadNumber: false,
+    // Post to all short-form platforms
+    const shortFormPosts = [
+      {
+        platform: 'instagram',
+        content,
+        platformSettings: { stories: true },
+        media: videoMedia,
+        label: 'Instagram Stories',
       },
-    };
+      {
+        platform: 'instagram',
+        content,
+        platformSettings: { type: 'reel' },
+        media: videoMedia,
+        label: 'Instagram Reels',
+      },
+      {
+        platform: 'threads',
+        content: threadsContent,
+        media: undefined,
+        label: 'Threads',
+      },
+      {
+        platform: 'twitter',
+        content: twitterContent,
+        media: videoMedia,
+        label: 'Twitter/X',
+      },
+      {
+        platform: 'bluesky',
+        content: blueskyContent,
+        media: videoMedia,
+        label: 'Bluesky',
+      },
+    ];
 
-    // Bluesky - 300 character limit
-    const blueskyPost = {
-      accountGroupId,
-      name: `Lunary Short - Bluesky - ${dateStr}`,
-      content: truncateContent(content, 300),
-      platforms: ['bluesky'],
-      scheduledDate: scheduledDate.toISOString(),
-      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
-    };
+    for (const post of shortFormPosts) {
+      try {
+        const result = await postToSocial({
+          platform: post.platform,
+          content: post.content,
+          scheduledDate: scheduledDateIso,
+          media: post.media,
+          platformSettings: post.platformSettings,
+        });
 
-    // Post to Instagram Stories
-    try {
-      const response = await fetch(succulentApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
-        },
-        body: JSON.stringify(storyPost),
-      });
-
-      if (response.ok) {
-        console.log(
-          `✅ Scheduled short-form video to Instagram Stories for ${scheduledDate.toISOString()}`,
-        );
-      } else {
-        const error = await response.text();
-        console.error(
-          `❌ Failed to schedule short-form video to Instagram Stories: ${response.status} ${error}`,
-        );
+        if (result.success) {
+          console.log(
+            `✅ Scheduled short-form video to ${post.label} for ${scheduledDateIso}`,
+          );
+        } else {
+          console.error(
+            `❌ Failed to schedule to ${post.label}: ${result.error}`,
+          );
+        }
+      } catch (error) {
+        console.error(`Error scheduling to ${post.label}:`, error);
       }
-    } catch (error) {
-      console.error(
-        'Error scheduling short-form video to Instagram Stories:',
-        error,
-      );
-    }
-
-    // Post to Instagram Reels
-    try {
-      const response = await fetch(succulentApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
-        },
-        body: JSON.stringify(reelPost),
-      });
-
-      if (response.ok) {
-        console.log(
-          `✅ Scheduled short-form video to Instagram Reels for ${scheduledDate.toISOString()}`,
-        );
-      } else {
-        const error = await response.text();
-        console.error(
-          `❌ Failed to schedule short-form video to Instagram Reels: ${response.status} ${error}`,
-        );
-      }
-    } catch (error) {
-      console.error(
-        'Error scheduling short-form video to Instagram Reels:',
-        error,
-      );
-    }
-
-    // Post to Threads
-    try {
-      const response = await fetch(succulentApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
-        },
-        body: JSON.stringify(threadsPost),
-      });
-
-      if (response.ok) {
-        console.log(
-          `✅ Scheduled short-form video to Threads for ${scheduledDate.toISOString()}`,
-        );
-      } else {
-        const error = await response.text();
-        console.error(
-          `❌ Failed to schedule short-form video to Threads: ${response.status} ${error}`,
-        );
-      }
-    } catch (error) {
-      console.error('Error scheduling short-form video to Threads:', error);
-    }
-
-    // Post to Twitter/X
-    try {
-      const response = await fetch(succulentApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
-        },
-        body: JSON.stringify(twitterPost),
-      });
-
-      if (response.ok) {
-        console.log(
-          `✅ Scheduled short-form video to Twitter/X for ${scheduledDate.toISOString()}`,
-        );
-      } else {
-        const error = await response.text();
-        console.error(
-          `❌ Failed to schedule short-form video to Twitter/X: ${response.status} ${error}`,
-        );
-      }
-    } catch (error) {
-      console.error('Error scheduling short-form video to Twitter/X:', error);
-    }
-
-    // Post to Bluesky (if it supports videos)
-    try {
-      const response = await fetch(succulentApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
-        },
-        body: JSON.stringify(blueskyPost),
-      });
-
-      if (response.ok) {
-        console.log(
-          `✅ Scheduled short-form video to Bluesky for ${scheduledDate.toISOString()}`,
-        );
-      } else {
-        const error = await response.text();
-        // Log as warning since Bluesky may not support videos yet
-        console.warn(
-          `⚠️ Failed to schedule short-form video to Bluesky (may not support videos): ${response.status} ${error}`,
-        );
-      }
-    } catch (error) {
-      console.warn(
-        'Error scheduling short-form video to Bluesky (may not support videos):',
-        error,
-      );
     }
   } else if (videoType === 'medium') {
-    // Medium form: Schedule to TikTok, Instagram Reels, YouTube Shorts
-    // Use postContent if available (generated from weekly data), otherwise fall back to description
     const content = postContent || description;
-    // TikTok - post immediately (omit scheduledDate)
-    const tiktokPost = {
-      accountGroupId,
-      name: `Lunary Medium - TikTok - ${dateStr}`,
-      content: content,
-      platforms: ['tiktok'],
-      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
-      scheduledDate: scheduledDate.toISOString(),
-      tiktokOptions: {
-        visibility: 'public',
-        isAiGenerated: true,
+
+    // Post to TikTok, Instagram Reels, and YouTube Shorts
+    const mediumFormPosts = [
+      {
+        platform: 'tiktok',
+        label: 'TikTok',
       },
-    };
-
-    // Instagram Reels - post immediately
-    const reelPost = {
-      accountGroupId,
-      name: `Lunary Medium - Instagram Reel - ${dateStr}`,
-      content: content,
-      platforms: ['instagram'],
-      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
-      scheduledDate: scheduledDate.toISOString(),
-      instagramOptions: { type: 'reel' as const },
-    };
-
-    const youtubeShortPost = {
-      accountGroupId,
-      name: `Lunary Medium - YouTube Short - ${dateStr}`,
-      content: content,
-      platforms: ['youtube'],
-      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
-      scheduledDate: scheduledDate.toISOString(),
-      youtubeOptions: {
-        title,
-        visibility: 'public',
-        isShort: true,
-        madeForKids: false,
-        playlistId: process.env.YOUTUBE_WEEKLY_SERIES_PLAYLIST_ID,
+      {
+        platform: 'instagram',
+        label: 'Instagram Reels',
+        platformSettings: { type: 'reel' },
       },
-    };
-
-    // Post to TikTok
-    try {
-      const tiktokResponse = await fetch(succulentApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
+      {
+        platform: 'youtube',
+        label: 'YouTube Shorts',
+        youtubeOptions: {
+          title,
+          visibility: 'public' as const,
+          isShort: true,
+          madeForKids: false,
+          playlistId: process.env.YOUTUBE_WEEKLY_SERIES_PLAYLIST_ID,
         },
-        body: JSON.stringify(tiktokPost),
-      });
+      },
+    ];
 
-      if (tiktokResponse.ok) {
-        console.log('✅ Posted medium-form video to TikTok');
-      } else {
-        const error = await tiktokResponse.text();
-        console.error(
-          `❌ Failed to post to TikTok: ${tiktokResponse.status} ${error}`,
-        );
+    for (const post of mediumFormPosts) {
+      try {
+        const result = await postToSocial({
+          platform: post.platform,
+          content,
+          scheduledDate: scheduledDateIso,
+          media: videoMedia,
+          platformSettings: post.platformSettings,
+          youtubeOptions: post.youtubeOptions,
+        });
+
+        if (result.success) {
+          console.log(`✅ Posted medium-form video to ${post.label}`);
+        } else {
+          console.error(`❌ Failed to post to ${post.label}: ${result.error}`);
+        }
+      } catch (error) {
+        console.error(`Error posting to ${post.label}:`, error);
       }
-    } catch (error) {
-      console.error('Error posting to TikTok:', error);
-    }
-
-    // Post to Instagram Reels
-    try {
-      const reelResponse = await fetch(succulentApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
-        },
-        body: JSON.stringify(reelPost),
-      });
-
-      if (reelResponse.ok) {
-        console.log('✅ Posted medium-form video to Instagram Reels');
-      } else {
-        const error = await reelResponse.text();
-        console.error(
-          `❌ Failed to post to Instagram Reels: ${reelResponse.status} ${error}`,
-        );
-      }
-    } catch (error) {
-      console.error('Error posting to Instagram Reels:', error);
-    }
-
-    // Post to YouTube Shorts via Succulent
-    try {
-      const youtubeResponse = await fetch(succulentApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
-        },
-        body: JSON.stringify(youtubeShortPost),
-      });
-
-      if (youtubeResponse.ok) {
-        console.log('✅ Scheduled medium-form video to YouTube Shorts');
-      } else {
-        const error = await youtubeResponse.text();
-        console.error(
-          `❌ Failed to schedule YouTube Shorts: ${youtubeResponse.status} ${error}`,
-        );
-      }
-    } catch (error) {
-      console.error('Error scheduling YouTube Shorts:', error);
     }
   }
   // Long form videos are already handled via YouTube upload route
@@ -572,10 +368,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const baseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://lunary.app'
-        : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
     let imageUrl: string;
     let videoFormat: 'story' | 'square' | 'landscape' | 'youtube';
@@ -943,10 +736,10 @@ export async function POST(request: NextRequest) {
 
             if (!cachedScriptValid) {
               console.warn(
-                `⚠️ Cached script for ${weekKey} doesn't match current week's data. Regenerating...`,
+                "⚠️ Cached script doesn't match current week's data. Regenerating...",
                 {
-                  weekTitle: weekTitle.substring(0, 30),
-                  weekSubtitle: weekSubtitle.substring(0, 30),
+                  weekTitleLen: weekTitle.length,
+                  weekSubtitleLen: weekSubtitle.length,
                   expectedDateStr,
                   monthDayStr,
                   hasTitleMatch,
@@ -954,15 +747,14 @@ export async function POST(request: NextRequest) {
                   hasMonthDayMatch,
                   hasPlanetaryMatch,
                   hasMoonPhaseMatch,
-                  scriptPreview: script.substring(0, 200),
+                  scriptLen: script.length,
                 },
               );
               script = undefined; // Force regeneration
             } else {
-              console.log(`♻️ Reusing validated cached script for ${weekKey}`, {
-                weekTitle: weekTitle.substring(0, 30),
-                weekSubtitle: weekSubtitle.substring(0, 30),
-              });
+              console.log(
+                `♻️ Reusing validated cached script for ${weekKey} (title: ${weekTitle.length} chars)`,
+              );
             }
           } else {
             // For short/medium form, just use the cached script

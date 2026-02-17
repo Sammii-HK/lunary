@@ -44,7 +44,7 @@ const faqs = [
   {
     question: "How accurate is Lunary's birth chart calculator?",
     answer:
-      'Lunary uses real astronomical data from the Swiss Ephemeris, the same source used by professional astrologers. Planetary positions are calculated to arcminute accuracy (1/60th of a degree), ensuring precise placements for all celestial bodies.',
+      'Lunary uses the Astronomy Engine library, validated against NOVAS and JPL Horizons to within 1 arcminute. Planetary positions are calculated to arcminute accuracy (1/60th of a degree), ensuring precise placements for all celestial bodies.',
   },
   {
     question: 'Do I need my exact birth time?',
@@ -206,9 +206,9 @@ export default async function BirthChartLandingPage() {
               </h3>
             </div>
             <p className='text-xs text-zinc-400'>
-              Powered by the Swiss Ephemeris, the same astronomical database
-              used by professional astrologers. Every planetary position is
-              calculated to 1/60th of a degree.
+              Powered by Astronomy Engine, validated to within 1 arcminute of
+              NOVAS and JPL Horizons. Every planetary position is calculated to
+              1/60th of a degree.
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
@@ -330,8 +330,8 @@ export default async function BirthChartLandingPage() {
                 We Calculate Everything
               </h3>
               <p className='text-xs text-zinc-400'>
-                Lunary computes positions for 24+ celestial bodies using the
-                Swiss Ephemeris.
+                Lunary computes positions for 24+ celestial bodies using
+                Astronomy Engine.
               </p>
             </div>
             <div className='text-center'>

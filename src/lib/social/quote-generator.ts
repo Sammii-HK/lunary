@@ -1,20 +1,10 @@
-import OpenAI from 'openai';
 import { sql } from '@vercel/postgres';
 import type { ImageFormat } from '@/lib/social/educational-images';
-
-// Lazy initialization to avoid build-time errors when API key is not available
-let openai: OpenAI | null = null;
-
-function getOpenAI(): OpenAI {
-  if (!openai) {
-    const apiKey = process.env.OPENAI_API_KEY?.trim();
-    if (!apiKey) {
-      throw new Error('OPENAI_API_KEY is not configured');
-    }
-    openai = new OpenAI({ apiKey });
-  }
-  return openai;
-}
+import {
+  generateContent,
+  generateStructuredContent,
+} from '@/lib/ai/content-generator';
+import { z } from 'zod';
 
 export interface StoredQuote {
   id: number;
@@ -136,24 +126,20 @@ Lunary Brand Quotes (use only if absolutely necessary - 0-1 max):
 Return JSON with quotes in this format: {"quotes": ["Quote 1 - Author Name", "Quote 2 - Author Name", "Quote 3 - Author Name", "Quote 4 - Author Name", "Quote 5 - Author Name"]}
 Include attribution like "- Author Name" or "- Lunary" at the end of each quote. Prioritize thought leaders from diverse categories.`;
 
-    const quoteCompletion = await getOpenAI().chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a quote curator for social media specializing in cosmic, mystical, and spiritual wisdom. Your job is to find and adapt profound quotes from thought leaders across diverse categories: scientists, astronomers, astrologers, philosophers, business leaders, mystics, tarot readers, numerologists, and poets. Prioritize famous quotes from thought leaders (Carl Sagan, Stephen Hawking, J.P. Morgan, Plato, Pythagoras, etc.) over brand quotes. Create quotes that are shareable, inspiring, and cover topics like stars, cosmos, moon, tarot, astrology, numerology, and mystical wisdom. Generate 4-5 thought leader quotes per batch, with 0-1 brand quotes maximum. Rotate through different categories for variety. Return only valid JSON.',
-        },
-        { role: 'user', content: quotePrompt },
-      ],
-      response_format: { type: 'json_object' },
-      max_tokens: 500,
+    const QuoteBatchSchema = z.object({
+      quotes: z.array(z.string()),
+    });
+
+    const quoteResult = await generateStructuredContent({
+      systemPrompt:
+        'You are a quote curator for social media specializing in cosmic, mystical, and spiritual wisdom. Your job is to find and adapt profound quotes from thought leaders across diverse categories: scientists, astronomers, astrologers, philosophers, business leaders, mystics, tarot readers, numerologists, and poets. Prioritize famous quotes from thought leaders (Carl Sagan, Stephen Hawking, J.P. Morgan, Plato, Pythagoras, etc.) over brand quotes. Create quotes that are shareable, inspiring, and cover topics like stars, cosmos, moon, tarot, astrology, numerology, and mystical wisdom. Generate 4-5 thought leader quotes per batch, with 0-1 brand quotes maximum. Rotate through different categories for variety.',
+      prompt: quotePrompt,
+      schema: QuoteBatchSchema,
+      schemaName: 'quoteBatch',
+      maxTokens: 500,
       temperature: 0.9,
     });
 
-    const quoteResult = JSON.parse(
-      quoteCompletion.choices[0]?.message?.content || '{}',
-    );
     const quotes = quoteResult.quotes || [];
 
     const savedQuotes: StoredQuote[] = [];
@@ -353,21 +339,13 @@ Requirements:
 
 Return ONLY the interpretation text, no markdown, no quotes.`;
 
-    const completion = await getOpenAI().chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a wise interpreter of cosmic and spiritual quotes. Your interpretations show authority and guide people gently to deeper learning. You position Lunary as a reference library, not a product.',
-        },
-        { role: 'user', content: prompt },
-      ],
-      max_tokens: 200,
+    return await generateContent({
+      systemPrompt:
+        'You are a wise interpreter of cosmic and spiritual quotes. Your interpretations show authority and guide people gently to deeper learning. You position Lunary as a reference library, not a product.',
+      prompt,
+      maxTokens: 200,
       temperature: 0.7,
     });
-
-    return completion.choices[0]?.message?.content?.trim() || '';
   } catch (error) {
     console.error('Failed to generate quote interpretation:', error);
     return '';

@@ -425,7 +425,9 @@ model conversion_events {
   entity_id            String?
   event_id             String?   @db.Uuid
 
+  @@unique([event_id], map: "idx_conversion_events_event_id_unique")
   @@index([anonymous_id], map: "idx_conversion_events_anonymous_id")
+  @@index([anonymous_id, event_type, created_at], map: "idx_conversion_events_anon_event")
   @@index([created_at], map: "idx_conversion_events_created_at")
   @@index([event_type, created_at], map: "idx_conversion_events_event_created_at")
   @@index([event_type], map: "idx_conversion_events_event_type")
@@ -1725,9 +1727,10 @@ model daily_metrics {
   total_accounts              Int       @default(0)
   grimoire_to_app_rate        Decimal?  @default(0) @db.Decimal(5, 2)
   grimoire_to_app_users       Int       @default(0)
-  returning_referrer_organic  Int?      @default(0)
-  returning_referrer_direct   Int?      @default(0)
-  returning_referrer_internal Int?      @default(0)
+  returning_referrer_organic           Int?      @default(0)
+  returning_referrer_direct            Int?      @default(0)
+  returning_referrer_internal          Int?      @default(0)
+  signed_in_product_returning_users    Int?      @default(0)
 
   @@index([metric_date(sort: Desc)], map: "idx_daily_metrics_date")
   @@index([metric_date(sort: Desc), computed_at(sort: Desc)], map: "idx_daily_metrics_date_computed")
@@ -1851,6 +1854,18 @@ model PodcastEpisode {
   @@index([status, publishedAt(sort: Desc)])
   @@index([weekNumber, year])
   @@map("podcast_episodes")
+}
+
+/// Daily unique user snapshots for incremental WAU/MAU computation
+/// Stores resolved user ID arrays per segment per day to avoid re-scanning conversion_events
+model daily_unique_users {
+  metric_date DateTime @db.Date
+  segment     String
+  user_ids    String[]
+  user_count  Int
+
+  @@id([metric_date, segment])
+  @@index([segment], map: "idx_daily_unique_users_segment")
 }
 
 enum tour_status {

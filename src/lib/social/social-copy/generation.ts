@@ -203,6 +203,11 @@ export async function generateSocialCopy(
   content = normalizeGeneratedContent(content, {
     topicLabel: pack.topicTitle,
   });
+  // Strip any stray hashtags the AI may have injected
+  content = content
+    .replace(/#[\w-]+/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
   const title = response.title ? String(response.title).trim() : undefined;
   const safetyChecks = Array.isArray(response.safetyChecks)
     ? response.safetyChecks.map((flag: string) => String(flag))

@@ -104,17 +104,6 @@ export async function POST(request: NextRequest) {
 
     const { type, data } = await request.json();
 
-    const apiKey = process.env.OPENAI_API_KEY?.trim();
-    if (!apiKey) {
-      return NextResponse.json(
-        {
-          error: 'OpenAI API key not configured',
-          hint: 'Set OPENAI_API_KEY in your .env.local file and restart your dev server',
-        },
-        { status: 400 },
-      );
-    }
-
     switch (type) {
       case 'generate-cta':
         return await generatePersonalizedCTA(data);
@@ -148,38 +137,26 @@ async function generatePersonalizedCTA(data: {
   userSegment?: string;
   goal: string;
 }): Promise<NextResponse> {
-  const { OpenAI } = await import('openai');
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: 'OpenAI API key not configured' },
-      { status: 400 },
-    );
-  }
-  const openai = new OpenAI({ apiKey });
+  const { generateStructuredContent } =
+    await import('@/lib/ai/content-generator');
+  const { z } = await import('zod');
 
   const prompt = `Context: ${data.context}
 Goal: ${data.goal}
 ${data.userSegment ? `Segment: ${data.userSegment}` : ''}
 
-Generate 5 CTAs (under 10 words, cosmic tone, conversion-focused). Return JSON: {"ctas": ["CTA 1", ...]}`;
+Generate 5 CTAs (under 10 words, cosmic tone, conversion-focused).`;
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: `${AI_CONTEXT}\n\nYou are a conversion copywriting expert for Lunary. Return only valid JSON.`,
-      },
-      { role: 'user', content: prompt },
-    ],
-    response_format: { type: 'json_object' },
-    max_tokens: 200,
+  const result = await generateStructuredContent({
+    systemPrompt: `${AI_CONTEXT}\n\nYou are a conversion copywriting expert for Lunary.`,
+    prompt,
+    schema: z.object({ ctas: z.array(z.string()) }),
+    schemaName: 'ctaList',
+    maxTokens: 200,
     temperature: 0.7,
   });
 
-  const ctas = JSON.parse(completion.choices[0]?.message?.content || '{}');
-  return NextResponse.json({ ctas: ctas.ctas || ctas });
+  return NextResponse.json({ ctas: result.ctas });
 }
 
 async function analyzeConversionFunnel(data: {
@@ -213,15 +190,7 @@ async function analyzeConversionFunnel(data: {
       END
   `;
 
-  const { OpenAI } = await import('openai');
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: 'OpenAI API key not configured' },
-      { status: 400 },
-    );
-  }
-  const openai = new OpenAI({ apiKey });
+  const { generateContent } = await import('@/lib/ai/content-generator');
 
   const funnelData = funnel.rows.map((r: any) => ({
     event: r.event_type,
@@ -242,21 +211,12 @@ Provide analysis:
 
 IMPORTANT: Do NOT include any percentage estimates, conversion rate predictions, or impact numbers. Only reference the actual user/event counts from the data above.`;
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: `${AI_CONTEXT}\n\nYou are a conversion optimization expert. Provide specific, actionable insights.`,
-      },
-      { role: 'user', content: prompt },
-    ],
-    max_tokens: 400,
+  let analysis = await generateContent({
+    systemPrompt: `${AI_CONTEXT}\n\nYou are a conversion optimization expert. Provide specific, actionable insights.`,
+    prompt,
+    maxTokens: 400,
     temperature: 0.5,
   });
-
-  // Validate that analysis doesn't contain fake stats
-  let analysis = completion.choices[0]?.message?.content || '';
 
   // Add data disclaimer if funnel has no data
   if (funnel.rows.length === 0) {
@@ -282,19 +242,13 @@ async function suggestABTests(data: {
   currentTests?: string[];
   conversionGoals?: string[];
 }): Promise<NextResponse> {
-  const { OpenAI } = await import('openai');
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: 'OpenAI API key not configured' },
-      { status: 400 },
-    );
-  }
-  const openai = new OpenAI({ apiKey });
+  const { generateStructuredContent } =
+    await import('@/lib/ai/content-generator');
+  const { z } = await import('zod');
 
   // Get current conversion rates
   const currentRates = await sql`
-    SELECT 
+    SELECT
       COUNT(DISTINCT CASE WHEN event_type = 'signup' THEN user_id END) as signups,
       COUNT(DISTINCT CASE WHEN event_type = 'trial_started' THEN user_id END) as trials,
       COUNT(DISTINCT CASE WHEN event_type IN ('trial_converted', 'subscription_started') THEN user_id END) as conversions
@@ -307,7 +261,7 @@ async function suggestABTests(data: {
 
 ACTUAL Current Stats (30d):
 - Signups: ${rates?.signups || 0} unique users
-- Trials: ${rates?.trials || 0} unique users  
+- Trials: ${rates?.trials || 0} unique users
 - Conversions: ${rates?.conversions || 0} unique users
 
 Goals: ${data.conversionGoals?.join(', ') || 'Increase trial conversions'}
@@ -315,29 +269,31 @@ ${data.currentTests?.length ? `Current tests: ${data.currentTests.join(', ')}` :
 
 For each test provide: name, hypothesis, variantA, variantB, difficulty (easy/medium/hard), and why it might help (qualitative reasoning only).
 
-CRITICAL: Do NOT include "expectedImpact", "conversionRate", or any numeric predictions. Only provide qualitative reasoning based on the actual numbers above. Return JSON: {"tests": [...]}`;
+CRITICAL: Do NOT include "expectedImpact", "conversionRate", or any numeric predictions. Only provide qualitative reasoning based on the actual numbers above.`;
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: `${AI_CONTEXT}\n\nYou are a data-driven conversion optimization expert. Return valid JSON.`,
-      },
-      { role: 'user', content: prompt },
-    ],
-    response_format: { type: 'json_object' },
-    max_tokens: 600,
+  const suggestions = await generateStructuredContent({
+    systemPrompt: `${AI_CONTEXT}\n\nYou are a data-driven conversion optimization expert.`,
+    prompt,
+    schema: z.object({
+      tests: z.array(
+        z.object({
+          name: z.string(),
+          hypothesis: z.string(),
+          variantA: z.string(),
+          variantB: z.string(),
+          difficulty: z.enum(['easy', 'medium', 'hard']),
+          reasoning: z.string(),
+        }),
+      ),
+    }),
+    schemaName: 'abTests',
+    maxTokens: 600,
     temperature: 0.7,
   });
 
-  const suggestions = JSON.parse(
-    completion.choices[0]?.message?.content || '{}',
-  );
-
   // Add actual stats to response for transparency
   return NextResponse.json({
-    suggestions: suggestions.tests || suggestions,
+    suggestions: suggestions.tests,
     actualStats: {
       signups: rates?.signups || 0,
       trials: rates?.trials || 0,
@@ -352,15 +308,9 @@ async function optimizeEmailCopy(data: {
   currentCopy: string;
   goal: string;
 }): Promise<NextResponse> {
-  const { OpenAI } = await import('openai');
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: 'OpenAI API key not configured' },
-      { status: 400 },
-    );
-  }
-  const openai = new OpenAI({ apiKey });
+  const { generateStructuredContent } =
+    await import('@/lib/ai/content-generator');
+  const { z } = await import('zod');
 
   const prompt = `Optimize email copy.
 
@@ -368,23 +318,22 @@ Type: ${data.emailType}
 Goal: ${data.goal}
 Current: ${data.currentCopy}
 
-Provide: subject, body (HTML), improvements, reasoning. Keep cosmic tone, conversion-focused. Return JSON.`;
+Provide: subject, body (HTML), improvements, reasoning. Keep cosmic tone, conversion-focused.`;
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: `${AI_CONTEXT}\n\nYou are an email marketing expert specializing in conversion optimization for Lunary.`,
-      },
-      { role: 'user', content: prompt },
-    ],
-    response_format: { type: 'json_object' },
-    max_tokens: 800,
+  const optimized = await generateStructuredContent({
+    systemPrompt: `${AI_CONTEXT}\n\nYou are an email marketing expert specializing in conversion optimization for Lunary.`,
+    prompt,
+    schema: z.object({
+      subject: z.string(),
+      body: z.string(),
+      improvements: z.array(z.string()),
+      reasoning: z.string(),
+    }),
+    schemaName: 'emailOptimization',
+    maxTokens: 800,
     temperature: 0.7,
   });
 
-  const optimized = JSON.parse(completion.choices[0]?.message?.content || '{}');
   return NextResponse.json({ optimized });
 }
 
@@ -402,15 +351,9 @@ async function predictChurn(data: { userId?: string }): Promise<NextResponse> {
       GROUP BY user_id
     `;
 
-    const { OpenAI } = await import('openai');
-    const apiKey = process.env.OPENAI_API_KEY?.trim();
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
-        { status: 400 },
-      );
-    }
-    const openai = new OpenAI({ apiKey });
+    const { generateStructuredContent } =
+      await import('@/lib/ai/content-generator');
+    const { z } = await import('zod');
 
     const activityData = userActivity.rows.slice(0, 50).map((r: any) => ({
       userId: r.user_id,
@@ -425,30 +368,26 @@ Real User Activity Data (last 90 days):
 ${JSON.stringify(activityData, null, 2)}
 
 Provide analysis:
-- highRiskUsers: Array of user IDs with low activity (based on actual activity patterns
+- highRiskUsers: Array of user IDs with low activity (based on actual activity patterns)
 - patterns: Qualitative patterns observed in the data (no fake percentages)
 - interventions: Actionable recommendations (qualitative only)
 - reEngagement: Suggestions for re-engaging users (no numeric predictions)
 
-IMPORTANT: Only reference the actual data provided. Do NOT include conversion rates, churn percentages, or any invented statistics. Return JSON.`;
+IMPORTANT: Only reference the actual data provided. Do NOT include conversion rates, churn percentages, or any invented statistics.`;
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `${AI_CONTEXT}\n\nYou are a customer retention expert for Lunary. Return valid JSON with predictions.`,
-        },
-        { role: 'user', content: prompt },
-      ],
-      response_format: { type: 'json_object' },
-      max_tokens: 800,
+    const predictions = await generateStructuredContent({
+      systemPrompt: `${AI_CONTEXT}\n\nYou are a customer retention expert for Lunary.`,
+      prompt,
+      schema: z.object({
+        highRiskUsers: z.array(z.string()),
+        patterns: z.array(z.string()),
+        interventions: z.array(z.string()),
+        reEngagement: z.array(z.string()),
+      }),
+      schemaName: 'churnPrediction',
+      maxTokens: 800,
       temperature: 0.5,
     });
-
-    const predictions = JSON.parse(
-      completion.choices[0]?.message?.content || '{}',
-    );
 
     // Add actual data summary for transparency
     return NextResponse.json({
@@ -480,15 +419,9 @@ async function personalizeExperience(data: {
     LIMIT 20
   `;
 
-  const { OpenAI } = await import('openai');
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: 'OpenAI API key not configured' },
-      { status: 400 },
-    );
-  }
-  const openai = new OpenAI({ apiKey });
+  const { generateStructuredContent } =
+    await import('@/lib/ai/content-generator');
+  const { z } = await import('zod');
 
   const eventsData = userEvents.rows.map((r: any) => ({
     event: r.event_type,
@@ -501,24 +434,21 @@ async function personalizeExperience(data: {
 User Events: ${JSON.stringify(eventsData)}
 Context: ${data.context}
 
-Provide: featuresToHighlight (array), personalizedMessaging (object), optimalTiming, contentRecommendations. Return JSON.`;
+Provide: featuresToHighlight (array), personalizedMessaging (object), optimalTiming, contentRecommendations.`;
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: `${AI_CONTEXT}\n\nYou are a personalization expert for Lunary. Return valid JSON with specific recommendations.`,
-      },
-      { role: 'user', content: prompt },
-    ],
-    response_format: { type: 'json_object' },
-    max_tokens: 500,
+  const personalization = await generateStructuredContent({
+    systemPrompt: `${AI_CONTEXT}\n\nYou are a personalization expert for Lunary.`,
+    prompt,
+    schema: z.object({
+      featuresToHighlight: z.array(z.string()),
+      personalizedMessaging: z.record(z.string(), z.string()),
+      optimalTiming: z.string(),
+      contentRecommendations: z.array(z.string()),
+    }),
+    schemaName: 'personalization',
+    maxTokens: 500,
     temperature: 0.7,
   });
 
-  const personalization = JSON.parse(
-    completion.choices[0]?.message?.content || '{}',
-  );
   return NextResponse.json({ personalization });
 }

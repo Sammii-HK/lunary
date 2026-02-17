@@ -117,9 +117,13 @@ const PLATFORM_GUIDANCE: Record<string, string> = {
 - 3-4 sentences max
 - Natural and approachable`,
 
-  linkedin: `Platform: LinkedIn (150-200 chars)
-- Professional but warm
-- Insight-forward`,
+  linkedin: `Platform: LinkedIn (800-1500 chars)
+- "Did you know?" educational format with structured depth
+- Professional but warm, frame through wellness and personal development
+- Open with a surprising fact or counter-intuitive insight
+- Include 2-3 supporting details and a practical takeaway
+- Aim for 3-5 short paragraphs
+- Audience: professionals interested in wellbeing and self-awareness`,
 };
 
 /**

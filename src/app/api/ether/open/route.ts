@@ -1,28 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { createHash } from 'crypto';
 import {
   canonicaliseEvent,
   insertCanonicalEvent,
 } from '@/lib/analytics/canonical-events';
+import { deterministicEventId } from '@/lib/analytics/deterministic-event-id';
 import { getCurrentUser } from '@/lib/get-user-session';
-
-/**
- * Generate deterministic eventId for deduplication
- * Same identity + date = same eventId, so DB unique constraint catches races
- */
-function generateDeterministicEventId(
-  eventType: string,
-  userId: string | undefined,
-  anonymousId: string | undefined,
-  date: string,
-): string {
-  const identity = userId || anonymousId || 'unknown';
-  const input = `${eventType}:${identity}:${date}`;
-  const hash = createHash('sha256').update(input).digest('hex');
-  // Convert hash to UUID format (take first 32 chars and format as UUID v5-like)
-  return `00000000-0000-5000-8000-${hash.substring(0, 12)}`;
-}
 
 export const runtime = 'nodejs';
 
@@ -72,12 +55,8 @@ export async function POST(request: NextRequest) {
     const today = new Date().toISOString().split('T')[0];
 
     // Generate deterministic eventId so DB unique constraint catches race conditions
-    const eventId = generateDeterministicEventId(
-      'app_opened',
-      userId,
-      anonymousId,
-      today,
-    );
+    const identity = userId || anonymousId || 'unknown';
+    const eventId = deterministicEventId('app_opened', identity, today);
 
     const canonical = canonicaliseEvent({
       eventType: 'app_opened',
@@ -127,20 +106,10 @@ export async function POST(request: NextRequest) {
         });
     }
 
-    // Check if already tracked by user_id OR anonymous_id
-    const existing = await sql`
-      SELECT 1 FROM conversion_events
-      WHERE event_type = 'app_opened'
-        AND created_at >= ${today}::date
-        AND created_at < (${today}::date + INTERVAL '1 day')
-        AND (
-          (${userId}::text IS NOT NULL AND user_id = ${userId})
-          OR (${anonymousId}::text IS NOT NULL AND anonymous_id = ${anonymousId})
-        )
-      LIMIT 1
-    `;
+    // Dedup handled by DB unique constraint on event_id — single INSERT, no SELECT needed
+    const { inserted } = await insertCanonicalEvent(canonical.row);
 
-    if (existing.rows.length > 0) {
+    if (!inserted) {
       console.log('[app_opened] SKIPPED - already tracked today');
       return NextResponse.json({
         success: true,
@@ -148,8 +117,6 @@ export async function POST(request: NextRequest) {
         reason: 'already_tracked_today',
       });
     }
-
-    await insertCanonicalEvent(canonical.row);
 
     console.log('[app_opened] INSERT success', {
       duration: Date.now() - startTime,

@@ -5,6 +5,15 @@ import { getCategoryVisuals } from '@/remotion/config/category-visuals';
 
 const CHAPTER_LABELS = ['Context', 'Significance', 'Reflection'];
 
+const simpleHash = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+};
+
 // Engagement CTAs — designed for TikTok interaction (comments, saves, shares)
 const ENGAGEMENT_CTAS = [
   'Which part hit different?',
@@ -26,20 +35,31 @@ const BRAND_CTAS = [
   'Discover more with Lunary',
 ];
 
-// 70% engagement / 30% brand rotation
-function getRandomCTA(): string {
-  const pool = Math.random() < 0.7 ? ENGAGEMENT_CTAS : BRAND_CTAS;
-  return pool[Math.floor(Math.random() * pool.length)];
+// 70% engagement / 30% brand rotation — rotated by script hash
+function getRandomCTA(seed?: string): string {
+  const hash = seed
+    ? simpleHash(seed + '-cta')
+    : Math.floor(Math.random() * 1000);
+  const pool = hash % 10 < 7 ? ENGAGEMENT_CTAS : BRAND_CTAS;
+  return pool[hash % pool.length];
 }
 
-// Mid-video micro-CTA for engagement
-function getMicroCTA(): string {
+// Mid-video micro-CTA for engagement — rotated by script hash
+function getMicroCTA(seed?: string): string {
   const microCTAs = [
     'Save this',
-    'Watch till the end',
+    'Wait for it',
     'This is important',
     'Pay attention here',
+    'Keep watching',
+    'You need to hear this',
+    "Don't skip this part",
+    'Bookmark this',
   ];
+  if (seed) {
+    const hash = simpleHash(seed + '-micro-cta');
+    return microCTAs[hash % microCTAs.length];
+  }
   return microCTAs[Math.floor(Math.random() * microCTAs.length)];
 }
 
@@ -326,9 +346,25 @@ export function buildThematicVideoComposition({
     return { url, startTime, endTime };
   });
 
-  // Get hook text (full first sentence - wrapping handled by compose-video)
+  // Get hook text (first sentence, capped for readability)
   const sentences = splitSentences(script);
-  const hookText = sentences[0] || '';
+  let hookText = sentences[0] || '';
+
+  // If the "sentence" is too long (e.g. scripts with no periods), truncate
+  // to the first clause or ~60 chars on a word boundary
+  const MAX_HOOK_CHARS = 80;
+  if (hookText.length > MAX_HOOK_CHARS) {
+    // Try splitting on comma/newline to get the first clause
+    const clauseMatch = hookText.match(/^[^,\n]+[,\n]/);
+    if (clauseMatch && clauseMatch[0].length >= 15) {
+      hookText = clauseMatch[0].replace(/[,\n]+$/, '').trim();
+    } else {
+      // Fallback: truncate on word boundary
+      const truncated = hookText.substring(0, MAX_HOOK_CHARS);
+      const lastSpace = truncated.lastIndexOf(' ');
+      hookText = lastSpace > 20 ? truncated.substring(0, lastSpace) : truncated;
+    }
+  }
 
   // Calculate total duration for CTA timing
   const totalDuration = images[images.length - 1]?.endTime || durationEstimate;
@@ -340,37 +376,45 @@ export function buildThematicVideoComposition({
   // Mid-video micro-CTA at ~60% duration for engagement
   const microCtaStart = totalDuration * 0.6;
 
+  // Ensure micro-CTA doesn't overlap with end CTA
+  const endCtaStart = totalDuration - 6;
+  const safeMicroEnd = Math.min(microCtaStart + 2.0, endCtaStart - 0.5);
+
   const overlays = [
-    // Hook text at 0.1s (was 0.3s — faster hook for TikTok retention)
-    ...(hookText.length > 10
+    // Hook text at frame 0 — visible in thumbnail/preview for CTR
+    ...(hookText.length > 3
       ? [
           {
             text: hookText,
-            startTime: 0.1,
+            startTime: 0,
             endTime: Math.min(4, images[0].endTime),
             style: hookStyle,
           },
         ]
       : []),
-    // Mid-video micro-CTA stamp at ~60% duration
+    // Mid-video micro-CTA stamp at ~60% duration (only if enough room)
+    ...(safeMicroEnd > microCtaStart + 0.5
+      ? [
+          {
+            text: getMicroCTA(script),
+            startTime: microCtaStart,
+            endTime: safeMicroEnd,
+            style: 'stamp' as const,
+          },
+        ]
+      : []),
+    // CTA appears near video end
     {
-      text: getMicroCTA(),
-      startTime: microCtaStart,
-      endTime: microCtaStart + 2.0,
-      style: 'stamp' as const,
-    },
-    // CTA appears later, fades out near video end
-    {
-      text: getRandomCTA(),
-      startTime: totalDuration - 6,
-      endTime: totalDuration - 0.5,
+      text: getRandomCTA(script),
+      startTime: endCtaStart,
+      endTime: totalDuration - 1.5,
       style: 'cta' as const,
     },
-    // Follow stamp - appears with CTA, fades out near video end
+    // Follow stamp - appears AFTER CTA fades, doesn't overlap
     {
       text: 'follow @lunary.app',
-      startTime: totalDuration - 5.5,
-      endTime: totalDuration - 0.5,
+      startTime: totalDuration - 1.5,
+      endTime: totalDuration - 0.3,
       style: 'stamp' as const,
     },
   ];

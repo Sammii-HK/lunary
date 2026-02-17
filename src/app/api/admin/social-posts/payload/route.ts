@@ -40,13 +40,8 @@ export async function GET(request: NextRequest) {
           .filter((value) => allowedStatuses.has(value))
       : ['pending', 'approved'];
 
-    const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
-    if (!accountGroupId) {
-      return NextResponse.json(
-        { success: false, error: 'SUCCULENT_ACCOUNT_GROUP_ID not set' },
-        { status: 500 },
-      );
-    }
+    const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID || 'preview';
+    // accountGroupId is used for payload preview only (not for sending)
 
     const result = await sql.query(
       `

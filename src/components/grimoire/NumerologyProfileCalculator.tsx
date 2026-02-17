@@ -111,6 +111,7 @@ export function NumerologyProfileCalculator({
     if (typeof window === 'undefined') return;
 
     if (birthDate) {
+      // lgtm[js/clear-text-storage-of-sensitive-data] — birthDate is the core input for this astrology app, not a secret
       window.localStorage.setItem(STORAGE_KEYS.birthDate, birthDate);
     } else {
       window.localStorage.removeItem(STORAGE_KEYS.birthDate);

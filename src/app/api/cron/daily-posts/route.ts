@@ -72,6 +72,7 @@ import {
   planetKeywords,
 } from '../../../../../utils/blog/aspectInterpretations';
 import { getSlowPlanetSignTotalDays } from '../../../../../utils/astrology/transit-duration';
+import { postToSocial, postToSocialMultiPlatform } from '@/lib/social/client';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -366,10 +367,7 @@ export async function GET(request: NextRequest) {
       const threadsBatch = await generateThreadsBatch(dateStr);
       const threadsExecutionTime = Date.now() - threadsStartTime;
 
-      // Send each Threads post to Succulent as standalone threads-only posts
-      const succulentApiUrl = 'https://app.succulent.social/api/posts';
-      const apiKey = process.env.SUCCULENT_SECRET_KEY;
-      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+      // Send each Threads post via social client as standalone threads-only posts
       const threadsSentResults: Array<{
         scheduledTime: string;
         pillar: string;
@@ -378,77 +376,53 @@ export async function GET(request: NextRequest) {
         error?: string;
       }> = [];
 
-      if (apiKey && accountGroupId) {
-        for (const post of threadsBatch.posts) {
-          try {
-            const readableDate = new Date(
-              post.scheduledTime,
-            ).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
+      for (const post of threadsBatch.posts) {
+        try {
+          const content = [post.hook, post.body, post.prompt]
+            .filter(Boolean)
+            .join('\n\n');
+
+          const result = await postToSocial({
+            platform: 'threads',
+            content,
+            scheduledDate: post.scheduledTime,
+            media:
+              post.hasImage && post.imageUrl
+                ? [
+                    {
+                      type: 'image',
+                      url: post.imageUrl,
+                      alt: `${post.topicTag} content from Lunary`,
+                    },
+                  ]
+                : [],
+          });
+
+          if (result.success) {
+            threadsSentResults.push({
+              scheduledTime: post.scheduledTime,
+              pillar: post.pillar,
+              source: post.source,
+              status: 'success',
             });
-
-            const content = [post.hook, post.body, post.prompt]
-              .filter(Boolean)
-              .join('\n\n');
-
-            const postData = {
-              accountGroupId,
-              name: `Threads - ${readableDate} - ${post.pillar}`,
-              content,
-              platforms: ['threads'],
-              scheduledDate: post.scheduledTime,
-              media:
-                post.hasImage && post.imageUrl
-                  ? [
-                      {
-                        type: 'image',
-                        url: post.imageUrl,
-                        alt: `${post.topicTag} content from Lunary`,
-                      },
-                    ]
-                  : [],
-            };
-
-            const response = await fetch(succulentApiUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': apiKey,
-              },
-              body: JSON.stringify(postData),
-            });
-
-            if (response.ok) {
-              threadsSentResults.push({
-                scheduledTime: post.scheduledTime,
-                pillar: post.pillar,
-                source: post.source,
-                status: 'success',
-              });
-            } else {
-              const errorText = await response.text();
-              threadsSentResults.push({
-                scheduledTime: post.scheduledTime,
-                pillar: post.pillar,
-                source: post.source,
-                status: 'error',
-                error: `HTTP ${response.status}: ${errorText.slice(0, 200)}`,
-              });
-            }
-          } catch (postError) {
+          } else {
             threadsSentResults.push({
               scheduledTime: post.scheduledTime,
               pillar: post.pillar,
               source: post.source,
               status: 'error',
-              error:
-                postError instanceof Error
-                  ? postError.message
-                  : 'Unknown error',
+              error: result.error || 'Unknown error',
             });
           }
+        } catch (postError) {
+          threadsSentResults.push({
+            scheduledTime: post.scheduledTime,
+            pillar: post.pillar,
+            source: post.source,
+            status: 'error',
+            error:
+              postError instanceof Error ? postError.message : 'Unknown error',
+          });
         }
       }
 
@@ -487,63 +461,31 @@ export async function GET(request: NextRequest) {
         const linkedinPost = generateLinkedInPost(dateStr);
         const linkedinExecutionTime = Date.now() - linkedinStartTime;
 
-        const succulentApiUrl = 'https://app.succulent.social/api/posts';
-        const apiKey = process.env.SUCCULENT_SECRET_KEY;
-        const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+        const scheduledTime = new Date(
+          `${dateStr}T${String(linkedinPost.scheduledHour).padStart(2, '0')}:00:00Z`,
+        );
 
-        if (apiKey && accountGroupId) {
-          const scheduledTime = new Date(
-            `${dateStr}T${String(linkedinPost.scheduledHour).padStart(2, '0')}:00:00Z`,
+        const result = await postToSocial({
+          platform: 'linkedin',
+          content: linkedinPost.content,
+          scheduledDate: scheduledTime.toISOString(),
+          media: [],
+        });
+
+        cronResults.linkedinPost = {
+          success: result.success,
+          category: linkedinPost.category,
+          scheduledDate: scheduledTime.toISOString(),
+          executionTimeMs: linkedinExecutionTime,
+          ...(result.success ? {} : { error: result.error || 'Unknown error' }),
+        };
+
+        if (result.success) {
+          console.log(
+            `💼 LinkedIn post scheduled: ${linkedinPost.category} fact at ${scheduledTime.toISOString()}`,
           );
-          const readableDate = scheduledTime.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          });
-
-          const postData = {
-            accountGroupId,
-            name: `LinkedIn - ${readableDate} - Did You Know (${linkedinPost.category})`,
-            content: linkedinPost.content,
-            platforms: ['linkedin'],
-            scheduledDate: scheduledTime.toISOString(),
-            media: [],
-          };
-
-          const response = await fetch(succulentApiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-API-Key': apiKey,
-            },
-            body: JSON.stringify(postData),
-          });
-
-          cronResults.linkedinPost = {
-            success: response.ok,
-            category: linkedinPost.category,
-            scheduledDate: scheduledTime.toISOString(),
-            executionTimeMs: linkedinExecutionTime,
-            ...(response.ok
-              ? {}
-              : {
-                  error: `HTTP ${response.status}: ${(await response.text()).slice(0, 200)}`,
-                }),
-          };
-
-          if (response.ok) {
-            console.log(
-              `💼 LinkedIn post scheduled: ${linkedinPost.category} fact at ${scheduledTime.toISOString()}`,
-            );
-          } else {
-            console.error(`💼 LinkedIn post failed: HTTP ${response.status}`);
-          }
         } else {
-          cronResults.linkedinPost = {
-            success: false,
-            error: 'Missing Succulent API credentials',
-            executionTimeMs: linkedinExecutionTime,
-          };
+          console.error(`💼 LinkedIn post failed: ${result.error}`);
         }
       } else {
         const linkedinExecutionTime = Date.now() - linkedinStartTime;
@@ -574,9 +516,6 @@ export async function GET(request: NextRequest) {
       const twitterPosts = generateTwitterPosts(dateStr);
       const twitterExecutionTime = Date.now() - twitterStartTime;
 
-      const succulentApiUrl = 'https://app.succulent.social/api/posts';
-      const apiKey = process.env.SUCCULENT_SECRET_KEY;
-      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
       const twitterResults: Array<{
         scheduledTime: string;
         postType: string;
@@ -585,55 +524,37 @@ export async function GET(request: NextRequest) {
         error?: string;
       }> = [];
 
-      if (apiKey && accountGroupId) {
-        for (const post of twitterPosts) {
-          try {
-            const scheduledTime = new Date(
-              `${dateStr}T${String(post.scheduledHour).padStart(2, '0')}:00:00Z`,
-            );
-            const readableDate = scheduledTime.toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            });
+      for (const post of twitterPosts) {
+        try {
+          const scheduledTime = new Date(
+            `${dateStr}T${String(post.scheduledHour).padStart(2, '0')}:00:00Z`,
+          );
 
-            const postData = {
-              accountGroupId,
-              name: `Twitter - ${readableDate} - ${post.postType} (${post.category})`,
-              content: post.content,
-              platforms: ['x'],
-              scheduledDate: scheduledTime.toISOString(),
-              media: [],
-            };
+          const result = await postToSocial({
+            platform: 'x',
+            content: post.content,
+            scheduledDate: scheduledTime.toISOString(),
+            media: [],
+          });
 
-            const response = await fetch(succulentApiUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': apiKey,
-              },
-              body: JSON.stringify(postData),
-            });
-
-            twitterResults.push({
-              scheduledTime: scheduledTime.toISOString(),
-              postType: post.postType,
-              category: post.category,
-              status: response.ok ? 'success' : 'error',
-              ...(response.ok ? {} : { error: `HTTP ${response.status}` }),
-            });
-          } catch (postError) {
-            twitterResults.push({
-              scheduledTime: '',
-              postType: post.postType,
-              category: post.category,
-              status: 'error',
-              error:
-                postError instanceof Error
-                  ? postError.message
-                  : 'Unknown error',
-            });
-          }
+          twitterResults.push({
+            scheduledTime: scheduledTime.toISOString(),
+            postType: post.postType,
+            category: post.category,
+            status: result.success ? 'success' : 'error',
+            ...(result.success
+              ? {}
+              : { error: result.error || 'Unknown error' }),
+          });
+        } catch (postError) {
+          twitterResults.push({
+            scheduledTime: '',
+            postType: post.postType,
+            category: post.category,
+            status: 'error',
+            error:
+              postError instanceof Error ? postError.message : 'Unknown error',
+          });
         }
       }
 
@@ -670,9 +591,6 @@ export async function GET(request: NextRequest) {
       const blueskyPosts = generateBlueskyPosts(dateStr);
       const blueskyExecutionTime = Date.now() - blueskyStartTime;
 
-      const succulentApiUrl = 'https://app.succulent.social/api/posts';
-      const apiKey = process.env.SUCCULENT_SECRET_KEY;
-      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
       const blueskyResults: Array<{
         scheduledTime: string;
         postType: string;
@@ -681,55 +599,37 @@ export async function GET(request: NextRequest) {
         error?: string;
       }> = [];
 
-      if (apiKey && accountGroupId) {
-        for (const post of blueskyPosts) {
-          try {
-            const scheduledTime = new Date(
-              `${dateStr}T${String(post.scheduledHour).padStart(2, '0')}:00:00Z`,
-            );
-            const readableDate = scheduledTime.toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            });
+      for (const post of blueskyPosts) {
+        try {
+          const scheduledTime = new Date(
+            `${dateStr}T${String(post.scheduledHour).padStart(2, '0')}:00:00Z`,
+          );
 
-            const postData = {
-              accountGroupId,
-              name: `Bluesky - ${readableDate} - ${post.postType} (${post.category})`,
-              content: post.content,
-              platforms: ['bluesky'],
-              scheduledDate: scheduledTime.toISOString(),
-              media: [],
-            };
+          const result = await postToSocial({
+            platform: 'bluesky',
+            content: post.content,
+            scheduledDate: scheduledTime.toISOString(),
+            media: [],
+          });
 
-            const response = await fetch(succulentApiUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': apiKey,
-              },
-              body: JSON.stringify(postData),
-            });
-
-            blueskyResults.push({
-              scheduledTime: scheduledTime.toISOString(),
-              postType: post.postType,
-              category: post.category,
-              status: response.ok ? 'success' : 'error',
-              ...(response.ok ? {} : { error: `HTTP ${response.status}` }),
-            });
-          } catch (postError) {
-            blueskyResults.push({
-              scheduledTime: '',
-              postType: post.postType,
-              category: post.category,
-              status: 'error',
-              error:
-                postError instanceof Error
-                  ? postError.message
-                  : 'Unknown error',
-            });
-          }
+          blueskyResults.push({
+            scheduledTime: scheduledTime.toISOString(),
+            postType: post.postType,
+            category: post.category,
+            status: result.success ? 'success' : 'error',
+            ...(result.success
+              ? {}
+              : { error: result.error || 'Unknown error' }),
+          });
+        } catch (postError) {
+          blueskyResults.push({
+            scheduledTime: '',
+            postType: post.postType,
+            category: post.category,
+            status: 'error',
+            error:
+              postError instanceof Error ? postError.message : 'Unknown error',
+          });
         }
       }
 
@@ -766,9 +666,6 @@ export async function GET(request: NextRequest) {
       const pinterestPins = generatePinterestPins(dateStr);
       const pinterestExecutionTime = Date.now() - pinterestStartTime;
 
-      const succulentApiUrl = 'https://app.succulent.social/api/posts';
-      const apiKey = process.env.SUCCULENT_SECRET_KEY;
-      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
       const pinterestResults: Array<{
         scheduledTime: string;
         title: string;
@@ -777,25 +674,18 @@ export async function GET(request: NextRequest) {
         error?: string;
       }> = [];
 
-      if (apiKey && accountGroupId) {
-        for (const pin of pinterestPins) {
-          try {
-            const scheduledTime = new Date(
-              `${dateStr}T${String(pin.scheduledHour).padStart(2, '0')}:00:00Z`,
-            );
-            const readableDate = scheduledTime.toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            });
+      for (const pin of pinterestPins) {
+        try {
+          const scheduledTime = new Date(
+            `${dateStr}T${String(pin.scheduledHour).padStart(2, '0')}:00:00Z`,
+          );
 
-            const postData = {
-              accountGroupId,
-              name: `Pinterest - ${readableDate} - ${pin.title}`,
-              content: pin.description,
-              platforms: ['pinterest'],
-              scheduledDate: scheduledTime.toISOString(),
-              media: [],
+          const result = await postToSocial({
+            platform: 'pinterest',
+            content: pin.description,
+            scheduledDate: scheduledTime.toISOString(),
+            media: [],
+            platformSettings: {
               pinterestOptions: {
                 boardId:
                   process.env.SUCCULENT_PINTEREST_BOARD_ID ||
@@ -804,36 +694,27 @@ export async function GET(request: NextRequest) {
                   process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
                 title: pin.title,
               },
-            };
+            },
+          });
 
-            const response = await fetch(succulentApiUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': apiKey,
-              },
-              body: JSON.stringify(postData),
-            });
-
-            pinterestResults.push({
-              scheduledTime: scheduledTime.toISOString(),
-              title: pin.title,
-              category: pin.category,
-              status: response.ok ? 'success' : 'error',
-              ...(response.ok ? {} : { error: `HTTP ${response.status}` }),
-            });
-          } catch (postError) {
-            pinterestResults.push({
-              scheduledTime: '',
-              title: pin.title,
-              category: pin.category,
-              status: 'error',
-              error:
-                postError instanceof Error
-                  ? postError.message
-                  : 'Unknown error',
-            });
-          }
+          pinterestResults.push({
+            scheduledTime: scheduledTime.toISOString(),
+            title: pin.title,
+            category: pin.category,
+            status: result.success ? 'success' : 'error',
+            ...(result.success
+              ? {}
+              : { error: result.error || 'Unknown error' }),
+          });
+        } catch (postError) {
+          pinterestResults.push({
+            scheduledTime: '',
+            title: pin.title,
+            category: pin.category,
+            status: 'error',
+            error:
+              postError instanceof Error ? postError.message : 'Unknown error',
+          });
         }
       }
 
@@ -928,9 +809,6 @@ export async function GET(request: NextRequest) {
 
       const SHARE_BASE_URL =
         process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-      const succulentApiUrl = 'https://app.succulent.social/api/posts';
-      const apiKey = process.env.SUCCULENT_SECRET_KEY;
-      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
 
       const storySentResults: Array<{
         scheduledTime: string;
@@ -939,69 +817,49 @@ export async function GET(request: NextRequest) {
         error?: string;
       }> = [];
 
-      if (apiKey && accountGroupId) {
-        for (let i = 0; i < allStories.length; i++) {
-          const story = allStories[i];
-          const utcHour = storyUtcHours[i];
-          const scheduledTime = new Date(
-            `${dateStr}T${String(utcHour).padStart(2, '0')}:00:00Z`,
-          );
+      for (let i = 0; i < allStories.length; i++) {
+        const story = allStories[i];
+        const utcHour = storyUtcHours[i];
+        const scheduledTime = new Date(
+          `${dateStr}T${String(utcHour).padStart(2, '0')}:00:00Z`,
+        );
 
-          const imageParams = new URLSearchParams(story.params);
-          const imageUrl = `${SHARE_BASE_URL}${story.endpoint}?${imageParams.toString()}`;
+        const imageParams = new URLSearchParams(story.params);
+        const imageUrl = `${SHARE_BASE_URL}${story.endpoint}?${imageParams.toString()}`;
 
-          const readableDate = scheduledTime.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
+        try {
+          const result = await postToSocial({
+            platform: 'instagram',
+            content: '',
+            scheduledDate: scheduledTime.toISOString(),
+            media: [{ type: 'image', url: imageUrl, alt: story.title }],
+            platformSettings: {
+              instagramOptions: { isStory: true },
+            },
           });
 
-          try {
-            const postData = {
-              accountGroupId,
-              name: `IG Story - ${readableDate} - ${story.variant}`,
-              content: '',
-              platforms: ['instagram'],
-              scheduledDate: scheduledTime.toISOString(),
-              media: [{ type: 'image', url: imageUrl, alt: story.title }],
-              instagramOptions: { isStory: true },
-            };
-
-            const response = await fetch(succulentApiUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': apiKey,
-              },
-              body: JSON.stringify(postData),
+          if (result.success) {
+            storySentResults.push({
+              scheduledTime: scheduledTime.toISOString(),
+              variant: story.variant,
+              status: 'success',
             });
-
-            if (response.ok) {
-              storySentResults.push({
-                scheduledTime: scheduledTime.toISOString(),
-                variant: story.variant,
-                status: 'success',
-              });
-            } else {
-              const errorText = await response.text();
-              storySentResults.push({
-                scheduledTime: scheduledTime.toISOString(),
-                variant: story.variant,
-                status: 'error',
-                error: `HTTP ${response.status}: ${errorText.slice(0, 200)}`,
-              });
-            }
-          } catch (postError) {
+          } else {
             storySentResults.push({
               scheduledTime: scheduledTime.toISOString(),
               variant: story.variant,
               status: 'error',
-              error:
-                postError instanceof Error
-                  ? postError.message
-                  : 'Unknown error',
+              error: result.error || 'Unknown error',
             });
           }
+        } catch (postError) {
+          storySentResults.push({
+            scheduledTime: scheduledTime.toISOString(),
+            variant: story.variant,
+            status: 'error',
+            error:
+              postError instanceof Error ? postError.message : 'Unknown error',
+          });
         }
       }
 
@@ -1567,171 +1425,73 @@ async function runDailyPosts(dateStr: string) {
     console.warn(`[DailyPosts] No Pinterest quote scheduled for ${dateStr}`);
   }
 
-  // Send posts to Succulent
-  const succulentApiUrl = 'https://app.succulent.social/api/posts';
-  const apiKey = process.env.SUCCULENT_SECRET_KEY;
-  const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+  // Send posts via social client
   const postResults: any[] = [];
 
-  // Helper function to format readable date
-  const formatReadableDate = (dateStr: string, scheduledDate: string) => {
-    const date = new Date(scheduledDate);
-    const formattedDate = date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-    const formattedTime = date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-    return `${formattedDate} at ${formattedTime}`;
-  };
+  for (const post of posts) {
+    try {
+      // Add Pinterest options if Pinterest is in platforms
+      const pinterestOptions = post.platforms.includes('pinterest')
+        ? {
+            boardId:
+              process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary',
+            boardName: process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
+          }
+        : undefined;
 
-  const missingConfig: string[] = [];
-  if (!apiKey) missingConfig.push('SUCCULENT_SECRET_KEY');
-  if (!accountGroupId) missingConfig.push('SUCCULENT_ACCOUNT_GROUP_ID');
+      const media = (post.imageUrls || []).map((imageUrl: string) => ({
+        type: 'image' as const,
+        url: imageUrl,
+        alt: post.alt,
+      }));
 
-  if (missingConfig.length > 0) {
-    const configError = `Missing required scheduler config: ${missingConfig.join(', ')}`;
-    for (const post of posts) {
-      postResults.push({
-        name: post.name,
+      const multiResult = await postToSocialMultiPlatform({
         platforms: post.platforms,
-        status: 'error',
-        error: configError,
+        content: post.content,
         scheduledDate: post.scheduledDate,
+        media,
+        variants: post.variants,
+        name: post.name,
+        pinterestOptions: pinterestOptions as any,
       });
-    }
-  } else {
-    for (const post of posts) {
-      try {
-        const readableDate = formatReadableDate(dateStr, post.scheduledDate);
 
-        // Add Pinterest options if Pinterest is in platforms
-        const pinterestOptions = post.platforms.includes('pinterest')
-          ? {
-              boardId:
-                process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary',
-              boardName: process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
-            }
-          : undefined;
+      // Check if all platforms succeeded
+      const platformResults = Object.entries(multiResult.results);
+      const allSucceeded = platformResults.every(([, r]) => r.success);
+      const anySucceeded = platformResults.some(([, r]) => r.success);
 
-        const postData: any = {
-          accountGroupId,
-          name: post.name || `Cosmic Post - ${readableDate}`,
-          content: post.content,
+      if (anySucceeded) {
+        console.log(`✅ ${post.name} post scheduled successfully`);
+        const firstSuccess = platformResults.find(([, r]) => r.success);
+        postResults.push({
+          name: post.name,
           platforms: post.platforms,
+          status: allSucceeded ? 'success' : 'partial',
+          postId: firstSuccess?.[1]?.postId,
           scheduledDate: post.scheduledDate,
-          media: (post.imageUrls || []).map((imageUrl: string) => ({
-            type: 'image',
-            url: imageUrl,
-            alt: post.alt,
-          })),
-          variants: post.variants,
-        };
-
-        if (pinterestOptions) {
-          postData.pinterestOptions = pinterestOptions;
-        }
-
-        const response = await fetch(succulentApiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-API-Key': apiKey || '',
-          },
-          body: JSON.stringify(postData),
         });
-
-        const responseText = await response.text();
-        let result: any = {};
-        if (responseText) {
-          try {
-            result = JSON.parse(responseText);
-          } catch {
-            result = { raw: responseText };
-          }
+        if (post.pinterestQuoteSlotId) {
+          await markPinterestQuoteSent(post.pinterestQuoteSlotId);
         }
+      } else {
+        const firstError = platformResults.find(([, r]) => !r.success);
+        const errorMessage = firstError?.[1]?.error || 'All platforms failed';
 
-        if (response.ok) {
-          console.log(`✅ ${post.name} post scheduled successfully`);
-          postResults.push({
-            name: post.name,
-            platforms: post.platforms,
-            status: 'success',
-            postId: result.data?.postId || result.postId || result.id,
-            scheduledDate: post.scheduledDate,
-          });
-          if (post.pinterestQuoteSlotId) {
-            await markPinterestQuoteSent(post.pinterestQuoteSlotId);
-          }
-        } else {
-          const errorMessage =
-            result.error ||
-            result.message ||
-            result.raw ||
-            `HTTP ${response.status}`;
-          const errorDetails = {
-            postName: post.name,
-            platforms: post.platforms,
-            status: response.status,
-            statusText: response.statusText,
-            error: errorMessage,
-            responseBody: responseText.substring(0, 500),
-          };
+        console.error(`❌ ${post.name} post failed:`, multiResult.results);
 
-          console.error(`❌ ${post.name} post failed:`, result);
-
-          // Log individual post failures
-          try {
-            const { logActivity } = await import('@/lib/admin-activity');
-            await logActivity({
-              activityType: 'content_creation',
-              activityCategory: 'content',
-              status: 'failed',
-              message: `Failed to schedule post "${post.name}" for ${dateStr}`,
-              metadata: errorDetails,
-              errorMessage,
-            });
-          } catch (logError) {
-            console.error('Failed to log post error:', logError);
-          }
-
-          postResults.push({
-            name: post.name,
-            platforms: post.platforms,
-            status: 'error',
-            error: errorMessage,
-            statusCode: response.status,
-            statusText: response.statusText,
-            scheduledDate: post.scheduledDate,
-          });
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error';
-        const errorStack = error instanceof Error ? error.stack : undefined;
-
-        console.error(`❌ ${post.name} post error:`, error);
-
-        // Log individual post errors
+        // Log individual post failures
         try {
           const { logActivity } = await import('@/lib/admin-activity');
           await logActivity({
             activityType: 'content_creation',
             activityCategory: 'content',
             status: 'failed',
-            message: `Error scheduling post "${post.name}" for ${dateStr}`,
+            message: `Failed to schedule post "${post.name}" for ${dateStr}`,
             metadata: {
               postName: post.name,
               platforms: post.platforms,
-              errorType:
-                error instanceof Error ? error.constructor.name : 'Unknown',
-              errorStack,
+              error: errorMessage,
+              results: multiResult.results,
             },
             errorMessage,
           });
@@ -1744,8 +1504,45 @@ async function runDailyPosts(dateStr: string) {
           platforms: post.platforms,
           status: 'error',
           error: errorMessage,
+          scheduledDate: post.scheduledDate,
         });
       }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      console.error(`❌ ${post.name} post error:`, error);
+
+      // Log individual post errors
+      try {
+        const { logActivity } = await import('@/lib/admin-activity');
+        await logActivity({
+          activityType: 'content_creation',
+          activityCategory: 'content',
+          status: 'failed',
+          message: `Error scheduling post "${post.name}" for ${dateStr}`,
+          metadata: {
+            postName: post.name,
+            platforms: post.platforms,
+            errorType:
+              error instanceof Error ? error.constructor.name : 'Unknown',
+            errorStack,
+          },
+          errorMessage,
+        });
+      } catch (logError) {
+        console.error('Failed to log post error:', logError);
+      }
+
+      postResults.push({
+        name: post.name,
+        platforms: post.platforms,
+        status: 'error',
+        error: errorMessage,
+      });
     }
   }
 

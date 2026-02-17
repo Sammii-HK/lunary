@@ -1,4 +1,3 @@
-import OpenAI from 'openai';
 import type {
   WeeklyCosmicData,
   PlanetaryHighlight,
@@ -8,14 +7,7 @@ import type {
 import { getMoonPhase } from '../../../utils/moon/moonPhases';
 import { GeoVector, Ecliptic, Body, AstroTime } from 'astronomy-engine';
 import { getZodiacSign } from '../../../utils/astrology/cosmic-og';
-
-function getOpenAI() {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY is not configured');
-  }
-  return new OpenAI({ apiKey });
-}
+import { generateContent } from '@/lib/ai/content-generator';
 
 /**
  * Select daily events from the week, prioritizing planetary highlights over aspects
@@ -120,8 +112,6 @@ function selectDailyEvents(
 export async function generateNarrativeFromWeeklyData(
   weeklyData: WeeklyCosmicData,
 ): Promise<string> {
-  const openai = getOpenAI();
-
   // Select daily events (1-2 planetary highlights per day, or most significant aspect if none)
   const dailyEvents = selectDailyEvents(
     weeklyData.planetaryHighlights,
@@ -290,23 +280,16 @@ ${
 Return ONLY the voiceover script text. No headings, no formatting, no section labels. The tone should be calm, authoritative, and reflective, suitable for a thoughtful YouTube audience.`;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a cosmic storyteller creating engaging voiceover scripts for YouTube astrology videos. Write in a natural, conversational tone that flows smoothly when spoken aloud. Start with a compelling hook that captures attention in the first 5 seconds. Use vivid, relatable language. Include transitions between topics that maintain engagement. This is Lunary - a moon-focused astrology app. Moon phases are core to the brand and MUST always be included in every script. End with clear YouTube CTAs (subscribe, like, comment).',
-        },
-        { role: 'user', content: prompt },
-      ],
-      max_tokens: 2500,
+    let script = await generateContent({
+      systemPrompt:
+        'You are a cosmic storyteller creating engaging voiceover scripts for YouTube astrology videos. Write in a natural, conversational tone that flows smoothly when spoken aloud. Start with a compelling hook that captures attention in the first 5 seconds. Use vivid, relatable language. Include transitions between topics that maintain engagement. This is Lunary - a moon-focused astrology app. Moon phases are core to the brand and MUST always be included in every script. End with clear YouTube CTAs (subscribe, like, comment).',
+      prompt,
+      maxTokens: 2500,
       temperature: 0.3,
     });
 
-    let script = completion.choices[0]?.message?.content || '';
     if (!script || script.trim().length === 0) {
-      throw new Error('OpenAI returned an empty script');
+      throw new Error('AI returned an empty script');
     }
 
     script = script.trim();
@@ -449,8 +432,6 @@ export function generateShortFormNarrative(
 export async function generateMediumFormNarrative(
   weeklyData: WeeklyCosmicData,
 ): Promise<string> {
-  const openai = getOpenAI();
-
   // Select daily events (1 planetary highlight per day, or most significant aspect if none)
   const dailyEvents = selectDailyEvents(
     weeklyData.planetaryHighlights,
@@ -585,24 +566,14 @@ ${moonPhases}
 Return ONLY the complete voiceover script. No headings, no bullet points, no formatting. Write in a calm, confident broadcast tone.`;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You create educational astrology voiceovers. CRITICAL: For aspects, ALWAYS say "[Planet1] [aspect] [Planet2]" - e.g., "Venus square Saturn" NOT "Venus faces challenges". The aspect word MUST appear between planet names. Be authoritative, not casual.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+    const generatedScript = await generateContent({
+      systemPrompt:
+        'You create educational astrology voiceovers. CRITICAL: For aspects, ALWAYS say "[Planet1] [aspect] [Planet2]" - e.g., "Venus square Saturn" NOT "Venus faces challenges". The aspect word MUST appear between planet names. Be authoritative, not casual.',
+      prompt,
       temperature: 0.8,
-      max_tokens: 300,
+      maxTokens: 300,
     });
 
-    const generatedScript = completion.choices[0]?.message?.content?.trim();
     if (!generatedScript) {
       throw new Error('Failed to generate medium-form narrative');
     }
@@ -1052,8 +1023,6 @@ export async function generateVideoPostContent(
   platform?: 'threads' | 'default',
   themeCategory?: string,
 ): Promise<string> {
-  const openai = getOpenAI();
-
   const weekRange = `${weeklyData.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${weeklyData.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
 
   // Different prompt based on video type
@@ -1127,23 +1096,16 @@ Key Events: ${eventOverview.length > 0 ? eventOverview.join(', ') : 'Various cos
 Return ONLY the caption text. No markdown, no formatting, no emojis, no hashtags, no links.`;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a social media content creator for Lunary, a cosmic astrology app. Create engaging, natural captions that guide people to learn more without being pushy or salesy. Write in a mystical but accessible tone. DO NOT use any emojis - keep the text clean and professional. DO NOT include hashtags.',
-        },
-        { role: 'user', content: prompt },
-      ],
-      max_tokens: 200,
+    let postContent = await generateContent({
+      systemPrompt:
+        'You are a social media content creator for Lunary, a cosmic astrology app. Create engaging, natural captions that guide people to learn more without being pushy or salesy. Write in a mystical but accessible tone. DO NOT use any emojis - keep the text clean and professional. DO NOT include hashtags.',
+      prompt,
+      maxTokens: 200,
       temperature: 0.8,
     });
 
-    let postContent = completion.choices[0]?.message?.content || '';
     if (!postContent || postContent.trim().length === 0) {
-      throw new Error('OpenAI returned empty post content');
+      throw new Error('AI returned empty post content');
     }
 
     postContent = postContent.trim();

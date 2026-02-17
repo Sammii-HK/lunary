@@ -18,7 +18,7 @@ const episodes = [
   {
     title: 'Why Real Astronomical Data Matters',
     description:
-      'Deep dive into NASA-grade ephemeris and why Lunary refuses to ship generic horoscopes.',
+      'Deep dive into astronomical-grade calculations and why Lunary refuses to ship generic horoscopes.',
     link: 'https://www.tiktok.com/@lunary/video/0001',
   },
   {

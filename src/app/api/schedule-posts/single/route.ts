@@ -1,113 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getImageBaseUrl } from '@/lib/urls';
+import { postToSocialMultiPlatform } from '@/lib/social/client';
 
 export async function POST(request: NextRequest) {
   try {
     console.log('🚀 Single post scheduler started');
 
-    const { postData, succulentApiUrl, testMode } = await request.json();
-    console.log('📥 Request data received:', {
-      succulentApiUrl,
-      testMode,
-      hasPostData: !!postData,
-    });
-
-    // Get environment variables
-    const apiKey = process.env.SUCCULENT_SECRET_KEY;
-    const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+    const { postData } = await request.json();
 
     // Get the base URL for the application (dev vs prod)
-    // Use production URL on any Vercel deployment
     const baseUrl = getImageBaseUrl();
-
-    console.log('🔑 Environment check:', {
-      hasApiKey: !!apiKey,
-      hasAccountGroupId: !!accountGroupId,
-      baseUrl,
-      nodeEnv: process.env.NODE_ENV,
-    });
-
-    if (!apiKey || !accountGroupId) {
-      console.error('❌ Missing environment variables');
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Missing Succulent API configuration',
-          error:
-            'SUCCULENT_SECRET_KEY or SUCCULENT_ACCOUNT_GROUP_ID not found in environment variables',
-        },
-        { status: 500 },
-      );
-    }
 
     // Ensure media URLs use the correct base URL
     const updatedMediaItems =
       postData.media?.map((item: any) => ({
         ...item,
-        // Replace any localhost or relative URLs with the correct base URL
         url: item.url.startsWith('http')
           ? item.url
           : `${baseUrl}${item.url.startsWith('/') ? '' : '/'}${item.url}`,
       })) || [];
 
-    console.log('🖼️ Media items:', updatedMediaItems);
-
-    // Use real account group ID and ensure proper URLs
-    const finalPostData = {
-      ...postData,
-      accountGroupId,
-      media: updatedMediaItems,
-    };
-
-    console.log('📤 Sending to Succulent');
+    console.log('📤 Scheduling post via social client');
     console.log('📋 Post Data:', {
-      contentLength: finalPostData.content?.length || 0,
-      platforms: finalPostData.platforms,
-      scheduledDate: finalPostData.scheduledDate,
-      media: finalPostData.media,
+      contentLength: postData.content?.length || 0,
+      platforms: postData.platforms,
+      scheduledDate: postData.scheduledDate,
+      media: updatedMediaItems,
     });
 
-    // Send to Succulent API - let Succulent handle the image URL
-    console.log('🌐 Making request to Succulent API...');
-    const response = await fetch(succulentApiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': apiKey,
-      },
-      body: JSON.stringify(finalPostData),
+    const { results } = await postToSocialMultiPlatform({
+      platforms: postData.platforms,
+      content: postData.content,
+      scheduledDate: postData.scheduledDate,
+      media: updatedMediaItems,
+      variants: postData.variants,
+      name: postData.name,
+      reddit: postData.reddit,
+      pinterestOptions: postData.pinterestOptions,
+      tiktokOptions: postData.tiktokOptions,
+      instagramOptions: postData.instagramOptions,
+      youtubeOptions: postData.youtubeOptions,
     });
 
-    console.log('📨 Succulent Response Status:', response.status);
+    const anySuccess = Object.values(results).some((r) => r.success);
 
-    let responseData;
-    try {
-      responseData = await response.json();
-      console.log('📨 Succulent Response Data:', responseData);
-    } catch (jsonError) {
-      console.error(
-        '❌ Failed to parse Succulent response as JSON:',
-        jsonError,
-      );
-      const responseText = await response.text();
-      console.error('📄 Raw response text:', responseText);
-
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Invalid response from Succulent API',
-          error: `Failed to parse response: ${jsonError instanceof Error ? jsonError.message : 'Unknown JSON parsing error'}`,
-          details: {
-            status: response.status,
-            statusText: response.statusText,
-            responseText: responseText.substring(0, 500),
-          },
-        },
-        { status: 500 },
-      );
-    }
-
-    if (response.ok) {
+    if (anySuccess) {
       console.log('✅ Success! Post scheduled successfully');
       return NextResponse.json({
         success: true,
@@ -122,27 +59,23 @@ export async function POST(request: NextRequest) {
           {
             date: postData.scheduledDate.split('T')[0],
             status: 'success',
-            postId: responseData.data?.postId || 'unknown',
             platforms: postData.platforms,
-            imageUrl: finalPostData.media?.[0]?.url,
+            imageUrl: updatedMediaItems?.[0]?.url,
+            backends: Object.fromEntries(
+              Object.entries(results).map(([p, r]) => [p, r.backend]),
+            ),
           },
         ],
         postContent: postData.content,
-        succulentResponse: responseData,
       });
     } else {
-      console.error(
-        '❌ Succulent API returned error:',
-        response.status,
-        responseData,
-      );
+      const firstError = Object.values(results).find((r) => r.error);
+      console.error('❌ All platforms failed:', results);
       return NextResponse.json(
         {
           success: false,
-          message: 'Failed to schedule post to Succulent',
-          error:
-            responseData.error ||
-            `HTTP ${response.status}: ${response.statusText}`,
+          message: 'Failed to schedule post',
+          error: firstError?.error || 'All platforms failed',
           summary: {
             totalPosts: 1,
             successful: 0,
@@ -152,48 +85,21 @@ export async function POST(request: NextRequest) {
             {
               date: postData.scheduledDate.split('T')[0],
               status: 'error',
-              error: responseData.error || `HTTP ${response.status}`,
+              error: firstError?.error || 'All platforms failed',
             },
           ],
-          succulentResponse: responseData,
         },
-        { status: response.status },
+        { status: 500 },
       );
     }
   } catch (error) {
     console.error('💥 Single post scheduler error:', error);
-    console.error(
-      '📍 Error stack:',
-      error instanceof Error ? error.stack : 'No stack trace',
-    );
-
-    // Provide more specific error information
-    let errorMessage = 'Unknown error occurred';
-    let errorDetails = {};
-
-    if (error instanceof Error) {
-      errorMessage = error.message;
-      errorDetails = {
-        name: error.name,
-        stack: error.stack?.substring(0, 1000), // Limit stack trace length
-      };
-    }
-
-    // Check for specific error types
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      errorMessage = 'Network error: Failed to connect to Succulent API';
-      errorDetails = { ...errorDetails, type: 'network_error' };
-    } else if (error instanceof SyntaxError) {
-      errorMessage = 'Data parsing error: Invalid request format';
-      errorDetails = { ...errorDetails, type: 'parsing_error' };
-    }
 
     return NextResponse.json(
       {
         success: false,
         message: 'Failed to process single post',
-        error: errorMessage,
-        details: errorDetails,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
       },
       { status: 500 },

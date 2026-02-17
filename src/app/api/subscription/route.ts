@@ -16,27 +16,34 @@ export async function GET(request: NextRequest) {
       LIMIT 1
     `;
 
+    const headers = {
+      'Cache-Control': 'private, max-age=300',
+    };
+
     if (result.rows.length === 0) {
-      return NextResponse.json({ subscription: null });
+      return NextResponse.json({ subscription: null }, { headers });
     }
 
     const subscription = result.rows[0];
-    return NextResponse.json({
-      subscription: {
-        id: subscription.id,
-        userId: subscription.user_id,
-        userEmail: subscription.user_email,
-        userName: subscription.user_name,
-        status: subscription.status,
-        planType: subscription.plan_type,
-        trialEndsAt: subscription.trial_ends_at,
-        stripeCustomerId: subscription.stripe_customer_id,
-        stripeSubscriptionId: subscription.stripe_subscription_id,
-        currentPeriodEnd: subscription.current_period_end,
-        createdAt: subscription.created_at,
-        updatedAt: subscription.updated_at,
+    return NextResponse.json(
+      {
+        subscription: {
+          id: subscription.id,
+          userId: subscription.user_id,
+          userEmail: subscription.user_email,
+          userName: subscription.user_name,
+          status: subscription.status,
+          planType: subscription.plan_type,
+          trialEndsAt: subscription.trial_ends_at,
+          stripeCustomerId: subscription.stripe_customer_id,
+          stripeSubscriptionId: subscription.stripe_subscription_id,
+          currentPeriodEnd: subscription.current_period_end,
+          createdAt: subscription.created_at,
+          updatedAt: subscription.updated_at,
+        },
       },
-    });
+      { headers },
+    );
   } catch (error) {
     console.error('Error fetching subscription:', error);
     return NextResponse.json(

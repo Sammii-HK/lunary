@@ -4,15 +4,15 @@ import {
 } from '@/lib/tts/normalize-script';
 
 describe('preprocessTextForTTS', () => {
-  it('converts paragraph breaks to ellipsis pause markers', () => {
+  it('converts paragraph breaks to pause markers', () => {
     const result = preprocessTextForTTS('First section.\n\nSecond section.');
-    expect(result).toContain('...');
+    expect(result).toContain('. . . , ,');
     expect(result).not.toContain('\n\n');
   });
 
   it('handles multiple paragraph breaks', () => {
     const result = preprocessTextForTTS('A.\n\n\n\nB.');
-    expect(result).toContain('...');
+    expect(result).toContain('. . . , ,');
     expect(result).not.toContain('\n');
   });
 
@@ -33,9 +33,9 @@ describe('preprocessTextForTTS', () => {
     expect(result).not.toContain('  ');
   });
 
-  it('preserves ellipses as pause tokens', () => {
+  it('converts ellipses to breathing pause markers', () => {
     const result = preprocessTextForTTS('Take a breath... then continue.');
-    expect(result).toContain('...');
+    expect(result).toContain('. . ,');
   });
 
   it('trims leading and trailing whitespace', () => {

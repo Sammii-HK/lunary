@@ -293,12 +293,6 @@ export async function POST(request: NextRequest) {
         const existingVideoUrl = postRow.video_url ?? undefined;
         const postWeekTheme = postRow.week_theme ?? undefined;
 
-        if (postWeekTheme && themeName && postWeekTheme !== themeName) {
-          throw new Error(
-            `Theme mismatch: post uses "${postWeekTheme}" but script uses "${themeName}"`,
-          );
-        }
-
         const force = url.searchParams.get('force') === 'true';
         let videoUrl = force ? undefined : existingVideoUrl;
         if (!videoUrl) {
@@ -437,9 +431,16 @@ export async function POST(request: NextRequest) {
                   ? remotionError.message
                   : String(remotionError);
               console.error(
-                `❌ Remotion render failed for script ${script.id}, falling back to FFmpeg: ${errMsg}`,
+                `❌ Remotion render failed for script ${script.id}: ${errMsg}`,
               );
-              useFFmpegFallback = true;
+              // Only fall back to FFmpeg on Vercel where Chromium may not be available.
+              // Locally, surface the real error so it can be fixed.
+              if (process.env.VERCEL) {
+                console.warn(`⚠️ Falling back to FFmpeg (Vercel environment)`);
+                useFFmpegFallback = true;
+              } else {
+                throw remotionError;
+              }
             }
           }
 

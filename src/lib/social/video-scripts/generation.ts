@@ -9,26 +9,27 @@
  * while guaranteeing numerology (the #1 performer) appears every week.
  */
 
-import { categoryThemes } from '../weekly-themes';
+import { categoryThemes, WITCHTOK_ROTATION_CATEGORIES } from '../weekly-themes';
+import type { DailyFacet, WeeklyTheme, SabbatTheme } from '../weekly-themes';
 import type { WeeklyVideoScripts } from './types';
 import { ensureVideoScriptsTable, saveVideoScript } from './database';
 import { VIDEO_ANGLE_OPTIONS, mapAngleToAspect } from './constants';
 import { generateTikTokScript } from './tiktok/generation';
 import { generateYouTubeScript } from './youtube/generation';
 
-/** Categories that rotate in the witchtok slot (Block B) */
-const WITCHTOK_ROTATION_CATEGORIES = [
-  'spells',
-  'tarot',
-  'crystals',
-  'zodiac',
-  'lunar',
-  'planetary',
-];
+/** A day entry from the weekly content plan */
+export interface WeekPlanDay {
+  date: Date;
+  theme: WeeklyTheme | SabbatTheme;
+  facet: DailyFacet;
+}
 
 /**
  * Generate all video scripts for a week
  * Returns 7 TikTok scripts (4 from Block A + 3 from Block B) and 1 YouTube script
+ *
+ * When weekPlan is provided, themes and facets are taken directly from the
+ * content plan so video scripts always match the post copy.
  *
  * Block A (Mon-Thu): 4 facets from a numerology theme
  * Block B (Fri-Sun): 3 facets from a rotating witchtok category
@@ -37,30 +38,45 @@ export async function generateWeeklyVideoScripts(
   weekStartDate: Date,
   themeIndex: number = 0,
   baseUrl: string = '',
+  weekPlan?: WeekPlanDay[],
 ): Promise<WeeklyVideoScripts> {
-  // Block A: Mon-Thu (4 parts) — ALWAYS numerology
-  const numerologyThemes = categoryThemes.filter(
-    (t) => t.category === 'numerology',
-  );
-  const themeA =
-    numerologyThemes.length > 0
-      ? numerologyThemes[themeIndex % numerologyThemes.length]
-      : categoryThemes[themeIndex % categoryThemes.length];
-  const facetsA = themeA.facets.slice(0, 4);
+  let themeA: WeeklyTheme | SabbatTheme;
+  let facetsA: DailyFacet[];
+  let themeB: WeeklyTheme | SabbatTheme;
+  let facetsB: DailyFacet[];
 
-  // Block B: Fri-Sun (3 parts) — rotate through witchtok categories
-  const witchtokCategory =
-    WITCHTOK_ROTATION_CATEGORIES[
-      themeIndex % WITCHTOK_ROTATION_CATEGORIES.length
-    ];
-  const witchtokThemes = categoryThemes.filter(
-    (t) => t.category === witchtokCategory,
-  );
-  const themeB =
-    witchtokThemes.length > 0
-      ? witchtokThemes[themeIndex % witchtokThemes.length]
-      : categoryThemes[(themeIndex + 1) % categoryThemes.length];
-  const facetsB = themeB.facets.slice(0, 3);
+  if (weekPlan && weekPlan.length >= 7) {
+    // Use the exact themes/facets from the content plan to stay in sync
+    const blockADays = weekPlan.slice(0, 4); // Mon-Thu
+    const blockBDays = weekPlan.slice(4, 7); // Fri-Sun
+    themeA = blockADays[0].theme;
+    facetsA = blockADays.map((d) => d.facet);
+    themeB = blockBDays[0].theme;
+    facetsB = blockBDays.map((d) => d.facet);
+  } else {
+    // Fallback: independent selection (legacy behaviour)
+    const numerologyThemes = categoryThemes.filter(
+      (t) => t.category === 'numerology',
+    );
+    themeA =
+      numerologyThemes.length > 0
+        ? numerologyThemes[themeIndex % numerologyThemes.length]
+        : categoryThemes[themeIndex % categoryThemes.length];
+    facetsA = (themeA as WeeklyTheme).facets.slice(0, 4);
+
+    const witchtokCategory =
+      WITCHTOK_ROTATION_CATEGORIES[
+        themeIndex % WITCHTOK_ROTATION_CATEGORIES.length
+      ];
+    const witchtokThemes = categoryThemes.filter(
+      (t) => t.category === witchtokCategory,
+    );
+    themeB =
+      witchtokThemes.length > 0
+        ? witchtokThemes[themeIndex % witchtokThemes.length]
+        : categoryThemes[(themeIndex + 1) % categoryThemes.length];
+    facetsB = (themeB as WeeklyTheme).facets.slice(0, 3);
+  }
 
   // Rotate angles across the week - each day gets a different angle
   const shuffledAngles = [...VIDEO_ANGLE_OPTIONS].sort(
@@ -78,7 +94,7 @@ export async function generateWeeklyVideoScripts(
 
       return await generateTikTokScript(
         facet,
-        themeA,
+        themeA as WeeklyTheme,
         scriptDate,
         dayOffset + 1,
         4, // totalParts=4 for Block A
@@ -102,7 +118,7 @@ export async function generateWeeklyVideoScripts(
 
       return await generateTikTokScript(
         facet,
-        themeB,
+        themeB as WeeklyTheme,
         scriptDate,
         i + 1,
         3, // totalParts=3 for Block B
@@ -118,14 +134,14 @@ export async function generateWeeklyVideoScripts(
   const youtubeDate = new Date(weekStartDate);
   youtubeDate.setDate(youtubeDate.getDate() + 6);
   const youtubeScript = await generateYouTubeScript(
-    themeA,
+    themeA as WeeklyTheme,
     facetsA,
     youtubeDate,
     baseUrl,
   );
 
   return {
-    theme: themeA, // Numerology = primary theme for YouTube summary
+    theme: themeA as WeeklyTheme, // Primary theme for YouTube summary
     tiktokScripts: [...blockAScripts, ...blockBScripts],
     youtubeScript,
     weekStartDate,
@@ -141,6 +157,7 @@ export async function generateAndSaveWeeklyScripts(
   weekStartDate: Date,
   themeIndex: number = 0,
   baseUrl: string = 'https://lunary.app',
+  weekPlan?: WeekPlanDay[],
 ): Promise<WeeklyVideoScripts> {
   await ensureVideoScriptsTable();
 
@@ -148,6 +165,7 @@ export async function generateAndSaveWeeklyScripts(
     weekStartDate,
     themeIndex,
     baseUrl,
+    weekPlan,
   );
 
   // Save TikTok scripts and capture IDs

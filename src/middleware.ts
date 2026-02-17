@@ -281,7 +281,7 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     let anonId = request.cookies.get(ANON_ID_COOKIE)?.value;
 
     if (!anonId) {
-      anonId = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2, 10);
+      anonId = crypto.randomUUID();
       response.cookies.set(ANON_ID_COOKIE, anonId, {
         httpOnly: false, // Readable by client JS so analytics can use the same ID
         sameSite: 'lax',
@@ -344,6 +344,18 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
 
     const realIp = request.headers.get('x-real-ip');
     if (realIp) headers.set('x-real-ip', realIp);
+
+    // Skip tracking for bots and prefetch requests
+    const isPrefetch =
+      request.headers.get('purpose') === 'prefetch' ||
+      request.headers.get('sec-purpose') === 'prefetch';
+    const isBot = /bot|crawler|spider|googlebot|bingbot|yandex|baidu/i.test(
+      userAgent || '',
+    );
+
+    if (isPrefetch || isBot) {
+      return response;
+    }
 
     // Track page_viewed (one per page per user per day)
     console.log('[middleware] Calling page_viewed:', { path: finalPath });

@@ -30,6 +30,42 @@ export function stripHtmlTags(str: string, substitute = ' '): string {
   return result;
 }
 
+/**
+ * Allow-list of trusted domains for external fetch requests.
+ * Prevents SSRF by rejecting URLs pointing to untrusted hosts.
+ */
+const TRUSTED_FETCH_DOMAINS = new Set([
+  'blob.vercel-storage.com',
+  'api.github.com',
+  'api.openai.com',
+  'api.deepinfra.com',
+]);
+
+/**
+ * Validate that a URL points to a trusted domain before fetching.
+ * Throws if the URL host is not in the allow-list.
+ */
+export function validateFetchUrl(url: string): string {
+  const parsed = new URL(url);
+  const host = parsed.hostname;
+  // Allow exact match or subdomain match (e.g. xyz.blob.vercel-storage.com)
+  const isTrusted = Array.from(TRUSTED_FETCH_DOMAINS).some(
+    (domain) => host === domain || host.endsWith(`.${domain}`),
+  );
+  if (!isTrusted) {
+    throw new Error(`Untrusted fetch URL domain: ${host}`);
+  }
+  // Reconstruct URL from parsed components to break CodeQL taint chain
+  return `${parsed.protocol}//${parsed.host}${parsed.pathname}${parsed.search}`;
+}
+
+/**
+ * Sanitize a string for safe logging — strips control characters.
+ */
+export function sanitizeForLog(value: string): string {
+  return String(value).replace(/[\r\n\x00-\x1F\x7F]/g, '');
+}
+
 export function generateUUID(): string {
   if (
     typeof crypto !== 'undefined' &&

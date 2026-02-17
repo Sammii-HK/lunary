@@ -11,28 +11,6 @@ import { generateReelHashtags } from '@/lib/video/narrative-generator';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
-interface SucculentPostData {
-  accountGroupId: string;
-  name: string;
-  content: string;
-  platforms: string[];
-  scheduledDate: string;
-  media?: Array<{
-    type: 'image' | 'video';
-    url: string;
-    alt: string;
-  }>;
-  instagramOptions?: {
-    type: 'story' | 'post' | 'reel';
-  };
-  facebookOptions?: {
-    type: 'story' | 'post';
-  };
-  tiktokOptions?: {
-    type: 'post';
-  };
-}
-
 function stripMarkdown(input: string) {
   return input
     .replace(/\[(.*?)\]\([^)]*\)/g, '$1')
@@ -238,12 +216,7 @@ export async function GET(request: NextRequest) {
 
     // Step 2: Generate and schedule social media posts
     try {
-      const apiKey = process.env.SUCCULENT_SECRET_KEY;
-      const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
-
-      if (!apiKey || !accountGroupId) {
-        throw new Error('Succulent API not configured');
-      }
+      const { postToSocial } = await import('@/lib/social/client');
 
       // Fetch social content for this week
       const contentResponse = await fetch(
@@ -256,11 +229,8 @@ export async function GET(request: NextRequest) {
       }
       const content = await contentResponse.json();
 
-      const succulentApiUrl = 'https://app.succulent.social/api/posts';
       const scheduledPosts: any[] = [];
 
-      // Helper to get caption based on platformOptions config
-      // Use exactly 3 hashtags for all platforms
       const getCaption = (
         captionType: 'short' | 'medium' | 'long',
         includeHashtags = false,
@@ -285,98 +255,11 @@ export async function GET(request: NextRequest) {
         postTime.setHours(now.getHours() + 1);
       }
 
-      // 1. Instagram is video-only; static posts are skipped here.
-
-      // 2. Shared story-style timing anchor
       const storyTime = new Date(postTime);
       storyTime.setMinutes(storyTime.getMinutes() + 30);
 
-      // 3. TikTok static posts are disabled (video-only)
-
-      // 4. Facebook Post (landscape) - uses long caption
       const fbPostTime = new Date(postTime);
       fbPostTime.setMinutes(fbPostTime.getMinutes() + 15);
-
-      const fbPost: SucculentPostData = {
-        accountGroupId,
-        name: `Lunary Weekly - Facebook Post - ${dateStr}`,
-        content: getCaption('long'),
-        platforms: ['facebook'],
-        scheduledDate: fbPostTime.toISOString(),
-        media: [
-          {
-            type: 'image',
-            url: `${baseUrl}/api/social/images?week=0&format=landscape`,
-            alt: content.captions.short,
-          },
-        ],
-        facebookOptions: { type: 'post' },
-      };
-
-      // 5. Facebook Story (story format) - uses short caption
-      const fbStoryPost: SucculentPostData = {
-        accountGroupId,
-        name: `Lunary Weekly - Facebook Story - ${dateStr}`,
-        content: getCaption('short'),
-        platforms: ['facebook'],
-        scheduledDate: storyTime.toISOString(),
-        media: [
-          {
-            type: 'image',
-            url: `${baseUrl}/api/social/images?week=0&format=story`,
-            alt: content.captions.short,
-          },
-        ],
-        facebookOptions: { type: 'story' },
-      };
-
-      // 6. Twitter/X (landscape 1200x675) - uses short caption with hashtags
-      const twitterPost: SucculentPostData = {
-        accountGroupId,
-        name: `Lunary Weekly - Twitter - ${dateStr}`,
-        content: getCaption('short', true),
-        platforms: ['twitter'],
-        scheduledDate: postTime.toISOString(),
-        media: [
-          {
-            type: 'image',
-            url: `${baseUrl}/api/social/images?week=0&format=landscape`,
-            alt: content.captions.short,
-          },
-        ],
-      };
-
-      // 7. LinkedIn (landscape 1200x627) - uses long caption with hashtags
-      const linkedinPost: SucculentPostData = {
-        accountGroupId,
-        name: `Lunary Weekly - LinkedIn - ${dateStr}`,
-        content: getCaption('long', true),
-        platforms: ['linkedin'],
-        scheduledDate: fbPostTime.toISOString(),
-        media: [
-          {
-            type: 'image',
-            url: `${baseUrl}/api/social/images?week=0&format=landscape`,
-            alt: content.captions.short,
-          },
-        ],
-      };
-
-      // 8. Bluesky (landscape 1200x630) - uses short caption with hashtags
-      const blueskyPost: SucculentPostData = {
-        accountGroupId,
-        name: `Lunary Weekly - Bluesky - ${dateStr}`,
-        content: getCaption('short', true),
-        platforms: ['bluesky'],
-        scheduledDate: postTime.toISOString(),
-        media: [
-          {
-            type: 'image',
-            url: `${baseUrl}/api/social/images?week=0&format=landscape`,
-            alt: content.captions.short,
-          },
-        ],
-      };
 
       const threadsScriptSource = freePost?.content || '';
       const threadsScript = truncateContent(
@@ -384,22 +267,88 @@ export async function GET(request: NextRequest) {
         420,
       );
 
-      // 9. Threads (text-only) - uses written script
-      const threadsPost: SucculentPostData = {
-        accountGroupId,
-        name: `Lunary Weekly - Threads - ${dateStr}`,
-        content: threadsScript || getCaption('medium', false),
-        platforms: ['threads'],
-        scheduledDate: postTime.toISOString(),
-      };
-
-      const allPosts = [
-        fbPost,
-        fbStoryPost,
-        twitterPost,
-        linkedinPost,
-        blueskyPost,
-        threadsPost,
+      // Define all posts to schedule
+      const allPosts: Array<{
+        name: string;
+        platform: string;
+        content: string;
+        scheduledDate: string;
+        media?: Array<{ type: 'image' | 'video'; url: string; alt: string }>;
+        platformSettings?: Record<string, unknown>;
+      }> = [
+        {
+          name: `Lunary Weekly - Facebook Post - ${dateStr}`,
+          platform: 'facebook',
+          content: getCaption('long'),
+          scheduledDate: fbPostTime.toISOString(),
+          media: [
+            {
+              type: 'image',
+              url: `${baseUrl}/api/social/images?week=0&format=landscape`,
+              alt: content.captions.short,
+            },
+          ],
+          platformSettings: { type: 'post' },
+        },
+        {
+          name: `Lunary Weekly - Facebook Story - ${dateStr}`,
+          platform: 'facebook',
+          content: getCaption('short'),
+          scheduledDate: storyTime.toISOString(),
+          media: [
+            {
+              type: 'image',
+              url: `${baseUrl}/api/social/images?week=0&format=story`,
+              alt: content.captions.short,
+            },
+          ],
+          platformSettings: { type: 'story' },
+        },
+        {
+          name: `Lunary Weekly - Twitter - ${dateStr}`,
+          platform: 'twitter',
+          content: getCaption('short', true),
+          scheduledDate: postTime.toISOString(),
+          media: [
+            {
+              type: 'image',
+              url: `${baseUrl}/api/social/images?week=0&format=landscape`,
+              alt: content.captions.short,
+            },
+          ],
+        },
+        {
+          name: `Lunary Weekly - LinkedIn - ${dateStr}`,
+          platform: 'linkedin',
+          content: getCaption('long', true),
+          scheduledDate: fbPostTime.toISOString(),
+          media: [
+            {
+              type: 'image',
+              url: `${baseUrl}/api/social/images?week=0&format=landscape`,
+              alt: content.captions.short,
+            },
+          ],
+        },
+        {
+          name: `Lunary Weekly - Bluesky - ${dateStr}`,
+          platform: 'bluesky',
+          content: getCaption('short', true),
+          scheduledDate: postTime.toISOString(),
+          media: [
+            {
+              type: 'image',
+              url: `${baseUrl}/api/social/images?week=0&format=landscape`,
+              alt: content.captions.short,
+            },
+          ],
+        },
+        {
+          name: `Lunary Weekly - Threads - ${dateStr}`,
+          platform: 'threads',
+          content: threadsScript || getCaption('medium', false),
+          scheduledDate: postTime.toISOString(),
+        },
       ];
 
       let reelHashtags: string[] | null = null;
@@ -413,69 +362,64 @@ export async function GET(request: NextRequest) {
 
       // Add video posts if short-form video was generated
       if (shortFormVideoUrl) {
-        // Instagram Reel
         const reelTime = new Date(postTime);
         reelTime.setMinutes(reelTime.getMinutes() + 60);
-        const igReelPost: SucculentPostData = {
-          accountGroupId,
-          name: `Lunary Weekly - Instagram Reel - ${dateStr}`,
-          content: getCaption('medium', true, 5, reelHashtags || undefined),
-          platforms: ['instagram'],
-          scheduledDate: reelTime.toISOString(),
-          media: [
-            {
-              type: 'video',
-              url: shortFormVideoUrl,
-              alt: content.captions.short,
-            },
-          ],
-          instagramOptions: { type: 'reel' },
-        };
 
-        // TikTok Video
-        const tiktokVideoPost: SucculentPostData = {
-          accountGroupId,
-          name: `Lunary Weekly - TikTok Video - ${dateStr}`,
-          content: getCaption('short', true),
-          platforms: ['tiktok'],
-          scheduledDate: reelTime.toISOString(),
-          media: [
-            {
-              type: 'video',
-              url: shortFormVideoUrl,
-              alt: content.captions.short,
-            },
-          ],
-        };
-
-        allPosts.push(igReelPost, tiktokVideoPost);
+        allPosts.push(
+          {
+            name: `Lunary Weekly - Instagram Reel - ${dateStr}`,
+            platform: 'instagram',
+            content: getCaption('medium', true, 5, reelHashtags || undefined),
+            scheduledDate: reelTime.toISOString(),
+            media: [
+              {
+                type: 'video',
+                url: shortFormVideoUrl,
+                alt: content.captions.short,
+              },
+            ],
+            platformSettings: { type: 'reel' },
+          },
+          {
+            name: `Lunary Weekly - TikTok Video - ${dateStr}`,
+            platform: 'tiktok',
+            content: getCaption('short', true),
+            scheduledDate: reelTime.toISOString(),
+            media: [
+              {
+                type: 'video',
+                url: shortFormVideoUrl,
+                alt: content.captions.short,
+              },
+            ],
+          },
+        );
       }
 
       for (const post of allPosts) {
         try {
-          const response = await fetch(succulentApiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-API-Key': apiKey,
-            },
-            body: JSON.stringify(post),
+          const result = await postToSocial({
+            platform: post.platform,
+            content: post.content,
+            scheduledDate: post.scheduledDate,
+            media: post.media,
+            platformSettings: post.platformSettings,
           });
 
-          const result = await response.json();
           scheduledPosts.push({
             name: post.name,
-            platform: post.platforms[0],
-            success: response.ok,
-            postId: result.data?.postId,
-            error: response.ok ? undefined : result.error,
+            platform: post.platform,
+            success: result.success,
+            postId: result.postId,
+            backend: result.backend,
+            error: result.success ? undefined : result.error,
           });
 
           await new Promise((r) => setTimeout(r, 200));
         } catch (error) {
           scheduledPosts.push({
             name: post.name,
-            platform: post.platforms[0],
+            platform: post.platform,
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',
           });
@@ -483,13 +427,13 @@ export async function GET(request: NextRequest) {
       }
 
       results.social = {
-        success: scheduledPosts.some((p) => p.success),
+        success: scheduledPosts.some((p: any) => p.success),
         posts: scheduledPosts,
       };
 
       console.log('[weekly-substack-social] Social posts scheduled:', {
         total: scheduledPosts.length,
-        successful: scheduledPosts.filter((p) => p.success).length,
+        successful: scheduledPosts.filter((p: any) => p.success).length,
       });
     } catch (error) {
       console.error('[weekly-substack-social] Social error:', error);

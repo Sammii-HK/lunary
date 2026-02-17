@@ -109,8 +109,8 @@ const COMPETITOR_CONTEXT = getCompetitorContext();
 
 export async function POST(request: NextRequest) {
   // Trim whitespace from API key (common issue with .env files)
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  const rawKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.DEEPINFRA_API_KEY?.trim();
+  const rawKey = process.env.DEEPINFRA_API_KEY;
 
   try {
     const {
@@ -123,48 +123,11 @@ export async function POST(request: NextRequest) {
       weekOffset = 0,
     } = await request.json();
 
-    // Check for all OpenAI-related env vars
-    const allOpenAIVars = Object.keys(process.env)
-      .filter((key) => key.toLowerCase().includes('openai'))
-      .map((key) => ({
-        key,
-        exists: !!process.env[key],
-        length: process.env[key]?.length || 0,
-      }));
-
-    // Debug logging (only first 8 chars for security)
-    console.log('🔑 API Key check:', {
-      exists: !!apiKey,
-      length: apiKey?.length || 0,
-      prefix: apiKey ? `${apiKey.substring(0, 8)}...` : 'missing',
-      startsWithSk: apiKey?.startsWith('sk-') || false,
-      originalLength: rawKey?.length || 0,
-      trimmedLength: apiKey?.length || 0,
-      nodeEnv: process.env.NODE_ENV,
-      vercelEnv: process.env.VERCEL_ENV,
-      allOpenAIVars,
-      rawExists: !!rawKey,
-      rawIsEmpty: rawKey === '',
-      rawIsWhitespace: rawKey?.trim() === '',
-    });
-
     if (!apiKey) {
-      const isProduction =
-        process.env.NODE_ENV === 'production' ||
-        process.env.VERCEL_ENV === 'production';
       return NextResponse.json(
         {
-          error: 'OpenAI API key not configured',
-          hint: isProduction
-            ? 'Set OPENAI_API_KEY in Vercel Dashboard > Settings > Environment Variables > Production. After adding, redeploy the project.'
-            : 'Set OPENAI_API_KEY in your .env.local file and restart your dev server',
-          debug: {
-            nodeEnv: process.env.NODE_ENV,
-            vercelEnv: process.env.VERCEL_ENV,
-            allOpenAIVars,
-            rawKeyExists: !!rawKey,
-            rawKeyLength: rawKey?.length || 0,
-          },
+          error: 'DeepInfra API key not configured',
+          hint: 'Set DEEPINFRA_API_KEY in your environment variables.',
         },
         { status: 400 },
       );
@@ -418,8 +381,9 @@ export async function POST(request: NextRequest) {
 
     const feedbackContext = rejectionContext + improvementContext;
 
-    const { OpenAI } = await import('openai');
-    const openai = new OpenAI({ apiKey });
+    const { generateStructuredContent } =
+      await import('@/lib/ai/content-generator');
+    const { z } = await import('zod');
 
     // Get Reddit subreddit info if platform is Reddit
     let redditSubreddit: {
@@ -510,14 +474,7 @@ Return JSON: {"posts": ["Post 1", "Post 2", ...]}`;
         'agile',
       ].some((word) => new RegExp(`\\b${word}\\b`, 'i').test(text));
 
-    const requestPosts = async (retryNote?: string) => {
-      const retrySuffix = retryNote ? `\nFix: ${retryNote}` : '';
-      return openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}
+    const socialSystemPrompt = `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}
 
 You are creating authentic social media content for Lunary, a cosmic astrology app.
 
@@ -531,24 +488,25 @@ CRITICAL RULES:
 7. Match the example posts in quality and tone for the given archetype
 8. Each post must feel unique - different hooks, structures, and angles
 9. Sound human - vulnerable, curious, or educational. Never salesy or generic.
-10. Position Lunary as a library/reference authority, not a product
+10. Position Lunary as a library/reference authority, not a product`;
 
-Return only valid JSON.`,
-          },
-          { role: 'user', content: `${prompt}${retrySuffix}` },
-        ],
-        response_format: { type: 'json_object' },
-        max_tokens: 1200,
+    const requestPosts = async (retryNote?: string) => {
+      return generateStructuredContent({
+        systemPrompt: socialSystemPrompt,
+        prompt,
+        schema: z.object({ posts: z.array(z.string()) }),
+        schemaName: 'socialPosts',
+        maxTokens: 1200,
         temperature: 0.9,
+        retryNote,
       });
     };
 
-    console.log('🤖 Calling OpenAI API...');
-    const completion = await requestPosts();
-    console.log('✅ OpenAI API call successful');
+    console.log('🤖 Calling AI API...');
+    const result = await requestPosts();
+    console.log('✅ AI API call successful');
 
-    const result = JSON.parse(completion.choices[0]?.message?.content || '{}');
-    const posts = result.posts || result.post || [];
+    const posts = result.posts || [];
     let postsArray = Array.isArray(posts) ? posts : [posts];
     if (
       postsArray.some(
@@ -557,13 +515,10 @@ Return only valid JSON.`,
           hasOffDomainKeyword(String(post)),
       )
     ) {
-      const retryCompletion = await requestPosts(
+      const retryResult = await requestPosts(
         'Remove deterministic claims and off-domain terms; use softer language (can, may, tends to, often, influences) and stay within astrology/tarot/lunar context.',
       );
-      const retryResult = JSON.parse(
-        retryCompletion.choices[0]?.message?.content || '{}',
-      );
-      const retryPosts = retryResult.posts || retryResult.post || [];
+      const retryPosts = retryResult.posts || [];
       postsArray = Array.isArray(retryPosts) ? retryPosts : [retryPosts];
     }
 
@@ -710,7 +665,7 @@ Return only valid JSON.`,
   } catch (error: any) {
     console.error('Error generating social media posts:', error);
 
-    // Check for OpenAI API errors
+    // Check for API authentication errors
     if (
       error?.status === 401 ||
       error?.code === 'invalid_api_key' ||
@@ -718,21 +673,12 @@ Return only valid JSON.`,
       error?.message?.includes('Incorrect API key') ||
       error?.message?.includes('Unauthorized')
     ) {
-      const apiKeyPreview = apiKey ? `${apiKey.substring(0, 8)}...` : 'not set';
-      const isPlaceholder =
-        apiKey?.includes('your-api') ||
-        apiKey?.includes('placeholder') ||
-        apiKey?.includes('example');
-
       return NextResponse.json(
         {
           success: false,
-          error: 'OpenAI API authentication failed',
-          hint: isPlaceholder
-            ? 'Your OPENAI_API_KEY appears to be a placeholder. Please set a real API key from https://platform.openai.com/account/api-keys'
-            : 'Check that your OPENAI_API_KEY is valid and has not expired. Get a new key at https://platform.openai.com/account/api-keys',
+          error: 'AI API authentication failed',
+          hint: 'Check that your DEEPINFRA_API_KEY is valid in your environment variables.',
           details: error?.message || 'Invalid API key',
-          apiKeyPreview: isPlaceholder ? 'Placeholder detected' : apiKeyPreview,
         },
         { status: 401 },
       );

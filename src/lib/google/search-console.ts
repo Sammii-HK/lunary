@@ -486,7 +486,10 @@ export async function auditUrlsIndexing(
         await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     } catch (error) {
-      console.error(`[Indexing Audit] Error checking ${url}:`, error);
+      console.error(
+        `[Indexing Audit] Error checking URL ${i + 1}/${urls.length}:`,
+        error,
+      );
       results.push({
         url,
         verdict: 'ERROR',

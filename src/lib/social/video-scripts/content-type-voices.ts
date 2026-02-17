@@ -35,8 +35,15 @@ export type ContentTypeKey =
 /**
  * Map category names to content type keys
  */
-export function getContentTypeFromCategory(category: string): ContentTypeKey {
-  const lower = category.toLowerCase();
+export function getContentTypeFromCategory(
+  category: string,
+  topic?: string,
+): ContentTypeKey {
+  // Combine category + topic for more precise matching
+  // e.g. category='numerology', topic='Mirror Hours 12-17' → should be mirror_hours not life_path
+  const lower = topic
+    ? `${category} ${topic}`.toLowerCase()
+    : category.toLowerCase();
 
   // Spells
   if (
@@ -180,13 +187,26 @@ export function getContentTypeFromCategory(category: string): ContentTypeKey {
     return 'elements';
   }
 
-  // Numerology - Life Path
+  // Numerology - Life Path (only when explicitly about life paths)
   if (lower.includes('life path')) {
     return 'numerology_life_path';
   }
 
-  // Numerology - Expression/Destiny
-  if (lower.includes('expression') || lower.includes('destiny number')) {
+  // Numerology - Expression/Destiny (includes "Numerology Core" which covers expression numbers)
+  if (
+    lower.includes('expression') ||
+    lower.includes('destiny number') ||
+    lower.includes('numerology core')
+  ) {
+    return 'numerology_expression';
+  }
+
+  // Numerology - General catch-all (soul urge, karmic, or generic numerology)
+  // Defaults to expression rather than life_path to avoid misattributing content
+  if (lower.includes('soul urge') || lower.includes('karmic')) {
+    return 'numerology_life_path';
+  }
+  if (lower.includes('numerology') || lower.includes('number')) {
     return 'numerology_expression';
   }
 

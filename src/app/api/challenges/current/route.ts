@@ -38,32 +38,37 @@ export async function GET(request: NextRequest) {
     const todayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     const prompts = ch.daily_prompts || [];
 
-    return NextResponse.json({
-      success: true,
-      challenge: {
-        id: ch.id,
-        weekStart: ch.week_start,
-        transitKey: ch.transit_key,
-        title: ch.challenge_title,
-        description: ch.challenge_description,
-        dailyPrompts: prompts,
-        todayPrompt: prompts[todayIndex] || null,
-        todayIndex,
-        xpPerDay: ch.xp_per_day,
-        xpBonusWeek: ch.xp_bonus_week,
-        participantCount: ch.participant_count,
+    return NextResponse.json(
+      {
+        success: true,
+        challenge: {
+          id: ch.id,
+          weekStart: ch.week_start,
+          transitKey: ch.transit_key,
+          title: ch.challenge_title,
+          description: ch.challenge_description,
+          dailyPrompts: prompts,
+          todayPrompt: prompts[todayIndex] || null,
+          todayIndex,
+          xpPerDay: ch.xp_per_day,
+          xpBonusWeek: ch.xp_bonus_week,
+          participantCount: ch.participant_count,
+        },
+        completions: completions.rows.map((c) => ({
+          date: c.check_in_date,
+          completed: c.completed,
+          reflection: c.reflection,
+        })),
+        completedToday: completions.rows.some(
+          (c) =>
+            new Date(c.check_in_date).toISOString().split('T')[0] ===
+            now.toISOString().split('T')[0],
+        ),
       },
-      completions: completions.rows.map((c) => ({
-        date: c.check_in_date,
-        completed: c.completed,
-        reflection: c.reflection,
-      })),
-      completedToday: completions.rows.some(
-        (c) =>
-          new Date(c.check_in_date).toISOString().split('T')[0] ===
-          now.toISOString().split('T')[0],
-      ),
-    });
+      {
+        headers: { 'Cache-Control': 'private, max-age=3600' },
+      },
+    );
   } catch (error) {
     console.error('Error fetching current challenge:', error);
     return NextResponse.json(

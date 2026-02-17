@@ -121,43 +121,46 @@ export async function GET(request: NextRequest) {
         0,
       );
 
-      // Calculate improvement (best vs worst with traffic)
+      // Calculate improvement and confidence using same pair (best vs runner-up)
       const variantsWithTraffic = variantMetrics.filter(
         (v) => v.impressions > 0,
       );
       let improvement: number | null = null;
       let bestVariant: string | null = null;
+      let confidence = 0;
 
       if (variantsWithTraffic.length >= 2) {
-        const best = variantsWithTraffic[0];
-        const worst = variantsWithTraffic[variantsWithTraffic.length - 1];
+        const [best, runnerUp] = variantsWithTraffic;
         bestVariant = best.name;
+        const bestRate = best.conversionRate ?? 0;
+        const runnerUpRate = runnerUp.conversionRate ?? 0;
 
-        if (worst.conversionRate > 0) {
-          improvement =
-            ((best.conversionRate - worst.conversionRate) /
-              worst.conversionRate) *
-            100;
-        } else if (best.conversionRate > 0) {
+        if (runnerUpRate > 0) {
+          improvement = ((bestRate - runnerUpRate) / runnerUpRate) * 100;
+        } else if (bestRate > 0) {
           improvement = 100;
         }
+
+        confidence = calculateConfidence(
+          best.impressions,
+          best.conversions,
+          runnerUp.impressions,
+          runnerUp.conversions,
+        );
       } else if (variantsWithTraffic.length === 1) {
         bestVariant = variantsWithTraffic[0].name;
       }
 
-      // Calculate confidence (pairwise between top 2 variants if available)
-      let confidence = 0;
-      if (variantsWithTraffic.length >= 2) {
-        const [first, second] = variantsWithTraffic;
-        confidence = calculateConfidence(
-          first.impressions,
-          first.conversions,
-          second.impressions,
-          second.conversions,
-        );
-      }
-
-      const isSignificant = confidence >= 95;
+      // Require minimum 100 impressions per compared variant for significance
+      const minPerVariantImpressions =
+        variantsWithTraffic.length >= 2
+          ? Math.min(
+              variantsWithTraffic[0].impressions,
+              variantsWithTraffic[1].impressions,
+            )
+          : 0;
+      const hasEnoughData = minPerVariantImpressions >= 100;
+      const isSignificant = confidence >= 95 && hasEnoughData;
 
       results.push({
         testName,
@@ -169,7 +172,7 @@ export async function GET(request: NextRequest) {
         recommendation: getRecommendation(
           variantMetrics,
           confidence,
-          totalImpressions,
+          hasEnoughData,
         ),
         totalImpressions,
         totalConversions,
@@ -224,13 +227,9 @@ function calculateConfidence(
 function getRecommendation(
   variants: VariantMetrics[],
   confidence: number,
-  totalImpressions: number,
+  hasEnoughData: boolean,
 ): string {
   const variantsWithTraffic = variants.filter((v) => v.impressions > 0);
-
-  if (totalImpressions < 100) {
-    return 'Need more data — collect at least 100 impressions per variant';
-  }
 
   if (variantsWithTraffic.length === 0) {
     return 'No traffic recorded for any variant';
@@ -240,20 +239,23 @@ function getRecommendation(
     return 'Only one variant has traffic — need multiple variants to compare';
   }
 
+  if (!hasEnoughData) {
+    return 'Need more data — collect at least 100 impressions per variant';
+  }
+
   if (confidence < 95) {
     return `Not statistically significant (${confidence.toFixed(1)}% confidence). Continue testing.`;
   }
 
   const [best, second] = variantsWithTraffic;
 
-  if (best.conversionRate > second.conversionRate) {
-    const improvement =
-      second.conversionRate > 0
-        ? ((best.conversionRate - second.conversionRate) /
-            second.conversionRate) *
-          100
-        : 100;
-    return `"${best.name}" is winning with ${improvement.toFixed(1)}% higher conversion. Consider implementing.`;
+  const bestRate = best.conversionRate ?? 0;
+  const secondRate = second.conversionRate ?? 0;
+
+  if (bestRate > secondRate) {
+    const improvementPct =
+      secondRate > 0 ? ((bestRate - secondRate) / secondRate) * 100 : 100;
+    return `"${best.name}" is winning with ${improvementPct.toFixed(1)}% higher conversion. Consider implementing.`;
   }
 
   return 'No significant difference between top variants.';

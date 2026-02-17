@@ -306,10 +306,12 @@ export async function GET(request: NextRequest) {
       }
 
       // Check if cohort is old enough for each retention window
-      const cohortEndMs = cohortEndDate.getTime();
-      const day1Mature = cohortEndMs + 1 * 86_400_000 <= nowMs;
-      const day7Mature = cohortEndMs + 7 * 86_400_000 <= nowMs;
-      const day30Mature = cohortEndMs + 30 * 86_400_000 <= nowMs;
+      // Use cohort START date — a user who signed up on day 1 of the cohort
+      // can return on day 1/7/30 relative to their own signup, not the cohort end.
+      const cohortStartMs = cohortStartDate.getTime();
+      const day1Mature = cohortStartMs + 1 * 86_400_000 <= nowMs;
+      const day7Mature = cohortStartMs + 7 * 86_400_000 <= nowMs;
+      const day30Mature = cohortStartMs + 30 * 86_400_000 <= nowMs;
 
       retentionMatrix.push({
         cohort: formattedStart,

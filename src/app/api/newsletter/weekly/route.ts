@@ -154,8 +154,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const weekOffset = parseInt(searchParams.get('week') || '0');
 
-    // Generate preview without sending
-    const response = await fetch(request.url.replace('/GET', '/POST'), {
+    // Generate preview without sending — use absolute URL with trusted base
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
+    const response = await fetch(`${baseUrl}/api/newsletter/weekly`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ send: false, weekOffset }),

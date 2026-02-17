@@ -102,14 +102,22 @@ export async function GET(request: NextRequest) {
       variantMetrics.sort((a, b) => b.rate - a.rate);
 
       const best = variantMetrics[0];
-      const worst = variantMetrics[variantMetrics.length - 1];
+      const runnerUp = variantMetrics.length >= 2 ? variantMetrics[1] : null;
 
-      if (!best || !worst || best.impressions === 0 || worst.impressions === 0)
+      if (
+        !best ||
+        !runnerUp ||
+        best.impressions === 0 ||
+        runnerUp.impressions === 0
+      )
         continue;
 
+      // Require minimum 100 impressions per compared variant
+      if (Math.min(best.impressions, runnerUp.impressions) < 100) continue;
+
       const improvement =
-        worst.rate > 0
-          ? ((best.rate - worst.rate) / worst.rate) * 100
+        runnerUp.rate > 0
+          ? ((best.rate - runnerUp.rate) / runnerUp.rate) * 100
           : best.rate > 0
             ? 100
             : 0;
@@ -117,8 +125,8 @@ export async function GET(request: NextRequest) {
       const confidence = calculateConfidence(
         best.impressions,
         best.conversions,
-        worst.impressions,
-        worst.conversions,
+        runnerUp.impressions,
+        runnerUp.conversions,
       );
 
       // Only suggest if statistically significant and meaningful improvement

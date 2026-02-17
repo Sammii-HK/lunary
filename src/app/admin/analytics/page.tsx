@@ -164,7 +164,7 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className='mx-auto max-w-7xl space-y-8 overflow-x-hidden px-4 py-6'>
+    <div className='mx-auto w-full max-w-7xl space-y-8 px-4 py-6'>
       {/* Header */}
       <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
         <div>

@@ -92,8 +92,8 @@ export function buildYouTubePrompt(
 
   const guardrailNote = FACTUAL_GUARDRAIL_INSTRUCTION;
 
-  // Get content-type specific configuration
-  const contentType = getContentTypeFromCategory(theme.category);
+  // Get content-type specific configuration — pass theme name for precise sub-type
+  const contentType = getContentTypeFromCategory(theme.category, theme.name);
   const voiceConfig = getVoiceConfig(contentType);
 
   // Build content-type specific bans

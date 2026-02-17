@@ -464,9 +464,9 @@ export async function GET(request: NextRequest) {
           dau: allUserDau,
           wau: allUserWau,
           mau: allUserMau,
-          engaged_users_dau: allUserDau,
-          engaged_users_wau: allUserWau,
-          engaged_users_mau: allUserMau,
+          engaged_users_dau: productDau,
+          engaged_users_wau: productWau,
+          engaged_users_mau: productMau,
           // Engaged rate = all-user XAU / signed-in product XAU
           // (matches snapshot-extractors formula; live path uses event counts instead)
           engaged_rate_dau:

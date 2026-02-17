@@ -299,7 +299,7 @@ export default function ABTestingPage() {
                       </p>
                     </div>
                     <div className='flex items-center gap-2'>
-                      {test.bestVariant && (
+                      {test.bestVariant && test.isSignificant && (
                         <Badge className='bg-lunary-accent-900/50 text-lunary-accent-300 border-lunary-accent-700'>
                           <Trophy className='w-3 h-3 mr-1' />
                           {formatVariantName(test.bestVariant)}
@@ -309,10 +309,14 @@ export default function ABTestingPage() {
                         className={
                           test.isSignificant
                             ? 'bg-lunary-success-900 text-lunary-success border-lunary-success-800'
-                            : 'bg-lunary-accent-900 text-lunary-accent border-lunary-accent-700'
+                            : 'bg-zinc-800 text-zinc-400 border-zinc-700'
                         }
                       >
-                        {test.confidence.toFixed(1)}% confidence
+                        {test.isSignificant
+                          ? `${test.confidence.toFixed(1)}% confidence`
+                          : test.recommendation.startsWith('Need more data')
+                            ? 'Insufficient data'
+                            : `${test.confidence.toFixed(1)}% confidence`}
                       </Badge>
                     </div>
                   </div>
@@ -409,7 +413,7 @@ export default function ABTestingPage() {
                       <Sparkles className='w-5 h-5 text-lunary-primary-400' />
                       {test.improvement !== null ? (
                         <span className='font-semibold text-lunary-primary-300'>
-                          Best vs Worst: {test.improvement > 0 ? '+' : ''}
+                          Best vs Runner-up: {test.improvement > 0 ? '+' : ''}
                           {test.improvement.toFixed(2)}%
                         </span>
                       ) : (
