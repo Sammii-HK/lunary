@@ -13813,7 +13813,7 @@
     "relatedSlugs": []
   },
   {
-    "slug": "numerology/planetary-days",
+    "slug": "correspondences/days",
     "title": "Planetary Days",
     "category": "numerology",
     "keywords": ["planetary", "days", "numerology"],
@@ -13821,7 +13821,7 @@
     "relatedSlugs": []
   },
   {
-    "slug": "numerology/planetary-days/friday",
+    "slug": "correspondences/days/friday",
     "title": "Planetary Days friday",
     "category": "numerology",
     "keywords": ["planetary", "days", "friday", "numerology"],
@@ -13829,7 +13829,7 @@
     "relatedSlugs": []
   },
   {
-    "slug": "numerology/planetary-days/monday",
+    "slug": "correspondences/days/monday",
     "title": "Planetary Days monday",
     "category": "numerology",
     "keywords": ["planetary", "days", "monday", "numerology"],
@@ -13837,7 +13837,7 @@
     "relatedSlugs": []
   },
   {
-    "slug": "numerology/planetary-days/saturday",
+    "slug": "correspondences/days/saturday",
     "title": "Planetary Days saturday",
     "category": "numerology",
     "keywords": ["planetary", "days", "saturday", "numerology"],
@@ -13845,7 +13845,7 @@
     "relatedSlugs": []
   },
   {
-    "slug": "numerology/planetary-days/sunday",
+    "slug": "correspondences/days/sunday",
     "title": "Planetary Days sunday",
     "category": "numerology",
     "keywords": ["planetary", "days", "sunday", "numerology"],
@@ -13853,7 +13853,7 @@
     "relatedSlugs": []
   },
   {
-    "slug": "numerology/planetary-days/thursday",
+    "slug": "correspondences/days/thursday",
     "title": "Planetary Days thursday",
     "category": "numerology",
     "keywords": ["planetary", "days", "thursday", "numerology"],
@@ -13861,7 +13861,7 @@
     "relatedSlugs": []
   },
   {
-    "slug": "numerology/planetary-days/tuesday",
+    "slug": "correspondences/days/tuesday",
     "title": "Planetary Days tuesday",
     "category": "numerology",
     "keywords": ["planetary", "days", "tuesday", "numerology"],
@@ -13869,7 +13869,7 @@
     "relatedSlugs": []
   },
   {
-    "slug": "numerology/planetary-days/wednesday",
+    "slug": "correspondences/days/wednesday",
     "title": "Planetary Days wednesday",
     "category": "numerology",
     "keywords": ["planetary", "days", "wednesday", "numerology"],

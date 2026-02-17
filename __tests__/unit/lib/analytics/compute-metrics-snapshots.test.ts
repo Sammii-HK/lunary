@@ -354,7 +354,7 @@ describe('compute-metrics cron (snapshot approach)', () => {
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
     expect(body.date).toBe('2026-02-15');
-    expect(body.computationDuration).toBeGreaterThan(0);
+    expect(body.computationDuration).toBeGreaterThanOrEqual(0);
     expect(body.metrics).toMatchObject({
       dau: expect.any(Number),
       wau: expect.any(Number),

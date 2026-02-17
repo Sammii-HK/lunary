@@ -27,12 +27,6 @@ const POST_TYPE_HASHTAGS: Record<IGPostType, string[]> = {
     '#savethis',
   ],
   quote: ['#cosmicquotes', '#spiritualquotes', '#inspiration', '#deepthoughts'],
-  daily_cosmic: [
-    '#dailyhoroscope',
-    '#cosmicupdate',
-    '#moonphasetoday',
-    '#starsign',
-  ],
   app_feature: ['#astrologyapp', '#birthchart', '#cosmictools', '#lunaryapp'],
   did_you_know: ['#didyouknow', '#astrologyfacts', '#witchtok', '#savethis'],
   sign_ranking: [
@@ -102,9 +96,6 @@ export function generateCaption(
       break;
     case 'quote':
       caption = generateQuoteCaption(options);
-      break;
-    case 'daily_cosmic':
-      caption = generateDailyCosmicCaption(options);
       break;
     case 'app_feature':
       caption = generateAppFeatureCaption(options);
@@ -189,15 +180,6 @@ function generateCarouselCaption(options: {
 
 function generateQuoteCaption(options: { headline?: string }): string {
   return `What resonates with you today?\n\nDrop a thought below.\nSave this for when you need a reminder.\n\nMore cosmic wisdom at lunary.app`;
-}
-
-function generateDailyCosmicCaption(options: {
-  headline?: string;
-  moonPhase?: string;
-}): string {
-  const moonPhase = options.moonPhase || 'the cosmic energy';
-
-  return `Today's cosmic energy: ${moonPhase}\n\nHow are you feeling this energy?\nComment your sign below.\n\nGet your personalised daily reading at lunary.app`;
 }
 
 function generateAppFeatureCaption(options: { title?: string }): string {

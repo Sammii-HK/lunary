@@ -8,7 +8,6 @@ export type IGPostType =
   | 'carousel'
   | 'angel_number_carousel'
   | 'quote'
-  | 'daily_cosmic'
   | 'app_feature'
   | 'did_you_know'
   | 'sign_ranking'
@@ -27,9 +26,6 @@ export type MemeCategory =
 
 // Carousel slide types
 export type CarouselSlideVariant = 'cover' | 'body' | 'cta';
-
-// Daily cosmic card variants
-export type CosmicCardVariant = 'moon_phase' | 'transit_alert' | 'daily_energy';
 
 // --- Content Structures ---
 
@@ -59,20 +55,27 @@ export interface IGCarouselContent {
   slides: IGCarouselSlide[];
 }
 
-export interface IGDailyCosmicContent {
-  date: string;
-  headline: string;
-  moonPhase: string;
-  variant: CosmicCardVariant;
-}
-
 // Story variants
 export type StoryVariant =
   | 'daily_moon'
   | 'tarot_pull'
   | 'quote'
   | 'did_you_know'
-  | 'cosmic_energy';
+  | 'affirmation'
+  | 'ritual_tip'
+  | 'sign_of_the_day'
+  | 'transit_alert'
+  | 'numerology';
+
+// Rotating pool story types (2 slots/day, change daily)
+export type RotatingStoryType =
+  | 'affirmation'
+  | 'ritual_tip'
+  | 'sign_of_the_day'
+  | 'transit_alert'
+  | 'did_you_know'
+  | 'numerology'
+  | 'quote';
 
 // --- New Content Structures ---
 

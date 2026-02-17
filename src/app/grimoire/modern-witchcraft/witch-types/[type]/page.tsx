@@ -33,8 +33,14 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${typeData.name}: Meaning, Traits, Practices and Tools`;
-  const description = `Are you a ${typeData.name.toLowerCase()}? Discover the path of ${typeData.name.toLowerCase()} witchcraft: working with ${typeData.focuses[0].toLowerCase()}. Complete guide to ${typeData.name.toLowerCase()} practices, rituals & philosophy.`;
+  const title = typeData.seo?.title
+    ? typeData.seo.title.length <= 60
+      ? typeData.seo.title
+      : typeData.seo.title.slice(0, 57) + '...'
+    : `${typeData.name} Guide: Signs, Practices & How to Start`;
+  const description =
+    typeData.seo?.description ||
+    `Think you might be a ${typeData.name.toLowerCase()}? ${typeData.focuses[0]} defines this path. Traits, beginner steps & essential tools.`;
 
   return {
     title,

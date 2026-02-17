@@ -458,7 +458,7 @@ const GRIMOIRE_FULL_STRUCTURE = [
       },
       {
         title: 'Planetary Days',
-        href: '/grimoire/numerology/planetary-days',
+        href: '/grimoire/correspondences/days',
         description: 'Day energies',
       },
     ],

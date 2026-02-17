@@ -27,8 +27,6 @@ export function adaptIGCaptionForThreads(
       return adaptDidYouKnow(igPost);
     case 'quote':
       return adaptQuote(igPost);
-    case 'daily_cosmic':
-      return adaptDailyCosmic(igPost);
     default:
       return adaptGeneric(igPost);
   }
@@ -84,16 +82,6 @@ function adaptQuote(post: IGScheduledPost): AdaptedCaption {
     hook: truncate(quote, THREADS_CHAR_LIMITS.hook),
     body: 'let this one land for a second',
     prompt: 'what does this bring up for you?',
-  });
-}
-
-function adaptDailyCosmic(post: IGScheduledPost): AdaptedCaption {
-  const captionLines = post.caption.split('\n').filter(Boolean);
-  const vibe = captionLines[0]?.slice(0, 60) || "today's cosmic energy";
-  return enforceCharLimits({
-    hook: truncate(vibe, THREADS_CHAR_LIMITS.hook),
-    body: 'the sky is setting the tone today',
-    prompt: 'drop your sign, what are you feeling?',
   });
 }
 

@@ -415,7 +415,7 @@ export const customContentHrefs: Record<string, Record<string, string>> = {
     'Karmic Debt': '/grimoire/numerology/karmic-debt',
     'Mirror Hours': '/grimoire/mirror-hours',
     'Double Hours': '/grimoire/double-hours',
-    'Planetary Days': '/grimoire/numerology/planetary-days',
+    'Planetary Days': '/grimoire/correspondences/days',
   },
   // Modern Witchcraft
   modernWitchcraft: {

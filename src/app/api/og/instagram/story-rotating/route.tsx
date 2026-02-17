@@ -11,21 +11,77 @@ import {
 
 export const runtime = 'edge';
 
+type RotatingType =
+  | 'affirmation'
+  | 'ritual_tip'
+  | 'sign_of_the_day'
+  | 'transit_alert'
+  | 'numerology';
+
+const TYPE_CONFIG: Record<
+  RotatingType,
+  { label: string; accent: string; gradient: string }
+> = {
+  affirmation: {
+    label: 'DAILY AFFIRMATION',
+    accent: CATEGORY_ACCENT.lunar,
+    gradient: 'linear-gradient(180deg, #0f1428 0%, #0d0a14 40%, #0a0a0a 100%)',
+  },
+  ritual_tip: {
+    label: 'RITUAL TIP',
+    accent: CATEGORY_ACCENT.spells,
+    gradient: 'linear-gradient(180deg, #1a0f28 0%, #0d0a14 40%, #0a0a0a 100%)',
+  },
+  sign_of_the_day: {
+    label: 'SIGN OF THE DAY',
+    accent: CATEGORY_ACCENT.zodiac,
+    gradient: 'linear-gradient(180deg, #1a1028 0%, #0d0a14 40%, #0a0a0a 100%)',
+  },
+  transit_alert: {
+    label: 'TRANSIT ALERT',
+    accent: CATEGORY_ACCENT.planetary,
+    gradient: 'linear-gradient(180deg, #0f1a28 0%, #0a0d14 40%, #0a0a0a 100%)',
+  },
+  numerology: {
+    label: 'NUMEROLOGY',
+    accent: CATEGORY_ACCENT.numerology,
+    gradient: 'linear-gradient(180deg, #1a1028 0%, #0d0a14 40%, #0a0a0a 100%)',
+  },
+};
+
+const VALID_TYPES = new Set<string>([
+  'affirmation',
+  'ritual_tip',
+  'sign_of_the_day',
+  'transit_alert',
+  'numerology',
+]);
+
 export async function GET(request: NextRequest) {
   try {
     const requestUrl = new URL(request.url);
     const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
     const { searchParams } = requestUrl;
-    const card = searchParams.get('card') || 'The Star';
-    const keywords =
-      searchParams.get('keywords') || 'Hope, healing, inspiration';
-    const message =
-      searchParams.get('message') || 'After the storm, the stars return.';
 
-    const accent = CATEGORY_ACCENT.tarot;
+    const rawType = searchParams.get('type') || 'affirmation';
+    const type: RotatingType = VALID_TYPES.has(rawType)
+      ? (rawType as RotatingType)
+      : 'affirmation';
+
+    const mainText = searchParams.get('main') || '';
+    const secondary = searchParams.get('secondary') || '';
+    const extra = searchParams.get('extra') || '';
+    // Allow label override (used by numerology sub-types: ANGEL NUMBER 444, LIFE PATH 7, etc.)
+    const labelOverride = searchParams.get('label') || '';
+
+    const config = TYPE_CONFIG[type];
+    const displayLabel = labelOverride || config.label;
     const { width, height } = IG_SIZES.story;
     const fonts = await loadIGFonts(request);
-    const stars = generateStarfield(`story-tarot-${card}`, 90);
+    const stars = generateStarfield(
+      `rotating-${type}-${mainText.slice(0, 12)}`,
+      90,
+    );
 
     const layoutJsx = (
       <div
@@ -36,8 +92,7 @@ export async function GET(request: NextRequest) {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background:
-            'linear-gradient(180deg, #1a0f28 0%, #0d0a14 40%, #0a0a0a 100%)',
+          background: config.gradient,
           padding: `${IG_STORY_SAFE.top}px ${IG_STORY_SAFE.sidePadding}px ${IG_STORY_SAFE.bottom}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
@@ -60,7 +115,7 @@ export async function GET(request: NextRequest) {
           />
         ))}
 
-        {/* "DAILY TAROT PULL" header */}
+        {/* Label header */}
         <div
           style={{
             fontSize: IG_TEXT.story.caption,
@@ -71,88 +126,65 @@ export async function GET(request: NextRequest) {
             display: 'flex',
           }}
         >
-          Daily Tarot Pull
+          {displayLabel}
         </div>
 
-        {/* Card decorative frame */}
+        {/* Moon icon separator */}
+        <img
+          src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+          width={32}
+          height={32}
+          style={{ opacity: 0.3, marginBottom: 48 }}
+          alt=''
+        />
+
+        {/* Main text */}
         <div
           style={{
+            fontSize: IG_TEXT.story.subtitle,
+            color: OG_COLORS.textPrimary,
+            textAlign: 'center',
+            lineHeight: 1.5,
+            maxWidth: '88%',
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '48px 40px',
-            borderRadius: 24,
-            border: `2px solid ${accent}40`,
-            background: `${accent}08`,
-            marginBottom: 48,
-            maxWidth: '85%',
+            fontWeight: 500,
+            marginBottom: 40,
           }}
         >
-          {/* Card name */}
-          <div
-            style={{
-              fontSize: IG_TEXT.story.title,
-              color: accent,
-              fontWeight: 700,
-              marginBottom: 24,
-              display: 'flex',
-              textAlign: 'center',
-            }}
-          >
-            {card}
-          </div>
+          {truncateIG(mainText, 160)}
+        </div>
 
-          {/* Keywords */}
+        {/* Secondary text */}
+        {secondary ? (
           <div
             style={{
               fontSize: IG_TEXT.story.label,
-              color: OG_COLORS.textSecondary,
+              color: config.accent,
               letterSpacing: '0.08em',
-              marginBottom: 32,
+              marginBottom: 24,
               display: 'flex',
               textAlign: 'center',
+              fontWeight: 600,
             }}
           >
-            {keywords}
+            {secondary}
           </div>
+        ) : null}
 
-          {/* Divider */}
+        {/* Extra info line */}
+        {extra ? (
           <div
             style={{
-              width: 60,
-              height: 2,
-              background: `${accent}50`,
-              marginBottom: 32,
+              fontSize: IG_TEXT.story.caption,
+              color: OG_COLORS.textSecondary,
               display: 'flex',
-            }}
-          />
-
-          {/* Message */}
-          <div
-            style={{
-              fontSize: IG_TEXT.story.subtitle,
-              color: OG_COLORS.textPrimary,
               textAlign: 'center',
-              lineHeight: 1.45,
-              fontWeight: 500,
-              display: 'flex',
+              letterSpacing: '0.05em',
             }}
           >
-            {truncateIG(message, 100)}
+            {extra}
           </div>
-        </div>
-
-        {/* CTA */}
-        <div
-          style={{
-            fontSize: IG_TEXT.story.caption,
-            color: OG_COLORS.textTertiary,
-            display: 'flex',
-            letterSpacing: '0.05em',
-          }}
-        >
-          Explore more at lunary.app
-        </div>
+        ) : null}
 
         {/* Brand footer */}
         <div
@@ -195,8 +227,8 @@ export async function GET(request: NextRequest) {
       headers: { 'Cache-Control': 'no-store, max-age=0' },
     });
   } catch (error) {
-    console.error('[IG Story Tarot] Error:', error);
-    return new Response('Failed to generate story tarot image', {
+    console.error('[IG Story Rotating] Error:', error);
+    return new Response('Failed to generate rotating story image', {
       status: 500,
     });
   }

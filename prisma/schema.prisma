@@ -42,6 +42,7 @@ model SocialPost {
   starfield_seed    String?
   video_metadata    Json?
   video_script      Json?
+  story_category    String?
 
   @@index([status], map: "idx_social_posts_status")
   @@index([platform], map: "idx_social_posts_platform")

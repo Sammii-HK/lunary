@@ -62,7 +62,6 @@ export const CROSSPOSTABLE_IG_TYPES = [
   'compatibility',
   'did_you_know',
   'quote',
-  'daily_cosmic',
 ] as const;
 
 export type CrosspostableIGType = (typeof CROSSPOSTABLE_IG_TYPES)[number];

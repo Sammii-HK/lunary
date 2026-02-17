@@ -1395,9 +1395,18 @@ export async function generateMetadata({
     'lunar calendar',
   ];
 
+  const shortWeekRange = `${weekStart.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })} – ${weekEnd.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })}`;
+
   return {
-    title: `${blogData.title} (${weekRange}) | Free Weekly Forecast`,
-    description: `What's cosmically in store ${weekRange}? ${blogData.subtitle} Discover the best days for love, career & big decisions this week.`,
+    title: `Weekly Astrology Forecast: ${shortWeekRange} | Lunary`,
+    description: `This week's key transits: ${blogData.subtitle} Best & worst days for love, money & decisions — free weekly forecast.`,
     keywords: [
       'weekly astrology forecast',
       'astrology timing',

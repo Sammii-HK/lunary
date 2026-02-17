@@ -256,7 +256,7 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     }
   }
 
-  // Blog week legacy
+  // Blog week legacy: /blog/week/53-2025 → /blog/week/week-53-2025
   const blogWeekMatch = normalisedPath.match(/^\/blog\/week\/(\d+)-(\d{4})$/);
   if (blogWeekMatch) {
     return buildRedirect(
@@ -264,6 +264,59 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
       `/blog/week/week-${blogWeekMatch[1]}-${blogWeekMatch[2]}`,
       301,
     );
+  }
+
+  // Blog week cumulative → ISO redirect: week-53-2025 through week-59-2025
+  // Old cumulative numbering broke when we switched to ISO weeks ~Feb 4 2026
+  const blogWeekIsoMatch = normalisedPath.match(
+    /^\/blog\/week\/week-(\d+)-(\d{4})$/,
+  );
+  if (blogWeekIsoMatch) {
+    const weekNum = parseInt(blogWeekIsoMatch[1], 10);
+    const year = parseInt(blogWeekIsoMatch[2], 10);
+
+    if (year === 2025 && weekNum >= 53) {
+      // Calculate the actual start date for this cumulative week
+      // Week 1 of 2025 (cumulative) started Jan 6, 2025
+      // Each subsequent week adds 7 days
+      const baseDate = new Date(2025, 0, 6); // Jan 6, 2025
+      const startDate = new Date(
+        baseDate.getTime() + (weekNum - 1) * 7 * 24 * 60 * 60 * 1000,
+      );
+
+      // Get ISO week number and year
+      // ISO week: the week containing the year's first Thursday
+      const thursday = new Date(startDate);
+      thursday.setDate(
+        thursday.getDate() + (3 - ((thursday.getDay() + 6) % 7)),
+      );
+      const yearStart = new Date(thursday.getFullYear(), 0, 1);
+      const isoWeek = Math.ceil(
+        ((thursday.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
+      );
+      const isoYear = thursday.getFullYear();
+
+      return buildRedirect(
+        request,
+        `/blog/week/week-${isoWeek}-${isoYear}`,
+        301,
+      );
+    }
+  }
+
+  // Numerology planetary-days → correspondences/days redirect
+  const planetaryDaysMatch = normalisedPath.match(
+    /^\/grimoire\/numerology\/planetary-days\/([^/]+)$/,
+  );
+  if (planetaryDaysMatch) {
+    return buildRedirect(
+      request,
+      `/grimoire/correspondences/days/${planetaryDaysMatch[1]}`,
+      301,
+    );
+  }
+  if (normalisedPath === '/grimoire/numerology/planetary-days') {
+    return buildRedirect(request, '/grimoire/correspondences/days', 301);
   }
 
   // Apply legacy mappings after normalisation, so it catches %20, casing, etc.

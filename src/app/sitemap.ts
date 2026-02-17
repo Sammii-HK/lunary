@@ -841,7 +841,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'friday',
     'saturday',
   ].map((day) => ({
-    url: `${baseUrl}/grimoire/numerology/planetary-days/${day}`,
+    url: `${baseUrl}/grimoire/correspondences/days/${day}`,
     lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
@@ -1045,7 +1045,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/grimoire/numerology/planetary-days`,
+      url: `${baseUrl}/grimoire/correspondences/days`,
       lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,

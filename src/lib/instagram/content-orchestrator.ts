@@ -13,7 +13,6 @@ import { generateSignRanking } from './ranking-content';
 import { generateCompatibility } from './compatibility-content';
 import { generateAngelNumberBatch } from './angel-number-content';
 import { seededRandom } from './ig-utils';
-import { getMoonPhase } from '../../../utils/moon/moonPhases';
 import type { IGScheduledPost, IGPostBatch, IGPostType } from './types';
 
 const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
@@ -26,30 +25,31 @@ const POSTING_TIMES: Record<IGPostType, number> = {
   did_you_know: 14, // 2pm UTC (afternoon education)
   sign_ranking: 12, // noon UTC (engagement slot)
   compatibility: 12, // noon UTC (engagement slot)
-  daily_cosmic: 8, // 8am UTC (morning engagement — stories/bonus)
   quote: 19, // 7pm UTC (evening reflection — stories/bonus)
   app_feature: 14, // 2pm UTC (when scheduled)
   story: 9, // 9am UTC (morning stories)
 };
 
-// Weekly cadence plan — maps to .claude/plans/28.instagram-cadence.md
-// Each day has specific themed content. Reels (Thu/Sat/Sun) are manual.
+// Weekly cadence plan — 5 feed posts/week (optimal 3-5 range)
+// Memes drive shares (growth), carousels drive saves, rankings drive comments
+// Angel numbers, DYK, quotes moved to story rotation for better format fit
+// Stories + reels provide presence on rest days (Wed/Sun)
 // 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
 const DAILY_CONTENT_MIX: Record<number, IGPostType[]> = {
-  0: ['carousel'], // Monday: zodiac carousel (forced via getCarouselCategoryForDay)
-  1: ['angel_number_carousel', 'meme'], // Tuesday: angel number carousel + numerology meme
-  2: ['compatibility'], // Wednesday: compatibility card/carousel
-  3: ['sign_ranking'], // Thursday: ranking post (Reel #1 is manual)
-  4: ['meme', 'did_you_know'], // Friday: spell meme + DYK fact
-  5: ['carousel'], // Saturday: tarot carousel (Reel #2 is manual)
-  6: ['carousel'], // Sunday: crystal carousel (Reel #3 is manual)
+  0: ['carousel'], // Monday: zodiac carousel (saves)
+  1: ['meme'], // Tuesday: meme (shares — #1 growth lever)
+  2: [], // Wednesday: rest day (stories carry)
+  3: ['sign_ranking'], // Thursday: ranking (comments — debate)
+  4: ['compatibility'], // Friday: compatibility (tags/shares)
+  5: ['carousel'], // Saturday: tarot carousel (saves)
+  6: [], // Sunday: rest day (stories only)
 };
 
 /**
  * Generate a full day's Instagram content batch.
- * Follows the weekly cadence plan:
- * Mon=zodiac carousel, Tue=angel number+meme, Wed=compatibility,
- * Thu=ranking, Fri=meme+DYK, Sat=tarot carousel, Sun=crystal carousel
+ * Follows the weekly cadence plan (5 posts/week):
+ * Mon=zodiac carousel, Tue=angel number, Wed=rest,
+ * Thu=ranking, Fri=DYK, Sat=tarot carousel, Sun=rest
  */
 export async function generateDailyBatch(
   dateStr: string,
@@ -92,8 +92,6 @@ async function generatePost(
       return generateCarouselPost(dateStr, scheduledTime, dayOfWeek);
     case 'angel_number_carousel':
       return generateAngelNumberPost(dateStr, scheduledTime);
-    case 'daily_cosmic':
-      return generateDailyCosmicPost(dateStr, scheduledTime);
     case 'quote':
       return generateQuotePost(dateStr, scheduledTime);
     case 'did_you_know':
@@ -220,127 +218,6 @@ async function generateAngelNumberPost(
     metadata: {
       category: 'numerology',
       slug: `angel-number-${number}`,
-    },
-  };
-}
-
-async function generateDailyCosmicPost(
-  dateStr: string,
-  scheduledTime: string,
-): Promise<IGScheduledPost> {
-  // Get ACTUAL moon phase for the date using real astronomical data
-  const date = new Date(dateStr);
-  const moonPhase = getMoonPhase(date);
-
-  // Headlines matched to moon phase energy
-  // Waxing phases (New → Full): Growth, manifestation, building
-  // Waning phases (Full → New): Release, reflection, letting go
-  const headlinesByPhase: Record<string, string[]> = {
-    'New Moon': [
-      'Set intentions with clarity and purpose',
-      'New beginnings await you today',
-      'Plant seeds for what you wish to manifest',
-      'A blank canvas for your cosmic dreams',
-      'Fresh starts are written in the stars',
-      'Embrace the power of starting anew',
-      'The universe supports your new chapter',
-    ],
-    'Waxing Crescent': [
-      'Trust the process unfolding around you',
-      'Your plans are taking root',
-      'Take action toward your goals',
-      'Small steps lead to cosmic transformations',
-      'Your intentions are gaining momentum',
-      'Nurture the seeds you have planted',
-      'Growth happens in the in-between moments',
-    ],
-    'First Quarter': [
-      'A day for creative breakthroughs',
-      'Push through challenges with determination',
-      'Your momentum is building',
-      'Obstacles are opportunities in disguise',
-      'The universe rewards bold action',
-      'Your courage is your superpower today',
-      'Break through limitations with confidence',
-    ],
-    'Waxing Gibbous': [
-      'Refinement leads to perfection',
-      'Fine-tune your approach',
-      'Success is within reach',
-      'Polish your vision until it shines',
-      'The final touches make all the difference',
-      'Trust in the culmination of your efforts',
-      'Your hard work is about to pay off',
-    ],
-    'Full Moon': [
-      'Your intuition is especially strong today',
-      'The cosmos aligns in your favour today',
-      'Celebrate your achievements',
-      'Bask in the glow of your manifestations',
-      'Your inner wisdom is illuminated',
-      'Everything you need is already within you',
-      'The peak of your power is now',
-    ],
-    'Waning Gibbous': [
-      'Share your wisdom with others',
-      'Gratitude opens new doors',
-      'Take time to reflect on your journey',
-      'Give thanks for all you have received',
-      'Your experiences are gifts to share',
-      'Abundance flows through appreciation',
-      'Wisdom ripens in the afterglow',
-    ],
-    'Last Quarter': [
-      'Release what no longer serves your growth',
-      'Let go of old patterns',
-      'Make space for transformation',
-      'Surrender to create space for miracles',
-      'What you release makes room for blessings',
-      'Trust the cosmic process of letting go',
-      'Freedom comes from releasing control',
-    ],
-    'Waning Crescent': [
-      'Rest and restore your energy',
-      'Quiet reflection brings clarity',
-      'Prepare for new beginnings',
-      'Embrace the sacred pause before rebirth',
-      'In stillness, you find your power',
-      'The darkness holds wisdom and healing',
-      'Rest deeply before the next chapter begins',
-    ],
-  };
-
-  // Select headline deterministically based on date
-  const rng = seededRandom(`cosmic-${dateStr}`);
-  const phaseHeadlines =
-    headlinesByPhase[moonPhase] || headlinesByPhase['Full Moon'];
-  const headline = phaseHeadlines[Math.floor(rng() * phaseHeadlines.length)];
-
-  const params = new URLSearchParams({
-    date: dateStr,
-    headline,
-    moonPhase,
-    variant: 'daily_energy',
-    v: '5', // Cache-busting version (using PNGs now!)
-    t: Date.now().toString(), // Timestamp to force fresh generation
-  });
-
-  const { caption, hashtags } = generateCaption('daily_cosmic', {
-    headline,
-    moonPhase,
-  });
-
-  return {
-    type: 'daily_cosmic',
-    format: 'square',
-    imageUrls: [
-      `${SHARE_BASE_URL}/api/og/instagram/daily-cosmic?${params.toString()}`,
-    ],
-    caption,
-    hashtags,
-    scheduledTime,
-    metadata: {
-      moonPhase, // Store actual moon phase for reference
     },
   };
 }
