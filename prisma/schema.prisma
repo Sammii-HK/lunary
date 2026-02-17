@@ -1740,6 +1740,7 @@ model daily_metrics {
   d1_retention                Decimal?  @default(0) @db.Decimal(5, 2)
   d7_retention                Decimal?  @default(0) @db.Decimal(5, 2)
   d30_retention               Decimal?  @default(0) @db.Decimal(5, 2)
+  product_d7_retention        Decimal?  @default(0) @db.Decimal(5, 2)
   active_days_1               Int       @default(0)
   active_days_2_3             Int       @default(0)
   active_days_4_7             Int       @default(0)
