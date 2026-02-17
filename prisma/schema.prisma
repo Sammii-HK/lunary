@@ -933,9 +933,30 @@ model social_quotes {
   created_at DateTime? @default(now()) @db.Timestamptz(6)
   updated_at DateTime? @default(now()) @db.Timestamptz(6)
 
+  pinterest_quote_queue pinterest_quote_queue[]
+
   @@index([created_at], map: "idx_social_quotes_created_at")
   @@index([status], map: "idx_social_quotes_status")
   @@index([use_count], map: "idx_social_quotes_use_count")
+}
+
+model pinterest_quote_queue {
+  id             Int       @id @default(autoincrement())
+  quote_id       Int?
+  quote_text     String
+  quote_author   String?
+  scheduled_date DateTime  @unique @db.Date
+  image_url      String?
+  status         String    @default("pending")
+  sent_at        DateTime? @db.Timestamptz(6)
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
+
+  quote social_quotes? @relation(fields: [quote_id], references: [id], onDelete: SetNull)
+
+  @@index([scheduled_date], map: "idx_pinterest_quote_queue_date")
+  @@index([status], map: "idx_pinterest_quote_queue_status")
+  @@index([quote_id], map: "idx_pinterest_quote_queue_quote_id")
 }
 
 model subscriptions {
