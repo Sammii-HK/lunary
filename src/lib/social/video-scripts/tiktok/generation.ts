@@ -273,6 +273,10 @@ async function generateTikTokScriptContent(
       scriptBody = bodyLines.join('\n');
     }
 
+    // Always use the curated hook template pool for variety.
+    // AI-generated hooks converge on repetitive patterns ("I've been looking
+    // into...", "So, what's the deal with...") — the template pool in hooks.ts
+    // provides 50+ diverse styles that keep content fresh across posts.
     let hookLine: string;
     if (fallbackScript) {
       hookLine =
@@ -281,19 +285,9 @@ async function generateTikTokScriptContent(
           normalizeHookLine(buildHookForTopic(facet.title, aspect)),
         );
     } else {
-      // Only fallback hook if CRITICAL issues
-      const finalHookIssues = validateVideoHook(
-        hook,
-        facet.title,
-        searchPhrase,
+      hookLine = ensureSentenceEndsWithPunctuation(
+        normalizeHookLine(buildHookForTopic(facet.title, aspect)),
       );
-      const finalHookCritical = getCriticalIssues(finalHookIssues);
-      hookLine =
-        finalHookCritical.length === 0
-          ? ensureSentenceEndsWithPunctuation(normalizeHookLine(hook))
-          : ensureSentenceEndsWithPunctuation(
-              normalizeHookLine(buildHookForTopic(facet.title, aspect)),
-            );
     }
     const script = fallbackScript
       ? fallbackScript

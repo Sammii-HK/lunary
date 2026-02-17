@@ -10,7 +10,7 @@ import {
   getSearchPhraseForTopic,
 } from '../shared/text/normalize';
 import { getFirstSentence, needsLineRewrite } from '../shared/text/truncation';
-import { validateVideoHook, isHookLikeLine } from './validation';
+import { isHookLikeLine } from './validation';
 import { DEBUG_VIDEO_HOOK } from './constants';
 import type { EnsureVideoHookOptions, EnsureVideoHookResult } from './types';
 
@@ -499,38 +499,20 @@ export const ensureVideoHook = (
 ): EnsureVideoHookResult => {
   const trimmedScript = (script || '').trim();
   const topic = options.topic;
-  const searchPhrase = getSearchPhraseForTopic(topic, options.category);
   const firstSentence = getFirstSentence(trimmedScript);
-  let hookLine = '';
-  let modified = false;
-  let issues: string[] = [];
 
-  if (firstSentence) {
-    const normalized = normalizeHookLine(firstSentence);
-    issues = validateVideoHook(normalized, topic, searchPhrase);
-    if (issues.length === 0) {
-      hookLine = normalized;
-    }
-  } else {
-    issues = ['Hook missing'];
-  }
-
-  if (!hookLine) {
-    const fallbackHook = normalizeHookLine(buildHookForTopic(topic, undefined));
-    hookLine = fallbackHook;
-    modified = true;
-  }
-
-  hookLine = ensureSentenceEndsWithPunctuation(hookLine);
-  if (hookLine.length > 140) {
-    hookLine = `${hookLine.substring(0, 140).trim()}`;
-    hookLine = ensureSentenceEndsWithPunctuation(hookLine);
-  }
-
+  // Always use the curated template pool for hooks — AI-generated hooks
+  // converge on repetitive patterns across posts.
+  const hookLine = ensureSentenceEndsWithPunctuation(
+    normalizeHookLine(buildHookForTopic(topic, undefined)),
+  );
+  // Strip the old AI hook from the body so it doesn't appear twice
   let bodyAfterHook = trimmedScript;
-  if (modified && firstSentence) {
+  if (firstSentence) {
     bodyAfterHook = trimmedScript.slice(firstSentence.length).trim();
   }
+
+  const searchPhrase = getSearchPhraseForTopic(topic, options.category);
   const normalizedHook = normalizeHookLine(hookLine);
   const bodyLinesRaw = bodyAfterHook
     .split('\n')
@@ -543,32 +525,30 @@ export const ensureVideoHook = (
       isHookLikeLine(cleanedBodyLines[0], topic, searchPhrase))
   ) {
     cleanedBodyLines = cleanedBodyLines.slice(1);
-    modified = true;
   }
   while (
     cleanedBodyLines.length > 0 &&
     needsLineRewrite(cleanedBodyLines[cleanedBodyLines.length - 1])
   ) {
     cleanedBodyLines = cleanedBodyLines.slice(0, -1);
-    modified = true;
   }
   if (cleanedBodyLines.length > 0) {
     bodyAfterHook = cleanedBodyLines.join('\n');
   }
-  const finalScript = modified
-    ? `${hookLine}\n\n${bodyAfterHook}`.trim()
-    : trimmedScript;
+  const finalScript = `${hookLine}\n\n${bodyAfterHook}`.trim();
+
+  const wasModified = firstSentence
+    ? normalizeHookLine(firstSentence) !== normalizedHook
+    : true;
 
   logVideoHookEvent('hook-check', {
     ...options,
-    changed: modified,
-    issues: modified ? issues : undefined,
+    changed: wasModified,
   });
 
   return {
     script: finalScript,
     hook: hookLine,
-    modified,
-    issues: modified ? issues : undefined,
+    modified: wasModified,
   };
 };
