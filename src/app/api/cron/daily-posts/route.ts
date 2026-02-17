@@ -1,3 +1,4 @@
+import { getPinterestBoard } from '@/lib/pinterest/boards';
 import { NextRequest, NextResponse } from 'next/server';
 import { NotificationTemplates } from '../../../../../utils/notifications/pushNotifications';
 import { sendDiscordAdminNotification } from '@/lib/discord';
@@ -73,6 +74,7 @@ import {
 } from '../../../../../utils/blog/aspectInterpretations';
 import { getSlowPlanetSignTotalDays } from '../../../../../utils/astrology/transit-duration';
 import { postToSocial, postToSocialMultiPlatform } from '@/lib/social/client';
+import { preUploadImage } from '@/lib/social/pre-upload-image';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -680,6 +682,8 @@ export async function GET(request: NextRequest) {
             `${dateStr}T${String(pin.scheduledHour).padStart(2, '0')}:00:00Z`,
           );
 
+          const pinBoard = getPinterestBoard(pin.category);
+
           const result = await postToSocial({
             platform: 'pinterest',
             content: pin.description,
@@ -687,11 +691,7 @@ export async function GET(request: NextRequest) {
             media: [],
             platformSettings: {
               pinterestOptions: {
-                boardId:
-                  process.env.SUCCULENT_PINTEREST_BOARD_ID ||
-                  'lunaryapp/lunary',
-                boardName:
-                  process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
+                ...pinBoard,
                 title: pin.title,
               },
             },
@@ -865,17 +865,20 @@ export async function GET(request: NextRequest) {
           const storyCategory = VARIANT_TO_HIGHLIGHT[story.variant] || 'Cosmic';
 
           try {
+            // Pre-upload dynamic OG image so Instagram gets a static blob URL
+            const staticImageUrl = await preUploadImage(imageUrl);
+
             // Persist story to DB for tracking and highlight categorisation
             await sql`
             INSERT INTO social_posts (content, platform, post_type, scheduled_date, status, image_url, story_category, content_type)
-            VALUES ('', 'instagram', 'story', ${scheduledTime.toISOString()}, 'sent', ${imageUrl}, ${storyCategory}, ${story.variant})
+            VALUES ('', 'instagram', 'story', ${scheduledTime.toISOString()}, 'sent', ${staticImageUrl}, ${storyCategory}, ${story.variant})
           `;
 
             const result = await postToSocial({
               platform: 'instagram',
               content: '',
               scheduledDate: scheduledTime.toISOString(),
-              media: [{ type: 'image', url: imageUrl, alt: story.title }],
+              media: [{ type: 'image', url: staticImageUrl, alt: story.title }],
               platformSettings: {
                 instagramOptions: { isStory: true },
               },
@@ -1511,25 +1514,39 @@ async function runDailyPosts(dateStr: string) {
     try {
       // Add Pinterest options if Pinterest is in platforms
       const pinterestOptions = post.platforms.includes('pinterest')
-        ? {
-            boardId:
-              process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary',
-            boardName: process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
-          }
+        ? getPinterestBoard('quotes')
         : undefined;
 
-      const media = (post.imageUrls || []).map((imageUrl: string) => ({
-        type: 'image' as const,
-        url: imageUrl,
-        alt: post.alt,
-      }));
+      // Pre-upload dynamic OG images so platforms get static blob URLs
+      const media = await Promise.all(
+        (post.imageUrls || []).map(async (imageUrl: string) => ({
+          type: 'image' as const,
+          url: await preUploadImage(imageUrl),
+          alt: post.alt,
+        })),
+      );
+
+      // Also pre-upload any media URLs inside variants (e.g. Pinterest)
+      const variants = post.variants ? { ...post.variants } : undefined;
+      if (variants) {
+        for (const [key, variant] of Object.entries(variants)) {
+          if (variant && Array.isArray(variant.media)) {
+            variants[key as keyof typeof variants] = {
+              ...variant,
+              media: await Promise.all(
+                variant.media.map((url: string) => preUploadImage(url)),
+              ),
+            };
+          }
+        }
+      }
 
       const multiResult = await postToSocialMultiPlatform({
         platforms: post.platforms,
         content: post.content,
         scheduledDate: post.scheduledDate,
         media,
-        variants: post.variants,
+        variants,
         name: post.name,
         pinterestOptions: pinterestOptions as any,
       });
@@ -4407,7 +4424,7 @@ function buildAspectTextPosts({
     posts.push({
       name: `Aspect • ${planetA} ${aspectLabel} ${planetB}`,
       content: xContent,
-      platforms: [],
+      platforms: ['x', 'bluesky'],
       imageUrls: [],
       alt: `${planetA} ${aspectLabel} ${planetB}`,
       scheduledDate: getSchedule(),
@@ -4500,7 +4517,7 @@ function buildEgressTextPosts({
     posts.push({
       name: `Egress • ${planet}'s last hours in ${sign}`,
       content: xContent,
-      platforms: [],
+      platforms: ['x', 'bluesky'],
       imageUrls: [],
       alt: `${planet}'s last hours in ${sign}`,
       scheduledDate: getSchedule(),
@@ -4677,7 +4694,7 @@ function buildMicromoonTextPosts({
   posts.push({
     name: `Micromoon • Full Moon`,
     content: xContent,
-    platforms: [],
+    platforms: ['x', 'bluesky'],
     imageUrls: [],
     alt: 'Micromoon Full Moon',
     scheduledDate: getSchedule(),
@@ -4883,7 +4900,7 @@ function buildMoonPhaseTextPosts({
   posts.push({
     name: `Moon Phase • ${phaseName}`,
     content: xContent,
-    platforms: [],
+    platforms: ['x', 'bluesky'],
     imageUrls: [],
     alt: `${phaseName}${signText}`,
     scheduledDate: getSchedule(),
@@ -5109,7 +5126,7 @@ function buildTransitMilestoneTextPosts({
     posts.push({
       name: postName,
       content: xContent,
-      platforms: [],
+      platforms: ['x', 'bluesky'],
       imageUrls: [],
       alt: `${planet} in ${sign} - ${milestoneLabel}`,
       scheduledDate: getSchedule(),
@@ -5210,7 +5227,7 @@ function buildCountdownTextPosts({
     posts.push({
       name: `Countdown • ${countdown.name}`,
       content: xContent,
-      platforms: [],
+      platforms: ['x', 'bluesky'],
       imageUrls: [],
       alt: countdown.name,
       scheduledDate: getSchedule(),
