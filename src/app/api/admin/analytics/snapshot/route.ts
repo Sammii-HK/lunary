@@ -240,6 +240,7 @@ export async function GET(request: NextRequest) {
       d1_retention: Number(latest.d1_retention || 0),
       d7_retention: Number(latest.d7_retention || 0),
       d30_retention: Number(latest.d30_retention || 0),
+      product_d7_retention: Number(latest.product_d7_retention || 0),
 
       // Active days distribution
       active_days_distribution: {

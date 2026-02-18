@@ -95,7 +95,6 @@ export function SnapshotTab({
     grimoireHealth,
     conversionInfluence,
     activation,
-    planBreakdown,
     successMetrics,
     insights,
     metricSnapshots,
@@ -108,10 +107,6 @@ export function SnapshotTab({
     appDau,
     appWau,
     appMau,
-    engagedDau,
-    engagedWau,
-    engagedMau,
-    engagementRate,
     appVisits,
     canonicalIdentities,
     appVisitsPerUser,
@@ -126,7 +121,6 @@ export function SnapshotTab({
     primaryCards,
     productMaError,
     integrityWarnings,
-    engagedMatchesApp,
     filteredInsights,
     returningReferrerBreakdown,
     siteMomentumRows,
@@ -192,23 +186,31 @@ export function SnapshotTab({
 
             <HealthMetricCard
               icon={RefreshCw}
-              label='User Retention'
+              label='Product Retention'
               value={
-                activity?.retention?.day_7 != null
-                  ? `${Number(activity.retention.day_7).toFixed(0)}%`
-                  : overallD7Retention > 0
-                    ? `${(overallD7Retention * 100).toFixed(0)}%`
-                    : '—'
+                activity?.product_d7_retention != null &&
+                activity.product_d7_retention > 0
+                  ? `${Number(activity.product_d7_retention).toFixed(0)}%`
+                  : activity?.retention?.day_7 != null
+                    ? `${Number(activity.retention.day_7).toFixed(0)}%`
+                    : overallD7Retention > 0
+                      ? `${(overallD7Retention * 100).toFixed(0)}%`
+                      : '—'
               }
               unit='D7'
               status={
-                (activity?.retention?.day_7 ?? overallD7Retention * 100) > 30
+                (activity?.product_d7_retention ?? 0) > 30
                   ? 'excellent'
-                  : (activity?.retention?.day_7 ?? overallD7Retention * 100) > 0
+                  : (activity?.product_d7_retention ?? 0) > 15
                     ? 'good'
                     : 'warning'
               }
-              description='7-day retention (rolling cohort)'
+              description={
+                activity?.product_d7_retention != null &&
+                activity.product_d7_retention > 0
+                  ? `Product-only D7 (all-event D7: ${Number(activity.retention?.day_7 ?? 0).toFixed(0)}%)`
+                  : '7-day retention (rolling cohort)'
+              }
             />
 
             <HealthMetricCard
@@ -409,44 +411,6 @@ export function SnapshotTab({
               icon={<Users className='h-5 w-5 text-lunary-accent-300' />}
             />
           </div>
-        </StatSection>
-      </section>
-
-      {/* Engagement Health */}
-      <section className='space-y-3'>
-        <StatSection
-          eyebrow='Engagement Health'
-          title='Engagement events & rates'
-          description='Total engagement events and events per signed-in user.'
-        >
-          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            <MiniStat
-              label='Engaged DAU'
-              value={engagedDau}
-              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
-            />
-            <MiniStat
-              label='Engaged WAU'
-              value={engagedWau}
-              icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
-            />
-            <MiniStat
-              label='Engaged MAU'
-              value={engagedMau}
-              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
-            />
-            <MiniStat
-              label='Returning Users'
-              value={engagementOverview?.returning_users_range ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-accent-300' />}
-            />
-          </div>
-          {engagedMatchesApp && (
-            <p className='text-xs text-zinc-500'>
-              Engaged Users currently matches App opens for this window. Check
-              key-action event set.
-            </p>
-          )}
           <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
             <MiniStat
               label='Engaged Rate (DAU)'

@@ -1,3 +1,4 @@
+import { getPinterestBoard } from '@/lib/pinterest/boards';
 import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 
 export type DbPostRow = {
@@ -168,10 +169,7 @@ export const buildPlatformPayload = (
     post.post_type === 'instagram_reel';
 
   if (platformStr === 'pinterest' && !isVideoOrStory) {
-    payload.pinterestOptions = {
-      boardId: process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary',
-      boardName: process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
-    };
+    payload.pinterestOptions = getPinterestBoard();
   }
 
   // TikTok photo mode for static IG content types

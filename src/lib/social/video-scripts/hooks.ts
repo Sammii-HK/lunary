@@ -505,6 +505,7 @@ export const ensureVideoHook = (
   let modified = false;
   let issues: string[] = [];
 
+  // Validate the existing hook — only replace if it fails validation
   if (firstSentence) {
     const normalized = normalizeHookLine(firstSentence);
     issues = validateVideoHook(normalized, topic, searchPhrase);
@@ -515,9 +516,9 @@ export const ensureVideoHook = (
     issues = ['Hook missing'];
   }
 
+  // Replace bad hooks with a curated template
   if (!hookLine) {
-    const fallbackHook = normalizeHookLine(buildHookForTopic(topic, undefined));
-    hookLine = fallbackHook;
+    hookLine = normalizeHookLine(buildHookForTopic(topic, undefined));
     modified = true;
   }
 

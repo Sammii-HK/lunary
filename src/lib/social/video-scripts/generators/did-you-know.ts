@@ -12,7 +12,13 @@ import {
   VideoScriptSchema,
 } from '@/lib/ai/content-generator';
 import { normalizeGeneratedContent } from '@/lib/social/content-normalizer';
-import { countWords, estimateDuration } from '../../shared/text/normalize';
+import {
+  countWords,
+  estimateDuration,
+  normalizeHookLine,
+  ensureSentenceEndsWithPunctuation,
+} from '../../shared/text/normalize';
+import { buildHookForTopic } from '../hooks';
 import {
   getVoiceConfig,
   getRandomScriptStructure,
@@ -108,22 +114,26 @@ Return strict JSON only:
     };
 
     const video = result.video || {};
-    const hook = String(video.hook || '').trim();
+    const aiHook = String(video.hook || '').trim();
     const bodyLines = Array.isArray(video.scriptBody)
       ? video.scriptBody.map((l) => String(l).trim()).filter(Boolean)
       : [];
 
-    if (!hook || bodyLines.length < 3) return null;
+    if (!aiHook || bodyLines.length < 3) return null;
+
+    const hookLine = ensureSentenceEndsWithPunctuation(
+      normalizeHookLine(buildHookForTopic(fact, undefined)),
+    );
 
     const fullScript = normalizeGeneratedContent(
-      `${hook}\n\n${bodyLines.join('\n')}`,
+      `${hookLine}\n\n${bodyLines.join('\n')}`,
       { topicLabel: fact },
     );
 
     const wordCount = countWords(fullScript);
 
     const sections: ScriptSection[] = [
-      { name: 'Hook', duration: '3 seconds', content: hook },
+      { name: 'Hook', duration: '3 seconds', content: hookLine },
       {
         name: 'Fact & Context',
         duration: `${Math.max(10, Math.round(wordCount / 2.6) - 3)} seconds`,
@@ -152,7 +162,7 @@ Return strict JSON only:
         targetAudience: 'discovery',
         contentTypeKey: 'did_you_know',
       } as VideoScript['metadata'],
-      hookText: hook,
+      hookText: hookLine,
       hookVersion: 1,
       hookStyle: 'curiosity',
       scriptStructureName:

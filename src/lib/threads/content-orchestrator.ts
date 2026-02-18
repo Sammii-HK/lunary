@@ -1,6 +1,8 @@
 import {
   generateConversationPost,
   generateCosmicTimingPost,
+  generateIdentityPost,
+  generateEducationalPost,
 } from './original-content';
 import { getDearStyleReferralPost } from '@/lib/social/shared/constants/persona-templates';
 import {
@@ -14,12 +16,13 @@ import {
 /**
  * Weekday schedule (3 slots — UK/US crossover window):
  * Slot 0 (14:00 UTC) - Original: cosmic timing / transit text — 9am EST morning
- * Slot 1 (17:00 UTC) - Dear-style referral CTA — peak 12pm EST engagement
+ * Slot 1 (17:00 UTC) - Rotating: Mon=identity, Tue=referral, Wed=educational,
+ *                       Thu=identity, Fri=referral — peak 12pm EST engagement
  * Slot 2 (21:00 UTC) - Original: conversation / question — 4pm EST all timezones active
  *
  * Weekend schedule (2 slots):
  * Slot 0 (14:00 UTC) - Original: cosmic timing / conversation
- * Slot 1 (20:00 UTC) - Dear-style referral CTA — weekend evening leisure
+ * Slot 1 (20:00 UTC) - Rotating: Sat=identity, Sun=educational
  */
 
 /**
@@ -44,13 +47,21 @@ function buildWeekdayBatch(dateStr: string): ThreadsPost[] {
   const slots = WEEKDAY_SLOTS_UTC;
   const posts: ThreadsPost[] = [];
   const date = new Date(dateStr);
+  const dayOfWeek = date.getDay(); // 1=Mon .. 5=Fri
   const seed = date.getDate() + date.getMonth() * 31;
 
   // Slot 0 (14:00 UTC) - Cosmic timing / transit content
   posts.push(generateCosmicTimingPost(dateStr, slots[0]));
 
-  // Slot 1 (17:00 UTC) - Dear-style referral CTA (best performer, peak slot)
-  posts.push(buildDearStylePost(dateStr, slots[1], seed));
+  // Slot 1 (17:00 UTC) - Rotating by day of week
+  // Mon(1)=identity, Tue(2)=referral, Wed(3)=educational, Thu(4)=identity, Fri(5)=referral
+  if (dayOfWeek === 2 || dayOfWeek === 5) {
+    posts.push(buildDearStylePost(dateStr, slots[1], seed));
+  } else if (dayOfWeek === 3) {
+    posts.push(generateEducationalPost(dateStr, slots[1]));
+  } else {
+    posts.push(generateIdentityPost(dateStr, slots[1]));
+  }
 
   // Slot 2 (21:00 UTC) - Conversation / question (drives replies)
   posts.push(generateConversationPost(dateStr, slots[2]));
@@ -62,13 +73,17 @@ function buildWeekendBatch(dateStr: string): ThreadsPost[] {
   const slots = WEEKEND_SLOTS_UTC;
   const posts: ThreadsPost[] = [];
   const date = new Date(dateStr);
-  const seed = date.getDate() + date.getMonth() * 31;
+  const dayOfWeek = date.getDay(); // 0=Sun, 6=Sat
 
   // Slot 0 (14:00 UTC) - Cosmic timing / conversation
   posts.push(generateCosmicTimingPost(dateStr, slots[0]));
 
-  // Slot 1 (20:00 UTC) - Dear-style referral CTA (weekend evening leisure)
-  posts.push(buildDearStylePost(dateStr, slots[1], seed));
+  // Slot 1 (20:00 UTC) - Rotating: Sat=identity, Sun=educational
+  if (dayOfWeek === 6) {
+    posts.push(generateIdentityPost(dateStr, slots[1]));
+  } else {
+    posts.push(generateEducationalPost(dateStr, slots[1]));
+  }
 
   return posts;
 }

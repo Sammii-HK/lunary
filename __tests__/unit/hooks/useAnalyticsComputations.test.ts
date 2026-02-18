@@ -105,6 +105,7 @@ function buildActivity(fields: Record<string, any> = {}) {
     content_mau_grimoire: 0,
     grimoire_only_mau: 0,
     total_accounts: 0,
+    product_d7_retention: 0,
     ...fields,
   };
 }

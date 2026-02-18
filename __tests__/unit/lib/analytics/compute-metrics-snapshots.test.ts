@@ -391,7 +391,7 @@ describe('compute-metrics cron (snapshot approach)', () => {
     );
 
     expect(metricsInsert).toBeTruthy();
-    expect(metricsInsert[1].length).toBe(52);
+    expect(metricsInsert[1].length).toBe(53);
     // $1 should be the date string
     expect(metricsInsert[1][0]).toBe('2026-02-15');
   });

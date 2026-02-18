@@ -54,6 +54,7 @@ export type ActivityResponse = {
     day_7: number | null;
     day_30: number | null;
   };
+  product_d7_retention: number;
   churn_rate: number | null;
   trends: ActivityTrend[];
   app_opened_trends: ActivityTrend[];

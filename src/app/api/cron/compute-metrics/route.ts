@@ -245,6 +245,7 @@ export async function GET(request: NextRequest) {
       d1RetentionResult,
       d7RetentionResult,
       d30RetentionResult,
+      productD7RetentionResult,
       // Signups, activation, MRR, subscriptions, conversions
       signupsResult,
       activationResult,
@@ -396,13 +397,13 @@ export async function GET(request: NextRequest) {
         [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // ── D7 Retention ──
+      // ── D7 Retention (mature cohorts only: signed up 14-7 days ago) ──
       sql.query(
         hasIdentityLinks
           ? `WITH cohort AS (
                SELECT id, "createdAt" FROM "user"
                WHERE "createdAt" >= $1::date - INTERVAL '14 days'
-                 AND "createdAt" < $1::date - INTERVAL '6 days'
+                 AND "createdAt" < $1::date - INTERVAL '7 days'
                  AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
              )
              SELECT
@@ -420,7 +421,7 @@ export async function GET(request: NextRequest) {
           : `WITH cohort AS (
                SELECT id, "createdAt" FROM "user"
                WHERE "createdAt" >= $1::date - INTERVAL '14 days'
-                 AND "createdAt" < $1::date - INTERVAL '6 days'
+                 AND "createdAt" < $1::date - INTERVAL '7 days'
                  AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
              )
              SELECT
@@ -436,13 +437,13 @@ export async function GET(request: NextRequest) {
         [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // ── D30 Retention ──
+      // ── D30 Retention (mature cohorts only: signed up 60-30 days ago) ──
       sql.query(
         hasIdentityLinks
           ? `WITH cohort AS (
                SELECT id, "createdAt" FROM "user"
-               WHERE "createdAt" >= $1::date - INTERVAL '37 days'
-                 AND "createdAt" < $1::date - INTERVAL '29 days'
+               WHERE "createdAt" >= $1::date - INTERVAL '60 days'
+                 AND "createdAt" < $1::date - INTERVAL '30 days'
                  AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
              )
              SELECT
@@ -459,8 +460,8 @@ export async function GET(request: NextRequest) {
              FROM cohort c`
           : `WITH cohort AS (
                SELECT id, "createdAt" FROM "user"
-               WHERE "createdAt" >= $1::date - INTERVAL '37 days'
-                 AND "createdAt" < $1::date - INTERVAL '29 days'
+               WHERE "createdAt" >= $1::date - INTERVAL '60 days'
+                 AND "createdAt" < $1::date - INTERVAL '30 days'
                  AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
              )
              SELECT
@@ -470,6 +471,48 @@ export async function GET(request: NextRequest) {
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = c.id
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + 30
+                 )
+               ) as returned
+             FROM cohort c`,
+        [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
+      ),
+
+      // ── Product D7 Retention (mature cohorts only, product actions only) ──
+      sql.query(
+        hasIdentityLinks
+          ? `WITH cohort AS (
+               SELECT id, "createdAt" FROM "user"
+               WHERE "createdAt" >= $1::date - INTERVAL '14 days'
+                 AND "createdAt" < $1::date - INTERVAL '7 days'
+                 AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
+             )
+             SELECT
+               COUNT(*) as cohort_size,
+               COUNT(*) FILTER (
+                 WHERE EXISTS (
+                   SELECT 1 FROM conversion_events ce
+                   LEFT JOIN analytics_identity_links ail
+                     ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
+                   WHERE (ce.user_id = c.id OR ail.user_id = c.id)
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + 7
+                 )
+               ) as returned
+             FROM cohort c`
+          : `WITH cohort AS (
+               SELECT id, "createdAt" FROM "user"
+               WHERE "createdAt" >= $1::date - INTERVAL '14 days'
+                 AND "createdAt" < $1::date - INTERVAL '7 days'
+                 AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
+             )
+             SELECT
+               COUNT(*) as cohort_size,
+               COUNT(*) FILTER (
+                 WHERE EXISTS (
+                   SELECT 1 FROM conversion_events ce
+                   WHERE ce.user_id = c.id
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + 7
                  )
                ) as returned
              FROM cohort c`,
@@ -689,6 +732,17 @@ export async function GET(request: NextRequest) {
     const d7Retention =
       d7CohortSize > 0 ? (d7Returned / d7CohortSize) * 100 : 0;
 
+    const productD7CohortSize = Number(
+      productD7RetentionResult.rows[0]?.cohort_size || 0,
+    );
+    const productD7Returned = Number(
+      productD7RetentionResult.rows[0]?.returned || 0,
+    );
+    const productD7Retention =
+      productD7CohortSize > 0
+        ? (productD7Returned / productD7CohortSize) * 100
+        : 0;
+
     const d30CohortSize = Number(d30RetentionResult.rows[0]?.cohort_size || 0);
     const d30Returned = Number(d30RetentionResult.rows[0]?.returned || 0);
     const d30Retention =
@@ -736,7 +790,7 @@ export async function GET(request: NextRequest) {
         returning_dau, returning_wau, returning_mau,
         reach_dau, reach_wau, reach_mau,
         grimoire_dau, grimoire_wau, grimoire_mau, grimoire_only_mau,
-        d1_retention, d7_retention, d30_retention,
+        d1_retention, d7_retention, d30_retention, product_d7_retention,
         active_days_1, active_days_2_3, active_days_4_7, active_days_8_14, active_days_15_plus,
         stickiness_wau_mau, total_accounts,
         grimoire_to_app_rate, grimoire_to_app_users,
@@ -754,7 +808,7 @@ export async function GET(request: NextRequest) {
         $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
         $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
         $41, $42, $43, $44, $45, $46, $47, $48, $49, $50,
-        $51, NOW(), $52
+        $51, $52, NOW(), $53
       )
       ON CONFLICT (metric_date)
       DO UPDATE SET
@@ -780,6 +834,7 @@ export async function GET(request: NextRequest) {
         d1_retention = EXCLUDED.d1_retention,
         d7_retention = EXCLUDED.d7_retention,
         d30_retention = EXCLUDED.d30_retention,
+        product_d7_retention = EXCLUDED.product_d7_retention,
         active_days_1 = EXCLUDED.active_days_1,
         active_days_2_3 = EXCLUDED.active_days_2_3,
         active_days_4_7 = EXCLUDED.active_days_4_7,
@@ -834,35 +889,36 @@ export async function GET(request: NextRequest) {
         d1Retention, // $21
         d7Retention, // $22
         d30Retention, // $23
-        activeDays1, // $24
-        activeDays2_3, // $25
-        activeDays4_7, // $26
-        activeDays8_14, // $27
-        activeDays15Plus, // $28
-        stickinessWauMau, // $29
-        totalAccounts, // $30
-        grimoireToAppRate, // $31
-        grimoireToAppUsers, // $32
-        signups, // $33
-        activatedUsers, // $34
-        activationRate, // $35
-        mrr, // $36
-        activeSubscriptions, // $37
-        trialSubscriptions, // $38
-        newConversions, // $39
-        stickiness, // $40
-        avgActiveDaysPerWeek, // $41
-        featureAdoption['daily_dashboard_viewed'] || 0, // $42
-        featureAdoption['personalized_horoscope_viewed'] || 0, // $43
-        featureAdoption['tarot_drawn'] || 0, // $44
-        featureAdoption['chart_viewed'] || 0, // $45
-        featureAdoption['astral_chat_used'] || 0, // $46
-        featureAdoption['ritual_completed'] || 0, // $47
-        returningReferrerOrganic, // $48
-        returningReferrerDirect, // $49
-        returningReferrerInternal, // $50
-        signedInProductReturningUsers, // $51
-        computationDuration, // $52
+        productD7Retention, // $24
+        activeDays1, // $25
+        activeDays2_3, // $26
+        activeDays4_7, // $27
+        activeDays8_14, // $28
+        activeDays15Plus, // $29
+        stickinessWauMau, // $30
+        totalAccounts, // $31
+        grimoireToAppRate, // $32
+        grimoireToAppUsers, // $33
+        signups, // $34
+        activatedUsers, // $35
+        activationRate, // $36
+        mrr, // $37
+        activeSubscriptions, // $38
+        trialSubscriptions, // $39
+        newConversions, // $40
+        stickiness, // $41
+        avgActiveDaysPerWeek, // $42
+        featureAdoption['daily_dashboard_viewed'] || 0, // $43
+        featureAdoption['personalized_horoscope_viewed'] || 0, // $44
+        featureAdoption['tarot_drawn'] || 0, // $45
+        featureAdoption['chart_viewed'] || 0, // $46
+        featureAdoption['astral_chat_used'] || 0, // $47
+        featureAdoption['ritual_completed'] || 0, // $48
+        returningReferrerOrganic, // $49
+        returningReferrerDirect, // $50
+        returningReferrerInternal, // $51
+        signedInProductReturningUsers, // $52
+        computationDuration, // $53
       ],
     );
 
@@ -888,6 +944,7 @@ export async function GET(request: NextRequest) {
         activationRate,
         d1Retention,
         d7Retention,
+        productD7Retention,
         d30Retention,
         mrr,
         conversions: newConversions,

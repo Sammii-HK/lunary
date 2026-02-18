@@ -53,6 +53,8 @@ const SOCIAL_EXCLUDED_THEME_PREFIXES = [
   'houses-',
   'decans-',
   'cusps-',
+  'mirror-hours-', // Too granular (individual times like "10 01")
+  'double-hours-', // Same issue
 ];
 
 const isSocialSuitableTheme = (theme: WeeklyTheme): boolean =>

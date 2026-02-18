@@ -67,6 +67,7 @@ export interface ConsolidatedSnapshot {
   d1_retention: number;
   d7_retention: number;
   d30_retention: number;
+  product_d7_retention: number;
 
   // Active days
   active_days_distribution: Record<string, number>;
@@ -201,6 +202,7 @@ export function extractActivity(s: ConsolidatedSnapshot): ActivityResponse {
     returning_mau: s.returning_mau,
     // Retention
     retention: s.retention,
+    product_d7_retention: s.product_d7_retention,
     churn_rate: null,
     // Trends
     trends: s.trends,
