@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { MarketingNavbar } from '@/components/MarketingNavbar';
@@ -214,11 +214,18 @@ export function AppChrome() {
   );
 
   const [testimonialModalOpen, setTestimonialModalOpen] = useState(false);
+  const testimonialCheckedRef = useRef(false);
 
   // Fetch testimonial prompt status from server
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!authState.isAuthenticated || isAdminSurface) return;
+    if (testimonialCheckedRef.current) return;
+
+    // Skip if already dismissed/submitted this session
+    if (sessionStorage.getItem('testimonial-handled')) return;
+
+    testimonialCheckedRef.current = true;
 
     const checkTestimonialPrompt = async () => {
       try {
@@ -238,6 +245,8 @@ export function AppChrome() {
   }, [authState.isAuthenticated, isAdminSurface]);
 
   const handleTestimonialModalClose = async () => {
+    setTestimonialModalOpen(false);
+    sessionStorage.setItem('testimonial-handled', '1');
     try {
       await fetch('/api/testimonials/prompt-tracking', {
         method: 'POST',
@@ -247,10 +256,11 @@ export function AppChrome() {
     } catch (error) {
       console.error('Error dismissing testimonial prompt:', error);
     }
-    setTestimonialModalOpen(false);
   };
 
   const handleTestimonialSubmitted = async () => {
+    setTestimonialModalOpen(false);
+    sessionStorage.setItem('testimonial-handled', '1');
     try {
       await fetch('/api/testimonials/prompt-tracking', {
         method: 'POST',
@@ -260,7 +270,6 @@ export function AppChrome() {
     } catch (error) {
       console.error('Error marking testimonial as submitted:', error);
     }
-    setTestimonialModalOpen(false);
   };
 
   // Actual app pages: in appPages, not a marketing route, not a contextual page

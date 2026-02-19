@@ -1,6 +1,6 @@
 import {
   WEEK_MS,
-  THREE_WEEK_MS,
+  DISMISS_COOLDOWN_MS,
   markTestimonialSubmitted,
   scheduleTestimonialReask,
   shouldPromptForTestimonial,
@@ -44,19 +44,11 @@ describe('testimonial prompt timing', () => {
     expect(shouldPromptForTestimonial(meta, now)).toBe(false);
   });
 
-  it('schedules a reask at least three weeks after firstSeen', () => {
+  it('schedules a reask 28 days from now', () => {
     const meta = buildMeta();
     const now = baseTime + WEEK_MS + 500;
     const next = scheduleTestimonialReask(meta, now);
-    expect(next.dontAskUntil).toBeGreaterThanOrEqual(baseTime + THREE_WEEK_MS);
-  });
-
-  it('does not lower an existing dontAskUntil when reasking', () => {
-    const future = baseTime + THREE_WEEK_MS + WEEK_MS;
-    const meta = buildMeta({ dontAskUntil: future });
-    const now = baseTime + WEEK_MS + 500;
-    const next = scheduleTestimonialReask(meta, now);
-    expect(next.dontAskUntil).toBe(future);
+    expect(next.dontAskUntil).toBe(now + DISMISS_COOLDOWN_MS);
   });
 
   it('marks the meta as submitted', () => {

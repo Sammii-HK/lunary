@@ -4,7 +4,7 @@ import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-const THREE_WEEK_MS = 21 * 24 * 60 * 60 * 1000;
+const DISMISS_COOLDOWN_MS = 28 * 24 * 60 * 60 * 1000;
 
 export async function GET() {
   try {
@@ -91,8 +91,7 @@ export async function POST(req: Request) {
         );
       }
 
-      const firstSeen = tracking.firstSeen!.getTime();
-      const reaskAt = new Date(firstSeen + THREE_WEEK_MS);
+      const reaskAt = new Date(Date.now() + DISMISS_COOLDOWN_MS);
 
       await prisma.testimonialPromptTracking.update({
         where: { userId: session.user.id },

@@ -1,5 +1,5 @@
 export const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-export const THREE_WEEK_MS = 21 * 24 * 60 * 60 * 1000;
+export const DISMISS_COOLDOWN_MS = 28 * 24 * 60 * 60 * 1000;
 
 export interface TestimonialPromptMeta {
   firstSeen: number;
@@ -24,10 +24,10 @@ export function scheduleTestimonialReask(
   meta: TestimonialPromptMeta,
   now: number,
 ): TestimonialPromptMeta {
-  const reaskAt = meta.firstSeen + THREE_WEEK_MS;
+  const reaskAt = now + DISMISS_COOLDOWN_MS;
   return {
     ...meta,
-    dontAskUntil: Math.max(meta.dontAskUntil, reaskAt, now),
+    dontAskUntil: reaskAt,
   };
 }
 
