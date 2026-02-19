@@ -27,6 +27,8 @@ import {
   KeyRound,
   Copy,
   Check,
+  Trash2,
+  Eye,
 } from 'lucide-react';
 
 interface Episode {
@@ -71,6 +73,12 @@ export default function PodcastsPage() {
     success: boolean;
     message: string;
   } | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [nextTopicPreview, setNextTopicPreview] = useState<{
+    episodeNumber: number;
+    topics: { title: string; slug: string }[];
+    coveredCount: number;
+  } | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -98,15 +106,38 @@ export default function PodcastsPage() {
   const fetchEpisodes = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/podcasts');
+      const res = await fetch('/api/admin/podcasts?preview=1');
       const data = await res.json();
       if (data.success) {
         setEpisodes(data.episodes);
+        if (data.nextTopicPreview) {
+          setNextTopicPreview(data.nextTopicPreview);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch episodes:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    setDeletingId(id);
+    try {
+      const res = await fetch('/api/admin/podcasts', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchEpisodes();
+      }
+    } catch (error) {
+      console.error('Failed to delete episode:', error);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -409,6 +440,27 @@ export default function PodcastsPage() {
                           </a>
                         </div>
                       )}
+
+                      {/* Delete */}
+                      <div className='pt-2 border-t'>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          className='text-destructive border-destructive/30 hover:bg-destructive/10'
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(episode.id, episode.title);
+                          }}
+                          disabled={deletingId === episode.id}
+                        >
+                          {deletingId === episode.id ? (
+                            <Loader2 className='h-3.5 w-3.5 mr-1.5 animate-spin' />
+                          ) : (
+                            <Trash2 className='h-3.5 w-3.5 mr-1.5' />
+                          )}
+                          Delete Episode
+                        </Button>
+                      </div>
                     </CardContent>
                   )}
                 </Card>
@@ -431,6 +483,40 @@ export default function PodcastsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
+              {/* Next topic preview */}
+              {nextTopicPreview && (
+                <Card className='border-lunary-primary-600/30 bg-lunary-primary-900/5'>
+                  <CardContent className='pt-4'>
+                    <p className='text-sm font-medium flex items-center gap-1.5 mb-2'>
+                      <Eye className='h-4 w-4' />
+                      Next Episode Preview — #{nextTopicPreview.episodeNumber}
+                    </p>
+                    {nextTopicPreview.topics.length > 0 ? (
+                      <div className='space-y-1'>
+                        {nextTopicPreview.topics.map((t) => (
+                          <div key={t.slug} className='flex items-center gap-2'>
+                            <Badge variant='secondary' className='text-xs'>
+                              {t.slug}
+                            </Badge>
+                            <span className='text-sm text-muted-foreground'>
+                              {t.title}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className='text-sm text-muted-foreground'>
+                        No uncovered topics found — will repeat from pool.
+                      </p>
+                    )}
+                    <p className='text-xs text-muted-foreground mt-2'>
+                      {nextTopicPreview.coveredCount} grimoire slugs already
+                      covered across all episodes
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
               <Button
                 onClick={handleGenerate}
                 disabled={generateLoading}
