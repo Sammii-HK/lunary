@@ -6,31 +6,15 @@ import { ComparisonPageStructuredData } from '@/components/ComparisonPageStructu
 const currentYear = new Date().getFullYear();
 
 export const metadata: Metadata = {
-  title: `Best Personalized Astrology Apps ${currentYear}: Lunary vs Co-Star vs CHANI`,
-  description:
-    'Compare Lunary vs Co-Star vs CHANI. See which astrology app uses real astronomical data, offers personalized birth charts with no ads, and includes a complete grimoire. Free tier available.',
+  title: `Best Personalized Astrology Apps ${currentYear}: Real Comparison`,
+  description: `Co-Star vs CHANI vs Lunary: which app uses real astronomical data, offers free birth charts & has no ads? Side-by-side feature breakdown.`,
   keywords: [
     'best astrology apps',
     'personalized astrology apps',
     'astrology app comparison',
     'Lunary vs Co-Star',
     'Lunary vs CHANI',
-    'Lunary vs Astro Gold',
-    'Lunary vs TimePassages',
-    'Lunary vs AstroFuture',
-    'Lunary vs Astro.com',
-    'Lunary vs Arcanene',
-    'Lunary vs AstroMatrix',
-    'Lunary vs Astro.com',
-    'Lunary vs Moonly',
-    'Lunary vs Lunar Guide',
-    'Lunary vs Arcarae',
     'Lunary vs Pattern',
-    'Lunary vs Moonly',
-    'Lunary vs Lunar Guide',
-    'Lunary vs Pattern',
-    'Lunary vs Moonly',
-    'Lunary vs Lunar Guide',
     'best birth chart app',
     'astrology app review',
     'personalized horoscope app',
@@ -58,9 +42,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `Best Personalized Astrology Apps ${currentYear}: Lunary vs Co-Star vs CHANI`,
-    description:
-      'Compare Lunary vs Co-Star vs CHANI. See which app uses real astronomical data and offers the most personalized insights with no ads.',
+    title: `Best Personalized Astrology Apps ${currentYear}: Real Comparison`,
+    description: `Co-Star vs CHANI vs Lunary: which app uses real astronomical data, offers free birth charts & has no ads?`,
     images: ['/api/og/cosmic'],
   },
   alternates: {

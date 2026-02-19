@@ -25,8 +25,8 @@ export async function generateMetadata({
   }
 
   return createGrimoireMetadata({
-    title: `${numberData.name} Meaning: Traits, Career & Love - Lunary`,
-    description: `Discover the complete guide to ${numberData.name}. Learn about ${numberData.name} traits, strengths, challenges, career paths, love compatibility, and how to calculate your life path number.`,
+    title: `Life Path ${numberData.number}: Personality, Career & Who You Match With`,
+    description: `Life path ${numberData.number} explained: your strengths, blind spots, ideal careers & best romantic matches. What your number says about you.`,
     keywords: [
       `${numberData.name}`,
       `life path ${numberData.number}`,
