@@ -81,9 +81,14 @@ export async function generateMetadata({
   const currentYear = new Date().getFullYear();
   const nextYear = currentYear + 1;
 
-  // SEO-optimized title targeting high-volume queries
-  const title = `${retrogradeData.name} ${currentYear}: Dates, Meaning & Survival Guide | Lunary`;
-  const description = `Complete ${retrogradeData.name} dates for ${currentYear} and ${nextYear}. When it starts, how long it lasts, what to expect, and how to survive each retrograde period.`;
+  // Mercury retrograde gets a custom title/desc (highest-volume query)
+  const isMercury = planetName === 'Mercury';
+  const title = isMercury
+    ? `Mercury Retrograde ${currentYear}: All Dates & What to Expect`
+    : `${retrogradeData.name} ${currentYear}: Dates, Effects & How to Cope`;
+  const description = isMercury
+    ? `When is Mercury retrograde in ${currentYear}? Every start & end date, what breaks down (tech, travel, communication) & exactly how to prepare. ${nextYear} dates included.`
+    : `When is ${retrogradeData.name.toLowerCase()} in ${currentYear}? Exact start/end dates, what it affects & how to navigate it. ${nextYear} dates too.`;
 
   return {
     title,

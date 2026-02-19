@@ -16,9 +16,9 @@ export const TTS_PRESETS = {
   // Medium-form (Reels/TikTok): balanced, warm
   medium: { model: 'tts-1-hd', voiceName: 'shimmer', speed: 1.0 },
 
-  // Long-form (YouTube): authoritative, trustworthy
-  long: { model: 'tts-1-hd', voiceName: 'onyx', speed: 0.96 },
-  long_authoritative: { model: 'tts-1-hd', voiceName: 'onyx', speed: 0.96 },
+  // Long-form (YouTube): warm, natural
+  long: { model: 'tts-1-hd', voiceName: 'shimmer', speed: 0.96 },
+  long_authoritative: { model: 'tts-1-hd', voiceName: 'shimmer', speed: 0.96 },
 } as const;
 
 /**

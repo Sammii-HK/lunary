@@ -353,6 +353,7 @@ export function selectPodcastTopics(
 ): GrimoireSnippet[] {
   const allEntries = getAllPodcastEntries();
   const now = new Date();
+  const coveredSlugs = new Set(recentGrimoireSlugs);
 
   let primaryCategory: PodcastCategory = PODCAST_CATEGORIES[0];
   let primaryEntry: GrimoireEntry | undefined;
@@ -364,7 +365,7 @@ export function selectPodcastTopics(
     const match = categoryEntries.find((e) =>
       e.slug.includes(seasonalOverride.slugKeyword),
     );
-    if (match && !recentGrimoireSlugs.includes(match.slug)) {
+    if (match && !coveredSlugs.has(match.slug)) {
       primaryCategory = seasonalOverride.category;
       primaryEntry = match;
     }
@@ -395,13 +396,15 @@ export function selectPodcastTopics(
     const categoryIndex = (episodeNumber - 1) % PODCAST_CATEGORIES.length;
     primaryCategory = PODCAST_CATEGORIES[categoryIndex];
     const categoryEntries = (allEntries.get(primaryCategory) || []).filter(
-      isPodcastWorthy,
+      (e) => isPodcastWorthy(e) && !coveredSlugs.has(e.slug),
     );
 
     if (categoryEntries.length === 0) {
-      // Fallback to any category with entries
+      // Fallback to any category with uncovered entries
       for (const cat of PODCAST_CATEGORIES) {
-        const entries = (allEntries.get(cat) || []).filter(isPodcastWorthy);
+        const entries = (allEntries.get(cat) || []).filter(
+          (e) => isPodcastWorthy(e) && !coveredSlugs.has(e.slug),
+        );
         if (entries.length > 0) {
           primaryCategory = cat;
           const idx =
@@ -412,7 +415,7 @@ export function selectPodcastTopics(
         }
       }
     } else {
-      // Pick specific entry within category (cycle through entries)
+      // Pick specific entry within category (cycle through uncovered entries)
       const entryIndex =
         Math.floor((episodeNumber - 1) / PODCAST_CATEGORIES.length) %
         categoryEntries.length;
@@ -421,17 +424,19 @@ export function selectPodcastTopics(
   }
 
   if (!primaryEntry) {
-    return [];
+    // All topics covered — allow repeats from the full pool as last resort
+    for (const cat of PODCAST_CATEGORIES) {
+      const entries = (allEntries.get(cat) || []).filter(isPodcastWorthy);
+      if (entries.length > 0) {
+        primaryCategory = cat;
+        primaryEntry = entries[episodeNumber % entries.length];
+        break;
+      }
+    }
   }
 
-  // Skip if recently covered (within last 10 episodes)
-  if (recentGrimoireSlugs.includes(primaryEntry.slug)) {
-    const categoryEntries = (allEntries.get(primaryCategory) || []).filter(
-      (e) => isPodcastWorthy(e) && !recentGrimoireSlugs.includes(e.slug),
-    );
-    if (categoryEntries.length > 0) {
-      primaryEntry = categoryEntries[episodeNumber % categoryEntries.length];
-    }
+  if (!primaryEntry) {
+    return [];
   }
 
   const primarySnippet = extractGrimoireSnippet(primaryEntry);

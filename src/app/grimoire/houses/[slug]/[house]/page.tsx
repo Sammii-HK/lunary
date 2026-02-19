@@ -41,8 +41,8 @@ export async function generateMetadata({
   const houseData = HOUSE_DATA[house];
   const ordinal = getOrdinalSuffix(house);
 
-  const title = `${planetName} in the ${ordinal} House: Meaning & Interpretation | Lunary`;
-  const description = `${planetName} in the ${ordinal} House meaning in astrology. Learn how ${planetName} influences ${houseData.lifeArea.toLowerCase()} in your natal chart.`;
+  const title = `${planetName} in the ${ordinal} House: What It Means in Your Chart`;
+  const description = `Have ${planetName} in your ${ordinal} house? This shapes your ${houseData.lifeArea.toLowerCase()}. How it affects relationships, career & personality.`;
 
   return {
     title,

@@ -678,7 +678,7 @@ export default function AdminDashboard() {
     {
       title: 'Content Videos',
       description: 'Generate weekly long-form videos and manage outputs',
-      href: '/content/videos',
+      href: '/admin/content/videos',
       icon: <Play className='h-5 w-5' />,
       category: 'content',
       status: 'active',
@@ -702,6 +702,14 @@ export default function AdminDashboard() {
       description: 'Create magical packs with grimoire database',
       href: '/admin/grimoire-packs',
       icon: <Sparkles className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
+      title: 'Weekly Stories',
+      description: 'Download weekly stories for TikTok scheduling',
+      href: '/admin/weekly-stories',
+      icon: <Smartphone className='h-5 w-5' />,
       category: 'content',
       status: 'new',
     },

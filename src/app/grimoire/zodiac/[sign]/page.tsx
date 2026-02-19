@@ -53,8 +53,8 @@ export async function generateMetadata({
     .replace('December', 'Dec');
 
   return createGrimoireMetadata({
-    title: `${signData.name} Zodiac Sign: Dates, Traits & Compatibility (${shortDates})`,
-    description: `Complete ${signData.name} guide: personality traits, love compatibility, career strengths, and horoscope. Discover the ${signData.element.toLowerCase()} sign's true nature.`,
+    title: `${signData.name} (${shortDates}): Personality, Love & Compatibility`,
+    description: `Everything about ${signData.name}: personality traits, best & worst matches, career strengths & what makes ${signData.element.toLowerCase()} signs tick. Accurate ${signData.name} profile.`,
     keywords: [
       `${signData.name} zodiac sign`,
       `${signData.name} dates`,

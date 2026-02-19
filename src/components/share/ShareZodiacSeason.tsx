@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Share2, Sparkles } from 'lucide-react';
+import { Share2, Sparkles, X } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { useShareModal } from '@/hooks/useShareModal';
 import { ShareModal } from './ShareModal';
@@ -294,6 +294,7 @@ export function ShareZodiacSeason({
   const { user } = useUser();
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const [shareRecord, setShareRecord] = useState<{
     shareId: string;
     shareUrl: string;
@@ -332,6 +333,30 @@ export function ShareZodiacSeason({
     };
     checkSeason();
   }, [onSeasonFetch, demo]);
+
+  // Check dismiss state from localStorage + cookie
+  useEffect(() => {
+    if (!seasonData) return;
+    const key = `season-banner-dismissed-${seasonData.sign}`;
+    if (localStorage.getItem(key)) {
+      setDismissed(true);
+      return;
+    }
+    // Also check cookie for cross-tab persistence
+    if (document.cookie.includes(key)) {
+      setDismissed(true);
+    }
+  }, [seasonData]);
+
+  const handleDismiss = useCallback(() => {
+    if (!seasonData) return;
+    const key = `season-banner-dismissed-${seasonData.sign}`;
+    localStorage.setItem(key, '1');
+    // Set cookie that expires when season ends (use endDate + 1 day)
+    const expires = new Date(seasonData.endDate + 'T23:59:59');
+    document.cookie = `${key}=1; path=/; expires=${expires.toUTCString()}; SameSite=Lax`;
+    setDismissed(true);
+  }, [seasonData]);
 
   const generateCard = useCallback(async () => {
     if (!seasonData) {
@@ -501,12 +526,20 @@ export function ShareZodiacSeason({
   };
 
   // Don't show button if not in season transition window (unless in demo mode)
-  if (!seasonData) {
+  if (!seasonData || dismissed) {
     return null;
   }
 
   return (
-    <div className='flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-lunary-primary-700/50 bg-lunary-primary-900/5'>
+    <div className='relative flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-lunary-primary-700/50 bg-lunary-primary-900/5'>
+      <button
+        onClick={handleDismiss}
+        className='absolute top-2 right-2 p-1 rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 transition-colors'
+        aria-label='Dismiss season banner'
+      >
+        <X className='w-3.5 h-3.5' />
+      </button>
+
       <div className='flex items-center gap-2 text-sm text-lunary-primary-200'>
         <Sparkles className='w-4 h-4' />
         <span>Welcome to {seasonData.sign} Season!</span>

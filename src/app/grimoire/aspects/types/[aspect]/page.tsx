@@ -32,8 +32,8 @@ export async function generateMetadata({
     astrologicalAspects[aspectKey as keyof typeof astrologicalAspects];
   // Use "an" for vowel sounds (Opposition, etc.), "a" for consonants
   const article = /^[aeiou]/i.test(aspectData.name) ? 'an' : 'a';
-  const title = `${aspectData.name} Aspect in Astrology: ${aspectData.degrees}° Meaning & Interpretation`;
-  const description = `What is ${article} ${aspectData.name.toLowerCase()} aspect? When planets sit ${aspectData.degrees}° apart, they create ${aspectData.nature === 'harmonious' ? 'flow and ease' : aspectData.nature === 'challenging' ? 'tension and awareness' : 'unique dynamics'}. Learn how ${aspectData.name.toLowerCase()}s work in your birth chart and transits.`;
+  const title = `${aspectData.name} in Astrology: What a ${aspectData.degrees}° Aspect Means in Your Chart`;
+  const description = `What is ${article} ${aspectData.name.toLowerCase()}? When planets sit ${aspectData.degrees}° apart they create ${aspectData.nature === 'harmonious' ? 'flow & ease' : aspectData.nature === 'challenging' ? 'tension & growth' : 'unique dynamics'}. How ${aspectData.name.toLowerCase()}s work in your birth chart, transits & synastry.`;
 
   return {
     title,

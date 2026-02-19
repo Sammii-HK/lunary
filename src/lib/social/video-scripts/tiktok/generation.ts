@@ -439,24 +439,25 @@ export async function generateTikTokScript(
     });
   }
 
-  // "Save this" closing overlay (#8) — last 5 seconds, non-conversion only
-  // Extended from 3s to 5s: save decision happens in the final 5 seconds
+  // Comment-driving CTA overlay — last 5 seconds, non-conversion only
+  // Data: "Save this" CTAs suppress TikTok reach. Comments drive algorithm.
+  // Replaced save prompts with comment-driving prompts.
   if (targetAudience !== 'conversion') {
-    const savePrompts = [
-      'Save this for later',
-      'Bookmark this one',
-      'Save for when you need it',
-      'Pin this',
-      'Screenshot this',
-      'Save this reference',
+    const commentPrompts = [
+      'Drop your sign below',
+      'Which one are you? Comment.',
+      'Tag someone who needs this',
+      'Tell me yours in the comments',
+      'Comment if this is you',
+      'Which number do you keep seeing?',
     ];
-    const saveSeed =
+    const ctaSeed =
       scheduledDate.getFullYear() * 10000 +
       (scheduledDate.getMonth() + 1) * 100 +
       scheduledDate.getDate();
     const estimatedSeconds = wordCount / 2.6;
     overlays.push({
-      text: savePrompts[saveSeed % savePrompts.length],
+      text: commentPrompts[ctaSeed % commentPrompts.length],
       startTime: Math.max(estimatedSeconds - 5, 0),
       endTime: estimatedSeconds,
       style: 'stamp',

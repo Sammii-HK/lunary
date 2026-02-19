@@ -70,13 +70,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Get recent grimoire slugs to avoid repeats
-    const recentEpisodes = await prisma.podcastEpisode.findMany({
-      orderBy: { episodeNumber: 'desc' },
-      take: 10,
+    // Get ALL grimoire slugs ever covered to avoid repeats
+    const allEpisodes = await prisma.podcastEpisode.findMany({
       select: { grimoireSlugs: true },
     });
-    const recentSlugs = recentEpisodes.flatMap((ep) => ep.grimoireSlugs);
+    const recentSlugs = allEpisodes.flatMap((ep) => ep.grimoireSlugs);
 
     // 1. Select content
     const topics = selectPodcastTopics(episodeNumber, recentSlugs);

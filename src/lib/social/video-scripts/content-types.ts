@@ -16,7 +16,11 @@ export type ContentType =
   | 'sign-check' // "If you're a [sign], stop scrolling" callout (12:00 UTC)
   | 'myth' // "The real reason [sign] is..." storytime (12:00 UTC)
   | 'transit-alert' // Timely transit content when major transits detected (12:00 UTC)
-  | 'did-you-know'; // Surprising facts from grimoire content (17:00 UTC)
+  | 'did-you-know' // Surprising facts from grimoire content (17:00 UTC)
+  | 'angel-number' // Angel number explainers (12:00 UTC)
+  | 'sign-identity' // "If you're a [sign]..." identity callouts (12:00 UTC)
+  | 'chiron-sign' // "Chiron in [sign]" content (17:00 UTC)
+  | 'sign-origin'; // "Why is [sign] the [ordinal] sign?" (12:00 UTC)
 
 export type TargetAudience = 'discovery' | 'consideration' | 'conversion';
 
@@ -157,6 +161,46 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
     platforms: ['tiktok'],
     description:
       'Save-worthy facts that educate and surprise. Hook-driven "Did you know...?" format designed for saves and shares.',
+  },
+
+  'angel-number': {
+    type: 'angel-number',
+    purpose: 'Angel number explainers — S-tier performer (3000+ avg views)',
+    idealTime: 12,
+    targetAudience: 'discovery',
+    platforms: ['tiktok', 'instagram'],
+    description:
+      'Angel number deep dives (111, 222, 333...). Top viral format. Max 2x/week for scarcity. Comment-driving CTA.',
+  },
+
+  'sign-identity': {
+    type: 'sign-identity',
+    purpose: 'Sign-specific identity callouts for targeted engagement',
+    idealTime: 12,
+    targetAudience: 'discovery',
+    platforms: ['tiktok', 'instagram'],
+    description:
+      '"If you\'re a [sign]..." identity-driven content. Names specific sign in hook for 2-4x view multiplier vs generic.',
+  },
+
+  'chiron-sign': {
+    type: 'chiron-sign',
+    purpose: 'Chiron in [sign] wound/healing content',
+    idealTime: 17,
+    targetAudience: 'discovery',
+    platforms: ['tiktok', 'instagram'],
+    description:
+      'Chiron placement content. Reliable 300-585 views. Deep, personal, save-worthy. Rotates through all 12 signs.',
+  },
+
+  'sign-origin': {
+    type: 'sign-origin',
+    purpose: 'Zodiac sign origin stories',
+    idealTime: 12,
+    targetAudience: 'discovery',
+    platforms: ['tiktok', 'instagram'],
+    description:
+      '"Why is [sign] the [ordinal] sign?" origin stories. A-tier performer (898 avg views). Share-driving format.',
   },
 };
 

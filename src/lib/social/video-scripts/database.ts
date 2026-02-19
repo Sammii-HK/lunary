@@ -467,6 +467,128 @@ export async function getTopPerformingStructures(
 }
 
 /**
+ * Get aggregated performance scores by content category.
+ * Used by the content scoring engine to compute dynamic scheduling weights.
+ *
+ * Returns rolling metrics over `days` window (default 30).
+ */
+export async function getContentCategoryScores(days: number = 30): Promise<
+  Array<{
+    category: string;
+    score: number;
+    count: number;
+    avgViews: number;
+    avgLikes: number;
+    avgComments: number;
+    avgShares: number;
+    trend: number;
+  }>
+> {
+  try {
+    const { sql } = await import('@vercel/postgres');
+
+    // Weighted composite score: views*0.3 + likes*1.0 + comments*3.0 + shares*2.0
+    // Comments weighted highest — primary TikTok algorithm signal
+    const result = await sql`
+      SELECT
+        content_type as category,
+        (AVG(views) * 0.3 + AVG(likes) * 1.0 + AVG(comments) * 3.0 + AVG(shares) * 2.0) as score,
+        COUNT(*)::int as count,
+        AVG(views) as avg_views,
+        AVG(likes) as avg_likes,
+        AVG(comments) as avg_comments,
+        AVG(shares) as avg_shares
+      FROM video_performance
+      WHERE content_type IS NOT NULL
+        AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+      GROUP BY content_type
+      HAVING COUNT(*) >= 2
+      ORDER BY score DESC
+    `;
+
+    // Calculate trend: compare last 15 days vs previous 15 days
+    const halfDays = Math.floor(days / 2);
+    const trendResult = await sql`
+      SELECT
+        content_type as category,
+        AVG(CASE WHEN recorded_at >= NOW() - INTERVAL '1 day' * ${halfDays} THEN views ELSE NULL END) as recent_avg,
+        AVG(CASE WHEN recorded_at < NOW() - INTERVAL '1 day' * ${halfDays} THEN views ELSE NULL END) as older_avg
+      FROM video_performance
+      WHERE content_type IS NOT NULL
+        AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+      GROUP BY content_type
+    `;
+
+    const trendMap = new Map<string, number>();
+    for (const row of trendResult.rows) {
+      const recent = Number(row.recent_avg) || 0;
+      const older = Number(row.older_avg) || 0;
+      // Trend: positive = improving, negative = declining
+      trendMap.set(row.category, older > 0 ? (recent - older) / older : 0);
+    }
+
+    return result.rows.map((row) => ({
+      category: row.category,
+      score: Number(row.score),
+      count: Number(row.count),
+      avgViews: Number(row.avg_views),
+      avgLikes: Number(row.avg_likes),
+      avgComments: Number(row.avg_comments),
+      avgShares: Number(row.avg_shares),
+      trend: trendMap.get(row.category) ?? 0,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Bulk insert performance records (for TikTok Studio data import).
+ * Inserts directly without requiring a linked video_script.
+ */
+export async function bulkInsertPerformance(
+  records: Array<{
+    platform?: string;
+    views: number;
+    likes: number;
+    comments: number;
+    shares: number;
+    saves?: number;
+    contentCategory: string;
+    postedAt: string;
+    description?: string;
+  }>,
+): Promise<number> {
+  const { sql } = await import('@vercel/postgres');
+  let inserted = 0;
+
+  for (const record of records) {
+    try {
+      await sql`
+        INSERT INTO video_performance (
+          platform, views, likes, comments, shares, saves,
+          content_type, recorded_at
+        ) VALUES (
+          ${record.platform || 'tiktok'},
+          ${record.views},
+          ${record.likes},
+          ${record.comments},
+          ${record.shares},
+          ${record.saves ?? 0},
+          ${record.contentCategory},
+          ${record.postedAt}
+        )
+      `;
+      inserted++;
+    } catch {
+      // Skip individual record failures
+    }
+  }
+
+  return inserted;
+}
+
+/**
  * Update video script written post content
  */
 export async function updateVideoScriptWrittenPost(
