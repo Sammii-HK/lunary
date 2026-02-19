@@ -28,6 +28,9 @@ export type ContentTypeKey =
   | 'ranking'
   | 'hot_take'
   | 'sign_check'
+  | 'sign_identity'
+  | 'chiron_sign'
+  | 'sign_origin'
   | 'myth'
   | 'did_you_know'
   | 'default';
@@ -971,8 +974,94 @@ export const CONTENT_TYPE_VOICES: Record<
       'most people dont realise',
       'the reason is',
       'next time you see this',
-      'save this',
+      'drop yours below',
       'now you know',
+    ],
+  },
+
+  sign_identity: {
+    tone: 'Direct, personal, identity-affirming',
+    voiceDescription: `SIGN IDENTITY VOICE:
+- This is pure identity content — make the viewer feel SEEN
+- Always name the specific sign in the first line
+- Speak DIRECTLY to that sign using "you"
+- Focus on behaviours, habits, and quirks they'll immediately recognise
+- The tone is affectionate but knowing — like you've studied them
+- Every line should make them nod or tag a friend`,
+    exampleEnergy: `Example energy:
+"Pisces, you romanticise literally everything. The barista who smiled at you? Already planned the wedding."
+"Leo, you didn't get dressed today. You got READY. There's a difference and everyone in the room knows it."
+"Virgo energy is rewriting a text 4 times then sending 'ok'."`,
+    specificBans: [
+      'all signs should',
+      'if you happen to be',
+      'some of you might',
+      'this might apply',
+      'no judgment',
+    ],
+    keyPhrases: [
+      'you already know',
+      'be honest',
+      'tag yourself',
+      'send this to your',
+      'drop your sign',
+      'which sign is this',
+    ],
+  },
+
+  chiron_sign: {
+    tone: 'Deep, empathetic, healing-focused',
+    voiceDescription: `CHIRON SIGN VOICE:
+- Chiron is the wounded healer — speak with depth and compassion
+- Always name the specific sign
+- Focus on the WOUND first, then the GIFT it becomes
+- Be specific about how the wound manifests in daily life
+- This content should feel like therapy, not entertainment
+- The viewer should feel understood, not diagnosed`,
+    exampleEnergy: `Example energy:
+"Chiron in Aries: The wound of feeling like you don't have the right to exist. To take up space. To want things."
+"Chiron in Gemini: You learned early that your words could hurt. So you started choosing them too carefully. The wound isn't silence. It's self-censorship."
+"Chiron in Leo: The fear isn't being seen. It's being seen and then rejected. So you perform instead of showing up real."`,
+    specificBans: [
+      'your wound defines you',
+      'you are broken because',
+      'chiron dooms you to',
+      'you will always struggle with',
+    ],
+    keyPhrases: [
+      'the wound here is',
+      'shows up in daily life as',
+      'the gift becomes',
+      'the healing starts when',
+      'you learned early that',
+    ],
+  },
+
+  sign_origin: {
+    tone: 'Storytelling, educational, awe-inspiring',
+    voiceDescription: `SIGN ORIGIN VOICE:
+- Tell the origin story like it's the most fascinating thing you've ever learned
+- Always name the specific sign
+- Connect ancient mythology to modern personality traits
+- The "why" should change how the viewer sees the sign
+- Build to a reveal that recontextualises the sign
+- Make them want to share this with every person of that sign they know`,
+    exampleEnergy: `Example energy:
+"Why is Scorpio the 8th sign? Because 8 is the number of death and rebirth. The original Scorpio symbol wasn't a scorpion. It was a phoenix."
+"Why is Virgo the 6th sign? 6 is the number of service and craft. Virgo was originally represented by the harvest goddess. Not purity. Mastery."
+"Libra is the only sign represented by an object, not a creature. The scales. Because Libra's lesson isn't about personality. It's about justice."`,
+    specificBans: [
+      'according to legend',
+      'ancient peoples believed',
+      'in olden times',
+      'scholars think',
+    ],
+    keyPhrases: [
+      'the real reason',
+      'the original symbol was',
+      'this changes everything',
+      'you will never see',
+      'the connection is',
     ],
   },
 
@@ -1221,6 +1310,24 @@ export const SCRIPT_STRUCTURES: Record<ContentTypeKey, string[]> = {
     `MISCONCEPTION_REVEAL: "Most people think [common belief]. Here's what's actually true." - Open with what people assume - Reveal the real fact - Add context that makes it stick - Close with "Now you know"`,
     `FACT_THEN_WHY: "Did you know [fact]? Here's why that matters." - Open with the surprising fact - Explain the mechanism or history - Connect it to something the viewer does or believes - Close with practical takeaway`,
     `CHAIN_FACTS: "Did you know [fact 1]? It gets better." - Open with an interesting fact - Layer a second related fact on top - Build to the most surprising detail - Close with "Save this for later"`,
+  ],
+
+  sign_identity: [
+    `IDENTITY_CALLOUT: "If you're a [sign]..." - Open with direct address naming the sign - 3-4 hyper-specific behaviours they'll recognise instantly - Each line more accurate than the last - Close with "Drop your sign below"`,
+    `SIGN_ENERGY: "[Sign] energy is [specific thing]." - Open with the essence distilled to one behaviour - Expand with 2-3 examples - Tease affectionately - Close with "Tag your [sign] friend"`,
+    `SIGN_VS_SIGN: "[Sign] thinks they're [thing]. Everyone else sees [other thing]." - Open with the gap between self-image and perception - Name 2-3 specific examples - Land on the truth in between - Close with debate prompt`,
+  ],
+
+  chiron_sign: [
+    `WOUND_REVEAL: "Chiron in [sign]: the wound of [core wound]." - Name the wound directly - How it shows up in relationships - How it shows up in work - The gift it becomes when healed`,
+    `DAILY_LIFE: "Chiron in [sign] shows up every time you [behaviour]." - Ground in observable daily behaviour - Explain the wound underneath - Why this pattern persists - The first step to healing`,
+    `HEALING_ARC: "Chiron in [sign]: from [wound] to [gift]." - Name the starting pain - The journey through it - What changes - The healer that emerges`,
+  ],
+
+  sign_origin: [
+    `WHY_ORDINAL: "Why is [sign] the [ordinal] sign?" - Open with the question - The mythology/numerology answer - How it connects to the sign's personality - Close with "You'll never see [sign] the same way"`,
+    `SYMBOL_ORIGIN: "The symbol for [sign] isn't what you think." - Open with common assumption - Reveal the original symbol or meaning - Connect to how the sign actually works - Close with share prompt`,
+    `HIDDEN_CONNECTION: "[Sign]'s origin connects to [unexpected thing]." - Open with the surprising connection - Tell the story behind it - Explain why it matters - Close with "Now you know"`,
   ],
 
   default: [

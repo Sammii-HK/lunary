@@ -84,12 +84,13 @@ const CATEGORY_ANIMATION_MAP: Record<string, BackgroundAnimationType> = {
   'jar-spells': 'candle-flames',
   protection: 'candle-flames',
 
-  // Sacred Geometry — numerology/numbers themes
-  numerology: 'sacred-geometry',
-  'angel-numbers': 'sacred-geometry',
-  'life-path': 'sacred-geometry',
-  'mirror-hours': 'sacred-geometry',
-  'double-hours': 'sacred-geometry',
+  // Aurora — numerology/numbers themes (switched from sacred-geometry;
+  // aurora bg consistently outperforms in TikTok engagement data)
+  numerology: 'aurora',
+  'angel-numbers': 'aurora',
+  'life-path': 'aurora',
+  'mirror-hours': 'aurora',
+  'double-hours': 'aurora',
   manifestation: 'sacred-geometry',
   meditation: 'sacred-geometry',
   chakras: 'sacred-geometry',

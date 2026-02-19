@@ -19,6 +19,48 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import ffmpeg from 'fluent-ffmpeg';
 
+/**
+ * Map contentTypeKey from script metadata to a category-visuals category.
+ * Engagement scripts (sign-check, ranking, angel-number, etc.) don't have a
+ * WeeklyTheme, so we derive the visual category from their content type key.
+ */
+function contentTypeKeyToCategory(
+  contentTypeKey: string | undefined,
+): string | undefined {
+  if (!contentTypeKey) return undefined;
+  const map: Record<string, string> = {
+    angel_numbers: 'angel-numbers',
+    sign_check: 'zodiac',
+    sign_identity: 'zodiac',
+    sign_origin: 'zodiac',
+    chiron_sign: 'zodiac',
+    ranking: 'zodiac',
+    hot_take: 'zodiac',
+    quiz: 'zodiac',
+    myth: 'zodiac',
+    did_you_know: 'zodiac',
+    transit_alert: 'transits',
+    zodiac_sun: 'zodiac',
+    zodiac_moon: 'zodiac',
+    zodiac_rising: 'zodiac',
+    moon_phases: 'moon',
+    numerology_life_path: 'numerology',
+    numerology_expression: 'numerology',
+    mirror_hours: 'mirror-hours',
+    crystals: 'crystals',
+    tarot_major: 'tarot',
+    tarot_minor: 'tarot',
+    spells: 'spells',
+    planets: 'transits',
+    retrogrades: 'transits',
+    eclipses: 'eclipses',
+    aspects: 'aspects',
+    houses: 'houses',
+    chakras: 'chakras',
+  };
+  return map[contentTypeKey];
+}
+
 function getAudioDurationFromBuffer(buffer: Buffer): Promise<number> {
   return new Promise(async (resolve, reject) => {
     // Validate buffer size (max 50MB for audio)
@@ -243,7 +285,14 @@ export async function POST(request: NextRequest) {
           .toLowerCase()
           .replace(/\s+/g, '-');
         const slug = facet?.grimoireSlug.split('/').pop() || fallbackSlug;
-        const category = theme?.category || 'lunar';
+        // For engagement scripts (sign-check, ranking, angel-number, etc.)
+        // theme is undefined because they don't use weekly themes.
+        // Derive category from script metadata contentTypeKey instead.
+        const metadata = script.metadata || {};
+        const category =
+          theme?.category ||
+          contentTypeKeyToCategory(metadata.contentTypeKey) ||
+          'lunar';
 
         const totalParts = theme?.facets.length || 7;
         const facetIndex =

@@ -1,26 +1,21 @@
 /**
- * Weekly Engagement Content Generators
+ * Weekly Engagement Content Generators — Self-Healing Scheduler
  *
  * Two engagement slots per day, complementary formats (no duplicates same day).
- * Reweighted for algorithm signal value: saves (10) + shares (7) + comments (5).
  *
- * Engagement A (17 UTC — UK evening / US lunch):
- * - Mon: Sign Check    | Tue: Rankings     | Wed: Hot Take
- * - Thu: Quiz          | Fri: Rankings     | Sat: Transit Alert
- * - Sun: Quiz
+ * DYNAMIC SCHEDULING: Content types are selected using performance-weighted
+ * probabilities from the content scoring engine. The system reads from
+ * video_performance to promote high-performing formats and suppress poor ones.
  *
- * Engagement B (20 UTC — UK leisure / US afternoon):
- * - Mon: Rankings      | Tue: Hot Take     | Wed: Quiz
- * - Thu: Rankings      | Fri: Myth         | Sat: Did You Know
- * - Sun: Hot Take
+ * Fallback: When insufficient performance data exists, uses seed weights
+ * derived from the 109-post TikTok analysis.
  *
- * Rankings 4x/week (highest multi-signal: saves + comments + shares)
- * Hot Take 3x/week (comments + stitches)
- * Quiz 3x/week (interactive = comments + shares)
- * Sign Check 2x/week (identity = comments + shares)
- * Myth 1x/week (save-only)
- * Transit Alert 1x/week (time-sensitive saves)
- * Did You Know 1x/week (Saturday saves)
+ * Rules:
+ * 1. Never same content type in both slots on same day
+ * 2. Angel numbers max 2x/week (scarcity = anticipation)
+ * 3. Sign-specific content at least 1x daily (always works)
+ * 4. Suppressed categories never scheduled
+ * 5. No more than maxPerWeek of same type per slot
  *
  * App demos and comparisons are parked (not deleted) for future use.
  */
@@ -35,6 +30,10 @@ import { generateQuizScript } from './quiz';
 import { generateHotTakeScript } from './hot-take';
 import { generateMythScript } from './myth';
 import { generateDidYouKnowScript } from './did-you-know';
+import { generateAngelNumberScript } from './angel-number';
+import { generateSignIdentityScript } from './sign-identity';
+import { generateChironSignScript } from './chiron-sign';
+import { generateSignOriginScript } from './sign-origin';
 import { getTodaysTransitVideo } from './transit-integration';
 import type { VideoScript } from '../types';
 import type { ContentType } from '../content-types';
@@ -44,6 +43,13 @@ import {
   getVideoSlotHour,
   type VideoSlot,
 } from '@/utils/posting-times';
+import {
+  getContentTypeWeights,
+  getSuppressedCategories,
+  weightedSelect,
+  type CategoryScore,
+} from '../content-scores';
+import { SEED_WEIGHTS } from '../content-score-seeds';
 
 interface DayConfig {
   contentType: ContentType;
@@ -51,32 +57,28 @@ interface DayConfig {
 }
 
 /**
- * Engagement A schedule (17 UTC slot)
- * Reweighted for high-signal content types (rankings, hot takes, quizzes)
+ * Static fallback schedules — used only when dynamic scheduling fails entirely.
+ * Kept for backwards compatibility with getEngagementASchedule/B.
  */
 const ENGAGEMENT_A_SCHEDULE: Record<string, DayConfig> = {
-  monday: { contentType: 'sign-check', label: 'Sign Check' },
-  tuesday: { contentType: 'ranking', label: 'Rankings' },
+  monday: { contentType: 'sign-identity', label: 'Sign Identity' },
+  tuesday: { contentType: 'angel-number', label: 'Angel Number' },
   wednesday: { contentType: 'hot-take', label: 'Hot Take' },
-  thursday: { contentType: 'quiz', label: 'Quiz' },
+  thursday: { contentType: 'sign-check', label: 'Sign Check' },
   friday: { contentType: 'ranking', label: 'Rankings' },
   saturday: {
     contentType: 'transit-alert',
     label: 'Transit Alert / Sign Check fallback',
   },
-  sunday: { contentType: 'quiz', label: 'Quiz' },
+  sunday: { contentType: 'sign-origin', label: 'Sign Origin' },
 };
 
-/**
- * Engagement B schedule (20 UTC slot)
- * Complementary formats — no duplicate content type on the same day as Slot A
- */
 const ENGAGEMENT_B_SCHEDULE: Record<string, DayConfig> = {
   monday: { contentType: 'ranking', label: 'Rankings' },
-  tuesday: { contentType: 'hot-take', label: 'Hot Take' },
+  tuesday: { contentType: 'chiron-sign', label: 'Chiron Sign' },
   wednesday: { contentType: 'quiz', label: 'Quiz' },
-  thursday: { contentType: 'ranking', label: 'Rankings' },
-  friday: { contentType: 'myth', label: 'Myth/Storytime' },
+  thursday: { contentType: 'sign-identity', label: 'Sign Identity' },
+  friday: { contentType: 'sign-origin', label: 'Sign Origin' },
   saturday: { contentType: 'did-you-know', label: 'Did You Know' },
   sunday: { contentType: 'hot-take', label: 'Hot Take' },
 };
@@ -90,6 +92,160 @@ const DAY_NAMES = [
   'saturday',
   'sunday',
 ] as const;
+
+/**
+ * Content types eligible for engagement slots.
+ * Maps content-score category names to ContentType values.
+ */
+const SCHEDULABLE_TYPES: ContentType[] = [
+  'angel-number',
+  'sign-identity',
+  'chiron-sign',
+  'sign-origin',
+  'sign-check',
+  'ranking',
+  'hot-take',
+  'quiz',
+  'transit-alert',
+  'did-you-know',
+  'myth',
+];
+
+/**
+ * Sign-specific types that should appear at least 1x daily across both slots.
+ */
+const SIGN_SPECIFIC_TYPES = new Set<ContentType>([
+  'sign-identity',
+  'sign-check',
+  'chiron-sign',
+  'sign-origin',
+]);
+
+/**
+ * Build a dynamic weekly schedule using performance-weighted content selection.
+ *
+ * Returns schedules for both engagement slots (A and B) for 7 days.
+ * Falls back to static schedules if scoring engine fails.
+ */
+export async function buildWeeklySchedule(weekStartDate: Date): Promise<{
+  slotA: Record<string, DayConfig>;
+  slotB: Record<string, DayConfig>;
+}> {
+  let weights: Map<string, CategoryScore>;
+  let suppressed: Set<string>;
+
+  try {
+    [weights, suppressed] = await Promise.all([
+      getContentTypeWeights(),
+      getSuppressedCategories(),
+    ]);
+  } catch {
+    console.log('Dynamic scheduling unavailable, using static fallback');
+    return { slotA: ENGAGEMENT_A_SCHEDULE, slotB: ENGAGEMENT_B_SCHEDULE };
+  }
+
+  const slotA: Record<string, DayConfig> = {};
+  const slotB: Record<string, DayConfig> = {};
+
+  // Track weekly usage counts per type per slot
+  const weeklyCountA = new Map<string, number>();
+  const weeklyCountB = new Map<string, number>();
+  let angelNumberCount = 0;
+
+  for (let i = 0; i < 7; i++) {
+    const dayName = DAY_NAMES[i];
+    const date = new Date(weekStartDate);
+    date.setDate(date.getDate() + i);
+
+    // Deterministic seed for this day
+    const daySeed =
+      date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+
+    // Build exclusion set for Slot A
+    const excludeA = new Set<string>(suppressed);
+    // Enforce maxPerWeek constraints
+    for (const [type, count] of weeklyCountA) {
+      const maxPerWeek = SEED_WEIGHTS[type]?.maxPerWeek ?? 4;
+      if (count >= maxPerWeek) excludeA.add(type);
+    }
+    // Enforce angel number cap (shared across both slots)
+    if (angelNumberCount >= 2) excludeA.add('angel-number');
+
+    // Select Slot A content type
+    const typeA = selectContentType(weights, excludeA, daySeed, i);
+    slotA[dayName] = { contentType: typeA, label: formatLabel(typeA) };
+    weeklyCountA.set(typeA, (weeklyCountA.get(typeA) || 0) + 1);
+    if (typeA === 'angel-number') angelNumberCount++;
+
+    // Build exclusion set for Slot B (includes Slot A pick for same day)
+    const excludeB = new Set<string>(suppressed);
+    excludeB.add(typeA); // No duplicate on same day
+    for (const [type, count] of weeklyCountB) {
+      const maxPerWeek = SEED_WEIGHTS[type]?.maxPerWeek ?? 4;
+      if (count >= maxPerWeek) excludeB.add(type);
+    }
+    if (angelNumberCount >= 2) excludeB.add('angel-number');
+
+    // If Slot A didn't get sign-specific content, bias Slot B toward it
+    const needSignSpecific = !SIGN_SPECIFIC_TYPES.has(typeA);
+    let typeB: ContentType;
+    if (needSignSpecific && Math.random() < 0.7) {
+      // 70% chance to force sign-specific for Slot B
+      const signTypes = [...SIGN_SPECIFIC_TYPES].filter(
+        (t) => !excludeB.has(t),
+      );
+      if (signTypes.length > 0) {
+        typeB = signTypes[daySeed % signTypes.length];
+      } else {
+        typeB = selectContentType(weights, excludeB, daySeed + 100, i);
+      }
+    } else {
+      typeB = selectContentType(weights, excludeB, daySeed + 100, i);
+    }
+
+    slotB[dayName] = { contentType: typeB, label: formatLabel(typeB) };
+    weeklyCountB.set(typeB, (weeklyCountB.get(typeB) || 0) + 1);
+    if (typeB === 'angel-number') angelNumberCount++;
+  }
+
+  return { slotA, slotB };
+}
+
+/**
+ * Select a content type from weighted options.
+ * Falls back through schedulable types if weighted select fails.
+ */
+function selectContentType(
+  weights: Map<string, CategoryScore>,
+  exclude: Set<string>,
+  seed: number,
+  dayIndex: number,
+): ContentType {
+  const selected = weightedSelect(weights, exclude, seed);
+
+  if (selected && SCHEDULABLE_TYPES.includes(selected as ContentType)) {
+    return selected as ContentType;
+  }
+
+  // Fallback: pick from schedulable types not excluded
+  const available = SCHEDULABLE_TYPES.filter((t) => !exclude.has(t));
+  if (available.length > 0) {
+    return available[(seed + dayIndex) % available.length];
+  }
+
+  // Ultimate fallback
+  return 'sign-identity';
+}
+
+/**
+ * Format a content type as a human-readable label
+ */
+function formatLabel(type: ContentType): string {
+  return type
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
 
 /**
  * Generate a script from a content type config
@@ -123,6 +279,18 @@ export async function generateScriptForContentType(
 
     case 'did-you-know':
       return generateDidYouKnowScript(date);
+
+    case 'angel-number':
+      return generateAngelNumberScript(date);
+
+    case 'sign-identity':
+      return generateSignIdentityScript(date);
+
+    case 'chiron-sign':
+      return generateChironSignScript(date);
+
+    case 'sign-origin':
+      return generateSignOriginScript(date);
 
     default:
       console.error(`  Unknown content type: ${contentType}`);
@@ -194,32 +362,28 @@ async function generateWeeklyEngagementScripts(
 
 /**
  * Generate Engagement A scripts for the week (17 UTC slot)
+ * Uses dynamic schedule when available, falls back to static.
  */
 export async function generateWeeklySecondaryScripts(
   weekStartDate: Date,
 ): Promise<VideoScript[]> {
-  return generateWeeklyEngagementScripts(
-    weekStartDate,
-    ENGAGEMENT_A_SCHEDULE,
-    'engagementA',
-  );
+  const { slotA } = await buildWeeklySchedule(weekStartDate);
+  return generateWeeklyEngagementScripts(weekStartDate, slotA, 'engagementA');
 }
 
 /**
  * Generate Engagement B scripts for the week (20 UTC slot)
+ * Uses dynamic schedule when available, falls back to static.
  */
 export async function generateWeeklyEngagementBScripts(
   weekStartDate: Date,
 ): Promise<VideoScript[]> {
-  return generateWeeklyEngagementScripts(
-    weekStartDate,
-    ENGAGEMENT_B_SCHEDULE,
-    'engagementB',
-  );
+  const { slotB } = await buildWeeklySchedule(weekStartDate);
+  return generateWeeklyEngagementScripts(weekStartDate, slotB, 'engagementB');
 }
 
 /**
- * Get the engagement schedules
+ * Get the engagement schedules (static fallback for compatibility)
  */
 export function getEngagementASchedule(): Record<string, DayConfig> {
   return ENGAGEMENT_A_SCHEDULE;

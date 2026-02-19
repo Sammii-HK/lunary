@@ -1456,6 +1456,134 @@ const FALLBACK_TEMPLATES: Record<
     ],
   },
 
+  sign_identity: {
+    context: [
+      'If you are a {topic}, this will feel personal.',
+      '{topic} energy shows up in very specific ways.',
+      'Only a {topic} would understand this.',
+      '{topic} does this and thinks nobody notices.',
+    ],
+    middle: [
+      'The thing about {topic} is the specificity.',
+      '{topic} has patterns only they recognise.',
+      'You feel seen because you are. {topic} is predictable.',
+      'Every {topic} reading this just nodded.',
+    ],
+    action: {
+      core_meaning: [
+        'Being a {topic} means carrying this trait everywhere you go.',
+      ],
+      common_misconception: [
+        'People misread {topic} energy as something else entirely.',
+      ],
+      emotional_impact: [
+        '{topic} feels this one deeply. You know exactly what this means.',
+      ],
+      real_life_expression: [
+        'In real life, {topic} shows up as this exact behaviour.',
+      ],
+      timing_and_context: ['{topic} does this at the worst possible moments.'],
+      practical_application: [
+        'Understanding your {topic} energy means knowing this pattern.',
+      ],
+      when_to_avoid: [
+        'Even {topic} needs to recognise when this trait goes too far.',
+      ],
+      subtle_insight: [
+        'The quiet {topic} trait nobody talks about is this one.',
+      ],
+    },
+    closing: [
+      'Drop your sign below.',
+      'Tag your {topic} friend.',
+      'If this is you, comment.',
+    ],
+  },
+
+  chiron_sign: {
+    context: [
+      'Chiron in {topic} carries a specific wound.',
+      'The wound of {topic} shows up in daily life.',
+      'Chiron in {topic} is about what you learned too early.',
+      '{topic} Chiron knows this feeling.',
+    ],
+    middle: [
+      'The wound is not the end. It becomes the gift.',
+      'Chiron in {topic} means healing through understanding.',
+      'What hurt you as {topic} becomes what heals others.',
+      'The pattern repeats until you recognise it.',
+    ],
+    action: {
+      core_meaning: [
+        'Chiron in {topic} means carrying this wound as a teacher.',
+      ],
+      common_misconception: [
+        'This wound is not weakness. It is your deepest source of wisdom.',
+      ],
+      emotional_impact: ['{topic} Chiron feels this in every relationship.'],
+      real_life_expression: [
+        'In daily life, this wound looks like a very specific pattern.',
+      ],
+      timing_and_context: [
+        'Chiron in {topic} activates during moments of vulnerability.',
+      ],
+      practical_application: [
+        'Healing Chiron in {topic} starts with recognising the pattern.',
+      ],
+      when_to_avoid: ['When {topic} Chiron flares up, pause before reacting.'],
+      subtle_insight: [
+        'The quiet gift of Chiron in {topic} is empathy born from experience.',
+      ],
+    },
+    closing: [
+      'If this is your Chiron, drop your sign.',
+      'The wound heals when you name it.',
+      'Comment if you felt this.',
+    ],
+  },
+
+  sign_origin: {
+    context: [
+      'The origin of {topic} explains everything about the sign.',
+      'Why is {topic} positioned here in the zodiac? The answer changes everything.',
+      'The original symbol for {topic} was not what you think.',
+      '{topic} has an origin story that recontextualises the sign.',
+    ],
+    middle: [
+      'The mythology behind {topic} connects to personality traits in specific ways.',
+      'Once you know the origin, {topic} makes perfect sense.',
+      'The ancient story maps perfectly to modern {topic} behaviour.',
+      'This connection has been there since the beginning.',
+    ],
+    action: {
+      core_meaning: [
+        'The origin of {topic} reveals the core lesson of the sign.',
+      ],
+      common_misconception: [
+        'Most people miss the real meaning behind {topic}.',
+      ],
+      emotional_impact: ['Knowing the origin makes {topic} feel different.'],
+      real_life_expression: [
+        'The origin story explains why {topic} behaves exactly this way.',
+      ],
+      timing_and_context: [
+        '{topic} was placed here for a reason tied to its mythology.',
+      ],
+      practical_application: [
+        'Understanding the origin helps you understand {topic} people.',
+      ],
+      when_to_avoid: ['Even the origin story has a shadow side for {topic}.'],
+      subtle_insight: [
+        'The detail most people miss about {topic} is in its original symbol.',
+      ],
+    },
+    closing: [
+      'Send this to every {topic} you know.',
+      'You will never see {topic} the same way.',
+      'Now you know. Share this.',
+    ],
+  },
+
   default: {
     context: [
       '{topic} has patterns worth noticing.',
