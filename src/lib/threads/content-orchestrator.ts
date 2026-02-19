@@ -54,8 +54,8 @@ function buildWeekdayBatch(dateStr: string): ThreadsPost[] {
   posts.push(generateCosmicTimingPost(dateStr, slots[0]));
 
   // Slot 1 (17:00 UTC) - Rotating by day of week
-  // Mon(1)=identity, Tue(2)=referral, Wed(3)=educational, Thu(4)=identity, Fri(5)=referral
-  if (dayOfWeek === 2 || dayOfWeek === 5) {
+  // Mon(1)=identity, Tue(2)=referral, Wed(3)=educational, Thu(4)=referral, Fri(5)=identity
+  if (dayOfWeek === 2 || dayOfWeek === 4) {
     posts.push(buildDearStylePost(dateStr, slots[1], seed));
   } else if (dayOfWeek === 3) {
     posts.push(generateEducationalPost(dateStr, slots[1]));
