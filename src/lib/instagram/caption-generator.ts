@@ -3,7 +3,15 @@ import type { IGPostType } from './types';
 
 // --- Hashtag Sets ---
 
-const CORE_HASHTAGS = ['#lunary', '#astrology', '#cosmic'];
+// Broad astrology discovery tags — used to fill remaining slots
+const DISCOVERY_HASHTAGS = [
+  '#astrology',
+  '#zodiacsigns',
+  '#horoscope',
+  '#spirituality',
+  '#mystic',
+  '#starsigns',
+];
 
 const CATEGORY_HASHTAGS: Record<ThemeCategory, string[]> = {
   zodiac: ['#zodiac', '#zodiacsigns', '#horoscope', '#astrologymemes'],
@@ -21,28 +29,20 @@ const CATEGORY_HASHTAGS: Record<ThemeCategory, string[]> = {
 const POST_TYPE_HASHTAGS: Record<IGPostType, string[]> = {
   meme: ['#astrologymemes', '#zodiacmemes', '#relatable', '#foryou'],
   carousel: [
-    '#learnontiktok',
     '#witchesofinstagram',
     '#grimoirepages',
     '#savethis',
+    '#astrologyfacts',
   ],
   quote: ['#cosmicquotes', '#spiritualquotes', '#inspiration', '#deepthoughts'],
   app_feature: ['#astrologyapp', '#birthchart', '#cosmictools', '#lunaryapp'],
-  did_you_know: ['#didyouknow', '#astrologyfacts', '#witchtok', '#savethis'],
-  sign_ranking: [
-    '#zodiacranking',
-    '#zodiacsigns',
-    '#signcheck',
-    '#astrologytok',
-  ],
+  did_you_know: ['#didyouknow', '#astrologyfacts', '#savethis', '#funfact'],
+  sign_ranking: ['#zodiacranking', '#zodiacsigns', '#signcheck', '#zodiactea'],
   angel_number_carousel: [
     '#angelnumbers',
     '#numerology',
-    '#111',
-    '#444',
     '#manifestation',
     '#spiritualawakening',
-    '#savethis',
   ],
   compatibility: [
     '#zodiaccompatibility',
@@ -280,41 +280,42 @@ function generateAngelNumberCaption(options: { title?: string }): string {
 }
 
 /**
- * Build combined hashtag list with rotation for variety.
- * Returns best 15-20 hashtags, rotated to avoid repetition.
+ * Build 3 topically relevant hashtags.
+ *
+ * Merges post-type tags + category tags into one pool of related tags,
+ * then picks 3 using seed-based rotation for daily variety.
+ * Falls back to broad discovery tags only if the topical pool is too small.
  */
 function buildHashtags(
   postType: IGPostType,
   category?: ThemeCategory,
   seed?: string,
 ): string[] {
-  const allTags: string[] = [];
+  const hash = hashString(seed || postType);
 
-  // Collect all relevant hashtags
-  allTags.push(...(POST_TYPE_HASHTAGS[postType] || []));
+  // Build a single pool of topically relevant tags
+  const pool: string[] = [];
+  pool.push(...(POST_TYPE_HASHTAGS[postType] || []));
   if (category && CATEGORY_HASHTAGS[category]) {
-    allTags.push(...CATEGORY_HASHTAGS[category]);
-  }
-  allTags.push(...CORE_HASHTAGS);
-
-  // Remove duplicates
-  const uniqueTags = Array.from(new Set(allTags));
-
-  // Rotate selection based on seed for variety
-  if (seed && uniqueTags.length > 12) {
-    const hash = hashString(seed);
-    const startIndex = hash % Math.max(1, uniqueTags.length - 12);
-
-    // Take a sliding window of tags starting from rotated position
-    const rotated = [
-      ...uniqueTags.slice(startIndex),
-      ...uniqueTags.slice(0, startIndex),
-    ];
-
-    return rotated.slice(0, 20);
+    pool.push(...CATEGORY_HASHTAGS[category]);
   }
 
-  return uniqueTags.slice(0, 20);
+  // Dedupe
+  const unique = Array.from(new Set(pool));
+
+  // If pool is too small, pad with broad discovery tags
+  if (unique.length < 3) {
+    for (const tag of DISCOVERY_HASHTAGS) {
+      if (!unique.includes(tag)) unique.push(tag);
+      if (unique.length >= 6) break;
+    }
+  }
+
+  // Rotate the pool based on seed so each post gets a different 3
+  const startIndex = hash % unique.length;
+  const rotated = [...unique.slice(startIndex), ...unique.slice(0, startIndex)];
+
+  return rotated.slice(0, 3);
 }
 
 /**
