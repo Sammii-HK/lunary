@@ -198,13 +198,16 @@ export function SnapshotTab({
                       : '—'
               }
               unit='D7'
-              status={
-                (activity?.product_d7_retention ?? 0) > 30
-                  ? 'excellent'
-                  : (activity?.product_d7_retention ?? 0) > 15
-                    ? 'good'
-                    : 'warning'
-              }
+              status={(() => {
+                const pct =
+                  activity?.product_d7_retention != null &&
+                  activity.product_d7_retention > 0
+                    ? activity.product_d7_retention
+                    : activity?.retention?.day_7 != null
+                      ? Number(activity.retention.day_7)
+                      : overallD7Retention * 100;
+                return pct > 30 ? 'excellent' : pct > 15 ? 'good' : 'warning';
+              })()}
               description={
                 activity?.product_d7_retention != null &&
                 activity.product_d7_retention > 0
