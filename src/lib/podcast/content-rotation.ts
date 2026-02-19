@@ -406,7 +406,6 @@ export function selectPodcastTopics(
           (e) => isPodcastWorthy(e) && !coveredSlugs.has(e.slug),
         );
         if (entries.length > 0) {
-          primaryCategory = cat;
           const idx =
             Math.floor((episodeNumber - 1) / PODCAST_CATEGORIES.length) %
             entries.length;
@@ -428,7 +427,6 @@ export function selectPodcastTopics(
     for (const cat of PODCAST_CATEGORIES) {
       const entries = (allEntries.get(cat) || []).filter(isPodcastWorthy);
       if (entries.length > 0) {
-        primaryCategory = cat;
         primaryEntry = entries[episodeNumber % entries.length];
         break;
       }
