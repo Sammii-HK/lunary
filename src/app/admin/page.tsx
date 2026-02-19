@@ -706,6 +706,14 @@ export default function AdminDashboard() {
       status: 'new',
     },
     {
+      title: 'Weekly Stories',
+      description: 'Download weekly stories for TikTok scheduling',
+      href: '/admin/weekly-stories',
+      icon: <Smartphone className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
       title: 'Social Preview',
       description: 'Preview social media images and videos (7-day retention)',
       href: '/admin/social-preview',
