@@ -30,7 +30,7 @@ const MAIN_LINKS = [
   {
     label: 'Open Lunary',
     description: 'Web app — horoscopes, birth charts & more',
-    href: 'https://app.lunary.app',
+    href: 'https://lunary.app/app',
     icon: Globe,
     external: true,
   },
