@@ -28,6 +28,7 @@ export interface SocialPostResult {
   videoId?: string;
   url?: string;
   error?: string;
+  rawResponse?: unknown;
   backend: 'youtube' | 'ayrshare' | 'postiz' | 'succulent';
 }
 

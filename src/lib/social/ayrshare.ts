@@ -61,6 +61,7 @@ export interface AyrshareResult {
   success: boolean;
   postId?: string;
   error?: string;
+  rawResponse?: unknown;
 }
 
 /**
@@ -76,7 +77,7 @@ function buildPlatformOptions(
 
   const p = platform.toLowerCase();
 
-  if (p === 'instagram' || p === 'instagram') {
+  if (p === 'instagram') {
     const igOptions: Record<string, unknown> = {};
     if (settings.instagramOptions) {
       const ig = settings.instagramOptions as Record<string, unknown>;
@@ -172,9 +173,16 @@ export async function postToAyrshare(
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Ayrshare API error (${response.status}):`, errorText);
+      let rawResponse: unknown;
+      try {
+        rawResponse = JSON.parse(errorText);
+      } catch {
+        rawResponse = errorText;
+      }
       return {
         success: false,
         error: `Ayrshare API error (${response.status}): ${errorText}`,
+        rawResponse,
       };
     }
 
@@ -185,12 +193,14 @@ export async function postToAyrshare(
       return {
         success: false,
         error: data.message || 'Ayrshare post failed',
+        rawResponse: data,
       };
     }
 
     return {
       success: true,
       postId: data.id || data.refId,
+      rawResponse: data,
     };
   } catch (error) {
     return {
