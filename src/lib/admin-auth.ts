@@ -6,8 +6,9 @@ import { auth } from '@/lib/auth';
  *
  * Checks in order:
  * 1. Vercel Cron header (x-vercel-cron === '1') — infrastructure calls
- * 2. Bearer token matching CRON_SECRET — MCP / programmatic access
- * 3. Session + admin email — browser / dashboard access
+ * 2. Bearer token matching CRON_SECRET — cron / scheduled jobs
+ * 3. Bearer token matching ADMIN_API_KEY — MCP / programmatic access
+ * 4. Session + admin email — browser / dashboard access
  *
  * Returns `{ ok: true }` on success, or a 401/403 NextResponse on failure.
  */
@@ -19,11 +20,16 @@ export async function requireAdminAuth(
     return { ok: true };
   }
 
-  // 2. Bearer token (CRON_SECRET)
+  // 2. Bearer token (CRON_SECRET or ADMIN_API_KEY)
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
+  const adminApiKey = process.env.ADMIN_API_KEY;
 
   if (cronSecret && authHeader === `Bearer ${cronSecret}`) {
+    return { ok: true };
+  }
+
+  if (adminApiKey && authHeader === `Bearer ${adminApiKey}`) {
     return { ok: true };
   }
 
