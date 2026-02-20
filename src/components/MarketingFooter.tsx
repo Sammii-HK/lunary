@@ -70,6 +70,18 @@ export function MarketingFooter() {
       ),
     },
     {
+      platform: 'youtube' as const,
+      url: SOCIAL_HANDLES.youtube
+        ? `https://www.youtube.com/${SOCIAL_HANDLES.youtube}`
+        : 'https://www.youtube.com/@LunaryApp',
+      label: SOCIAL_PLATFORM_LABELS.youtube,
+      icon: (
+        <svg className='w-5 h-5' fill='currentColor' viewBox='0 0 576 512'>
+          <path d='M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6C14.9 167 14.9 256 14.9 256s0 89 11.4 131.9c6.3 23.7 24.8 42.3 48.3 48.6C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.9 48.3-48.6C561.1 345 561.1 256 561.1 256s0-89-11.4-131.9zM232 337.7V174.3L374.9 256 232 337.7z' />
+        </svg>
+      ),
+    },
+    {
       platform: 'discord' as const,
       url: 'https://discord.gg/SUvdhDXFSk',
       label: 'Discord',
