@@ -4,6 +4,7 @@ import {
   generateLinkedInDidYouKnowBatch,
 } from '@/lib/instagram/content-orchestrator';
 import { PrismaClient } from '@prisma/client';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 const prisma = new PrismaClient();
 
@@ -20,6 +21,9 @@ export const maxDuration = 300; // 5 minutes
  */
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const body = await request.json();
     const { startDate } = body;
 

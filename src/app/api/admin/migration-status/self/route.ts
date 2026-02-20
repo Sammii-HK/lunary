@@ -1,29 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const headersList = await headers();
-    const session = await auth.api.getSession({
-      headers: headersList,
-    });
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
 
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const adminEmails =
-      process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',').map((e) =>
-        e.trim().toLowerCase(),
-      ) || [];
-
-    if (!adminEmails.includes(session.user.email.toLowerCase())) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
-    const normalizedEmail = session.user.email.toLowerCase();
+    const session = await auth.api.getSession({ headers: request.headers });
+    const normalizedEmail = session?.user?.email?.toLowerCase() ?? '';
     const userResult = await sql`
       SELECT id, email, "createdAt", "updatedAt"
       FROM "user"

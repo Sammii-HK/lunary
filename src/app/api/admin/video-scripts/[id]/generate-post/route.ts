@@ -3,6 +3,7 @@ import {
   getVideoScripts,
   updateVideoScriptWrittenPost,
 } from '@/lib/social/video-script-generator';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import {
   applyPlatformFormatting,
@@ -25,6 +26,9 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { id } = await params;
     const scriptId = parseInt(id, 10);
 

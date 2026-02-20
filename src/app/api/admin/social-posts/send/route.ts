@@ -1,5 +1,6 @@
 import { getPinterestBoard } from '@/lib/pinterest/boards';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { sql } from '@vercel/postgres';
 import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 import { categoryThemes } from '@/lib/social/weekly-themes';
@@ -203,6 +204,9 @@ const buildPlatformPayload = (
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const {
       postId,
       content,

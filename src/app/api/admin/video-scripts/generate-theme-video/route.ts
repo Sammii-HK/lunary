@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { put } from '@vercel/blob';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { composeVideo } from '@/lib/video/compose-video';
 import { generateVoiceover } from '@/lib/tts';
 import { TTS_PRESETS } from '@/lib/tts/presets';
@@ -77,6 +78,9 @@ async function resolveThemeIndex(referenceDate: Date): Promise<number> {
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const body = await request.json().catch(() => ({}));
     const weekOffset = Number(body?.weekOffset ?? 0);
     const weekStartParam = body?.weekStart as string | undefined;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { ensureVideoScriptsTable } from '@/lib/social/video-script-generator';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 async function ensureVideoJobsTable() {
   try {
@@ -28,6 +29,9 @@ async function ensureVideoJobsTable() {
 }
 
 export async function GET(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     try {
       await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS week_theme TEXT`;

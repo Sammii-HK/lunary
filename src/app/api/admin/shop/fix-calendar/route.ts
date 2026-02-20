@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { auth } from '@/lib/auth';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -11,34 +11,10 @@ function getStripe() {
 
 export const dynamic = 'force-dynamic';
 
-async function checkAdminAuth(request: NextRequest) {
-  try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-    const userEmail = session?.user?.email?.toLowerCase();
-    const adminEmails = (
-      process.env.ADMIN_EMAILS ||
-      process.env.ADMIN_EMAIL ||
-      ''
-    )
-      .split(',')
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-
-    return Boolean(userEmail && adminEmails.includes(userEmail));
-  } catch (error) {
-    console.error('Admin auth check failed:', error);
-    return false;
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const isAdmin = await checkAdminAuth(request);
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
 
     const { year } = await request.json();
 

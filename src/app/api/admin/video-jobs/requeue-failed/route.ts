@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 
@@ -24,8 +25,11 @@ async function ensureVideoJobsTable() {
   `;
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     await ensureVideoJobsTable();
 
     const result = await sql`

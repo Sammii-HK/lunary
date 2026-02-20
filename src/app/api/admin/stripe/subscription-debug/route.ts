@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const ADMIN_TOKEN = process.env.ADMIN_DEBUG_TOKEN;
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 function getBaseUrl() {
   if (process.env.VERCEL) {
@@ -11,15 +10,8 @@ function getBaseUrl() {
 }
 
 export async function POST(request: NextRequest) {
-  if (ADMIN_TOKEN) {
-    const auth = request.headers.get('authorization');
-    if (auth !== `Bearer ${ADMIN_TOKEN}`) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 },
-      );
-    }
-  }
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
 
   try {
     const payload = await request.json().catch(() => ({}));

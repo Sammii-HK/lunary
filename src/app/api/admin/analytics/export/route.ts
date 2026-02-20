@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 /**
  * Export analytics data as CSV or JSON
@@ -9,6 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('start_date');
     const endDate = searchParams.get('end_date');
@@ -27,6 +31,12 @@ export async function GET(request: NextRequest) {
       : 'http://localhost:3000';
     const queryParams = `start_date=${startDate}&end_date=${endDate}`;
 
+    // Forward auth header to internal admin API calls
+    const authHeader = request.headers.get('authorization');
+    const fetchHeaders: HeadersInit = {
+      ...(authHeader && { Authorization: authHeader }),
+    };
+
     // Fetch data from the same endpoints as the dashboard
     const [
       dauWauMauRes,
@@ -37,16 +47,28 @@ export async function GET(request: NextRequest) {
       successMetricsRes,
       subscriptionLifecycleRes,
     ] = await Promise.all([
-      fetch(`${baseUrl}/api/admin/analytics/dau-wau-mau?${queryParams}`),
-      fetch(`${baseUrl}/api/admin/analytics/conversions?${queryParams}`),
-      fetch(`${baseUrl}/api/admin/analytics/activation?${queryParams}`),
-      fetch(`${baseUrl}/api/admin/analytics/user-growth?${queryParams}`),
+      fetch(`${baseUrl}/api/admin/analytics/dau-wau-mau?${queryParams}`, {
+        headers: fetchHeaders,
+      }),
+      fetch(`${baseUrl}/api/admin/analytics/conversions?${queryParams}`, {
+        headers: fetchHeaders,
+      }),
+      fetch(`${baseUrl}/api/admin/analytics/activation?${queryParams}`, {
+        headers: fetchHeaders,
+      }),
+      fetch(`${baseUrl}/api/admin/analytics/user-growth?${queryParams}`, {
+        headers: fetchHeaders,
+      }),
       fetch(
         `${baseUrl}/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`,
+        { headers: fetchHeaders },
       ),
-      fetch(`${baseUrl}/api/admin/analytics/success-metrics?${queryParams}`),
+      fetch(`${baseUrl}/api/admin/analytics/success-metrics?${queryParams}`, {
+        headers: fetchHeaders,
+      }),
       fetch(
         `${baseUrl}/api/admin/analytics/subscription-lifecycle?${queryParams}`,
+        { headers: fetchHeaders },
       ),
     ]);
 

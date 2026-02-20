@@ -7,6 +7,7 @@ import {
   formatDateLondon,
 } from '@/lib/analytics/weekly-metrics';
 import { ensureHeaders, upsertRow, appendRows } from '@/lib/google/sheets';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 const SHEETS_ID = process.env.GOOGLE_SHEETS_ID;
 
@@ -17,14 +18,8 @@ const SHEETS_ID = process.env.GOOGLE_SHEETS_ID;
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify authorization
-    const authHeader = request.headers.get('authorization');
-    if (
-      process.env.CRON_SECRET &&
-      authHeader !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
 
     if (!SHEETS_ID) {
       return NextResponse.json(

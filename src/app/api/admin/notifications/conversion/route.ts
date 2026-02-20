@@ -3,11 +3,15 @@ import {
   sendDiscordAdminNotification,
   queueAnalyticsEvent,
 } from '@/lib/discord';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 const HIGH_VALUE_EVENTS = ['trial_converted', 'subscription_started'];
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const bodyText = await request.text();
     if (!bodyText || bodyText.trim() === '') {
       return NextResponse.json(

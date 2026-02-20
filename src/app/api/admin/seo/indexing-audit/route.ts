@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import {
   auditUrlsIndexing,
   getSuggestedFix,
@@ -140,6 +141,9 @@ export async function GET(
   request: Request,
 ): Promise<NextResponse<AuditResponse | { error: string }>> {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const limitParam = searchParams.get('limit');
     const urlsParam = searchParams.get('urls');
@@ -221,6 +225,9 @@ export async function POST(
   request: Request,
 ): Promise<NextResponse<AuditResponse | { error: string }>> {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const body = await request.json();
     const { urls } = body as { urls?: string[] };
 

@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { resolveDateRange, formatTimestamp } from '@/lib/analytics/date-range';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { filterFields, getFieldsParam } from '@/lib/analytics/field-selection';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -109,6 +110,9 @@ const fillSignupTrends = (
  */
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const granularity = (searchParams.get('granularity') || 'day') as
       | 'day'

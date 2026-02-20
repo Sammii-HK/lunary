@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 
@@ -8,8 +9,10 @@ export const runtime = 'nodejs';
  * Returns aggregated video performance metrics by hook_style, script_structure,
  * content_type, and has_loop_structure for the admin dashboard.
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
     // Aggregated metrics by hook style
     const byHookStyle = await sql`
       SELECT

@@ -4,9 +4,13 @@ import {
   type MetricSnapshot,
 } from '@/lib/analytics/metric-snapshots';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const periodType = searchParams.get('type') as
       | 'weekly'

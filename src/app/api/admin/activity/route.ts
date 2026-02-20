@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import {
   getRecentActivity,
   getActivityByType,
@@ -10,6 +11,9 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') as ActivityType | null;
     const limit = parseInt(searchParams.get('limit') || '50');

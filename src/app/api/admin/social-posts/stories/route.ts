@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 /**
  * GET /api/admin/social-posts/stories
@@ -8,6 +9,9 @@ import { sql } from '@vercel/postgres';
  */
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const days = parseInt(searchParams.get('days') || '30', 10);

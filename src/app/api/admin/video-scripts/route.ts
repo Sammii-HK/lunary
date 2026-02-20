@@ -3,6 +3,7 @@ import {
   getVideoScripts,
   ensureVideoScriptsTable,
 } from '@/lib/social/video-script-generator';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,9 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: Request) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     await ensureVideoScriptsTable();
 
     const { searchParams } = new URL(request.url);

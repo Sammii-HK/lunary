@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { auth } from '@/lib/auth';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { decrypt } from '@/lib/encryption';
 import { normalizeIsoDateOnly } from '@/lib/date-only';
 import { decryptLocation, encryptLocation } from '@/lib/location-encryption';
@@ -15,36 +15,10 @@ import tzLookup from 'tz-lookup';
 
 export const dynamic = 'force-dynamic';
 
-async function isAdmin(request: NextRequest) {
-  try {
-    const session = await auth.api.getSession({ headers: request.headers });
-    const userEmail = session?.user?.email?.toLowerCase();
-    if (!userEmail) return false;
-
-    const adminEmails = (
-      process.env.ADMIN_EMAILS ||
-      process.env.ADMIN_EMAIL ||
-      process.env.NEXT_PUBLIC_ADMIN_EMAILS ||
-      process.env.NEXT_PUBLIC_ADMIN_EMAIL ||
-      ''
-    )
-      .split(',')
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean);
-
-    return adminEmails.includes(userEmail);
-  } catch (error) {
-    console.error('Admin auth check failed:', error);
-    return false;
-  }
-}
-
 export async function GET(request: NextRequest) {
   try {
-    const authorized = await isAdmin(request);
-    if (!authorized) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
 
     const email = request.nextUrl.searchParams.get('email')?.trim();
     if (!email) {
@@ -115,10 +89,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authorized = await isAdmin(request);
-    if (!authorized) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
 
     const body = await request.json();
     const email = typeof body.email === 'string' ? body.email.trim() : null;

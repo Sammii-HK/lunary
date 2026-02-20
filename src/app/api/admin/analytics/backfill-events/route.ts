@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runPostHogBackfill } from '@/lib/analytics/posthog-backfill';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 type Payload = {
   start_date?: string;
@@ -16,12 +17,8 @@ function parseDate(value: string | undefined, fallback: Date): Date {
 }
 
 export async function POST(request: NextRequest) {
-  const authHeader = request.headers.get('authorization') || '';
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
 
   const body = (await request.json().catch(() => ({}))) as Payload;
 

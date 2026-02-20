@@ -4,6 +4,7 @@ import { postToSocial } from '@/lib/social/client';
 import { preUploadImage } from '@/lib/social/pre-upload-image';
 import { generateDailyStoryData } from '@/lib/instagram/story-content';
 import { format } from 'date-fns';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 /**
  * Debug endpoint: try posting to Instagram via Ayrshare and return raw results.
@@ -19,6 +20,9 @@ import { format } from 'date-fns';
  */
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const body = await request.json();
     const type = body.type || 'story'; // 'story' | 'feed'
     const dryRun = body.dryRun === true;
