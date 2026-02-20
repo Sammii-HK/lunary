@@ -1,14 +1,46 @@
 {
   "description": "Curated zodiac compatibility pairs with detailed content",
   "zodiacInfo": {
-    "aries": { "element": "Fire", "modality": "Cardinal", "ruler": "Mars" },
-    "taurus": { "element": "Earth", "modality": "Fixed", "ruler": "Venus" },
-    "gemini": { "element": "Air", "modality": "Mutable", "ruler": "Mercury" },
-    "cancer": { "element": "Water", "modality": "Cardinal", "ruler": "Moon" },
-    "leo": { "element": "Fire", "modality": "Fixed", "ruler": "Sun" },
-    "virgo": { "element": "Earth", "modality": "Mutable", "ruler": "Mercury" },
-    "libra": { "element": "Air", "modality": "Cardinal", "ruler": "Venus" },
-    "scorpio": { "element": "Water", "modality": "Fixed", "ruler": "Pluto" },
+    "aries": {
+      "element": "Fire",
+      "modality": "Cardinal",
+      "ruler": "Mars"
+    },
+    "taurus": {
+      "element": "Earth",
+      "modality": "Fixed",
+      "ruler": "Venus"
+    },
+    "gemini": {
+      "element": "Air",
+      "modality": "Mutable",
+      "ruler": "Mercury"
+    },
+    "cancer": {
+      "element": "Water",
+      "modality": "Cardinal",
+      "ruler": "Moon"
+    },
+    "leo": {
+      "element": "Fire",
+      "modality": "Fixed",
+      "ruler": "Sun"
+    },
+    "virgo": {
+      "element": "Earth",
+      "modality": "Mutable",
+      "ruler": "Mercury"
+    },
+    "libra": {
+      "element": "Air",
+      "modality": "Cardinal",
+      "ruler": "Venus"
+    },
+    "scorpio": {
+      "element": "Water",
+      "modality": "Fixed",
+      "ruler": "Pluto"
+    },
     "sagittarius": {
       "element": "Fire",
       "modality": "Mutable",
@@ -19,8 +51,16 @@
       "modality": "Cardinal",
       "ruler": "Saturn"
     },
-    "aquarius": { "element": "Air", "modality": "Fixed", "ruler": "Uranus" },
-    "pisces": { "element": "Water", "modality": "Mutable", "ruler": "Neptune" }
+    "aquarius": {
+      "element": "Air",
+      "modality": "Fixed",
+      "ruler": "Uranus"
+    },
+    "pisces": {
+      "element": "Water",
+      "modality": "Mutable",
+      "ruler": "Neptune"
+    }
   },
   "elementalCompatibility": {
     "Fire-Fire": {
@@ -68,7 +108,12 @@
     "aries-and-leo": {
       "sign1": "Aries",
       "sign2": "Leo",
-      "scores": { "overall": 8, "love": 9, "friendship": 9, "work": 8 },
+      "scores": {
+        "overall": 8,
+        "love": 9,
+        "friendship": 9,
+        "work": 8
+      },
       "summary": "Aries and Leo create a power couple dynamic with mutual admiration and shared passion.",
       "strengths": [
         "Shared Fire element creates natural understanding and similar energy",
@@ -88,7 +133,12 @@
     "taurus-and-cancer": {
       "sign1": "Taurus",
       "sign2": "Cancer",
-      "scores": { "overall": 9, "love": 9, "friendship": 9, "work": 8 },
+      "scores": {
+        "overall": 9,
+        "love": 9,
+        "friendship": 9,
+        "work": 8
+      },
       "summary": "Taurus and Cancer form one of the most harmonious matches, both seeking security and comfort.",
       "strengths": [
         "Earth and Water elements nurture each other naturally",
@@ -108,7 +158,12 @@
     "gemini-and-libra": {
       "sign1": "Gemini",
       "sign2": "Libra",
-      "scores": { "overall": 9, "love": 8, "friendship": 10, "work": 9 },
+      "scores": {
+        "overall": 9,
+        "love": 8,
+        "friendship": 10,
+        "work": 9
+      },
       "summary": "Gemini and Libra share an Air element connection that creates intellectual harmony and social synergy.",
       "strengths": [
         "Natural intellectual rapport and endless conversation",
@@ -128,7 +183,12 @@
     "cancer-and-scorpio": {
       "sign1": "Cancer",
       "sign2": "Scorpio",
-      "scores": { "overall": 9, "love": 10, "friendship": 8, "work": 7 },
+      "scores": {
+        "overall": 9,
+        "love": 10,
+        "friendship": 8,
+        "work": 7
+      },
       "summary": "Cancer and Scorpio share profound emotional depth as Water signs, creating intense and transformative bonds.",
       "strengths": [
         "Deep emotional understanding and intuition",
@@ -148,7 +208,12 @@
     "leo-and-sagittarius": {
       "sign1": "Leo",
       "sign2": "Sagittarius",
-      "scores": { "overall": 9, "love": 9, "friendship": 10, "work": 8 },
+      "scores": {
+        "overall": 9,
+        "love": 9,
+        "friendship": 10,
+        "work": 8
+      },
       "summary": "Leo and Sagittarius create a joyful, optimistic Fire sign match with shared enthusiasm for life.",
       "strengths": [
         "Shared optimism, generosity, and love of life",
@@ -168,7 +233,12 @@
     "virgo-and-capricorn": {
       "sign1": "Virgo",
       "sign2": "Capricorn",
-      "scores": { "overall": 9, "love": 8, "friendship": 9, "work": 10 },
+      "scores": {
+        "overall": 9,
+        "love": 8,
+        "friendship": 9,
+        "work": 10
+      },
       "summary": "Virgo and Capricorn form a powerhouse Earth sign match built on shared values of hard work and quality.",
       "strengths": [
         "Shared practical approach to life and relationships",
@@ -188,7 +258,12 @@
     "libra-and-aquarius": {
       "sign1": "Libra",
       "sign2": "Aquarius",
-      "scores": { "overall": 9, "love": 8, "friendship": 10, "work": 9 },
+      "scores": {
+        "overall": 9,
+        "love": 8,
+        "friendship": 10,
+        "work": 9
+      },
       "summary": "Libra and Aquarius share Air element harmony with a focus on ideas, social causes, and intellectual partnership.",
       "strengths": [
         "Strong intellectual and social connection",
@@ -208,7 +283,12 @@
     "scorpio-and-pisces": {
       "sign1": "Scorpio",
       "sign2": "Pisces",
-      "scores": { "overall": 9, "love": 10, "friendship": 9, "work": 7 },
+      "scores": {
+        "overall": 9,
+        "love": 10,
+        "friendship": 9,
+        "work": 7
+      },
       "summary": "Scorpio and Pisces create an intensely emotional and spiritual Water sign bond with profound understanding.",
       "strengths": [
         "Deep spiritual and emotional connection",
@@ -228,7 +308,12 @@
     "sagittarius-and-aquarius": {
       "sign1": "Sagittarius",
       "sign2": "Aquarius",
-      "scores": { "overall": 9, "love": 8, "friendship": 10, "work": 8 },
+      "scores": {
+        "overall": 9,
+        "love": 8,
+        "friendship": 10,
+        "work": 8
+      },
       "summary": "Sagittarius and Aquarius form an exciting Fire-Air match focused on freedom, ideas, and exploration.",
       "strengths": [
         "Shared love of freedom and independence",
@@ -248,7 +333,12 @@
     "capricorn-and-pisces": {
       "sign1": "Capricorn",
       "sign2": "Pisces",
-      "scores": { "overall": 7, "love": 8, "friendship": 7, "work": 7 },
+      "scores": {
+        "overall": 7,
+        "love": 8,
+        "friendship": 7,
+        "work": 7
+      },
       "summary": "Capricorn and Pisces represent Earth and Water combining in complementary ways that balance dreams with reality.",
       "strengths": [
         "Capricorn grounds Pisces's dreams in reality",
@@ -268,7 +358,12 @@
     "taurus-and-scorpio": {
       "sign1": "Taurus",
       "sign2": "Scorpio",
-      "scores": { "overall": 8, "love": 9, "friendship": 7, "work": 7 },
+      "scores": {
+        "overall": 8,
+        "love": 9,
+        "friendship": 7,
+        "work": 7
+      },
       "summary": "Taurus and Scorpio are opposite signs with magnetic attraction and intense chemistry.",
       "strengths": [
         "Powerful magnetic attraction (opposites attract)",
@@ -288,7 +383,12 @@
     "gemini-and-sagittarius": {
       "sign1": "Gemini",
       "sign2": "Sagittarius",
-      "scores": { "overall": 8, "love": 8, "friendship": 9, "work": 7 },
+      "scores": {
+        "overall": 8,
+        "love": 8,
+        "friendship": 9,
+        "work": 7
+      },
       "summary": "Gemini and Sagittarius are opposite signs who share a love of learning, exploration, and mental stimulation.",
       "strengths": [
         "Endless fascinating conversation",
@@ -304,6 +404,696 @@
         "Different scales: Gemini details, Sagittarius big picture"
       ],
       "advice": "Build depth and commitment within your exciting dynamic. Ground your mental connection with emotional intimacy."
+    },
+    "aries-and-aries": {
+      "sign1": "Aries",
+      "sign2": "Aries",
+      "scores": {
+        "overall": 7,
+        "love": 7,
+        "friendship": 8,
+        "work": 6
+      },
+      "summary": "Two Aries together create a high-voltage, fast-paced connection fueled by Mars energy, where passion runs as hot as the arguments.",
+      "strengths": [
+        "Instant understanding of each other's need for independence and action",
+        "Unmatched energy and enthusiasm when pursuing shared goals",
+        "Neither plays passive-aggressive games; directness is the default",
+        "Shared courage means they push each other to take bold leaps"
+      ],
+      "challenges": [
+        "Two Cardinal Fire signs both need to lead, creating constant power struggles",
+        "Arguments escalate quickly when neither is willing to back down first",
+        "Both chase the thrill of the new, making long-term consistency a weak spot"
+      ],
+      "advice": "Designate different domains where each of you leads. Compete with the world together, not with each other."
+    },
+    "taurus-and-taurus": {
+      "sign1": "Taurus",
+      "sign2": "Taurus",
+      "scores": {
+        "overall": 8,
+        "love": 8,
+        "friendship": 9,
+        "work": 7
+      },
+      "summary": "Two Taureans build a deeply comfortable, sensory-rich world together, united by Venus's love of beauty, pleasure, and stability.",
+      "strengths": [
+        "Shared values around loyalty, comfort, and financial security create a rock-solid foundation",
+        "Both appreciate the finer things in life, from good food to music to physical affection",
+        "Patience with each other comes naturally since they operate at the same steady pace",
+        "Deep mutual trust develops because both signs follow through on their promises"
+      ],
+      "challenges": [
+        "Double Fixed Earth energy can make the relationship resistant to any change or growth",
+        "When two Bulls lock horns, neither budges, and conflicts can last weeks",
+        "Shared tendency toward possessiveness can become suffocating without outside friendships"
+      ],
+      "advice": "Schedule regular new experiences to keep things fresh. When stuck in a standoff, agree to revisit the issue after 24 hours rather than digging in deeper."
+    },
+    "gemini-and-gemini": {
+      "sign1": "Gemini",
+      "sign2": "Gemini",
+      "scores": {
+        "overall": 7,
+        "love": 6,
+        "friendship": 9,
+        "work": 7
+      },
+      "summary": "Two Geminis create the most mentally stimulating pairing in the zodiac, a whirlwind of ideas, conversation, and social energy that rarely slows down.",
+      "strengths": [
+        "Conversation never dies; both bring fresh topics, curiosity, and wit to every exchange",
+        "Mutual understanding of each other's need for variety and social freedom",
+        "Adaptable Mutable energy means they flow through changes without drama",
+        "Shared love of learning keeps the relationship intellectually alive for years"
+      ],
+      "challenges": [
+        "Neither naturally provides emotional depth, so the connection can feel surface-level",
+        "Two Mutable signs together struggle with follow-through and making firm decisions",
+        "Both may flirt freely, creating trust issues if boundaries aren't discussed"
+      ],
+      "advice": "Build rituals that ground your airy connection, like a weekly check-in about feelings, not just ideas. Take turns being the one who commits to a plan."
+    },
+    "cancer-and-cancer": {
+      "sign1": "Cancer",
+      "sign2": "Cancer",
+      "scores": {
+        "overall": 7,
+        "love": 8,
+        "friendship": 8,
+        "work": 6
+      },
+      "summary": "Two Cancers create an emotionally rich, deeply nurturing bond where both partners finally feel truly understood on a soul level.",
+      "strengths": [
+        "Unparalleled emotional attunement; both read moods and needs without words",
+        "Shared devotion to home and family creates a warm, protective environment",
+        "Fierce mutual loyalty; both will fight for the relationship above all else",
+        "Moon-ruled intuition on both sides creates an almost psychic connection"
+      ],
+      "challenges": [
+        "When both retreat into their shells simultaneously, communication shuts down entirely",
+        "Double Water Cardinal energy amplifies mood swings and emotional reactivity",
+        "Both tend to hold grudges and replay past hurts, making forgiveness slow"
+      ],
+      "advice": "Develop a system for signaling when you need space versus when you need comfort. Invite trusted friends into your world to prevent emotional codependency."
+    },
+    "leo-and-leo": {
+      "sign1": "Leo",
+      "sign2": "Leo",
+      "scores": {
+        "overall": 7,
+        "love": 8,
+        "friendship": 8,
+        "work": 6
+      },
+      "summary": "Two Leos create a glamorous, generous, and dramatically passionate relationship where both partners want to be adored, and both know exactly how to deliver.",
+      "strengths": [
+        "Mutual warmth and generosity create a relationship that feels like a celebration",
+        "Both understand the importance of loyalty, pride, and standing by your partner publicly",
+        "Shared creative energy and love of self-expression inspire each other's best work",
+        "The romance stays alive because both value grand gestures and heartfelt attention"
+      ],
+      "challenges": [
+        "Two Fixed Fire signs competing for the spotlight can turn love into a rivalry",
+        "Neither handles being ignored or upstaged gracefully, and ego clashes run deep",
+        "Both can be stubborn about admitting fault, making reconciliation a slow process"
+      ],
+      "advice": "Be each other's biggest fan rather than each other's competition. Take turns being the star, and make the other's wins feel like shared victories."
+    },
+    "virgo-and-virgo": {
+      "sign1": "Virgo",
+      "sign2": "Virgo",
+      "scores": {
+        "overall": 7,
+        "love": 6,
+        "friendship": 8,
+        "work": 9
+      },
+      "summary": "Two Virgos build an efficient, thoughtful partnership grounded in shared standards and Mercury-ruled analytical minds, though they must guard against mutual overcriticism.",
+      "strengths": [
+        "Shared dedication to improvement means both are always working to make the relationship better",
+        "Practical problem-solving as a team; no issue goes unanalyzed or unaddressed",
+        "Both value health, routine, and acts of service as love languages",
+        "Mercury-ruled communication is detailed, precise, and rarely misunderstood"
+      ],
+      "challenges": [
+        "Double Virgo criticism can erode self-esteem when both partners fixate on flaws",
+        "Neither is naturally comfortable with emotional vulnerability or grand romantic gestures",
+        "Perfectionism paralysis: both may overthink decisions instead of trusting their instincts"
+      ],
+      "advice": "Practice voicing appreciation as often as you voice improvements. Schedule unstructured, imperfect fun to loosen the grip of shared perfectionism."
+    },
+    "libra-and-libra": {
+      "sign1": "Libra",
+      "sign2": "Libra",
+      "scores": {
+        "overall": 7,
+        "love": 8,
+        "friendship": 9,
+        "work": 6
+      },
+      "summary": "Two Libras create an aesthetically beautiful, socially vibrant partnership ruled by Venus, though decision-making becomes their shared Achilles' heel.",
+      "strengths": [
+        "Shared appreciation for beauty, harmony, and refinement makes for an elegant life together",
+        "Both prioritize fairness and compromise, reducing the frequency of ugly conflicts",
+        "Social ease as a couple; they charm every room and host effortlessly together",
+        "Venus-ruled romance keeps the courtship phase alive long past the honeymoon period"
+      ],
+      "challenges": [
+        "Two Cardinal Air signs who both avoid conflict may let resentments build unspoken for months",
+        "Indecisiveness doubles: choosing a restaurant can take an hour, choosing a life direction takes years",
+        "People-pleasing tendencies mean neither may voice their authentic needs"
+      ],
+      "advice": "Assign a weekly decision-maker role that alternates between you. Practice small acts of honest disagreement to build the muscle for bigger conversations."
+    },
+    "scorpio-and-scorpio": {
+      "sign1": "Scorpio",
+      "sign2": "Scorpio",
+      "scores": {
+        "overall": 7,
+        "love": 9,
+        "friendship": 7,
+        "work": 6
+      },
+      "summary": "Two Scorpios form the most intensely transformative pairing in the zodiac, a bond that reaches profound depths but can become a power struggle of Plutonian proportions.",
+      "strengths": [
+        "Emotional depth and intimacy that other pairings cannot access; nothing stays surface-level",
+        "Absolute loyalty once committed; both take vows and promises as sacred",
+        "Shared understanding of the shadow side of life creates radical acceptance",
+        "Transformative energy means this relationship catalyzes profound personal growth in both partners"
+      ],
+      "challenges": [
+        "Two Fixed Water signs with control needs can create a suffocating dynamic of surveillance and jealousy",
+        "Power struggles are intense because both sense manipulation instinctively and refuse to be controlled",
+        "Shared tendency toward secrecy means critical truths may be withheld out of self-protection"
+      ],
+      "advice": "Establish radical transparency as a non-negotiable foundation. Channel your shared intensity into creative or healing work rather than turning it on each other."
+    },
+    "sagittarius-and-sagittarius": {
+      "sign1": "Sagittarius",
+      "sign2": "Sagittarius",
+      "scores": {
+        "overall": 7,
+        "love": 7,
+        "friendship": 9,
+        "work": 7
+      },
+      "summary": "Two Sagittarians create a high-energy adventure partnership fueled by Jupiter's optimism, though their shared restlessness can make commitment feel like a cage.",
+      "strengths": [
+        "Shared love of travel, philosophy, and new experiences creates an endlessly exciting life together",
+        "Neither is clingy or possessive, giving each other the freedom both need to thrive",
+        "Jupiter-ruled optimism means they bounce back from setbacks faster than any other pairing",
+        "Honest to a fault with each other; what you see is genuinely what you get"
+      ],
+      "challenges": [
+        "Two Mutable Fire signs may never settle down enough to build lasting structures together",
+        "Bluntness times two means feelings get hurt regularly, even without malicious intent",
+        "Both avoid heavy emotional processing, so unresolved issues get outrun rather than resolved"
+      ],
+      "advice": "Choose one shared anchor, whether it is a home, a project, or a tradition, to ground your wanderlust. Slow down enough to ask how each other actually feels, not just what you want to do next."
+    },
+    "capricorn-and-capricorn": {
+      "sign1": "Capricorn",
+      "sign2": "Capricorn",
+      "scores": {
+        "overall": 7,
+        "love": 6,
+        "friendship": 8,
+        "work": 10
+      },
+      "summary": "Two Capricorns build an empire together with Saturn-ruled discipline and shared ambition, though the relationship can feel more like a business partnership than a romance.",
+      "strengths": [
+        "Unmatched work ethic and shared long-term vision create tangible, impressive results together",
+        "Both respect tradition, responsibility, and earning things through effort rather than shortcuts",
+        "Financial stability is practically guaranteed when two Capricorns manage resources together",
+        "Deep mutual respect based on competence and character rather than superficial charm"
+      ],
+      "challenges": [
+        "Saturn's influence doubled can make the relationship feel heavy, dutiful, and joyless",
+        "Neither naturally prioritizes emotional expression, so affection may go unspoken for too long",
+        "Competition around career achievement can create quiet resentment if one partner outpaces the other"
+      ],
+      "advice": "Deliberately schedule play and spontaneity into your disciplined life. Say the warm things out loud; your partner needs to hear them even if you both act like you don't."
+    },
+    "aquarius-and-aquarius": {
+      "sign1": "Aquarius",
+      "sign2": "Aquarius",
+      "scores": {
+        "overall": 7,
+        "love": 6,
+        "friendship": 9,
+        "work": 8
+      },
+      "summary": "Two Aquarians form an unconventional, intellectually electric partnership united by Uranus-ruled independence, though emotional intimacy requires conscious effort.",
+      "strengths": [
+        "Shared vision for a better future and passion for humanitarian or progressive causes",
+        "Both respect individuality within the relationship; neither tries to change the other",
+        "Inventive problem-solving as a team; they approach challenges from angles no one else considers",
+        "Friendship forms the backbone of the connection, creating durability beyond initial attraction"
+      ],
+      "challenges": [
+        "Two Fixed Air signs can be emotionally detached, leaving the relationship intellectualized but cold",
+        "Both value being different so strongly that compromise can feel like conformity and be resisted",
+        "Stubbornness about their own ideas despite positioning themselves as open-minded"
+      ],
+      "advice": "Practice vulnerability as deliberately as you practice your ideals. Being emotionally available is not the same as being emotionally conventional."
+    },
+    "pisces-and-pisces": {
+      "sign1": "Pisces",
+      "sign2": "Pisces",
+      "scores": {
+        "overall": 7,
+        "love": 9,
+        "friendship": 8,
+        "work": 5
+      },
+      "summary": "Two Pisces merge into a dreamy, spiritually rich connection ruled by Neptune, where empathy flows effortlessly but practical reality may dissolve at the edges.",
+      "strengths": [
+        "Intuitive emotional understanding so deep it often bypasses the need for words entirely",
+        "Shared creativity and imagination fuel artistic collaboration and spiritual exploration",
+        "Compassion and forgiveness come naturally; both extend grace when the other stumbles",
+        "Neptune-ruled romanticism creates a love story that feels fated and transcendent"
+      ],
+      "challenges": [
+        "Neither partner naturally anchors to practical reality, so bills, deadlines, and logistics suffer",
+        "Boundaries blur dangerously when both absorb each other's emotions without filtering",
+        "Shared escapist tendencies can lead both toward avoidance rather than confronting problems"
+      ],
+      "advice": "Assign concrete responsibilities and hold each other accountable with love. Build one solid routine into your fluid life to keep the dream from dissolving into chaos."
+    },
+    "aries-and-libra": {
+      "sign1": "Aries",
+      "sign2": "Libra",
+      "scores": {
+        "overall": 7,
+        "love": 8,
+        "friendship": 7,
+        "work": 6
+      },
+      "summary": "Aries and Libra sit across the zodiac wheel as opposites, creating magnetic attraction between Mars-driven independence and Venus-ruled partnership, each holding what the other lacks.",
+      "strengths": [
+        "Powerful magnetic attraction born from opposite sign polarity; each fascinates the other",
+        "Aries teaches Libra decisiveness and courage; Libra teaches Aries diplomacy and grace",
+        "Mars-Venus axis creates strong romantic and physical chemistry",
+        "Cardinal energy on both sides means they are both initiators who get things moving"
+      ],
+      "challenges": [
+        "Aries' bluntness regularly wounds Libra's need for harmony and tact",
+        "Libra's indecisiveness and need for consensus frustrates action-oriented Aries",
+        "Fundamental tension between 'me first' (Aries) and 'us first' (Libra) philosophies"
+      ],
+      "advice": "Appreciate your differences as complementary rather than oppositional. Aries: pause before steamrolling. Libra: speak your truth even when it disrupts the peace."
+    },
+    "aries-and-sagittarius": {
+      "sign1": "Aries",
+      "sign2": "Sagittarius",
+      "scores": {
+        "overall": 9,
+        "love": 9,
+        "friendship": 10,
+        "work": 8
+      },
+      "summary": "Aries and Sagittarius form one of the zodiac's most naturally compatible pairings, a Fire trine connection built on shared enthusiasm, honesty, and an insatiable appetite for adventure.",
+      "strengths": [
+        "Fire trine creates effortless understanding; both live with passion, courage, and forward momentum",
+        "Shared love of adventure and new experiences keeps the relationship perpetually exciting",
+        "Both value honesty and directness, eliminating guesswork and passive-aggressive dynamics",
+        "Aries' initiative pairs perfectly with Sagittarius' vision, turning big ideas into bold action"
+      ],
+      "challenges": [
+        "Both can be impatient and may abandon plans before seeing them through together",
+        "Sagittarius' need for philosophical freedom can feel like emotional unavailability to Aries",
+        "Neither naturally handles domestic details, so practical life management falls through the cracks"
+      ],
+      "advice": "Build a shared bucket list and work through it systematically. Assign mundane life tasks rather than assuming the other will handle them."
+    },
+    "aries-and-taurus": {
+      "sign1": "Aries",
+      "sign2": "Taurus",
+      "scores": {
+        "overall": 5,
+        "love": 6,
+        "friendship": 5,
+        "work": 6
+      },
+      "summary": "Aries and Taurus are adjacent signs with fundamentally different speeds and values, where Mars' urgency meets Venus' patience in a friction that can either forge steel or spark frustration.",
+      "strengths": [
+        "Aries brings excitement and spontaneity that shakes Taurus out of comfortable ruts",
+        "Taurus provides the stability and follow-through that Aries' projects desperately need",
+        "Adjacent signs can learn enormously from each other precisely because they are so different",
+        "Mars-Venus interplay creates strong physical attraction despite personality friction"
+      ],
+      "challenges": [
+        "Aries' impulsiveness directly conflicts with Taurus' need to deliberate and plan carefully",
+        "Taurus' slow, steady pace feels suffocating to fast-moving Aries",
+        "Fundamental disagreement on spending: Aries is impulsive while Taurus is conservative"
+      ],
+      "advice": "Respect each other's natural rhythm instead of trying to change it. Meet in the middle: Aries, slow down occasionally; Taurus, take a leap sometimes."
+    },
+    "cancer-and-leo": {
+      "sign1": "Cancer",
+      "sign2": "Leo",
+      "scores": {
+        "overall": 6,
+        "love": 7,
+        "friendship": 6,
+        "work": 6
+      },
+      "summary": "Cancer and Leo are adjacent signs ruled by the luminaries, Moon and Sun, creating a relationship that mirrors the dance between inner emotional life and outer radiant expression.",
+      "strengths": [
+        "Moon-Sun connection creates a primal, complementary dynamic of nurturing and shining",
+        "Leo's warmth and confidence make Cancer feel safe and protected",
+        "Cancer's devotion and emotional attentiveness make Leo feel genuinely adored",
+        "Both are fiercely protective of loved ones and prioritize family loyalty"
+      ],
+      "challenges": [
+        "Leo needs public admiration while Cancer craves private emotional intimacy, creating competing needs",
+        "Cancer's moodiness can dim Leo's sunny disposition, and Leo's self-focus can feel neglectful to Cancer",
+        "Water and Fire elements create steam: emotional overwhelm when Cancer's feelings meet Leo's directness"
+      ],
+      "advice": "Leo: check in emotionally before expecting Cancer to celebrate with you. Cancer: step into Leo's spotlight sometimes rather than always staying behind the scenes."
+    },
+    "cancer-and-pisces": {
+      "sign1": "Cancer",
+      "sign2": "Pisces",
+      "scores": {
+        "overall": 9,
+        "love": 10,
+        "friendship": 9,
+        "work": 7
+      },
+      "summary": "Cancer and Pisces share a Water trine that creates one of the zodiac's most emotionally attuned and spiritually connected partnerships, where empathy flows like a shared current.",
+      "strengths": [
+        "Intuitive emotional connection so deep that words often become unnecessary",
+        "Cancer's protective instincts shelter Pisces' sensitive, open heart",
+        "Pisces' imagination and spiritual depth expand Cancer's sometimes insular worldview",
+        "Shared devotion and willingness to sacrifice for each other creates unshakable loyalty"
+      ],
+      "challenges": [
+        "Double Water energy can create emotional flooding where both partners drown in feelings without solutions",
+        "Cancer's directional drive (Cardinal) can sometimes overwhelm Pisces' go-with-the-flow nature (Mutable)",
+        "Both avoid confrontation, allowing small issues to accumulate into resentment"
+      ],
+      "advice": "Build practical structures to support your emotional bond: shared budgets, clear household responsibilities. Address issues when they are small ripples, not tidal waves."
+    },
+    "capricorn-and-taurus": {
+      "sign1": "Capricorn",
+      "sign2": "Taurus",
+      "scores": {
+        "overall": 9,
+        "love": 8,
+        "friendship": 9,
+        "work": 10
+      },
+      "summary": "Capricorn and Taurus form a powerhouse Earth trine where Saturn's discipline meets Venus' sensuality, building a partnership that is both materially successful and genuinely enjoyable.",
+      "strengths": [
+        "Earth trine creates natural understanding of each other's need for security, stability, and tangible results",
+        "Taurus softens Capricorn's severity with pleasure and warmth; Capricorn gives Taurus' comfort zone a purpose",
+        "Exceptional financial compatibility; both are builders who think in long-term investments",
+        "Shared reliability and follow-through means promises made are promises kept"
+      ],
+      "challenges": [
+        "Double Earth energy can make the relationship overly focused on material achievement at the expense of emotional or spiritual growth",
+        "Both are stubborn in different ways: Taurus digs in, Capricorn insists on their method",
+        "Capricorn's workaholism can make Taurus feel deprioritized below career goals"
+      ],
+      "advice": "Balance ambition with enjoyment. Capricorn: let Taurus teach you to savor the success you work so hard to achieve. Taurus: respect that work is how Capricorn shows love."
+    },
+    "gemini-and-aquarius": {
+      "sign1": "Gemini",
+      "sign2": "Aquarius",
+      "scores": {
+        "overall": 8,
+        "love": 7,
+        "friendship": 10,
+        "work": 9
+      },
+      "summary": "Gemini and Aquarius form an electrifying Air trine where Mercury's curiosity meets Uranus' innovation, creating a mentally stimulating partnership that thrives on ideas and independence.",
+      "strengths": [
+        "Air trine creates instant intellectual rapport; conversations are endlessly stimulating and wide-ranging",
+        "Both prize independence and give each other freedom without drama or jealousy",
+        "Shared progressive thinking and openness to unconventional lifestyles and relationships",
+        "Gemini's adaptability complements Aquarius' fixed vision, creating a dynamic idea-to-execution pipeline"
+      ],
+      "challenges": [
+        "Both can intellectualize emotions rather than feeling them, creating emotional distance over time",
+        "Gemini's surface-level exploration can frustrate Aquarius' desire for deep systemic understanding",
+        "Aquarius' stubbornness about their worldview clashes with Gemini's ever-shifting perspectives"
+      ],
+      "advice": "Schedule distraction-free time for emotional connection, not just intellectual exchange. Gemini: commit to Aquarius' causes sometimes. Aquarius: lighten up and enjoy Gemini's playfulness."
+    },
+    "gemini-and-cancer": {
+      "sign1": "Gemini",
+      "sign2": "Cancer",
+      "scores": {
+        "overall": 5,
+        "love": 6,
+        "friendship": 6,
+        "work": 5
+      },
+      "summary": "Gemini and Cancer are adjacent signs where Mercury's restless intellect meets the Moon's emotional depth, a pairing that requires conscious bridging between head and heart.",
+      "strengths": [
+        "Cancer provides the emotional warmth and home base that anchors Gemini's scattered energy",
+        "Gemini brings lightness and humor that lifts Cancer out of emotional heaviness",
+        "Both are responsive and adaptive in their own ways: Gemini mentally, Cancer emotionally",
+        "Adjacent sign connection means each holds skills the other needs to develop"
+      ],
+      "challenges": [
+        "Gemini processes through talking and thinking; Cancer processes through feeling, creating communication mismatch",
+        "Cancer's need for emotional security feels clingy to freedom-loving Gemini",
+        "Gemini's changeability triggers Cancer's abandonment fears and deepens insecurity"
+      ],
+      "advice": "Learn each other's emotional language rather than expecting your partner to speak yours. Gemini: your words land harder on Cancer than you realize. Cancer: not every outing means Gemini is leaving."
+    },
+    "leo-and-aquarius": {
+      "sign1": "Leo",
+      "sign2": "Aquarius",
+      "scores": {
+        "overall": 7,
+        "love": 8,
+        "friendship": 7,
+        "work": 7
+      },
+      "summary": "Leo and Aquarius are opposite signs on the axis of individual expression versus collective vision, creating powerful attraction between the Sun's personal radiance and Uranus' revolutionary idealism.",
+      "strengths": [
+        "Opposite sign magnetism creates an irresistible pull; each sees their missing piece in the other",
+        "Leo's creative warmth gives Aquarius' abstract ideals a human, personal touch",
+        "Aquarius' big-picture thinking gives Leo's personal ambitions a greater purpose and audience",
+        "Both are Fixed signs, so commitment runs deep once they decide they are in"
+      ],
+      "challenges": [
+        "Leo craves personal recognition while Aquarius deprioritizes individual ego for the group, a core tension",
+        "Aquarius' emotional detachment feels cold and dismissive to warmth-seeking Leo",
+        "Double Fixed sign stubbornness means neither yields easily in ideological disagreements"
+      ],
+      "advice": "Leo: expand your definition of spotlight to include collective achievements. Aquarius: your partner is not being selfish by wanting personal attention; it is a legitimate need."
+    },
+    "leo-and-libra": {
+      "sign1": "Leo",
+      "sign2": "Libra",
+      "scores": {
+        "overall": 8,
+        "love": 9,
+        "friendship": 9,
+        "work": 7
+      },
+      "summary": "Leo and Libra form a glamorous, socially magnetic sextile connection where the Sun's radiance meets Venus' charm, creating a partnership that dazzles in public and adores in private.",
+      "strengths": [
+        "Sextile aspect creates natural harmony with just enough difference to stay interesting",
+        "Both love beauty, romance, and social life, making them a naturally elegant couple",
+        "Libra's diplomacy soothes Leo's pride, while Leo's decisiveness rescues Libra from indecision",
+        "Shared generosity and desire to make others feel special extends warmth to everyone around them"
+      ],
+      "challenges": [
+        "Leo's need for dominance can overwhelm Libra's desire for equal partnership",
+        "Libra's flirtatious social nature may trigger Leo's jealousy and possessiveness",
+        "Both can prioritize appearances over substance, avoiding deeper relational work"
+      ],
+      "advice": "Enjoy your shared social life but protect private time for real emotional intimacy. Leo: listen to Libra's perspective before deciding. Libra: be direct about what you need instead of hinting."
+    },
+    "libra-and-scorpio": {
+      "sign1": "Libra",
+      "sign2": "Scorpio",
+      "scores": {
+        "overall": 6,
+        "love": 7,
+        "friendship": 5,
+        "work": 6
+      },
+      "summary": "Libra and Scorpio are adjacent signs where Venus' graceful surface meets Pluto's probing depths, a pairing that oscillates between seductive charm and uncomfortable exposure.",
+      "strengths": [
+        "Scorpio's intensity and depth fascinate harmony-seeking Libra, pulling them into richer emotional territory",
+        "Libra's social grace and diplomacy give Scorpio access to networks and lightness they lack alone",
+        "Both are strategic thinkers who can navigate complex social and emotional landscapes together",
+        "The Venus-Pluto interplay creates magnetic physical and romantic chemistry"
+      ],
+      "challenges": [
+        "Libra wants to keep things pleasant; Scorpio wants to dig into what is real, even when it is ugly",
+        "Scorpio's jealousy and possessiveness clash with Libra's natural friendliness with everyone",
+        "Libra's conflict avoidance drives Scorpio's suspicion that important truths are being withheld"
+      ],
+      "advice": "Libra: engage with Scorpio's depth rather than deflecting with charm. Scorpio: not everything is a test of loyalty; sometimes socializing is just socializing."
+    },
+    "pisces-and-sagittarius": {
+      "sign1": "Pisces",
+      "sign2": "Sagittarius",
+      "scores": {
+        "overall": 6,
+        "love": 7,
+        "friendship": 7,
+        "work": 5
+      },
+      "summary": "Pisces and Sagittarius form a square aspect connecting Jupiter-ruled visionaries, both seekers of meaning who search through vastly different terrain: one inward and spiritual, the other outward and philosophical.",
+      "strengths": [
+        "Shared Jupiter rulership gives both an expansive, optimistic outlook and love of meaning-making",
+        "Both are Mutable signs, creating flexibility and willingness to adapt to each other's rhythms",
+        "Sagittarius' adventurous spirit appeals to Pisces' imaginative, open-ended nature",
+        "Shared interest in spirituality, culture, and the big questions of existence"
+      ],
+      "challenges": [
+        "Square aspect creates friction: Sagittarius is blunt while Pisces absorbs harsh words like a sponge",
+        "Sagittarius seeks truth through logic and experience; Pisces seeks it through feeling and intuition, leading to mutual dismissal",
+        "Pisces needs emotional reassurance that wandering Sagittarius may forget to provide"
+      ],
+      "advice": "Honor both paths to truth: Sagittarius, intuition is valid; Pisces, directness is not cruelty. Build shared rituals that blend adventure with spiritual depth, like travel to meaningful places."
+    },
+    "scorpio-and-sagittarius": {
+      "sign1": "Scorpio",
+      "sign2": "Sagittarius",
+      "scores": {
+        "overall": 5,
+        "love": 6,
+        "friendship": 6,
+        "work": 5
+      },
+      "summary": "Scorpio and Sagittarius are adjacent signs where Pluto's consuming depth meets Jupiter's expansive freedom, a pairing that feels exciting at first but reveals fundamental differences in how they engage with life.",
+      "strengths": [
+        "Scorpio's intensity and Sagittarius' fearlessness create a bold dynamic that takes on big challenges",
+        "Both are honest in their own ways: Scorpio values authenticity, Sagittarius values transparency",
+        "Sagittarius helps Scorpio lighten up and see beyond their emotional tunnel vision",
+        "Scorpio teaches Sagittarius the value of depth and commitment over breadth and novelty"
+      ],
+      "challenges": [
+        "Scorpio's need for emotional control and intimacy suffocates freedom-seeking Sagittarius",
+        "Sagittarius' casual attitude toward commitment and feelings wounds possessive Scorpio deeply",
+        "Adjacent sign tension: neither element (Water and Fire) naturally supports the other"
+      ],
+      "advice": "Be explicit about your needs for closeness and freedom from the start. Scorpio: loosen the reins. Sagittarius: show up consistently for the emotional moments that matter to your partner."
+    },
+    "taurus-and-virgo": {
+      "sign1": "Taurus",
+      "sign2": "Virgo",
+      "scores": {
+        "overall": 9,
+        "love": 8,
+        "friendship": 9,
+        "work": 10
+      },
+      "summary": "Taurus and Virgo form a deeply harmonious Earth trine where Venus' appreciation of beauty meets Mercury's attention to detail, building a relationship that is both comforting and continually refined.",
+      "strengths": [
+        "Earth trine creates instinctive understanding of each other's need for stability, quality, and tangible progress",
+        "Taurus' calm, grounding presence soothes Virgo's anxious, overthinking tendencies",
+        "Virgo's attention to detail improves every aspect of the life Taurus loves to build",
+        "Shared practical nature means they handle finances, health, and daily life with competence and care"
+      ],
+      "challenges": [
+        "Virgo's critical nature can chip away at pleasure-loving Taurus' contentment over time",
+        "Taurus' resistance to change frustrates improvement-oriented Virgo",
+        "Both can be so focused on the practical that emotional expression and spontaneity atrophy"
+      ],
+      "advice": "Virgo: trade some critiques for compliments; Taurus thrives on appreciation, not optimization. Taurus: accept that Virgo's suggestions come from love, not dissatisfaction."
+    },
+    "virgo-and-libra": {
+      "sign1": "Virgo",
+      "sign2": "Libra",
+      "scores": {
+        "overall": 6,
+        "love": 6,
+        "friendship": 7,
+        "work": 7
+      },
+      "summary": "Virgo and Libra are adjacent signs where Mercury's analytical precision meets Venus' aesthetic harmony, a pairing that shares a love of refinement but approaches it from entirely different angles.",
+      "strengths": [
+        "Shared appreciation for quality, elegance, and getting things right creates a refined shared life",
+        "Libra's social warmth draws reserved Virgo into a richer, more connected social world",
+        "Virgo's practical skills complement Libra's vision, turning beautiful ideas into functioning realities",
+        "Both are thoughtful communicators who prefer discussion over argument"
+      ],
+      "challenges": [
+        "Virgo focuses on flaws to fix them; Libra focuses on harmony to maintain it, creating tension about whether to address problems or smooth them over",
+        "Virgo's directness about imperfections hurts Libra's feelings, while Libra's diplomatic hedging frustrates Virgo",
+        "Earth-Air disconnect: Virgo wants practical solutions while Libra wants conceptual balance"
+      ],
+      "advice": "Appreciate your shared refinement while respecting different methods. Virgo: soften your delivery. Libra: accept that honest feedback is a form of care, not criticism."
+    },
+    "aries-and-cancer": {
+      "sign1": "Aries",
+      "sign2": "Cancer",
+      "scores": {
+        "overall": 5,
+        "love": 6,
+        "friendship": 5,
+        "work": 5
+      },
+      "summary": "Aries and Cancer form a Cardinal square where Mars' combative drive meets the Moon's protective instincts, creating a relationship charged with tension that can become growth if both partners are willing to stretch.",
+      "strengths": [
+        "Both are Cardinal signs who take initiative, ensuring the relationship always moves forward",
+        "Aries' courage and directness can feel refreshingly protective to security-seeking Cancer",
+        "Cancer's emotional intelligence provides the depth that action-oriented Aries often lacks",
+        "Square aspect generates dynamic tension that prevents complacency and forces mutual growth"
+      ],
+      "challenges": [
+        "Aries charges ahead while Cancer needs to process emotionally first, creating constant pacing conflicts",
+        "Cancer's sensitivity and indirect communication baffles straightforward Aries",
+        "Aries perceives Cancer's need for reassurance as weakness; Cancer perceives Aries' independence as abandonment"
+      ],
+      "advice": "Aries: slow down and ask how your partner feels before announcing the plan. Cancer: state your needs directly rather than hoping Aries will intuit them, because they will not."
+    },
+    "leo-and-scorpio": {
+      "sign1": "Leo",
+      "sign2": "Scorpio",
+      "scores": {
+        "overall": 6,
+        "love": 7,
+        "friendship": 5,
+        "work": 6
+      },
+      "summary": "Leo and Scorpio form a Fixed square where the Sun's radiant pride meets Pluto's hidden power, creating a magnetic but volatile dynamic between two signs who both insist on control.",
+      "strengths": [
+        "Intense mutual fascination; both sense the other's strength and are drawn to it like a challenge",
+        "Double Fixed sign commitment means when they are in, they are fully in and deeply loyal",
+        "Leo's warmth can slowly melt Scorpio's defenses; Scorpio's depth gives Leo's life more meaning",
+        "Both are fiercely protective of those they love, creating a formidable united front"
+      ],
+      "challenges": [
+        "Two of the most willful signs in the zodiac locked in a square aspect creates epic power struggles",
+        "Leo needs open admiration while Scorpio withholds praise as a control mechanism, wounding Leo's core",
+        "Scorpio's secrecy infuriates transparent Leo; Leo's need for external validation triggers Scorpio's jealousy"
+      ],
+      "advice": "Neither of you will ever win the control game, so stop playing it. Channel your combined intensity into a shared mission, cause, or creative project bigger than both of you."
+    },
+    "capricorn-and-aquarius": {
+      "sign1": "Capricorn",
+      "sign2": "Aquarius",
+      "scores": {
+        "overall": 6,
+        "love": 5,
+        "friendship": 7,
+        "work": 7
+      },
+      "summary": "Capricorn and Aquarius are adjacent signs sharing Saturn as a traditional ruler, connecting the established order with the impulse to reform it, a pairing that bridges convention and revolution.",
+      "strengths": [
+        "Shared Saturnian discipline gives both signs a serious, committed approach to whatever they undertake",
+        "Capricorn's strategic pragmatism can ground Aquarius' visionary ideas into workable plans",
+        "Aquarius introduces innovative thinking that keeps Capricorn's methods from becoming outdated",
+        "Both are emotionally self-contained, so neither overwhelms the other with neediness"
+      ],
+      "challenges": [
+        "Capricorn respects hierarchy and tradition; Aquarius questions and dismantles both, creating ideological friction",
+        "Neither sign is naturally emotionally expressive, so the relationship can feel functional but cold",
+        "Capricorn's focus on proven methods frustrates Aquarius' need to experiment and break rules"
+      ],
+      "advice": "Find the overlap between preserving what works and innovating what doesn't. Schedule dedicated time for emotional connection since neither of you will prioritize it organically."
     }
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import Stripe from 'stripe';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -17,6 +18,9 @@ function sanitizeForLog(value: unknown): string {
 
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     // List all unresolved orphaned subscriptions
     const result = await sql`
       SELECT
@@ -50,6 +54,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const body = await request.json();
     const { subscriptionId, userId, action } = body;
 

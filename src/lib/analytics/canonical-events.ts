@@ -501,7 +501,9 @@ export async function insertCanonicalEvent(row: CanonicalInsertRow): Promise<{
       ? row.createdAt.toISOString()
       : (row.createdAt ?? null);
 
-  // The unique constraint on event_id keeps retries/idempotent inserts from inflating counts.
+  // ON CONFLICT DO NOTHING handles ALL unique constraints:
+  // - event_id uniqueness (idempotent retries)
+  // - daily dedup partial indexes (app_opened, product_opened, daily_dashboard, grimoire_viewed)
   const result = await sql.query(
     `
       INSERT INTO conversion_events (
@@ -533,7 +535,7 @@ export async function insertCanonicalEvent(row: CanonicalInsertRow): Promise<{
         COALESCE($12::jsonb, NULL),
         COALESCE($13::timestamptz, NOW())
       )
-      ON CONFLICT (event_id) DO NOTHING
+      ON CONFLICT DO NOTHING
       RETURNING id
     `,
     [
@@ -607,7 +609,7 @@ export async function insertCanonicalEventsBatch(
         created_at
       )
       VALUES ${values.join(',')}
-      ON CONFLICT (event_id) DO NOTHING
+      ON CONFLICT DO NOTHING
       RETURNING 1
     `,
     params,

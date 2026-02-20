@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { generateWeeklyReport } from '@/lib/cosmic-snapshot/reports';
 import {
   generateWeeklyReportEmailHTML,
@@ -8,6 +9,9 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
     const userEmail = searchParams.get('email');

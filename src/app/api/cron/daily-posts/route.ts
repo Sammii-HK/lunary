@@ -338,18 +338,90 @@ export async function GET(request: NextRequest) {
       const { generateDailyBatch } =
         await import('@/lib/instagram/content-orchestrator');
       const igBatch = await generateDailyBatch(dateStr);
+
+      // Post each Instagram batch item via Ayrshare
+      const igSentResults: Array<{
+        scheduledTime: string;
+        type: string;
+        status: string;
+        error?: string;
+      }> = [];
+
+      for (const post of igBatch.posts) {
+        try {
+          // Pre-upload all images to static blob URLs
+          const mediaItems: Array<{
+            type: 'image';
+            url: string;
+            alt: string;
+          }> = [];
+          for (const imageUrl of post.imageUrls) {
+            const staticUrl = await preUploadImage(imageUrl);
+            mediaItems.push({
+              type: 'image',
+              url: staticUrl,
+              alt: `${post.type} content from Lunary`,
+            });
+          }
+
+          // Cap hashtags at 3 (Instagram sweet spot; Ayrshare max is 5)
+          const limitedHashtags = post.hashtags.slice(0, 3);
+          const caption =
+            limitedHashtags.length > 0
+              ? `${post.caption}\n\n${limitedHashtags.join(' ')}`
+              : post.caption;
+
+          const isStory = post.type === 'story';
+          const isCarousel =
+            post.type === 'carousel' || post.type === 'angel_number_carousel';
+
+          const result = await postToSocial({
+            platform: 'instagram',
+            content: isStory ? '' : caption,
+            scheduledDate: post.scheduledTime,
+            media: mediaItems,
+            platformSettings: {
+              instagramOptions: {
+                ...(isStory ? { isStory: true } : {}),
+                ...(isCarousel ? { type: 'carousel' } : {}),
+              },
+            },
+          });
+
+          igSentResults.push({
+            scheduledTime: post.scheduledTime,
+            type: post.type,
+            status: result.success ? 'success' : 'error',
+            error: result.success ? undefined : result.error || 'Unknown error',
+          });
+        } catch (postError) {
+          igSentResults.push({
+            scheduledTime: post.scheduledTime,
+            type: post.type,
+            status: 'error',
+            error:
+              postError instanceof Error ? postError.message : 'Unknown error',
+          });
+        }
+      }
+
+      const igSuccessCount = igSentResults.filter(
+        (r) => r.status === 'success',
+      ).length;
       const igExecutionTime = Date.now() - igStartTime;
+
+      console.log(
+        `📸 Instagram batch: ${igBatch.posts.length} posts generated, ${igSuccessCount} sent in ${igExecutionTime}ms`,
+      );
 
       cronResults.instagramBatch = {
         success: true,
         postCount: igBatch.posts.length,
+        sentCount: igSuccessCount,
+        posts: igSentResults,
         types: igBatch.posts.map((p: { type: string }) => p.type),
         executionTimeMs: igExecutionTime,
       };
-
-      console.log(
-        `📸 Instagram batch: ${igBatch.posts.length} posts generated in ${igExecutionTime}ms`,
-      );
     } catch (error) {
       const igExecutionTime = Date.now() - igStartTime;
       console.error('📸 Instagram batch failed:', error);

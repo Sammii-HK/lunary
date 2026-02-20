@@ -5,6 +5,8 @@ import {
   testUserFilterUsers,
 } from '@/lib/analytics/test-filter';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { requireAdminAuth } from '@/lib/admin-auth';
+
 const ACTIVITY_EVENTS = [
   'app_opened',
   'tarot_viewed',
@@ -26,6 +28,9 @@ const ACTIVITY_EVENTS = [
 
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('timeRange') || '30d';
 

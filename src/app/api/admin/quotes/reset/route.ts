@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
     const result = await sql`
       UPDATE social_quotes
       SET status = 'available',

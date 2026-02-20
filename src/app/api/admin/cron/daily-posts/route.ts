@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getImageBaseUrl } from '@/lib/urls';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json().catch(() => ({}));
     const force = Boolean(body?.force);

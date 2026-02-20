@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { queueAnalyticsEvent } from '@/lib/discord';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (
-      process.env.CRON_SECRET &&
-      authHeader !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
 
     const last7Days = await sql`
       SELECT 

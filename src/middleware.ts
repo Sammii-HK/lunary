@@ -9,7 +9,8 @@ const camelToKebab = (str: string) =>
 const isProductionHost = (hostname: string) =>
   hostname === 'lunary.app' ||
   hostname === 'www.lunary.app' ||
-  hostname.startsWith('admin.');
+  hostname.startsWith('admin.') ||
+  hostname.startsWith('links.');
 
 const ANON_ID_COOKIE = 'lunary_anon_id';
 const AB_TEST_COOKIE = 'lunary_ab_tests';
@@ -210,6 +211,13 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     url.protocol = 'https:';
     url.port = '';
     return NextResponse.redirect(url, 301);
+  }
+
+  // Links subdomain routing — links.lunary.app → /links
+  if (isProd && hostname.startsWith('links.')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/links';
+    return NextResponse.rewrite(url);
   }
 
   // Admin subdomain routing

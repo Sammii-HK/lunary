@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { formatTimestamp } from '@/lib/analytics/date-range';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 // Ensure conversion_events table exists
 let tableChecked = false;
@@ -86,6 +87,9 @@ const AI_CONTEXT = getAIContext();
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     // Ensure table exists before processing
     try {
       await ensureConversionEventsTable();

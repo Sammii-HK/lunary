@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 import {
   getArchetypePrompt,
@@ -108,6 +109,9 @@ const POSTING_STRATEGY = getPostingStrategy();
 const COMPETITOR_CONTEXT = getCompetitorContext();
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   // Trim whitespace from API key (common issue with .env files)
   const apiKey = process.env.DEEPINFRA_API_KEY?.trim();
   const rawKey = process.env.DEEPINFRA_API_KEY;

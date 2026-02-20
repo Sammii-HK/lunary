@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 function getAIContext(): string {
   try {
@@ -38,6 +39,9 @@ function getDateCutoff(timeRange: string): Date {
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { testName, variants, timeRange } = await request.json();
 
     if (!testName) {

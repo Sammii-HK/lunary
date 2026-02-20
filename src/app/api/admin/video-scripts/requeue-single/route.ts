@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 
@@ -14,6 +15,9 @@ function getWeekStart(date: Date): Date {
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const body = await request.json().catch(() => ({}));
     const postId = body?.postId as string | undefined;
     const scriptIdParam = body?.scriptId as number | undefined;

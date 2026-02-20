@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getThematicImageUrl } from '@/lib/social/educational-images';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import { getImageBaseUrl } from '@/lib/urls';
 
@@ -17,6 +18,9 @@ function getWeekStart(date: Date): Date {
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const body = await request.json().catch(() => ({}));
     const weekStartParam = body?.weekStart as string | undefined;
     const weekOffset = Number(body?.weekOffset ?? 0);

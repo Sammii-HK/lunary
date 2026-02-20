@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { detectMoods } from '@/lib/journal/mood-detector';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -12,11 +13,8 @@ export const maxDuration = 300;
  */
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Add admin authentication
-    // const apiKey = request.headers.get('x-admin-key');
-    // if (apiKey !== process.env.ADMIN_API_KEY) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
 
     const body = await request.json();
     const {

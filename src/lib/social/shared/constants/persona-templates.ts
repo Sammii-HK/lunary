@@ -91,12 +91,12 @@ export const AUDIENCE_TERMS = Object.values(AUDIENCE_FACETS).flat();
  * Use proper capitalisation (especially "I") and avoid em dashes/hyphens
  */
 export const PERSONA_BODY_TEMPLATES = [
-  'I built Lunary for you.\nPersonalised horoscopes, transits, tarot, and crystals. All based on your full birth chart, not just your sun sign.',
-  'Lunary goes beyond your sun sign.\nYour full natal chart shapes everything: horoscopes, transits, tarot pulls, crystal guidance. All personalised to you.',
-  'Lunary is where I put everything I wish I had when I started.\nEverything based on your full birth chart. Horoscopes, transits, tarot, crystals.',
-  'I made Lunary for moments like this.\nPersonalised to your full natal chart. Not generic sun sign content. Horoscopes, transits, tarot, crystals.',
-  'Share Lunary with a friend and you both get rewarded.\nThey get 30 days of Pro. You unlock badges, exclusive spreads, and more as you refer.',
-  'Lunary is live.\nDaily horoscopes, transits, tarot readings, crystal guidance. All based on your complete natal chart, not just your sun sign.',
+  'I built Lunary for you.\nPersonal astrology using your full birth chart, not just your sun sign. Now on Google Play.',
+  'Lunary goes beyond your sun sign.\nYour full natal chart shapes everything: horoscopes, transits, tarot pulls, crystal guidance. Now on Google Play.',
+  'Lunary tracks how transits are actually affecting you, using your full birth chart.\nNot generic content. Now on Google Play.',
+  'I made Lunary for people who want more than a sun sign horoscope.\nYour full natal chart drives everything. Now on Google Play.',
+  'Lunary is live on Google Play.\nDaily horoscopes, real time transit tracking, tarot, crystals. All based on your complete natal chart.',
+  'Lunary reads your transits in real time and tells you what they mean for you personally.\nNow on Google Play. 3 months free with code COSMICSEASON.',
 ];
 
 /**
@@ -138,62 +138,62 @@ export const THREADS_QUESTION_TEMPLATES = [
 ];
 
 /**
- * Dear-style referral CTA templates for Threads
- * These drive referral signups during peak app usage times (evening)
- * No hardcoded promo codes — referral links are per-user, generated in-app
- * Moon phase emojis: 🌑🌒🌓🌔🌕🌖🌗🌘
+ * Dear-style CTA templates for Threads
+ * Persona rotation: "dear [audience terms]" opening stays varied via AUDIENCE_FACETS
+ * Body: USPs (full birth chart, transit tracking, not just sun sign) + Google Play + promo code
+ * Closing CTA: rotated separately for variety
  */
-export const DEAR_STYLE_REFERRAL_TEMPLATES = [
-  `Dear tarot readers, witches, astrologers, and moon lovers 🌕
-Share Lunary with a friend and you both get rewarded.
-They get 30 days of Pro. You unlock exclusive spreads, badges, and more.
-Find your referral link in the app.`,
 
-  `For astrology lovers, moon watchers, and chart nerds 🌔
-Know someone who would love Lunary? Send them your referral link.
-They get 30 days of Pro free. You earn rewards with every friend who joins.
-Your link is waiting in the app.`,
-
-  `Dear moon gazers and cosmic seekers 🌓
-Lunary is better with friends.
-Share your referral link and they get 30 days of Pro. You unlock badges, exclusive spreads, and more the more friends you refer.
-Find your link in the app.`,
-
-  `To the witches, the chart readers, the crystal collectors 🌖
-I built a referral program to say thank you.
-Share Lunary with a friend. They get 30 days of Pro. You earn tiered rewards as you refer more people.
-Your referral link is in the app.`,
-
-  `Dear cosmic wanderers and horoscope checkers 🌗
-If you love Lunary, share it with someone who would too.
-They get 30 days of Pro. You unlock exclusive spreads and badges along the way.
-Your referral link is in the app.`,
-
-  `For the transit trackers and birth chart obsessives 🌕
-Share Lunary with someone who gets it.
-They get 30 days of Pro. You get rewarded for every friend who signs up.
-Unlock badges, exclusive spreads, and more. Your link is in the app.`,
-
-  `Dear tarot pullers, moon trackers, and star gazers 🌒
-I built Lunary for you. Now I want to make it easy to share it.
-Refer a friend and they get 30 days of Pro. You earn rewards for every sign-up.
-Find your referral link in the app.`,
-
-  `To the astrologers and the astro-curious 🌘
-Lunary goes beyond your sun sign. Know someone who would love that?
-Share your referral link. They get 30 days of Pro. You unlock rewards as you refer.
-Your link is in the app.`,
-
-  `Dear crystal hoarders and horoscope readers 🌑
-I wanted to give back to this community.
-Share Lunary with a friend. They get 30 days of Pro. You earn badges, exclusive spreads, and months of Pro as you refer more.
-Your referral link is in the app.`,
-
-  `For moon lovers and chart nerds 🌔
-The best way to grow Lunary is through you.
-Refer a friend. They get 30 days of Pro. You unlock tiered rewards the more you share.
-Find your referral link in the app.`,
+const CTA_BODIES = [
+  // Transit tracking (real differentiator vs every other app)
+  `Lunary is now on Google Play. It tracks how transits are actually affecting you, using your full birth chart. Not a generic sun sign forecast.`,
+  // Pattern recognition (unique feature)
+  `Lunary is on Google Play. It learns your patterns over time. Your tarot pulls, journal entries, and transits start connecting after a few weeks. No other app does this.`,
+  // Astronomical accuracy
+  `Lunary is now on Google Play. Every chart is calculated to within 1 arcminute, validated against the US Naval Observatory. Most apps round the numbers. We don't.`,
+  // Free grimoire (2000+ pages, no paywall)
+  `Lunary is on Google Play. There's a 2,000+ page grimoire built in. Spells, rituals, tarot meanings, correspondences. All free. No paywall on learning.`,
+  // No ads, ever
+  `Lunary is now on Google Play. No ads. Not in free, not ever. Your birth chart drives your horoscopes, transits, tarot, and crystal guidance. Not your sun sign.`,
+  // Teaches you to read your own chart
+  `I built Lunary so you can learn to read your own chart. Not depend on an app to tell you what to think. Now on Google Play.`,
+  // Real time transit updates
+  `Lunary is on Google Play. It reads your transits in real time and tells you what they actually mean for your specific chart. Updates throughout the day.`,
+  // Chart-first tarot
+  `Lunary is on Google Play. Even your tarot readings are guided by your birth chart. Nothing is generic. Everything connects back to your birth data.`,
+  // Full practice in one place
+  `Lunary is on Google Play. Astrology, tarot, moon phases, crystals, rituals, journaling. All in one place, all connected to your birth chart. Not fragments across five apps.`,
+  // Reflection over prediction
+  `Lunary is on Google Play. It's built for understanding yourself, not predicting the future. Your chart, your transits, your patterns. Everything based on real astronomy.`,
 ];
+
+const CTA_CLOSINGS = [
+  `3 months free with code COSMICSEASON. Tell me what you think.`,
+  `Use code COSMICSEASON for 3 months free. Let me know how it feels.`,
+  `3 months free with code COSMICSEASON. Would love to hear your thoughts.`,
+  `Code COSMICSEASON gets you 3 months free. Drop your sign below.`,
+  `3 months on me with code COSMICSEASON. What do you think?`,
+  `Try it free for 3 months with code COSMICSEASON. Curious what you notice first.`,
+];
+
+/**
+ * Build a complete dear-style CTA by combining audience opening + body + closing.
+ * Each piece rotates independently for maximum variety.
+ */
+export function getDearStyleReferralPost(seed?: number): string {
+  const s = seed ?? Math.floor(Math.random() * 1000);
+  const terms = buildAudienceTerms(4);
+  const opening = `dear ${terms.join(', ')}, and anyone who's ever asked "what time were you born" on a first date 🌖`;
+  const body = CTA_BODIES[s % CTA_BODIES.length];
+  const closing = CTA_CLOSINGS[(s >> 3) % CTA_CLOSINGS.length];
+  return `${opening}\n${body}\n${closing}`;
+}
+
+/** @deprecated kept for backwards compat, use getDearStyleReferralPost() */
+export const DEAR_STYLE_REFERRAL_TEMPLATES = CTA_BODIES.map(
+  (body, i) =>
+    `dear astrologers, witches, tarot readers, stargazers, crystal lovers, and anyone who's ever asked "what time were you born" on a first date 🌖\n${body}\n${CTA_CLOSINGS[i % CTA_CLOSINGS.length]}`,
+);
 
 /**
  * Conversational deep-dive templates for Threads
@@ -250,17 +250,6 @@ export function getThreadsQuestion(topic: string, seed?: number): string {
     .replace('{topic}', topic)
     .replace('{sign_type}', signType)
     .replace('{placement}', placement);
-}
-
-/**
- * Get a dear-style referral CTA post
- */
-export function getDearStyleReferralPost(seed?: number): string {
-  const index =
-    seed !== undefined
-      ? seed % DEAR_STYLE_REFERRAL_TEMPLATES.length
-      : Math.floor(Math.random() * DEAR_STYLE_REFERRAL_TEMPLATES.length);
-  return DEAR_STYLE_REFERRAL_TEMPLATES[index];
 }
 
 /**

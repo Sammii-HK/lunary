@@ -4,19 +4,25 @@ import { postToSocial } from '@/lib/social/client';
 import { preUploadImage } from '@/lib/social/pre-upload-image';
 import { generateDailyStoryData } from '@/lib/instagram/story-content';
 import { format } from 'date-fns';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 /**
  * Debug endpoint: try posting to Instagram via Ayrshare and return raw results.
  *
  * POST /api/admin/test-post
- * Body: { type: 'story' | 'feed', dateStr?: string, dryRun?: boolean }
+ * Body: { type: 'story' | 'feed' | 'batch' | 'all-stories', dateStr?: string, dryRun?: boolean }
  *
- * - type=story  → generates today's first story, pre-uploads, posts via Ayrshare
- * - type=feed   → grabs the latest pending/approved instagram post from DB, posts it
- * - dryRun=true → does everything except the actual Ayrshare call
+ * - type=story       → generates today's first story, pre-uploads, posts via Ayrshare
+ * - type=feed        → grabs the latest pending/approved instagram post from DB, posts it
+ * - type=batch       → generates and posts the full Instagram content batch for today
+ * - type=all-stories → generates and posts all stories for today
+ * - dryRun=true      → does everything except the actual Ayrshare call
  */
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const body = await request.json();
     const type = body.type || 'story'; // 'story' | 'feed'
     const dryRun = body.dryRun === true;
@@ -25,7 +31,8 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
     const log: string[] = [];
     const addLog = (msg: string) => {
-      console.log(`[test-post] ${msg}`);
+      const safeMsg = msg.replace(/[\r\n\x00-\x1F\x7F]/g, '');
+      console.log(`[test-post] ${safeMsg}`);
       log.push(msg);
     };
 
@@ -97,6 +104,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: result.success,
         result,
+        rawResponse: result.rawResponse,
         log,
         existingPosts: existingSummary,
         payload,
@@ -135,33 +143,39 @@ export async function POST(request: NextRequest) {
       addLog(`Image URL: ${post.image_url || 'NONE'}`);
       addLog(`Video URL: ${post.video_url || 'NONE'}`);
 
-      let mediaUrl = post.image_url ? String(post.image_url).trim() : '';
-      if (mediaUrl && !mediaUrl.startsWith('http')) {
-        mediaUrl = `${baseUrl}${mediaUrl}`;
+      const rawImageUrl = post.image_url ? String(post.image_url).trim() : '';
+      let imageUrls: string[] = [];
+      if (rawImageUrl) {
+        // Handle pipe-delimited carousel URLs
+        imageUrls = rawImageUrl.split('|').map((u: string) => {
+          const trimmed = u.trim();
+          return trimmed.startsWith('http') ? trimmed : `${baseUrl}${trimmed}`;
+        });
+        if (imageUrls.length > 1) {
+          addLog(`Carousel detected: ${imageUrls.length} images`);
+        }
       }
 
-      // Handle pipe-delimited carousel URLs — use the first one
-      if (mediaUrl.includes('|')) {
-        mediaUrl = mediaUrl.split('|')[0];
-        addLog(`Carousel detected, using first image: ${mediaUrl}`);
+      // Pre-upload all images
+      const media: Array<{ type: 'image'; url: string; alt: string }> = [];
+      for (const url of imageUrls) {
+        addLog(`Pre-uploading feed image: ${url.substring(0, 80)}...`);
+        const staticUrl = await preUploadImage(url);
+        media.push({ type: 'image', url: staticUrl, alt: 'Lunary post' });
+        addLog(`Static URL: ${staticUrl}`);
       }
 
-      if (mediaUrl) {
-        addLog('Pre-uploading feed image...');
-        mediaUrl = await preUploadImage(mediaUrl);
-        addLog(`Static URL: ${mediaUrl}`);
-      }
-
+      const isCarousel = media.length > 1;
       const scheduleDate = new Date(Date.now() + 15 * 60 * 1000);
       const payload = {
         platform: 'instagram' as const,
         content: String(post.content || ''),
         scheduledDate: scheduleDate.toISOString(),
-        media: mediaUrl
-          ? [{ type: 'image' as const, url: mediaUrl, alt: 'Lunary post' }]
-          : [],
+        media,
         platformSettings: {
-          instagramOptions: { type: 'post' },
+          instagramOptions: isCarousel
+            ? { type: 'carousel' }
+            : { type: 'post' },
         },
       };
       addLog(
@@ -195,6 +209,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: result.success,
         result,
+        rawResponse: result.rawResponse,
         log,
         existingPosts: existingSummary,
         postFromDb: {
@@ -209,10 +224,229 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (type === 'batch') {
+      // Generate and post the full Instagram content batch for today
+      const { generateDailyBatch } =
+        await import('@/lib/instagram/content-orchestrator');
+      const igBatch = await generateDailyBatch(dateStr);
+      addLog(`Generated ${igBatch.posts.length} batch posts for ${dateStr}`);
+      addLog(
+        `Types: ${igBatch.posts.map((p: { type: string }) => p.type).join(', ')}`,
+      );
+
+      const batchResults: Array<{
+        type: string;
+        scheduledTime: string;
+        imageCount: number;
+        status: string;
+        error?: string;
+        rawResponse?: unknown;
+      }> = [];
+
+      for (const post of igBatch.posts) {
+        addLog(
+          `\nProcessing ${post.type} (${post.imageUrls.length} images, scheduled: ${post.scheduledTime})`,
+        );
+
+        // Pre-upload all images
+        const mediaItems: Array<{
+          type: 'image';
+          url: string;
+          alt: string;
+        }> = [];
+        for (const imageUrl of post.imageUrls) {
+          addLog(`  Pre-uploading: ${imageUrl.substring(0, 80)}...`);
+          try {
+            const staticUrl = await preUploadImage(imageUrl);
+            mediaItems.push({
+              type: 'image',
+              url: staticUrl,
+              alt: `${post.type} content from Lunary`,
+            });
+            addLog(`  Uploaded: ${staticUrl}`);
+          } catch (uploadError) {
+            addLog(
+              `  Upload failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown'}`,
+            );
+          }
+        }
+
+        if (mediaItems.length === 0) {
+          addLog(`  Skipping ${post.type} - no images uploaded`);
+          batchResults.push({
+            type: post.type,
+            scheduledTime: post.scheduledTime,
+            imageCount: 0,
+            status: 'error',
+            error: 'No images could be uploaded',
+          });
+          continue;
+        }
+
+        // Cap hashtags at 3 (Instagram sweet spot; Ayrshare max is 5)
+        const limitedHashtags = post.hashtags.slice(0, 3);
+        const caption =
+          limitedHashtags.length > 0
+            ? `${post.caption}\n\n${limitedHashtags.join(' ')}`
+            : post.caption;
+
+        const isCarousel =
+          post.type === 'carousel' || post.type === 'angel_number_carousel';
+
+        const payload = {
+          platform: 'instagram' as const,
+          content: caption,
+          scheduledDate: post.scheduledTime,
+          media: mediaItems,
+          platformSettings: {
+            instagramOptions: {
+              ...(isCarousel ? { type: 'carousel' } : {}),
+            },
+          },
+        };
+
+        addLog(`  Payload: ${mediaItems.length} media, carousel=${isCarousel}`);
+
+        if (dryRun) {
+          batchResults.push({
+            type: post.type,
+            scheduledTime: post.scheduledTime,
+            imageCount: mediaItems.length,
+            status: 'dry_run',
+          });
+          continue;
+        }
+
+        const result = await postToSocial(payload);
+        addLog(
+          `  Result: success=${result.success}${result.error ? `, error=${result.error}` : ''}`,
+        );
+
+        batchResults.push({
+          type: post.type,
+          scheduledTime: post.scheduledTime,
+          imageCount: mediaItems.length,
+          status: result.success ? 'success' : 'error',
+          error: result.success ? undefined : result.error,
+          rawResponse: result.rawResponse,
+        });
+      }
+
+      const successCount = batchResults.filter(
+        (r) => r.status === 'success' || r.status === 'dry_run',
+      ).length;
+
+      return NextResponse.json({
+        success: successCount > 0,
+        dryRun,
+        totalPosts: igBatch.posts.length,
+        successCount,
+        batchResults,
+        log,
+        existingPosts: existingSummary,
+      });
+    }
+
+    if (type === 'all-stories') {
+      // Generate and post all stories for today
+      const stories = generateDailyStoryData(dateStr);
+      addLog(`Generated ${stories.length} stories for ${dateStr}`);
+
+      const storyUtcHours = [9, 12, 15, 19];
+      const storyResults: Array<{
+        variant: string;
+        scheduledTime: string;
+        status: string;
+        error?: string;
+        rawResponse?: unknown;
+      }> = [];
+
+      for (let i = 0; i < stories.length; i++) {
+        const story = stories[i];
+        const utcHour = storyUtcHours[i] ?? 9 + i * 3;
+        const scheduledTime = new Date(
+          `${dateStr}T${String(utcHour).padStart(2, '0')}:00:00Z`,
+        );
+
+        addLog(
+          `\nStory ${i + 1}: ${story.variant} - ${story.title || '(no title)'}`,
+        );
+
+        const imageParams = new URLSearchParams(story.params);
+        const imageUrl = `${baseUrl}${story.endpoint}?${imageParams.toString()}`;
+        addLog(`  OG URL: ${imageUrl.substring(0, 100)}...`);
+
+        let staticUrl: string;
+        try {
+          staticUrl = await preUploadImage(imageUrl);
+          addLog(`  Uploaded: ${staticUrl}`);
+        } catch (uploadError) {
+          addLog(
+            `  Upload failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown'}`,
+          );
+          storyResults.push({
+            variant: story.variant,
+            scheduledTime: scheduledTime.toISOString(),
+            status: 'error',
+            error: `Image upload failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown'}`,
+          });
+          continue;
+        }
+
+        const payload = {
+          platform: 'instagram' as const,
+          content: '',
+          scheduledDate: scheduledTime.toISOString(),
+          media: [
+            { type: 'image' as const, url: staticUrl, alt: story.title || '' },
+          ],
+          platformSettings: {
+            instagramOptions: { isStory: true },
+          },
+        };
+
+        if (dryRun) {
+          storyResults.push({
+            variant: story.variant,
+            scheduledTime: scheduledTime.toISOString(),
+            status: 'dry_run',
+          });
+          continue;
+        }
+
+        const result = await postToSocial(payload);
+        addLog(
+          `  Result: success=${result.success}${result.error ? `, error=${result.error}` : ''}`,
+        );
+
+        storyResults.push({
+          variant: story.variant,
+          scheduledTime: scheduledTime.toISOString(),
+          status: result.success ? 'success' : 'error',
+          error: result.success ? undefined : result.error,
+          rawResponse: result.rawResponse,
+        });
+      }
+
+      const successCount = storyResults.filter(
+        (r) => r.status === 'success' || r.status === 'dry_run',
+      ).length;
+
+      return NextResponse.json({
+        success: successCount > 0,
+        dryRun,
+        totalStories: stories.length,
+        successCount,
+        storyResults,
+        log,
+        existingPosts: existingSummary,
+      });
+    }
+
     return NextResponse.json(
       {
         success: false,
-        error: `Unknown type: ${type}. Use 'story' or 'feed'.`,
+        error: `Unknown type: ${type}. Use 'story', 'feed', 'batch', or 'all-stories'.`,
       },
       { status: 400 },
     );

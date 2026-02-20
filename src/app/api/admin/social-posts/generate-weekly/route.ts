@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import {
   PLATFORM_POSTING_TIMES,
   getDefaultPostingTime,
@@ -1710,6 +1711,9 @@ async function generateThematicWeeklyPosts(
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const {
       weekStart,
       currentWeek,

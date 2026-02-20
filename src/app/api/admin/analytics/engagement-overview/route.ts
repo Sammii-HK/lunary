@@ -4,6 +4,7 @@ import { resolveDateRange } from '@/lib/analytics/date-range';
 import { getEngagementOverview } from '@/lib/analytics/kpis';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { filterFields, getFieldsParam } from '@/lib/analytics/field-selection';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 const familyToEventType = (
   family: string | null,
@@ -26,6 +27,9 @@ const familyToEventType = (
  */
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
     const includeAudit = searchParams.get('debug') === '1';

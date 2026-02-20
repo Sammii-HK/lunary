@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateDailyBatch } from '@/lib/instagram/content-orchestrator';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const dateStr =
       searchParams.get('date') || new Date().toISOString().split('T')[0];

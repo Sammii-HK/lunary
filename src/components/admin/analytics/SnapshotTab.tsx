@@ -140,7 +140,7 @@ export function SnapshotTab({
           <CardDescription>Last 30 days</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className='grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4'>
+          <div className='grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5'>
             <HealthMetricCard
               icon={TrendingUp}
               label='User Growth'
@@ -214,6 +214,21 @@ export function SnapshotTab({
                   ? `Product-only D7 (all-event D7: ${Number(activity.retention?.day_7 ?? 0).toFixed(0)}%)`
                   : '7-day retention (rolling cohort)'
               }
+            />
+
+            <HealthMetricCard
+              icon={Users}
+              label='Product DAU (Today)'
+              value={activity?.signed_in_product_dau_realtime ?? 0}
+              unit='users'
+              status={
+                (activity?.signed_in_product_dau_realtime ?? 0) > 5
+                  ? 'excellent'
+                  : (activity?.signed_in_product_dau_realtime ?? 0) > 0
+                    ? 'good'
+                    : 'warning'
+              }
+              description='Realtime signed-in product users today'
             />
 
             <HealthMetricCard
@@ -356,7 +371,7 @@ export function SnapshotTab({
         >
           <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
             <MiniStat
-              label='Product DAU'
+              label='Product DAU (last full day)'
               value={activity?.signed_in_product_dau ?? 0}
               icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
             />

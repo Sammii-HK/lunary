@@ -6,6 +6,7 @@ import {
   ANALYTICS_CACHE_TTL_SECONDS,
 } from '@/lib/analytics-cache-config';
 import { filterFields, getFieldsParam } from '@/lib/analytics/field-selection';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -375,6 +376,9 @@ const countDistinctInWindow = (
  */
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const granularity = (searchParams.get('granularity') || 'day') as
       | 'day'
@@ -430,10 +434,9 @@ export async function GET(request: NextRequest) {
           mau: Number(row.grimoire_mau || 0),
         }));
 
-        // Summary metrics: use real-time DAU if available (during the day),
-        // fall back to latest snapshot DAU (at midnight / early morning)
+        // Summary metrics: always use last full day from snapshot for stable ratios
         const snapshotDau = Number(latest.signed_in_product_dau || 0);
-        const signedInProductDau = realtimeDAU > 0 ? realtimeDAU : snapshotDau;
+        const signedInProductDau = snapshotDau;
         const signedInProductWau = Number(latest.signed_in_product_wau || 0);
         const signedInProductMau = Number(latest.signed_in_product_mau || 0);
         const appOpenedDau = Number(latest.app_opened_dau || 0);
@@ -524,6 +527,7 @@ export async function GET(request: NextRequest) {
               : 0,
           // Signed-in product metrics
           signed_in_product_dau: signedInProductDau,
+          signed_in_product_dau_realtime: realtimeDAU,
           signed_in_product_wau: signedInProductWau,
           signed_in_product_mau: signedInProductMau,
           signed_in_product_stickiness_dau_mau:

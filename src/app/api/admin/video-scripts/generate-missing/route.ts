@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { generateScriptForContentType } from '@/lib/social/video-scripts/generators/weekly-secondary';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { saveVideoScript } from '@/lib/social/video-scripts/database';
 import type { ContentType } from '@/lib/social/video-scripts/content-types';
 
@@ -92,6 +93,9 @@ function getWeekStartForDate(date: Date): string {
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const body = await request.json().catch(() => ({}));
     const weekStart = body.weekStart as string | undefined;
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import {
   generateAndSaveWeeklyScripts,
   type WeeklyVideoScripts,
@@ -17,6 +18,9 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(request: Request) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const body = await request.json().catch(() => ({}));
     const { week = 'current', themeIndex } = body;
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 type TestimonialRow = {
   id: number;
@@ -9,7 +10,10 @@ type TestimonialRow = {
   createdAt: string;
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   const result = await sql<TestimonialRow>`
     SELECT
       id,
@@ -25,6 +29,9 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   let payload: { id?: number; isPublished?: boolean };
 
   try {

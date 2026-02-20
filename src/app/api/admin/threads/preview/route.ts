@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateThreadsBatch } from '@/lib/threads/content-orchestrator';
 import { THREADS_CHAR_LIMITS } from '@/lib/threads/types';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 /**
  * GET /api/admin/threads/preview?date=YYYY-MM-DD
@@ -9,6 +10,9 @@ import { THREADS_CHAR_LIMITS } from '@/lib/threads/types';
  * sending anything to Succulent. Useful for testing and QA.
  */
 export async function GET(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   const { searchParams } = new URL(request.url);
   const dateStr =
     searchParams.get('date') || new Date().toISOString().split('T')[0];

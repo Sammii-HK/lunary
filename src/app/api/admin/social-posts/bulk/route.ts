@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { action } = await request.json();
 
     if (!action) {
@@ -23,11 +27,15 @@ export async function POST(request: NextRequest) {
         ? 'https://lunary.app'
         : 'http://localhost:3000';
 
+      const authHeader = request.headers.get('authorization');
       for (const row of pendingResult.rows) {
         try {
           await fetch(`${baseUrl}/api/admin/social-posts/approve`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authHeader && { Authorization: authHeader }),
+            },
             body: JSON.stringify({
               postId: row.id,
               action: 'approve',

@@ -6,7 +6,7 @@
  * Tests for insertCanonicalEvent deduplication behavior.
  *
  * Verifies:
- * - ON CONFLICT (event_id) DO NOTHING returns inserted:false for duplicates
+ * - ON CONFLICT DO NOTHING returns inserted:false for duplicates
  * - New events return inserted:true
  * - NULL event_ids don't conflict (PostgreSQL treats NULLs as distinct)
  * - Batch inserts handle mixed duplicates correctly
@@ -61,13 +61,13 @@ describe('insertCanonicalEvent', () => {
     expect(result.inserted).toBe(false);
   });
 
-  it('SQL contains ON CONFLICT (event_id) DO NOTHING', async () => {
+  it('SQL contains ON CONFLICT DO NOTHING', async () => {
     mockSqlQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] });
 
     await insertCanonicalEvent(makeRow());
 
     const sqlText = mockSqlQuery.mock.calls[0][0];
-    expect(sqlText).toContain('ON CONFLICT (event_id) DO NOTHING');
+    expect(sqlText).toContain('ON CONFLICT DO NOTHING');
   });
 
   it('passes event_id as parameter $2', async () => {
@@ -120,11 +120,11 @@ describe('insertCanonicalEventsBatch', () => {
     expect(mockSqlQuery).not.toHaveBeenCalled();
   });
 
-  it('batch SQL also contains ON CONFLICT (event_id) DO NOTHING', async () => {
+  it('batch SQL also contains ON CONFLICT DO NOTHING', async () => {
     mockSqlQuery.mockResolvedValueOnce({ rows: [{}] });
     await insertCanonicalEventsBatch([makeRow()]);
 
     const sqlText = mockSqlQuery.mock.calls[0][0];
-    expect(sqlText).toContain('ON CONFLICT (event_id) DO NOTHING');
+    expect(sqlText).toContain('ON CONFLICT DO NOTHING');
   });
 });

@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 const utcDateExpr = `(created_at AT TIME ZONE 'UTC')::date`;
 
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const maybeUserId = request.nextUrl.pathname.split('/');
     const userId = maybeUserId.at(-2) ?? '';
     if (!userId || typeof userId !== 'string') {

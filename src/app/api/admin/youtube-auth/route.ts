@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/youtube.upload',
@@ -15,7 +16,10 @@ function getRedirectUri() {
 }
 
 /** GET — redirect to Google consent screen */
-export async function GET() {
+export async function GET(request: Request) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 

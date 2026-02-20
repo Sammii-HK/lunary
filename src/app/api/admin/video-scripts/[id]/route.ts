@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { updateVideoScriptStatus } from '@/lib/social/video-script-generator';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { id } = await params;
     const scriptId = parseInt(id, 10);
 

@@ -6,9 +6,13 @@ import {
   type AnalyticsMetrics,
 } from '@/lib/analytics/insights';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
@@ -23,6 +27,12 @@ export async function GET(request: NextRequest) {
     const endDate = formatDate(range.end);
     const dateParams = `start_date=${startDate}&end_date=${endDate}`;
 
+    // Forward auth header to internal admin API calls
+    const authHeader = request.headers.get('authorization');
+    const fetchHeaders: HeadersInit = {
+      ...(authHeader && { Authorization: authHeader }),
+    };
+
     // Fetch all necessary metrics in parallel
     const [
       activityResponse,
@@ -32,14 +42,25 @@ export async function GET(request: NextRequest) {
       growthResponse,
       revenueResponse,
     ] = await Promise.all([
-      fetch(`${baseUrl}/api/admin/analytics/activity?${dateParams}`),
-      fetch(`${baseUrl}/api/admin/analytics/engagement?${dateParams}`),
-      fetch(`${baseUrl}/api/admin/analytics/feature-adoption?${dateParams}`),
+      fetch(`${baseUrl}/api/admin/analytics/activity?${dateParams}`, {
+        headers: fetchHeaders,
+      }),
+      fetch(`${baseUrl}/api/admin/analytics/engagement?${dateParams}`, {
+        headers: fetchHeaders,
+      }),
+      fetch(`${baseUrl}/api/admin/analytics/feature-adoption?${dateParams}`, {
+        headers: fetchHeaders,
+      }),
       fetch(
         `${baseUrl}/api/admin/analytics/cohort-retention?start=${startDate}&end=${endDate}`,
+        { headers: fetchHeaders },
       ),
-      fetch(`${baseUrl}/api/admin/analytics/growth?${dateParams}`),
-      fetch(`${baseUrl}/api/admin/analytics/revenue?${dateParams}`),
+      fetch(`${baseUrl}/api/admin/analytics/growth?${dateParams}`, {
+        headers: fetchHeaders,
+      }),
+      fetch(`${baseUrl}/api/admin/analytics/revenue?${dateParams}`, {
+        headers: fetchHeaders,
+      }),
     ]);
 
     // Validate all responses are successful

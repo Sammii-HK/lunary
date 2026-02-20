@@ -136,7 +136,9 @@ function buildRotatingStory(
  * If a slot is `quote`, it returns a placeholder that the cron fills from DB.
  */
 export function generateDailyStoryData(dateStr: string): IGStoryData[] {
-  const date = new Date(dateStr);
+  // Use noon UTC for moon phase calculation — midnight can straddle phase
+  // boundaries and show the previous phase for most of the day
+  const date = new Date(`${dateStr}T12:00:00Z`);
   const dayOfYear = getDayOfYear(date);
   const dayOfWeek = date.getDay(); // 0=Sun
 

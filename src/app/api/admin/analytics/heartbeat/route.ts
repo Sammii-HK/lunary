@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { formatTimestamp } from '@/lib/analytics/date-range';
 import { EngagementEventType, getEventAudit } from '@/lib/analytics/kpis';
 import { ANALYTICS_REALTIME_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 const HEARTBEAT_WINDOW_MINUTES = 30;
 
@@ -17,8 +18,11 @@ const HEARTBEAT_EVENTS: HeartbeatEventConfig[] = [
   { label: 'Signups (signup)', eventType: 'signup' },
 ];
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const now = new Date();
     const start = new Date(
       now.getTime() - HEARTBEAT_WINDOW_MINUTES * 60 * 1000,

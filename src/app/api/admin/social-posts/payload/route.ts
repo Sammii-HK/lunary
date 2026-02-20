@@ -5,6 +5,7 @@ import {
   buildSucculentPostPayload,
   type DbPostRow,
 } from '@/lib/succulent/payload';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 
@@ -16,6 +17,9 @@ type PayloadGroup = {
 
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
     const url = new URL(request.url);
     const date = url.searchParams.get('date');
     const statusParam = url.searchParams.get('status');
