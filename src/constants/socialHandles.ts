@@ -35,7 +35,7 @@ export const SOCIAL_HANDLES: Record<SocialPlatform, string | undefined> = {
   threads: getEnvHandle('NEXT_PUBLIC_THREADS_HANDLE', '@lunary.app'),
   bluesky: getEnvHandle('NEXT_PUBLIC_BLUESKY_HANDLE', '@lunaryapp.bsky.social'),
   pinterest: getEnvHandle('NEXT_PUBLIC_PINTEREST_HANDLE', '@lunaryapp'),
-  tiktok: getEnvHandle('NEXT_PUBLIC_TIKTOK_HANDLE'),
+  tiktok: getEnvHandle('NEXT_PUBLIC_TIKTOK_HANDLE', '@lunary.app'),
 };
 
 export const SOCIAL_PLATFORM_LABELS: Record<SocialPlatform, string> = {

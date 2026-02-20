@@ -46,6 +46,18 @@ export function MarketingFooter() {
       ),
     },
     {
+      platform: 'tiktok' as const,
+      url: SOCIAL_HANDLES.tiktok
+        ? `https://www.tiktok.com/${SOCIAL_HANDLES.tiktok.replace('@', '@')}`
+        : 'https://www.tiktok.com/@lunary.app',
+      label: SOCIAL_PLATFORM_LABELS.tiktok,
+      icon: (
+        <svg className='w-5 h-5' fill='currentColor' viewBox='0 0 448 512'>
+          <path d='M448 209.9a210.1 210.1 0 0 1-122.8-39.3v178.8A162.6 162.6 0 1 1 185 188.3v89.9a74.6 74.6 0 1 0 52.2 71.2V0h88a121 121 0 0 0 1.9 22.2A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z' />
+        </svg>
+      ),
+    },
+    {
       platform: 'bluesky' as const,
       url: SOCIAL_HANDLES.bluesky
         ? `https://bsky.app/profile/${SOCIAL_HANDLES.bluesky.replace('@', '')}`
