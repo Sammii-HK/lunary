@@ -66,6 +66,7 @@ export type ActivityResponse = {
   product_stickiness_wau_mau: number;
   product_trends: ActivityTrend[];
   signed_in_product_dau: number;
+  signed_in_product_dau_realtime?: number;
   signed_in_product_wau: number;
   signed_in_product_mau: number;
   signed_in_product_stickiness_dau_mau: number;
