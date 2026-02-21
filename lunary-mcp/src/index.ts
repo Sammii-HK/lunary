@@ -9,6 +9,11 @@ import { registerContentTools } from './tools/content.js';
 import { registerAbTestingTools } from './tools/ab-testing.js';
 import { registerSocialTools } from './tools/social.js';
 import { registerFeatureTools } from './tools/features.js';
+import { registerAiConversionTools } from './tools/ai-conversion.js';
+import { registerAdminTools } from './tools/admin.js';
+import { registerVideoScriptTools } from './tools/video-scripts.js';
+import { registerOperationsTools } from './tools/operations.js';
+import { registerAstralGuideTools } from './tools/astral-guide.js';
 
 const server = new McpServer({
   name: 'lunary',
@@ -24,6 +29,11 @@ registerContentTools(server);
 registerAbTestingTools(server);
 registerSocialTools(server);
 registerFeatureTools(server);
+registerAiConversionTools(server);
+registerAdminTools(server);
+registerVideoScriptTools(server);
+registerOperationsTools(server);
+registerAstralGuideTools(server);
 
 // Start with stdio transport
 const transport = new StdioServerTransport();
