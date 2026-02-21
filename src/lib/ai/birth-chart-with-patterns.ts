@@ -5,10 +5,38 @@
 
 import { sql } from '@vercel/postgres';
 import { BirthChartSnapshot } from './types';
+import type { BirthChartData } from '../../../utils/astrology/birthChart';
 import { detectNatalAspectPatterns } from '../journal/aspect-pattern-detector';
 
 const BASE_LAT = 51.5074;
 const BASE_LON = -0.1278;
+
+/**
+ * Fetches raw birth chart data from the database.
+ * Returns the raw BirthChartData array without enrichment.
+ * Use this when you need the raw planetary data (e.g. for transit calculations).
+ */
+export async function fetchRawBirthChartData(
+  userId: string,
+): Promise<BirthChartData[] | null> {
+  try {
+    const result = await sql`
+      SELECT birth_chart
+      FROM user_profiles
+      WHERE user_id = ${userId}
+      LIMIT 1
+    `;
+
+    if (result.rows.length === 0 || !result.rows[0].birth_chart) {
+      return null;
+    }
+
+    return result.rows[0].birth_chart as BirthChartData[];
+  } catch (error) {
+    console.error('[fetchRawBirthChartData] Error:', error);
+    return null;
+  }
+}
 
 /**
  * Fetches birth chart from database and enriches it with:
@@ -166,8 +194,7 @@ export function formatBirthChartSummary(
 
   const parts: string[] = [];
 
-  // Major placements
-  const majorPlanets = [
+  const planets = new Set([
     'Sun',
     'Moon',
     'Mercury',
@@ -178,17 +205,38 @@ export function formatBirthChartSummary(
     'Uranus',
     'Neptune',
     'Pluto',
-  ];
+  ]);
 
-  const keyPlacements = birthChart.placements
-    .filter((p) => majorPlanets.includes(p.planet))
-    .map((p) => {
-      const house = p.house ? ` (H${p.house})` : '';
-      return `${p.planet} in ${p.sign}${house}`;
-    });
+  const sensitivePoints = new Set([
+    'Rising',
+    'Ascendant',
+    'Descendant',
+    'Midheaven',
+    'North Node',
+    'South Node',
+    'Chiron',
+    'Lilith',
+  ]);
 
-  if (keyPlacements.length > 0) {
-    parts.push(`Placements: ${keyPlacements.join(', ')}`);
+  const fmt = (p: { planet: string; sign: string; house?: number }) => {
+    const house = p.house ? ` (H${p.house})` : '';
+    return `${p.planet} in ${p.sign}${house}`;
+  };
+
+  const planetPlacements = birthChart.placements
+    .filter((p) => planets.has(p.planet))
+    .map(fmt);
+
+  if (planetPlacements.length > 0) {
+    parts.push(`Planets: ${planetPlacements.join(', ')}`);
+  }
+
+  const pointPlacements = birthChart.placements
+    .filter((p) => sensitivePoints.has(p.planet))
+    .map(fmt);
+
+  if (pointPlacements.length > 0) {
+    parts.push(`Sensitive Points: ${pointPlacements.join(', ')}`);
   }
 
   // Aspects

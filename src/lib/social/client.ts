@@ -3,8 +3,9 @@
  *
  * Routes posts to the appropriate backend:
  * - YouTube → direct YouTube Data API (src/lib/youtube/client.ts)
+ * - SPELLCAST_PLATFORMS → Spellcast API (posts appear in Spellcast dashboard)
  * - AYRSHARE_API_KEY set → Ayrshare API (immediate)
- * - ENABLE_POSTIZ=true → Postiz API (self-hosted, for later)
+ * - ENABLE_POSTIZ=true → Postiz API (self-hosted)
  * - Otherwise → fallback to legacy Succulent
  *
  * Usage:
@@ -19,6 +20,11 @@
 
 import { postToPostiz, postToPostizMultiPlatform } from './postiz';
 import { postToAyrshare, postToAyrshareMultiPlatform } from './ayrshare';
+import {
+  postToSpellcast,
+  postToSpellcastMultiPlatform,
+  isSpellcastConfigured,
+} from './spellcast';
 import { postToYouTube } from './youtube';
 import type { YouTubePostParams } from './youtube';
 
@@ -64,12 +70,38 @@ export interface MultiPlatformPostParams {
   facebookOptions?: { type: string };
 }
 
-type SocialBackend = 'ayrshare' | 'postiz' | 'succulent';
+type SocialBackend = 'ayrshare' | 'postiz' | 'spellcast' | 'succulent';
+
+/**
+ * Platforms that should route through Spellcast (or Postiz) instead of Ayrshare.
+ * Set SPELLCAST_PLATFORMS=instagram,facebook,threads in env.
+ */
+const spellcastPlatforms: Set<string> = new Set(
+  (process.env.SPELLCAST_PLATFORMS ?? '')
+    .split(',')
+    .map((p) => p.trim().toLowerCase())
+    .filter(Boolean),
+);
 
 function getActiveBackend(): SocialBackend {
   if (process.env.AYRSHARE_API_KEY) return 'ayrshare';
   if (process.env.ENABLE_POSTIZ === 'true') return 'postiz';
   return 'succulent';
+}
+
+/**
+ * Get the backend for a specific platform.
+ * If SPELLCAST_PLATFORMS includes this platform and Spellcast is configured, route through Spellcast.
+ * Otherwise fall back to the default active backend.
+ */
+function getBackendForPlatform(platform: string): SocialBackend {
+  if (
+    spellcastPlatforms.has(platform.toLowerCase()) &&
+    isSpellcastConfigured()
+  ) {
+    return 'spellcast';
+  }
+  return getActiveBackend();
 }
 
 function isYouTubePlatform(platform: string): boolean {
@@ -150,7 +182,7 @@ export async function postToSocial(
     };
   }
 
-  const backend = getActiveBackend();
+  const backend = getBackendForPlatform(params.platform);
 
   if (backend === 'ayrshare') {
     try {
@@ -167,6 +199,24 @@ export async function postToSocial(
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
         backend: 'ayrshare',
+      };
+    }
+  }
+
+  if (backend === 'spellcast') {
+    try {
+      return await postToSpellcast({
+        platform: params.platform,
+        content: params.content,
+        scheduledDate: params.scheduledDate,
+        media: params.media,
+        platformSettings: params.platformSettings,
+      });
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        backend: 'postiz',
       };
     }
   }
@@ -241,12 +291,56 @@ export async function postToSocialMultiPlatform(
     return { results };
   }
 
-  const backend = getActiveBackend();
+  // Split platforms by backend
+  const backendGroups = new Map<SocialBackend, string[]>();
+  for (const p of otherPlatforms) {
+    const backend = getBackendForPlatform(p);
+    const group = backendGroups.get(backend) ?? [];
+    group.push(p);
+    backendGroups.set(backend, group);
+  }
 
-  // Ayrshare path
-  if (backend === 'ayrshare') {
+  const spellcastGroup = backendGroups.get('spellcast') ?? [];
+  const postizGroup = backendGroups.get('postiz') ?? [];
+  const ayrshareGroup = backendGroups.get('ayrshare') ?? [];
+  const succulentGroup = backendGroups.get('succulent') ?? [];
+
+  // Spellcast group (posts appear in Spellcast dashboard)
+  if (spellcastGroup.length > 0) {
+    const spellcastResult = await postToSpellcastMultiPlatform({
+      platforms: spellcastGroup,
+      content: params.content,
+      scheduledDate: params.scheduledDate,
+      media: params.media,
+      variants: params.variants,
+      platformSettings: params.platformSettings,
+    });
+
+    for (const [platform, result] of Object.entries(spellcastResult.results)) {
+      results[platform] = result;
+    }
+  }
+
+  // Postiz group (direct to Postiz, bypasses Spellcast dashboard)
+  if (postizGroup.length > 0) {
+    const postizResult = await postToPostizMultiPlatform({
+      platforms: postizGroup,
+      content: params.content,
+      scheduledDate: params.scheduledDate,
+      media: params.media,
+      variants: params.variants,
+      platformSettings: params.platformSettings,
+    });
+
+    for (const [platform, result] of Object.entries(postizResult.results)) {
+      results[platform] = { ...result, backend: 'postiz' };
+    }
+  }
+
+  // Ayrshare group
+  if (ayrshareGroup.length > 0) {
     const ayrshareResult = await postToAyrshareMultiPlatform({
-      platforms: otherPlatforms,
+      platforms: ayrshareGroup,
       content: params.content,
       scheduledDate: params.scheduledDate,
       media: params.media,
@@ -262,33 +356,17 @@ export async function postToSocialMultiPlatform(
     for (const [platform, result] of Object.entries(ayrshareResult.results)) {
       results[platform] = { ...result, backend: 'ayrshare' };
     }
+  }
 
+  if (succulentGroup.length === 0) {
     return { results };
   }
 
-  // Postiz path
-  if (backend === 'postiz') {
-    const postizResult = await postToPostizMultiPlatform({
-      platforms: otherPlatforms,
-      content: params.content,
-      scheduledDate: params.scheduledDate,
-      media: params.media,
-      variants: params.variants,
-      platformSettings: params.platformSettings,
-    });
-
-    for (const [platform, result] of Object.entries(postizResult.results)) {
-      results[platform] = { ...result, backend: 'postiz' };
-    }
-
-    return { results };
-  }
-
-  // Succulent fallback
+  // Succulent fallback (only for platforms not handled above)
   const accountGroupId =
     params.accountGroupId || process.env.SUCCULENT_ACCOUNT_GROUP_ID;
   if (!accountGroupId) {
-    for (const platform of otherPlatforms) {
+    for (const platform of succulentGroup) {
       results[platform] = {
         success: false,
         error: 'SUCCULENT_ACCOUNT_GROUP_ID not configured',
@@ -302,7 +380,7 @@ export async function postToSocialMultiPlatform(
     accountGroupId,
     name: params.name,
     content: params.content,
-    platforms: otherPlatforms,
+    platforms: succulentGroup,
     scheduledDate: params.scheduledDate,
     media: params.media || [],
   };
@@ -324,7 +402,7 @@ export async function postToSocialMultiPlatform(
 
   const succulentResult = await postToSucculent(succulentPayload);
 
-  for (const platform of otherPlatforms) {
+  for (const platform of succulentGroup) {
     results[platform] = { ...succulentResult };
   }
 

@@ -305,28 +305,52 @@ const describeContext = (
     );
   }
 
-  // Birth chart - include more placements for better personalization
+  // Birth chart - show ALL placements grouped into Planets and Points
   if (context.birthChart && context.birthChart.placements) {
-    const keyPlacements = context.birthChart.placements
-      .filter((p) =>
-        [
-          'Sun',
-          'Moon',
-          'Ascendant',
-          'Mercury',
-          'Venus',
-          'Mars',
-          'Jupiter',
-          'Saturn',
-        ].includes(p.planet),
-      )
-      .map((p) => {
-        const house = p.house ? ` (H${p.house})` : '';
-        return `${p.planet}: ${p.sign}${house}`;
-      })
-      .slice(0, 8);
-    if (keyPlacements.length > 0) {
-      parts.push(`BIRTH CHART: ${keyPlacements.join(', ')}`);
+    const planetNames = new Set([
+      'Sun',
+      'Moon',
+      'Mercury',
+      'Venus',
+      'Mars',
+      'Jupiter',
+      'Saturn',
+      'Uranus',
+      'Neptune',
+      'Pluto',
+    ]);
+    const pointNames = new Set([
+      'Rising',
+      'Ascendant',
+      'Descendant',
+      'Midheaven',
+      'North Node',
+      'South Node',
+      'Chiron',
+      'Lilith',
+    ]);
+
+    const fmt = (p: { planet: string; sign: string; house?: number }) => {
+      const house = p.house ? ` (H${p.house})` : '';
+      return `${p.planet}: ${p.sign}${house}`;
+    };
+
+    const planetPlacements = context.birthChart.placements
+      .filter((p) => planetNames.has(p.planet))
+      .map(fmt);
+    const pointPlacements = context.birthChart.placements
+      .filter((p) => pointNames.has(p.planet))
+      .map(fmt);
+
+    const chartParts: string[] = [];
+    if (planetPlacements.length > 0) {
+      chartParts.push(`Planets: ${planetPlacements.join(', ')}`);
+    }
+    if (pointPlacements.length > 0) {
+      chartParts.push(`Points: ${pointPlacements.join(', ')}`);
+    }
+    if (chartParts.length > 0) {
+      parts.push(`BIRTH CHART: ${chartParts.join(' | ')}`);
     }
 
     // Transit house positions are now included in PERSONAL TRANSITS section above

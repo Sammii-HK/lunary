@@ -8,7 +8,6 @@ import {
   type PersonalTransitImpact,
 } from '../../../utils/astrology/personalTransits';
 import { getUpcomingTransits } from '../../../utils/astrology/transitCalendar';
-import type { BirthChartData } from '../../../utils/astrology/birthChart';
 import { detectNatalAspectPatterns } from '../journal/aspect-pattern-detector';
 import { calculatePlanetaryReturns } from '../journal/planetary-return-tracker';
 import { detectLunarSensitivity } from '../journal/lunar-pattern-detector';
@@ -25,7 +24,10 @@ import {
   getContextRequirements,
   type QueryContext,
 } from '../grimoire/query-analyzer';
-import { formatBirthChartSummary } from './birth-chart-with-patterns';
+import {
+  formatBirthChartSummary,
+  fetchRawBirthChartData,
+} from './birth-chart-with-patterns';
 
 /**
  * Detects if a user message is asking about astrological/cosmic topics
@@ -115,34 +117,6 @@ export interface AstralContext {
 }
 
 /**
- * Fetches user's birth chart data from the database
- * Returns null if no birth chart is found
- */
-async function fetchUserBirthChart(
-  userId: string,
-): Promise<BirthChartData[] | null> {
-  try {
-    const birthChartResult = await sql`
-      SELECT birth_chart
-      FROM user_profiles
-      WHERE user_id = ${userId}
-      LIMIT 1
-    `;
-
-    if (
-      birthChartResult.rows.length > 0 &&
-      birthChartResult.rows[0].birth_chart
-    ) {
-      return birthChartResult.rows[0].birth_chart as BirthChartData[];
-    }
-    return null;
-  } catch (error) {
-    console.error('[Astral Guide] Failed to fetch birth chart:', error);
-    return null;
-  }
-}
-
-/**
  * Calculates personal transit impacts for a given date range
  * Returns current and upcoming personal transits
  */
@@ -153,7 +127,7 @@ export async function calculatePersonalTransits(
   current: PersonalTransitImpact[] | undefined;
   upcoming: PersonalTransitImpact[] | undefined;
 }> {
-  const userBirthChartData = await fetchUserBirthChart(userId);
+  const userBirthChartData = await fetchRawBirthChartData(userId);
 
   if (!userBirthChartData || userBirthChartData.length === 0) {
     return { current: undefined, upcoming: undefined };
@@ -235,7 +209,7 @@ export async function buildAstralContext(
   // Analyze user query to determine what context is needed (if message provided)
   let queryContext: QueryContext | undefined;
   if (userMessage) {
-    const hasBirthChart = !!(await fetchUserBirthChart(userId));
+    const hasBirthChart = !!(await fetchRawBirthChartData(userId));
     queryContext = analyzeQuery(userMessage, hasBirthChart, !!userBirthday);
 
     // Use query analyzer to optimize context requirements
@@ -318,7 +292,7 @@ export async function buildAstralContext(
   );
 
   // PHASE 2 & 3: Detect patterns, calculate progressions & eclipses
-  const userBirthChartData = await fetchUserBirthChart(userId);
+  const userBirthChartData = await fetchRawBirthChartData(userId);
   let natalAspectPatterns;
   let planetaryReturns;
   let natalHouseEmphasis;
