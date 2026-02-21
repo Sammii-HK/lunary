@@ -146,7 +146,8 @@ export function AnnualWelcomeEmail({
                 🔮 <strong>Yearly Forecast</strong> - See what the cosmos has in
                 store
                 <br />
-                💬 <strong>Astral Guide</strong> - Your AI companion with memory
+                💬 <strong>Astral Guide</strong> - Your personal companion with
+                memory
                 <br />
                 📓 <strong>Book of Shadows</strong> - Journal with pattern
                 analysis
@@ -242,7 +243,7 @@ Your Exclusive Annual Features:
 
 Start Exploring:
 - 🔮 Yearly Forecast - See what the cosmos has in store
-- 💬 Astral Guide - Your AI companion with memory
+- 💬 Astral Guide - Your personal companion with memory
 - 📓 Book of Shadows - Journal with pattern analysis
 - 🌙 Moon Circles - Lunar rituals and guidance
 

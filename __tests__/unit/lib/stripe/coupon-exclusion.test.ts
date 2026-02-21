@@ -1,6 +1,6 @@
 /**
- * Tests for 100% off coupon handling:
- * - Webhook status override (trial → active for 100% discount)
+ * Tests for coupon handling:
+ * - Webhook status override (trial → active for ANY discount)
  * - extractDiscountInfo correctly calculates monthlyAmountDue
  * - Checkout session removes allow_promotion_codes when discount applied
  *
@@ -38,11 +38,8 @@ function computeEffectiveStatus(
   discountInfo: DiscountInfo,
 ): string {
   const rawStatus = mapStripeStatus(stripeStatus);
-  if (
-    rawStatus === 'trial' &&
-    discountInfo.hasDiscount &&
-    (discountInfo.discountPercent >= 100 || discountInfo.monthlyAmountDue <= 0)
-  ) {
+  // ANY discount on a trial → treat as active (coupon users should never be in trial)
+  if (rawStatus === 'trial' && discountInfo.hasDiscount) {
     return 'active';
   }
   return rawStatus;
@@ -62,25 +59,16 @@ function shouldExcludeFromTrialEmails(subscription: {
   // Must be a trial to even be in the email pipeline
   if (subscription.status !== 'trial') return true;
 
-  // 100% discount exclusion (matches the SQL filter)
-  if (
-    subscription.hasDiscount &&
-    ((subscription.discountPercent ?? 0) >= 100 ||
-      (subscription.monthlyAmountDue !== null &&
-        subscription.monthlyAmountDue <= 0))
-  ) {
-    return true;
-  }
+  // ANY discount excludes from trial emails
+  if (subscription.hasDiscount) return true;
 
-  // FULLORBIT promo code exclusion
-  if (subscription.promoCode === 'FULLORBIT') {
-    return true;
-  }
+  // ANY promo code excludes from trial emails
+  if (subscription.promoCode) return true;
 
   return false;
 }
 
-describe('100% off coupon handling', () => {
+describe('coupon handling', () => {
   describe('mapStripeStatus', () => {
     it('maps trialing to trial', () => {
       expect(mapStripeStatus('trialing')).toBe('trial');
@@ -104,23 +92,18 @@ describe('100% off coupon handling', () => {
     });
   });
 
-  describe('is100PercentOff detection - triggers Stripe trial removal', () => {
-    function is100PercentOff(
+  describe('hasCouponOnTrial detection - triggers Stripe trial removal', () => {
+    function hasCouponOnTrial(
       stripeStatus: string,
       discountInfo: DiscountInfo,
     ): boolean {
       const rawStatus = mapStripeStatus(stripeStatus);
-      return (
-        rawStatus === 'trial' &&
-        discountInfo.hasDiscount &&
-        (discountInfo.discountPercent >= 100 ||
-          discountInfo.monthlyAmountDue <= 0)
-      );
+      return rawStatus === 'trial' && discountInfo.hasDiscount;
     }
 
     it('detects 100% off on trialing subscription', () => {
       expect(
-        is100PercentOff('trialing', {
+        hasCouponOnTrial('trialing', {
           hasDiscount: true,
           discountPercent: 100,
           monthlyAmountDue: 0,
@@ -130,9 +113,21 @@ describe('100% off coupon handling', () => {
       ).toBe(true);
     });
 
-    it('does not flag active subscriptions with 100% off', () => {
+    it('detects partial discount on trialing subscription', () => {
       expect(
-        is100PercentOff('active', {
+        hasCouponOnTrial('trialing', {
+          hasDiscount: true,
+          discountPercent: 50,
+          monthlyAmountDue: 4.99,
+          couponId: 'half-off',
+          discountEndsAt: null,
+        }),
+      ).toBe(true);
+    });
+
+    it('does not flag active subscriptions with discount', () => {
+      expect(
+        hasCouponOnTrial('active', {
           hasDiscount: true,
           discountPercent: 100,
           monthlyAmountDue: 0,
@@ -142,13 +137,13 @@ describe('100% off coupon handling', () => {
       ).toBe(false);
     });
 
-    it('does not flag partial discount trialing subscriptions', () => {
+    it('does not flag trialing subscriptions without discount', () => {
       expect(
-        is100PercentOff('trialing', {
-          hasDiscount: true,
-          discountPercent: 50,
-          monthlyAmountDue: 4.99,
-          couponId: 'half-off',
+        hasCouponOnTrial('trialing', {
+          hasDiscount: false,
+          discountPercent: 0,
+          monthlyAmountDue: 9.99,
+          couponId: null,
           discountEndsAt: null,
         }),
       ).toBe(false);
@@ -189,7 +184,7 @@ describe('100% off coupon handling', () => {
       expect(result).toBe('active');
     });
 
-    it('does NOT override trial when discount is less than 100%', () => {
+    it('overrides trial to active for partial discount too', () => {
       const result = computeEffectiveStatus('trialing', {
         hasDiscount: true,
         discountPercent: 50,
@@ -197,7 +192,7 @@ describe('100% off coupon handling', () => {
         couponId: 'half-off',
         discountEndsAt: null,
       });
-      expect(result).toBe('trial');
+      expect(result).toBe('active');
     });
 
     it('does NOT override trial when there is no discount', () => {
@@ -306,7 +301,7 @@ describe('100% off coupon handling', () => {
       ).toBe(false);
     });
 
-    it('does NOT exclude partial discount trial users', () => {
+    it('excludes partial discount trial users', () => {
       expect(
         shouldExcludeFromTrialEmails({
           status: 'trial',
@@ -315,10 +310,10 @@ describe('100% off coupon handling', () => {
           monthlyAmountDue: 4.99,
           promoCode: null,
         }),
-      ).toBe(false);
+      ).toBe(true);
     });
 
-    it('does NOT exclude users with other promo codes', () => {
+    it('excludes users with any promo code', () => {
       expect(
         shouldExcludeFromTrialEmails({
           status: 'trial',
@@ -327,7 +322,19 @@ describe('100% off coupon handling', () => {
           monthlyAmountDue: 7.99,
           promoCode: 'WELCOME20',
         }),
-      ).toBe(false);
+      ).toBe(true);
+    });
+
+    it('excludes users with promo code even without discount flag', () => {
+      expect(
+        shouldExcludeFromTrialEmails({
+          status: 'trial',
+          hasDiscount: false,
+          discountPercent: null,
+          monthlyAmountDue: 9.99,
+          promoCode: 'WELCOME20',
+        }),
+      ).toBe(true);
     });
 
     it('excludes non-trial subscriptions (they are not in the pipeline)', () => {

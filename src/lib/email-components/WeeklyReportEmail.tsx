@@ -326,7 +326,7 @@ export function WeeklyReportEmail({
                 href={`${appUrl}/book-of-shadows`}
                 style={{ color: '#8b5cf6' }}
               >
-                Ask Lunary AI
+                Ask Your Astral Guide
               </Link>
             </Text>
             <Text
@@ -433,7 +433,7 @@ This week's cosmic energy has been ${dominantTheme}, with ${report.keyTransits.l
 Looking ahead: Use these insights to align with the cosmic flow. Pay attention to the patterns that emerged this week—they're guiding you toward your highest path.
 
 View your full cosmic state: ${appUrl}/cosmic-state
-Ask Lunary AI: ${appUrl}/book-of-shadows
+Ask Your Astral Guide: ${appUrl}/book-of-shadows
 
 ---
 Unsubscribe: ${unsubscribeUrl}

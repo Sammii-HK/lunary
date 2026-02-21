@@ -351,7 +351,7 @@ export function TrialReminderEmail({
             <Text style={{ margin: '15px 0' }}>
               • 🎯 Personalized birth chart interpretations <br />
               • 🔮 Daily tarot + horoscope guides tailored to you
-              <br />• ✨ AI-powered rituals, grimoire deep dives, and transit
+              <br />• ✨ Personalised rituals, grimoire deep dives, and transit
               alerts
             </Text>
             <Text>
@@ -808,7 +808,7 @@ Continue your journey: ${baseUrl}/profile?source=trial-reminder
 After your trial ends, you automatically switch back to the free tier and lose:
 - 🎯 personalized birth chart interpretations
 - 🔮 your tailored tarot + horoscope guidance
-- ✨ AI rituals, grimoire deep dives, and transit alerts
+- ✨ Personalised rituals, grimoire deep dives, and transit alerts
 
 Add a payment method now so the plan continues seamlessly after the trial.
 
