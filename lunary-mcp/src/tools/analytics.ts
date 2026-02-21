@@ -1,28 +1,11 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { z } from 'zod';
 import { lunary } from '../client.js';
-import { jsonResult, errorResult } from '../types.js';
-
-const timeParams = {
-  time_range: z
-    .enum(['7d', '30d', '90d', '365d'])
-    .optional()
-    .describe('Time window (default 30d)'),
-  start: z.string().optional().describe('Custom range start (ISO date)'),
-  end: z.string().optional().describe('Custom range end (ISO date)'),
-};
-
-function timeQueryParams(params: {
-  time_range?: string;
-  start?: string;
-  end?: string;
-}) {
-  return {
-    ...(params.time_range && { range: params.time_range }),
-    ...(params.start && { start: params.start }),
-    ...(params.end && { end: params.end }),
-  };
-}
+import {
+  jsonResult,
+  errorResult,
+  timeParams,
+  timeQueryParams,
+} from '../types.js';
 
 export function registerAnalyticsTools(server: McpServer) {
   server.tool(
@@ -112,6 +95,102 @@ export function registerAnalyticsTools(server: McpServer) {
     async (params) => {
       try {
         const data = await lunary('/analytics/snapshot', {
+          params: timeQueryParams(params),
+        });
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
+
+  server.tool(
+    'get_api_costs',
+    'API spend breakdown by provider (OpenAI, Anthropic, etc.)',
+    timeParams,
+    async (params) => {
+      try {
+        const data = await lunary('/analytics/api-costs', {
+          params: timeQueryParams(params),
+        });
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
+
+  server.tool(
+    'get_ai_insights',
+    'AI-generated anomaly detection and trend insights',
+    timeParams,
+    async (params) => {
+      try {
+        const data = await lunary('/analytics/insights', {
+          params: timeQueryParams(params),
+        });
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
+
+  server.tool(
+    'get_cohorts',
+    'Cohort grouping analysis with behavioral segments',
+    timeParams,
+    async (params) => {
+      try {
+        const data = await lunary('/analytics/cohorts', {
+          params: timeQueryParams(params),
+        });
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
+
+  server.tool(
+    'get_notification_stats',
+    'Push notification delivery rates and engagement',
+    timeParams,
+    async (params) => {
+      try {
+        const data = await lunary('/analytics/notifications', {
+          params: timeQueryParams(params),
+        });
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
+
+  server.tool(
+    'get_intention_breakdown',
+    'User intent tracking — what users are trying to accomplish',
+    timeParams,
+    async (params) => {
+      try {
+        const data = await lunary('/analytics/intention-breakdown', {
+          params: timeQueryParams(params),
+        });
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
+
+  server.tool(
+    'get_success_metrics',
+    'KPI dashboard — key success metrics and goal tracking',
+    timeParams,
+    async (params) => {
+      try {
+        const data = await lunary('/analytics/success-metrics', {
           params: timeQueryParams(params),
         });
         return jsonResult(data);

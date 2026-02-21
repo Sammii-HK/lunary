@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { lunary } from '../client.js';
+import { lunary, BASE_URL, ADMIN_KEY } from '../client.js';
 import { jsonResult, errorResult } from '../types.js';
 
 const CRON_JOBS = [
@@ -108,7 +108,6 @@ export function registerHealthTools(server: McpServer) {
     {},
     async () => {
       try {
-        const BASE_URL = process.env.LUNARY_API_URL || 'https://www.lunary.app';
         const res = await fetch(`${BASE_URL}/api/health`);
         const data = await res.json();
         return jsonResult({ status: res.status, ...data });
@@ -124,8 +123,6 @@ export function registerHealthTools(server: McpServer) {
     {},
     async () => {
       try {
-        const BASE_URL = process.env.LUNARY_API_URL || 'https://www.lunary.app';
-        const ADMIN_KEY = process.env.LUNARY_ADMIN_KEY || '';
         const res = await fetch(`${BASE_URL}/api/cron/health-check`, {
           headers: { Authorization: `Bearer ${ADMIN_KEY}` },
         });
@@ -158,8 +155,6 @@ export function registerHealthTools(server: McpServer) {
     },
     async ({ job }) => {
       try {
-        const BASE_URL = process.env.LUNARY_API_URL || 'https://www.lunary.app';
-        const ADMIN_KEY = process.env.LUNARY_ADMIN_KEY || '';
         const res = await fetch(`${BASE_URL}/api/cron/${job}`, {
           headers: { Authorization: `Bearer ${ADMIN_KEY}` },
         });

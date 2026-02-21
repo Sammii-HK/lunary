@@ -1,5 +1,49 @@
-const BASE_URL = process.env.LUNARY_API_URL || 'https://www.lunary.app';
-const ADMIN_KEY = process.env.LUNARY_ADMIN_KEY || '';
+import { readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+/**
+ * Load env vars from lunary-mcp/.env as fallback when Claude Code
+ * doesn't pass them through (stale MCP process, config issue, etc.).
+ */
+function loadEnvFallback(): Record<string, string> {
+  try {
+    const dir = dirname(fileURLToPath(import.meta.url));
+    const envPath = resolve(dir, '..', '.env');
+    const content = readFileSync(envPath, 'utf-8');
+    const vars: Record<string, string> = {};
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eq = trimmed.indexOf('=');
+      if (eq === -1) continue;
+      const key = trimmed.slice(0, eq).trim();
+      const val = trimmed
+        .slice(eq + 1)
+        .trim()
+        .replace(/^["']|["']$/g, '');
+      vars[key] = val;
+    }
+    return vars;
+  } catch {
+    return {};
+  }
+}
+
+const fallback = loadEnvFallback();
+export const BASE_URL =
+  process.env.LUNARY_API_URL || fallback.LUNARY_API_URL || 'https://lunary.app';
+export const ADMIN_KEY =
+  process.env.LUNARY_ADMIN_KEY || fallback.LUNARY_ADMIN_KEY || '';
+
+const keySource = process.env.LUNARY_ADMIN_KEY
+  ? 'env'
+  : fallback.LUNARY_ADMIN_KEY
+    ? '.env file'
+    : 'MISSING';
+console.error(
+  `[lunary-mcp] BASE_URL=${BASE_URL} ADMIN_KEY=${ADMIN_KEY ? ADMIN_KEY.slice(0, 8) + '...(len=' + ADMIN_KEY.length + ')' : 'EMPTY'} (source: ${keySource})`,
+);
 
 export async function lunary<T = unknown>(
   path: string,
@@ -31,6 +75,9 @@ export async function lunary<T = unknown>(
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
+    console.error(
+      `[lunary-mcp] FAILED ${method} ${url.toString()} → ${res.status} | key=${ADMIN_KEY ? ADMIN_KEY.slice(0, 8) + '...' : 'EMPTY'}`,
+    );
     throw new Error(
       `Lunary API ${method} ${path}: ${res.status} ${text.slice(0, 300)}`,
     );
