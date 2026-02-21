@@ -24,6 +24,7 @@ import {
   signDescriptions,
 } from '../src/constants/seo/planet-sign-content';
 import { getDecanData, ZODIAC_SIGNS } from '../src/constants/seo/decans';
+import synastryData from '../src/data/synastry-aspects.json';
 
 // Helper to flatten nested tarot card structure
 function flattenTarotCards() {
@@ -145,20 +146,85 @@ async function generateAllEmbeddings() {
     });
   });
 
-  // Compatibility (generated dynamically)
+  // Compatibility (generated dynamically, enriched with synastry aspects)
   console.log('📌 Collecting compatibility matches...');
   const signKeys = Object.keys(signDescriptions);
+  const aspects = synastryData.aspects as Record<string, any>;
+
+  // Build a lookup of synastry aspects for quick matching
+  const synastryByPlanets = new Map<string, any[]>();
+  for (const [, aspect] of Object.entries(aspects)) {
+    const pairKey = `${aspect.planet1.toLowerCase()}-${aspect.planet2.toLowerCase()}`;
+    if (!synastryByPlanets.has(pairKey)) synastryByPlanets.set(pairKey, []);
+    synastryByPlanets.get(pairKey)!.push(aspect);
+  }
+
+  // Get the top synastry aspects to include in compatibility content
+  function getSynastryEnrichment(): string {
+    const topAspects = Object.values(aspects).slice(0, 8) as any[];
+    return topAspects
+      .map((a) => {
+        const scores = a.scores;
+        const parts = [
+          `${a.planet1} ${a.aspect} ${a.planet2}: ${a.overview}`,
+          scores
+            ? `Scores - Overall: ${scores.overall}/10, Love: ${scores.love}/10, Emotional: ${scores.emotional}/10`
+            : '',
+          a.challenges?.length
+            ? `Challenges: ${a.challenges.slice(0, 2).join('; ')}`
+            : '',
+          a.strengths?.length
+            ? `Strengths: ${a.strengths.slice(0, 2).join('; ')}`
+            : '',
+        ].filter(Boolean);
+        return parts.join('. ');
+      })
+      .join('\n');
+  }
+
+  const synastryEnrichment = getSynastryEnrichment();
+
   signKeys.forEach((sign1Key) => {
     signKeys.forEach((sign2Key) => {
       const s1 = signDescriptions[sign1Key];
       const s2 = signDescriptions[sign2Key];
       const key = `${sign1Key}-${sign2Key}`;
+
+      // Build rich content with element compatibility context
+      const sameElement = s1.element === s2.element;
+      const elementCompat = sameElement
+        ? `Both are ${s1.element} signs, creating natural understanding and shared values.`
+        : `This pairing combines ${s1.element} with ${s2.element} energy, creating ${
+            (s1.element === 'Fire' && s2.element === 'Air') ||
+            (s1.element === 'Air' && s2.element === 'Fire')
+              ? 'an exciting, stimulating dynamic'
+              : (s1.element === 'Earth' && s2.element === 'Water') ||
+                  (s1.element === 'Water' && s2.element === 'Earth')
+                ? 'a nurturing, grounding connection'
+                : (s1.element === 'Fire' && s2.element === 'Water') ||
+                    (s1.element === 'Water' && s2.element === 'Fire')
+                  ? 'a steamy but challenging dynamic requiring balance'
+                  : (s1.element === 'Earth' && s2.element === 'Air') ||
+                      (s1.element === 'Air' && s2.element === 'Earth')
+                    ? 'a complementary but sometimes disconnected pairing'
+                    : 'a dynamic interplay of energies'
+          }.`;
+
+      const content = [
+        `${s1.name} and ${s2.name} compatibility.`,
+        `${s1.name} is a ${s1.element} ${s1.modality} sign ruled by ${s1.ruler}.`,
+        `${s2.name} is a ${s2.element} ${s2.modality} sign ruled by ${s2.ruler}.`,
+        elementCompat,
+        `Key synastry aspects that influence this pairing:`,
+        synastryEnrichment,
+      ].join(' ');
+
       entries.push({
         id: `compatibility-${key}`,
         slug: `compatibility/${key}`,
         title: `${s1.name} and ${s2.name} Compatibility`,
         category: 'compatibility',
-        content: `${s1.name} and ${s2.name} compatibility. ${s1.name} is a ${s1.element} ${s1.modality} sign ruled by ${s1.ruler}. ${s2.name} is a ${s2.element} ${s2.modality} sign ruled by ${s2.ruler}. This pairing combines ${s1.element} with ${s2.element} energy.`,
+        content,
         metadata: { sign1: s1.name, sign2: s2.name },
       });
     });
