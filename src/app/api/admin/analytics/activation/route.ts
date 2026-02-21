@@ -3,21 +3,10 @@ import { sql } from '@vercel/postgres';
 import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { ACTIVATION_EVENTS } from '@/lib/analytics/activation-events';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
-
-// Activation events - users who complete these within 7 days are considered "activated"
-const ACTIVATION_EVENTS = [
-  'grimoire_save',
-  'tarot_pull',
-  'moon_phase_view',
-  'birth_chart_viewed',
-  'tarot_viewed',
-  'horoscope_viewed',
-  'personalized_tarot_viewed',
-  'personalized_horoscope_viewed',
-];
 const PLAN_CHANGE_EVENTS = [
   'trial_started',
   'trial_converted',

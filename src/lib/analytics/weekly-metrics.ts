@@ -7,6 +7,10 @@ import {
   getISOWeek,
   getISOWeekYear,
 } from 'date-fns';
+import {
+  ACTIVATION_EVENTS,
+  ACTIVATION_WINDOW_DAYS,
+} from '@/lib/analytics/activation-events';
 
 const TIMEZONE = 'Europe/London';
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
@@ -272,7 +276,7 @@ async function calculateAcquisition(
 
 /**
  * Calculate activation metrics
- * User is "activated" if they complete any activation event within 24h of signup
+ * User is "activated" if they complete any activation event within 7 days of signup
  */
 async function calculateActivation(
   weekStart: string,
@@ -281,67 +285,43 @@ async function calculateActivation(
   activatedUsers: number;
   activationRate: number;
 }> {
-  // Get new users this week
+  // Count new signups this week
   const newUsersResult = await sql`
-    SELECT id as user_id, "createdAt" as signup_at
+    SELECT COUNT(*) as count
     FROM "user"
     WHERE "createdAt" >= ${weekStart}
       AND "createdAt" <= ${weekEnd}
       AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
   `;
 
-  const newUsers = newUsersResult.rows || [];
-  if (newUsers.length === 0) {
+  const totalSignups = parseInt(newUsersResult.rows[0]?.count || '0');
+  if (totalSignups === 0) {
     return { activatedUsers: 0, activationRate: 0 };
   }
 
-  // Check which users activated within 24h
-  // Activation events: user completes a meaningful action within 24h of signup
-  const activationEvents = [
-    'tarot_viewed',
-    'personalized_tarot_viewed',
-    'birth_chart_viewed',
-    'horoscope_viewed',
-    'personalized_horoscope_viewed',
-    'cosmic_pulse_opened',
-  ];
-  let activatedCount = 0;
+  // Count activated users in a single bulk query
+  const activatedResult = await sql.query(
+    `SELECT COUNT(DISTINCT u.id) as count
+     FROM "user" u
+     INNER JOIN conversion_events ce ON ce.user_id = u.id
+     WHERE u."createdAt" >= $1 AND u."createdAt" <= $2
+       AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
+       AND ce.event_type = ANY($5::text[])
+       AND ce.created_at >= u."createdAt"
+       AND ce.created_at <= u."createdAt" + INTERVAL '${ACTIVATION_WINDOW_DAYS} days'`,
+    [
+      weekStart,
+      weekEnd,
+      TEST_EMAIL_PATTERN,
+      TEST_EMAIL_EXACT,
+      [...ACTIVATION_EVENTS],
+    ],
+  );
 
-  for (const user of newUsers) {
-    const signupAt = new Date(user.signup_at);
-    const activationDeadline = new Date(
-      signupAt.getTime() + 24 * 60 * 60 * 1000,
-    );
-
-    // Build OR conditions for activation events
-    const eventConditions = activationEvents
-      .map((e, i) =>
-        i === 0 ? `event_type = $${i + 2}` : ` OR event_type = $${i + 2}`,
-      )
-      .join('');
-
-    const activated = await sql.query(
-      `SELECT COUNT(*) as count
-       FROM conversion_events
-       WHERE user_id = $1
-         AND (${eventConditions})
-         AND created_at >= $${activationEvents.length + 2}
-         AND created_at <= $${activationEvents.length + 3}`,
-      [
-        user.user_id,
-        ...activationEvents,
-        formatTimestamp(signupAt),
-        formatTimestamp(activationDeadline),
-      ],
-    );
-
-    if (parseInt(activated.rows[0]?.count || '0') > 0) {
-      activatedCount++;
-    }
-  }
+  const activatedCount = parseInt(activatedResult.rows[0]?.count || '0');
 
   const activationRate =
-    newUsers.length > 0 ? (activatedCount / newUsers.length) * 100 : 0;
+    totalSignups > 0 ? (activatedCount / totalSignups) * 100 : 0;
 
   return {
     activatedUsers: activatedCount,
@@ -785,13 +765,14 @@ export async function calculateFunnelMetrics(
           AND "createdAt" <= ${weekEndFormatted}
           AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
       `,
-    sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE event_type IN ('tarot_viewed', 'personalized_tarot_viewed', 'birth_chart_viewed', 'horoscope_viewed', 'personalized_horoscope_viewed', 'cosmic_pulse_opened')
-          AND created_at >= ${weekStartFormatted}
-          AND created_at <= ${weekEndFormatted}
-      `,
+    sql.query(
+      `SELECT COUNT(DISTINCT user_id) as count
+       FROM conversion_events
+       WHERE event_type = ANY($1::text[])
+         AND created_at >= $2
+         AND created_at <= $3`,
+      [[...ACTIVATION_EVENTS], weekStartFormatted, weekEndFormatted],
+    ),
     sql`
         SELECT COUNT(DISTINCT user_id) as count
         FROM conversion_events
