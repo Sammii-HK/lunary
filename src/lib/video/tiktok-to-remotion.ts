@@ -8,7 +8,10 @@ import type { TikTokScript } from './tiktok-scripts';
 import type { AppDemoVideoProps } from '@/remotion/compositions/AppDemoVideo';
 import type { Overlay } from '@/remotion/components/TextOverlays';
 import { getCategoryVisuals } from '@/remotion/config/category-visuals';
-import { scriptToAudioSegments } from './remotion-renderer';
+import {
+  scriptToAudioSegments,
+  scriptToSceneAlignedSegments,
+} from './remotion-renderer';
 
 /**
  * Maps TikTok script IDs to category-visual category keys.
@@ -109,10 +112,13 @@ export function scriptToAppDemoProps(
   const outroStartTime = effectiveDuration - script.outro.durationSeconds;
   const outroEndTime = effectiveDuration;
 
-  // Subtitle segments from voiceover text + audio duration
+  // Subtitle segments — use scene-aligned if voiceoverLine data exists, else fallback
+  const hasVoiceoverLines = script.scenes.some((s) => s.voiceoverLine);
   const segments =
     audioDuration && audioDuration > 0
-      ? scriptToAudioSegments(script.voiceover, audioDuration)
+      ? hasVoiceoverLines
+        ? scriptToSceneAlignedSegments(script, audioDuration)
+        : scriptToAudioSegments(script.voiceover, audioDuration)
       : undefined;
 
   // Category visuals
@@ -121,6 +127,18 @@ export function scriptToAppDemoProps(
 
   // Highlight terms
   const highlightTerms = extractHighlightTerms(script);
+
+  // Recording dead time before the first scene is visible:
+  // - Hook wait: 800ms (all scripts)
+  // - DISMISS_MODALS beforeSteps: 600ms (Escape 300ms + wait 300ms) — only some scripts
+  const SCRIPTS_WITH_DISMISS_MODALS = new Set([
+    'dashboard-overview',
+    'sky-now-deepdive',
+    'ritual-system',
+  ]);
+  const audioStartOffset = SCRIPTS_WITH_DISMISS_MODALS.has(script.id)
+    ? 1.4 // 600ms modals + 800ms hook
+    : 0.8; // 800ms hook only
 
   return {
     videoSrc,
@@ -136,5 +154,8 @@ export function scriptToAppDemoProps(
     categoryVisuals,
     highlightTerms,
     showProgress: true,
+    audioStartOffset,
+    backgroundMusicUrl: 'audio/series/lunary-bed-v1.mp3',
+    backgroundMusicVolume: 0.15,
   };
 }

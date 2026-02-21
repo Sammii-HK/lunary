@@ -76,9 +76,8 @@ function pickNotableTransitPlanet(sky: SkyData): {
 // ============================================================================
 
 function generateDashboardOverview(_sky: SkyData): TikTokScript {
-  // Complete rewrite — each scene = one voiceover sentence.
-  // Mobile layout order: Moon → Sky Now → Daily Insight → Tarot → Transit → Crystal
-  // Voiceover describes EXACTLY what is visible. No referencing off-screen content.
+  // TikTok-native pacing: fast scrolls, curiosity gaps, pattern interrupts.
+  // Fewer scenes, bigger scroll distances, punchier VO.
   return {
     id: 'dashboard-overview',
     title: 'POV: Your Morning Cosmic Check-In',
@@ -86,95 +85,83 @@ function generateDashboardOverview(_sky: SkyData): TikTokScript {
     category: 'walkthrough',
     totalSeconds: 20,
     hook: {
-      text: "Wait... your app doesn't show houses?",
-      durationSeconds: 2.5,
+      text: "your astrology app doesn't do this.",
+      durationSeconds: 2,
     },
     scenes: [
       {
-        // VO: "Personalized horoscope. Daily ritual."
-        description:
-          "Dashboard loads — Today's Cosmic Energy section with personalized horoscope + daily ritual",
+        description: 'Dashboard loads — horoscope + ritual visible',
         path: '/app',
-        durationSeconds: 2.5,
+        durationSeconds: 2,
         action: 'show',
-        focusPoint:
-          'Personalized horoscope text, daily ritual checkbox, streak counter visible',
+        focusPoint: 'Personalized horoscope, daily ritual, cosmic score',
+        voiceoverLine:
+          'First thing I see... personalized. Not a generic horoscope.',
       },
       {
-        // VO: "Moon phase. Current sign."
-        description: 'Scroll to Moon phase card with sign + illumination',
+        description: 'Scroll to Sky Now widget — positioned in top third',
+        path: '/app',
+        durationSeconds: 1.5,
+        action: 'scroll',
+        scrollTo: '[data-testid="sky-now-widget"]',
+        focusPoint: 'Sky Now widget in top third of screen',
+        voiceoverLine: 'Moon phase... okay cool. But watch this.',
+      },
+      {
+        description: 'Tap Sky Now — planets cascade open',
+        path: '/app',
+        durationSeconds: 1.5,
+        action: 'expand',
+        target: '[data-testid="sky-now-widget"]',
+        focusPoint: 'Planet list expanding with houses',
+        voiceoverLine: 'Every planet. Which house.',
+      },
+      {
+        description:
+          'Scroll through expanded planet list inside Sky Now dropdown',
         path: '/app',
         durationSeconds: 2,
         action: 'scroll',
         scrollDistance: 250,
-        focusPoint:
-          'Moon phase name, constellation, illumination percentage visible',
+        scrollContainer:
+          '[data-testid="sky-now-widget"] [class*="overflow-y-auto"]',
+        focusPoint: 'Multiple planets with house numbers scrolling past',
+        voiceoverLine:
+          "YOUR chart... not just signs. Houses. That's the difference.",
       },
       {
-        // VO: "But look. Every planet."
-        description: 'Tap Sky Now — planets cascade open',
-        path: '/app',
-        durationSeconds: 2.5,
-        action: 'expand',
-        target: '[data-testid="sky-now-widget"]',
-        focusPoint: 'Planet list expanding — signs, degrees, houses visible',
-      },
-      {
-        // VO: "Which house it's in. For YOUR chart."
-        description: 'Scroll through expanded planets showing houses',
+        description: 'Scroll to tarot section — centered on screen',
         path: '/app',
         durationSeconds: 2,
         action: 'scroll',
-        scrollDistance: 200,
-        focusPoint: 'House numbers next to each planet clearly on screen',
+        scrollTo: '[data-testid="tarot-daily-card"]',
+        focusPoint: 'Tarot card centered on screen',
+        voiceoverLine:
+          "And the tarot? It's connected to your transits. Not random.",
       },
       {
-        // VO: "Today's influence. Your tarot card. Connected to your transits."
-        description:
-          "Scroll to Today's Influence + Tarot for Today with transit connection",
-        path: '/app',
-        durationSeconds: 2,
-        action: 'scroll',
-        scrollDistance: 300,
-        focusPoint:
-          'Daily insight card and tarot card visible — transit connection on tarot',
-      },
-      {
-        // VO: "Your next transit. Which house it's hitting."
-        description: 'Scroll to Your Next Transit widget',
-        path: '/app',
-        durationSeconds: 2,
-        action: 'scroll',
-        scrollDistance: 200,
-        focusPoint:
-          'Next transit with planet, house activation, timing, and guidance',
-      },
-      {
-        // VO: "Even the crystal."
-        description: 'Scroll to Crystal Preview — visible on screen',
+        description: 'Scroll to crystal — centered on screen',
         path: '/app',
         durationSeconds: 1.5,
         action: 'scroll',
-        scrollDistance: 200,
-        focusPoint: 'Crystal matched to current transits + chart',
+        scrollTo: '[data-testid="crystal-card"]',
+        focusPoint: 'Crystal centered on screen',
+        voiceoverLine:
+          'Even the crystal matches. All of this... every morning.',
       },
     ],
     outro: {
-      text: 'Every morning. Your chart.',
+      text: 'link in bio',
       durationSeconds: 2,
     },
-    // Scene-aligned voiceover: each sentence matches one scene.
-    // 0–2.5s hook (filler). 2.5–5s moon. 5–7.5s sky now expand.
-    // 7.5–10s planets. 10–12s insight. 12–14s tarot. 14–16s transit.
-    // 16–18s crystal. 18–20s outro.
     voiceover:
-      "Okay so. Morning check-in. Personalized horoscope. Daily ritual. Moon phase. Current sign. But look. Every planet. Which house it's in. For YOUR chart. Today's influence. Your tarot card. Connected to your transits. Your next transit. Which house it's hitting. Even the crystal. Everything here... is yours.",
+      "First thing I see... personalized. Not a generic horoscope. Moon phase... okay cool. But watch this. Every planet. Which house. YOUR chart... not just signs. Houses. That's the difference. And the tarot? It's connected to your transits. Not random. Even the crystal matches. All of this... every morning.",
     textOverlays: [],
     caption:
-      "Your app doesn't show which house each planet is in. This one does. Horoscope, ritual, moon, planets, tarot with transit connections, crystal — all personalized. What does YOUR morning look like?",
-    hashtags: ['astrology', 'birthchart', 'lunary', 'witchtok', 'cosmicenergy'],
+      'Your astrology app shows you a horoscope. This one shows which house every planet is in, connects your tarot to your transits, and matches a crystal to your chart. Every single morning. Not generic — yours.',
+    hashtags: ['astrology', 'birthchart', 'witchtok', 'lunary', 'cosmicenergy'],
     playwrightNotes:
-      "Start at /app after auth. Dismiss modals. SLOW deliberate scrolls — each section must be FULLY VISIBLE before the next. Today's Cosmic Energy (2.5s), Moon card (2s), expand Sky Now (2.5s), scroll planets (2s), scroll to Today's Influence + Tarot for Today (2s), Your Next Transit (2s), Crystal (1.5s). iPhone 390x844.",
+      'Start at /app after auth. Dismiss modals. Fast scrolls (500-600px). Expand Sky Now. Keep moving — TikTok pacing.',
   };
 }
 
@@ -187,9 +174,28 @@ function generateSkyNowDeepDive(sky: SkyData): TikTokScript {
     ? `${retroPlanet} Rx mapped to YOUR houses.`
     : 'Every planet. YOUR houses. Right now.';
 
+  // Per-scene voiceover lines (retrograde vs non-retrograde variants)
+  const sceneVoLines = hasRetrograde
+    ? [
+        `${retroPlanet} retrograde... in my 6th house. That explains everything.`,
+        "Here's the full sky... right now.",
+        "Every planet... what sign it's at...",
+        "and which house it's hitting... in MY chart. Retrograde isn't the same for everyone.",
+        'My 6th house... work. Your 7th... relationships.',
+        'Jupiter... Saturn... Pluto... all mapped to my houses. Updated live.',
+      ]
+    : [
+        "Here's the full sky... right now.",
+        "Every planet... what sign it's at...",
+        "and which house it's hitting... in MY chart.",
+        'Not the same for everyone... my 6th house... work.',
+        'Your 7th... relationships.',
+        'Jupiter... Saturn... Pluto... all mapped to my houses. This changes daily.',
+      ];
+
   const voiceover = hasRetrograde
-    ? `${retroPlanet} retrograde in my 6th house. That explains everything. Here's the full sky right now. Every planet... what sign it's at... and which house it's hitting in MY chart. Retrograde isn't the same for everyone. My 6th house = work. Your 7th = relationships. Jupiter, Saturn, Pluto... all mapped to my houses. Updated live.`
-    : `Here's the full sky right now. Every planet... what sign it's at... and which house it's hitting in MY chart. Not the same for everyone. My 6th house = work. Your 7th = relationships. Jupiter, Saturn, Pluto... all mapped to my houses. This changes daily. Updated live.`;
+    ? `${retroPlanet} retrograde... in my 6th house. That explains everything. Here's the full sky... right now. Every planet... what sign it's at... and which house it's hitting... in MY chart. Retrograde isn't the same for everyone. My 6th house... work. Your 7th... relationships. Jupiter... Saturn... Pluto... all mapped to my houses. Updated live.`
+    : `Here's the full sky... right now. Every planet... what sign it's at... and which house it's hitting... in MY chart. Not the same for everyone... my 6th house... work. Your 7th... relationships. Jupiter... Saturn... Pluto... all mapped to my houses. This changes daily.`;
 
   const caption = hasRetrograde
     ? `${retroPlanet} retrograde in your 6th house hits completely different than your 7th. Which house is it hitting for YOU?`
@@ -202,7 +208,7 @@ function generateSkyNowDeepDive(sky: SkyData): TikTokScript {
       : 'Every Planet Right Now. Mapped to YOUR Houses.',
     tier: 2,
     category: 'deep-dive',
-    totalSeconds: 15,
+    totalSeconds: 22,
     hook: {
       text: hook,
       durationSeconds: 2,
@@ -211,9 +217,10 @@ function generateSkyNowDeepDive(sky: SkyData): TikTokScript {
       {
         description: 'Sky Now widget collapsed - planet symbols visible',
         path: '/app',
-        durationSeconds: 1,
+        durationSeconds: hasRetrograde ? 3.5 : 2, // retrograde line is longer
         action: 'show',
         focusPoint: 'Planet grid - "what does all this mean?"',
+        voiceoverLine: sceneVoLines[0],
       },
       {
         description: 'Tap to expand - cascade of planetary data',
@@ -223,39 +230,44 @@ function generateSkyNowDeepDive(sky: SkyData): TikTokScript {
         target: '[data-testid="sky-now-widget"]',
         focusPoint:
           'Every planet: sign, degree, YOUR house - satisfying reveal',
+        voiceoverLine: sceneVoLines[1],
       },
       {
         description: 'Scroll through Sun, Moon, Mercury - personal planets',
         path: '/app',
-        durationSeconds: 2,
+        durationSeconds: 2.5,
         action: 'scroll',
         scrollDistance: 120,
         focusPoint:
           'Sun sign + degree + house, Moon + house, Mercury retrograde',
+        voiceoverLine: sceneVoLines[2],
       },
       {
         description: 'Scroll to Venus, Mars - relationship & drive planets',
         path: '/app',
-        durationSeconds: 2,
+        durationSeconds: 3.5, // longer line about houses + retrograde
         action: 'scroll',
         scrollDistance: 120,
         focusPoint: 'Venus in YOUR love house, Mars in YOUR career house',
+        voiceoverLine: sceneVoLines[3],
       },
       {
         description: 'Scroll to Jupiter, Saturn - life themes',
         path: '/app',
-        durationSeconds: 2,
+        durationSeconds: 2.5,
         action: 'scroll',
         scrollDistance: 120,
         focusPoint: 'Jupiter expansion + Saturn lessons in YOUR houses',
+        voiceoverLine: sceneVoLines[4],
       },
       {
         description: 'Scroll to Uranus, Neptune, Pluto - generational',
         path: '/app',
-        durationSeconds: 2,
+        durationSeconds: 3.5, // longer closing line
         action: 'scroll',
         scrollDistance: 120,
         focusPoint: 'Generational planets mapped to YOUR specific houses',
+        voiceoverLine: sceneVoLines[5],
       },
     ],
     outro: {
@@ -325,7 +337,7 @@ function generateNumerologyDeepDive(sky: SkyData): TikTokScript {
     title: `My Personal Day Is a ${pd}. The Universal Day Is a ${ud}.`,
     tier: 2,
     category: 'did-you-know',
-    totalSeconds: 18,
+    totalSeconds: 21,
     hook: {
       text: `Personal day: ${pd}. Universal day: ${ud}. ${relationship}.`,
       durationSeconds: 2,
@@ -339,6 +351,7 @@ function generateNumerologyDeepDive(sky: SkyData): TikTokScript {
         action: 'scroll',
         scrollDistance: 150,
         focusPoint: 'Two different numbers visible - instant visual contrast',
+        voiceoverLine: `My personal day... is a ${pd}. ${pdKeyword}.`,
       },
       {
         description: 'Tap personal day number - the deeper meaning',
@@ -347,22 +360,26 @@ function generateNumerologyDeepDive(sky: SkyData): TikTokScript {
         action: 'click',
         target: '[data-testid="numerology-day"]',
         focusPoint: `Modal: "${pd} = ${pdKeyword}" - specific to YOU`,
+        voiceoverLine: `The universal day... is a ${ud}. ${udKeyword}. ${relationship} energies.`,
       },
       {
         description: 'Close modal - back to comparison view',
         path: '/horoscope',
-        durationSeconds: 2,
+        durationSeconds: 2.5,
         action: 'click',
         target: '[data-testid="numerology-close"]',
         focusPoint:
           'Both numbers visible again - "see how different they are?"',
+        voiceoverLine: 'The universal number... applies to everyone.',
       },
       {
         description: 'Show universal day for side-by-side contrast',
         path: '/horoscope',
-        durationSeconds: 2,
+        durationSeconds: 2.5,
         action: 'show',
         focusPoint: `Universal ${ud} = ${udKeyword}. YOUR ${pd} = ${pdKeyword}. ${relationship}.`,
+        voiceoverLine:
+          'Your personal number? ...Calculated from YOUR birthdate.',
       },
       {
         description: 'Scroll to month and year numbers',
@@ -372,21 +389,24 @@ function generateNumerologyDeepDive(sky: SkyData): TikTokScript {
         scrollDistance: 100,
         focusPoint:
           'Personal month + personal year - "wait there are more cycles?"',
+        voiceoverLine: 'And it goes deeper... personal month... personal year.',
       },
       {
         description: 'Show all personal numbers together',
         path: '/horoscope',
-        durationSeconds: 2,
+        durationSeconds: 3.5,
         action: 'show',
         focusPoint:
           'Day, month, year - three nested cycles from YOUR birthdate',
+        voiceoverLine:
+          'Three nested cycles... unique to you. Feel out of sync? ...You might be following the universal energy... instead of your own.',
       },
     ],
     outro: {
       text: 'From your birthdate. Not universal.',
       durationSeconds: 2,
     },
-    voiceover: `My personal day is a ${pd}. ${pdKeyword}. The universal day is a ${ud}. ${udKeyword}. ${relationship} energies. The universal number applies to everyone. Your personal number? Calculated from YOUR birthdate. And it goes deeper... personal month, personal year. Three nested cycles unique to you. Feel out of sync? You might be following the universal energy instead of your own.`,
+    voiceover: `My personal day... is a ${pd}. ${pdKeyword}. The universal day... is a ${ud}. ${udKeyword}. ${relationship} energies. The universal number... applies to everyone. Your personal number? ...Calculated from YOUR birthdate. And it goes deeper... personal month... personal year. Three nested cycles... unique to you. Feel out of sync? ...You might be following the universal energy... instead of your own.`,
     textOverlays: [
       {
         text: `${pd} vs ${ud} \u2014 ${relationship.toLowerCase()}`,
@@ -440,7 +460,7 @@ function generateRitualSystem(sky: SkyData): TikTokScript {
     title: `Why Today's Ritual Is About ${moonTheme.charAt(0).toUpperCase() + moonTheme.slice(1)}`,
     tier: 2,
     category: 'did-you-know',
-    totalSeconds: 16,
+    totalSeconds: 18,
     hook: {
       text: `Today: ${moonTheme} ritual. They change daily.`,
       durationSeconds: 2,
@@ -453,23 +473,27 @@ function generateRitualSystem(sky: SkyData): TikTokScript {
         action: 'scroll',
         scrollDistance: 150,
         focusPoint: 'Ritual card with completion tracking - matches the hook',
+        voiceoverLine: `Today's ritual... ${moonTheme}. ...Why?`,
       },
       {
         description: 'Navigate to horoscope for full ritual details',
         path: '/horoscope',
-        durationSeconds: 2,
+        durationSeconds: 2.5,
         action: 'navigate',
         target: '/horoscope',
         focusPoint: 'Page transition - fast',
+        voiceoverLine: 'Moon is in my 4th house...',
       },
       {
         description: 'Scroll to ritual section - full personalized details',
         path: '/horoscope',
-        durationSeconds: 3,
+        durationSeconds: 4,
         action: 'scroll',
         scrollDistance: 400,
         focusPoint:
           'Ritual aligned to moon phase + active transits in YOUR chart',
+        voiceoverLine:
+          'Yesterday was different... the moon moved. Every day... the ritual changes based on which house the moon activates... in YOUR chart.',
       },
       {
         description: 'Show ritual instructions tied to cosmic energy',
@@ -478,21 +502,24 @@ function generateRitualSystem(sky: SkyData): TikTokScript {
         action: 'scroll',
         scrollDistance: 200,
         focusPoint: 'Step-by-step instructions + WHY this timing matters',
+        voiceoverLine:
+          'The crystal matches too... everything connected to your cosmic weather.',
       },
       {
         description: 'Scroll to crystal recommendation tied to ritual',
         path: '/horoscope',
-        durationSeconds: 2,
+        durationSeconds: 2.5,
         action: 'scroll',
         scrollDistance: 150,
         focusPoint: 'Crystal matched to ritual energy - everything connected',
+        voiceoverLine: 'Different tomorrow... because the moon moves.',
       },
     ],
     outro: {
       text: 'Different tomorrow. Moon moves.',
       durationSeconds: 2,
     },
-    voiceover: `Today's ritual... ${moonTheme}. Why? Moon is in my 4th house. Yesterday was different\u2014the moon moved. Every day, the ritual changes based on which house the moon activates in YOUR chart. The crystal matches too. Everything connected to your cosmic weather. Different tomorrow. Because the moon moves.`,
+    voiceover: `Today's ritual... ${moonTheme}. ...Why? Moon is in my 4th house... Yesterday was different... the moon moved. Every day... the ritual changes based on which house the moon activates... in YOUR chart. The crystal matches too... everything connected to your cosmic weather. Different tomorrow... because the moon moves.`,
     textOverlays: [
       {
         text: `moon in ${sky.moonSign.toLowerCase()} = ${moonTheme}`,
@@ -534,7 +561,7 @@ function generateTransitWisdomDeepDive(sky: SkyData): TikTokScript {
     title: `${planet} in ${sign} Hits My 7th House. Relationships.`,
     tier: 2,
     category: 'deep-dive',
-    totalSeconds: 19,
+    totalSeconds: 22,
     hook: {
       text: `${planet} in ${sign}. 12 meanings. Mine\u2014`,
       durationSeconds: 2,
@@ -544,33 +571,38 @@ function generateTransitWisdomDeepDive(sky: SkyData): TikTokScript {
         description:
           'Transit Wisdom section - first transit with house + intensity',
         path: '/horoscope',
-        durationSeconds: 2,
+        durationSeconds: 3.5, // 10 words / 3wps = 3.3s + scroll
         action: 'scroll',
         scrollDistance: 350,
         focusPoint: `${planet} in ${sign} \u2192 7th house \u2192 Relationships \u2192 High intensity`,
+        voiceoverLine: `${planet} entering ${sign}... means something different for every person.`,
       },
       {
         description: 'Show the intensity badge - this transit matters',
         path: '/horoscope',
-        durationSeconds: 2,
+        durationSeconds: 3,
         action: 'show',
         focusPoint: 'Intensity badge - "this one\'s a big deal for you"',
+        voiceoverLine: 'For me? ...7th house. Relationships... high intensity.',
       },
       {
         description: 'Scroll to show multiple active transits',
         path: '/horoscope',
-        durationSeconds: 3,
+        durationSeconds: 3.5,
         action: 'scroll',
         scrollDistance: 300,
         focusPoint: 'Multiple transits hitting different areas simultaneously',
+        voiceoverLine:
+          "But that's just one transit... every transit active right now... which areas they're touching.",
       },
       {
         description: 'Scroll to exact aspects - real astronomical data',
         path: '/horoscope',
-        durationSeconds: 3,
+        durationSeconds: 2.5,
         action: 'scroll',
         scrollDistance: 300,
         focusPoint: 'Aspects forming to YOUR natal planets with real orbs',
+        voiceoverLine: 'Exact aspects... with real orbs.',
       },
       {
         description: 'Scroll to upcoming transits - your personal forecast',
@@ -579,21 +611,23 @@ function generateTransitWisdomDeepDive(sky: SkyData): TikTokScript {
         action: 'scroll',
         scrollDistance: 300,
         focusPoint: "30-day forecast - see what's coming for YOUR chart",
+        voiceoverLine: 'And the next 30 days... mapped out.',
       },
       {
         description: 'Show specific upcoming dates and transits',
         path: '/horoscope',
-        durationSeconds: 2,
+        durationSeconds: 2.5,
         action: 'scroll',
         scrollDistance: 150,
         focusPoint: 'Specific dates + which transits + which houses',
+        voiceoverLine: 'Not a paragraph... for all Leos.',
       },
     ],
     outro: {
       text: 'Not a paragraph for all Leos.',
       durationSeconds: 2,
     },
-    voiceover: `${planet} entering ${sign} means something different for every person. For me? 7th house. Relationships. High intensity. But that's just one transit. Every transit active right now... which areas they're touching. Exact aspects with real orbs. And the next 30 days mapped out. Not a paragraph for all Leos.`,
+    voiceover: `${planet} entering ${sign}... means something different for every person. For me? ...7th house. Relationships... high intensity. But that's just one transit... every transit active right now... which areas they're touching. Exact aspects... with real orbs. And the next 30 days... mapped out. Not a paragraph... for all Leos.`,
     textOverlays: [
       {
         text: `${planet} \u2192 YOUR chart`,
@@ -639,7 +673,7 @@ function generateGrimoireSearch(sky: SkyData): TikTokScript {
     title: `Search Anything. Venus in ${venusSign}? Here.`,
     tier: 3,
     category: 'feature-reveal',
-    totalSeconds: 17,
+    totalSeconds: 18,
     hook: {
       text: `Venus in ${venusSign}? Mars in ${marsSign}? Here.`,
       durationSeconds: 2,
@@ -652,15 +686,17 @@ function generateGrimoireSearch(sky: SkyData): TikTokScript {
         action: 'show',
         focusPoint:
           'Planets, Signs, Houses, Aspects, Tarot, Crystals, Spells - everything',
+        voiceoverLine: `Search any placement... Venus in ${venusSign}? Full article.`,
       },
       {
         description: 'Fast scroll through categories - volume flex',
         path: '/grimoire',
-        durationSeconds: 2,
+        durationSeconds: 3,
         action: 'scroll',
         scrollDistance: 400,
         focusPoint:
           'Every planet in every sign, all houses, all aspects - depth',
+        voiceoverLine: `Mars in ${marsSign}? Full article... 2,000 plus articles.`,
       },
       {
         description: 'Type into search bar - live demo',
@@ -671,6 +707,8 @@ function generateGrimoireSearch(sky: SkyData): TikTokScript {
           '[data-testid="grimoire-search"], input[name="grimoire-search"], input[aria-label="Search grimoire"]',
         typeText: searchExample,
         focusPoint: 'Results appearing as you type - instant',
+        voiceoverLine:
+          'Every planet in every sign... all 12 houses... every aspect.',
       },
       {
         description: 'Show search results - full articles, not snippets',
@@ -678,6 +716,7 @@ function generateGrimoireSearch(sky: SkyData): TikTokScript {
         durationSeconds: 2,
         action: 'show',
         focusPoint: 'Matching articles with rich previews - real depth',
+        voiceoverLine: 'Tarot... crystals... spells.',
       },
       {
         description: 'Click first result - full article opens',
@@ -686,6 +725,7 @@ function generateGrimoireSearch(sky: SkyData): TikTokScript {
         action: 'click',
         target: '.max-h-80 a, [data-testid="grimoire-categories"] a',
         focusPoint: 'Full article page loads instantly',
+        voiceoverLine: 'No paywall... on education.',
       },
       {
         description: 'Scroll through the article showing depth',
@@ -694,13 +734,14 @@ function generateGrimoireSearch(sky: SkyData): TikTokScript {
         action: 'scroll',
         scrollDistance: 300,
         focusPoint: 'Complete article - not a snippet, a full guide',
+        voiceoverLine: 'Search yours.',
       },
     ],
     outro: {
       text: 'No paywall. Search yours.',
       durationSeconds: 2,
     },
-    voiceover: `Search any placement. Venus in ${venusSign}? Full article. Mars in ${marsSign}? Full article. 2,000 plus articles. Every planet in every sign. All 12 houses. Every aspect. Tarot. Crystals. Spells. No paywall on education. Search yours.`,
+    voiceover: `Search any placement... Venus in ${venusSign}? Full article. Mars in ${marsSign}? Full article... 2,000 plus articles. Every planet in every sign... all 12 houses... every aspect. Tarot... crystals... spells. No paywall... on education. Search yours.`,
     textOverlays: [
       {
         text: '2,000+ articles',

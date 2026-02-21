@@ -39,9 +39,9 @@ export const FONTS = {
   title: 'Roboto',
   titleWeight: '700',
 
-  // Subtitle font
-  subtitle: 'Roboto Mono',
-  subtitleWeight: '400',
+  // Subtitle font (bold sans-serif for TikTok legibility)
+  subtitle: 'Roboto',
+  subtitleWeight: '600',
 
   // Body text
   body: 'Roboto',
@@ -93,7 +93,7 @@ export const STYLES = {
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     padding: '8px 16px',
     borderRadius: 4,
-    fontSize: 56, // Increased from 48 for more prominence
+    fontSize: 46, // Optimized for TikTok with bold sans-serif
     lineHeight: 1.4,
   },
 } as const;

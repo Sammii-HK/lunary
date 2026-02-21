@@ -49,7 +49,7 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
         return 28;
       case 'chapter':
       default:
-        return baseFontSize; // 44px
+        return baseFontSize - 4; // 40px — slightly smaller to fit pill
     }
   };
 
@@ -177,6 +177,18 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
                   lineHeight: `${lineHeight}px`,
                   margin: 0,
                   textShadow,
+                  // Chapter: pill with semi-transparent background for readability
+                  ...(style === 'chapter'
+                    ? {
+                        backgroundColor: 'rgba(0, 0, 0, 0.55)',
+                        borderRadius: 10,
+                        paddingLeft: 14,
+                        paddingRight: 14,
+                        paddingTop: 6,
+                        paddingBottom: 6,
+                        display: 'inline-block',
+                      }
+                    : {}),
                   // Stamp: left accent border + semi-transparent background
                   ...(isStamp && accentColor
                     ? {

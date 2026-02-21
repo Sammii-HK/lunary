@@ -220,6 +220,9 @@ async function composeVideo(
     segments: props.segments,
     categoryVisuals: props.categoryVisuals,
     highlightTerms: props.highlightTerms,
+    audioStartOffset: props.audioStartOffset,
+    backgroundMusicUrl: props.backgroundMusicUrl,
+    backgroundMusicVolume: props.backgroundMusicVolume,
     crf,
   });
 
