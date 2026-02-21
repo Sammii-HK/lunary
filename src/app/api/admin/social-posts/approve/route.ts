@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { buildUtmUrl } from '@/lib/urls';
 
 const toIntArrayLiteral = (values: number[]) =>
   `{${values.map((value) => Number(value)).join(',')}}`;
@@ -335,8 +336,32 @@ export async function POST(request: NextRequest) {
             )
               .filter(Boolean)
               .join(' ');
-            const youtubeDescription =
-              `${post.content}\n\n${descriptionTags}`.trim();
+            const youtubeDescription = [
+              post.content,
+              '',
+              '✨ Get your free birth chart reading at lunary.app',
+              '',
+              descriptionTags,
+              '',
+              '🔮 Explore more:',
+              `Grimoire: ${buildUtmUrl('/grimoire', 'youtube', 'social', 'shorts_description')}`,
+              `Birth Chart: ${buildUtmUrl('/birth-chart', 'youtube', 'social', 'shorts_description')}`,
+              `Moon Calendar: ${buildUtmUrl('/moon-calendar', 'youtube', 'social', 'shorts_description')}`,
+            ]
+              .join('\n')
+              .trim();
+
+            const youtubeTags = [
+              'astrology',
+              'zodiac',
+              themeName.toLowerCase().replace(/\s+/g, ''),
+              ...(post.topic
+                ? [post.topic.toLowerCase().replace(/\s+/g, '')]
+                : []),
+              'horoscope',
+              'lunary',
+              'spirituality',
+            ].filter(Boolean);
 
             const publishDate = (() => {
               if (!dateValue) {
@@ -366,6 +391,7 @@ export async function POST(request: NextRequest) {
                   title: youtubeTitle,
                   description: youtubeDescription,
                   type: 'short',
+                  tags: youtubeTags,
                   script,
                   publishDate,
                 }),

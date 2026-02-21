@@ -67,6 +67,7 @@ export interface MultiPlatformPostParams {
   name?: string;
   reddit?: { title?: string; subreddit?: string };
   pinterestOptions?: { boardId: string; boardName: string };
+  pinterestLink?: string;
   tiktokOptions?: { type: string; coverUrl?: string; autoAddMusic?: boolean };
   instagramOptions?: { type: string; coverUrl?: string; stories?: boolean };
   facebookOptions?: { type: string };
@@ -362,7 +363,12 @@ export async function postToSocialMultiPlatform(
       variants: params.variants,
       platformSettings: params.platformSettings,
       reddit: params.reddit,
-      pinterestOptions: params.pinterestOptions,
+      pinterestOptions: params.pinterestOptions
+        ? {
+            ...params.pinterestOptions,
+            ...(params.pinterestLink ? { link: params.pinterestLink } : {}),
+          }
+        : undefined,
       tiktokOptions: params.tiktokOptions,
       instagramOptions: params.instagramOptions,
       facebookOptions: params.facebookOptions,

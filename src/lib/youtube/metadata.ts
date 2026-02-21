@@ -3,6 +3,8 @@
  * Generates SEO-optimized titles, descriptions, and tags
  */
 
+import { buildUtmUrl } from '@/lib/urls';
+
 const BASE_URL = 'https://lunary.app';
 
 /** Format a grimoire slug into a readable title */
@@ -133,20 +135,26 @@ export function buildPodcastYouTubeMetadata(episode: PodcastMetadataInput): {
     descParts.push('EXPLORE MORE');
     for (const slug of episode.grimoireSlugs) {
       const readableTitle = formatSlugTitle(slug);
-      descParts.push(`${readableTitle}: ${BASE_URL}/grimoire/${slug}`);
+      descParts.push(
+        `${readableTitle}: ${buildUtmUrl(`/grimoire/${slug}`, 'youtube', 'social', 'podcast_description')}`,
+      );
     }
     descParts.push('');
   }
 
   // 4. Podcast page link
-  descParts.push(`Listen to this episode: ${BASE_URL}/podcast/${episode.slug}`);
+  descParts.push(
+    `Listen to this episode: ${buildUtmUrl(`/podcast/${episode.slug}`, 'youtube', 'social', 'podcast_description')}`,
+  );
   descParts.push('');
 
   // 5. Channel subscribe CTA
   descParts.push(
     'Subscribe to The Grimoire by Lunary for weekly astrology, tarot, crystals, and cosmic wisdom.',
   );
-  descParts.push(`${BASE_URL} — Your Cosmic Guide`);
+  descParts.push(
+    `${buildUtmUrl('/', 'youtube', 'social', 'podcast_description')} — Your Cosmic Guide`,
+  );
 
   const description = descParts.join('\n');
 

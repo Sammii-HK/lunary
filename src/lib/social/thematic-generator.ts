@@ -1722,8 +1722,7 @@ export async function generateThematicPostsForWeek(
   const ctaPlatforms = new Set(['threads']);
 
   // Long-form platforms (educational depth, images)
-  // Pinterest now gets visual content from the Instagram pipeline instead
-  const longFormPlatforms = ['linkedin'];
+  const longFormPlatforms = ['linkedin', 'pinterest'];
   // Short-form platforms (1-2 sentences, optional hashtags)
   const shortFormPlatforms = ['twitter', 'bluesky', 'threads'];
 

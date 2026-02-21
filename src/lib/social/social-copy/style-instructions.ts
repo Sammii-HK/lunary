@@ -87,7 +87,8 @@ const POST_TYPE_FRAMEWORKS: Partial<Record<SocialPostType, string>> = {
 - Contractions and natural speech patterns
 - Hook in first line must be magnetic
 - Build to payoff, don't frontload everything
-- Write how you'd explain to a friend, not an essay`,
+- Write how you'd explain to a friend, not an essay
+- Platform-specific length applies (TikTok shorter, Instagram longer)`,
 };
 
 /**
@@ -111,6 +112,19 @@ const PLATFORM_GUIDANCE: Record<string, string> = {
   bluesky: `Platform: Bluesky (280 chars)
 - Similar to Twitter but slightly more conversational
 - Community-focused tone`,
+
+  tiktok: `Platform: TikTok
+- Hook-first: first line must stop scrolling
+- Spoken-style, conversational language
+- 150-300 characters for captions (algorithm sweet spot)
+- Searchable keywords matter (TikTok is a search engine)
+- No formal structure, keep it punchy`,
+
+  facebook: `Platform: Facebook
+- Slightly longer, deeper style for broader demographic
+- Text overlays carry the hook; caption adds context
+- 200-400 characters, conversational but informative
+- Encourage saves and shares with relatable framing`,
 
   instagram: `Platform: Instagram
 - First line is the hook (critical for feed)

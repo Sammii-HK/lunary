@@ -92,11 +92,14 @@ export const validateVideoCaptionResponse = (
     .filter(Boolean);
   const issues: string[] = [];
 
+  const maxLines = pack.platform === 'tiktok' ? 3 : 4;
   if (sanitizedLines.length < 2) {
     issues.push('Need at least 2 caption lines after the search phrase');
   }
-  if (sanitizedLines.length > 4) {
-    issues.push('Use no more than 4 caption lines after the search phrase');
+  if (sanitizedLines.length > maxLines) {
+    issues.push(
+      `Use no more than ${maxLines} caption lines after the search phrase`,
+    );
   }
 
   sanitizedLines.forEach((line) => {

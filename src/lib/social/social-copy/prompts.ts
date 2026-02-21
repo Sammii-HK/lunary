@@ -8,6 +8,43 @@ import { SOCIAL_POST_STYLE_INSTRUCTION } from './style-instructions';
 import { buildNoveltyInstruction } from './novelty';
 
 /**
+ * Simple hash for deterministic seeding
+ */
+function hashSeed(pack: SourcePack): number {
+  const str = `${pack.topicTitle}-${pack.platform}-${pack.postType}`;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+/**
+ * Platform-specific video caption instructions
+ */
+const TIKTOK_CAPTION_INSTRUCTIONS = `Write 2-3 lines (150-300 characters total) that:
+- Hook-first: line 1 must stop the scroll
+- Use searchable keywords naturally (TikTok is a search engine)
+- Spoken-style, conversational language
+- Optimise for saves and shares
+- Include the topic name once`;
+
+const INSTAGRAM_REELS_CAPTION_INSTRUCTIONS = `Write 2-4 lines (200-500 characters total) that:
+- First 125 characters must work as a feed preview (the hook)
+- Build a mini-narrative arc: hook, insight, payoff
+- Include a save-worthy insight or reframe
+- Natural interaction invitation (not "comment below!")
+- Include the topic name once`;
+
+const GENERIC_VIDEO_CAPTION_INSTRUCTIONS = `Write 2-4 lines that:
+- Complement the video naturally
+- Provide context or insight
+- Use conversational, clear language
+- Include the topic name once
+- Optionally mention timing if relevant (this week, tonight, etc.)`;
+
+/**
  * Critical rules that must appear in all prompts
  */
 const CRITICAL_RULES = `
@@ -129,6 +166,18 @@ export const buildVideoCaptionPrompt = (pack: SourcePack): string => {
 
   const noveltyNote = buildNoveltyInstruction(pack.noveltyContext);
 
+  const captionInstructions =
+    pack.platform === 'tiktok'
+      ? TIKTOK_CAPTION_INSTRUCTIONS
+      : pack.platform === 'instagram'
+        ? INSTAGRAM_REELS_CAPTION_INSTRUCTIONS
+        : GENERIC_VIDEO_CAPTION_INSTRUCTIONS;
+
+  const includeSoftCta = hashSeed(pack) % 4 === 0;
+  const ctaInstruction = includeSoftCta
+    ? `\nEnd with a natural soft CTA like "Get your personalised chart on Lunary" or "Lunary breaks this down for your exact chart". Make it feel like a natural extension of the insight, not an ad.`
+    : '\nDo not mention Lunary or the Grimoire.';
+
   return `Write a video caption about "${pack.topicTitle}" in UK English.
 
 What you know:
@@ -143,12 +192,8 @@ ${domainContext}
 
 ${styleGuidance}
 
-Write 2-4 lines that:
-- Complement the video naturally
-- Provide context or insight
-- Use conversational, clear language
-- Include the topic name once
-- Optionally mention timing if relevant (this week, tonight, etc.)
+${captionInstructions}
+${ctaInstruction}
 
 ${CRITICAL_RULES}
 
@@ -156,8 +201,7 @@ ${BANNED_PATTERNS}
 
 Avoid:
 - Marketing speak or "deepen your practice" type phrases
-- Rigid formulas
-- Mentioning Lunary or the Grimoire
+- Rigid formulas${includeSoftCta ? '' : '\n- Mentioning Lunary or the Grimoire'}
 - Deterministic claims - use "tends to", "often", "can" not "always" or "controls"
 ${noveltyNote ? `\n${noveltyNote}` : ''}
 

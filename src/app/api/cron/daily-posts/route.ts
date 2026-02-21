@@ -1,4 +1,5 @@
 import { getPinterestBoard } from '@/lib/pinterest/boards';
+import { buildUtmUrl } from '@/lib/urls';
 import { NextRequest, NextResponse } from 'next/server';
 import { NotificationTemplates } from '../../../../../utils/notifications/pushNotifications';
 import { sendDiscordAdminNotification } from '@/lib/discord';
@@ -756,6 +757,13 @@ export async function GET(request: NextRequest) {
 
           const pinBoard = getPinterestBoard(pin.category);
 
+          const pinLink = buildUtmUrl(
+            `/grimoire/${pin.category}`,
+            'pinterest',
+            'social',
+            'evergreen_pin',
+          );
+
           const result = await postToSocial({
             platform: 'pinterest',
             content: pin.description,
@@ -765,6 +773,7 @@ export async function GET(request: NextRequest) {
               pinterestOptions: {
                 ...pinBoard,
                 title: pin.title,
+                link: pinLink,
               },
             },
           });
@@ -1621,6 +1630,9 @@ async function runDailyPosts(dateStr: string) {
         variants,
         name: post.name,
         pinterestOptions: pinterestOptions as any,
+        pinterestLink: post.platforms.includes('pinterest')
+          ? buildUtmUrl('/grimoire', 'pinterest', 'social', 'daily_quote')
+          : undefined,
       });
 
       // Check if all platforms succeeded

@@ -230,7 +230,7 @@ export async function postToAyrshareMultiPlatform(params: {
   >;
   platformSettings?: Record<string, Record<string, unknown>>;
   reddit?: { title?: string; subreddit?: string };
-  pinterestOptions?: { boardId: string; boardName: string };
+  pinterestOptions?: { boardId: string; boardName: string; link?: string };
   tiktokOptions?: { type: string; coverUrl?: string; autoAddMusic?: boolean };
   instagramOptions?: { type: string; coverUrl?: string; stories?: boolean };
   facebookOptions?: { type: string };
@@ -409,6 +409,9 @@ export async function postToAyrshareMultiPlatform(params: {
     payload.pinterestOptions = {
       boardId: params.pinterestOptions.boardId,
       title: params.pinterestOptions.boardName,
+      ...(params.pinterestOptions.link
+        ? { link: params.pinterestOptions.link }
+        : {}),
     };
   }
 

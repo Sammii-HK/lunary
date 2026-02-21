@@ -41,7 +41,7 @@ interface SpellcastPostParams {
   firstComment?: string;
 }
 
-async function spellcastFetch(
+export async function spellcastFetch(
   path: string,
   options: RequestInit = {},
 ): Promise<Response> {

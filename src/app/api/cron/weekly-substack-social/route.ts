@@ -148,8 +148,12 @@ export async function GET(request: NextRequest) {
             }
 
             // Generate and upload long-form video
+            // Use event-driven title for YouTube (keyword-rich), keep generic for blog
+            const blogTitle = `Weekly Cosmic Forecast - Week of ${weeklyData.weekStart.toLocaleDateString()}`;
+            const youtubeTitle = weeklyData.title || blogTitle;
+
             const blogContent = {
-              title: `Weekly Cosmic Forecast - Week of ${weeklyData.weekStart.toLocaleDateString()}`,
+              title: blogTitle,
               description: freePost.subtitle || paidPost.subtitle || '',
               body: freePost.content || paidPost.content || '',
             };
@@ -178,7 +182,7 @@ export async function GET(request: NextRequest) {
                       body: JSON.stringify({
                         videoUrl: longVideoData.video.url,
                         videoId: longVideoData.video.id,
-                        title: blogContent.title,
+                        title: youtubeTitle,
                         description: blogContent.description,
                         type: 'long',
                         publishDate: longFormPublishDate.toISOString(),

@@ -5,10 +5,11 @@ import { sql } from '@vercel/postgres';
 import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import { recordThemeUsage } from '@/lib/social/thematic-generator';
-import { getImageBaseUrl } from '@/lib/urls';
+import { getImageBaseUrl, buildUtmUrl } from '@/lib/urls';
 import { sanitizeForLog } from '@/lib/security/log-sanitize';
 import { postToSocialMultiPlatform } from '@/lib/social/client';
 import { preUploadImage } from '@/lib/social/pre-upload-image';
+import { captureEvent } from '@/lib/posthog-server';
 
 type DbPostRow = {
   id: number;
@@ -31,6 +32,7 @@ type PlatformPayload = {
   media: Array<{ type: 'image' | 'video'; url: string; alt: string }>;
   reddit?: { title?: string; subreddit?: string };
   pinterestOptions?: { boardId: string; boardName: string };
+  pinterestLink?: string;
   tiktokOptions?: { type: string; coverUrl?: string; autoAddMusic?: boolean };
   instagramOptions?: { type: string; coverUrl?: string };
   firstComment?: string;
@@ -135,6 +137,92 @@ function extractEngagementQuestion(content: string): string | undefined {
   return undefined;
 }
 
+const CATEGORY_TO_BOARD_KEY: Record<string, string> = {
+  zodiac: 'zodiac',
+  tarot: 'tarot',
+  lunar: 'moon',
+  planetary: 'zodiac',
+  crystals: 'crystals',
+  numerology: 'numerology',
+  chakras: 'chakras',
+  runes: 'runes',
+  spells: 'spells',
+  sabbat: 'spells',
+};
+
+const CATEGORY_LINKS: Record<string, string> = {
+  zodiac: buildUtmUrl(
+    '/grimoire/zodiac',
+    'pinterest',
+    'social',
+    'grimoire_zodiac',
+  ),
+  tarot: buildUtmUrl(
+    '/grimoire/tarot',
+    'pinterest',
+    'social',
+    'grimoire_tarot',
+  ),
+  moon: buildUtmUrl(
+    '/grimoire/moon/phases',
+    'pinterest',
+    'social',
+    'grimoire_moon',
+  ),
+  crystals: buildUtmUrl(
+    '/grimoire/crystals',
+    'pinterest',
+    'social',
+    'grimoire_crystals',
+  ),
+  numerology: buildUtmUrl(
+    '/grimoire/numerology',
+    'pinterest',
+    'social',
+    'grimoire_numerology',
+  ),
+  chakras: buildUtmUrl(
+    '/grimoire/chakras',
+    'pinterest',
+    'social',
+    'grimoire_chakras',
+  ),
+  runes: buildUtmUrl(
+    '/grimoire/runes',
+    'pinterest',
+    'social',
+    'grimoire_runes',
+  ),
+  spells: buildUtmUrl(
+    '/grimoire/spells',
+    'pinterest',
+    'social',
+    'grimoire_spells',
+  ),
+};
+
+function getPinterestContentKey(weekTheme: string | null): string | undefined {
+  if (!weekTheme) return undefined;
+  const theme = categoryThemes.find((t) => t.name === weekTheme);
+  return theme?.category;
+}
+
+function buildAltText(post: DbPostRow): string {
+  const firstLine =
+    post.content
+      .split('\n')
+      .find((l) => l.trim().length > 0)
+      ?.trim() ?? '';
+  const hook =
+    firstLine.length > 120 ? firstLine.substring(0, 117) + '...' : firstLine;
+
+  if (post.week_theme) {
+    return `${post.week_theme} — ${hook}`;
+  }
+
+  return hook || `Lunary ${post.post_type} post`;
+}
+
 const buildPlatformPayload = (
   post: DbPostRow,
   scheduleDate: Date,
@@ -191,12 +279,14 @@ const buildPlatformPayload = (
     }
   }
 
+  const altText = buildAltText(post);
+
   const media: PlatformPayload['media'] = shouldUseVideo
     ? [
         {
           type: 'video',
           url: String(post.video_url || '').trim(),
-          alt: scheduleLabel,
+          alt: altText,
         },
       ]
     : imageUrlForPlatform
@@ -204,7 +294,7 @@ const buildPlatformPayload = (
           {
             type: 'image',
             url: imageUrlForPlatform,
-            alt: scheduleLabel,
+            alt: altText,
           },
         ]
       : [];
@@ -227,7 +317,11 @@ const buildPlatformPayload = (
   }
 
   if (platformStr === 'pinterest') {
-    payload.pinterestOptions = getPinterestBoard();
+    const boardKey = getPinterestContentKey(post.week_theme);
+    const mappedKey = boardKey ? CATEGORY_TO_BOARD_KEY[boardKey] : undefined;
+    payload.pinterestOptions = getPinterestBoard(mappedKey);
+    payload.pinterestLink =
+      CATEGORY_LINKS[mappedKey ?? ''] ?? buildUtmUrl('/grimoire', 'pinterest');
   }
 
   if (platformStr === 'tiktok' && media.length > 0) {
@@ -421,6 +515,7 @@ export async function POST(request: NextRequest) {
       { content: string; media?: string[] | null; noImage?: boolean }
     > = {};
     let pinterestOptions: PlatformPayload['pinterestOptions'];
+    let pinterestLink: string | undefined;
     let tiktokOptions: PlatformPayload['tiktokOptions'];
     let instagramOptions: PlatformPayload['instagramOptions'];
     let facebookOptions: PlatformPayload['facebookOptions'];
@@ -443,6 +538,9 @@ export async function POST(request: NextRequest) {
 
       if (payload.pinterestOptions) {
         pinterestOptions = payload.pinterestOptions;
+      }
+      if (payload.pinterestLink) {
+        pinterestLink = payload.pinterestLink;
       }
       if (payload.tiktokOptions) {
         tiktokOptions = payload.tiktokOptions;
@@ -572,6 +670,7 @@ export async function POST(request: NextRequest) {
       variants: Object.keys(variants).length > 0 ? variants : undefined,
       reddit: redditData,
       pinterestOptions,
+      pinterestLink,
       tiktokOptions,
       instagramOptions,
       facebookOptions,
@@ -584,6 +683,21 @@ export async function POST(request: NextRequest) {
     console.log('📥 Social client response:', platformResults);
 
     if (anySuccess) {
+      captureEvent('system', 'social_post_sent', {
+        platforms: Array.from(platformsToSend),
+        platformCount: platformsToSend.size,
+        postType: primaryPost.post_type,
+        weekTheme: primaryPost.week_theme,
+        hasVideo: hasVideoMedia,
+        hasFirstComments: Object.keys(firstComments).length > 0,
+        results: Object.fromEntries(
+          Object.entries(platformResults).map(([p, r]) => [
+            p,
+            { success: r.success, backend: r.backend },
+          ]),
+        ),
+      });
+
       // Update status to 'sent' for all posts in the group (or just the single post)
       console.log('🔄 Updating post status to sent...', {
         postId,
@@ -693,6 +807,11 @@ export async function POST(request: NextRequest) {
       });
     } else {
       const firstError = Object.values(platformResults).find((r) => r.error);
+      captureEvent('system', 'social_post_failed', {
+        platforms: Array.from(platformsToSend),
+        postType: primaryPost.post_type,
+        error: firstError?.error,
+      });
       return NextResponse.json(
         {
           success: false,
