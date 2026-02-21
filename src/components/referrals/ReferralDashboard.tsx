@@ -59,7 +59,7 @@ export function ReferralDashboard() {
       typeof window !== 'undefined'
         ? window.location.origin
         : 'https://lunary.app';
-    const shareUrl = `${baseUrl}/signup?ref=${stats.code}`;
+    const shareUrl = `${baseUrl}/pricing?ref=${stats.code}`;
 
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -77,13 +77,13 @@ export function ReferralDashboard() {
       typeof window !== 'undefined'
         ? window.location.origin
         : 'https://lunary.app';
-    const shareUrl = `${baseUrl}/signup?ref=${stats.code}`;
+    const shareUrl = `${baseUrl}/pricing?ref=${stats.code}`;
 
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'Join me on Lunary',
-          text: 'Explore astrology, tarot, and cosmic insights with me on Lunary!',
+          text: `Explore astrology, tarot, and cosmic insights with me on Lunary — you'll get 30 days of Pro free!`,
           url: shareUrl,
         });
       } catch (err) {
