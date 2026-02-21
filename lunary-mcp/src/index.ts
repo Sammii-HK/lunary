@@ -14,6 +14,7 @@ import { registerAdminTools } from './tools/admin.js';
 import { registerVideoScriptTools } from './tools/video-scripts.js';
 import { registerOperationsTools } from './tools/operations.js';
 import { registerAstralGuideTools } from './tools/astral-guide.js';
+import { registerGrimoireTools } from './tools/grimoire.js';
 
 const server = new McpServer({
   name: 'lunary',
@@ -34,6 +35,7 @@ registerAdminTools(server);
 registerVideoScriptTools(server);
 registerOperationsTools(server);
 registerAstralGuideTools(server);
+registerGrimoireTools(server);
 
 // Start with stdio transport
 const transport = new StdioServerTransport();
