@@ -33,6 +33,8 @@ type PlatformPayload = {
   pinterestOptions?: { boardId: string; boardName: string };
   tiktokOptions?: { type: string; coverUrl?: string; autoAddMusic?: boolean };
   instagramOptions?: { type: string; coverUrl?: string };
+  firstComment?: string;
+  facebookOptions?: { type: string };
 };
 
 const videoPlatforms = ['instagram', 'tiktok', 'facebook', 'youtube'];
@@ -78,6 +80,60 @@ const formatReadableDate = (scheduleDate: Date) => {
   });
   return `${formattedDate} at ${formattedTime}`;
 };
+
+/**
+ * Extract engagement question from TikTok caption.
+ * TikTok captions typically have: hook line, then body with a question.
+ * Returns the first ?-ending line after the first non-empty line.
+ */
+function extractTikTokEngagementQuestion(content: string): string | undefined {
+  const lines = content.split('\n').filter((l) => l.trim().length > 0);
+  // Skip the hook (first line), look for first question in remaining lines
+  for (let i = 1; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed.endsWith('?')) return trimmed;
+  }
+  return undefined;
+}
+
+/**
+ * Extract trailing hashtag block from Instagram caption.
+ * Hashtags are typically after the last double-newline separator.
+ */
+function extractInstagramHashtags(content: string): string | undefined {
+  const parts = content.split('\n\n');
+  if (parts.length < 2) return undefined;
+  const lastBlock = parts[parts.length - 1].trim();
+  // Only treat as hashtag block if it starts with # and is mostly hashtags
+  if (lastBlock.startsWith('#') && lastBlock.includes('#')) {
+    return lastBlock;
+  }
+  return undefined;
+}
+
+/**
+ * Extract engagement question for Facebook/LinkedIn.
+ * Finds the last ?-ending line before any trailing hashtag block.
+ */
+function extractEngagementQuestion(content: string): string | undefined {
+  // Strip trailing hashtag block if present
+  const parts = content.split('\n\n');
+  let bodyParts = parts;
+  if (parts.length >= 2) {
+    const lastBlock = parts[parts.length - 1].trim();
+    if (lastBlock.startsWith('#')) {
+      bodyParts = parts.slice(0, -1);
+    }
+  }
+  const body = bodyParts.join('\n\n');
+  const lines = body.split('\n').filter((l) => l.trim().length > 0);
+  // Find last question mark line
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const trimmed = lines[i].trim();
+    if (trimmed.endsWith('?')) return trimmed;
+  }
+  return undefined;
+}
 
 const buildPlatformPayload = (
   post: DbPostRow,
@@ -197,6 +253,28 @@ const buildPlatformPayload = (
         type: 'post',
       };
     }
+  }
+
+  // First comment per platform
+  if (platformStr === 'tiktok' && shouldUseVideo) {
+    const question = extractTikTokEngagementQuestion(content);
+    if (question) payload.firstComment = question;
+  } else if (platformStr === 'instagram') {
+    const hashtags = extractInstagramHashtags(content);
+    if (hashtags) {
+      payload.firstComment = hashtags;
+      // Strip trailing hashtag block from caption body
+      const parts = content.split('\n\n');
+      payload.content = parts.slice(0, -1).join('\n\n').trim();
+    }
+  } else if (platformStr === 'facebook' || platformStr === 'linkedin') {
+    const question = extractEngagementQuestion(content);
+    if (question) payload.firstComment = question;
+  }
+
+  // Facebook video type
+  if (platformStr === 'facebook' && shouldUseVideo) {
+    payload.facebookOptions = { type: 'video' };
   }
 
   return payload;
@@ -345,7 +423,9 @@ export async function POST(request: NextRequest) {
     let pinterestOptions: PlatformPayload['pinterestOptions'];
     let tiktokOptions: PlatformPayload['tiktokOptions'];
     let instagramOptions: PlatformPayload['instagramOptions'];
+    let facebookOptions: PlatformPayload['facebookOptions'];
     let redditData: PlatformPayload['reddit'];
+    const firstComments: Record<string, string> = {};
 
     const baseMediaKey = formatMediaKey(basePayload.media);
 
@@ -369,6 +449,12 @@ export async function POST(request: NextRequest) {
       }
       if (payload.instagramOptions) {
         instagramOptions = payload.instagramOptions;
+      }
+      if (payload.facebookOptions) {
+        facebookOptions = payload.facebookOptions;
+      }
+      if (payload.firstComment) {
+        firstComments[payload.platform] = payload.firstComment;
       }
       if (payload.reddit) {
         redditData = payload.reddit;
@@ -488,6 +574,9 @@ export async function POST(request: NextRequest) {
       pinterestOptions,
       tiktokOptions,
       instagramOptions,
+      facebookOptions,
+      firstComments:
+        Object.keys(firstComments).length > 0 ? firstComments : undefined,
     });
 
     const anySuccess = Object.values(platformResults).some((r) => r.success);

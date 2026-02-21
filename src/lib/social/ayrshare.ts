@@ -55,6 +55,7 @@ export interface AyrsharePostParams {
   scheduledDate: string;
   media?: Array<{ type: 'image' | 'video'; url: string; alt?: string }>;
   platformSettings?: Record<string, unknown>;
+  firstComment?: string;
 }
 
 export interface AyrshareResult {
@@ -156,6 +157,10 @@ export async function postToAyrshare(
     if (hasVideo) payload.isVideo = true;
   }
 
+  if (params.firstComment) {
+    payload.firstComment = { comment: params.firstComment };
+  }
+
   // Add platform-specific options
   const platformOptions = buildPlatformOptions(
     ayrsharePlatform,
@@ -229,6 +234,7 @@ export async function postToAyrshareMultiPlatform(params: {
   tiktokOptions?: { type: string; coverUrl?: string; autoAddMusic?: boolean };
   instagramOptions?: { type: string; coverUrl?: string; stories?: boolean };
   facebookOptions?: { type: string };
+  firstComment?: string;
 }): Promise<{ results: Record<string, AyrshareResult> }> {
   const headers = getAyrshareHeaders();
   const results: Record<string, AyrshareResult> = {};
@@ -385,6 +391,10 @@ export async function postToAyrshareMultiPlatform(params: {
     payload.mediaUrls = mediaUrlsPayload;
     const hasVideo = params.media?.some((m) => m.type === 'video');
     if (hasVideo) payload.isVideo = true;
+  }
+
+  if (params.firstComment) {
+    payload.firstComment = { comment: params.firstComment };
   }
 
   // Add platform-specific options from top-level params

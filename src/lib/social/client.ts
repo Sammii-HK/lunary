@@ -46,6 +46,7 @@ export interface SocialPostParams {
   youtubeOptions?: YouTubePostParams['youtubeOptions'];
   transcript?: string;
   platformSettings?: Record<string, unknown>;
+  firstComment?: string;
 }
 
 export interface MultiPlatformPostParams {
@@ -60,6 +61,7 @@ export interface MultiPlatformPostParams {
   youtubeOptions?: YouTubePostParams['youtubeOptions'];
   transcript?: string;
   platformSettings?: Record<string, Record<string, unknown>>;
+  firstComments?: Record<string, string>;
   // Legacy Succulent fields (used when falling back to Succulent)
   accountGroupId?: string;
   name?: string;
@@ -192,6 +194,7 @@ export async function postToSocial(
         scheduledDate: params.scheduledDate,
         media: params.media,
         platformSettings: params.platformSettings,
+        firstComment: params.firstComment,
       });
       return { ...result, backend: 'ayrshare' };
     } catch (error) {
@@ -211,6 +214,7 @@ export async function postToSocial(
         scheduledDate: params.scheduledDate,
         media: params.media,
         platformSettings: params.platformSettings,
+        firstComment: params.firstComment,
       });
     } catch (error) {
       return {
@@ -305,6 +309,16 @@ export async function postToSocialMultiPlatform(
   const ayrshareGroup = backendGroups.get('ayrshare') ?? [];
   const succulentGroup = backendGroups.get('succulent') ?? [];
 
+  // Derive per-backend first comments (pick first available from each group)
+  const spellcastFirstComment = spellcastGroup.reduce<string | undefined>(
+    (found, p) => found ?? params.firstComments?.[p],
+    undefined,
+  );
+  const ayrshareFirstComment = ayrshareGroup.reduce<string | undefined>(
+    (found, p) => found ?? params.firstComments?.[p],
+    undefined,
+  );
+
   // Spellcast group (posts appear in Spellcast dashboard)
   if (spellcastGroup.length > 0) {
     const spellcastResult = await postToSpellcastMultiPlatform({
@@ -314,6 +328,7 @@ export async function postToSocialMultiPlatform(
       media: params.media,
       variants: params.variants,
       platformSettings: params.platformSettings,
+      firstComment: spellcastFirstComment,
     });
 
     for (const [platform, result] of Object.entries(spellcastResult.results)) {
@@ -351,6 +366,7 @@ export async function postToSocialMultiPlatform(
       tiktokOptions: params.tiktokOptions,
       instagramOptions: params.instagramOptions,
       facebookOptions: params.facebookOptions,
+      firstComment: ayrshareFirstComment,
     });
 
     for (const [platform, result] of Object.entries(ayrshareResult.results)) {

@@ -38,6 +38,7 @@ interface SpellcastPostParams {
   scheduledDate: string;
   media?: Array<{ type: 'image' | 'video'; url: string; alt?: string }>;
   platformSettings?: Record<string, unknown>;
+  firstComment?: string;
 }
 
 async function spellcastFetch(
@@ -79,6 +80,7 @@ export async function postToSpellcast(
         ...(params.platformSettings
           ? { platformSettings: params.platformSettings }
           : {}),
+        ...(params.firstComment ? { first_comment: params.firstComment } : {}),
       }),
     });
 
@@ -138,6 +140,7 @@ export async function postToSpellcastMultiPlatform(params: {
     { content: string; media?: string[] | null; noImage?: boolean }
   >;
   platformSettings?: Record<string, Record<string, unknown>>;
+  firstComment?: string;
 }): Promise<{ results: Record<string, SocialPostResult> }> {
   const results: Record<string, SocialPostResult> = {};
   const { accountSetId } = getSpellcastConfig();
@@ -165,6 +168,10 @@ export async function postToSpellcastMultiPlatform(params: {
         ...(Object.keys(platformVariations).length > 0
           ? { platformVariations }
           : {}),
+        ...(params.platformSettings
+          ? { platformSettings: params.platformSettings }
+          : {}),
+        ...(params.firstComment ? { first_comment: params.firstComment } : {}),
       }),
     });
 
