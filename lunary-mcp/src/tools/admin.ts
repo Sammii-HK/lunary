@@ -98,33 +98,53 @@ export function registerAdminTools(server: McpServer) {
 
   server.tool(
     'create_announcement',
-    'Create a new in-app announcement',
+    'Create a new in-app feature announcement shown to users once per session',
     {
       title: z.string().describe('Announcement title'),
-      body: z.string().describe('Announcement body text'),
-      type: z
-        .enum(['info', 'warning', 'success', 'promo'])
+      description: z.string().describe('Announcement body text'),
+      icon: z
+        .enum(['Sparkles', 'Star', 'Moon', 'Heart', 'Users'])
         .optional()
-        .describe('Announcement type (default info)'),
-      starts_at: z
+        .describe('Lucide icon name (default Sparkles)'),
+      cta_label: z
         .string()
         .optional()
-        .describe('Start date (ISO string, default now)'),
-      ends_at: z
+        .describe('Optional CTA button label (e.g. "Try it now")'),
+      cta_href: z
         .string()
         .optional()
-        .describe('End date (ISO string, default 7 days)'),
+        .describe('Optional CTA button link (e.g. "/birth-chart")'),
+      required_tier: z
+        .array(
+          z.enum(['lunary_plus', 'lunary_plus_ai', 'lunary_plus_ai_annual']),
+        )
+        .optional()
+        .describe('Subscription tiers that can see this (omit for all users)'),
+      released_at: z
+        .string()
+        .optional()
+        .describe('Release date ISO string (default now)'),
     },
-    async ({ title, body, type, starts_at, ends_at }) => {
+    async ({
+      title,
+      description,
+      icon,
+      cta_label,
+      cta_href,
+      required_tier,
+      released_at,
+    }) => {
       try {
         const data = await lunary('/announcements', {
           method: 'POST',
           body: {
             title,
-            body,
-            ...(type && { type }),
-            ...(starts_at && { startsAt: starts_at }),
-            ...(ends_at && { endsAt: ends_at }),
+            description,
+            ...(icon && { icon }),
+            ...(cta_label && { ctaLabel: cta_label }),
+            ...(cta_href && { ctaHref: cta_href }),
+            ...(required_tier && { requiredTier: required_tier }),
+            ...(released_at && { releasedAt: released_at }),
           },
         });
         return jsonResult(data);
@@ -136,25 +156,53 @@ export function registerAdminTools(server: McpServer) {
 
   server.tool(
     'update_announcement',
-    'Update an existing announcement',
+    'Update an existing in-app feature announcement',
     {
       id: z.string().describe('Announcement ID to update'),
       title: z.string().optional().describe('New title'),
-      body: z.string().optional().describe('New body text'),
-      active: z
+      description: z.string().optional().describe('New body text'),
+      icon: z
+        .enum(['Sparkles', 'Star', 'Moon', 'Heart', 'Users'])
+        .optional()
+        .describe('Lucide icon name'),
+      cta_label: z.string().optional().describe('CTA button label'),
+      cta_href: z.string().optional().describe('CTA button link'),
+      required_tier: z
+        .array(
+          z.enum(['lunary_plus', 'lunary_plus_ai', 'lunary_plus_ai_annual']),
+        )
+        .optional()
+        .describe('Required subscription tiers (empty array = all users)'),
+      is_active: z
         .boolean()
         .optional()
         .describe('Enable/disable the announcement'),
+      released_at: z.string().optional().describe('Release date ISO string'),
     },
-    async ({ id, title, body, active }) => {
+    async ({
+      id,
+      title,
+      description,
+      icon,
+      cta_label,
+      cta_href,
+      required_tier,
+      is_active,
+      released_at,
+    }) => {
       try {
         const data = await lunary(`/announcements`, {
           method: 'PATCH',
           body: {
             id,
-            ...(title && { title }),
-            ...(body && { body }),
-            ...(active !== undefined && { active }),
+            ...(title !== undefined && { title }),
+            ...(description !== undefined && { description }),
+            ...(icon !== undefined && { icon }),
+            ...(cta_label !== undefined && { ctaLabel: cta_label }),
+            ...(cta_href !== undefined && { ctaHref: cta_href }),
+            ...(required_tier !== undefined && { requiredTier: required_tier }),
+            ...(is_active !== undefined && { isActive: is_active }),
+            ...(released_at !== undefined && { releasedAt: released_at }),
           },
         });
         return jsonResult(data);
