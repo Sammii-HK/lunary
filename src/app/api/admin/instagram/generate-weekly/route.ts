@@ -59,8 +59,10 @@ export async function POST(request: NextRequest) {
         // Generate content batch for this day
         const batch = await generateDailyBatch(dateStr);
 
+        // Rest days (Wed/Sun) intentionally return 0 posts — skip gracefully
         if (!batch || !batch.posts || batch.posts.length === 0) {
-          throw new Error('No posts generated');
+          results.push({ date: dateStr, success: true, postsGenerated: 0 });
+          continue;
         }
 
         // Save to social_posts table

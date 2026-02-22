@@ -409,7 +409,7 @@ async function generateThematicWeeklyPosts(
     const dayContent = generateDayContent(day.date, day.theme, day.facet);
     const sourceInfo = resolveSourceForFacet(day.facet, day.theme.category);
     const longFormPlatforms = ['linkedin', 'pinterest'];
-    const shortFormPlatforms = ['twitter', 'bluesky', 'threads'];
+    const shortFormPlatforms = ['twitter', 'bluesky'];
     const dayOffset = day.date.getDay() === 0 ? 6 : day.date.getDay() - 1;
     const totalParts = day.theme.leadUpFacets.length;
     const partNumber =
@@ -1338,7 +1338,9 @@ async function generateThematicWeeklyPosts(
     if (videoScripts?.tiktokScripts?.length) {
       const { getThematicImageUrl } =
         await import('@/lib/social/educational-images');
-      const videoPlatforms = ['instagram', 'tiktok', 'facebook', 'youtube'];
+      // Instagram is handled separately: engagement scripts cross-post to instagram-reels
+      // Primary scripts stay on TikTok/Facebook/YouTube to keep IG cadence at ~2-3/week
+      const videoPlatforms = ['tiktok', 'facebook', 'youtube'];
       const uniqueScripts = dedupeScriptsByDate(videoScripts.tiktokScripts);
       const dayInfoByKey = new Map<
         string,

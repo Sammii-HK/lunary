@@ -19,6 +19,8 @@ export const TOPIC_HASHTAG_POOLS: Record<string, string[]> = {
   tarot: ['#tarot', '#tarotreading'],
   'major arcana': ['#majorarcana', '#tarot'],
   'minor arcana': ['#minorarcana', '#tarot'],
+  'angel numbers': ['#angelnumbers', '#angelnumber', '#numerology'],
+  'angel number': ['#angelnumbers', '#angelnumber', '#numerology'],
 };
 
 export const ZODIAC_HASHTAGS: Record<string, string> = {
@@ -98,13 +100,12 @@ const TIKTOK_CATEGORY_POOLS: Record<string, string[]> = {
     '#spiritualtiktok',
   ],
   '#numerology': [
-    '#angelnumbers',
+    '#numerologyreading',
     '#manifestation',
-    '#1111',
-    '#444',
     '#lifepath',
     '#spiritualawakening',
     '#manifest',
+    '#numerologydaily',
     '#spiritualtiktok',
   ],
   '#crystalhealing': [
@@ -205,12 +206,12 @@ const INSTAGRAM_CATEGORY_POOLS: Record<string, string[]> = {
     '#moonritual',
   ],
   '#numerology': [
-    '#angelnumbers',
+    '#numerologyreading',
     '#manifestation',
     '#manifest',
-    '#numerologyreading',
+    '#lifepath',
     '#spiritualawakening',
-    '#angelnumber',
+    '#numerologydaily',
   ],
   '#crystalhealing': [
     '#crystals',
@@ -257,7 +258,7 @@ const TWITTER_CATEGORY_POOLS: Record<string, string[]> = {
   '#zodiacsigns': ['#zodiac', '#horoscope', '#astrologyposts'],
   '#tarot': ['#tarotreading', '#tarotcards', '#divination'],
   '#moonphases': ['#fullmoon', '#newmoon', '#moonmagic'],
-  '#numerology': ['#angelnumbers', '#manifestation'],
+  '#numerology': ['#numerologyreading', '#manifestation'],
   '#crystalhealing': ['#crystals', '#healingcrystals'],
   '#witchtok': ['#witchcraft', '#witch', '#spellwork'],
   '#spirituality': ['#spiritual', '#spiritualawakening', '#meditation'],

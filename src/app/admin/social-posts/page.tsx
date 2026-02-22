@@ -825,6 +825,7 @@ export default function SocialPostsPage() {
 
       const data = await response.json();
       if (data.success) {
+        alert(data.message || 'Done');
         loadPendingPosts();
       } else {
         alert(`Failed: ${data.error}`);

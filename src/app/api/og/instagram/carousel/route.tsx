@@ -617,7 +617,10 @@ export async function GET(request: NextRequest) {
       width,
       height,
       fonts,
-      headers: { 'Cache-Control': 'no-store, max-age=0' },
+      headers: {
+        'Cache-Control': 'no-store, max-age=0',
+        'Access-Control-Allow-Origin': '*',
+      },
     });
   } catch (error) {
     console.error('[IG Carousel] Error:', error);

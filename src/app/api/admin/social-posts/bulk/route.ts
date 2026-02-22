@@ -61,10 +61,12 @@ export async function POST(request: NextRequest) {
         RETURNING id
       `;
 
-      // Clear orphaned video jobs (jobs without corresponding posts)
-      await sql`
-        DELETE FROM video_jobs
-      `;
+      // Clear orphaned video jobs (best-effort — table may not exist yet)
+      try {
+        await sql`DELETE FROM video_jobs`;
+      } catch {
+        // table doesn't exist yet — safe to ignore
+      }
 
       return NextResponse.json({
         success: true,
