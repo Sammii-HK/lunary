@@ -20,6 +20,7 @@ import { ShareZodiacSeason } from '@/components/share/ShareZodiacSeason';
 import { TourTrigger } from '@/components/feature-tour/tour-trigger';
 import { useMilestones } from '@/hooks/useMilestones';
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
+import { ReferralOnboardingModal } from '@/components/referrals/ReferralOnboardingModal';
 
 const DateWidget = dynamic(
   () =>
@@ -518,6 +519,8 @@ export default function AppDashboardClient() {
           onCelebrate={celebrateMilestone}
         />
       )}
+
+      {authState.isAuthenticated && !isDemoMode && <ReferralOnboardingModal />}
     </div>
   );
 }
