@@ -48,7 +48,7 @@ export function MarketingFooter() {
     {
       platform: 'tiktok' as const,
       url: SOCIAL_HANDLES.tiktok
-        ? `https://www.tiktok.com/${SOCIAL_HANDLES.tiktok.replace('@', '@')}`
+        ? `https://www.tiktok.com/${SOCIAL_HANDLES.tiktok}`
         : 'https://www.tiktok.com/@lunary.app',
       label: SOCIAL_PLATFORM_LABELS.tiktok,
       icon: (

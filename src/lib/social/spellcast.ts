@@ -140,6 +140,19 @@ export async function postToSpellcast(
  * Until this is fixed, always pass the full set of desired platforms in the account set
  * and avoid using an account set that contains platforms you don't want to post to.
  */
+const ALLOWED_PLATFORMS = new Set([
+  'instagram',
+  'twitter',
+  'x',
+  'threads',
+  'facebook',
+  'bluesky',
+  'tiktok',
+  'linkedin',
+  'youtube',
+  'pinterest',
+]);
+
 export async function postToSpellcastMultiPlatform(params: {
   platforms: string[];
   content: string;
@@ -155,12 +168,17 @@ export async function postToSpellcastMultiPlatform(params: {
   const results: Record<string, SocialPostResult> = {};
   const { accountSetId } = getSpellcastConfig();
 
+  // Validate all platforms against allow-list before use as object keys
+  const safePlatforms = params.platforms.filter((p) =>
+    ALLOWED_PLATFORMS.has(p),
+  );
+
   try {
     // Build platform variations if present
     const platformVariations: Record<string, string> = {};
     if (params.variants) {
       for (const [platform, variant] of Object.entries(params.variants)) {
-        if (variant.content) {
+        if (variant.content && ALLOWED_PLATFORMS.has(platform)) {
           platformVariations[platform] = variant.content;
         }
       }
@@ -205,7 +223,7 @@ export async function postToSpellcastMultiPlatform(params: {
 
     if (!createRes.ok) {
       const errorText = await createRes.text();
-      for (const platform of params.platforms) {
+      for (const platform of safePlatforms) {
         results[platform] = {
           success: false,
           error: `Spellcast create failed (${createRes.status}): ${errorText}`,
@@ -225,7 +243,7 @@ export async function postToSpellcastMultiPlatform(params: {
 
     if (!scheduleRes.ok) {
       const errorText = await scheduleRes.text();
-      for (const platform of params.platforms) {
+      for (const platform of safePlatforms) {
         results[platform] = {
           success: false,
           error: `Spellcast schedule failed (${scheduleRes.status}): ${errorText}`,
@@ -238,7 +256,7 @@ export async function postToSpellcastMultiPlatform(params: {
     const scheduled = await scheduleRes.json();
     const postId = scheduled.postizPostId || scheduled.id;
 
-    for (const platform of params.platforms) {
+    for (const platform of safePlatforms) {
       results[platform] = {
         success: true,
         postId,
@@ -247,7 +265,7 @@ export async function postToSpellcastMultiPlatform(params: {
     }
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : 'Unknown error';
-    for (const platform of params.platforms) {
+    for (const platform of safePlatforms) {
       results[platform] = {
         success: false,
         error: errMsg,
