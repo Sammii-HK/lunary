@@ -397,7 +397,7 @@ export async function GET(request: NextRequest) {
                   display: 'flex',
                 }}
               >
-                {truncateIG(title, 30)}
+                {truncateIG(title, 50)}
               </div>
               <div
                 style={{
@@ -429,7 +429,7 @@ export async function GET(request: NextRequest) {
                 fontWeight: 700,
               }}
             >
-              {truncateIG(subtitle, 60)}
+              {truncateIG(subtitle, 80)}
             </div>
           )}
 
@@ -525,61 +525,51 @@ export async function GET(request: NextRequest) {
                 })}
               </div>
             ) : contentLines.length > 1 ? (
-              /* Multi-line: show as structured list */
+              /* Multi-line: label + body blocks with clear separation */
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 20,
+                  gap: 36,
                 }}
               >
                 {contentLines.slice(0, 3).map((line, i) => {
-                  const [label, ...rest] = line.split(': ');
-                  const value = rest.join(': ');
+                  const colonIdx = line.indexOf(': ');
+                  const label = colonIdx !== -1 ? line.slice(0, colonIdx) : '';
+                  const value =
+                    colonIdx !== -1 ? line.slice(colonIdx + 2) : line;
                   return (
                     <div
                       key={i}
                       style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: 12,
+                        gap: 10,
                       }}
                     >
-                      {value ? (
-                        <>
-                          <span
-                            style={{
-                              fontSize: IG_TEXT.dark.body,
-                              color: accent,
-                              fontWeight: 600,
-                              display: 'flex',
-                            }}
-                          >
-                            {label}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: IG_TEXT.dark.body - 4,
-                              color: OG_COLORS.textSecondary,
-                              lineHeight: 1.5,
-                              display: 'flex',
-                            }}
-                          >
-                            {truncateIG(value, 120)}
-                          </span>
-                        </>
-                      ) : (
-                        <span
+                      {label ? (
+                        <div
                           style={{
                             fontSize: IG_TEXT.dark.body,
-                            color: OG_COLORS.textSecondary,
-                            lineHeight: 1.5,
+                            color: accent,
+                            fontWeight: 700,
                             display: 'flex',
+                            letterSpacing: '0.04em',
                           }}
                         >
-                          {truncateIG(line, 120)}
-                        </span>
-                      )}
+                          {label}
+                        </div>
+                      ) : null}
+                      <div
+                        style={{
+                          fontSize: IG_TEXT.dark.body - 2,
+                          color: OG_COLORS.textSecondary,
+                          lineHeight: 1.6,
+                          display: 'flex',
+                        }}
+                      >
+                        {value}
+                      </div>
                     </div>
                   );
                 })}
@@ -602,7 +592,7 @@ export async function GET(request: NextRequest) {
                     fontWeight: 500,
                   }}
                 >
-                  {truncateIG(content, 180)}
+                  {content}
                 </div>
               </div>
             )}

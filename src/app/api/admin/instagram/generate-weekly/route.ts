@@ -68,12 +68,8 @@ export async function POST(request: NextRequest) {
         // Save to social_posts table
         for (const post of batch.posts) {
           try {
-            const groupKey = `instagram-${dateStr}-${post.type}`;
-
-            // Check if post already exists
-            const existingPost = await prisma.socialPost.findFirst({
-              where: { base_group_key: groupKey },
-            });
+            // All platforms share one group key so they appear together in the UI
+            const groupKey = `${dateStr}-${post.type}`;
 
             // For carousels (including angel number carousels), store all
             // image URLs pipe-delimited so buildPlatformPayload can split
@@ -98,64 +94,30 @@ export async function POST(request: NextRequest) {
               },
             };
 
-            if (existingPost) {
-              await prisma.socialPost.update({
-                where: { id: existingPost.id },
-                data: postData,
+            for (const platform of [
+              'instagram',
+              'facebook',
+              'pinterest',
+            ] as const) {
+              const existingPost = await prisma.socialPost.findFirst({
+                where: { base_group_key: groupKey, platform },
               });
-            } else {
-              await prisma.socialPost.create({
-                data: {
-                  ...postData,
-                  platform: 'instagram',
-                  status: 'pending',
-                  base_group_key: groupKey,
-                },
-              });
-            }
 
-            // Cross-post to Facebook with the same content
-            const fbGroupKey = `facebook-${dateStr}-${post.type}`;
-            const existingFbPost = await prisma.socialPost.findFirst({
-              where: { base_group_key: fbGroupKey },
-            });
-
-            if (existingFbPost) {
-              await prisma.socialPost.update({
-                where: { id: existingFbPost.id },
-                data: postData,
-              });
-            } else {
-              await prisma.socialPost.create({
-                data: {
-                  ...postData,
-                  platform: 'facebook',
-                  status: 'pending',
-                  base_group_key: fbGroupKey,
-                },
-              });
-            }
-
-            // Cross-post to Pinterest with the same content
-            const pinGroupKey = `pinterest-${dateStr}-${post.type}`;
-            const existingPinPost = await prisma.socialPost.findFirst({
-              where: { base_group_key: pinGroupKey },
-            });
-
-            if (existingPinPost) {
-              await prisma.socialPost.update({
-                where: { id: existingPinPost.id },
-                data: postData,
-              });
-            } else {
-              await prisma.socialPost.create({
-                data: {
-                  ...postData,
-                  platform: 'pinterest',
-                  status: 'pending',
-                  base_group_key: pinGroupKey,
-                },
-              });
+              if (existingPost) {
+                await prisma.socialPost.update({
+                  where: { id: existingPost.id },
+                  data: postData,
+                });
+              } else {
+                await prisma.socialPost.create({
+                  data: {
+                    ...postData,
+                    platform,
+                    status: 'pending',
+                    base_group_key: groupKey,
+                  },
+                });
+              }
             }
           } catch (dbError) {
             console.warn(

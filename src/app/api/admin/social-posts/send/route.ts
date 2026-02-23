@@ -281,6 +281,41 @@ const buildPlatformPayload = (
 
   const altText = buildAltText(post);
 
+  // Detect carousel posts with pipe-delimited image URLs
+  const isCarouselPost =
+    !shouldUseVideo &&
+    (post.post_type === 'instagram_carousel' ||
+      post.post_type === 'carousel') &&
+    typeof post.image_url === 'string' &&
+    post.image_url.includes('|');
+
+  let carouselMedia: Array<{ type: 'image'; url: string; alt: string }> = [];
+  if (isCarouselPost && post.image_url) {
+    const rawUrls = String(post.image_url)
+      .split('|')
+      .map((u) => u.trim())
+      .filter(Boolean);
+    if (rawUrls.length > 1) {
+      carouselMedia = rawUrls.map((rawUrl, i) => {
+        let url = rawUrl;
+        try {
+          if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = new URL(url, baseUrl).toString();
+          }
+        } catch {
+          // keep as-is
+        }
+        return {
+          type: 'image' as const,
+          url,
+          alt: i === 0 ? altText : `Slide ${i + 1}`,
+        };
+      });
+      // Use first URL as the single-image reference (cover, etc.)
+      imageUrlForPlatform = carouselMedia[0].url;
+    }
+  }
+
   const media: PlatformPayload['media'] = shouldUseVideo
     ? [
         {
@@ -289,15 +324,17 @@ const buildPlatformPayload = (
           alt: altText,
         },
       ]
-    : imageUrlForPlatform
-      ? [
-          {
-            type: 'image',
-            url: imageUrlForPlatform,
-            alt: altText,
-          },
-        ]
-      : [];
+    : carouselMedia.length > 1
+      ? carouselMedia
+      : imageUrlForPlatform
+        ? [
+            {
+              type: 'image',
+              url: imageUrlForPlatform,
+              alt: altText,
+            },
+          ]
+        : [];
 
   const payload: PlatformPayload = {
     platform: platformStr,
@@ -341,8 +378,11 @@ const buildPlatformPayload = (
         type: 'reel',
         ...(imageUrlForPlatform ? { coverUrl: imageUrlForPlatform } : {}),
       };
+    } else if (carouselMedia.length > 1) {
+      payload.instagramOptions = {
+        type: 'carousel',
+      };
     } else {
-      // Static Instagram post (meme, carousel, daily cosmic, etc.)
       payload.instagramOptions = {
         type: 'post',
       };
@@ -661,6 +701,15 @@ export async function POST(request: NextRequest) {
       scheduledDate: scheduleDate.toISOString(),
     });
 
+    // Explicitly set Facebook platformSettings to avoid Postiz sending invalid defaults
+    const platformSettingsOverrides: Record<
+      string,
+      Record<string, unknown>
+    > = {};
+    if (platformsToSend.has('facebook')) {
+      platformSettingsOverrides.facebook = { who_can_reply_post: 'everyone' };
+    }
+
     const { results: platformResults } = await postToSocialMultiPlatform({
       platforms: Array.from(platformsToSend),
       content: basePayload.content,
@@ -674,6 +723,10 @@ export async function POST(request: NextRequest) {
       tiktokOptions,
       instagramOptions,
       facebookOptions,
+      platformSettings:
+        Object.keys(platformSettingsOverrides).length > 0
+          ? platformSettingsOverrides
+          : undefined,
       firstComments:
         Object.keys(firstComments).length > 0 ? firstComments : undefined,
     });

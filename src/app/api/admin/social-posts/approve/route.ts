@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireAdminAuth } from '@/lib/admin-auth';
 import { buildUtmUrl } from '@/lib/urls';
+import { POST as youtubeUploadPost } from '@/app/api/youtube/upload/route';
 
 const toIntArrayLiteral = (values: number[]) =>
   `{${values.map((value) => Number(value)).join(',')}}`;
@@ -377,25 +378,26 @@ export async function POST(request: NextRequest) {
               return dateValue.toISOString();
             })();
 
-            const baseUrl = process.env.VERCEL
-              ? 'https://lunary.app'
-              : 'http://localhost:3000';
-
             let uploadResult: YouTubeUploadResult;
             try {
-              const response = await fetch(`${baseUrl}/api/youtube/upload`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  videoUrl: post.video_url,
-                  title: youtubeTitle,
-                  description: youtubeDescription,
-                  type: 'short',
-                  tags: youtubeTags,
-                  script,
-                  publishDate,
-                }),
-              });
+              // Call the YouTube upload handler directly to avoid self-fetch ECONNREFUSED in dev
+              const uploadReq = new NextRequest(
+                new URL('/api/youtube/upload', request.url),
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    videoUrl: post.video_url,
+                    title: youtubeTitle,
+                    description: youtubeDescription,
+                    type: 'short',
+                    tags: youtubeTags,
+                    script,
+                    publishDate,
+                  }),
+                },
+              );
+              const response = await youtubeUploadPost(uploadReq);
               const data = await response.json().catch(() => ({}));
               if (response.ok) {
                 uploadResult = { success: true, videoId: data.videoId };

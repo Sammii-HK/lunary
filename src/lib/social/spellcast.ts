@@ -156,6 +156,24 @@ export async function postToSpellcastMultiPlatform(params: {
       }
     }
 
+    // Flatten platform-keyed settings (e.g. { facebook: { who_can_reply_post } })
+    // into a single flat object that Postiz understands.
+    // Also always set who_can_reply_post explicitly — Postiz's default is invalid.
+    const flatPostizSettings: Record<string, unknown> = {
+      who_can_reply_post: 'everyone',
+    };
+    if (params.platformSettings) {
+      for (const platformSpecific of Object.values(params.platformSettings)) {
+        if (
+          typeof platformSpecific === 'object' &&
+          platformSpecific !== null &&
+          !Array.isArray(platformSpecific)
+        ) {
+          Object.assign(flatPostizSettings, platformSpecific);
+        }
+      }
+    }
+
     // 1. Create draft
     const createRes = await spellcastFetch('/api/posts', {
       method: 'POST',
@@ -168,9 +186,7 @@ export async function postToSpellcastMultiPlatform(params: {
         ...(Object.keys(platformVariations).length > 0
           ? { platformVariations }
           : {}),
-        ...(params.platformSettings
-          ? { platformSettings: params.platformSettings }
-          : {}),
+        platformSettings: flatPostizSettings,
         ...(params.firstComment ? { first_comment: params.firstComment } : {}),
       }),
     });

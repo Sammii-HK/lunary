@@ -1413,6 +1413,10 @@ async function generateThematicWeeklyPosts(
         existingVideoByKey.set(`${dateKey}|${row.topic}`, row.video_url);
       }
 
+      // Instagram Reels cadence: max 3 cross-posts per week
+      const MAX_INSTAGRAM_REELS_PER_WEEK = 3;
+      let instagramReelsCrossPostCount = 0;
+
       for (const script of uniqueScripts) {
         try {
           const dateKey = script.scheduledDate.toISOString().split('T')[0];
@@ -1442,8 +1446,12 @@ async function generateThematicWeeklyPosts(
           const isEngagement =
             scriptSlot === 'engagementA' || scriptSlot === 'engagementB';
 
-          // Engagement videos cross-post to Instagram Reels; primary stays TikTok-only
-          const platforms = isEngagement
+          // Engagement videos cross-post to Instagram Reels (max 3/week); primary stays TikTok-only
+          const includeInstagramReels =
+            isEngagement &&
+            instagramReelsCrossPostCount < MAX_INSTAGRAM_REELS_PER_WEEK;
+          if (includeInstagramReels) instagramReelsCrossPostCount++;
+          const platforms = includeInstagramReels
             ? [...videoPlatforms, 'instagram-reels']
             : videoPlatforms;
 
