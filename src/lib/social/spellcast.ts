@@ -129,6 +129,16 @@ export async function postToSpellcast(
 /**
  * Post to multiple platforms via Spellcast in a single request.
  * Creates one post targeting the account set — Spellcast handles fan-out.
+ *
+ * TODO: Platform targeting is not implemented — the `platforms` param is ignored.
+ * The post always goes to ALL accounts in the account set, not just the specified platforms.
+ * To fix this:
+ *   1. Fetch the account set's social accounts from Spellcast:
+ *      GET /api/account-sets/{accountSetId} → returns socialAccounts[] with { id, platform }
+ *   2. Filter to only the accounts whose `platform` matches `params.platforms`
+ *   3. Pass the filtered account IDs as `selectedIntegrationIds` in the create POST body
+ * Until this is fixed, always pass the full set of desired platforms in the account set
+ * and avoid using an account set that contains platforms you don't want to post to.
  */
 export async function postToSpellcastMultiPlatform(params: {
   platforms: string[];
@@ -175,6 +185,8 @@ export async function postToSpellcastMultiPlatform(params: {
     }
 
     // 1. Create draft
+    // TODO: add selectedIntegrationIds here once platform→account ID lookup is implemented
+    // (see function-level TODO above). Without it, the post goes to all platforms in the set.
     const createRes = await spellcastFetch('/api/posts', {
       method: 'POST',
       body: JSON.stringify({
