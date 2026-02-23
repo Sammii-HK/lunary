@@ -1,5 +1,6 @@
 import { LunaryContext } from './types';
 import { constellations } from '../../../utils/constellations';
+import { getRealPlanetaryPositions } from '../../../utils/astrology/astronomical-data';
 
 const ZODIAC_SIGNS = [
   'Aries',
@@ -47,6 +48,7 @@ CRITICAL RULES:
 4. If tarot cards are provided, reference them by their exact names from the context.
 5. Connect ONLY the actual cosmic patterns provided to the user's question.
 6. Be direct and specific - avoid generic astrological language.
+7. PLANETARY POSITIONS: The context contains a CURRENT PLANETARY POSITIONS line computed in real-time from VSOP87 astronomical calculations. These are authoritative. NEVER use your training data to state where a planet is — always use the provided positions. If a position is not in the context, say so rather than guessing.
 7. CRITICAL: Do NOT include journal prompts or reflection prompts in your response. Never write phrases like "You could journal on..." or "inviting you to explore..." - these are handled separately by the system and should NEVER appear in your message content. Your response should end naturally without suggesting journaling or reflection activities.
 8. TAROT CONTEXT: The context includes recent readings (actual cards the user pulled), pattern analysis (dominant themes, frequent cards, pattern insights), and fallback cards (daily/weekly/personal). ALWAYS prioritize recentReadings over fallback cards - these are the ACTUAL cards the user pulled. The fallback daily/weekly/personal cards are only for users who haven't pulled cards yet.
 9. MESSAGE LENGTH VARIES BY CONTENT TYPE:
@@ -135,6 +137,38 @@ const describeContext = (
   parts.push(
     `TODAY: ${today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`,
   );
+
+  // Real-time planetary positions computed from astronomy-engine (VSOP87/NOVAS, ±1 arcmin)
+  // This is the authoritative source — NEVER guess or use training data for positions
+  try {
+    const PLANET_ORDER = [
+      'Sun',
+      'Moon',
+      'Mercury',
+      'Venus',
+      'Mars',
+      'Jupiter',
+      'Saturn',
+      'Uranus',
+      'Neptune',
+      'Pluto',
+    ];
+    const positions = getRealPlanetaryPositions(today);
+    const positionParts = PLANET_ORDER.filter((name) => positions[name]).map(
+      (name) => {
+        const p = positions[name];
+        const retro = p.retrograde ? ' ℞' : '';
+        return `${name} ${p.sign} ${p.degree}°${p.minutes}'${retro}`;
+      },
+    );
+    if (positionParts.length > 0) {
+      parts.push(
+        `CURRENT PLANETARY POSITIONS (real-time, VSOP87): ${positionParts.join(' | ')}`,
+      );
+    }
+  } catch {
+    // Non-critical — continue without positions
+  }
 
   // SAVED SPREAD - always include if user has one (for spread interpretation)
   if (
