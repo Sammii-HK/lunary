@@ -155,9 +155,9 @@ export function getPlatformPostingInfo(
 export const VIDEO_POSTING_HOURS = {
   primary: 12,
   engagementA: 17,
-  engagementB: 20,
+  engagementB: 21,
   /** @deprecated Use engagementB — kept for backward compatibility */
-  secondary: 20,
+  secondary: 21,
 } as const;
 
 export type VideoSlot = 'primary' | 'engagementA' | 'engagementB';

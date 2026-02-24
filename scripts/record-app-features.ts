@@ -17,7 +17,7 @@ config({ path: resolve(process.cwd(), '.env.local') });
 import { chromium, type Page } from '@playwright/test';
 import { mkdir, unlink, rename, stat } from 'fs/promises';
 import { join } from 'path';
-import { execFileSync } from 'child_process';
+import { execFileSync, spawnSync } from 'child_process';
 import {
   getFeatureRecording,
   getAllFeatureIds,
@@ -54,7 +54,7 @@ async function handleCookieConsent(page: Page): Promise<void> {
   console.log(`   Handling cookie consent...`);
 
   // Navigate to home page first to trigger cookie popup
-  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
   await page.waitForTimeout(1000);
 
   // Set the cookie_consent key that CookieConsent.tsx checks (localStorage + cookie)
@@ -76,6 +76,26 @@ async function handleCookieConsent(page: Page): Promise<void> {
       // Dismiss notification prompt (localStorage + cookie)
       localStorage.setItem('pwa_notifications_prompted', '1');
       document.cookie = `pwa_notifications_prompted=1; max-age=31536000; path=/; SameSite=Lax`;
+      // Dismiss all zodiac season banners (localStorage + cookie)
+      const signs = [
+        'Aries',
+        'Taurus',
+        'Gemini',
+        'Cancer',
+        'Leo',
+        'Virgo',
+        'Libra',
+        'Scorpio',
+        'Sagittarius',
+        'Capricorn',
+        'Aquarius',
+        'Pisces',
+      ];
+      for (const sign of signs) {
+        const key = `season-banner-dismissed-${sign}`;
+        localStorage.setItem(key, '1');
+        document.cookie = `${key}=1; max-age=31536000; path=/; SameSite=Lax`;
+      }
     });
     console.log(`   ✓ Cookie consent set`);
   } catch {
@@ -100,13 +120,31 @@ async function authenticate(page: Page, attempt = 1): Promise<void> {
   );
 
   // Navigate to auth page
-  await page.goto(BASE_URL + '/auth?login=true', {
+  await page.goto(BASE_URL + '/auth', {
     waitUntil: 'domcontentloaded',
+    timeout: 60000,
   });
-  await page.waitForTimeout(1500);
+
+  // Wait for either the login form to appear OR a redirect to /app (already authed)
+  const emailInput = page.locator('input[type="email"], input[name="email"]');
+  try {
+    await Promise.race([
+      emailInput.waitFor({ state: 'visible', timeout: 10000 }),
+      page.waitForURL((url) => url.pathname === '/app', { timeout: 10000 }),
+    ]);
+  } catch {
+    // Fallback: wait a bit more for slow hydration
+    await page.waitForTimeout(3000);
+  }
+
+  // If already redirected to /app, we're authenticated
+  const currentUrl = new URL(page.url()).pathname;
+  if (currentUrl === '/app' || currentUrl.startsWith('/app')) {
+    console.log(`   ✓ Already authenticated at ${currentUrl}`);
+    return;
+  }
 
   // Fill in email and password
-  const emailInput = page.locator('input[type="email"], input[name="email"]');
   const passwordInput = page.locator(
     'input[type="password"], input[name="password"]',
   );
@@ -118,7 +156,7 @@ async function authenticate(page: Page, attempt = 1): Promise<void> {
 
   // Click login button
   const loginButton = page.locator(
-    'button:has-text("Log in"), button:has-text("Sign in"), button[type="submit"]',
+    'button:has-text("Sign In"), button:has-text("Log in"), button[type="submit"]',
   );
   await loginButton.click();
 
@@ -128,6 +166,12 @@ async function authenticate(page: Page, attempt = 1): Promise<void> {
       timeout: 15000,
     });
   } catch {
+    // Check if we ended up on /app despite the timeout
+    const afterUrl = new URL(page.url()).pathname;
+    if (afterUrl === '/app' || afterUrl.startsWith('/app')) {
+      console.log(`   ✓ Authenticated (late redirect) at ${afterUrl}`);
+      return;
+    }
     if (attempt < 3) {
       console.log(`   ⚠ Auth redirect timed out, retrying...`);
       return authenticate(page, attempt + 1);
@@ -138,15 +182,48 @@ async function authenticate(page: Page, attempt = 1): Promise<void> {
   }
   await page.waitForTimeout(2000); // Let dashboard load completely
 
-  // Verify we're on the actual app, not the marketing page
-  const currentPath = new URL(page.url()).pathname;
-  if (currentPath === '/' || currentPath === '') {
-    throw new Error(
-      'Authentication did not redirect to /app - still on marketing page',
-    );
-  }
+  const finalPath = new URL(page.url()).pathname;
+  console.log(`   ✓ Authenticated successfully at ${finalPath}`);
+}
 
-  console.log(`   ✓ Authenticated successfully at ${currentPath}`);
+/**
+ * Scroll an element to the center of the viewport.
+ * Walks up the DOM from the element to find the nearest scrollable ancestor
+ * (works for any tag: <main>, <div>, <section>, etc.).
+ * Places the element's center at ~40% from viewport top to leave room for subtitles.
+ */
+async function scrollElementToCenter(
+  page: Page,
+  selector: string,
+): Promise<void> {
+  const locator = page.locator(selector).first();
+  await locator.waitFor({ state: 'attached', timeout: 20000 });
+  await locator.evaluate((el) => {
+    // Walk up DOM to find nearest scrollable ancestor
+    let scrollParent: Element | null = null;
+    let current = el.parentElement;
+    while (current) {
+      const style = window.getComputedStyle(current);
+      if (
+        (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+        current.scrollHeight > current.clientHeight
+      ) {
+        scrollParent = current;
+        break;
+      }
+      current = current.parentElement;
+    }
+    if (!scrollParent) return;
+
+    const rect = el.getBoundingClientRect();
+    const elementCenter = rect.top + rect.height / 2;
+    const viewportTarget = window.innerHeight * 0.33; // 33% from top
+    scrollParent.scrollBy({
+      top: elementCenter - viewportTarget,
+      behavior: 'smooth',
+    });
+  });
+  await page.waitForTimeout(1000); // let smooth scroll complete
 }
 
 /**
@@ -233,7 +310,7 @@ async function executeStep(page: Page, step: RecordingStep): Promise<void> {
       case 'click':
         if (step.selector) {
           try {
-            const timeout = step.optional ? 5000 : 30000;
+            const timeout = step.optional ? 15000 : 30000;
             const force = step.force || false;
             const urlBefore = page.url();
             await page.click(step.selector, { timeout, force });
@@ -282,15 +359,9 @@ async function executeStep(page: Page, step: RecordingStep): Promise<void> {
 
       case 'scroll':
         if (step.scrollTo) {
-          // Use Playwright's locator API — handles nested scroll containers
-          // and uses the same engine as page.click()
           try {
-            await page
-              .locator(step.scrollTo)
-              .first()
-              .scrollIntoViewIfNeeded({ timeout: 10000 });
-            await page.waitForTimeout(800); // settle after scroll
-            console.log(`    ✓ Scrolled to: ${step.scrollTo}`);
+            await scrollElementToCenter(page, step.scrollTo);
+            console.log(`    ✓ Scrolled to center: ${step.scrollTo}`);
           } catch (e) {
             console.log(
               `    ⚠ Could not scroll to: ${step.scrollTo} (${(e as Error).message})`,
@@ -298,52 +369,67 @@ async function executeStep(page: Page, step: RecordingStep): Promise<void> {
           }
         } else if (step.distance) {
           // Find the scrollable element and perform slow, human-like scroll
-          const scrolled = await page.evaluate(async (distance) => {
-            // Try to find the main scrollable container
-            const scrollableDiv = document.querySelector(
-              'div[class*="overflow-y-auto"], div[class*="overflow-auto"]',
-            );
-            const mainElement = document.querySelector('main');
+          const scrolled = await page.evaluate(
+            async ({ distance, containerSelector }) => {
+              // If a specific container selector is provided, use it
+              let scrollContainer: Element | Window = window;
 
-            let scrollContainer: Element | Window = window;
-
-            if (
-              scrollableDiv &&
-              scrollableDiv.scrollHeight > scrollableDiv.clientHeight
-            ) {
-              scrollContainer = scrollableDiv;
-            } else if (
-              mainElement &&
-              mainElement.scrollHeight > mainElement.clientHeight
-            ) {
-              scrollContainer = mainElement;
-            }
-
-            // Get starting position
-            const startScroll =
-              scrollContainer instanceof Element
-                ? scrollContainer.scrollTop
-                : window.scrollY;
-
-            // Perform slow, incremental scroll for human-like effect
-            const steps = Math.ceil(Math.abs(distance) / 80); // Scroll 80px per step
-            const stepDistance = distance / steps;
-            const stepDelay = 150; // 150ms between steps
-
-            for (let i = 0; i < steps; i++) {
-              if (scrollContainer instanceof Element) {
-                scrollContainer.scrollBy({
-                  top: stepDistance,
-                  behavior: 'smooth',
-                });
+              if (containerSelector) {
+                const target = document.querySelector(containerSelector);
+                if (target && target.scrollHeight > target.clientHeight) {
+                  scrollContainer = target;
+                }
               } else {
-                window.scrollBy({ top: stepDistance, behavior: 'smooth' });
-              }
-              await new Promise((resolve) => setTimeout(resolve, stepDelay));
-            }
+                // Try to find the main scrollable container
+                const scrollableDiv = document.querySelector(
+                  'div[class*="overflow-y-auto"], div[class*="overflow-auto"]',
+                );
+                const mainElement = document.querySelector('main');
 
-            return `scrolled element (from ${startScroll}px)`;
-          }, step.distance);
+                if (
+                  scrollableDiv &&
+                  scrollableDiv.scrollHeight > scrollableDiv.clientHeight
+                ) {
+                  scrollContainer = scrollableDiv;
+                } else if (
+                  mainElement &&
+                  mainElement.scrollHeight > mainElement.clientHeight
+                ) {
+                  scrollContainer = mainElement;
+                }
+              }
+
+              // Get starting position
+              const startScroll =
+                scrollContainer instanceof Element
+                  ? scrollContainer.scrollTop
+                  : window.scrollY;
+
+              // Perform slow, incremental scroll for human-like effect
+              const steps = Math.ceil(Math.abs(distance) / 80); // Scroll 80px per step
+              const stepDistance = distance / steps;
+              const stepDelay = 150; // 150ms between steps
+
+              for (let i = 0; i < steps; i++) {
+                if (scrollContainer instanceof Element) {
+                  scrollContainer.scrollBy({
+                    top: stepDistance,
+                    behavior: 'smooth',
+                  });
+                } else {
+                  window.scrollBy({ top: stepDistance, behavior: 'smooth' });
+                }
+                await new Promise((resolve) => setTimeout(resolve, stepDelay));
+              }
+
+              const containerName = containerSelector || 'page';
+              return `scrolled ${containerName} (from ${startScroll}px)`;
+            },
+            {
+              distance: step.distance,
+              containerSelector: step.scrollContainer,
+            },
+          );
 
           await page.waitForTimeout(800); // Final pause after scroll completes
           console.log(`    ✓ Scrolled ${step.distance}px (${scrolled})`);
@@ -373,45 +459,54 @@ async function executeStep(page: Page, step: RecordingStep): Promise<void> {
 }
 
 /**
- * Trim black frames from the start and end of a video using ffmpeg.
- * Detects the first non-black frame and trims everything before it.
+ * Trim the pre-roll from a video using ffmpeg.
+ * Uses the measured setup duration (time from recording start to page reveal)
+ * and falls back to blackdetect via spawnSync for proper stderr capture.
  */
-async function trimBlackFrames(videoPath: string): Promise<void> {
+async function trimPreroll(
+  videoPath: string,
+  setupDurationSeconds?: number,
+): Promise<void> {
   try {
-    // Detect black frames at the start
-    const detectOutput = execFileSync(
-      'ffmpeg',
-      [
-        '-i',
-        videoPath,
-        '-vf',
-        'blackdetect=d=0.1:pix_th=0.05',
-        '-an',
-        '-f',
-        'null',
-        '-',
-      ],
-      { encoding: 'utf-8', timeout: 30000, stdio: ['pipe', 'pipe', 'pipe'] },
-    );
+    let trimStart = setupDurationSeconds ?? 0;
 
-    // Parse blackdetect output: [blackdetect @ ...] black_start:0 black_end:3.5 black_duration:3.5
-    const blackMatches = detectOutput.matchAll(
-      /black_start:([\d.]+)\s+black_end:([\d.]+)/g,
-    );
-    let trimStart = 0;
-    for (const match of blackMatches) {
-      const start = parseFloat(match[1]);
-      const end = parseFloat(match[2]);
-      // Only trim black that starts at or near the beginning
-      if (start < 0.5) {
-        trimStart = end;
+    // If no measured setup duration, detect black frames
+    if (trimStart < 0.5) {
+      // Use spawnSync to capture stderr (where blackdetect writes output)
+      const result = spawnSync(
+        'ffmpeg',
+        [
+          '-i',
+          videoPath,
+          '-vf',
+          'blackdetect=d=0.1:pix_th=0.10',
+          '-an',
+          '-f',
+          'null',
+          '-',
+        ],
+        { encoding: 'utf-8', timeout: 30000 },
+      );
+
+      const detectOutput = (result.stderr || '') + (result.stdout || '');
+      const blackMatches = detectOutput.matchAll(
+        /black_start:([\d.]+)\s+black_end:([\d.]+)/g,
+      );
+      for (const match of blackMatches) {
+        const start = parseFloat(match[1]);
+        const end = parseFloat(match[2]);
+        if (start < 0.5) {
+          trimStart = Math.max(trimStart, end);
+        }
       }
     }
 
     if (trimStart < 0.5) {
-      console.log(`   ✂ No significant black pre-roll detected`);
+      console.log(`   ✂ No significant pre-roll to trim`);
       return;
     }
+
+    console.log(`   ✂ Trimming ${trimStart.toFixed(1)}s pre-roll...`);
 
     // Trim the video — re-encode to avoid keyframe issues
     const trimmedPath = videoPath.replace('.webm', '.trimmed.webm');
@@ -430,10 +525,12 @@ async function trimBlackFrames(videoPath: string): Promise<void> {
           '2M',
           trimmedPath,
         ],
-        { timeout: 60000, stdio: 'pipe' },
+        { timeout: 180000, stdio: 'pipe' },
       );
-    } catch (encodeError) {
-      console.log(`   ⚠ ffmpeg trim failed, keeping original`);
+    } catch (trimErr: any) {
+      const errMsg =
+        trimErr?.stderr?.toString() || trimErr?.message || 'unknown';
+      console.log(`   ⚠ ffmpeg trim failed: ${errMsg.substring(0, 200)}`);
       await unlink(trimmedPath).catch(() => {});
       return;
     }
@@ -454,9 +551,51 @@ async function trimBlackFrames(videoPath: string): Promise<void> {
     // Replace original with trimmed version
     await unlink(videoPath);
     await rename(trimmedPath, videoPath);
-    console.log(`   ✂ Trimmed ${trimStart.toFixed(1)}s black pre-roll`);
-  } catch (error) {
+    console.log(`   ✂ Trimmed ${trimStart.toFixed(1)}s pre-roll`);
+  } catch {
     console.log(`   ⚠ Could not trim video (ffmpeg not available or failed)`);
+  }
+}
+
+/**
+ * Upscale video to TikTok resolution (1080x1920) using ffmpeg.
+ * Uses lanczos scaling for sharp upscale from 360x640.
+ */
+async function upscaleToTikTok(videoPath: string): Promise<void> {
+  try {
+    const upscaledPath = videoPath.replace('.webm', '.upscaled.webm');
+    execFileSync(
+      'ffmpeg',
+      [
+        '-y',
+        '-i',
+        videoPath,
+        '-vf',
+        'scale=1080:1920:flags=lanczos',
+        '-c:v',
+        'libvpx-vp9',
+        '-b:v',
+        '4M',
+        upscaledPath,
+      ],
+      { timeout: 120000, stdio: 'pipe' },
+    );
+
+    // Verify upscaled file
+    const upscaledStat = await stat(upscaledPath);
+    if (upscaledStat.size < 1000) {
+      console.log(`   ⚠ Upscaled file too small, keeping original`);
+      await unlink(upscaledPath).catch(() => {});
+      return;
+    }
+
+    await unlink(videoPath);
+    await rename(upscaledPath, videoPath);
+    console.log(`   ⬆ Upscaled to 1080x1920`);
+  } catch {
+    console.log(
+      `   ⚠ Could not upscale video (ffmpeg not available or failed)`,
+    );
   }
 }
 
@@ -466,7 +605,7 @@ async function trimBlackFrames(videoPath: string): Promise<void> {
  */
 async function setupAuth(browser: any, needsAuth: boolean): Promise<any> {
   const setupContext = await browser.newContext({
-    viewport: { width: 390, height: 844 },
+    viewport: { width: 360, height: 640 },
     userAgent:
       'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
     deviceScaleFactor: 3,
@@ -494,7 +633,7 @@ async function recordClean(
   storage: any,
   featureId: string,
 ): Promise<string> {
-  const viewport = config.viewport || { width: 390, height: 844 };
+  const viewport = config.viewport || { width: 360, height: 640 };
   const targetUrl = BASE_URL + config.startUrl;
 
   // 1. Warm-up: open the target page in a non-recording context so it's cached
@@ -529,6 +668,9 @@ async function recordClean(
   await warmupContext.close();
 
   // 2. Record: fresh context with video — page loads fast from cache/state
+  // Record at viewport size (390x844), then upscale to 1080x1920 in post.
+  // deviceScaleFactor: 3 means internal rendering is crisp (1170x2532),
+  // but Playwright video capture operates at CSS pixel dimensions.
   const recordContext = await browser.newContext({
     viewport,
     recordVideo: { dir: OUTPUT_DIR, size: viewport },
@@ -539,6 +681,8 @@ async function recordClean(
   });
 
   const page = await recordContext.newPage();
+  // Track time from recording start to page reveal for precise trimming
+  const recordingStartTime = Date.now();
 
   try {
     // Cloak CSS injected into HTML via route interception.
@@ -554,10 +698,15 @@ async function recordClean(
         await route.continue();
         return;
       }
-      const response = await route.fetch();
-      let body = await response.text();
-      body = body.replace('<head>', '<head>' + CLOAK_CSS);
-      await route.fulfill({ response, body });
+      try {
+        const response = await route.fetch({ timeout: 60000 });
+        let body = await response.text();
+        body = body.replace('<head>', '<head>' + CLOAK_CSS);
+        await route.fulfill({ response, body });
+      } catch {
+        // If fetch times out, continue without cloaking
+        await route.continue();
+      }
     };
     await page.route('**/*', cloakHandler);
 
@@ -568,6 +717,54 @@ async function recordClean(
     await page.addInitScript(() => {
       localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
       localStorage.setItem('pwa_notifications_prompted', '1');
+      // Dismiss all zodiac season banners permanently
+      const signs = [
+        'Aries',
+        'Taurus',
+        'Gemini',
+        'Cancer',
+        'Leo',
+        'Virgo',
+        'Libra',
+        'Scorpio',
+        'Sagittarius',
+        'Capricorn',
+        'Aquarius',
+        'Pisces',
+      ];
+      for (const sign of signs) {
+        localStorage.setItem(`season-banner-dismissed-${sign}`, '1');
+      }
+    });
+
+    // Touch cursor ripple — visual tap feedback for TikTok demo
+    await page.addInitScript(() => {
+      const style = document.createElement('style');
+      style.textContent = `@keyframes tap-ripple {
+        0% { transform: scale(0.5); opacity: 1; }
+        100% { transform: scale(1.5); opacity: 0; }
+      }`;
+      document.addEventListener('DOMContentLoaded', () => {
+        document.head.appendChild(style);
+      });
+      document.addEventListener('pointerdown', (e) => {
+        const ripple = document.createElement('div');
+        Object.assign(ripple.style, {
+          position: 'fixed',
+          left: `${e.clientX - 20}px`,
+          top: `${e.clientY - 20}px`,
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.4)',
+          border: '2px solid rgba(255,255,255,0.6)',
+          pointerEvents: 'none',
+          zIndex: '99999',
+          animation: 'tap-ripple 0.4s ease-out forwards',
+        });
+        document.body.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 500);
+      });
     });
 
     // Navigate to target — auth state is in storage, warmup primed the session
@@ -587,22 +784,37 @@ async function recordClean(
     } catch {
       // Fallback: page structure may differ
     }
-    // Wait for rendering to complete behind the cloak (images, fonts, animations)
-    await page.waitForTimeout(1500);
+    // Wait for rendering to complete behind the cloak (images, fonts, animations).
+    // Data-dependent components (SkyNowCard, etc.) can take 5-15s on cold dev server.
+    await page.waitForTimeout(3000);
+
+    // Wait for key dashboard components to mount (data-dependent widgets)
+    await page
+      .waitForSelector('[data-testid="sky-now-widget"]', {
+        state: 'attached',
+        timeout: 15000,
+      })
+      .catch(() => {});
 
     // Reveal: fade in the fully-loaded page
     await page.evaluate(() => {
       document.body.classList.add('__loaded');
     });
-    await page.waitForTimeout(500); // Let the 0.3s fade-in complete
+    await page.waitForTimeout(400); // Let the 0.3s fade-in complete
 
     // Stop injecting cloak CSS on subsequent navigations — only the
     // initial page load needed it. Mid-video page transitions should
     // show the app's natural loading state, not black.
     await page.unroute('**/*', cloakHandler);
 
+    // Measure how long the setup took — this is the pre-roll to trim
+    const setupDurationMs = Date.now() - recordingStartTime;
+    const setupDurationSeconds = setupDurationMs / 1000;
+
     const landedUrl = new URL(page.url()).pathname;
-    console.log(`   ✓ Page ready at: ${landedUrl}`);
+    console.log(
+      `   ✓ Page ready at: ${landedUrl} (setup: ${setupDurationSeconds.toFixed(1)}s)`,
+    );
 
     // Execute all recording steps
     for (const step of config.steps) {
@@ -622,8 +834,10 @@ async function recordClean(
     if (rawVideoPath && rawVideoPath !== finalPath) {
       await unlink(rawVideoPath).catch(() => {});
     }
-    // Detect and trim black pre-roll, then save as the final named file
-    await trimBlackFrames(finalPath);
+    // Trim the setup pre-roll (navigation, loading, cloak) using measured time
+    await trimPreroll(finalPath, setupDurationSeconds);
+    // Upscale to TikTok resolution (1080x1920)
+    await upscaleToTikTok(finalPath);
     console.log(`   📹 ${featureId}.webm`);
 
     return finalPath;

@@ -91,8 +91,8 @@ export default function ReferralTermsPage() {
                 The referred person has not previously had a Lunary account
               </li>
               <li>
-                The referred person completes any required qualifying actions
-                (such as subscribing to Lunary+)
+                The referred person completes a qualifying action (such as a
+                tarot reading, journal entry, or daily ritual)
               </li>
               <li>
                 The referral is not flagged as fraudulent or in violation of

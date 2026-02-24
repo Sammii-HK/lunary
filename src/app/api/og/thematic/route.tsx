@@ -525,6 +525,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       'Vercel-CDN-Cache-Control',
       'public, s-maxage=2592000, immutable',
     );
+    headers.set('Access-Control-Allow-Origin', '*');
 
     return new Response(ogResponse.body, {
       status: ogResponse.status,

@@ -1,19 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { ACTIVATION_EVENTS } from '@/lib/analytics/activation-events';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
-
-const ACTIVATION_EVENTS = [
-  'grimoire_save',
-  'tarot_pull',
-  'moon_phase_view',
-  'birth_chart_viewed',
-  'tarot_viewed',
-  'horoscope_viewed',
-  'personalized_tarot_viewed',
-  'personalized_horoscope_viewed',
-];
 
 /**
  * Compute daily metrics and store in daily_metrics table

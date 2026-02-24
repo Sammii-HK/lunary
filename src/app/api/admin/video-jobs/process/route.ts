@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { POST as processCronPost } from '@/app/api/cron/process-video-jobs/route';
 
 export const runtime = 'nodejs';
 
@@ -11,37 +12,29 @@ export async function POST(request: NextRequest) {
     const url = new URL(request.url);
     const limit = url.searchParams.get('limit') || '1';
     const force = url.searchParams.get('force') || '';
-    const baseUrl = process.env.VERCEL
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
     const cronSecret = process.env.CRON_SECRET;
 
-    const response = await fetch(
-      `${baseUrl}/api/cron/process-video-jobs?limit=${encodeURIComponent(limit)}${force ? `&force=${encodeURIComponent(force)}` : ''}`,
-      {
-        method: 'POST',
-        headers: cronSecret ? { Authorization: `Bearer ${cronSecret}` } : {},
-      },
+    // Build a synthetic request for the cron handler so we avoid a self-fetch
+    // (server-side fetch to localhost:3000 fails with ECONNREFUSED in dev).
+    const cronUrl = new URL(
+      `/api/cron/process-video-jobs?limit=${encodeURIComponent(limit)}${force ? `&force=${encodeURIComponent(force)}` : ''}`,
+      url.origin,
     );
+    const cronRequest = new NextRequest(cronUrl.toString(), {
+      method: 'POST',
+      headers: cronSecret ? { Authorization: `Bearer ${cronSecret}` } : {},
+    });
+
+    const response = await processCronPost(cronRequest);
 
     let data: any = null;
     try {
       data = await response.json();
-    } catch (parseError) {
-      const text = await response.text();
-      console.error(
-        'Video job processor responded with non-JSON (likely an error page):',
-        {
-          status: response.status,
-          statusText: response.statusText,
-          contentType: response.headers.get('content-type'),
-          bodyPreview: text.substring(0, 500),
-        },
-      );
+    } catch {
       return NextResponse.json(
         {
           success: false,
-          error: `Video processor returned ${response.status} ${response.statusText}. Check server logs for details.`,
+          error: `Video processor returned ${response.status}`,
         },
         { status: 502 },
       );
@@ -60,41 +53,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (data) {
-      return NextResponse.json(data, { status: response.status });
-    }
-
-    return NextResponse.json(
-      {
-        success: true,
-        warning:
-          'Video processor accepted the request; response will arrive asynchronously.',
-      },
-      { status: 202 },
-    );
+    return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error('Failed to trigger video job processor:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
-    const cause = (error as any)?.cause;
-    const isTimeout =
-      cause?.name === 'HeadersTimeoutError' ||
-      message?.includes('Headers Timeout');
-    if (isTimeout) {
-      return NextResponse.json(
-        {
-          success: true,
-          warning:
-            'Video job processor is still working. Request timed out waiting for a response.',
-        },
-        { status: 202 },
-      );
-    }
-
     return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
+      { success: false, error: message },
       { status: 500 },
     );
   }

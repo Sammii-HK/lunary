@@ -116,6 +116,94 @@ export function scriptToAudioSegments(
 }
 
 /**
+ * Scene-aligned audio segments using per-scene voiceoverLine data.
+ *
+ * The TTS audio is generated from `script.voiceover` (the full continuous text).
+ * The hook text is NOT spoken — it's a text overlay only.
+ * So the audio starts at time 0 with the first voiceoverLine content.
+ *
+ * We split the voiceover into per-scene chunks using voiceoverLine,
+ * then distribute audio time proportionally by estimated speech duration.
+ * Ellipsis pauses (`...`) count as extra time to account for TTS breathing pauses.
+ */
+export function scriptToSceneAlignedSegments(
+  script: {
+    hook: { text: string; durationSeconds: number };
+    scenes: Array<{ voiceoverLine?: string }>;
+    voiceover: string;
+  },
+  audioDuration: number,
+): AudioSegment[] {
+  // Collect voiceover lines from scenes
+  const lines: string[] = [];
+  for (const scene of script.scenes) {
+    if (scene.voiceoverLine) {
+      lines.push(scene.voiceoverLine);
+    }
+  }
+
+  // If no voiceover lines on scenes, fall back to the old method
+  if (lines.length === 0) {
+    return scriptToAudioSegments(script.voiceover, audioDuration);
+  }
+
+  // Estimate relative duration per line using word count + pause count.
+  // TTS pauses ~0.3s per ellipsis, so lines with more `...` take longer.
+  const PAUSE_WEIGHT = 0.3; // seconds per ellipsis pause
+  const WPS = 3.0; // words per second (shimmer at 1.05x)
+
+  function estimateLineDuration(line: string): number {
+    const words = line.split(/\s+/).filter(Boolean).length;
+    const pauses = (line.match(/\.\.\./g) || []).length;
+    return words / WPS + pauses * PAUSE_WEIGHT;
+  }
+
+  // The full voiceover may have extra words not in any scene voiceoverLine
+  // (e.g. "Okay so..." intro, "Everything here... is yours." closing).
+  // We need to account for these so proportions are correct against the full audio.
+  const sceneLineText = lines.join(' ');
+  const fullVoText = script.voiceover;
+
+  // Estimate total speech time for the full voiceover (what TTS actually speaks)
+  const totalEstimated = estimateLineDuration(fullVoText);
+  if (totalEstimated === 0) return [];
+
+  // Estimate time for scene lines only
+  const lineDurations = lines.map(estimateLineDuration);
+  const scenesEstimated = lineDurations.reduce((a, b) => a + b, 0);
+
+  // The "extra" words outside scene lines consume some audio time.
+  // Calculate where scene content starts in the audio.
+  const extraEstimated = totalEstimated - scenesEstimated;
+  // Distribute extra time: some before scenes, some after (for closing words)
+  // Find where scenes start by checking if voiceover starts with scene content
+  const firstSceneLine = lines[0];
+  const voStartsWithScene = fullVoText
+    .trimStart()
+    .startsWith(firstSceneLine.split('...')[0].trim());
+  const preSceneTime = voStartsWithScene ? 0 : extraEstimated * 0.6;
+
+  // Scale scene durations to fit within actual audio time
+  const sceneAudioTime =
+    audioDuration - (extraEstimated / totalEstimated) * audioDuration;
+  let currentTime = (preSceneTime / totalEstimated) * audioDuration;
+  const segments: AudioSegment[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const proportion = lineDurations[i] / scenesEstimated;
+    const lineDuration = proportion * sceneAudioTime;
+    segments.push({
+      text: lines[i],
+      startTime: currentTime,
+      endTime: Math.min(currentTime + lineDuration, audioDuration),
+    });
+    currentTime += lineDuration;
+  }
+
+  return segments;
+}
+
+/**
  * Props for Remotion video rendering
  */
 import type { HookIntroVariant } from '@/lib/social/video-scripts/types';
@@ -153,8 +241,10 @@ export interface RemotionVideoProps {
   segments?: AudioSegment[];
   /** Audio file URL */
   audioUrl?: string;
-  /** Background music URL (for long-form) */
+  /** Background music URL */
   backgroundMusicUrl?: string;
+  /** Background music volume (0-1) */
+  backgroundMusicVolume?: number;
   /** Background images with timestamps */
   images?: Array<{
     url: string;
@@ -194,6 +284,8 @@ export interface RemotionVideoProps {
   outroStartTime?: number;
   /** AppDemoVideo-specific: outro end time */
   outroEndTime?: number;
+  /** AppDemoVideo-specific: seconds to delay audio start (recording dead time) */
+  audioStartOffset?: number;
   /** CRF quality setting override */
   crf?: number;
   /** Hook intro animation variant (#7) */
@@ -275,6 +367,9 @@ export async function renderRemotionVideo(
       categoryVisuals: props.categoryVisuals,
       highlightTerms: props.highlightTerms || [],
       showProgress: true,
+      audioStartOffset: props.audioStartOffset,
+      backgroundMusicUrl: props.backgroundMusicUrl,
+      backgroundMusicVolume: props.backgroundMusicVolume,
     };
   } else if (props.format === 'ShortFormVideo') {
     inputProps = {

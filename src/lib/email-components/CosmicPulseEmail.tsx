@@ -66,7 +66,9 @@ export function CosmicPulseEmail({
         </ContentSection>
 
         <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
-          <CTAButton href={deepLinkUrl}>Ask Lunary AI for Guidance →</CTAButton>
+          <CTAButton href={deepLinkUrl}>
+            Ask Your Astral Guide for Guidance →
+          </CTAButton>
         </Section>
       </Section>
 
@@ -116,7 +118,7 @@ ${content.mainTransit}
 💭 Reflection Prompt
 ${content.reflectionPrompt}
 
-Ask Lunary AI for guidance: ${deepLinkUrl}
+Ask Your Astral Guide for guidance: ${deepLinkUrl}
 
 ---
 Unsubscribe: ${baseUrl}/unsubscribe?email=${userEmail ? encodeURIComponent(userEmail) : ''}

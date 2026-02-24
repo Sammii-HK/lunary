@@ -121,7 +121,7 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
 
       // Active word or keyword gets highlight color
       const color = isActive || isKeyword ? highlightColor : COLORS.primaryText;
-      const fontWeight = isActive ? 700 : isKeyword ? 600 : 500;
+      const fontWeight = isActive ? 800 : isKeyword ? 700 : 600;
 
       return (
         <span
@@ -175,8 +175,8 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
       style={{
         position: 'absolute',
         bottom: `${bottomPosition}%`,
-        left: '5%',
-        right: '5%',
+        left: '8%',
+        right: '14%',
         textAlign: 'center',
         opacity,
         transform: `translateY(${slideUp}px)`,
@@ -185,9 +185,9 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
     >
       <p
         style={{
-          fontFamily: 'Roboto Mono, monospace',
+          fontFamily: 'Roboto, sans-serif',
           fontSize,
-          fontWeight: 500,
+          fontWeight: 600,
           color: COLORS.primaryText,
           lineHeight: 1.4,
           margin: 0,

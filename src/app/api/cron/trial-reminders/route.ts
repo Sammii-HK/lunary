@@ -41,14 +41,8 @@ export async function GET(request: NextRequest) {
       AND s.trial_ends_at::date = ${threeDaysFromNow.toISOString().split('T')[0]}
       AND (s.trial_reminder_3d_sent = false OR s.trial_reminder_3d_sent IS NULL)
       AND s.user_email IS NOT NULL
-      AND NOT (
-        s.has_discount = true
-        AND (
-          COALESCE(s.discount_percent, 0) >= 100
-          OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
-        )
-      )
-      AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
+      AND (s.has_discount IS NULL OR s.has_discount = false)
+      AND (s.promo_code IS NULL OR s.promo_code = '')
     `;
 
     // Get trials ending in 1 day (final reminder)
@@ -64,14 +58,8 @@ export async function GET(request: NextRequest) {
       AND s.trial_ends_at::date = ${oneDayFromNow.toISOString().split('T')[0]}
       AND (s.trial_reminder_1d_sent = false OR s.trial_reminder_1d_sent IS NULL)
       AND s.user_email IS NOT NULL
-      AND NOT (
-        s.has_discount = true
-        AND (
-          COALESCE(s.discount_percent, 0) >= 100
-          OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
-        )
-      )
-      AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
+      AND (s.has_discount IS NULL OR s.has_discount = false)
+      AND (s.promo_code IS NULL OR s.promo_code = '')
     `;
 
     let sent3Day = 0;
@@ -195,14 +183,8 @@ export async function GET(request: NextRequest) {
       AND s.trial_ends_at < NOW()
       AND (s.trial_expired_email_sent = false OR s.trial_expired_email_sent IS NULL)
       AND s.user_email IS NOT NULL
-      AND NOT (
-        s.has_discount = true
-        AND (
-          COALESCE(s.discount_percent, 0) >= 100
-          OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
-        )
-      )
-      AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
+      AND (s.has_discount IS NULL OR s.has_discount = false)
+      AND (s.promo_code IS NULL OR s.promo_code = '')
       LIMIT 100
     `;
 

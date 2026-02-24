@@ -5,6 +5,65 @@ import { jsonResult, errorResult } from '../types.js';
 
 export function registerSocialTools(server: McpServer) {
   server.tool(
+    'generate_social_posts',
+    'AI-generate social media posts for specified platforms',
+    {
+      topic: z.string().optional().describe('Topic or theme for the posts'),
+      platforms: z
+        .array(z.string())
+        .optional()
+        .describe(
+          'Target platforms (e.g. facebook, instagram, threads, tiktok)',
+        ),
+      count: z
+        .number()
+        .optional()
+        .describe('Number of posts to generate (default 3)'),
+    },
+    async ({ topic, platforms, count }) => {
+      try {
+        const data = await lunary('/social-posts/generate', {
+          method: 'POST',
+          body: {
+            ...(topic && { topic }),
+            ...(platforms && { platforms }),
+            ...(count && { count }),
+          },
+        });
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
+
+  server.tool(
+    'send_social_post',
+    'Send/publish a social post to connected platforms',
+    {
+      post_id: z.string().describe('ID of the post to send'),
+      platforms: z
+        .array(z.string())
+        .optional()
+        .describe('Override target platforms (uses post defaults if omitted)'),
+    },
+    async ({ post_id, platforms }) => {
+      try {
+        const data = await lunary('/social-posts/send', {
+          method: 'POST',
+          body: {
+            postId: post_id,
+            ...(platforms && { platforms }),
+          },
+        });
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
+
+  server.tool(
     'get_pending_posts',
     "Posts awaiting approval in Lunary's internal social pipeline",
     {},

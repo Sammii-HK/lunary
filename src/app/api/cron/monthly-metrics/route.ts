@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { formatTimestamp } from '@/lib/analytics/date-range';
 import { saveMetricSnapshot } from '@/lib/analytics/metric-snapshots';
+import {
+  ACTIVATION_EVENTS,
+  ACTIVATION_WINDOW_DAYS,
+} from '@/lib/analytics/activation-events';
 
 /**
  * Monthly metrics snapshot
@@ -102,17 +106,24 @@ export async function GET(request: NextRequest) {
           endTs,
         ],
       ),
-      // Activation: users who signed up AND completed an activation event within 24h
-      sql`
-        SELECT COUNT(DISTINCT u.id) as count
-        FROM "user" u
-        INNER JOIN conversion_events ce ON ce.user_id = u.id
-        WHERE u."createdAt" >= ${startTs} AND u."createdAt" <= ${endTs}
-          AND (u.email IS NULL OR (u.email NOT LIKE ${TEST_EMAIL_PATTERN} AND u.email != ${TEST_EMAIL_EXACT}))
-          AND ce.event_type IN ('tarot_viewed', 'personalized_tarot_viewed', 'birth_chart_viewed', 'horoscope_viewed', 'personalized_horoscope_viewed', 'cosmic_pulse_opened')
-          AND ce.created_at >= u."createdAt"
-          AND ce.created_at <= u."createdAt" + INTERVAL '24 hours'
-      `,
+      // Activation: users who signed up AND completed an activation event within 7 days
+      sql.query(
+        `SELECT COUNT(DISTINCT u.id) as count
+         FROM "user" u
+         INNER JOIN conversion_events ce ON ce.user_id = u.id
+         WHERE u."createdAt" >= $1 AND u."createdAt" <= $2
+           AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
+           AND ce.event_type = ANY($5::text[])
+           AND ce.created_at >= u."createdAt"
+           AND ce.created_at <= u."createdAt" + INTERVAL '${ACTIVATION_WINDOW_DAYS} days'`,
+        [
+          startTs,
+          endTs,
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+          [...ACTIVATION_EVENTS],
+        ],
+      ),
       // Trial to paid conversion (trials that converted within the month)
       sql`
         SELECT

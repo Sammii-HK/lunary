@@ -46,6 +46,18 @@ export function MarketingFooter() {
       ),
     },
     {
+      platform: 'tiktok' as const,
+      url: SOCIAL_HANDLES.tiktok
+        ? `https://www.tiktok.com/${SOCIAL_HANDLES.tiktok}`
+        : 'https://www.tiktok.com/@lunary.app',
+      label: SOCIAL_PLATFORM_LABELS.tiktok,
+      icon: (
+        <svg className='w-5 h-5' fill='currentColor' viewBox='0 0 448 512'>
+          <path d='M448 209.9a210.1 210.1 0 0 1-122.8-39.3v178.8A162.6 162.6 0 1 1 185 188.3v89.9a74.6 74.6 0 1 0 52.2 71.2V0h88a121 121 0 0 0 1.9 22.2A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z' />
+        </svg>
+      ),
+    },
+    {
       platform: 'bluesky' as const,
       url: SOCIAL_HANDLES.bluesky
         ? `https://bsky.app/profile/${SOCIAL_HANDLES.bluesky.replace('@', '')}`
@@ -54,6 +66,18 @@ export function MarketingFooter() {
       icon: (
         <svg className='w-5 h-5' fill='currentColor' viewBox='0 0 640 640'>
           <path d='M439.8 358.7C436.5 358.3 433.1 357.9 429.8 357.4C433.2 357.8 436.5 358.3 439.8 358.7zM320 291.1C293.9 240.4 222.9 145.9 156.9 99.3C93.6 54.6 69.5 62.3 53.6 69.5C35.3 77.8 32 105.9 32 122.4C32 138.9 41.1 258 47 277.9C66.5 343.6 136.1 365.8 200.2 358.6C203.5 358.1 206.8 357.7 210.2 357.2C206.9 357.7 203.6 358.2 200.2 358.6C106.3 372.6 22.9 406.8 132.3 528.5C252.6 653.1 297.1 501.8 320 425.1C342.9 501.8 369.2 647.6 505.6 528.5C608 425.1 533.7 372.5 439.8 358.6C436.5 358.2 433.1 357.8 429.8 357.3C433.2 357.7 436.5 358.2 439.8 358.6C503.9 365.7 573.4 343.5 593 277.9C598.9 258 608 139 608 122.4C608 105.8 604.7 77.7 586.4 69.5C570.6 62.4 546.4 54.6 483.2 99.3C417.1 145.9 346.1 240.4 320 291.1z' />
+        </svg>
+      ),
+    },
+    {
+      platform: 'youtube' as const,
+      url: SOCIAL_HANDLES.youtube
+        ? `https://www.youtube.com/${SOCIAL_HANDLES.youtube}`
+        : 'https://www.youtube.com/@LunaryApp',
+      label: SOCIAL_PLATFORM_LABELS.youtube,
+      icon: (
+        <svg className='w-5 h-5' fill='currentColor' viewBox='0 0 576 512'>
+          <path d='M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6C14.9 167 14.9 256 14.9 256s0 89 11.4 131.9c6.3 23.7 24.8 42.3 48.3 48.6C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.9 48.3-48.6C561.1 345 561.1 256 561.1 256s0-89-11.4-131.9zM232 337.7V174.3L374.9 256 232 337.7z' />
         </svg>
       ),
     },

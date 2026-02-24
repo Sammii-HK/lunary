@@ -39,6 +39,7 @@ const TRUSTED_FETCH_DOMAINS = new Set([
   'api.github.com',
   'api.openai.com',
   'api.deepinfra.com',
+  'www.reddit.com',
 ]);
 
 /**

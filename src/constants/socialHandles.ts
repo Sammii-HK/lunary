@@ -1,6 +1,7 @@
 export type SocialPlatform =
   | 'instagram'
   | 'tiktok'
+  | 'youtube'
   | 'twitter'
   | 'threads'
   | 'pinterest'
@@ -27,6 +28,7 @@ const PLATFORM_ORDER: SocialPlatform[] = [
   'bluesky',
   'pinterest',
   'tiktok',
+  'youtube',
 ];
 
 export const SOCIAL_HANDLES: Record<SocialPlatform, string | undefined> = {
@@ -35,7 +37,8 @@ export const SOCIAL_HANDLES: Record<SocialPlatform, string | undefined> = {
   threads: getEnvHandle('NEXT_PUBLIC_THREADS_HANDLE', '@lunary.app'),
   bluesky: getEnvHandle('NEXT_PUBLIC_BLUESKY_HANDLE', '@lunaryapp.bsky.social'),
   pinterest: getEnvHandle('NEXT_PUBLIC_PINTEREST_HANDLE', '@lunaryapp'),
-  tiktok: getEnvHandle('NEXT_PUBLIC_TIKTOK_HANDLE'),
+  tiktok: getEnvHandle('NEXT_PUBLIC_TIKTOK_HANDLE', '@lunary.app'),
+  youtube: getEnvHandle('NEXT_PUBLIC_YOUTUBE_HANDLE', '@LunaryApp'),
 };
 
 export const SOCIAL_PLATFORM_LABELS: Record<SocialPlatform, string> = {
@@ -45,6 +48,7 @@ export const SOCIAL_PLATFORM_LABELS: Record<SocialPlatform, string> = {
   threads: 'Threads',
   pinterest: 'Pinterest',
   bluesky: 'Bluesky',
+  youtube: 'YouTube',
 };
 
 type SocialTag = {

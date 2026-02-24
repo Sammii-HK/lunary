@@ -150,7 +150,7 @@ export function DeletionScheduledEmail({
               • Saved tarot readings and journal entries
             </Text>
             <Text style={{ color: '#d1c4ff', margin: '8px 0' }}>
-              • AI conversation history
+              • Astral Guide conversation history
             </Text>
             <Text style={{ color: '#d1c4ff', margin: '8px 0' }}>
               • Subscription and purchase history
@@ -772,7 +772,7 @@ export function DeletionCompleteEmail({
               • Tarot readings and journal entries
             </Text>
             <Text style={{ color: '#d1c4ff', margin: '4px 0' }}>
-              • AI conversations and memory
+              • Astral Guide conversations and memory
             </Text>
             <Text style={{ color: '#d1c4ff', margin: '4px 0' }}>
               • Collections, rituals, and progress
@@ -867,7 +867,7 @@ Your Lunary account for ${userEmail} has been permanently deleted.
 What was deleted:
 • Profile and birth chart data
 • Tarot readings and journal entries
-• AI conversations and memory
+• Astral Guide conversations and memory
 • Collections, rituals, and progress
 • Subscriptions and payment records
 
@@ -939,7 +939,7 @@ Your account will be permanently deleted on: ${scheduledDate}
 This gives you a 30-day grace period to change your mind. After this date, all your data will be permanently erased including:
 - Your profile and birth chart data
 - Saved tarot readings and journal entries
-- AI conversation history
+- Astral Guide conversation history
 - Subscription and purchase history
 
 To cancel this request, visit: ${cancelUrl}

@@ -44,6 +44,7 @@ import {
   Key,
   Quote,
   User,
+  MessageCircle,
 } from 'lucide-react';
 
 interface AdminTool {
@@ -652,6 +653,15 @@ export default function AdminDashboard() {
   // Section 2: Content
   const contentTools: AdminTool[] = [
     {
+      title: 'Creator Brief',
+      description:
+        'Morning dashboard with transits, script options, and hot topics',
+      href: '/admin/creator-brief',
+      icon: <Sparkles className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
       title: 'Content Preview Hub',
       description: 'Preview all OG images, daily posts, and weekly reports',
       href: '/admin/daily-posts-preview',
@@ -664,6 +674,14 @@ export default function AdminDashboard() {
       description: 'Generate and approve social media posts',
       href: '/admin/social-posts',
       icon: <Send className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
+      title: 'Seer Sammii',
+      description: 'First-person video scripts with talking points',
+      href: '/admin/seer-sammii',
+      icon: <Video className='h-5 w-5' />,
       category: 'content',
       status: 'new',
     },
@@ -720,6 +738,19 @@ export default function AdminDashboard() {
       icon: <Play className='h-5 w-5' />,
       category: 'content',
       status: 'active',
+    },
+  ];
+
+  // Section 2b: Tools (content creation)
+  const creatorTools: AdminTool[] = [
+    {
+      title: 'Reddit Generator',
+      description:
+        'Generate subreddit-specific content from grimoire knowledge',
+      href: '/admin/reddit-generator',
+      icon: <MessageCircle className='h-5 w-5' />,
+      category: 'tools',
+      status: 'new',
     },
   ];
 
@@ -826,6 +857,14 @@ export default function AdminDashboard() {
       color: 'from-blue-600/20 to-blue-600/5',
       iconColor: 'text-lunary-secondary',
       borderColor: 'border-lunary-secondary-800',
+    },
+    {
+      title: 'Creator Tools',
+      icon: <MessageCircle className='h-5 w-5 md:h-6 md:w-6' />,
+      tools: creatorTools,
+      color: 'from-orange-600/20 to-orange-600/5',
+      iconColor: 'text-lunary-accent',
+      borderColor: 'border-lunary-accent-700',
     },
     {
       title: 'Shop & Assets',

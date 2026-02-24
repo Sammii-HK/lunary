@@ -52,6 +52,8 @@ export interface RecordingStep {
   distance?: number;
   /** Selector to scroll into view (for scroll action, alternative to distance) */
   scrollTo?: string;
+  /** Selector for a specific scroll container (for scroll action within nested elements) */
+  scrollContainer?: string;
   /** Key to press (for pressKey action) - e.g., 'Escape', 'Enter' */
   key?: string;
   /** Description of what this step does */
@@ -72,12 +74,37 @@ interface ScriptOverrides {
   requiresAuth?: boolean;
 }
 
+/** TTS words per second (shimmer voice at 1.05x speed) */
+const TTS_WORDS_PER_SECOND = 3.0;
+/** Minimum scene duration in seconds */
+const MIN_SCENE_DURATION = 1.0;
+/** Overhead for scroll/navigate actions (animation time) — kept tight so
+ *  screen pacing matches voiceover speed. */
+const ACTION_OVERHEAD: Record<string, number> = {
+  scroll: 0.4,
+  navigate: 0.3,
+  expand: 0.3,
+};
+
+/**
+ * Calculate scene duration from voiceoverLine word count.
+ * Falls back to the manual durationSeconds if no voiceoverLine.
+ */
+function calculateSceneDuration(scene: Scene): number {
+  if (!scene.voiceoverLine) return scene.durationSeconds;
+  const wordCount = scene.voiceoverLine.split(/\s+/).length;
+  const speechTime = wordCount / TTS_WORDS_PER_SECOND;
+  const overhead = ACTION_OVERHEAD[scene.action] ?? 0;
+  return Math.max(MIN_SCENE_DURATION, speechTime + overhead);
+}
+
 /**
  * Convert a TikTok scene action to RecordingStep(s)
  */
 function sceneToSteps(scene: Scene): RecordingStep[] {
   const steps: RecordingStep[] = [];
-  const durationMs = scene.durationSeconds * 1000;
+  const effectiveDuration = calculateSceneDuration(scene);
+  const durationMs = effectiveDuration * 1000;
 
   switch (scene.action) {
     case 'show':
@@ -99,6 +126,7 @@ function sceneToSteps(scene: Scene): RecordingStep[] {
         steps.push({
           type: 'scroll',
           distance: scene.scrollDistance || 300,
+          scrollContainer: scene.scrollContainer,
           description: scene.description,
         });
       }
@@ -190,10 +218,11 @@ function generateRecordingFromScript(
     steps.push(...overrides.beforeSteps);
   }
 
-  // Add hook wait
+  // Brief hook pause — the hook text is a Remotion overlay, not part of the
+  // recording. Just need a short beat so the initial frame is stable.
   steps.push({
     type: 'wait',
-    duration: script.hook.durationSeconds * 1000,
+    duration: 800,
     description: `Hook: ${script.hook.text.substring(0, 60)}...`,
   });
 
@@ -252,7 +281,9 @@ function generateRecordingFromScript(
     startUrl: script.scenes[0]?.path || '/app',
     steps,
     durationSeconds: script.totalSeconds,
-    viewport: { width: 390, height: 844 },
+    // 9:16 aspect ratio (TikTok native). 360px triggers mobile CSS.
+    // Upscaled to 1080x1920 in post-processing (3x).
+    viewport: { width: 360, height: 640 },
     requiresAuth: overrides?.requiresAuth ?? true,
   };
 }
@@ -269,7 +300,7 @@ const DISMISS_MODALS: RecordingStep[] = [
   },
   {
     type: 'wait',
-    duration: 1000,
+    duration: 300,
     description: 'Wait for modal to close',
   },
 ];

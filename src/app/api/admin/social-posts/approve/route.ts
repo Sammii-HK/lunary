@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { buildUtmUrl } from '@/lib/urls';
+import { POST as youtubeUploadPost } from '@/app/api/youtube/upload/route';
 
 const toIntArrayLiteral = (values: number[]) =>
   `{${values.map((value) => Number(value)).join(',')}}`;
@@ -335,8 +337,32 @@ export async function POST(request: NextRequest) {
             )
               .filter(Boolean)
               .join(' ');
-            const youtubeDescription =
-              `${post.content}\n\n${descriptionTags}`.trim();
+            const youtubeDescription = [
+              post.content,
+              '',
+              '✨ Get your free birth chart reading at lunary.app',
+              '',
+              descriptionTags,
+              '',
+              '🔮 Explore more:',
+              `Grimoire: ${buildUtmUrl('/grimoire', 'youtube', 'social', 'shorts_description')}`,
+              `Birth Chart: ${buildUtmUrl('/birth-chart', 'youtube', 'social', 'shorts_description')}`,
+              `Moon Calendar: ${buildUtmUrl('/moon-calendar', 'youtube', 'social', 'shorts_description')}`,
+            ]
+              .join('\n')
+              .trim();
+
+            const youtubeTags = [
+              'astrology',
+              'zodiac',
+              themeName.toLowerCase().replace(/\s+/g, ''),
+              ...(post.topic
+                ? [post.topic.toLowerCase().replace(/\s+/g, '')]
+                : []),
+              'horoscope',
+              'lunary',
+              'spirituality',
+            ].filter(Boolean);
 
             const publishDate = (() => {
               if (!dateValue) {
@@ -352,24 +378,26 @@ export async function POST(request: NextRequest) {
               return dateValue.toISOString();
             })();
 
-            const baseUrl = process.env.VERCEL
-              ? 'https://lunary.app'
-              : 'http://localhost:3000';
-
             let uploadResult: YouTubeUploadResult;
             try {
-              const response = await fetch(`${baseUrl}/api/youtube/upload`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  videoUrl: post.video_url,
-                  title: youtubeTitle,
-                  description: youtubeDescription,
-                  type: 'short',
-                  script,
-                  publishDate,
-                }),
-              });
+              // Call the YouTube upload handler directly to avoid self-fetch ECONNREFUSED in dev
+              const uploadReq = new NextRequest(
+                new URL('/api/youtube/upload', request.url),
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    videoUrl: post.video_url,
+                    title: youtubeTitle,
+                    description: youtubeDescription,
+                    type: 'short',
+                    tags: youtubeTags,
+                    script,
+                    publishDate,
+                  }),
+                },
+              );
+              const response = await youtubeUploadPost(uploadReq);
               const data = await response.json().catch(() => ({}));
               if (response.ok) {
                 uploadResult = { success: true, videoId: data.videoId };

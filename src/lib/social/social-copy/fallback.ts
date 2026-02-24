@@ -9,6 +9,19 @@ import { buildCuratedHashtags } from './hashtags';
 import { CTA_PHRASES } from './constants';
 
 /**
+ * Deterministic hash for seeded CTA decisions in fallback
+ */
+function fallbackHashSeed(pack: SourcePack): number {
+  const str = `${pack.topicTitle}-${pack.platform}-${pack.postType}`;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+/**
  * Build caption content from validated lines
  */
 export const buildCaptionContent = (
@@ -25,8 +38,9 @@ export const buildCaptionContent = (
   const curatedHashtags = buildCuratedHashtags(pack);
   const hashtagsLine = curatedHashtags.join(' ');
   const includeCTA = false;
+  const useDisplayTitle = pack.postType !== 'video_caption';
   const contentLines = [
-    pack.displayTitle,
+    ...(useDisplayTitle && pack.displayTitle ? [pack.displayTitle] : []),
     ...sanitizedLines,
     includeCTA ? Array.from(CTA_PHRASES)[0] : '',
   ]
@@ -210,15 +224,24 @@ export async function buildFallbackCopy(
       };
     }
     case 'video_caption': {
-      const videoLines = [
-        `${pack.topicTitle} describes ${baseDefinition.replace(/^[A-Z]/, (c) =>
-          c.toLowerCase(),
-        )}`,
-        `It matters because ${detailSentence.replace(/^[A-Z]/, (c) =>
-          c.toLowerCase(),
-        )}`,
-        exampleSentence,
-      ];
+      const isTikTok = pack.platform === 'tiktok';
+      const videoLines = isTikTok
+        ? [
+            safeSentence(pack.grimoireFacts[0] || baseDefinition),
+            detailSentence,
+          ]
+        : [domainSentence, detailSentence, exampleSentence];
+
+      // Seeded soft CTA: ~25% of fallback video captions mention Lunary
+      const ctaSeed = fallbackHashSeed(pack);
+      if (ctaSeed % 4 === 0) {
+        const softCtas = [
+          'Lunary breaks this down for your exact chart.',
+          'Get your personalised chart on Lunary.',
+        ];
+        videoLines.push(softCtas[ctaSeed % softCtas.length]);
+      }
+
       const caption = buildCaptionContent(pack, videoLines);
       return {
         content: normalizeGeneratedContent(caption.content, {

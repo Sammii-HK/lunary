@@ -5,10 +5,11 @@ import { sql } from '@vercel/postgres';
 import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import { recordThemeUsage } from '@/lib/social/thematic-generator';
-import { getImageBaseUrl } from '@/lib/urls';
+import { getImageBaseUrl, buildUtmUrl } from '@/lib/urls';
 import { sanitizeForLog } from '@/lib/security/log-sanitize';
 import { postToSocialMultiPlatform } from '@/lib/social/client';
 import { preUploadImage } from '@/lib/social/pre-upload-image';
+import { captureEvent } from '@/lib/posthog-server';
 
 type DbPostRow = {
   id: number;
@@ -31,8 +32,11 @@ type PlatformPayload = {
   media: Array<{ type: 'image' | 'video'; url: string; alt: string }>;
   reddit?: { title?: string; subreddit?: string };
   pinterestOptions?: { boardId: string; boardName: string };
+  pinterestLink?: string;
   tiktokOptions?: { type: string; coverUrl?: string; autoAddMusic?: boolean };
   instagramOptions?: { type: string; coverUrl?: string };
+  firstComment?: string;
+  facebookOptions?: { type: string };
 };
 
 const videoPlatforms = ['instagram', 'tiktok', 'facebook', 'youtube'];
@@ -78,6 +82,146 @@ const formatReadableDate = (scheduleDate: Date) => {
   });
   return `${formattedDate} at ${formattedTime}`;
 };
+
+/**
+ * Extract engagement question from TikTok caption.
+ * TikTok captions typically have: hook line, then body with a question.
+ * Returns the first ?-ending line after the first non-empty line.
+ */
+function extractTikTokEngagementQuestion(content: string): string | undefined {
+  const lines = content.split('\n').filter((l) => l.trim().length > 0);
+  // Skip the hook (first line), look for first question in remaining lines
+  for (let i = 1; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed.endsWith('?')) return trimmed;
+  }
+  return undefined;
+}
+
+/**
+ * Extract trailing hashtag block from Instagram caption.
+ * Hashtags are typically after the last double-newline separator.
+ */
+function extractInstagramHashtags(content: string): string | undefined {
+  const parts = content.split('\n\n');
+  if (parts.length < 2) return undefined;
+  const lastBlock = parts[parts.length - 1].trim();
+  // Only treat as hashtag block if it starts with # and is mostly hashtags
+  if (lastBlock.startsWith('#') && lastBlock.includes('#')) {
+    return lastBlock;
+  }
+  return undefined;
+}
+
+/**
+ * Extract engagement question for Facebook/LinkedIn.
+ * Finds the last ?-ending line before any trailing hashtag block.
+ */
+function extractEngagementQuestion(content: string): string | undefined {
+  // Strip trailing hashtag block if present
+  const parts = content.split('\n\n');
+  let bodyParts = parts;
+  if (parts.length >= 2) {
+    const lastBlock = parts[parts.length - 1].trim();
+    if (lastBlock.startsWith('#')) {
+      bodyParts = parts.slice(0, -1);
+    }
+  }
+  const body = bodyParts.join('\n\n');
+  const lines = body.split('\n').filter((l) => l.trim().length > 0);
+  // Find last question mark line
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const trimmed = lines[i].trim();
+    if (trimmed.endsWith('?')) return trimmed;
+  }
+  return undefined;
+}
+
+const CATEGORY_TO_BOARD_KEY: Record<string, string> = {
+  zodiac: 'zodiac',
+  tarot: 'tarot',
+  lunar: 'moon',
+  planetary: 'zodiac',
+  crystals: 'crystals',
+  numerology: 'numerology',
+  chakras: 'chakras',
+  runes: 'runes',
+  spells: 'spells',
+  sabbat: 'spells',
+};
+
+const CATEGORY_LINKS: Record<string, string> = {
+  zodiac: buildUtmUrl(
+    '/grimoire/zodiac',
+    'pinterest',
+    'social',
+    'grimoire_zodiac',
+  ),
+  tarot: buildUtmUrl(
+    '/grimoire/tarot',
+    'pinterest',
+    'social',
+    'grimoire_tarot',
+  ),
+  moon: buildUtmUrl(
+    '/grimoire/moon/phases',
+    'pinterest',
+    'social',
+    'grimoire_moon',
+  ),
+  crystals: buildUtmUrl(
+    '/grimoire/crystals',
+    'pinterest',
+    'social',
+    'grimoire_crystals',
+  ),
+  numerology: buildUtmUrl(
+    '/grimoire/numerology',
+    'pinterest',
+    'social',
+    'grimoire_numerology',
+  ),
+  chakras: buildUtmUrl(
+    '/grimoire/chakras',
+    'pinterest',
+    'social',
+    'grimoire_chakras',
+  ),
+  runes: buildUtmUrl(
+    '/grimoire/runes',
+    'pinterest',
+    'social',
+    'grimoire_runes',
+  ),
+  spells: buildUtmUrl(
+    '/grimoire/spells',
+    'pinterest',
+    'social',
+    'grimoire_spells',
+  ),
+};
+
+function getPinterestContentKey(weekTheme: string | null): string | undefined {
+  if (!weekTheme) return undefined;
+  const theme = categoryThemes.find((t) => t.name === weekTheme);
+  return theme?.category;
+}
+
+function buildAltText(post: DbPostRow): string {
+  const firstLine =
+    post.content
+      .split('\n')
+      .find((l) => l.trim().length > 0)
+      ?.trim() ?? '';
+  const hook =
+    firstLine.length > 120 ? firstLine.substring(0, 117) + '...' : firstLine;
+
+  if (post.week_theme) {
+    return `${post.week_theme} — ${hook}`;
+  }
+
+  return hook || `Lunary ${post.post_type} post`;
+}
 
 const buildPlatformPayload = (
   post: DbPostRow,
@@ -135,23 +279,62 @@ const buildPlatformPayload = (
     }
   }
 
+  const altText = buildAltText(post);
+
+  // Detect carousel posts with pipe-delimited image URLs
+  const isCarouselPost =
+    !shouldUseVideo &&
+    (post.post_type === 'instagram_carousel' ||
+      post.post_type === 'carousel') &&
+    typeof post.image_url === 'string' &&
+    post.image_url.includes('|');
+
+  let carouselMedia: Array<{ type: 'image'; url: string; alt: string }> = [];
+  if (isCarouselPost && post.image_url) {
+    const rawUrls = String(post.image_url)
+      .split('|')
+      .map((u) => u.trim())
+      .filter(Boolean);
+    if (rawUrls.length > 1) {
+      carouselMedia = rawUrls.map((rawUrl, i) => {
+        let url = rawUrl;
+        try {
+          if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = new URL(url, baseUrl).toString();
+          }
+        } catch {
+          // keep as-is
+        }
+        return {
+          type: 'image' as const,
+          url,
+          alt: i === 0 ? altText : `Slide ${i + 1}`,
+        };
+      });
+      // Use first URL as the single-image reference (cover, etc.)
+      imageUrlForPlatform = carouselMedia[0].url;
+    }
+  }
+
   const media: PlatformPayload['media'] = shouldUseVideo
     ? [
         {
           type: 'video',
           url: String(post.video_url || '').trim(),
-          alt: scheduleLabel,
+          alt: altText,
         },
       ]
-    : imageUrlForPlatform
-      ? [
-          {
-            type: 'image',
-            url: imageUrlForPlatform,
-            alt: scheduleLabel,
-          },
-        ]
-      : [];
+    : carouselMedia.length > 1
+      ? carouselMedia
+      : imageUrlForPlatform
+        ? [
+            {
+              type: 'image',
+              url: imageUrlForPlatform,
+              alt: altText,
+            },
+          ]
+        : [];
 
   const payload: PlatformPayload = {
     platform: platformStr,
@@ -171,7 +354,11 @@ const buildPlatformPayload = (
   }
 
   if (platformStr === 'pinterest') {
-    payload.pinterestOptions = getPinterestBoard();
+    const boardKey = getPinterestContentKey(post.week_theme);
+    const mappedKey = boardKey ? CATEGORY_TO_BOARD_KEY[boardKey] : undefined;
+    payload.pinterestOptions = getPinterestBoard(mappedKey);
+    payload.pinterestLink =
+      CATEGORY_LINKS[mappedKey ?? ''] ?? buildUtmUrl('/grimoire', 'pinterest');
   }
 
   if (platformStr === 'tiktok' && media.length > 0) {
@@ -191,12 +378,37 @@ const buildPlatformPayload = (
         type: 'reel',
         ...(imageUrlForPlatform ? { coverUrl: imageUrlForPlatform } : {}),
       };
+    } else if (carouselMedia.length > 1) {
+      payload.instagramOptions = {
+        type: 'carousel',
+      };
     } else {
-      // Static Instagram post (meme, carousel, daily cosmic, etc.)
       payload.instagramOptions = {
         type: 'post',
       };
     }
+  }
+
+  // First comment per platform
+  if (platformStr === 'tiktok' && shouldUseVideo) {
+    const question = extractTikTokEngagementQuestion(content);
+    if (question) payload.firstComment = question;
+  } else if (platformStr === 'instagram') {
+    const hashtags = extractInstagramHashtags(content);
+    if (hashtags) {
+      payload.firstComment = hashtags;
+      // Strip trailing hashtag block from caption body
+      const parts = content.split('\n\n');
+      payload.content = parts.slice(0, -1).join('\n\n').trim();
+    }
+  } else if (platformStr === 'facebook' || platformStr === 'linkedin') {
+    const question = extractEngagementQuestion(content);
+    if (question) payload.firstComment = question;
+  }
+
+  // Facebook video type
+  if (platformStr === 'facebook' && shouldUseVideo) {
+    payload.facebookOptions = { type: 'video' };
   }
 
   return payload;
@@ -343,9 +555,12 @@ export async function POST(request: NextRequest) {
       { content: string; media?: string[] | null; noImage?: boolean }
     > = {};
     let pinterestOptions: PlatformPayload['pinterestOptions'];
+    let pinterestLink: string | undefined;
     let tiktokOptions: PlatformPayload['tiktokOptions'];
     let instagramOptions: PlatformPayload['instagramOptions'];
+    let facebookOptions: PlatformPayload['facebookOptions'];
     let redditData: PlatformPayload['reddit'];
+    const firstComments: Record<string, string> = {};
 
     const baseMediaKey = formatMediaKey(basePayload.media);
 
@@ -364,11 +579,20 @@ export async function POST(request: NextRequest) {
       if (payload.pinterestOptions) {
         pinterestOptions = payload.pinterestOptions;
       }
+      if (payload.pinterestLink) {
+        pinterestLink = payload.pinterestLink;
+      }
       if (payload.tiktokOptions) {
         tiktokOptions = payload.tiktokOptions;
       }
       if (payload.instagramOptions) {
         instagramOptions = payload.instagramOptions;
+      }
+      if (payload.facebookOptions) {
+        facebookOptions = payload.facebookOptions;
+      }
+      if (payload.firstComment) {
+        firstComments[payload.platform] = payload.firstComment;
       }
       if (payload.reddit) {
         redditData = payload.reddit;
@@ -477,6 +701,15 @@ export async function POST(request: NextRequest) {
       scheduledDate: scheduleDate.toISOString(),
     });
 
+    // Explicitly set Facebook platformSettings to avoid Postiz sending invalid defaults
+    const platformSettingsOverrides: Record<
+      string,
+      Record<string, unknown>
+    > = {};
+    if (platformsToSend.has('facebook')) {
+      platformSettingsOverrides.facebook = { who_can_reply_post: 'everyone' };
+    }
+
     const { results: platformResults } = await postToSocialMultiPlatform({
       platforms: Array.from(platformsToSend),
       content: basePayload.content,
@@ -486,8 +719,16 @@ export async function POST(request: NextRequest) {
       variants: Object.keys(variants).length > 0 ? variants : undefined,
       reddit: redditData,
       pinterestOptions,
+      pinterestLink,
       tiktokOptions,
       instagramOptions,
+      facebookOptions,
+      platformSettings:
+        Object.keys(platformSettingsOverrides).length > 0
+          ? platformSettingsOverrides
+          : undefined,
+      firstComments:
+        Object.keys(firstComments).length > 0 ? firstComments : undefined,
     });
 
     const anySuccess = Object.values(platformResults).some((r) => r.success);
@@ -495,6 +736,21 @@ export async function POST(request: NextRequest) {
     console.log('📥 Social client response:', platformResults);
 
     if (anySuccess) {
+      captureEvent('system', 'social_post_sent', {
+        platforms: Array.from(platformsToSend),
+        platformCount: platformsToSend.size,
+        postType: primaryPost.post_type,
+        weekTheme: primaryPost.week_theme,
+        hasVideo: hasVideoMedia,
+        hasFirstComments: Object.keys(firstComments).length > 0,
+        results: Object.fromEntries(
+          Object.entries(platformResults).map(([p, r]) => [
+            p,
+            { success: r.success, backend: r.backend },
+          ]),
+        ),
+      });
+
       // Update status to 'sent' for all posts in the group (or just the single post)
       console.log('🔄 Updating post status to sent...', {
         postId,
@@ -604,6 +860,11 @@ export async function POST(request: NextRequest) {
       });
     } else {
       const firstError = Object.values(platformResults).find((r) => r.error);
+      captureEvent('system', 'social_post_failed', {
+        platforms: Array.from(platformsToSend),
+        postType: primaryPost.post_type,
+        error: firstError?.error,
+      });
       return NextResponse.json(
         {
           success: false,

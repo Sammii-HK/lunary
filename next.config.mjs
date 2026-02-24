@@ -392,6 +392,7 @@ const nextConfig = {
       },
       {
         // Cache OG images for 24 hours (content updates daily)
+        // CORS allows admin panel (localhost) to display production-hosted images
         source: '/api/og/:path*',
         headers: [
           {
@@ -401,6 +402,10 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, s-maxage=86400, stale-while-revalidate=172800',
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
           },
         ],
       },

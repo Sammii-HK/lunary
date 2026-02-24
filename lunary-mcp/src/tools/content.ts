@@ -1,28 +1,12 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { lunary } from '../client.js';
-import { jsonResult, errorResult } from '../types.js';
-
-const timeParams = {
-  time_range: z
-    .enum(['7d', '30d', '90d', '365d'])
-    .optional()
-    .describe('Time window (default 30d)'),
-  start: z.string().optional().describe('Custom range start (ISO date)'),
-  end: z.string().optional().describe('Custom range end (ISO date)'),
-};
-
-function timeQueryParams(params: {
-  time_range?: string;
-  start?: string;
-  end?: string;
-}) {
-  return {
-    ...(params.time_range && { range: params.time_range }),
-    ...(params.start && { start: params.start }),
-    ...(params.end && { end: params.end }),
-  };
-}
+import {
+  jsonResult,
+  errorResult,
+  timeParams,
+  timeQueryParams,
+} from '../types.js';
 
 export function registerContentTools(server: McpServer) {
   server.tool(
@@ -62,6 +46,55 @@ export function registerContentTools(server: McpServer) {
     async () => {
       try {
         const data = await lunary('/seo/indexing-audit');
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
+
+  server.tool(
+    'get_grimoire_context',
+    'Query Lunary grimoire knowledge base: retrieve grounded passages about astrology, crystals, spells, tarot, correspondences. Use lightweight mode for topic knowledge, full mode for user-specific transits + grimoire.',
+    {
+      query: z
+        .string()
+        .describe(
+          'Topic to search (e.g. "Pisces season energy", "full moon ritual", "rose quartz")',
+        ),
+      mode: z
+        .enum(['lightweight', 'full'])
+        .optional()
+        .describe(
+          'lightweight = grimoire only (default), full = grimoire + transits/moon/tarot (requires user_id)',
+        ),
+      limit: z
+        .number()
+        .optional()
+        .describe('Number of grimoire results (1-10, default 3)'),
+      category: z
+        .string()
+        .optional()
+        .describe(
+          'Filter by grimoire category (e.g. crystals, spells, zodiac)',
+        ),
+      user_id: z
+        .string()
+        .optional()
+        .describe('User ID for full mode (birth chart / transit context)'),
+    },
+    async (params) => {
+      try {
+        const data = await lunary('/grimoire-context', {
+          method: 'POST',
+          body: {
+            query: params.query,
+            ...(params.mode && { mode: params.mode }),
+            ...(params.limit && { limit: params.limit }),
+            ...(params.category && { category: params.category }),
+            ...(params.user_id && { userId: params.user_id }),
+          },
+        });
         return jsonResult(data);
       } catch (error) {
         return errorResult(error);

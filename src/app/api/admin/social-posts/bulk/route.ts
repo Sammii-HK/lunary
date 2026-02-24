@@ -17,39 +17,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'approve_all') {
-      const pendingResult = await sql`
-        SELECT id
-        FROM social_posts
+      const result = await sql`
+        UPDATE social_posts
+        SET status = 'approved', updated_at = NOW()
         WHERE status = 'pending'
+        RETURNING id
       `;
-
-      const baseUrl = process.env.VERCEL
-        ? 'https://lunary.app'
-        : 'http://localhost:3000';
-
-      const authHeader = request.headers.get('authorization');
-      for (const row of pendingResult.rows) {
-        try {
-          await fetch(`${baseUrl}/api/admin/social-posts/approve`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(authHeader && { Authorization: authHeader }),
-            },
-            body: JSON.stringify({
-              postId: row.id,
-              action: 'approve',
-            }),
-          });
-        } catch (error) {
-          console.warn('Failed to approve post during bulk approval:', row.id);
-        }
-      }
 
       return NextResponse.json({
         success: true,
-        message: `Approved ${pendingResult.rows.length} posts`,
-        count: pendingResult.rows.length,
+        message: `Approved ${result.rows.length} posts`,
+        count: result.rows.length,
       });
     }
 
@@ -61,10 +39,12 @@ export async function POST(request: NextRequest) {
         RETURNING id
       `;
 
-      // Clear orphaned video jobs (jobs without corresponding posts)
-      await sql`
-        DELETE FROM video_jobs
-      `;
+      // Clear orphaned video jobs (best-effort — table may not exist yet)
+      try {
+        await sql`DELETE FROM video_jobs`;
+      } catch {
+        // table doesn't exist yet — safe to ignore
+      }
 
       return NextResponse.json({
         success: true,

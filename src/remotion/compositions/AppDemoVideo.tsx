@@ -3,6 +3,7 @@ import {
   AbsoluteFill,
   Video,
   Audio,
+  Sequence,
   useVideoConfig,
   staticFile,
 } from 'remotion';
@@ -38,6 +39,14 @@ export interface AppDemoVideoProps {
   highlightTerms?: string[];
   /** Show progress bar */
   showProgress?: boolean;
+  /** Playback rate for screen recording (> 1 = faster scrolling to match VO pace) */
+  videoPlaybackRate?: number;
+  /** Seconds to delay audio start (accounts for recording dead time before first scene) */
+  audioStartOffset?: number;
+  /** Background music URL (relative to public/) */
+  backgroundMusicUrl?: string;
+  /** Background music volume (0-1, default 0.15 = ~16dB below voice) */
+  backgroundMusicVolume?: number;
 }
 
 /**
@@ -69,8 +78,19 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
   categoryVisuals,
   highlightTerms = [],
   showProgress = true,
+  videoPlaybackRate = 1,
+  audioStartOffset = 0,
+  backgroundMusicUrl,
+  backgroundMusicVolume,
 }) => {
   const { fps, durationInFrames } = useVideoConfig();
+
+  // Shift subtitle segments forward by audioStartOffset to sync with delayed audio
+  const shiftedSegments = segments?.map((s) => ({
+    ...s,
+    startTime: s.startTime + audioStartOffset,
+    endTime: s.endTime + audioStartOffset,
+  }));
 
   // Build outro as a CTA-style overlay (only CTA, no mid-video overlays)
   const outroOverlay: Overlay = {
@@ -86,6 +106,8 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
       <AbsoluteFill style={{ zIndex: 1 }}>
         <Video
           src={staticFile(videoSrc)}
+          startFrom={Math.round(audioStartOffset * fps)}
+          playbackRate={videoPlaybackRate}
           style={{
             width: '100%',
             height: '100%',
@@ -107,26 +129,39 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
         />
       </div>
 
-      {/* 4. Outro CTA only (mid-video overlays removed — TTS + subtitles cover it) */}
+      {/* 4. Mid-video text overlays + Outro CTA */}
       <TextOverlays
-        overlays={[outroOverlay]}
+        overlays={[...overlays, outroOverlay]}
         accentColor={categoryVisuals?.accentColor}
       />
 
       {/* 5. Animated subtitles with transparent background */}
-      {segments && segments.length > 0 && (
+      {shiftedSegments && shiftedSegments.length > 0 && (
         <AnimatedSubtitles
-          segments={segments}
+          segments={shiftedSegments}
           highlightTerms={highlightTerms}
           highlightColor={categoryVisuals?.highlightColor}
-          fontSize={44}
-          bottomPosition={12}
+          fontSize={46}
+          bottomPosition={22}
           fps={fps}
+          backgroundOpacity={0.6}
         />
       )}
 
-      {/* 6. TTS voiceover audio track */}
-      {audioUrl && <Audio src={staticFile(audioUrl)} />}
+      {/* 6. TTS voiceover audio track (delayed by audioStartOffset to sync with recording) */}
+      {audioUrl && (
+        <Sequence from={Math.round(audioStartOffset * fps)}>
+          <Audio src={staticFile(audioUrl)} />
+        </Sequence>
+      )}
+
+      {/* 6b. Background music (plays for full duration) */}
+      {backgroundMusicUrl && (
+        <Audio
+          src={staticFile(backgroundMusicUrl)}
+          volume={backgroundMusicVolume ?? 0.15}
+        />
+      )}
 
       {/* 7. Progress indicator */}
       {showProgress && (

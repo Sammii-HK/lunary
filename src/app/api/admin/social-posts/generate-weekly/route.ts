@@ -409,7 +409,7 @@ async function generateThematicWeeklyPosts(
     const dayContent = generateDayContent(day.date, day.theme, day.facet);
     const sourceInfo = resolveSourceForFacet(day.facet, day.theme.category);
     const longFormPlatforms = ['linkedin', 'pinterest'];
-    const shortFormPlatforms = ['twitter', 'bluesky', 'threads'];
+    const shortFormPlatforms = ['twitter', 'bluesky'];
     const dayOffset = day.date.getDay() === 0 ? 6 : day.date.getDay() - 1;
     const totalParts = day.theme.leadUpFacets.length;
     const partNumber =
@@ -1338,7 +1338,9 @@ async function generateThematicWeeklyPosts(
     if (videoScripts?.tiktokScripts?.length) {
       const { getThematicImageUrl } =
         await import('@/lib/social/educational-images');
-      const videoPlatforms = ['instagram', 'tiktok', 'facebook', 'youtube'];
+      // Instagram is handled separately: engagement scripts cross-post to instagram-reels
+      // Primary scripts stay on TikTok/Facebook/YouTube to keep IG cadence at ~2-3/week
+      const videoPlatforms = ['tiktok', 'facebook', 'youtube'];
       const uniqueScripts = dedupeScriptsByDate(videoScripts.tiktokScripts);
       const dayInfoByKey = new Map<
         string,
@@ -1411,6 +1413,10 @@ async function generateThematicWeeklyPosts(
         existingVideoByKey.set(`${dateKey}|${row.topic}`, row.video_url);
       }
 
+      // Instagram Reels cadence: max 3 cross-posts per week
+      const MAX_INSTAGRAM_REELS_PER_WEEK = 3;
+      let instagramReelsCrossPostCount = 0;
+
       for (const script of uniqueScripts) {
         try {
           const dateKey = script.scheduledDate.toISOString().split('T')[0];
@@ -1440,8 +1446,12 @@ async function generateThematicWeeklyPosts(
           const isEngagement =
             scriptSlot === 'engagementA' || scriptSlot === 'engagementB';
 
-          // Engagement videos cross-post to Instagram Reels; primary stays TikTok-only
-          const platforms = isEngagement
+          // Engagement videos cross-post to Instagram Reels (max 3/week); primary stays TikTok-only
+          const includeInstagramReels =
+            isEngagement &&
+            instagramReelsCrossPostCount < MAX_INSTAGRAM_REELS_PER_WEEK;
+          if (includeInstagramReels) instagramReelsCrossPostCount++;
+          const platforms = includeInstagramReels
             ? [...videoPlatforms, 'instagram-reels']
             : videoPlatforms;
 

@@ -52,6 +52,13 @@ import { Heading } from '@/components/ui/Heading';
 - **Commits**: Imperative mood, concise ("Add X" not "Added X")
 - **PRs**: Target `main`, include summary and test plan
 
+## Deployments
+
+- **Minimize Vercel builds** — this is a large project and builds are expensive. Never push to multiple branches separately when one push would do.
+- **Do not push to feature branches AND main** in the same task — cherry-pick or merge in a single push.
+- **Always ask before deploying** — don't push to main/production without explicit confirmation.
+- **Batch changes** — accumulate related commits and deploy once, not incrementally.
+
 ## Domain: Astrology & Lunar Content
 
 ### Key Concepts

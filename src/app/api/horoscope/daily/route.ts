@@ -5,6 +5,8 @@ import { requireUser } from '@/lib/ai/auth';
 import { decrypt } from '@/lib/encryption';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
 import { getDailyCacheHeaders } from '@/lib/cache-utils';
+import { CURRENT_BIRTH_CHART_VERSION } from '../../../../../utils/astrology/chart-version';
+import { decryptLocation } from '@/lib/location-encryption';
 
 export const runtime = 'nodejs';
 
@@ -12,12 +14,13 @@ interface UserProfile {
   name?: string;
   birthday?: string;
   birthChart?: any;
+  birthChartVersion?: number;
 }
 
 async function getUserProfile(userId: string): Promise<UserProfile> {
   try {
     const result = await sql`
-      SELECT name, birthday, birth_chart
+      SELECT name, birthday, birth_chart, location
       FROM user_profiles
       WHERE user_id = ${userId}
       LIMIT 1
@@ -28,10 +31,12 @@ async function getUserProfile(userId: string): Promise<UserProfile> {
     }
 
     const row = result.rows[0];
+    const locationData = row.location ? decryptLocation(row.location) : null;
     return {
       name: row.name ? decrypt(row.name) : undefined,
       birthday: row.birthday ? decrypt(row.birthday) : undefined,
       birthChart: row.birth_chart || undefined,
+      birthChartVersion: locationData?.birthChartVersion ?? undefined,
     };
   } catch (error: any) {
     if (error?.code === '42P01') {
@@ -62,6 +67,7 @@ interface CachedHoroscope {
   cosmicHighlight: string;
   dailyAffirmation: string;
   generatedAt: string;
+  birthChartVersion?: number;
 }
 
 // Get cached horoscope from database
@@ -255,7 +261,14 @@ export async function GET(request: NextRequest) {
     const cached = await getCachedHoroscope(userId, dateStr);
     const isCacheComplete =
       cached?.headline && cached?.overview && cached?.tinyAction;
-    if (cached && isCacheComplete) {
+    // Fetch profile to check birth chart version before serving from cache
+    const profile = cached ? await getUserProfile(userId) : null;
+    const currentChartVersion = profile?.birthChartVersion ?? null;
+    const cacheIsStale =
+      currentChartVersion !== null &&
+      cached?.birthChartVersion !== undefined &&
+      cached.birthChartVersion !== currentChartVersion;
+    if (cached && isCacheComplete && !cacheIsStale) {
       const response = NextResponse.json(
         {
           ...cached,
@@ -292,13 +305,15 @@ export async function GET(request: NextRequest) {
       return response;
     }
 
-    // Fetch user profile from database
-    const profile = await getUserProfile(userId);
+    // Fetch user profile from database (reuse if already fetched for version check)
+    const freshProfile = profile ?? (await getUserProfile(userId));
 
     // Generate fresh horoscope
-    const userBirthday = profile.birthday;
-    const userName = profile.name;
-    const birthChart = profile.birthChart;
+    const userBirthday = freshProfile.birthday;
+    const userName = freshProfile.name;
+    const birthChart = freshProfile.birthChart;
+    const birthChartVersion =
+      freshProfile.birthChartVersion ?? CURRENT_BIRTH_CHART_VERSION;
 
     const horoscope = getEnhancedPersonalizedHoroscope(
       userBirthday,
@@ -322,6 +337,7 @@ export async function GET(request: NextRequest) {
       cosmicHighlight: horoscope.cosmicHighlight,
       dailyAffirmation: horoscope.dailyAffirmation,
       generatedAt: new Date().toISOString(),
+      birthChartVersion,
     };
 
     // Save to cache (fire and forget)
@@ -360,12 +376,14 @@ export async function POST(request: NextRequest) {
     const dateStr = today.toISOString().split('T')[0];
 
     // Fetch user profile from database
-    const profile = await getUserProfile(userId);
+    const postProfile = await getUserProfile(userId);
 
     // Generate fresh horoscope (skip cache)
-    const userBirthday = user.birthday || profile.birthday;
-    const userName = user.displayName || profile.name;
-    const birthChart = profile.birthChart;
+    const userBirthday = user.birthday || postProfile.birthday;
+    const userName = user.displayName || postProfile.name;
+    const birthChart = postProfile.birthChart;
+    const birthChartVersion =
+      postProfile.birthChartVersion ?? CURRENT_BIRTH_CHART_VERSION;
 
     const horoscope = getEnhancedPersonalizedHoroscope(
       userBirthday,
@@ -389,6 +407,7 @@ export async function POST(request: NextRequest) {
       cosmicHighlight: horoscope.cosmicHighlight,
       dailyAffirmation: horoscope.dailyAffirmation,
       generatedAt: new Date().toISOString(),
+      birthChartVersion,
     };
 
     // Save to cache

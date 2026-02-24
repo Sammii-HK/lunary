@@ -18,6 +18,40 @@ export const REDDIT_SUBREDDITS: SubredditConfig[] = [
     allowsSelfPromotion: true,
     notes: 'Our own subreddit - always safe to post any content',
   },
+  {
+    name: 'astrology',
+    memberCount: 1200000,
+    description: 'Technical astrology discussion, chart analysis, transit talk',
+    contentType: 'educational',
+    allowsSelfPromotion: false,
+    notes:
+      'Value-first, no self-promotion. Reference chart data with specificity.',
+  },
+  {
+    name: 'tarot',
+    memberCount: 400000,
+    description: 'Tarot practice, interpretations, and reading techniques',
+    contentType: 'educational',
+    allowsSelfPromotion: false,
+    notes: 'Practical, spreads-focused. No fearmongering about "scary" cards.',
+  },
+  {
+    name: 'witchcraft',
+    memberCount: 500000,
+    description: 'Practical witchcraft, spellwork, and ritual discussion',
+    contentType: 'community',
+    allowsSelfPromotion: false,
+    notes:
+      'Ritual-focused, include materials and timing. Respect all traditions.',
+  },
+  {
+    name: 'spirituality',
+    memberCount: 800000,
+    description: 'Spiritual growth, philosophy, and personal development',
+    contentType: 'community',
+    allowsSelfPromotion: false,
+    notes: 'Philosophical and accessible. Inclusive of different paths.',
+  },
 ];
 
 let currentIndex = 0;

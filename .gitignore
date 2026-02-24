@@ -77,8 +77,9 @@ PRESS-KIT-TODO.md
 *.jks
 android/key.properties
 
-# Claude plans
+# Claude
 .claude/plans
+.claude/TROUBLESHOOTING.md
 ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 .temp-sitemaps/
 

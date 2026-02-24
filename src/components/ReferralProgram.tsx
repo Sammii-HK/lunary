@@ -276,7 +276,7 @@ export function ReferralProgram() {
                     {stats.activeReferrals}
                   </p>
                   <p className='text-xs text-lunary-accent-100/70'>
-                    Friends who activated their trial (free month granted).
+                    Friends who completed their first action.
                   </p>
                 </div>
               </div>
