@@ -102,11 +102,14 @@ export async function postToSpellcast(
     const isStory = instagramOpts?.isStory === true;
     const postType = isStory ? 'story' : 'post';
 
+    // Spellcast requires non-empty content; stories are image-only so use a space
+    const content = params.content || ' ';
+
     // 1. Create draft post
     const createRes = await spellcastFetch('/api/posts', {
       method: 'POST',
       body: JSON.stringify({
-        content: params.content,
+        content,
         mediaUrls: params.media?.map((m) => m.url) ?? [],
         scheduledFor: params.scheduledDate,
         accountSetId,

@@ -35,7 +35,7 @@ const POST_TYPE_HASHTAGS: Record<IGPostType, string[]> = {
     '#astrologyfacts',
   ],
   quote: ['#cosmicquotes', '#spiritualquotes', '#inspiration', '#deepthoughts'],
-  app_feature: ['#astrologyapp', '#birthchart', '#cosmictools', '#lunaryapp'],
+  app_feature: ['#astrologyapp', '#birthchart', '#cosmictools', '#astrology'],
   did_you_know: ['#didyouknow', '#astrologyfacts', '#savethis', '#funfact'],
   sign_ranking: ['#zodiacranking', '#zodiacsigns', '#signcheck', '#zodiactea'],
   angel_number_carousel: [

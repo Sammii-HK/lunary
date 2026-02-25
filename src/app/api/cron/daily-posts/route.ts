@@ -4110,15 +4110,16 @@ function buildEventTags(
     add('#eclipseseason');
   } else if (eventType === 'moon') {
     add('#moonphases');
+  } else if (eventType === 'transit' || eventType === 'aspect') {
+    add('#astrology');
   }
 
-  // Planet tag (if not Moon — Moon is handled by factory's moonPhase context)
-  if (context.planet && context.planet !== 'Moon') {
-    add(`#${context.planet.toLowerCase()}`);
-  }
-
-  // Sign tag
-  if (context.sign && context.sign !== 'in transit') {
+  // Sign tag for retrogrades and eclipses (skip planet name — too generic)
+  if (
+    (eventType === 'retrograde' || eventType === 'eclipse') &&
+    context.sign &&
+    context.sign !== 'in transit'
+  ) {
     add(`#${context.sign.toLowerCase()}`);
   }
 
