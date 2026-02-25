@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Map, Telescope, X, Check, MapPin } from 'lucide-react';
 import { useLocation } from '@/hooks/useLocation';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
@@ -150,6 +150,171 @@ const getRetrogradeGuidance = (planet: string, sign: string): string => {
     `${planet} retrograde invites reflection and review of its themes.`
   );
 };
+
+type Dignity = 'domicile' | 'exalted' | 'detriment' | 'fall';
+
+const PLANET_DIGNITIES: Record<
+  string,
+  { rules: string[]; exalted?: string; detriment?: string; fall?: string }
+> = {
+  Sun: {
+    rules: ['Leo'],
+    exalted: 'Aries',
+    detriment: 'Aquarius',
+    fall: 'Libra',
+  },
+  Moon: {
+    rules: ['Cancer'],
+    exalted: 'Taurus',
+    detriment: 'Capricorn',
+    fall: 'Scorpio',
+  },
+  Mercury: {
+    rules: ['Gemini', 'Virgo'],
+    exalted: 'Virgo',
+    detriment: 'Sagittarius',
+    fall: 'Pisces',
+  },
+  Venus: {
+    rules: ['Taurus', 'Libra'],
+    exalted: 'Pisces',
+    detriment: 'Aries',
+    fall: 'Virgo',
+  },
+  Mars: {
+    rules: ['Aries', 'Scorpio'],
+    exalted: 'Capricorn',
+    detriment: 'Libra',
+    fall: 'Cancer',
+  },
+  Jupiter: {
+    rules: ['Sagittarius', 'Pisces'],
+    exalted: 'Cancer',
+    detriment: 'Gemini',
+    fall: 'Capricorn',
+  },
+  Saturn: {
+    rules: ['Capricorn', 'Aquarius'],
+    exalted: 'Libra',
+    detriment: 'Cancer',
+    fall: 'Aries',
+  },
+  Uranus: {
+    rules: ['Aquarius'],
+    exalted: 'Scorpio',
+    detriment: 'Leo',
+    fall: 'Taurus',
+  },
+  Neptune: {
+    rules: ['Pisces'],
+    exalted: 'Cancer',
+    detriment: 'Virgo',
+    fall: 'Capricorn',
+  },
+  Pluto: {
+    rules: ['Scorpio'],
+    exalted: 'Aries',
+    detriment: 'Taurus',
+    fall: 'Libra',
+  },
+};
+
+const getPlanetDignity = (planet: string, sign: string): Dignity | null => {
+  const data = PLANET_DIGNITIES[planet];
+  if (!data) return null;
+  if (data.rules.includes(sign)) return 'domicile';
+  if (data.exalted === sign) return 'exalted';
+  if (data.detriment === sign) return 'detriment';
+  if (data.fall === sign) return 'fall';
+  return null;
+};
+
+const DIGNITY_DOT_CLASS: Record<Dignity, string> = {
+  domicile: 'bg-amber-400/70',
+  exalted: 'bg-yellow-300/80',
+  detriment: 'bg-rose-400/60',
+  fall: 'bg-indigo-400/50',
+};
+
+const DIGNITY_TEXT_CLASS: Record<Dignity, string> = {
+  domicile: 'text-amber-400/70',
+  exalted: 'text-yellow-300/80',
+  detriment: 'text-rose-400/60',
+  fall: 'text-indigo-400/60',
+};
+
+const DIGNITY_ABBR: Record<Dignity, string> = {
+  domicile: 'dom',
+  exalted: 'ex',
+  detriment: 'det',
+  fall: 'fall',
+};
+
+const DIGNITY_LABEL: Record<Dignity, string> = {
+  domicile: 'domicile — at home, full strength',
+  exalted: 'exalted — peak expression',
+  detriment: 'detriment — uncomfortable placement',
+  fall: 'fall — weakened expression',
+};
+
+function DignityTooltip({
+  dignity,
+  planet,
+  sign,
+  children,
+}: {
+  dignity: Dignity;
+  planet: string;
+  sign: string;
+  children: React.ReactNode;
+}) {
+  const [visible, setVisible] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearTimer = () => {
+    if (timer.current) clearTimeout(timer.current);
+  };
+
+  const handleMouseEnter = () => {
+    clearTimer();
+    setVisible(true);
+  };
+
+  const handleMouseLeave = () => {
+    clearTimer();
+    timer.current = setTimeout(() => setVisible(false), 120);
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    clearTimer();
+    if (visible) {
+      setVisible(false);
+    } else {
+      setVisible(true);
+      timer.current = setTimeout(() => setVisible(false), 2500);
+    }
+  };
+
+  return (
+    <span
+      className='relative inline-flex items-center justify-center'
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
+    >
+      {children}
+      {visible && (
+        <span className='pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[10px] text-zinc-200 shadow-lg'>
+          <span className={`font-mono ${DIGNITY_TEXT_CLASS[dignity]}`}>
+            {DIGNITY_ABBR[dignity]}
+          </span>{' '}
+          — {planet} {DIGNITY_LABEL[dignity].split('—')[1]?.trim()}
+        </span>
+      )}
+    </span>
+  );
+}
 
 const getPlanetSymbol = (planet: string): string => {
   const key = planet.toLowerCase() as keyof typeof bodiesSymbols;
@@ -381,28 +546,46 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
       />
       <div className='mt-2 space-y-1 w-full'>
         <div className='grid grid-cols-10 gap-y-2 w-full text-center'>
-          {planets.map((planet) => (
-            <div
-              key={planet.body}
-              className='flex flex-col items-center justify-center gap-0'
-              data-testid='planet-item'
-              data-planet={planet.body}
-            >
-              <span
-                className={`font-astro text-base ${planet.retrograde ? 'text-lunary-error-300' : 'text-zinc-300'}`}
-                title={planet.body}
+          {planets.map((planet) => {
+            const dignity = getPlanetDignity(planet.body, planet.sign);
+            return (
+              <div
+                key={planet.body}
+                className='flex flex-col items-center justify-center gap-0'
+                data-testid='planet-item'
+                data-planet={planet.body}
               >
-                {getPlanetSymbol(planet.body)}
-              </span>
-              <span
-                className={`text-xs font-astro tracking-wider ${
-                  planet.retrograde ? 'text-lunary-error-300' : 'text-zinc-400'
-                }`}
-              >
-                {getZodiacSymbol(planet.sign)}
-              </span>
-            </div>
-          ))}
+                <span
+                  className={`font-astro text-base ${planet.retrograde ? 'text-lunary-error-300' : 'text-zinc-300'}`}
+                  title={planet.body}
+                >
+                  {getPlanetSymbol(planet.body)}
+                </span>
+                <span
+                  className={`text-xs font-astro tracking-wider ${
+                    planet.retrograde
+                      ? 'text-lunary-error-300'
+                      : 'text-zinc-400'
+                  }`}
+                >
+                  {getZodiacSymbol(planet.sign)}
+                </span>
+                {dignity ? (
+                  <DignityTooltip
+                    dignity={dignity}
+                    planet={planet.body}
+                    sign={planet.sign}
+                  >
+                    <span
+                      className={`w-1 h-1 rounded-full mt-0.5 ${DIGNITY_DOT_CLASS[dignity]}`}
+                    />
+                  </DignityTooltip>
+                ) : (
+                  <span className='w-1 h-1 mt-0.5' />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -413,6 +596,7 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
       <div className='space-y-2'>
         {planets.map((planet) => {
           const normalizedSign = normalizeSignName(planet.sign);
+          const dignity = getPlanetDignity(planet.body, planet.sign);
           return (
             <div
               key={planet.body}
@@ -443,6 +627,19 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                   )}
                   {planet.retrograde && (
                     <span className='text-xs text-lunary-error-300'>℞</span>
+                  )}
+                  {dignity && (
+                    <DignityTooltip
+                      dignity={dignity}
+                      planet={planet.body}
+                      sign={planet.sign}
+                    >
+                      <span
+                        className={`text-[9px] font-mono tracking-wide leading-none ${DIGNITY_TEXT_CLASS[dignity]}`}
+                      >
+                        {DIGNITY_ABBR[dignity]}
+                      </span>
+                    </DignityTooltip>
                   )}
                 </div>
                 <TransitDurationBadge duration={planet.duration} />
