@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { AuthComponent } from './Auth';
+import { IOSPaywall } from './IOSPaywall';
 import { useModal } from '@/hooks/useModal';
 import { Button } from '@/components/ui/button';
 import { isFreeFeature } from '@/utils/messaging';
@@ -13,6 +15,8 @@ import type { FeatureKey } from '../../utils/pricing';
 import { cn } from '@/lib/utils';
 import { trackCtaClick } from '@/lib/analytics';
 import { getContextualHub } from '@/lib/grimoire/getContextualNudge';
+
+const isIOS = Capacitor.getPlatform() === 'ios';
 
 interface SmartTrialButtonProps {
   size?: 'sm' | 'default' | 'lg' | 'xs';
@@ -32,6 +36,7 @@ export function SmartTrialButton({
   const authState = useAuthStatus();
   const { isSubscribed, isTrialActive } = useSubscription();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showIOSPaywall, setShowIOSPaywall] = useState(false);
   const pathname = usePathname() || '';
 
   useModal({
@@ -114,6 +119,35 @@ export function SmartTrialButton({
   };
 
   if (config.action === 'link' && config.href) {
+    // On iOS, intercept /pricing links and show native IAP instead
+    if (isIOS && config.href === '/pricing') {
+      return (
+        <>
+          <Button
+            variant={config.variant}
+            size={size}
+            className={cn(fullWidth ? 'w-full' : '', className)}
+            onClick={() => {
+              trackClick();
+              setShowIOSPaywall(true);
+            }}
+          >
+            {config.text}
+          </Button>
+          {showIOSPaywall && (
+            <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50 p-4'>
+              <div className='bg-zinc-900 rounded-2xl p-6 w-full max-w-md'>
+                <IOSPaywall
+                  onSuccess={() => setShowIOSPaywall(false)}
+                  onDismiss={() => setShowIOSPaywall(false)}
+                />
+              </div>
+            </div>
+          )}
+        </>
+      );
+    }
+
     return (
       <Button
         variant={config.variant}
@@ -177,7 +211,11 @@ export function SmartTrialButton({
               defaultToSignUp={true}
               onSuccess={() => {
                 setShowAuthModal(false);
-                window.location.href = '/pricing';
+                if (isIOS) {
+                  setShowIOSPaywall(true);
+                } else {
+                  window.location.href = '/pricing';
+                }
               }}
             />
           </div>

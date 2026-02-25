@@ -83,6 +83,9 @@ dependencies:
   '@remotion/renderer':
     specifier: ^4.0.417
     version: 4.0.421(react-dom@18.3.1)(react@18.3.1)
+  '@revenuecat/purchases-capacitor':
+    specifier: ^12.2.0
+    version: 12.2.0(@capacitor/core@8.1.0)
   '@stripe/stripe-js':
     specifier: ^7.9.0
     version: 7.9.0
@@ -4648,6 +4651,19 @@ packages:
       '@resvg/resvg-js-win32-ia32-msvc': 2.6.2
       '@resvg/resvg-js-win32-x64-msvc': 2.6.2
     dev: true
+
+  /@revenuecat/purchases-capacitor@12.2.0(@capacitor/core@8.1.0):
+    resolution: {integrity: sha512-6lOfs1sXTM3M1sbptKAUeHDIkwk6XBGl5IFyfnCtkA/+xecxOM+bq3pwBrO2mAzBCG9lysQi66CFG5tzqQi6lA==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+    dependencies:
+      '@capacitor/core': 8.1.0
+      '@revenuecat/purchases-typescript-internal-esm': 17.41.1
+    dev: false
+
+  /@revenuecat/purchases-typescript-internal-esm@17.41.1:
+    resolution: {integrity: sha512-GduNxWNKRL6cpQcR1Xv7KJp0JJMusjCcp+lSsAiowSkTvLTZvYRTepyIt8gqKBHWh71KDykzOkFT0Hejgx+XXQ==}
+    dev: false
 
   /@rtsao/scc@1.1.0:
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}

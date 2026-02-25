@@ -33,24 +33,25 @@ function resolvePriceId(planId: PlanId, currency: string): string | null {
 }
 
 /**
- * Normalizes plan type to one of the four valid plans:
+ * Normalizes plan type to one of the five valid plans:
  * - 'free'
- * - 'lunary_plus' (Plus)
- * - 'lunary_plus_ai' (Plus AI)
- * - 'lunary_plus_ai_annual' (Plus AI Annual)
+ * - 'lunary_plus' (Plus monthly)
+ * - 'lunary_plus_annual' (Plus annual)
+ * - 'lunary_plus_ai' (Plus Pro monthly)
+ * - 'lunary_plus_ai_annual' (Plus Pro annual)
  *
  * IMPORTANT: This function preserves specific plan identifiers.
  * Only converts generic 'monthly'/'yearly' when specific plan isn't available.
- * WARNING: Converting 'monthly' to 'lunary_plus' may be incorrect if user has 'lunary_plus_ai'.
  * Always prefer fetching specific plan name from Stripe via price ID mapping.
  */
 export function normalizePlanType(planType: string | undefined): string {
   if (!planType) return 'free';
 
-  // Preserve specific plan identifiers first - these are the four valid plans
+  // Preserve specific plan identifiers
   if (
     planType === 'lunary_plus_ai' ||
     planType === 'lunary_plus_ai_annual' ||
+    planType === 'lunary_plus_annual' ||
     planType === 'lunary_plus' ||
     planType === 'free'
   ) {
@@ -125,7 +126,9 @@ export function hasFeatureAccess(
         ? FEATURE_ACCESS.lunary_plus_ai_annual
         : effectivePlan === 'lunary_plus_ai'
           ? FEATURE_ACCESS.lunary_plus_ai
-          : FEATURE_ACCESS.lunary_plus;
+          : effectivePlan === 'lunary_plus_annual'
+            ? FEATURE_ACCESS.lunary_plus_annual
+            : FEATURE_ACCESS.lunary_plus;
 
     return (
       freeFeatures.includes(feature) ||

@@ -970,9 +970,11 @@ model subscriptions {
   trial_reminder_3d_sent   Boolean?  @default(false)
   trial_reminder_1d_sent   Boolean?  @default(false)
   trial_expired_email_sent Boolean?  @default(false)
-  stripe_customer_id       String?
-  stripe_subscription_id   String?
-  current_period_end       DateTime? @db.Timestamptz(6)
+  stripe_customer_id             String?
+  stripe_subscription_id         String?
+  apple_original_transaction_id  String?
+  subscription_source            String?   @default("stripe")
+  current_period_end             DateTime? @db.Timestamptz(6)
   created_at               DateTime? @default(now()) @db.Timestamptz(6)
   updated_at               DateTime? @default(now()) @db.Timestamptz(6)
   trial_nurture_day1_sent  Boolean?  @default(false)
