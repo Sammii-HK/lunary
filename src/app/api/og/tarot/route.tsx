@@ -12,6 +12,8 @@ import {
   OGTitle,
   OGSubtitle,
   OGFooter,
+  OGStarfield,
+  OGGlowOrbs,
   createOGResponse,
   defaultThemes,
   OGImageSize,
@@ -120,18 +122,38 @@ export async function GET(request: NextRequest) {
   const formattedDate = showDate ? dateObj.format('DD/MM/YYYY') : undefined;
   const theme = defaultThemes.tarot(card.color);
 
-  const robotoFont = await loadGoogleFont(request);
+  let robotoFont: ArrayBuffer | null = null;
+  try {
+    robotoFont = await loadGoogleFont(request);
+  } catch {
+    // continue without custom font
+  }
 
   return createOGResponse(
     <OGWrapper theme={theme}>
-      <OGHeader title={card.keywords.join(' • ')} fontSize={24} />
+      <OGStarfield seed={card.name} count={60} accentColor={card.color} />
+      <OGGlowOrbs accentColor={card.color} />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        <OGHeader title={card.keywords.join(' • ')} fontSize={24} />
 
-      <OGContentCenter>
-        <OGTitle text={card.name} />
-        <OGSubtitle text={card.archetype} fontSize={32} opacity={0.8} />
-      </OGContentCenter>
+        <OGContentCenter>
+          <OGTitle text={card.name} />
+          <OGSubtitle text={card.archetype} fontSize={32} opacity={0.8} />
+        </OGContentCenter>
 
-      <OGFooter date={formattedDate} />
+        <OGFooter date={formattedDate} />
+      </div>
     </OGWrapper>,
     {
       size,

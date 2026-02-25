@@ -200,6 +200,30 @@ export default function SharePreviewPage() {
           title: 'Numerology',
           url: `/api/og/share/numerology?shareId=demo&format=${format}`,
         },
+        {
+          title: 'Big Three',
+          url: `/api/og/share/big-three?format=${format}&sun=Scorpio&moon=Cancer&rising=Leo`,
+        },
+        {
+          title: 'Streak',
+          url: `/api/og/share/streak?format=${format}&streakDays=30&totalReadings=142&totalEntries=67&totalRituals=30`,
+        },
+        {
+          title: 'Tarot',
+          url: `/api/og/share/tarot?shareId=demo&format=${format}`,
+        },
+        {
+          title: 'Synastry',
+          url: `/api/og/share/synastry?shareId=demo&format=${format}`,
+        },
+        {
+          title: 'Compat Invite',
+          url: `/api/og/share/compat-invite?format=${format}&inviterName=Cosmic+Explorer&inviterSign=Scorpio&sun=Scorpio&moon=Cancer&rising=Leo`,
+        },
+        {
+          title: 'Referral',
+          url: `/api/og/share/referral?format=${format}&name=Cosmic+Explorer&sign=Scorpio`,
+        },
       ];
     }
 
@@ -389,6 +413,30 @@ export default function SharePreviewPage() {
       {
         title: 'Numerology',
         url: `/api/og/share/numerology?format=${format}&name=${encodeURIComponent(firstName)}&birthDate=${birthDate || ''}&lifePath=${lifePath}&soulUrge=${soulUrge}&expression=${expression}&lifePathMeaning=${encodeURIComponent('The Seeker - wisdom and introspection')}&soulUrgeMeaning=${encodeURIComponent('The Creative - self-expression and joy')}&expressionMeaning=${encodeURIComponent('The Explorer - freedom and change')}`,
+      },
+      {
+        title: 'Big Three',
+        url: `/api/og/share/big-three?format=${format}&name=${encodeURIComponent(firstName)}&sun=${sun}&moon=${moon}&rising=${rising}`,
+      },
+      {
+        title: 'Streak',
+        url: `/api/og/share/streak?format=${format}&streakDays=30&totalReadings=142&totalEntries=67&totalRituals=30&userName=${encodeURIComponent(firstName)}`,
+      },
+      {
+        title: 'Tarot',
+        url: `/api/og/share/tarot?shareId=demo&format=${format}`,
+      },
+      {
+        title: 'Synastry',
+        url: `/api/og/share/synastry?shareId=demo&format=${format}`,
+      },
+      {
+        title: 'Compat Invite',
+        url: `/api/og/share/compat-invite?format=${format}&inviterName=${encodeURIComponent(firstName)}&inviterSign=${sun}&sun=${sun}&moon=${moon}&rising=${rising}`,
+      },
+      {
+        title: 'Referral',
+        url: `/api/og/share/referral?format=${format}&name=${encodeURIComponent(firstName)}&sign=${sun}`,
       },
     ];
   };

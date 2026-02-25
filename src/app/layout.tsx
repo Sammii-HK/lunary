@@ -86,10 +86,18 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
+      site: '@LunaryApp',
       title: 'Lunary - Learn to Read Your Own Chart',
       description:
         'Learn to read your own birth chart through daily practice. Track patterns, interpret transits, and understand relationships with full synastry analysis.',
-      images: ['/api/og/cosmic'],
+      images: [
+        {
+          url: '/api/og/cosmic',
+          width: 2400,
+          height: 1260,
+          alt: 'Lunary - The astrology app that teaches you to read your own chart',
+        },
+      ],
     },
     appleWebApp: {
       capable: true,

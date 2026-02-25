@@ -1151,6 +1151,1485 @@ const PROMPTS: ImagePrompt[] = [
       'A single tarot card face down on dark surface, its edges glowing with golden light from within. Stars and a faint nebula behind. Anticipation and mystery. No text.',
     tags: ['tarot', 'glowing', 'mystery', 'gold'],
   },
+
+  // TAROT MAJOR ARCANA — individual card art
+  {
+    id: 'tarot-the-moon-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Moon tarot card art. A luminous full moon between two dark towers. A wolf and a dog howl at it from below. A crayfish emerges from a pool. Deep indigo and silver. Mysterious and dreamlike. Dark atmospheric painting style. No text or card name.',
+    tags: ['tarot', 'the-moon', 'major-arcana', 'dark'],
+  },
+  {
+    id: 'tarot-the-star-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Star tarot card art. A luminous woman kneeling at a pool beneath a vast star-filled sky. A bright central star above her, seven smaller stars around it. She pours water from two vessels. Hope and renewal. Ethereal and beautiful. No text or card name.',
+    tags: ['tarot', 'the-star', 'major-arcana', 'hope'],
+  },
+  {
+    id: 'tarot-the-sun-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Sun tarot card art. A blazing radiant sun against a warm sky. Sunflowers below. Warm gold and amber. Pure joy and vitality. Painterly style, dramatic sun rays. No text or card name.',
+    tags: ['tarot', 'the-sun', 'major-arcana', 'joy'],
+  },
+  {
+    id: 'tarot-the-tower-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Tower tarot card art. A tall stone tower struck by lightning. Figures falling from its crown. Flames burst from the windows. Dark stormy sky. Dramatic and powerful. Dark painterly style. No text or card name.',
+    tags: ['tarot', 'the-tower', 'major-arcana', 'upheaval'],
+  },
+  {
+    id: 'tarot-high-priestess-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The High Priestess tarot card art. A mysterious robed figure sits between two pillars — one black, one white. A crescent moon at her feet. A veil of pomegranates behind her. Deep blue and silver. Intuition and mystery. No text or card name.',
+    tags: ['tarot', 'high-priestess', 'major-arcana', 'mystery'],
+  },
+  {
+    id: 'tarot-the-world-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The World tarot card art. A dancing figure at the centre of a laurel wreath. Four corner figures: an angel, an eagle, a lion, a bull. Cosmic background. Completion and wholeness. Rich and symbolic. No text or card name.',
+    tags: ['tarot', 'the-world', 'major-arcana', 'completion'],
+  },
+  {
+    id: 'tarot-wheel-of-fortune-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Wheel of Fortune tarot card art. A great spinning wheel of symbols against a cosmic sky. The wheel of fate turns in deep space. Gold and deep blue. Rich symbolism. No text or card name.',
+    tags: ['tarot', 'wheel-of-fortune', 'major-arcana', 'fate'],
+  },
+  {
+    id: 'tarot-the-hermit-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Hermit tarot card art. A cloaked figure on a snowy mountain peak holds a lantern aloft in the darkness. Stars above. Isolated but illuminated. Deep shadow and a single point of golden light. No text or card name.',
+    tags: ['tarot', 'the-hermit', 'major-arcana', 'solitude'],
+  },
+  {
+    id: 'tarot-the-lovers-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Lovers tarot card art. Two figures beneath a radiant angel in the sky above. A mountain behind them. The sun blazes warmly. Love, choice and union. Rich painterly style. No text or card name.',
+    tags: ['tarot', 'the-lovers', 'major-arcana', 'love'],
+  },
+  {
+    id: 'tarot-death-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Death tarot card art. A skeletal figure in black armour on a pale horse. A sun rises on the horizon — transformation, not ending. Dark and dramatic but with a distant dawn. No text or card name.',
+    tags: ['tarot', 'death', 'major-arcana', 'transformation'],
+  },
+  {
+    id: 'tarot-the-empress-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Empress tarot card art. A lush abundant figure seated on a throne of nature. Wheat, roses, a waterfall behind her. Crown of twelve stars. Rich greens, gold, warm tones. Fertility and abundance. No text or card name.',
+    tags: ['tarot', 'the-empress', 'major-arcana', 'abundance'],
+  },
+  {
+    id: 'tarot-the-magician-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Magician tarot card art. A robed figure stands before a table with four tools: cup, wand, sword, pentacle. One hand points up, one down. A lemniscate above their head. Powerful and focused. Bright energy. No text or card name.',
+    tags: ['tarot', 'the-magician', 'major-arcana', 'will'],
+  },
+
+  // AURA PHOTOGRAPHY — silhouette with glowing energy field
+  {
+    id: 'aura-purple-cosmic',
+    category: 'aura',
+    prompt:
+      'A human silhouette surrounded by a glowing purple and violet aura. The energy field radiates outward in soft light. Deep black background. Stars faintly visible. Spiritual and ethereal. No faces, no text.',
+    tags: ['aura', 'purple', 'spiritual', 'silhouette'],
+  },
+  {
+    id: 'aura-gold-radiant',
+    category: 'aura',
+    prompt:
+      'A human silhouette with a brilliant golden aura radiating outward. Warm gold and amber light. The aura pulses with divine energy. Dark background. Majestic and powerful. No faces, no text.',
+    tags: ['aura', 'gold', 'radiant', 'divine'],
+  },
+  {
+    id: 'aura-blue-electric',
+    category: 'aura',
+    prompt:
+      'A human silhouette with an electric blue aura crackling with energy. Lightning-like tendrils extend from the body. Deep black background. Intense and vivid. No faces, no text.',
+    tags: ['aura', 'blue', 'electric', 'energy'],
+  },
+  {
+    id: 'aura-pink-love',
+    category: 'aura',
+    prompt:
+      'A human silhouette with a soft rose pink aura glowing gently around them. Heart chakra energy radiating outward. Warm and loving. Dark background with faint stars. No faces, no text.',
+    tags: ['aura', 'pink', 'love', 'heart'],
+  },
+  {
+    id: 'aura-rainbow-full',
+    category: 'aura',
+    prompt:
+      'A human silhouette with a full rainbow aura — all seven chakra colours radiating from the body in concentric bands. Red at the base through violet at the crown. Beautiful and balanced. Dark background. No faces, no text.',
+    tags: ['aura', 'rainbow', 'chakra', 'full'],
+  },
+  {
+    id: 'aura-green-healer',
+    category: 'aura',
+    prompt:
+      'A human silhouette with a soft emerald green aura. Healing energy emanates outward in soft waves. Dark background. Calming and restorative. No faces, no text.',
+    tags: ['aura', 'green', 'healing', 'emerald'],
+  },
+  {
+    id: 'aura-white-angelic',
+    category: 'aura',
+    prompt:
+      'A human silhouette surrounded by a brilliant white and silver angelic aura. Pure light radiates in all directions. Stars and cosmic light merge with the aura. Transcendent and divine. No faces, no text.',
+    tags: ['aura', 'white', 'angelic', 'transcendent'],
+  },
+
+  // MOON PHASES — individual phase portraits
+  {
+    id: 'phase-new-moon',
+    category: 'moon-phase',
+    prompt:
+      'New moon. Just a faint dark circle visible against a dense star field. The moon is barely there — only its dark outline against the night. Deep black sky, thousands of stars. New beginnings. No text.',
+    tags: ['moon-phase', 'new-moon', 'dark', 'stars'],
+  },
+  {
+    id: 'phase-waxing-crescent',
+    category: 'moon-phase',
+    prompt:
+      'Waxing crescent moon. A thin sliver of silver light on the right side of the moon. Deep blue night sky. Stars around it. The moon is young and growing. Hopeful and delicate. No text.',
+    tags: ['moon-phase', 'waxing-crescent', 'crescent'],
+  },
+  {
+    id: 'phase-first-quarter',
+    category: 'moon-phase',
+    prompt:
+      'First quarter moon. Exactly half the moon illuminated on the right, half in shadow. The terminator line crisp. Craters visible in the lit half. Deep blue-black sky. Action and momentum. No text.',
+    tags: ['moon-phase', 'first-quarter', 'half-moon'],
+  },
+  {
+    id: 'phase-waxing-gibbous',
+    category: 'moon-phase',
+    prompt:
+      'Waxing gibbous moon. More than half illuminated, building toward fullness. Bright and luminous. Surface detail visible. Deep indigo sky. Anticipation and building energy. No text.',
+    tags: ['moon-phase', 'waxing-gibbous', 'building'],
+  },
+  {
+    id: 'phase-full-moon-solo',
+    category: 'moon-phase',
+    prompt:
+      'Full moon at its peak. A perfect luminous circle. Bright and detailed surface features. The moon fills much of the frame against a deep black star-filled sky. Peak energy and power. No text.',
+    tags: ['moon-phase', 'full-moon', 'peak', 'power'],
+  },
+  {
+    id: 'phase-waning-gibbous',
+    category: 'moon-phase',
+    prompt:
+      'Waning gibbous moon. Still mostly bright, now the left side begins to shadow. Beautiful detailed surface. Dark sky and stars. Release and reflection beginning. No text.',
+    tags: ['moon-phase', 'waning-gibbous', 'release'],
+  },
+  {
+    id: 'phase-last-quarter',
+    category: 'moon-phase',
+    prompt:
+      'Last quarter moon. Left half illuminated, right in shadow. Mirror of the first quarter. Stars in the dark sky. Letting go and surrendering. No text.',
+    tags: ['moon-phase', 'last-quarter', 'half-moon'],
+  },
+  {
+    id: 'phase-waning-crescent',
+    category: 'moon-phase',
+    prompt:
+      'Waning crescent moon. A thin silver sliver on the left side, barely visible. Dark sky blazing with stars. The moon resting before renewal. Rest and surrender. No text.',
+    tags: ['moon-phase', 'waning-crescent', 'surrender'],
+  },
+
+  // ABSTRACT COLOUR WASHES — clean backgrounds for text overlay
+  {
+    id: 'wash-deep-indigo',
+    category: 'wash',
+    prompt:
+      'A deep indigo gradient background. Very dark at the top, softening toward deep blue-purple at the bottom. Almost no detail — pure colour atmosphere. Subtle texture like velvet. Perfect for text overlay. No text.',
+    tags: ['wash', 'indigo', 'gradient', 'background'],
+  },
+  {
+    id: 'wash-obsidian-black',
+    category: 'wash',
+    prompt:
+      'A near-black background with the faintest hint of deep charcoal texture. Rich and velvety. The darkest possible background with just enough life to not feel flat. Perfect for white text overlay. No text.',
+    tags: ['wash', 'black', 'obsidian', 'dark'],
+  },
+  {
+    id: 'wash-rose-gold',
+    category: 'wash',
+    prompt:
+      'A rose gold gradient background. Soft blush pink fading to warm gold at the edges. Smooth and luxurious. Subtle shimmering metallic texture. Feminine and elegant. Perfect for text overlay. No text.',
+    tags: ['wash', 'rose-gold', 'pink', 'gradient'],
+  },
+  {
+    id: 'wash-midnight-nebula',
+    category: 'wash',
+    prompt:
+      'A very dark midnight blue background with the faintest wisp of purple nebula in one corner and scattered tiny stars. Mostly dark — minimal, elegant, cosmic. Ideal text overlay background. No text.',
+    tags: ['wash', 'midnight', 'blue', 'minimal'],
+  },
+  {
+    id: 'wash-sage-forest',
+    category: 'wash',
+    prompt:
+      'A dark sage green gradient background. Deep forest green fading to almost black. Earthy and grounded. Very dark, minimal texture. Suitable for text overlay. No text.',
+    tags: ['wash', 'sage', 'green', 'earth'],
+  },
+  {
+    id: 'wash-gold-shimmer',
+    category: 'wash',
+    prompt:
+      'A dark background with a warm golden shimmer emanating from the centre. Like candlelight seen through dark glass. Luxurious and magical. Very dark at edges, warm gold at heart. No text.',
+    tags: ['wash', 'gold', 'shimmer', 'luxury'],
+  },
+  {
+    id: 'wash-deep-crimson',
+    category: 'wash',
+    prompt:
+      'A deep crimson and burgundy gradient background. Dark blood red, rich and intense. The colour of wine and roses in darkness. Perfect dramatic background for text. No text.',
+    tags: ['wash', 'crimson', 'red', 'deep'],
+  },
+  {
+    id: 'wash-silver-mist',
+    category: 'wash',
+    prompt:
+      'A cool silver and light grey gradient. Like early morning mist before dawn. Smooth, soft, minimal. Almost colourless but beautifully textured. Clean background for dark text. No text.',
+    tags: ['wash', 'silver', 'mist', 'minimal'],
+  },
+
+  // ZODIAC CREATURE PORTRAITS — dark dramatic art style
+  {
+    id: 'zodiac-aries-ram-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic dark portrait of a ram — Aries. The ram stands against a fiery red and gold cosmic background. Its horns glow like embers. Powerful and primal. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'aries', 'ram', 'portrait', 'fire'],
+  },
+  {
+    id: 'zodiac-taurus-bull-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic dark portrait of a bull — Taurus. Deep earthy tones, dark green and gold cosmic background. The bull exudes strength and patience. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'taurus', 'bull', 'portrait', 'earth'],
+  },
+  {
+    id: 'zodiac-cancer-crab-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic portrait of a crab — Cancer. Silver and deep blue tones, a full moon behind it. The crab shimmers with moonlight. Emotional and mysterious. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'cancer', 'crab', 'portrait', 'moon'],
+  },
+  {
+    id: 'zodiac-leo-lion-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic portrait of a lion — Leo. A magnificent mane catches golden sunlight against a dark cosmic background. Regal and powerful. Gold and deep amber tones. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'leo', 'lion', 'portrait', 'sun'],
+  },
+  {
+    id: 'zodiac-scorpio-scorpion-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic portrait of a scorpion — Scorpio. Deep crimson, black and dark teal background. The scorpion radiates intensity and power. Its tail poised. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'scorpio', 'scorpion', 'portrait', 'intense'],
+  },
+  {
+    id: 'zodiac-sagittarius-centaur-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic portrait of a centaur archer — Sagittarius. Drawing a bow aimed at a distant star. Purple and gold cosmic background. Wild and free. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'sagittarius', 'centaur', 'portrait', 'archer'],
+  },
+  {
+    id: 'zodiac-capricorn-goat-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic portrait of a sea-goat — Capricorn. Half goat, half fish emerging from dark ocean waves under a starry sky. Dark teal and gold tones. Ancient and mythical. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'capricorn', 'sea-goat', 'portrait', 'mythical'],
+  },
+  {
+    id: 'zodiac-pisces-fish-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic portrait of two fish swimming in opposite directions — Pisces. Deep ocean blues and silvers. The fish trail stardust and light. Ethereal and dreamy. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'pisces', 'fish', 'portrait', 'ocean'],
+  },
+
+  // PLANET CLOSE-UPS — additional detail shots
+  {
+    id: 'planet-saturn-rings-edge',
+    category: 'planets',
+    prompt:
+      "Saturn's rings seen perfectly edge-on. A razor-thin line of ice and rock extending across the frame. Saturn's banded surface above and below. Deep space black. Elegant and precise. No text.",
+    tags: ['planets', 'saturn', 'rings', 'edge-on'],
+  },
+  {
+    id: 'planet-jupiter-grs-macro',
+    category: 'planets',
+    prompt:
+      'The Great Red Spot on Jupiter, close up. The vast storm system swirls in amber, orange and cream. Smaller storms around it. Atmospheric bands curve away. Dramatic and beautiful. No text.',
+    tags: ['planets', 'jupiter', 'great-red-spot', 'storm'],
+  },
+  {
+    id: 'planet-mars-surface',
+    category: 'planets',
+    prompt:
+      'Mars surface at sunset. Red and ochre terrain with dust devils in the distance. Twin moons (Phobos and Deimos) faintly visible in the pinkish sky. Curiosity rover aesthetic. No text.',
+    tags: ['planets', 'mars', 'surface', 'sunset'],
+  },
+  {
+    id: 'planet-neptune-storms',
+    category: 'planets',
+    prompt:
+      "Neptune's deep blue surface swirling with storm systems. The Great Dark Spot, white cirrus clouds, and bands of dark blue weather. The most alien-looking planet in the solar system. No text.",
+    tags: ['planets', 'neptune', 'storms', 'blue'],
+  },
+  {
+    id: 'planet-saturn-rings-golden',
+    category: 'planets',
+    prompt:
+      "Saturn from below its rings. Looking up through the ring plane — ice and rock particles catch the distant sunlight in gold and amber. Saturn's golden globe in the background. Stunning perspective. No text.",
+    tags: ['planets', 'saturn', 'rings', 'perspective', 'gold'],
+  },
+  {
+    id: 'planet-venus-clouds',
+    category: 'planets',
+    prompt:
+      'Venus from orbit. Thick swirling yellow and cream cloud cover. UV photography reveals complex atmospheric patterns. An alien world hidden beneath eternal storms. No text.',
+    tags: ['planets', 'venus', 'clouds', 'atmosphere'],
+  },
+
+  // MISSING ZODIAC CREATURES — completing the 12
+  {
+    id: 'zodiac-gemini-twins-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic dark portrait of the Gemini twins — two mirrored figures made of stars and light, one reaching toward light, one toward shadow. Electric yellow and deep purple cosmic background. Duality and intelligence. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'gemini', 'twins', 'portrait', 'duality'],
+  },
+  {
+    id: 'zodiac-virgo-maiden-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic portrait of the Virgo maiden — an ethereal figure in flowing robes of stars and wheat. She holds a sheaf of golden grain. Deep forest green and gold cosmic background. Pure and precise. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'virgo', 'maiden', 'portrait', 'harvest'],
+  },
+  {
+    id: 'zodiac-libra-scales-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic portrait of the Libra scales — enormous golden cosmic scales perfectly balanced in deep space. Rose and lavender nebula behind. Feathers and stars on the pans. Justice and harmony. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'libra', 'scales', 'portrait', 'balance'],
+  },
+  {
+    id: 'zodiac-aquarius-bearer-portrait',
+    category: 'zodiac-creature',
+    prompt:
+      'A dramatic portrait of the Aquarius water-bearer — a figure pouring an endless stream of cosmic water that becomes stars as it falls. Electric blue and silver. Visionary and electric. Dark fantasy art style. No text.',
+    tags: ['zodiac', 'aquarius', 'water-bearer', 'portrait', 'electric'],
+  },
+
+  // MORE ANGEL NUMBERS
+  {
+    id: 'numerology-000-void',
+    category: 'numerology',
+    prompt:
+      'The number 000 in soft white light against a deep black void. Pure and infinite. Like the universe before creation. Glowing gently, vast and silent. No other text.',
+    tags: ['numerology', '000', 'angel-number', 'infinite'],
+  },
+  {
+    id: 'numerology-222-balance',
+    category: 'numerology',
+    prompt:
+      'The number 222 in soft silver and moonlight against a midnight blue background with a crescent moon. Balance and harmony. Gentle and reassuring energy. No other text.',
+    tags: ['numerology', '222', 'angel-number', 'balance'],
+  },
+  {
+    id: 'numerology-444-earth',
+    category: 'numerology',
+    prompt:
+      'The number 444 in deep green and gold light, grounded energy emanating from it. Earth tones and stability. Surrounded by subtle sacred geometry patterns. No other text.',
+    tags: ['numerology', '444', 'angel-number', 'stability'],
+  },
+  {
+    id: 'numerology-888-abundance',
+    category: 'numerology',
+    prompt:
+      'The number 888 in warm golden abundance energy. Rich and glowing against deep space. Flowing wealth energy in spirals around the numbers. Infinite loops of gold. No other text.',
+    tags: ['numerology', '888', 'angel-number', 'abundance'],
+  },
+  {
+    id: 'numerology-999-completion',
+    category: 'numerology',
+    prompt:
+      'The number 999 in violet and white light. End of a cycle, completion and transformation. The numbers glow like a dying star before rebirth. Deep cosmic background. No other text.',
+    tags: ['numerology', '999', 'angel-number', 'completion'],
+  },
+  {
+    id: 'numerology-1111-portal',
+    category: 'numerology',
+    prompt:
+      'The number 1111 blazing in bright white and gold. A portal opening behind the numbers. The alignment gateway. Four pillars of light. Electric and powerful. No other text.',
+    tags: ['numerology', '1111', 'angel-number', 'portal', 'alignment'],
+  },
+
+  // GODDESS ARCHETYPES — spiritual figures
+  {
+    id: 'goddess-hecate-night',
+    category: 'goddess',
+    prompt:
+      'Hecate, goddess of the crossroads and witchcraft. A dark cloaked female figure at a three-way crossroads at midnight. Three torches burning. The full moon above. Owls in the shadows. Dark fantasy art, no face visible. No text.',
+    tags: ['goddess', 'hecate', 'witchcraft', 'dark'],
+  },
+  {
+    id: 'goddess-isis-wings',
+    category: 'goddess',
+    prompt:
+      'Isis, Egyptian goddess. A majestic winged female silhouette with vast golden wings spread wide. A solar disc and horns crown her head. Deep indigo sky filled with stars. Ancient and powerful. No face, no text.',
+    tags: ['goddess', 'isis', 'egyptian', 'wings'],
+  },
+  {
+    id: 'goddess-artemis-moon',
+    category: 'goddess',
+    prompt:
+      'Artemis, goddess of the moon and hunt. A silver archer silhouette with a crescent moon crown, drawing a bow against a full moon sky. A stag visible in the forest below. Ancient Greek aesthetic. No face, no text.',
+    tags: ['goddess', 'artemis', 'moon', 'hunt'],
+  },
+  {
+    id: 'goddess-persephone-underworld',
+    category: 'goddess',
+    prompt:
+      'Persephone, queen of the underworld. A figure half in light (spring flowers, sunlight) and half in shadow (pomegranates, dark flowers). The transition between worlds. Dark and beautiful. No face, no text.',
+    tags: ['goddess', 'persephone', 'duality', 'underworld'],
+  },
+  {
+    id: 'goddess-kali-cosmic',
+    category: 'goddess',
+    prompt:
+      'Kali, goddess of time and destruction. A powerful many-armed silhouette against a cosmos of dying stars and supernovae. Dark purples and electric blue. Primal, fearless energy. No face, no text.',
+    tags: ['goddess', 'kali', 'destruction', 'transformation'],
+  },
+  {
+    id: 'goddess-aphrodite-venus',
+    category: 'goddess',
+    prompt:
+      'Aphrodite / Venus rising. A luminous female silhouette emerging from glowing sea foam, roses floating around her. Venus the planet glows above. Pink, rose gold and warm gold tones. Love and beauty. No face, no text.',
+    tags: ['goddess', 'aphrodite', 'venus', 'love'],
+  },
+  {
+    id: 'goddess-triple-moon',
+    category: 'goddess',
+    prompt:
+      'The Triple Goddess — maiden, mother, crone — represented as three female silhouettes beneath a waxing crescent, full moon, and waning crescent. Silver and indigo. Ancient and sacred. No faces, no text.',
+    tags: ['goddess', 'triple-goddess', 'maiden-mother-crone', 'moon'],
+  },
+  {
+    id: 'goddess-lilith-dark',
+    category: 'goddess',
+    prompt:
+      'Lilith, first woman and dark goddess. A fierce winged silhouette against a blood moon sky. Owls perch on her arms. Her wings are those of a night bird. Raw feminine power. Dark fantasy art. No face, no text.',
+    tags: ['goddess', 'lilith', 'dark', 'wings', 'power'],
+  },
+
+  // SPIRIT ANIMALS — viral TikTok content
+  {
+    id: 'spirit-wolf-moon',
+    category: 'spirit-animal',
+    prompt:
+      'A lone wolf silhouette howling at a massive full moon against a star-filled sky. Snow-covered ground. Moonlight on its coat. Wild and primal. Deep blues and silver. No text.',
+    tags: ['spirit-animal', 'wolf', 'moon', 'howling'],
+  },
+  {
+    id: 'spirit-owl-cosmic',
+    category: 'spirit-animal',
+    prompt:
+      'An ethereal owl in flight against a cosmic nebula background. Its wings span wide, feathers detailed and luminous. Stars in its eyes. Wisdom and mystery. Deep space behind it. No text.',
+    tags: ['spirit-animal', 'owl', 'wisdom', 'cosmic'],
+  },
+  {
+    id: 'spirit-raven-dark',
+    category: 'spirit-animal',
+    prompt:
+      'A raven perched on a twisted branch, moonlight catching its iridescent feathers. Deep blue-black plumage. Stars visible behind bare winter trees. Mystical and intelligent. No text.',
+    tags: ['spirit-animal', 'raven', 'dark', 'mystical'],
+  },
+  {
+    id: 'spirit-deer-stars',
+    category: 'spirit-animal',
+    prompt:
+      'A deer standing in a forest clearing at night, antlers filled with tiny stars like a constellation. The Milky Way above. Soft silver light. Gentle and magical. No text.',
+    tags: ['spirit-animal', 'deer', 'stars', 'antlers'],
+  },
+  {
+    id: 'spirit-serpent-cosmic',
+    category: 'spirit-animal',
+    prompt:
+      'A great cosmic serpent coiling through deep space, its scales like stars and galaxies. An ouroboros — the snake eating its own tail. Eternal cycle and cosmic wisdom. Gold and deep black. No text.',
+    tags: ['spirit-animal', 'serpent', 'ouroboros', 'cosmic'],
+  },
+  {
+    id: 'spirit-butterfly-cosmos',
+    category: 'spirit-animal',
+    prompt:
+      'A luminous butterfly with wings made of nebula gas and stars. Iridescent and cosmic. It hovers against a dark space background, wings shifting with galaxy colours. Transformation and beauty. No text.',
+    tags: ['spirit-animal', 'butterfly', 'transformation', 'nebula'],
+  },
+  {
+    id: 'spirit-phoenix-rising',
+    category: 'spirit-animal',
+    prompt:
+      'A phoenix rising from flames against a deep black sky. Gold, orange and red fire trails upward as the bird ascends. Rebirth and transformation. Dramatic and powerful. No text.',
+    tags: ['spirit-animal', 'phoenix', 'rebirth', 'fire'],
+  },
+  {
+    id: 'spirit-fox-aurora',
+    category: 'spirit-animal',
+    prompt:
+      'A silver fox trotting across a snowy landscape beneath a vivid aurora borealis. The Northern Lights dance overhead in green and violet. Magical and otherworldly. No text.',
+    tags: ['spirit-animal', 'fox', 'aurora', 'silver'],
+  },
+  {
+    id: 'spirit-black-cat-moon',
+    category: 'spirit-animal',
+    prompt:
+      'A sleek black cat sitting perfectly still, silhouetted against a huge full moon. Its eyes reflect the moonlight as two golden orbs. Stars around the moon. Witchy and magical. No text.',
+    tags: ['spirit-animal', 'black-cat', 'moon', 'witchy'],
+  },
+  {
+    id: 'spirit-hummingbird-flowers',
+    category: 'spirit-animal',
+    prompt:
+      'A tiny luminous hummingbird hovering at glowing flowers at dusk. Stars beginning to appear above. Its wings create a blur of iridescent colour. Joy and magic made visible. No text.',
+    tags: ['spirit-animal', 'hummingbird', 'joy', 'luminous'],
+  },
+
+  // MORE CRYSTALS — popular ones we missed
+  {
+    id: 'crystal-citrine-sunstone',
+    category: 'crystals',
+    prompt:
+      'Citrine crystals glowing warm yellow and amber. Bright and sunny energy. Facets catch the light in golden flashes. Dark background. Abundance and joy. Macro photography. No text.',
+    tags: ['crystals', 'citrine', 'yellow', 'abundance'],
+  },
+  {
+    id: 'crystal-moonstone-glow',
+    category: 'crystals',
+    prompt:
+      'Moonstone crystals with their characteristic adularescence — a ghostly blue-white light shifting and moving within the stone. Set against dark velvet. Mysterious and lunar. Macro photography. No text.',
+    tags: ['crystals', 'moonstone', 'adularescence', 'lunar'],
+  },
+  {
+    id: 'crystal-black-tourmaline',
+    category: 'crystals',
+    prompt:
+      'Black tourmaline crystal columns, deep black with vertical striations catching faint light. Set against a dark background. Protective and grounding energy. Macro photography. No text.',
+    tags: ['crystals', 'tourmaline', 'black', 'protection'],
+  },
+  {
+    id: 'crystal-lapis-lazuli',
+    category: 'crystals',
+    prompt:
+      'Lapis lazuli — rich royal blue with gold pyrite flecks glittering like stars in a night sky. Dark background. Ancient and regal. The stone of pharaohs and seers. Macro photography. No text.',
+    tags: ['crystals', 'lapis', 'blue', 'gold', 'ancient'],
+  },
+  {
+    id: 'crystal-tigers-eye',
+    category: 'crystals',
+    prompt:
+      "Tiger's eye crystals. Rich brown and gold chatoyancy — the optical effect that makes the stone appear to have a moving band of light like an eye. Dark background. Macro photography. No text.",
+    tags: ['crystals', 'tigers-eye', 'chatoyancy', 'gold'],
+  },
+  {
+    id: 'crystal-pyrite-gold',
+    category: 'crystals',
+    prompt:
+      "Pyrite (fool's gold) — cubic crystals glittering metallic gold. Faceted and brilliant against a dark background. Manifestation and abundance energy. Looks like solid gold. Macro photography. No text.",
+    tags: ['crystals', 'pyrite', 'gold', 'abundance'],
+  },
+  {
+    id: 'crystal-malachite-green',
+    category: 'crystals',
+    prompt:
+      'Malachite with its distinctive deep green banding patterns. Swirling dark and light green concentric rings. A stone of transformation. Dark background. Macro photography. No text.',
+    tags: ['crystals', 'malachite', 'green', 'transformation'],
+  },
+  {
+    id: 'crystal-selenite-wand',
+    category: 'crystals',
+    prompt:
+      'A selenite wand, long and translucent white. Backlit so light passes through it, creating an angelic glow. Delicate fibrous texture. Dark background. Cleansing and angelic energy. No text.',
+    tags: ['crystals', 'selenite', 'wand', 'white', 'angelic'],
+  },
+
+  // SPIRITUAL SYMBOLS — none yet
+  {
+    id: 'symbol-triple-moon',
+    category: 'symbol',
+    prompt:
+      'The triple moon symbol — waxing crescent, full moon, waning crescent — glowing silver against a deep indigo sky. Stars behind. Ancient symbol of the goddess and the three phases of womanhood. No text.',
+    tags: ['symbol', 'triple-moon', 'goddess', 'silver'],
+  },
+  {
+    id: 'symbol-pentacle-star',
+    category: 'symbol',
+    prompt:
+      'A five-pointed star (pentacle) drawn in golden light against deep black space with a circle of stars around it. Sacred geometry and elemental balance. Ancient and powerful. No text.',
+    tags: ['symbol', 'pentacle', 'five-pointed', 'gold'],
+  },
+  {
+    id: 'symbol-eye-of-horus',
+    category: 'symbol',
+    prompt:
+      'The Eye of Horus in gold and blue against a deep lapis background. Ornate Egyptian design. Stars and hieroglyphic patterns faintly visible around it. Ancient protection and wisdom. No text.',
+    tags: ['symbol', 'eye-of-horus', 'egyptian', 'gold'],
+  },
+  {
+    id: 'symbol-ankh-cosmic',
+    category: 'symbol',
+    prompt:
+      'An ankh — the Egyptian symbol of life — glowing gold against a deep cosmic background. Stars visible through it. The loop at the top shines brighter than the cross below. Eternal life. No text.',
+    tags: ['symbol', 'ankh', 'life', 'egyptian', 'gold'],
+  },
+  {
+    id: 'symbol-om-sacred',
+    category: 'symbol',
+    prompt:
+      'The Om (Aum) symbol in warm gold light against a deep purple and indigo background. Sacred vibration made visible as soft ripples of light emanate from the symbol. Sanskrit and cosmic. No text.',
+    tags: ['symbol', 'om', 'aum', 'sacred', 'vibration'],
+  },
+  {
+    id: 'symbol-hamsa-hand',
+    category: 'symbol',
+    prompt:
+      'A Hamsa hand — the hand of Fatima — in ornate gold against a deep teal background. Intricate patterns within the hand. An eye at the centre. Protective and beautiful. No text.',
+    tags: ['symbol', 'hamsa', 'protection', 'eye', 'gold'],
+  },
+  {
+    id: 'symbol-vesica-piscis',
+    category: 'symbol',
+    prompt:
+      'The Vesica Piscis — two overlapping circles creating the ancient sacred geometry symbol. Glowing gold on deep indigo. The intersection glows brightest. Creation and union of opposites. No text.',
+    tags: ['symbol', 'vesica-piscis', 'sacred-geometry', 'gold'],
+  },
+
+  // MORE SACRED GEOMETRY
+  {
+    id: 'sacred-torus-energy',
+    category: 'sacred',
+    prompt:
+      'A torus — the fundamental shape of energy fields — visualised as glowing gold light looping in a continuous donut shape against deep space. Energy flows through it endlessly. No text.',
+    tags: ['sacred', 'torus', 'energy', 'geometry'],
+  },
+  {
+    id: 'sacred-golden-spiral',
+    category: 'sacred',
+    prompt:
+      "The golden ratio spiral made of stars and nebula gas. Fibonacci proportions revealed in cosmic structure. Gold and deep blue. The universe's most fundamental pattern. No text.",
+    tags: ['sacred', 'golden-ratio', 'fibonacci', 'spiral'],
+  },
+  {
+    id: 'sacred-64-tetrahedron',
+    category: 'sacred',
+    prompt:
+      'A 64 tetrahedron grid — 64 interlocking tetrahedra forming a perfect sphere of sacred geometry. Glowing white and gold against black space. The blueprint of the vacuum of space. No text.',
+    tags: ['sacred', '64-tetrahedron', 'geometry', 'grid'],
+  },
+  {
+    id: 'sacred-tree-of-life',
+    category: 'sacred',
+    prompt:
+      'The Kabbalistic Tree of Life. Ten glowing spheres (sephiroth) connected by 22 paths in gold on deep indigo. Stars behind. Ancient wisdom made visual. The structure of existence. No text.',
+    tags: ['sacred', 'tree-of-life', 'kabbalah', 'sephiroth'],
+  },
+
+  // REMAINING TAROT MAJOR ARCANA — completing the 22
+  {
+    id: 'tarot-the-fool-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Fool tarot card art. A carefree figure stepping off a cliff edge toward a vast open sky, small dog at their heels, bindle over shoulder. A sun blazes above. Infinite potential and new beginnings. Painterly style. No text or card name.',
+    tags: ['tarot', 'the-fool', 'major-arcana', 'beginning'],
+  },
+  {
+    id: 'tarot-the-emperor-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Emperor tarot card art. A commanding armoured figure on a stone throne. Ram heads on the throne arms. Mountains behind. A sceptre and orb in hand. Authority and structure. Deep red and gold. No text or card name.',
+    tags: ['tarot', 'the-emperor', 'major-arcana', 'authority'],
+  },
+  {
+    id: 'tarot-the-hierophant-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Hierophant tarot card art. A robed religious figure on a throne between two pillars, hand raised in blessing. Two followers kneel before him. Gold and deep burgundy. Tradition and sacred knowledge. No text or card name.',
+    tags: ['tarot', 'the-hierophant', 'major-arcana', 'tradition'],
+  },
+  {
+    id: 'tarot-the-chariot-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Chariot tarot card art. A warrior in armour rides a chariot pulled by two sphinxes — one black, one white. Stars on the canopy above. A walled city behind. Triumph and will. Dramatic and powerful. No text or card name.',
+    tags: ['tarot', 'the-chariot', 'major-arcana', 'triumph'],
+  },
+  {
+    id: 'tarot-strength-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Strength tarot card art. A woman gently tames a lion, closing its jaws with bare hands. A lemniscate (infinity symbol) floats above her head. Soft floral landscape. Inner strength and compassion. No text or card name.',
+    tags: ['tarot', 'strength', 'major-arcana', 'courage'],
+  },
+  {
+    id: 'tarot-justice-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Justice tarot card art. A stern figure seated on a throne, holding balanced scales in one hand, a double-edged sword raised in the other. Red robes, grey pillars. Truth and fairness. No text or card name.',
+    tags: ['tarot', 'justice', 'major-arcana', 'truth'],
+  },
+  {
+    id: 'tarot-hanged-man-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Hanged Man tarot card art. A serene figure hanging upside down from a living T-shaped tree by one foot. The other leg crosses. A halo of light around his head. Surrender and new perspective. No text or card name.',
+    tags: ['tarot', 'hanged-man', 'major-arcana', 'surrender'],
+  },
+  {
+    id: 'tarot-temperance-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Temperance tarot card art. An angelic figure pours water between two golden cups. One foot in a river, one on land. A radiant sun rises over mountains in the distance. Balance and alchemy. No text or card name.',
+    tags: ['tarot', 'temperance', 'major-arcana', 'balance'],
+  },
+  {
+    id: 'tarot-the-devil-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Devil tarot card art. A horned goat-like figure on a black cube, two chained figures below. Torch burning downward. Dark and intense but not evil — illusion and attachment. Deep black and red. No text or card name.',
+    tags: ['tarot', 'the-devil', 'major-arcana', 'shadow'],
+  },
+  {
+    id: 'tarot-judgement-card',
+    category: 'tarot-arcana',
+    prompt:
+      'The Judgement tarot card art. An angel blows a trumpet from the clouds, figures rising from coffins below with arms raised. Dawn light breaking. Awakening, rebirth and calling. Dramatic sky. No text or card name.',
+    tags: ['tarot', 'judgement', 'major-arcana', 'awakening'],
+  },
+
+  // ASTROLOGY PLANET GLYPHS — cosmic symbol art
+  {
+    id: 'glyph-sun-symbol',
+    category: 'glyph',
+    prompt:
+      'The astrological Sun symbol ☉ — a circle with a dot at its centre — rendered in blazing gold light against deep black space. Solar corona energy radiates outward from it. Sacred and powerful. No other text.',
+    tags: ['glyph', 'sun', 'astrology', 'gold'],
+  },
+  {
+    id: 'glyph-moon-symbol',
+    category: 'glyph',
+    prompt:
+      'The astrological Moon symbol ☽ — a crescent — rendered in silver light against deep indigo. Stars cluster around it. Soft and luminous. Sacred lunar energy. No other text.',
+    tags: ['glyph', 'moon', 'astrology', 'silver'],
+  },
+  {
+    id: 'glyph-mercury-symbol',
+    category: 'glyph',
+    prompt:
+      'The Mercury astrological glyph ☿ glowing in quicksilver light against a dark background. Electric and communicative energy. Subtle geometric patterns around it. No other text.',
+    tags: ['glyph', 'mercury', 'astrology', 'silver'],
+  },
+  {
+    id: 'glyph-venus-symbol',
+    category: 'glyph',
+    prompt:
+      'The Venus astrological glyph ♀ glowing in rose gold and soft pink. A circle above a cross, radiating love and beauty. Flowers and soft light around it. No other text.',
+    tags: ['glyph', 'venus', 'astrology', 'rose-gold'],
+  },
+  {
+    id: 'glyph-mars-symbol',
+    category: 'glyph',
+    prompt:
+      'The Mars astrological glyph ♂ blazing in deep red and orange energy. Bold and aggressive. Flames and sparks radiate from it. Power and drive. No other text.',
+    tags: ['glyph', 'mars', 'astrology', 'red'],
+  },
+  {
+    id: 'glyph-jupiter-symbol',
+    category: 'glyph',
+    prompt:
+      'The Jupiter astrological glyph ♃ in royal blue and gold. Large and expansive energy. Cosmic abundance radiating from it. Ancient and wise. No other text.',
+    tags: ['glyph', 'jupiter', 'astrology', 'blue-gold'],
+  },
+  {
+    id: 'glyph-saturn-symbol',
+    category: 'glyph',
+    prompt:
+      'The Saturn astrological glyph ♄ in deep indigo and dark gold. Ancient, disciplined energy. Rings echo the planet behind it. Time and structure. No other text.',
+    tags: ['glyph', 'saturn', 'astrology', 'dark'],
+  },
+  {
+    id: 'glyph-uranus-symbol',
+    category: 'glyph',
+    prompt:
+      'The Uranus astrological glyph in electric blue and cyan. Lightning energy crackles around it. Revolutionary and unexpected. Vivid and striking. No other text.',
+    tags: ['glyph', 'uranus', 'astrology', 'electric'],
+  },
+  {
+    id: 'glyph-neptune-symbol',
+    category: 'glyph',
+    prompt:
+      'The Neptune astrological glyph ♆ — a trident — in deep sea blue and aquamarine. Ocean waves and cosmic mist surround it. Dreamy and spiritual. No other text.',
+    tags: ['glyph', 'neptune', 'astrology', 'ocean-blue'],
+  },
+  {
+    id: 'glyph-pluto-symbol',
+    category: 'glyph',
+    prompt:
+      'The Pluto astrological glyph ♇ in deep black and dark crimson. Transformation energy. The underworld meets the cosmos. Intense and primal. No other text.',
+    tags: ['glyph', 'pluto', 'astrology', 'dark'],
+  },
+
+  // MORE SPIRIT ANIMALS
+  {
+    id: 'spirit-bear-cave',
+    category: 'spirit-animal',
+    prompt:
+      'A great bear silhouette standing on its hind legs against a full moon. Forested mountains behind. Power and protection. Deep winter night. Stars blazing above. Primal and ancient. No text.',
+    tags: ['spirit-animal', 'bear', 'moon', 'power'],
+  },
+  {
+    id: 'spirit-dragon-cosmic',
+    category: 'spirit-animal',
+    prompt:
+      'A vast cosmic dragon coiling through deep space, its scales like galaxies and nebulae. Wings spread across star fields. Ancient and powerful beyond measure. Gold and deep purple. No text.',
+    tags: ['spirit-animal', 'dragon', 'cosmic', 'ancient'],
+  },
+  {
+    id: 'spirit-eagle-sun',
+    category: 'spirit-animal',
+    prompt:
+      'A golden eagle soaring against a blazing sun. Wings spread wide, feathers catching fire in the light. Below are mountains and vast sky. Strength, clarity and freedom. No text.',
+    tags: ['spirit-animal', 'eagle', 'sun', 'freedom'],
+  },
+  {
+    id: 'spirit-whale-cosmos',
+    category: 'spirit-animal',
+    prompt:
+      'A humpback whale swimming through a cosmic ocean — water and space merge, stars visible beneath the surface. The whale is enormous and graceful. Deep blues and blacks. Wisdom and depth. No text.',
+    tags: ['spirit-animal', 'whale', 'cosmic-ocean', 'wisdom'],
+  },
+  {
+    id: 'spirit-jaguar-dark',
+    category: 'spirit-animal',
+    prompt:
+      'A black jaguar stalking through a moonlit jungle. Its golden eyes glow in the darkness. Stars visible through the canopy above. Stealth and power. Dark and beautiful. No text.',
+    tags: ['spirit-animal', 'jaguar', 'dark', 'moon'],
+  },
+  {
+    id: 'spirit-tiger-fire',
+    category: 'spirit-animal',
+    prompt:
+      'A white tiger walking through darkness, its stripes glowing faintly with blue energy. Stars and a nebula behind it. Mystical and powerful. No text.',
+    tags: ['spirit-animal', 'tiger', 'white', 'cosmic'],
+  },
+  {
+    id: 'spirit-peacock-cosmos',
+    category: 'spirit-animal',
+    prompt:
+      'A peacock with its magnificent tail fanned open, each eye in the tail feathers containing a tiny galaxy. Deep blues and gold. Cosmic beauty and self-expression. No text.',
+    tags: ['spirit-animal', 'peacock', 'cosmos', 'beauty'],
+  },
+  {
+    id: 'spirit-horse-nebula',
+    category: 'spirit-animal',
+    prompt:
+      'A white horse running free through cosmic clouds and nebula. Its mane flows like stardust. Stars trail behind hooves. Freedom and power made cosmic. No text.',
+    tags: ['spirit-animal', 'horse', 'freedom', 'stardust'],
+  },
+
+  // MORE GODDESSES
+  {
+    id: 'goddess-freya-ravens',
+    category: 'goddess',
+    prompt:
+      'Freya, Norse goddess of love and war. A powerful silhouette with two ravens perched on her shoulders. A full moon behind her. Her cloak of feathers spreads wide. Norse forests at night. No face, no text.',
+    tags: ['goddess', 'freya', 'norse', 'ravens'],
+  },
+  {
+    id: 'goddess-brigid-flame',
+    category: 'goddess',
+    prompt:
+      'Brigid, Celtic goddess of fire and healing. A silhouette with a flame burning in her outstretched hand. Snowdrops bloom around her feet. The promise of spring after winter. Dawn light. No face, no text.',
+    tags: ['goddess', 'brigid', 'celtic', 'fire', 'spring'],
+  },
+  {
+    id: 'goddess-selene-moon',
+    category: 'goddess',
+    prompt:
+      'Selene, Greek goddess of the moon. A luminous silhouette in a chariot of silver, driving two pale horses across the night sky. The full moon behind her. Stars all around. No face, no text.',
+    tags: ['goddess', 'selene', 'moon', 'greek'],
+  },
+  {
+    id: 'goddess-nyx-night',
+    category: 'goddess',
+    prompt:
+      'Nyx, goddess of the night. A vast dark silhouette whose robes are made of deep space and stars. She spreads her arms wide and night falls across the cosmos. Primal and ancient darkness. No face, no text.',
+    tags: ['goddess', 'nyx', 'night', 'cosmos', 'dark'],
+  },
+  {
+    id: 'goddess-circe-magic',
+    category: 'goddess',
+    prompt:
+      'Circe, goddess sorceress. A silhouette raising a wand of glowing light, surrounded by transformed creatures. An island at night, stars above the ocean. Magic and transformation. No face, no text.',
+    tags: ['goddess', 'circe', 'magic', 'sorceress'],
+  },
+  {
+    id: 'goddess-morgan-le-fay',
+    category: 'goddess',
+    prompt:
+      'Morgan le Fay, enchantress of Avalon. A dark silhouette on a misty isle, apple trees heavy with fruit behind her. The moon reflects on still water. Mystery and ancient power. No face, no text.',
+    tags: ['goddess', 'morgan-le-fay', 'avalon', 'celtic'],
+  },
+
+  // ANCIENT SACRED SITES
+  {
+    id: 'site-stonehenge-stars',
+    category: 'sacred-site',
+    prompt:
+      'Stonehenge at night under the Milky Way. The ancient standing stones silhouetted against a blazing star field. The galaxy arches overhead. Timeless and mysterious. No text.',
+    tags: ['sacred-site', 'stonehenge', 'milky-way', 'ancient'],
+  },
+  {
+    id: 'site-pyramids-cosmos',
+    category: 'sacred-site',
+    prompt:
+      'The Egyptian pyramids of Giza at night under a magnificent starry sky. The Milky Way visible above. Stars reflect in desert sands. Timeless, aligned with the cosmos. No text.',
+    tags: ['sacred-site', 'pyramids', 'egypt', 'stars'],
+  },
+  {
+    id: 'site-mayan-temple-dawn',
+    category: 'sacred-site',
+    prompt:
+      'A Mayan pyramid temple at dawn. The sun rises directly over the apex as the solstice alignment occurs. Jungle surrounds it. Pink and gold sky. Ancient astronomical precision. No text.',
+    tags: ['sacred-site', 'mayan', 'temple', 'solstice'],
+  },
+  {
+    id: 'site-greek-temple-moon',
+    category: 'sacred-site',
+    prompt:
+      'Ancient Greek marble temple columns under a full moon. White marble glows silver in the moonlight. Stars above. Timeless and sacred. Mediterranean night. No text.',
+    tags: ['sacred-site', 'greek', 'temple', 'moon'],
+  },
+  {
+    id: 'site-nazca-lines-above',
+    category: 'sacred-site',
+    prompt:
+      'The Nazca lines seen from above at night. The giant geoglyphs glow faintly as if lit from within against the dark Peruvian desert. Stars overhead. Ancient mystery. No text.',
+    tags: ['sacred-site', 'nazca', 'lines', 'mystery'],
+  },
+  {
+    id: 'site-angkor-wat-sunrise',
+    category: 'sacred-site',
+    prompt:
+      'Angkor Wat temple at sunrise. The massive temple complex reflected perfectly in the still moat. Pink and gold sky. Silhouetted towers. Ancient Khmer architecture at its most magical. No text.',
+    tags: ['sacred-site', 'angkor-wat', 'sunrise', 'reflection'],
+  },
+
+  // COSMIC EVENTS — extreme phenomena
+  {
+    id: 'event-supernova-explosion',
+    category: 'cosmic-event',
+    prompt:
+      'A supernova explosion. A massive star detonates in a blinding flash of light, expanding shockwave of plasma and gas in gold, white and blue. The most powerful explosion in the universe. No text.',
+    tags: ['cosmic-event', 'supernova', 'explosion', 'stellar'],
+  },
+  {
+    id: 'event-quasar-beam',
+    category: 'cosmic-event',
+    prompt:
+      'A quasar — the most luminous object in the universe. A blazing point of light with twin jets of energy blasting out in opposite directions for millions of light years. Intense and cosmic. No text.',
+    tags: ['cosmic-event', 'quasar', 'jets', 'luminous'],
+  },
+  {
+    id: 'event-neutron-star-merger',
+    category: 'cosmic-event',
+    prompt:
+      'Two neutron stars spiralling toward each other and merging in a kilonova explosion. Gold and platinum-coloured light erupts from the collision. Gravitational waves visualised as ripples. No text.',
+    tags: ['cosmic-event', 'neutron-star', 'kilonova', 'merger'],
+  },
+  {
+    id: 'event-gamma-ray-burst',
+    category: 'cosmic-event',
+    prompt:
+      'A gamma-ray burst — the most energetic explosion in the universe. A blinding beam of energy cuts across the cosmos. The source glows impossibly bright. Dramatic scientific visualisation. No text.',
+    tags: ['cosmic-event', 'gamma-ray', 'burst', 'extreme'],
+  },
+  {
+    id: 'event-solar-flare-extreme',
+    category: 'cosmic-event',
+    prompt:
+      'An X-class solar flare erupting from the sun. A titanic arch of plasma millions of kilometres high. The corona boils. CME shockwave expands outward. Dramatic and beautiful. No text.',
+    tags: ['cosmic-event', 'solar-flare', 'x-class', 'plasma'],
+  },
+
+  // ELEMENTS DEEP DIVE
+  {
+    id: 'element-underwater-bioluminescent',
+    category: 'elements',
+    prompt:
+      'Deep ocean bioluminescence at night. Glowing blue and cyan sea creatures, jellyfish and plankton light the dark water. Looking upward, stars are visible through the surface. Magical and otherworldly. No text.',
+    tags: ['elements', 'water', 'bioluminescence', 'ocean'],
+  },
+  {
+    id: 'element-volcanic-cosmos',
+    category: 'elements',
+    prompt:
+      "A volcanic eruption at night. Lava flows red and orange against a black sky filled with stars. Lava bombs arc through the air like shooting stars. Earth's primal fire under the cosmos. No text.",
+    tags: ['elements', 'fire', 'volcanic', 'lava'],
+  },
+  {
+    id: 'element-lightning-storm',
+    category: 'elements',
+    prompt:
+      'A dramatic lightning storm at night. Multiple lightning bolts fork across a dark sky filled with stars above the storm. The bolts illuminate purple-black clouds. Raw elemental power. No text.',
+    tags: ['elements', 'air', 'lightning', 'storm'],
+  },
+  {
+    id: 'element-desert-sandstorm',
+    category: 'elements',
+    prompt:
+      'A desert sandstorm at dusk. A massive wall of ochre and red sand rolls across the landscape. Stars visible above the storm where the sky is still clear. Ancient and elemental. No text.',
+    tags: ['elements', 'earth', 'sandstorm', 'desert'],
+  },
+
+  // MASTER NUMBERS AND SEQUENCES
+  {
+    id: 'numerology-11-master',
+    category: 'numerology',
+    prompt:
+      'The master number 11 in brilliant white light against a starfield. Two pillars of light. Intuition and illumination. Gateway energy. No other text.',
+    tags: ['numerology', '11', 'master-number', 'intuition'],
+  },
+  {
+    id: 'numerology-22-master',
+    category: 'numerology',
+    prompt:
+      'The master number 22 in deep gold light. The master builder. Four equal pillars of energy. Foundation and manifestation on the largest scale. No other text.',
+    tags: ['numerology', '22', 'master-number', 'builder'],
+  },
+  {
+    id: 'numerology-33-master',
+    category: 'numerology',
+    prompt:
+      'The master number 33 in radiant rose and gold light. The master teacher. Love and compassion radiating outward. The highest master number. No other text.',
+    tags: ['numerology', '33', 'master-number', 'compassion'],
+  },
+  {
+    id: 'numerology-123-sequence',
+    category: 'numerology',
+    prompt:
+      'The number sequence 123 in ascending steps of light — each number brighter than the last. Staircase of stars. Progress and growth upward. No other text.',
+    tags: ['numerology', '123', 'sequence', 'progress'],
+  },
+  {
+    id: 'numerology-456-sequence',
+    category: 'numerology',
+    prompt:
+      'The number sequence 456 in warm amber and green light. Stability building toward change. Earth tones with cosmic background. No other text.',
+    tags: ['numerology', '456', 'sequence', 'stability'],
+  },
+  {
+    id: 'numerology-789-sequence',
+    category: 'numerology',
+    prompt:
+      'The number sequence 789 in violet and gold light. Completion, wisdom and universal love. The final steps before return to zero. No other text.',
+    tags: ['numerology', '789', 'sequence', 'completion'],
+  },
+
+  // ZODIAC SIGN GLYPHS — each sign as glowing cosmic art
+  {
+    id: 'sign-aries-glyph',
+    category: 'sign-glyph',
+    prompt:
+      'The Aries zodiac glyph ♈ rendered in blazing crimson and gold energy against deep black space. Ram horns forming the symbol. Fire energy radiates outward. Bold and powerful. No other text.',
+    tags: ['sign-glyph', 'aries', 'fire', 'red'],
+  },
+  {
+    id: 'sign-taurus-glyph',
+    category: 'sign-glyph',
+    prompt:
+      'The Taurus zodiac glyph ♉ in deep green and gold against a dark earthy cosmic background. The bull circle and horns glow steadily. Grounded and sensual energy. No other text.',
+    tags: ['sign-glyph', 'taurus', 'earth', 'green'],
+  },
+  {
+    id: 'sign-gemini-glyph',
+    category: 'sign-glyph',
+    prompt:
+      'The Gemini zodiac glyph ♊ in electric yellow and silver. Two parallel lines connected — duality made visible. Quick intellectual energy crackles around it. Deep space behind. No other text.',
+    tags: ['sign-glyph', 'gemini', 'air', 'yellow'],
+  },
+  {
+    id: 'sign-cancer-glyph',
+    category: 'sign-glyph',
+    prompt:
+      'The Cancer zodiac glyph ♋ in soft silver and moonlit blue. The two interlocking spirals glow with lunar energy. A full moon shimmers behind it. Emotional and intuitive. No other text.',
+    tags: ['sign-glyph', 'cancer', 'water', 'moon'],
+  },
+  {
+    id: 'sign-leo-glyph',
+    category: 'sign-glyph',
+    prompt:
+      "The Leo zodiac glyph ♌ blazing in gold and amber. The lion's tail curling symbol radiates solar warmth. A sun glows behind it. Regal and radiant. No other text.",
+    tags: ['sign-glyph', 'leo', 'fire', 'gold'],
+  },
+  {
+    id: 'sign-virgo-glyph',
+    category: 'sign-glyph',
+    prompt:
+      'The Virgo zodiac glyph ♍ in soft sage green and silver. The precise angular symbol glows with quiet intelligence. Wheat and stars in the background. Refined and pure. No other text.',
+    tags: ['sign-glyph', 'virgo', 'earth', 'green'],
+  },
+  {
+    id: 'sign-libra-glyph',
+    category: 'sign-glyph',
+    prompt:
+      'The Libra zodiac glyph ♎ in rose gold and lavender. The scales symbol balanced perfectly. Symmetrical light emanates from both sides equally. Justice and harmony. No other text.',
+    tags: ['sign-glyph', 'libra', 'air', 'rose-gold'],
+  },
+  {
+    id: 'sign-scorpio-glyph',
+    category: 'sign-glyph',
+    prompt:
+      'The Scorpio zodiac glyph ♏ in deep crimson and black. The M with the scorpion tail arrow pulses with intense energy. Dark and magnetic power. No other text.',
+    tags: ['sign-glyph', 'scorpio', 'water', 'dark'],
+  },
+  {
+    id: 'sign-sagittarius-glyph',
+    category: 'sign-glyph',
+    prompt:
+      'The Sagittarius zodiac glyph ♐ in deep purple and gold. An arrow pointing upward and to the right — always aiming higher. Stars scatter in its wake. Freedom and adventure. No other text.',
+    tags: ['sign-glyph', 'sagittarius', 'fire', 'purple'],
+  },
+  {
+    id: 'sign-capricorn-glyph',
+    category: 'sign-glyph',
+    prompt:
+      'The Capricorn zodiac glyph ♑ in dark indigo and aged gold. The sea-goat symbol glows with ancient ambition. Mountains and ocean in the dark background. Disciplined power. No other text.',
+    tags: ['sign-glyph', 'capricorn', 'earth', 'indigo'],
+  },
+  {
+    id: 'sign-aquarius-glyph',
+    category: 'sign-glyph',
+    prompt:
+      'The Aquarius zodiac glyph ♒ in electric blue and cyan. Two wavy lines — water waves or electric current — crackle with revolutionary energy. Stars and lightning behind. No other text.',
+    tags: ['sign-glyph', 'aquarius', 'air', 'electric'],
+  },
+  {
+    id: 'sign-pisces-glyph',
+    category: 'sign-glyph',
+    prompt:
+      'The Pisces zodiac glyph ♓ in deep ocean blue and silver. Two fish connected by a cord — flowing in opposite directions. The symbol pulses like breathing tides. No other text.',
+    tags: ['sign-glyph', 'pisces', 'water', 'ocean'],
+  },
+
+  // MEDITATION AND SOUND HEALING
+  {
+    id: 'meditation-lotus-silhouette',
+    category: 'meditation',
+    prompt:
+      'A human silhouette seated in lotus meditation pose. A radiant cosmic background behind them. All seven chakra colours glow along the spine. Stars and nebula surround the figure. Peace and transcendence. No face, no text.',
+    tags: ['meditation', 'lotus', 'silhouette', 'chakra'],
+  },
+  {
+    id: 'meditation-singing-bowl',
+    category: 'meditation',
+    prompt:
+      'A Tibetan singing bowl struck with a mallet. Sound waves visible as glowing rings expanding outward from the bowl. Deep gold and amber. Dark background. The vibration is visible. Sound healing. No text.',
+    tags: ['meditation', 'singing-bowl', 'sound', 'healing'],
+  },
+  {
+    id: 'meditation-kundalini-rising',
+    category: 'meditation',
+    prompt:
+      'Kundalini energy rising. A serpent of pure energy coiling upward through seven chakra points along a human spine silhouette. Each chakra blazes in its colour. Cosmic background. No face, no text.',
+    tags: ['meditation', 'kundalini', 'serpent', 'chakra'],
+  },
+  {
+    id: 'meditation-third-eye-open',
+    category: 'meditation',
+    prompt:
+      'A glowing eye opening on a forehead. Indigo and violet light floods outward as the third eye awakens. Sacred geometry patterns radiate. Stars and cosmos visible within the eye. No face, no text.',
+    tags: ['meditation', 'third-eye', 'awakening', 'indigo'],
+  },
+  {
+    id: 'meditation-sound-bath',
+    category: 'meditation',
+    prompt:
+      'Multiple crystal and Tibetan singing bowls arranged in a circle, all vibrating simultaneously. Sound waves from each bowl create interference patterns of light. Deep and resonant. Dark background. No text.',
+    tags: ['meditation', 'sound-bath', 'bowls', 'vibration'],
+  },
+  {
+    id: 'meditation-breathwork',
+    category: 'meditation',
+    prompt:
+      'An abstract visualisation of breathwork. Expanding and contracting circles of light, like lungs breathing in cosmic energy. Blue and silver light. Calming and rhythmic. Dark background. No text.',
+    tags: ['meditation', 'breathwork', 'breath', 'expanding'],
+  },
+
+  // WITCHCRAFT TOOLS
+  {
+    id: 'witch-cauldron-smoke',
+    category: 'witchcraft',
+    prompt:
+      'A cast iron cauldron with green and purple smoke curling from within. Moonlight illuminates it from above. Dark background with stars. Mysterious herbs hanging nearby. Witch aesthetic. No text.',
+    tags: ['witchcraft', 'cauldron', 'smoke', 'dark'],
+  },
+  {
+    id: 'witch-spell-jar',
+    category: 'witchcraft',
+    prompt:
+      'A glass spell jar filled with herbs, crystals and a rolled intention scroll. Sealed with wax, surrounded by candles on dark cloth. Warm candlelight. Magical and intentional. No text.',
+    tags: ['witchcraft', 'spell-jar', 'herbs', 'crystals'],
+  },
+  {
+    id: 'witch-herb-bundles',
+    category: 'witchcraft',
+    prompt:
+      'Dried sage, lavender and rosemary bundles tied with twine on a dark wooden surface. Crystals and moon symbols nearby. Soft natural light. Earthy and magical witchcraft aesthetic. No text.',
+    tags: ['witchcraft', 'herbs', 'sage', 'lavender'],
+  },
+  {
+    id: 'witch-book-of-shadows',
+    category: 'witchcraft',
+    prompt:
+      'An old leather-bound grimoire / Book of Shadows open to pages of handwritten spells and sigils. Moonlight illuminates the pages. A quill, candle and crystals nearby. Dark and magical. No text.',
+    tags: ['witchcraft', 'grimoire', 'book', 'spells'],
+  },
+  {
+    id: 'witch-pendulum-divination',
+    category: 'witchcraft',
+    prompt:
+      'A crystal pendulum suspended above a divination board. It glows at the tip. Moonlight and candlelight. The pendulum swings with intention. Mystical and focused. No text.',
+    tags: ['witchcraft', 'pendulum', 'divination', 'crystal'],
+  },
+  {
+    id: 'witch-altar-flatlay',
+    category: 'witchcraft',
+    prompt:
+      'A witchcraft altar from above. Triple moon symbol, black candles, crystals, dried flowers, rune stones, a small cauldron — all arranged on dark cloth. Perfect flat lay. Magical aesthetic. No text.',
+    tags: ['witchcraft', 'altar', 'flatlay', 'aesthetic'],
+  },
+
+  // MYTHOLOGY — male archetypes and creatures
+  {
+    id: 'myth-medusa-portrait',
+    category: 'mythology',
+    prompt:
+      'Medusa, the gorgon — a powerful silhouette with serpents for hair, each snake glowing with energy. She radiates primal feminine power, not fear. Deep teal and gold. No face shown, no text.',
+    tags: ['mythology', 'medusa', 'gorgon', 'serpents'],
+  },
+  {
+    id: 'myth-pegasus-stars',
+    category: 'mythology',
+    prompt:
+      'Pegasus, the winged horse, soaring through a cosmic nebula. Its white wings catch starlight. Trails of stardust follow its path. Ancient and free. Deep space background. No text.',
+    tags: ['mythology', 'pegasus', 'winged-horse', 'cosmos'],
+  },
+  {
+    id: 'myth-atlas-cosmos',
+    category: 'mythology',
+    prompt:
+      'Atlas holding the entire cosmos — a glowing sphere of stars and galaxies — on his shoulders. A dark silhouette of immense strength. The universe itself rests on him. No face, no text.',
+    tags: ['mythology', 'atlas', 'cosmos', 'strength'],
+  },
+  {
+    id: 'myth-hermes-wings',
+    category: 'mythology',
+    prompt:
+      'Hermes / Mercury, messenger of the gods. A winged silhouette in motion, moving between worlds. His caduceus glows with intertwining serpents. Quick and cosmic. Deep blue and gold. No face, no text.',
+    tags: ['mythology', 'hermes', 'messenger', 'caduceus'],
+  },
+  {
+    id: 'myth-cerberus-dark',
+    category: 'mythology',
+    prompt:
+      'Cerberus, the three-headed hound of the underworld. Three silhouetted heads against deep crimson and black. Each head with glowing eyes. Guardian of the threshold. Dark and powerful. No text.',
+    tags: ['mythology', 'cerberus', 'underworld', 'hound'],
+  },
+  {
+    id: 'myth-odin-ravens',
+    category: 'mythology',
+    prompt:
+      'Odin, the All-Father, silhouetted against the Norse cosmos. Two ravens (Huginn and Muninn) circle his shoulders. A single eye glows beneath his wide-brimmed hat. Stars and aurora behind. No face, no text.',
+    tags: ['mythology', 'odin', 'norse', 'ravens'],
+  },
+  {
+    id: 'myth-thor-lightning',
+    category: 'mythology',
+    prompt:
+      'Thor raising Mjölnir above his head as lightning erupts across a dramatic sky. A powerful silhouette against storm clouds and stars. Norse energy. Primal and electric. No face, no text.',
+    tags: ['mythology', 'thor', 'lightning', 'norse'],
+  },
+
+  // MORE SPIRIT ANIMALS
+  {
+    id: 'spirit-elephant-cosmos',
+    category: 'spirit-animal',
+    prompt:
+      'A great elephant silhouetted against a vast star field. Its tusks glow silver in the cosmic light. Ancient wisdom and memory. Deep and calm. A galaxy visible in the background. No text.',
+    tags: ['spirit-animal', 'elephant', 'wisdom', 'ancient'],
+  },
+  {
+    id: 'spirit-dolphin-bioluminescent',
+    category: 'spirit-animal',
+    prompt:
+      'Dolphins leaping through bioluminescent ocean waves at night. Their paths trail electric blue light. Stars above, glowing water below. Joy and intelligence made luminous. No text.',
+    tags: ['spirit-animal', 'dolphin', 'bioluminescent', 'joy'],
+  },
+  {
+    id: 'spirit-stag-forest',
+    category: 'spirit-animal',
+    prompt:
+      'A magnificent stag standing in a moonlit forest clearing. Enormous antlers silhouetted against a full moon. Stars blazing above. Ancient and noble. Silver and deep forest tones. No text.',
+    tags: ['spirit-animal', 'stag', 'antlers', 'moon'],
+  },
+  {
+    id: 'spirit-crow-moon',
+    category: 'spirit-animal',
+    prompt:
+      'A crow perched on a bare branch against a huge luminous moon. Its feathers catch iridescent blue-black light. Stars around the moon. Intelligence and magic. No text.',
+    tags: ['spirit-animal', 'crow', 'moon', 'intelligence'],
+  },
+  {
+    id: 'spirit-octopus-cosmic',
+    category: 'spirit-animal',
+    prompt:
+      'A cosmic octopus floating through deep space, its tentacles reaching across star fields. Each sucker glows with bioluminescent light. Deep intelligence and mystery. Deep blue and black. No text.',
+    tags: ['spirit-animal', 'octopus', 'cosmic', 'intelligence'],
+  },
+  {
+    id: 'spirit-dragonfly-light',
+    category: 'spirit-animal',
+    prompt:
+      'A dragonfly with iridescent wings catching rainbow light, hovering above a still moonlit water surface. Stars reflected below. Change and transformation in delicate beauty. No text.',
+    tags: ['spirit-animal', 'dragonfly', 'iridescent', 'transformation'],
+  },
+  {
+    id: 'spirit-snow-leopard',
+    category: 'spirit-animal',
+    prompt:
+      'A snow leopard silhouetted on a mountain peak at night. Stars blazing overhead. Its spotted coat faintly visible in moonlight. Elusive and powerful. High altitude solitude. No text.',
+    tags: ['spirit-animal', 'snow-leopard', 'mountain', 'elusive'],
+  },
+  {
+    id: 'spirit-polar-bear-aurora',
+    category: 'spirit-animal',
+    prompt:
+      'A polar bear standing on arctic ice, illuminated by a vivid aurora borealis above. Green and violet Northern Lights dance above the white bear. Primal and magical. No text.',
+    tags: ['spirit-animal', 'polar-bear', 'aurora', 'arctic'],
+  },
+
+  // TAROT SUITS — concept art
+  {
+    id: 'tarot-suit-cups',
+    category: 'tarot-suit',
+    prompt:
+      'The suit of Cups. A golden chalice overflowing with water that becomes stars as it falls. Deep blue ocean and night sky behind. Emotion, love and intuition. Rich and symbolic. No text.',
+    tags: ['tarot', 'cups', 'suit', 'water', 'emotion'],
+  },
+  {
+    id: 'tarot-suit-wands',
+    category: 'tarot-suit',
+    prompt:
+      'The suit of Wands. A wooden staff wreathed in living flames and leaves, set against a deep red and gold cosmic sky. Fire, passion and creative energy. Bold and alive. No text.',
+    tags: ['tarot', 'wands', 'suit', 'fire', 'passion'],
+  },
+  {
+    id: 'tarot-suit-swords',
+    category: 'tarot-suit',
+    prompt:
+      'The suit of Swords. A gleaming double-edged sword pointing upward into storm clouds and stars. Lightning flickers. Truth, intellect and conflict. Silver and electric blue. No text.',
+    tags: ['tarot', 'swords', 'suit', 'air', 'truth'],
+  },
+  {
+    id: 'tarot-suit-pentacles',
+    category: 'tarot-suit',
+    prompt:
+      'The suit of Pentacles. A gold pentacle coin resting on dark earth surrounded by autumn leaves, moss and crystals. Earthy abundance. Deep greens and gold. Material wealth and nature. No text.',
+    tags: ['tarot', 'pentacles', 'suit', 'earth', 'abundance'],
+  },
+
+  // ASTROLOGY CHART AESTHETICS
+  {
+    id: 'astro-natal-chart-wheel',
+    category: 'astrology',
+    prompt:
+      'A birth chart / natal chart wheel. Twelve houses, zodiac glyphs, planetary symbols arranged in a beautiful circular diagram. Gold lines on deep indigo. Sacred geometry of a life. No text labels.',
+    tags: ['astrology', 'natal-chart', 'wheel', 'houses'],
+  },
+  {
+    id: 'astro-planetary-alignment',
+    category: 'astrology',
+    prompt:
+      'All planets of the solar system in a perfect alignment — lined up in a row against the black void of space. From Mercury to Neptune, each glowing in its true colour. Rare and cosmic. No text.',
+    tags: ['astrology', 'planetary-alignment', 'solar-system', 'rare'],
+  },
+  {
+    id: 'astro-mercury-retrograde',
+    category: 'astrology',
+    prompt:
+      'Mercury retrograde aesthetic. Mercury appears to move backward across a star field, leaving a looping trail of light. Chaos and communication disruption visualised. Electric and glitchy. No text.',
+    tags: ['astrology', 'mercury-retrograde', 'chaos', 'electric'],
+  },
+
+  // MORE CRYSTALS
+  {
+    id: 'crystal-smoky-quartz',
+    category: 'crystals',
+    prompt:
+      'Smoky quartz crystals. Dark translucent brown and grey points, smoke-like inclusions within. Grounding and protective energy. Dark background, macro photography. Earthy and mysterious. No text.',
+    tags: ['crystals', 'smoky-quartz', 'brown', 'grounding'],
+  },
+  {
+    id: 'crystal-fluorite-rainbow',
+    category: 'crystals',
+    prompt:
+      'Fluorite crystals in purple and green banding. The natural colour zoning creates stunning patterns. Translucent and glowing. Macro photography, dark background. Mental clarity energy. No text.',
+    tags: ['crystals', 'fluorite', 'purple-green', 'banding'],
+  },
+  {
+    id: 'crystal-aquamarine-blue',
+    category: 'crystals',
+    prompt:
+      'Aquamarine crystals in pale blue-green. Clear and oceanic, like frozen seawater. Macro photography on dark background. Calm and communicative energy. Elegant and serene. No text.',
+    tags: ['crystals', 'aquamarine', 'blue', 'ocean'],
+  },
+  {
+    id: 'crystal-carnelian-fire',
+    category: 'crystals',
+    prompt:
+      'Carnelian crystals glowing deep orange-red. Like fire captured in stone. Translucent and warm. Dark background, macro photography. Courage and vitality energy. Bold and beautiful. No text.',
+    tags: ['crystals', 'carnelian', 'orange', 'fire'],
+  },
+  {
+    id: 'crystal-sunstone-golden',
+    category: 'crystals',
+    prompt:
+      'Sunstone crystals with their glittery aventurescence — gold and copper metallic flecks sparkling within warm orange stone. Macro photography, dark background. Solar joy and optimism. No text.',
+    tags: ['crystals', 'sunstone', 'gold', 'sparkle'],
+  },
+  {
+    id: 'crystal-tanzanite-violet',
+    category: 'crystals',
+    prompt:
+      'Tanzanite gems in deep violet-blue. Rare and magnificent, shifting between blue and purple as light moves. Dark background, macro. Found only near Kilimanjaro. Spiritual elevation. No text.',
+    tags: ['crystals', 'tanzanite', 'violet', 'rare'],
+  },
 ];
 
 // ─── Types ───────────────────────────────────────────────────────────────────

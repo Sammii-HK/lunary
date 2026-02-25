@@ -155,20 +155,20 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 48 : isStory ? 60 : 60;
-    const titleSize = isLandscape ? 44 : isStory ? 84 : 72;
-    const subtitleSize = isLandscape ? 20 : isStory ? 36 : 28;
+    const padding = isLandscape ? 48 : isStory ? 80 : 60;
+    const titleSize = isLandscape ? 40 : isStory ? 80 : 64;
+    const subtitleSize = isLandscape ? 18 : isStory ? 34 : 26;
     const daySize = isLandscape ? 100 : isStory ? 160 : 140;
-    const labelSize = isLandscape ? 20 : isStory ? 42 : 32;
-    const humorSize = isLandscape ? 16 : isStory ? 32 : 26;
-    const mercurySymbolSize = isLandscape ? 48 : isStory ? 80 : 72;
+    const labelSize = isLandscape ? 20 : isStory ? 44 : 36;
+    const humorSize = isLandscape ? 16 : isStory ? 34 : 28;
+    const mercurySymbolSize = isLandscape ? 60 : isStory ? 200 : 110;
 
     const badgeColors = BADGE_COLORS[data.badgeLevel];
     const badgeLabel = BADGE_LABELS[data.badgeLevel];
     const badgeIcon = BADGE_ICONS[data.badgeLevel];
 
     // Dynamic badge circle sizing based on content
-    const badgeSizeBase = isLandscape ? 220 : isStory ? 460 : 400;
+    const badgeSizeBase = isLandscape ? 230 : isStory ? 660 : 460;
 
     // Generate unique starfield based on shareId
     const stars = generateStarfield(data.shareId, getStarCount(format));
@@ -416,9 +416,8 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
           background: OG_COLORS.background,
-          padding: '80px 60px 140px 60px',
+          padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
           border: SHARE_IMAGE_BORDER,
@@ -433,7 +432,7 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 48,
+            marginBottom: 24,
           }}
         >
           <div
@@ -474,6 +473,17 @@ export async function GET(request: NextRequest) {
             justifyContent: 'center',
           }}
         >
+          {/* Radial glow behind story badge */}
+          <div
+            style={{
+              position: 'absolute',
+              width: badgeSizeBase + 500,
+              height: badgeSizeBase + 500,
+              borderRadius: '50%',
+              background: `radial-gradient(ellipse at center, ${badgeColors.border}30 0%, transparent 65%)`,
+              display: 'flex',
+            }}
+          />
           <div
             style={{
               display: 'flex',
@@ -491,7 +501,7 @@ export async function GET(request: NextRequest) {
           >
             <div
               style={{
-                fontSize: 72,
+                fontSize: 130,
                 fontWeight: 400,
                 color: badgeColors.text,
                 marginBottom: 16,
@@ -615,6 +625,17 @@ export async function GET(request: NextRequest) {
             justifyContent: 'center',
           }}
         >
+          {/* Radial glow behind badge */}
+          <div
+            style={{
+              position: 'absolute',
+              width: badgeSizeBase + 200,
+              height: badgeSizeBase + 200,
+              borderRadius: '50%',
+              background: `radial-gradient(ellipse at center, ${badgeColors.border}18 0%, transparent 65%)`,
+              display: 'flex',
+            }}
+          />
           <div
             style={{
               display: 'flex',
@@ -628,11 +649,12 @@ export async function GET(request: NextRequest) {
               flexDirection: 'column',
               marginBottom: 32,
               padding: 28,
+              boxShadow: `0 0 60px ${badgeColors.border}30`,
             }}
           >
             <div
               style={{
-                fontSize: 64,
+                fontSize: 80,
                 fontWeight: 400,
                 color: badgeColors.text,
                 marginBottom: 12,
@@ -661,7 +683,7 @@ export async function GET(request: NextRequest) {
               fontWeight: 400,
               color: badgeColors.text,
               textTransform: 'uppercase',
-              letterSpacing: '0.12em',
+              letterSpacing: '0.14em',
               marginBottom: 16,
               textAlign: 'center',
               display: 'flex',
@@ -688,7 +710,6 @@ export async function GET(request: NextRequest) {
           {progressBarJsx}
         </div>
 
-        {/* Footer Branding */}
         <ShareFooter format={format} />
       </div>
     );

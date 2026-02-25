@@ -426,6 +426,250 @@ const PROMPTS: VideoPrompt[] = [
       'A small spiral galaxy slowly rotating. Blue and gold arms of stars and dust turn hypnotically. Deep black background. Designed to loop seamlessly. Simple and beautiful. No text.',
     tags: ['loop', 'galaxy', 'spin', 'seamless'],
   },
+
+  // SPIRIT ANIMALS — viral TikTok video content
+  {
+    id: 'spirit-wolf-howl',
+    category: 'spirit',
+    prompt:
+      'A lone wolf standing on a snowy hill, howling at a huge luminous full moon. Cinematic slow motion. Moonlight on its silver coat. Snow particles drift. Deep and primal. No text.',
+    tags: ['spirit', 'wolf', 'moon', 'howling'],
+  },
+  {
+    id: 'spirit-phoenix-fire',
+    category: 'spirit',
+    prompt:
+      'A phoenix rising from golden flames in slow motion. Fire trails upward as the great bird ascends. Sparks become stars. Transformation and rebirth. Cinematic and dramatic. No text.',
+    tags: ['spirit', 'phoenix', 'fire', 'rebirth'],
+  },
+  {
+    id: 'spirit-owl-flight',
+    category: 'spirit',
+    prompt:
+      'An ethereal owl in slow-motion flight through deep space, wings spread wide. Nebula colours shift behind it. Its eyes glow gold. Silent and wise. Cinematic. No text.',
+    tags: ['spirit', 'owl', 'flight', 'wisdom'],
+  },
+  {
+    id: 'spirit-butterfly-transform',
+    category: 'spirit',
+    prompt:
+      'A butterfly with wings made of nebula and stars slowly opening and closing. Each wingbeat releases stardust. Against a dark cosmic background. Transformation made visible. No text.',
+    tags: ['spirit', 'butterfly', 'transformation', 'stardust'],
+  },
+
+  // GODDESS / AURA — powerful vertical videos
+  {
+    id: 'goddess-silhouette-moon',
+    category: 'goddess',
+    prompt:
+      'A female silhouette standing with arms raised toward a massive full moon. Moonlight pours down onto her. Her aura glows silver and violet. Stars above. Ancient and powerful. Cinematic. No text.',
+    tags: ['goddess', 'silhouette', 'moon', 'aura'],
+  },
+  {
+    id: 'aura-pulse-gold',
+    category: 'aura',
+    prompt:
+      'A human silhouette with a golden aura that slowly pulses outward in waves of light. Like a heartbeat of divine energy. Dark background. Slow and meditative. No faces, no text.',
+    tags: ['aura', 'gold', 'pulse', 'divine'],
+  },
+
+  // ANGEL NUMBERS — number reveals
+  {
+    id: 'angel-number-1111',
+    category: 'numerology',
+    prompt:
+      'The number 1111 forming from particles of light against deep black space. Each digit materialises slowly, glowing brighter until all four glow together. A portal opens behind them. Electric. No text besides the numbers.',
+    tags: ['numerology', '1111', 'angel-number', 'portal'],
+  },
+  {
+    id: 'angel-number-333',
+    category: 'numerology',
+    prompt:
+      'The number 333 glowing in warm gold against a cosmic background. The numbers pulse with energy. Stars drift behind them. Sacred and powerful. Simple and beautiful. No text besides the numbers.',
+    tags: ['numerology', '333', 'angel-number', 'gold'],
+  },
+
+  // CRYSTAL MACRO — slow zoom videos
+  {
+    id: 'crystal-amethyst-macro',
+    category: 'crystals',
+    prompt:
+      'Extreme close-up macro shot of an amethyst crystal cluster. The camera slowly zooms into a single purple crystal point. Light refracts into tiny rainbows. Deep and meditative. No text.',
+    tags: ['crystals', 'amethyst', 'macro', 'purple'],
+  },
+
+  // MOON PHASE — cinematic phase transition
+  {
+    id: 'moon-phase-transition',
+    category: 'moon',
+    prompt:
+      'A timelapse of the moon moving through its phases. New moon darkness, waxing crescent growing, full moon blazing, waning back to dark. Stars spin behind it. Beautiful lunar cycle. No text.',
+    tags: ['moon', 'phases', 'timelapse', 'cycle'],
+  },
+
+  // SACRED GEOMETRY — animated
+  {
+    id: 'sacred-flower-of-life-spin',
+    category: 'sacred',
+    prompt:
+      'The Flower of Life sacred geometry pattern slowly rotating and glowing gold. New circles form and join the pattern. Stars visible behind. Ancient cosmic blueprint coming alive. No text.',
+    tags: ['sacred', 'flower-of-life', 'rotation', 'gold'],
+  },
+
+  // SYMBOL REVEALS
+  {
+    id: 'symbol-om-vibration',
+    category: 'symbol',
+    prompt:
+      'The Om symbol forming from golden light particles on a deep purple background. As it forms, concentric rings of light ripple outward like sound waves. Sacred vibration. No text besides the symbol.',
+    tags: ['symbol', 'om', 'vibration', 'formation'],
+  },
+
+  // SPIRIT ANIMALS — more
+  {
+    id: 'spirit-dragon-stars',
+    category: 'spirit',
+    prompt:
+      'A cosmic dragon slowly coiling through deep space, its scales shimmering like galaxies. Nebula colours shift as it moves. Ancient and vast. Cinematic slow motion. No text.',
+    tags: ['spirit', 'dragon', 'cosmic', 'ancient'],
+  },
+  {
+    id: 'spirit-eagle-soar',
+    category: 'spirit',
+    prompt:
+      'A golden eagle soaring in slow motion against a blazing sunrise. Wings spread wide, feathers catching fire in the light. Absolute freedom and clarity. Cinematic and powerful. No text.',
+    tags: ['spirit', 'eagle', 'sun', 'freedom'],
+  },
+  {
+    id: 'spirit-whale-deep',
+    category: 'spirit',
+    prompt:
+      'A humpback whale swimming through a cosmic ocean — water and deep space merge. Stars visible beneath the translucent surface. The whale sings, soundwaves visible. Cinematic. No text.',
+    tags: ['spirit', 'whale', 'cosmic-ocean', 'depth'],
+  },
+
+  // SACRED SITES — cinematic reveals
+  {
+    id: 'site-stonehenge-timelapse',
+    category: 'sacred-site',
+    prompt:
+      'Stonehenge timelapse at night. Stars rotate around Polaris above the ancient stones. The Milky Way arcs overhead. The stones stand eternal and still. Cinematic and awe-inspiring. No text.',
+    tags: ['sacred-site', 'stonehenge', 'timelapse', 'stars'],
+  },
+  {
+    id: 'site-pyramids-night',
+    category: 'sacred-site',
+    prompt:
+      'The Great Pyramid of Giza under a blazing star field at night. Slow cinematic approach. The Milky Way directly above. Ancient and cosmic. The pyramid glows faintly in starlight. No text.',
+    tags: ['sacred-site', 'pyramids', 'egypt', 'milky-way'],
+  },
+
+  // COSMIC EVENTS — dramatic
+  {
+    id: 'event-supernova-cinematic',
+    category: 'cosmic-event',
+    prompt:
+      'A star going supernova in cinematic slow motion. It swells, then detonates in an expanding sphere of light and plasma. Gold, white and electric blue. The most powerful event in the universe. No text.',
+    tags: ['cosmic-event', 'supernova', 'explosion', 'dramatic'],
+  },
+
+  // GODDESS — cinematic
+  {
+    id: 'goddess-rising-moon',
+    category: 'goddess',
+    prompt:
+      'A goddess silhouette slowly rising from a still dark ocean under a full moon. Arms spread wide. Moonlight cascades around her. Silver and deep indigo. Ancient feminine power emerging. Cinematic. No text.',
+    tags: ['goddess', 'rising', 'ocean', 'moon'],
+  },
+
+  // ELEMENTS
+  {
+    id: 'element-lava-stars',
+    category: 'elements',
+    prompt:
+      "Lava flowing into the ocean at night, creating plumes of steam. Stars blazing above. The red molten rock glows intensely. Earth's fire meeting the sea under the cosmos. Cinematic. No text.",
+    tags: ['elements', 'lava', 'ocean', 'fire-water'],
+  },
+  {
+    id: 'element-lightning-cosmos',
+    category: 'elements',
+    prompt:
+      'Lightning bolts forking across a storm sky, stars visible above the cloud layer. Multiple strikes illuminate the clouds purple and blue. Raw elemental power with cosmic backdrop. Cinematic. No text.',
+    tags: ['elements', 'lightning', 'storm', 'cosmic'],
+  },
+
+  // MYTHOLOGY — cinematic
+  {
+    id: 'myth-pegasus-flight',
+    category: 'mythology',
+    prompt:
+      'Pegasus in slow-motion flight through a cosmic nebula. Vast white wings spread against swirling purple and gold gas clouds. Stars streak past. Ancient mythology made cosmic. Cinematic. No text.',
+    tags: ['mythology', 'pegasus', 'flight', 'cosmic'],
+  },
+  {
+    id: 'myth-medusa-awakens',
+    category: 'mythology',
+    prompt:
+      'Medusa — powerful serpent-haired silhouette turning slowly against a deep teal cosmic background. Each serpent moves independently, glowing faintly. Primal feminine power. Cinematic slow rotation. No text.',
+    tags: ['mythology', 'medusa', 'serpents', 'power'],
+  },
+
+  // SPIRIT ANIMALS — more cinematic
+  {
+    id: 'spirit-elephant-walk',
+    category: 'spirit',
+    prompt:
+      'A great elephant walking slowly through a cosmic landscape — dust rises and becomes stars. Its silhouette moves with ancient grace. The Milky Way above. Wisdom in motion. Cinematic. No text.',
+    tags: ['spirit', 'elephant', 'cosmic', 'ancient'],
+  },
+  {
+    id: 'spirit-octopus-deep',
+    category: 'spirit',
+    prompt:
+      'A cosmic octopus drifting through deep space, tentacles flowing. Each arm reaches across star fields. Bioluminescent light pulses along its body. Intelligence and mystery. Slow and hypnotic. No text.',
+    tags: ['spirit', 'octopus', 'cosmic', 'bioluminescent'],
+  },
+
+  // WITCHCRAFT — atmospheric video
+  {
+    id: 'witch-cauldron-bubbling',
+    category: 'witchcraft',
+    prompt:
+      'A cauldron bubbling with glowing liquid, coloured smoke rising in slow spirals. Moonlight from above. Stars visible through a forest canopy. Magical and atmospheric. Slow cinematic. No text.',
+    tags: ['witchcraft', 'cauldron', 'smoke', 'magic'],
+  },
+
+  // MEDITATION — cinematic
+  {
+    id: 'meditation-kundalini-video',
+    category: 'meditation',
+    prompt:
+      'Kundalini energy rising up a human spine silhouette. A glowing serpent of light coils upward through seven chakra orbs. Each chakra blazes to life as the energy passes. Cosmic background. No text.',
+    tags: ['meditation', 'kundalini', 'chakra', 'rising'],
+  },
+  {
+    id: 'meditation-third-eye-open-video',
+    category: 'meditation',
+    prompt:
+      'A third eye slowly opening on a forehead. Indigo light floods outward, sacred geometry unfolds. The iris of the inner eye contains a galaxy. Awakening made visible. Cinematic. No text.',
+    tags: ['meditation', 'third-eye', 'opening', 'galaxy'],
+  },
+
+  // ASTROLOGY
+  {
+    id: 'astro-natal-chart-spin',
+    category: 'astrology',
+    prompt:
+      'A birth chart wheel slowly rotating. Zodiac signs, house lines and planetary symbols glow gold on deep indigo. The wheel of a life, turning. Sacred and beautiful. Cinematic slow rotation. No text.',
+    tags: ['astrology', 'natal-chart', 'wheel', 'rotation'],
+  },
+  {
+    id: 'astro-planetary-parade',
+    category: 'astrology',
+    prompt:
+      'All planets of the solar system slowly aligning in a row. Mercury to Neptune, each glowing in their true colour. A rare cosmic parade across the star field. Cinematic and awe-inspiring. No text.',
+    tags: ['astrology', 'planets', 'alignment', 'parade'],
+  },
 ];
 
 // ─── Types ───────────────────────────────────────────────────────────────────

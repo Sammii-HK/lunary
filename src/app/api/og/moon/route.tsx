@@ -10,6 +10,8 @@ import {
   OGTitle,
   OGSubtitle,
   OGFooter,
+  OGStarfield,
+  OGGlowOrbs,
   createOGResponse,
   getLunarBackgroundVariant,
   formatOGDate,
@@ -56,29 +58,51 @@ export async function GET(request: NextRequest) {
   const formattedDate = formatOGDate(targetDate);
   const background = getLunarBackgroundVariant(targetDate.getDate());
 
-  const robotoFont = await loadGoogleFont(request);
+  let robotoFont: ArrayBuffer | null = null;
+  try {
+    robotoFont = await loadGoogleFont(request);
+  } catch {
+    // continue without custom font
+  }
+
+  const moonAccent = '#c8d6e5';
 
   return createOGResponse(
     <OGWrapper theme={{ background }}>
-      <OGHeader
-        title={`${Math.round(moonPhase.illumination)}% ILLUMINATED`}
-        fontSize={24}
-      />
-
-      <OGContentCenter>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`${baseUrl}/icons/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
-          width={180}
-          height={180}
-          alt={moonPhase.name}
-          style={{ marginBottom: '30px' }}
+      <OGStarfield seed={moonPhase.name} count={80} accentColor={moonAccent} />
+      <OGGlowOrbs accentColor={moonAccent} />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        <OGHeader
+          title={`${Math.round(moonPhase.illumination)}% ILLUMINATED`}
+          fontSize={24}
         />
-        <OGTitle text={moonPhase.name} marginBottom='30px' />
-        <OGSubtitle text={moonPhase.energy} />
-      </OGContentCenter>
 
-      <OGFooter date={formattedDate} />
+        <OGContentCenter>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${baseUrl}/icons/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
+            width={180}
+            height={180}
+            alt={moonPhase.name}
+            style={{ marginBottom: '30px' }}
+          />
+          <OGTitle text={moonPhase.name} marginBottom='30px' />
+          <OGSubtitle text={moonPhase.energy} />
+        </OGContentCenter>
+
+        <OGFooter date={formattedDate} />
+      </div>
     </OGWrapper>,
     {
       size: 'square',

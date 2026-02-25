@@ -146,13 +146,13 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 48 : isStory ? 60 : 60;
-    const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
-    const dateSize = isLandscape ? 22 : isStory ? 36 : 28;
-    const phaseSize = isLandscape ? 40 : isStory ? 72 : 56;
-    const labelSize = isLandscape ? 22 : isStory ? 36 : 32;
-    const insightSize = isLandscape ? 22 : isStory ? 36 : 32;
-    const moonIconSize = isLandscape ? 175 : isStory ? 225 : 175;
+    const padding = isLandscape ? 48 : isStory ? 80 : 60;
+    const titleSize = isLandscape ? 44 : isStory ? 80 : 66;
+    const dateSize = isLandscape ? 20 : isStory ? 32 : 24;
+    const phaseSize = isLandscape ? 38 : isStory ? 64 : 52;
+    const labelSize = isLandscape ? 20 : isStory ? 34 : 28;
+    const insightSize = isLandscape ? 22 : isStory ? 36 : 30;
+    const moonIconSize = isLandscape ? 190 : isStory ? 380 : 270;
 
     const truncate = truncateText;
 
@@ -216,7 +216,7 @@ export async function GET(request: NextRequest) {
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: 20,
           }}
@@ -227,7 +227,6 @@ export async function GET(request: NextRequest) {
               fontWeight: 400,
               color: OG_COLORS.textPrimary,
               letterSpacing: '0.05em',
-              textAlign: 'center',
               display: 'flex',
               textShadow: SHARE_TITLE_GLOW,
             }}
@@ -238,7 +237,6 @@ export async function GET(request: NextRequest) {
             style={{
               fontSize: dateSize,
               color: OG_COLORS.textTertiary,
-              marginTop: 8,
               letterSpacing: '0.1em',
               display: 'flex',
             }}
@@ -256,25 +254,25 @@ export async function GET(request: NextRequest) {
             flex: 1,
           }}
         >
-          {/* Left: Moon Phase (40%) */}
+          {/* Left: Moon Phase */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              padding: '24px',
+              padding: '20px',
               background: SHARE_CARDS.primary,
               border: SHARE_BORDERS.card,
               borderRadius: 16,
               alignItems: 'center',
               justifyContent: 'center',
-              width: '40%',
+              width: '38%',
+              gap: 10,
             }}
           >
             <img
               src={`${baseUrl}${moonIconPath}`}
               width={moonIconSize}
               height={moonIconSize}
-              style={{ marginBottom: 16 }}
               alt={data.moonPhase.name}
             />
             <div
@@ -284,7 +282,6 @@ export async function GET(request: NextRequest) {
                 color: OG_COLORS.primaryViolet,
                 letterSpacing: '0.05em',
                 textAlign: 'center',
-                marginBottom: 8,
                 display: 'flex',
               }}
             >
@@ -292,10 +289,10 @@ export async function GET(request: NextRequest) {
             </div>
             <div
               style={{
-                fontSize: labelSize,
+                fontSize: labelSize - 4,
                 color: OG_COLORS.textSecondary,
                 textTransform: 'uppercase',
-                letterSpacing: '0.1em',
+                letterSpacing: '0.12em',
                 fontWeight: 300,
                 textAlign: 'center',
                 display: 'flex',
@@ -305,21 +302,20 @@ export async function GET(request: NextRequest) {
             </div>
           </div>
 
-          {/* Right: Insight + Transit (60%) */}
+          {/* Right: Insight + Transit */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 16,
+              gap: 14,
               flex: 1,
             }}
           >
-            {/* Insight Card */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                padding: '24px',
+                padding: '20px 24px',
                 background: SHARE_CARDS.primary,
                 border: SHARE_BORDERS.card,
                 borderRadius: 16,
@@ -329,11 +325,11 @@ export async function GET(request: NextRequest) {
             >
               <div
                 style={{
-                  fontSize: 14,
-                  color: OG_COLORS.textSecondary,
+                  fontSize: 12,
+                  color: OG_COLORS.textTertiary,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  marginBottom: 12,
+                  letterSpacing: '0.14em',
+                  marginBottom: 10,
                   display: 'flex',
                 }}
               >
@@ -351,21 +347,20 @@ export async function GET(request: NextRequest) {
               </div>
             </div>
 
-            {/* Transit Card (if present) */}
             {data.transit && (
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  padding: '20px 24px',
+                  padding: '18px 22px',
                   background: SHARE_CARDS.primary,
-                  border: `2px solid ${OG_COLORS.galaxyHaze}`,
-                  borderRadius: 16,
+                  border: `1px solid ${OG_COLORS.galaxyHaze}50`,
+                  borderRadius: 14,
                 }}
               >
                 <div
                   style={{
-                    fontSize: 18,
+                    fontSize: insightSize - 2,
                     color: OG_COLORS.galaxyHaze,
                     fontWeight: 400,
                     marginBottom: 6,
@@ -376,7 +371,7 @@ export async function GET(request: NextRequest) {
                 </div>
                 <div
                   style={{
-                    fontSize: 16,
+                    fontSize: insightSize - 6,
                     color: OG_COLORS.textSecondary,
                     lineHeight: 1.4,
                     display: 'flex',
@@ -389,7 +384,6 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Footer */}
         <ShareFooter format={format} />
       </div>
     ) : isStory ? (
@@ -400,15 +394,30 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
           background: OG_COLORS.background,
-          padding: '80px 60px 140px 60px',
+          padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
           border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
+
+        {/* Radial glow behind moon */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '20%',
+            left: '50%',
+            width: 700,
+            height: 700,
+            borderRadius: '50%',
+            background:
+              'radial-gradient(ellipse at center, rgba(167,139,250,0.15) 0%, transparent 65%)',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+          }}
+        />
 
         {/* Header */}
         <div
@@ -436,7 +445,7 @@ export async function GET(request: NextRequest) {
             style={{
               fontSize: dateSize,
               color: OG_COLORS.textTertiary,
-              marginTop: 12,
+              marginTop: 14,
               letterSpacing: '0.1em',
               display: 'flex',
             }}
@@ -445,20 +454,20 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Large Moon Icon - upper third */}
+        {/* Large Moon Icon */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 48,
+            marginBottom: 40,
           }}
         >
           <img
             src={`${baseUrl}${moonIconPath}`}
             width={moonIconSize}
             height={moonIconSize}
-            style={{ marginBottom: 24 }}
+            style={{ marginBottom: 28 }}
             alt={data.moonPhase.name}
           />
           <div
@@ -468,7 +477,7 @@ export async function GET(request: NextRequest) {
               color: OG_COLORS.primaryViolet,
               letterSpacing: '0.05em',
               textAlign: 'center',
-              marginBottom: 12,
+              marginBottom: 14,
               display: 'flex',
             }}
           >
@@ -479,7 +488,7 @@ export async function GET(request: NextRequest) {
               fontSize: labelSize,
               color: OG_COLORS.textSecondary,
               textTransform: 'uppercase',
-              letterSpacing: '0.1em',
+              letterSpacing: '0.12em',
               fontWeight: 300,
               textAlign: 'center',
               display: 'flex',
@@ -489,86 +498,88 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Insight Card - Full width */}
+        {/* Cards — flex:1 wrapper distributes space evenly */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: '36px 40px',
-            background: SHARE_CARDS.primary,
-            border: SHARE_BORDERS.card,
-            borderRadius: 20,
-            marginBottom: data.transit ? 28 : 0,
-            flex: data.transit ? 0 : 1,
-            justifyContent: 'center',
+            flex: 1,
+            gap: 24,
           }}
         >
-          <div
-            style={{
-              fontSize: 20,
-              color: OG_COLORS.textSecondary,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: 16,
-              display: 'flex',
-            }}
-          >
-            Cosmic Insight
-          </div>
-          <div
-            style={{
-              fontSize: insightSize,
-              color: OG_COLORS.textPrimary,
-              lineHeight: 1.6,
-              textAlign: 'center',
-              display: 'flex',
-            }}
-          >
-            {truncate(data.insight, insightLimit)}
-          </div>
-        </div>
-
-        {/* Transit Card (if present) */}
-        {data.transit && (
+          {/* Insight Card */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              padding: '32px 40px',
+              padding: '36px 44px',
               background: SHARE_CARDS.primary,
-              border: `2px solid ${OG_COLORS.galaxyHaze}`,
-              borderRadius: 20,
+              border: SHARE_BORDERS.card,
+              borderRadius: 24,
               flex: 1,
-              justifyContent: 'center',
             }}
           >
             <div
               style={{
-                fontSize: labelSize,
-                color: OG_COLORS.galaxyHaze,
-                fontWeight: 400,
-                marginBottom: 12,
-                textAlign: 'center',
+                fontSize: 20,
+                color: OG_COLORS.textTertiary,
+                textTransform: 'uppercase',
+                letterSpacing: '0.14em',
+                marginBottom: 18,
                 display: 'flex',
               }}
             >
-              {truncate(data.transit.headline, transitHeadlineLimit)}
+              Cosmic Insight
             </div>
             <div
               style={{
-                fontSize: insightSize - 4,
-                color: OG_COLORS.textSecondary,
-                textAlign: 'center',
-                lineHeight: 1.5,
+                fontSize: insightSize,
+                color: OG_COLORS.textPrimary,
+                lineHeight: 1.65,
                 display: 'flex',
               }}
             >
-              {truncate(data.transit.description, transitDescLimit)}
+              {truncate(data.insight, insightLimit)}
             </div>
           </div>
-        )}
 
-        {/* Footer */}
+          {data.transit && (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '36px 44px',
+                background: SHARE_CARDS.primary,
+                border: `1px solid ${OG_COLORS.galaxyHaze}50`,
+                borderRadius: 24,
+                flex: 1,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: labelSize,
+                  color: OG_COLORS.galaxyHaze,
+                  fontWeight: 400,
+                  marginBottom: 16,
+                  display: 'flex',
+                }}
+              >
+                {truncate(data.transit.headline, transitHeadlineLimit)}
+              </div>
+              <div
+                style={{
+                  fontSize: insightSize - 2,
+                  color: OG_COLORS.textSecondary,
+                  lineHeight: 1.55,
+                  display: 'flex',
+                }}
+              >
+                {truncate(data.transit.description, transitDescLimit)}
+              </div>
+            </div>
+          )}
+        </div>
+
         <ShareFooter format={format} />
       </div>
     ) : (
@@ -588,13 +599,29 @@ export async function GET(request: NextRequest) {
       >
         {starfieldJsx}
 
+        {/* Radial glow behind moon icon */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '25%',
+            left: '50%',
+            width: 520,
+            height: 520,
+            borderRadius: '50%',
+            background:
+              'radial-gradient(ellipse at center, rgba(167,139,250,0.18) 0%, transparent 65%)',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+          }}
+        />
+
         {/* Header */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 36,
+            marginBottom: 28,
           }}
         >
           <div
@@ -623,24 +650,24 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Moon Phase - Full width card */}
+        {/* Moon Phase — hero */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: '24px',
+            padding: '28px 32px',
             background: SHARE_CARDS.primary,
             border: SHARE_BORDERS.card,
-            borderRadius: 20,
-            marginBottom: 20,
+            borderRadius: 24,
+            marginBottom: 18,
             alignItems: 'center',
+            gap: 14,
           }}
         >
           <img
             src={`${baseUrl}${moonIconPath}`}
             width={moonIconSize}
             height={moonIconSize}
-            style={{ marginBottom: 20 }}
             alt={data.moonPhase.name}
           />
           <div
@@ -650,7 +677,6 @@ export async function GET(request: NextRequest) {
               color: OG_COLORS.primaryViolet,
               letterSpacing: '0.05em',
               textAlign: 'center',
-              marginBottom: 10,
               display: 'flex',
             }}
           >
@@ -658,10 +684,10 @@ export async function GET(request: NextRequest) {
           </div>
           <div
             style={{
-              fontSize: labelSize,
+              fontSize: labelSize - 4,
               color: OG_COLORS.textSecondary,
               textTransform: 'uppercase',
-              letterSpacing: '0.1em',
+              letterSpacing: '0.14em',
               fontWeight: 300,
               textAlign: 'center',
               display: 'flex',
@@ -671,26 +697,26 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Insight Card - Full width */}
+        {/* Insight Card */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: '28px 32px',
+            padding: '24px 28px',
             background: SHARE_CARDS.primary,
             border: SHARE_BORDERS.card,
             borderRadius: 20,
-            marginBottom: data.transit ? 24 : 0,
+            marginBottom: data.transit ? 18 : 0,
             flex: data.transit ? 0 : 1,
             justifyContent: 'center',
           }}
         >
           <div
             style={{
-              fontSize: 16,
-              color: OG_COLORS.textSecondary,
+              fontSize: 14,
+              color: OG_COLORS.textTertiary,
               textTransform: 'uppercase',
-              letterSpacing: '0.1em',
+              letterSpacing: '0.14em',
               marginBottom: 12,
               display: 'flex',
             }}
@@ -701,8 +727,7 @@ export async function GET(request: NextRequest) {
             style={{
               fontSize: insightSize,
               color: OG_COLORS.textPrimary,
-              lineHeight: 1.5,
-              textAlign: 'center',
+              lineHeight: 1.55,
               display: 'flex',
             }}
           >
@@ -710,15 +735,14 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Transit Card (if present) */}
         {data.transit && (
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              padding: '24px 32px',
+              padding: '22px 28px',
               background: SHARE_CARDS.primary,
-              border: `2px solid ${OG_COLORS.galaxyHaze}`,
+              border: `1px solid ${OG_COLORS.galaxyHaze}50`,
               borderRadius: 20,
               flex: 1,
               justifyContent: 'center',
@@ -730,7 +754,6 @@ export async function GET(request: NextRequest) {
                 color: OG_COLORS.galaxyHaze,
                 fontWeight: 400,
                 marginBottom: 10,
-                textAlign: 'center',
                 display: 'flex',
               }}
             >
@@ -740,7 +763,6 @@ export async function GET(request: NextRequest) {
               style={{
                 fontSize: insightSize - 2,
                 color: OG_COLORS.textSecondary,
-                textAlign: 'center',
                 lineHeight: 1.5,
                 display: 'flex',
               }}
@@ -750,7 +772,6 @@ export async function GET(request: NextRequest) {
           </div>
         )}
 
-        {/* Footer */}
         <ShareFooter format={format} />
       </div>
     );

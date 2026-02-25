@@ -7,6 +7,8 @@ import {
   OGTitle,
   OGSubtitle,
   OGFooter,
+  OGStarfield,
+  OGGlowOrbs,
   createOGResponse,
 } from '../../../../../utils/og/base';
 
@@ -25,25 +27,45 @@ export async function GET(request: NextRequest): Promise<Response> {
   const background =
     'linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #312e81 70%, #1e1b2e 100%)';
 
+  const accentColor = '#a78bfa';
+
   return createOGResponse(
     <OGWrapper theme={{ background }}>
-      <OGHeader
-        title='Lunary'
-        subtitle='Blog'
-        fontSize={28}
-        paddingTop='70px'
-      />
-
-      <OGContentCenter>
-        <OGTitle text={`Weekly Astrology Forecasts • ${year}`} fontSize={58} />
-        <OGSubtitle
-          text='Transits • Moon Phases • Retrogrades • Cosmic Guidance'
+      <OGStarfield seed='blog' count={60} accentColor={accentColor} />
+      <OGGlowOrbs accentColor={accentColor} />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        <OGHeader
+          title='Lunary'
+          subtitle='Blog'
           fontSize={28}
-          opacity={0.8}
+          paddingTop='70px'
         />
-      </OGContentCenter>
 
-      <OGFooter />
+        <OGContentCenter>
+          <OGTitle
+            text={`Weekly Astrology Forecasts • ${year}`}
+            fontSize={58}
+          />
+          <OGSubtitle
+            text='Transits • Moon Phases • Retrogrades • Cosmic Guidance'
+            fontSize={28}
+            opacity={0.8}
+          />
+        </OGContentCenter>
+
+        <OGFooter />
+      </div>
     </OGWrapper>,
     {
       size: 'landscape',
