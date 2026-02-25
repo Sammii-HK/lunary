@@ -7,7 +7,7 @@ import WebKit
 @objc public class WidgetDataBridge: NSObject, WKScriptMessageHandler {
     static let shared = WidgetDataBridge()
 
-    private let appGroupId = "group.app.lunary"
+    private let appGroupId = "group.io.lunary"
     private let dataKey = "widgetData"
 
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -63,7 +63,7 @@ public class WidgetBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "reloadWidgets", returnType: CAPPluginReturnPromise),
     ]
 
-    private let appGroupId = "group.app.lunary"
+    private let appGroupId = "group.io.lunary"
     private let dataKey = "widgetData"
 
     override public func load() {
