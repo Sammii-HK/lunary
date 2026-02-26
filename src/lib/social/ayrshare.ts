@@ -32,6 +32,21 @@ function getAyrshareHeaders() {
   return headers;
 }
 
+/** Allow-list of supported platform names */
+const ALLOWED_PLATFORMS = new Set([
+  'x',
+  'twitter',
+  'instagram',
+  'facebook',
+  'linkedin',
+  'tiktok',
+  'pinterest',
+  'reddit',
+  'bluesky',
+  'threads',
+  'youtube',
+]);
+
 /** Map our platform names to Ayrshare platform names */
 function toAyrsharePlatform(platform: string): string {
   const map: Record<string, string> = {
@@ -240,8 +255,8 @@ export async function postToAyrshareMultiPlatform(params: {
   const headers = getAyrshareHeaders();
   const results: Record<string, AyrshareResult> = {};
 
-  const allPlatforms = params.platforms.filter(
-    (p) => p.toLowerCase() !== 'youtube',
+  const allPlatforms = params.platforms.filter((p) =>
+    ALLOWED_PLATFORMS.has(p.toLowerCase()),
   );
 
   if (allPlatforms.length === 0) {

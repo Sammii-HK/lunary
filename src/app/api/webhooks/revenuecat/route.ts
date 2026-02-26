@@ -66,7 +66,11 @@ export async function POST(req: NextRequest) {
 
   if (!userId) {
     // Anonymous purchase — can't link to a user, log and return OK
-    console.warn('[RC webhook] Missing app_user_id on event:', eventType);
+    const safeEventType = String(eventType ?? '').replace(
+      /[\r\n\x00-\x1F\x7F]/g,
+      '',
+    );
+    console.warn('[RC webhook] Missing app_user_id on event:', safeEventType);
     return NextResponse.json({ received: true });
   }
 
