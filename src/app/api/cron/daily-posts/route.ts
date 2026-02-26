@@ -504,6 +504,7 @@ export async function GET(request: NextRequest) {
                       },
                     ]
                   : [],
+              platformSettings: { topic_tag: post.topicTag },
             });
 
             if (result.success) {
@@ -1688,6 +1689,9 @@ async function runDailyPosts(dateStr: string) {
         pinterestLink: post.platforms.includes('pinterest')
           ? buildUtmUrl('/grimoire', 'pinterest', 'social', 'daily_quote')
           : undefined,
+        ...(post.platforms.includes('threads')
+          ? { platformSettings: { threads: { topic_tag: 'Astrology' } } }
+          : {}),
       });
 
       // Check if all platforms succeeded
