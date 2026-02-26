@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { Capacitor } from '@capacitor/core';
 
 export type CookiePreferences = {
   essential: boolean;
@@ -113,6 +114,9 @@ export function CookieConsent() {
   }, []);
 
   useEffect(() => {
+    // Never show on native iOS/Android — no GDPR cookie banner needed in apps
+    if (Capacitor.isNativePlatform()) return;
+
     // Don't show in demo mode or demo-preview pages
     if (typeof window !== 'undefined') {
       const isDemoMode =
