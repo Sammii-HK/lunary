@@ -41,19 +41,21 @@ export default function AuthPage() {
     }
   }, [authState.isAuthenticated, authState.loading]);
 
-  if (authState.loading) {
+  if (authState.loading || authState.isAuthenticated) {
+    // Show spinner while auth check runs OR while redirecting to /app.
+    // Returning null causes a blank screen in Capacitor WKWebView.
     return (
       <div className='min-h-screen bg-black text-white flex items-center justify-center p-4'>
         <div className='text-center'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-lunary-primary mx-auto mb-4'></div>
-          <p className='text-zinc-400'>Checking authentication...</p>
+          <p className='text-zinc-400'>
+            {authState.isAuthenticated
+              ? 'Taking you to the app…'
+              : 'Checking authentication...'}
+          </p>
         </div>
       </div>
     );
-  }
-
-  if (authState.isAuthenticated) {
-    return null;
   }
 
   return (
