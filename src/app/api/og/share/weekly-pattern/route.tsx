@@ -307,23 +307,24 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              padding: '28px 32px',
+              padding: '24px 28px',
               background: SHARE_CARDS.primary,
               border: `2px solid ${suitColor}`,
               borderRadius: 18,
               width: '50%',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: 8,
             }}
           >
             <div
               style={{
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
+                width: 28,
+                height: 3,
+                borderRadius: 2,
                 background: suitColor,
                 display: 'flex',
-                marginBottom: 16,
+                opacity: 0.7,
               }}
             />
             <div
@@ -334,22 +335,34 @@ export async function GET(request: NextRequest) {
                 letterSpacing: '0.05em',
                 display: 'flex',
                 textAlign: 'center',
-                marginBottom: 8,
               }}
             >
               {truncate(data.season.name, seasonNameLimit)}
             </div>
+            {data.season.description && (
+              <div
+                style={{
+                  fontSize: labelSize - 4,
+                  color: OG_COLORS.textSecondary,
+                  lineHeight: 1.4,
+                  textAlign: 'center',
+                  display: 'flex',
+                }}
+              >
+                {truncate(data.season.description, 60)}
+              </div>
+            )}
             <div
               style={{
-                fontSize: labelSize,
-                color: OG_COLORS.textSecondary,
+                fontSize: labelSize - 4,
+                color: OG_COLORS.textTertiary,
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
                 fontWeight: 300,
                 display: 'flex',
               }}
             >
-              {data.dominantSuit.suit} Dominant •{' '}
+              {data.dominantSuit.suit} ·{' '}
               {data.dominantSuit.percentage.toFixed(0)}%
             </div>
           </div>
@@ -359,7 +372,6 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 12,
               flex: 1,
             }}
           >
@@ -371,49 +383,59 @@ export async function GET(request: NextRequest) {
                 letterSpacing: '0.1em',
                 fontWeight: 300,
                 display: 'flex',
+                marginBottom: 12,
               }}
             >
               Top Cards This Week
             </div>
-            {displayTopCards.map((card, index) => (
-              <div
-                key={index}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '16px 20px',
-                  background: SHARE_CARDS.primary,
-                  border: SHARE_BORDERS.card,
-                  borderRadius: 14,
-                  flex: 1,
-                }}
-              >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                flex: 1,
+                justifyContent: 'space-between',
+              }}
+            >
+              {displayTopCards.map((card, index) => (
                 <div
+                  key={index}
                   style={{
-                    fontSize: cardNameSize,
-                    color: OG_COLORS.textPrimary,
-                    fontWeight: 400,
                     display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '18px 20px',
+                    background: SHARE_CARDS.primary,
+                    border: SHARE_BORDERS.card,
+                    borderRadius: 14,
+                    flex: 1,
                   }}
                 >
-                  {truncate(card.name, 22)}
-                  {getSuitKeyword(card.name)
-                    ? ` \u2014 ${getSuitKeyword(card.name)}`
-                    : ''}
+                  <div
+                    style={{
+                      fontSize: cardNameSize,
+                      color: OG_COLORS.textPrimary,
+                      fontWeight: 400,
+                      display: 'flex',
+                    }}
+                  >
+                    {truncate(card.name, 22)}
+                    {getSuitKeyword(card.name)
+                      ? ` · ${getSuitKeyword(card.name)}`
+                      : ''}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: cardNameSize,
+                      color: OG_COLORS.textTertiary,
+                      fontWeight: 300,
+                      display: 'flex',
+                    }}
+                  >
+                    ×{card.count}
+                  </div>
                 </div>
-                <div
-                  style={{
-                    fontSize: cardNameSize,
-                    color: OG_COLORS.textTertiary,
-                    fontWeight: 300,
-                    display: 'flex',
-                  }}
-                >
-                  ×{card.count}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
@@ -427,9 +449,8 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
           background: OG_COLORS.background,
-          padding: '80px 60px 140px 60px',
+          padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
           border: SHARE_IMAGE_BORDER,
@@ -478,22 +499,23 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: '36px 44px',
+            padding: '24px 36px',
             background: SHARE_CARDS.primary,
             border: `3px solid ${suitColor}`,
             borderRadius: 24,
-            marginBottom: 32,
+            marginBottom: 28,
             alignItems: 'center',
+            gap: 10,
           }}
         >
           <div
             style={{
-              width: 16,
-              height: 16,
-              borderRadius: '50%',
+              width: 36,
+              height: 4,
+              borderRadius: 2,
               background: suitColor,
               display: 'flex',
-              marginBottom: 20,
+              opacity: 0.8,
             }}
           />
           <div
@@ -504,23 +526,36 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               display: 'flex',
               textAlign: 'center',
-              marginBottom: 12,
             }}
           >
             {truncate(data.season.name, seasonNameLimit)}
           </div>
+          {data.season.description && (
+            <div
+              style={{
+                fontSize: subtitleSize - 6,
+                color: OG_COLORS.textSecondary,
+                lineHeight: 1.45,
+                textAlign: 'center',
+                display: 'flex',
+                maxWidth: '90%',
+              }}
+            >
+              {truncate(data.season.description, 80)}
+            </div>
+          )}
           <div
             style={{
-              fontSize: labelSize,
-              color: OG_COLORS.textSecondary,
+              fontSize: labelSize - 4,
+              color: OG_COLORS.textTertiary,
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
               fontWeight: 300,
               display: 'flex',
             }}
           >
-            {data.dominantSuit.suit} Dominant •{' '}
-            {data.dominantSuit.percentage.toFixed(0)}%
+            {data.dominantSuit.suit} · {data.dominantSuit.percentage.toFixed(0)}
+            %
           </div>
         </div>
 
@@ -529,7 +564,6 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 20,
             flex: 1,
           }}
         >
@@ -541,48 +575,59 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.1em',
               fontWeight: 300,
               display: 'flex',
+              marginBottom: 24,
             }}
           >
             Top Cards This Week
           </div>
-          {displayTopCards.map((card, index) => (
-            <div
-              key={index}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '24px 32px',
-                background: SHARE_CARDS.primary,
-                border: SHARE_BORDERS.card,
-                borderRadius: 18,
-              }}
-            >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
+              gap: 16,
+            }}
+          >
+            {displayTopCards.map((card, index) => (
               <div
+                key={index}
                 style={{
-                  fontSize: cardNameSize,
-                  color: OG_COLORS.textPrimary,
-                  fontWeight: 400,
                   display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '28px 36px',
+                  background: SHARE_CARDS.primary,
+                  border: SHARE_BORDERS.card,
+                  borderRadius: 18,
+                  flex: 1,
                 }}
               >
-                {truncate(card.name, 22)}
-                {getSuitKeyword(card.name)
-                  ? ` \u2014 ${getSuitKeyword(card.name)}`
-                  : ''}
+                <div
+                  style={{
+                    fontSize: cardNameSize,
+                    color: OG_COLORS.textPrimary,
+                    fontWeight: 400,
+                    display: 'flex',
+                  }}
+                >
+                  {truncate(card.name, 22)}
+                  {getSuitKeyword(card.name)
+                    ? ` · ${getSuitKeyword(card.name)}`
+                    : ''}
+                </div>
+                <div
+                  style={{
+                    fontSize: cardNameSize,
+                    color: OG_COLORS.textTertiary,
+                    fontWeight: 300,
+                    display: 'flex',
+                  }}
+                >
+                  ×{card.count}
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: cardNameSize,
-                  color: OG_COLORS.textTertiary,
-                  fontWeight: 300,
-                  display: 'flex',
-                }}
-              >
-                ×{card.count}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         <ShareFooter format={format} />
@@ -645,22 +690,23 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: '28px 32px',
+            padding: '24px 32px',
             background: SHARE_CARDS.primary,
             border: `2px solid ${suitColor}`,
             borderRadius: 20,
-            marginBottom: 24,
+            marginBottom: 20,
             alignItems: 'center',
+            gap: 8,
           }}
         >
           <div
             style={{
-              width: 14,
-              height: 14,
-              borderRadius: '50%',
+              width: 28,
+              height: 3,
+              borderRadius: 2,
               background: suitColor,
               display: 'flex',
-              marginBottom: 16,
+              opacity: 0.7,
             }}
           />
           <div
@@ -671,23 +717,35 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               display: 'flex',
               textAlign: 'center',
-              marginBottom: 10,
             }}
           >
             {truncate(data.season.name, seasonNameLimit)}
           </div>
+          {data.season.description && (
+            <div
+              style={{
+                fontSize: labelSize - 4,
+                color: OG_COLORS.textSecondary,
+                lineHeight: 1.4,
+                textAlign: 'center',
+                display: 'flex',
+              }}
+            >
+              {truncate(data.season.description, 70)}
+            </div>
+          )}
           <div
             style={{
-              fontSize: labelSize,
-              color: OG_COLORS.textSecondary,
+              fontSize: labelSize - 4,
+              color: OG_COLORS.textTertiary,
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
               fontWeight: 300,
               display: 'flex',
             }}
           >
-            {data.dominantSuit.suit} Dominant •{' '}
-            {data.dominantSuit.percentage.toFixed(0)}%
+            {data.dominantSuit.suit} · {data.dominantSuit.percentage.toFixed(0)}
+            %
           </div>
         </div>
 
@@ -696,7 +754,6 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 16,
             flex: 1,
           }}
         >
@@ -708,48 +765,59 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.1em',
               fontWeight: 300,
               display: 'flex',
+              marginBottom: 16,
             }}
           >
             Top Cards This Week
           </div>
-          {displayTopCards.map((card, index) => (
-            <div
-              key={index}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '20px 24px',
-                background: SHARE_CARDS.primary,
-                border: SHARE_BORDERS.card,
-                borderRadius: 16,
-              }}
-            >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
+              justifyContent: 'space-between',
+            }}
+          >
+            {displayTopCards.map((card, index) => (
               <div
+                key={index}
                 style={{
-                  fontSize: cardNameSize,
-                  color: OG_COLORS.textPrimary,
-                  fontWeight: 400,
                   display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '24px 24px',
+                  background: SHARE_CARDS.primary,
+                  border: SHARE_BORDERS.card,
+                  borderRadius: 16,
+                  flex: 1,
                 }}
               >
-                {truncate(card.name, 22)}
-                {getSuitKeyword(card.name)
-                  ? ` \u2014 ${getSuitKeyword(card.name)}`
-                  : ''}
+                <div
+                  style={{
+                    fontSize: cardNameSize,
+                    color: OG_COLORS.textPrimary,
+                    fontWeight: 400,
+                    display: 'flex',
+                  }}
+                >
+                  {truncate(card.name, 22)}
+                  {getSuitKeyword(card.name)
+                    ? ` · ${getSuitKeyword(card.name)}`
+                    : ''}
+                </div>
+                <div
+                  style={{
+                    fontSize: cardNameSize,
+                    color: OG_COLORS.textTertiary,
+                    fontWeight: 300,
+                    display: 'flex',
+                  }}
+                >
+                  ×{card.count}
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: cardNameSize,
-                  color: OG_COLORS.textTertiary,
-                  fontWeight: 300,
-                  display: 'flex',
-                }}
-              >
-                ×{card.count}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         <ShareFooter format={format} />

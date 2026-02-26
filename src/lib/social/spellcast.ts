@@ -59,6 +59,31 @@ export async function spellcastFetch(
 }
 
 /**
+ * Resolve a list of platform names to social account IDs within the account set.
+ * Returns undefined if the lookup fails (post will go to all accounts as fallback).
+ */
+async function resolveSelectedAccountIds(
+  accountSetId: string,
+  platforms: string[],
+): Promise<string[] | undefined> {
+  if (platforms.length === 0) return undefined;
+  try {
+    const res = await spellcastFetch(`/api/account-sets/${accountSetId}`);
+    if (!res.ok) return undefined;
+    const accountSet = await res.json();
+    const accounts: Array<{ id: string; platform: string }> =
+      accountSet.socialAccounts ?? [];
+    const platformSet = new Set(platforms);
+    const ids = accounts
+      .filter((a) => platformSet.has(a.platform))
+      .map((a) => a.id);
+    return ids.length > 0 ? ids : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Post to a single platform via Spellcast.
  * Creates a draft, then schedules it.
  */
@@ -68,15 +93,28 @@ export async function postToSpellcast(
   const { accountSetId } = getSpellcastConfig();
 
   try {
+    const selectedAccountIds = await resolveSelectedAccountIds(accountSetId, [
+      params.platform,
+    ]);
+
+    // Detect story format from platformSettings
+    const instagramOpts = (params.platformSettings as any)?.instagramOptions;
+    const isStory = instagramOpts?.isStory === true;
+    const postType = isStory ? 'story' : 'post';
+
+    // Spellcast requires non-empty content; stories are image-only so use a space
+    const content = params.content || ' ';
+
     // 1. Create draft post
     const createRes = await spellcastFetch('/api/posts', {
       method: 'POST',
       body: JSON.stringify({
-        content: params.content,
+        content,
         mediaUrls: params.media?.map((m) => m.url) ?? [],
         scheduledFor: params.scheduledDate,
         accountSetId,
-        postType: 'post',
+        postType,
+        ...(selectedAccountIds ? { selectedAccountIds } : {}),
         ...(params.platformSettings
           ? { platformSettings: params.platformSettings }
           : {}),
@@ -128,17 +166,8 @@ export async function postToSpellcast(
 
 /**
  * Post to multiple platforms via Spellcast in a single request.
- * Creates one post targeting the account set — Spellcast handles fan-out.
- *
- * TODO: Platform targeting is not implemented — the `platforms` param is ignored.
- * The post always goes to ALL accounts in the account set, not just the specified platforms.
- * To fix this:
- *   1. Fetch the account set's social accounts from Spellcast:
- *      GET /api/account-sets/{accountSetId} → returns socialAccounts[] with { id, platform }
- *   2. Filter to only the accounts whose `platform` matches `params.platforms`
- *   3. Pass the filtered account IDs as `selectedIntegrationIds` in the create POST body
- * Until this is fixed, always pass the full set of desired platforms in the account set
- * and avoid using an account set that contains platforms you don't want to post to.
+ * Creates one post targeting the account set — Spellcast handles fan-out to the
+ * specified platforms only.
  */
 const ALLOWED_PLATFORMS = new Set([
   'instagram',
@@ -174,6 +203,13 @@ export async function postToSpellcastMultiPlatform(params: {
   );
 
   try {
+    // Resolve platform names to specific account IDs so only the requested
+    // platforms receive the post (not the entire account set).
+    const selectedAccountIds = await resolveSelectedAccountIds(
+      accountSetId,
+      safePlatforms,
+    );
+
     // Build platform variations if present
     const platformVariations: Record<string, string> = {};
     if (params.variants) {
@@ -203,8 +239,6 @@ export async function postToSpellcastMultiPlatform(params: {
     }
 
     // 1. Create draft
-    // TODO: add selectedIntegrationIds here once platform→account ID lookup is implemented
-    // (see function-level TODO above). Without it, the post goes to all platforms in the set.
     const createRes = await spellcastFetch('/api/posts', {
       method: 'POST',
       body: JSON.stringify({
@@ -213,6 +247,7 @@ export async function postToSpellcastMultiPlatform(params: {
         scheduledFor: params.scheduledDate,
         accountSetId,
         postType: 'post',
+        ...(selectedAccountIds ? { selectedAccountIds } : {}),
         ...(Object.keys(platformVariations).length > 0
           ? { platformVariations }
           : {}),

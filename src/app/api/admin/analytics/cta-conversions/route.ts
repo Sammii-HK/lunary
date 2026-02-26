@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
             anonymous_id,
             COALESCE(metadata->>'hub', 'unknown') AS hub
           FROM conversion_events
-          WHERE event_type = 'cta_clicked'
+          WHERE event_type IN ('cta_clicked', 'upgrade_clicked')
             AND created_at >= $1
             AND created_at <= $2
             AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))

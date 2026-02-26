@@ -9,6 +9,8 @@ import {
   OGTitle,
   OGSubtitle,
   OGFooter,
+  OGStarfield,
+  OGGlowOrbs,
   createOGResponse,
   formatOGDate,
 } from '../../../../../utils/og/base';
@@ -16,10 +18,9 @@ import {
 export const runtime = 'nodejs';
 export const revalidate = 86400;
 
-function getCrystalTheme(crystalName: string): string {
+function getCrystalColor(crystalName: string): string {
   const crystal = getCrystalByName(crystalName);
-  const colorHex = crystal?.ogColor || '#9333EA';
-  return `linear-gradient(135deg, ${colorHex}40, #0a0a0a)`;
+  return crystal?.ogColor || '#9333EA';
 }
 
 export async function GET(request: NextRequest) {
@@ -48,21 +49,46 @@ export async function GET(request: NextRequest) {
   }
 
   const formattedDate = formatOGDate(targetDate);
-  const background = getCrystalTheme(crystalRec.name);
+  const accentColor = getCrystalColor(crystalRec.name);
+  const background = `linear-gradient(135deg, ${accentColor}40, #0a0a0a)`;
   const propertiesText = crystalRec.properties.slice(0, 3).join(' • ');
 
-  const robotoFont = await loadGoogleFont(request);
+  let robotoFont: ArrayBuffer | null = null;
+  try {
+    robotoFont = await loadGoogleFont(request);
+  } catch {
+    // continue without custom font
+  }
 
   return createOGResponse(
     <OGWrapper theme={{ background }}>
-      <OGHeader title={propertiesText} fontSize={24} />
+      <OGStarfield
+        seed={crystalRec.name}
+        count={60}
+        accentColor={accentColor}
+      />
+      <OGGlowOrbs accentColor={accentColor} />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        <OGHeader title={propertiesText} fontSize={24} />
 
-      <OGContentCenter>
-        <OGTitle text={crystalRec.name} />
-        <OGSubtitle text='Crystal of the Day' fontSize={32} opacity={0.8} />
-      </OGContentCenter>
+        <OGContentCenter>
+          <OGTitle text={crystalRec.name} />
+          <OGSubtitle text='Crystal of the Day' fontSize={32} opacity={0.8} />
+        </OGContentCenter>
 
-      <OGFooter date={formattedDate} />
+        <OGFooter date={formattedDate} />
+      </div>
     </OGWrapper>,
     {
       size: 'square',

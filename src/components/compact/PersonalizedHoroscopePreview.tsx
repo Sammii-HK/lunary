@@ -361,9 +361,14 @@ export const PersonalizedHoroscopePreview = () => {
       href='/horoscope'
       className='group block border border-zinc-800 rounded-2xl bg-zinc-950/70 p-4 shadow-sm transition-colors hover:border-lunary-primary-500 hover:bg-zinc-900'
       onClick={(e) => {
-        // If click target is a button, let button handle it
+        // Prevent navigation when clicking interactive elements inside the card
         const target = e.target as HTMLElement;
-        if (target.closest('button')) {
+        if (
+          target.closest('button') ||
+          target.closest('input') ||
+          target.closest('textarea') ||
+          target.closest('a')
+        ) {
           e.preventDefault();
         }
       }}

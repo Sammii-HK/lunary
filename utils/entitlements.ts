@@ -8,7 +8,7 @@ export type PlanKey = 'free' | PlanId;
 
 export type PricingPlan = {
   id: PlanKey;
-  tier: 'free' | 'plus' | 'ai' | 'ai_annual';
+  tier: 'free' | 'plus' | 'plus_annual' | 'ai' | 'ai_annual';
   name: string;
   description: string;
   price: number;
@@ -139,6 +139,42 @@ const FEATURE_ACCESS_BASE = {
     'compatibility_widget', // Gated behind signup
     'referral_rewards', // Referral program + bonus tiers
   ],
+  lunary_plus_annual: [
+    'birth_chart',
+    'birthday_collection',
+    'personalized_horoscope',
+    'personal_tarot',
+    'personalized_crystal_recommendations',
+    'transit_calendar',
+    'tarot_patterns',
+    'tarot_patterns_basic', // 14-90 day patterns, progress bars, basic visualizations
+    'pattern_drill_down', // Interactive frequent cards with cosmic context
+    'solar_return',
+    'cosmic_profile',
+    'personalized_transit_readings',
+    'moon_circles',
+    'ritual_generator',
+    'collections',
+    'monthly_insights',
+    'personal_day_number',
+    'personal_day_meaning',
+    'personal_year_number',
+    'personal_year_meaning',
+    'cosmic_patterns',
+    'keyword_mood_detection',
+    'friend_connections',
+    'cosmic_score_detailed',
+    'community_spaces',
+    'intentions',
+    'daily_rituals_full',
+    'weekly_challenges',
+    'milestones_basic',
+    'milestones_advanced',
+    'cosmic_gifting',
+    'ask_questions',
+    'compatibility_widget',
+    'referral_rewards',
+  ],
   lunary_plus_ai_annual: [
     'birth_chart',
     'birthday_collection',
@@ -215,6 +251,7 @@ export const FREE_TRIAL_DAYS = {
 export const CHAT_LIMITS: Record<PlanKey, number> = {
   free: 3,
   lunary_plus: 50,
+  lunary_plus_annual: 50,
   lunary_plus_ai: 300,
   lunary_plus_ai_annual: 300,
 };
@@ -241,6 +278,7 @@ export const QUESTION_LIMITS = {
 export const JOURNAL_PROMPT_LIMITS: Record<PlanKey, number> = {
   free: 1,
   lunary_plus: 5,
+  lunary_plus_annual: 5,
   lunary_plus_ai: 5,
   lunary_plus_ai_annual: 5,
 };
@@ -315,6 +353,23 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Collections (no limit)',
       'Collection folders (no limit)',
       'Cosmic Circle: Unlimited friends + full synastry analysis',
+    ],
+  },
+  {
+    id: 'lunary_plus_annual',
+    tier: 'plus_annual',
+    name: 'Lunary+ Annual',
+    description: 'For building a consistent practice',
+    price: 49.99,
+    interval: 'year',
+    stripePriceId: '',
+    savings: 'Save 16%',
+    chatLimitPerDay: CHAT_LIMITS.lunary_plus_annual,
+    chatLabel: 'Generous daily Astral Guide chat',
+    trialDays: FREE_TRIAL_DAYS.yearly,
+    features: [
+      'Everything in Lunary+',
+      'Billed annually — equivalent to 10 months',
     ],
   },
   {

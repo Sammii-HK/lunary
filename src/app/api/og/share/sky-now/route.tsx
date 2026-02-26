@@ -117,6 +117,7 @@ export async function GET(request: NextRequest) {
     const firstName = data.name?.trim().split(' ')[0] || '';
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
+    const padding = isLandscape ? 48 : isStory ? 80 : 60;
     const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
     const dateSize = isLandscape ? 22 : isStory ? 36 : 28;
     const labelSize = isLandscape ? 22 : isStory ? 36 : 30;
@@ -318,7 +319,7 @@ export async function GET(request: NextRequest) {
     const renderPlanetRow = (planet: string, index: number) => {
       const position = data.positions[planet];
       const isRetrograde = position?.retrograde || false;
-      const rowPadding = isStory ? '14px 18px' : '10px 14px';
+      const rowPadding = isStory ? '20px 18px' : '10px 14px';
 
       return (
         <div
@@ -495,6 +496,7 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
+              justifyContent: 'space-between',
               flex: 1,
             }}
           >
@@ -506,6 +508,7 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
+              justifyContent: 'space-between',
               flex: 1,
             }}
           >
@@ -526,9 +529,8 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
           background: OG_COLORS.background,
-          padding: '80px 60px 140px 60px',
+          padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
           border: SHARE_IMAGE_BORDER,
@@ -616,7 +618,7 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 16,
+              justifyContent: 'space-between',
               flex: 1,
             }}
           >
@@ -628,7 +630,7 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 16,
+              justifyContent: 'space-between',
               flex: 1,
             }}
           >
@@ -738,7 +740,7 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 8,
+              justifyContent: 'space-between',
               flex: 1,
             }}
           >
@@ -750,7 +752,7 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 8,
+              justifyContent: 'space-between',
               flex: 1,
             }}
           >

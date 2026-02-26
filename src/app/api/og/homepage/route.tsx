@@ -184,11 +184,24 @@ export async function GET(): Promise<Response> {
     });
   } catch (error) {
     console.error('Homepage OG image generation failed:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Failed to generate image',
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
+    const fallback = new ImageResponse(
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#0a0a0a',
+          color: '#d8b4fe',
+          fontSize: '64px',
+          fontFamily: 'system-ui',
+        }}
+      >
+        Lunary
+      </div>,
+      { width: 1200, height: 630 },
     );
+    return fallback;
   }
 }

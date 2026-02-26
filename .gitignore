@@ -85,3 +85,8 @@ ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 
 
 voice-samples/
+# Generated AI assets (large binary files)
+videos/
+images/backgrounds/
+
+app-store-assets/*

@@ -14,6 +14,8 @@ const customJestConfig = {
     '^@/utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@/constants/(.*)$': '<rootDir>/src/constants/$1',
     '^utils/(.*)$': '<rootDir>/utils/$1',
+    '^@revenuecat/purchases-capacitor$':
+      '<rootDir>/__mocks__/@revenuecat/purchases-capacitor.js',
   },
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
   testPathIgnorePatterns: [
@@ -58,7 +60,9 @@ const customJestConfig = {
   ],
   moduleDirectories: ['node_modules', '<rootDir>/'],
   testTimeout: 10000,
-  transformIgnorePatterns: ['/node_modules/(?!(better-auth)/)'],
+  transformIgnorePatterns: [
+    '/node_modules/(?!(better-auth|@revenuecat/purchases-capacitor|@capacitor)/)/',
+  ],
 };
 
 module.exports = createJestConfig(customJestConfig);

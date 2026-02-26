@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useSubscription } from '../hooks/useSubscription';
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
 import { Settings, ExternalLink, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
+
+const isIOS = Capacitor.getPlatform() === 'ios';
 
 interface SubscriptionManagementProps {
   customerId?: string;
@@ -229,9 +232,18 @@ export default function SubscriptionManagement({
           <p className='text-zinc-400 text-sm mb-4'>
             Unlock personalized horoscopes, birth charts, and mystical insights
           </p>
-          <Button variant='outline' asChild>
-            <Link href='/pricing'>View Plans</Link>
-          </Button>
+          {isIOS ? (
+            <Button
+              variant='outline'
+              onClick={() => Capacitor.openUrl('https://lunary.app/pricing')}
+            >
+              View Plans
+            </Button>
+          ) : (
+            <Button variant='outline' asChild>
+              <Link href='/pricing'>View Plans</Link>
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -356,10 +368,21 @@ export default function SubscriptionManagement({
         </div>
       )}
 
-      {/* Show billing portal button for active subscriptions, even if set to cancel at period end */}
-      {/* Also show for cancelled subscriptions that might still have access until period ends */}
-      {(isActiveSubscription ||
-        (displaySubscription.status === 'cancelled' && customerIdToUse)) &&
+      {/* Manage subscription — iOS opens Apple's subscription settings, web opens Stripe portal */}
+      {isIOS ? (
+        <button
+          onClick={() =>
+            Capacitor.openUrl('https://apps.apple.com/account/subscriptions')
+          }
+          className='w-full flex items-center justify-center gap-2 bg-lunary-secondary hover:bg-lunary-secondary-400 text-white py-2 px-3 rounded-md transition-colors text-sm'
+        >
+          <Settings size={14} />
+          Manage Subscription
+          <ExternalLink size={12} />
+        </button>
+      ) : (
+        (isActiveSubscription ||
+          (displaySubscription.status === 'cancelled' && customerIdToUse)) &&
         customerIdToUse && (
           <button
             onClick={handleBillingPortal}
@@ -370,7 +393,8 @@ export default function SubscriptionManagement({
             {loading === 'portal' ? 'Opening...' : 'Manage Subscription'}
             <ExternalLink size={12} />
           </button>
-        )}
+        )
+      )}
     </div>
   );
 }

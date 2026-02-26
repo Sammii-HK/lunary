@@ -61,7 +61,7 @@ struct LunaryEntry: TimelineEntry {
 }
 
 struct LunaryProvider: TimelineProvider {
-    private let appGroupId = "group.app.lunary"
+    private let appGroupId = "group.io.lunary"
     private let dataKey = "widgetData"
 
     func placeholder(in context: Context) -> LunaryEntry {

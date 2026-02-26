@@ -15,7 +15,7 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 
 import { chromium, type Page } from '@playwright/test';
-import { mkdir, unlink, rename, stat } from 'fs/promises';
+import { mkdir, unlink, stat } from 'fs/promises';
 import { join } from 'path';
 import { execFileSync, spawnSync } from 'child_process';
 import {
@@ -24,11 +24,63 @@ import {
   type RecordingStep,
   type FeatureRecordingConfig,
 } from '../src/lib/video/app-feature-recordings';
+import {
+  getAppStoreRecording,
+  getAllAppStoreIds,
+} from '../src/lib/video/app-store-recordings';
 
 const OUTPUT_DIR = join(process.cwd(), 'public', 'app-demos');
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 const PERSONA_EMAIL = process.env.PERSONA_EMAIL;
 const PERSONA_PASSWORD = process.env.PERSONA_PASSWORD;
+
+const IPHONE_UA =
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+const IPAD_UA =
+  'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+
+interface DeviceProfile {
+  name: string;
+  viewport: { width: number; height: number };
+  deviceScaleFactor: number;
+  outputWidth: number;
+  outputHeight: number;
+  outputDir: string;
+  userAgent: string;
+}
+
+const DEVICE_PROFILES: Record<string, DeviceProfile> = {
+  // Default: TikTok-style (existing behaviour, WebM upscaled to 1080×1920)
+  tiktok: {
+    name: 'TikTok (1080×1920)',
+    viewport: { width: 360, height: 640 },
+    deviceScaleFactor: 3,
+    outputWidth: 1080,
+    outputHeight: 1920,
+    outputDir: OUTPUT_DIR,
+    userAgent: IPHONE_UA,
+  },
+  // App Store — iPhone 6.5" (886×1920, required slot)
+  iphone65: {
+    name: 'iPhone App Store (886×1920)',
+    viewport: { width: 414, height: 896 },
+    deviceScaleFactor: 3,
+    outputWidth: 886,
+    outputHeight: 1920,
+    outputDir: join(OUTPUT_DIR, 'iphone-6.5'),
+    userAgent: IPHONE_UA,
+  },
+  // App Store — iPad Pro 13" (1200×1600)
+  ipad: {
+    name: 'iPad Pro App Store (1200×1600)',
+    viewport: { width: 1024, height: 1366 },
+    deviceScaleFactor: 2,
+    outputWidth: 1200,
+    outputHeight: 1600,
+    outputDir: join(OUTPUT_DIR, 'ipad-pro-13'),
+    userAgent: IPAD_UA,
+  },
+};
 
 /**
  * Validate required environment variables
@@ -459,25 +511,26 @@ async function executeStep(page: Page, step: RecordingStep): Promise<void> {
 }
 
 /**
- * Trim the pre-roll from a video using ffmpeg.
- * Uses the measured setup duration (time from recording start to page reveal)
- * and falls back to blackdetect via spawnSync for proper stderr capture.
+ * Convert a raw Playwright WebM recording to a device-appropriate MP4.
+ * Trims the pre-roll, scales to device output dimensions, and encodes as H.264.
+ * Returns the path of the output MP4 (or null if ffmpeg is unavailable).
  */
-async function trimPreroll(
-  videoPath: string,
-  setupDurationSeconds?: number,
-): Promise<void> {
+async function convertForDevice(
+  webmPath: string,
+  mp4Path: string,
+  device: DeviceProfile,
+  setupDurationSeconds: number,
+): Promise<boolean> {
   try {
-    let trimStart = setupDurationSeconds ?? 0;
+    let trimStart = setupDurationSeconds;
 
-    // If no measured setup duration, detect black frames
+    // Fall back to blackdetect if no measured setup time
     if (trimStart < 0.5) {
-      // Use spawnSync to capture stderr (where blackdetect writes output)
       const result = spawnSync(
         'ffmpeg',
         [
           '-i',
-          videoPath,
+          webmPath,
           '-vf',
           'blackdetect=d=0.1:pix_th=0.10',
           '-an',
@@ -487,115 +540,69 @@ async function trimPreroll(
         ],
         { encoding: 'utf-8', timeout: 30000 },
       );
-
       const detectOutput = (result.stderr || '') + (result.stdout || '');
-      const blackMatches = detectOutput.matchAll(
+      for (const match of detectOutput.matchAll(
         /black_start:([\d.]+)\s+black_end:([\d.]+)/g,
-      );
-      for (const match of blackMatches) {
+      )) {
         const start = parseFloat(match[1]);
         const end = parseFloat(match[2]);
-        if (start < 0.5) {
-          trimStart = Math.max(trimStart, end);
-        }
+        if (start < 0.5) trimStart = Math.max(trimStart, end);
       }
     }
 
-    if (trimStart < 0.5) {
-      console.log(`   ✂ No significant pre-roll to trim`);
-      return;
+    const trimArgs = trimStart >= 0.5 ? ['-ss', trimStart.toFixed(2)] : [];
+    if (trimStart >= 0.5) {
+      console.log(`   ✂ Trimming ${trimStart.toFixed(1)}s pre-roll`);
     }
 
-    console.log(`   ✂ Trimming ${trimStart.toFixed(1)}s pre-roll...`);
+    console.log(
+      `   🔄 Converting to MP4 at ${device.outputWidth}×${device.outputHeight}...`,
+    );
 
-    // Trim the video — re-encode to avoid keyframe issues
-    const trimmedPath = videoPath.replace('.webm', '.trimmed.webm');
-    try {
-      execFileSync(
-        'ffmpeg',
-        [
-          '-y',
-          '-ss',
-          trimStart.toFixed(2),
-          '-i',
-          videoPath,
-          '-c:v',
-          'libvpx-vp9',
-          '-b:v',
-          '2M',
-          trimmedPath,
-        ],
-        { timeout: 180000, stdio: 'pipe' },
-      );
-    } catch (trimErr: any) {
-      const errMsg =
-        trimErr?.stderr?.toString() || trimErr?.message || 'unknown';
-      console.log(`   ⚠ ffmpeg trim failed: ${errMsg.substring(0, 200)}`);
-      await unlink(trimmedPath).catch(() => {});
-      return;
-    }
-
-    // Verify the trimmed file exists and has content before replacing
-    try {
-      const trimmedStat = await stat(trimmedPath);
-      if (trimmedStat.size < 1000) {
-        console.log(`   ⚠ Trimmed file too small, keeping original`);
-        await unlink(trimmedPath).catch(() => {});
-        return;
-      }
-    } catch {
-      console.log(`   ⚠ Trimmed file not created, keeping original`);
-      return;
-    }
-
-    // Replace original with trimmed version
-    await unlink(videoPath);
-    await rename(trimmedPath, videoPath);
-    console.log(`   ✂ Trimmed ${trimStart.toFixed(1)}s pre-roll`);
-  } catch {
-    console.log(`   ⚠ Could not trim video (ffmpeg not available or failed)`);
-  }
-}
-
-/**
- * Upscale video to TikTok resolution (1080x1920) using ffmpeg.
- * Uses lanczos scaling for sharp upscale from 360x640.
- */
-async function upscaleToTikTok(videoPath: string): Promise<void> {
-  try {
-    const upscaledPath = videoPath.replace('.webm', '.upscaled.webm');
+    // Single-pass: trim + scale + H.264 encode → MP4
     execFileSync(
       'ffmpeg',
       [
         '-y',
+        ...trimArgs,
         '-i',
-        videoPath,
+        webmPath,
         '-vf',
-        'scale=1080:1920:flags=lanczos',
+        `scale=${device.outputWidth}:${device.outputHeight}:flags=lanczos,setsar=1`,
         '-c:v',
-        'libvpx-vp9',
-        '-b:v',
-        '4M',
-        upscaledPath,
+        'libx264',
+        '-preset',
+        'slow',
+        '-crf',
+        '20',
+        '-pix_fmt',
+        'yuv420p',
+        '-c:a',
+        'aac',
+        '-b:a',
+        '192k',
+        '-movflags',
+        '+faststart',
+        mp4Path,
       ],
-      { timeout: 120000, stdio: 'pipe' },
+      { timeout: 300000, stdio: 'pipe' },
     );
 
-    // Verify upscaled file
-    const upscaledStat = await stat(upscaledPath);
-    if (upscaledStat.size < 1000) {
-      console.log(`   ⚠ Upscaled file too small, keeping original`);
-      await unlink(upscaledPath).catch(() => {});
-      return;
+    const mp4Stat = await stat(mp4Path);
+    if (mp4Stat.size < 1000) {
+      console.log(`   ⚠ Output MP4 too small, conversion may have failed`);
+      await unlink(mp4Path).catch(() => {});
+      return false;
     }
 
-    await unlink(videoPath);
-    await rename(upscaledPath, videoPath);
-    console.log(`   ⬆ Upscaled to 1080x1920`);
-  } catch {
-    console.log(
-      `   ⚠ Could not upscale video (ffmpeg not available or failed)`,
-    );
+    // Remove the raw WebM
+    await unlink(webmPath).catch(() => {});
+    console.log(`   ✓ Saved ${device.outputWidth}×${device.outputHeight} MP4`);
+    return true;
+  } catch (err: any) {
+    const msg = err?.stderr?.toString() || err?.message || 'unknown';
+    console.log(`   ⚠ ffmpeg conversion failed: ${msg.substring(0, 200)}`);
+    return false;
   }
 }
 
@@ -603,12 +610,15 @@ async function upscaleToTikTok(videoPath: string): Promise<void> {
  * Setup: handle cookies + auth in a throwaway context (no video).
  * Returns saved storage state for clean recording contexts.
  */
-async function setupAuth(browser: any, needsAuth: boolean): Promise<any> {
+async function setupAuth(
+  browser: any,
+  needsAuth: boolean,
+  device: DeviceProfile,
+): Promise<any> {
   const setupContext = await browser.newContext({
-    viewport: { width: 360, height: 640 },
-    userAgent:
-      'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
-    deviceScaleFactor: 3,
+    viewport: device.viewport,
+    userAgent: device.userAgent,
+    deviceScaleFactor: device.deviceScaleFactor,
   });
 
   const setupPage = await setupContext.newPage();
@@ -632,16 +642,17 @@ async function recordClean(
   config: FeatureRecordingConfig,
   storage: any,
   featureId: string,
+  device: DeviceProfile,
 ): Promise<string> {
-  const viewport = config.viewport || { width: 360, height: 640 };
+  // Always use the device viewport for App Store profiles; config.viewport is TikTok-specific
+  const viewport = device.viewport;
   const targetUrl = BASE_URL + config.startUrl;
 
   // 1. Warm-up: open the target page in a non-recording context so it's cached
   const warmupContext = await browser.newContext({
     viewport,
-    userAgent:
-      'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
-    deviceScaleFactor: 3,
+    userAgent: device.userAgent,
+    deviceScaleFactor: device.deviceScaleFactor,
     storageState: storage,
   });
   const warmupPage = await warmupContext.newPage();
@@ -668,15 +679,13 @@ async function recordClean(
   await warmupContext.close();
 
   // 2. Record: fresh context with video — page loads fast from cache/state
-  // Record at viewport size (390x844), then upscale to 1080x1920 in post.
-  // deviceScaleFactor: 3 means internal rendering is crisp (1170x2532),
-  // but Playwright video capture operates at CSS pixel dimensions.
+  // Playwright video capture operates at CSS pixel dimensions; we upscale
+  // to the device's output resolution in post via ffmpeg.
   const recordContext = await browser.newContext({
     viewport,
-    recordVideo: { dir: OUTPUT_DIR, size: viewport },
-    userAgent:
-      'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
-    deviceScaleFactor: 3,
+    recordVideo: { dir: device.outputDir, size: viewport },
+    userAgent: device.userAgent,
+    deviceScaleFactor: device.deviceScaleFactor,
     storageState: warmedStorage,
   });
 
@@ -717,6 +726,8 @@ async function recordClean(
     await page.addInitScript(() => {
       localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
       localStorage.setItem('pwa_notifications_prompted', '1');
+      localStorage.setItem('lunary_referral_onboarding_shown', '1');
+      sessionStorage.setItem('testimonial-handled', '1');
       // Dismiss all zodiac season banners permanently
       const signs = [
         'Aries',
@@ -826,21 +837,28 @@ async function recordClean(
     await page.waitForTimeout(2000);
     console.log(`   ✓ Recording complete`);
 
-    // Finalize: close context → save → trim → clean up (one pipeline)
-    const finalPath = join(OUTPUT_DIR, `${featureId}.webm`);
+    // Finalize: close context → save → convert (trim + scale + MP4 encode)
+    const webmPath = join(device.outputDir, `${featureId}.webm`);
+    const mp4Path = join(device.outputDir, `${featureId}.mp4`);
     const rawVideoPath = await page.video()?.path();
     await recordContext.close();
-    await page.video()?.saveAs(finalPath);
-    if (rawVideoPath && rawVideoPath !== finalPath) {
+    await page.video()?.saveAs(webmPath);
+    if (rawVideoPath && rawVideoPath !== webmPath) {
       await unlink(rawVideoPath).catch(() => {});
     }
-    // Trim the setup pre-roll (navigation, loading, cloak) using measured time
-    await trimPreroll(finalPath, setupDurationSeconds);
-    // Upscale to TikTok resolution (1080x1920)
-    await upscaleToTikTok(finalPath);
-    console.log(`   📹 ${featureId}.webm`);
+    // Trim pre-roll + scale to device dimensions + encode as MP4
+    const ok = await convertForDevice(
+      webmPath,
+      mp4Path,
+      device,
+      setupDurationSeconds,
+    );
+    const outputPath = ok ? mp4Path : webmPath;
+    console.log(
+      `   📹 ${featureId}.${ok ? 'mp4' : 'webm'} (${device.outputWidth}×${device.outputHeight})`,
+    );
 
-    return finalPath;
+    return outputPath;
   } catch (error) {
     await recordContext.close().catch(() => {});
     throw error;
@@ -850,10 +868,16 @@ async function recordClean(
 /**
  * Record a single feature
  */
-async function recordFeature(featureId: string): Promise<string> {
-  const config = getFeatureRecording(featureId);
+async function recordFeature(
+  featureId: string,
+  device: DeviceProfile,
+  appStore = false,
+): Promise<string> {
+  const config = appStore
+    ? getAppStoreRecording(featureId)
+    : getFeatureRecording(featureId);
 
-  console.log(`\n🎬 Recording: ${config.name}`);
+  console.log(`\n🎬 Recording: ${config.name} [${device.name}]`);
   console.log(`   Duration: ${config.durationSeconds}s`);
   console.log(`   Steps: ${config.steps.length}`);
 
@@ -861,8 +885,8 @@ async function recordFeature(featureId: string): Promise<string> {
 
   try {
     const needsAuth = config.requiresAuth !== false;
-    const storage = await setupAuth(browser, needsAuth);
-    return await recordClean(browser, config, storage, featureId);
+    const storage = await setupAuth(browser, needsAuth, device);
+    return await recordClean(browser, config, storage, featureId, device);
   } catch (error) {
     console.error(`   ✗ Error during recording:`, error);
     throw error;
@@ -876,12 +900,16 @@ async function recordFeature(featureId: string): Promise<string> {
  */
 async function recordSuite(
   featureIds: string[],
+  device: DeviceProfile,
+  appStore = false,
 ): Promise<Record<string, string>> {
   console.log(
-    `\n🎬 Suite Mode: Recording ${featureIds.length} features with single login\n`,
+    `\n🎬 Suite Mode: Recording ${featureIds.length} features with single login [${device.name}]\n`,
   );
 
-  const configs = featureIds.map((id) => getFeatureRecording(id));
+  const configs = featureIds.map((id) =>
+    appStore ? getAppStoreRecording(id) : getFeatureRecording(id),
+  );
   const needsAuth = configs.some((c) => c.requiresAuth !== false);
 
   const browser = await chromium.launch({ headless: true });
@@ -889,11 +917,13 @@ async function recordSuite(
 
   try {
     // Setup auth once (no video)
-    const storage = await setupAuth(browser, needsAuth);
+    const storage = await setupAuth(browser, needsAuth, device);
 
     // Record each feature cleanly
     for (const featureId of featureIds) {
-      const config = getFeatureRecording(featureId);
+      const config = appStore
+        ? getAppStoreRecording(featureId)
+        : getFeatureRecording(featureId);
 
       console.log(`\n🎬 Recording: ${config.name}`);
       console.log(`   Duration: ${config.durationSeconds}s`);
@@ -908,6 +938,7 @@ async function recordSuite(
           config,
           storage,
           featureId,
+          device,
         );
         results[featureId] = videoPath;
       } catch (error) {
@@ -927,23 +958,47 @@ async function recordSuite(
 async function main() {
   const args = process.argv.slice(2);
   const useSuiteMode = args.includes('--suite');
-  const featureArgs = args.filter((arg) => !arg.startsWith('--'));
+
+  // --device <tiktok|iphone65|ipad>  (default: tiktok)
+  const deviceFlagIdx = args.indexOf('--device');
+  const deviceKey = deviceFlagIdx !== -1 ? args[deviceFlagIdx + 1] : 'tiktok';
+  const device = DEVICE_PROFILES[deviceKey];
+  if (!device) {
+    console.error(
+      `❌ Unknown device "${deviceKey}". Valid options: ${Object.keys(DEVICE_PROFILES).join(', ')}`,
+    );
+    process.exit(1);
+  }
+
+  // --source <tiktok|appstore>  (default: tiktok)
+  const sourceFlagIdx = args.indexOf('--source');
+  const source = sourceFlagIdx !== -1 ? args[sourceFlagIdx + 1] : 'tiktok';
+  const isAppStore = source === 'appstore';
+
+  const featureArgs = args.filter(
+    (arg) => !arg.startsWith('--') && arg !== deviceKey && arg !== source,
+  );
   const targetFeatures = featureArgs.length > 0 ? featureArgs : null;
 
   // Determine which features to record
-  const featuresToRecord = targetFeatures || getAllFeatureIds();
+  const featuresToRecord =
+    targetFeatures || (isAppStore ? getAllAppStoreIds() : getAllFeatureIds());
 
   // Check if any features need auth, validate env vars accordingly
-  const configs = featuresToRecord.map((id) => getFeatureRecording(id));
+  const configs = featuresToRecord.map((id) =>
+    isAppStore ? getAppStoreRecording(id) : getFeatureRecording(id),
+  );
   const anyNeedsAuth = configs.some((c) => c.requiresAuth !== false);
   validateEnvironment(anyNeedsAuth);
 
-  // Ensure output directory exists
+  // Ensure output directories exist
   await mkdir(OUTPUT_DIR, { recursive: true });
+  await mkdir(device.outputDir, { recursive: true });
 
   console.log('🎥 App Feature Recorder');
   console.log('━'.repeat(50));
-  console.log(`Output: ${OUTPUT_DIR}`);
+  console.log(`Device: ${device.name}`);
+  console.log(`Output: ${device.outputDir}`);
   console.log(`Base URL: ${BASE_URL}`);
   if (anyNeedsAuth) {
     console.log(`Persona: ${PERSONA_EMAIL}`);
@@ -951,6 +1006,7 @@ async function main() {
   console.log(
     `Mode: ${useSuiteMode || (targetFeatures && targetFeatures.length > 1) ? 'Suite (login once)' : 'Single'}`,
   );
+  console.log(`Source: ${isAppStore ? 'App Store demos' : 'TikTok scripts'}`);
 
   console.log(`\nRecording ${featuresToRecord.length} feature(s)...`);
 
@@ -960,7 +1016,11 @@ async function main() {
 
   // Use suite mode if flag is present OR multiple features are specified
   if (useSuiteMode || featuresToRecord.length > 1) {
-    const suiteResults = await recordSuite(featuresToRecord);
+    const suiteResults = await recordSuite(
+      featuresToRecord,
+      device,
+      isAppStore,
+    );
     for (const [featureId, videoPath] of Object.entries(suiteResults)) {
       if (videoPath) {
         results[featureId] = videoPath;
@@ -973,7 +1033,7 @@ async function main() {
     // Single feature mode (original behavior)
     for (const featureId of featuresToRecord) {
       try {
-        const videoPath = await recordFeature(featureId);
+        const videoPath = await recordFeature(featureId, device, isAppStore);
         results[featureId] = videoPath;
         successCount++;
       } catch (error) {
@@ -1004,11 +1064,7 @@ async function main() {
   }
 
   console.log('\n✅ All features recorded successfully!');
-  console.log(
-    '\n💡 Next steps:',
-    '\n   1. Convert .webm to .mp4: pnpm run convert:app-demos',
-    '\n   2. Generate demo videos with scripts',
-  );
+  console.log(`\n💡 Output: ${device.outputDir}`);
 }
 
 // Run if called directly

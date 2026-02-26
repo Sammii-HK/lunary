@@ -4,6 +4,8 @@ import {
   OGWrapper,
   OGFooter,
   OGContentCenter,
+  OGStarfield,
+  OGGlowOrbs,
   createOGResponse,
 } from '../../../../../../utils/og/base';
 
@@ -77,81 +79,98 @@ export async function GET(
       ? `Learn more: lunary.app${learnPath}`
       : `Learn more: lunary.app/grimoire/${topic}`;
 
+    const accentColor = '#a78bfa';
+
     return createOGResponse(
       <OGWrapper theme={{ background }}>
+        <OGStarfield seed={topic} count={60} accentColor={accentColor} />
+        <OGGlowOrbs accentColor={accentColor} />
         <div
           style={{
             display: 'flex',
-            justifyContent: 'center',
+            flexDirection: 'column',
+            flex: 1,
+            width: '100%',
             alignItems: 'center',
-            paddingTop: '40px',
+            justifyContent: 'space-between',
+            position: 'relative',
+            zIndex: 1,
           }}
         >
           <div
             style={{
-              fontSize: '28px',
-              fontWeight: '400',
-              color: 'rgba(255,255,255,0.7)',
-              textAlign: 'center',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-            }}
-          >
-            {topLabel}
-          </div>
-        </div>
-
-        <OGContentCenter>
-          <div
-            style={{
-              fontSize: sizes.titleSize,
-              fontWeight: '600',
-              color: 'white',
-              textAlign: 'center',
-              letterSpacing: '0.02em',
               display: 'flex',
-              marginTop: '20px',
-              maxWidth: '90%',
-              textShadow: '0 2px 18px rgba(0,0,0,0.65)',
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingTop: '40px',
             }}
           >
-            {title}
-          </div>
-          {subtitle && (
             <div
               style={{
-                fontSize: sizes.subtitleSize,
-                fontWeight: '300',
-                color: 'rgba(255,255,255,0.8)',
-                textAlign: 'center',
-                letterSpacing: '0.05em',
-                display: 'flex',
-                marginTop: '30px',
-                maxWidth: '85%',
-                textShadow: '0 2px 16px rgba(0,0,0,0.6)',
-              }}
-            >
-              {subtitle}
-            </div>
-          )}
-          {!hideLearnMore && (
-            <div
-              style={{
-                fontSize: sizes.keyPointSize,
-                fontWeight: '300',
+                fontSize: '28px',
+                fontWeight: '400',
                 color: 'rgba(255,255,255,0.7)',
                 textAlign: 'center',
-                display: 'flex',
-                marginTop: '40px',
-                textShadow: '0 2px 14px rgba(0,0,0,0.6)',
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
               }}
             >
-              {learnMoreText}
+              {topLabel}
             </div>
-          )}
-        </OGContentCenter>
+          </div>
 
-        <OGFooter />
+          <OGContentCenter>
+            <div
+              style={{
+                fontSize: sizes.titleSize,
+                fontWeight: '600',
+                color: 'white',
+                textAlign: 'center',
+                letterSpacing: '0.02em',
+                display: 'flex',
+                marginTop: '20px',
+                maxWidth: '90%',
+                textShadow: '0 2px 18px rgba(0,0,0,0.65)',
+              }}
+            >
+              {title}
+            </div>
+            {subtitle && (
+              <div
+                style={{
+                  fontSize: sizes.subtitleSize,
+                  fontWeight: '300',
+                  color: 'rgba(255,255,255,0.8)',
+                  textAlign: 'center',
+                  letterSpacing: '0.05em',
+                  display: 'flex',
+                  marginTop: '30px',
+                  maxWidth: '85%',
+                  textShadow: '0 2px 16px rgba(0,0,0,0.6)',
+                }}
+              >
+                {subtitle}
+              </div>
+            )}
+            {!hideLearnMore && (
+              <div
+                style={{
+                  fontSize: sizes.keyPointSize,
+                  fontWeight: '300',
+                  color: 'rgba(255,255,255,0.7)',
+                  textAlign: 'center',
+                  display: 'flex',
+                  marginTop: '40px',
+                  textShadow: '0 2px 14px rgba(0,0,0,0.6)',
+                }}
+              >
+                {learnMoreText}
+              </div>
+            )}
+          </OGContentCenter>
+
+          <OGFooter />
+        </div>
       </OGWrapper>,
       {
         size: format,

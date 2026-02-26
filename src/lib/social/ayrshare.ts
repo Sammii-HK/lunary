@@ -32,6 +32,21 @@ function getAyrshareHeaders() {
   return headers;
 }
 
+/** Allow-list of supported platform names */
+const ALLOWED_PLATFORMS = new Set([
+  'x',
+  'twitter',
+  'instagram',
+  'facebook',
+  'linkedin',
+  'tiktok',
+  'pinterest',
+  'reddit',
+  'bluesky',
+  'threads',
+  'youtube',
+]);
+
 /** Map our platform names to Ayrshare platform names */
 function toAyrsharePlatform(platform: string): string {
   const map: Record<string, string> = {
@@ -173,6 +188,7 @@ export async function postToAyrshare(
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(60000),
     });
 
     if (!response.ok) {
@@ -239,8 +255,8 @@ export async function postToAyrshareMultiPlatform(params: {
   const headers = getAyrshareHeaders();
   const results: Record<string, AyrshareResult> = {};
 
-  const allPlatforms = params.platforms.filter(
-    (p) => p.toLowerCase() !== 'youtube',
+  const allPlatforms = params.platforms.filter((p) =>
+    ALLOWED_PLATFORMS.has(p.toLowerCase()),
   );
 
   if (allPlatforms.length === 0) {
@@ -291,6 +307,7 @@ export async function postToAyrshareMultiPlatform(params: {
         method: 'POST',
         headers,
         body: JSON.stringify(textPayload),
+        signal: AbortSignal.timeout(30000),
       });
 
       if (!response.ok) {
@@ -456,6 +473,7 @@ export async function postToAyrshareMultiPlatform(params: {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(60000),
     });
 
     if (!response.ok) {
@@ -471,6 +489,17 @@ export async function postToAyrshareMultiPlatform(params: {
     }
 
     const data = await response.json();
+
+    // Top-level error (Ayrshare returns 200 with status:'error' for account config issues)
+    if (data.status === 'error') {
+      const errMsg = data.message || 'Ayrshare post failed';
+      console.error('Ayrshare top-level error:', errMsg);
+      for (const platform of mediaPlatforms) {
+        results[platform] = { success: false, error: errMsg };
+      }
+      return { results };
+    }
+
     const postId = data.id || data.refId;
 
     // Ayrshare returns per-platform status in the response

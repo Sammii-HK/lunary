@@ -416,9 +416,8 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'space-between',
             flex: 1,
-            gap: 32,
             position: 'relative',
             zIndex: 1,
           }}
@@ -468,11 +467,12 @@ export async function GET(request: NextRequest) {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 280,
-              height: 280,
+              width: 320,
+              height: 320,
               borderRadius: '50%',
               background: `linear-gradient(135deg, ${scoreColor}20 0%, ${scoreColor}05 100%)`,
-              border: `3px solid ${scoreColor}50`,
+              border: `3px solid ${scoreColor}60`,
+              boxShadow: `0 0 40px ${scoreColor}20`,
             }}
           >
             <div

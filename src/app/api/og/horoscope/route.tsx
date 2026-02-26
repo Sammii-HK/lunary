@@ -6,6 +6,8 @@ import {
   OGHeader,
   OGContentCenter,
   OGFooter,
+  OGStarfield,
+  OGGlowOrbs,
   createOGResponse,
   OGImageSize,
   formatOGDate,
@@ -69,7 +71,12 @@ export async function GET(request: NextRequest) {
     'linear-gradient(135deg, #1f1f1f, #1a1a1a)',
   ];
 
-  const robotoFont = await loadGoogleFont(request);
+  let robotoFont: ArrayBuffer | null = null;
+  try {
+    robotoFont = await loadGoogleFont(request);
+  } catch {
+    // continue without custom font
+  }
 
   const headlineParts = [
     signParam ? `${signParam} Horoscope` : 'Daily Horoscope',
@@ -77,27 +84,48 @@ export async function GET(request: NextRequest) {
   ].filter(Boolean);
   const headline = headlineParts.join(' • ');
 
+  const accentColor = '#818cf8';
+
   return createOGResponse(
     <OGWrapper theme={{ background: themes[dayVariation] }}>
-      <OGHeader title={headline} fontSize={24} />
+      <OGStarfield
+        seed={signParam || 'horoscope'}
+        count={60}
+        accentColor={accentColor}
+      />
+      <OGGlowOrbs accentColor={accentColor} />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        <OGHeader title={headline} fontSize={24} />
 
-      <OGContentCenter>
-        <div
-          style={{
-            display: 'flex',
-            fontSize: '36px',
-            fontWeight: '400',
-            color: 'white',
-            textAlign: 'center',
-            letterSpacing: '0.1em',
-            marginBottom: '40px',
-          }}
-        >
-          {horoscopeSnippet}
-        </div>
-      </OGContentCenter>
+        <OGContentCenter>
+          <div
+            style={{
+              display: 'flex',
+              fontSize: '36px',
+              fontWeight: '400',
+              color: 'white',
+              textAlign: 'center',
+              letterSpacing: '0.1em',
+              marginBottom: '40px',
+            }}
+          >
+            {horoscopeSnippet}
+          </div>
+        </OGContentCenter>
 
-      <OGFooter date={formattedDate} />
+        <OGFooter date={formattedDate} />
+      </div>
     </OGWrapper>,
     {
       size,

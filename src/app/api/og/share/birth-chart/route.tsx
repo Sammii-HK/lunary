@@ -279,424 +279,181 @@ function parsePlacements(raw: string | null): BirthChartData[] {
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const shareId = searchParams.get('shareId');
-  const format = (searchParams.get('format') as ShareFormat) || 'square';
-  const { width, height } = getFormatDimensions(format);
+  try {
+    const { searchParams } = new URL(request.url);
+    const shareId = searchParams.get('shareId');
+    const format = (searchParams.get('format') as ShareFormat) || 'square';
+    const { width, height } = getFormatDimensions(format);
 
-  const shareRecord = shareId ? await getBirthChartShare(shareId) : null;
-  const name = shareRecord?.name ?? sanitize(searchParams.get('name'), 32);
-  const sun = shareRecord?.sun ?? sanitize(searchParams.get('sun'), 16) ?? '—';
-  const moon =
-    shareRecord?.moon ?? sanitize(searchParams.get('moon'), 16) ?? '—';
-  const rising =
-    shareRecord?.rising ?? sanitize(searchParams.get('rising'), 16) ?? '—';
-  const element =
-    shareRecord?.element ?? sanitize(searchParams.get('element'), 16);
-  const modality =
-    shareRecord?.modality ?? sanitize(searchParams.get('modality'), 16);
-  const insight =
-    shareRecord?.insight ?? sanitize(searchParams.get('insight'), 170);
+    const shareRecord = shareId ? await getBirthChartShare(shareId) : null;
+    const name = shareRecord?.name ?? sanitize(searchParams.get('name'), 32);
+    const sun =
+      shareRecord?.sun ?? sanitize(searchParams.get('sun'), 16) ?? '—';
+    const moon =
+      shareRecord?.moon ?? sanitize(searchParams.get('moon'), 16) ?? '—';
+    const rising =
+      shareRecord?.rising ?? sanitize(searchParams.get('rising'), 16) ?? '—';
+    const element =
+      shareRecord?.element ?? sanitize(searchParams.get('element'), 16);
+    const modality =
+      shareRecord?.modality ?? sanitize(searchParams.get('modality'), 16);
+    const insight =
+      shareRecord?.insight ?? sanitize(searchParams.get('insight'), 170);
 
-  const placements = parsePlacements(searchParams.get('placements'));
-  const birthChart = shareRecord?.placements ?? placements;
+    const placements = parsePlacements(searchParams.get('placements'));
+    const birthChart = shareRecord?.placements ?? placements;
 
-  const theme =
-    (element && gradientsByElement[element]) || gradientsByElement.default;
-  const robotoMono = await loadRobotoMono(request);
-  const astronomiconFont = await loadAstronomiconFont(request);
+    const theme =
+      (element && gradientsByElement[element]) || gradientsByElement.default;
+    const robotoMono = await loadRobotoMono(request);
+    const astronomiconFont = await loadAstronomiconFont(request);
 
-  // Format-aware sizing
-  const isLandscape = format === 'landscape';
-  const isStory = format === 'story';
-  const isSquare = format === 'square';
-  const padding = isLandscape ? 40 : isStory ? 100 : 48;
-  const titleSize = isLandscape ? 40 : isStory ? 80 : 62;
-  const subtitleSize = isLandscape ? 15 : isStory ? 26 : 20;
-  const bigThreeSize = isLandscape ? 20 : isStory ? 36 : 28;
-  const bigThreeGlyphSize = isLandscape ? 24 : isStory ? 46 : 36;
-  const chartSize = isLandscape ? 480 : isStory ? 800 : 500;
+    // Format-aware sizing
+    const isLandscape = format === 'landscape';
+    const isStory = format === 'story';
+    const isSquare = format === 'square';
+    const padding = isLandscape ? 40 : isStory ? 100 : 48;
+    const titleSize = isLandscape ? 40 : isStory ? 80 : 62;
+    const subtitleSize = isLandscape ? 15 : isStory ? 26 : 20;
+    const bigThreeSize = isLandscape ? 20 : isStory ? 36 : 28;
+    const bigThreeGlyphSize = isLandscape ? 24 : isStory ? 46 : 36;
+    const chartSize = isLandscape ? 480 : isStory ? 800 : 420;
 
-  const elementCounts = ELEMENT_ORDER.reduce(
-    (acc, label) => {
-      acc[label] = 0;
-      return acc;
-    },
-    {} as Record<ElementType, number>,
-  );
+    const elementCounts = ELEMENT_ORDER.reduce(
+      (acc, label) => {
+        acc[label] = 0;
+        return acc;
+      },
+      {} as Record<ElementType, number>,
+    );
 
-  const modalityCounts = MODALITY_ORDER.reduce(
-    (acc, label) => {
-      acc[label] = 0;
-      return acc;
-    },
-    {} as Record<ModalityType, number>,
-  );
+    const modalityCounts = MODALITY_ORDER.reduce(
+      (acc, label) => {
+        acc[label] = 0;
+        return acc;
+      },
+      {} as Record<ModalityType, number>,
+    );
 
-  birthChart.forEach((planet) => {
-    const normalizedSign = normalizeSignKey(planet.sign);
+    birthChart.forEach((planet) => {
+      const normalizedSign = normalizeSignKey(planet.sign);
 
-    if (normalizedSign) {
-      const elementLabel = SIGN_TO_ELEMENT[normalizedSign];
-      if (elementLabel) {
-        elementCounts[elementLabel] += 1;
+      if (normalizedSign) {
+        const elementLabel = SIGN_TO_ELEMENT[normalizedSign];
+        if (elementLabel) {
+          elementCounts[elementLabel] += 1;
+        }
+
+        const modalityLabel = SIGN_TO_MODALITY[normalizedSign];
+        if (modalityLabel) {
+          modalityCounts[modalityLabel] += 1;
+        }
       }
+    });
 
-      const modalityLabel = SIGN_TO_MODALITY[normalizedSign];
-      if (modalityLabel) {
-        modalityCounts[modalityLabel] += 1;
-      }
-    }
-  });
+    const rawInsight =
+      insight ?? 'A balanced cosmic profile with diverse energies.';
+    const insightText = rawInsight.replace(/\.([A-Z])/g, '. $1');
 
-  const rawInsight =
-    insight ?? 'A balanced cosmic profile with diverse energies.';
-  const insightText = rawInsight.replace(/\.([A-Z])/g, '. $1');
+    // Compute archetype subtitle from dominant element + modality
+    const dominantElement = ELEMENT_ORDER.reduce((best, label) =>
+      elementCounts[label] > elementCounts[best] ? label : best,
+    );
+    const dominantModality = MODALITY_ORDER.reduce((best, label) =>
+      modalityCounts[label] > modalityCounts[best] ? label : best,
+    );
+    const archetypeSubtitle = `A ${dominantModality} ${dominantElement} Chart`;
+    const archetypeTagline =
+      ARCHETYPE_TAGLINES[dominantElement]?.[dominantModality] ?? '';
 
-  // Compute archetype subtitle from dominant element + modality
-  const dominantElement = ELEMENT_ORDER.reduce((best, label) =>
-    elementCounts[label] > elementCounts[best] ? label : best,
-  );
-  const dominantModality = MODALITY_ORDER.reduce((best, label) =>
-    modalityCounts[label] > modalityCounts[best] ? label : best,
-  );
-  const archetypeSubtitle = `A ${dominantModality} ${dominantElement} Chart`;
-  const archetypeTagline =
-    ARCHETYPE_TAGLINES[dominantElement]?.[dominantModality] ?? '';
+    // Element-specific decorative gradient overlays
+    const elementDecorativeGradient: Record<string, string> = {
+      Fire: 'radial-gradient(ellipse at 50% 0%, rgba(251, 191, 36, 0.08) 0%, transparent 60%)',
+      Earth:
+        'radial-gradient(ellipse at 50% 100%, rgba(34, 197, 94, 0.08) 0%, transparent 60%)',
+      Air: 'radial-gradient(ellipse at 80% 20%, rgba(147, 197, 253, 0.08) 0%, transparent 60%)',
+      Water:
+        'radial-gradient(ellipse at 50% 100%, rgba(99, 102, 241, 0.08) 0%, transparent 60%)',
+    };
+    const decorativeGradient = elementDecorativeGradient[dominantElement] ?? '';
 
-  // Element-specific decorative gradient overlays
-  const elementDecorativeGradient: Record<string, string> = {
-    Fire: 'radial-gradient(ellipse at 50% 0%, rgba(251, 191, 36, 0.08) 0%, transparent 60%)',
-    Earth:
-      'radial-gradient(ellipse at 50% 100%, rgba(34, 197, 94, 0.08) 0%, transparent 60%)',
-    Air: 'radial-gradient(ellipse at 80% 20%, rgba(147, 197, 253, 0.08) 0%, transparent 60%)',
-    Water:
-      'radial-gradient(ellipse at 50% 100%, rgba(99, 102, 241, 0.08) 0%, transparent 60%)',
-  };
-  const decorativeGradient = elementDecorativeGradient[dominantElement] ?? '';
+    const bigThree = [
+      { glyph: bodiesSymbols.sun, value: sun, label: 'Sun' },
+      { glyph: bodiesSymbols.moon, value: moon, label: 'Moon' },
+      { glyph: astroPointSymbols.ascendant, value: rising, label: 'Rising' },
+    ];
 
-  const bigThree = [
-    { glyph: bodiesSymbols.sun, value: sun, label: 'Sun' },
-    { glyph: bodiesSymbols.moon, value: moon, label: 'Moon' },
-    { glyph: astroPointSymbols.ascendant, value: rising, label: 'Rising' },
-  ];
+    // Generate unique starfield based on shareId
+    const starfieldId = shareId || 'default-birth-chart';
+    const stars = generateStarfield(starfieldId, getStarCount(format));
 
-  // Generate unique starfield based on shareId
-  const starfieldId = shareId || 'default-birth-chart';
-  const stars = generateStarfield(starfieldId, getStarCount(format));
-
-  // Starfield component - increased opacity for better visibility
-  const starfieldJsx = stars.map((star, i) => (
-    <div
-      key={i}
-      style={{
-        position: 'absolute',
-        left: `${star.x}%`,
-        top: `${star.y}%`,
-        width: star.size,
-        height: star.size,
-        borderRadius: '50%',
-        background: '#fff',
-        opacity: star.opacity * 0.8, // Brighter stars with reduced gradient
-      }}
-    />
-  ));
-
-  // Inline JSX directly based on format
-  const layoutJsx = isLandscape ? (
-    // Landscape Layout
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        background: '#0A0A0A',
-        color: '#fff',
-        padding,
-        fontFamily: 'Roboto Mono',
-        position: 'relative',
-        border: SHARE_IMAGE_BORDER,
-      }}
-    >
-      {/* Gradient overlay */}
+    // Starfield component - increased opacity for better visibility
+    const starfieldJsx = stars.map((star, i) => (
       <div
+        key={i}
         style={{
           position: 'absolute',
-          inset: 0,
-          background: theme.background,
-          display: 'flex',
+          left: `${star.x}%`,
+          top: `${star.y}%`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          background: '#fff',
+          opacity: star.opacity * 0.8, // Brighter stars with reduced gradient
         }}
       />
-      {/* Unique starfield background */}
-      {starfieldJsx}
-      {/* Element decorative gradient */}
-      {decorativeGradient && (
+    ));
+
+    // Inline JSX directly based on format
+    const layoutJsx = isLandscape ? (
+      // Landscape Layout
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#0A0A0A',
+          color: '#fff',
+          padding,
+          fontFamily: 'Roboto Mono',
+          position: 'relative',
+          border: SHARE_IMAGE_BORDER,
+        }}
+      >
+        {/* Gradient overlay */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            background: decorativeGradient,
+            background: theme.background,
             display: 'flex',
           }}
         />
-      )}
-
-      {/* Header - spans full width */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-          alignItems: 'center',
-          textAlign: 'center',
-          position: 'relative',
-          marginBottom: 20,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            letterSpacing: 4,
-            textTransform: 'uppercase',
-            fontSize: subtitleSize,
-            opacity: 0.6,
-          }}
-        >
-          {archetypeSubtitle}
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            fontSize: titleSize,
-            fontWeight: 500,
-            lineHeight: 1.05,
-            textShadow: SHARE_TITLE_GLOW,
-          }}
-        >
-          {name ? `${name}'s birth chart` : 'Birth chart highlights'}
-        </div>
-        {archetypeTagline && (
+        {/* Unique starfield background */}
+        {starfieldJsx}
+        {/* Element decorative gradient */}
+        {decorativeGradient && (
           <div
             style={{
+              position: 'absolute',
+              inset: 0,
+              background: decorativeGradient,
               display: 'flex',
-              fontSize: 14,
-              fontStyle: 'italic',
-              color: '#A78BFA',
-              marginTop: 4,
             }}
-          >
-            {archetypeTagline}
-          </div>
-        )}
-        <div
-          style={{
-            display: 'flex',
-            gap: 16,
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            fontSize: bigThreeSize,
-            letterSpacing: 1,
-          }}
-        >
-          {bigThree.map((item) => (
-            <div
-              key={item.label}
-              style={{
-                display: 'flex',
-                gap: 10,
-                alignItems: 'center',
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: 'Astronomicon',
-                  fontSize: bigThreeGlyphSize,
-                  opacity: 0.85,
-                  display: 'flex',
-                }}
-              >
-                {item.glyph}
-              </span>
-              <span style={{ display: 'flex' }}>{item.value || '—'}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Main horizontal layout: Chart on left, Stats on right */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          gap: 24,
-          flex: 1,
-          position: 'relative',
-          alignItems: 'flex-start',
-        }}
-      >
-        {/* Left column: Chart */}
-        <div
-          style={{
-            width: 480,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <ChartWheelOg
-            birthChart={birthChart}
-            size={chartSize}
-            showTooltips={false}
           />
-        </div>
+        )}
 
-        {/* Right column: Stats */}
+        {/* Header - spans full width */}
         <div
           style={{
-            flex: 1,
             display: 'flex',
             flexDirection: 'column',
             gap: 12,
-          }}
-        >
-          {/* Element & Modality Badges */}
-          <div
-            style={{
-              display: 'flex',
-              gap: 12,
-              flexWrap: 'wrap',
-            }}
-          >
-            <Badge
-              label='Element'
-              value={element ?? 'Balanced'}
-              glyph={elementGlyph(element)}
-            />
-            <Badge
-              label='Modality'
-              value={modality ?? 'Dynamic'}
-              glyph={modalityGlyph(modality)}
-            />
-          </div>
-
-          {/* Insight box - compact */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 6,
-              borderRadius: 16,
-              border: '1px solid rgba(255,255,255,0.16)',
-              background: theme.soft,
-              padding: '12px 14px',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                letterSpacing: 3,
-                textTransform: 'uppercase',
-                opacity: 0.75,
-                display: 'flex',
-              }}
-            >
-              Chart insight
-            </div>
-            <div
-              style={{
-                fontSize: 14,
-                lineHeight: 1.3,
-                opacity: 0.95,
-                display: 'flex',
-              }}
-            >
-              {truncateText(insightText, 100)}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Watermark */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 14,
-          left: padding,
-          fontSize: 11,
-          opacity: 0.3,
-          letterSpacing: 1,
-          display: 'flex',
-        }}
-      >
-        lunary.app/chart
-      </div>
-
-      {/* Branded Footer */}
-      <ShareFooter format={format} />
-    </div>
-  ) : (
-    // Square/Story Layout
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: isStory ? 'center' : undefined,
-        background: '#0A0A0A',
-        color: '#fff',
-        padding,
-        fontFamily: 'Roboto Mono',
-        position: 'relative',
-        border: SHARE_IMAGE_BORDER,
-      }}
-    >
-      {/* Gradient overlay */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: theme.background,
-          display: 'flex',
-        }}
-      />
-
-      {/* Unique starfield background */}
-      {starfieldJsx}
-      {/* Element decorative gradient */}
-      {decorativeGradient && (
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: decorativeGradient,
-            display: 'flex',
-          }}
-        />
-      )}
-
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          width: '100%',
-          maxWidth: 960,
-          gap: isStory ? 48 : isSquare ? 28 : 40,
-          alignItems: 'center',
-          position: 'relative',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 18,
             alignItems: 'center',
             textAlign: 'center',
+            position: 'relative',
+            marginBottom: 20,
           }}
         >
           <div
@@ -725,7 +482,7 @@ export async function GET(request: NextRequest) {
             <div
               style={{
                 display: 'flex',
-                fontSize: isStory ? 24 : 18,
+                fontSize: 14,
                 fontStyle: 'italic',
                 color: '#A78BFA',
                 marginTop: 4,
@@ -737,7 +494,7 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               display: 'flex',
-              gap: isLandscape ? 16 : 24,
+              gap: 16,
               flexWrap: 'wrap',
               justifyContent: 'center',
               fontSize: bigThreeSize,
@@ -769,122 +526,370 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
+        {/* Main horizontal layout: Chart on left, Stats on right */}
         <div
           style={{
-            width: '100%',
-            padding: 4,
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
+            flexDirection: 'row',
+            gap: 24,
+            flex: 1,
+            position: 'relative',
+            alignItems: 'flex-start',
           }}
         >
-          <ChartWheelOg
-            birthChart={birthChart}
-            size={chartSize}
-            showTooltips={false}
-          />
-        </div>
-
-        <div
-          style={{
-            width: '100%',
-            maxWidth: 820,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: isSquare ? 16 : 24,
-            alignItems: 'stretch',
-            marginBottom: isSquare ? 60 : 0,
-          }}
-        >
+          {/* Left column: Chart */}
           <div
             style={{
+              width: 480,
               display: 'flex',
-              gap: 18,
-              flexWrap: 'wrap',
               justifyContent: 'center',
+              alignItems: 'center',
+              flexShrink: 0,
             }}
           >
-            <Badge
-              label='Element'
-              value={element ?? 'Balanced'}
-              glyph={elementGlyph(element)}
-            />
-            <Badge
-              label='Modality'
-              value={modality ?? 'Dynamic'}
-              glyph={modalityGlyph(modality)}
+            <ChartWheelOg
+              birthChart={birthChart}
+              size={chartSize}
+              showTooltips={false}
             />
           </div>
 
+          {/* Right column: Stats */}
           <div
             style={{
+              flex: 1,
               display: 'flex',
               flexDirection: 'column',
-              gap: 10,
-              borderRadius: 20,
-              border: '1px solid rgba(255,255,255,0.16)',
-              background: theme.soft,
-              padding: '20px 22px',
+              gap: 12,
             }}
           >
+            {/* Element & Modality Badges */}
             <div
               style={{
                 display: 'flex',
-                gap: 6,
-                alignItems: 'center',
+                gap: 12,
+                flexWrap: 'wrap',
               }}
             >
-              <span
+              <Badge
+                label='Element'
+                value={element ?? 'Balanced'}
+                glyph={elementGlyph(element)}
+              />
+              <Badge
+                label='Modality'
+                value={modality ?? 'Dynamic'}
+                glyph={modalityGlyph(modality)}
+              />
+            </div>
+
+            {/* Insight box - compact */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+                borderRadius: 16,
+                border: '1px solid rgba(255,255,255,0.16)',
+                background: theme.soft,
+                padding: '12px 14px',
+              }}
+            >
+              <div
                 style={{
-                  fontSize: 16,
-                  letterSpacing: 4,
+                  fontSize: 11,
+                  letterSpacing: 3,
                   textTransform: 'uppercase',
                   opacity: 0.75,
                   display: 'flex',
                 }}
               >
                 Chart insight
-              </span>
-            </div>
-            <div
-              style={{
-                fontSize: 24,
-                lineHeight: 1.4,
-                opacity: 0.95,
-                display: 'flex',
-              }}
-            >
-              {isSquare ? truncateText(insightText, 120) : insightText}
+              </div>
+              <div
+                style={{
+                  fontSize: 14,
+                  lineHeight: 1.3,
+                  opacity: 0.95,
+                  display: 'flex',
+                }}
+              >
+                {truncateText(insightText, 100)}
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Watermark */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 14,
+            left: padding,
+            fontSize: 11,
+            opacity: 0.3,
+            letterSpacing: 1,
+            display: 'flex',
+          }}
+        >
+          lunary.app/chart
+        </div>
+
+        {/* Branded Footer */}
+        <ShareFooter format={format} />
       </div>
-      {/* Watermark */}
+    ) : (
+      // Square/Story Layout
       <div
         style={{
-          position: 'absolute',
-          bottom: isStory ? 20 : 14,
-          left: padding,
-          fontSize: isStory ? 14 : 12,
-          opacity: 0.3,
-          letterSpacing: 1,
+          width: '100%',
+          height: '100%',
           display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          background: '#0A0A0A',
+          color: '#fff',
+          padding,
+          fontFamily: 'Roboto Mono',
+          position: 'relative',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
-        lunary.app/chart
+        {/* Gradient overlay */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: theme.background,
+            display: 'flex',
+          }}
+        />
+
+        {/* Unique starfield background */}
+        {starfieldJsx}
+        {/* Element decorative gradient */}
+        {decorativeGradient && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: decorativeGradient,
+              display: 'flex',
+            }}
+          />
+        )}
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            width: '100%',
+            maxWidth: 960,
+            gap: isStory ? 48 : isSquare ? 20 : 40,
+            alignItems: 'center',
+            position: 'relative',
+            flex: 1,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 18,
+              alignItems: 'center',
+              textAlign: 'center',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                letterSpacing: 4,
+                textTransform: 'uppercase',
+                fontSize: subtitleSize,
+                opacity: 0.6,
+              }}
+            >
+              {archetypeSubtitle}
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                fontSize: titleSize,
+                fontWeight: 500,
+                lineHeight: 1.05,
+                textShadow: SHARE_TITLE_GLOW,
+              }}
+            >
+              {name ? `${name}'s birth chart` : 'Birth chart highlights'}
+            </div>
+            {archetypeTagline && (
+              <div
+                style={{
+                  display: 'flex',
+                  fontSize: isStory ? 24 : 18,
+                  fontStyle: 'italic',
+                  color: '#A78BFA',
+                  marginTop: 4,
+                }}
+              >
+                {archetypeTagline}
+              </div>
+            )}
+            <div
+              style={{
+                display: 'flex',
+                gap: isLandscape ? 16 : 24,
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                fontSize: bigThreeSize,
+                letterSpacing: 1,
+              }}
+            >
+              {bigThree.map((item) => (
+                <div
+                  key={item.label}
+                  style={{
+                    display: 'flex',
+                    gap: 10,
+                    alignItems: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: 'Astronomicon',
+                      fontSize: bigThreeGlyphSize,
+                      opacity: 0.85,
+                      display: 'flex',
+                    }}
+                  >
+                    {item.glyph}
+                  </span>
+                  <span style={{ display: 'flex' }}>{item.value || '—'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div
+            style={{
+              width: '100%',
+              padding: 4,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <ChartWheelOg
+              birthChart={birthChart}
+              size={chartSize}
+              showTooltips={false}
+            />
+          </div>
+
+          <div
+            style={{
+              width: '100%',
+              maxWidth: 820,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isSquare ? 16 : 24,
+              alignItems: 'stretch',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                gap: 18,
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+              }}
+            >
+              <Badge
+                label='Element'
+                value={element ?? 'Balanced'}
+                glyph={elementGlyph(element)}
+              />
+              <Badge
+                label='Modality'
+                value={modality ?? 'Dynamic'}
+                glyph={modalityGlyph(modality)}
+              />
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+                borderRadius: 20,
+                border: '1px solid rgba(255,255,255,0.16)',
+                background: theme.soft,
+                padding: '20px 22px',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 6,
+                  alignItems: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 16,
+                    letterSpacing: 4,
+                    textTransform: 'uppercase',
+                    opacity: 0.75,
+                    display: 'flex',
+                  }}
+                >
+                  Chart insight
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: 24,
+                  lineHeight: 1.4,
+                  opacity: 0.95,
+                  display: 'flex',
+                }}
+              >
+                {isSquare ? truncateText(insightText, 120) : insightText}
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Watermark */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: isStory ? 20 : 14,
+            left: padding,
+            fontSize: isStory ? 14 : 12,
+            opacity: 0.3,
+            letterSpacing: 1,
+            display: 'flex',
+          }}
+        >
+          lunary.app/chart
+        </div>
+
+        {/* Branded Footer */}
+        <ShareFooter format={format} />
       </div>
+    );
 
-      {/* Branded Footer */}
-      <ShareFooter format={format} />
-    </div>
-  );
-
-  return new ImageResponse(layoutJsx, {
-    width,
-    height,
-    fonts: [
-      { name: 'Roboto Mono', data: robotoMono, style: 'normal' },
-      { name: 'Astronomicon', data: astronomiconFont, style: 'normal' },
-    ],
-  });
+    return new ImageResponse(layoutJsx, {
+      width,
+      height,
+      fonts: [
+        { name: 'Roboto Mono', data: robotoMono, style: 'normal' },
+        { name: 'Astronomicon', data: astronomiconFont, style: 'normal' },
+      ],
+    });
+  } catch (error) {
+    console.error('[BirthChartOG] Failed to generate image:', error);
+    return new Response('Failed to generate image', { status: 500 });
+  }
 }

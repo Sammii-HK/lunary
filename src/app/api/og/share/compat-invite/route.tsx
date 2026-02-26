@@ -7,7 +7,12 @@ import {
   generateStarfield,
   getStarCount,
 } from '@/lib/share/og-utils';
-import { ShareFooter, getShareSizes } from '@/lib/share/og-share-utils';
+import {
+  ShareFooter,
+  getShareSizes,
+  SHARE_IMAGE_BORDER,
+  SHARE_TITLE_GLOW,
+} from '@/lib/share/og-share-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
@@ -116,7 +121,7 @@ export async function GET(request: NextRequest) {
 
     const signSymbol = SIGN_SYMBOLS[data.inviterSign] || '\u2606';
     const bigThree = data.inviterBigThree;
-    const symbolSize = sizes.isLandscape ? 100 : sizes.isStory ? 180 : 140;
+    const symbolSize = sizes.isLandscape ? 120 : sizes.isStory ? 260 : 180;
 
     const layoutJsx = (
       <div
@@ -129,9 +134,21 @@ export async function GET(request: NextRequest) {
           padding: `${sizes.padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
         }}
       >
         {starfieldJsx}
+
+        {/* Gradient overlay */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background:
+              'linear-gradient(135deg, rgba(132, 88, 216, 0.15) 0%, transparent 55%, rgba(238, 120, 158, 0.08) 100%)',
+            display: 'flex',
+          }}
+        />
 
         {/* Main content centered */}
         <div
@@ -141,7 +158,7 @@ export async function GET(request: NextRequest) {
             alignItems: 'center',
             justifyContent: 'center',
             flex: 1,
-            gap: sizes.isLandscape ? 20 : 32,
+            gap: sizes.isLandscape ? 20 : 28,
           }}
         >
           {/* Sign symbol */}
@@ -150,7 +167,8 @@ export async function GET(request: NextRequest) {
               fontSize: symbolSize,
               color: '#a78bfa',
               display: 'flex',
-              opacity: 0.8,
+              opacity: 0.85,
+              lineHeight: 1,
             }}
           >
             {signSymbol}
@@ -166,6 +184,7 @@ export async function GET(request: NextRequest) {
               textAlign: 'center',
               display: 'flex',
               lineHeight: 1.1,
+              textShadow: SHARE_TITLE_GLOW,
             }}
           >
             {data.inviterName}
@@ -178,6 +197,10 @@ export async function GET(request: NextRequest) {
                 display: 'flex',
                 gap: sizes.isLandscape ? 24 : 32,
                 justifyContent: 'center',
+                padding: sizes.isStory ? '20px 40px' : '14px 28px',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(167, 139, 250, 0.2)',
+                borderRadius: 16,
               }}
             >
               {[
@@ -219,14 +242,14 @@ export async function GET(request: NextRequest) {
             </div>
           )}
 
-          {/* CTA */}
+          {/* CTA pill */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              marginTop: sizes.isLandscape ? 12 : 24,
-              gap: 8,
+              gap: sizes.isStory ? 16 : 10,
+              marginTop: sizes.isLandscape ? 8 : 16,
             }}
           >
             <div
@@ -241,12 +264,23 @@ export async function GET(request: NextRequest) {
             </div>
             <div
               style={{
-                fontSize: sizes.labelSize,
-                color: OG_COLORS.textTertiary,
                 display: 'flex',
+                padding: sizes.isStory ? '18px 44px' : '12px 32px',
+                background: 'rgba(132, 88, 216, 0.15)',
+                border: '1px solid rgba(167, 139, 250, 0.4)',
+                borderRadius: 100,
               }}
             >
-              Tap to discover your cosmic connection
+              <div
+                style={{
+                  fontSize: sizes.labelSize,
+                  color: '#a78bfa',
+                  letterSpacing: '0.08em',
+                  display: 'flex',
+                }}
+              >
+                Tap to discover your cosmic connection
+              </div>
             </div>
           </div>
         </div>

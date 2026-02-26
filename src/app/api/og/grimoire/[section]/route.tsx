@@ -4,6 +4,8 @@ import {
   OGWrapper,
   OGFooter,
   OGContentCenter,
+  OGStarfield,
+  OGGlowOrbs,
   createOGResponse,
 } from '../../../../../../utils/og/base';
 import { createSectionGradient } from '../../../../../../utils/og/gradients';
@@ -235,66 +237,81 @@ export async function GET(
 
   return createOGResponse(
     <OGWrapper theme={{ background }}>
+      <OGStarfield seed={section} count={60} accentColor={data.color} />
+      <OGGlowOrbs accentColor={data.color} />
       <div
         style={{
           display: 'flex',
-          justifyContent: 'center',
+          flexDirection: 'column',
+          flex: 1,
+          width: '100%',
           alignItems: 'center',
-          paddingTop: '40px',
+          justifyContent: 'space-between',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         <div
           style={{
-            fontSize: '28px',
-            fontWeight: '400',
-            color: 'rgba(255,255,255,0.7)',
-            textAlign: 'center',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingTop: '40px',
           }}
         >
-          Grimoire
+          <div
+            style={{
+              fontSize: '28px',
+              fontWeight: '400',
+              color: 'rgba(255,255,255,0.7)',
+              textAlign: 'center',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Grimoire
+          </div>
         </div>
+
+        <OGContentCenter>
+          <div
+            style={{
+              fontSize: '120px',
+              display: 'flex',
+            }}
+          >
+            {data.emoji}
+          </div>
+          <div
+            style={{
+              fontSize: '64px',
+              fontWeight: '600',
+              color: 'white',
+              textAlign: 'center',
+              letterSpacing: '0.02em',
+              display: 'flex',
+              marginTop: '30px',
+            }}
+          >
+            {data.title}
+          </div>
+          <div
+            style={{
+              fontSize: '28px',
+              fontWeight: '300',
+              color: 'rgba(255,255,255,0.7)',
+              textAlign: 'center',
+              letterSpacing: '0.05em',
+              display: 'flex',
+              marginTop: '30px',
+            }}
+          >
+            {data.subtitle}
+          </div>
+        </OGContentCenter>
+
+        <OGFooter />
       </div>
-
-      <OGContentCenter>
-        <div
-          style={{
-            fontSize: '120px',
-            display: 'flex',
-          }}
-        >
-          {data.emoji}
-        </div>
-        <div
-          style={{
-            fontSize: '64px',
-            fontWeight: '600',
-            color: 'white',
-            textAlign: 'center',
-            letterSpacing: '0.02em',
-            display: 'flex',
-            marginTop: '30px',
-          }}
-        >
-          {data.title}
-        </div>
-        <div
-          style={{
-            fontSize: '28px',
-            fontWeight: '300',
-            color: 'rgba(255,255,255,0.7)',
-            textAlign: 'center',
-            letterSpacing: '0.05em',
-            display: 'flex',
-            marginTop: '30px',
-          }}
-        >
-          {data.subtitle}
-        </div>
-      </OGContentCenter>
-
-      <OGFooter />
     </OGWrapper>,
     {
       size: 'landscape',

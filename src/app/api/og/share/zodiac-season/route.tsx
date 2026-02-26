@@ -184,13 +184,13 @@ export async function GET(request: NextRequest) {
     const firstName = data.name?.trim().split(' ')[0] || '';
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 48 : isStory ? 60 : 60;
-    const titleSize = isLandscape ? 44 : isStory ? 84 : 72;
-    const symbolSize = isLandscape ? 120 : isStory ? 200 : 160;
-    const signSize = isLandscape ? 52 : isStory ? 96 : 72;
+    const padding = isLandscape ? 48 : isStory ? 80 : 60;
+    const titleSize = isLandscape ? 40 : isStory ? 76 : 64;
+    const symbolSize = isLandscape ? 180 : isStory ? 700 : 290;
+    const signSize = isLandscape ? 56 : isStory ? 96 : 80;
     const badgeSize = isLandscape ? 20 : isStory ? 32 : 28;
-    const themeSize = isLandscape ? 18 : isStory ? 32 : 30;
-    const dateSize = isLandscape ? 20 : isStory ? 32 : 28;
+    const themeSize = isLandscape ? 18 : isStory ? 34 : 30;
+    const dateSize = isLandscape ? 18 : isStory ? 30 : 24;
 
     const gradient = ELEMENT_GRADIENTS[data.element];
     const elementColor = ELEMENT_COLORS[data.element];
@@ -233,7 +233,7 @@ export async function GET(request: NextRequest) {
           right: 0,
           bottom: 0,
           background: gradientBg,
-          opacity: 0.2,
+          opacity: isStory ? 0.55 : 0.3,
           display: 'flex',
         }}
       />
@@ -403,9 +403,8 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
           background: OG_COLORS.background,
-          padding: '80px 60px 140px 60px',
+          padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
           border: SHARE_IMAGE_BORDER,
@@ -414,13 +413,28 @@ export async function GET(request: NextRequest) {
         {gradientOverlay}
         {starfieldJsx}
 
+        {/* Radial glow */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '22%',
+            left: '50%',
+            width: 1000,
+            height: 1000,
+            borderRadius: '50%',
+            background: `radial-gradient(ellipse at center, ${elementColor}40 0%, transparent 65%)`,
+            transform: 'translateX(-50%)',
+            display: 'flex',
+          }}
+        />
+
         {/* Header */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 48,
+            marginBottom: 20,
           }}
         >
           <div
@@ -438,7 +452,7 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Giant Symbol */}
+        {/* Giant Symbol — fills remaining */}
         <div
           style={{
             display: 'flex',
@@ -446,6 +460,7 @@ export async function GET(request: NextRequest) {
             alignItems: 'center',
             flex: 1,
             justifyContent: 'center',
+            gap: 28,
           }}
         >
           <div
@@ -453,9 +468,9 @@ export async function GET(request: NextRequest) {
               fontFamily: 'Astronomicon',
               fontSize: symbolSize,
               color: elementColor,
-              marginBottom: 24,
               lineHeight: 1,
               display: 'flex',
+              textShadow: `0 0 100px ${elementColor}70`,
             }}
           >
             {getZodiacGlyph(data.sign)}
@@ -466,8 +481,7 @@ export async function GET(request: NextRequest) {
               fontSize: signSize,
               fontWeight: 400,
               color: elementColor,
-              letterSpacing: '0.05em',
-              marginBottom: 24,
+              letterSpacing: '0.06em',
               display: 'flex',
             }}
           >
@@ -480,11 +494,158 @@ export async function GET(request: NextRequest) {
               display: 'flex',
               alignItems: 'center',
               gap: 10,
-              padding: '14px 28px',
-              background: `rgba(${parseInt(elementColor.slice(1, 3), 16)}, ${parseInt(elementColor.slice(3, 5), 16)}, ${parseInt(elementColor.slice(5, 7), 16)}, 0.15)`,
-              border: `2px solid ${elementColor}`,
+              padding: '16px 36px',
+              background: `${elementColor}18`,
+              border: `2px solid ${elementColor}80`,
               borderRadius: 9999,
-              marginBottom: 32,
+            }}
+          >
+            <div
+              style={{
+                fontSize: badgeSize,
+                color: elementColor,
+                fontWeight: 300,
+                textTransform: 'uppercase',
+                letterSpacing: '0.14em',
+                display: 'flex',
+              }}
+            >
+              {data.modality} {data.element}
+            </div>
+          </div>
+
+          {/* Date Range */}
+          <div
+            style={{
+              fontSize: dateSize,
+              color: OG_COLORS.textTertiary,
+              letterSpacing: '0.1em',
+              display: 'flex',
+            }}
+          >
+            {dateRangeText}
+          </div>
+
+          {/* Themes */}
+          <div
+            style={{
+              fontSize: themeSize,
+              color: OG_COLORS.textSecondary,
+              letterSpacing: '0.05em',
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}
+          >
+            {data.themes.join(' · ')}
+          </div>
+        </div>
+
+        <ShareFooter format={format} />
+      </div>
+    ) : (
+      // Square Layout
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: OG_COLORS.background,
+          padding: `${padding}px`,
+          position: 'relative',
+          fontFamily: 'Roboto Mono',
+          border: SHARE_IMAGE_BORDER,
+        }}
+      >
+        {gradientOverlay}
+        {starfieldJsx}
+
+        {/* Radial glow behind symbol */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '28%',
+            left: '50%',
+            width: 560,
+            height: 560,
+            borderRadius: '50%',
+            background: `radial-gradient(ellipse at center, ${elementColor}22 0%, transparent 65%)`,
+            transform: 'translateX(-50%)',
+            display: 'flex',
+          }}
+        />
+
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 24,
+          }}
+        >
+          <div
+            style={{
+              fontSize: titleSize,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              display: 'flex',
+              textShadow: SHARE_TITLE_GLOW,
+            }}
+          >
+            {firstName ? `${firstName} enters` : 'Welcome to'}
+          </div>
+        </div>
+
+        {/* Hero symbol section — fills remaining space */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            flex: 1,
+            justifyContent: 'center',
+            gap: 20,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: 'Astronomicon',
+              fontSize: symbolSize,
+              color: elementColor,
+              lineHeight: 1,
+              display: 'flex',
+              textShadow: `0 0 80px ${elementColor}60`,
+            }}
+          >
+            {getZodiacGlyph(data.sign)}
+          </div>
+
+          <div
+            style={{
+              fontSize: signSize,
+              fontWeight: 400,
+              color: elementColor,
+              letterSpacing: '0.06em',
+              display: 'flex',
+            }}
+          >
+            {data.sign} Season
+          </div>
+
+          {/* Element & Modality Badge */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '12px 28px',
+              background: `${elementColor}18`,
+              border: `1px solid ${elementColor}80`,
+              borderRadius: 9999,
             }}
           >
             <div
@@ -506,7 +667,6 @@ export async function GET(request: NextRequest) {
             style={{
               fontSize: dateSize,
               color: OG_COLORS.textTertiary,
-              marginBottom: 36,
               letterSpacing: '0.1em',
               display: 'flex',
             }}
@@ -523,162 +683,13 @@ export async function GET(request: NextRequest) {
               display: 'flex',
               flexWrap: 'wrap',
               justifyContent: 'center',
-              gap: 8,
             }}
           >
             {data.themes.join(' · ')}
           </div>
         </div>
 
-        {/* Footer */}
         <ShareFooter format={format} />
-      </div>
-    ) : (
-      // Square Layout
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          background: OG_COLORS.background,
-          padding: `${padding}px`,
-          position: 'relative',
-          fontFamily: 'Roboto Mono',
-          border: SHARE_IMAGE_BORDER,
-        }}
-      >
-        {gradientOverlay}
-        {starfieldJsx}
-
-        {/* Content */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            flex: 1,
-          }}
-        >
-          {/* Header */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              marginBottom: 36,
-            }}
-          >
-            <div
-              style={{
-                fontSize: titleSize,
-                fontWeight: 400,
-                color: OG_COLORS.textPrimary,
-                letterSpacing: '0.05em',
-                textAlign: 'center',
-                display: 'flex',
-                textShadow: SHARE_TITLE_GLOW,
-              }}
-            >
-              {firstName ? `${firstName} enters` : 'Welcome to'}
-            </div>
-          </div>
-
-          {/* Zodiac Symbol */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              flex: 1,
-              justifyContent: 'center',
-            }}
-          >
-            <div
-              style={{
-                fontFamily: 'Astronomicon',
-                fontSize: symbolSize,
-                color: elementColor,
-                marginBottom: 20,
-                lineHeight: 1,
-                display: 'flex',
-              }}
-            >
-              {getZodiacGlyph(data.sign)}
-            </div>
-
-            <div
-              style={{
-                fontSize: signSize,
-                fontWeight: 400,
-                color: elementColor,
-                letterSpacing: '0.05em',
-                marginBottom: 20,
-                display: 'flex',
-              }}
-            >
-              {data.sign} Season
-            </div>
-
-            {/* Element & Modality Badge */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '12px 24px',
-                background: `rgba(${parseInt(elementColor.slice(1, 3), 16)}, ${parseInt(elementColor.slice(3, 5), 16)}, ${parseInt(elementColor.slice(5, 7), 16)}, 0.15)`,
-                border: `1px solid ${elementColor}`,
-                borderRadius: 9999,
-                marginBottom: 28,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: badgeSize,
-                  color: elementColor,
-                  fontWeight: 300,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  display: 'flex',
-                }}
-              >
-                {data.modality} {data.element}
-              </div>
-            </div>
-
-            {/* Date Range */}
-            <div
-              style={{
-                fontSize: dateSize,
-                color: OG_COLORS.textTertiary,
-                marginBottom: 28,
-                letterSpacing: '0.1em',
-                display: 'flex',
-              }}
-            >
-              {dateRangeText}
-            </div>
-
-            {/* Themes */}
-            <div
-              style={{
-                fontSize: themeSize,
-                color: OG_COLORS.textSecondary,
-                letterSpacing: '0.05em',
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                gap: 8,
-              }}
-            >
-              {data.themes.join(' · ')}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <ShareFooter format={format} />
-        </div>
       </div>
     );
 

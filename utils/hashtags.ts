@@ -145,8 +145,6 @@ const platformLimits: Record<Platform, number> = {
   threads: 0,
 };
 
-const brandHashtag = '#LunaryApp';
-
 /**
  * Generates daily hashtags by picking one from each of 3 different themes
  * @param date ISO date string (YYYY-MM-DD)
@@ -237,8 +235,7 @@ export function getPlatformHashtags(
     return '';
   }
 
-  const hashtags: string[] =
-    platform === 'tiktok' || platform === 'threads' ? [] : [brandHashtag];
+  const hashtags: string[] = [];
 
   if (context) {
     const contextual = getContextualHashtags(context);

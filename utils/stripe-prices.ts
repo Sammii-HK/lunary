@@ -105,6 +105,22 @@ export const STRIPE_PRICE_MAPPING = {
       currency: 'zar',
     },
   },
+  lunary_plus_annual: {
+    USD: {
+      priceId: 'price_1T4QhXPsyR7YcHgYlzbfWtKX',
+      amount: 49.99,
+      currency: 'usd',
+    },
+    GBP: { priceId: '', amount: 49.99, currency: 'gbp' },
+    EUR: { priceId: '', amount: 49.99, currency: 'eur' },
+    CAD: { priceId: '', amount: 64.99, currency: 'cad' },
+    AUD: { priceId: '', amount: 74.99, currency: 'aud' },
+    JPY: { priceId: '', amount: 7499, currency: 'jpy' },
+    CHF: { priceId: '', amount: 49.99, currency: 'chf' },
+    INR: { priceId: '', amount: 3999, currency: 'inr' },
+    BRL: { priceId: '', amount: 249.99, currency: 'brl' },
+    ZAR: { priceId: '', amount: 899.99, currency: 'zar' },
+  },
   lunary_plus_ai: {
     USD: {
       priceId: 'price_1SY7mcPsyR7YcHgYiLacvG85',

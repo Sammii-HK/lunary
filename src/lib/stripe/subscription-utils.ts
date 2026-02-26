@@ -14,8 +14,9 @@ const STATUS_PRIORITY: Record<string, number> = {
  * Plan tier priority for ranking subscriptions (higher = better)
  */
 const PLAN_PRIORITY: Record<string, number> = {
-  lunary_plus_ai_annual: 3,
-  lunary_plus_ai: 2,
+  lunary_plus_ai_annual: 4,
+  lunary_plus_ai: 3,
+  lunary_plus_annual: 2,
   lunary_plus: 1,
 };
 
@@ -42,12 +43,13 @@ export function pickBestSubscription(
 
 /**
  * Trial level for per-tier trial tracking.
- * - 'plus' = lunary_plus ($4.99/mo)
- * - 'pro' = lunary_plus_ai + lunary_plus_ai_annual ($8.99/mo or $89.99/yr)
+ * - 'plus' = lunary_plus / lunary_plus_annual
+ * - 'pro' = lunary_plus_ai / lunary_plus_ai_annual
  */
 export type TrialLevel = 'plus' | 'pro';
 
 export function getTrialLevel(planType: string): TrialLevel {
-  if (planType === 'lunary_plus') return 'plus';
-  return 'pro'; // lunary_plus_ai, lunary_plus_ai_annual both map to 'pro'
+  if (planType === 'lunary_plus' || planType === 'lunary_plus_annual')
+    return 'plus';
+  return 'pro';
 }

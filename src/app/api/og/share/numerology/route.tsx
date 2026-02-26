@@ -105,9 +105,10 @@ export async function GET(request: NextRequest) {
     const firstName = data.name?.trim().split(' ')[0] || '';
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
+    const padding = isLandscape ? 48 : isStory ? 80 : 60;
     const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
     const subtitleSize = isLandscape ? 18 : isStory ? 28 : 24;
-    const numberSize = isLandscape ? 80 : isStory ? 140 : 120;
+    const numberSize = isLandscape ? 80 : isStory ? 200 : 120;
     const labelSize = isLandscape ? 14 : isStory ? 24 : 20;
     const meaningSize = isLandscape ? 16 : isStory ? 24 : 22;
 
@@ -250,6 +251,7 @@ export async function GET(request: NextRequest) {
             flexDirection: 'row',
             gap: 20,
             flex: 1,
+            alignItems: 'stretch',
           }}
         >
           {renderNumberCard(
@@ -284,9 +286,8 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
           background: OG_COLORS.background,
-          padding: '80px 60px 140px 60px',
+          padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
           border: SHARE_IMAGE_BORDER,

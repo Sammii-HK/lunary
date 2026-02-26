@@ -96,14 +96,14 @@ export function getShareSizes(format: ShareFormat): ShareSizes {
       };
     case 'story':
       return {
-        padding: 60,
-        titleSize: 48,
-        subtitleSize: 32,
-        labelSize: 20,
-        bodySize: 24,
-        footerIconSize: 28,
-        footerTextSize: 20,
-        symbolSize: 140,
+        padding: 80,
+        titleSize: 64,
+        subtitleSize: 40,
+        labelSize: 24,
+        bodySize: 28,
+        footerIconSize: 32,
+        footerTextSize: 22,
+        symbolSize: 220,
         isLandscape: false,
         isStory: true,
       };
@@ -145,9 +145,12 @@ export function renderStarfield(shareId: string, format: ShareFormat) {
 }
 
 // --- Footer (viral CTA) ---
+// In-flow footer — place as the last child of a flex-column wrapper.
+// Content above it should use flex: 1 to fill remaining space.
 
 export function ShareFooter({ format }: { format: ShareFormat }) {
   const sizes = getShareSizes(format);
+  const isStory = format === 'story';
   return (
     <div
       style={{
@@ -156,10 +159,8 @@ export function ShareFooter({ format }: { format: ShareFormat }) {
         alignItems: 'center',
         gap: 4,
         justifyContent: 'center',
-        position: 'absolute',
-        bottom: 40,
-        left: 0,
-        right: 0,
+        paddingTop: isStory ? 40 : 24,
+        flexShrink: 0,
       }}
     >
       <span

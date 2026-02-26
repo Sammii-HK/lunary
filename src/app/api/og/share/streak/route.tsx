@@ -125,8 +125,8 @@ export async function GET(request: NextRequest) {
     ].filter((s) => s.value > 0);
 
     // Flame circle sizing
-    const flameSizeBase = sizes.isLandscape ? 180 : sizes.isStory ? 360 : 300;
-    const daysFontSize = sizes.isLandscape ? 64 : sizes.isStory ? 120 : 100;
+    const flameSizeBase = sizes.isLandscape ? 180 : sizes.isStory ? 540 : 300;
+    const daysFontSize = sizes.isLandscape ? 64 : sizes.isStory ? 160 : 100;
 
     const layoutJsx = (
       <div
@@ -142,6 +142,24 @@ export async function GET(request: NextRequest) {
         }}
       >
         {starfieldJsx}
+
+        {/* Radial glow behind flame — story only */}
+        {sizes.isStory && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '22%',
+              left: '50%',
+              width: 1000,
+              height: 1000,
+              borderRadius: '50%',
+              background:
+                'radial-gradient(ellipse at center, rgba(251, 146, 60, 0.25) 0%, transparent 65%)',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+            }}
+          />
+        )}
 
         {/* Header */}
         <div
@@ -174,7 +192,8 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: sizes.isLandscape ? 'left' : 'center',
               display: 'flex',
-              lineHeight: 1.1,
+              lineHeight: 1.2,
+              maxWidth: sizes.isStory ? '85%' : '100%',
             }}
           >
             {milestoneLabel}
@@ -249,7 +268,15 @@ export async function GET(request: NextRequest) {
               style={{
                 display: 'flex',
                 flexDirection: sizes.isLandscape ? 'column' : 'row',
-                gap: sizes.isLandscape ? 20 : 32,
+                gap: sizes.isLandscape ? 12 : 20,
+                padding: sizes.isLandscape
+                  ? '16px 20px'
+                  : sizes.isStory
+                    ? '24px 40px'
+                    : '18px 32px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(251, 146, 60, 0.18)',
+                borderRadius: sizes.isLandscape ? 14 : 20,
               }}
             >
               {stats.map((stat) => (
@@ -259,12 +286,13 @@ export async function GET(request: NextRequest) {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    gap: 4,
                   }}
                 >
                   <div
                     style={{
                       fontSize: sizes.subtitleSize,
-                      color: OG_COLORS.textPrimary,
+                      color: '#fb923c',
                       fontWeight: 400,
                       display: 'flex',
                     }}

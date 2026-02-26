@@ -83,6 +83,13 @@ function getEnergyLabel(energy: string): string {
   return labels[energy] || energy;
 }
 
+function getScoreGrade(score: number): string {
+  if (score >= 80) return 'Powerful Day';
+  if (score >= 60) return 'Favourable Energy';
+  if (score >= 40) return 'Mixed Influences';
+  return 'Challenging Period';
+}
+
 // Sun sign glyphs from Astronomicon font
 const SUN_SIGN_GLYPHS: Record<string, string> = {
   Aries: 'A',
@@ -161,7 +168,7 @@ export async function GET(request: NextRequest) {
     ));
 
     // Score sizes
-    const scoreSize = isLandscape ? 100 : isStory ? 160 : 130;
+    const scoreSize = isLandscape ? 100 : isStory ? 200 : 130;
     const headlineSize = isLandscape ? 22 : isStory ? 36 : 30;
     const dateSize = isLandscape ? 16 : isStory ? 24 : 20;
     const energySize = isLandscape ? 18 : isStory ? 28 : 24;
@@ -310,7 +317,7 @@ export async function GET(request: NextRequest) {
         <ShareFooter format={format} />
       </div>
     ) : (
-      // Story & Square layout
+      // Story & Square layout — top-to-bottom fill
       <div
         style={{
           width: '100%',
@@ -318,12 +325,27 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           background: OG_COLORS.background,
-          padding: isStory ? '100px 60px 140px 60px' : `${padding}px`,
+          padding: `${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
           alignItems: 'center',
         }}
       >
+        {/* Radial glow behind score circle */}
+        <div
+          style={{
+            position: 'absolute',
+            top: isStory ? '18%' : '16%',
+            left: '50%',
+            width: isStory ? 720 : 520,
+            height: isStory ? 720 : 520,
+            borderRadius: '50%',
+            background: `radial-gradient(ellipse at center, ${scoreGlow} 0%, transparent 65%)`,
+            transform: 'translateX(-50%)',
+            display: 'flex',
+          }}
+        />
+
         {starfieldJsx}
 
         {/* Date */}
@@ -333,7 +355,7 @@ export async function GET(request: NextRequest) {
             color: OG_COLORS.textTertiary,
             letterSpacing: 3,
             textTransform: 'uppercase',
-            marginBottom: isStory ? 60 : 36,
+            marginBottom: isStory ? 44 : 28,
             display: 'flex',
           }}
         >
@@ -346,13 +368,14 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: isStory ? 340 : 280,
-            height: isStory ? 340 : 280,
+            width: isStory ? 440 : 280,
+            height: isStory ? 440 : 280,
             borderRadius: '50%',
             border: `5px solid ${scoreColor}`,
             boxShadow: `0 0 60px ${scoreGlow}, 0 0 120px ${scoreGlow}`,
-            marginBottom: isStory ? 24 : 16,
+            marginBottom: isStory ? 28 : 16,
             position: 'relative',
+            flexShrink: 0,
           }}
         >
           <span
@@ -372,16 +395,16 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             gap: 6,
-            marginBottom: isStory ? 48 : 32,
+            marginBottom: isStory ? 28 : 16,
           }}
         >
           {Array.from({ length: arcSegments }).map((_, i) => (
             <div
               key={i}
               style={{
-                width: isStory ? 28 : 22,
-                height: 6,
-                borderRadius: 3,
+                width: isStory ? 32 : 22,
+                height: isStory ? 8 : 6,
+                borderRadius: 4,
                 background:
                   i < filledSegments ? scoreColor : 'rgba(255,255,255,0.1)',
                 display: 'flex',
@@ -390,18 +413,38 @@ export async function GET(request: NextRequest) {
           ))}
         </div>
 
-        {/* Title */}
+        {/* Title + grade */}
         <div
           style={{
-            fontSize: isStory ? 56 : 44,
-            fontWeight: 400,
-            color: OG_COLORS.textPrimary,
-            letterSpacing: 2,
-            marginBottom: isStory ? 24 : 16,
             display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: isStory ? 14 : 8,
+            marginBottom: isStory ? 24 : 14,
           }}
         >
-          Cosmic Score
+          <div
+            style={{
+              fontSize: isStory ? 64 : 44,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: 2,
+              display: 'flex',
+            }}
+          >
+            Cosmic Score
+          </div>
+          <div
+            style={{
+              fontSize: isStory ? 28 : 18,
+              color: scoreColor,
+              letterSpacing: '0.06em',
+              display: 'flex',
+              opacity: 0.9,
+            }}
+          >
+            {getScoreGrade(data.overall)}
+          </div>
         </div>
 
         {/* Dominant energy badge */}
@@ -409,68 +452,74 @@ export async function GET(request: NextRequest) {
           style={{
             fontSize: energySize,
             color: scoreColor,
-            padding: isStory ? '10px 24px' : '8px 20px',
+            padding: isStory ? '12px 28px' : '8px 20px',
             borderRadius: 999,
             border: `1px solid ${scoreColor}`,
             background: `${scoreColor}10`,
-            marginBottom: isStory ? 48 : 32,
+            marginBottom: isStory ? 36 : 22,
             display: 'flex',
           }}
         >
           {getEnergyLabel(data.dominantEnergy)}
         </div>
 
-        {/* Headline */}
+        {/* Headline card — grows to fill remaining space */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: isStory ? '32px 40px' : '24px 28px',
+            padding: isStory ? '36px 44px' : '24px 28px',
             background: SHARE_CARDS.primary,
             border: SHARE_BORDERS.card,
             borderRadius: 20,
             width: '100%',
-            maxWidth: isStory ? 900 : 900,
-            alignItems: 'center',
+            flex: 1,
             justifyContent: 'center',
+            position: 'relative',
+            overflow: 'hidden',
           }}
         >
+          {/* Sun sign glyph — decorative watermark inside card */}
+          {sunSignGlyph && (
+            <span
+              style={{
+                fontFamily: 'Astronomicon',
+                fontSize: isStory ? glyphSize + 48 : glyphSize + 16,
+                color: scoreColor,
+                opacity: 0.07,
+                display: 'flex',
+                position: 'absolute',
+                right: isStory ? 36 : 20,
+                bottom: isStory ? 24 : 12,
+                lineHeight: 1,
+              }}
+            >
+              {sunSignGlyph}
+            </span>
+          )}
           <div
             style={{
-              fontSize: headlineSize,
+              fontSize: isStory ? 18 : 12,
+              color: OG_COLORS.textTertiary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.14em',
+              marginBottom: isStory ? 18 : 10,
+              display: 'flex',
+            }}
+          >
+            Today's Insight
+          </div>
+          <div
+            style={{
+              fontSize: isStory ? headlineSize + 4 : headlineSize,
               color: OG_COLORS.textPrimary,
-              lineHeight: 1.6,
-              textAlign: 'center',
+              lineHeight: 1.65,
               display: 'flex',
             }}
           >
             {data.headline}
           </div>
         </div>
-
-        {/* Sun sign glyph */}
-        {sunSignGlyph && (
-          <div
-            style={{
-              marginTop: isStory ? 48 : 24,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-            }}
-          >
-            <span
-              style={{
-                fontFamily: 'Astronomicon',
-                fontSize: glyphSize,
-                color: OG_COLORS.textSecondary,
-                opacity: 0.6,
-                display: 'flex',
-              }}
-            >
-              {sunSignGlyph}
-            </span>
-          </div>
-        )}
 
         <ShareFooter format={format} />
       </div>

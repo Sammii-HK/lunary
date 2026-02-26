@@ -169,6 +169,7 @@ export function createArticleSchema({
   section,
   aboutEntity,
 }: ArticleSchemaProps) {
+  const imageUrl = image || `${BASE_URL}/api/og/cosmic`;
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -178,7 +179,14 @@ export function createArticleSchema({
     keywords: keywords.join(', '),
     datePublished: datePublished || new Date().toISOString(),
     dateModified: dateModified || new Date().toISOString(),
-    image: image || `${BASE_URL}/api/og/cosmic`,
+    image: {
+      '@type': 'ImageObject',
+      url: imageUrl,
+      license: `${BASE_URL}/terms`,
+      acquireLicensePage: `${BASE_URL}/terms`,
+      copyrightNotice: '© Lunary',
+      creditText: 'Lunary',
+    },
     author: {
       '@type': 'Organization',
       name: 'Lunary',
@@ -222,6 +230,7 @@ interface ProductSchemaProps {
   features?: string[];
   sku?: string;
   stripePriceId?: string;
+  image?: string;
 }
 
 export function createProductSchema({
@@ -233,12 +242,19 @@ export function createProductSchema({
   interval,
   features = [],
   sku,
+  image,
 }: ProductSchemaProps) {
+  // priceValidUntil: 1 year from now
+  const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name,
     description,
+    image: image || `${BASE_URL}/logo.png`,
     brand: {
       '@type': 'Brand',
       name: 'Lunary',
@@ -246,9 +262,51 @@ export function createProductSchema({
     stripePriceId,
     offers: {
       '@type': 'Offer',
+      url: `${BASE_URL}/pricing`,
       price: price.toString(),
       priceCurrency,
+      priceValidUntil,
       availability: 'https://schema.org/InStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'Lunary',
+      },
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'US',
+        returnPolicyCategory:
+          'https://schema.org/MerchantReturnFiniteReturnWindow',
+        merchantReturnDays: 14,
+        returnMethod: 'https://schema.org/ReturnByMail',
+        returnFees: 'https://schema.org/FreeReturn',
+      },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: '0',
+          currency: priceCurrency,
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'US',
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 0,
+            unitCode: 'DAY',
+          },
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 0,
+            unitCode: 'DAY',
+          },
+        },
+      },
       ...(interval && {
         priceSpecification: {
           '@type': 'UnitPriceSpecification',

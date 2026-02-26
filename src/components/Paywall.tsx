@@ -2,9 +2,11 @@
 
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Capacitor } from '@capacitor/core';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
+import { IOSPaywall } from './IOSPaywall';
 import { X } from 'lucide-react';
 import { captureEvent } from '@/lib/posthog-client';
 import { Button } from './ui/button';
@@ -110,14 +112,19 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
         )}
 
         <div className='space-y-3'>
-          <SmartTrialButton fullWidth />
-
-          <Link
-            href='/welcome'
-            className='block text-sm text-gray-400 hover:text-white transition-colors'
-          >
-            Learn more about Personalised Features
-          </Link>
+          {Capacitor.getPlatform() === 'ios' ? (
+            <IOSPaywall />
+          ) : (
+            <>
+              <SmartTrialButton fullWidth />
+              <Link
+                href='/welcome'
+                className='block text-sm text-gray-400 hover:text-white transition-colors'
+              >
+                Learn more about Personalised Features
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -117,13 +117,13 @@ export async function GET(request: NextRequest) {
     const firstName = data.name?.trim().split(' ')[0] || '';
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 48 : isStory ? 60 : 60;
-    const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
-    const signSize = isLandscape ? 100 : isStory ? 220 : 160;
-    const signNameSize = isLandscape ? 40 : isStory ? 64 : 52;
-    const headlineSize = isLandscape ? 36 : isStory ? 60 : 52;
-    const overviewSize = isLandscape ? 22 : isStory ? 34 : 30;
-    const labelSize = isLandscape ? 18 : isStory ? 28 : 24;
+    const padding = isLandscape ? 48 : isStory ? 80 : 60;
+    const titleSize = isLandscape ? 44 : isStory ? 80 : 64;
+    const signSize = isLandscape ? 150 : isStory ? 700 : 260;
+    const signNameSize = isLandscape ? 44 : isStory ? 72 : 60;
+    const headlineSize = isLandscape ? 32 : isStory ? 56 : 44;
+    const overviewSize = isLandscape ? 20 : isStory ? 32 : 26;
+    const labelSize = isLandscape ? 16 : isStory ? 26 : 20;
 
     const truncate = truncateText;
 
@@ -204,8 +204,8 @@ export async function GET(request: NextRequest) {
           display: 'flex',
           position: 'absolute',
           inset: 0,
-          background: `linear-gradient(135deg, ${gradient.from}20 0%, ${gradient.via}15 50%, ${gradient.to}20 100%)`,
-          opacity: 0.4,
+          background: `linear-gradient(135deg, ${gradient.from}${isStory ? '35' : '20'} 0%, ${gradient.via}${isStory ? '25' : '15'} 50%, ${gradient.to}${isStory ? '35' : '20'} 100%)`,
+          opacity: isStory ? 0.65 : 0.4,
         }}
       />
     );
@@ -233,7 +233,7 @@ export async function GET(request: NextRequest) {
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: 20,
           }}
@@ -244,7 +244,6 @@ export async function GET(request: NextRequest) {
               fontWeight: 400,
               color: OG_COLORS.textPrimary,
               letterSpacing: '0.05em',
-              textAlign: 'center',
               display: 'flex',
               textShadow: SHARE_TITLE_GLOW,
             }}
@@ -255,7 +254,6 @@ export async function GET(request: NextRequest) {
             style={{
               fontSize: labelSize,
               color: OG_COLORS.textTertiary,
-              marginTop: 8,
               display: 'flex',
             }}
           >
@@ -272,14 +270,15 @@ export async function GET(request: NextRequest) {
             flex: 1,
           }}
         >
-          {/* Left: Symbol + Sign */}
+          {/* Left: Symbol + Sign + Day numbers */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '35%',
+              width: '32%',
+              gap: 12,
             }}
           >
             <div
@@ -288,7 +287,8 @@ export async function GET(request: NextRequest) {
                 fontSize: signSize,
                 color: gradient.via,
                 display: 'flex',
-                marginBottom: 12,
+                lineHeight: 1,
+                textShadow: `0 0 60px ${gradient.via}60`,
               }}
             >
               {getZodiacSymbol(data.sunSign)}
@@ -299,18 +299,13 @@ export async function GET(request: NextRequest) {
                 color: OG_COLORS.textPrimary,
                 fontWeight: 500,
                 display: 'flex',
+                letterSpacing: '0.05em',
               }}
             >
               {data.sunSign}
             </div>
             {/* Day Numbers Row */}
-            <div
-              style={{
-                display: 'flex',
-                gap: 12,
-                marginTop: 16,
-              }}
-            >
+            <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
               <div
                 style={{
                   display: 'flex',
@@ -318,22 +313,22 @@ export async function GET(request: NextRequest) {
                   gap: 8,
                   background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
                   border: `1px solid ${gradient.via}40`,
-                  borderRadius: 12,
-                  padding: '8px 14px',
+                  borderRadius: 10,
+                  padding: '6px 12px',
                 }}
               >
                 <div
                   style={{
-                    fontSize: 12,
+                    fontSize: 11,
                     color: OG_COLORS.textSecondary,
                     display: 'flex',
                   }}
                 >
-                  Universal
+                  Univ.
                 </div>
                 <div
                   style={{
-                    fontSize: 24,
+                    fontSize: 22,
                     color: gradient.via,
                     fontWeight: 600,
                     display: 'flex',
@@ -350,22 +345,22 @@ export async function GET(request: NextRequest) {
                     gap: 8,
                     background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
                     border: `1px solid ${gradient.via}40`,
-                    borderRadius: 12,
-                    padding: '8px 14px',
+                    borderRadius: 10,
+                    padding: '6px 12px',
                   }}
                 >
                   <div
                     style={{
-                      fontSize: 12,
+                      fontSize: 11,
                       color: OG_COLORS.textSecondary,
                       display: 'flex',
                     }}
                   >
-                    Personal
+                    Pers.
                   </div>
                   <div
                     style={{
-                      fontSize: 24,
+                      fontSize: 22,
                       color: gradient.via,
                       fontWeight: 600,
                       display: 'flex',
@@ -383,10 +378,8 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 16,
+              gap: 14,
               flex: 1,
-              justifyContent: 'center',
-              maxWidth: '60%',
             }}
           >
             {/* Headline */}
@@ -397,15 +390,15 @@ export async function GET(request: NextRequest) {
                 background: SHARE_CARDS.primary,
                 border: SHARE_BORDERS.card,
                 borderRadius: 16,
-                padding: '20px 24px',
+                padding: '18px 22px',
               }}
             >
               <div
                 style={{
-                  fontSize: 14,
+                  fontSize: 12,
                   color: OG_COLORS.textSecondary,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
+                  letterSpacing: '0.12em',
                   marginBottom: 10,
                   display: 'flex',
                 }}
@@ -416,7 +409,7 @@ export async function GET(request: NextRequest) {
                 style={{
                   fontSize: headlineSize,
                   color: OG_COLORS.textPrimary,
-                  lineHeight: 1.4,
+                  lineHeight: 1.35,
                   display: 'flex',
                 }}
               >
@@ -432,14 +425,15 @@ export async function GET(request: NextRequest) {
                 background: SHARE_CARDS.secondary,
                 border: SHARE_BORDERS.card,
                 borderRadius: 14,
-                padding: '16px 20px',
+                padding: '14px 18px',
+                flex: 1,
               }}
             >
               <div
                 style={{
                   fontSize: overviewSize,
                   color: OG_COLORS.textSecondary,
-                  lineHeight: 1.5,
+                  lineHeight: 1.55,
                   display: 'flex',
                 }}
               >
@@ -459,9 +453,8 @@ export async function GET(request: NextRequest) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
           background: OG_COLORS.background,
-          padding: '80px 60px 140px 60px',
+          padding: `${padding}px ${padding}px ${padding}px ${padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
           border: SHARE_IMAGE_BORDER,
@@ -470,13 +463,28 @@ export async function GET(request: NextRequest) {
         {gradientOverlay}
         {starfieldJsx}
 
+        {/* Radial glow behind symbol */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '22%',
+            left: '50%',
+            width: 1000,
+            height: 1000,
+            borderRadius: '50%',
+            background: `radial-gradient(ellipse at center, ${gradient.via}40 0%, transparent 65%)`,
+            transform: 'translateX(-50%)',
+            display: 'flex',
+          }}
+        />
+
         {/* Header */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 32,
+            marginBottom: 20,
           }}
         >
           <div
@@ -494,9 +502,9 @@ export async function GET(request: NextRequest) {
           </div>
           <div
             style={{
-              fontSize: labelSize,
+              fontSize: labelSize + 4,
               color: OG_COLORS.textTertiary,
-              marginTop: 12,
+              marginTop: 14,
               display: 'flex',
             }}
           >
@@ -504,13 +512,15 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Giant Zodiac Symbol */}
+        {/* Giant Zodiac Symbol — hero fills remaining space */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 32,
+            justifyContent: 'center',
+            flex: 1,
+            gap: 24,
           }}
         >
           <div
@@ -519,7 +529,8 @@ export async function GET(request: NextRequest) {
               fontSize: signSize,
               color: gradient.via,
               display: 'flex',
-              marginBottom: 16,
+              lineHeight: 1,
+              textShadow: `0 0 120px ${gradient.via}80`,
             }}
           >
             {getZodiacSymbol(data.sunSign)}
@@ -530,6 +541,7 @@ export async function GET(request: NextRequest) {
               color: OG_COLORS.textPrimary,
               fontWeight: 500,
               display: 'flex',
+              letterSpacing: '0.08em',
             }}
           >
             {data.sunSign}
@@ -541,20 +553,20 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: 24,
-            padding: '32px 36px',
-            marginBottom: 20,
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: `1px solid ${gradient.via}30`,
+            borderRadius: 28,
+            padding: '36px 44px',
+            marginBottom: 24,
           }}
         >
           <div
             style={{
-              fontSize: 20,
-              color: OG_COLORS.textSecondary,
+              fontSize: labelSize + 2,
+              color: gradient.via,
               textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: 16,
+              letterSpacing: '0.14em',
+              marginBottom: 18,
               display: 'flex',
             }}
           >
@@ -572,53 +584,29 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Overview Card - Full width */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            background: 'rgba(255, 255, 255, 0.02)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: 20,
-            padding: '28px 36px',
-            flex: 1,
-          }}
-        >
-          <div
-            style={{
-              fontSize: overviewSize,
-              color: OG_COLORS.textSecondary,
-              lineHeight: 1.6,
-              display: 'flex',
-            }}
-          >
-            {truncate(data.overview, overviewLimit)}
-          </div>
-        </div>
-
         {/* Day Number Badges */}
         <div
           style={{
             display: 'flex',
             justifyContent: 'center',
-            gap: 20,
-            marginTop: 20,
+            gap: 24,
+            marginBottom: 8,
           }}
         >
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 14,
+              gap: 16,
               background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
               border: `1px solid ${gradient.via}40`,
-              borderRadius: 16,
-              padding: '14px 24px',
+              borderRadius: 20,
+              padding: '16px 32px',
             }}
           >
             <div
               style={{
-                fontSize: labelSize - 4,
+                fontSize: labelSize,
                 color: OG_COLORS.textSecondary,
                 display: 'flex',
               }}
@@ -627,7 +615,7 @@ export async function GET(request: NextRequest) {
             </div>
             <div
               style={{
-                fontSize: 44,
+                fontSize: 52,
                 color: gradient.via,
                 fontWeight: 600,
                 display: 'flex',
@@ -641,16 +629,16 @@ export async function GET(request: NextRequest) {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 14,
+                gap: 16,
                 background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
                 border: `1px solid ${gradient.via}40`,
-                borderRadius: 16,
-                padding: '14px 24px',
+                borderRadius: 20,
+                padding: '16px 32px',
               }}
             >
               <div
                 style={{
-                  fontSize: labelSize - 4,
+                  fontSize: labelSize,
                   color: OG_COLORS.textSecondary,
                   display: 'flex',
                 }}
@@ -659,7 +647,7 @@ export async function GET(request: NextRequest) {
               </div>
               <div
                 style={{
-                  fontSize: 44,
+                  fontSize: 52,
                   color: gradient.via,
                   fontWeight: 600,
                   display: 'flex',
@@ -691,13 +679,28 @@ export async function GET(request: NextRequest) {
         {gradientOverlay}
         {starfieldJsx}
 
+        {/* Radial glow behind zodiac symbol */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '28%',
+            left: '50%',
+            width: 500,
+            height: 500,
+            borderRadius: '50%',
+            background: `radial-gradient(ellipse at center, ${gradient.via}25 0%, transparent 65%)`,
+            transform: 'translateX(-50%)',
+            display: 'flex',
+          }}
+        />
+
         {/* Header */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 32,
+            marginBottom: 28,
           }}
         >
           <div
@@ -715,7 +718,7 @@ export async function GET(request: NextRequest) {
           </div>
           <div
             style={{
-              fontSize: labelSize,
+              fontSize: labelSize + 2,
               color: OG_COLORS.textTertiary,
               marginTop: 10,
               display: 'flex',
@@ -725,13 +728,13 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Zodiac Symbol */}
+        {/* Zodiac Symbol — hero element */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 36,
+            marginBottom: 28,
           }}
         >
           <div
@@ -740,7 +743,9 @@ export async function GET(request: NextRequest) {
               fontSize: signSize,
               color: gradient.via,
               display: 'flex',
-              marginBottom: 12,
+              marginBottom: 14,
+              lineHeight: 1,
+              textShadow: `0 0 60px ${gradient.via}70`,
             }}
           >
             {getZodiacSymbol(data.sunSign)}
@@ -751,31 +756,32 @@ export async function GET(request: NextRequest) {
               color: OG_COLORS.textPrimary,
               fontWeight: 500,
               display: 'flex',
+              letterSpacing: '0.06em',
             }}
           >
             {data.sunSign}
           </div>
         </div>
 
-        {/* Message Card - Full width */}
+        {/* Message Card */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: `1px solid ${gradient.via}30`,
             borderRadius: 20,
-            padding: '28px 32px',
-            marginBottom: 24,
+            padding: '24px 28px',
+            marginBottom: 18,
           }}
         >
           <div
             style={{
-              fontSize: 16,
-              color: OG_COLORS.textSecondary,
+              fontSize: labelSize,
+              color: gradient.via,
               textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: 14,
+              letterSpacing: '0.12em',
+              marginBottom: 12,
               display: 'flex',
             }}
           >
@@ -793,7 +799,7 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Overview Card - Full width */}
+        {/* Overview Card — flex fills remaining space */}
         <div
           style={{
             display: 'flex',
@@ -801,7 +807,7 @@ export async function GET(request: NextRequest) {
             background: 'rgba(255, 255, 255, 0.02)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
             borderRadius: 18,
-            padding: '24px 28px',
+            padding: '20px 28px',
             flex: 1,
           }}
         >
@@ -823,7 +829,7 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             justifyContent: 'center',
             gap: 16,
-            marginTop: 24,
+            marginTop: 20,
           }}
         >
           <div
@@ -834,7 +840,7 @@ export async function GET(request: NextRequest) {
               background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
               border: `1px solid ${gradient.via}40`,
               borderRadius: 14,
-              padding: '12px 20px',
+              padding: '10px 18px',
             }}
           >
             <div
@@ -848,7 +854,7 @@ export async function GET(request: NextRequest) {
             </div>
             <div
               style={{
-                fontSize: 32,
+                fontSize: 30,
                 color: gradient.via,
                 fontWeight: 600,
                 display: 'flex',
@@ -866,7 +872,7 @@ export async function GET(request: NextRequest) {
                 background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
                 border: `1px solid ${gradient.via}40`,
                 borderRadius: 14,
-                padding: '12px 20px',
+                padding: '10px 18px',
               }}
             >
               <div
@@ -880,7 +886,7 @@ export async function GET(request: NextRequest) {
               </div>
               <div
                 style={{
-                  fontSize: 32,
+                  fontSize: 30,
                   color: gradient.via,
                   fontWeight: 600,
                   display: 'flex',
