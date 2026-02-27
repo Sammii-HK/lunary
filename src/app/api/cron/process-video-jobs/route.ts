@@ -615,7 +615,7 @@ export async function POST(request: NextRequest) {
             'Sign Check: Pisces',
             'Did You Know',
           ]);
-          const MAX_INSTAGRAM_REELS_PER_WEEK = 4;
+          const MAX_INSTAGRAM_REELS_PER_WEEK = 2;
           const igWeekCountResult = await sql`
             SELECT COUNT(*) as count
             FROM social_posts

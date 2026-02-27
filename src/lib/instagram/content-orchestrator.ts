@@ -38,8 +38,8 @@ const POSTING_TIMES: Record<IGPostType, number> = {
 const DAILY_CONTENT_MIX: Record<number, IGPostType[]> = {
   0: ['carousel'], // Monday: zodiac carousel (saves)
   1: ['meme'], // Tuesday: meme (shares — #1 growth lever)
-  2: [], // Wednesday: rest day (stories carry)
-  3: ['sign_ranking'], // Thursday: ranking (comments — debate)
+  2: ['did_you_know'], // Wednesday: factual DYK (saves/shares)
+  3: ['carousel'], // Thursday: factual carousel (saves)
   4: ['compatibility'], // Friday: compatibility (tags/shares)
   5: ['carousel'], // Saturday: tarot carousel (saves)
   6: [], // Sunday: rest day (stories only)

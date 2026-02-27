@@ -1460,12 +1460,12 @@ async function runDailyPosts(dateStr: string) {
   const posts: DailySocialPost[] = [];
 
   // Transit post scheduling - avoid existing content slots at 12:00, 17:00, 20:00 UTC
-  // Use 07:00, 09:00, 14:00, 15:00 UTC for transit posts
+  // Space evenly through the day with ~4h gaps so posts don't hammer in a burst
   const transitTimeSlots = [
     { hour: 7, label: 'primary' }, // UK early morning
-    { hour: 9, label: 'secondary' }, // UK mid-morning
-    { hour: 14, label: 'tertiary' }, // UK afternoon, US East morning
-    { hour: 15, label: 'backup' }, // If many events
+    { hour: 11, label: 'secondary' }, // UK late morning
+    { hour: 15, label: 'tertiary' }, // UK afternoon, US East morning
+    { hour: 19, label: 'backup' }, // UK evening, US afternoon
   ];
   let transitSlotIndex = 0;
   const getTransitSchedule = () => {
@@ -4296,6 +4296,7 @@ function buildRetrogradeTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }
@@ -4412,6 +4413,7 @@ function buildIngressTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }
@@ -4557,6 +4559,7 @@ function buildAspectTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }
@@ -4646,6 +4649,7 @@ function buildEgressTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }
@@ -4737,6 +4741,7 @@ function buildSupermoonTextPosts({
     variants: {
       bluesky: { content: blueskyContent },
       twitter: { content: xContent },
+      threads: { content: threadsContent },
     },
   });
 
@@ -4823,6 +4828,7 @@ function buildMicromoonTextPosts({
     variants: {
       bluesky: { content: blueskyContent },
       twitter: { content: xContent },
+      threads: { content: threadsContent },
     },
   });
 
@@ -5029,6 +5035,7 @@ function buildMoonPhaseTextPosts({
     variants: {
       bluesky: { content: blueskyContent },
       twitter: { content: xContent },
+      threads: { content: threadsContent },
     },
   });
 
@@ -5239,6 +5246,7 @@ function buildTransitMilestoneTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }
@@ -5335,6 +5343,7 @@ function buildCountdownTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }
