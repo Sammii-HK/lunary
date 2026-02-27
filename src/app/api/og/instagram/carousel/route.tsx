@@ -86,6 +86,7 @@ export async function GET(request: NextRequest) {
     const variant = (searchParams.get('variant') ||
       'body') as CarouselSlideVariant;
     const symbol = searchParams.get('symbol') || '';
+    const nextSubtitle = searchParams.get('nextSubtitle') || '';
 
     const accent = CATEGORY_ACCENT[category] || CATEGORY_ACCENT.tarot;
     const gradient = CATEGORY_GRADIENT[category] || CATEGORY_GRADIENT.tarot;
@@ -99,8 +100,7 @@ export async function GET(request: NextRequest) {
     let layoutJsx: React.ReactElement;
 
     if (variant === 'cover') {
-      // Cover slide: Hook text, bold title, category badge, "Swipe" indicator
-      // Parse hook from content field (set by carousel-content.ts)
+      // Cover slide: dominant hook text hero, badge top-left, strong swipe CTA
       const hookText = content || '';
       layoutJsx = (
         <div
@@ -149,64 +149,84 @@ export async function GET(request: NextRequest) {
             </div>
           )}
 
-          {/* Category badge */}
-          <div style={{ display: 'flex', marginBottom: 40 }}>
+          {/* Category badge — top-left, out of content flow */}
+          <div
+            style={{ position: 'absolute', top: 60, left: 60, display: 'flex' }}
+          >
             <IGCategoryBadge category={category} />
           </div>
 
-          {/* Hook text — hero */}
-          {hookText && (
-            <div
-              style={{
-                fontSize: IG_TEXT.dark.subtitle + 8,
-                color: OG_COLORS.textPrimary,
-                textAlign: 'center',
-                lineHeight: 1.25,
-                maxWidth: '90%',
-                display: 'flex',
-                fontWeight: 700,
-                marginBottom: 24,
-                textShadow: `0 0 40px ${accent}40`,
-              }}
-            >
-              {truncateIG(hookText, 80)}
-            </div>
+          {hookText ? (
+            <>
+              {/* HERO: massive hook text dominates the frame */}
+              <div
+                style={{
+                  fontSize: 80,
+                  color: OG_COLORS.textPrimary,
+                  textAlign: 'center',
+                  lineHeight: 1.15,
+                  maxWidth: '88%',
+                  display: 'flex',
+                  fontWeight: 800,
+                  marginBottom: 36,
+                  textShadow: `0 0 80px ${accent}60, 0 4px 24px rgba(0,0,0,0.7)`,
+                }}
+              >
+                {truncateIG(hookText, 70)}
+              </div>
+
+              {/* Title — secondary, accent colour */}
+              <div
+                style={{
+                  fontSize: 30,
+                  color: accent,
+                  textAlign: 'center',
+                  lineHeight: 1.3,
+                  maxWidth: '72%',
+                  display: 'flex',
+                  fontWeight: 600,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {truncateIG(title, 50)}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* No hook: title is the hero */}
+              <div
+                style={{
+                  fontSize: IG_TEXT.dark.title,
+                  color: OG_COLORS.textPrimary,
+                  textAlign: 'center',
+                  lineHeight: 1.2,
+                  maxWidth: '85%',
+                  display: 'flex',
+                  fontWeight: 700,
+                }}
+              >
+                {truncateIG(title, 80)}
+              </div>
+              {subtitle && (
+                <div
+                  style={{
+                    fontSize: IG_TEXT.dark.subtitle,
+                    color: OG_COLORS.textSecondary,
+                    textAlign: 'center',
+                    lineHeight: 1.4,
+                    maxWidth: '80%',
+                    marginTop: 20,
+                    display: 'flex',
+                  }}
+                >
+                  {truncateIG(subtitle, 100)}
+                </div>
+              )}
+            </>
           )}
 
-          {/* Title */}
-          <div
-            style={{
-              fontSize: hookText ? IG_TEXT.dark.subtitle : IG_TEXT.dark.title,
-              color: hookText ? accent : OG_COLORS.textPrimary,
-              textAlign: 'center',
-              lineHeight: 1.2,
-              maxWidth: '85%',
-              display: 'flex',
-              fontWeight: 600,
-              letterSpacing: '0.02em',
-            }}
-          >
-            {truncateIG(title, 80)}
-          </div>
-
-          {/* Subtitle */}
-          {subtitle && !hookText && (
-            <div
-              style={{
-                fontSize: IG_TEXT.dark.subtitle,
-                color: OG_COLORS.textSecondary,
-                textAlign: 'center',
-                lineHeight: 1.4,
-                maxWidth: '80%',
-                marginTop: 20,
-                display: 'flex',
-              }}
-            >
-              {truncateIG(subtitle, 100)}
-            </div>
-          )}
-
-          {/* Swipe indicator */}
+          {/* Swipe indicator — prominent, accent colour */}
           <div
             style={{
               display: 'flex',
@@ -218,19 +238,21 @@ export async function GET(request: NextRequest) {
           >
             <span
               style={{
-                fontSize: IG_TEXT.dark.label,
-                color: OG_COLORS.textTertiary,
-                letterSpacing: '0.15em',
+                fontSize: 30,
+                color: accent,
+                letterSpacing: '0.2em',
                 display: 'flex',
+                fontWeight: 700,
               }}
             >
               SWIPE
             </span>
             <span
               style={{
-                fontSize: 36,
+                fontSize: 44,
                 color: accent,
                 display: 'flex',
+                fontWeight: 700,
               }}
             >
               {'\u2192'}
@@ -299,8 +321,8 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 16,
-              marginBottom: 48,
+              gap: 20,
+              marginBottom: 52,
               maxWidth: '85%',
             }}
           >
@@ -308,14 +330,14 @@ export async function GET(request: NextRequest) {
               <div
                 key={i}
                 style={{
-                  fontSize: IG_TEXT.dark.caption,
+                  fontSize: 30,
                   color: OG_COLORS.textSecondary,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 12,
+                  gap: 16,
                 }}
               >
-                <span style={{ color: accent, display: 'flex' }}>
+                <span style={{ color: accent, display: 'flex', fontSize: 36 }}>
                   {'\u2022'}
                 </span>
                 <span style={{ display: 'flex' }}>{bullet}</span>
@@ -328,17 +350,18 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              padding: '20px 56px',
-              borderRadius: 16,
-              background: `${accent}18`,
-              border: `1px solid ${accent}40`,
+              padding: '24px 64px',
+              borderRadius: 20,
+              background: `${accent}28`,
+              border: `2px solid ${accent}60`,
               gap: 12,
               marginBottom: 32,
+              boxShadow: `0 0 40px ${accent}30`,
             }}
           >
             <span
               style={{
-                fontSize: 32,
+                fontSize: 44,
                 color: accent,
                 fontWeight: 700,
                 letterSpacing: '0.05em',
@@ -648,7 +671,69 @@ export async function GET(request: NextRequest) {
             )}
           </div>
 
-          <IGBrandTag baseUrl={SHARE_BASE_URL} />
+          {/* "Next up" teaser — keeps viewers swiping */}
+          {nextSubtitle && (
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 68,
+                left: 0,
+                right: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 12,
+              }}
+            >
+              <div
+                style={{
+                  width: '70%',
+                  height: 1,
+                  background: 'rgba(255,255,255,0.12)',
+                  display: 'flex',
+                }}
+              />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: IG_TEXT.dark.caption,
+                    color: OG_COLORS.textTertiary,
+                    letterSpacing: '0.08em',
+                    display: 'flex',
+                  }}
+                >
+                  NEXT:
+                </span>
+                <span
+                  style={{
+                    fontSize: IG_TEXT.dark.caption,
+                    color: accent,
+                    fontWeight: 600,
+                    display: 'flex',
+                  }}
+                >
+                  {truncateIG(nextSubtitle, 40)}
+                </span>
+                <span
+                  style={{
+                    fontSize: 22,
+                    color: accent,
+                    display: 'flex',
+                  }}
+                >
+                  {'\u2192'}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <IGBrandTag baseUrl={SHARE_BASE_URL} bottom={32} />
         </div>
       );
     }

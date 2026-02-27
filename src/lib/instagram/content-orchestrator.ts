@@ -41,17 +41,16 @@ const DAILY_CONTENT_MIX: Record<number, IGPostType[]> = {
   0: ['carousel'], // Monday: zodiac carousel (saves)
   1: ['meme'], // Tuesday: meme (shares — #1 growth lever)
   2: ['did_you_know'], // Wednesday: factual DYK (saves/shares)
-  3: ['carousel'], // Thursday: factual carousel (saves)
+  3: ['one_word'], // Thursday: one-word trait carousel (engagement)
   4: ['did_you_know'], // Friday: factual DYK (saves/shares)
-  5: ['one_word'], // Saturday: one-word trait carousel (saves + shares)
-  6: [], // Sunday: rest day (stories only)
+  5: ['carousel'], // Saturday: carousel (saves — 4th carousel slot)
+  6: ['sign_ranking'], // Sunday: sign ranking (shares + reach)
 };
 
 /**
  * Generate a full day's Instagram content batch.
- * Follows the weekly cadence plan (5 posts/week):
- * Mon=zodiac carousel, Tue=angel number, Wed=rest,
- * Thu=ranking, Fri=DYK, Sat=tarot carousel, Sun=rest
+ * Follows the weekly cadence plan (6 posts/week):
+ * Mon=carousel, Tue=meme, Wed=DYK, Thu=one_word, Fri=DYK, Sat=carousel, Sun=sign_ranking
  */
 export async function generateDailyBatch(
   dateStr: string,

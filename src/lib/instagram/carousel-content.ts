@@ -857,7 +857,7 @@ export function getCarouselImageUrls(
 ): string[] {
   const base = baseUrl || SHARE_BASE_URL;
   const cacheBust = Date.now().toString(); // Timestamp for cache busting
-  return carousel.slides.map((slide) => {
+  return carousel.slides.map((slide, i) => {
     const params = new URLSearchParams({
       title: slide.title,
       slideIndex: String(slide.slideIndex),
@@ -870,6 +870,13 @@ export function getCarouselImageUrls(
     });
     if (slide.subtitle) params.set('subtitle', slide.subtitle);
     if (slide.symbol) params.set('symbol', slide.symbol);
+    // Add next slide teaser for body slides when next slide is also a body slide
+    if (slide.variant === 'body') {
+      const nextSlide = carousel.slides[i + 1];
+      if (nextSlide?.variant === 'body' && nextSlide.subtitle) {
+        params.set('nextSubtitle', nextSlide.subtitle);
+      }
+    }
     return `${base}/api/og/instagram/carousel?${params.toString()}`;
   });
 }
