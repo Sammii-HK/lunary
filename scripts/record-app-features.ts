@@ -80,6 +80,27 @@ const DEVICE_PROFILES: Record<string, DeviceProfile> = {
     outputDir: join(OUTPUT_DIR, 'ipad-pro-13'),
     userAgent: IPAD_UA,
   },
+  // Instagram Feed (4:5)
+  'instagram-feed': {
+    name: 'Instagram Feed (1080×1350)',
+    viewport: { width: 360, height: 450 },
+    deviceScaleFactor: 3,
+    outputWidth: 1080,
+    outputHeight: 1350,
+    outputDir: join(OUTPUT_DIR, 'instagram-feed'),
+    userAgent: IPHONE_UA,
+  },
+  // X / Twitter landscape (16:9)
+  'x-landscape': {
+    name: 'X / Twitter (1280×720)',
+    viewport: { width: 1280, height: 720 },
+    deviceScaleFactor: 1,
+    outputWidth: 1280,
+    outputHeight: 720,
+    outputDir: join(OUTPUT_DIR, 'x'),
+    userAgent:
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+  },
 };
 
 /**

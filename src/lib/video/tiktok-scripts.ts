@@ -100,6 +100,19 @@ export interface Scene {
   focusPoint: string;
   /** Voiceover text spoken during this scene — used for timing sync */
   voiceoverLine?: string;
+  /**
+   * Optional zoom target for this scene.
+   * x, y are 0-1 fractions of screen (e.g. 0.5, 0.35 = top-center).
+   * scale is the zoom multiplier (e.g. 1.25 = 25% zoom in).
+   * When set, the video zooms into this area for the duration of the scene.
+   */
+  zoomTo?: { x: number; y: number; scale: number };
+  /**
+   * Optional tap position for click/expand actions (0-1 fraction of screen).
+   * When set, a touch-ripple animation appears at this position.
+   * If omitted on a click/expand action, a default center position is used.
+   */
+  tapPosition?: { x: number; y: number };
 }
 
 export interface TextOverlay {
@@ -154,6 +167,8 @@ const dashboardOverview: TikTokScript = {
       target: '[data-testid="sky-now-widget"]',
       focusPoint: 'Planet list expanding with houses',
       voiceoverLine: 'Every planet. Which house.',
+      zoomTo: { x: 0.5, y: 0.32, scale: 1.28 },
+      tapPosition: { x: 0.5, y: 0.32 },
     },
     {
       description:
@@ -240,6 +255,8 @@ const horoscopeDeepDive: TikTokScript = {
       action: 'click',
       target: '[data-testid="numerology-day"]',
       focusPoint: 'Full breakdown of YOUR day energy',
+      zoomTo: { x: 0.5, y: 0.52, scale: 1.3 },
+      tapPosition: { x: 0.5, y: 0.52 },
       // No voiceoverLine — silent interaction moment
     },
     {
@@ -345,6 +362,8 @@ const tarotPatterns: TikTokScript = {
       target: '[data-testid="pattern-30days"]',
       focusPoint: 'Themes, frequent cards, recurring suits - visible proof',
       voiceoverLine: 'Every daily card... is connected to your transits.',
+      zoomTo: { x: 0.5, y: 0.48, scale: 1.25 },
+      tapPosition: { x: 0.5, y: 0.48 },
     },
     {
       description: 'Scroll back up to daily card showing transit connection',
@@ -384,6 +403,8 @@ const tarotPatterns: TikTokScript = {
       focusPoint:
         'Themes shifting over 3 months - your personal textbook forming',
       voiceoverLine: 'At 90 days... undeniable.',
+      zoomTo: { x: 0.5, y: 0.48, scale: 1.25 },
+      tapPosition: { x: 0.5, y: 0.48 },
     },
     {
       description: 'Scroll to rituals generated from your patterns',
@@ -585,6 +606,7 @@ const birthChart: TikTokScript = {
         'Full birth chart wheel - visually stunning, stops the scroll',
       voiceoverLine:
         'Your astrology app shows 10 planets... this one? Twenty-four plus.',
+      zoomTo: { x: 0.5, y: 0.42, scale: 1.15 },
     },
     {
       description: 'Scroll to planet list - the count escalation begins',
@@ -625,6 +647,8 @@ const birthChart: TikTokScript = {
       focusPoint: 'Aspect grid appears with real orbs',
       voiceoverLine:
         'Aspects tab... how your planets actually interact. Real orbs.',
+      zoomTo: { x: 0.5, y: 0.28, scale: 1.2 },
+      tapPosition: { x: 0.5, y: 0.28 },
     },
     {
       description: 'Scroll through aspects slowly - show the depth',
@@ -643,6 +667,8 @@ const birthChart: TikTokScript = {
       target: '[data-testid="tab-houses"], button:has-text("Houses")',
       focusPoint: 'All 12 houses with signs and rulers',
       voiceoverLine: 'Houses tab maps every area of your life.',
+      zoomTo: { x: 0.5, y: 0.28, scale: 1.2 },
+      tapPosition: { x: 0.5, y: 0.28 },
     },
     {
       description: 'Scroll through houses - each area of life mapped',

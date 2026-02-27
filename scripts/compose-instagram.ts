@@ -1,18 +1,19 @@
 /**
- * TikTok Video Composer — Remotion + TTS Pipeline
+ * Instagram Reels Composer — Remotion + TTS Pipeline
  *
- * Takes raw screen recordings, generates TTS voiceover, and renders
- * polished TikTok videos using Remotion with animated overlays.
+ * Reuses existing TikTok screen recordings (same 9:16 format) and renders
+ * Instagram Reels with expanded captions and 25 hashtags.
  *
  * Usage:
- *   pnpm compose:tiktok                        # Compose all
- *   pnpm compose:tiktok dashboard-overview      # Compose one
- *   pnpm compose:tiktok --preview               # Quick low-quality preview
- *   pnpm compose:tiktok --info                  # Print captions/hashtags
- *   pnpm compose:tiktok --force-tts             # Regenerate TTS even if cached
- *   pnpm compose:tiktok --no-tts                # Skip TTS, render without voiceover
+ *   pnpm compose:instagram                        # Compose all
+ *   pnpm compose:instagram dashboard-overview      # Compose one
+ *   pnpm compose:instagram --preview               # Quick low-quality preview
+ *   pnpm compose:instagram --info                  # Print Instagram captions/hashtags
+ *   pnpm compose:instagram --force-tts             # Regenerate TTS even if cached
+ *   pnpm compose:instagram --no-tts                # Skip TTS
  *
- * Pipeline: record-app-features.ts → compose-tiktok.ts → ready-to-post .mp4
+ * Pipeline: record-app-features.ts (tiktok device) → compose-instagram.ts → ready-to-post .mp4
+ * Note: No re-recording needed — reuses TikTok recordings (same 9:16 file).
  */
 
 import { config } from 'dotenv';
@@ -36,13 +37,16 @@ import {
   readFileText,
   findRecordingExtension,
 } from '../src/lib/video/compose-utils';
+import { adaptForInstagram } from '../src/lib/video/platform-adapters';
 
+// Instagram Reels reuses TikTok recordings — same 9:16 source files
 const INPUT_DIR = join(process.cwd(), 'public', 'app-demos');
-const OUTPUT_DIR = join(process.cwd(), 'public', 'app-demos', 'final');
+const OUTPUT_DIR = join(process.cwd(), 'public', 'app-demos', 'instagram');
+// TTS cache is shared with TikTok — if TikTok already generated audio, it's free here
 const TTS_DIR = join(process.cwd(), 'public', 'app-demos', 'tts');
 
 // ============================================================================
-// Phase A: TTS Generation
+// Phase A: TTS Generation (shared cache with TikTok)
 // ============================================================================
 
 async function generateTTS(
@@ -53,7 +57,7 @@ async function generateTTS(
   const hashPath = join(TTS_DIR, `${script.id}.hash`);
   const currentHash = voiceoverHash(script.voiceover);
 
-  // Check cache — invalidate if voiceover text changed (dynamic scripts)
+  // Check cache — invalidate if voiceover text changed
   if (!options.forceTts && (await fileExists(audioPath))) {
     const cachedHash = await readFileText(hashPath);
     if (cachedHash === currentHash) {
@@ -98,9 +102,9 @@ async function composeVideo(
   skyData?: SkyData,
 ): Promise<string> {
   const script = getDynamicScript(featureId, skyData);
-  if (!script) throw new Error(`No TikTok script found for: ${featureId}`);
+  if (!script) throw new Error(`No script found for: ${featureId}`);
 
-  // Find input recording
+  // Find input recording (same as TikTok — 9:16)
   const ext = findRecordingExtension(featureId, INPUT_DIR);
   if (!ext) {
     throw new Error(
@@ -114,14 +118,12 @@ async function composeVideo(
     `   Script: ${script.totalSeconds}s, ${script.textOverlays.length} overlays`,
   );
 
-  // Phase A: TTS Generation
+  // Phase A: TTS Generation (Reels with voiceover perform well)
   let audioUrl: string | undefined;
   let audioDuration: number | undefined;
 
   if (!options.noTts) {
-    const ttsResult = await generateTTS(script, {
-      forceTts: options.forceTts,
-    });
+    const ttsResult = await generateTTS(script, { forceTts: options.forceTts });
     if (ttsResult) {
       audioUrl = `app-demos/tts/${featureId}.mp3`;
       audioDuration = ttsResult.audioDuration;
@@ -133,7 +135,6 @@ async function composeVideo(
   // Phase B: Build Props
   const props = scriptToAppDemoProps(script, videoSrc, audioUrl, audioDuration);
 
-  // Effective duration — extend if TTS is longer than script to avoid audio cutoff
   const effectiveDuration = audioDuration
     ? Math.max(script.totalSeconds, Math.ceil(audioDuration))
     : script.totalSeconds;
@@ -144,7 +145,7 @@ async function composeVideo(
     );
   }
 
-  // Phase C: Remotion Render
+  // Phase C: Remotion Render — same 9:16 AppDemoVideo composition as TikTok
   console.log(`   Rendering with Remotion...`);
   const outputPath = join(OUTPUT_DIR, `${featureId}.mp4`);
   const crf = options.preview ? 28 : 18;
@@ -168,12 +169,9 @@ async function composeVideo(
     audioStartOffset: props.audioStartOffset,
     backgroundMusicUrl: props.backgroundMusicUrl,
     backgroundMusicVolume: props.backgroundMusicVolume,
-    zoomPoints: props.zoomPoints,
-    tapPoints: props.tapPoints,
     crf,
   });
 
-  // Renderer returns buffer and cleans up temp — write to final output
   await writeFile(outputPath, videoBuffer);
 
   const sizeMB = (videoBuffer.length / 1024 / 1024).toFixed(1);
@@ -183,34 +181,17 @@ async function composeVideo(
 }
 
 // ============================================================================
-// Print script info (captions, hashtags for posting)
+// Print script info (Instagram captions/hashtags)
 // ============================================================================
 
 function printScriptInfo(script: TikTokScript): void {
-  const hookWords = script.hook.text.split(/\s+/).length;
-  const voWords = script.voiceover.split(/\s+/).length;
-  const wps = (voWords / script.totalSeconds).toFixed(1);
+  const { caption, hashtags } = adaptForInstagram(script);
 
-  console.log(`   Hook (${hookWords}w): "${script.hook.text}"`);
-  console.log(`   CTA: "${script.outro.text}"`);
-  console.log(`   Caption:\n     ${script.caption}`);
+  console.log(`   Hook: "${script.hook.text}"`);
+  console.log(`   Caption:\n${caption.replace(/^/gm, '     ')}`);
   console.log(
-    `   Hashtags (${script.hashtags.length}): ${script.hashtags.map((h) => `#${h}`).join(' ')}`,
+    `   Hashtags (${hashtags.length}): ${hashtags.map((h) => `#${h}`).join(' ')}`,
   );
-  console.log(
-    `   Voiceover: ${voWords} words / ${script.totalSeconds}s = ${wps} wps`,
-  );
-
-  // Overlay word count check
-  const longOverlays = script.textOverlays.filter(
-    (o) => o.text.split(/\s+/).length > 6,
-  );
-  if (longOverlays.length > 0) {
-    console.log(`   WARNING: ${longOverlays.length} overlay(s) exceed 6 words`);
-    for (const o of longOverlays) {
-      console.log(`     - "${o.text}" (${o.text.split(/\s+/).length}w)`);
-    }
-  }
 }
 
 // ============================================================================
@@ -239,18 +220,15 @@ async function main() {
     `Sky: Moon in ${skyData.moonSign}, ${skyData.moonPhase.name}` +
       (skyData.retrogradePlanets.length > 0
         ? `, Rx: ${skyData.retrogradePlanets.join(', ')}`
-        : ', no retrogrades') +
-      (skyData.numerology
-        ? `, PD:${skyData.numerology.personalDay} UD:${skyData.numerology.universalDay}`
-        : ''),
+        : ', no retrogrades'),
   );
 
-  console.log('\nTikTok Video Composer (Remotion + TTS)');
+  console.log('\nInstagram Reels Composer (Remotion + TTS)');
   console.log('='.repeat(50));
-  console.log(`Input: ${INPUT_DIR}`);
+  console.log(`Input: ${INPUT_DIR} (reusing TikTok recordings)`);
   console.log(`Output: ${OUTPUT_DIR}`);
   console.log(
-    `TTS: ${noTts ? 'disabled' : forceTts ? 'force regenerate' : 'cached'}`,
+    `TTS: ${noTts ? 'disabled' : forceTts ? 'force regenerate' : 'cached (shared with TikTok)'}`,
   );
   console.log(
     `Quality: ${preview ? 'preview (crf 28)' : 'production (crf 18)'}`,
@@ -300,9 +278,11 @@ async function main() {
   if (success > 0) {
     console.log(`\nComposed videos in: ${OUTPUT_DIR}`);
     console.log('\nNext steps:');
-    console.log('   1. Preview: open public/app-demos/final/ in Finder');
-    console.log('   2. See captions: pnpm compose:tiktok --info');
-    console.log('   3. Post to TikTok with script caption + hashtags');
+    console.log('   1. Preview: open public/app-demos/instagram/ in Finder');
+    console.log('   2. See captions: pnpm compose:instagram --info');
+    console.log(
+      '   3. Post to Instagram Reels with full caption + 25 hashtags',
+    );
   }
 
   if (failed > 0) process.exit(1);

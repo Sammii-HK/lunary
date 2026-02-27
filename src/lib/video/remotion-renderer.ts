@@ -228,7 +228,9 @@ export interface RemotionVideoProps {
     | 'ShortFormVideo'
     | 'MediumFormVideo'
     | 'LongFormVideo'
-    | 'AppDemoVideo';
+    | 'AppDemoVideo'
+    | 'AppDemoVideoFeed'
+    | 'AppDemoVideoX';
   /** Output file path */
   outputPath: string;
   /** Hook/title text */
@@ -286,6 +288,16 @@ export interface RemotionVideoProps {
   outroEndTime?: number;
   /** AppDemoVideo-specific: seconds to delay audio start (recording dead time) */
   audioStartOffset?: number;
+  /** AppDemoVideo-specific: zoom punch-in windows */
+  zoomPoints?: Array<{
+    startTime: number;
+    endTime: number;
+    scale: number;
+    x: number;
+    y: number;
+  }>;
+  /** AppDemoVideo-specific: touch ripple animations */
+  tapPoints?: Array<{ time: number; x: number; y: number; color?: string }>;
   /** CRF quality setting override */
   crf?: number;
   /** Hook intro animation variant (#7) */
@@ -352,7 +364,11 @@ export async function renderRemotionVideo(
   // Generate a fallback seed if none provided
   const seed = props.seed || `video-${Date.now()}`;
 
-  if (props.format === 'AppDemoVideo') {
+  if (
+    props.format === 'AppDemoVideo' ||
+    props.format === 'AppDemoVideoFeed' ||
+    props.format === 'AppDemoVideoX'
+  ) {
     inputProps = {
       videoSrc: props.videoSrc,
       hookText: props.hookTextForDemo || props.hookText || '',
@@ -370,6 +386,8 @@ export async function renderRemotionVideo(
       audioStartOffset: props.audioStartOffset,
       backgroundMusicUrl: props.backgroundMusicUrl,
       backgroundMusicVolume: props.backgroundMusicVolume,
+      zoomPoints: props.zoomPoints || [],
+      tapPoints: props.tapPoints || [],
     };
   } else if (props.format === 'ShortFormVideo') {
     inputProps = {

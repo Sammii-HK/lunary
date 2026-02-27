@@ -7,6 +7,8 @@
 import type { TikTokScript } from './tiktok-scripts';
 import type { AppDemoVideoProps } from '@/remotion/compositions/AppDemoVideo';
 import type { Overlay } from '@/remotion/components/TextOverlays';
+import type { ZoomPoint } from '@/remotion/components/ZoomRegion';
+import type { TapPoint } from '@/remotion/components/TapIndicator';
 import { getCategoryVisuals } from '@/remotion/config/category-visuals';
 import {
   scriptToAudioSegments,
@@ -78,6 +80,79 @@ function extractHighlightTerms(script: TikTokScript): string[] {
 }
 
 /**
+ * Derive zoom punch-in windows from a script's scenes.
+ *
+ * Scenes with an explicit `zoomTo` use those coordinates.
+ * Scenes with action 'click' or 'expand' without `zoomTo` get a default
+ * center-screen zoom at 1.2× to add visual dynamics automatically.
+ */
+function deriveZoomPoints(script: TikTokScript): ZoomPoint[] {
+  const zoomPoints: ZoomPoint[] = [];
+  let t = script.hook.durationSeconds;
+
+  for (const scene of script.scenes) {
+    const sceneStart = t;
+    const sceneEnd = t + scene.durationSeconds;
+
+    if (scene.zoomTo) {
+      // Explicit zoom target defined on this scene
+      zoomPoints.push({
+        startTime: sceneStart + 0.15,
+        endTime: sceneEnd - 0.15,
+        scale: scene.zoomTo.scale,
+        x: scene.zoomTo.x,
+        y: scene.zoomTo.y,
+      });
+    } else if (
+      (scene.action === 'click' || scene.action === 'expand') &&
+      scene.durationSeconds >= 1.5
+    ) {
+      // Auto-derive: gentle zoom for interaction scenes without explicit target
+      zoomPoints.push({
+        startTime: sceneStart + 0.2,
+        endTime: sceneEnd - 0.2,
+        scale: 1.2,
+        x: 0.5,
+        y: 0.45,
+      });
+    }
+
+    t = sceneEnd;
+  }
+
+  return zoomPoints;
+}
+
+/**
+ * Derive tap ripple positions from a script's scenes.
+ *
+ * Scenes with an explicit `tapPosition` use those coordinates.
+ * Scenes with action 'click' or 'expand' without `tapPosition` get a
+ * default center-screen tap.
+ */
+function deriveTapPoints(
+  script: TikTokScript,
+  accentColor?: string,
+): TapPoint[] {
+  const tapPoints: TapPoint[] = [];
+  let t = script.hook.durationSeconds;
+
+  for (const scene of script.scenes) {
+    if (scene.action === 'click' || scene.action === 'expand') {
+      tapPoints.push({
+        time: t + 0.3,
+        x: scene.tapPosition?.x ?? 0.5,
+        y: scene.tapPosition?.y ?? 0.45,
+        color: accentColor,
+      });
+    }
+    t += scene.durationSeconds;
+  }
+
+  return tapPoints;
+}
+
+/**
  * Convert a TikTokScript to AppDemoVideoProps for Remotion rendering.
  *
  * @param script — The TikTok script definition
@@ -140,6 +215,9 @@ export function scriptToAppDemoProps(
     ? 1.4 // 600ms modals + 800ms hook
     : 0.8; // 800ms hook only
 
+  const zoomPoints = deriveZoomPoints(script);
+  const tapPoints = deriveTapPoints(script, categoryVisuals?.accentColor);
+
   return {
     videoSrc,
     hookText: script.hook.text,
@@ -157,5 +235,7 @@ export function scriptToAppDemoProps(
     audioStartOffset,
     backgroundMusicUrl: 'audio/series/lunary-bed-v1.mp3',
     backgroundMusicVolume: 0.15,
+    zoomPoints,
+    tapPoints,
   };
 }

@@ -1,18 +1,20 @@
 /**
- * TikTok Video Composer — Remotion + TTS Pipeline
+ * X / Twitter Video Composer — Remotion Pipeline
  *
- * Takes raw screen recordings, generates TTS voiceover, and renders
- * polished TikTok videos using Remotion with animated overlays.
+ * Renders X/Twitter landscape (16:9, 1280×720) videos from native x-landscape
+ * recordings. TTS is off by default — X autoplay is muted, text overlays carry
+ * the message. Override with --with-tts.
  *
  * Usage:
- *   pnpm compose:tiktok                        # Compose all
- *   pnpm compose:tiktok dashboard-overview      # Compose one
- *   pnpm compose:tiktok --preview               # Quick low-quality preview
- *   pnpm compose:tiktok --info                  # Print captions/hashtags
- *   pnpm compose:tiktok --force-tts             # Regenerate TTS even if cached
- *   pnpm compose:tiktok --no-tts                # Skip TTS, render without voiceover
+ *   pnpm compose:x                       # Compose all
+ *   pnpm compose:x dashboard-overview    # Compose one
+ *   pnpm compose:x --preview             # Quick low-quality preview
+ *   pnpm compose:x --info                # Print X captions/hashtags
+ *   pnpm compose:x --with-tts            # Enable TTS voiceover
+ *   pnpm compose:x --force-tts           # Regenerate TTS even if cached
  *
- * Pipeline: record-app-features.ts → compose-tiktok.ts → ready-to-post .mp4
+ * Pipeline: record:x → compose-x.ts → ready-to-post .mp4
+ * Requires: BASE_URL=https://lunary.app pnpm record:x
  */
 
 import { config } from 'dotenv';
@@ -36,13 +38,15 @@ import {
   readFileText,
   findRecordingExtension,
 } from '../src/lib/video/compose-utils';
+import { adaptForX } from '../src/lib/video/platform-adapters';
 
-const INPUT_DIR = join(process.cwd(), 'public', 'app-demos');
-const OUTPUT_DIR = join(process.cwd(), 'public', 'app-demos', 'final');
+const INPUT_DIR = join(process.cwd(), 'public', 'app-demos', 'x');
+const OUTPUT_DIR = join(process.cwd(), 'public', 'app-demos', 'x', 'final');
+// TTS cache is shared across all platforms
 const TTS_DIR = join(process.cwd(), 'public', 'app-demos', 'tts');
 
 // ============================================================================
-// Phase A: TTS Generation
+// Phase A: TTS Generation (shared cache, optional)
 // ============================================================================
 
 async function generateTTS(
@@ -53,7 +57,6 @@ async function generateTTS(
   const hashPath = join(TTS_DIR, `${script.id}.hash`);
   const currentHash = voiceoverHash(script.voiceover);
 
-  // Check cache — invalidate if voiceover text changed (dynamic scripts)
   if (!options.forceTts && (await fileExists(audioPath))) {
     const cachedHash = await readFileText(hashPath);
     if (cachedHash === currentHash) {
@@ -94,63 +97,55 @@ async function generateTTS(
 
 async function composeVideo(
   featureId: string,
-  options: { preview: boolean; forceTts: boolean; noTts: boolean },
+  options: { preview: boolean; forceTts: boolean; withTts: boolean },
   skyData?: SkyData,
 ): Promise<string> {
   const script = getDynamicScript(featureId, skyData);
-  if (!script) throw new Error(`No TikTok script found for: ${featureId}`);
+  if (!script) throw new Error(`No script found for: ${featureId}`);
 
-  // Find input recording
   const ext = findRecordingExtension(featureId, INPUT_DIR);
   if (!ext) {
     throw new Error(
-      `No recording found. Run: pnpm record:app-features ${featureId}`,
+      `No x-landscape recording found. Run: BASE_URL=https://lunary.app pnpm record:x ${featureId}`,
     );
   }
 
-  const videoSrc = `app-demos/${featureId}.${ext}`;
+  const videoSrc = `app-demos/x/${featureId}.${ext}`;
   console.log(`   Input: ${videoSrc}`);
   console.log(
     `   Script: ${script.totalSeconds}s, ${script.textOverlays.length} overlays`,
   );
 
-  // Phase A: TTS Generation
+  // TTS is off by default for X — autoplay is muted
   let audioUrl: string | undefined;
   let audioDuration: number | undefined;
 
-  if (!options.noTts) {
-    const ttsResult = await generateTTS(script, {
-      forceTts: options.forceTts,
-    });
+  if (options.withTts) {
+    const ttsResult = await generateTTS(script, { forceTts: options.forceTts });
     if (ttsResult) {
       audioUrl = `app-demos/tts/${featureId}.mp3`;
       audioDuration = ttsResult.audioDuration;
     }
   } else {
-    console.log(`   TTS: skipped (--no-tts)`);
+    console.log(
+      `   TTS: disabled (X autoplay is muted; use --with-tts to enable)`,
+    );
   }
 
-  // Phase B: Build Props
   const props = scriptToAppDemoProps(script, videoSrc, audioUrl, audioDuration);
 
-  // Effective duration — extend if TTS is longer than script to avoid audio cutoff
   const effectiveDuration = audioDuration
     ? Math.max(script.totalSeconds, Math.ceil(audioDuration))
     : script.totalSeconds;
 
-  if (effectiveDuration > script.totalSeconds) {
-    console.log(
-      `   Duration: extended ${script.totalSeconds}s → ${effectiveDuration}s (TTS: ${audioDuration?.toFixed(1)}s)`,
-    );
-  }
-
-  // Phase C: Remotion Render
-  console.log(`   Rendering with Remotion...`);
+  // Phase C: Remotion Render — AppDemoVideoX (1280×720, 16:9)
+  // Background music is skipped by default (no audio on autoplay)
+  console.log(`   Rendering with Remotion (1280×720)...`);
   const outputPath = join(OUTPUT_DIR, `${featureId}.mp4`);
   const crf = options.preview ? 28 : 18;
 
   const videoBuffer = await renderRemotionVideo({
-    format: 'AppDemoVideo',
+    format: 'AppDemoVideoX',
     outputPath,
     durationSeconds: effectiveDuration,
     videoSrc: props.videoSrc,
@@ -166,14 +161,10 @@ async function composeVideo(
     categoryVisuals: props.categoryVisuals,
     highlightTerms: props.highlightTerms,
     audioStartOffset: props.audioStartOffset,
-    backgroundMusicUrl: props.backgroundMusicUrl,
-    backgroundMusicVolume: props.backgroundMusicVolume,
-    zoomPoints: props.zoomPoints,
-    tapPoints: props.tapPoints,
+    // No background music by default — X videos autoplay muted
     crf,
   });
 
-  // Renderer returns buffer and cleans up temp — write to final output
   await writeFile(outputPath, videoBuffer);
 
   const sizeMB = (videoBuffer.length / 1024 / 1024).toFixed(1);
@@ -183,34 +174,20 @@ async function composeVideo(
 }
 
 // ============================================================================
-// Print script info (captions, hashtags for posting)
+// Print script info (X caption/hashtags)
 // ============================================================================
 
 function printScriptInfo(script: TikTokScript): void {
-  const hookWords = script.hook.text.split(/\s+/).length;
-  const voWords = script.voiceover.split(/\s+/).length;
-  const wps = (voWords / script.totalSeconds).toFixed(1);
+  const { caption, hashtags } = adaptForX(script);
+  const hashtagStr = hashtags.map((h) => `#${h}`).join(' ');
+  const fullPost = `${caption} ${hashtagStr}`;
 
-  console.log(`   Hook (${hookWords}w): "${script.hook.text}"`);
-  console.log(`   CTA: "${script.outro.text}"`);
-  console.log(`   Caption:\n     ${script.caption}`);
+  console.log(`   Hook: "${script.hook.text}"`);
+  console.log(`   Caption (${caption.length} chars): "${caption}"`);
+  console.log(`   Hashtags (${hashtags.length}): ${hashtagStr}`);
   console.log(
-    `   Hashtags (${script.hashtags.length}): ${script.hashtags.map((h) => `#${h}`).join(' ')}`,
+    `   Full post (~${fullPost.length} chars): "${fullPost.slice(0, 100)}${fullPost.length > 100 ? '...' : ''}"`,
   );
-  console.log(
-    `   Voiceover: ${voWords} words / ${script.totalSeconds}s = ${wps} wps`,
-  );
-
-  // Overlay word count check
-  const longOverlays = script.textOverlays.filter(
-    (o) => o.text.split(/\s+/).length > 6,
-  );
-  if (longOverlays.length > 0) {
-    console.log(`   WARNING: ${longOverlays.length} overlay(s) exceed 6 words`);
-    for (const o of longOverlays) {
-      console.log(`     - "${o.text}" (${o.text.split(/\s+/).length}w)`);
-    }
-  }
 }
 
 // ============================================================================
@@ -222,7 +199,7 @@ async function main() {
   const preview = args.includes('--preview');
   const showInfo = args.includes('--info');
   const forceTts = args.includes('--force-tts');
-  const noTts = args.includes('--no-tts');
+  const withTts = args.includes('--with-tts');
   const featureArgs = args.filter((a) => !a.startsWith('--'));
 
   const featureIds =
@@ -231,7 +208,6 @@ async function main() {
   await mkdir(OUTPUT_DIR, { recursive: true });
   await mkdir(TTS_DIR, { recursive: true });
 
-  // Build sky data for dynamic scripts
   console.log('Building sky data...');
   const personaBirthday = process.env.PERSONA_BIRTHDAY;
   const skyData = await buildSkyData(new Date(), personaBirthday);
@@ -239,18 +215,15 @@ async function main() {
     `Sky: Moon in ${skyData.moonSign}, ${skyData.moonPhase.name}` +
       (skyData.retrogradePlanets.length > 0
         ? `, Rx: ${skyData.retrogradePlanets.join(', ')}`
-        : ', no retrogrades') +
-      (skyData.numerology
-        ? `, PD:${skyData.numerology.personalDay} UD:${skyData.numerology.universalDay}`
-        : ''),
+        : ', no retrogrades'),
   );
 
-  console.log('\nTikTok Video Composer (Remotion + TTS)');
+  console.log('\nX / Twitter Video Composer (Remotion, 1280×720)');
   console.log('='.repeat(50));
   console.log(`Input: ${INPUT_DIR}`);
   console.log(`Output: ${OUTPUT_DIR}`);
   console.log(
-    `TTS: ${noTts ? 'disabled' : forceTts ? 'force regenerate' : 'cached'}`,
+    `TTS: ${withTts ? (forceTts ? 'force regenerate' : 'cached') : 'disabled (X autoplay muted; use --with-tts)'}`,
   );
   console.log(
     `Quality: ${preview ? 'preview (crf 28)' : 'production (crf 18)'}`,
@@ -276,7 +249,7 @@ async function main() {
     }
 
     try {
-      await composeVideo(featureId, { preview, forceTts, noTts }, skyData);
+      await composeVideo(featureId, { preview, forceTts, withTts }, skyData);
       success++;
     } catch (error) {
       console.error(
@@ -300,9 +273,9 @@ async function main() {
   if (success > 0) {
     console.log(`\nComposed videos in: ${OUTPUT_DIR}`);
     console.log('\nNext steps:');
-    console.log('   1. Preview: open public/app-demos/final/ in Finder');
-    console.log('   2. See captions: pnpm compose:tiktok --info');
-    console.log('   3. Post to TikTok with script caption + hashtags');
+    console.log('   1. Preview: open public/app-demos/x/final/ in Finder');
+    console.log('   2. See captions: pnpm compose:x --info');
+    console.log('   3. Post to @LunaryApp on X with caption + 1-2 hashtags');
   }
 
   if (failed > 0) process.exit(1);
