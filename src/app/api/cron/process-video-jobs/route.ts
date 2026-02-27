@@ -215,11 +215,14 @@ export async function POST(request: NextRequest) {
 
   try {
     await ensureVideoJobsTable();
-    // Clean up orphaned jobs — but don't require week_theme match
-    // (engagement scripts may have different theme names than their social_posts)
+    // Clean up orphaned jobs — jobs where no social_post of any status exists
+    // for the matching script topic + date. A 48-hour grace period prevents
+    // newly-created engagement scripts (which have no social_post yet) from
+    // being swept up before the pipeline has a chance to process them.
     await sql`
       DELETE FROM video_jobs vj
       WHERE vj.status IN ('pending', 'failed')
+        AND vj.created_at < NOW() - INTERVAL '48 hours'
         AND NOT EXISTS (
           SELECT 1
           FROM video_scripts vs
@@ -227,7 +230,6 @@ export async function POST(request: NextRequest) {
             ON sp.topic = vs.facet_title
            AND sp.scheduled_date::date = vs.scheduled_date
            AND sp.post_type = 'video'
-           AND sp.status IN ('pending', 'approved')
           WHERE vs.id = vj.script_id
         )
     `;
@@ -631,10 +633,10 @@ export async function POST(request: NextRequest) {
             metadata.contentTypeKey === 'angel_numbers';
 
           // Optimal Instagram Reel posting times (UTC): 17-19 = UK evening / US East lunch
-          // Rotate through these across the week for variety
+          // Rotate by day-of-week for stable, predictable distribution across the week
           const IG_REEL_HOURS = [17, 12, 19, 18];
           const igReelHour =
-            IG_REEL_HOURS[igReelsThisWeek % IG_REEL_HOURS.length];
+            IG_REEL_HOURS[scheduledDate.getUTCDay() % IG_REEL_HOURS.length];
 
           for (const platform of shortVideoPlatforms) {
             if (existingPlatforms.has(platform)) continue;

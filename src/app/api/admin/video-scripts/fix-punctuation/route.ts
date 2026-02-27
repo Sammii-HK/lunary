@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
 
     let updated = 0;
     let skipped = 0;
+    const updatedIds: number[] = [];
 
     for (const row of scripts.rows) {
       const original = row.full_script as string;
@@ -50,7 +51,32 @@ export async function POST(request: NextRequest) {
         SET full_script = ${fixed}
         WHERE id = ${row.id}
       `;
+      updatedIds.push(row.id as number);
       updated++;
+    }
+
+    // Script text changed — reset video_jobs and clear cached video URLs so
+    // the next process-video-jobs run re-renders with the corrected audio.
+    if (updatedIds.length > 0) {
+      await sql.query(
+        `UPDATE video_jobs
+         SET status = 'pending', attempts = 0, last_error = NULL, updated_at = NOW()
+         WHERE script_id = ANY($1::int[])
+           AND status != 'processing'`,
+        [updatedIds],
+      );
+      await sql.query(
+        `UPDATE social_posts sp
+         SET video_url = NULL
+         WHERE sp.post_type = 'video'
+           AND EXISTS (
+             SELECT 1 FROM video_scripts vs
+             WHERE vs.id = ANY($1::int[])
+               AND vs.facet_title = sp.topic
+               AND vs.scheduled_date::date = sp.scheduled_date::date
+           )`,
+        [updatedIds],
+      );
     }
 
     return NextResponse.json({
@@ -58,6 +84,7 @@ export async function POST(request: NextRequest) {
       total: scripts.rows.length,
       updated,
       skipped,
+      requeued: updatedIds.length,
     });
   } catch (error) {
     console.error('Error fixing punctuation:', error);
