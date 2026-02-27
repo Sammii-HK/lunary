@@ -91,7 +91,10 @@ export async function GET(request: NextRequest) {
     const gradient = CATEGORY_GRADIENT[category] || CATEGORY_GRADIENT.tarot;
     const { width, height } = IG_SIZES.portrait;
 
-    const fonts = await loadIGFonts(request, { includeAstronomicon: true });
+    const fonts = await loadIGFonts(request, {
+      includeAstronomicon: true,
+      includeRunic: category === 'runes',
+    });
 
     let layoutJsx: React.ReactElement;
 
@@ -434,6 +437,7 @@ export async function GET(request: NextRequest) {
           )}
 
           {/* Content — structured display based on slide type */}
+          {/* paddingBottom shifts content above true centre for better optical weight */}
           <div
             style={{
               display: 'flex',
@@ -441,15 +445,16 @@ export async function GET(request: NextRequest) {
               flex: 1,
               justifyContent: 'center',
               gap: 20,
+              paddingBottom: '80px',
             }}
           >
             {isPills ? (
-              /* Keyword pills layout */
+              /* Keyword cards layout — rounded squares matching app design */
               <div
                 style={{
                   display: 'flex',
                   flexWrap: 'wrap',
-                  gap: 16,
+                  gap: 20,
                 }}
               >
                 {content
@@ -459,10 +464,10 @@ export async function GET(request: NextRequest) {
                     <div
                       key={i}
                       style={{
-                        padding: '14px 28px',
-                        borderRadius: 100,
+                        padding: '20px 28px',
+                        borderRadius: 16,
                         background: `${accent}15`,
-                        border: `1px solid ${accent}30`,
+                        border: `1px solid ${accent}35`,
                         display: 'flex',
                       }}
                     >

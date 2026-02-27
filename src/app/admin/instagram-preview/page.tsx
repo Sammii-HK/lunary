@@ -268,7 +268,30 @@ export default function InstagramPreviewPage() {
     () => new Date().toISOString().split('T')[0],
   );
   const [cacheBuster, setCacheBuster] = useState(Date.now());
+  const VALID_TABS: Tab[] = [
+    'memes',
+    'carousels',
+    'quotes',
+    'did_you_know',
+    'rankings',
+    'compatibility',
+    'stories',
+    'angel_numbers',
+    'one_word',
+  ];
+  // Always start with 'memes' to match SSR, then sync from hash after hydration
   const [activeTab, setActiveTab] = useState<Tab>('memes');
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1) as Tab;
+    if (VALID_TABS.includes(hash)) setActiveTab(hash);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleTabChange = useCallback((tab: Tab) => {
+    setActiveTab(tab);
+    window.location.hash = tab;
+  }, []);
   const [selectedSign, setSelectedSign] = useState('scorpio');
   const [carouselPreviews, setCarouselPreviews] = useState<CarouselPreview[]>(
     [],
@@ -448,11 +471,24 @@ export default function InstagramPreviewPage() {
     });
   }, [selectedDate, cacheBuster]);
 
-  // One word carousel previews (Fix 10)
+  // One word carousel previews
   const oneWordPreviews = useMemo(() => {
     const batch = generateOneWordBatch(selectedDate, 2);
     return batch.map((item) => {
       const imageUrls = item.slides.map((slide) => {
+        if (slide.variant === 'body') {
+          // Dedicated hero layout: word is the centrepiece
+          const params = new URLSearchParams({
+            sign: slide.title,
+            word: slide.content,
+            explanation: slide.subtitle || '',
+            symbol: slide.symbol || '',
+            slideIndex: String(slide.slideIndex),
+            totalSlides: String(slide.totalSlides),
+          });
+          return `/api/og/instagram/one-word?${params.toString()}&t=${cacheBuster}`;
+        }
+        // Cover and CTA use the standard carousel route
         const params = new URLSearchParams({
           title: slide.title,
           slideIndex: String(slide.slideIndex),
@@ -605,7 +641,7 @@ export default function InstagramPreviewPage() {
             {tabs.map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => handleTabChange(tab.key)}
                 className={`px-4 py-2 rounded-t-md font-medium transition-colors text-sm ${
                   activeTab === tab.key
                     ? 'bg-zinc-800 text-white border-b-2 border-lunary-primary-500'

@@ -75,18 +75,18 @@ export const CATEGORY_ACCENT: Record<ThemeCategory, string> = {
 };
 
 // Category → gradient for dark mode backgrounds
-// Cosmic violet/purple tones matching Lunary brand — lifted from pure black to show stars
+// Cosmic violet/purple tones matching Lunary brand — bright enough for stars to show
 export const CATEGORY_GRADIENT: Record<ThemeCategory, string> = {
-  zodiac: 'linear-gradient(135deg, #2d1a4a 0%, #1a1030 50%, #110d20 100%)', // Deep violet
-  tarot: 'linear-gradient(135deg, #2e1440 0%, #1a0d28 50%, #120a1e 100%)', // Purple
-  lunar: 'linear-gradient(135deg, #152040 0%, #0e1428 50%, #0c1020 100%)', // Indigo
-  planetary: 'linear-gradient(135deg, #12203a 0%, #0e1428 50%, #0c1020 100%)', // Blue-violet
-  crystals: 'linear-gradient(135deg, #2e1440 0%, #1a0d28 50%, #120a1e 100%)', // Violet
-  numerology: 'linear-gradient(135deg, #2d1a4a 0%, #1a1030 50%, #110d20 100%)', // Cosmic violet
-  chakras: 'linear-gradient(135deg, #3c1228 0%, #220d18 50%, #180b12 100%)', // Rose-violet
-  sabbat: 'linear-gradient(135deg, #2d1a4a 0%, #1a1030 50%, #110d20 100%)', // Violet
-  runes: 'linear-gradient(135deg, #1e1e2a 0%, #141420 50%, #101018 100%)', // Neutral blue-gray
-  spells: 'linear-gradient(135deg, #2e1440 0%, #1a0d28 50%, #120a1e 100%)', // Deep purple
+  zodiac: 'linear-gradient(135deg, #4a2878 0%, #2e1a52 50%, #1a1030 100%)', // Deep violet
+  tarot: 'linear-gradient(135deg, #4a1e68 0%, #2e1248 50%, #1a0a2e 100%)', // Purple
+  lunar: 'linear-gradient(135deg, #1e3460 0%, #162248 50%, #0e1630 100%)', // Indigo
+  planetary: 'linear-gradient(135deg, #1a3258 0%, #142248 50%, #0e1630 100%)', // Blue-violet
+  crystals: 'linear-gradient(135deg, #4a1e68 0%, #2e1248 50%, #1a0a2e 100%)', // Violet
+  numerology: 'linear-gradient(135deg, #4a2878 0%, #2e1a52 50%, #1a1030 100%)', // Cosmic violet
+  chakras: 'linear-gradient(135deg, #5c1a3c 0%, #3a1028 50%, #220a18 100%)', // Rose-violet
+  sabbat: 'linear-gradient(135deg, #4a2878 0%, #2e1a52 50%, #1a1030 100%)', // Violet
+  runes: 'linear-gradient(135deg, #2e2e42 0%, #1e1e30 50%, #141420 100%)', // Neutral blue-gray
+  spells: 'linear-gradient(135deg, #4a1e68 0%, #2e1248 50%, #1a0a2e 100%)', // Deep purple
 };
 
 // Dark cosmic backgrounds for memes (sign-tinted gradients matching brand)

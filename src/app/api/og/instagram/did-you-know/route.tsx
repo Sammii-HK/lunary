@@ -2,15 +2,15 @@ import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import {
   loadIGFonts,
-  IGStoryBrandTag,
+  IGBrandTag,
   IGCategoryBadge,
   truncateIG,
-  renderIGStoryStarfield,
+  renderIGStarfield,
 } from '@/lib/instagram/ig-utils';
 import {
   IG_SIZES,
   IG_TEXT,
-  IG_STORY_SAFE,
+  IG_SPACING,
   CATEGORY_ACCENT,
   CATEGORY_GRADIENT,
 } from '@/lib/instagram/design-system';
@@ -32,10 +32,10 @@ export async function GET(request: NextRequest) {
 
     const accent = CATEGORY_ACCENT[category] || CATEGORY_ACCENT.tarot;
     const gradient = CATEGORY_GRADIENT[category] || CATEGORY_GRADIENT.tarot;
-    const { width, height } = IG_SIZES.story;
+    const { width, height } = IG_SIZES.portrait;
 
     const fonts = await loadIGFonts(request, { includeRunic: true });
-    const starfield = renderIGStoryStarfield(`dyk-${fact.slice(0, 15)}`);
+    const starfield = renderIGStarfield(`dyk-${fact.slice(0, 15)}`);
 
     const layoutJsx = (
       <div
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
           alignItems: 'center',
           justifyContent: 'center',
           background: gradient,
-          padding: `${IG_STORY_SAFE.top}px ${IG_STORY_SAFE.sidePadding}px ${IG_STORY_SAFE.bottom}px`,
+          padding: `${IG_SPACING.padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
         }}
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         >
           <span
             style={{
-              fontSize: IG_TEXT.story.label,
+              fontSize: IG_TEXT.dark.label,
               color: accent,
               letterSpacing: '0.15em',
               textTransform: 'uppercase',
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
         {/* Fact text - centred, large, readable */}
         <div
           style={{
-            fontSize: IG_TEXT.story.subtitle,
+            fontSize: IG_TEXT.dark.subtitle,
             color: OG_COLORS.textPrimary,
             textAlign: 'center',
             lineHeight: 1.45,
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
             fontWeight: 500,
           }}
         >
-          {truncateIG(fact, 240)}
+          {truncateIG(fact, 200)}
         </div>
 
         {/* Category badge */}
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
           <IGCategoryBadge category={category} />
         </div>
 
-        <IGStoryBrandTag baseUrl={SHARE_BASE_URL} />
+        <IGBrandTag baseUrl={SHARE_BASE_URL} />
       </div>
     );
 

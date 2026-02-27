@@ -118,7 +118,10 @@ export function renderIGStarfield(seed: string) {
         height: star.size,
         borderRadius: '50%',
         background: '#fff',
-        opacity: Math.min(1, star.opacity * 1.2),
+        opacity: Math.min(1, star.opacity * 2.2),
+        ...(star.size > 2
+          ? { boxShadow: `0 0 ${star.size * 2}px rgba(255,255,255,0.6)` }
+          : {}),
       }}
     />
   ));

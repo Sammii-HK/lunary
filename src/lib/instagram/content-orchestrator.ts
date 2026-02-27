@@ -12,6 +12,7 @@ import { generateDidYouKnow } from './did-you-know-content';
 import { generateSignRanking } from './ranking-content';
 import { generateCompatibility } from './compatibility-content';
 import { generateAngelNumberBatch } from './angel-number-content';
+import { generateOneWordBatch } from './one-word-content';
 import { seededRandom } from './ig-utils';
 import type { IGScheduledPost, IGPostBatch, IGPostType } from './types';
 
@@ -21,6 +22,7 @@ const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
 const POSTING_TIMES: Record<IGPostType, number> = {
   carousel: 10, // 10am UTC (primary content slot)
   angel_number_carousel: 10, // 10am UTC (primary content slot)
+  one_word: 12, // noon UTC (engagement slot)
   meme: 12, // noon UTC (lunch scroll)
   did_you_know: 14, // 2pm UTC (afternoon education)
   sign_ranking: 12, // noon UTC (engagement slot)
@@ -41,7 +43,7 @@ const DAILY_CONTENT_MIX: Record<number, IGPostType[]> = {
   2: ['did_you_know'], // Wednesday: factual DYK (saves/shares)
   3: ['carousel'], // Thursday: factual carousel (saves)
   4: ['did_you_know'], // Friday: factual DYK (saves/shares)
-  5: ['carousel'], // Saturday: tarot carousel (saves)
+  5: ['one_word'], // Saturday: one-word trait carousel (saves + shares)
   6: [], // Sunday: rest day (stories only)
 };
 
@@ -92,6 +94,8 @@ async function generatePost(
       return generateCarouselPost(dateStr, scheduledTime, dayOfWeek);
     case 'angel_number_carousel':
       return generateAngelNumberPost(dateStr, scheduledTime);
+    case 'one_word':
+      return generateOneWordPost(dateStr, scheduledTime);
     case 'quote':
       return generateQuotePost(dateStr, scheduledTime);
     case 'did_you_know':
@@ -222,6 +226,66 @@ async function generateAngelNumberPost(
   };
 }
 
+async function generateOneWordPost(
+  dateStr: string,
+  scheduledTime: string,
+): Promise<IGScheduledPost | null> {
+  const batch = generateOneWordBatch(dateStr, 1);
+  if (batch.length === 0) return null;
+
+  const { traitKey, traitLabel, slides } = batch[0];
+  const cacheBust = Date.now().toString();
+
+  const imageUrls = slides.map((slide) => {
+    if (slide.variant === 'body') {
+      // Dedicated hero layout: word is the centrepiece
+      const params = new URLSearchParams({
+        sign: slide.title,
+        word: slide.content,
+        explanation: slide.subtitle || '',
+        symbol: slide.symbol || '',
+        slideIndex: String(slide.slideIndex),
+        totalSlides: String(slide.totalSlides),
+        v: '4',
+        t: cacheBust,
+      });
+      return `${SHARE_BASE_URL}/api/og/instagram/one-word?${params.toString()}`;
+    }
+    // Cover and CTA use the standard carousel route
+    const params = new URLSearchParams({
+      title: slide.title,
+      slideIndex: String(slide.slideIndex),
+      totalSlides: String(slide.totalSlides),
+      content: slide.content,
+      category: slide.category,
+      variant: slide.variant,
+      v: '4',
+      t: cacheBust,
+    });
+    if (slide.subtitle) params.set('subtitle', slide.subtitle);
+    if (slide.symbol) params.set('symbol', slide.symbol);
+    return `${SHARE_BASE_URL}/api/og/instagram/carousel?${params.toString()}`;
+  });
+
+  const { caption, hashtags } = generateCaption('angel_number_carousel', {
+    title: traitLabel,
+    category: 'zodiac',
+  });
+
+  return {
+    type: 'one_word',
+    format: 'square',
+    imageUrls,
+    caption,
+    hashtags,
+    scheduledTime,
+    metadata: {
+      category: 'zodiac',
+      slug: `one-word-${traitKey}`,
+    },
+  };
+}
+
 async function generateQuotePost(
   dateStr: string,
   scheduledTime: string,
@@ -266,7 +330,7 @@ async function generateQuotePost(
 
   const params = new URLSearchParams({
     text: author !== 'Lunary' ? `${quoteText} - ${author}` : quoteText,
-    format: 'square',
+    format: 'portrait',
     v: '4',
     t: Date.now().toString(),
   });
@@ -277,7 +341,7 @@ async function generateQuotePost(
 
   return {
     type: 'quote',
-    format: 'square',
+    format: 'portrait',
     imageUrls: [`${SHARE_BASE_URL}/api/og/social-quote?${params.toString()}`],
     caption,
     hashtags,
@@ -307,7 +371,7 @@ async function generateDidYouKnowPost(
 
   return {
     type: 'did_you_know',
-    format: 'square',
+    format: 'portrait',
     imageUrls: [
       `${SHARE_BASE_URL}/api/og/instagram/did-you-know?${params.toString()}`,
     ],
