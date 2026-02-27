@@ -44,7 +44,7 @@ const MIN_CONTENT_WORDS = 30;
  * Build a flat list of all grimoire entries suitable for podcasts,
  * organized by podcast category.
  */
-function getAllPodcastEntries(): Map<PodcastCategory, GrimoireEntry[]> {
+export function getAllPodcastEntries(): Map<PodcastCategory, GrimoireEntry[]> {
   const entryMap = new Map<PodcastCategory, GrimoireEntry[]>();
   for (const cat of PODCAST_CATEGORIES) {
     entryMap.set(cat, []);
@@ -382,8 +382,9 @@ export function selectPodcastTopics(
       const sabbatEntries = allEntries.get('sabbats') || [];
       const sabbatName = activeSabbat.sabbat.name.toLowerCase();
       const sabbatEntry =
-        sabbatEntries.find((e) => e.slug.includes(sabbatName)) ||
-        sabbatEntries[0];
+        sabbatEntries.find(
+          (e) => e.slug.includes(sabbatName) && !coveredSlugs.has(e.slug),
+        ) || sabbatEntries.find((e) => !coveredSlugs.has(e.slug));
       if (sabbatEntry) {
         primaryCategory = 'sabbats';
         primaryEntry = sabbatEntry;
