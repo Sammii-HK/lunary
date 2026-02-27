@@ -997,12 +997,6 @@ export async function GET(request: NextRequest) {
               // Pre-upload dynamic OG image so Instagram gets a static blob URL
               const staticImageUrl = await preUploadImage(imageUrl);
 
-              // Persist story to DB for tracking and highlight categorisation
-              await sql`
-            INSERT INTO social_posts (content, platform, post_type, scheduled_date, status, image_url, story_category, content_type)
-            VALUES ('', 'instagram', 'story', ${scheduledTime.toISOString()}, 'sent', ${staticImageUrl}, ${storyCategory}, ${story.variant})
-          `;
-
               const result = await postToSocial({
                 platform: 'instagram',
                 content: '',
@@ -1016,12 +1010,20 @@ export async function GET(request: NextRequest) {
               });
 
               if (result.success) {
+                // Persist story to DB only on success for accurate tracking
+                await sql`
+              INSERT INTO social_posts (content, platform, post_type, scheduled_date, status, image_url, story_category, content_type)
+              VALUES ('', 'instagram', 'story', ${scheduledTime.toISOString()}, 'sent', ${staticImageUrl}, ${storyCategory}, ${story.variant})
+            `;
                 storySentResults.push({
                   scheduledTime: scheduledTime.toISOString(),
                   variant: story.variant,
                   status: 'success',
                 });
               } else {
+                console.error(
+                  `[daily-cron] IG story failed (${story.variant}): ${result.error}`,
+                );
                 storySentResults.push({
                   scheduledTime: scheduledTime.toISOString(),
                   variant: story.variant,
@@ -1030,6 +1032,10 @@ export async function GET(request: NextRequest) {
                 });
               }
             } catch (postError) {
+              console.error(
+                `[daily-cron] IG story exception (${story.variant}):`,
+                postError,
+              );
               storySentResults.push({
                 scheduledTime: scheduledTime.toISOString(),
                 variant: story.variant,
@@ -1460,12 +1466,12 @@ async function runDailyPosts(dateStr: string) {
   const posts: DailySocialPost[] = [];
 
   // Transit post scheduling - avoid existing content slots at 12:00, 17:00, 20:00 UTC
-  // Use 07:00, 09:00, 14:00, 15:00 UTC for transit posts
+  // Space evenly through the day with ~4h gaps so posts don't hammer in a burst
   const transitTimeSlots = [
     { hour: 7, label: 'primary' }, // UK early morning
-    { hour: 9, label: 'secondary' }, // UK mid-morning
-    { hour: 14, label: 'tertiary' }, // UK afternoon, US East morning
-    { hour: 15, label: 'backup' }, // If many events
+    { hour: 11, label: 'secondary' }, // UK late morning
+    { hour: 15, label: 'tertiary' }, // UK afternoon, US East morning
+    { hour: 19, label: 'backup' }, // UK evening, US afternoon
   ];
   let transitSlotIndex = 0;
   const getTransitSchedule = () => {
@@ -4296,6 +4302,7 @@ function buildRetrogradeTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }
@@ -4412,6 +4419,7 @@ function buildIngressTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }
@@ -4557,6 +4565,7 @@ function buildAspectTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }
@@ -4646,6 +4655,7 @@ function buildEgressTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }
@@ -4737,6 +4747,7 @@ function buildSupermoonTextPosts({
     variants: {
       bluesky: { content: blueskyContent },
       twitter: { content: xContent },
+      threads: { content: threadsContent },
     },
   });
 
@@ -4823,6 +4834,7 @@ function buildMicromoonTextPosts({
     variants: {
       bluesky: { content: blueskyContent },
       twitter: { content: xContent },
+      threads: { content: threadsContent },
     },
   });
 
@@ -5029,6 +5041,7 @@ function buildMoonPhaseTextPosts({
     variants: {
       bluesky: { content: blueskyContent },
       twitter: { content: xContent },
+      threads: { content: threadsContent },
     },
   });
 
@@ -5239,6 +5252,7 @@ function buildTransitMilestoneTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }
@@ -5335,6 +5349,7 @@ function buildCountdownTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }

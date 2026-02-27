@@ -134,6 +134,25 @@ export async function updateVideoScriptHook(
         updated_at = NOW()
     WHERE id = ${id}
   `;
+  // Script text changed — reset the video_job so the next cron re-renders,
+  // and clear video_url from social_posts so the old video isn't reused.
+  await sql`
+    UPDATE video_jobs
+    SET status = 'pending', attempts = 0, last_error = NULL, updated_at = NOW()
+    WHERE script_id = ${id}
+      AND status != 'processing'
+  `;
+  await sql`
+    UPDATE social_posts sp
+    SET video_url = NULL
+    WHERE sp.post_type = 'video'
+      AND EXISTS (
+        SELECT 1 FROM video_scripts vs
+        WHERE vs.id = ${id}
+          AND vs.facet_title = sp.topic
+          AND vs.scheduled_date::date = sp.scheduled_date::date
+      )
+  `;
 }
 
 /**

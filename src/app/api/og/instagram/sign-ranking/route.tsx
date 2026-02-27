@@ -5,6 +5,7 @@ import {
   loadIGFonts,
   IGBrandTag,
   renderIGStarfield,
+  renderConstellation,
 } from '@/lib/instagram/ig-utils';
 import { IG_SIZES, IG_TEXT, SIGN_ACCENT } from '@/lib/instagram/design-system';
 import { OG_COLORS } from '@/lib/share/og-utils';
@@ -74,9 +75,38 @@ export async function GET(request: NextRequest) {
           padding: '48px 56px',
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          overflow: 'hidden',
         }}
       >
         {starfield}
+        {renderConstellation(topSign, accent, width, height)}
+
+        {/* Top sign's glyph — giant ghost backdrop */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: 'Astronomicon',
+              fontSize: 1100,
+              color: accent,
+              opacity: 0.07,
+              display: 'flex',
+              lineHeight: 1,
+            }}
+          >
+            {getZodiacGlyph(topSign)}
+          </div>
+        </div>
 
         {/* Title */}
         <div
@@ -84,7 +114,7 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 28,
+            marginBottom: 20,
           }}
         >
           <div
@@ -93,7 +123,7 @@ export async function GET(request: NextRequest) {
               color: OG_COLORS.textTertiary,
               letterSpacing: '0.15em',
               textTransform: 'uppercase',
-              marginBottom: 8,
+              marginBottom: 6,
               display: 'flex',
             }}
           >
@@ -101,11 +131,14 @@ export async function GET(request: NextRequest) {
           </div>
           <div
             style={{
-              fontSize: IG_TEXT.dark.title - 4,
+              fontSize: 88,
               color: accent,
               fontWeight: 700,
               textTransform: 'capitalize',
               display: 'flex',
+              lineHeight: 1,
+              textShadow: `0 0 50px ${accent}60`,
+              letterSpacing: '-0.02em',
             }}
           >
             {trait}

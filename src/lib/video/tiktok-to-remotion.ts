@@ -237,5 +237,6 @@ export function scriptToAppDemoProps(
     backgroundMusicVolume: 0.15,
     zoomPoints,
     tapPoints,
+    zodiacSign: script.zodiacSign,
   };
 }

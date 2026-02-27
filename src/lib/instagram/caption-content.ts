@@ -190,36 +190,36 @@ const ANGEL_NUMBER_CTAS = [
   'Save this so you remember what it means',
 ];
 
-// --- SEO lines ---
+// --- SEO lines (NO URLs — algorithm penalises links in caption body) ---
 
 const SEO_LINES: Record<string, string[]> = {
   zodiac: [
-    "Learn about your zodiac sign's personality, love style, and career strengths on Lunary \u2014 the free astrology app with 2,000+ articles.",
-    'Discover your zodiac personality traits and what makes your sign unique \u2014 free birth chart reading at lunary.app.',
+    'Free birth chart reading personalised to your exact birth date, time, and location — link in bio.',
+    'Understand your zodiac sign on a deeper level: personality, love style, career strengths, shadow traits. Link in bio.',
   ],
   tarot: [
-    'Learn the full meaning of every tarot card on Lunary \u2014 the free astrology app with 78 detailed card guides.',
-    'Get your free tarot reading and explore card meanings at lunary.app \u2014 no sign-up required.',
+    'Full tarot card guide with upright and reversed meanings, love, and career readings — link in bio.',
+    '78 detailed tarot card meanings, spreads, and daily readings — all free, no sign-up. Link in bio.',
   ],
   crystals: [
-    'Explore 100+ crystals and their healing properties on Lunary \u2014 the free spiritual guide app.',
-    'Discover crystal meanings, chakra connections, and care guides at lunary.app \u2014 free forever.',
+    '100+ crystal guides with healing properties, chakra connections, and care instructions — link in bio.',
+    'Deep-dive crystal meanings, chakra pairings, and cleansing guides — all free. Link in bio.',
   ],
   compatibility: [
-    'Check your compatibility with any sign for free on Lunary \u2014 personalised birth chart readings with no ads.',
-    'Discover your zodiac compatibility score at lunary.app \u2014 free birth chart readings for every sign.',
+    'Free zodiac compatibility reading for every sign pairing — personalised to your birth chart. Link in bio.',
+    'Discover what the stars actually say about your relationship. Full birth chart synastry — link in bio.',
   ],
   ranking: [
-    'Discover your zodiac personality traits and what makes your sign unique \u2014 free birth chart reading at lunary.app.',
-    'Learn what makes each zodiac sign special on Lunary \u2014 the free astrology app with 2,000+ articles.',
+    'Explore every zodiac sign personality breakdown — free birth chart reading personalised to you. Link in bio.',
+    '2,000+ astrology articles, zodiac guides, and birth chart readings — all free. Link in bio.',
   ],
   numerology: [
-    'Track your angel numbers and learn their meanings on Lunary \u2014 the free astrology app with 2,000+ spiritual guides.',
-    'Discover angel number meanings and numerology guides at lunary.app \u2014 free forever, no ads.',
+    'Full angel number guide with meanings for every sequence — plus life path and numerology readings. Link in bio.',
+    'Track your angel numbers and explore their spiritual meanings in depth — link in bio.',
   ],
   meme: [
-    'Follow @lunary.app for daily astrology memes, zodiac content, and free birth chart readings.',
-    'More astrology content every day at lunary.app \u2014 your free cosmic companion.',
+    'Follow for daily zodiac memes, astrology facts, and free birth chart content.',
+    'More daily astrology content, zodiac guides, and cosmic humour — follow to stay in the loop.',
   ],
 };
 
@@ -247,7 +247,7 @@ function pickHashtags(
   const rng = seededRandom(`hashtags-${seed}`);
   const shuffledBroad = [...broad].sort(() => rng() - 0.5);
   const shuffledNiche = [...niche, ...extra].sort(() => rng() - 0.5);
-  return [...shuffledBroad.slice(0, 2), ...shuffledNiche.slice(0, 3)];
+  return [...shuffledBroad.slice(0, 3), ...shuffledNiche.slice(0, 7)];
 }
 
 export function generateZodiacCaption(sign: string, seed: string): IGCaption {
@@ -255,7 +255,7 @@ export function generateZodiacCaption(sign: string, seed: string): IGCaption {
   const hookTemplate = seededPick(ZODIAC_CAPTION_HOOKS, `zhook-${seed}`);
   const hook = hookTemplate.replace('[Sign]', signName);
 
-  const body = `${signName}s get labelled as one thing, but there\u2019s so much more beneath the surface. Swipe through to discover what really makes this sign tick.`;
+  const body = `${signName} energy goes so much deeper than the one-line description most people know. Swipe through for the full picture: core personality traits, what drives them, how they handle love and conflict, and what they're like at their best and worst.\n\nSave this and share it with the ${signName} in your life — or keep it to understand yourself better.`;
 
   const ctaTemplate = seededPick(ZODIAC_CTAS, `zcta-${seed}`);
   const cta = ctaTemplate.replace('[Sign]', signName);
@@ -279,7 +279,7 @@ export function generateTarotCaption(card: string, seed: string): IGCaption {
   const hookTemplate = seededPick(TAROT_CAPTION_HOOKS, `thook-${seed}`);
   const hook = hookTemplate.replace('[Card]', card);
 
-  const body = `${card} carries a powerful message \u2014 whether upright or reversed. Swipe to understand what this card is really telling you.`;
+  const body = `${card} carries a powerful message — whether it shows up upright or reversed, the meaning shifts and goes deeper than the surface reading. Swipe through for the full breakdown: upright meaning, reversed meaning, what it means for love, career, and spiritual growth.\n\nSave this for your next reading — you'll want it.`;
 
   const ctaTemplate = seededPick(TAROT_CTAS, `tcta-${seed}`);
   const cta = ctaTemplate.replace('[Card]', card);
@@ -297,7 +297,7 @@ export function generateCrystalCaption(
   const hookTemplate = seededPick(CRYSTAL_CAPTION_HOOKS, `chook-${seed}`);
   const hook = hookTemplate.replace('[Crystal]', crystal);
 
-  const body = `${crystal} is more than just a pretty stone. Swipe to discover its healing properties, chakra connections, and how to work with it.`;
+  const body = `${crystal} is one of the most misunderstood stones in the mineral kingdom. Most people pick it up because it looks good — but when you understand what it actually does energetically, it becomes a whole different tool.\n\nSwipe through for the full guide: healing properties, which chakras it works with, how to cleanse it, and how to actually use it in practice.`;
 
   const ctaTemplate = seededPick(CRYSTAL_CTAS, `ccta-${seed}`);
   const cta = ctaTemplate.replace('[Crystal]', crystal);

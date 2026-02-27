@@ -1,7 +1,12 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import { OG_COLORS, generateStarfield } from '@/lib/share/og-utils';
-import { loadIGFonts, truncateIG } from '@/lib/instagram/ig-utils';
+import { OG_COLORS } from '@/lib/share/og-utils';
+import {
+  loadIGFonts,
+  truncateIG,
+  renderIGStarfield,
+  IGBrandTag,
+} from '@/lib/instagram/ig-utils';
 import {
   IG_SIZES,
   IG_TEXT,
@@ -10,6 +15,8 @@ import {
 } from '@/lib/instagram/design-system';
 
 export const runtime = 'edge';
+
+const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
 
 type RotatingType =
   | 'affirmation'
@@ -20,32 +27,37 @@ type RotatingType =
 
 const TYPE_CONFIG: Record<
   RotatingType,
-  { label: string; accent: string; gradient: string }
+  { label: string; accent: string; gradient: string; glyph: string }
 > = {
   affirmation: {
     label: 'DAILY AFFIRMATION',
     accent: CATEGORY_ACCENT.lunar,
     gradient: 'linear-gradient(180deg, #0f1428 0%, #0d0a14 40%, #0a0a0a 100%)',
+    glyph: 'R', // Moon
   },
   ritual_tip: {
     label: 'RITUAL TIP',
     accent: CATEGORY_ACCENT.spells,
     gradient: 'linear-gradient(180deg, #1a0f28 0%, #0d0a14 40%, #0a0a0a 100%)',
+    glyph: 'R', // Moon
   },
   sign_of_the_day: {
     label: 'SIGN OF THE DAY',
     accent: CATEGORY_ACCENT.zodiac,
     gradient: 'linear-gradient(180deg, #1a1028 0%, #0d0a14 40%, #0a0a0a 100%)',
+    glyph: 'Q', // Sun
   },
   transit_alert: {
     label: 'TRANSIT ALERT',
     accent: CATEGORY_ACCENT.planetary,
     gradient: 'linear-gradient(180deg, #0f1a28 0%, #0a0d14 40%, #0a0a0a 100%)',
+    glyph: 'S', // Mercury (most transit-associated)
   },
   numerology: {
     label: 'NUMEROLOGY',
     accent: CATEGORY_ACCENT.numerology,
     gradient: 'linear-gradient(180deg, #1a1028 0%, #0d0a14 40%, #0a0a0a 100%)',
+    glyph: 'V', // Jupiter — expansion, spiritual numbers
   },
 };
 
@@ -59,9 +71,7 @@ const VALID_TYPES = new Set<string>([
 
 export async function GET(request: NextRequest) {
   try {
-    const requestUrl = new URL(request.url);
-    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
-    const { searchParams } = requestUrl;
+    const { searchParams } = new URL(request.url);
 
     const rawType = searchParams.get('type') || 'affirmation';
     const type: RotatingType = VALID_TYPES.has(rawType)
@@ -71,16 +81,15 @@ export async function GET(request: NextRequest) {
     const mainText = searchParams.get('main') || '';
     const secondary = searchParams.get('secondary') || '';
     const extra = searchParams.get('extra') || '';
-    // Allow label override (used by numerology sub-types: ANGEL NUMBER 444, LIFE PATH 7, etc.)
     const labelOverride = searchParams.get('label') || '';
 
     const config = TYPE_CONFIG[type];
     const displayLabel = labelOverride || config.label;
     const { width, height } = IG_SIZES.story;
-    const fonts = await loadIGFonts(request);
-    const stars = generateStarfield(
+    const fonts = await loadIGFonts(request, { includeAstronomicon: true });
+    const starfield = renderIGStarfield(
       `rotating-${type}-${mainText.slice(0, 12)}`,
-      90,
+      120,
     );
 
     const layoutJsx = (
@@ -96,59 +105,65 @@ export async function GET(request: NextRequest) {
           padding: `${IG_STORY_SAFE.top}px ${IG_STORY_SAFE.sidePadding}px ${IG_STORY_SAFE.bottom}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          overflow: 'hidden',
         }}
       >
-        {/* Starfield */}
-        {stars.map((star, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              left: `${star.x}%`,
-              top: `${star.y}%`,
-              width: star.size,
-              height: star.size,
-              borderRadius: '50%',
-              background: '#fff',
-              opacity: star.opacity * 0.3,
-            }}
-          />
-        ))}
+        {starfield}
 
-        {/* Label header */}
+        {/* Ghost glyph backdrop — Satori-safe */}
         <div
           style={{
-            fontSize: IG_TEXT.story.caption,
-            color: OG_COLORS.textTertiary,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: 'Astronomicon',
+              fontSize: 1800,
+              color: config.accent,
+              opacity: 0.06,
+              display: 'flex',
+              lineHeight: 1,
+            }}
+          >
+            {config.glyph}
+          </div>
+        </div>
+
+        {/* Label header — more impactful */}
+        <div
+          style={{
+            fontSize: IG_TEXT.story.label + 2,
+            color: config.accent,
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
-            marginBottom: 64,
+            marginBottom: 72,
             display: 'flex',
+            fontWeight: 600,
+            textShadow: `0 0 20px ${config.accent}60`,
           }}
         >
           {displayLabel}
         </div>
 
-        {/* Moon icon separator */}
-        <img
-          src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-          width={32}
-          height={32}
-          style={{ opacity: 0.3, marginBottom: 48 }}
-          alt=''
-        />
-
-        {/* Main text */}
+        {/* Main text — hero */}
         <div
           style={{
-            fontSize: IG_TEXT.story.subtitle,
+            fontSize: IG_TEXT.story.subtitle + 4,
             color: OG_COLORS.textPrimary,
             textAlign: 'center',
-            lineHeight: 1.5,
+            lineHeight: 1.45,
             maxWidth: '88%',
             display: 'flex',
-            fontWeight: 500,
-            marginBottom: 40,
+            fontWeight: 600,
+            marginBottom: 48,
           }}
         >
           {truncateIG(mainText, 160)}
@@ -158,13 +173,14 @@ export async function GET(request: NextRequest) {
         {secondary ? (
           <div
             style={{
-              fontSize: IG_TEXT.story.label,
+              fontSize: IG_TEXT.story.label + 2,
               color: config.accent,
-              letterSpacing: '0.08em',
+              letterSpacing: '0.06em',
               marginBottom: 24,
               display: 'flex',
               textAlign: 'center',
-              fontWeight: 600,
+              fontWeight: 700,
+              textShadow: `0 0 30px ${config.accent}60`,
             }}
           >
             {secondary}
@@ -186,37 +202,7 @@ export async function GET(request: NextRequest) {
           </div>
         ) : null}
 
-        {/* Brand footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            justifyContent: 'center',
-            position: 'absolute',
-            bottom: IG_STORY_SAFE.bottom + 20,
-            left: 0,
-            right: 0,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={18}
-            height={18}
-            style={{ opacity: 0.4 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontSize: IG_TEXT.story.footer,
-              color: 'rgba(255,255,255,0.35)',
-              letterSpacing: '0.1em',
-              display: 'flex',
-            }}
-          >
-            lunary.app
-          </span>
-        </div>
+        <IGBrandTag baseUrl={SHARE_BASE_URL} isStory />
       </div>
     );
 

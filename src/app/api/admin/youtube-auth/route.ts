@@ -11,7 +11,9 @@ const SCOPES = [
 ];
 
 function getRedirectUri() {
-  const base = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const base = (
+    process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  ).replace(/\/$/, '');
   return `${base}/api/admin/youtube-auth/callback`;
 }
 

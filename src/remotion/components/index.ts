@@ -14,5 +14,7 @@ export { TextOverlays } from './TextOverlays';
 export { TextScrim } from './TextScrim';
 export { ZoomRegion } from './ZoomRegion';
 export { TapIndicator } from './TapIndicator';
+export { ConstellationOverlay } from './ConstellationOverlay';
+export type { ConstellationOverlayProps } from './ConstellationOverlay';
 export type { ZoomPoint } from './ZoomRegion';
 export type { TapPoint } from './TapIndicator';

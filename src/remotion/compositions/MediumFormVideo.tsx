@@ -4,6 +4,8 @@ import {
   Audio,
   useVideoConfig,
   useCurrentFrame,
+  interpolate,
+  Easing,
   staticFile,
 } from 'remotion';
 import { AnimatedBackground } from '../components/AnimatedBackground';
@@ -121,6 +123,17 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
     : null;
   const isInOutro = isOutroSegment(currentTime, segments);
 
+  // Find the frame when the outro speech section first starts (for CTA entrance animation)
+  const ctaEntranceFrame = React.useMemo(() => {
+    if (segments.length === 0) return 0;
+    for (const seg of segments) {
+      if (isOutroSegment(seg.startTime + 0.01, segments)) {
+        return Math.round(seg.startTime * fps);
+      }
+    }
+    return 0;
+  }, [segments, fps]);
+
   // Fallback to image-based topics or zodiacSign prop (single-topic only)
   let imageTopic: string | undefined = undefined;
   if (!isMultiSign && images.length > 0) {
@@ -187,15 +200,18 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
             <p
               style={{
                 fontFamily: 'Roboto Mono, monospace',
-                fontWeight: 500,
-                fontSize: 36,
-                color: COLORS.primaryText,
+                fontWeight: 600,
+                fontSize: 34,
+                color: categoryVisuals?.accentColor ?? COLORS.primaryText,
                 margin: 0,
-                letterSpacing: '-0.01em',
-                textShadow: '0 4px 12px rgba(0, 0, 0, 0.8)',
-                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                padding: '12px 20px',
-                borderRadius: '8px',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase' as const,
+                textShadow: categoryVisuals?.accentColor
+                  ? `0 0 20px ${categoryVisuals.accentColor}50, -1px -1px 0 rgba(0,0,0,0.9), 1px 1px 0 rgba(0,0,0,0.9)`
+                  : '0 4px 12px rgba(0, 0, 0, 0.8)',
+                display: 'inline-block',
+                borderBottom: `2px solid ${categoryVisuals?.accentColor ?? 'rgba(255,255,255,0.3)'}`,
+                paddingBottom: '6px',
               }}
             >
               {detectedTopic}
@@ -225,7 +241,7 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
         />
       )}
 
-      {/* CTA overlay during outro speech - clean text only */}
+      {/* CTA overlay during outro speech - animated entrance */}
       {isInOutro && !showIntro && (
         <div
           style={{
@@ -235,19 +251,39 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
             right: '8%',
             textAlign: 'center',
             zIndex: 20,
+            opacity: interpolate(
+              frame,
+              [ctaEntranceFrame, ctaEntranceFrame + 9],
+              [0, 1],
+              {
+                extrapolateLeft: 'clamp',
+                extrapolateRight: 'clamp',
+                easing: Easing.out(Easing.cubic),
+              },
+            ),
+            transform: `translateY(${interpolate(
+              frame,
+              [ctaEntranceFrame, ctaEntranceFrame + 9],
+              [16, 0],
+              {
+                extrapolateLeft: 'clamp',
+                extrapolateRight: 'clamp',
+                easing: Easing.out(Easing.cubic),
+              },
+            )}px)`,
           }}
         >
           <p
             style={{
               fontFamily: 'Roboto Mono, monospace',
-              fontWeight: 600,
+              fontWeight: 700,
               fontSize: 44,
               color: COLORS.primaryText,
               margin: 0,
               marginBottom: '16px',
-              letterSpacing: '-0.01em',
+              letterSpacing: '-0.02em',
               textShadow:
-                '0 0 40px rgba(0, 0, 0, 1), 0 4px 20px rgba(0, 0, 0, 0.9)',
+                '-2px -2px 0 rgba(0,0,0,0.8), 2px -2px 0 rgba(0,0,0,0.8), -2px 2px 0 rgba(0,0,0,0.8), 2px 2px 0 rgba(0,0,0,0.8), 0 0 24px rgba(0,0,0,0.6)',
             }}
           >
             Follow for more cosmic updates
@@ -255,13 +291,12 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
           <p
             style={{
               fontFamily: 'Roboto Mono, monospace',
-              fontWeight: 400,
-              fontSize: 26,
-              color: '#8B7DFF',
+              fontWeight: 600,
+              fontSize: 28,
+              color: categoryVisuals?.accentColor ?? '#8B7DFF',
               margin: 0,
-              letterSpacing: 0,
-              textShadow:
-                '0 0 30px rgba(0, 0, 0, 1), 0 2px 12px rgba(0, 0, 0, 0.9)',
+              letterSpacing: '0.04em',
+              textShadow: `0 0 20px ${categoryVisuals?.accentColor ?? '#8B7DFF'}60, -1px -1px 0 rgba(0,0,0,0.8), 1px 1px 0 rgba(0,0,0,0.8)`,
             }}
           >
             lunary.app

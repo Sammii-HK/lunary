@@ -233,7 +233,11 @@ function getPairKey(sign1: string, sign2: string): string {
 }
 
 function getElementPairKey(element1: string, element2: string): string {
-  return [element1, element2].sort().join('-');
+  const key = `${element1}-${element2}`;
+  if (PAIR_DETAILS[key]) return key;
+  const reverseKey = `${element2}-${element1}`;
+  if (PAIR_DETAILS[reverseKey]) return reverseKey;
+  return key;
 }
 
 function getCompatibilityScore(sign1: string, sign2: string): number {

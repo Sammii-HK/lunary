@@ -95,172 +95,163 @@ export const HookIntro: React.FC<HookIntroProps> = ({
         opacity: containerOpacity,
         zIndex: 16,
         pointerEvents: 'none',
+        paddingLeft: '6%',
+        paddingRight: '6%',
       }}
     >
-      {/* Full-width background bar for legibility */}
       <div
         style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.75)',
-          paddingTop: 28,
-          paddingBottom: 28,
-          paddingLeft: '8%',
-          paddingRight: '8%',
-          borderTop: '2px solid rgba(255, 255, 255, 0.15)',
-          borderBottom: '2px solid rgba(255, 255, 255, 0.15)',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          gap: '4px 16px',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '6px 14px',
-          }}
-        >
-          {words.map((word, idx) => {
-            // Each word enters with a stagger
-            const wordStart = idx * wordEntranceDuration;
+        {words.map((word, idx) => {
+          // Each word enters with a stagger
+          const wordStart = idx * wordEntranceDuration;
 
-            // Highlight word gets accent color and a pop after entrance
-            const highlighted = idx === firstHighlightIdx && accentColor;
+          // Highlight word gets accent color and a pop after entrance
+          const highlighted = idx === firstHighlightIdx && accentColor;
 
-            // Settled state subtle glow for highlight word
-            const isSettled = localFrame > totalEntranceTime + 6;
+          // Settled state subtle glow for highlight word
+          const isSettled = localFrame > totalEntranceTime + 6;
 
-            // Variant-specific animations
-            let wordOpacity = 1;
-            let transformStyle = '';
+          // Variant-specific animations
+          let wordOpacity = 1;
+          let transformStyle = '';
 
-            // Poster frame: all words fully visible, no animation
-            if (isPosterFrame) {
-              wordOpacity = 1;
-              transformStyle = '';
-            } else if (variant === 'typewriter') {
-              // Typewriter: left-to-right opacity fade
-              wordOpacity = interpolate(
-                localFrame,
-                [wordStart, wordStart + 2],
-                [0, 1],
-                { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-              );
-              transformStyle = highlighted
-                ? `scale(${interpolate(
-                    localFrame,
-                    [
-                      wordStart + wordEntranceDuration,
-                      wordStart + wordEntranceDuration + 6,
-                      wordStart + wordEntranceDuration + 12,
-                    ],
-                    [1.0, 1.12, 1.0],
-                    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-                  )})`
-                : '';
-            } else if (variant === 'scale_pop') {
-              // Scale pop: center-out scale-from-0 with bounce
-              const scaleValue = spring({
-                frame: Math.max(0, localFrame - wordStart),
-                fps,
-                config: { damping: 8, stiffness: 150, mass: 0.5 },
-              });
-              wordOpacity = interpolate(
-                localFrame,
-                [wordStart, wordStart + 2],
-                [0, 1],
-                { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-              );
-              const highlightPop = highlighted
-                ? interpolate(
-                    localFrame,
-                    [
-                      wordStart + wordEntranceDuration,
-                      wordStart + wordEntranceDuration + 6,
-                      wordStart + wordEntranceDuration + 12,
-                    ],
-                    [1.0, 1.12, 1.0],
-                    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-                  )
-                : 1.0;
-              transformStyle = `scale(${scaleValue * highlightPop})`;
-            } else {
-              // Default: slide_up (existing behavior)
-              wordOpacity = interpolate(
-                localFrame,
-                [wordStart, wordStart + wordEntranceDuration],
-                [0, 1],
-                { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-              );
-              const slideUp = interpolate(
-                localFrame,
-                [wordStart, wordStart + wordEntranceDuration],
-                [14, 0],
-                {
-                  extrapolateLeft: 'clamp',
-                  extrapolateRight: 'clamp',
-                  easing: Easing.out(Easing.cubic),
-                },
-              );
-              const highlightPop = highlighted
-                ? interpolate(
-                    localFrame,
-                    [
-                      wordStart + wordEntranceDuration,
-                      wordStart + wordEntranceDuration + 6,
-                      wordStart + wordEntranceDuration + 12,
-                    ],
-                    [1.0, 1.12, 1.0],
-                    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-                  )
-                : 1.0;
-              transformStyle = `translateY(${slideUp}px) scale(${highlightPop})`;
-            }
-
-            return (
-              <span
-                key={idx}
-                style={{
-                  fontFamily: 'Roboto Mono, monospace',
-                  fontSize: words.length <= 6 ? 56 : 46,
-                  fontWeight: highlighted ? 700 : 600,
-                  color: highlighted ? accentColor : COLORS.primaryText,
-                  opacity: wordOpacity,
-                  transform: transformStyle,
-                  display: 'inline-block',
-                  textShadow:
-                    highlighted && isSettled
-                      ? `0 0 20px ${accentColor}40, 0 0 40px ${accentColor}20`
-                      : `
-                    -1px -1px 0 rgba(0,0,0,0.6),
-                    1px -1px 0 rgba(0,0,0,0.6),
-                    -1px 1px 0 rgba(0,0,0,0.6),
-                    1px 1px 0 rgba(0,0,0,0.6),
-                    0 2px 8px rgba(0,0,0,0.5)
-                  `,
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1.3,
-                }}
-              >
-                {word}
-              </span>
+          // Poster frame: all words fully visible, no animation
+          if (isPosterFrame) {
+            wordOpacity = 1;
+            transformStyle = '';
+          } else if (variant === 'typewriter') {
+            // Typewriter: left-to-right opacity fade
+            wordOpacity = interpolate(
+              localFrame,
+              [wordStart, wordStart + 2],
+              [0, 1],
+              { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
             );
-          })}
-          {/* Typewriter blinking cursor */}
-          {variant === 'typewriter' &&
-            localFrame >= words.length * wordEntranceDuration && (
-              <span
-                style={{
-                  fontFamily: 'Roboto Mono, monospace',
-                  fontSize: words.length <= 6 ? 56 : 46,
-                  fontWeight: 400,
-                  color: COLORS.primaryText,
-                  opacity: Math.sin(localFrame * 0.3) > 0 ? 1 : 0,
-                  display: 'inline-block',
-                  lineHeight: 1.3,
-                }}
-              >
-                |
-              </span>
-            )}
-        </div>
+            transformStyle = highlighted
+              ? `scale(${interpolate(
+                  localFrame,
+                  [
+                    wordStart + wordEntranceDuration,
+                    wordStart + wordEntranceDuration + 6,
+                    wordStart + wordEntranceDuration + 12,
+                  ],
+                  [1.0, 1.12, 1.0],
+                  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+                )})`
+              : '';
+          } else if (variant === 'scale_pop') {
+            // Scale pop: center-out scale-from-0 with bounce
+            const scaleValue = spring({
+              frame: Math.max(0, localFrame - wordStart),
+              fps,
+              config: { damping: 8, stiffness: 150, mass: 0.5 },
+            });
+            wordOpacity = interpolate(
+              localFrame,
+              [wordStart, wordStart + 2],
+              [0, 1],
+              { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+            );
+            const highlightPop = highlighted
+              ? interpolate(
+                  localFrame,
+                  [
+                    wordStart + wordEntranceDuration,
+                    wordStart + wordEntranceDuration + 6,
+                    wordStart + wordEntranceDuration + 12,
+                  ],
+                  [1.0, 1.12, 1.0],
+                  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+                )
+              : 1.0;
+            transformStyle = `scale(${scaleValue * highlightPop})`;
+          } else {
+            // Default: slide_up (existing behavior)
+            wordOpacity = interpolate(
+              localFrame,
+              [wordStart, wordStart + wordEntranceDuration],
+              [0, 1],
+              { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+            );
+            const slideUp = interpolate(
+              localFrame,
+              [wordStart, wordStart + wordEntranceDuration],
+              [14, 0],
+              {
+                extrapolateLeft: 'clamp',
+                extrapolateRight: 'clamp',
+                easing: Easing.out(Easing.cubic),
+              },
+            );
+            const highlightPop = highlighted
+              ? interpolate(
+                  localFrame,
+                  [
+                    wordStart + wordEntranceDuration,
+                    wordStart + wordEntranceDuration + 6,
+                    wordStart + wordEntranceDuration + 12,
+                  ],
+                  [1.0, 1.12, 1.0],
+                  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+                )
+              : 1.0;
+            transformStyle = `translateY(${slideUp}px) scale(${highlightPop})`;
+          }
+
+          return (
+            <span
+              key={idx}
+              style={{
+                fontFamily: 'Roboto Mono, monospace',
+                fontSize: words.length <= 4 ? 76 : words.length <= 7 ? 64 : 54,
+                fontWeight: highlighted ? 800 : 700,
+                color: highlighted ? accentColor : COLORS.primaryText,
+                opacity: wordOpacity,
+                transform: transformStyle,
+                display: 'inline-block',
+                textShadow:
+                  highlighted && isSettled
+                    ? `0 0 24px ${accentColor}60, 0 0 48px ${accentColor}30,
+                       -2px -2px 0 rgba(0,0,0,0.8), 2px -2px 0 rgba(0,0,0,0.8),
+                       -2px 2px 0 rgba(0,0,0,0.8), 2px 2px 0 rgba(0,0,0,0.8),
+                       0 4px 16px rgba(0,0,0,0.7)`
+                    : `-2px -2px 0 rgba(0,0,0,0.8),
+                       2px -2px 0 rgba(0,0,0,0.8),
+                       -2px 2px 0 rgba(0,0,0,0.8),
+                       2px 2px 0 rgba(0,0,0,0.8),
+                       0 0 12px rgba(0,0,0,0.6),
+                       0 4px 16px rgba(0,0,0,0.7)`,
+                letterSpacing: '-0.01em',
+                lineHeight: 1.25,
+              }}
+            >
+              {word}
+            </span>
+          );
+        })}
+        {/* Typewriter blinking cursor */}
+        {variant === 'typewriter' &&
+          localFrame >= words.length * wordEntranceDuration && (
+            <span
+              style={{
+                fontFamily: 'Roboto Mono, monospace',
+                fontSize: words.length <= 4 ? 76 : words.length <= 7 ? 64 : 54,
+                fontWeight: 400,
+                color: COLORS.primaryText,
+                opacity: Math.sin(localFrame * 0.3) > 0 ? 1 : 0,
+                display: 'inline-block',
+                lineHeight: 1.25,
+              }}
+            >
+              |
+            </span>
+          )}
       </div>
     </div>
   );

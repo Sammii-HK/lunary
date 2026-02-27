@@ -68,6 +68,8 @@ export interface TikTokScript {
   hashtags: string[];
   /** What Playwright needs to do (high-level) */
   playwrightNotes: string;
+  /** Zodiac sign to overlay as constellation (e.g. 'scorpio'). Only set for zodiac-focused videos. */
+  zodiacSign?: string;
 }
 
 export interface Scene {
@@ -332,6 +334,7 @@ const horoscopeDeepDive: TikTokScript = {
   hashtags: ['horoscope', 'birthchart', 'lunary', 'witchtok', 'transits'],
   playwrightNotes:
     'Navigate to /horoscope. Scene durations synced to voiceoverLine word counts. Click numerology modal is a silent interaction moment.',
+  zodiacSign: 'scorpio',
 };
 
 const tarotPatterns: TikTokScript = {
@@ -723,6 +726,7 @@ const birthChart: TikTokScript = {
   hashtags: ['birthchart', 'astrology', 'lunary', 'natalchart', 'witchtok'],
   playwrightNotes:
     'Navigate to /birth-chart. Escalating reveal. Scene durations synced to voiceoverLine. "Free" at the end is the loop trigger.',
+  zodiacSign: 'scorpio',
 };
 
 const profileCircle: TikTokScript = {

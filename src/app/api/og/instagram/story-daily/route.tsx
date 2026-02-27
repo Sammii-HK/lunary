@@ -1,11 +1,12 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { getMoonPhaseIcon, OG_COLORS } from '@/lib/share/og-utils';
 import {
-  getMoonPhaseIcon,
-  OG_COLORS,
-  generateStarfield,
-} from '@/lib/share/og-utils';
-import { loadIGFonts, truncateIG } from '@/lib/instagram/ig-utils';
+  loadIGFonts,
+  truncateIG,
+  renderIGStarfield,
+  IGBrandTag,
+} from '@/lib/instagram/ig-utils';
 import {
   IG_SIZES,
   IG_TEXT,
@@ -14,11 +15,15 @@ import {
 
 export const runtime = 'edge';
 
+const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+
+// Moon Astronomicon character
+const MOON_GLYPH = 'R';
+const MOON_ACCENT = '#818CF8';
+
 export async function GET(request: NextRequest) {
   try {
-    const requestUrl = new URL(request.url);
-    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
-    const { searchParams } = requestUrl;
+    const { searchParams } = new URL(request.url);
     const phase = searchParams.get('phase') || 'Waxing Crescent';
     const energy =
       searchParams.get('energy') || 'Trust the process unfolding around you';
@@ -34,8 +39,8 @@ export async function GET(request: NextRequest) {
 
     const moonIconUrl = getMoonPhaseIcon(phase);
     const { width, height } = IG_SIZES.story;
-    const fonts = await loadIGFonts(request);
-    const stars = generateStarfield(`story-moon-${dateStr}`, 100);
+    const fonts = await loadIGFonts(request, { includeAstronomicon: true });
+    const starfield = renderIGStarfield(`story-moon-${dateStr}`, 120);
 
     const layoutJsx = (
       <div
@@ -51,24 +56,37 @@ export async function GET(request: NextRequest) {
           padding: `${IG_STORY_SAFE.top}px ${IG_STORY_SAFE.sidePadding}px ${IG_STORY_SAFE.bottom}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          overflow: 'hidden',
         }}
       >
-        {/* Starfield */}
-        {stars.map((star, i) => (
+        {starfield}
+
+        {/* Giant Moon ghost backdrop — Satori-safe centering */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <div
-            key={i}
             style={{
-              position: 'absolute',
-              left: `${star.x}%`,
-              top: `${star.y}%`,
-              width: star.size,
-              height: star.size,
-              borderRadius: '50%',
-              background: '#fff',
-              opacity: star.opacity * 0.35,
+              fontFamily: 'Astronomicon',
+              fontSize: 1800,
+              color: MOON_ACCENT,
+              opacity: 0.06,
+              display: 'flex',
+              lineHeight: 1,
             }}
-          />
-        ))}
+          >
+            {MOON_GLYPH}
+          </div>
+        </div>
 
         {/* Date label */}
         <div
@@ -77,31 +95,36 @@ export async function GET(request: NextRequest) {
             color: OG_COLORS.textTertiary,
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
-            marginBottom: 48,
+            marginBottom: 56,
             display: 'flex',
           }}
         >
           {dateText}
         </div>
 
-        {/* Moon phase icon (large for story) */}
+        {/* Moon phase icon — bigger */}
         <img
           src={moonIconUrl}
-          width={240}
-          height={240}
-          style={{ marginBottom: 48, opacity: 0.9 }}
+          width={320}
+          height={320}
+          style={{
+            marginBottom: 48,
+            opacity: 0.95,
+            filter: `drop-shadow(0 0 40px ${MOON_ACCENT}80)`,
+          }}
           alt=''
         />
 
-        {/* Moon phase name */}
+        {/* Moon phase name — hero with glow */}
         <div
           style={{
-            fontSize: IG_TEXT.story.title,
-            color: '#818CF8',
-            letterSpacing: '0.08em',
+            fontSize: IG_TEXT.story.title + 8,
+            color: MOON_ACCENT,
+            letterSpacing: '0.06em',
             marginBottom: 40,
             display: 'flex',
-            fontWeight: 600,
+            fontWeight: 700,
+            textShadow: `0 0 50px ${MOON_ACCENT}80`,
           }}
         >
           {phase}
@@ -110,11 +133,11 @@ export async function GET(request: NextRequest) {
         {/* Energy description */}
         <div
           style={{
-            fontSize: IG_TEXT.story.subtitle,
+            fontSize: IG_TEXT.story.subtitle + 2,
             color: OG_COLORS.textPrimary,
             textAlign: 'center',
-            lineHeight: 1.4,
-            maxWidth: '90%',
+            lineHeight: 1.45,
+            maxWidth: '88%',
             display: 'flex',
             fontWeight: 500,
             marginBottom: 64,
@@ -123,7 +146,7 @@ export async function GET(request: NextRequest) {
           {truncateIG(energy, 100)}
         </div>
 
-        {/* CTA in safe zone */}
+        {/* CTA */}
         <div
           style={{
             fontSize: IG_TEXT.story.caption,
@@ -132,40 +155,10 @@ export async function GET(request: NextRequest) {
             letterSpacing: '0.05em',
           }}
         >
-          Explore more at lunary.app
+          Link in bio for your full moon reading
         </div>
 
-        {/* Brand footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            justifyContent: 'center',
-            position: 'absolute',
-            bottom: IG_STORY_SAFE.bottom + 20,
-            left: 0,
-            right: 0,
-          }}
-        >
-          <img
-            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={18}
-            height={18}
-            style={{ opacity: 0.4 }}
-            alt=''
-          />
-          <span
-            style={{
-              fontSize: IG_TEXT.story.footer,
-              color: 'rgba(255,255,255,0.35)',
-              letterSpacing: '0.1em',
-              display: 'flex',
-            }}
-          >
-            lunary.app
-          </span>
-        </div>
+        <IGBrandTag baseUrl={SHARE_BASE_URL} isStory />
       </div>
     );
 

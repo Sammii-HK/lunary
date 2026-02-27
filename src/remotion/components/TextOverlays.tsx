@@ -147,6 +147,18 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
 
         const opacity = Math.min(fadeIn, fadeOut);
 
+        // Slide-up entrance (stronger for CTA, subtle for chapter)
+        const slideUp = interpolate(
+          frame,
+          [startFrame, startFrame + fadeInDuration],
+          [style === 'cta' ? -20 : 12, 0],
+          {
+            extrapolateLeft: 'clamp',
+            extrapolateRight: 'clamp',
+            easing: Easing.out(Easing.cubic),
+          },
+        );
+
         // Style-specific accent enhancements
         const isStamp = style === 'stamp';
         const isCta = style === 'cta';
@@ -160,75 +172,107 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
               top: yPosition,
               left: '5%',
               right: '5%',
-              transform: 'translateY(-50%)',
+              transform: `translateY(calc(-50% + ${slideUp}px))`,
               textAlign: 'center',
               opacity,
-              zIndex: 15, // Above stars (5) and background, below fade transitions
+              zIndex: 15,
             }}
           >
-            {lines.map((line, lineIndex) => (
-              <p
-                key={lineIndex}
+            {/* CTA: full-width card with gradient + accent glow */}
+            {isCta ? (
+              <div
                 style={{
-                  fontFamily: 'Roboto Mono, monospace',
-                  fontSize,
-                  fontWeight: 400,
-                  color: '#ffffff',
-                  lineHeight: `${lineHeight}px`,
-                  margin: 0,
-                  textShadow,
-                  // Chapter: pill with semi-transparent background for readability
-                  ...(style === 'chapter'
-                    ? {
-                        backgroundColor: 'rgba(0, 0, 0, 0.55)',
-                        borderRadius: 10,
-                        paddingLeft: 14,
-                        paddingRight: 14,
-                        paddingTop: 6,
-                        paddingBottom: 6,
-                        display: 'inline-block',
-                      }
-                    : {}),
-                  // Stamp: left accent border + semi-transparent background
-                  ...(isStamp && accentColor
-                    ? {
-                        borderLeft: `3px solid ${accentColor}`,
-                        paddingLeft: 12,
-                        paddingTop: 4,
-                        paddingBottom: 4,
-                        backgroundColor: 'rgba(0, 0, 0, 0.25)',
-                        display: 'inline-block',
-                      }
-                    : {}),
-                  // CTA: subtle accent underline
-                  ...(isCta && accentColor
-                    ? {
-                        borderBottom: `2px solid ${accentColor}`,
-                        paddingBottom: 4,
-                        display: 'inline-block',
-                      }
-                    : {}),
-                  // Series badge: pill-shaped with accent background
-                  ...(isSeriesBadge
-                    ? {
-                        borderRadius: 20,
-                        backgroundColor: accentColor
-                          ? `${accentColor}4D` // 30% opacity
-                          : 'rgba(90, 215, 255, 0.3)',
-                        border: `1px solid ${accentColor || 'rgba(90, 215, 255, 0.6)'}`,
-                        paddingLeft: 16,
-                        paddingRight: 16,
-                        paddingTop: 6,
-                        paddingBottom: 6,
-                        display: 'inline-block',
-                        fontWeight: 600,
-                      }
-                    : {}),
+                  display: 'inline-block',
+                  background: accentColor
+                    ? `linear-gradient(135deg, ${accentColor}22 0%, rgba(0,0,0,0.7) 100%)`
+                    : 'rgba(0,0,0,0.7)',
+                  border: `1px solid ${accentColor ?? 'rgba(255,255,255,0.2)'}`,
+                  borderRadius: 16,
+                  paddingLeft: 32,
+                  paddingRight: 32,
+                  paddingTop: 18,
+                  paddingBottom: 18,
+                  boxShadow: accentColor
+                    ? `0 0 24px ${accentColor}40, inset 0 1px 0 rgba(255,255,255,0.1)`
+                    : 'none',
                 }}
               >
-                {line}
-              </p>
-            ))}
+                {lines.map((line, lineIndex) => (
+                  <p
+                    key={lineIndex}
+                    style={{
+                      fontFamily: 'Roboto Mono, monospace',
+                      fontSize: fontSize + 2,
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      lineHeight: `${lineHeight}px`,
+                      margin: lineIndex > 0 ? '4px 0 0' : 0,
+                      textShadow,
+                      letterSpacing: '0.02em',
+                    }}
+                  >
+                    {line}
+                  </p>
+                ))}
+              </div>
+            ) : (
+              lines.map((line, lineIndex) => (
+                <p
+                  key={lineIndex}
+                  style={{
+                    fontFamily: 'Roboto Mono, monospace',
+                    fontSize,
+                    fontWeight: style === 'chapter' ? 600 : 400,
+                    color: '#ffffff',
+                    lineHeight: `${lineHeight}px`,
+                    margin: lineIndex > 0 ? '4px 0 0' : 0,
+                    textShadow,
+                    // Chapter: pill with semi-transparent background
+                    ...(style === 'chapter'
+                      ? {
+                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: 12,
+                          paddingLeft: 18,
+                          paddingRight: 18,
+                          paddingTop: 8,
+                          paddingBottom: 8,
+                          display: 'inline-block',
+                        }
+                      : {}),
+                    // Stamp: left accent border
+                    ...(isStamp && accentColor
+                      ? {
+                          borderLeft: `3px solid ${accentColor}`,
+                          paddingLeft: 14,
+                          paddingTop: 4,
+                          paddingBottom: 4,
+                          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                          display: 'inline-block',
+                        }
+                      : {}),
+                    // Series badge: pill with accent bg
+                    ...(isSeriesBadge
+                      ? {
+                          borderRadius: 20,
+                          backgroundColor: accentColor
+                            ? `${accentColor}4D`
+                            : 'rgba(90, 215, 255, 0.3)',
+                          border: `1px solid ${accentColor || 'rgba(90, 215, 255, 0.6)'}`,
+                          paddingLeft: 16,
+                          paddingRight: 16,
+                          paddingTop: 6,
+                          paddingBottom: 6,
+                          display: 'inline-block',
+                          fontWeight: 600,
+                        }
+                      : {}),
+                  }}
+                >
+                  {line}
+                </p>
+              ))
+            )}
           </div>
         );
       })}

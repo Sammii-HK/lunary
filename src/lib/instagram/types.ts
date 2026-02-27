@@ -7,6 +7,7 @@ export type IGPostType =
   | 'meme'
   | 'carousel'
   | 'angel_number_carousel'
+  | 'one_word'
   | 'quote'
   | 'app_feature'
   | 'did_you_know'

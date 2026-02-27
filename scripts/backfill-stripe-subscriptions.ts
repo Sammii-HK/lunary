@@ -264,6 +264,33 @@ function needsUpdate(
   return false;
 }
 
+// Status rank: lower number = higher priority
+const STATUS_RANK: Record<string, number> = {
+  active: 1,
+  trialing: 2,
+  past_due: 3,
+};
+
+interface Candidate {
+  subscription: Stripe.Subscription;
+  customer: Stripe.Customer;
+  payload: Record<string, unknown>;
+}
+
+function pickBestCandidate(candidates: Candidate[]): Candidate {
+  return candidates.slice().sort((a, b) => {
+    const rankA = STATUS_RANK[a.subscription.status] ?? 99;
+    const rankB = STATUS_RANK[b.subscription.status] ?? 99;
+    if (rankA !== rankB) return rankA - rankB;
+    // Same status — prefer higher monthly amount (non-discounted users > discounted)
+    const amountA = (a.payload.monthly_amount_due as number) ?? 0;
+    const amountB = (b.payload.monthly_amount_due as number) ?? 0;
+    if (amountA !== amountB) return amountB - amountA;
+    // Fallback: newer subscription wins
+    return (b.subscription.created ?? 0) - (a.subscription.created ?? 0);
+  })[0];
+}
+
 function buildSubscriptionUpsert(
   existingColumns: Set<string>,
   data: Record<string, unknown>,
@@ -302,6 +329,10 @@ function buildSubscriptionUpsert(
 async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run') || args.includes('--preview');
+  // --force bypasses the change-detection check and always upserts every row.
+  // This ensures fields like monthly_amount_due that aren't in UPDATE_CHECK_COLUMNS
+  // still get written on every run.
+  const force = args.includes('--force');
   const limitArg = args.find((arg) => arg.startsWith('--limit='));
   const limit = limitArg ? Number(limitArg.split('=')[1]) : null;
 
@@ -314,12 +345,22 @@ async function main() {
   let skipped = 0;
   let unresolved = 0;
 
+  if (force) {
+    console.log(
+      '⚡ --force mode: change detection bypassed, all rows will be upserted',
+    );
+  }
   console.log('🔄 Backfilling Stripe subscriptions...');
+
+  // Pass 1: collect all active/trialing/past_due candidates per user.
+  // We do NOT write anything yet — we need all candidates before picking the best.
+  const candidatesByUser = new Map<string, Candidate[]>();
 
   while (true) {
     const response = await stripe.subscriptions.list({
       status: 'all',
       limit: 100,
+      expand: ['data.discounts'],
       starting_after: startingAfter,
     });
 
@@ -393,72 +434,16 @@ async function main() {
         current_period_end: currentPeriodEnd,
         has_discount: discountInfo.hasDiscount,
         discount_percent: discountInfo.discountPercent || null,
-        monthly_amount_due: discountInfo.monthlyAmountDue || null,
+        monthly_amount_due: discountInfo.monthlyAmountDue ?? null,
         coupon_id: discountInfo.couponId || null,
         promo_code: promoCode,
         discount_ends_at: discountInfo.discountEndsAt || null,
         trial_used: true,
       };
 
-      const insertColumns = SUBSCRIPTION_COLUMNS.filter((column) =>
-        subscriptionColumns.has(column),
-      );
-      const updateCheckColumns = UPDATE_CHECK_COLUMNS.filter((column) =>
-        subscriptionColumns.has(column),
-      );
-      const existingRow = await getExistingSubscription(
-        userId,
-        updateCheckColumns,
-      );
-      const shouldUpdate = needsUpdate(
-        existingRow,
-        payload,
-        updateCheckColumns,
-      );
-
-      if (dryRun) {
-        if (shouldUpdate) {
-          console.log(
-            `🧪 ${userId} -> ${subscription.id} (${status}, ${planType})`,
-          );
-        } else {
-          unchanged += 1;
-        }
-      } else {
-        if (shouldUpdate) {
-          const { query, values } = buildSubscriptionUpsert(
-            subscriptionColumns,
-            payload,
-          );
-          await sql.query(query, values);
-        } else {
-          unchanged += 1;
-        }
-
-        await sql`
-          INSERT INTO user_profiles (user_id, stripe_customer_id)
-          VALUES (${userId}, ${customer.id})
-          ON CONFLICT (user_id) DO UPDATE SET
-            stripe_customer_id = EXCLUDED.stripe_customer_id,
-            updated_at = NOW()
-        `;
-
-        if (!customer.metadata?.userId) {
-          await stripe.customers.update(customer.id, {
-            metadata: { ...(customer.metadata || {}), userId },
-          });
-        }
-
-        if (!subscription.metadata?.userId) {
-          await stripe.subscriptions.update(subscription.id, {
-            metadata: { ...(subscription.metadata || {}), userId },
-          });
-        }
-      }
-
-      if (shouldUpdate) {
-        updated += 1;
-      }
+      const existing = candidatesByUser.get(userId) ?? [];
+      existing.push({ subscription, customer, payload });
+      candidatesByUser.set(userId, existing);
     }
 
     if (limit && processed >= limit) {
@@ -466,6 +451,78 @@ async function main() {
     }
 
     startingAfter = response.data[response.data.length - 1]?.id;
+  }
+
+  // Warn about users with multiple active subs so we have visibility
+  for (const [userId, candidates] of candidatesByUser) {
+    if (candidates.length > 1) {
+      const ids = candidates.map((c) => c.subscription.id).join(', ');
+      console.warn(
+        `⚠️  Multiple active subs for ${userId}: [${ids}] — picking best`,
+      );
+    }
+  }
+
+  // Pass 2: for each user, pick the best candidate and write it
+  const updateCheckColumns = UPDATE_CHECK_COLUMNS.filter((column) =>
+    subscriptionColumns.has(column),
+  );
+
+  for (const [userId, candidates] of candidatesByUser) {
+    const { subscription, customer, payload } = pickBestCandidate(candidates);
+    const status = payload.status as string;
+    const planType = payload.plan_type as string;
+
+    const existingRow = await getExistingSubscription(
+      userId,
+      updateCheckColumns,
+    );
+    const shouldUpdate =
+      force || needsUpdate(existingRow, payload, updateCheckColumns);
+
+    if (dryRun) {
+      if (shouldUpdate) {
+        console.log(
+          `🧪 ${userId} -> ${subscription.id} (${status}, ${planType})`,
+        );
+      } else {
+        unchanged += 1;
+      }
+    } else {
+      if (shouldUpdate) {
+        const { query, values } = buildSubscriptionUpsert(
+          subscriptionColumns,
+          payload,
+        );
+        await sql.query(query, values);
+      } else {
+        unchanged += 1;
+      }
+
+      await sql`
+        INSERT INTO user_profiles (user_id, stripe_customer_id)
+        VALUES (${userId}, ${customer.id})
+        ON CONFLICT (user_id) DO UPDATE SET
+          stripe_customer_id = EXCLUDED.stripe_customer_id,
+          updated_at = NOW()
+      `;
+
+      if (!customer.metadata?.userId) {
+        await stripe.customers.update(customer.id, {
+          metadata: { ...(customer.metadata || {}), userId },
+        });
+      }
+
+      if (!subscription.metadata?.userId) {
+        await stripe.subscriptions.update(subscription.id, {
+          metadata: { ...(subscription.metadata || {}), userId },
+        });
+      }
+    }
+
+    if (shouldUpdate) {
+      updated += 1;
+    }
   }
 
   console.log('✅ Backfill complete');

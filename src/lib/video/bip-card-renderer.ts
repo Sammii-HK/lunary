@@ -20,12 +20,13 @@ const WIDTH = 1200;
 const HEIGHT = 675;
 
 const COLORS = {
-  bg: '#0a0a0f',
-  gold: '#d4af37',
+  bg: '#0a0a0a',
+  primary: '#8458d8', // Nebula Violet
+  accent: '#c77dff', // Galaxy Haze
   white: '#ffffff',
   secondary: '#b0b0c0',
   muted: '#6b6b80',
-  border: '#1e1e2e',
+  border: '#2a1f4a',
   positive: '#4ade80',
   negative: '#f87171',
 } as const;
@@ -51,18 +52,18 @@ function background(): string {
     <rect width="${WIDTH}" height="${HEIGHT}" fill="${COLORS.bg}"/>
     <defs>
       <radialGradient id="glow1" cx="10%" cy="20%" r="40%">
-        <stop offset="0%" stop-color="${COLORS.gold}" stop-opacity="0.04"/>
-        <stop offset="100%" stop-color="${COLORS.gold}" stop-opacity="0"/>
+        <stop offset="0%" stop-color="${COLORS.primary}" stop-opacity="0.04"/>
+        <stop offset="100%" stop-color="${COLORS.primary}" stop-opacity="0"/>
       </radialGradient>
       <radialGradient id="glow2" cx="90%" cy="80%" r="35%">
-        <stop offset="0%" stop-color="#9b59b6" stop-opacity="0.06"/>
-        <stop offset="100%" stop-color="#9b59b6" stop-opacity="0"/>
+        <stop offset="0%" stop-color="${COLORS.accent}" stop-opacity="0.06"/>
+        <stop offset="100%" stop-color="${COLORS.accent}" stop-opacity="0"/>
       </radialGradient>
     </defs>
     <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#glow1)"/>
     <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#glow2)"/>
     <rect x="24" y="24" width="${WIDTH - 48}" height="${HEIGHT - 48}" rx="8" ry="8"
-          fill="none" stroke="${COLORS.gold}" stroke-width="1" opacity="0.3"/>
+          fill="none" stroke="${COLORS.primary}" stroke-width="1" opacity="0.3"/>
   `;
 }
 
@@ -71,7 +72,7 @@ function header(label: string, rightLabel?: string): string {
     ? `<text x="${WIDTH - 50}" y="70" text-anchor="end" font-family="${FONT_SANS}" font-size="22" fill="${COLORS.muted}">${escapeXml(rightLabel)}</text>`
     : '';
   return `
-    <text x="50" y="70" font-family="${FONT_SANS}" font-size="22" font-weight="600" fill="${COLORS.gold}">${escapeXml(label)}</text>
+    <text x="50" y="70" font-family="${FONT_SANS}" font-size="22" font-weight="600" fill="${COLORS.primary}">${escapeXml(label)}</text>
     ${right}
     <line x1="50" y1="86" x2="${WIDTH - 50}" y2="86" stroke="${COLORS.border}" stroke-width="1"/>
   `;
@@ -223,7 +224,7 @@ function buildMilestoneSvg(opts: MilestoneCardOptions): string {
     ${
       opts.multiplier
         ? `<text x="${WIDTH / 2}" y="${contextY + 42}" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="32" font-weight="600" fill="${COLORS.gold}">${escapeXml(opts.multiplier)}</text>`
+          font-family="${FONT_SANS}" font-size="32" font-weight="600" fill="${COLORS.primary}">${escapeXml(opts.multiplier)}</text>`
         : ''
     }
   `
@@ -236,7 +237,7 @@ function buildMilestoneSvg(opts: MilestoneCardOptions): string {
           font-family="${FONT_SANS}" font-size="${valueFontSize}" font-weight="700" fill="${COLORS.white}">${escapeXml(valueStr)}</text>
     <text x="${WIDTH / 2}" y="290" text-anchor="middle"
           font-family="${FONT_SANS}" font-size="28" fill="${COLORS.secondary}">${escapeXml(metricLabel)}</text>
-    <line x1="${WIDTH / 2 - 100}" y1="322" x2="${WIDTH / 2 + 100}" y2="322" stroke="${COLORS.gold}" stroke-width="1.5" opacity="0.6"/>
+    <line x1="${WIDTH / 2 - 100}" y1="322" x2="${WIDTH / 2 + 100}" y2="322" stroke="${COLORS.primary}" stroke-width="1.5" opacity="0.6"/>
     ${contextSection}
     ${watermark()}
   </svg>`;
@@ -283,7 +284,7 @@ function buildFeatureLaunchSvg(opts: FeatureLaunchCardOptions): string {
     <text x="50" y="155" font-family="${FONT_SANS}" font-size="22" fill="${COLORS.muted}" font-style="italic">just shipped</text>
     <text x="${WIDTH / 2}" y="270" text-anchor="middle"
           font-family="${FONT_SANS}" font-size="${nameFontSize}" font-weight="700" fill="${COLORS.white}">${escapeXml(opts.featureName)}</text>
-    <line x1="${WIDTH / 2 - 120}" y1="300" x2="${WIDTH / 2 + 120}" y2="300" stroke="${COLORS.gold}" stroke-width="1.5" opacity="0.7"/>
+    <line x1="${WIDTH / 2 - 120}" y1="300" x2="${WIDTH / 2 + 120}" y2="300" stroke="${COLORS.primary}" stroke-width="1.5" opacity="0.7"/>
     ${opts.tagline ? `<text x="${WIDTH / 2}" y="338" text-anchor="middle" font-family="${FONT_SANS}" font-size="26" fill="${COLORS.secondary}">${escapeXml(opts.tagline)}</text>` : ''}
     ${bulletsSection}
     ${statsSection}

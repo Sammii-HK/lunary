@@ -5,6 +5,7 @@ import type {
 } from './types';
 import type { ThemeCategory } from '@/lib/social/types';
 import { seededRandom } from './ig-utils';
+import { zodiacSymbol } from '@/constants/symbols';
 
 const SIGNS = [
   'aries',
@@ -516,7 +517,7 @@ export function generateRankingCarousel(dateStr: string): {
       title: traitCapitalized,
       content: reason,
       subtitle: `#${rank} ${signCapitalized}`,
-      symbol: sign,
+      symbol: zodiacSymbol[sign as keyof typeof zodiacSymbol] || sign,
       category,
       variant: 'body' as CarouselSlideVariant,
     });

@@ -9,6 +9,7 @@ import {
   generateDayGuidanceSummary,
   checkRetrogradeEvents,
   checkRetrogradeIngress,
+  checkActiveRetrogrades,
 } from '../../../../../../utils/astrology/cosmic-og';
 import { getGeneralCrystalRecommendation } from '../../../../../../utils/crystals/generalCrystals';
 import { getGeneralTarotReading } from '../../../../../../utils/tarot/generalTarot';
@@ -48,8 +49,9 @@ async function generateResponse(
   const ingresses = checkSignIngress(positions, targetDate);
   const retrogradeEvents = checkRetrogradeEvents(positions);
   const retrogradeIngress = checkRetrogradeIngress(positions);
+  const activeRetrogrades = checkActiveRetrogrades(positions);
 
-  // Combine events with priority order: moon phases > extraordinary planetary events > sign ingress > daily aspects > seasonal > cosmic flow
+  // Combine events with priority order: moon phases > active retrogrades > extraordinary planetary events > sign ingress > daily aspects > seasonal > cosmic flow
   let allEvents: Array<any> = [];
 
   // 1. MOON PHASES (Priority 10 - highest)
@@ -63,18 +65,22 @@ async function generateResponse(
     });
   }
 
-  // 2. EXTRAORDINARY PLANETARY EVENTS (Priority 9)
+  // 2. ACTIVE RETROGRADES (Priority 9-10) — fires every day during retrograde period
+  allEvents.push(...retrogradeEvents); // station days (start/end)
+  allEvents.push(...activeRetrogrades); // mid-period days
+
+  // 3. EXTRAORDINARY PLANETARY EVENTS (Priority 9)
   const extraordinaryAspects = aspects.filter((a) => a.priority >= 9);
   allEvents.push(...extraordinaryAspects);
 
-  // 3. SIGN INGRESS (Priority 4)
+  // 4. SIGN INGRESS (Priority 4)
   allEvents.push(...ingresses);
 
-  // 4. DAILY ASPECTS (Priority 5-7)
+  // 5. DAILY ASPECTS (Priority 5-7)
   const dailyAspects = aspects.filter((a) => a.priority < 9);
   allEvents.push(...dailyAspects);
 
-  // 5. SEASONAL EVENTS (Priority 8)
+  // 6. SEASONAL EVENTS (Priority 8)
   allEvents.push(...seasonalEvents);
 
   // 6. If no events, add cosmic flow

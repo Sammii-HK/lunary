@@ -32,14 +32,14 @@ const DEFAULT_FORMAT: Format = 'square';
 // Category-themed gradients for visual variety
 // ALL brand violet/purple/cosmic - NO green or orange!
 const THEMED_GRADIENTS = [
-  'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // violet
-  'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)', // purple
-  'linear-gradient(135deg, #0f1428 0%, #0a0d14 50%, #0a0a0a 100%)', // indigo
-  'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // cosmic violet
-  'linear-gradient(135deg, #280f1a 0%, #140a0d 50%, #0a0a0a 100%)', // rose-violet
-  'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)', // deep purple
-  'linear-gradient(135deg, #0f1428 0%, #0a0d14 50%, #0a0a0a 100%)', // midnight violet
-  'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // nebula
+  'linear-gradient(135deg, #3a2260 0%, #241440 50%, #160e2a 100%)', // violet
+  'linear-gradient(135deg, #3a1a50 0%, #26104a 50%, #180a30 100%)', // purple
+  'linear-gradient(135deg, #1a2c58 0%, #141e3e 50%, #0e1428 100%)', // indigo
+  'linear-gradient(135deg, #3a2260 0%, #241440 50%, #160e2a 100%)', // cosmic violet
+  'linear-gradient(135deg, #4c1830 0%, #300e1e 50%, #1e0a14 100%)', // rose-violet
+  'linear-gradient(135deg, #3a1a50 0%, #26104a 50%, #180a30 100%)', // deep purple
+  'linear-gradient(135deg, #1a2c58 0%, #141e3e 50%, #0e1428 100%)', // midnight violet
+  'linear-gradient(135deg, #3a2260 0%, #241440 50%, #160e2a 100%)', // nebula
 ];
 
 // Accent colors that pair with each gradient - Lunary brand colors only
@@ -128,6 +128,7 @@ export async function GET(request: NextRequest) {
               : '60px 100px',
           fontFamily: fontData ? 'Roboto Mono' : 'system-ui',
           position: 'relative',
+          overflow: 'hidden',
         }}
       >
         {/* Starfield - more visible */}
@@ -142,26 +143,37 @@ export async function GET(request: NextRequest) {
               height: star.size,
               borderRadius: '50%',
               background: '#fff',
-              opacity: star.opacity * 0.85, // Increased from 0.3
-              boxShadow: `0 0 ${star.size * 2}px rgba(255, 255, 255, ${star.opacity * 0.5})`, // Glow
+              opacity: Math.min(1, star.opacity * 2.0),
+              boxShadow: `0 0 ${star.size * 3}px rgba(255, 255, 255, ${star.opacity * 0.8})`,
             }}
           />
         ))}
 
-        {/* Decorative quote mark */}
+        {/* Giant quote mark — ghost backdrop, Satori-safe centering */}
         <div
           style={{
             position: 'absolute',
-            top: isSquare ? 60 : 80,
-            left: isSquare ? 60 : 80,
-            fontSize: 120,
-            color: accent,
-            opacity: 0.1,
-            lineHeight: 1,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          {'\u201C'}
+          <div
+            style={{
+              fontSize: 900,
+              color: accent,
+              opacity: 0.07,
+              lineHeight: 1,
+              display: 'flex',
+              fontWeight: 700,
+            }}
+          >
+            {'\u201C'}
+          </div>
         </div>
 
         <div
@@ -183,6 +195,9 @@ export async function GET(request: NextRequest) {
               marginBottom: 40,
               color: '#f0f0f2',
               display: 'flex',
+              flexWrap: 'wrap',
+              wordBreak: 'break-word',
+              textAlign: 'center',
             }}
           >
             {quoteText}
