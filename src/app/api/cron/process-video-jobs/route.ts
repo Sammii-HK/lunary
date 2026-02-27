@@ -12,6 +12,7 @@ import { TTS_PRESETS } from '@/lib/tts/presets';
 import { buildThematicVideoComposition } from '@/lib/video/thematic-video';
 import { buildVideoCaption } from '@/lib/social/video-captions';
 import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
+import { generateInstagramReelCaption } from '@/lib/social/video-scripts/tiktok/metadata';
 import { getImageBaseUrl } from '@/lib/urls';
 import { createHash } from 'crypto';
 import { writeFile, unlink, mkdtemp } from 'fs/promises';
@@ -168,7 +169,7 @@ const videoHashtagConfig: Record<
   string,
   { useHashtags: boolean; count: number }
 > = {
-  instagram: { useHashtags: true, count: 3 },
+  instagram: { useHashtags: true, count: 10 },
   tiktok: { useHashtags: true, count: 3 },
   twitter: { useHashtags: true, count: 2 },
   threads: { useHashtags: false, count: 0 },
@@ -615,7 +616,7 @@ export async function POST(request: NextRequest) {
             'Sign Check: Pisces',
             'Did You Know',
           ]);
-          const MAX_INSTAGRAM_REELS_PER_WEEK = 2;
+          const MAX_INSTAGRAM_REELS_PER_WEEK = 4;
           const igWeekCountResult = await sql`
             SELECT COUNT(*) as count
             FROM social_posts
@@ -625,11 +626,13 @@ export async function POST(request: NextRequest) {
           `;
           const igReelsThisWeek = Number(igWeekCountResult.rows[0]?.count || 0);
           const igCapReached = igReelsThisWeek >= MAX_INSTAGRAM_REELS_PER_WEEK;
-          const isIgWorthy = IG_REEL_PRIORITY_THEMES.has(themeName);
+          const isIgWorthy =
+            IG_REEL_PRIORITY_THEMES.has(themeName) ||
+            metadata.contentTypeKey === 'angel_numbers';
 
-          // Optimal Instagram Reel posting times (UTC): 9, 12, 18
+          // Optimal Instagram Reel posting times (UTC): 17-19 = UK evening / US East lunch
           // Rotate through these across the week for variety
-          const IG_REEL_HOURS = [9, 12, 18];
+          const IG_REEL_HOURS = [17, 12, 19, 18];
           const igReelHour =
             IG_REEL_HOURS[igReelsThisWeek % IG_REEL_HOURS.length];
 
@@ -638,12 +641,28 @@ export async function POST(request: NextRequest) {
             // Only post priority content to Instagram, and respect weekly cap
             if (platform === 'instagram' && (igCapReached || !isIgWorthy))
               continue;
+            // Skip series parts > 1 on Instagram — users don't see parts in order
+            if (platform === 'instagram' && partNumber > 1) continue;
             // Use optimal posting time for Instagram reels
             let platformScheduledDate = scheduledDate;
             if (platform === 'instagram') {
               platformScheduledDate = new Date(scheduledDate);
               platformScheduledDate.setUTCHours(igReelHour, 0, 0, 0);
             }
+            // Instagram gets its own caption optimised for saves/shares/follows
+            const postCaption =
+              platform === 'instagram'
+                ? generateInstagramReelCaption({
+                    category,
+                    themeName,
+                    facetTitle: script.facet_title,
+                    hookText:
+                      typeof metadata.hookText === 'string'
+                        ? metadata.hookText
+                        : undefined,
+                    scheduledDate: platformScheduledDate,
+                  })
+                : buildCaptionForPlatform(platform);
             const imageUrl: string | null = null;
             await sql`
               INSERT INTO social_posts (
@@ -660,7 +679,7 @@ export async function POST(request: NextRequest) {
                 created_at
               )
               VALUES (
-                ${buildCaptionForPlatform(platform)},
+                ${postCaption},
                 ${platform},
                 'video',
                 ${script.facet_title},

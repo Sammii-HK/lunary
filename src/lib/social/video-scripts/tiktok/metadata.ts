@@ -560,6 +560,251 @@ const URGENCY_LINES: Record<string, string[]> = {
   ],
 };
 
+// ─── Instagram Reel caption helpers ─────────────────────────────────────────
+
+/**
+ * IG-native format hashtag pool (no TikTok-specific tags)
+ */
+const IG_FORMAT_HASHTAGS = [
+  '#reels',
+  '#instareels',
+  '#reelsinstagram',
+  '#explore',
+  '#instagramreels',
+  '#viralreels',
+];
+
+/**
+ * IG category-specific hashtag pools (spiritualinstagram / witchesofinstagram
+ * replace TikTok equivalents; no #fyp or #learnontiktok)
+ */
+const IG_CATEGORY_HASHTAGS: Record<string, string[]> = {
+  zodiac: [
+    '#astrology',
+    '#zodiac',
+    '#zodiacsigns',
+    '#birthchart',
+    '#astrologymemes',
+    '#spiritualinstagram',
+    '#astrologyinstagram',
+    '#horoscope',
+    '#astrologer',
+    '#cosmicenergy',
+    '#sunmoon',
+    '#astrologycommunity',
+  ],
+  tarot: [
+    '#tarot',
+    '#tarotreading',
+    '#tarotcommunity',
+    '#tarotcards',
+    '#tarotreader',
+    '#witchesofinstagram',
+    '#spiritualinstagram',
+    '#dailytarot',
+    '#tarotreadersofinstagram',
+    '#intuitivetarot',
+  ],
+  numerology: [
+    '#numerology',
+    '#angelnumbers',
+    '#spiritualinstagram',
+    '#numerologysigns',
+    '#angelnumber',
+    '#manifestation',
+    '#spiritualawakening',
+    '#numerologyreading',
+    '#divinenumbers',
+    '#lawofattraction',
+  ],
+  'angel-numbers': [
+    '#angelnumbers',
+    '#angelnumber',
+    '#spiritualawakening',
+    '#manifestation',
+    '#spiritualinstagram',
+    '#divinenumbers',
+    '#numerology',
+    '#lawofattraction',
+    '#spiritualsigns',
+    '#synchronicity',
+  ],
+  crystals: [
+    '#crystals',
+    '#crystalhealing',
+    '#crystalcollection',
+    '#witchesofinstagram',
+    '#spiritualinstagram',
+    '#chakra',
+    '#gemstones',
+    '#crystalmagic',
+    '#healingcrystals',
+    '#reiki',
+  ],
+  lunar: [
+    '#moonphases',
+    '#fullmoon',
+    '#newmoon',
+    '#moonmagic',
+    '#spiritualinstagram',
+    '#moonritual',
+    '#moonenergy',
+    '#witchesofinstagram',
+    '#moonphase',
+    '#lunarenergy',
+  ],
+  spells: [
+    '#witchesofinstagram',
+    '#spells',
+    '#witchcraft',
+    '#witch',
+    '#magick',
+    '#wicca',
+    '#babywitch',
+    '#spellwork',
+    '#pagan',
+    '#spiritualinstagram',
+  ],
+  chakras: [
+    '#chakras',
+    '#spirituality',
+    '#spiritual',
+    '#spiritualawakening',
+    '#meditation',
+    '#healing',
+    '#reiki',
+    '#thirdeye',
+    '#lightworker',
+    '#spiritualinstagram',
+  ],
+};
+
+/** Save CTAs — the primary IG algorithmic signal */
+const IG_SAVE_CTA_LINES = [
+  'Save this for when you need it.',
+  "Bookmark this — you'll come back to it.",
+  'Save this for when Mercury goes retrograde.',
+  'Save this to your collection.',
+  'Save this and come back when the energy shifts.',
+  'Save this. You will thank yourself later.',
+  'Bookmark this for the next time it comes up.',
+  'Save this reference. It comes in handy.',
+];
+
+/** Share/DM CTAs — the strongest IG reach signal (non-follower distribution) */
+const IG_SHARE_CTA_LINES = [
+  'Send this to a {sign} you know.',
+  'Share this with whoever needs to hear it today.',
+  'Tag the {sign} in your life.',
+  'DM this to the person who needs it.',
+  'Send this to your group chat.',
+  'Tag a friend who needs to see this.',
+  'Share this with someone you were just thinking about.',
+  'DM this to the first person who came to mind.',
+];
+
+/**
+ * IG CTA rotation by day-of-week:
+ * Mon/Wed/Fri = save (drives saves), Tue/Thu = share (drives DM reach), Sat/Sun = follow
+ */
+const IG_CTA_ROTATION: Array<'save' | 'share' | 'follow'> = [
+  'follow', // Sun=0
+  'save', //   Mon=1
+  'share', //  Tue=2
+  'save', //   Wed=3
+  'share', //  Thu=4
+  'save', //   Fri=5
+  'follow', // Sat=6
+];
+
+/**
+ * Deterministic pick of N items from an array using a string seed
+ */
+function seededPickN<T>(items: T[], seed: string, n: number): T[] {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+  }
+  const start = Math.abs(hash) % items.length;
+  const result: T[] = [];
+  for (let i = 0; i < n && i < items.length; i++) {
+    result.push(items[(start + i) % items.length]);
+  }
+  return result;
+}
+
+/**
+ * Generate IG-native hashtag string: 7 category + 3 format tags (8-10 total)
+ */
+function generateInstagramHashtags(
+  category: string,
+  theme: string,
+  facetTitle: string,
+): string {
+  const categoryPool =
+    IG_CATEGORY_HASHTAGS[category] ?? IG_CATEGORY_HASHTAGS.zodiac;
+  const categoryTags = seededPickN(categoryPool, `ig-cat-${theme}`, 7);
+  const formatTags = seededPickN(IG_FORMAT_HASHTAGS, `ig-fmt-${theme}`, 3);
+  const all = [...categoryTags, ...formatTags];
+  return all.map((t) => (t.startsWith('#') ? t : `#${t}`)).join(' ');
+}
+
+export interface InstagramReelCaptionParams {
+  category: string;
+  themeName: string;
+  facetTitle: string;
+  hookText?: string;
+  scheduledDate?: Date;
+}
+
+/**
+ * Generate Instagram Reel caption
+ *
+ * Structure (IG-optimised):
+ * [Hook line + emoji]
+ * [Value teaser]
+ * [Engagement question]
+ * [CTA — save Mon/Wed/Fri, share Tue/Thu, follow Sat/Sun]
+ * [Hashtags — 8-10 IG-native tags, no #fyp/#learnontiktok]
+ */
+export function generateInstagramReelCaption(
+  params: InstagramReelCaptionParams,
+): string {
+  const { category, themeName, facetTitle, hookText, scheduledDate } = params;
+  const date = scheduledDate || new Date();
+  const day = date.getDay();
+
+  const emojiPool = CATEGORY_EMOJI[category] || CATEGORY_EMOJI.default;
+  const emoji = pickByDate(emojiPool, date);
+  const hookLine = `${hookText || themeName} ${emoji}`;
+
+  const teaserPool = SOFT_CTA_LINES[category] || SOFT_CTA_LINES.default;
+  const teaser = pickByDate(teaserPool, date);
+
+  const questionCategory =
+    category in ENGAGEMENT_QUESTIONS ? category : 'default';
+  const question = pickByDate(
+    ENGAGEMENT_QUESTIONS[questionCategory],
+    date,
+  ).replace(/\{topic\}/g, facetTitle);
+
+  const ctaType = IG_CTA_ROTATION[day];
+  let cta: string;
+  if (ctaType === 'save') {
+    cta = pickByDate(IG_SAVE_CTA_LINES, date);
+  } else if (ctaType === 'share') {
+    cta = pickByDate(IG_SHARE_CTA_LINES, date).replace(/\{sign\}/g, facetTitle);
+  } else {
+    cta = pickByDate(FOLLOW_CTA_LINES, date);
+  }
+
+  const hashtags = generateInstagramHashtags(category, themeName, facetTitle);
+
+  return [hookLine, '', teaser, '', question, '', cta, '', hashtags].join('\n');
+}
+
+// ─── End Instagram Reel helpers ───────────────────────────────────────────────
+
 /**
  * Content types that are inherently time-sensitive
  */
