@@ -700,6 +700,30 @@ export function checkRetrogradeEvents(positions: any): Array<any> {
 }
 
 /**
+ * Check for planets that are CURRENTLY retrograde (mid-period, not just station days).
+ * Mercury gets priority 10 — it's the most culturally significant retrograde.
+ * All other retrograde planets get priority 9.
+ * This fires every day during the retrograde period so it always ranks near the top.
+ */
+export function checkActiveRetrogrades(positions: any): Array<any> {
+  const activeRetrogrades: Array<any> = [];
+  Object.entries(positions).forEach(([planet, data]: [string, any]) => {
+    // Skip if not currently retrograde, or if it's a station day (handled by checkRetrogradeEvents)
+    if (!data.retrograde || data.newRetrograde || data.newDirect) return;
+    const isMercury = planet.toLowerCase() === 'mercury';
+    activeRetrogrades.push({
+      name: `${planet} Retrograde`,
+      energy: `${planet} is retrograde in ${data.sign}`,
+      priority: isMercury ? 10 : 9,
+      type: 'active_retrograde',
+      planet,
+      sign: data.sign,
+    });
+  });
+  return activeRetrogrades.sort((a, b) => b.priority - a.priority);
+}
+
+/**
  * Check for retrograde ingress
  */
 export function checkRetrogradeIngress(positions: any): Array<any> {

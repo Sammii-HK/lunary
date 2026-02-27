@@ -9,6 +9,7 @@ import {
   checkSignIngress,
   checkRetrogradeEvents,
   checkRetrogradeIngress,
+  checkActiveRetrogrades,
   getSignDescription,
 } from './astronomical-data';
 
@@ -22,6 +23,7 @@ export {
   checkSignIngress,
   checkRetrogradeEvents,
   checkRetrogradeIngress,
+  checkActiveRetrogrades,
   getSignDescription,
   formatDegreeMinutes,
 };

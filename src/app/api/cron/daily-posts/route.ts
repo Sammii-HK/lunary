@@ -997,12 +997,6 @@ export async function GET(request: NextRequest) {
               // Pre-upload dynamic OG image so Instagram gets a static blob URL
               const staticImageUrl = await preUploadImage(imageUrl);
 
-              // Persist story to DB for tracking and highlight categorisation
-              await sql`
-            INSERT INTO social_posts (content, platform, post_type, scheduled_date, status, image_url, story_category, content_type)
-            VALUES ('', 'instagram', 'story', ${scheduledTime.toISOString()}, 'sent', ${staticImageUrl}, ${storyCategory}, ${story.variant})
-          `;
-
               const result = await postToSocial({
                 platform: 'instagram',
                 content: '',
@@ -1016,12 +1010,20 @@ export async function GET(request: NextRequest) {
               });
 
               if (result.success) {
+                // Persist story to DB only on success for accurate tracking
+                await sql`
+              INSERT INTO social_posts (content, platform, post_type, scheduled_date, status, image_url, story_category, content_type)
+              VALUES ('', 'instagram', 'story', ${scheduledTime.toISOString()}, 'sent', ${staticImageUrl}, ${storyCategory}, ${story.variant})
+            `;
                 storySentResults.push({
                   scheduledTime: scheduledTime.toISOString(),
                   variant: story.variant,
                   status: 'success',
                 });
               } else {
+                console.error(
+                  `[daily-cron] IG story failed (${story.variant}): ${result.error}`,
+                );
                 storySentResults.push({
                   scheduledTime: scheduledTime.toISOString(),
                   variant: story.variant,
@@ -1030,6 +1032,10 @@ export async function GET(request: NextRequest) {
                 });
               }
             } catch (postError) {
+              console.error(
+                `[daily-cron] IG story exception (${story.variant}):`,
+                postError,
+              );
               storySentResults.push({
                 scheduledTime: scheduledTime.toISOString(),
                 variant: story.variant,

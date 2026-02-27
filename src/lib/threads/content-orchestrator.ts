@@ -26,6 +26,37 @@ import {
  */
 
 /**
+ * Returns a deterministic minute offset (0–14) for a given slot index and date.
+ * Spreads posts within the hour so they don't all fire at :00.
+ */
+function slotMinuteOffset(dateStr: string, slotIndex: number): number {
+  const date = new Date(dateStr);
+  // Combine date parts + slot to get a repeatable but varied number
+  const seed = date.getUTCDate() * 17 + date.getUTCMonth() * 31 + slotIndex * 7;
+  return seed % 15;
+}
+
+/**
+ * Applies per-slot minute offsets to a list of posts so they don't all fire at :00.
+ * Slots are identified by their hour component; each gets a different deterministic offset.
+ */
+function applyMinuteOffsets(
+  posts: ThreadsPost[],
+  slots: number[],
+  dateStr: string,
+): ThreadsPost[] {
+  return posts.map((post) => {
+    const postDate = new Date(post.scheduledTime);
+    const hourUTC = postDate.getUTCHours();
+    const slotIndex = slots.indexOf(hourUTC);
+    if (slotIndex === -1) return post;
+    const minutes = slotMinuteOffset(dateStr, slotIndex);
+    postDate.setUTCMinutes(minutes, 0, 0);
+    return { ...post, scheduledTime: postDate.toISOString() };
+  });
+}
+
+/**
  * Generate a full day's Threads content batch.
  * Text-first posts only, no IG cross-posts.
  */
@@ -36,9 +67,12 @@ export async function generateThreadsBatch(
   const dayOfWeek = date.getDay(); // 0=Sun, 6=Sat
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
-  const posts: ThreadsPost[] = isWeekend
+  const slots = isWeekend ? WEEKEND_SLOTS_UTC : WEEKDAY_SLOTS_UTC;
+  const rawPosts: ThreadsPost[] = isWeekend
     ? buildWeekendBatch(dateStr)
     : buildWeekdayBatch(dateStr);
+
+  const posts = applyMinuteOffsets(rawPosts, slots, dateStr);
 
   return { date: dateStr, posts };
 }
