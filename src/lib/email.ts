@@ -238,6 +238,12 @@ export {
 } from './email-components/AuthEmails';
 
 export {
+  generateAccessRestoredEmailHTML,
+  generateAccessRestoredEmailText,
+  AccessRestoredEmail,
+} from './email-components/AccessRestoredEmail';
+
+export {
   generateDeletionScheduledEmailHTML,
   generateDeletionScheduledEmailText,
   generateDeletionCancelledEmailHTML,
