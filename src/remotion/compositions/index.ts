@@ -10,3 +10,15 @@ export type { LongFormVideoProps } from './LongFormVideo';
 
 export { AppDemoVideo } from './AppDemoVideo';
 export type { AppDemoVideoProps } from './AppDemoVideo';
+
+export { LandscapeShowcase } from './LandscapeShowcase';
+export type {
+  LandscapeShowcaseProps,
+  ShowcaseScene,
+} from './LandscapeShowcase';
+
+export { MultiPhoneShowcase } from './MultiPhoneShowcase';
+export type { MultiPhoneShowcaseProps, PhoneSlot } from './MultiPhoneShowcase';
+
+export { CinematicPhoneDemo } from './CinematicPhoneDemo';
+export type { CinematicPhoneDemoProps } from './CinematicPhoneDemo';

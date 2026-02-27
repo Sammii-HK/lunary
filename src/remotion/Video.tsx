@@ -13,6 +13,18 @@ import {
   LongFormVideoProps,
 } from './compositions/LongFormVideo';
 import { AppDemoVideo, AppDemoVideoProps } from './compositions/AppDemoVideo';
+import {
+  LandscapeShowcase,
+  LandscapeShowcaseProps,
+} from './compositions/LandscapeShowcase';
+import {
+  MultiPhoneShowcase,
+  MultiPhoneShowcaseProps,
+} from './compositions/MultiPhoneShowcase';
+import {
+  CinematicPhoneDemo,
+  CinematicPhoneDemoProps,
+} from './compositions/CinematicPhoneDemo';
 import { DIMENSIONS } from './styles/theme';
 
 /**
@@ -144,6 +156,75 @@ const LongFormVideoComponent = LongFormVideo as unknown as React.FC<
 const AppDemoVideoComponent = AppDemoVideo as unknown as React.FC<
   Record<string, unknown>
 >;
+const LandscapeShowcaseComponent = LandscapeShowcase as unknown as React.FC<
+  Record<string, unknown>
+>;
+const MultiPhoneShowcaseComponent = MultiPhoneShowcase as unknown as React.FC<
+  Record<string, unknown>
+>;
+const CinematicPhoneDemoComponent = CinematicPhoneDemo as unknown as React.FC<
+  Record<string, unknown>
+>;
+
+// Default props for new compositions
+const defaultLandscapeShowcaseProps: LandscapeShowcaseProps = {
+  scenes: [
+    {
+      headline: 'Good morning, [name].',
+      subline: 'Personalised from the moment you open it.',
+      callout: 'Your chart. Today.',
+      videoSrc: 'app-demos/dashboard-overview.webm',
+      seekToSeconds: 1,
+      startTime: 0,
+      endTime: 7,
+      calloutSide: 'right',
+    },
+    {
+      headline: 'Every planet. Your houses.',
+      subline: 'Not generic sky positions — yours.',
+      callout: 'Sky Now expanded',
+      videoSrc: 'app-demos/dashboard-overview.webm',
+      seekToSeconds: 6,
+      startTime: 7,
+      endTime: 14,
+      calloutSide: 'right',
+    },
+  ],
+  backgroundType: 'starfield',
+};
+
+const defaultMultiPhoneShowcaseProps: MultiPhoneShowcaseProps = {
+  phones: [
+    { videoSrc: 'app-demos/dashboard-overview.webm', seekToSeconds: 1 },
+    { videoSrc: 'app-demos/birth-chart.webm', seekToSeconds: 1 },
+    { videoSrc: 'app-demos/horoscope-deepdive.webm', seekToSeconds: 8 },
+    { videoSrc: 'app-demos/tarot-patterns.webm', seekToSeconds: 5 },
+    { videoSrc: 'app-demos/astral-guide.webm', seekToSeconds: 4 },
+  ],
+  layout: 'arc',
+  backgroundType: 'starfield',
+  animate: false,
+};
+
+const defaultCinematicPhoneDemoProps: CinematicPhoneDemoProps = {
+  videoSrc: 'app-demos/dashboard-overview.webm',
+  hookText: "Wait... your app doesn't show houses?",
+  hookStartTime: 0,
+  hookEndTime: 2,
+  overlays: [
+    {
+      text: 'your chart. not your sign.',
+      startTime: 2,
+      endTime: 4,
+      style: 'chapter',
+    },
+  ],
+  outroText: 'Every morning. Your chart.',
+  outroStartTime: 16,
+  outroEndTime: 18,
+  highlightTerms: ['houses', 'chart'],
+  backgroundType: 'starfield',
+};
 
 export const RemotionVideo: React.FC = () => {
   return (
@@ -190,6 +271,83 @@ export const RemotionVideo: React.FC = () => {
         width={DIMENSIONS.story.width}
         height={DIMENSIONS.story.height}
         defaultProps={defaultAppDemoProps}
+      />
+
+      {/* App Demo - Instagram Feed (4:5) */}
+      <Composition
+        id='AppDemoVideoFeed'
+        component={AppDemoVideoComponent}
+        durationInFrames={540} // 18 seconds default
+        fps={30}
+        width={DIMENSIONS.feed.width}
+        height={DIMENSIONS.feed.height}
+        defaultProps={defaultAppDemoProps}
+      />
+
+      {/* App Demo - X / Twitter (16:9) */}
+      <Composition
+        id='AppDemoVideoX'
+        component={AppDemoVideoComponent}
+        durationInFrames={540} // 18 seconds default
+        fps={30}
+        width={DIMENSIONS.xVideo.width}
+        height={DIMENSIONS.xVideo.height}
+        defaultProps={defaultAppDemoProps}
+      />
+
+      {/* Landscape Showcase - YouTube / X marketing (16:9, 1920×1080) */}
+      <Composition
+        id='LandscapeShowcase'
+        component={LandscapeShowcaseComponent}
+        durationInFrames={1350} // 45 seconds default
+        fps={30}
+        width={DIMENSIONS.youtube.width}
+        height={DIMENSIONS.youtube.height}
+        defaultProps={defaultLandscapeShowcaseProps}
+      />
+
+      {/* Landscape Showcase - Square (1:1, 1080×1080) */}
+      <Composition
+        id='LandscapeShowcaseSquare'
+        component={LandscapeShowcaseComponent}
+        durationInFrames={1350}
+        fps={30}
+        width={DIMENSIONS.square.width}
+        height={DIMENSIONS.square.height}
+        defaultProps={defaultLandscapeShowcaseProps}
+      />
+
+      {/* Multi-Phone Showcase - YouTube / X static hero (16:9, 1920×1080) */}
+      <Composition
+        id='MultiPhoneShowcase'
+        component={MultiPhoneShowcaseComponent}
+        durationInFrames={300} // 10 seconds (or frame 0 for still)
+        fps={30}
+        width={DIMENSIONS.youtube.width}
+        height={DIMENSIONS.youtube.height}
+        defaultProps={defaultMultiPhoneShowcaseProps}
+      />
+
+      {/* Multi-Phone Showcase - Square (1:1, 1080×1080) */}
+      <Composition
+        id='MultiPhoneShowcaseSquare'
+        component={MultiPhoneShowcaseComponent}
+        durationInFrames={300}
+        fps={30}
+        width={DIMENSIONS.square.width}
+        height={DIMENSIONS.square.height}
+        defaultProps={defaultMultiPhoneShowcaseProps}
+      />
+
+      {/* Cinematic Phone Demo - TikTok with phone frame (9:16, 1080×1920) */}
+      <Composition
+        id='CinematicPhoneDemo'
+        component={CinematicPhoneDemoComponent}
+        durationInFrames={540} // 18 seconds default
+        fps={30}
+        width={DIMENSIONS.story.width}
+        height={DIMENSIONS.story.height}
+        defaultProps={defaultCinematicPhoneDemoProps}
       />
     </>
   );
