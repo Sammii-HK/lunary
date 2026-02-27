@@ -114,7 +114,14 @@ export interface ComposeVideoOptions {
     text: string;
     startTime: number;
     endTime: number;
-    style?: 'chapter' | 'stamp' | 'title' | 'hook' | 'hook_large' | 'cta';
+    style?:
+      | 'chapter'
+      | 'stamp'
+      | 'title'
+      | 'hook'
+      | 'hook_large'
+      | 'cta'
+      | 'series_badge';
   }>;
   backgroundMusicPath?: string | null;
   hueShiftBase?: number;
