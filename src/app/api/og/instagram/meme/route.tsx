@@ -7,7 +7,6 @@ import {
   renderIGStarfield,
   IGBrandTag,
   renderConstellation,
-  renderMeteors,
 } from '@/lib/instagram/ig-utils';
 import {
   IG_SIZES,
@@ -109,7 +108,6 @@ export async function GET(request: NextRequest) {
             }}
           >
             {starfield}
-            {...renderMeteors(`meme-${sign}-${setup.slice(0, 10)}`, accent)}
             {constellation}
             {glyphBackdrop}
 
@@ -247,7 +245,6 @@ export async function GET(request: NextRequest) {
             }}
           >
             {starfield}
-            {...renderMeteors(`meme-${sign}-${setup.slice(0, 10)}`, accent)}
             {constellation}
             {/* Ghost backdrop — Satori-safe */}
             <div
@@ -350,7 +347,6 @@ export async function GET(request: NextRequest) {
             }}
           >
             {starfield}
-            {...renderMeteors(`meme-${sign}-${setup.slice(0, 10)}`, accent)}
             {constellation}
             {glyphBackdrop}
 

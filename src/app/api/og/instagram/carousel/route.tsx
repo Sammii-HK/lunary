@@ -7,7 +7,6 @@ import {
   IGProgressDots,
   truncateIG,
   renderIGStarfield,
-  renderMeteors,
 } from '@/lib/instagram/ig-utils';
 import {
   IG_SIZES,
@@ -120,7 +119,6 @@ export async function GET(request: NextRequest) {
           }}
         >
           {renderIGStarfield(`cover-${title}`)}
-          {...renderMeteors(`cover-${title}`, accent)}
 
           {/* Symbol ghost backdrop — huge, Satori-safe centering */}
           {symbol && (
@@ -261,7 +259,6 @@ export async function GET(request: NextRequest) {
           }}
         >
           {renderIGStarfield(`cta-${title}`)}
-          {...renderMeteors(`cta-${title}`, accent)}
 
           {/* Progress dots */}
           <div
@@ -393,7 +390,6 @@ export async function GET(request: NextRequest) {
           }}
         >
           {renderIGStarfield(`body-${title}-${slideIndex}`)}
-          {...renderMeteors(`body-${title}-${slideIndex}`, accent)}
 
           {/* Symbol ghost backdrop (zodiac/rune slides) — huge, Satori-safe centering */}
           {symbol && (

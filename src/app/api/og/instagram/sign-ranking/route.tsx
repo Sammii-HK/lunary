@@ -6,7 +6,6 @@ import {
   IGBrandTag,
   renderIGStarfield,
   renderConstellation,
-  renderMeteors,
 } from '@/lib/instagram/ig-utils';
 import { IG_SIZES, IG_TEXT, SIGN_ACCENT } from '@/lib/instagram/design-system';
 import { OG_COLORS } from '@/lib/share/og-utils';
@@ -80,7 +79,6 @@ export async function GET(request: NextRequest) {
         }}
       >
         {starfield}
-        {...renderMeteors(`rank-${trait}`, accent)}
         {renderConstellation(topSign, accent, width, height)}
 
         {/* Top sign's glyph — giant ghost backdrop */}
