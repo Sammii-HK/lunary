@@ -5,6 +5,8 @@ import {
   loadIGFonts,
   IGBrandTag,
   renderIGStarfield,
+  renderConstellation,
+  renderDepthRings,
 } from '@/lib/instagram/ig-utils';
 import { IG_SIZES, IG_TEXT, SIGN_ACCENT } from '@/lib/instagram/design-system';
 import { OG_COLORS } from '@/lib/share/og-utils';
@@ -78,6 +80,8 @@ export async function GET(request: NextRequest) {
         }}
       >
         {starfield}
+        {...renderDepthRings(accent, width, height)}
+        {renderConstellation(topSign, accent, width, height)}
 
         {/* Top sign's glyph — giant ghost backdrop */}
         <div

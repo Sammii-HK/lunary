@@ -6,6 +6,8 @@ import {
   IGBrandTag,
   truncateIG,
   renderIGStarfield,
+  renderConstellation,
+  renderDepthRings,
 } from '@/lib/instagram/ig-utils';
 import {
   IG_SIZES,
@@ -52,6 +54,7 @@ export async function GET(request: NextRequest) {
 
     const fonts = await loadIGFonts(request, { includeAstronomicon: true });
     const starfield = renderIGStarfield(`compat-${sign1}-${sign2}`);
+    const depthRings = renderDepthRings(accent1, width, height);
 
     const layoutJsx = (
       <div
@@ -71,6 +74,9 @@ export async function GET(request: NextRequest) {
         }}
       >
         {starfield}
+        {...depthRings}
+        {renderConstellation(sign1, accent1, width, height)}
+        {renderConstellation(sign2, accent2, width, height)}
 
         {/* Score as giant ghost backdrop */}
         <div

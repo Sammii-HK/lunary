@@ -313,6 +313,352 @@ export function seededPick<T>(items: T[], seed: string): T {
   return items[Math.floor(rng() * items.length)];
 }
 
+// --- Constellation Overlay ---
+// Normalized [x, y] coords (0–1) based on major stars of each constellation.
+// Designed to span roughly 40–55% of the frame for a balanced overlay.
+
+const CONSTELLATION_DATA: Record<
+  string,
+  { stars: [number, number][]; lines: [number, number][] }
+> = {
+  aries: {
+    stars: [
+      [0.34, 0.46],
+      [0.44, 0.38],
+      [0.56, 0.44],
+      [0.66, 0.5],
+    ],
+    lines: [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+    ],
+  },
+  taurus: {
+    stars: [
+      [0.28, 0.56],
+      [0.4, 0.46],
+      [0.5, 0.5],
+      [0.6, 0.4],
+      [0.72, 0.38],
+      [0.5, 0.62],
+    ],
+    lines: [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 4],
+      [2, 5],
+    ],
+  },
+  gemini: {
+    stars: [
+      [0.36, 0.24],
+      [0.52, 0.24],
+      [0.34, 0.42],
+      [0.5, 0.42],
+      [0.32, 0.58],
+      [0.48, 0.58],
+      [0.28, 0.74],
+      [0.44, 0.74],
+    ],
+    lines: [
+      [0, 2],
+      [2, 4],
+      [4, 6],
+      [1, 3],
+      [3, 5],
+      [5, 7],
+      [2, 3],
+    ],
+  },
+  cancer: {
+    stars: [
+      [0.42, 0.36],
+      [0.54, 0.44],
+      [0.36, 0.58],
+      [0.62, 0.56],
+      [0.5, 0.64],
+    ],
+    lines: [
+      [0, 1],
+      [1, 2],
+      [1, 3],
+      [2, 4],
+      [3, 4],
+    ],
+  },
+  leo: {
+    stars: [
+      [0.5, 0.24],
+      [0.38, 0.36],
+      [0.3, 0.5],
+      [0.38, 0.64],
+      [0.54, 0.68],
+      [0.66, 0.58],
+      [0.64, 0.4],
+      [0.54, 0.26],
+    ],
+    lines: [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 4],
+      [4, 5],
+      [5, 6],
+      [6, 7],
+      [7, 0],
+    ],
+  },
+  virgo: {
+    stars: [
+      [0.5, 0.24],
+      [0.5, 0.4],
+      [0.36, 0.5],
+      [0.62, 0.5],
+      [0.5, 0.6],
+      [0.42, 0.72],
+      [0.58, 0.72],
+    ],
+    lines: [
+      [0, 1],
+      [1, 2],
+      [1, 3],
+      [1, 4],
+      [4, 5],
+      [4, 6],
+    ],
+  },
+  libra: {
+    stars: [
+      [0.5, 0.38],
+      [0.34, 0.54],
+      [0.66, 0.54],
+      [0.5, 0.54],
+      [0.36, 0.7],
+      [0.64, 0.7],
+    ],
+    lines: [
+      [0, 3],
+      [3, 1],
+      [3, 2],
+      [1, 4],
+      [2, 5],
+      [1, 2],
+    ],
+  },
+  scorpio: {
+    stars: [
+      [0.3, 0.32],
+      [0.38, 0.42],
+      [0.44, 0.5],
+      [0.5, 0.56],
+      [0.56, 0.62],
+      [0.62, 0.66],
+      [0.68, 0.7],
+      [0.72, 0.62],
+      [0.74, 0.52],
+    ],
+    lines: [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 4],
+      [4, 5],
+      [5, 6],
+      [6, 7],
+      [7, 8],
+    ],
+  },
+  sagittarius: {
+    stars: [
+      [0.5, 0.28],
+      [0.38, 0.42],
+      [0.32, 0.58],
+      [0.44, 0.68],
+      [0.58, 0.62],
+      [0.66, 0.48],
+      [0.56, 0.38],
+    ],
+    lines: [
+      [0, 6],
+      [6, 5],
+      [5, 4],
+      [4, 3],
+      [3, 2],
+      [2, 1],
+      [1, 0],
+      [1, 6],
+    ],
+  },
+  capricorn: {
+    stars: [
+      [0.28, 0.38],
+      [0.42, 0.32],
+      [0.56, 0.38],
+      [0.66, 0.48],
+      [0.66, 0.62],
+      [0.52, 0.72],
+      [0.38, 0.68],
+      [0.3, 0.54],
+    ],
+    lines: [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 4],
+      [4, 5],
+      [5, 6],
+      [6, 7],
+      [7, 0],
+    ],
+  },
+  aquarius: {
+    stars: [
+      [0.28, 0.42],
+      [0.42, 0.38],
+      [0.52, 0.48],
+      [0.64, 0.42],
+      [0.74, 0.38],
+      [0.34, 0.58],
+      [0.48, 0.62],
+      [0.58, 0.55],
+      [0.7, 0.6],
+    ],
+    lines: [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 4],
+      [5, 6],
+      [6, 7],
+      [7, 8],
+      [1, 6],
+    ],
+  },
+  pisces: {
+    stars: [
+      [0.28, 0.35],
+      [0.38, 0.28],
+      [0.48, 0.35],
+      [0.48, 0.5],
+      [0.38, 0.62],
+      [0.28, 0.56],
+      [0.58, 0.48],
+      [0.68, 0.42],
+      [0.76, 0.52],
+      [0.66, 0.62],
+    ],
+    lines: [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 4],
+      [4, 5],
+      [5, 0],
+      [3, 6],
+      [6, 7],
+      [7, 8],
+      [8, 9],
+      [9, 6],
+    ],
+  },
+};
+
+/**
+ * Renders the constellation pattern for a zodiac sign as an SVG overlay.
+ * Lines are faint; stars are slightly brighter dots. Both use the sign's accent colour.
+ */
+export function renderConstellation(
+  sign: string,
+  accent: string,
+  width: number,
+  height: number,
+): React.ReactElement | null {
+  const data = CONSTELLATION_DATA[sign.toLowerCase()];
+  if (!data) return null;
+
+  return (
+    <svg
+      width={width}
+      height={height}
+      style={{ position: 'absolute', top: 0, left: 0 }}
+    >
+      {/* Connecting lines */}
+      {data.lines.map(([a, b], i) => (
+        <line
+          key={`line-${i}`}
+          x1={data.stars[a][0] * width}
+          y1={data.stars[a][1] * height}
+          x2={data.stars[b][0] * width}
+          y2={data.stars[b][1] * height}
+          stroke={accent}
+          stroke-width='1.5'
+          opacity='0.3'
+        />
+      ))}
+      {/* Star dots — slightly brighter */}
+      {data.stars.map(([x, y], i) => (
+        <circle
+          key={`star-${i}`}
+          cx={x * width}
+          cy={y * height}
+          r={i === 0 ? 5 : 3.5}
+          fill={accent}
+          opacity={i === 0 ? '0.9' : '0.65'}
+        />
+      ))}
+    </svg>
+  );
+}
+
+/**
+ * Renders 3 concentric depth rings centred on the canvas.
+ * Returns an array — spread into the parent JSX.
+ */
+export function renderDepthRings(
+  accent: string,
+  width: number,
+  height: number,
+): React.ReactElement[] {
+  const base = Math.min(width, height);
+  const rings = [
+    { scale: 0.55, opacity: 0.07 },
+    { scale: 0.72, opacity: 0.045 },
+    { scale: 0.9, opacity: 0.025 },
+  ];
+
+  return rings.map((ring, i) => {
+    const dim = base * ring.scale;
+    return (
+      <div
+        key={`ring-${i}`}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <div
+          style={{
+            width: dim,
+            height: dim,
+            borderRadius: '50%',
+            border: `1px solid ${accent}`,
+            opacity: ring.opacity,
+            display: 'flex',
+          }}
+        />
+      </div>
+    );
+  });
+}
+
 // --- Story Starfield (taller portrait) ---
 
 export function renderIGStoryStarfield(seed: string) {
