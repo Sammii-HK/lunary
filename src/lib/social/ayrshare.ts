@@ -255,9 +255,11 @@ export async function postToAyrshareMultiPlatform(params: {
   const headers = getAyrshareHeaders();
   const results: Record<string, AyrshareResult> = {};
 
-  const allPlatforms = params.platforms.filter((p) =>
-    ALLOWED_PLATFORMS.has(p.toLowerCase()),
-  );
+  // Normalise to lowercase and validate against allow-list so that platform
+  // names used as object keys are never user-controlled raw strings.
+  const allPlatforms = params.platforms
+    .map((p) => p.toLowerCase())
+    .filter((p) => ALLOWED_PLATFORMS.has(p));
 
   if (allPlatforms.length === 0) {
     return { results };

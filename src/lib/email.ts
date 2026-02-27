@@ -51,7 +51,7 @@ export interface BatchEmailResult {
 }
 
 const getFromEmail = () => {
-  return process.env.EMAIL_FROM || 'Lunary <help@lunary.app>';
+  return process.env.EMAIL_FROM || 'Lunary <noreply@lunary.app>';
 };
 
 const parseFromEmail = (from: string) => {
@@ -90,6 +90,7 @@ export async function sendEmail({
     if (recipients.length === 1) {
       const sendSmtpEmail = new SendSmtpEmail();
       sendSmtpEmail.sender = { name: fromInfo.name, email: fromInfo.email };
+      sendSmtpEmail.replyTo = { email: 'noreply@lunary.app' };
       sendSmtpEmail.to = [{ email: recipients[0] }];
       sendSmtpEmail.subject = subject;
       sendSmtpEmail.htmlContent = finalHtml;
@@ -166,6 +167,7 @@ async function sendBatchEmails(
       try {
         const sendSmtpEmail = new SendSmtpEmail();
         sendSmtpEmail.sender = { name: fromInfo.name, email: fromInfo.email };
+        sendSmtpEmail.replyTo = { email: 'noreply@lunary.app' };
         sendSmtpEmail.to = [{ email }];
         sendSmtpEmail.subject = subject;
         sendSmtpEmail.htmlContent = html;
