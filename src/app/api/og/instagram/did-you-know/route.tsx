@@ -6,6 +6,7 @@ import {
   IGCategoryBadge,
   truncateIG,
   renderIGStarfield,
+  renderMeteors,
 } from '@/lib/instagram/ig-utils';
 import {
   IG_SIZES,
@@ -54,6 +55,7 @@ export async function GET(request: NextRequest) {
         }}
       >
         {starfield}
+        {...renderMeteors(`dyk-${fact.slice(0, 15)}`, accent)}
 
         {/* Giant "?" ghost backdrop — Satori-safe centering */}
         <div

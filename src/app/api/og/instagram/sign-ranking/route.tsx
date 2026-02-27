@@ -7,6 +7,7 @@ import {
   renderIGStarfield,
   renderConstellation,
   renderDepthRings,
+  renderMeteors,
 } from '@/lib/instagram/ig-utils';
 import { IG_SIZES, IG_TEXT, SIGN_ACCENT } from '@/lib/instagram/design-system';
 import { OG_COLORS } from '@/lib/share/og-utils';
@@ -80,6 +81,7 @@ export async function GET(request: NextRequest) {
         }}
       >
         {starfield}
+        {...renderMeteors(`rank-${trait}`, accent)}
         {...renderDepthRings(accent, width, height)}
         {renderConstellation(topSign, accent, width, height)}
 

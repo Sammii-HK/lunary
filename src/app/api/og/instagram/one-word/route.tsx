@@ -7,6 +7,7 @@ import {
   renderIGStarfield,
   renderConstellation,
   renderDepthRings,
+  renderMeteors,
 } from '@/lib/instagram/ig-utils';
 import { IG_SIZES, CATEGORY_GRADIENT } from '@/lib/instagram/design-system';
 
@@ -61,6 +62,7 @@ export async function GET(request: NextRequest) {
         }}
       >
         {renderIGStarfield(`one-word-${sign}-${word}`)}
+        {...renderMeteors(`one-word-${sign}-${word}`, accent)}
         {...renderDepthRings(accent, width, height)}
         {renderConstellation(sign, accent, width, height)}
 

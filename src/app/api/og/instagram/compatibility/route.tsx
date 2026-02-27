@@ -8,6 +8,7 @@ import {
   renderIGStarfield,
   renderConstellation,
   renderDepthRings,
+  renderMeteors,
 } from '@/lib/instagram/ig-utils';
 import {
   IG_SIZES,
@@ -74,6 +75,7 @@ export async function GET(request: NextRequest) {
         }}
       >
         {starfield}
+        {...renderMeteors(`compat-${sign1}-${sign2}`, accent1)}
         {...depthRings}
         {renderConstellation(sign1, accent1, width, height)}
         {renderConstellation(sign2, accent2, width, height)}

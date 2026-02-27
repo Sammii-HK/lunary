@@ -313,6 +313,97 @@ export function seededPick<T>(items: T[], seed: string): T {
   return items[Math.floor(rng() * items.length)];
 }
 
+// --- Meteor Streaks ---
+//
+// Static simulation of shooting stars at different "speeds":
+//   fast  → long (250-380px), thin (2-3px), high opacity, near-white
+//   medium → mid length (110-200px), semi-transparent
+//   slow  → short (50-100px), faint, accent-coloured
+//
+// "Speed" is implied through length + opacity + width — the classic
+// motion-blur shorthand photographers use for stars.
+
+type MeteorClass = 'fast' | 'medium' | 'slow';
+
+const METEOR_COLORS = {
+  fast: ['#ffffff', '#e8e8ff', '#f0f0ff'],
+  medium: ['#c8c8ff', '#b8b8e8', '#d0d0ff'],
+  slow: null, // uses accent
+};
+
+export function renderMeteors(
+  seed: string,
+  accent: string,
+): React.ReactElement[] {
+  const rng = seededRandom(`meteors-${seed}`);
+
+  // Mix of 6-8 meteors with weighted speed class distribution
+  const speedPattern: MeteorClass[] = [
+    'fast',
+    'fast',
+    'medium',
+    'medium',
+    'medium',
+    'slow',
+    'slow',
+  ];
+  // Shuffle so each image has a different mix
+  const shuffled = [...speedPattern].sort(() => rng() - 0.5);
+  const count = 5 + Math.floor(rng() * 3); // 5-7
+
+  return shuffled.slice(0, count).map((cls, i) => {
+    let length: number, thickness: number, opacity: number, color: string;
+
+    if (cls === 'fast') {
+      length = 250 + rng() * 130; // 250-380px
+      thickness = 2 + rng() * 1.2; // 2-3.2px
+      opacity = 0.72 + rng() * 0.22; // 0.72-0.94
+      const palette = METEOR_COLORS.fast;
+      color = palette[Math.floor(rng() * palette.length)];
+    } else if (cls === 'medium') {
+      length = 110 + rng() * 90; // 110-200px
+      thickness = 1.4 + rng() * 0.6; // 1.4-2px
+      opacity = 0.35 + rng() * 0.25; // 0.35-0.6
+      const palette = METEOR_COLORS.medium;
+      color = palette[Math.floor(rng() * palette.length)];
+    } else {
+      length = 50 + rng() * 55; // 50-105px
+      thickness = 1 + rng() * 0.5; // 1-1.5px
+      opacity = 0.14 + rng() * 0.14; // 0.14-0.28
+      color = accent;
+    }
+
+    // Angle: mostly -30° to -45° (classic top-right→bottom-left)
+    // with a few outliers for variety
+    const angle = -(26 + rng() * 22);
+
+    // Position: spread across canvas, bias toward upper half
+    const top = rng() * 70; // 0-70%
+    const left = 5 + rng() * 80; // 5-85%
+
+    // Gradient: transparent tail (left) → bright head (right)
+    // Sharp build-up at the tip simulates a luminous head
+    const gradient = `linear-gradient(to right, transparent 0%, ${color}18 45%, ${color}70 80%, ${color} 95%, white 100%)`;
+
+    return (
+      <div
+        key={`meteor-${i}`}
+        style={{
+          position: 'absolute',
+          top: `${top}%`,
+          left: `${left}%`,
+          width: Math.round(length),
+          height: Math.max(1, Math.round(thickness)),
+          background: gradient,
+          opacity,
+          transform: `rotate(${angle}deg)`,
+          borderRadius: thickness,
+        }}
+      />
+    );
+  });
+}
+
 // --- Constellation Overlay ---
 // Normalized [x, y] coords (0–1) based on major stars of each constellation.
 // Designed to span roughly 40–55% of the frame for a balanced overlay.
