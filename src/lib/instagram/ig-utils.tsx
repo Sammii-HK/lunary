@@ -105,8 +105,8 @@ export function getIGDimensions(format: IGFormat = 'square') {
 
 // --- Starfield Rendering ---
 
-export function renderIGStarfield(seed: string) {
-  const stars = generateStarfield(seed, 90);
+export function renderIGStarfield(seed: string, count = 90) {
+  const stars = generateStarfield(seed, count);
   return stars.map((star, i) => (
     <div
       key={i}
@@ -132,11 +132,16 @@ export function renderIGStarfield(seed: string) {
 export function IGBrandTag({
   baseUrl,
   mode = 'dark',
+  bottom = 32,
+  isStory = false,
 }: {
   baseUrl: string;
   mode?: 'dark' | 'light';
+  bottom?: number;
+  isStory?: boolean;
 }) {
   const color = mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)';
+  const resolvedBottom = isStory ? 80 : bottom;
   return (
     <div
       style={{
@@ -145,7 +150,7 @@ export function IGBrandTag({
         gap: 10,
         justifyContent: 'center',
         position: 'absolute',
-        bottom: 32,
+        bottom: resolvedBottom,
         left: 0,
         right: 0,
       }}
