@@ -1,5 +1,9 @@
 // Export all Remotion components
 export { AnimatedBackground } from './AnimatedBackground';
+export { PhoneMockup } from './PhoneMockup';
+export type { PhoneMockupProps } from './PhoneMockup';
+export { FeatureCallout } from './FeatureCallout';
+export type { FeatureCalloutProps } from './FeatureCallout';
 export { AnimatedSubtitles } from './AnimatedSubtitles';
 export { HookSequence } from './HookSequence';
 export { TopicCard } from './TopicCard';
@@ -8,3 +12,7 @@ export { ProgressIndicator } from './ProgressIndicator';
 export { TransitionEffect } from './TransitionEffect';
 export { TextOverlays } from './TextOverlays';
 export { TextScrim } from './TextScrim';
+export { ZoomRegion } from './ZoomRegion';
+export { TapIndicator } from './TapIndicator';
+export type { ZoomPoint } from './ZoomRegion';
+export type { TapPoint } from './TapIndicator';

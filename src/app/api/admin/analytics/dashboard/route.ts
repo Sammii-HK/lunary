@@ -165,13 +165,13 @@ export async function GET(request: NextRequest) {
             ],
           ),
 
-          // Current MRR (snapshot, not daily)
+          // Current MRR (snapshot, not daily) — active only, trials excluded (not yet charged)
           sql.query(
             `SELECT COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as mrr,
                     COUNT(*) FILTER (WHERE status = 'active') as active,
                     COUNT(*) FILTER (WHERE status IN ('trial', 'trialing')) as trial
              FROM subscriptions
-             WHERE status IN ('active', 'trial', 'trialing')
+             WHERE status = 'active'
                AND stripe_subscription_id IS NOT NULL
                AND (user_email IS NULL OR (user_email NOT LIKE $1 AND user_email != $2))`,
             [TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],

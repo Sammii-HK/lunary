@@ -35,6 +35,12 @@ export const BASE_URL =
   process.env.LUNARY_API_URL || fallback.LUNARY_API_URL || 'https://lunary.app';
 export const ADMIN_KEY =
   process.env.LUNARY_ADMIN_KEY || fallback.LUNARY_ADMIN_KEY || '';
+export const SPELLCAST_URL =
+  process.env.SPELLCAST_API_URL ||
+  fallback.SPELLCAST_API_URL ||
+  'https://api.spellcast.sammii.dev';
+export const SPELLCAST_KEY =
+  process.env.SPELLCAST_API_KEY || fallback.SPELLCAST_API_KEY || '';
 
 const keySource = process.env.LUNARY_ADMIN_KEY
   ? 'env'

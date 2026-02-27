@@ -2630,6 +2630,416 @@ const PROMPTS: ImagePrompt[] = [
       'Tanzanite gems in deep violet-blue. Rare and magnificent, shifting between blue and purple as light moves. Dark background, macro. Found only near Kilimanjaro. Spiritual elevation. No text.',
     tags: ['crystals', 'tanzanite', 'violet', 'rare'],
   },
+
+  // ZODIAC SEASON AESTHETICS — full vibe/mood for each sign season
+  {
+    id: 'season-aries',
+    category: 'zodiac-season',
+    prompt:
+      'Aries season aesthetic. Burning red and orange — wildfire, red poppies, a charging ram, sparks flying. Raw spring energy and new beginnings. Bold and untamed. Dark fantasy mood. No text.',
+    tags: ['zodiac-season', 'aries', 'fire', 'spring'],
+  },
+  {
+    id: 'season-taurus',
+    category: 'zodiac-season',
+    prompt:
+      'Taurus season aesthetic. Lush dark garden — deep red roses, rich soil, a bull among wildflowers, a full moon over rolling hills. Sensual and abundant. Dark and earthy beauty. No text.',
+    tags: ['zodiac-season', 'taurus', 'earth', 'abundance'],
+  },
+  {
+    id: 'season-gemini',
+    category: 'zodiac-season',
+    prompt:
+      'Gemini season aesthetic. Duality — two mirrors facing each other, books, butterflies, electric sky, twin figures. Quick and bright. Pale yellow and silver energy. Curious and mercurial. No text.',
+    tags: ['zodiac-season', 'gemini', 'air', 'duality'],
+  },
+  {
+    id: 'season-cancer',
+    category: 'zodiac-season',
+    prompt:
+      'Cancer season aesthetic. A moonlit cottage with warm candlelight inside, sea mist rolling in, shells and pearls on the windowsill, a full moon over calm water. Home and intuition. Silver and cream. No text.',
+    tags: ['zodiac-season', 'cancer', 'moon', 'home'],
+  },
+  {
+    id: 'season-leo',
+    category: 'zodiac-season',
+    prompt:
+      'Leo season aesthetic. A blazing sun at peak summer, sunflowers, gold jewellery, a throne of light, dramatic sunsets. Regal, warm and radiant. Rich golds and deep burnt orange. No text.',
+    tags: ['zodiac-season', 'leo', 'fire', 'royalty'],
+  },
+  {
+    id: 'season-virgo',
+    category: 'zodiac-season',
+    prompt:
+      'Virgo season aesthetic. Late summer harvest — wheat fields, pressed botanicals, neat rows of herbs, a writing desk by candlelight. Precise, clean and earthy. Sage green and cream. No text.',
+    tags: ['zodiac-season', 'virgo', 'earth', 'harvest'],
+  },
+  {
+    id: 'season-libra',
+    category: 'zodiac-season',
+    prompt:
+      'Libra season aesthetic. Autumn beauty — pink roses, marble surfaces, balanced scales in gold, soft warm light, art and elegance. Harmonious and refined. Rose gold and lavender. No text.',
+    tags: ['zodiac-season', 'libra', 'air', 'beauty'],
+  },
+  {
+    id: 'season-scorpio',
+    category: 'zodiac-season',
+    prompt:
+      'Scorpio season aesthetic. Deep autumn darkness — pomegranates split open, bare trees, a blood moon, black water, crimson and obsidian. Intensity, mystery and transformation. No text.',
+    tags: ['zodiac-season', 'scorpio', 'water', 'dark'],
+  },
+  {
+    id: 'season-sagittarius',
+    category: 'zodiac-season',
+    prompt:
+      'Sagittarius season aesthetic. Open road under a vast starry sky, a bow and arrow, maps, bonfire, freedom and adventure. Deep purple night and gold flames. Wandering and optimistic. No text.',
+    tags: ['zodiac-season', 'sagittarius', 'fire', 'freedom'],
+  },
+  {
+    id: 'season-capricorn',
+    category: 'zodiac-season',
+    prompt:
+      'Capricorn season aesthetic. Winter mountain peak, snow and ice, a lone figure climbing toward a distant summit under stars. Ambition and discipline. Dark teal and cold silver. No text.',
+    tags: ['zodiac-season', 'capricorn', 'earth', 'ambition'],
+  },
+  {
+    id: 'season-aquarius',
+    category: 'zodiac-season',
+    prompt:
+      'Aquarius season aesthetic. Futuristic and electric — lightning, geometric patterns, a figure pouring stars, neon cosmic colours. Revolutionary and eccentric. Electric blue and violet. No text.',
+    tags: ['zodiac-season', 'aquarius', 'air', 'revolution'],
+  },
+  {
+    id: 'season-pisces',
+    category: 'zodiac-season',
+    prompt:
+      'Pisces season aesthetic. Deep underwater dreamscape — bioluminescent fish, coral, moonlight filtering through dark water, two fish circling. Dreamy and mystical. Deep blue and silver. No text.',
+    tags: ['zodiac-season', 'pisces', 'water', 'dreams'],
+  },
+
+  // MORE SACRED SITES
+  {
+    id: 'site-machu-picchu-dawn',
+    category: 'sacred-site',
+    prompt:
+      'Machu Picchu at dawn, wrapped in morning mist. The Inca citadel emerges from clouds on its mountain. First light touches the stone. Sacred and breathtaking. Peruvian Andes. No text.',
+    tags: ['sacred-site', 'machu-picchu', 'inca', 'dawn'],
+  },
+  {
+    id: 'site-easter-island-stars',
+    category: 'sacred-site',
+    prompt:
+      'Easter Island moai statues silhouetted against a blazing Milky Way. The ancient stone heads face the stars from which their creators came. Mysterious and ancient. No text.',
+    tags: ['sacred-site', 'easter-island', 'moai', 'milky-way'],
+  },
+  {
+    id: 'site-teotihuacan-sunrise',
+    category: 'sacred-site',
+    prompt:
+      'Teotihuacan Pyramid of the Sun at sunrise. The massive pyramid aligned with the rising sun. Warm orange and gold light. Ancient Mexican astronomical precision. No text.',
+    tags: ['sacred-site', 'teotihuacan', 'pyramid', 'sunrise'],
+  },
+  {
+    id: 'site-petra-torchlight',
+    category: 'sacred-site',
+    prompt:
+      'Petra, the rose-red city of Jordan, lit by hundreds of candles at night. The Treasury carved into the cliff face glows amber. Stars above the canyon. Ancient and magical. No text.',
+    tags: ['sacred-site', 'petra', 'torchlight', 'ancient'],
+  },
+  {
+    id: 'site-avebury-circle',
+    category: 'sacred-site',
+    prompt:
+      'Avebury stone circle at night under the Milky Way. The massive ancient megaliths stand in the field, stars blazing overhead. Older than Stonehenge. Mysterious and primal. No text.',
+    tags: ['sacred-site', 'avebury', 'stone-circle', 'ancient'],
+  },
+  {
+    id: 'site-chichen-itza-equinox',
+    category: 'sacred-site',
+    prompt:
+      'Chichen Itza at the spring equinox. The serpent shadow descends the pyramid staircase as the sun moves. Ancient Mayan astronomical genius made visible. Dramatic and sacred. No text.',
+    tags: ['sacred-site', 'chichen-itza', 'equinox', 'mayan'],
+  },
+
+  // SOLFEGGIO FREQUENCIES — sound as visual art
+  {
+    id: 'freq-432hz',
+    category: 'frequency',
+    prompt:
+      '432Hz frequency visualised. A perfect circular sound wave expanding outward in gold from a central point. The natural frequency of the universe. Cymatic patterns form in the wave. Dark background. No text.',
+    tags: ['frequency', '432hz', 'cymatics', 'gold'],
+  },
+  {
+    id: 'freq-528hz',
+    category: 'frequency',
+    prompt:
+      '528Hz — the love and DNA repair frequency. Green light waves pulse outward in perfect spirals. Cymatics patterns of emerald and gold. Life and healing made visible. No text.',
+    tags: ['frequency', '528hz', 'love', 'healing', 'green'],
+  },
+  {
+    id: 'freq-639hz',
+    category: 'frequency',
+    prompt:
+      '639Hz — the harmony and relationships frequency. Warm amber and rose cymatics patterns rippling outward. Two interlocking wave patterns finding resonance. Connection made visible. No text.',
+    tags: ['frequency', '639hz', 'harmony', 'amber'],
+  },
+  {
+    id: 'freq-741hz',
+    category: 'frequency',
+    prompt:
+      '741Hz — awakening intuition and solving problems. Blue-violet cymatics patterns, sharp and precise. Geometric forms emerging from sound. Mental clarity as vibration. No text.',
+    tags: ['frequency', '741hz', 'intuition', 'blue'],
+  },
+  {
+    id: 'freq-852hz',
+    category: 'frequency',
+    prompt:
+      '852Hz — returning to spiritual order. Deep indigo cymatics, intricate and symmetrical. Sacred geometry forms spontaneously from this frequency. Spiritual resonance visualised. No text.',
+    tags: ['frequency', '852hz', 'spiritual', 'indigo'],
+  },
+  {
+    id: 'freq-963hz',
+    category: 'frequency',
+    prompt:
+      '963Hz — the frequency of the divine, the pineal gland activator. Pure white and violet light pulsing in concentric rings. Crown chakra resonance. Transcendence made visible. No text.',
+    tags: ['frequency', '963hz', 'divine', 'crown'],
+  },
+
+  // DREAM AND SUBCONSCIOUS
+  {
+    id: 'dream-catcher-stars',
+    category: 'dreams',
+    prompt:
+      'A dreamcatcher hanging against a starry night sky. Feathers drift in a gentle breeze. The web catches moonlight. Stars visible through the web. Sacred and peaceful. No text.',
+    tags: ['dreams', 'dreamcatcher', 'stars', 'sacred'],
+  },
+  {
+    id: 'dream-lucid-floating',
+    category: 'dreams',
+    prompt:
+      'A human silhouette floating horizontally above clouds in a dreamscape. Stars below and above — the boundary between sky and space dissolves. Lucid dreaming and astral travel. No face, no text.',
+    tags: ['dreams', 'lucid', 'floating', 'astral'],
+  },
+  {
+    id: 'dream-liminal-corridor',
+    category: 'dreams',
+    prompt:
+      'An endless corridor stretching into infinity. Soft yellow light from overhead. A familiar yet unsettling dreamspace. Liminal aesthetic. Empty and full of potential. No text.',
+    tags: ['dreams', 'liminal', 'corridor', 'infinite'],
+  },
+  {
+    id: 'dream-subconscious-ocean',
+    category: 'dreams',
+    prompt:
+      'The subconscious mind visualised as a deep ocean. A figure stands on the surface and peers into impossible depths. Bioluminescent creatures below. Stars reflected above. No face, no text.',
+    tags: ['dreams', 'subconscious', 'ocean', 'depth'],
+  },
+  {
+    id: 'dream-hypnagogic',
+    category: 'dreams',
+    prompt:
+      'Hypnagogic visions — the state between waking and sleep. Shifting geometric shapes and patterns dissolving into each other. Phosphene light patterns in purple and gold. No text.',
+    tags: ['dreams', 'hypnagogic', 'geometric', 'phosphene'],
+  },
+
+  // TAROT ACES
+  {
+    id: 'tarot-ace-cups',
+    category: 'tarot-arcana',
+    prompt:
+      'Ace of Cups tarot card art. A divine hand emerging from clouds offers a golden chalice overflowing with water and white doves. A lotus and rose below. Pure emotion and love. No text or card name.',
+    tags: ['tarot', 'ace-of-cups', 'cups', 'love'],
+  },
+  {
+    id: 'tarot-ace-wands',
+    category: 'tarot-arcana',
+    prompt:
+      'Ace of Wands tarot card art. A divine hand emerges from a cloud holding a living wooden staff with leaves sprouting. Lightning and fire around it. Pure creative and passionate energy. No text or card name.',
+    tags: ['tarot', 'ace-of-wands', 'wands', 'fire'],
+  },
+  {
+    id: 'tarot-ace-swords',
+    category: 'tarot-arcana',
+    prompt:
+      'Ace of Swords tarot card art. A divine hand emerges from clouds gripping a gleaming upright sword. A crown of stars at the tip. Mountains below. Pure truth, clarity and intellect. No text or card name.',
+    tags: ['tarot', 'ace-of-swords', 'swords', 'truth'],
+  },
+  {
+    id: 'tarot-ace-pentacles',
+    category: 'tarot-arcana',
+    prompt:
+      'Ace of Pentacles tarot card art. A divine hand offers a gleaming gold pentacle coin from parted clouds. A lush garden archway below, flowers blooming. Pure material abundance. No text or card name.',
+    tags: ['tarot', 'ace-of-pentacles', 'pentacles', 'abundance'],
+  },
+
+  // MORE MYTHOLOGY CREATURES
+  {
+    id: 'myth-griffin-cosmic',
+    category: 'mythology',
+    prompt:
+      'A griffin — half eagle, half lion — soaring through a cosmic nebula. Golden eagle wings spread wide, lion body powerful and regal. Stars trail behind it. Ancient and noble. No text.',
+    tags: ['mythology', 'griffin', 'eagle-lion', 'cosmic'],
+  },
+  {
+    id: 'myth-sphinx-desert',
+    category: 'mythology',
+    prompt:
+      'A great sphinx silhouetted against a star-filled Egyptian sky. Ancient and inscrutable. The stars align above the sphinx. Deep desert night. Timeless mystery and wisdom. No text.',
+    tags: ['mythology', 'sphinx', 'egyptian', 'ancient'],
+  },
+  {
+    id: 'myth-fenrir-nordic',
+    category: 'mythology',
+    prompt:
+      'Fenrir, the great wolf of Norse mythology. An immense wolf silhouette that fills the sky, jaws open, stars spilling from its mouth. Norse cosmos at the edge of Ragnarok. No text.',
+    tags: ['mythology', 'fenrir', 'norse', 'wolf'],
+  },
+  {
+    id: 'myth-jormungandr-serpent',
+    category: 'mythology',
+    prompt:
+      'Jörmungandr, the World Serpent, encircling the cosmos. Its massive body coils around the entire observable universe. Ocean scales and star patterns. Ancient and vast. No text.',
+    tags: ['mythology', 'jormungandr', 'world-serpent', 'cosmic'],
+  },
+  {
+    id: 'myth-unicorn-cosmic',
+    category: 'mythology',
+    prompt:
+      'A pure white unicorn with a spiralling horn that catches prismatic light, running through a cosmic nebula. Its mane flows like aurora borealis. Magical and pure. No text.',
+    tags: ['mythology', 'unicorn', 'pure', 'cosmic'],
+  },
+
+  // SPECIFIC BRIGHT STARS
+  {
+    id: 'star-sirius-dog-star',
+    category: 'stars',
+    prompt:
+      'Sirius, the Dog Star — the brightest star in the night sky. A blazing blue-white star with dramatic diffraction spikes. Surrounding star field. Revered by ancient Egyptians. No text.',
+    tags: ['stars', 'sirius', 'bright', 'blue-white'],
+  },
+  {
+    id: 'star-antares-red',
+    category: 'stars',
+    prompt:
+      'Antares, the heart of Scorpius — a massive red supergiant surrounded by a nebula of its own expelled gas. Deep red and orange. Enormous and ancient. Set against dense star field. No text.',
+    tags: ['stars', 'antares', 'red-supergiant', 'scorpius'],
+  },
+  {
+    id: 'star-betelgeuse-giant',
+    category: 'stars',
+    prompt:
+      "Betelgeuse, the red shoulder of Orion. An enormous red supergiant star, its surface boiling with convection. Deep crimson and orange. So large it would swallow Jupiter's orbit. No text.",
+    tags: ['stars', 'betelgeuse', 'red-supergiant', 'orion'],
+  },
+  {
+    id: 'star-vega-blue',
+    category: 'stars',
+    prompt:
+      'Vega, the brightest star in Lyra. A brilliant blue-white star with a ring of debris around it — future planets forming. Precise and brilliant. Future north star in 12,000 years. No text.',
+    tags: ['stars', 'vega', 'blue-white', 'lyra'],
+  },
+  {
+    id: 'star-aldebaran-red',
+    category: 'stars',
+    prompt:
+      'Aldebaran, the red eye of Taurus. A giant orange-red star blazing in the V-shaped Hyades star cluster. Ancient waypoint for sailors. Bold and warm. No text.',
+    tags: ['stars', 'aldebaran', 'red-giant', 'taurus'],
+  },
+  {
+    id: 'star-rigel-blue',
+    category: 'stars',
+    prompt:
+      'Rigel, the blue foot of Orion. One of the most luminous stars known — a blue supergiant blazing with intense white-blue light. Surrounded by faint nebulosity. Brilliant and powerful. No text.',
+    tags: ['stars', 'rigel', 'blue-supergiant', 'orion'],
+  },
+
+  // MORE ANGEL NUMBERS
+  {
+    id: 'numerology-1010-new-start',
+    category: 'numerology',
+    prompt:
+      'The number 1010 in clean white and gold light. A new cycle beginning. The zero and one alternating like binary code of the universe. Minimalist cosmic background. No other text.',
+    tags: ['numerology', '1010', 'angel-number', 'new-cycle'],
+  },
+  {
+    id: 'numerology-1212-divine',
+    category: 'numerology',
+    prompt:
+      'The number 1212 in silver and celestial white. Divine alignment. The numbers repeat in perfect sequence — a sign of being on the right path. Starfield background. No other text.',
+    tags: ['numerology', '1212', 'angel-number', 'alignment'],
+  },
+  {
+    id: 'numerology-2222-harmony',
+    category: 'numerology',
+    prompt:
+      'The number 2222 in soft pink and silver. Deep harmony and partnership energy. Four twos vibrating in unison. Gentle cosmic glow. No other text.',
+    tags: ['numerology', '2222', 'angel-number', 'harmony'],
+  },
+  {
+    id: 'numerology-4444-foundation',
+    category: 'numerology',
+    prompt:
+      'The number 4444 in deep green and gold. The angels are with you. Solid foundation energy — four solid pillars of light. Earthy and protective. No other text.',
+    tags: ['numerology', '4444', 'angel-number', 'protection'],
+  },
+  {
+    id: 'numerology-6666-balance-reborn',
+    category: 'numerology',
+    prompt:
+      'The number 6666 in deep teal and violet. Not dark — rebalancing energy. Four sixes creating harmony from chaos. Calm and centring light. No other text.',
+    tags: ['numerology', '6666', 'angel-number', 'rebalance'],
+  },
+  {
+    id: 'numerology-8888-infinite',
+    category: 'numerology',
+    prompt:
+      'The number 8888 in rich gold. Infinite abundance and success. Four infinity symbols stacked. Unlimited wealth and flow energy radiating outward. No other text.',
+    tags: ['numerology', '8888', 'angel-number', 'infinite-abundance'],
+  },
+
+  // MORE COLOUR WASHES
+  {
+    id: 'wash-teal-ocean',
+    category: 'wash',
+    prompt:
+      'A deep teal gradient background. Dark ocean green-blue at the edges, brighter aqua at the centre. Like looking into deep water from below. Perfect for text overlay. No text.',
+    tags: ['wash', 'teal', 'ocean', 'gradient'],
+  },
+  {
+    id: 'wash-bronze-copper',
+    category: 'wash',
+    prompt:
+      'A bronze and copper gradient background. Warm metallic tones, dark at edges, gleaming at centre. Like polished ancient metal. Luxurious and earthy. No text.',
+    tags: ['wash', 'bronze', 'copper', 'metallic'],
+  },
+  {
+    id: 'wash-warm-amber',
+    category: 'wash',
+    prompt:
+      'A warm amber gradient background. Deep burnt orange fading to honey gold. Like late afternoon light through amber glass. Warm and inviting. No text.',
+    tags: ['wash', 'amber', 'warm', 'honey'],
+  },
+  {
+    id: 'wash-forest-dark',
+    category: 'wash',
+    prompt:
+      'A deep forest green gradient background. Very dark at the top, rich hunter green below. Like standing in an old growth forest at dusk. Grounded and alive. No text.',
+    tags: ['wash', 'forest', 'green', 'dark'],
+  },
+  {
+    id: 'wash-dusty-rose',
+    category: 'wash',
+    prompt:
+      'A dusty rose gradient background. Muted pink fading to warm cream. Soft and romantic. Like pressed petals. Feminine and gentle. No text.',
+    tags: ['wash', 'dusty-rose', 'pink', 'soft'],
+  },
+  {
+    id: 'wash-slate-blue',
+    category: 'wash',
+    prompt:
+      'A slate blue gradient background. Cool blue-grey, sophisticated and calm. Like a winter sky before snow. Clean and minimal. No text.',
+    tags: ['wash', 'slate', 'blue-grey', 'calm'],
+  },
 ];
 
 // ─── Types ───────────────────────────────────────────────────────────────────

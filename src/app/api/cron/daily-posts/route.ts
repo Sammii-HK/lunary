@@ -504,6 +504,7 @@ export async function GET(request: NextRequest) {
                       },
                     ]
                   : [],
+              platformSettings: { topic_tag: post.topicTag },
             });
 
             if (result.success) {
@@ -1441,6 +1442,11 @@ async function runDailyPosts(dateStr: string) {
 
   // Generate platform-optimized hashtags
   const platformHashtags = getAllPlatformHashtags(dateStr, cosmicContext);
+  // Transit-specific hashtags: exclude moon phase tags from non-moon posts
+  const transitPlatformHashtags = getAllPlatformHashtags(dateStr, {
+    ...cosmicContext,
+    moonPhase: undefined,
+  });
   const majorTransitBase = new Date(dateStr + 'T16:00:00Z');
   let majorTransitOffsetMinutes = 0;
   const getMajorTransitSchedule = () => {
@@ -1486,7 +1492,7 @@ async function runDailyPosts(dateStr: string) {
   const retrogradeTextPosts = buildRetrogradeTextPosts({
     dateStr,
     events: upcomingStations,
-    platformHashtags,
+    platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
   });
   const { ingresses, egresses } = await detectUpcomingSignChanges(
@@ -1501,7 +1507,7 @@ async function runDailyPosts(dateStr: string) {
   const ingressTextPosts = buildIngressTextPosts({
     dateStr,
     ingressEvents: ingresses,
-    platformHashtags,
+    platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
     tomorrowPositions,
   });
@@ -1509,7 +1515,7 @@ async function runDailyPosts(dateStr: string) {
   const egressTextPosts = buildEgressTextPosts({
     dateStr,
     egressEvents: egresses,
-    platformHashtags,
+    platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
   });
 
@@ -1552,7 +1558,7 @@ async function runDailyPosts(dateStr: string) {
   const transitMilestoneTextPosts = buildTransitMilestoneTextPosts({
     dateStr,
     milestones: transitMilestones,
-    platformHashtags,
+    platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
   });
 
@@ -1561,7 +1567,7 @@ async function runDailyPosts(dateStr: string) {
   const countdownTextPosts = buildCountdownTextPosts({
     dateStr,
     countdowns: countdownEvents,
-    platformHashtags,
+    platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
   });
 
@@ -1572,7 +1578,7 @@ async function runDailyPosts(dateStr: string) {
   const aspectTextPosts = buildAspectTextPosts({
     dateStr,
     aspects: aspectSource,
-    platformHashtags,
+    platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
   });
 
@@ -1683,6 +1689,9 @@ async function runDailyPosts(dateStr: string) {
         pinterestLink: post.platforms.includes('pinterest')
           ? buildUtmUrl('/grimoire', 'pinterest', 'social', 'daily_quote')
           : undefined,
+        ...(post.platforms.includes('threads')
+          ? { platformSettings: { threads: { topic_tag: 'Astrology' } } }
+          : {}),
       });
 
       // Check if all platforms succeeded
@@ -4242,19 +4251,15 @@ function buildRetrogradeTextPosts({
       0,
     );
 
-    // X/Twitter: compact with CTA
+    // X/Twitter: compact
     const xBody = isRetrograde
       ? [
           `${planet} stations retrograde ${timeStr}.`,
           `Time to slow down and review ${focus}.`,
-          '',
-          'lunary.app',
         ].join('\n')
       : [
           `${planet} stations direct ${timeStr}.`,
           `Momentum returns to ${focus}.`,
-          '',
-          'lunary.app',
         ].join('\n');
     const xContent = addEventHashtags(
       xBody,
@@ -4264,19 +4269,15 @@ function buildRetrogradeTextPosts({
       2,
     );
 
-    // Bluesky: informational with CTA
+    // Bluesky: informational
     const blueskyBody = isRetrograde
       ? [
           `${planet} stations retrograde ${timeStr} in ${event.sign}.`,
           `Time to slow down and review ${focus}.`,
-          '',
-          'Track retrogrades at lunary.app',
         ].join('\n')
       : [
           `${planet} stations direct ${timeStr} in ${event.sign}.`,
           `Momentum returns to ${focus}.`,
-          '',
-          'Track retrogrades at lunary.app',
         ].join('\n');
     const blueskyContent = addEventHashtags(
       blueskyBody,
@@ -4379,7 +4380,6 @@ function buildIngressTextPosts({
     } else {
       xBodyParts.push(`A shift toward ${energy} energy begins.`);
     }
-    xBodyParts.push('', 'lunary.app');
     const xBody = xBodyParts.join('\n');
     const xContent = addEventHashtags(
       xBody,
@@ -4389,12 +4389,10 @@ function buildIngressTextPosts({
       2,
     );
 
-    // Bluesky: informational with CTA
+    // Bluesky: informational
     const blueskyBodyParts = [
       `${planet} enters ${sign} ${timeStr}.`,
       durationText || `A shift toward ${energy} energy begins.`,
-      '',
-      'Track cosmic shifts at lunary.app',
     ];
     const blueskyBody = blueskyBodyParts.join('\n');
     const blueskyContent = addEventHashtags(
@@ -4530,10 +4528,8 @@ function buildAspectTextPosts({
       0,
     );
 
-    // X/Twitter: compact with CTA
-    const xBody = [headlineWithSigns, energyDescription, '', 'lunary.app'].join(
-      '\n',
-    );
+    // X/Twitter: compact
+    const xBody = [headlineWithSigns, energyDescription].join('\n');
     const xContent = addEventHashtags(
       xBody,
       platformHashtags.twitter,
@@ -4542,13 +4538,8 @@ function buildAspectTextPosts({
       2,
     );
 
-    // Bluesky: informational with CTA
-    const blueskyBody = [
-      headlineWithSigns,
-      energyDescription,
-      '',
-      'lunary.app',
-    ].join('\n');
+    // Bluesky: informational
+    const blueskyBody = [headlineWithSigns, energyDescription].join('\n');
     const blueskyContent = addEventHashtags(
       blueskyBody,
       platformHashtags.bluesky,
@@ -4620,12 +4611,10 @@ function buildEgressTextPosts({
       0,
     );
 
-    // X/Twitter: compact with CTA
+    // X/Twitter: compact
     const xBody = [
       `${planet}'s last hours in ${sign}.`,
       `${planet} enters ${nextSign} ${timeStr}.`,
-      '',
-      'lunary.app',
     ].join('\n');
     const xContent = addEventHashtags(
       xBody,
@@ -4635,12 +4624,10 @@ function buildEgressTextPosts({
       2,
     );
 
-    // Bluesky: informational with CTA
+    // Bluesky: informational
     const blueskyBody = [
       `${planet}'s last hours in ${sign}.`,
       `${planet} enters ${nextSign} ${timeStr}.`,
-      '',
-      'Track cosmic shifts at lunary.app',
     ].join('\n');
     const blueskyContent = addEventHashtags(
       blueskyBody,
@@ -5173,22 +5160,10 @@ function buildTransitMilestoneTextPosts({
       ].join('\n');
 
       // X/Twitter: compact
-      xBody = [
-        headline,
-        durationInNextSign,
-        energyShift,
-        '',
-        'lunary.app',
-      ].join('\n');
+      xBody = [headline, durationInNextSign, energyShift].join('\n');
 
       // Bluesky: informational
-      blueskyBody = [
-        headline,
-        durationInNextSign,
-        energyShift,
-        '',
-        'Track slow planet transits at lunary.app',
-      ].join('\n');
+      blueskyBody = [headline, durationInNextSign, energyShift].join('\n');
 
       postName = `Transit Milestone • ${planet} leaves ${sign}, enters ${nextSign} ${timeframe}`;
     } else {
@@ -5217,20 +5192,16 @@ function buildTransitMilestoneTextPosts({
         engagementHook,
       ].join('\n');
 
-      // X/Twitter: compact with CTA
+      // X/Twitter: compact
       xBody = [
         `${planet} in ${sign}: ${milestoneLabel}.`,
         `Themes of ${theme} continue.`,
-        '',
-        'lunary.app',
       ].join('\n');
 
-      // Bluesky: informational with CTA
+      // Bluesky: informational
       blueskyBody = [
         `${planet} in ${sign}: ${milestoneLabel}.`,
         durationContext,
-        '',
-        'Track slow planet transits at lunary.app',
       ].join('\n');
 
       postName = `Transit Milestone • ${planet} in ${sign} ${milestoneLabel}`;
@@ -5334,9 +5305,7 @@ function buildCountdownTextPosts({
     );
 
     // X: compact
-    const xBody = [countdown.name, actionAdvice, '', 'lunary.app']
-      .filter(Boolean)
-      .join('\n');
+    const xBody = [countdown.name, actionAdvice].filter(Boolean).join('\n');
     const xContent = addEventHashtags(
       xBody,
       platformHashtags.twitter,
@@ -5346,12 +5315,9 @@ function buildCountdownTextPosts({
     );
 
     // Bluesky: informational
-    const blueskyBody = [
-      countdown.name,
-      countdown.energy,
-      '',
-      'Track upcoming transits at lunary.app',
-    ].join('\n');
+    const blueskyBody = [countdown.name, countdown.energy]
+      .filter(Boolean)
+      .join('\n');
     const blueskyContent = addEventHashtags(
       blueskyBody,
       platformHashtags.bluesky,

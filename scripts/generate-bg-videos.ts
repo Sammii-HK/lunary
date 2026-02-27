@@ -670,6 +670,167 @@ const PROMPTS: VideoPrompt[] = [
       'All planets of the solar system slowly aligning in a row. Mercury to Neptune, each glowing in their true colour. A rare cosmic parade across the star field. Cinematic and awe-inspiring. No text.',
     tags: ['astrology', 'planets', 'alignment', 'parade'],
   },
+
+  // ZODIAC SEASON AESTHETICS — cinematic mood videos
+  {
+    id: 'season-aries-video',
+    category: 'zodiac-season',
+    prompt:
+      'Aries season cinematic video. Wildfire spreading across a dark landscape, sparks rising like stars. A charging ram silhouette in the embers. Raw spring energy. Bold reds and gold. No text.',
+    tags: ['zodiac-season', 'aries', 'fire', 'cinematic'],
+  },
+  {
+    id: 'season-scorpio-video',
+    category: 'zodiac-season',
+    prompt:
+      'Scorpio season cinematic video. A blood moon rising over dark water. Pomegranates split open, red seeds scatter. Bare trees against crimson sky. Transformation and intensity. Deep dark aesthetic. No text.',
+    tags: ['zodiac-season', 'scorpio', 'dark', 'moon'],
+  },
+  {
+    id: 'season-pisces-video',
+    category: 'zodiac-season',
+    prompt:
+      'Pisces season cinematic video. Deep underwater dreamscape — bioluminescent creatures drift in slow motion. Moonlight filters through dark water. Two fish circle each other. Dreamy and mystical. No text.',
+    tags: ['zodiac-season', 'pisces', 'underwater', 'dreamy'],
+  },
+  {
+    id: 'season-sagittarius-video',
+    category: 'zodiac-season',
+    prompt:
+      'Sagittarius season cinematic video. An arrow flying through deep space, trailing stardust. An open road stretching to the horizon under a vast Milky Way. Adventure and freedom. No text.',
+    tags: ['zodiac-season', 'sagittarius', 'freedom', 'stars'],
+  },
+
+  // MORE SACRED SITES — cinematic reveals
+  {
+    id: 'site-machu-picchu-cinematic',
+    category: 'sacred-site',
+    prompt:
+      'Machu Picchu emerging from morning mist at dawn. The Inca citadel slowly revealed as clouds part. First golden light touches ancient stone. Breathtaking and sacred. Cinematic slow reveal. No text.',
+    tags: ['sacred-site', 'machu-picchu', 'mist', 'dawn'],
+  },
+  {
+    id: 'site-easter-island-cinematic',
+    category: 'sacred-site',
+    prompt:
+      'Easter Island moai statues at night under the Milky Way. A slow cinematic pan across the ancient stone heads. Stars blazing overhead. The ancient guardians face the cosmos. Mysterious and powerful. No text.',
+    tags: ['sacred-site', 'easter-island', 'moai', 'milky-way'],
+  },
+  {
+    id: 'site-petra-candles',
+    category: 'sacred-site',
+    prompt:
+      'Petra, the rose-red city, lit by hundreds of candles at night. A slow cinematic approach through the canyon. The Treasury facade glows warm amber. Stars above. Ancient and magical. No text.',
+    tags: ['sacred-site', 'petra', 'candles', 'cinematic'],
+  },
+  {
+    id: 'site-chichen-itza-serpent',
+    category: 'sacred-site',
+    prompt:
+      'Chichen Itza equinox. The serpent shadow descends the pyramid staircase in slow time-lapse. Ancient Mayan astronomical precision made cinematic. Sun and shadow dance. Dramatic. No text.',
+    tags: ['sacred-site', 'chichen-itza', 'equinox', 'serpent-shadow'],
+  },
+
+  // SOLFEGGIO FREQUENCIES — cymatics visualisations
+  {
+    id: 'freq-528hz-video',
+    category: 'frequency',
+    prompt:
+      '528Hz — the love frequency. Green cymatics patterns form in slow motion from a central vibration. Perfect geometric shapes emerge from sound waves in emerald and gold. Life and healing. No text.',
+    tags: ['frequency', '528hz', 'cymatics', 'healing'],
+  },
+  {
+    id: 'freq-963hz-video',
+    category: 'frequency',
+    prompt:
+      '963Hz — the frequency of the divine. Pure white and violet light pulses outward in concentric rings. A crown chakra activating. Transcendence made visible. Slow and meditative. No text.',
+    tags: ['frequency', '963hz', 'divine', 'crown'],
+  },
+  {
+    id: 'freq-432hz-video',
+    category: 'frequency',
+    prompt:
+      '432Hz — the natural frequency of the universe. A golden sound wave expands outward from a central point in perfect circles. Cymatic patterns in warm gold on black. Universal resonance. No text.',
+    tags: ['frequency', '432hz', 'cymatics', 'gold'],
+  },
+
+  // DREAM AND SUBCONSCIOUS — cinematic
+  {
+    id: 'dream-lucid-floating-video',
+    category: 'dreams',
+    prompt:
+      'A human silhouette slowly floating upward through layers of dreamscape — clouds become stars. Lucid dreaming and astral projection. Slow and weightless. Deep blue and silver. No face, no text.',
+    tags: ['dreams', 'lucid', 'floating', 'astral'],
+  },
+  {
+    id: 'dream-subconscious-video',
+    category: 'dreams',
+    prompt:
+      'The subconscious ocean. A figure standing on dark water, looking down into impossible bioluminescent depths. Strange creatures drift below. Stars reflected on the surface. Slow and hypnotic. No text.',
+    tags: ['dreams', 'subconscious', 'ocean', 'bioluminescent'],
+  },
+  {
+    id: 'dream-hypnagogic-video',
+    category: 'dreams',
+    prompt:
+      'Hypnagogic visuals — the state between waking and sleep. Shifting geometric shapes dissolving into each other. Phosphene light patterns in purple and gold slowly morphing. No text.',
+    tags: ['dreams', 'hypnagogic', 'geometric', 'phosphene'],
+  },
+
+  // MORE MYTHOLOGY CREATURES — cinematic
+  {
+    id: 'myth-unicorn-nebula',
+    category: 'mythology',
+    prompt:
+      'A pure white unicorn galloping through a cosmic nebula in slow motion. Its horn trails prismatic light. Mane flows like aurora borealis. Stars scatter with every step. Magical and free. No text.',
+    tags: ['mythology', 'unicorn', 'cosmic', 'nebula'],
+  },
+  {
+    id: 'myth-fenrir-cosmos',
+    category: 'mythology',
+    prompt:
+      'Fenrir, the cosmic wolf, howling at the edge of the universe. Its massive silhouette fills the sky. Stars pour from its open jaws. Norse mythology at cosmic scale. Dramatic and primal. No text.',
+    tags: ['mythology', 'fenrir', 'wolf', 'cosmic'],
+  },
+  {
+    id: 'myth-griffin-flight',
+    category: 'mythology',
+    prompt:
+      'A griffin soaring through a cosmic nebula in slow motion. Golden eagle wings spread against purple and gold gas clouds. Regal and powerful. Ancient mythology made cosmic. No text.',
+    tags: ['mythology', 'griffin', 'flight', 'cosmic'],
+  },
+
+  // SPECIFIC BRIGHT STARS — close-up cinematic
+  {
+    id: 'star-sirius-video',
+    category: 'stars',
+    prompt:
+      'Sirius, the Dog Star blazing in blue-white glory. A slow cinematic zoom into the brightest star. Diffraction spikes radiate. The star that announced the Nile flood to ancient Egyptians. No text.',
+    tags: ['stars', 'sirius', 'blue-white', 'cinematic'],
+  },
+  {
+    id: 'star-betelgeuse-video',
+    category: 'stars',
+    prompt:
+      'Betelgeuse, the red shoulder of Orion, pulsing with slow convective movement. Its surface boils in deep red and orange. So vast it would swallow our solar system. Pre-supernova dimming. No text.',
+    tags: ['stars', 'betelgeuse', 'red-supergiant', 'pulsing'],
+  },
+
+  // MORE ANGEL NUMBERS — energy reveals
+  {
+    id: 'angel-number-1010-video',
+    category: 'numerology',
+    prompt:
+      'The number 1010 forming from particles of light against deep space. Ones and zeros materialise in clean white and gold. A new cycle beginning. The binary code of the universe. No text besides the numbers.',
+    tags: ['numerology', '1010', 'angel-number', 'new-cycle'],
+  },
+  {
+    id: 'angel-number-8888-video',
+    category: 'numerology',
+    prompt:
+      'The number 8888 blazing in rich gold against deep black space. Four infinity symbols stacked. Unlimited abundance radiating outward in waves of golden light. Prosperity energy. No text besides the numbers.',
+    tags: ['numerology', '8888', 'angel-number', 'abundance'],
+  },
 ];
 
 // ─── Types ───────────────────────────────────────────────────────────────────

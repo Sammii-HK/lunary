@@ -69,6 +69,10 @@ export const DIMENSIONS = {
   // YouTube (16:9)
   landscape: { width: 1920, height: 1080 },
   youtube: { width: 1920, height: 1080 },
+  // Instagram Feed (4:5)
+  feed: { width: 1080, height: 1350 },
+  // X / Twitter (16:9)
+  xVideo: { width: 1280, height: 720 },
 } as const;
 
 export const STYLES = {

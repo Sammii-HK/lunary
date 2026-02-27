@@ -12,6 +12,8 @@ import { TextOverlays, type Overlay } from '../components/TextOverlays';
 import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
 import { TransitionEffect } from '../components/TransitionEffect';
 import { ProgressIndicator } from '../components/ProgressIndicator';
+import { ZoomRegion, type ZoomPoint } from '../components/ZoomRegion';
+import { TapIndicator, type TapPoint } from '../components/TapIndicator';
 import type { AudioSegment } from '../utils/timing';
 import type { CategoryVisualConfig } from '../config/category-visuals';
 import { COLORS } from '../styles/theme';
@@ -47,6 +49,10 @@ export interface AppDemoVideoProps {
   backgroundMusicUrl?: string;
   /** Background music volume (0-1, default 0.15 = ~16dB below voice) */
   backgroundMusicVolume?: number;
+  /** Zoom punch-in windows — zooms into specific screen areas at key moments */
+  zoomPoints?: ZoomPoint[];
+  /** Touch ripple animations — shows where taps occur during the recording */
+  tapPoints?: TapPoint[];
 }
 
 /**
@@ -56,13 +62,14 @@ export interface AppDemoVideoProps {
  * Designed for TikTok app demo videos (9:16 @ 1080x1920).
  *
  * Layer order:
- * 1. <Video> — screen recording fills the frame
- * 2. HookIntro — animated word-by-word hook text
- * 3. TextOverlays — outro CTA
- * 4. AnimatedSubtitles — word-level karaoke at bottom
- * 5. <Audio> — TTS voiceover
- * 6. ProgressIndicator — thin bar at bottom
- * 7. TransitionEffect — fade out to black
+ * 1. <Video> inside ZoomRegion — screen recording with zoom/pan effects
+ * 2. TapIndicator — touch ripple animations over the recording
+ * 3. HookIntro — animated word-by-word hook text
+ * 4. TextOverlays — mid-video chapter cards + outro CTA
+ * 5. AnimatedSubtitles — word-level karaoke at bottom
+ * 6. <Audio> — TTS voiceover + background music
+ * 7. ProgressIndicator — thin bar at bottom
+ * 8. TransitionEffect — fade out to black
  */
 export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
   videoSrc,
@@ -82,6 +89,8 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
   audioStartOffset = 0,
   backgroundMusicUrl,
   backgroundMusicVolume,
+  zoomPoints = [],
+  tapPoints = [],
 }) => {
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -92,7 +101,7 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
     endTime: s.endTime + audioStartOffset,
   }));
 
-  // Build outro as a CTA-style overlay (only CTA, no mid-video overlays)
+  // Build outro as a CTA-style overlay
   const outroOverlay: Overlay = {
     text: outroText,
     startTime: outroStartTime,
@@ -102,19 +111,33 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
 
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.cosmicBlack }}>
-      {/* 1. Screen recording background */}
+      {/* 1. Screen recording with zoom/pan effects */}
       <AbsoluteFill style={{ zIndex: 1 }}>
-        <Video
-          src={staticFile(videoSrc)}
-          startFrom={Math.round(audioStartOffset * fps)}
-          playbackRate={videoPlaybackRate}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
-        />
+        <ZoomRegion zoomPoints={zoomPoints}>
+          <Video
+            src={staticFile(videoSrc)}
+            startFrom={Math.round(audioStartOffset * fps)}
+            playbackRate={videoPlaybackRate}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+        </ZoomRegion>
       </AbsoluteFill>
+
+      {/* 2. Touch ripple animations — sit above the recording, below text */}
+      {tapPoints.length > 0 && (
+        <AbsoluteFill style={{ zIndex: 10 }}>
+          <TapIndicator
+            tapPoints={tapPoints}
+            defaultColor={
+              categoryVisuals?.accentColor ?? 'rgba(255, 255, 255, 0.9)'
+            }
+          />
+        </AbsoluteFill>
+      )}
 
       {/* No fade-in — TikTok needs visible content on frame 0 for previews */}
 
@@ -148,7 +171,7 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
         />
       )}
 
-      {/* 6. TTS voiceover audio track (delayed by audioStartOffset to sync with recording) */}
+      {/* 6. TTS voiceover (delayed by audioStartOffset to sync with recording) */}
       {audioUrl && (
         <Sequence from={Math.round(audioStartOffset * fps)}>
           <Audio src={staticFile(audioUrl)} />

@@ -43,7 +43,13 @@ export default function AuthenticatedLayout({
   useEffect(() => {
     if (!authStatus.loading && !authStatus.isAuthenticated) {
       const returnTo = encodeURIComponent(pathname);
-      router.replace(`/auth?returnTo=${returnTo}`);
+      // Use hard navigation for reliability in Capacitor WKWebView (client-side
+      // router.replace can stall on first load before cookies are set)
+      if (typeof window !== 'undefined') {
+        window.location.replace(`/auth?returnTo=${returnTo}`);
+      } else {
+        router.replace(`/auth?returnTo=${returnTo}`);
+      }
     }
   }, [authStatus.isAuthenticated, authStatus.loading, pathname, router]);
 
@@ -93,7 +99,13 @@ export default function AuthenticatedLayout({
   }
 
   if (!authStatus.isAuthenticated) {
-    return null;
+    // Keep showing loading while window.location.replace navigates to /auth.
+    // Returning null here causes a blank screen in Capacitor WKWebView.
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        <span className='text-zinc-400 text-sm'>Redirecting…</span>
+      </div>
+    );
   }
 
   return (
