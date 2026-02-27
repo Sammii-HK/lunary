@@ -211,6 +211,14 @@ const POST_TYPE_HASHTAGS: Record<IGPostType, string[]> = {
     '#dailyastrology',
     '#cosmicforecast',
   ],
+  one_word: [
+    '#zodiacsigns',
+    '#zodiacenergy',
+    '#astrologyfacts',
+    '#zodiacpersonality',
+    '#astrologymemes',
+    '#zodiacvibes',
+  ],
 };
 
 // --- Caption Generators ---
@@ -271,6 +279,9 @@ export function generateCaption(
       break;
     case 'story':
       caption = generateStoryCaption(options);
+      break;
+    case 'one_word':
+      caption = generateOneWordCaption(options);
       break;
     default:
       caption = 'Explore the cosmos with Lunary \u2728';
@@ -451,6 +462,24 @@ function generateAngelNumberCaption(options: { title?: string }): string {
   const hook = hooks[hookIndex];
 
   return `${hook}\n\nSave this for next time it appears.\nWhat number do YOU keep seeing? Comment below.\n\nFull angel number guide — link in bio`;
+}
+
+function generateOneWordCaption(options: { sign?: string }): string {
+  const sign = options.sign
+    ? options.sign.charAt(0).toUpperCase() + options.sign.slice(1)
+    : 'zodiac';
+
+  const hooks = [
+    `One word for ${sign} and it says everything`,
+    `If you know a ${sign}, you already know this is accurate`,
+    `This is the most ${sign} thing ever`,
+    `${sign} described in one word. Do you agree?`,
+  ];
+
+  const hookIndex = hashString(sign) % hooks.length;
+  const hook = hooks[hookIndex];
+
+  return `${hook}\n\nTag a ${sign} who needs to see this.\nComment your sign below.\n\nFollow for daily zodiac content`;
 }
 
 /**
