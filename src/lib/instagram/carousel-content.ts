@@ -808,6 +808,21 @@ function buildSlideData(snippet: NonNullable<SnippetLike>) {
   return snippet;
 }
 
+// Astronomicon characters used as ghost backdrops per category
+// Q=Sun, R=Moon, T=Venus, U=Mars, V=Jupiter, W=Saturn, Y=Neptune, Z=Pluto
+const CATEGORY_SYMBOL: Partial<Record<ThemeCategory, string>> = {
+  tarot: 'R', // Moon — mystery, intuition
+  crystals: 'T', // Venus — beauty, earth energy
+  numerology: 'V', // Jupiter — expansion, spiritual growth
+  runes: 'W', // Saturn — ancient wisdom, discipline
+  spells: 'R', // Moon — magic, cycles
+  chakras: 'Q', // Sun — energy, radiance
+  sabbat: 'R', // Moon — seasonal cycles
+  lunar: 'R', // Moon
+  planetary: 'Q', // Sun
+  zodiac: 'Q', // Sun (zodiac carousels use sign glyph via symbol param)
+};
+
 function makeSlide(
   slideIndex: number,
   totalSlides: number,
@@ -816,7 +831,11 @@ function makeSlide(
   category: ThemeCategory,
   variant: IGCarouselSlide['variant'],
   subtitle?: string,
+  symbol?: string,
 ): IGCarouselSlide {
+  // For body slides, fall back to category symbol if none provided
+  const resolvedSymbol =
+    symbol ?? (variant === 'body' ? CATEGORY_SYMBOL[category] : undefined);
   return {
     slideIndex,
     totalSlides,
@@ -825,6 +844,7 @@ function makeSlide(
     subtitle,
     category,
     variant,
+    symbol: resolvedSymbol,
   };
 }
 

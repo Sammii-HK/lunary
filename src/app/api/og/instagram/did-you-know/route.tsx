@@ -50,9 +50,37 @@ export async function GET(request: NextRequest) {
           padding: `${IG_SPACING.padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          overflow: 'hidden',
         }}
       >
         {starfield}
+
+        {/* Giant "?" ghost backdrop — Satori-safe centering */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 1200,
+              color: accent,
+              opacity: 0.07,
+              display: 'flex',
+              lineHeight: 1,
+              fontWeight: 700,
+            }}
+          >
+            ?
+          </div>
+        </div>
 
         {/* "DID YOU KNOW?" header badge */}
         <div
@@ -82,13 +110,14 @@ export async function GET(request: NextRequest) {
         {/* Fact text - centred, large, readable */}
         <div
           style={{
-            fontSize: IG_TEXT.dark.subtitle,
+            fontSize: IG_TEXT.dark.subtitle + 4,
             color: OG_COLORS.textPrimary,
             textAlign: 'center',
             lineHeight: 1.45,
             maxWidth: '88%',
             display: 'flex',
             fontWeight: 500,
+            textShadow: `0 0 40px ${accent}40`,
           }}
         >
           {truncateIG(fact, 200)}

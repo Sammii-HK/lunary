@@ -128,6 +128,7 @@ export async function GET(request: NextRequest) {
               : '60px 100px',
           fontFamily: fontData ? 'Roboto Mono' : 'system-ui',
           position: 'relative',
+          overflow: 'hidden',
         }}
       >
         {/* Starfield - more visible */}
@@ -148,20 +149,31 @@ export async function GET(request: NextRequest) {
           />
         ))}
 
-        {/* Decorative quote mark */}
+        {/* Giant quote mark — ghost backdrop, Satori-safe centering */}
         <div
           style={{
             position: 'absolute',
-            top: isSquare ? 60 : 80,
-            left: isSquare ? 60 : 80,
-            fontSize: 120,
-            color: accent,
-            opacity: 0.1,
-            lineHeight: 1,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          {'\u201C'}
+          <div
+            style={{
+              fontSize: 900,
+              color: accent,
+              opacity: 0.07,
+              lineHeight: 1,
+              display: 'flex',
+              fontWeight: 700,
+            }}
+          >
+            {'\u201C'}
+          </div>
         </div>
 
         <div

@@ -11,46 +11,206 @@ const DISCOVERY_HASHTAGS = [
   '#spirituality',
   '#mystic',
   '#starsigns',
+  '#astrologypost',
+  '#cosmicenergy',
 ];
 
 const CATEGORY_HASHTAGS: Record<ThemeCategory, string[]> = {
-  zodiac: ['#zodiac', '#zodiacsigns', '#horoscope', '#astrologymemes'],
-  tarot: ['#tarot', '#tarotreading', '#tarotcards', '#divination'],
-  lunar: ['#moonphases', '#moonmagic', '#lunarphase', '#moon'],
-  planetary: ['#astrology', '#planets', '#cosmicenergy', '#celestial'],
-  crystals: ['#crystals', '#crystalhealing', '#witchtok', '#crystalgrid'],
-  numerology: ['#numerology', '#angelnumbers', '#lifepath', '#manifestation'],
-  chakras: ['#chakras', '#chakrahealing', '#energyhealing', '#spirituality'],
-  sabbat: ['#wheeloftheyear', '#paganism', '#witchcraft', '#sabbat'],
-  runes: ['#runes', '#norsemythology', '#runemagic', '#divination'],
-  spells: ['#witchtok', '#spellwork', '#witchcraft', '#magick'],
+  zodiac: [
+    '#zodiac',
+    '#zodiacsigns',
+    '#horoscope',
+    '#astrologymemes',
+    '#birthchart',
+    '#astrologyfacts',
+    '#zodiacpersonality',
+    '#learnastrology',
+    '#astrologylovers',
+    '#zodiacenergy',
+  ],
+  tarot: [
+    '#tarot',
+    '#tarotreading',
+    '#tarotcards',
+    '#divination',
+    '#dailytarot',
+    '#tarotcommunity',
+    '#tarotdeck',
+    '#tarotspread',
+    '#tarotmeanings',
+    '#tarotguidance',
+  ],
+  lunar: [
+    '#moonphases',
+    '#moonmagic',
+    '#lunarphase',
+    '#moon',
+    '#fullmoon',
+    '#newmoon',
+    '#moonritual',
+    '#moonenergy',
+    '#lunarmagic',
+    '#moonwitch',
+  ],
+  planetary: [
+    '#astrology',
+    '#planets',
+    '#cosmicenergy',
+    '#celestial',
+    '#planetarymagic',
+    '#astrotransits',
+    '#mercuryretrograde',
+    '#venusinretrograde',
+    '#astrologycommunity',
+    '#cosmicguidance',
+  ],
+  crystals: [
+    '#crystals',
+    '#crystalhealing',
+    '#crystalcollection',
+    '#healingcrystals',
+    '#crystalgrid',
+    '#witchesofinstagram',
+    '#crystalmagic',
+    '#chakrahealing',
+    '#gemstones',
+    '#crystalwitch',
+  ],
+  numerology: [
+    '#numerology',
+    '#angelnumbers',
+    '#lifepath',
+    '#manifestation',
+    '#angelnumber',
+    '#numerologyreading',
+    '#spiritualawakening',
+    '#divineguidance',
+    '#lawofattraction',
+    '#111',
+  ],
+  chakras: [
+    '#chakras',
+    '#chakrahealing',
+    '#energyhealing',
+    '#spirituality',
+    '#chakrabalancing',
+    '#sacredgeometry',
+    '#kundalini',
+    '#thirdeyeopen',
+    '#rootchakra',
+    '#highervibration',
+  ],
+  sabbat: [
+    '#wheeloftheyear',
+    '#paganism',
+    '#witchcraft',
+    '#sabbat',
+    '#witchesofinstagram',
+    '#pagancommunity',
+    '#wicca',
+    '#greenwitch',
+    '#earthmagic',
+    '#ritualmagic',
+  ],
+  runes: [
+    '#runes',
+    '#norsemythology',
+    '#runemagic',
+    '#divination',
+    '#elderfuthark',
+    '#vikingmagic',
+    '#runesofinstagram',
+    '#norsewitchcraft',
+    '#runerunes',
+    '#runereading',
+  ],
+  spells: [
+    '#witchtok',
+    '#spellwork',
+    '#witchcraft',
+    '#magick',
+    '#witchesofinstagram',
+    '#spellcasting',
+    '#ritualmagic',
+    '#manifestation',
+    '#moonspell',
+    '#candle magic',
+  ],
 };
 
 const POST_TYPE_HASHTAGS: Record<IGPostType, string[]> = {
-  meme: ['#astrologymemes', '#zodiacmemes', '#relatable', '#foryou'],
+  meme: [
+    '#astrologymemes',
+    '#zodiacmemes',
+    '#relatable',
+    '#zodiachumor',
+    '#astrologytiktok',
+    '#zodiacfacts',
+  ],
   carousel: [
     '#witchesofinstagram',
     '#grimoirepages',
     '#savethis',
     '#astrologyfacts',
+    '#learnastrology',
+    '#astrologytips',
   ],
-  quote: ['#cosmicquotes', '#spiritualquotes', '#inspiration', '#deepthoughts'],
-  app_feature: ['#astrologyapp', '#birthchart', '#cosmictools', '#astrology'],
-  did_you_know: ['#didyouknow', '#astrologyfacts', '#savethis', '#funfact'],
-  sign_ranking: ['#zodiacranking', '#zodiacsigns', '#signcheck', '#zodiactea'],
+  quote: [
+    '#cosmicquotes',
+    '#spiritualquotes',
+    '#inspiration',
+    '#deepthoughts',
+    '#cosmicwisdom',
+    '#soulquotes',
+  ],
+  app_feature: [
+    '#astrologyapp',
+    '#birthchart',
+    '#cosmictools',
+    '#astrology',
+    '#birthchartreading',
+    '#freebirthchart',
+  ],
+  did_you_know: [
+    '#didyouknow',
+    '#astrologyfacts',
+    '#savethis',
+    '#funfact',
+    '#astrologytips',
+    '#learnastrology',
+  ],
+  sign_ranking: [
+    '#zodiacranking',
+    '#zodiacsigns',
+    '#signcheck',
+    '#zodiactea',
+    '#zodiacfacts',
+    '#astrologymemes',
+  ],
   angel_number_carousel: [
     '#angelnumbers',
     '#numerology',
     '#manifestation',
     '#spiritualawakening',
+    '#angelnumber',
+    '#divineguidance',
   ],
   compatibility: [
     '#zodiaccompatibility',
     '#astrolove',
     '#cosmicmatch',
     '#tagsomeone',
+    '#zodiaclove',
+    '#astrologylove',
   ],
-  story: ['#dailyhoroscope', '#moonphase', '#tarotdaily', '#cosmicguidance'],
+  story: [
+    '#dailyhoroscope',
+    '#moonphase',
+    '#tarotdaily',
+    '#cosmicguidance',
+    '#dailyastrology',
+    '#cosmicforecast',
+  ],
 };
 
 // --- Caption Generators ---
@@ -150,7 +310,7 @@ function generateMemeCaption(options: {
   const hookIndex = hashString(options.setup || sign) % hooks.length;
   const hook = hooks[hookIndex];
 
-  return `${hook}\n\nDouble tap if this is you.\nTag someone who needs to see this.\n\nFollow @lunaryapp for daily cosmic content`;
+  return `${hook}\n\nDouble tap if this is you.\nTag someone who needs to see this.\n\nFollow for daily zodiac content and astrology facts`;
 }
 
 function generateCarouselCaption(options: {
@@ -164,28 +324,42 @@ function generateCarouselCaption(options: {
     tarot: `Everything you need to know about ${title}`,
     zodiac: `The complete guide to ${title}`,
     spells: `How to cast: ${title}`,
-    crystals: `${title} - properties, uses, and healing`,
-    numerology: `${title} - what the numbers reveal`,
-    runes: `${title} - meaning and magical uses`,
-    chakras: `${title} - healing and alignment`,
-    sabbat: `${title} - traditions and rituals`,
-    lunar: `${title} - cosmic insight`,
-    planetary: `${title} - planetary energy guide`,
+    crystals: `${title} — properties, uses, and healing`,
+    numerology: `${title} — what the numbers reveal`,
+    runes: `${title} — meaning and magical uses`,
+    chakras: `${title} — healing and alignment`,
+    sabbat: `${title} — traditions and rituals`,
+    lunar: `${title} — cosmic insight`,
+    planetary: `${title} — planetary energy guide`,
+  };
+
+  const bodies: Record<string, string> = {
+    tarot: `Swipe through for the full breakdown — upright meaning, reversed meaning, love, career, and spirituality. Save this post so you have it for your next reading.\n\nThis card carries more wisdom than most people realise. The more you study it, the more it reveals.`,
+    zodiac: `Swipe through for everything — personality traits, strengths, weaknesses, love compatibility, and career energy. Save this post and share it with someone who has this placement in their chart.\n\nAstrology is most powerful when you go beyond the surface. This is the deep dive.`,
+    crystals: `Swipe for the full guide — healing properties, chakra connections, how to cleanse it, and how to work with its energy. Save this for your next crystal haul.\n\nKnowing your crystals is one of the most practical parts of spiritual practice.`,
+    runes: `Swipe for the full meaning — upright, reversed, and how to work with this rune in readings and daily practice. Save this and come back when it shows up in your spreads.\n\nThe Elder Futhark holds ancient wisdom. Each rune has layers.`,
+    spells: `Swipe for the full ritual — ingredients, timing, and step-by-step method. Save this and use it when the moment is right.\n\nIntention is everything. Read through the full guide before casting.`,
+    numerology: `Swipe for the complete breakdown — the core meaning, what it tells you about life path, relationships, and spiritual growth. Save this for the next time this number appears.\n\nNumerology reveals patterns most people miss entirely.`,
+    chakras: `Swipe for the full guide — location, meaning, signs of imbalance, and practices to heal and activate this energy centre. Save this and revisit it regularly.\n\nChakra work is ongoing — not a one-time thing.`,
+    sabbat: `Swipe for the full breakdown — the history, traditions, rituals, and how to mark this point on the Wheel of the Year. Save this and return to it as the date approaches.\n\nThe sabbats are about alignment with natural cycles.`,
   };
 
   const hook = hooks[category] || `Discover: ${title}`;
+  const body =
+    bodies[category] ||
+    `Swipe through for the full guide. Save this post — you will want to come back to it.\n\nThis is the kind of deep dive most people never get.`;
 
-  return `${hook}\n\nSave this for later - you'll want to come back to it.\nSwipe through for the full guide.\n\nExplore the complete Grimoire at lunary.app`;
+  return `${hook}\n\n${body}\n\nFree to read — link in bio`;
 }
 
 function generateQuoteCaption(options: { headline?: string }): string {
-  return `What resonates with you today?\n\nDrop a thought below.\nSave this for when you need a reminder.\n\nMore cosmic wisdom at lunary.app`;
+  return `What resonates with you today?\n\nDrop a thought below.\nSave this for when you need a reminder.\n\nFollow for daily cosmic wisdom and astrology insights`;
 }
 
 function generateAppFeatureCaption(options: { title?: string }): string {
   const title = options.title || 'your cosmic profile';
 
-  return `Discover ${title} with Lunary\n\nYour personal astrology companion.\nBirth charts, daily readings, and 200+ grimoire entries.\n\nLink in bio`;
+  return `Discover ${title}\n\nPersonal birth chart readings, daily horoscopes, transit tracking, and 2,000+ articles in the grimoire.\n100% free, no ads.\n\nLink in bio`;
 }
 
 function generateDidYouKnowCaption(options: {
@@ -205,7 +379,7 @@ function generateDidYouKnowCaption(options: {
   const hookIndex = hashString(options.fact || category) % hooks.length;
   const hook = hooks[hookIndex];
 
-  return `${hook}\n\nSave this post and share it with someone who needs to know.\n\nMore cosmic wisdom in the Grimoire at lunary.app`;
+  return `${hook}\n\nSave this post and share it with someone who needs to know.\n\nFollow for daily astrology facts, zodiac guides, and spiritual knowledge`;
 }
 
 function generateSignRankingCaption(options: { trait?: string }): string {
@@ -221,7 +395,7 @@ function generateSignRankingCaption(options: { trait?: string }): string {
   const hookIndex = hashString(trait) % hooks.length;
   const hook = hooks[hookIndex];
 
-  return `${hook}\n\nTag someone and see if they agree with their ranking.\nComment your sign and let's debate.\n\nFollow @lunaryapp for daily cosmic content`;
+  return `${hook}\n\nTag someone and see if they agree with their ranking.\nComment your sign below — let's debate.\n\nFollow for daily zodiac rankings, astrology facts, and cosmic content`;
 }
 
 function generateCompatibilityCaption(options: {
@@ -253,7 +427,7 @@ function generateCompatibilityCaption(options: {
   const hookIndex = hashString(sign1 + sign2) % hooks.length;
   const hook = hooks[hookIndex];
 
-  return `${hook}\n\nTag your person and see if they agree.\nDrop your signs in the comments.\n\nCheck your full compatibility at lunary.app`;
+  return `${hook}\n\nTag your person and see if they agree.\nDrop your signs in the comments — let's talk about it.\n\nFull birth chart compatibility reading — link in bio`;
 }
 
 function generateStoryCaption(options: {
@@ -276,7 +450,7 @@ function generateAngelNumberCaption(options: { title?: string }): string {
   const hookIndex = hashString(title) % hooks.length;
   const hook = hooks[hookIndex];
 
-  return `${hook}\n\nSave this for next time it appears.\nWhat number do YOU keep seeing? Comment below.\n\nExplore all angel numbers at lunary.app`;
+  return `${hook}\n\nSave this for next time it appears.\nWhat number do YOU keep seeing? Comment below.\n\nFull angel number guide — link in bio`;
 }
 
 /**
@@ -311,11 +485,11 @@ function buildHashtags(
     }
   }
 
-  // Rotate the pool based on seed so each post gets a different 3
+  // Rotate the pool based on seed so each post gets a different set
   const startIndex = hash % unique.length;
   const rotated = [...unique.slice(startIndex), ...unique.slice(0, startIndex)];
 
-  return rotated.slice(0, 3);
+  return rotated.slice(0, 10);
 }
 
 /**

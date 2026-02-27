@@ -67,9 +67,38 @@ export async function GET(request: NextRequest) {
           padding: `${IG_SPACING.padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
+          overflow: 'hidden',
         }}
       >
         {starfield}
+
+        {/* Score as giant ghost backdrop */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 600,
+              color: scoreColor,
+              opacity: 0.06,
+              display: 'flex',
+              lineHeight: 1,
+              fontWeight: 700,
+              letterSpacing: '-0.04em',
+            }}
+          >
+            {score}%
+          </div>
+        </div>
 
         {/* "COMPATIBILITY" header */}
         <div
@@ -85,12 +114,12 @@ export async function GET(request: NextRequest) {
           Compatibility
         </div>
 
-        {/* Sign pair with glyphs */}
+        {/* Sign pair with glyphs — bigger, no circles */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 40,
+            gap: 48,
             marginBottom: 32,
           }}
         >
@@ -103,35 +132,24 @@ export async function GET(request: NextRequest) {
               gap: 16,
             }}
           >
-            <div
+            <span
               style={{
-                width: 140,
-                height: 140,
-                borderRadius: '50%',
-                background: `${accent1}15`,
-                border: `2px solid ${accent1}50`,
+                fontFamily: 'Astronomicon',
+                fontSize: 120,
+                color: accent1,
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                textShadow: `0 0 40px ${accent1}60`,
               }}
             >
-              <span
-                style={{
-                  fontFamily: 'Astronomicon',
-                  fontSize: 72,
-                  color: accent1,
-                  display: 'flex',
-                }}
-              >
-                {getZodiacGlyph(sign1)}
-              </span>
-            </div>
+              {getZodiacGlyph(sign1)}
+            </span>
             <span
               style={{
                 fontSize: IG_TEXT.dark.label,
                 color: accent1,
                 display: 'flex',
                 fontWeight: 600,
+                letterSpacing: '0.08em',
               }}
             >
               {capitalize(sign1)}
@@ -147,38 +165,28 @@ export async function GET(request: NextRequest) {
             </span>
           </div>
 
-          {/* Score circle in center */}
+          {/* Score — hero number */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 8,
+              gap: 4,
             }}
           >
-            <div
+            <span
               style={{
-                width: 120,
-                height: 120,
-                borderRadius: '50%',
-                background: `${scoreColor}15`,
-                border: `3px solid ${scoreColor}80`,
+                fontSize: 96,
+                color: scoreColor,
+                fontWeight: 700,
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                lineHeight: 1,
+                textShadow: `0 0 50px ${scoreColor}60`,
+                letterSpacing: '-0.02em',
               }}
             >
-              <span
-                style={{
-                  fontSize: IG_TEXT.dark.title,
-                  color: scoreColor,
-                  fontWeight: 700,
-                  display: 'flex',
-                }}
-              >
-                {score}%
-              </span>
-            </div>
+              {score}%
+            </span>
           </div>
 
           {/* Sign 2 */}
@@ -190,35 +198,24 @@ export async function GET(request: NextRequest) {
               gap: 16,
             }}
           >
-            <div
+            <span
               style={{
-                width: 140,
-                height: 140,
-                borderRadius: '50%',
-                background: `${accent2}15`,
-                border: `2px solid ${accent2}50`,
+                fontFamily: 'Astronomicon',
+                fontSize: 120,
+                color: accent2,
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                textShadow: `0 0 40px ${accent2}60`,
               }}
             >
-              <span
-                style={{
-                  fontFamily: 'Astronomicon',
-                  fontSize: 72,
-                  color: accent2,
-                  display: 'flex',
-                }}
-              >
-                {getZodiacGlyph(sign2)}
-              </span>
-            </div>
+              {getZodiacGlyph(sign2)}
+            </span>
             <span
               style={{
                 fontSize: IG_TEXT.dark.label,
                 color: accent2,
                 display: 'flex',
                 fontWeight: 600,
+                letterSpacing: '0.08em',
               }}
             >
               {capitalize(sign2)}
@@ -238,13 +235,13 @@ export async function GET(request: NextRequest) {
         {/* Headline */}
         <div
           style={{
-            fontSize: IG_TEXT.dark.subtitle,
+            fontSize: IG_TEXT.dark.subtitle + 4,
             color: OG_COLORS.textPrimary,
             textAlign: 'center',
             lineHeight: 1.3,
             maxWidth: '85%',
             display: 'flex',
-            fontWeight: 500,
+            fontWeight: 600,
             marginBottom: 32,
           }}
         >
@@ -257,7 +254,8 @@ export async function GET(request: NextRequest) {
             fontSize: IG_TEXT.dark.caption,
             color: OG_COLORS.textTertiary,
             display: 'flex',
-            letterSpacing: '0.05em',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
           }}
         >
           Tag your person

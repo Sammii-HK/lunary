@@ -115,46 +115,61 @@ export async function GET(request: NextRequest) {
             padding: '60px',
             position: 'relative',
             fontFamily: 'Roboto Mono',
+            overflow: 'hidden',
           }}
         >
           {renderIGStarfield(`cover-${title}`)}
+
+          {/* Symbol ghost backdrop — huge, Satori-safe centering */}
+          {symbol && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'Astronomicon',
+                  fontSize: 1200,
+                  color: accent,
+                  opacity: 0.1,
+                  display: 'flex',
+                  lineHeight: 1,
+                }}
+              >
+                {symbol}
+              </div>
+            </div>
+          )}
 
           {/* Category badge */}
           <div style={{ display: 'flex', marginBottom: 40 }}>
             <IGCategoryBadge category={category} />
           </div>
 
-          {/* Hook text (Fix 3) */}
+          {/* Hook text — hero */}
           {hookText && (
             <div
               style={{
-                fontSize: IG_TEXT.dark.subtitle + 4,
+                fontSize: IG_TEXT.dark.subtitle + 8,
                 color: OG_COLORS.textPrimary,
                 textAlign: 'center',
-                lineHeight: 1.3,
+                lineHeight: 1.25,
                 maxWidth: '90%',
                 display: 'flex',
-                fontWeight: 600,
+                fontWeight: 700,
                 marginBottom: 24,
+                textShadow: `0 0 40px ${accent}40`,
               }}
             >
               {truncateIG(hookText, 80)}
-            </div>
-          )}
-
-          {/* Symbol (if provided) — larger for 4:5 canvas */}
-          {symbol && (
-            <div
-              style={{
-                fontFamily: 'Astronomicon',
-                fontSize: 160,
-                color: accent,
-                display: 'flex',
-                marginBottom: 32,
-                opacity: 0.8,
-              }}
-            >
-              {symbol}
             </div>
           )}
 
@@ -162,7 +177,7 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               fontSize: hookText ? IG_TEXT.dark.subtitle : IG_TEXT.dark.title,
-              color: hookText ? `${accent}` : OG_COLORS.textPrimary,
+              color: hookText ? accent : OG_COLORS.textPrimary,
               textAlign: 'center',
               lineHeight: 1.2,
               maxWidth: '85%',
@@ -191,7 +206,7 @@ export async function GET(request: NextRequest) {
             </div>
           )}
 
-          {/* Swipe indicator — 50% larger */}
+          {/* Swipe indicator */}
           <div
             style={{
               display: 'flex',
@@ -371,9 +386,39 @@ export async function GET(request: NextRequest) {
             padding: '60px',
             position: 'relative',
             fontFamily: 'Roboto Mono',
+            overflow: 'hidden',
           }}
         >
           {renderIGStarfield(`body-${title}-${slideIndex}`)}
+
+          {/* Symbol ghost backdrop (zodiac/rune slides) — huge, Satori-safe centering */}
+          {symbol && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'Astronomicon',
+                  fontSize: 1100,
+                  color: accent,
+                  opacity: 0.08,
+                  display: 'flex',
+                  lineHeight: 1,
+                }}
+              >
+                {symbol}
+              </div>
+            </div>
+          )}
 
           {/* Top bar: title + progress dots */}
           <div
