@@ -106,7 +106,7 @@ export function getIGDimensions(format: IGFormat = 'square') {
 // --- Starfield Rendering ---
 
 export function renderIGStarfield(seed: string) {
-  const stars = generateStarfield(seed, 60);
+  const stars = generateStarfield(seed, 90);
   return stars.map((star, i) => (
     <div
       key={i}
@@ -118,7 +118,7 @@ export function renderIGStarfield(seed: string) {
         height: star.size,
         borderRadius: '50%',
         background: '#fff',
-        opacity: star.opacity * 0.5,
+        opacity: Math.min(1, star.opacity * 1.2),
       }}
     />
   ));
@@ -308,7 +308,7 @@ export function seededPick<T>(items: T[], seed: string): T {
 // --- Story Starfield (taller portrait) ---
 
 export function renderIGStoryStarfield(seed: string) {
-  const stars = generateStarfield(seed, 100);
+  const stars = generateStarfield(seed, 140);
   return stars.map((star, i) => (
     <div
       key={i}
@@ -320,7 +320,7 @@ export function renderIGStoryStarfield(seed: string) {
         height: star.size,
         borderRadius: '50%',
         background: '#fff',
-        opacity: star.opacity * 0.4,
+        opacity: Math.min(1, star.opacity * 1.1),
       }}
     />
   ));

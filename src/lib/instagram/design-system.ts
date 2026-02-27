@@ -75,34 +75,35 @@ export const CATEGORY_ACCENT: Record<ThemeCategory, string> = {
 };
 
 // Category → gradient for dark mode backgrounds
-// Cosmic violet/purple tones matching Lunary brand
+// Cosmic violet/purple tones matching Lunary brand — lifted from pure black to show stars
 export const CATEGORY_GRADIENT: Record<ThemeCategory, string> = {
-  zodiac: 'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // Deep violet
-  tarot: 'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)', // Purple
-  lunar: 'linear-gradient(135deg, #0f1428 0%, #0a0d14 50%, #0a0a0a 100%)', // Indigo
-  planetary: 'linear-gradient(135deg, #0f1a28 0%, #0a0d14 50%, #0a0a0a 100%)', // Blue-violet
-  crystals: 'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)', // Violet (was green)
-  numerology: 'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // Cosmic violet (was orange)
-  chakras: 'linear-gradient(135deg, #280f1a 0%, #140a0d 50%, #0a0a0a 100%)', // Rose-violet
-  sabbat: 'linear-gradient(135deg, #1a1028 0%, #0d0a14 50%, #0a0a0a 100%)', // Violet (was lime)
-  runes: 'linear-gradient(135deg, #1a1a1f 0%, #0d0d10 50%, #0a0a0a 100%)', // Neutral gray
-  spells: 'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)', // Deep purple
+  zodiac: 'linear-gradient(135deg, #2d1a4a 0%, #1a1030 50%, #110d20 100%)', // Deep violet
+  tarot: 'linear-gradient(135deg, #2e1440 0%, #1a0d28 50%, #120a1e 100%)', // Purple
+  lunar: 'linear-gradient(135deg, #152040 0%, #0e1428 50%, #0c1020 100%)', // Indigo
+  planetary: 'linear-gradient(135deg, #12203a 0%, #0e1428 50%, #0c1020 100%)', // Blue-violet
+  crystals: 'linear-gradient(135deg, #2e1440 0%, #1a0d28 50%, #120a1e 100%)', // Violet
+  numerology: 'linear-gradient(135deg, #2d1a4a 0%, #1a1030 50%, #110d20 100%)', // Cosmic violet
+  chakras: 'linear-gradient(135deg, #3c1228 0%, #220d18 50%, #180b12 100%)', // Rose-violet
+  sabbat: 'linear-gradient(135deg, #2d1a4a 0%, #1a1030 50%, #110d20 100%)', // Violet
+  runes: 'linear-gradient(135deg, #1e1e2a 0%, #141420 50%, #101018 100%)', // Neutral blue-gray
+  spells: 'linear-gradient(135deg, #2e1440 0%, #1a0d28 50%, #120a1e 100%)', // Deep purple
 };
 
 // Dark cosmic backgrounds for memes (sign-tinted gradients matching brand)
+// Lifted from pure black so stars and text have more contrast against the bg
 export const MEME_BACKGROUNDS: Record<string, string> = {
-  aries: 'linear-gradient(135deg, #1a0a0a 0%, #0d0a0a 50%, #0a0a0a 100%)',
-  taurus: 'linear-gradient(135deg, #0a1a0f 0%, #0a0d0a 50%, #0a0a0a 100%)',
-  gemini: 'linear-gradient(135deg, #1a1a0a 0%, #0d0d0a 50%, #0a0a0a 100%)',
-  cancer: 'linear-gradient(135deg, #14101a 0%, #0d0a14 50%, #0a0a0a 100%)',
-  leo: 'linear-gradient(135deg, #1a150a 0%, #0d0d0a 50%, #0a0a0a 100%)',
-  virgo: 'linear-gradient(135deg, #0a1a0f 0%, #0a0d0a 50%, #0a0a0a 100%)',
-  libra: 'linear-gradient(135deg, #1a0a14 0%, #0d0a0d 50%, #0a0a0a 100%)',
-  scorpio: 'linear-gradient(135deg, #14081a 0%, #0d0a14 50%, #0a0a0a 100%)',
-  sagittarius: 'linear-gradient(135deg, #1a0f0a 0%, #0d0a0a 50%, #0a0a0a 100%)',
-  capricorn: 'linear-gradient(135deg, #12121a 0%, #0d0d10 50%, #0a0a0a 100%)',
-  aquarius: 'linear-gradient(135deg, #0a101a 0%, #0a0d14 50%, #0a0a0a 100%)',
-  pisces: 'linear-gradient(135deg, #0a1418 0%, #0a0d10 50%, #0a0a0a 100%)',
+  aries: 'linear-gradient(135deg, #2a1010 0%, #1a0a0a 50%, #120808 100%)',
+  taurus: 'linear-gradient(135deg, #102a18 0%, #0a1a0f 50%, #081210 100%)',
+  gemini: 'linear-gradient(135deg, #2a2a10 0%, #1a1a0a 50%, #121208 100%)',
+  cancer: 'linear-gradient(135deg, #1e1428 0%, #14102a 50%, #100c1e 100%)',
+  leo: 'linear-gradient(135deg, #2a1e0a 0%, #1a150a 50%, #120f08 100%)',
+  virgo: 'linear-gradient(135deg, #102a18 0%, #0a1a0f 50%, #081210 100%)',
+  libra: 'linear-gradient(135deg, #2a1020 0%, #1a0a14 50%, #120810 100%)',
+  scorpio: 'linear-gradient(135deg, #1c0a28 0%, #14082a 50%, #100820 100%)',
+  sagittarius: 'linear-gradient(135deg, #2a1808 0%, #1a1008 50%, #120c08 100%)',
+  capricorn: 'linear-gradient(135deg, #1c1c2a 0%, #14141e 50%, #101018 100%)',
+  aquarius: 'linear-gradient(135deg, #0a182a 0%, #0a1020 50%, #081018 100%)',
+  pisces: 'linear-gradient(135deg, #0a1e28 0%, #0a1418 50%, #081018 100%)',
 };
 
 // Zodiac sign → primary accent for meme text

@@ -40,7 +40,7 @@ const DAILY_CONTENT_MIX: Record<number, IGPostType[]> = {
   1: ['meme'], // Tuesday: meme (shares — #1 growth lever)
   2: ['did_you_know'], // Wednesday: factual DYK (saves/shares)
   3: ['carousel'], // Thursday: factual carousel (saves)
-  4: ['compatibility'], // Friday: compatibility (tags/shares)
+  4: ['did_you_know'], // Friday: factual DYK (saves/shares)
   5: ['carousel'], // Saturday: tarot carousel (saves)
   6: [], // Sunday: rest day (stories only)
 };

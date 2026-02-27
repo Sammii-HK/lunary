@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
           alignItems: 'center',
           justifyContent: 'center',
           background:
-            'linear-gradient(135deg, #1a0f28 0%, #0d0a14 50%, #0a0a0a 100%)',
+            'linear-gradient(135deg, #2e1440 0%, #1a0d28 50%, #120a1e 100%)',
           padding: `${IG_SPACING.padding}px`,
           position: 'relative',
           fontFamily: 'Roboto Mono',
