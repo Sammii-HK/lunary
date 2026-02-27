@@ -20,6 +20,7 @@ import { TransitionEffect } from '../components/TransitionEffect';
 import { ProgressIndicator } from '../components/ProgressIndicator';
 import { ZoomRegion, type ZoomPoint } from '../components/ZoomRegion';
 import { TapIndicator, type TapPoint } from '../components/TapIndicator';
+import { ConstellationOverlay } from '../components/ConstellationOverlay';
 import type { AudioSegment } from '../utils/timing';
 import type {
   CategoryVisualConfig,
@@ -72,6 +73,8 @@ export interface CinematicPhoneDemoProps {
   callouts?: FeatureCalloutProps[];
   /** Seed for deterministic background */
   seed?: string;
+  /** Zodiac sign to draw constellation overlay (e.g. 'scorpio'). Optional. */
+  zodiacSign?: string;
 }
 
 // Phone dimensions for 1080×1920: width 440px, height ~953px
@@ -111,6 +114,7 @@ export const CinematicPhoneDemo: React.FC<CinematicPhoneDemoProps> = ({
   phoneGlowColor,
   callouts = [],
   seed = 'cinematic-demo',
+  zodiacSign,
 }) => {
   const { fps, width, height, durationInFrames } = useVideoConfig();
 
@@ -156,7 +160,21 @@ export const CinematicPhoneDemo: React.FC<CinematicPhoneDemoProps> = ({
         />
       )}
 
-      {/* 2. Screen recording — inside phone or full-bleed */}
+      {/* 2. Constellation overlay — draws on behind the phone */}
+      {showPhoneFrame && zodiacSign && (
+        <AbsoluteFill style={{ zIndex: 2 }}>
+          <ConstellationOverlay
+            sign={zodiacSign}
+            accent={categoryVisuals?.accentColor ?? '#8458D8'}
+            drawDuration={Math.round(fps * 1.5)}
+            startFrame={Math.round(fps * 0.5)}
+            opacity={0.7}
+            scale={0.75}
+          />
+        </AbsoluteFill>
+      )}
+
+      {/* 3. Screen recording — inside phone or full-bleed */}
       {showPhoneFrame ? (
         <div
           style={{
@@ -181,7 +199,7 @@ export const CinematicPhoneDemo: React.FC<CinematicPhoneDemoProps> = ({
         <AbsoluteFill style={{ zIndex: 1 }}>{videoContent}</AbsoluteFill>
       )}
 
-      {/* 3. Touch ripples */}
+      {/* 4. Touch ripples */}
       {tapPoints.length > 0 && (
         <AbsoluteFill style={{ zIndex: 10 }}>
           <TapIndicator tapPoints={tapPoints} defaultColor={glowColor} />
