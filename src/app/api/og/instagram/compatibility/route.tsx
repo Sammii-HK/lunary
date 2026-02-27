@@ -7,7 +7,6 @@ import {
   truncateIG,
   renderIGStarfield,
   renderConstellation,
-  renderDepthRings,
   renderMeteors,
 } from '@/lib/instagram/ig-utils';
 import {
@@ -55,8 +54,6 @@ export async function GET(request: NextRequest) {
 
     const fonts = await loadIGFonts(request, { includeAstronomicon: true });
     const starfield = renderIGStarfield(`compat-${sign1}-${sign2}`);
-    const depthRings = renderDepthRings(accent1, width, height);
-
     const layoutJsx = (
       <div
         style={{
@@ -76,7 +73,6 @@ export async function GET(request: NextRequest) {
       >
         {starfield}
         {...renderMeteors(`compat-${sign1}-${sign2}`, accent1)}
-        {...depthRings}
         {renderConstellation(sign1, accent1, width, height)}
         {renderConstellation(sign2, accent2, width, height)}
 

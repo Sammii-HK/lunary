@@ -669,6 +669,11 @@ export function renderConstellation(
   const data = CONSTELLATION_DATA[sign.toLowerCase()];
   if (!data) return null;
 
+  // Map normalised [0,1] coords into [margin, 1-margin] so the pattern
+  // always sits fully inset from the canvas edge.
+  const margin = 0.1;
+  const map = (v: number, dim: number) => (margin + v * (1 - margin * 2)) * dim;
+
   return (
     <svg
       width={width}
@@ -679,24 +684,24 @@ export function renderConstellation(
       {data.lines.map(([a, b], i) => (
         <line
           key={`line-${i}`}
-          x1={data.stars[a][0] * width}
-          y1={data.stars[a][1] * height}
-          x2={data.stars[b][0] * width}
-          y2={data.stars[b][1] * height}
+          x1={map(data.stars[a][0], width)}
+          y1={map(data.stars[a][1], height)}
+          x2={map(data.stars[b][0], width)}
+          y2={map(data.stars[b][1], height)}
           stroke={accent}
-          stroke-width='1.5'
-          opacity='0.3'
+          strokeWidth={1.5}
+          opacity={0.3}
         />
       ))}
       {/* Star dots — slightly brighter */}
       {data.stars.map(([x, y], i) => (
         <circle
           key={`star-${i}`}
-          cx={x * width}
-          cy={y * height}
+          cx={map(x, width)}
+          cy={map(y, height)}
           r={i === 0 ? 5 : 3.5}
           fill={accent}
-          opacity={i === 0 ? '0.9' : '0.65'}
+          opacity={i === 0 ? 0.9 : 0.65}
         />
       ))}
     </svg>

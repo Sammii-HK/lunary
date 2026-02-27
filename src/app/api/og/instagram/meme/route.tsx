@@ -7,7 +7,6 @@ import {
   renderIGStarfield,
   IGBrandTag,
   renderConstellation,
-  renderDepthRings,
   renderMeteors,
 } from '@/lib/instagram/ig-utils';
 import {
@@ -57,7 +56,6 @@ export async function GET(request: NextRequest) {
     const fonts = await loadIGFonts(request, { includeAstronomicon: true });
     const starfield = renderIGStarfield(`meme-${sign}-${setup.slice(0, 10)}`);
     const glyph = getZodiacGlyph(sign);
-    const depthRings = renderDepthRings(accent, width, height);
     const constellation = renderConstellation(sign, accent, width, height);
 
     // Satori-safe ghost backdrop — reused in all templates
@@ -112,7 +110,6 @@ export async function GET(request: NextRequest) {
           >
             {starfield}
             {...renderMeteors(`meme-${sign}-${setup.slice(0, 10)}`, accent)}
-            {...depthRings}
             {constellation}
             {glyphBackdrop}
 
@@ -251,7 +248,6 @@ export async function GET(request: NextRequest) {
           >
             {starfield}
             {...renderMeteors(`meme-${sign}-${setup.slice(0, 10)}`, accent)}
-            {...depthRings}
             {constellation}
             {/* Ghost backdrop — Satori-safe */}
             <div
@@ -355,7 +351,6 @@ export async function GET(request: NextRequest) {
           >
             {starfield}
             {...renderMeteors(`meme-${sign}-${setup.slice(0, 10)}`, accent)}
-            {...depthRings}
             {constellation}
             {glyphBackdrop}
 
