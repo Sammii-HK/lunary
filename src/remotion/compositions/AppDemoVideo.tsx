@@ -14,6 +14,7 @@ import { TransitionEffect } from '../components/TransitionEffect';
 import { ProgressIndicator } from '../components/ProgressIndicator';
 import { ZoomRegion, type ZoomPoint } from '../components/ZoomRegion';
 import { TapIndicator, type TapPoint } from '../components/TapIndicator';
+import { ConstellationOverlay } from '../components/ConstellationOverlay';
 import type { AudioSegment } from '../utils/timing';
 import type { CategoryVisualConfig } from '../config/category-visuals';
 import { COLORS } from '../styles/theme';
@@ -53,6 +54,8 @@ export interface AppDemoVideoProps {
   zoomPoints?: ZoomPoint[];
   /** Touch ripple animations — shows where taps occur during the recording */
   tapPoints?: TapPoint[];
+  /** Zodiac sign to draw constellation overlay (e.g. 'scorpio'). Optional. */
+  zodiacSign?: string;
 }
 
 /**
@@ -91,6 +94,7 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
   backgroundMusicVolume,
   zoomPoints = [],
   tapPoints = [],
+  zodiacSign,
 }) => {
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -139,9 +143,23 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
         </AbsoluteFill>
       )}
 
+      {/* 3. Constellation overlay — subtle zodiac watermark over the recording */}
+      {zodiacSign && (
+        <AbsoluteFill style={{ zIndex: 8 }}>
+          <ConstellationOverlay
+            sign={zodiacSign}
+            accent={categoryVisuals?.accentColor ?? '#8458D8'}
+            drawDuration={Math.round(fps * 1.5)}
+            startFrame={Math.round(fps * 0.5)}
+            opacity={0.35}
+            scale={0.7}
+          />
+        </AbsoluteFill>
+      )}
+
       {/* No fade-in — TikTok needs visible content on frame 0 for previews */}
 
-      {/* 3. Animated hook intro with background bar */}
+      {/* 4. Animated hook intro with background bar */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 16 }}>
         <HookIntro
           text={hookText}
@@ -152,13 +170,13 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
         />
       </div>
 
-      {/* 4. Mid-video text overlays + Outro CTA */}
+      {/* 5. Mid-video text overlays + Outro CTA */}
       <TextOverlays
         overlays={[...overlays, outroOverlay]}
         accentColor={categoryVisuals?.accentColor}
       />
 
-      {/* 5. Animated subtitles with transparent background */}
+      {/* 6. Animated subtitles with transparent background */}
       {shiftedSegments && shiftedSegments.length > 0 && (
         <AnimatedSubtitles
           segments={shiftedSegments}
@@ -171,14 +189,14 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
         />
       )}
 
-      {/* 6. TTS voiceover (delayed by audioStartOffset to sync with recording) */}
+      {/* 7. TTS voiceover (delayed by audioStartOffset to sync with recording) */}
       {audioUrl && (
         <Sequence from={Math.round(audioStartOffset * fps)}>
           <Audio src={staticFile(audioUrl)} />
         </Sequence>
       )}
 
-      {/* 6b. Background music (plays for full duration) */}
+      {/* 7b. Background music (plays for full duration) */}
       {backgroundMusicUrl && (
         <Audio
           src={staticFile(backgroundMusicUrl)}
@@ -186,7 +204,7 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
         />
       )}
 
-      {/* 7. Progress indicator */}
+      {/* 8. Progress indicator */}
       {showProgress && (
         <ProgressIndicator
           position='bottom'
@@ -195,7 +213,7 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
         />
       )}
 
-      {/* 8. Fade out at end (0.8s = 24 frames) */}
+      {/* 9. Fade out at end (0.8s = 24 frames) */}
       <TransitionEffect
         type='fade'
         startFrame={durationInFrames - 24}

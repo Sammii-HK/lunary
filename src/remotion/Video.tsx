@@ -35,8 +35,6 @@ import { DIMENSIONS } from './styles/theme';
 
 // Default props for preview/development
 const defaultShortFormProps: ShortFormVideoProps = {
-  hookText: "What's the universe saying this week?",
-  hookSubtitle: 'Your weekly cosmic forecast',
   segments: [
     {
       text: 'The stars are aligning for new beginnings.',
@@ -48,9 +46,29 @@ const defaultShortFormProps: ShortFormVideoProps = {
       startTime: 6,
       endTime: 10,
     },
-    { text: 'Trust your intuition this week.', startTime: 10, endTime: 14 },
+    { text: 'Trust your intuition this week.', startTime: 10, endTime: 13 },
+    {
+      text: 'Follow for more cosmic updates at lunary.app',
+      startTime: 13,
+      endTime: 15,
+    },
+  ],
+  overlays: [
+    {
+      text: "What's the universe saying this week?",
+      startTime: 0,
+      endTime: 3,
+      style: 'hook',
+    },
+    {
+      text: 'Mercury entering a new phase',
+      startTime: 6,
+      endTime: 10,
+      style: 'chapter',
+    },
   ],
   highlightTerms: ['Mercury', 'intuition', 'stars'],
+  seed: 'preview-2026',
 };
 
 const defaultMediumFormProps: MediumFormVideoProps = {
@@ -141,6 +159,7 @@ const defaultAppDemoProps: AppDemoVideoProps = {
   outroStartTime: 16,
   outroEndTime: 18,
   highlightTerms: ['houses', 'chart'],
+  zodiacSign: 'scorpio',
 };
 
 // Cast components to work around Remotion's strict typing

@@ -119,9 +119,21 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
       const isActive = frame >= wt.startFrame && frame < wt.endFrame;
       const isKeyword = isHighlightTerm(wt.word);
 
-      // Active word or keyword gets highlight color
-      const color = isActive || isKeyword ? highlightColor : COLORS.primaryText;
+      // Active word: white + scale pop. Keyword: accent color. Inactive: soft white.
+      const color = isActive
+        ? '#FFFFFF'
+        : isKeyword
+          ? highlightColor
+          : 'rgba(255,255,255,0.75)';
       const fontWeight = isActive ? 800 : isKeyword ? 700 : 600;
+
+      // Quick scale-in on word activation
+      const wordScale = isActive
+        ? interpolate(frame, [wt.startFrame, wt.startFrame + 3], [0.88, 1.06], {
+            extrapolateLeft: 'clamp',
+            extrapolateRight: 'clamp',
+          })
+        : 1;
 
       return (
         <span
@@ -130,8 +142,12 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
             color,
             fontWeight,
             display: 'inline-block',
-            marginRight: '0.3em', // Increased spacing to prevent overlap
-            transition: 'color 0.1s ease-out, font-weight 0.1s ease-out',
+            marginRight: '0.25em',
+            transform: `scale(${wordScale})`,
+            transformOrigin: 'bottom center',
+            textShadow: isActive
+              ? `0 0 12px rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.6)`
+              : `0 2px 6px rgba(0,0,0,0.5)`,
           }}
         >
           {wt.word}
@@ -169,41 +185,37 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
     });
   };
 
-  // FFmpeg-matching style: no background box, outline + shadow
   return (
     <div
       style={{
         position: 'absolute',
         bottom: `${bottomPosition}%`,
-        left: '8%',
-        right: '14%',
+        left: 0,
+        right: 0,
         textAlign: 'center',
         opacity,
         transform: `translateY(${slideUp}px)`,
         zIndex: 15,
+        paddingLeft: '5%',
+        paddingRight: '5%',
       }}
     >
       <p
         style={{
-          fontFamily: 'Roboto, sans-serif',
+          fontFamily: 'Roboto Mono, monospace',
           fontSize,
           fontWeight: 600,
           color: COLORS.primaryText,
-          lineHeight: 1.4,
+          lineHeight: 1.45,
           margin: 0,
-          backgroundColor: `rgba(0, 0, 0, ${backgroundOpacity ?? 0.45})`,
-          borderRadius: 8,
-          paddingLeft: 16,
-          paddingRight: 16,
-          paddingTop: 8,
-          paddingBottom: 8,
+          backgroundColor: `rgba(0, 0, 0, ${backgroundOpacity ?? 0.55})`,
+          borderRadius: 10,
+          paddingLeft: 20,
+          paddingRight: 20,
+          paddingTop: 10,
+          paddingBottom: 10,
           display: 'inline-block',
-          textShadow: `
-            -1px -1px 0 rgba(0,0,0,0.3),
-            1px -1px 0 rgba(0,0,0,0.3),
-            -1px 1px 0 rgba(0,0,0,0.3),
-            1px 1px 0 rgba(0,0,0,0.3)
-          `,
+          maxWidth: '90%',
         }}
       >
         {wordHighlight ? renderWordHighlight() : renderText()}
