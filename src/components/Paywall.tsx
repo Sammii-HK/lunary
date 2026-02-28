@@ -1,8 +1,8 @@
 'use client';
 
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState } from 'react';
 import Link from 'next/link';
-import { Capacitor } from '@capacitor/core';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
@@ -30,12 +30,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
   } = useSubscription();
   const _authState = useAuthStatus();
   const [paywallTracked, setPaywallTracked] = useState(false);
-  const [isNativeIOS, setIsNativeIOS] = useState<boolean | null>(null);
-  useEffect(() => {
-    setIsNativeIOS(
-      Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios',
-    );
-  }, []);
+  const isNativeIOS = useIsNativeIOS();
 
   const shouldShowPaywall = !loading && !hasAccess(feature) && !fallback;
 

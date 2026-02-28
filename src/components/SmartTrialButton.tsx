@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Capacitor } from '@capacitor/core';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { AuthComponent } from './Auth';
@@ -35,10 +35,7 @@ export function SmartTrialButton({
   const { isSubscribed, isTrialActive } = useSubscription();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showIOSPaywall, setShowIOSPaywall] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  useEffect(() => {
-    setIsIOS(Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios');
-  }, []);
+  const isIOS = useIsNativeIOS();
   const pathname = usePathname() || '';
 
   useModal({
@@ -121,8 +118,8 @@ export function SmartTrialButton({
   };
 
   if (config.action === 'link' && config.href) {
-    // On iOS, intercept /pricing links and show native IAP instead
-    if (isIOS && config.href === '/pricing') {
+    // On iOS (or while detecting), intercept /pricing links — show native IAP modal
+    if (isIOS !== false && config.href === '/pricing') {
       return (
         <>
           <Button
