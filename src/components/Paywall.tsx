@@ -30,7 +30,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
   } = useSubscription();
   const _authState = useAuthStatus();
   const [paywallTracked, setPaywallTracked] = useState(false);
-  const [isNativeIOS, setIsNativeIOS] = useState(false);
+  const [isNativeIOS, setIsNativeIOS] = useState<boolean | null>(null);
   useEffect(() => {
     setIsNativeIOS(
       Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios',
@@ -118,7 +118,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
         )}
 
         <div className='space-y-3'>
-          {isNativeIOS ? (
+          {isNativeIOS === null ? null : isNativeIOS ? (
             <IOSPaywall />
           ) : (
             <>

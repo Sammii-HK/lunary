@@ -488,25 +488,9 @@ export default function PricingPage() {
                     Lunary+ ($4.99/mo)
                   </span>
                 </div>
-                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-zinc-800/50'>
-                  <span className='text-zinc-400'>
-                    Learn astrology deeply over time
-                  </span>
-                  <span className='text-lunary-primary-300 font-medium'>
-                    Lunary+ ($4.99/mo)
-                  </span>
-                </div>
-                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-zinc-800/50'>
-                  <span className='text-zinc-400'>
-                    Explore your patterns in depth with your Astral Guide
-                  </span>
-                  <span className='text-lunary-primary-300 font-medium'>
-                    Lunary+ Pro ($8.99/mo)
-                  </span>
-                </div>
                 <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2'>
                   <span className='text-zinc-400'>
-                    Track long-term patterns (years)
+                    Explore your patterns in depth with your Astral Guide
                   </span>
                   <span className='text-lunary-primary-300 font-medium'>
                     Lunary+ Pro ($8.99/mo)
