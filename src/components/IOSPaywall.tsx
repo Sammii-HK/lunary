@@ -41,7 +41,7 @@ const PLAN_CONFIGS: PlanConfig[] = [
   {
     key: 'proMonthly',
     name: 'Lunary+ Pro',
-    description: 'AI chat, weekly reports, advanced patterns',
+    description: 'Astral Guide, weekly reports, advanced patterns',
   },
   {
     key: 'proAnnual',
