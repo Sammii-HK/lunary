@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import dynamic from 'next/dynamic';
+import { Capacitor } from '@capacitor/core';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 
 const SkeletonCard = () => (
@@ -11,6 +12,14 @@ const SkeletonCard = () => (
 const SubscriptionManagement = dynamic(
   () => import('@/components/SubscriptionManagement'),
   { loading: () => <SkeletonCard /> },
+);
+
+const IOSSubscriptionSection = dynamic(
+  () =>
+    import('@/components/IOSSubscriptionSection').then((m) => ({
+      default: m.IOSSubscriptionSection,
+    })),
+  { ssr: false, loading: () => <SkeletonCard /> },
 );
 
 const LocationRefresh = dynamic(
@@ -67,6 +76,13 @@ export function SettingsTab({
   subscriptionId,
 }: SettingsTabProps) {
   const [openSections, setOpenSections] = useState<string[]>([]);
+  const [isNativeIOS, setIsNativeIOS] = useState(false);
+
+  useEffect(() => {
+    setIsNativeIOS(
+      Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios',
+    );
+  }, []);
 
   const toggleSection = (sectionId: string) => {
     setOpenSections((prev) =>
@@ -186,10 +202,14 @@ export function SettingsTab({
       {/* Subscription */}
       <div className='w-full max-w-3xl space-y-3'>
         <SectionTitle as='h2'>Subscription</SectionTitle>
-        <SubscriptionManagement
-          customerId={stripeCustomerId}
-          subscriptionId={subscriptionId}
-        />
+        {isNativeIOS ? (
+          <IOSSubscriptionSection />
+        ) : (
+          <SubscriptionManagement
+            customerId={stripeCustomerId}
+            subscriptionId={subscriptionId}
+          />
+        )}
       </div>
 
       {/* Data & Privacy */}

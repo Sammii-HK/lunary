@@ -18,6 +18,7 @@ import {
   ModalHeader,
 } from '@/components/ui/modal';
 import { TestimonialForm } from '@/components/TestimonialForm';
+import { RateApp } from 'capacitor-rate-app';
 import { useAuthStatus } from './AuthStatus';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
@@ -223,10 +224,33 @@ export function AppChrome() {
 
   const [testimonialModalOpen, setTestimonialModalOpen] = useState(false);
   const testimonialCheckedRef = useRef(false);
+  const ratingCheckedRef = useRef(false);
+
+  // Native app rating prompt (iOS + Android) — replaces testimonial modal
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    if (!authState.isAuthenticated || isAdminSurface) return;
+    if (ratingCheckedRef.current) return;
+    if (sessionStorage.getItem('rating-prompted')) return;
+
+    ratingCheckedRef.current = true;
+
+    // Reuse the same server-side timing logic as the testimonial prompt
+    fetch('/api/testimonials/prompt-tracking')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.shouldPrompt) {
+          sessionStorage.setItem('rating-prompted', '1');
+          RateApp.requestReview();
+        }
+      })
+      .catch(() => {});
+  }, [authState.isAuthenticated, isAdminSurface]);
 
   // Fetch testimonial prompt status from server
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (Capacitor.isNativePlatform()) return;
     if (!authState.isAuthenticated || isAdminSurface) return;
     if (testimonialCheckedRef.current) return;
 

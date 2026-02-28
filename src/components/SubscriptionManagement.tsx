@@ -365,8 +365,9 @@ export default function SubscriptionManagement({
       {isIOS ? (
         <button
           onClick={() =>
-            Capacitor.openUrl(
+            window.open(
               'itms-apps://apps.apple.com/account/subscriptions',
+              '_system',
             )
           }
           className='w-full flex items-center justify-center gap-2 bg-lunary-secondary hover:bg-lunary-secondary-400 text-white py-2 px-3 rounded-md transition-colors text-sm'

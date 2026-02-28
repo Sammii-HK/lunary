@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
 import { getCookieConsent } from './CookieConsent';
 import { initializeAttribution } from '@/lib/attribution';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -82,6 +83,7 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
   const shouldInitPosthog =
     !isAdminPath &&
     !isAdminHost &&
+    !Capacitor.isNativePlatform() &&
     (hasConsent === true || authStatus.isAuthenticated === true);
 
   useEffect(() => {

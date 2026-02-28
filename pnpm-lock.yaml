@@ -128,6 +128,9 @@ dependencies:
   canvas-confetti:
     specifier: ^1.9.4
     version: 1.9.4
+  capacitor-rate-app:
+    specifier: ^4.0.3
+    version: 4.0.3(@capacitor/core@8.1.0)
   class-variance-authority:
     specifier: ^0.7.1
     version: 0.7.1
@@ -6423,6 +6426,14 @@ packages:
 
   /canvas-confetti@1.9.4:
     resolution: {integrity: sha512-yxQbJkAVrFXWNbTUjPqjF7G+g6pDotOUHGbkZq2NELZUMDpiJ85rIEazVb8GTaAptNW2miJAXbs1BtioA251Pw==}
+    dev: false
+
+  /capacitor-rate-app@4.0.3(@capacitor/core@8.1.0):
+    resolution: {integrity: sha512-HdTftIzBSfcNfbjQFCtvdvFU83MPCt11H/QXV4t7jctLelA8jXu3qee9MiZ4dqDc+kwNoufcQ95ncoCvn5viig==}
+    peerDependencies:
+      '@capacitor/core': ^5.0.0
+    dependencies:
+      '@capacitor/core': 8.1.0
     dev: false
 
   /caseless@0.12.0:
