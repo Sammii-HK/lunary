@@ -62,21 +62,79 @@ export function generateCosmicTimingPost(
   let topicTag = 'Astrology';
 
   if (transit) {
+    const transitRng = seededRandom(`transit-${dateStr}-${slotHour}`);
+
     if (transit.hoursUntil > 12) {
-      // Anticipation: ingress is tomorrow
+      // Anticipation: ingress is tomorrow (12–36h away)
       hook = `${transit.planet} moves into ${transit.toSign} tomorrow`;
-      body = `this kind of shift changes the energy for weeks. pay attention to what surfaces in the next 24 hours`;
-      prompt = `are you already feeling ${transit.planet} energy building?`;
+      const anticipationBodies = [
+        `This kind of shift changes the energy for weeks. Pay attention to what starts to surface.`,
+        `Slow-moving planets don't change sign often. When they do, things actually shift.`,
+        `The pressure you've been feeling is about to make more sense.`,
+        `This is not a subtle transit. Start noticing what is already changing around you.`,
+        `Energy is already building around this. You might feel it before you can name it.`,
+      ];
+      const anticipationPrompts = [
+        `Are you already feeling ${transit.planet} energy building?`,
+        `What has been shifting for you lately?`,
+        `Which area of your life feels most unsettled right now?`,
+        `Ready for this one?`,
+        `What do you expect to change when ${transit.planet} moves into ${transit.toSign}?`,
+      ];
+      body =
+        anticipationBodies[
+          Math.floor(transitRng() * anticipationBodies.length)
+        ];
+      prompt =
+        anticipationPrompts[
+          Math.floor(transitRng() * anticipationPrompts.length)
+        ];
     } else if (transit.hoursUntil >= 0) {
       // Imminent: within 12 hours
       hook = `${transit.planet} is moving into ${transit.toSign}`;
-      body = `${transit.hoursUntil > 0 ? `${transit.hoursUntil} hour${transit.hoursUntil !== 1 ? 's' : ''} away and you might already feel it building` : 'this shift is happening right now, pay attention to what surfaces'}`;
-      prompt = `how is ${transit.planet} energy showing up for you?`;
+      const imminentBodies =
+        transit.hoursUntil > 0
+          ? [
+              `${transit.hoursUntil} hour${transit.hoursUntil !== 1 ? 's' : ''} away and you might already feel it building.`,
+              `Less than ${transit.hoursUntil + 1} hours away. The energy is already shifting.`,
+              `${transit.hoursUntil} hour${transit.hoursUntil !== 1 ? 's' : ''} to go. Pay attention to what surfaces today.`,
+            ]
+          : [
+              `This shift is happening right now. Pay attention to what surfaces.`,
+              `It is happening as you read this. Notice what changes in the next few hours.`,
+              `Right now. This is the moment the energy moves.`,
+            ];
+      const imminentPrompts = [
+        `How is ${transit.planet} energy showing up for you?`,
+        `What are you noticing right now?`,
+        `Can you feel the shift?`,
+        `What area of your life feels most activated today?`,
+      ];
+      body = imminentBodies[Math.floor(transitRng() * imminentBodies.length)];
+      prompt =
+        imminentPrompts[Math.floor(transitRng() * imminentPrompts.length)];
     } else {
       // Post-ingress: happened within the last 12 hours
       hook = `${transit.planet} is now in ${transit.toSign}`;
-      body = `the shift has happened — notice what has already started to change`;
-      prompt = `what shifted for you when ${transit.planet} moved into ${transit.toSign}?`;
+      const postIngressBodies = [
+        `The shift has happened. Notice what has already started to change.`,
+        `Pay attention to the next 48 hours. This is when it gets obvious.`,
+        `The energy has moved. Some things that felt stuck are about to loosen.`,
+        `It landed. What you have been sensing is now confirmed.`,
+        `This is the moment the energy actually changed. Look back in a month.`,
+      ];
+      const postIngressPrompts = [
+        `What shifted for you when ${transit.planet} moved into ${transit.toSign}?`,
+        `Did you feel it? What changed?`,
+        `What do you expect to shift in the weeks ahead?`,
+        `What are you ready to leave behind with this transit?`,
+      ];
+      body =
+        postIngressBodies[Math.floor(transitRng() * postIngressBodies.length)];
+      prompt =
+        postIngressPrompts[
+          Math.floor(transitRng() * postIngressPrompts.length)
+        ];
     }
   } else {
     const moonRng = seededRandom(`moon-${dateStr}-${slotHour}`);
@@ -84,29 +142,29 @@ export function generateCosmicTimingPost(
     // Body templates — seeded selection for variety even during same phase
     const bodyTemplates = [
       moonPhase.isSignificant
-        ? 'this is a potent phase, your intentions carry extra weight right now'
-        : `${moonPhase.trend === 'waxing' ? 'building momentum' : 'time to release'}, work with it not against it`,
-      `Moon in ${moonPhase.trend === 'waxing' ? 'growth' : 'release'} mode today — ${moonPhase.isSignificant ? 'a powerful window' : 'subtle but steady'}`,
-      `${moonPhase.illumination}% illuminated and ${moonPhase.trend === 'waxing' ? 'building' : 'fading'}`,
+        ? 'This is a potent phase. Your intentions carry extra weight right now.'
+        : `${moonPhase.trend === 'waxing' ? 'Building momentum' : 'Time to release'}. Work with it, not against it.`,
+      `Moon in ${moonPhase.trend === 'waxing' ? 'growth' : 'release'} mode today. ${moonPhase.isSignificant ? 'A powerful window.' : 'Subtle but steady.'}`,
+      `${moonPhase.illumination}% illuminated and ${moonPhase.trend === 'waxing' ? 'building' : 'fading'}.`,
       moonPhase.trend === 'waxing'
-        ? 'momentum is picking up, lean into what you started'
-        : "the pressure is easing, let go of what isn't working",
+        ? 'Momentum is picking up. Lean into what you started.'
+        : "The pressure is easing. Let go of what isn't working.",
       moonPhase.isSignificant
-        ? 'this phase hits different, pay attention to what surfaces'
-        : "quiet shifts are still shifts, don't ignore the subtle ones",
-      `${moonPhase.name} wants you to ${moonPhase.trend === 'waxing' ? 'build' : 'shed'}, not force`,
+        ? 'This phase hits different. Pay attention to what surfaces.'
+        : "Quiet shifts are still shifts. Don't ignore the subtle ones.",
+      `${moonPhase.name} wants you to ${moonPhase.trend === 'waxing' ? 'build' : 'shed'}, not force.`,
       moonPhase.trend === 'waxing'
-        ? 'each day the light grows, so does your clarity'
-        : "as the light thins, so should your grip on what's done",
+        ? 'Each day the light grows, so does your clarity.'
+        : "As the light thins, so should your grip on what's done.",
     ];
 
     // Prompt templates — seeded selection for variety
     const promptTemplates = [
-      'what are you setting into motion this phase?',
-      'what are you working with today?',
-      'how is this energy landing for you?',
-      'what are you releasing this cycle?',
-      'notice anything shifting?',
+      'What are you setting into motion this phase?',
+      'What are you working with today?',
+      'How is this energy landing for you?',
+      'What are you releasing this cycle?',
+      'Notice anything shifting?',
     ];
 
     hook = `${moonPhase.name} energy is running the show today`;
