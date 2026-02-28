@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Capacitor } from '@capacitor/core';
@@ -15,8 +15,6 @@ import type { FeatureKey } from '../../utils/pricing';
 import { cn } from '@/lib/utils';
 import { trackCtaClick } from '@/lib/analytics';
 import { getContextualHub } from '@/lib/grimoire/getContextualNudge';
-
-const isIOS = Capacitor.getPlatform() === 'ios';
 
 interface SmartTrialButtonProps {
   size?: 'sm' | 'default' | 'lg' | 'xs';
@@ -37,6 +35,10 @@ export function SmartTrialButton({
   const { isSubscribed, isTrialActive } = useSubscription();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showIOSPaywall, setShowIOSPaywall] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  useEffect(() => {
+    setIsIOS(Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios');
+  }, []);
   const pathname = usePathname() || '';
 
   useModal({

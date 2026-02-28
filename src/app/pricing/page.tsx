@@ -63,7 +63,9 @@ export default function PricingPage() {
   // null = not yet determined (SSR or first frame), false = web, true = iOS
   const [isNativeIOS, setIsNativeIOS] = useState<boolean | null>(null);
   useEffect(() => {
-    setIsNativeIOS(Capacitor.getPlatform() === 'ios');
+    setIsNativeIOS(
+      Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios',
+    );
   }, []);
   const { user } = useUser();
   const subscription = useSubscription();

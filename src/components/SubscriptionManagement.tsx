@@ -31,7 +31,10 @@ export default function SubscriptionManagement({
   customerId,
   subscriptionId,
 }: SubscriptionManagementProps) {
-  const isIOS = Capacitor.getPlatform() === 'ios';
+  const [isIOS, setIsIOS] = useState(false);
+  useEffect(() => {
+    setIsIOS(Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios');
+  }, []);
   const { user, refetch } = useUser();
   const subscription = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
