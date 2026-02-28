@@ -28,12 +28,12 @@ export function AppChrome() {
   const authState = useAuthStatus();
   const [isAdminHost, setIsAdminHost] = useState(false);
   const [cameFromApp, setCameFromApp] = useState(false);
-  // Lazy init so the value is correct on the very first render (client-side),
-  // preventing a flash of the marketing nav before the useEffect fires.
-  const [isNativeApp] = useState(() =>
-    typeof window !== 'undefined' ? Capacitor.isNativePlatform() : false,
-  );
+  const [isNativeApp, setIsNativeApp] = useState(false);
   const navOverride = searchParams?.get('nav');
+
+  useEffect(() => {
+    setIsNativeApp(Capacitor.isNativePlatform());
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -160,6 +160,7 @@ export function AppChrome() {
     '/blog',
     '/explore', // Explore is always app-only
     '/community',
+    '/pricing', // Pricing always shows app nav (in-app paywall on iOS, Stripe on web)
   ];
 
   // Define core marketing pages (always show marketing nav)
@@ -209,8 +210,9 @@ export function AppChrome() {
     '/cosmic-state',
   ];
 
-  // Pages that can show app nav if coming from app: blog, pricing, explore pages
-  const contextualPages = ['/blog', '/pricing', '/grimoire', ...explorePages];
+  // Pages that can show app nav if coming from app: blog, explore pages
+  // Note: /pricing is now in appPages so always shows app nav
+  const contextualPages = ['/blog', '/grimoire', ...explorePages];
   const isContextualPage = contextualPages.some(
     (page) => pathname === page || pathname?.startsWith(`${page}/`),
   );

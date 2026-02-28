@@ -60,10 +60,11 @@ const buildPlanFeatures = (plan: PricingPlan): string[] => {
   return [...plan.features, ...derived];
 };
 export default function PricingPage() {
-  // Lazy init so the iOS paywall renders immediately without a flash of Stripe UI.
-  const [isNativeIOS] = useState(() =>
-    typeof window !== 'undefined' ? Capacitor.getPlatform() === 'ios' : false,
-  );
+  // null = not yet determined (SSR or first frame), false = web, true = iOS
+  const [isNativeIOS, setIsNativeIOS] = useState<boolean | null>(null);
+  useEffect(() => {
+    setIsNativeIOS(Capacitor.getPlatform() === 'ios');
+  }, []);
   const { user } = useUser();
   const subscription = useSubscription();
   const authState = useAuthStatus();
@@ -317,6 +318,11 @@ export default function PricingPage() {
       ),
     [pricingPlans],
   );
+
+  // While platform is being detected, show blank (avoids hydration flash)
+  if (isNativeIOS === null) {
+    return <div className='min-h-screen bg-zinc-950' />;
+  }
 
   // On iOS, always use Apple IAP — never Stripe
   if (isNativeIOS) {
