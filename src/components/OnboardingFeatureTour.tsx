@@ -94,12 +94,12 @@ export function OnboardingFeatureTour({
       return [
         { title: 'Everything in Lunary+', items: basePlanHighlights },
         {
-          title: 'Plus AI guidance',
+          title: 'Plus Astral Guide',
           items: [
-            'Up to 300 messages/day AI chat + extended context memory',
+            'Up to 300 messages/day with the Astral Guide + extended memory',
             'Personalized weekly reports + deeper readings',
             'Advanced pattern analysis + downloadable PDFs',
-            'AI ritual generation + deeper guidance',
+            'Astral ritual guidance + deeper insights',
           ],
         },
       ];
@@ -110,10 +110,10 @@ export function OnboardingFeatureTour({
       {
         title: 'Everything in Lunary+ Pro',
         items: [
-          'Up to 300 messages/day AI chat + extended context memory',
+          'Up to 300 messages/day with the Astral Guide + extended memory',
           'Personalized weekly reports + deeper readings',
           'Advanced pattern analysis + downloadable PDFs',
-          'AI ritual generation + deeper guidance',
+          'Astral ritual guidance + deeper insights',
         ],
       },
       {

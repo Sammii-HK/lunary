@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
 import {
   Store,
   CircleDot,
@@ -64,10 +65,16 @@ const exploreItems: ExploreItem[] = [
   },
 ];
 
+const NATIVE_HIDDEN = new Set(['/pricing', '/shop']);
+
 export const ExploreMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const isNative = Capacitor.isNativePlatform();
+  const visibleItems = isNative
+    ? exploreItems.filter((item) => !NATIVE_HIDDEN.has(item.href))
+    : exploreItems;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -85,7 +92,7 @@ export const ExploreMenu = () => {
     };
   }, [isOpen]);
 
-  const isActive = exploreItems.some((item) => {
+  const isActive = visibleItems.some((item) => {
     if (item.href === '/') return pathname === '/';
     return pathname === item.href || pathname?.startsWith(`${item.href}/`);
   });
@@ -114,7 +121,7 @@ export const ExploreMenu = () => {
       {isOpen && (
         <div className='absolute bottom-full mb-2 z-50 rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl left-2 right-2 w-auto sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-56'>
           <div className='p-2 space-y-1'>
-            {exploreItems.map((item) => {
+            {visibleItems.map((item) => {
               const ItemIcon = item.icon;
               const itemActive =
                 pathname === item.href || pathname?.startsWith(`${item.href}/`);

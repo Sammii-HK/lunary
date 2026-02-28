@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
 import { SignOutButton } from './SignOutButton';
@@ -53,6 +55,13 @@ export function AuthComponent({
   );
 
   const { refreshAuth, ...authState } = useAuthStatus();
+  const router = useRouter();
+  const [isNative, setIsNative] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
+  }, []);
 
   useEffect(() => {
     cachedAuthFormData = formData;
@@ -233,7 +242,11 @@ export function AuthComponent({
           console.log('🔄 Redirecting to app after sign-in');
           setSuccess('Signed in successfully! Redirecting...');
           setTimeout(() => {
-            window.location.href = '/app';
+            if (Capacitor.isNativePlatform()) {
+              router.replace('/app');
+            } else {
+              window.location.href = '/app';
+            }
           }, 500);
           return;
         }
@@ -284,6 +297,107 @@ export function AuthComponent({
       setError(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    setAppleLoading(true);
+    setError(null);
+    try {
+      const SignInWithApple = registerPlugin<{
+        authorize(options: { nonce?: string }): Promise<{
+          response: {
+            identityToken: string;
+            user: string;
+            email?: string;
+            givenName?: string;
+            familyName?: string;
+          };
+        }>;
+      }>('SignInWithApple');
+
+      // Capacitor's SignInWithApple plugin calls console.error({}) internally on
+      // cancellation/no-Apple-ID, which triggers the Next.js dev overlay. Suppress it.
+      const _origConsoleError = console.error;
+      console.error = (...args: unknown[]) => {
+        const first = args[0];
+        if (
+          args.length === 1 &&
+          first !== null &&
+          typeof first === 'object' &&
+          Object.keys(first).length === 0
+        )
+          return;
+        _origConsoleError(...args);
+      };
+      let result: Awaited<ReturnType<typeof SignInWithApple.authorize>>;
+      try {
+        result = await SignInWithApple.authorize({
+          nonce: crypto.randomUUID(),
+        });
+      } finally {
+        console.error = _origConsoleError;
+      }
+
+      const response = await fetch('/api/auth/apple-native', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          identityToken: result.response.identityToken,
+          user: {
+            email: result.response.email,
+            givenName: result.response.givenName,
+            familyName: result.response.familyName,
+          },
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Apple sign-in failed');
+      }
+
+      // Set cookie directly in JS so WKWebView includes it in subsequent navigation requests.
+      // data.token is already signed (token.base64sig). URI-encode it to match the server-set format.
+      // Must use __Secure- prefix with Secure flag to match better-auth's cookie name
+      // (triggered because NEXT_PUBLIC_BASE_URL starts with https://).
+      if (data.token) {
+        const cookieName =
+          data.cookieName || '__Secure-better-auth.session_token';
+        const expires = new Date(data.expiresAt).toUTCString();
+        document.cookie = `${cookieName}=${encodeURIComponent(data.token)}; path=/; expires=${expires}; SameSite=Lax; Secure`;
+      }
+
+      invalidateAuthCache();
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        window.location.href = '/app';
+      }
+    } catch (err: any) {
+      // err may be a plain {} from Capacitor — normalise it
+      const code: number | string | undefined = err?.code ?? err?.error?.code;
+      const msg: string = err?.message ?? err?.error?.message ?? '';
+
+      const isSilent =
+        (!code && !msg) || // empty object {} = user dismissed
+        code === 1001 ||
+        String(code).includes('1001') ||
+        msg.includes('1001') ||
+        msg.toLowerCase().includes('cancel') ||
+        code === 1000 || // no Apple ID in Settings — Apple shows its own native modal
+        String(code).includes('1000') ||
+        msg.includes('1000');
+
+      if (isSilent) {
+        // silent — Apple already handles this with a native modal or sheet dismissal
+      } else {
+        setError(msg || 'Apple sign-in failed. Please try again.');
+      }
+    } finally {
+      setAppleLoading(false);
     }
   };
 
@@ -435,7 +549,7 @@ export function AuthComponent({
             required
             value={formData.email}
             onChange={handleInputChange}
-            className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
+            className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent placeholder:text-zinc-500 ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
             placeholder='Enter your email'
           />
         </div>
@@ -555,6 +669,31 @@ export function AuthComponent({
           </button>
         )}
       </div>
+
+      {isNative && !isForgot && (
+        <div className='mt-6'>
+          <div className='relative flex items-center gap-3 mb-4'>
+            <div className='flex-1 h-px bg-zinc-700' />
+            <span className='text-xs text-zinc-500'>or</span>
+            <div className='flex-1 h-px bg-zinc-700' />
+          </div>
+          <button
+            type='button'
+            onClick={handleAppleSignIn}
+            disabled={appleLoading}
+            className='w-full bg-white hover:bg-zinc-100 disabled:opacity-50 text-black font-medium rounded-lg py-3 px-4 flex items-center justify-center gap-3 transition-colors'
+          >
+            {appleLoading ? (
+              <Loader2 className='w-5 h-5 animate-spin text-black' />
+            ) : (
+              <svg className='w-5 h-5' viewBox='0 0 24 24' fill='currentColor'>
+                <path d='M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z' />
+              </svg>
+            )}
+            {isSignUp ? 'Sign up with Apple' : 'Sign in with Apple'}
+          </button>
+        </div>
+      )}
 
       <div className='mt-4 text-center'>
         <p className='text-xs text-zinc-400'>

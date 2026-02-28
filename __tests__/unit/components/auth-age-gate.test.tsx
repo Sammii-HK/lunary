@@ -40,6 +40,16 @@ jest.mock('@/lib/posthog-client', () => ({
   captureEvent: jest.fn(),
 }));
 
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+  usePathname: () => '/',
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 import { AuthComponent } from '@/components/Auth';
 
 const setNavigatorLanguage = (language: string) => {

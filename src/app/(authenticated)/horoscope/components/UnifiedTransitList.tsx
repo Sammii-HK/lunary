@@ -160,7 +160,7 @@ export function UnifiedTransitList({
       tier: 'free',
       overflow_variant: overflowVariant,
     });
-    router.push('/pricing');
+    router.push('/pricing?nav=app');
   };
 
   if (transits.length === 0) {

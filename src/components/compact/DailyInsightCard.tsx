@@ -481,7 +481,7 @@ export const DailyInsightCard = () => {
                   e.stopPropagation();
                   router.push(
                     authStatus.isAuthenticated
-                      ? '/pricing'
+                      ? '/pricing?nav=app'
                       : '/auth?signup=true',
                   );
                 }}
@@ -491,7 +491,7 @@ export const DailyInsightCard = () => {
                     e.stopPropagation();
                     router.push(
                       authStatus.isAuthenticated
-                        ? '/pricing'
+                        ? '/pricing?nav=app'
                         : '/auth?signup=true',
                     );
                   }
@@ -513,7 +513,7 @@ export const DailyInsightCard = () => {
                 if (router) {
                   router.push(
                     authStatus.isAuthenticated
-                      ? '/pricing'
+                      ? '/pricing?nav=app'
                       : '/auth?signup=true',
                   );
                 }
@@ -526,7 +526,7 @@ export const DailyInsightCard = () => {
                   if (router) {
                     router.push(
                       authStatus.isAuthenticated
-                        ? '/pricing'
+                        ? '/pricing?nav=app'
                         : '/auth?signup=true',
                     );
                   }

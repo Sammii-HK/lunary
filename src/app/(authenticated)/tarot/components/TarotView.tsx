@@ -823,7 +823,7 @@ export function TarotView({
                   )}
                   <button
                     type='button'
-                    onClick={() => router.push('/pricing')}
+                    onClick={() => router.push('/pricing?nav=app')}
                     className='mt-2 text-xs text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors font-medium'
                   >
                     Unlock personalized insights
@@ -858,11 +858,11 @@ export function TarotView({
                   <span
                     role='button'
                     tabIndex={0}
-                    onClick={() => router.push('/pricing')}
+                    onClick={() => router.push('/pricing?nav=app')}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        router.push('/pricing');
+                        router.push('/pricing?nav=app');
                       }
                     }}
                     className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300 cursor-pointer hover:bg-lunary-primary-800/50 transition-colors'
@@ -878,7 +878,7 @@ export function TarotView({
                         feature: 'weekly_tarot_card',
                         tier: 'free',
                       });
-                      router.push('/pricing');
+                      router.push('/pricing?nav=app');
                     }}
                     className='mt-1 inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-700 bg-zinc-900/80 px-3 py-1.5 text-xs font-medium text-lunary-primary-300 hover:bg-zinc-900 transition-colors'
                   >
@@ -912,7 +912,7 @@ export function TarotView({
                         feature: 'daily_tarot_interpretation',
                         tier: 'free',
                       });
-                      router.push('/pricing');
+                      router.push('/pricing?nav=app');
                     }}
                     className='mt-2 text-xs text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors font-medium'
                   >
@@ -929,11 +929,11 @@ export function TarotView({
                   <span
                     role='button'
                     tabIndex={0}
-                    onClick={() => router.push('/pricing')}
+                    onClick={() => router.push('/pricing?nav=app')}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        router.push('/pricing');
+                        router.push('/pricing?nav=app');
                       }
                     }}
                     className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded text-lunary-primary-300 cursor-pointer hover:bg-lunary-primary-800/50 transition-colors'
@@ -955,7 +955,7 @@ export function TarotView({
                       feature: 'weekly_tarot',
                       tier: 'free',
                     });
-                    router.push('/pricing');
+                    router.push('/pricing?nav=app');
                   }}
                   className='mt-3 text-xs text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors font-medium'
                 >

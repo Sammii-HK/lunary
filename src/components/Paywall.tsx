@@ -2,7 +2,7 @@
 
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Capacitor } from '@capacitor/core';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
@@ -30,6 +30,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
   } = useSubscription();
   const _authState = useAuthStatus();
   const [paywallTracked, setPaywallTracked] = useState(false);
+  const isNativeIOS = useIsNativeIOS();
 
   const shouldShowPaywall = !loading && !hasAccess(feature) && !fallback;
 
@@ -112,7 +113,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
         )}
 
         <div className='space-y-3'>
-          {Capacitor.getPlatform() === 'ios' ? (
+          {isNativeIOS === null ? null : isNativeIOS ? (
             <IOSPaywall />
           ) : (
             <>
@@ -257,7 +258,7 @@ export function UpgradePrompt() {
           className='rounded-full w-full'
           asChild
         >
-          <Link href={authState.isAuthenticated ? '/pricing' : '/auth'}>
+          <Link href={authState.isAuthenticated ? '/pricing?nav=app' : '/auth'}>
             {authState.isAuthenticated
               ? isTrialActive
                 ? 'Continue Trial'

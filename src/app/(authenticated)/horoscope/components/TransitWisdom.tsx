@@ -325,7 +325,7 @@ function TransitCard({
           ) : (
             <div className='pt-2 mt-2 border-t border-zinc-800/30'>
               <Link
-                href='/pricing'
+                href='/pricing?nav=app'
                 className='text-xs text-zinc-500 hover:text-lunary-primary-400 transition-colors'
               >
                 Unlock detailed transit breakdowns with Lunary+

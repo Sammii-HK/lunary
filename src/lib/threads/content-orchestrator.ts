@@ -5,6 +5,7 @@ import {
   generateEducationalPost,
 } from './original-content';
 import { getDearStyleReferralPost } from '@/lib/social/shared/constants/persona-templates';
+import { getTransitThemeForDate } from '@/lib/social/weekly-themes';
 import {
   WEEKDAY_SLOTS_UTC,
   WEEKEND_SLOTS_UTC,
@@ -87,6 +88,16 @@ function buildWeekdayBatch(dateStr: string): ThreadsPost[] {
   // Slot 0 (14:00 UTC) - Cosmic timing / transit content
   posts.push(generateCosmicTimingPost(dateStr, slots[0]));
 
+  // Determine if slot 0 will use a transit post (narrow posting window).
+  // If yes, exclude 'planetary' from slot 2 to avoid same-day duplicate transit content.
+  const slot0Date = new Date(dateStr);
+  slot0Date.setUTCHours(slots[0], 0, 0, 0);
+  const transitCheck = getTransitThemeForDate(slot0Date);
+  const isTransitActive =
+    transitCheck !== null &&
+    transitCheck.hoursUntil >= -12 &&
+    transitCheck.hoursUntil <= 36;
+
   // Slot 1 (17:00 UTC) - Rotating by day of week
   // Mon(1)=identity, Tue(2)=referral, Wed(3)=educational, Thu(4)=referral, Fri(5)=identity
   if (dayOfWeek === 2 || dayOfWeek === 4) {
@@ -98,7 +109,11 @@ function buildWeekdayBatch(dateStr: string): ThreadsPost[] {
   }
 
   // Slot 2 (21:00 UTC) - Conversation / question (drives replies)
-  posts.push(generateConversationPost(dateStr, slots[2]));
+  posts.push(
+    generateConversationPost(dateStr, slots[2], {
+      excludeCategory: isTransitActive ? 'planetary' : undefined,
+    }),
+  );
 
   return posts;
 }

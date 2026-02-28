@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { Capacitor } from '@capacitor/core';
+import { IOSPaywall } from '@/components/IOSPaywall';
 import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
@@ -58,6 +60,13 @@ const buildPlanFeatures = (plan: PricingPlan): string[] => {
   return [...plan.features, ...derived];
 };
 export default function PricingPage() {
+  // null = not yet determined (SSR or first frame), false = web, true = iOS
+  const [isNativeIOS, setIsNativeIOS] = useState<boolean | null>(null);
+  useEffect(() => {
+    setIsNativeIOS(
+      Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios',
+    );
+  }, []);
   const { user } = useUser();
   const subscription = useSubscription();
   const authState = useAuthStatus();
@@ -312,6 +321,38 @@ export default function PricingPage() {
     [pricingPlans],
   );
 
+  // While platform is being detected, show blank (avoids hydration flash)
+  if (isNativeIOS === null) {
+    return <div className='min-h-screen bg-zinc-950' />;
+  }
+
+  // On iOS, always use Apple IAP — never Stripe
+  if (isNativeIOS) {
+    return (
+      <div
+        className='h-screen overflow-y-auto px-6 pt-12'
+        style={{
+          backgroundColor: '#0a0a0f',
+          paddingBottom: 'max(3rem, env(safe-area-inset-bottom))',
+        }}
+      >
+        <div className='max-w-sm mx-auto w-full'>
+          <h1 className='text-2xl font-semibold text-zinc-100 text-center mb-2'>
+            Lunary+
+          </h1>
+          <p className='text-sm text-zinc-400 text-center mb-8'>
+            Unlock your full cosmic experience
+          </p>
+          <IOSPaywall
+            onSuccess={() => {
+              window.location.href = '/app';
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <FAQStructuredData faqs={faqs} />
@@ -453,25 +494,9 @@ export default function PricingPage() {
                     Lunary+ ($4.99/mo)
                   </span>
                 </div>
-                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-zinc-800/50'>
-                  <span className='text-zinc-400'>
-                    Learn astrology deeply over time
-                  </span>
-                  <span className='text-lunary-primary-300 font-medium'>
-                    Lunary+ ($4.99/mo)
-                  </span>
-                </div>
-                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-zinc-800/50'>
-                  <span className='text-zinc-400'>
-                    Explore your patterns in depth with your Astral Guide
-                  </span>
-                  <span className='text-lunary-primary-300 font-medium'>
-                    Lunary+ Pro ($8.99/mo)
-                  </span>
-                </div>
                 <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2'>
                   <span className='text-zinc-400'>
-                    Track long-term patterns (years)
+                    Explore your patterns in depth with your Astral Guide
                   </span>
                   <span className='text-lunary-primary-300 font-medium'>
                     Lunary+ Pro ($8.99/mo)

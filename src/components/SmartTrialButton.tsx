@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Capacitor } from '@capacitor/core';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { AuthComponent } from './Auth';
@@ -15,8 +15,6 @@ import type { FeatureKey } from '../../utils/pricing';
 import { cn } from '@/lib/utils';
 import { trackCtaClick } from '@/lib/analytics';
 import { getContextualHub } from '@/lib/grimoire/getContextualNudge';
-
-const isIOS = Capacitor.getPlatform() === 'ios';
 
 interface SmartTrialButtonProps {
   size?: 'sm' | 'default' | 'lg' | 'xs';
@@ -37,6 +35,7 @@ export function SmartTrialButton({
   const { isSubscribed, isTrialActive } = useSubscription();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showIOSPaywall, setShowIOSPaywall] = useState(false);
+  const isIOS = useIsNativeIOS();
   const pathname = usePathname() || '';
 
   useModal({
@@ -119,8 +118,8 @@ export function SmartTrialButton({
   };
 
   if (config.action === 'link' && config.href) {
-    // On iOS, intercept /pricing links and show native IAP instead
-    if (isIOS && config.href === '/pricing') {
+    // On iOS (or while detecting), intercept /pricing links — show native IAP modal
+    if (isIOS !== false && config.href === '/pricing') {
       return (
         <>
           <Button
@@ -214,7 +213,7 @@ export function SmartTrialButton({
                 if (isIOS) {
                   setShowIOSPaywall(true);
                 } else {
-                  window.location.href = '/pricing';
+                  window.location.href = '/pricing?nav=app';
                 }
               }}
             />

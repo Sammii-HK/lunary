@@ -397,7 +397,7 @@ export function HoroscopeView({
         </p>
 
         {personalizedTeaser && (
-          <Link href='/pricing' className='block space-y-2 group'>
+          <Link href='/pricing?nav=app' className='block space-y-2 group'>
             {/* Line 1: readable start → blur fade */}
             <div className='relative h-[1.25rem] overflow-hidden'>
               {/* Blurred layer underneath */}
@@ -428,7 +428,7 @@ export function HoroscopeView({
 
         {!hasPaidAccess && !userBirthday && (
           <Link
-            href='/pricing'
+            href='/pricing?nav=app'
             className='inline-flex items-center gap-1.5 text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
           >
             <Sparkles className='w-3 h-3' />

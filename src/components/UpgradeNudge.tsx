@@ -29,7 +29,7 @@ export function UpgradeNudge({
   if (inline) {
     return (
       <Link
-        href='/pricing'
+        href='/pricing?nav=app'
         className={`flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-lunary-accent-300 transition-colors ${className}`}
       >
         <Sparkles className='w-3.5 h-3.5' />
@@ -44,7 +44,7 @@ export function UpgradeNudge({
     >
       <Sparkles className='w-4 h-4 text-lunary-accent-600 flex-shrink-0' />
       <Link
-        href='/pricing'
+        href='/pricing?nav=app'
         className='flex-1 text-sm text-zinc-400 hover:text-zinc-300 transition-colors'
       >
         {message}
@@ -84,7 +84,7 @@ export function UpgradeNudgeBanner({
         <span className='text-sm text-zinc-300'>
           {feature} available with{' '}
           <Link
-            href='/pricing'
+            href='/pricing?nav=app'
             className='text-lunary-accent hover:text-lunary-accent-300'
           >
             Lunary+
@@ -113,7 +113,7 @@ export function UpgradeNudgeInline({
 }: UpgradeNudgeInlineProps) {
   return (
     <Link
-      href='/pricing'
+      href='/pricing?nav=app'
       className={`inline-flex items-center gap-1.5 text-xs text-lunary-accent-500 hover:text-lunary-accent-300 transition-colors ${className}`}
     >
       <Sparkles className='w-3 h-3' />
@@ -143,7 +143,7 @@ export function UpgradeNudgeOverlay({
         <p className='text-xs text-zinc-400 text-center mb-3'>{description}</p>
       )}
       <Link
-        href='/pricing'
+        href='/pricing?nav=app'
         className='px-4 py-2 text-sm bg-lunary-primary-900 text-lunary-accent-300 rounded-lg hover:bg-lunary-primary-800 transition-colors'
       >
         Upgrade to Lunary+

@@ -340,7 +340,7 @@ export default function CirclePage() {
                   handleCtaClick('best-times', 'Upgrade to Pro', '/pricing')
                 }
               >
-                <Link href='/pricing'>Upgrade to Pro</Link>
+                <Link href='/pricing?nav=app'>Upgrade to Pro</Link>
               </Button>
             </div>
 
@@ -496,7 +496,7 @@ export default function CirclePage() {
               variant='outline'
               onClick={() => handleCtaClick('tiers', 'See pricing', '/pricing')}
             >
-              <Link href='/pricing'>See pricing</Link>
+              <Link href='/pricing?nav=app'>See pricing</Link>
             </Button>
           </div>
         </div>

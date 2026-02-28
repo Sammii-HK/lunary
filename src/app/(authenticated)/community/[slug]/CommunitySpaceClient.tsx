@@ -161,7 +161,7 @@ export default function CommunitySpaceClient() {
               Upgrade to Lunary+ to post in community spaces
             </p>
             <Link
-              href='/pricing'
+              href='/pricing?nav=app'
               className='text-xs text-lunary-primary-400 hover:underline mt-1 inline-block'
             >
               View plans

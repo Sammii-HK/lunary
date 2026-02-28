@@ -870,11 +870,12 @@ export async function GET(request: NextRequest) {
       console.log('📖 Generating Instagram stories...');
       const storiesStartTime = Date.now();
       try {
-        // Dedup guard: skip if stories already posted today
+        // Dedup guard: skip if stories already attempted today (success or failure)
         const existingStories = await sql`
         SELECT COUNT(*) as count FROM social_posts
         WHERE post_type = 'story' AND platform = 'instagram'
           AND scheduled_date::date = ${dateStr}::date
+          AND status IN ('sent', 'failed')
       `;
         if (Number(existingStories.rows[0]?.count || 0) >= 4) {
           console.log('📖 Stories already generated for today, skipping');
@@ -1010,7 +1011,6 @@ export async function GET(request: NextRequest) {
               });
 
               if (result.success) {
-                // Persist story to DB only on success for accurate tracking
                 await sql`
               INSERT INTO social_posts (content, platform, post_type, scheduled_date, status, image_url, story_category, content_type)
               VALUES ('', 'instagram', 'story', ${scheduledTime.toISOString()}, 'sent', ${staticImageUrl}, ${storyCategory}, ${story.variant})
@@ -1021,29 +1021,41 @@ export async function GET(request: NextRequest) {
                   status: 'success',
                 });
               } else {
+                const errorMsg = result.error || 'Unknown error';
                 console.error(
-                  `[daily-cron] IG story failed (${story.variant}): ${result.error}`,
+                  `[daily-cron] IG story failed (${story.variant}): ${errorMsg}`,
                 );
+                // Persist failure so the error is visible in the DB
+                await sql`
+              INSERT INTO social_posts (content, platform, post_type, scheduled_date, status, story_category, content_type, rejection_feedback)
+              VALUES ('', 'instagram', 'story', ${scheduledTime.toISOString()}, 'failed', ${storyCategory}, ${story.variant}, ${errorMsg})
+            `;
                 storySentResults.push({
                   scheduledTime: scheduledTime.toISOString(),
                   variant: story.variant,
                   status: 'error',
-                  error: result.error || 'Unknown error',
+                  error: errorMsg,
                 });
               }
             } catch (postError) {
+              const errorMsg =
+                postError instanceof Error
+                  ? postError.message
+                  : 'Unknown error';
               console.error(
                 `[daily-cron] IG story exception (${story.variant}):`,
                 postError,
               );
+              // Persist exception so the error is visible in the DB
+              await sql`
+              INSERT INTO social_posts (content, platform, post_type, scheduled_date, status, story_category, content_type, rejection_feedback)
+              VALUES ('', 'instagram', 'story', ${scheduledTime.toISOString()}, 'failed', ${storyCategory}, ${story.variant}, ${errorMsg})
+            `;
               storySentResults.push({
                 scheduledTime: scheduledTime.toISOString(),
                 variant: story.variant,
                 status: 'error',
-                error:
-                  postError instanceof Error
-                    ? postError.message
-                    : 'Unknown error',
+                error: errorMsg,
               });
             }
           }

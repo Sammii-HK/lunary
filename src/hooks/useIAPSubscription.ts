@@ -8,11 +8,33 @@ import type { PurchasesPackage } from '@revenuecat/purchases-capacitor';
 export const RC_ENTITLEMENT_PLUS = 'plus';
 export const RC_ENTITLEMENT_PRO = 'pro';
 
-// RevenueCat package identifiers set in the RC dashboard Offering
-const PACKAGE_PLUS_MONTHLY = '$rc_monthly';
-const PACKAGE_PLUS_ANNUAL = '$rc_annual_plus';
-const PACKAGE_PRO_MONTHLY = '$rc_monthly_pro';
-const PACKAGE_PRO_ANNUAL = '$rc_annual';
+// Public iOS API key from RevenueCat dashboard — safe to expose client-side
+const RC_IOS_API_KEY = process.env.NEXT_PUBLIC_REVENUECAT_IOS_KEY ?? '';
+
+let rcConfigured = false;
+
+/**
+ * Configure RevenueCat SDK. Must be called before any IAP operations.
+ * Safe to call multiple times — subsequent calls are no-ops.
+ */
+export async function configureIAP(userId?: string): Promise<void> {
+  if (rcConfigured) return;
+  if (!RC_IOS_API_KEY) {
+    console.warn('[IAP] NEXT_PUBLIC_REVENUECAT_IOS_KEY is not set');
+    return;
+  }
+  await Purchases.configure({ apiKey: RC_IOS_API_KEY });
+  if (userId) {
+    await Purchases.logIn({ appUserID: userId }).catch(() => {});
+  }
+  rcConfigured = true;
+}
+
+// Apple product IDs as configured in App Store Connect
+const PRODUCT_PLUS_MONTHLY = 'app.lunary.plus.monthly';
+const PRODUCT_PLUS_ANNUAL = 'app.lunary.plus.annual';
+const PRODUCT_PRO_MONTHLY = 'app.lunary.pro.monthly';
+const PRODUCT_PRO_ANNUAL = 'app.lunary.pro.annual';
 
 // Maps active RC entitlement to the Lunary plan ID used by the rest of the app
 function entitlementsToPlanId(
@@ -33,12 +55,24 @@ export interface IAPOfferings {
 export async function getIAPOfferings(): Promise<IAPOfferings> {
   const offerings = await Purchases.getOfferings();
   const pkgs = offerings.current?.availablePackages ?? [];
+  console.log('[IAP] current offering id:', offerings.current?.identifier);
+  console.log(
+    '[IAP] packages:',
+    pkgs.map((p) => `${p.identifier} → ${p.product.productIdentifier}`),
+  );
   return {
     plusMonthly:
-      pkgs.find((p) => p.identifier === PACKAGE_PLUS_MONTHLY) ?? null,
-    plusAnnual: pkgs.find((p) => p.identifier === PACKAGE_PLUS_ANNUAL) ?? null,
-    proMonthly: pkgs.find((p) => p.identifier === PACKAGE_PRO_MONTHLY) ?? null,
-    proAnnual: pkgs.find((p) => p.identifier === PACKAGE_PRO_ANNUAL) ?? null,
+      pkgs.find((p) => p.product.productIdentifier === PRODUCT_PLUS_MONTHLY) ??
+      null,
+    plusAnnual:
+      pkgs.find((p) => p.product.productIdentifier === PRODUCT_PLUS_ANNUAL) ??
+      null,
+    proMonthly:
+      pkgs.find((p) => p.product.productIdentifier === PRODUCT_PRO_MONTHLY) ??
+      null,
+    proAnnual:
+      pkgs.find((p) => p.product.productIdentifier === PRODUCT_PRO_ANNUAL) ??
+      null,
   };
 }
 

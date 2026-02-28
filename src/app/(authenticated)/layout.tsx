@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import SessionTracker from '@/components/SessionTracker';
@@ -9,6 +10,7 @@ import { TourProvider } from '@/context/TourContext';
 import { AnnouncementProvider } from '@/components/feature-announcements/AnnouncementProvider';
 import dynamic from 'next/dynamic';
 import { nativePushService } from '@/services/native';
+import { configureIAP } from '@/hooks/useIAPSubscription';
 
 // Dynamically import OfflineBanner to avoid SSR issues
 const OfflineBanner = dynamic(
@@ -43,10 +45,14 @@ export default function AuthenticatedLayout({
   useEffect(() => {
     if (!authStatus.loading && !authStatus.isAuthenticated) {
       const returnTo = encodeURIComponent(pathname);
-      // Use hard navigation for reliability in Capacitor WKWebView (client-side
-      // router.replace can stall on first load before cookies are set)
       if (typeof window !== 'undefined') {
-        window.location.replace(`/auth?returnTo=${returnTo}`);
+        if (Capacitor.isNativePlatform()) {
+          // On native, use Next.js router to avoid WKWebView opening Safari
+          router.replace(`/auth?returnTo=${returnTo}`);
+        } else {
+          // On web, use hard navigation for reliability before cookies are set
+          window.location.replace(`/auth?returnTo=${returnTo}`);
+        }
       } else {
         router.replace(`/auth?returnTo=${returnTo}`);
       }
@@ -74,6 +80,28 @@ export default function AuthenticatedLayout({
     authStatus.user?.email,
   ]);
 
+  // Suppress Capacitor "plugin not implemented" console.error in iOS simulator.
+  // The plugin bridge itself logs console.error before our catch block runs.
+  // On a real device with Firebase set up, this never fires.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const orig = console.error.bind(console);
+    console.error = (...args: unknown[]) => {
+      const msg = args.join(' ');
+      if (
+        msg.includes('not implemented') ||
+        msg.includes('FirebaseMessaging')
+      ) {
+        console.debug('[Native] Suppressed expected simulator error:', msg);
+        return;
+      }
+      orig(...args);
+    };
+    return () => {
+      console.error = orig;
+    };
+  }, []);
+
   // Initialize native push notifications for authenticated users
   useEffect(() => {
     if (
@@ -83,7 +111,10 @@ export default function AuthenticatedLayout({
       !nativePushInitialized.current
     ) {
       nativePushInitialized.current = true;
-      // Initialize in background - don't block render
+      // Configure RevenueCat IAP and push in background — don't block render
+      configureIAP(authStatus.user.id).catch((error) => {
+        console.debug('[Layout] IAP configure skipped:', error);
+      });
       nativePushService.initialize(authStatus.user.id).catch((error) => {
         console.debug('[Layout] Native push init skipped:', error);
       });

@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Settings, ExternalLink, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
-const isIOS = Capacitor.getPlatform() === 'ios';
-
 interface SubscriptionManagementProps {
   customerId?: string;
   subscriptionId?: string;
@@ -33,6 +31,10 @@ export default function SubscriptionManagement({
   customerId,
   subscriptionId,
 }: SubscriptionManagementProps) {
+  const [isIOS, setIsIOS] = useState(false);
+  useEffect(() => {
+    setIsIOS(Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios');
+  }, []);
   const { user, refetch } = useUser();
   const subscription = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
@@ -232,18 +234,9 @@ export default function SubscriptionManagement({
           <p className='text-zinc-400 text-sm mb-4'>
             Unlock personalized horoscopes, birth charts, and mystical insights
           </p>
-          {isIOS ? (
-            <Button
-              variant='outline'
-              onClick={() => Capacitor.openUrl('https://lunary.app/pricing')}
-            >
-              View Plans
-            </Button>
-          ) : (
-            <Button variant='outline' asChild>
-              <Link href='/pricing'>View Plans</Link>
-            </Button>
-          )}
+          <Button variant='outline' asChild>
+            <Link href='/pricing?nav=app'>View Plans</Link>
+          </Button>
         </div>
       </div>
     );
@@ -372,7 +365,10 @@ export default function SubscriptionManagement({
       {isIOS ? (
         <button
           onClick={() =>
-            Capacitor.openUrl('https://apps.apple.com/account/subscriptions')
+            window.open(
+              'itms-apps://apps.apple.com/account/subscriptions',
+              '_system',
+            )
           }
           className='w-full flex items-center justify-center gap-2 bg-lunary-secondary hover:bg-lunary-secondary-400 text-white py-2 px-3 rounded-md transition-colors text-sm'
         >

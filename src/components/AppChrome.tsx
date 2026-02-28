@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
 import { Navbar } from '@/components/Navbar';
 import { MarketingNavbar } from '@/components/MarketingNavbar';
 import { PWAHandler } from '@/components/PWAHandler';
@@ -17,6 +18,7 @@ import {
   ModalHeader,
 } from '@/components/ui/modal';
 import { TestimonialForm } from '@/components/TestimonialForm';
+import { RateApp } from 'capacitor-rate-app';
 import { useAuthStatus } from './AuthStatus';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
@@ -27,7 +29,12 @@ export function AppChrome() {
   const authState = useAuthStatus();
   const [isAdminHost, setIsAdminHost] = useState(false);
   const [cameFromApp, setCameFromApp] = useState(false);
+  const [isNativeApp, setIsNativeApp] = useState(false);
   const navOverride = searchParams?.get('nav');
+
+  useEffect(() => {
+    setIsNativeApp(Capacitor.isNativePlatform());
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -154,6 +161,7 @@ export function AppChrome() {
     '/blog',
     '/explore', // Explore is always app-only
     '/community',
+    '/pricing', // Pricing always shows app nav (in-app paywall on iOS, Stripe on web)
   ];
 
   // Define core marketing pages (always show marketing nav)
@@ -203,8 +211,9 @@ export function AppChrome() {
     '/cosmic-state',
   ];
 
-  // Pages that can show app nav if coming from app: blog, pricing, explore pages
-  const contextualPages = ['/blog', '/pricing', '/grimoire', ...explorePages];
+  // Pages that can show app nav if coming from app: blog, explore pages
+  // Note: /pricing is now in appPages so always shows app nav
+  const contextualPages = ['/blog', '/grimoire', ...explorePages];
   const isContextualPage = contextualPages.some(
     (page) => pathname === page || pathname?.startsWith(`${page}/`),
   );
@@ -215,10 +224,33 @@ export function AppChrome() {
 
   const [testimonialModalOpen, setTestimonialModalOpen] = useState(false);
   const testimonialCheckedRef = useRef(false);
+  const ratingCheckedRef = useRef(false);
+
+  // Native app rating prompt (iOS + Android) — replaces testimonial modal
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    if (!authState.isAuthenticated || isAdminSurface) return;
+    if (ratingCheckedRef.current) return;
+    if (sessionStorage.getItem('rating-prompted')) return;
+
+    ratingCheckedRef.current = true;
+
+    // Reuse the same server-side timing logic as the testimonial prompt
+    fetch('/api/testimonials/prompt-tracking')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.shouldPrompt) {
+          sessionStorage.setItem('rating-prompted', '1');
+          RateApp.requestReview();
+        }
+      })
+      .catch(() => {});
+  }, [authState.isAuthenticated, isAdminSurface]);
 
   // Fetch testimonial prompt status from server
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (Capacitor.isNativePlatform()) return;
     if (!authState.isAuthenticated || isAdminSurface) return;
     if (testimonialCheckedRef.current) return;
 
@@ -277,7 +309,9 @@ export function AppChrome() {
     isAppPage && !isCoreMarketingRoute && !isContextualPage;
 
   // Marketing nav: core marketing pages OR contextual pages without app context
+  // Never show on native app — the app has its own native nav
   const showMarketingNav =
+    !isNativeApp &&
     (navOverride === 'marketing' ||
       isCoreMarketingRoute ||
       (isContextualPage && !cameFromApp)) &&
@@ -285,10 +319,14 @@ export function AppChrome() {
     !isAdminSurface;
 
   // App nav: actual app pages OR contextual pages with app context
+  // On native: show for all app/contextual pages (web Navbar IS the bottom nav — no separate native nav)
+  // On web: show for app pages, OR contextual pages (pricing, blog, etc.) when coming from the app
   const showAppNav =
-    (navOverride === 'app' ||
-      isActuallyAppPage ||
-      (isContextualPage && cameFromApp)) &&
+    (isNativeApp
+      ? (isAppPage || isContextualPage) && !isCoreMarketingRoute
+      : navOverride === 'app' ||
+        isActuallyAppPage ||
+        (isContextualPage && cameFromApp)) &&
     navOverride !== 'marketing' &&
     !isAdminSurface;
 
@@ -362,7 +400,7 @@ export function AppChrome() {
           allowUnauthenticatedInstall={isAdminSurface}
           silent={isAdminSurface}
         />
-        {!isAdminSurface && (
+        {!isAdminSurface && !isNativeApp && (
           <>
             <NotificationManager />
             <ExitIntent />

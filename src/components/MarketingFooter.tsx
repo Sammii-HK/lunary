@@ -1,4 +1,8 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Capacitor } from '@capacitor/core';
 import {
   SOCIAL_HANDLES,
   SOCIAL_PLATFORM_LABELS,
@@ -8,6 +12,13 @@ import { CookieSettingsButton } from './CookieConsent';
 import { marketingFooterSections } from '@/constants/marketing/footerSections';
 
 export function MarketingFooter() {
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
+  }, []);
+
+  if (isNative) return null;
   const socialLinks = [
     {
       platform: 'instagram' as const,

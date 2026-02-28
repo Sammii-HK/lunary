@@ -369,7 +369,7 @@ export function AdvancedPatterns({
         onUpgradeClick={() => {
           // Redirect to pricing page for upgrades
           if (typeof window !== 'undefined') {
-            window.location.href = '/pricing';
+            window.location.href = '/pricing?nav=app';
           }
         }}
         birthChart={birthChart}

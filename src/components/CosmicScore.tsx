@@ -339,7 +339,7 @@ export function CosmicScore() {
             {/* Upsell for free users */}
             {!isPaid && sortedCategories.length > 2 && (
               <Link
-                href='/pricing'
+                href='/pricing?nav=app'
                 className='flex items-center gap-1.5 mt-1 text-[10px] text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
               >
                 <Lock className='w-3 h-3' />

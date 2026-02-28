@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { useAuthStatus } from './AuthStatus';
 import { Logo } from './Logo';
 import { Button } from './ui/button';
@@ -12,6 +13,13 @@ export function MarketingNavbar() {
   const _pathname = usePathname();
   const authState = useAuthStatus();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
+  }, []);
+
+  if (isNative) return null;
 
   return (
     <nav

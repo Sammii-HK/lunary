@@ -1,5 +1,8 @@
 import { createRequire } from 'module';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 const require = createRequire(import.meta.url);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Bundle analyzer (only enabled when ANALYZE env var is set)
 const withBundleAnalyzer =
@@ -135,6 +138,20 @@ const nextConfig = {
         ];
       }
     }
+
+    // Stub out heavy Capacitor plugin packages in web/Vercel builds.
+    // @capacitor/core is kept — it's small and needed for platform detection.
+    // The plugins (RevenueCat, Haptics, Share, RateApp) are iOS-only and are
+    // always guarded by platform checks — safe to replace with no-op stubs.
+    const pluginsStub = resolve(__dirname, 'src/stubs/capacitor-plugins-stub.ts');
+    const rateAppStub = resolve(__dirname, 'src/stubs/capacitor-rate-app-stub.ts');
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@capacitor/haptics': pluginsStub,
+      '@capacitor/share': pluginsStub,
+      '@revenuecat/purchases-capacitor': pluginsStub,
+      'capacitor-rate-app': rateAppStub,
+    };
 
     // Client-side polyfills
     if (!isServer) {
@@ -318,6 +335,20 @@ const nextConfig = {
     const isDev = process.env.NODE_ENV === 'development';
 
     return [
+      // In dev, force WKWebView (Capacitor simulator) to never cache pages or JS
+      ...(isDev
+        ? [
+            {
+              source: '/:path*',
+              headers: [
+                {
+                  key: 'Cache-Control',
+                  value: 'no-store, no-cache, must-revalidate',
+                },
+              ],
+            },
+          ]
+        : []),
       // Security headers for all routes
       {
         source: '/:path*',

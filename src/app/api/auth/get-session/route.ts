@@ -28,12 +28,6 @@ async function handleAuthRequest(request: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
   }
-  // console.log('🔍 Auth request to get-session:', {
-  //   method: request.method,
-  //   url: request.url,
-  //   headers: Object.fromEntries(request.headers.entries()),
-  // });
-
   try {
     const response = await withCors(request, auth.handler);
 

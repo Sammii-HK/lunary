@@ -15,6 +15,8 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
+		B44A64BF2F532D1A00F74162 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B44A64BE2F532D1A00F74162 /* GoogleService-Info.plist */; };
+		B44A64C12F532F9500F74162 /* SignInWithApplePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44A64C02F532F9500F74162 /* SignInWithApplePlugin.swift */; };
 		B45BFC7E2F313F2600FAC877 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B45BFC3D2F3136B500FAC877 /* WidgetKit.framework */; };
 		B45BFC7F2F313F2600FAC877 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B45BFC3F2F3136B500FAC877 /* SwiftUI.framework */; };
 		B45BFC822F313F2600FAC877 /* LunaryWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45BFC812F313F2600FAC877 /* LunaryWidgets.swift */; };
@@ -66,6 +68,8 @@
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		B44A64BE2F532D1A00F74162 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		B44A64C02F532F9500F74162 /* SignInWithApplePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInWithApplePlugin.swift; sourceTree = "<group>"; };
 		B45BFC3D2F3136B500FAC877 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		B45BFC3F2F3136B500FAC877 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		B45BFC772F31390500FAC877 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
@@ -128,6 +132,8 @@
 		504EC3061FED79650016851F /* App */ = {
 			isa = PBXGroup;
 			children = (
+				B44A64C02F532F9500F74162 /* SignInWithApplePlugin.swift */,
+				B44A64BE2F532D1A00F74162 /* GoogleService-Info.plist */,
 				B45BFCA02F320E6F00FAC877 /* WidgetBridgePlugin.m */,
 				B45BFC9E2F320D6500FAC877 /* LunaryBridgeViewController.swift */,
 				B45BFC772F31390500FAC877 /* App.entitlements */,
@@ -261,6 +267,7 @@
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				B45BFC902F31469000FAC877 /* RobotoMono-Bold.ttf in Resources */,
+				B44A64BF2F532D1A00F74162 /* GoogleService-Info.plist in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
 				B45BFC912F31469000FAC877 /* RobotoMono-Regular.ttf in Resources */,
 			);
@@ -286,6 +293,7 @@
 			files = (
 				B45BFC982F31546D00FAC877 /* WidgetBridge.swift in Sources */,
 				B45BFC9F2F320D6500FAC877 /* LunaryBridgeViewController.swift in Sources */,
+				B44A64C12F532F9500F74162 /* SignInWithApplePlugin.swift in Sources */,
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				B45BFCA12F320E6F00FAC877 /* WidgetBridgePlugin.m in Sources */,
 			);

@@ -90,7 +90,7 @@ export function PremiumPathway({
           <p className='text-sm font-medium text-zinc-200 mb-1'>{copy.title}</p>
           <p className='text-xs text-zinc-400 mb-3'>{copy.description}</p>
           <Link
-            href='/pricing'
+            href='/pricing?nav=app'
             className='inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white transition-colors'
           >
             {ctaLabel}

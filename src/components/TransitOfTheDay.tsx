@@ -266,7 +266,7 @@ export const TransitOfTheDay = () => {
       // Fallback: show upsell if no transits available (shouldn't happen)
       return (
         <Link
-          href='/pricing'
+          href='/pricing?nav=app'
           className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors'
         >
           <div className='flex items-center justify-between'>
@@ -319,7 +319,7 @@ export const TransitOfTheDay = () => {
                   e.stopPropagation();
                   router.push(
                     authStatus.isAuthenticated
-                      ? '/pricing'
+                      ? '/pricing?nav=app'
                       : '/auth?signup=true',
                   );
                 }}
@@ -329,7 +329,7 @@ export const TransitOfTheDay = () => {
                     e.stopPropagation();
                     router.push(
                       authStatus.isAuthenticated
-                        ? '/pricing'
+                        ? '/pricing?nav=app'
                         : '/auth?signup=true',
                     );
                   }
