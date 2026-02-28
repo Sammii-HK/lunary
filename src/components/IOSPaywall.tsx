@@ -195,6 +195,26 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
       <p className='text-xs text-gray-600 text-center'>
         Or subscribe at lunary.app for less
       </p>
+
+      <p className='text-xs text-gray-600 text-center'>
+        <a
+          href='https://lunary.app/privacy'
+          target='_blank'
+          rel='noopener noreferrer'
+          className='underline hover:text-gray-400'
+        >
+          Privacy Policy
+        </a>
+        {' · '}
+        <a
+          href='https://lunary.app/terms'
+          target='_blank'
+          rel='noopener noreferrer'
+          className='underline hover:text-gray-400'
+        >
+          Terms of Use
+        </a>
+      </p>
     </div>
   );
 }

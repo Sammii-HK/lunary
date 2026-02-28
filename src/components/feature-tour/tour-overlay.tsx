@@ -74,10 +74,10 @@ export function TourOverlay({
       <div
         ref={cardRef}
         className={cn(
-          'fixed z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl',
+          'fixed z-50 bg-zinc-950 rounded-lg shadow-xl',
           'max-w-md w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto',
           'p-6 animate-in fade-in slide-in-from-bottom-4',
-          'border border-gray-200 dark:border-gray-800',
+          'border border-zinc-800',
           getTransformClass(),
         )}
         style={{
@@ -93,12 +93,8 @@ export function TourOverlay({
         )}
 
         {/* Content */}
-        <h3 className='text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100'>
-          {title}
-        </h3>
-        <p className='text-sm text-gray-600 dark:text-gray-400 mb-4'>
-          {content}
-        </p>
+        <h3 className='text-lg font-semibold mb-2 text-zinc-100'>{title}</h3>
+        <p className='text-sm text-zinc-400 mb-4'>{content}</p>
 
         {/* Progress indicator */}
         <div className='flex items-center gap-1 mb-4'>
@@ -107,9 +103,7 @@ export function TourOverlay({
               key={idx}
               className={cn(
                 'h-1 flex-1 rounded-full transition-colors',
-                idx <= currentStep
-                  ? 'bg-purple-500'
-                  : 'bg-gray-200 dark:bg-gray-700',
+                idx <= currentStep ? 'bg-purple-500' : 'bg-zinc-700',
               )}
             />
           ))}
@@ -121,7 +115,7 @@ export function TourOverlay({
             variant='ghost'
             size='sm'
             onClick={onDismiss}
-            className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+            className='text-zinc-400 hover:text-zinc-200'
           >
             Skip tour
           </Button>

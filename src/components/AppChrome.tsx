@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
 import { Navbar } from '@/components/Navbar';
 import { MarketingNavbar } from '@/components/MarketingNavbar';
 import { PWAHandler } from '@/components/PWAHandler';
@@ -27,7 +28,12 @@ export function AppChrome() {
   const authState = useAuthStatus();
   const [isAdminHost, setIsAdminHost] = useState(false);
   const [cameFromApp, setCameFromApp] = useState(false);
+  const [isNativeApp, setIsNativeApp] = useState(false);
   const navOverride = searchParams?.get('nav');
+
+  useEffect(() => {
+    setIsNativeApp(Capacitor.isNativePlatform());
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -277,7 +283,9 @@ export function AppChrome() {
     isAppPage && !isCoreMarketingRoute && !isContextualPage;
 
   // Marketing nav: core marketing pages OR contextual pages without app context
+  // Never show on native app — the app has its own native nav
   const showMarketingNav =
+    !isNativeApp &&
     (navOverride === 'marketing' ||
       isCoreMarketingRoute ||
       (isContextualPage && !cameFromApp)) &&
@@ -285,7 +293,9 @@ export function AppChrome() {
     !isAdminSurface;
 
   // App nav: actual app pages OR contextual pages with app context
+  // Never show on native app — the app has its own native nav
   const showAppNav =
+    !isNativeApp &&
     (navOverride === 'app' ||
       isActuallyAppPage ||
       (isContextualPage && cameFromApp)) &&
@@ -362,7 +372,7 @@ export function AppChrome() {
           allowUnauthenticatedInstall={isAdminSurface}
           silent={isAdminSurface}
         />
-        {!isAdminSurface && (
+        {!isAdminSurface && !isNativeApp && (
           <>
             <NotificationManager />
             <ExitIntent />

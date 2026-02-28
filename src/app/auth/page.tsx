@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
 import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import { AuthComponent } from '@/components/Auth';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -23,9 +25,15 @@ function isTestMode(): boolean {
 
 export default function AuthPage() {
   const authState = useAuthStatus();
+  const router = useRouter();
   const redirectExecuted = useRef(false);
   const searchParams = useSafeSearchParams();
   const defaultToSignUp = searchParams.get('signup') === 'true';
+  const [isNative, setIsNative] = useState(false);
+
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
+  }, []);
 
   useEffect(() => {
     // Skip redirect logic in Playwright e2e test mode
@@ -37,9 +45,13 @@ export default function AuthPage() {
 
     if (!authState.loading && authState.isAuthenticated) {
       redirectExecuted.current = true;
-      window.location.replace('/app');
+      if (Capacitor.isNativePlatform()) {
+        router.replace('/app');
+      } else {
+        window.location.replace('/app');
+      }
     }
-  }, [authState.isAuthenticated, authState.loading]);
+  }, [authState.isAuthenticated, authState.loading, router]);
 
   if (authState.loading || authState.isAuthenticated) {
     // Show spinner while auth check runs OR while redirecting to /app.
@@ -75,9 +87,11 @@ export default function AuthPage() {
           <AuthComponent defaultToSignUp={defaultToSignUp} />
         </div>
       </div>
-      <div className='mt-auto'>
-        <MarketingFooter />
-      </div>
+      {!isNative && (
+        <div className='mt-auto'>
+          <MarketingFooter />
+        </div>
+      )}
     </div>
   );
 }

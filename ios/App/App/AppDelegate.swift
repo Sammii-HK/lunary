@@ -1,6 +1,7 @@
 import UIKit
 import Capacitor
 import RevenueCat
+import AppTrackingTransparency
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -13,8 +14,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Purchases.logLevel = .error
         Purchases.configure(withAPIKey: "appl_glpoURCDefowlFmMDhrxEgYnngJ")
 
+        // Request App Tracking Transparency after a short delay (UI must be ready)
+        if #available(iOS 14, *) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                ATTrackingManager.requestTrackingAuthorization { _ in }
+            }
+        }
+
         // Force reference to prevent linker stripping
         _ = WidgetBridgePlugin.self
+        _ = SignInWithApplePlugin.self
 
         // Debug: print to verify the class exists
         print("[Lunary] WidgetBridgePlugin class loaded: \(WidgetBridgePlugin.self)")

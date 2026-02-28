@@ -122,7 +122,15 @@ class NativePushService {
       console.log('[Push] Initialization complete');
       return true;
     } catch (error) {
-      console.error('[Push] Initialization failed:', error);
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes('not implemented')) {
+        // Expected in iOS simulator — Firebase push requires a real device with APNs
+        console.debug(
+          '[Push] Firebase not available (simulator or missing setup)',
+        );
+      } else {
+        console.error('[Push] Initialization failed:', error);
+      }
       return false;
     }
   }

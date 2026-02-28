@@ -218,7 +218,13 @@ async function initializeAuth() {
       return origins;
     },
 
-    advanced: { database: { generateId: () => crypto.randomUUID() } },
+    advanced: {
+      database: { generateId: () => crypto.randomUUID() },
+      // In development, NEXT_PUBLIC_BASE_URL is set to the production HTTPS URL which causes
+      // better-auth to use __Secure- cookie prefix. WKWebView on http://localhost rejects those.
+      // Explicitly disable secure cookies in dev so the prefix is omitted and cookies work on HTTP.
+      useSecureCookies: process.env.NODE_ENV !== 'development',
+    },
   };
 
   // Skip auth initialization if no database (CI/test mode)

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import SessionTracker from '@/components/SessionTracker';
@@ -43,10 +44,14 @@ export default function AuthenticatedLayout({
   useEffect(() => {
     if (!authStatus.loading && !authStatus.isAuthenticated) {
       const returnTo = encodeURIComponent(pathname);
-      // Use hard navigation for reliability in Capacitor WKWebView (client-side
-      // router.replace can stall on first load before cookies are set)
       if (typeof window !== 'undefined') {
-        window.location.replace(`/auth?returnTo=${returnTo}`);
+        if (Capacitor.isNativePlatform()) {
+          // On native, use Next.js router to avoid WKWebView opening Safari
+          router.replace(`/auth?returnTo=${returnTo}`);
+        } else {
+          // On web, use hard navigation for reliability before cookies are set
+          window.location.replace(`/auth?returnTo=${returnTo}`);
+        }
       } else {
         router.replace(`/auth?returnTo=${returnTo}`);
       }
