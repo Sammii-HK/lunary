@@ -2,6 +2,7 @@ import UIKit
 import Capacitor
 import RevenueCat
 import AppTrackingTransparency
+import FirebaseCore
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -9,6 +10,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Firebase — must be configured before any Firebase plugins (Messaging etc.)
+        FirebaseApp.configure()
+
         // RevenueCat — initialise before any IAP calls
         // Public SDK key is safe to commit; it only allows fetching offerings + making purchases
         Purchases.logLevel = .error

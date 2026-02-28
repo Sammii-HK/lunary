@@ -306,7 +306,7 @@ export const PersonalizedHoroscopePreview = () => {
 
     return (
       <Link
-        href='/pricing'
+        href='/pricing?nav=app'
         className='group block border border-zinc-800 rounded-2xl bg-zinc-950/70 p-4 shadow-sm transition-colors hover:border-lunary-primary-500 hover:bg-zinc-900'
         onClick={(e) => {
           // If click target is a button, let button handle it
