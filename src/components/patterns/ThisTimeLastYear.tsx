@@ -292,7 +292,7 @@ export function ThisTimeLastYear({ className = '' }: ThisTimeLastYearProps) {
                 last year.
               </p>
               <Link
-                href='/pricing'
+                href='/pricing?nav=app'
                 className='inline-block mt-2 text-[10px] text-amber-400 hover:text-amber-300 transition-colors'
               >
                 Learn more →

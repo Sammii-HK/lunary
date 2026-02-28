@@ -201,7 +201,9 @@ export const CrystalPreview = () => {
       <div
         onClick={() =>
           router.push(
-            authStatus.isAuthenticated ? '/pricing' : '/auth?signup=true',
+            authStatus.isAuthenticated
+              ? '/pricing?nav=app'
+              : '/auth?signup=true',
           )
         }
         role='button'
@@ -210,7 +212,9 @@ export const CrystalPreview = () => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             router.push(
-              authStatus.isAuthenticated ? '/pricing' : '/auth?signup=true',
+              authStatus.isAuthenticated
+                ? '/pricing?nav=app'
+                : '/auth?signup=true',
             );
           }
         }}
@@ -265,7 +269,7 @@ export const CrystalPreview = () => {
                     e.stopPropagation();
                     router.push(
                       authStatus.isAuthenticated
-                        ? '/pricing'
+                        ? '/pricing?nav=app'
                         : '/auth?signup=true',
                     );
                   }}
@@ -275,7 +279,7 @@ export const CrystalPreview = () => {
                       e.stopPropagation();
                       router.push(
                         authStatus.isAuthenticated
-                          ? '/pricing'
+                          ? '/pricing?nav=app'
                           : '/auth?signup=true',
                       );
                     }
@@ -299,7 +303,7 @@ export const CrystalPreview = () => {
                   if (router) {
                     router.push(
                       authStatus.isAuthenticated
-                        ? '/pricing'
+                        ? '/pricing?nav=app'
                         : '/auth?signup=true',
                     );
                   }
@@ -312,7 +316,7 @@ export const CrystalPreview = () => {
                     if (router) {
                       router.push(
                         authStatus.isAuthenticated
-                          ? '/pricing'
+                          ? '/pricing?nav=app'
                           : '/auth?signup=true',
                       );
                     }
@@ -410,7 +414,7 @@ export const CrystalPreview = () => {
                     if (router) {
                       router.push(
                         authStatus.isAuthenticated
-                          ? '/pricing'
+                          ? '/pricing?nav=app'
                           : '/auth?signup=true',
                       );
                     }

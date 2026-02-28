@@ -354,7 +354,7 @@ export function HoroscopeReflectionPrompts({
 
           {!hasAccess && (
             <Link
-              href='/pricing'
+              href='/pricing?nav=app'
               className='flex items-center gap-2 rounded-lg border border-lunary-primary-800/40 bg-lunary-primary-950/30 px-3 py-2.5 hover:bg-lunary-primary-950/50 transition-colors group'
             >
               <Sparkles className='w-3.5 h-3.5 text-lunary-primary-400 flex-shrink-0' />

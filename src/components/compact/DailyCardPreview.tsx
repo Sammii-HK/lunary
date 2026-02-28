@@ -252,7 +252,7 @@ export const DailyCardPreview = () => {
                   e.stopPropagation();
                   router.push(
                     authStatus.isAuthenticated
-                      ? '/pricing'
+                      ? '/pricing?nav=app'
                       : '/auth?signup=true',
                   );
                 }}
@@ -262,7 +262,7 @@ export const DailyCardPreview = () => {
                     e.stopPropagation();
                     router.push(
                       authStatus.isAuthenticated
-                        ? '/pricing'
+                        ? '/pricing?nav=app'
                         : '/auth?signup=true',
                     );
                   }
@@ -284,7 +284,7 @@ export const DailyCardPreview = () => {
                 if (router) {
                   router.push(
                     authStatus.isAuthenticated
-                      ? '/pricing'
+                      ? '/pricing?nav=app'
                       : '/auth?signup=true',
                   );
                 }
@@ -297,7 +297,7 @@ export const DailyCardPreview = () => {
                   if (router) {
                     router.push(
                       authStatus.isAuthenticated
-                        ? '/pricing'
+                        ? '/pricing?nav=app'
                         : '/auth?signup=true',
                     );
                   }

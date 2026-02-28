@@ -26,7 +26,7 @@ export function TrialCountdownBanner() {
               Your trial ends in {trialDaysRemaining} day
               {trialDaysRemaining !== 1 ? 's' : ''} ·{' '}
               <Link
-                href='/pricing'
+                href='/pricing?nav=app'
                 className='underline hover:text-lunary-accent transition-colors inline-flex items-center gap-1'
               >
                 Unlock deeper insights
@@ -40,7 +40,7 @@ export function TrialCountdownBanner() {
             className='rounded-full'
             asChild
           >
-            <Link href='/pricing'>Upgrade Now</Link>
+            <Link href='/pricing?nav=app'>Upgrade Now</Link>
           </Button>
         </div>
       </div>

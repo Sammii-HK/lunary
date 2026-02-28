@@ -232,7 +232,7 @@ export default function SubscriptionManagement({
             Unlock personalized horoscopes, birth charts, and mystical insights
           </p>
           <Button variant='outline' asChild>
-            <Link href='/pricing'>View Plans</Link>
+            <Link href='/pricing?nav=app'>View Plans</Link>
           </Button>
         </div>
       </div>

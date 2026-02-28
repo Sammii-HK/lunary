@@ -187,7 +187,7 @@ export function TransitImpact({
         <div className='pt-2'>
           <p className='text-xs text-zinc-400'>
             <a
-              href='/pricing'
+              href='/pricing?nav=app'
               className='text-lunary-primary-400 hover:text-lunary-primary-300'
             >
               Upgrade to Lunary+

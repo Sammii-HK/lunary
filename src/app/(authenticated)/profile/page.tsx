@@ -799,7 +799,7 @@ export default function ProfilePage() {
                     </p>
                     <div className='flex justify-center'>
                       <a
-                        href='/pricing'
+                        href='/pricing?nav=app'
                         className='rounded-md bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:from-lunary-primary-400 hover:to-lunary-highlight-400'
                       >
                         Upgrade to Premium

@@ -59,7 +59,7 @@ export function PremiumPathway({
   if (compact) {
     return (
       <Link
-        href='/pricing'
+        href='/pricing?nav=app'
         className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-lunary-primary-700/30 bg-lunary-primary-950/20 hover:bg-lunary-primary-950/40 transition-colors ${className}`}
       >
         <LockIcon className='w-3 h-3 text-lunary-primary-400' />
@@ -85,7 +85,7 @@ export function PremiumPathway({
             {content.text}
           </p>
           <Link
-            href='/pricing'
+            href='/pricing?nav=app'
             className='group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-lunary-primary-600/20 border border-lunary-primary-600/40 text-xs font-medium text-lunary-primary-300 hover:bg-lunary-primary-600/30 transition-colors'
           >
             <Sparkles className='w-3 h-3' />
@@ -113,7 +113,7 @@ export function InlineUpgrade({ feature, className = '' }: InlineUpgradeProps) {
   return (
     <span className={`text-xs text-zinc-400 ${className}`}>
       <Link
-        href='/pricing'
+        href='/pricing?nav=app'
         className='text-lunary-primary-400 hover:text-lunary-primary-300'
       >
         Upgrade to Lunary+

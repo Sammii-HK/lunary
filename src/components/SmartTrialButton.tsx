@@ -214,7 +214,7 @@ export function SmartTrialButton({
                 if (isIOS) {
                   setShowIOSPaywall(true);
                 } else {
-                  window.location.href = '/pricing';
+                  window.location.href = '/pricing?nav=app';
                 }
               }}
             />

@@ -42,7 +42,7 @@ export function PostTrialMessaging() {
           <div className='flex flex-col sm:flex-row gap-3'>
             <SmartTrialButton size='default' />
             <Button variant='outline' size='sm' asChild>
-              <Link href='/pricing'>View Plans</Link>
+              <Link href='/pricing?nav=app'>View Plans</Link>
             </Button>
           </div>
         </div>

@@ -60,7 +60,7 @@ export function TrialReminder({
   if (variant === 'badge') {
     return (
       <Link
-        href='/pricing'
+        href='/pricing?nav=app'
         onClick={handleUpgradeClick}
         className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lunary-rose-900 border border-lunary-rose-700 text-lunary-rose text-xs font-medium hover:bg-lunary-rose-800 transition-colors ${className}`}
       >
@@ -91,7 +91,7 @@ export function TrialReminder({
           onClick={handleUpgradeClick}
           asChild
         >
-          <Link href='/pricing'>Upgrade Now</Link>
+          <Link href='/pricing?nav=app'>Upgrade Now</Link>
         </Button>
       </div>
     </div>
