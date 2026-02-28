@@ -25,6 +25,7 @@ interface PlanConfig {
   description: string;
   badge?: string;
   popular?: boolean;
+  fallbackPrice: string;
 }
 
 const PLAN_CONFIGS: PlanConfig[] = [
@@ -32,17 +33,20 @@ const PLAN_CONFIGS: PlanConfig[] = [
     key: 'plusMonthly',
     name: 'Lunary+',
     description: 'Birth chart, transits, personal tarot',
+    fallbackPrice: '$4.99/month',
   },
   {
     key: 'plusAnnual',
     name: 'Lunary+ Annual',
     description: 'Everything in Lunary+ — billed yearly',
     badge: 'Save 16%',
+    fallbackPrice: '$49.99/year',
   },
   {
     key: 'proMonthly',
     name: 'Lunary+ Pro',
     description: 'Astral Guide, weekly reports, advanced patterns',
+    fallbackPrice: '$8.99/month',
   },
   {
     key: 'proAnnual',
@@ -50,6 +54,7 @@ const PLAN_CONFIGS: PlanConfig[] = [
     description: 'Everything in Pro — billed yearly',
     badge: 'Save 17%',
     popular: true,
+    fallbackPrice: '$89.99/year',
   },
 ];
 
@@ -59,6 +64,8 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
+  // True when StoreKit is unavailable (simulator) — show UI but disable purchase
+  const [simulatorMode, setSimulatorMode] = useState(false);
 
   useEffect(() => {
     if (Capacitor.getPlatform() !== 'ios') return;
@@ -67,13 +74,13 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
       .then(setOfferings)
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : String(err);
-        // StoreKit isn't available in the iOS simulator — expected, not an error
         if (
           msg.includes('not implemented') ||
           msg.includes('simulator') ||
           msg.includes('NEXT_PUBLIC_REVENUECAT_IOS_KEY')
         ) {
-          setError('In-app purchases are not available in this environment.');
+          // Simulator — show the UI with fallback prices, disable actual purchase
+          setSimulatorMode(true);
         } else {
           setError('Could not load subscription options. Please try again.');
         }
@@ -111,11 +118,16 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
     setRestoring(false);
   }
 
-  function getPriceLabel(pkg: PurchasesPackage | null): string {
-    if (!pkg) return '—';
-    const price = pkg.product.priceString;
-    const period = pkg.packageType === 'ANNUAL' ? '/year' : '/month';
-    return `${price}${period}`;
+  function getPriceLabel(
+    pkg: PurchasesPackage | null,
+    config: PlanConfig,
+  ): string {
+    if (pkg) {
+      const price = pkg.product.priceString;
+      const period = pkg.packageType === 'ANNUAL' ? '/year' : '/month';
+      return `${price}${period}`;
+    }
+    return config.fallbackPrice;
   }
 
   return (
@@ -163,7 +175,7 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
                   </p>
                 </div>
                 <span className='text-sm font-medium text-white ml-4 shrink-0'>
-                  {offerings ? getPriceLabel(pkg) : '…'}
+                  {getPriceLabel(pkg, config)}
                 </span>
               </div>
             </button>
@@ -177,7 +189,7 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
         variant='lunary-solid'
         className='w-full'
         onClick={handlePurchase}
-        disabled={loading || !offerings}
+        disabled={loading || (!offerings && !simulatorMode)}
       >
         {loading ? 'Processing…' : 'Start free trial'}
       </Button>

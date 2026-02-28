@@ -318,6 +318,20 @@ const nextConfig = {
     const isDev = process.env.NODE_ENV === 'development';
 
     return [
+      // In dev, force WKWebView (Capacitor simulator) to never cache pages or JS
+      ...(isDev
+        ? [
+            {
+              source: '/:path*',
+              headers: [
+                {
+                  key: 'Cache-Control',
+                  value: 'no-store, no-cache, must-revalidate',
+                },
+              ],
+            },
+          ]
+        : []),
       // Security headers for all routes
       {
         source: '/:path*',
