@@ -167,7 +167,17 @@ export function generateCosmicTimingPost(
       'Notice anything shifting?',
     ];
 
-    hook = `${moonPhase.name} energy is running the show today`;
+    const hookTemplates = [
+      `${moonPhase.name} energy is running the show today`,
+      `We are in ${moonPhase.name} territory`,
+      `${moonPhase.name} is here`,
+      `It is ${moonPhase.name} season`,
+      `The moon is ${moonPhase.name} right now`,
+      `${moonPhase.name} vibes today`,
+      `${moonPhase.name} is the energy to work with`,
+    ];
+
+    hook = hookTemplates[Math.floor(moonRng() * hookTemplates.length)];
     body = bodyTemplates[Math.floor(moonRng() * bodyTemplates.length)];
     prompt = promptTemplates[Math.floor(moonRng() * promptTemplates.length)];
     topicTag = 'Moon';
