@@ -46,7 +46,15 @@ export function generateCosmicTimingPost(
   const postDate = new Date(dateStr);
   postDate.setUTCHours(slotHour, 0, 0, 0);
   const moonPhase = getAccurateMoonPhase(postDate);
-  const transit = getTransitThemeForDate(postDate);
+  const transitRaw = getTransitThemeForDate(postDate);
+
+  // Only use transit within the posting window: up to 36h before ingress or 12h after.
+  // This limits transit content to ~2 posts per event (anticipation + happening-now)
+  // instead of 7 days of the same hook. After the window closes, fall back to moon.
+  const transit =
+    transitRaw && transitRaw.hoursUntil >= -12 && transitRaw.hoursUntil <= 36
+      ? transitRaw
+      : null;
 
   let hook: string;
   let body: string;
@@ -54,16 +62,22 @@ export function generateCosmicTimingPost(
   let topicTag = 'Astrology';
 
   if (transit) {
-    hook = `${transit.planet} is moving into ${transit.toSign}`;
-    if (transit.hoursUntil <= 0) {
-      body =
-        'this shift is happening right now, pay attention to what surfaces';
-    } else if (transit.hoursUntil < 24) {
-      body = `${transit.hoursUntil} hour${transit.hoursUntil !== 1 ? 's' : ''} away and you might already feel it building`;
+    if (transit.hoursUntil > 12) {
+      // Anticipation: ingress is tomorrow
+      hook = `${transit.planet} moves into ${transit.toSign} tomorrow`;
+      body = `this kind of shift changes the energy for weeks. pay attention to what surfaces in the next 24 hours`;
+      prompt = `are you already feeling ${transit.planet} energy building?`;
+    } else if (transit.hoursUntil >= 0) {
+      // Imminent: within 12 hours
+      hook = `${transit.planet} is moving into ${transit.toSign}`;
+      body = `${transit.hoursUntil > 0 ? `${transit.hoursUntil} hour${transit.hoursUntil !== 1 ? 's' : ''} away and you might already feel it building` : 'this shift is happening right now, pay attention to what surfaces'}`;
+      prompt = `how is ${transit.planet} energy showing up for you?`;
     } else {
-      body = `${transit.daysUntil} day${transit.daysUntil !== 1 ? 's' : ''} away and you might already feel it building`;
+      // Post-ingress: happened within the last 12 hours
+      hook = `${transit.planet} is now in ${transit.toSign}`;
+      body = `the shift has happened — notice what has already started to change`;
+      prompt = `what shifted for you when ${transit.planet} moved into ${transit.toSign}?`;
     }
-    prompt = `how is ${transit.planet} energy showing up for you?`;
   } else {
     const moonRng = seededRandom(`moon-${dateStr}-${slotHour}`);
 
@@ -115,14 +129,24 @@ export function generateCosmicTimingPost(
 /**
  * Generate a conversation starter post (questions and hot takes).
  * Uses theme-based angle templates for variety.
+ *
+ * @param options.excludeCategory - Skip this category and fall back to 'zodiac'.
+ *   Used when slot 0 already generated a transit/planetary post to avoid duplicates.
  */
 export function generateConversationPost(
   dateStr: string,
   slotHour: number,
+  options?: { excludeCategory?: ThemeCategory },
 ): ThreadsPost {
   const date = new Date(dateStr);
   const { theme } = getThemeForDate(date);
-  const category = theme.category as ThemeCategory;
+  let category = theme.category as ThemeCategory;
+
+  // If this category is excluded (e.g. a transit post already covered planetary today),
+  // fall back to zodiac which is always safe and engagement-positive.
+  if (options?.excludeCategory && category === options.excludeCategory) {
+    category = 'zodiac';
+  }
   const rng = seededRandom(`threads-convo-${dateStr}-${slotHour}`);
 
   // Mix between existing category angles and new threads-specific angles
