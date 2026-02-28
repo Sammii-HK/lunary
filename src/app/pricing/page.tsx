@@ -329,7 +329,13 @@ export default function PricingPage() {
   // On iOS, always use Apple IAP — never Stripe
   if (isNativeIOS) {
     return (
-      <div className='min-h-screen bg-zinc-950 flex flex-col justify-center px-6 py-12'>
+      <div
+        className='h-screen overflow-y-auto px-6 pt-12'
+        style={{
+          backgroundColor: '#0a0a0f',
+          paddingBottom: 'max(3rem, env(safe-area-inset-bottom))',
+        }}
+      >
         <div className='max-w-sm mx-auto w-full'>
           <h1 className='text-2xl font-semibold text-zinc-100 text-center mb-2'>
             Lunary+

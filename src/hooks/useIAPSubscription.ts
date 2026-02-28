@@ -30,11 +30,11 @@ export async function configureIAP(userId?: string): Promise<void> {
   rcConfigured = true;
 }
 
-// RevenueCat package identifiers set in the RC dashboard Offering
-const PACKAGE_PLUS_MONTHLY = '$rc_monthly';
-const PACKAGE_PLUS_ANNUAL = '$rc_annual_plus';
-const PACKAGE_PRO_MONTHLY = '$rc_monthly_pro';
-const PACKAGE_PRO_ANNUAL = '$rc_annual';
+// Apple product IDs as configured in App Store Connect
+const PRODUCT_PLUS_MONTHLY = 'app.lunary.plus.monthly';
+const PRODUCT_PLUS_ANNUAL = 'app.lunary.plus.annual';
+const PRODUCT_PRO_MONTHLY = 'app.lunary.pro.monthly';
+const PRODUCT_PRO_ANNUAL = 'app.lunary.pro.annual';
 
 // Maps active RC entitlement to the Lunary plan ID used by the rest of the app
 function entitlementsToPlanId(
@@ -55,12 +55,24 @@ export interface IAPOfferings {
 export async function getIAPOfferings(): Promise<IAPOfferings> {
   const offerings = await Purchases.getOfferings();
   const pkgs = offerings.current?.availablePackages ?? [];
+  console.log('[IAP] current offering id:', offerings.current?.identifier);
+  console.log(
+    '[IAP] packages:',
+    pkgs.map((p) => `${p.identifier} → ${p.product.productIdentifier}`),
+  );
   return {
     plusMonthly:
-      pkgs.find((p) => p.identifier === PACKAGE_PLUS_MONTHLY) ?? null,
-    plusAnnual: pkgs.find((p) => p.identifier === PACKAGE_PLUS_ANNUAL) ?? null,
-    proMonthly: pkgs.find((p) => p.identifier === PACKAGE_PRO_MONTHLY) ?? null,
-    proAnnual: pkgs.find((p) => p.identifier === PACKAGE_PRO_ANNUAL) ?? null,
+      pkgs.find((p) => p.product.productIdentifier === PRODUCT_PLUS_MONTHLY) ??
+      null,
+    plusAnnual:
+      pkgs.find((p) => p.product.productIdentifier === PRODUCT_PLUS_ANNUAL) ??
+      null,
+    proMonthly:
+      pkgs.find((p) => p.product.productIdentifier === PRODUCT_PRO_MONTHLY) ??
+      null,
+    proAnnual:
+      pkgs.find((p) => p.product.productIdentifier === PRODUCT_PRO_ANNUAL) ??
+      null,
   };
 }
 

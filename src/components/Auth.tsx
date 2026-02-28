@@ -316,9 +316,28 @@ export function AuthComponent({
         }>;
       }>('SignInWithApple');
 
-      const result = await SignInWithApple.authorize({
-        nonce: crypto.randomUUID(),
-      });
+      // Capacitor's SignInWithApple plugin calls console.error({}) internally on
+      // cancellation/no-Apple-ID, which triggers the Next.js dev overlay. Suppress it.
+      const _origConsoleError = console.error;
+      console.error = (...args: unknown[]) => {
+        const first = args[0];
+        if (
+          args.length === 1 &&
+          first !== null &&
+          typeof first === 'object' &&
+          Object.keys(first).length === 0
+        )
+          return;
+        _origConsoleError(...args);
+      };
+      let result: Awaited<ReturnType<typeof SignInWithApple.authorize>>;
+      try {
+        result = await SignInWithApple.authorize({
+          nonce: crypto.randomUUID(),
+        });
+      } finally {
+        console.error = _origConsoleError;
+      }
 
       const response = await fetch('/api/auth/apple-native', {
         method: 'POST',
@@ -358,16 +377,24 @@ export function AuthComponent({
         window.location.href = '/app';
       }
     } catch (err: any) {
-      // 1001 = user cancelled, don't show error
-      // 1000 = Apple ID not configured in Settings
-      if (err.message?.includes('AuthorizationError error 1001')) {
-        // silent cancel
-      } else if (err.message?.includes('AuthorizationError error 1000')) {
-        setError(
-          'Please sign in to your Apple ID in Settings, then try again.',
-        );
+      // err may be a plain {} from Capacitor — normalise it
+      const code: number | string | undefined = err?.code ?? err?.error?.code;
+      const msg: string = err?.message ?? err?.error?.message ?? '';
+
+      const isSilent =
+        (!code && !msg) || // empty object {} = user dismissed
+        code === 1001 ||
+        String(code).includes('1001') ||
+        msg.includes('1001') ||
+        msg.toLowerCase().includes('cancel') ||
+        code === 1000 || // no Apple ID in Settings — Apple shows its own native modal
+        String(code).includes('1000') ||
+        msg.includes('1000');
+
+      if (isSilent) {
+        // silent — Apple already handles this with a native modal or sheet dismissal
       } else {
-        setError(err.message || 'Apple sign-in failed. Please try again.');
+        setError(msg || 'Apple sign-in failed. Please try again.');
       }
     } finally {
       setAppleLoading(false);
@@ -522,7 +549,7 @@ export function AuthComponent({
             required
             value={formData.email}
             onChange={handleInputChange}
-            className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
+            className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent placeholder:text-zinc-500 ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
             placeholder='Enter your email'
           />
         </div>

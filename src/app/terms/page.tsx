@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default function TermsOfServicePage() {
-  const lastUpdated = 'February 12, 2026';
+  const lastUpdated = 'February 28, 2026';
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
@@ -644,7 +644,130 @@ export default function TermsOfServicePage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              15. Contact Us
+              15. iOS App License Terms (Apple App Store)
+            </h2>
+            <p className='text-zinc-300 leading-relaxed mb-4'>
+              If you downloaded the Lunary app from the Apple App Store, the
+              following additional terms apply. These terms are required by
+              Apple and are incorporated into these Terms of Service.
+            </p>
+
+            <h3 className='text-xl font-medium text-white mb-3'>
+              15.1 Acknowledgement
+            </h3>
+            <p className='text-zinc-300 leading-relaxed'>
+              You acknowledge that this End User License Agreement (EULA) is
+              between you and Lunar Computing, Inc. only, and not with Apple
+              Inc. (&quot;Apple&quot;). Lunar Computing, Inc., not Apple, is
+              solely responsible for the Lunary app and its content.
+            </p>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              15.2 Scope of Licence
+            </h3>
+            <p className='text-zinc-300 leading-relaxed'>
+              The licence granted to you for the Lunary app is a
+              non-transferable licence to use the application on any
+              Apple-branded products that you own or control, subject to the
+              Usage Rules set forth in the App Store Terms of Service. You may
+              not transfer the app to a third party. If Family Sharing is
+              enabled, the app may be shared with other family members subject
+              to Apple&apos;s Family Sharing terms.
+            </p>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              15.3 Maintenance and Support
+            </h3>
+            <p className='text-zinc-300 leading-relaxed'>
+              Lunar Computing, Inc. is solely responsible for providing any
+              maintenance and support services for the Lunary app. Apple has no
+              obligation whatsoever to furnish any maintenance and support
+              services with respect to the app. For support, contact us at{' '}
+              <a
+                href='mailto:support@lunary.app'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+              >
+                support@lunary.app
+              </a>
+              .
+            </p>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              15.4 Warranty
+            </h3>
+            <p className='text-zinc-300 leading-relaxed'>
+              Lunar Computing, Inc. is solely responsible for any product
+              warranties, whether express or implied by law, to the extent not
+              effectively disclaimed in these Terms. In the event of any failure
+              of the app to conform to any applicable warranty, you may notify
+              Apple, and Apple will refund the purchase price (if any) for the
+              app. To the maximum extent permitted by applicable law, Apple will
+              have no other warranty obligation whatsoever with respect to the
+              app, and any other claims, losses, liabilities, damages, costs, or
+              expenses attributable to any failure to conform to any warranty
+              will be Lunar Computing, Inc.&apos;s sole responsibility.
+            </p>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              15.5 Product Claims
+            </h3>
+            <p className='text-zinc-300 leading-relaxed'>
+              Lunar Computing, Inc., not Apple, is responsible for addressing
+              any claims by you or any third party relating to the app or your
+              possession and/or use of the app, including but not limited to:
+              (a) product liability claims; (b) any claim that the app fails to
+              conform to any applicable legal or regulatory requirement; and (c)
+              claims arising under consumer protection, privacy, or similar
+              legislation.
+            </p>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              15.6 Intellectual Property Rights
+            </h3>
+            <p className='text-zinc-300 leading-relaxed'>
+              In the event of any third-party claim that the app or your
+              possession and use of the app infringes that third party&apos;s
+              intellectual property rights, Lunar Computing, Inc., not Apple,
+              will be solely responsible for the investigation, defence,
+              settlement, and discharge of any such intellectual property
+              infringement claim.
+            </p>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              15.7 Legal Compliance
+            </h3>
+            <p className='text-zinc-300 leading-relaxed'>
+              You represent and warrant that: (a) you are not located in a
+              country that is subject to a U.S. Government embargo, or that has
+              been designated by the U.S. Government as a &quot;terrorist
+              supporting&quot; country; and (b) you are not listed on any U.S.
+              Government list of prohibited or restricted parties.
+            </p>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              15.8 Third-Party Terms of Agreement
+            </h3>
+            <p className='text-zinc-300 leading-relaxed'>
+              You must comply with applicable third-party terms of agreement
+              when using the Lunary app. For example, if you have a VoIP
+              application, then you must not be in violation of their wireless
+              data service agreement when using the app.
+            </p>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              15.9 Apple as Third-Party Beneficiary
+            </h3>
+            <p className='text-zinc-300 leading-relaxed'>
+              Apple and its subsidiaries are third-party beneficiaries of this
+              EULA. Upon your acceptance of these Terms, Apple will have the
+              right (and will be deemed to have accepted the right) to enforce
+              these Terms against you as a third-party beneficiary thereof.
+            </p>
+          </section>
+
+          <section>
+            <h2 className='text-2xl font-semibold text-white mb-4'>
+              16. Contact Us
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
               If you have any questions about these Terms, please contact us:
