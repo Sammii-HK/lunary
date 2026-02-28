@@ -80,7 +80,7 @@ export default defineConfig({
       : 'lsof -ti:3000 | xargs kill -9 2>/dev/null || true; rm -rf .next/routes-manifest.json 2>/dev/null || true && pnpm dev', // Kill any process on port 3000 and clean routes manifest
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI, // Reuse existing server in local dev, always start fresh in CI
-    timeout: 120000, // 120 seconds to allow Next.js to compile routes and generate manifest files
+    timeout: 180000, // 180 seconds to allow Next.js to compile routes and generate manifest files
     stdout: process.env.CI ? 'ignore' : 'pipe',
     stderr: process.env.CI ? 'ignore' : 'pipe',
     env: {
