@@ -50,14 +50,14 @@ export async function POST(req: NextRequest) {
       user?: { email?: string; givenName?: string; familyName?: string };
     };
 
-    if (!identityToken) {
+    // Verify Apple identity token — jwtVerify throws on missing/invalid tokens
+    if (typeof identityToken !== 'string' || identityToken.length === 0) {
       return NextResponse.json(
         { error: 'identityToken required' },
         { status: 400 },
       );
     }
 
-    // Verify Apple identity token
     const JWKS = createRemoteJWKSet(new URL(APPLE_JWKS_URL));
     const { payload } = await jwtVerify(identityToken, JWKS, {
       issuer: APPLE_ISSUER,
