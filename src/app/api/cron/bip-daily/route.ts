@@ -154,19 +154,19 @@ export async function GET(request: NextRequest) {
 
     const captionPrompt = `Write a Build in Public daily update tweet for day ${nextDay} of building Lunary.
 
-Context: Lunary is a live astrology app with real users and revenue. This is NOT a brand new project.
+Context: Lunary is a live astrology app with real users. This is NOT a brand new project.
 
-Metrics:
+Metrics for today (ONLY use what is listed here — do not invent or assume any metric not present):
 ${dataLines}
 
 Format rules:
-- First line: "Day ${nextDay} of building Lunary" + a short honest hook about where things are (e.g. "and the SEO growth is wild", "and MRR just crossed £100")
+- First line: "Day ${nextDay} of building Lunary" + a short honest hook about where things are (e.g. "and the SEO numbers keep climbing", "and users are actually sticking around")
 - Blank line
 - 3 bullet points using ✅ emoji, each on its own line
 - Bullets must be short and punchy (under 60 chars each), written as natural observations NOT data labels
-- Good: "✅ MRR sitting at £115, up from zero six months ago"
+- Good: "✅ 229 active users this month, still growing"
 - Bad: "✅ Current MRR: £115.72, which feels like a solid foundation"
-- Use the metrics as inspiration. Write them as achievements or honest observations.
+- Only reference metrics that appear in the data above. If MRR is not in the data, do not mention MRR or revenue at all.
 - Blank line
 - Final line: a short question or reflection that invites replies (one sentence)
 - No hashtags in the body
