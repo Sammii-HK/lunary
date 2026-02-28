@@ -257,7 +257,7 @@ export function UpgradePrompt() {
           className='rounded-full w-full'
           asChild
         >
-          <Link href={authState.isAuthenticated ? '/pricing' : '/auth'}>
+          <Link href={authState.isAuthenticated ? '/pricing?nav=app' : '/auth'}>
             {authState.isAuthenticated
               ? isTrialActive
                 ? 'Continue Trial'

@@ -225,7 +225,9 @@ export function UpgradePrompt({
               onClick={handleUpgradeClick}
               asChild
             >
-              <Link href={authState.isAuthenticated ? '/pricing' : '/auth'}>
+              <Link
+                href={authState.isAuthenticated ? '/pricing?nav=app' : '/auth'}
+              >
                 {authState.isAuthenticated
                   ? shouldShowTrialCountdown
                     ? 'Continue'
@@ -287,7 +289,11 @@ export function UpgradePrompt({
                 onClick={handleUpgradeClick}
                 asChild
               >
-                <Link href={authState.isAuthenticated ? '/pricing' : '/auth'}>
+                <Link
+                  href={
+                    authState.isAuthenticated ? '/pricing?nav=app' : '/auth'
+                  }
+                >
                   {authState.isAuthenticated
                     ? shouldShowTrialCountdown
                       ? 'Continue Trial'

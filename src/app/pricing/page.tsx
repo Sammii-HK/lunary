@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { Capacitor } from '@capacitor/core';
+import { IOSPaywall } from '@/components/IOSPaywall';
 import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
@@ -58,6 +60,10 @@ const buildPlanFeatures = (plan: PricingPlan): string[] => {
   return [...plan.features, ...derived];
 };
 export default function PricingPage() {
+  // Lazy init so the iOS paywall renders immediately without a flash of Stripe UI.
+  const [isNativeIOS] = useState(() =>
+    typeof window !== 'undefined' ? Capacitor.getPlatform() === 'ios' : false,
+  );
   const { user } = useUser();
   const subscription = useSubscription();
   const authState = useAuthStatus();
@@ -311,6 +317,27 @@ export default function PricingPage() {
       ),
     [pricingPlans],
   );
+
+  // On iOS, always use Apple IAP — never Stripe
+  if (isNativeIOS) {
+    return (
+      <div className='min-h-screen bg-zinc-950 flex flex-col justify-center px-6 py-12'>
+        <div className='max-w-sm mx-auto w-full'>
+          <h1 className='text-2xl font-semibold text-zinc-100 text-center mb-2'>
+            Lunary+
+          </h1>
+          <p className='text-sm text-zinc-400 text-center mb-8'>
+            Unlock your full cosmic experience
+          </p>
+          <IOSPaywall
+            onSuccess={() => {
+              window.location.href = '/app';
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

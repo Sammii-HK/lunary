@@ -28,12 +28,12 @@ export function AppChrome() {
   const authState = useAuthStatus();
   const [isAdminHost, setIsAdminHost] = useState(false);
   const [cameFromApp, setCameFromApp] = useState(false);
-  const [isNativeApp, setIsNativeApp] = useState(false);
+  // Lazy init so the value is correct on the very first render (client-side),
+  // preventing a flash of the marketing nav before the useEffect fires.
+  const [isNativeApp] = useState(() =>
+    typeof window !== 'undefined' ? Capacitor.isNativePlatform() : false,
+  );
   const navOverride = searchParams?.get('nav');
-
-  useEffect(() => {
-    setIsNativeApp(Capacitor.isNativePlatform());
-  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -293,12 +293,14 @@ export function AppChrome() {
     !isAdminSurface;
 
   // App nav: actual app pages OR contextual pages with app context
-  // Never show on native app — the app has its own native nav
+  // On native: show for all app/contextual pages (web Navbar IS the bottom nav — no separate native nav)
+  // On web: show for app pages, OR contextual pages (pricing, blog, etc.) when coming from the app
   const showAppNav =
-    !isNativeApp &&
-    (navOverride === 'app' ||
-      isActuallyAppPage ||
-      (isContextualPage && cameFromApp)) &&
+    (isNativeApp
+      ? (isAppPage || isContextualPage) && !isCoreMarketingRoute
+      : navOverride === 'app' ||
+        isActuallyAppPage ||
+        (isContextualPage && cameFromApp)) &&
     navOverride !== 'marketing' &&
     !isAdminSurface;
 

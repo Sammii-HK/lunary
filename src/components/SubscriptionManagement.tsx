@@ -231,18 +231,9 @@ export default function SubscriptionManagement({
           <p className='text-zinc-400 text-sm mb-4'>
             Unlock personalized horoscopes, birth charts, and mystical insights
           </p>
-          {isIOS ? (
-            <Button
-              variant='outline'
-              onClick={() => Capacitor.openUrl('https://lunary.app/pricing')}
-            >
-              View Plans
-            </Button>
-          ) : (
-            <Button variant='outline' asChild>
-              <Link href='/pricing'>View Plans</Link>
-            </Button>
-          )}
+          <Button variant='outline' asChild>
+            <Link href='/pricing'>View Plans</Link>
+          </Button>
         </div>
       </div>
     );

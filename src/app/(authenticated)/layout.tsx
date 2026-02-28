@@ -79,6 +79,28 @@ export default function AuthenticatedLayout({
     authStatus.user?.email,
   ]);
 
+  // Suppress Capacitor "plugin not implemented" console.error in iOS simulator.
+  // The plugin bridge itself logs console.error before our catch block runs.
+  // On a real device with Firebase set up, this never fires.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const orig = console.error.bind(console);
+    console.error = (...args: unknown[]) => {
+      const msg = args.join(' ');
+      if (
+        msg.includes('not implemented') ||
+        msg.includes('FirebaseMessaging')
+      ) {
+        console.debug('[Native] Suppressed expected simulator error:', msg);
+        return;
+      }
+      orig(...args);
+    };
+    return () => {
+      console.error = orig;
+    };
+  }, []);
+
   // Initialize native push notifications for authenticated users
   useEffect(() => {
     if (

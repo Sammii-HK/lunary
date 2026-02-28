@@ -51,7 +51,7 @@ export function FeaturePreview({
         preview_variant: variant,
       });
     }
-    router.push('/pricing');
+    router.push('/pricing?nav=app');
   }, [ctaKey, ctaCopy, page, trackingFeature, router, variant]);
 
   const renderBlurredContent = () => {
