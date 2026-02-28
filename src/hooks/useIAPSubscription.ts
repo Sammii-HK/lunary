@@ -8,6 +8,28 @@ import type { PurchasesPackage } from '@revenuecat/purchases-capacitor';
 export const RC_ENTITLEMENT_PLUS = 'plus';
 export const RC_ENTITLEMENT_PRO = 'pro';
 
+// Public iOS API key from RevenueCat dashboard — safe to expose client-side
+const RC_IOS_API_KEY = process.env.NEXT_PUBLIC_REVENUECAT_IOS_KEY ?? '';
+
+let rcConfigured = false;
+
+/**
+ * Configure RevenueCat SDK. Must be called before any IAP operations.
+ * Safe to call multiple times — subsequent calls are no-ops.
+ */
+export async function configureIAP(userId?: string): Promise<void> {
+  if (rcConfigured) return;
+  if (!RC_IOS_API_KEY) {
+    console.warn('[IAP] NEXT_PUBLIC_REVENUECAT_IOS_KEY is not set');
+    return;
+  }
+  await Purchases.configure({ apiKey: RC_IOS_API_KEY });
+  if (userId) {
+    await Purchases.logIn({ appUserID: userId }).catch(() => {});
+  }
+  rcConfigured = true;
+}
+
 // RevenueCat package identifiers set in the RC dashboard Offering
 const PACKAGE_PLUS_MONTHLY = '$rc_monthly';
 const PACKAGE_PLUS_ANNUAL = '$rc_annual_plus';

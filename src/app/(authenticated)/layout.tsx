@@ -10,6 +10,7 @@ import { TourProvider } from '@/context/TourContext';
 import { AnnouncementProvider } from '@/components/feature-announcements/AnnouncementProvider';
 import dynamic from 'next/dynamic';
 import { nativePushService } from '@/services/native';
+import { configureIAP } from '@/hooks/useIAPSubscription';
 
 // Dynamically import OfflineBanner to avoid SSR issues
 const OfflineBanner = dynamic(
@@ -110,7 +111,10 @@ export default function AuthenticatedLayout({
       !nativePushInitialized.current
     ) {
       nativePushInitialized.current = true;
-      // Initialize in background - don't block render
+      // Configure RevenueCat IAP and push in background — don't block render
+      configureIAP(authStatus.user.id).catch((error) => {
+        console.debug('[Layout] IAP configure skipped:', error);
+      });
       nativePushService.initialize(authStatus.user.id).catch((error) => {
         console.debug('[Layout] Native push init skipped:', error);
       });

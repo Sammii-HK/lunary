@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Button } from '@/components/ui/button';
 import {
+  configureIAP,
   getIAPOfferings,
   purchaseIAPPackage,
   restoreIAPPurchases,
@@ -61,11 +62,22 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
 
   useEffect(() => {
     if (Capacitor.getPlatform() !== 'ios') return;
-    getIAPOfferings()
+    configureIAP()
+      .then(() => getIAPOfferings())
       .then(setOfferings)
-      .catch(() =>
-        setError('Could not load subscription options. Please try again.'),
-      );
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : String(err);
+        // StoreKit isn't available in the iOS simulator — expected, not an error
+        if (
+          msg.includes('not implemented') ||
+          msg.includes('simulator') ||
+          msg.includes('NEXT_PUBLIC_REVENUECAT_IOS_KEY')
+        ) {
+          setError('In-app purchases are not available in this environment.');
+        } else {
+          setError('Could not load subscription options. Please try again.');
+        }
+      });
   }, []);
 
   async function handlePurchase() {
