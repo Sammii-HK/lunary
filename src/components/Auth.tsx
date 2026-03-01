@@ -241,6 +241,7 @@ export function AuthComponent({
         ) {
           console.log('🔄 Redirecting to app after sign-in');
           setSuccess('Signed in successfully! Redirecting...');
+          invalidateAuthCache();
           setTimeout(() => {
             if (Capacitor.isNativePlatform()) {
               router.replace('/app');
