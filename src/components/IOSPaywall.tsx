@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp, Check } from 'lucide-react';
 import {
+  configureIAP,
   getIAPOfferings,
   purchaseIAPPackage,
   restoreIAPPurchases,
@@ -103,8 +104,12 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
       setDebugInfo('platform: ' + Capacitor.getPlatform() + ' (not ios)');
       return;
     }
-    setDebugInfo('fetching offerings…');
-    getIAPOfferings()
+    setDebugInfo('configuring RC…');
+    configureIAP()
+      .then(() => {
+        setDebugInfo('fetching offerings…');
+        return getIAPOfferings();
+      })
       .then((o) => {
         setOfferings(o);
         const loaded = Object.entries(o)
