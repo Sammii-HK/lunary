@@ -523,13 +523,14 @@ export async function POST(request: NextRequest) {
         }
 
         if (videoUrl) {
-          const shortVideoPlatforms = [
-            'tiktok',
-            'threads',
-            'instagram',
-            'twitter',
-            'youtube',
-          ];
+          // Instagram-dedicated scripts (platform='instagram' in video_scripts) post only
+          // to Instagram — they must not cross-post to TikTok or other platforms.
+          // Threads is excluded from video cross-posting: it's a text/conversation
+          // platform and receiving 3 videos/day on top of text posts is spammy.
+          const shortVideoPlatforms =
+            script.platform === 'instagram'
+              ? ['instagram']
+              : ['tiktok', 'instagram', 'twitter', 'youtube'];
           const shortPlatformSet = new Set(['twitter']);
           const scheduledDate = new Date(script.scheduled_date);
           // Use the engagement-optimized caption from generateTikTokCaption()
@@ -598,12 +599,12 @@ export async function POST(request: NextRequest) {
 
           // Instagram Reel selection: only post high-engagement formats at optimal times.
           // Research: 3-4 reels/week optimal, DM-shareable content ranks highest.
-          // Best IG Reel types: Hot Takes, Rankings, Sign Checks, Quizzes (drive shares/comments).
-          // Skip: Deep Dives, Mirror Hours, Forecasts, Myths (better for TikTok/YouTube).
+          // Best IG Reel types: Hot Takes, Rankings, Sign Checks, Myths, Did You Know.
+          // Skip: Deep Dives, Mirror Hours, Forecasts (poor Reels retention).
           const IG_REEL_PRIORITY_THEMES = new Set([
             'Hot Take',
             'Ranking',
-            'Quiz: zodiac',
+            'Myth',
             'Sign Check: Aries',
             'Sign Check: Taurus',
             'Sign Check: Gemini',

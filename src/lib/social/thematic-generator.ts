@@ -1838,26 +1838,31 @@ export async function generateThematicPostsForWeek(
           platform,
           dayContent.hashtags,
         );
-        posts.push({
-          content: introContent,
-          platform,
-          postType: 'educational_intro',
-          topic: dayContent.facet.title,
-          scheduledDate: dayContent.date,
-          hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
-          category: dayContent.theme.category,
-          dayOffset,
-          slug:
-            dayContent.facet.grimoireSlug.split('/').pop() ||
-            dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
-          themeName: dayContent.theme.name,
-          partNumber: dayOffset + 1,
-          totalParts:
-            dayContent.theme.category === 'sabbat'
-              ? (dayContent.theme as SabbatTheme).leadUpFacets.length
-              : 7,
-          ...sourceMeta,
-        });
+        // On non-override days, post the educational intro.
+        // On override days the intro is skipped — the override replaces it entirely
+        // so Threads never gets two posts for the same day/topic.
+        if (!override) {
+          posts.push({
+            content: introContent,
+            platform,
+            postType: 'educational_intro',
+            topic: dayContent.facet.title,
+            scheduledDate: dayContent.date,
+            hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
+            category: dayContent.theme.category,
+            dayOffset,
+            slug:
+              dayContent.facet.grimoireSlug.split('/').pop() ||
+              dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
+            themeName: dayContent.theme.name,
+            partNumber: dayOffset + 1,
+            totalParts:
+              dayContent.theme.category === 'sabbat'
+                ? (dayContent.theme as SabbatTheme).leadUpFacets.length
+                : 7,
+            ...sourceMeta,
+          });
+        }
 
         if (override) {
           const overrideText = await getOverrideContent(

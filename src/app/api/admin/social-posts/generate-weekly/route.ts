@@ -744,24 +744,31 @@ async function generateThematicWeeklyPosts(
         AND scheduled_date::date < ${weekEndKeyVideo}
     `;
 
-    // Generate all scripts in parallel (primary + YouTube + engagement A + B)
+    // Generate all scripts in parallel (primary + YouTube + engagement A + B + Instagram)
     const { generateWeeklySecondaryScripts, generateWeeklyEngagementBScripts } =
       await import('@/lib/social/video-scripts/generators/weekly-secondary');
+    const { generateWeeklyInstagramScripts } =
+      await import('@/lib/social/video-scripts/generators/instagram-reels');
     const { saveVideoScript } =
       await import('@/lib/social/video-scripts/database');
 
     console.log('🎬 [VIDEO] Generating all video scripts in parallel...');
-    const [primaryScripts, engagementAScripts, engagementBScripts] =
-      await Promise.all([
-        generateAndSaveWeeklyScripts(
-          weekStartDate,
-          themeIndex,
-          'https://lunary.app',
-          weekPlan,
-        ),
-        generateWeeklySecondaryScripts(weekStartDate),
-        generateWeeklyEngagementBScripts(weekStartDate),
-      ]);
+    const [
+      primaryScripts,
+      engagementAScripts,
+      engagementBScripts,
+      instagramScripts,
+    ] = await Promise.all([
+      generateAndSaveWeeklyScripts(
+        weekStartDate,
+        themeIndex,
+        'https://lunary.app',
+        weekPlan,
+      ),
+      generateWeeklySecondaryScripts(weekStartDate),
+      generateWeeklyEngagementBScripts(weekStartDate),
+      generateWeeklyInstagramScripts(weekStartDate),
+    ]);
 
     videoScripts = primaryScripts;
     videoScriptsGenerated = true;
@@ -788,6 +795,84 @@ async function generateThematicWeeklyPosts(
 
     console.log(
       `🎬 [VIDEO] Generated ${videoScripts.tiktokScripts.length} total scripts (primary + ${engagementAScripts.length} engA + ${engagementBScripts.length} engB) + 1 YouTube`,
+    );
+
+    // Save Instagram-dedicated scripts and create their social posts + video jobs.
+    // These are IG-only (platform='instagram') and are NOT merged into tiktokScripts.
+    // They post Mon-Fri at 15:00 UTC — a slot distinct from all TikTok/cross-post slots.
+    const { generateInstagramReelCaption } =
+      await import('@/lib/social/video-scripts/tiktok/metadata');
+
+    // Simple category lookup for IG caption generation (most IG types are zodiac content)
+    const igContentTypeToCategory = (
+      contentTypeKey: string | undefined,
+    ): string => {
+      if (contentTypeKey === 'angel_numbers') return 'angel-numbers';
+      return 'zodiac';
+    };
+
+    for (const igScript of instagramScripts) {
+      try {
+        const igId = await saveVideoScript(igScript);
+        igScript.id = igId;
+
+        const dateKey = igScript.scheduledDate.toISOString().split('T')[0];
+        // scheduledDate was already set to 15:00 UTC in the generator;
+        // reconstruct to guarantee the correct UTC time even if tz shifts occurred.
+        const igScheduledDate = new Date(`${dateKey}T15:00:00.000Z`);
+
+        const igCategory = igContentTypeToCategory(
+          igScript.metadata?.contentTypeKey,
+        );
+        const igCaption = generateInstagramReelCaption({
+          category: igCategory,
+          themeName: igScript.themeName,
+          facetTitle: igScript.facetTitle,
+          hookText:
+            typeof igScript.hookText === 'string'
+              ? igScript.hookText
+              : undefined,
+          scheduledDate: igScheduledDate,
+        });
+
+        await sql`
+          INSERT INTO social_posts (
+            content, platform, post_type, topic, status, image_url, video_url,
+            scheduled_date, week_theme, week_start, source_type, source_id,
+            source_title, created_at
+          )
+          SELECT ${igCaption}, 'instagram', 'video', ${igScript.facetTitle}, 'pending',
+                 ${null}, ${null}, ${igScheduledDate.toISOString()},
+                 ${igScript.themeName}, ${weekStartKeyVideo},
+                 'video_script', ${igId}, ${igScript.facetTitle}, NOW()
+          WHERE NOT EXISTS (
+            SELECT 1 FROM social_posts
+            WHERE platform = 'instagram'
+              AND post_type = 'video'
+              AND topic = ${igScript.facetTitle}
+              AND scheduled_date = ${igScheduledDate.toISOString()}
+          )
+        `;
+
+        await sql`
+          INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
+          VALUES (${igId}, ${weekStartKeyVideo}, ${dateKey}, ${igScript.facetTitle}, 'pending', NOW(), NOW())
+          ON CONFLICT (script_id)
+          DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
+        `;
+
+        console.log(
+          `📸 [IG] Queued: ${igScript.facetTitle} (${dateKey} 15:00 UTC)`,
+        );
+      } catch (igError) {
+        console.error(
+          `📸 [IG] Failed to save Instagram script: ${igScript.facetTitle}`,
+          igError,
+        );
+      }
+    }
+    console.log(
+      `📸 [IG] ${instagramScripts.length}/5 Instagram scripts queued`,
     );
 
     // Generate YouTube thematic deep-dives + cosmic forecast in parallel
@@ -1338,8 +1423,8 @@ async function generateThematicWeeklyPosts(
     if (videoScripts?.tiktokScripts?.length) {
       const { getThematicImageUrl } =
         await import('@/lib/social/educational-images');
-      // Instagram is handled separately: engagement scripts cross-post to instagram-reels
-      // Primary scripts stay on TikTok/Facebook/YouTube to keep IG cadence at ~2-3/week
+      // Instagram is handled separately: IG-dedicated scripts (Mon-Fri 15:00 UTC) + 2 cross-posts (Sat/Sun).
+      // Primary scripts stay on TikTok/Facebook/YouTube only.
       const videoPlatforms = ['tiktok', 'facebook', 'youtube'];
       const uniqueScripts = dedupeScriptsByDate(videoScripts.tiktokScripts);
       const dayInfoByKey = new Map<
@@ -1413,8 +1498,9 @@ async function generateThematicWeeklyPosts(
         existingVideoByKey.set(`${dateKey}|${row.topic}`, row.video_url);
       }
 
-      // Instagram Reels cadence: max 3 cross-posts per week
-      const MAX_INSTAGRAM_REELS_PER_WEEK = 3;
+      // Instagram Reels cadence: max 2 cross-posts per week
+      // (IG now gets 5 dedicated Mon-Fri videos; Sat+Sun still get cross-posts)
+      const MAX_INSTAGRAM_REELS_PER_WEEK = 2;
       let instagramReelsCrossPostCount = 0;
 
       for (const script of uniqueScripts) {
