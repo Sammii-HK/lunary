@@ -76,7 +76,7 @@ const ENGAGEMENT_A_SCHEDULE: Record<string, DayConfig> = {
 const ENGAGEMENT_B_SCHEDULE: Record<string, DayConfig> = {
   monday: { contentType: 'ranking', label: 'Rankings' },
   tuesday: { contentType: 'chiron-sign', label: 'Chiron Sign' },
-  wednesday: { contentType: 'quiz', label: 'Quiz' },
+  wednesday: { contentType: 'myth', label: 'Myth / Origin' },
   thursday: { contentType: 'sign-identity', label: 'Sign Identity' },
   friday: { contentType: 'sign-origin', label: 'Sign Origin' },
   saturday: { contentType: 'did-you-know', label: 'Did You Know' },
@@ -105,7 +105,6 @@ const SCHEDULABLE_TYPES: ContentType[] = [
   'sign-check',
   'ranking',
   'hot-take',
-  'quiz',
   'transit-alert',
   'did-you-know',
   'myth',

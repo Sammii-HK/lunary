@@ -51,7 +51,7 @@ export interface VideoScript {
   angle?: string;
   aspect?: string;
   contentType?: ContentType; // NEW: Content type for secondary videos
-  platform: 'tiktok' | 'youtube';
+  platform: 'tiktok' | 'youtube' | 'instagram';
   sections: ScriptSection[];
   fullScript: string;
   wordCount: number;

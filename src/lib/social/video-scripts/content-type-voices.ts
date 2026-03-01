@@ -1518,3 +1518,80 @@ export function getVoiceConfig(contentType: ContentTypeKey) {
 export function getAllScriptStructures(contentType: ContentTypeKey): string[] {
   return SCRIPT_STRUCTURES[contentType];
 }
+
+/**
+ * Instagram Reels voice overrides — platform-specific hooks, CTAs, and tone
+ * for content types that perform well on Reels.
+ *
+ * Instagram rewards: visual-first hooks, save/share/comment CTAs,
+ * shorter scripts (30-45s), no algorithm-bait text.
+ */
+export const INSTAGRAM_VOICE_OVERRIDES: Partial<
+  Record<
+    ContentTypeKey,
+    {
+      hookStyle: 'visual-first' | 'pov' | 'curiosity-gap';
+      ctaStyle: 'save' | 'comment' | 'share';
+      targetDuration: number; // seconds
+      toneAdjustment: string;
+      ctaLine: string;
+    }
+  >
+> = {
+  angel_numbers: {
+    hookStyle: 'curiosity-gap',
+    ctaStyle: 'comment',
+    targetDuration: 30,
+    toneAdjustment: 'mystical and direct, no preamble',
+    ctaLine: 'Comment if this keeps showing up for you.',
+  },
+  sign_identity: {
+    hookStyle: 'pov',
+    ctaStyle: 'comment',
+    targetDuration: 25,
+    toneAdjustment: 'affectionate and hyper-specific',
+    ctaLine: 'Comment your sign below.',
+  },
+  hot_take: {
+    hookStyle: 'visual-first',
+    ctaStyle: 'comment',
+    targetDuration: 30,
+    toneAdjustment: 'punchy and polarising',
+    ctaLine: 'Comment if you agree.',
+  },
+  ranking: {
+    hookStyle: 'curiosity-gap',
+    ctaStyle: 'save',
+    targetDuration: 40,
+    toneAdjustment: 'punchy list format, visual pace',
+    ctaLine: 'Save this. Your sign is coming up.',
+  },
+  sign_check: {
+    hookStyle: 'pov',
+    ctaStyle: 'comment',
+    targetDuration: 25,
+    toneAdjustment: 'direct callout energy',
+    ctaLine: 'Comment your sign below.',
+  },
+  chiron_sign: {
+    hookStyle: 'curiosity-gap',
+    ctaStyle: 'save',
+    targetDuration: 35,
+    toneAdjustment: 'introspective and validating',
+    ctaLine: 'Save this for when you need it.',
+  },
+  did_you_know: {
+    hookStyle: 'visual-first',
+    ctaStyle: 'save',
+    targetDuration: 30,
+    toneAdjustment: 'surprising and punchy',
+    ctaLine: 'Save this — you will want to come back to it.',
+  },
+  myth: {
+    hookStyle: 'curiosity-gap',
+    ctaStyle: 'save',
+    targetDuration: 35,
+    toneAdjustment: 'storytime but tight, no waffle',
+    ctaLine: 'Save this and comment if you knew that.',
+  },
+};
