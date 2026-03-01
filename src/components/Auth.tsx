@@ -235,10 +235,15 @@ export function AuthComponent({
         ) {
           setSuccess('Signed in successfully! Redirecting...');
           invalidateAuthCache();
-          const returnTo = new URLSearchParams(window.location.search).get(
+          const rawReturnTo = new URLSearchParams(window.location.search).get(
             'returnTo',
           );
-          const destination = returnTo ? decodeURIComponent(returnTo) : '/app';
+          const decoded = rawReturnTo ? decodeURIComponent(rawReturnTo) : null;
+          // Only allow same-site relative paths — reject anything with a host
+          const destination =
+            decoded?.startsWith('/') && !decoded.startsWith('//')
+              ? decoded
+              : '/app';
           setTimeout(() => {
             if (Capacitor.isNativePlatform()) {
               router.replace(destination);

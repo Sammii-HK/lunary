@@ -116,10 +116,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
 
         <div className='space-y-3'>
           {isNativeIOS === null ? null : isNativeIOS ? (
-            <IOSPaywall
-              onSuccess={() => router.refresh()}
-              onDismiss={() => router.refresh()}
-            />
+            <IOSPaywall onSuccess={() => router.refresh()} />
           ) : (
             <>
               <SmartTrialButton fullWidth />

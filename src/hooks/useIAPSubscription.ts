@@ -57,11 +57,6 @@ export interface IAPOfferings {
 export async function getIAPOfferings(): Promise<IAPOfferings> {
   const offerings = await Purchases.getOfferings();
   const pkgs = offerings.current?.availablePackages ?? [];
-  console.log('[IAP] current offering id:', offerings.current?.identifier);
-  console.log(
-    '[IAP] packages:',
-    pkgs.map((p) => `${p.identifier} → ${p.product.productIdentifier}`),
-  );
   return {
     plusMonthly:
       pkgs.find((p) => p.product.productIdentifier === PRODUCT_PLUS_MONTHLY) ??
