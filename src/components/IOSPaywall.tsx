@@ -94,22 +94,36 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
   const [error, setError] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
   const [expanded, setExpanded] = useState<PlanKey | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string>('loading…');
   // True when StoreKit is unavailable (simulator) — show UI but disable purchase
   const [simulatorMode, setSimulatorMode] = useState(false);
 
   useEffect(() => {
-    if (Capacitor.getPlatform() !== 'ios') return;
+    if (Capacitor.getPlatform() !== 'ios') {
+      setDebugInfo('platform: ' + Capacitor.getPlatform() + ' (not ios)');
+      return;
+    }
+    setDebugInfo('configuring RC…');
     configureIAP()
-      .then(() => getIAPOfferings())
-      .then(setOfferings)
+      .then(() => {
+        setDebugInfo('fetching offerings…');
+        return getIAPOfferings();
+      })
+      .then((o) => {
+        setOfferings(o);
+        const loaded = Object.entries(o)
+          .map(([k, v]) => `${k}:${v ? '✓' : '✗'}`)
+          .join(' ');
+        setDebugInfo('offerings: ' + loaded);
+      })
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : String(err);
+        setDebugInfo('error: ' + msg);
         if (
           msg.includes('not implemented') ||
           msg.includes('simulator') ||
           msg.includes('NEXT_PUBLIC_REVENUECAT_IOS_KEY')
         ) {
-          // Simulator — show the UI with fallback prices, disable actual purchase
           setSimulatorMode(true);
         } else {
           setError('Could not load subscription options. Please try again.');
@@ -118,9 +132,21 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
   }, []);
 
   async function handlePurchase() {
-    if (!offerings) return;
+    if (!offerings) {
+      setError('Subscription options not loaded. Please close and reopen.');
+      return;
+    }
     const pkg: PurchasesPackage | null = offerings[selected];
-    if (!pkg) return;
+    if (!pkg) {
+      setError(`Plan not available (${selected}). Check RevenueCat offerings.`);
+      console.error(
+        '[IAP] pkg null for selected:',
+        selected,
+        'offerings:',
+        JSON.stringify(offerings),
+      );
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -162,6 +188,16 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
 
   return (
     <div className='space-y-3'>
+      {/* DEBUG — remove before release */}
+      <div className='rounded-lg bg-zinc-900 border border-zinc-700 p-2'>
+        <p className='text-xs text-yellow-400 font-mono break-all'>
+          {debugInfo}
+        </p>
+        {simulatorMode && (
+          <p className='text-xs text-orange-400 mt-1'>simulator mode</p>
+        )}
+      </div>
+
       <div className='text-center mb-1'>
         <p className='text-sm text-gray-400'>
           Choose a plan — 7-day free trial included
