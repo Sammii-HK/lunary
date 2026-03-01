@@ -187,7 +187,6 @@ export function AppChrome() {
     '/trademark',
     '/press-kit',
     '/developers',
-    '/pricing',
     '/features',
     '/faq',
     '/about',

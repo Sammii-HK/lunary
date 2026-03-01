@@ -27,7 +27,7 @@ import { useCurrency, formatPrice } from '../../hooks/useCurrency';
 import { getPriceForCurrency } from '../../../utils/stripe-prices';
 import { FAQStructuredData } from '@/components/FAQStructuredData';
 import { conversionTracking } from '@/lib/analytics';
-import { MarketingFooter } from '@/components/MarketingFooter';
+import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { createProductSchema, renderJsonLd } from '@/lib/schema';
 import { AuthComponent } from '@/components/Auth';
 import { useModal } from '@/hooks/useModal';
@@ -837,7 +837,7 @@ export default function PricingPage() {
         </section>
 
         <div className='mt-auto'>
-          <MarketingFooter />
+          <MarketingFooterGate />
         </div>
       </div>
 

@@ -152,10 +152,6 @@ function getFeatureDescription(feature: FeatureKey): string {
       return 'Export all your cosmic data including birth chart, tarot readings, collections, and insights. Download your complete Lunary journey as JSON.';
     case 'monthly_insights':
       return 'Track your monthly cosmic patterns with frequent tarot cards, dominant themes, and personalized insights from your readings. See how your cosmic journey unfolds over time.';
-    case 'personalized_horoscope':
-      return 'Get daily personalized horoscopes that dynamically change based on your selected date, incorporating your entire birth chart for truly customized guidance.';
-    case 'personalized_crystal_recommendations':
-      return 'Receive crystal recommendations that dynamically change based on your selected date, perfectly aligned with your birth chart and cosmic energies.';
     default:
       return 'This Personalised Feature provides deeper insights into your cosmic profile and personalized guidance.';
   }
@@ -174,7 +170,9 @@ export function UpgradePrompt() {
     status,
   } = useSubscription();
   const authState = useAuthStatus();
+  const isNativeIOS = useIsNativeIOS();
   const [isDismissed, setIsDismissed] = useState(false);
+  const [showIOSPaywall, setShowIOSPaywall] = useState(false);
 
   // Check if trial upsell was dismissed recently
   useEffect(() => {
@@ -245,20 +243,45 @@ export function UpgradePrompt() {
           </>
         )}
 
-        <Button
-          variant='lunary-white'
-          size='sm'
-          className='rounded-full w-full'
-          asChild
-        >
-          <Link href={authState.isAuthenticated ? '/pricing?nav=app' : '/auth'}>
-            {authState.isAuthenticated
-              ? isTrialActive
-                ? 'Continue Trial'
-                : 'Upgrade now'
-              : 'Sign In to Continue'}
-          </Link>
-        </Button>
+        {isNativeIOS === true && authState.isAuthenticated ? (
+          <>
+            <Button
+              variant='lunary-white'
+              size='sm'
+              className='rounded-full w-full'
+              onClick={() => setShowIOSPaywall(true)}
+            >
+              {isTrialActive ? 'Continue Trial' : 'Upgrade now'}
+            </Button>
+            {showIOSPaywall && (
+              <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50 p-4'>
+                <div className='bg-zinc-900 rounded-2xl p-6 w-full max-w-md'>
+                  <IOSPaywall
+                    onSuccess={() => setShowIOSPaywall(false)}
+                    onDismiss={() => setShowIOSPaywall(false)}
+                  />
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <Button
+            variant='lunary-white'
+            size='sm'
+            className='rounded-full w-full'
+            asChild
+          >
+            <Link
+              href={authState.isAuthenticated ? '/pricing?nav=app' : '/auth'}
+            >
+              {authState.isAuthenticated
+                ? isTrialActive
+                  ? 'Continue Trial'
+                  : 'Upgrade now'
+                : 'Sign In to Continue'}
+            </Link>
+          </Button>
+        )}
       </div>
     </div>
   );

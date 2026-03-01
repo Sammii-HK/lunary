@@ -210,7 +210,7 @@ export function SmartTrialButton({
               defaultToSignUp={true}
               onSuccess={() => {
                 setShowAuthModal(false);
-                if (isIOS) {
+                if (isIOS === true) {
                   setShowIOSPaywall(true);
                 } else {
                   window.location.href = '/pricing?nav=app';

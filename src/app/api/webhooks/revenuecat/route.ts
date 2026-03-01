@@ -74,6 +74,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
+  // RC anonymous IDs have no Lunary account — ignore
+  if (userId.startsWith('$RCAnonymousID:')) {
+    return NextResponse.json({ received: true });
+  }
+
   try {
     if (ACTIVATING_EVENTS.has(eventType)) {
       const planType =

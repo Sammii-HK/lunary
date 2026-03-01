@@ -855,12 +855,12 @@ export default function ProfilePage() {
                   >
                     Browse Shop
                   </Link>
-                  <a
-                    href='/blog'
+                  <Link
+                    href='/blog?from=explore'
                     className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
                   >
                     Read the Blog
-                  </a>
+                  </Link>
                 </div>
               </div>
             )}
