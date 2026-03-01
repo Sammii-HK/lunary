@@ -525,10 +525,12 @@ export async function POST(request: NextRequest) {
         if (videoUrl) {
           // Instagram-dedicated scripts (platform='instagram' in video_scripts) post only
           // to Instagram — they must not cross-post to TikTok or other platforms.
+          // Threads is excluded from video cross-posting: it's a text/conversation
+          // platform and receiving 3 videos/day on top of text posts is spammy.
           const shortVideoPlatforms =
             script.platform === 'instagram'
               ? ['instagram']
-              : ['tiktok', 'threads', 'instagram', 'twitter', 'youtube'];
+              : ['tiktok', 'instagram', 'twitter', 'youtube'];
           const shortPlatformSet = new Set(['twitter']);
           const scheduledDate = new Date(script.scheduled_date);
           // Use the engagement-optimized caption from generateTikTokCaption()
