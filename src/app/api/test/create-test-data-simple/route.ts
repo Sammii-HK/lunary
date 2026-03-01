@@ -5,6 +5,10 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   try {
     const testUserId = 'test-pattern-user-001';
     console.log('Creating test data for:', testUserId);
@@ -203,7 +207,6 @@ export async function GET() {
       {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 },
     );

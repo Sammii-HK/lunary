@@ -16,6 +16,25 @@ export const revalidate = 86400; // Cache for 24 hours - cosmic data for a speci
 type Ctx = { params: Promise<{ date: string }> };
 type Format = 'square' | 'portrait' | 'landscape' | 'story';
 
+type PlanetInfo = {
+  name: string;
+  symbol: string;
+  constellation: string;
+  constellationSymbol: string;
+};
+
+type CosmicEvent = {
+  type: string;
+  name: string;
+  energy?: string;
+  priority: number;
+  emoji?: string;
+  planetA?: PlanetInfo;
+  planetB?: PlanetInfo;
+  aspect?: string;
+  glyph?: string;
+};
+
 // Request deduplication - prevent duplicate calculations for simultaneous requests
 const pendingRequests = new Map<string, Promise<Response>>();
 
@@ -169,7 +188,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
   const aspects = calculateRealAspects(positions);
 
   // Determine primary event using SAME PRIORITY as post route
-  let allEvents: Array<any> = [];
+  let allEvents: CosmicEvent[] = [];
 
   // 1. MOON PHASES (Priority 10)
   if (moonPhase.isSignificant) {
@@ -373,7 +392,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
                   display: 'flex',
                 }}
               >
-                {(primaryEvent as any).planetA.name}
+                {primaryEvent.planetA.name}
               </div>
               <div
                 style={{
@@ -394,7 +413,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
                     fontFamily: 'Astronomicon',
                   }}
                 >
-                  {(primaryEvent as any).planetA.symbol}
+                  {primaryEvent.planetA.symbol}
                 </div>
               </div>
               <div
@@ -414,7 +433,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
                     paddingBottom: '10px',
                   }}
                 >
-                  {(primaryEvent as any).planetA.constellation}
+                  {primaryEvent.planetA.constellation}
                 </div>
                 <div
                   style={{
@@ -423,7 +442,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
                     fontFamily: 'Astronomicon',
                   }}
                 >
-                  {(primaryEvent as any).planetA.constellationSymbol}
+                  {primaryEvent.planetA.constellationSymbol}
                 </div>
               </div>
             </div>
@@ -451,8 +470,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
                     fontFamily: 'Roboto Mono',
                   }}
                 >
-                  {(primaryEvent as any).aspect?.replace('-', ' ') ||
-                    'Conjunction'}
+                  {primaryEvent.aspect?.replace('-', ' ') || 'Conjunction'}
                 </div>
               )}
               <div
@@ -471,7 +489,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
                   marginTop: '75px',
                 }}
               >
-                {(primaryEvent as any).glyph || '!'}
+                {primaryEvent.glyph || '!'}
               </div>
             </div>
 
@@ -494,7 +512,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
                   marginBottom: '50px',
                 }}
               >
-                {(primaryEvent as any).planetB.name}
+                {primaryEvent.planetB.name}
               </div>
               <div
                 style={{
@@ -515,7 +533,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
                     fontFamily: 'Astronomicon',
                   }}
                 >
-                  {(primaryEvent as any).planetB.symbol}
+                  {primaryEvent.planetB.symbol}
                 </div>
               </div>
               <div
@@ -535,7 +553,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
                     paddingBottom: '10px',
                   }}
                 >
-                  {(primaryEvent as any).planetB.constellation}
+                  {primaryEvent.planetB.constellation}
                 </div>
                 <div
                   style={{
@@ -544,7 +562,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
                     fontFamily: 'Astronomicon',
                   }}
                 >
-                  {(primaryEvent as any).planetB.constellationSymbol}
+                  {primaryEvent.planetB.constellationSymbol}
                 </div>
               </div>
             </div>

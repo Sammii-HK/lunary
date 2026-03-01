@@ -15,6 +15,10 @@ import {
 } from '@/lib/patterns/storage/secure-storage';
 
 export async function GET(request: NextRequest) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const userIdParam = searchParams.get('userId');

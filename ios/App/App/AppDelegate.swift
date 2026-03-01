@@ -1,6 +1,5 @@
 import UIKit
 import Capacitor
-import RevenueCat
 import AppTrackingTransparency
 import WebKit
 
@@ -23,11 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             modifiedSince: Date(timeIntervalSince1970: 0)
         ) {}
         #endif
-
-        // RevenueCat — initialise before any IAP calls
-        // Public SDK key is safe to commit; it only allows fetching offerings + making purchases
-        Purchases.logLevel = .error
-        Purchases.configure(withAPIKey: "appl_glpoURCDefowlFmMDhrxEgYnngJ")
 
         // Request App Tracking Transparency after a short delay (UI must be ready)
         if #available(iOS 14, *) {

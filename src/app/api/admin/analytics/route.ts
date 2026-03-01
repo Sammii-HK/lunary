@@ -6,6 +6,11 @@ import {
 } from '@/lib/analytics/test-filter';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { apiError } from '@/lib/api-response';
+
+export const dynamic = 'force-dynamic';
+
+const ALLOWED_TIME_RANGES = new Set(['7d', '30d', '90d']);
 
 const ACTIVITY_EVENTS = [
   'app_opened',
@@ -34,26 +39,21 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('timeRange') || '30d';
 
-    let dateFilter = '';
-    switch (timeRange) {
-      case '7d':
-        dateFilter = "created_at >= NOW() - INTERVAL '7 days'";
-        break;
-      case '30d':
-        dateFilter = "created_at >= NOW() - INTERVAL '30 days'";
-        break;
-      case '90d':
-        dateFilter = "created_at >= NOW() - INTERVAL '90 days'";
-        break;
-      default:
-        dateFilter = '1=1';
+    if (!ALLOWED_TIME_RANGES.has(timeRange)) {
+      return apiError('Invalid timeRange. Must be one of: 7d, 30d, 90d', 400);
     }
+
+    const daysAgo = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
+    const dateStart = new Date();
+    dateStart.setDate(dateStart.getDate() - daysAgo);
+
+    const dateStartIso = dateStart.toISOString();
 
     const signups = await sql`
       SELECT COUNT(*) as count
       FROM "user"
       WHERE "createdAt" IS NOT NULL
-        AND ${(sql as any).raw(dateFilter.replace('created_at', '"createdAt"'))}
+        AND "createdAt" >= ${dateStartIso}
         AND ${testUserFilterUsers()}
     `;
 
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
       WHERE event_type = 'trial_started'
-        AND ${(sql as any).raw(dateFilter)}
+        AND created_at >= ${dateStartIso}
         AND ${testUserFilter()}
     `;
 
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
       WHERE event_type = 'subscription_started'
-        AND ${(sql as any).raw(dateFilter)}
+        AND created_at >= ${dateStartIso}
         AND ${testUserFilter()}
     `;
 
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
       WHERE event_type = 'trial_converted'
-        AND ${(sql as any).raw(dateFilter)}
+        AND created_at >= ${dateStartIso}
         AND ${testUserFilter()}
     `;
 
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
       WHERE t1.event_type = 'trial_started'
         AND t2.event_type IN ('trial_converted', 'subscription_started')
         AND t2.created_at > t1.created_at
-        AND ${(sql as any).raw(dateFilter.replace('created_at', 't1.created_at'))}
+        AND t1.created_at >= ${dateStartIso}
         AND (t1.user_email IS NULL OR (t1.user_email NOT LIKE '%@test.lunary.app' AND t1.user_email != 'test@test.lunary.app'))
         AND (t2.user_email IS NULL OR (t2.user_email NOT LIKE '%@test.lunary.app' AND t2.user_email != 'test@test.lunary.app'))
     `;
@@ -137,22 +137,14 @@ export async function GET(request: NextRequest) {
     const mrr = Number(mrrResult.rows[0]?.total_mrr || 0);
 
     // Fix: Proper revenue calculation (daily rate × days in period)
-    const daysInPeriod =
-      timeRange === '7d'
-        ? 7
-        : timeRange === '30d'
-          ? 30
-          : timeRange === '90d'
-            ? 90
-            : 365;
-    const revenue = (mrr * daysInPeriod) / 30;
+    const revenue = (mrr * daysAgo) / 30;
 
     const events = await sql`
-      SELECT 
+      SELECT
         event_type,
         COUNT(*) as count
       FROM conversion_events
-      WHERE ${(sql as any).raw(dateFilter)}
+      WHERE created_at >= ${dateStartIso}
       GROUP BY event_type
       ORDER BY count DESC
     `;
@@ -172,31 +164,31 @@ export async function GET(request: NextRequest) {
     const birthDataSubmitted = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = 'birth_data_submitted' AND ${(sql as any).raw(dateFilter)}
+      WHERE event_type = 'birth_data_submitted' AND created_at >= ${dateStartIso}
     `;
 
     const onboardingCompleted = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = 'onboarding_completed' AND ${(sql as any).raw(dateFilter)}
+      WHERE event_type = 'onboarding_completed' AND created_at >= ${dateStartIso}
     `;
 
     const pricingPageViews = await sql`
       SELECT COUNT(*) as count
       FROM conversion_events
-      WHERE event_type = 'pricing_page_viewed' AND ${(sql as any).raw(dateFilter)}
+      WHERE event_type = 'pricing_page_viewed' AND created_at >= ${dateStartIso}
     `;
 
     const upgradeClicks = await sql`
       SELECT COUNT(*) as count
       FROM conversion_events
-      WHERE event_type = 'upgrade_clicked' AND ${(sql as any).raw(dateFilter)}
+      WHERE event_type = 'upgrade_clicked' AND created_at >= ${dateStartIso}
     `;
 
     const featureGated = await sql`
       SELECT COUNT(*) as count
       FROM conversion_events
-      WHERE event_type = 'feature_gated' AND ${(sql as any).raw(dateFilter)}
+      WHERE event_type = 'feature_gated' AND created_at >= ${dateStartIso}
     `;
 
     const birthDataRate =
@@ -265,7 +257,7 @@ export async function GET(request: NextRequest) {
           metadata->>'utm_source' = 'tiktok'
           OR metadata->>'referrer' LIKE '%tiktok.com%'
         )
-        AND ${(sql as any).raw(dateFilter)}
+        AND created_at >= ${dateStartIso}
       `;
       tiktokVisitors = parseInt(tiktokVisits.rows[0]?.count || '0');
 
@@ -277,7 +269,7 @@ export async function GET(request: NextRequest) {
           metadata->>'utm_source' = 'tiktok'
           OR metadata->>'referrer' LIKE '%tiktok.com%'
         )
-        AND ${(sql as any).raw(dateFilter)}
+        AND created_at >= ${dateStartIso}
       `;
       tiktokSignups = parseInt(tiktokSignupsResult.rows[0]?.count || '0');
 
@@ -295,7 +287,7 @@ export async function GET(request: NextRequest) {
         SELECT COUNT(DISTINCT user_id) as count
         FROM conversion_events
         WHERE event_type IN ('personalized_tarot_viewed', 'personalized_horoscope_viewed', 'birth_chart_viewed', 'crystal_recommendations_viewed')
-        AND ${(sql as any).raw(dateFilter)}
+        AND created_at >= ${dateStartIso}
       `;
       aiUsageCount = parseInt(aiUsers.rows[0]?.count || '0');
 
@@ -303,7 +295,7 @@ export async function GET(request: NextRequest) {
         SELECT COUNT(DISTINCT user_id) as count
         FROM conversion_events
         WHERE event_type IN ('app_opened', 'horoscope_viewed', 'tarot_viewed', 'birth_chart_viewed')
-        AND ${(sql as any).raw(dateFilter)}
+        AND created_at >= ${dateStartIso}
       `;
       const activeUsersCount = parseInt(activeUsers.rows[0]?.count || '0');
 
@@ -365,12 +357,9 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Error fetching analytics:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 },
+    return apiError(
+      error instanceof Error ? error.message : 'Unknown error',
+      500,
     );
   }
 }

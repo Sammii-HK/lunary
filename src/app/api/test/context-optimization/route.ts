@@ -12,6 +12,10 @@ import {
  * Usage: GET /api/test/context-optimization?query=YOUR_QUERY
  */
 export async function GET(request: Request) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('query') || "What's the cosmic weather?";
 

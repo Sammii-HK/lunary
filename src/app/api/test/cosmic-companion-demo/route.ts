@@ -10,6 +10,10 @@ import { sql } from '@vercel/postgres';
  * Usage: GET /api/test/cosmic-companion-demo
  */
 export async function GET(request: Request) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   try {
     // Require authentication
     const user = await requireUser(request);
