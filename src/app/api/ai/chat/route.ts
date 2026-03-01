@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 import { requireUser, UnauthorizedError } from '@/lib/ai/auth';
 import { buildLunaryContext } from '@/lib/ai/context';
@@ -35,13 +36,17 @@ import {
 } from '@/lib/ai/astral-guide';
 import { analyzeContextNeeds } from '@/lib/ai/context-optimizer';
 
-type ChatRequest = {
-  message?: string;
-  messages?: Array<{ role: string; content: string }>;
-  threadId?: string;
-  mode?: string;
-  birthday?: string;
-};
+const chatRequestSchema = z.object({
+  message: z.string().max(4000).optional(),
+  messages: z
+    .array(z.object({ role: z.string(), content: z.string() }))
+    .optional(),
+  threadId: z.string().uuid().optional(),
+  mode: z.string().optional(),
+  birthday: z.string().optional(),
+});
+
+type ChatRequest = z.infer<typeof chatRequestSchema>;
 
 const jsonResponse = (payload: unknown, status = 200, init?: ResponseInit) =>
   NextResponse.json(payload, {
@@ -53,7 +58,11 @@ export async function POST(request: NextRequest) {
   const now = new Date();
 
   try {
-    const body = (await request.json()) as ChatRequest;
+    const parsed = chatRequestSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return jsonResponse({ error: 'Invalid request body' }, 400);
+    }
+    const body: ChatRequest = parsed.data;
 
     // Support both formats: direct message or AI SDK messages array
     let userMessage: string;
@@ -77,10 +86,6 @@ export async function POST(request: NextRequest) {
     const userWithBirthday = { ...user, birthday: userBirthday };
     const planId = resolvePlanId(user);
     const assistCommand = detectAssistCommand(userMessage);
-    console.log('[AI Chat] Processing message:', {
-      userMessage: userMessage.substring(0, 50),
-      assistCommand,
-    });
     const aiMode =
       typeof body.mode === 'string' && body.mode.trim().length > 0
         ? body.mode.trim()

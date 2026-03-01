@@ -6,6 +6,7 @@ import {
 } from '@/lib/analytics/test-filter';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { apiError } from '@/lib/api-response';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,10 +40,7 @@ export async function GET(request: NextRequest) {
     const timeRange = searchParams.get('timeRange') || '30d';
 
     if (!ALLOWED_TIME_RANGES.has(timeRange)) {
-      return NextResponse.json(
-        { error: 'Invalid timeRange. Must be one of: 7d, 30d, 90d' },
-        { status: 400 },
-      );
+      return apiError('Invalid timeRange. Must be one of: 7d, 30d, 90d', 400);
     }
 
     const daysAgo = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
@@ -359,12 +357,9 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Error fetching analytics:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 },
+    return apiError(
+      error instanceof Error ? error.message : 'Unknown error',
+      500,
     );
   }
 }

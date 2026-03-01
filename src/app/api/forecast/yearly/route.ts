@@ -23,18 +23,6 @@ const CACHE_HEADERS = {
 async function getCachedYearlyForecast(
   year: number,
 ): Promise<YearlyForecast | null> {
-  const dbUrl =
-    process.env.POSTGRES_URL || process.env.DATABASE_URL || 'not-set';
-  const dbPrefix = dbUrl.includes('localhost')
-    ? 'local'
-    : dbUrl.includes('vercel')
-      ? 'vercel'
-      : 'unknown';
-
-  console.log(
-    `[forecast/yearly] Checking cache for year ${year} (DB: ${dbPrefix})`,
-  );
-
   try {
     const result = await sql<YearlyForecastRow>`
       SELECT forecast, expires_at
@@ -43,47 +31,19 @@ async function getCachedYearlyForecast(
       LIMIT 1
     `;
 
-    console.log(
-      `[forecast/yearly] Cache query returned ${result.rows.length} row(s) for year ${year}`,
-    );
-
     const row = result.rows[0];
-    if (!row) {
-      console.log(`[forecast/yearly] No cached data found for year ${year}`);
-      return null;
-    }
+    if (!row || !row.forecast) return null;
+    if (row.expires_at && new Date(row.expires_at) < new Date()) return null;
 
-    if (!row.forecast) {
+    return row.forecast;
+  } catch (error: unknown) {
+    if ((error as { code?: string })?.code === '42P01') {
       console.warn(
-        `[forecast/yearly] Cached row exists but forecast field is null for year ${year}`,
+        '[forecast/yearly] yearly_forecasts table missing — run setup-db to create it',
       );
       return null;
     }
-
-    if (row.expires_at && new Date(row.expires_at) < new Date()) {
-      console.log(
-        `[forecast/yearly] Cached data expired for year ${year} (expires_at: ${row.expires_at})`,
-      );
-      return null;
-    }
-
-    const forecast = row.forecast;
-    console.log(
-      `[forecast/yearly] Cache HIT for year ${year}: ${forecast.majorTransits?.length || 0} transits, ${forecast.retrogrades?.length || 0} retrogrades, ${forecast.eclipses?.length || 0} eclipses, ${forecast.keyAspects?.length || 0} aspects`,
-    );
-
-    return forecast;
-  } catch (error: any) {
-    if (error?.code === '42P01') {
-      console.warn(
-        `[forecast/yearly] yearly_forecasts table missing (code: 42P01) - run setup-db to create it. Error: ${error.message}`,
-      );
-      return null;
-    }
-    console.error(
-      `[forecast/yearly] Error querying cache for year ${year}:`,
-      error,
-    );
+    console.error('[forecast/yearly] Error querying cache:', error);
     throw error;
   }
 }
@@ -99,18 +59,6 @@ async function cacheYearlyForecast(
     eclipses: forecast.eclipses.length,
     keyAspects: forecast.keyAspects.length,
   };
-
-  const dbUrl =
-    process.env.POSTGRES_URL || process.env.DATABASE_URL || 'not-set';
-  const dbPrefix = dbUrl.includes('localhost')
-    ? 'local'
-    : dbUrl.includes('vercel')
-      ? 'vercel'
-      : 'unknown';
-
-  console.log(
-    `[forecast/yearly] Caching forecast for year ${year} (source: ${source}, DB: ${dbPrefix})`,
-  );
 
   try {
     await sql`
@@ -146,21 +94,14 @@ async function cacheYearlyForecast(
         expires_at = NULL,
         updated_at = NOW()
     `;
-    console.log(
-      `[forecast/yearly] Successfully cached forecast for year ${year} with stats:`,
-      stats,
-    );
-  } catch (error: any) {
-    if (error?.code === '42P01') {
+  } catch (error: unknown) {
+    if ((error as { code?: string })?.code === '42P01') {
       console.warn(
-        `[forecast/yearly] yearly_forecasts table missing (code: 42P01) - skipping cache write. Error: ${error.message}`,
+        '[forecast/yearly] yearly_forecasts table missing — skipping cache write',
       );
       return;
     }
-    console.error(
-      `[forecast/yearly] Error caching forecast for year ${year}:`,
-      error,
-    );
+    console.error('[forecast/yearly] Error caching forecast:', error);
     throw error;
   }
 }
@@ -265,18 +206,11 @@ export async function GET(request: NextRequest) {
           const lookupData = await customerLookup.json();
           if (lookupData?.found && lookupData.customer?.id) {
             customerId = lookupData.customer.id;
-            console.log(
-              `[forecast/yearly] Found Stripe customer via email lookup: ${customerId}`,
-            );
           }
-        } else {
-          console.warn(
-            `[forecast/yearly] Failed to look up customer by email (${userEmail}): ${customerLookup.status}`,
-          );
         }
       } catch (error) {
         console.error(
-          '[forecast/yearly] Error while looking up Stripe customer by email:',
+          '[forecast/yearly] Error looking up Stripe customer:',
           error,
         );
       }
@@ -301,55 +235,24 @@ export async function GET(request: NextRequest) {
 
         if (stripeResponse.ok) {
           const stripeData = await stripeResponse.json();
-          console.log(
-            `[forecast/yearly] Stripe API response:`,
-            JSON.stringify(stripeData, null, 2),
-          );
           if (
             (stripeData.success || stripeData.hasSubscription) &&
             stripeData.subscription
           ) {
             const stripeSub = stripeData.subscription;
-            // Normalize status: 'trialing' -> 'trial' for consistency
             const rawStripeStatus = stripeSub.status;
             subscriptionStatus =
               rawStripeStatus === 'trialing'
                 ? 'trial'
                 : (rawStripeStatus as typeof subscriptionStatus);
-            const rawPlan = stripeSub.plan;
-            planType = normalizePlanType(rawPlan);
+            planType = normalizePlanType(stripeSub.plan);
             planSource = 'stripe';
-            console.log(
-              `[forecast/yearly] Fetched from Stripe: rawStatus=${rawStripeStatus}, status=${subscriptionStatus}, rawPlan=${rawPlan}, normalized=${planType}`,
-            );
-          } else {
-            console.log(
-              '[forecast/yearly] Stripe response missing subscription data, using database subscription',
-              { stripeData },
-            );
           }
-        } else {
-          // Check if Stripe is unavailable (503) - this is expected in preview/dev
-          const stripeData =
-            stripeResponse.status === 503
-              ? await stripeResponse.json().catch(() => null)
-              : null;
-
-          if (stripeData?.useDatabaseFallback) {
-            console.log(
-              '[forecast/yearly] Stripe not configured in this environment, using database subscription',
-            );
-            // Continue with database subscription (already set above)
-          } else {
-            console.log(
-              `[forecast/yearly] Stripe fetch failed: ${stripeResponse.status}, using database subscription`,
-            );
-            // Continue with database subscription (already set above)
-          }
+          // else: Stripe response missing subscription data, fall through to DB subscription
         }
+        // else: Stripe unavailable or fetch failed — fall through to DB subscription
       } catch (error) {
         console.error('[forecast/yearly] Failed to fetch from Stripe:', error);
-        // Continue with database subscription (already set above)
       }
     }
 
@@ -374,14 +277,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log(
-      `[forecast/yearly] Access decision for user ${userId}: hasAccess=${hasAccess}, plan=${normalizedPlan}, planSource=${planSource}, status=${subscriptionStatus}`,
-    );
-
     if (!hasAccess) {
-      console.error(
-        `[forecast/yearly] ACCESS DENIED - status: ${subscriptionStatus}, plan: ${planType}, normalized: ${normalizedPlan}`,
-      );
       return NextResponse.json(
         {
           error:
@@ -394,26 +290,14 @@ export async function GET(request: NextRequest) {
 
     const cachedForecast = await getCachedYearlyForecast(year);
     if (cachedForecast) {
-      console.log(
-        `[forecast/yearly] ✅ CACHE HIT - Serving cached forecast for ${year} from yearly_forecasts table`,
-      );
       return NextResponse.json(
         { success: true, forecast: cachedForecast },
         { headers: CACHE_HEADERS },
       );
     }
 
-    console.log(
-      `[forecast/yearly] ❌ CACHE MISS - Generating forecast for year ${year} on-demand`,
-    );
     const forecast = await generateYearlyForecast(year);
-    console.log(
-      `[forecast/yearly] Generated forecast: ${forecast.majorTransits.length} transits, ${forecast.retrogrades.length} retrogrades, ${forecast.eclipses.length} eclipses, ${forecast.keyAspects.length} aspects`,
-    );
     await cacheYearlyForecast(year, forecast, 'api');
-    console.log(
-      `[forecast/yearly] Cached newly generated forecast for year ${year}`,
-    );
 
     return NextResponse.json(
       { success: true, forecast },
