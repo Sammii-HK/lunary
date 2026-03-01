@@ -15,6 +15,25 @@ export const revalidate = 86400; // Cache for 24 hours - cosmic data for a speci
 
 type Ctx = { params: Promise<{ date: string; size: string }> };
 
+type PlanetInfo = {
+  name: string;
+  symbol: string;
+  constellation: string;
+  constellationSymbol: string;
+};
+
+type CosmicEvent = {
+  type: string;
+  name: string;
+  energy?: string;
+  priority: number;
+  emoji?: string;
+  planetA?: PlanetInfo;
+  planetB?: PlanetInfo;
+  aspect?: string;
+  glyph?: string;
+};
+
 export async function GET(req: NextRequest, ctx: Ctx) {
   const { date, size } = await ctx.params;
   const normalizedSize = size === 'story' ? 'story' : size;
@@ -115,7 +134,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   const aspects = calculateRealAspects(positions);
 
   // Determine primary event using SAME PRIORITY as post route
-  let allEvents: Array<any> = [];
+  let allEvents: CosmicEvent[] = [];
 
   // 1. MOON PHASES (Priority 10)
   if (moonPhase.isSignificant) {
@@ -129,11 +148,13 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   }
 
   // 2. EXTRAORDINARY PLANETARY EVENTS (Priority 9)
-  const extraordinaryAspects = aspects.filter((a: any) => a.priority >= 9);
+  const extraordinaryAspects = aspects.filter(
+    (a: CosmicEvent) => a.priority >= 9,
+  );
   allEvents.push(...extraordinaryAspects);
 
   // 3. DAILY ASPECTS (Priority 5-7)
-  const dailyAspects = aspects.filter((a: any) => a.priority < 9);
+  const dailyAspects = aspects.filter((a: CosmicEvent) => a.priority < 9);
   allEvents.push(...dailyAspects);
 
   // 4. SEASONAL EVENTS (Priority 8)
@@ -319,7 +340,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
                   display: 'flex',
                 }}
               >
-                {(primaryEvent as any).planetA.name}
+                {primaryEvent.planetA.name}
               </div>
               <div
                 style={{
@@ -340,7 +361,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
                     fontFamily: 'Astronomicon',
                   }}
                 >
-                  {(primaryEvent as any).planetA.symbol}
+                  {primaryEvent.planetA.symbol}
                 </div>
               </div>
               <div
@@ -360,7 +381,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
                     paddingBottom: '10px',
                   }}
                 >
-                  {(primaryEvent as any).planetA.constellation}
+                  {primaryEvent.planetA.constellation}
                 </div>
                 <div
                   style={{
@@ -369,7 +390,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
                     fontFamily: 'Astronomicon',
                   }}
                 >
-                  {(primaryEvent as any).planetA.constellationSymbol}
+                  {primaryEvent.planetA.constellationSymbol}
                 </div>
               </div>
             </div>
@@ -397,8 +418,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
                     fontFamily: 'Roboto Mono',
                   }}
                 >
-                  {(primaryEvent as any).aspect?.replace('-', ' ') ||
-                    'Conjunction'}
+                  {primaryEvent.aspect?.replace('-', ' ') || 'Conjunction'}
                 </div>
               )}
               <div
@@ -417,7 +437,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
                   marginTop: '75px',
                 }}
               >
-                {(primaryEvent as any).glyph || '!'}
+                {primaryEvent.glyph || '!'}
               </div>
             </div>
 
@@ -440,7 +460,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
                   marginBottom: '50px',
                 }}
               >
-                {(primaryEvent as any).planetB.name}
+                {primaryEvent.planetB.name}
               </div>
               <div
                 style={{
@@ -461,7 +481,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
                     fontFamily: 'Astronomicon',
                   }}
                 >
-                  {(primaryEvent as any).planetB.symbol}
+                  {primaryEvent.planetB.symbol}
                 </div>
               </div>
               <div
@@ -481,7 +501,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
                     paddingBottom: '10px',
                   }}
                 >
-                  {(primaryEvent as any).planetB.constellation}
+                  {primaryEvent.planetB.constellation}
                 </div>
                 <div
                   style={{
@@ -490,7 +510,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
                     fontFamily: 'Astronomicon',
                   }}
                 >
-                  {(primaryEvent as any).planetB.constellationSymbol}
+                  {primaryEvent.planetB.constellationSymbol}
                 </div>
               </div>
             </div>

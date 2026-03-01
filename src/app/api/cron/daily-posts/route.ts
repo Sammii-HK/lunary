@@ -219,8 +219,8 @@ export async function GET(request: NextRequest) {
             skipped: true,
           });
         }
-      } catch (error: any) {
-        if (error?.code === '42P01') {
+      } catch (error: unknown) {
+        if ((error as { code?: string })?.code === '42P01') {
           console.warn(
             'notification_sent_events table missing; proceeding without DB dedupe',
           );
@@ -1399,8 +1399,8 @@ async function runDailyPosts(dateStr: string) {
     excludeEvents = recentEvents.rows
       .map((row) => row.event_name)
       .filter(Boolean);
-  } catch (error: any) {
-    if (error?.code !== '42P01') {
+  } catch (error: unknown) {
+    if ((error as { code?: string })?.code !== '42P01') {
       console.error('Failed to load recent cosmic events:', error);
     }
   }
@@ -1831,8 +1831,8 @@ async function runDailyPosts(dateStr: string) {
         )
         ON CONFLICT (date, event_key) DO NOTHING
       `;
-    } catch (error: any) {
-      if (error?.code !== '42P01') {
+    } catch (error: unknown) {
+      if ((error as { code?: string })?.code !== '42P01') {
         console.error('Failed to record daily cosmic post event:', error);
       }
     }
