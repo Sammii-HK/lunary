@@ -60,6 +60,10 @@ const JOURNAL_TEMPLATES = {
 };
 
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   try {
     console.log('🌙 Starting test journal data generation...');
 

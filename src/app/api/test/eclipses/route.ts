@@ -13,6 +13,10 @@ import { sql } from '@vercel/postgres';
  * Usage: GET /api/test/eclipses?months=6
  */
 export async function GET(request: NextRequest) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   try {
     // Require authentication
     const user = await requireUser(request);

@@ -10,6 +10,10 @@ export const maxDuration = 300;
  * WARNING: For testing only - production should use authenticated endpoint
  */
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   try {
     const body = await request.json();
     const { email, daysBack = 90, method = 'keyword', dryRun = true } = body;

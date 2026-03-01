@@ -9,6 +9,10 @@ const capturedErrors: string[] = [];
 const originalConsoleError = console.error;
 
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   capturedErrors.length = 0; // Clear previous errors
 
   // Override console.error temporarily

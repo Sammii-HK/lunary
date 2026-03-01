@@ -10,6 +10,10 @@ import { requireUser } from '@/lib/ai/auth';
  * Usage: GET /api/test/astral-context?query=YOUR_QUERY
  */
 export async function GET(request: Request) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   try {
     // Require authentication
     const user = await requireUser(request);

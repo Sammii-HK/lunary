@@ -8,6 +8,10 @@ import { detectArchetypes } from '@/lib/archetypes/detector';
 import type { ArchetypeDetectorInput } from '@/lib/archetypes/detector';
 
 export async function GET(request: NextRequest) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const email = searchParams.get('email') || 'kellow.sammii@gmail.com';
