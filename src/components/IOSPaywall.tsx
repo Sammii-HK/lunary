@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp, Check } from 'lucide-react';
 import {
-  configureIAP,
   getIAPOfferings,
   purchaseIAPPackage,
   restoreIAPPurchases,
@@ -103,12 +103,8 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
       setDebugInfo('platform: ' + Capacitor.getPlatform() + ' (not ios)');
       return;
     }
-    setDebugInfo('configuring RC…');
-    configureIAP()
-      .then(() => {
-        setDebugInfo('fetching offerings…');
-        return getIAPOfferings();
-      })
+    setDebugInfo('fetching offerings…');
+    getIAPOfferings()
       .then((o) => {
         setOfferings(o);
         const loaded = Object.entries(o)
@@ -322,27 +318,13 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
       </div>
 
       <p className='text-xs text-gray-600 text-center'>
-        Or subscribe at lunary.app for less
-      </p>
-
-      <p className='text-xs text-gray-600 text-center'>
-        <a
-          href='https://lunary.app/privacy'
-          target='_blank'
-          rel='noopener noreferrer'
-          className='underline hover:text-gray-400'
-        >
+        <Link href='/privacy' className='underline hover:text-gray-400'>
           Privacy Policy
-        </a>
+        </Link>
         {' · '}
-        <a
-          href='https://lunary.app/terms'
-          target='_blank'
-          rel='noopener noreferrer'
-          className='underline hover:text-gray-400'
-        >
+        <Link href='/terms' className='underline hover:text-gray-400'>
           Terms of Use
-        </a>
+        </Link>
       </p>
     </div>
   );

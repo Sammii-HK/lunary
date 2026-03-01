@@ -118,8 +118,8 @@ export function SmartTrialButton({
   };
 
   if (config.action === 'link' && config.href) {
-    // On iOS (or while detecting), intercept /pricing links — show native IAP modal
-    if (isIOS !== false && config.href === '/pricing') {
+    // On confirmed iOS native only, intercept /pricing links — show native IAP modal
+    if (isIOS === true && config.href === '/pricing') {
       return (
         <>
           <Button

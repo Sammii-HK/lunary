@@ -2,6 +2,7 @@
 
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { useSubscription } from '../hooks/useSubscription';
 import { useAuthStatus } from './AuthStatus';
@@ -31,6 +32,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
   const _authState = useAuthStatus();
   const [paywallTracked, setPaywallTracked] = useState(false);
   const isNativeIOS = useIsNativeIOS();
+  const router = useRouter();
 
   const shouldShowPaywall = !loading && !hasAccess(feature) && !fallback;
 
@@ -114,7 +116,10 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
 
         <div className='space-y-3'>
           {isNativeIOS === null ? null : isNativeIOS ? (
-            <IOSPaywall />
+            <IOSPaywall
+              onSuccess={() => router.refresh()}
+              onDismiss={() => router.refresh()}
+            />
           ) : (
             <>
               <SmartTrialButton fullWidth />
@@ -194,15 +199,6 @@ export function UpgradePrompt() {
       setIsDismissed(false);
     }
   }, [isTrialActive]);
-
-  console.log('UpgradePrompt render:', {
-    showUpgradePrompt,
-    isTrialActive,
-    trialDaysRemaining,
-    isSubscribed,
-    status,
-    isDismissed,
-  });
 
   // Only show trial-specific messaging if user is actually on trial AND not dismissed
   // Otherwise, only show if showUpgradePrompt is true (free users)

@@ -31,7 +31,7 @@ const PRODUCT_TO_PLAN: Record<string, string> = {
 function getWebhookSecret(): string {
   const secret = process.env.REVENUECAT_WEBHOOK_SECRET;
   if (!secret) throw new Error('REVENUECAT_WEBHOOK_SECRET is not set');
-  return secret;
+  return secret.trim();
 }
 
 export async function POST(req: NextRequest) {

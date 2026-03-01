@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <Capacitor/Capacitor.h>
 
-CAP_PLUGIN(SignInWithApplePlugin, "SignInWithApple",
-           CAP_PLUGIN_METHOD(authorize, CAPPluginReturnPromise);
-)
+// Plugin is registered via registerPluginType in LunaryBridgeViewController.
+// The CAP_PLUGIN macro is intentionally omitted to prevent duplicate registration
+// which caused "plugin not implemented on iOS" on real devices.

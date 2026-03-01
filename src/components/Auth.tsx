@@ -205,19 +205,13 @@ export function AuthComponent({
           password: formData.password,
         });
 
-        console.log('✅ Sign in result:', result);
-
         if (result.error) {
-          console.error('❌ Sign in error:', result.error);
           throw new Error(result.error.message || 'Sign in failed');
         }
 
         if (!result.data) {
-          console.error('❌ Sign in failed - no data returned');
           throw new Error('Sign in failed - no data returned');
         }
-
-        console.log('✅ Sign in successful, user:', result.data.user?.email);
 
         // If on admin subdomain, redirect immediately after successful sign-in
         if (
@@ -234,19 +228,22 @@ export function AuthComponent({
           return;
         }
 
-        // If on /auth page (not in modal), redirect to app
+        // If on /auth page (not in modal), redirect to app (or returnTo)
         if (
           typeof window !== 'undefined' &&
           window.location.pathname === '/auth'
         ) {
-          console.log('🔄 Redirecting to app after sign-in');
           setSuccess('Signed in successfully! Redirecting...');
           invalidateAuthCache();
+          const returnTo = new URLSearchParams(window.location.search).get(
+            'returnTo',
+          );
+          const destination = returnTo ? decodeURIComponent(returnTo) : '/app';
           setTimeout(() => {
             if (Capacitor.isNativePlatform()) {
-              router.replace('/app');
+              router.replace(destination);
             } else {
-              window.location.href = '/app';
+              window.location.href = destination;
             }
           }, 500);
           return;
