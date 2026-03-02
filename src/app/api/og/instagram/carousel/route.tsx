@@ -176,7 +176,6 @@ export async function GET(request: NextRequest) {
                   lineHeight: 1.15,
                   width: '88%',
                   display: 'flex',
-                  flexWrap: 'wrap',
                   justifyContent: 'center',
                   fontWeight: 800,
                   marginBottom: 36,
@@ -195,7 +194,6 @@ export async function GET(request: NextRequest) {
                   lineHeight: 1.3,
                   width: '72%',
                   display: 'flex',
-                  flexWrap: 'wrap',
                   justifyContent: 'center',
                   fontWeight: 600,
                   letterSpacing: '0.1em',
@@ -216,7 +214,6 @@ export async function GET(request: NextRequest) {
                   lineHeight: 1.2,
                   width: '85%',
                   display: 'flex',
-                  flexWrap: 'wrap',
                   justifyContent: 'center',
                   fontWeight: 700,
                 }}
@@ -232,7 +229,6 @@ export async function GET(request: NextRequest) {
                     lineHeight: 1.4,
                     width: '80%',
                     display: 'flex',
-                    flexWrap: 'wrap',
                     justifyContent: 'center',
                     marginTop: 20,
                   }}

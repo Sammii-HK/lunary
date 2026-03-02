@@ -229,6 +229,12 @@ function buildSlides(
   const fc = snippet.fullContent || {};
   const slides: IGCarouselSlide[] = [];
 
+  // For zodiac carousels, use the sign-specific Astronomicon glyph on every slide
+  const zodiacSignSymbol =
+    category === 'zodiac'
+      ? ZODIAC_SIGN_SYMBOLS[snippet.title.toLowerCase()]
+      : undefined;
+
   // Cover slide (always first) — hook text goes in content field
   const hookText = getHookText(category, snippet.title);
   slides.push(
@@ -239,6 +245,8 @@ function buildSlides(
       hookText || snippet.summary,
       category,
       'cover',
+      undefined,
+      zodiacSignSymbol,
     ),
   );
 
@@ -574,6 +582,7 @@ function buildSlides(
             category,
             'body',
             'Element & Ruler',
+            zodiacSignSymbol,
           ),
         );
       }
@@ -587,6 +596,7 @@ function buildSlides(
             category,
             'body',
             'Strengths',
+            zodiacSignSymbol,
           ),
         );
       }
@@ -600,6 +610,7 @@ function buildSlides(
             category,
             'body',
             'Personality',
+            zodiacSignSymbol,
           ),
         );
       }
@@ -619,6 +630,7 @@ function buildSlides(
             category,
             'body',
             'Love & Career',
+            zodiacSignSymbol,
           ),
         );
       }
@@ -820,7 +832,23 @@ const CATEGORY_SYMBOL: Partial<Record<ThemeCategory, string>> = {
   sabbat: 'R', // Moon — seasonal cycles
   lunar: 'R', // Moon
   planetary: 'Q', // Sun
-  zodiac: 'Q', // Sun (zodiac carousels use sign glyph via symbol param)
+  // zodiac: sign-specific glyph passed explicitly per slide (see ZODIAC_SIGN_SYMBOLS)
+};
+
+// Astronomicon zodiac sign characters (A=Aries … L=Pisces)
+const ZODIAC_SIGN_SYMBOLS: Record<string, string> = {
+  aries: 'A',
+  taurus: 'B',
+  gemini: 'C',
+  cancer: 'D',
+  leo: 'E',
+  virgo: 'F',
+  libra: 'G',
+  scorpio: 'H',
+  sagittarius: 'I',
+  capricorn: 'J',
+  aquarius: 'K',
+  pisces: 'L',
 };
 
 function makeSlide(
