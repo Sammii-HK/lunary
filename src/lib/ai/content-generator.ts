@@ -12,13 +12,12 @@ import { z, ZodSchema } from 'zod';
 /** @deprecated Use default model — tiers removed. Kept for call-site compat. */
 export type AIModelKey = 'quality' | 'fast' | 'premium';
 
-/** Create DeepInfra model for social content generation */
+/** Create gpt-4o-mini model for social content generation */
 export function getDeepInfraModel(): LanguageModel {
   const provider = createOpenAI({
-    apiKey: process.env.DEEPINFRA_API_KEY ?? '',
-    baseURL: 'https://api.deepinfra.com/v1/openai',
+    apiKey: process.env.OPENAI_API_KEY ?? '',
   });
-  return provider.chat('meta-llama/Llama-3.3-70B-Instruct') as LanguageModel;
+  return provider.chat('gpt-4o-mini') as LanguageModel;
 }
 
 /** @deprecated */
