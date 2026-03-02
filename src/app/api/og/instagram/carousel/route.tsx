@@ -121,7 +121,10 @@ export async function GET(request: NextRequest) {
             alignItems: 'center',
             justifyContent: 'center',
             background: gradient,
-            padding: '60px',
+            paddingTop: 60,
+            paddingBottom: 60,
+            paddingLeft: 60,
+            paddingRight: 60,
             position: 'relative',
             fontFamily: 'Roboto Mono',
             overflow: 'hidden',
@@ -166,20 +169,25 @@ export async function GET(request: NextRequest) {
           </div>
 
           {hookText ? (
-            <>
-              {/* HERO: massive hook text dominates the frame */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
+              {/* HERO: maxWidth + textAlign center */}
               <div
                 style={{
+                  display: 'flex',
+                  maxWidth: 860,
                   fontSize: 80,
                   color: OG_COLORS.textPrimary,
-                  textAlign: 'center',
                   lineHeight: 1.15,
-                  width: '88%',
-                  display: 'flex',
-                  justifyContent: 'center',
                   fontWeight: 800,
                   marginBottom: 36,
-                  textShadow: `0 0 80px ${accent}60, 0 4px 24px rgba(0,0,0,0.7)`,
+                  textAlign: 'center',
                 }}
               >
                 {truncateIG(hookText, 70)}
@@ -188,34 +196,39 @@ export async function GET(request: NextRequest) {
               {/* Title — secondary, accent colour */}
               <div
                 style={{
+                  display: 'flex',
+                  maxWidth: 700,
                   fontSize: 30,
                   color: accent,
-                  textAlign: 'center',
                   lineHeight: 1.3,
-                  width: '72%',
-                  display: 'flex',
-                  justifyContent: 'center',
                   fontWeight: 600,
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase',
+                  textAlign: 'center',
                 }}
               >
                 {truncateIG(title, 50)}
               </div>
-            </>
+            </div>
           ) : (
-            <>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
               {/* No hook: title is the hero */}
               <div
                 style={{
+                  display: 'flex',
+                  maxWidth: 860,
                   fontSize: IG_TEXT.dark.title,
                   color: OG_COLORS.textPrimary,
-                  textAlign: 'center',
                   lineHeight: 1.2,
-                  width: '85%',
-                  display: 'flex',
-                  justifyContent: 'center',
                   fontWeight: 700,
+                  textAlign: 'center',
                 }}
               >
                 {truncateIG(title, 80)}
@@ -223,20 +236,19 @@ export async function GET(request: NextRequest) {
               {subtitle && (
                 <div
                   style={{
+                    display: 'flex',
+                    maxWidth: 800,
                     fontSize: IG_TEXT.dark.subtitle,
                     color: OG_COLORS.textSecondary,
-                    textAlign: 'center',
                     lineHeight: 1.4,
-                    width: '80%',
-                    display: 'flex',
-                    justifyContent: 'center',
                     marginTop: 20,
+                    textAlign: 'center',
                   }}
                 >
                   {truncateIG(subtitle, 100)}
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {/* Swipe indicator — prominent, accent colour */}
