@@ -4497,9 +4497,12 @@ function buildIngressTextPosts({
     const seed = `ingress-${planet}-${sign}-${dateStr}`;
     const engagementHook = getEngagementHook('ingress', seed);
 
+    // Use past tense if the ingress already happened today
+    const verb = timeStr === 'today' ? 'entered' : 'enters';
+
     // Threads: conversational with engagement hook
     const threadsBodyParts = [
-      `${planet} enters ${sign} ${timeStr}.`,
+      `${planet} ${verb} ${sign} ${timeStr}.`,
       durationText || `A shift toward ${energy} energy begins.`,
       '',
       engagementHook,
@@ -4515,7 +4518,7 @@ function buildIngressTextPosts({
     );
 
     // X/Twitter: compact with CTA
-    const xBodyParts = [`${planet} enters ${sign} ${timeStr}.`];
+    const xBodyParts = [`${planet} ${verb} ${sign} ${timeStr}.`];
     if (durationText) {
       xBodyParts.push(durationText);
     } else if (previousSign) {
@@ -4534,7 +4537,7 @@ function buildIngressTextPosts({
 
     // Bluesky: informational
     const blueskyBodyParts = [
-      `${planet} enters ${sign} ${timeStr}.`,
+      `${planet} ${verb} ${sign} ${timeStr}.`,
       durationText || `A shift toward ${energy} energy begins.`,
     ];
     const blueskyBody = blueskyBodyParts.join('\n');
@@ -4546,11 +4549,11 @@ function buildIngressTextPosts({
     );
 
     posts.push({
-      name: `Ingress • ${planet} enters ${sign} ${timeStr}`,
+      name: `Ingress • ${planet} ${verb} ${sign} ${timeStr}`,
       content: xContent,
       platforms: ['x', 'bluesky', 'threads'],
       imageUrls: [],
-      alt: `${planet} enters ${sign} ${timeStr}`,
+      alt: `${planet} ${verb} ${sign} ${timeStr}`,
       scheduledDate: getSchedule(),
       variants: {
         bluesky: { content: blueskyContent },
