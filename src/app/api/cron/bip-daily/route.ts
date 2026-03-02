@@ -73,10 +73,16 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Get day count
-    const dayCountStr = await getBipState('bip_day_count');
-    const dayCount = dayCountStr ? parseInt(dayCountStr, 10) : 0;
-    const nextDay = dayCount + 1;
+    // Calculate the actual day number from a fixed start date so the counter
+    // reflects real elapsed time rather than a bare incrementing DB value.
+    // BIP_START_DATE defaults to 2024-11-01 — override via env var if needed.
+    const startDateStr = process.env.BIP_START_DATE || '2024-11-01';
+    const startDate = new Date(startDateStr);
+    const dayMs = 24 * 60 * 60 * 1000;
+    const nextDay = Math.max(
+      1,
+      Math.round((Date.now() - startDate.getTime()) / dayMs) + 1,
+    );
 
     // Fetch current metrics (same queries as the admin dashboard)
     const now30dAgo = new Date(
@@ -152,15 +158,15 @@ export async function GET(request: NextRequest) {
       .filter(Boolean)
       .join('\n');
 
-    const captionPrompt = `Write a Build in Public daily update tweet for day ${nextDay} of building Lunary.
+    const captionPrompt = `Write a Build in Public daily update tweet for day ${nextDay} of building in public.
 
-Context: Lunary is a live astrology app with real users. This is NOT a brand new project.
+Context: Lunary is a live astrology app with real users. This is NOT a brand new project — it has been building for months.
 
 Metrics for today (ONLY use what is listed here — do not invent or assume any metric not present):
 ${dataLines}
 
 Format rules:
-- First line: "Day ${nextDay} of building Lunary" + a short honest hook about where things are (e.g. "and the SEO numbers keep climbing", "and users are actually sticking around")
+- First line: "Day ${nextDay} of building in public" + a short honest hook about where things are (e.g. "and the SEO numbers keep climbing", "and users are actually sticking around")
 - Blank line
 - 3 bullet points using ✅ emoji, each on its own line
 - Bullets must be short and punchy (under 60 chars each), written as natural observations NOT data labels
@@ -197,8 +203,7 @@ Format rules:
       scheduledFor: scheduledDate.toISOString(),
     });
 
-    // Persist state
-    await setBipState('bip_day_count', String(nextDay));
+    // Persist state (day count is now derived from BIP_START_DATE, not stored)
     await setBipState('bip_last_daily_post', today);
 
     console.log(`[BIP Daily] Day ${nextDay} posted: ${postId}`);
