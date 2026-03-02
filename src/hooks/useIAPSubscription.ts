@@ -23,6 +23,8 @@ export async function configureIAP(userId?: string): Promise<void> {
       console.warn('[IAP] NEXT_PUBLIC_REVENUECAT_IOS_KEY is not set');
       return;
     }
+    // Enable verbose RC logging so Xcode console shows full native SDK output
+    await Purchases.setLogLevel({ level: 'DEBUG' }).catch(() => {});
     await Purchases.configure({ apiKey: RC_IOS_API_KEY });
     rcConfigured = true;
   }
@@ -56,7 +58,21 @@ export interface IAPOfferings {
 
 export async function getIAPOfferings(): Promise<IAPOfferings> {
   const offerings = await Purchases.getOfferings();
-  const pkgs = offerings.current?.availablePackages ?? [];
+  console.log('[IAP] raw offerings:', JSON.stringify(offerings));
+
+  // Fall back to the 'default' offering by name if current is null or has no packages
+  const current = offerings.current?.availablePackages?.length
+    ? offerings.current
+    : (offerings.all?.['default'] ?? null);
+
+  const pkgs = current?.availablePackages ?? [];
+  console.log(
+    '[IAP] using offering:',
+    current?.identifier ?? 'none',
+    '| packages:',
+    pkgs.length,
+  );
+
   return {
     plusMonthly:
       pkgs.find((p) => p.product.productIdentifier === PRODUCT_PLUS_MONTHLY) ??
