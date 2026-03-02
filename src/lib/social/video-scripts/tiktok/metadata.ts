@@ -6,6 +6,8 @@ import type { DailyFacet, WeeklyTheme } from '../../weekly-themes';
 import type { TikTokMetadata } from '../types';
 import { THEME_DISPLAY_MAP } from '../constants';
 import { capitalizeThematicTitle } from '../../../../../utils/og/text';
+import { buildHashtags } from '../../../instagram/caption-generator';
+import type { ThemeCategory } from '../../types';
 
 /**
  * Generate TikTok overlay metadata
@@ -734,21 +736,20 @@ function seededPickN<T>(items: T[], seed: string, n: number): T[] {
 }
 
 /**
- * Fixed IG Reels hashtag set — these 10 tags are used on every reel.
- * Chosen for discovery in the astrology niche + Reels algorithm signals.
- */
-const IG_REELS_HASHTAGS =
-  '#astrologycommunity #astrology #zodiac #zodiacsigns #birthchart #astrologymemes #spiritualinstagram #reelsinstagram #explore #instagramreels';
-
-/**
- * Generate IG-native hashtag string — returns the fixed Reels hashtag set.
+ * Generate IG Reels hashtags — picks 5 topical tags from the category pool,
+ * rotated by facetTitle seed for variety across posts.
  */
 function generateInstagramHashtags(
-  _category: string,
+  category: string,
   _theme: string,
-  _facetTitle: string,
+  facetTitle: string,
 ): string {
-  return IG_REELS_HASHTAGS;
+  const tags = buildHashtags(
+    'story',
+    category as ThemeCategory,
+    facetTitle,
+  ).slice(0, 5);
+  return tags.join(' ');
 }
 
 export interface InstagramReelCaptionParams {
@@ -778,7 +779,8 @@ export function generateInstagramReelCaption(
 
   const emojiPool = CATEGORY_EMOJI[category] || CATEGORY_EMOJI.default;
   const emoji = pickByDate(emojiPool, date);
-  const hookLine = `${hookText || themeName} ${emoji}`;
+  const rawHook = hookText || themeName;
+  const hookLine = `${rawHook.charAt(0).toUpperCase()}${rawHook.slice(1)} ${emoji}`;
 
   const teaserPool = SOFT_CTA_LINES[category] || SOFT_CTA_LINES.default;
   const teaser = pickByDate(teaserPool, date);

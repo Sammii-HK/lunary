@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { generateDailyBatch } from '@/lib/instagram/content-orchestrator';
+import { PrismaClient } from '@prisma/client';
 import {
   PLATFORM_POSTING_TIMES,
   getDefaultPostingTime,
@@ -20,6 +22,8 @@ import {
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
+
+const prisma = new PrismaClient();
 
 let cachedSocialContext: string | null = null;
 let cachedAIContext: string | null = null;
@@ -1782,6 +1786,77 @@ async function generateThematicWeeklyPosts(
     console.warn('Failed to set base post ids:', groupError);
   }
 
+  // Generate Instagram static posts (carousels, memes, DYK, one-word, sign-ranking)
+  // Instagram only — Facebook/Pinterest/LinkedIn handled by their own pipelines
+  let igStaticsGenerated = 0;
+  try {
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(weekStartDate);
+      date.setDate(weekStartDate.getDate() + i);
+      const dateStr = date.toISOString().split('T')[0];
+
+      const batch = await generateDailyBatch(dateStr);
+      if (!batch?.posts?.length) continue;
+
+      for (const post of batch.posts) {
+        try {
+          const groupKey = `${dateStr}-${post.type}`;
+          const isCarousel =
+            post.type === 'carousel' || post.type === 'angel_number_carousel';
+          const imageUrls = post.imageUrls || [];
+          const imageUrlValue =
+            isCarousel && imageUrls.length > 1
+              ? imageUrls.join('|')
+              : imageUrls[0] || null;
+
+          const postData = {
+            content: post.caption,
+            postType: isCarousel ? 'instagram_carousel' : post.type,
+            scheduledDate: new Date(post.scheduledTime),
+            image_url: imageUrlValue,
+            video_metadata: {
+              hashtags: post.hashtags || [],
+              metadata: post.metadata || {},
+              imageUrls,
+            },
+          };
+
+          const existingPost = await prisma.socialPost.findFirst({
+            where: { base_group_key: groupKey, platform: 'instagram' },
+          });
+
+          if (existingPost) {
+            await prisma.socialPost.update({
+              where: { id: existingPost.id },
+              data: postData,
+            });
+          } else {
+            await prisma.socialPost.create({
+              data: {
+                ...postData,
+                platform: 'instagram',
+                status: 'pending',
+                base_group_key: groupKey,
+              },
+            });
+            igStaticsGenerated += 1;
+          }
+        } catch (dbError) {
+          console.warn(
+            `Failed to save IG static post ${post.type} for ${dateStr}:`,
+            dbError instanceof Error ? dbError.message : 'Unknown error',
+          );
+        }
+      }
+    }
+    console.log(`📸 Generated ${igStaticsGenerated} Instagram static posts`);
+  } catch (igBatchError) {
+    console.warn(
+      'Failed to generate Instagram static posts:',
+      igBatchError instanceof Error ? igBatchError.message : 'Unknown error',
+    );
+  }
+
   return NextResponse.json({
     success: true,
     message: `Generated ${allGeneratedPosts.length} thematic posts for the week (${savedPostIds.length} saved)`,
@@ -1806,6 +1881,7 @@ async function generateThematicWeeklyPosts(
     videoScriptsGenerated,
     dailyShortVideosGenerated,
     dailyShortVideosQueued,
+    igStaticsGenerated,
   });
 }
 

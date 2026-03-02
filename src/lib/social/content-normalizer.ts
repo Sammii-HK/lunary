@@ -45,6 +45,14 @@ const dedupeAdjacentLines = (lines: string[]) => {
   return result;
 };
 
+/**
+ * Capitalise the first character of a line (sentence case).
+ * Leaves the rest of the line untouched — proper nouns in the source text
+ * should already be capitalised by the LLM.
+ */
+const sentenceCaseLine = (line: string) =>
+  line ? line.charAt(0).toUpperCase() + line.slice(1) : line;
+
 const fixDuplicateWords = (text: string) => {
   let output = text;
   const pattern = /\b([a-zA-Z]+)\s+\1\b/g;
@@ -60,7 +68,10 @@ export const normalizeGeneratedContent = (
   options: NormalizeOptions = {},
 ): string => {
   if (!text) return text;
-  let output = text;
+  // Strip control characters that are illegal in JSON strings (0x00-0x08, 0x0B, 0x0C, 0x0E-0x1F).
+  // Keep \t (0x09), \n (0x0A), and \r (0x0D) which are safe and meaningful.
+  // eslint-disable-next-line no-control-regex
+  let output = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
   if (options.topicLabel) {
     const safeTopic = options.topicLabel.trim();
@@ -75,7 +86,7 @@ export const normalizeGeneratedContent = (
     .split('\n')
     .map((line) => line.replace(/\s+/g, ' ').trim());
   const cleanedLines = lines.map((line) => dedupeAdjacentSentences(line));
-  const deduped = dedupeAdjacentLines(cleanedLines);
+  const deduped = dedupeAdjacentLines(cleanedLines).map(sentenceCaseLine);
 
   return deduped.join('\n').trim();
 };
