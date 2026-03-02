@@ -19,6 +19,7 @@ import {
 } from '@/lib/social/weekly-themes';
 
 export const runtime = 'nodejs';
+export const maxDuration = 300;
 
 let cachedSocialContext: string | null = null;
 let cachedAIContext: string | null = null;
