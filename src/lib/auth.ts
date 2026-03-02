@@ -224,6 +224,11 @@ async function initializeAuth() {
       // better-auth to use __Secure- cookie prefix. WKWebView on http://localhost rejects those.
       // Explicitly disable secure cookies in dev so the prefix is omitted and cookies work on HTTP.
       useSecureCookies: process.env.NODE_ENV !== 'development',
+      // Share session cookie across all lunary.app subdomains (e.g. admin.lunary.app)
+      cookieOptions: {
+        domain:
+          process.env.NODE_ENV === 'production' ? '.lunary.app' : undefined,
+      },
     },
   };
 
