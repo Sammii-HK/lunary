@@ -75,7 +75,10 @@ import {
 } from '../../../../../utils/blog/aspectInterpretations';
 import { getSlowPlanetSignTotalDays } from '../../../../../utils/astrology/transit-duration';
 import { postToSocial, postToSocialMultiPlatform } from '@/lib/social/client';
-import { preUploadImage } from '@/lib/social/pre-upload-image';
+import {
+  preUploadImage,
+  hasValidImageExtension,
+} from '@/lib/social/pre-upload-image';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -997,6 +1000,20 @@ export async function GET(request: NextRequest) {
             try {
               // Pre-upload dynamic OG image so Instagram gets a static blob URL
               const staticImageUrl = await preUploadImage(imageUrl);
+
+              // Skip if blob upload failed — Postiz requires a valid image extension
+              if (!hasValidImageExtension(staticImageUrl)) {
+                console.error(
+                  `[daily-cron] IG story skipped — image has no valid extension after pre-upload: ${staticImageUrl}`,
+                );
+                storySentResults.push({
+                  scheduledTime: scheduledTime.toISOString(),
+                  variant: story.variant,
+                  status: 'error',
+                  error: `Pre-upload failed: no valid extension in ${staticImageUrl}`,
+                });
+                continue;
+              }
 
               const result = await postToSocial({
                 platform: 'instagram',
