@@ -4625,11 +4625,23 @@ function buildAspectTextPosts({
     const signAEnergy = signA !== 'in transit' ? getSignDescription(signA) : '';
     const signBEnergy = signB !== 'in transit' ? getSignDescription(signB) : '';
 
+    // For conjunctions, both planets are nearly in the same position so they're
+    // usually in the same sign. Use "conjoin in [Sign]" when that's the case.
+    const sharedSign =
+      aspectType === 'conjunction' && signA === signB && signA !== 'in transit'
+        ? signA
+        : null;
+    const sharedSignEnergy = sharedSign ? getSignDescription(sharedSign) : '';
+
     // Build energy description based on aspect type
     const isTension = isTensionAspect(aspectType);
     let energyDescription = '';
 
-    if (signAEnergy && signBEnergy) {
+    if (aspectType === 'conjunction' && sharedSign) {
+      // e.g. "Saturn and Neptune merge their energies in Pisces — structure meets
+      // dissolution, rewriting what we believe is real."
+      energyDescription = `${planetAInfo.domain} and ${planetBInfo.domain} merge in ${sharedSign}: ${sharedSignEnergy}`;
+    } else if (signAEnergy && signBEnergy) {
       if (isTension) {
         energyDescription = `${planetAInfo.domain} meets resistance, challenging ${signAEnergy} drive with ${signBEnergy} force`;
       } else if (aspectType === 'conjunction') {
@@ -4651,11 +4663,17 @@ function buildAspectTextPosts({
     const seed = `aspect-${planetA}-${aspectType}-${planetB}-${dateStr}`;
     const engagementHook = getAspectHook(aspectType, seed);
 
-    // Format headline with signs
-    const headlineWithSigns =
-      signA !== 'in transit' && signB !== 'in transit'
-        ? `${planetA} in ${signA} ${aspectLabel.toLowerCase()}s ${planetB} in ${signB}`
-        : `${planetA} ${aspectLabel.toLowerCase()} ${planetB}`;
+    // Format headline: conjunctions in a shared sign get "X and Y conjoin in [Sign]"
+    // which is more natural than "X in [Sign] conjuncts Y in [Sign]"
+    const headlineWithSigns = (() => {
+      if (aspectType === 'conjunction' && sharedSign) {
+        return `${planetA} and ${planetB} conjoin in ${sharedSign}`;
+      }
+      if (signA !== 'in transit' && signB !== 'in transit') {
+        return `${planetA} in ${signA} ${aspectLabel.toLowerCase()}s ${planetB} in ${signB}`;
+      }
+      return `${planetA} ${aspectLabel.toLowerCase()} ${planetB}`;
+    })();
 
     // Threads: conversational with engagement hook
     const threadsBody = [

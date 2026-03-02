@@ -540,11 +540,29 @@ export function calculateRealAspects(positions: any): Array<any> {
 
       if (separation < 8) {
         aspectType = 'conjunction';
-        priority =
-          (planetA === 'Jupiter' && planetB === 'Saturn') ||
-          (planetA === 'Saturn' && planetB === 'Jupiter')
-            ? 9
-            : 7;
+        // Priority based on rarity: outer-outer conjunctions happen once per decade+,
+        // outer-inner every few years, inner-inner every few months
+        const outerPlanets = new Set([
+          'Jupiter',
+          'Saturn',
+          'Uranus',
+          'Neptune',
+          'Pluto',
+        ]);
+        const aIsOuter = outerPlanets.has(planetA);
+        const bIsOuter = outerPlanets.has(planetB);
+        if (aIsOuter && bIsOuter) {
+          priority = 9; // e.g. Saturn-Neptune, Jupiter-Saturn — generational, very rare
+        } else if (aIsOuter || bIsOuter) {
+          // One outer + Mars: years apart. One outer + inner: more frequent.
+          const aMars = planetA === 'Mars';
+          const bMars = planetB === 'Mars';
+          priority = aMars || bMars ? 8 : 6; // Mars-outer: noteworthy; inner-outer: less rare
+        } else if (planetA === 'Mars' || planetB === 'Mars') {
+          priority = 6; // Mars + inner planet: every few months
+        } else {
+          priority = 4; // Mercury/Venus/Sun combos: very frequent
+        }
       } else if (Math.abs(separation - 60) < 6) {
         aspectType = 'sextile';
         priority = 5;
