@@ -962,8 +962,9 @@ export async function GET(request: NextRequest) {
           const allStories = storyItems;
           const storyUtcHours = [9, 12, 15, 19];
 
-          const SHARE_BASE_URL =
-            process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+          const SHARE_BASE_URL = (
+            process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
+          ).replace(/\/$/, '');
 
           const storySentResults: Array<{
             scheduledTime: string;
