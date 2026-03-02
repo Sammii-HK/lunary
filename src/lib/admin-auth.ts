@@ -56,8 +56,8 @@ export async function requireAdminAuth(
 
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
-  } catch {
-    // Session check failed — fall through to 401
+  } catch (err) {
+    console.error('[admin-auth] session check threw:', err);
   }
 
   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

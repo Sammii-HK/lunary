@@ -53,15 +53,15 @@ class LunaryBridgeViewController: CAPBridgeViewController, WKNavigationDelegate 
             return
         }
 
-        // For external links (not lunary.app), open in Safari
-        if navigationAction.navigationType == .linkActivated {
+        // All external http/https URLs should open in Safari (link taps and JS navigations)
+        if let scheme = url.scheme, scheme == "http" || scheme == "https" {
             print("[Lunary] Opening external link in Safari: \(url.absoluteString)")
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
             decisionHandler(.cancel)
             return
         }
 
-        // Default: allow
+        // Default: allow (e.g. data:, blob:, mailto:)
         print("[Lunary] Allowing navigation (default): \(url.absoluteString)")
         decisionHandler(.allow)
     }

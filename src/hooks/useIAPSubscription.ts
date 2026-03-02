@@ -18,16 +18,18 @@ let rcConfigured = false;
  * Safe to call multiple times — subsequent calls are no-ops.
  */
 export async function configureIAP(userId?: string): Promise<void> {
-  if (rcConfigured) return;
-  if (!RC_IOS_API_KEY) {
-    console.warn('[IAP] NEXT_PUBLIC_REVENUECAT_IOS_KEY is not set');
-    return;
+  if (!rcConfigured) {
+    if (!RC_IOS_API_KEY) {
+      console.warn('[IAP] NEXT_PUBLIC_REVENUECAT_IOS_KEY is not set');
+      return;
+    }
+    await Purchases.configure({ apiKey: RC_IOS_API_KEY });
+    rcConfigured = true;
   }
-  await Purchases.configure({ apiKey: RC_IOS_API_KEY });
+  // Always identify the user if provided, even if RC was already configured
   if (userId) {
     await Purchases.logIn({ appUserID: userId }).catch(() => {});
   }
-  rcConfigured = true;
 }
 
 // Apple product IDs as configured in App Store Connect
@@ -55,11 +57,6 @@ export interface IAPOfferings {
 export async function getIAPOfferings(): Promise<IAPOfferings> {
   const offerings = await Purchases.getOfferings();
   const pkgs = offerings.current?.availablePackages ?? [];
-  console.log('[IAP] current offering id:', offerings.current?.identifier);
-  console.log(
-    '[IAP] packages:',
-    pkgs.map((p) => `${p.identifier} → ${p.product.productIdentifier}`),
-  );
   return {
     plusMonthly:
       pkgs.find((p) => p.product.productIdentifier === PRODUCT_PLUS_MONTHLY) ??

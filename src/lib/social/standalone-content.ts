@@ -20,7 +20,6 @@ const CATEGORIES: ThemeCategory[] = [
   'crystals',
   'spells',
   'numerology',
-  'runes',
   'chakras',
   'zodiac',
 ];

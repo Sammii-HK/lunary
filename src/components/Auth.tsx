@@ -141,8 +141,6 @@ export function AuthComponent({
           name: formData.name || 'User',
         });
 
-        console.log('✅ Sign up result:', result);
-
         if (result.error) {
           throw new Error(result.error.message || 'Signup failed');
         }
@@ -205,47 +203,48 @@ export function AuthComponent({
           password: formData.password,
         });
 
-        console.log('✅ Sign in result:', result);
-
         if (result.error) {
-          console.error('❌ Sign in error:', result.error);
           throw new Error(result.error.message || 'Sign in failed');
         }
 
         if (!result.data) {
-          console.error('❌ Sign in failed - no data returned');
           throw new Error('Sign in failed - no data returned');
         }
-
-        console.log('✅ Sign in successful, user:', result.data.user?.email);
 
         // If on admin subdomain, redirect immediately after successful sign-in
         if (
           typeof window !== 'undefined' &&
           window.location.hostname.startsWith('admin.')
         ) {
-          console.log('🔄 Redirecting to admin dashboard after sign-in');
           setSuccess('Signed in successfully! Redirecting...');
           // Use setTimeout to ensure redirect happens after state update
           setTimeout(() => {
-            console.log('🔄 Executing redirect to /');
             window.location.href = '/';
           }, 500);
           return;
         }
 
-        // If on /auth page (not in modal), redirect to app
+        // If on /auth page (not in modal), redirect to app (or returnTo)
         if (
           typeof window !== 'undefined' &&
           window.location.pathname === '/auth'
         ) {
-          console.log('🔄 Redirecting to app after sign-in');
           setSuccess('Signed in successfully! Redirecting...');
+          invalidateAuthCache();
+          const rawReturnTo = new URLSearchParams(window.location.search).get(
+            'returnTo',
+          );
+          const decoded = rawReturnTo ? decodeURIComponent(rawReturnTo) : null;
+          // Only allow same-site relative paths — reject anything with a host
+          const destination =
+            decoded?.startsWith('/') && !decoded.startsWith('//')
+              ? decoded
+              : '/app';
           setTimeout(() => {
             if (Capacitor.isNativePlatform()) {
-              router.replace('/app');
+              router.replace(destination);
             } else {
-              window.location.href = '/app';
+              window.location.href = destination;
             }
           }, 500);
           return;
@@ -266,14 +265,14 @@ export function AuthComponent({
           setSuccess('Welcome back! You are now signed in.');
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Authentication error:', err);
 
       let errorMessage = isForgot
         ? 'We could not send the reset email. Please try again.'
         : 'Authentication failed. Please try again.';
 
-      const msg = err.message || '';
+      const msg = err instanceof Error ? err.message : '';
 
       if (msg.includes('timed out')) {
         errorMessage =

@@ -961,10 +961,7 @@ function BookOfShadowsContent() {
                             ) {
                               const slug = (entity as any).slug;
                               if (slug) {
-                                window.open(
-                                  `/grimoire/spells/${slug}`,
-                                  '_blank',
-                                );
+                                router.push(`/grimoire/spells/${slug}`);
                                 return;
                               }
                               // Fallback: try to find the spell and get its ID
@@ -981,10 +978,7 @@ function BookOfShadowsContent() {
                                   ),
                               );
                               if (spell) {
-                                window.open(
-                                  `/grimoire/spells/${spell.id}`,
-                                  '_blank',
-                                );
+                                router.push(`/grimoire/spells/${spell.id}`);
                                 return;
                               }
                             }

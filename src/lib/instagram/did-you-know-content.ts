@@ -279,48 +279,6 @@ export const FACT_POOLS: Record<
       source: 'numerology/angel-numbers/666',
     },
   ],
-  runes: [
-    {
-      fact: 'The Elder Futhark has 24 runes, divided into three aettir of eight. Each aett is governed by a different Norse deity.',
-      source: 'runes/fehu',
-    },
-    {
-      fact: "Fehu, the first rune, literally means 'cattle'. In Norse society, cattle was wealth. It represents abundance and new beginnings.",
-      source: 'runes/fehu',
-    },
-    {
-      fact: "The word 'rune' comes from Old Norse 'rún', meaning 'secret' or 'whisper'. Runes were never just an alphabet: they were a system of magic.",
-      source: 'runes/ansuz',
-    },
-    {
-      fact: "Odin hung upside down from Yggdrasil for nine days and nights to gain the knowledge of runes. That's why rune magic is considered sacred.",
-      source: 'runes/ansuz',
-    },
-    {
-      fact: "The rune Gebo (ᚷ) means 'gift' and represents equal exchange. It's the origin of the X we use for kisses.",
-      source: 'runes/gebo',
-    },
-    {
-      fact: 'Vikings carved runes into their weapons believing it imbued them with power. The rune Tiwaz (ᛏ) was marked on swords for victory.',
-      source: 'runes/tiwaz',
-    },
-    {
-      fact: 'The rune Algiz (ᛉ) is the most recognisable protection symbol. Its shape — a person with arms raised — represents the shield of the divine.',
-      source: 'runes/algiz',
-    },
-    {
-      fact: "The blank rune (Wyrd) isn't historically authentic. It was added in the 1980s. Traditional Elder Futhark has exactly 24 runes.",
-      source: 'runes/fehu',
-    },
-    {
-      fact: 'Runes were never written left-to-right exclusively. They could be carved in any direction, even in spirals, and were read by context.',
-      source: 'runes/ansuz',
-    },
-    {
-      fact: "The rune Isa (ᛁ) is a single vertical line meaning 'ice'. It represents stillness, patience, and the power of doing nothing.",
-      source: 'runes/isa',
-    },
-  ],
   chakras: [
     {
       fact: "The word 'chakra' comes from Sanskrit meaning 'wheel'. There are 7 main chakras aligned along your spine, each spinning at a different frequency.",

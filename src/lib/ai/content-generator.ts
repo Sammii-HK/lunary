@@ -9,21 +9,18 @@ import { generateText, LanguageModel } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { z, ZodSchema } from 'zod';
 
-const LLM_MODEL = 'meta-llama/Llama-3.3-70B-Instruct';
-
 /** @deprecated Use default model — tiers removed. Kept for call-site compat. */
 export type AIModelKey = 'quality' | 'fast' | 'premium';
 
-/** Create DeepInfra model (lazy to ensure env vars are loaded at call time) */
+/** Create GPT-4o model for social content generation */
 export function getDeepInfraModel(): LanguageModel {
   const provider = createOpenAI({
-    baseURL: 'https://api.deepinfra.com/v1/openai',
-    apiKey: process.env.DEEPINFRA_API_KEY ?? '',
+    apiKey: process.env.OPENAI_API_KEY ?? '',
   });
-  return provider.chat(LLM_MODEL) as LanguageModel;
+  return provider.chat('gpt-4o') as LanguageModel;
 }
 
-/** @deprecated Use getDeepInfraModel() instead */
+/** @deprecated */
 export const deepinfraModel = null as unknown as LanguageModel;
 
 const getModel = (): LanguageModel => getDeepInfraModel();

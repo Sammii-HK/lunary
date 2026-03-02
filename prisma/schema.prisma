@@ -1723,6 +1723,7 @@ model daily_metrics {
   avg_active_days_per_week    Decimal?  @default(0) @db.Decimal(5, 2)
   dashboard_adoption          Decimal?  @default(0) @db.Decimal(5, 2)
   horoscope_adoption          Decimal?  @default(0) @db.Decimal(5, 2)
+  horoscope_views_all         Decimal?  @default(0) @db.Decimal(5, 2)
   tarot_adoption              Decimal?  @default(0) @db.Decimal(5, 2)
   chart_adoption              Decimal?  @default(0) @db.Decimal(5, 2)
   guide_adoption              Decimal?  @default(0) @db.Decimal(5, 2)

@@ -13,6 +13,7 @@ import {
 } from '../../../../utils/pricing';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from '@/components/ui/birthday-input';
 import { geocodeLocation, parseCoordinates } from '../../../../utils/location';
@@ -83,6 +84,7 @@ export default function ProfilePage() {
   const subscription = useSubscription();
   const authState = useAuthStatus();
   const router = useRouter();
+  const isNativeIOS = useIsNativeIOS();
   const searchParams = useSearchParams();
   const queryTab = searchParams.get('tab');
 
@@ -843,23 +845,25 @@ export default function ProfilePage() {
                 encrypted.
               </p>
             </div>
-            <div className='flex flex-col items-center gap-2 text-sm mt-4'>
-              <span className='text-zinc-400'>Looking for more?</span>
-              <div className='flex flex-wrap justify-center gap-3'>
-                <Link
-                  href='/shop'
-                  className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
-                >
-                  Browse Shop
-                </Link>
-                <a
-                  href='/blog'
-                  className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
-                >
-                  Read the Blog
-                </a>
+            {!isNativeIOS && (
+              <div className='flex flex-col items-center gap-2 text-sm mt-4'>
+                <span className='text-zinc-400'>Looking for more?</span>
+                <div className='flex flex-wrap justify-center gap-3'>
+                  <Link
+                    href='/shop'
+                    className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
+                  >
+                    Browse Shop
+                  </Link>
+                  <Link
+                    href='/blog?from=explore'
+                    className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
+                  >
+                    Read the Blog
+                  </Link>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </>
       )}

@@ -112,9 +112,7 @@ export async function POST(request: NextRequest) {
   const authResult = await requireAdminAuth(request);
   if (authResult instanceof NextResponse) return authResult;
 
-  // Trim whitespace from API key (common issue with .env files)
-  const apiKey = process.env.DEEPINFRA_API_KEY?.trim();
-  const rawKey = process.env.DEEPINFRA_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
 
   try {
     const {
@@ -130,8 +128,8 @@ export async function POST(request: NextRequest) {
     if (!apiKey) {
       return NextResponse.json(
         {
-          error: 'DeepInfra API key not configured',
-          hint: 'Set DEEPINFRA_API_KEY in your environment variables.',
+          error: 'OpenAI API key not configured',
+          hint: 'Set OPENAI_API_KEY in your environment variables.',
         },
         { status: 400 },
       );
@@ -681,7 +679,7 @@ CRITICAL RULES:
         {
           success: false,
           error: 'AI API authentication failed',
-          hint: 'Check that your DEEPINFRA_API_KEY is valid in your environment variables.',
+          hint: 'Check that your OPENAI_API_KEY is valid in your environment variables.',
           details: error?.message || 'Invalid API key',
         },
         { status: 401 },

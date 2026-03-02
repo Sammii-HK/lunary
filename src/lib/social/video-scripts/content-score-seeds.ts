@@ -109,10 +109,10 @@ export const SEED_WEIGHTS: Record<string, SeedWeight> = {
     maxPerWeek: 1,
   },
   rune: {
-    weight: 0.1,
-    tier: 'C',
+    weight: 0,
+    tier: 'D',
     avgViews: 255,
-    maxPerWeek: 1,
+    maxPerWeek: 0,
   },
   'saturn-return': {
     weight: 0.0,

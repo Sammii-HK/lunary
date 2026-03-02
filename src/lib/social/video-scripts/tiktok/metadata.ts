@@ -6,6 +6,8 @@ import type { DailyFacet, WeeklyTheme } from '../../weekly-themes';
 import type { TikTokMetadata } from '../types';
 import { THEME_DISPLAY_MAP } from '../constants';
 import { capitalizeThematicTitle } from '../../../../../utils/og/text';
+import { buildHashtags } from '../../../instagram/caption-generator';
+import type { ThemeCategory } from '../../types';
 
 /**
  * Generate TikTok overlay metadata
@@ -734,19 +736,20 @@ function seededPickN<T>(items: T[], seed: string, n: number): T[] {
 }
 
 /**
- * Generate IG-native hashtag string: 7 category + 3 format tags (8-10 total)
+ * Generate IG Reels hashtags — picks 5 topical tags from the category pool,
+ * rotated by facetTitle seed for variety across posts.
  */
 function generateInstagramHashtags(
   category: string,
-  theme: string,
+  _theme: string,
   facetTitle: string,
 ): string {
-  const categoryPool =
-    IG_CATEGORY_HASHTAGS[category] ?? IG_CATEGORY_HASHTAGS.zodiac;
-  const categoryTags = seededPickN(categoryPool, `ig-cat-${theme}`, 7);
-  const formatTags = seededPickN(IG_FORMAT_HASHTAGS, `ig-fmt-${theme}`, 3);
-  const all = [...categoryTags, ...formatTags];
-  return all.map((t) => (t.startsWith('#') ? t : `#${t}`)).join(' ');
+  const tags = buildHashtags(
+    'story',
+    category as ThemeCategory,
+    facetTitle,
+  ).slice(0, 5);
+  return tags.join(' ');
 }
 
 export interface InstagramReelCaptionParams {
@@ -776,7 +779,8 @@ export function generateInstagramReelCaption(
 
   const emojiPool = CATEGORY_EMOJI[category] || CATEGORY_EMOJI.default;
   const emoji = pickByDate(emojiPool, date);
-  const hookLine = `${hookText || themeName} ${emoji}`;
+  const rawHook = hookText || themeName;
+  const hookLine = `${rawHook.charAt(0).toUpperCase()}${rawHook.slice(1)} ${emoji}`;
 
   const teaserPool = SOFT_CTA_LINES[category] || SOFT_CTA_LINES.default;
   const teaser = pickByDate(teaserPool, date);

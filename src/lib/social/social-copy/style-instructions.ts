@@ -101,9 +101,13 @@ const PLATFORM_GUIDANCE: Record<string, string> = {
 - Lead with something interesting or unexpected
 - No formal structures or repeated patterns`,
 
-  pinterest: `Platform: Pinterest (100-150 chars)
-- Brief, conversational with hashtag
-- Lead with the insight, not buildup`,
+  pinterest: `Platform: Pinterest (150-300 words)
+- Educational and informative — Pinterest rewards saves and people return to reference content
+- Open with a strong hook sentence, then deliver real depth: explain what the topic is, why it matters, how it works
+- Use a natural list or short paragraph structure so it's easy to scan
+- Include 2-3 specific facts or practical details unique to this topic
+- End with a gentle call to save or try it
+- No questions, no vague reflections — just genuinely useful information`,
 
   twitter: `Platform: Twitter/X (280 chars)
 - Punchy and direct

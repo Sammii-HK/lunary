@@ -483,13 +483,13 @@ function generateOneWordCaption(options: { sign?: string }): string {
 }
 
 /**
- * Build 3 topically relevant hashtags.
+ * Build topically relevant hashtags.
  *
  * Merges post-type tags + category tags into one pool of related tags,
- * then picks 3 using seed-based rotation for daily variety.
+ * then picks using seed-based rotation for daily variety.
  * Falls back to broad discovery tags only if the topical pool is too small.
  */
-function buildHashtags(
+export function buildHashtags(
   postType: IGPostType,
   category?: ThemeCategory,
   seed?: string,

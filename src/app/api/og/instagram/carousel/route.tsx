@@ -13,6 +13,8 @@ import {
   IG_TEXT,
   CATEGORY_ACCENT,
   CATEGORY_GRADIENT,
+  MEME_BACKGROUNDS,
+  SIGN_ACCENT,
 } from '@/lib/instagram/design-system';
 import { OG_COLORS } from '@/lib/share/og-utils';
 import type { ThemeCategory } from '@/lib/social/types';
@@ -88,8 +90,15 @@ export async function GET(request: NextRequest) {
     const symbol = searchParams.get('symbol') || '';
     const nextSubtitle = searchParams.get('nextSubtitle') || '';
 
-    const accent = CATEGORY_ACCENT[category] || CATEGORY_ACCENT.tarot;
-    const gradient = CATEGORY_GRADIENT[category] || CATEGORY_GRADIENT.tarot;
+    let accent = CATEGORY_ACCENT[category] || CATEGORY_ACCENT.tarot;
+    let gradient = CATEGORY_GRADIENT[category] || CATEGORY_GRADIENT.tarot;
+
+    // Use sign-specific background and accent for zodiac sign carousels
+    if (category === 'zodiac') {
+      const signKey = title.toLowerCase();
+      if (MEME_BACKGROUNDS[signKey]) gradient = MEME_BACKGROUNDS[signKey];
+      if (SIGN_ACCENT[signKey]) accent = SIGN_ACCENT[signKey];
+    }
     const { width, height } = IG_SIZES.portrait;
 
     const fonts = await loadIGFonts(request, {
@@ -165,8 +174,10 @@ export async function GET(request: NextRequest) {
                   color: OG_COLORS.textPrimary,
                   textAlign: 'center',
                   lineHeight: 1.15,
-                  maxWidth: '88%',
+                  width: '88%',
                   display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
                   fontWeight: 800,
                   marginBottom: 36,
                   textShadow: `0 0 80px ${accent}60, 0 4px 24px rgba(0,0,0,0.7)`,
@@ -182,8 +193,10 @@ export async function GET(request: NextRequest) {
                   color: accent,
                   textAlign: 'center',
                   lineHeight: 1.3,
-                  maxWidth: '72%',
+                  width: '72%',
                   display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
                   fontWeight: 600,
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase',
@@ -201,8 +214,10 @@ export async function GET(request: NextRequest) {
                   color: OG_COLORS.textPrimary,
                   textAlign: 'center',
                   lineHeight: 1.2,
-                  maxWidth: '85%',
+                  width: '85%',
                   display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
                   fontWeight: 700,
                 }}
               >
@@ -215,9 +230,11 @@ export async function GET(request: NextRequest) {
                     color: OG_COLORS.textSecondary,
                     textAlign: 'center',
                     lineHeight: 1.4,
-                    maxWidth: '80%',
-                    marginTop: 20,
+                    width: '80%',
                     display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    marginTop: 20,
                   }}
                 >
                   {truncateIG(subtitle, 100)}
@@ -454,31 +471,14 @@ export async function GET(request: NextRequest) {
           >
             <div
               style={{
+                fontSize: IG_TEXT.dark.caption,
+                color: accent,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
               }}
             >
-              <div
-                style={{
-                  fontSize: IG_TEXT.dark.caption,
-                  color: accent,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  display: 'flex',
-                }}
-              >
-                {truncateIG(title, 50)}
-              </div>
-              <div
-                style={{
-                  fontSize: IG_TEXT.dark.footer,
-                  color: OG_COLORS.textTertiary,
-                  display: 'flex',
-                }}
-              >
-                {slideIndex + 1}/{totalSlides}
-              </div>
+              {truncateIG(title, 50)}
             </div>
 
             <IGProgressDots

@@ -13,11 +13,13 @@ import Link from 'next/link';
 import { useRitualBadge } from '@/hooks/useRitualBadge';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hapticService } from '@/services/native/haptic-service';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 
 export const Navbar = () => {
   const pathname = usePathname();
   const { isSubscribed } = useSubscription();
   const { hasUnreadMessage } = useRitualBadge(isSubscribed);
+  const isNativeIOS = useIsNativeIOS();
 
   if (!pathname) {
     return null;
@@ -36,7 +38,7 @@ export const Navbar = () => {
     '/cosmic-report-generator',
     '/blog',
     '/pricing',
-    '/shop',
+    ...(isNativeIOS ? [] : ['/shop']),
     '/moon-circles',
     '/collections',
     '/forecast',
