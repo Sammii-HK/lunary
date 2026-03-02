@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
 
@@ -52,7 +53,7 @@ export function SignOutButton({
 
     // Hard reload to guarantee UI updates
     if (redirect) {
-      window.location.href = '/';
+      window.location.href = Capacitor.isNativePlatform() ? '/auth' : '/';
     } else {
       window.location.reload();
     }
