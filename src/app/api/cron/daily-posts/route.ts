@@ -1381,6 +1381,8 @@ interface DailySocialPost {
   imageUrls: string[];
   alt: string;
   scheduledDate: string;
+  postType?: string;
+  sourceId?: string;
   pinterestOptions?: {
     boardId?: string;
   };
@@ -1500,13 +1502,15 @@ async function runDailyPosts(dateStr: string) {
     getPlatformImageFormat(platform === 'x' ? 'twitter' : platform);
   const posts: DailySocialPost[] = [];
 
-  // Transit post scheduling - avoid existing content slots at 12:00, 17:00, 20:00 UTC
-  // Space evenly through the day with ~4h gaps so posts don't hammer in a burst
+  // Transit post scheduling — UK lunch/afternoon/evening + US morning/afternoon overlap
+  // Removed morning slots (7, 11 UTC) which get low engagement.
+  // 13 UTC = 1pm UK / 8am US East — UK lunch + US morning
+  // 17 UTC = 5pm UK / 12pm US East — UK late afternoon + US midday
+  // 21 UTC = 9pm UK / 4pm US East — UK evening + US afternoon peak
   const transitTimeSlots = [
-    { hour: 7, label: 'primary' }, // UK early morning
-    { hour: 11, label: 'secondary' }, // UK late morning
-    { hour: 15, label: 'tertiary' }, // UK afternoon, US East morning
-    { hour: 19, label: 'backup' }, // UK evening, US afternoon
+    { hour: 13, label: 'primary' }, // UK lunch / US morning
+    { hour: 17, label: 'secondary' }, // UK late afternoon / US midday
+    { hour: 21, label: 'tertiary' }, // UK evening / US afternoon
   ];
   let transitSlotIndex = 0;
   const getTransitSchedule = () => {
@@ -1612,13 +1616,85 @@ async function runDailyPosts(dateStr: string) {
     getSchedule: getTransitSchedule,
   });
 
-  // Build separate focused posts for significant aspects
+  // Build separate focused posts for significant aspects.
+  //
+  // Lifecycle-aware dedup: aspects are only worth posting when they're
+  // newsworthy — i.e. when they first form or when they're about to leave.
+  // A Saturn-Neptune conjunction lasting 4 months should NOT post every day.
+  //
+  // Dedup windows by planet speed:
+  //   Outer planet pair (Jupiter/Saturn/Uranus/Neptune/Pluto involved): 30 days
+  //   Inner planet pair (Sun/Mercury/Venus/Mars/Moon only): 5 days
+  //
+  // Additionally, sustained slow-planet aspects (separation > 2°) are skipped
+  // entirely — only near-exact (≤ 2°) or newly-entered slow aspects are posted.
+  const OUTER_PLANETS = new Set([
+    'Jupiter',
+    'Saturn',
+    'Uranus',
+    'Neptune',
+    'Pluto',
+  ]);
+
+  const getAspectDedupDays = (planetA: string, planetB: string): number => {
+    if (OUTER_PLANETS.has(planetA) || OUTER_PLANETS.has(planetB)) return 30;
+    return 5;
+  };
+
   const aspectSource = Array.isArray(cosmicContent.dailyAspects)
     ? cosmicContent.dailyAspects
     : (cosmicContent.aspectEvents ?? []);
+
+  // Fetch the last-posted date for each aspect key from social_posts
+  let recentAspectLastPosted = new Map<string, Date>();
+  try {
+    const thirtyDaysAgo = new Date(dateStr);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentAspects = await sql`
+      SELECT source_id, MAX(created_at) as last_posted
+      FROM social_posts
+      WHERE post_type = 'aspect'
+        AND source_id IS NOT NULL
+        AND created_at >= ${thirtyDaysAgo.toISOString()}
+      GROUP BY source_id
+    `;
+    for (const row of recentAspects.rows) {
+      recentAspectLastPosted.set(row.source_id, new Date(row.last_posted));
+    }
+  } catch {
+    // Non-fatal
+  }
+
+  const now = new Date(dateStr);
+  const deduplicatedAspects = aspectSource.filter((aspect: any) => {
+    const planetA = aspect.planetA?.name || aspect.planetA || '';
+    const planetB = aspect.planetB?.name || aspect.planetB || '';
+    const aspectType = (aspect.aspect || '').toLowerCase();
+    const separation =
+      typeof aspect.separation === 'number' ? aspect.separation : 8;
+    const key = `${planetA}-${aspectType}-${planetB}`;
+
+    // For slow outer-planet aspects, only post when near-exact (≤ 2°).
+    // The important moments are when it first tightens to near-exact
+    // and when it's about to leave. The sustained middle is not news.
+    if (OUTER_PLANETS.has(planetA) || OUTER_PLANETS.has(planetB)) {
+      if (separation > 2) return false;
+    }
+
+    // Check dedup window
+    const dedupDays = getAspectDedupDays(planetA, planetB);
+    const lastPosted = recentAspectLastPosted.get(key);
+    if (lastPosted) {
+      const daysSince = (now.getTime() - lastPosted.getTime()) / 86400000;
+      if (daysSince < dedupDays) return false;
+    }
+
+    return true;
+  });
+
   const aspectTextPosts = buildAspectTextPosts({
     dateStr,
-    aspects: aspectSource,
+    aspects: deduplicatedAspects,
     platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
   });
@@ -1743,6 +1819,21 @@ async function runDailyPosts(dateStr: string) {
       if (anySucceeded) {
         console.log(`✅ ${post.name} post scheduled successfully`);
         const firstSuccess = platformResults.find(([, r]) => r.success);
+
+        // Persist aspect posts to social_posts so next day's dedup check
+        // can detect them and skip re-posting the same conjunction.
+        if (post.postType === 'aspect' && post.sourceId) {
+          try {
+            await sql`
+              INSERT INTO social_posts (content, platform, post_type, source_id, status, scheduled_date)
+              VALUES (${post.content}, 'threads', 'aspect', ${post.sourceId}, 'sent', ${post.scheduledDate})
+              ON CONFLICT DO NOTHING
+            `;
+          } catch {
+            // Non-fatal
+          }
+        }
+
         postResults.push({
           name: post.name,
           platforms: post.platforms,
@@ -4486,11 +4577,13 @@ function buildAspectTextPosts({
 
   if (validAspects.length === 0) return posts;
 
-  // Sort by priority (higher first), take top 4 aspects
+  // Sort by priority (higher first), take only the top 1 aspect per day.
+  // Long-duration aspects (e.g. Saturn conj Neptune lasting months) would spam
+  // every day at top priority if we took more — dedup handles multi-day coverage.
   const sortedAspects = [...validAspects].sort(
     (a, b) => (b.priority || 5) - (a.priority || 5),
   );
-  const selectedAspects = sortedAspects.slice(0, 4);
+  const selectedAspects = sortedAspects.slice(0, 1);
 
   for (const aspect of selectedAspects) {
     const planetA = aspect.planetA?.name || aspect.planetA;
@@ -4590,6 +4683,7 @@ function buildAspectTextPosts({
       aspectCtx,
     );
 
+    const aspectKey = `${planetA}-${aspectType}-${planetB}`;
     posts.push({
       name: `Aspect • ${planetA} ${aspectLabel} ${planetB}`,
       content: xContent,
@@ -4597,6 +4691,8 @@ function buildAspectTextPosts({
       imageUrls: [],
       alt: `${planetA} ${aspectLabel} ${planetB}`,
       scheduledDate: getSchedule(),
+      postType: 'aspect',
+      sourceId: aspectKey,
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
