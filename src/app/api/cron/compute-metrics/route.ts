@@ -351,15 +351,26 @@ export async function GET(request: NextRequest) {
         [TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // ── D1/D7/D30 Retention — single cohort (signed up 31-60 days ago) ──
-      // Using one cohort for all three ensures D1 >= D7 >= D30 (no survivorship bias)
+      // ── D1/D7/D30 Retention — signed-in product users only ──
+      // Cohort: users signed up 31-60 days ago who performed at least one product action
+      // within their first 7 days (excludes SEO/anonymous signups who never engaged)
+      // Return checks also require product events (not just page views)
       sql.query(
         hasIdentityLinks
           ? `WITH cohort AS (
-               SELECT id, "createdAt" FROM "user"
-               WHERE "createdAt" >= $1::date - INTERVAL '60 days'
-                 AND "createdAt" < $1::date - INTERVAL '31 days'
-                 AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
+               SELECT u.id, u."createdAt" FROM "user" u
+               WHERE u."createdAt" >= $1::date - INTERVAL '60 days'
+                 AND u."createdAt" < $1::date - INTERVAL '31 days'
+                 AND (u.email IS NULL OR (u.email NOT LIKE $2 AND u.email != $3))
+                 AND EXISTS (
+                   SELECT 1 FROM conversion_events ce
+                   LEFT JOIN analytics_identity_links ail
+                     ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
+                   WHERE (ce.user_id = u.id OR ail.user_id = u.id)
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.created_at >= u."createdAt"
+                     AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
+                 )
              )
              SELECT
                COUNT(*) as cohort_size,
@@ -369,6 +380,7 @@ export async function GET(request: NextRequest) {
                    LEFT JOIN analytics_identity_links ail
                      ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
                    WHERE (ce.user_id = c.id OR ail.user_id = c.id)
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '1 day'
                  )
                ) as d1_returned,
@@ -378,6 +390,7 @@ export async function GET(request: NextRequest) {
                    LEFT JOIN analytics_identity_links ail
                      ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
                    WHERE (ce.user_id = c.id OR ail.user_id = c.id)
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '7 days'
                  )
                ) as d7_returned,
@@ -387,15 +400,23 @@ export async function GET(request: NextRequest) {
                    LEFT JOIN analytics_identity_links ail
                      ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
                    WHERE (ce.user_id = c.id OR ail.user_id = c.id)
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '30 days'
                  )
                ) as d30_returned
              FROM cohort c`
           : `WITH cohort AS (
-               SELECT id, "createdAt" FROM "user"
-               WHERE "createdAt" >= $1::date - INTERVAL '60 days'
-                 AND "createdAt" < $1::date - INTERVAL '31 days'
-                 AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
+               SELECT u.id, u."createdAt" FROM "user" u
+               WHERE u."createdAt" >= $1::date - INTERVAL '60 days'
+                 AND u."createdAt" < $1::date - INTERVAL '31 days'
+                 AND (u.email IS NULL OR (u.email NOT LIKE $2 AND u.email != $3))
+                 AND EXISTS (
+                   SELECT 1 FROM conversion_events ce
+                   WHERE ce.user_id = u.id
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.created_at >= u."createdAt"
+                     AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
+                 )
              )
              SELECT
                COUNT(*) as cohort_size,
@@ -403,6 +424,7 @@ export async function GET(request: NextRequest) {
                  WHERE EXISTS (
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = c.id
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '1 day'
                  )
                ) as d1_returned,
@@ -410,6 +432,7 @@ export async function GET(request: NextRequest) {
                  WHERE EXISTS (
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = c.id
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '7 days'
                  )
                ) as d7_returned,
@@ -417,6 +440,7 @@ export async function GET(request: NextRequest) {
                  WHERE EXISTS (
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = c.id
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
                      AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '30 days'
                  )
                ) as d30_returned
@@ -430,14 +454,23 @@ export async function GET(request: NextRequest) {
       // ── D30 placeholder (kept for result array index compat — data comes from unified query above) ──
       Promise.resolve({ rows: [{}] }),
 
-      // ── Product D7 Retention (mature cohorts only, product actions only) ──
+      // ── Product D7 Retention — signed-in product users only ──
       sql.query(
         hasIdentityLinks
           ? `WITH cohort AS (
-               SELECT id, "createdAt" FROM "user"
-               WHERE "createdAt" >= $1::date - INTERVAL '14 days'
-                 AND "createdAt" < $1::date - INTERVAL '7 days'
-                 AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
+               SELECT u.id, u."createdAt" FROM "user" u
+               WHERE u."createdAt" >= $1::date - INTERVAL '14 days'
+                 AND u."createdAt" < $1::date - INTERVAL '7 days'
+                 AND (u.email IS NULL OR (u.email NOT LIKE $2 AND u.email != $3))
+                 AND EXISTS (
+                   SELECT 1 FROM conversion_events ce
+                   LEFT JOIN analytics_identity_links ail
+                     ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
+                   WHERE (ce.user_id = u.id OR ail.user_id = u.id)
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.created_at >= u."createdAt"
+                     AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
+                 )
              )
              SELECT
                COUNT(*) as cohort_size,
@@ -448,15 +481,22 @@ export async function GET(request: NextRequest) {
                      ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
                    WHERE (ce.user_id = c.id OR ail.user_id = c.id)
                      AND ce.event_type NOT IN ('app_opened', 'page_viewed')
-                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + 7
+                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '7 days'
                  )
                ) as returned
              FROM cohort c`
           : `WITH cohort AS (
-               SELECT id, "createdAt" FROM "user"
-               WHERE "createdAt" >= $1::date - INTERVAL '14 days'
-                 AND "createdAt" < $1::date - INTERVAL '7 days'
-                 AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
+               SELECT u.id, u."createdAt" FROM "user" u
+               WHERE u."createdAt" >= $1::date - INTERVAL '14 days'
+                 AND u."createdAt" < $1::date - INTERVAL '7 days'
+                 AND (u.email IS NULL OR (u.email NOT LIKE $2 AND u.email != $3))
+                 AND EXISTS (
+                   SELECT 1 FROM conversion_events ce
+                   WHERE ce.user_id = u.id
+                     AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+                     AND ce.created_at >= u."createdAt"
+                     AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
+                 )
              )
              SELECT
                COUNT(*) as cohort_size,
@@ -465,7 +505,7 @@ export async function GET(request: NextRequest) {
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = c.id
                      AND ce.event_type NOT IN ('app_opened', 'page_viewed')
-                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + 7
+                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '7 days'
                  )
                ) as returned
              FROM cohort c`,
