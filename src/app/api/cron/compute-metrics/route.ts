@@ -595,15 +595,20 @@ export async function GET(request: NextRequest) {
       ),
 
       // ── Feature adoption (MAU window, still scans conversion_events — bounded query) ──
+      // horoscope_viewed and personalized_horoscope_viewed are merged into 'horoscope_viewed'
+      // because free users fire horoscope_viewed and paid users fire personalized_horoscope_viewed
       sql.query(
         `SELECT
-           ce.event_type,
+           CASE WHEN ce.event_type IN ('horoscope_viewed', 'personalized_horoscope_viewed')
+                THEN 'horoscope_viewed'
+                ELSE ce.event_type END as event_type,
            COUNT(DISTINCT ${signedInId}) as users
          FROM conversion_events ce
          ${idJoin}
          WHERE ce.created_at >= $1 AND ce.created_at <= $2
            AND ce.event_type IN (
              'daily_dashboard_viewed',
+             'horoscope_viewed',
              'personalized_horoscope_viewed',
              'tarot_drawn',
              'chart_viewed',
@@ -611,7 +616,7 @@ export async function GET(request: NextRequest) {
              'ritual_completed'
            )
            AND ${whereBase}
-         GROUP BY ce.event_type`,
+         GROUP BY 1`,
         [
           mauStart.toISOString(),
           dayEnd.toISOString(),
@@ -691,12 +696,13 @@ export async function GET(request: NextRequest) {
       ),
 
       // ── Horoscope all-users (including anon) in 30-day window ──
+      // Covers both free (horoscope_viewed) and paid (personalized_horoscope_viewed)
       sql.query(
         `SELECT COUNT(DISTINCT ${anyId}) as count
          FROM conversion_events ce
          ${idJoin}
          WHERE ce.created_at >= $1 AND ce.created_at <= $2
-           AND ce.event_type = 'personalized_horoscope_viewed'
+           AND ce.event_type IN ('horoscope_viewed', 'personalized_horoscope_viewed')
            AND ${whereBase}`,
         [
           mauStart.toISOString(),
@@ -958,7 +964,7 @@ export async function GET(request: NextRequest) {
         stickiness, // $41
         avgActiveDaysPerWeek, // $42
         featureAdoption['daily_dashboard_viewed'] || 0, // $43
-        featureAdoption['personalized_horoscope_viewed'] || 0, // $44
+        featureAdoption['horoscope_viewed'] || 0, // $44 (free + paid merged)
         featureAdoption['tarot_drawn'] || 0, // $45
         featureAdoption['chart_viewed'] || 0, // $46
         featureAdoption['astral_chat_used'] || 0, // $47
