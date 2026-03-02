@@ -661,7 +661,7 @@ export function buildHashtags(
   const startIndex = hash % unique.length;
   const rotated = [...unique.slice(startIndex), ...unique.slice(0, startIndex)];
 
-  return rotated.slice(0, 10);
+  return rotated.slice(0, 5);
 }
 
 /**

@@ -170,7 +170,7 @@ const videoHashtagConfig: Record<
   string,
   { useHashtags: boolean; count: number }
 > = {
-  instagram: { useHashtags: true, count: 10 },
+  instagram: { useHashtags: true, count: 5 },
   tiktok: { useHashtags: true, count: 3 },
   twitter: { useHashtags: true, count: 2 },
   threads: { useHashtags: false, count: 0 },
