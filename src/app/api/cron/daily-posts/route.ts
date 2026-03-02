@@ -880,7 +880,7 @@ export async function GET(request: NextRequest) {
           AND scheduled_date::date = ${dateStr}::date
           AND status IN ('sent', 'failed')
       `;
-        if (Number(existingStories.rows[0]?.count || 0) >= 4) {
+        if (!force && Number(existingStories.rows[0]?.count || 0) >= 4) {
           console.log('📖 Stories already generated for today, skipping');
           cronResults.instagramStories = {
             success: true,
@@ -963,7 +963,9 @@ export async function GET(request: NextRequest) {
           const storyUtcHours = [9, 12, 15, 19];
 
           const SHARE_BASE_URL = (
-            process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
+            url.searchParams.get('storyBaseUrl') ||
+            process.env.NEXT_PUBLIC_BASE_URL ||
+            'https://lunary.app'
           ).replace(/\/$/, '');
 
           const storySentResults: Array<{
