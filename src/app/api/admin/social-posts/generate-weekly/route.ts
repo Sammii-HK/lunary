@@ -1914,13 +1914,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check DeepInfra API key
-    const apiKey = process.env.DEEPINFRA_API_KEY?.trim();
+    // Check OpenAI API key
+    const apiKey = process.env.OPENAI_API_KEY?.trim();
     if (!apiKey) {
       return NextResponse.json(
         {
-          error: 'DeepInfra API key not configured',
-          hint: 'Set DEEPINFRA_API_KEY in your environment variables.',
+          error: 'OpenAI API key not configured',
+          hint: 'Set OPENAI_API_KEY in your environment variables.',
         },
         { status: 400 },
       );
