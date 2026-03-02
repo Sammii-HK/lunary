@@ -1951,7 +1951,7 @@ export default function SocialPostsPage() {
                                       Instagram Carousel -{' '}
                                       {carouselImages.length} slides
                                     </Badge>
-                                    <div className='grid grid-cols-2 gap-2 max-w-2xl mx-auto'>
+                                    <div className='grid grid-cols-1 gap-2 max-w-md mx-auto'>
                                       {carouselImages.map(
                                         (imgUrl: string, idx: number) => (
                                           <div key={idx} className='relative'>

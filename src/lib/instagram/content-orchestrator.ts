@@ -9,7 +9,7 @@ import {
 } from './carousel-scheduler';
 import { generateCaption } from './caption-generator';
 import { generateDidYouKnow } from './did-you-know-content';
-import { generateSignRanking } from './ranking-content';
+import { generateRankingCarousel } from './ranking-content';
 import { generateCompatibility } from './compatibility-content';
 import { generateAngelNumberBatch } from './angel-number-content';
 import { generateOneWordBatch } from './one-word-content';
@@ -273,8 +273,8 @@ async function generateOneWordPost(
     return `${base}/api/og/instagram/carousel?${params.toString()}`;
   });
 
-  const { caption, hashtags } = generateCaption('angel_number_carousel', {
-    title: traitLabel,
+  const { caption, hashtags } = generateCaption('one_word', {
+    trait: traitKey,
     category: 'zodiac',
   });
 
@@ -395,29 +395,32 @@ async function generateSignRankingPost(
   dateStr: string,
   scheduledTime: string,
 ): Promise<IGScheduledPost> {
-  const content = generateSignRanking(dateStr);
+  const { trait, slides, rankings } = generateRankingCarousel(dateStr);
 
-  const params = new URLSearchParams({
-    trait: content.trait,
-    rankings: JSON.stringify(content.rankings),
-    v: '4',
-    t: Date.now().toString(),
-  });
+  const carouselContent = {
+    title: `Signs ranked by ${trait}`,
+    category: 'zodiac' as const,
+    slug: `sign-ranking-${dateStr}`,
+    slides,
+  };
+
+  const imageUrls = getCarouselImageUrls(carouselContent, SHARE_BASE_URL);
 
   const { caption, hashtags } = generateCaption('sign_ranking', {
-    trait: content.trait,
+    trait,
   });
 
   return {
-    type: 'sign_ranking',
-    format: 'square',
-    imageUrls: [
-      `${SHARE_BASE_URL}/api/og/instagram/sign-ranking?${params.toString()}`,
-    ],
+    type: 'carousel',
+    format: 'portrait',
+    imageUrls,
     caption,
     hashtags,
     scheduledTime,
-    metadata: {},
+    metadata: {
+      dateStr,
+      trait,
+    },
   };
 }
 

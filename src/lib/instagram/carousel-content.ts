@@ -145,7 +145,7 @@ export async function buildCarouselFromSlug(
           colors: fullCrystalData.colors,
           description: fullCrystalData.description,
           metaphysicalProperties: fullCrystalData.metaphysicalProperties,
-        },
+        } as any,
       };
     }
   } else if (category === 'spells') {
@@ -173,12 +173,30 @@ export async function buildCarouselFromSlug(
           timing: fullSpellData.timing,
           instructions: fullSpellData.instructions || fullSpellData.steps,
           intention: fullSpellData.intention,
-        },
+        } as any,
       };
     }
   }
 
-  const slides = buildSlides(enrichedSnippet, category);
+  // Determine the backdrop symbol override for tarot and crystals
+  let overrideSymbol: string | undefined;
+
+  if (category === 'tarot') {
+    const fc = (snippet.fullContent || {}) as any;
+    const zodiac = fc.zodiacSign?.toLowerCase();
+    const planet = fc.planet;
+    overrideSymbol =
+      (zodiac && ZODIAC_SIGN_SYMBOLS[zodiac]) ??
+      (planet && PLANET_SYMBOLS[planet]) ??
+      'R'; // Moon fallback
+  }
+
+  const enrichedFc = enrichedSnippet.fullContent as any;
+  if (category === 'crystals' && enrichedFc?.planets?.length) {
+    overrideSymbol = PLANET_SYMBOLS[enrichedFc.planets[0]] ?? 'T'; // Venus fallback
+  }
+
+  const slides = buildSlides(enrichedSnippet, category, overrideSymbol);
 
   return {
     title: snippet.title,
@@ -225,15 +243,18 @@ function mapCategory(raw: string): ThemeCategory {
 function buildSlides(
   snippet: ReturnType<typeof buildSlideData>,
   category: ThemeCategory,
+  overrideSymbol?: string,
 ): IGCarouselSlide[] {
-  const fc = snippet.fullContent || {};
+  const fc = (snippet.fullContent || {}) as any;
   const slides: IGCarouselSlide[] = [];
 
-  // For zodiac carousels, use the sign-specific Astronomicon glyph on every slide
+  // For zodiac carousels, use the sign-specific Astronomicon glyph on every slide.
+  // overrideSymbol (tarot/crystal) takes priority over the zodiac sign fallback.
   const zodiacSignSymbol =
     category === 'zodiac'
       ? ZODIAC_SIGN_SYMBOLS[snippet.title.toLowerCase()]
       : undefined;
+  const slideSymbol = overrideSymbol ?? zodiacSignSymbol;
 
   // Cover slide (always first) — hook text goes in content field
   const hookText = getHookText(category, snippet.title);
@@ -246,7 +267,7 @@ function buildSlides(
       category,
       'cover',
       undefined,
-      zodiacSignSymbol,
+      slideSymbol,
     ),
   );
 
@@ -312,6 +333,7 @@ function buildSlides(
             category,
             'body',
             'Metaphysical Properties',
+            slideSymbol,
           ),
         );
       }
@@ -332,6 +354,7 @@ function buildSlides(
               category,
               'body',
               'Chakra Connections',
+              slideSymbol,
             ),
           );
         }
@@ -357,6 +380,7 @@ function buildSlides(
             category,
             'body',
             'Cosmic Alignments',
+            slideSymbol,
           ),
         );
       }
@@ -384,6 +408,7 @@ function buildSlides(
               category,
               'body',
               'How to Use',
+              slideSymbol,
             ),
           );
         }
@@ -413,6 +438,7 @@ function buildSlides(
               category,
               'body',
               'Crystal Care',
+              slideSymbol,
             ),
           );
         }
@@ -442,6 +468,7 @@ function buildSlides(
               category,
               'body',
               'Crystal Pairings',
+              slideSymbol,
             ),
           );
         }
@@ -459,6 +486,7 @@ function buildSlides(
             category,
             'body',
             'Keywords',
+            slideSymbol,
           ),
         );
       }
@@ -472,6 +500,7 @@ function buildSlides(
             category,
             'body',
             'Upright',
+            slideSymbol,
           ),
         );
       }
@@ -485,6 +514,7 @@ function buildSlides(
             category,
             'body',
             'Reversed',
+            slideSymbol,
           ),
         );
       }
@@ -504,6 +534,7 @@ function buildSlides(
             category,
             'body',
             'Love & Career',
+            slideSymbol,
           ),
         );
       }
@@ -582,7 +613,7 @@ function buildSlides(
             category,
             'body',
             'Element & Ruler',
-            zodiacSignSymbol,
+            slideSymbol,
           ),
         );
       }
@@ -596,7 +627,7 @@ function buildSlides(
             category,
             'body',
             'Strengths',
-            zodiacSignSymbol,
+            slideSymbol,
           ),
         );
       }
@@ -610,7 +641,7 @@ function buildSlides(
             category,
             'body',
             'Personality',
-            zodiacSignSymbol,
+            slideSymbol,
           ),
         );
       }
@@ -630,7 +661,7 @@ function buildSlides(
             category,
             'body',
             'Love & Career',
-            zodiacSignSymbol,
+            slideSymbol,
           ),
         );
       }
@@ -849,6 +880,20 @@ const ZODIAC_SIGN_SYMBOLS: Record<string, string> = {
   capricorn: 'J',
   aquarius: 'K',
   pisces: 'L',
+};
+
+// Astronomicon planet characters
+const PLANET_SYMBOLS: Record<string, string> = {
+  Sun: 'Q',
+  Moon: 'R',
+  Mercury: 'S',
+  Venus: 'T',
+  Mars: 'U',
+  Jupiter: 'V',
+  Saturn: 'W',
+  Uranus: 'X',
+  Neptune: 'Y',
+  Pluto: 'Z',
 };
 
 function makeSlide(

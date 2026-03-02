@@ -7,6 +7,7 @@ import {
   IGProgressDots,
   truncateIG,
   renderIGStarfield,
+  renderConstellation,
 } from '@/lib/instagram/ig-utils';
 import {
   IG_SIZES,
@@ -90,6 +91,28 @@ export async function GET(request: NextRequest) {
     const symbol = searchParams.get('symbol') || '';
     const nextSubtitle = searchParams.get('nextSubtitle') || '';
 
+    // Reverse map: Astronomicon zodiac glyph → sign name for constellation rendering
+    const SYMBOL_TO_SIGN: Record<string, string> = {
+      A: 'aries',
+      B: 'taurus',
+      C: 'gemini',
+      D: 'cancer',
+      E: 'leo',
+      F: 'virgo',
+      G: 'libra',
+      H: 'scorpio',
+      I: 'sagittarius',
+      J: 'capricorn',
+      K: 'aquarius',
+      L: 'pisces',
+    };
+    const zodiacSign =
+      category === 'zodiac'
+        ? title.toLowerCase()
+        : symbol
+          ? SYMBOL_TO_SIGN[symbol]
+          : undefined;
+
     let accent = CATEGORY_ACCENT[category] || CATEGORY_ACCENT.tarot;
     let gradient = CATEGORY_GRADIENT[category] || CATEGORY_GRADIENT.tarot;
 
@@ -131,8 +154,9 @@ export async function GET(request: NextRequest) {
           }}
         >
           {renderIGStarfield(`cover-${title}`)}
+          {zodiacSign && renderConstellation(zodiacSign, accent, width, height)}
 
-          {/* Symbol ghost backdrop — huge, Satori-safe centering */}
+          {/* Symbol ghost backdrop — centered */}
           {symbol && (
             <div
               style={{
@@ -181,6 +205,9 @@ export async function GET(request: NextRequest) {
               <div
                 style={{
                   display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
                   maxWidth: 860,
                   fontSize: 80,
                   color: OG_COLORS.textPrimary,
@@ -197,6 +224,9 @@ export async function GET(request: NextRequest) {
               <div
                 style={{
                   display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
                   maxWidth: 700,
                   fontSize: 30,
                   color: accent,
@@ -223,6 +253,9 @@ export async function GET(request: NextRequest) {
               <div
                 style={{
                   display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
                   maxWidth: 860,
                   fontSize: IG_TEXT.dark.title,
                   color: OG_COLORS.textPrimary,
@@ -237,6 +270,9 @@ export async function GET(request: NextRequest) {
                 <div
                   style={{
                     display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    alignSelf: 'center',
                     maxWidth: 800,
                     fontSize: IG_TEXT.dark.subtitle,
                     color: OG_COLORS.textSecondary,
@@ -438,8 +474,9 @@ export async function GET(request: NextRequest) {
           }}
         >
           {renderIGStarfield(`body-${title}-${slideIndex}`)}
+          {zodiacSign && renderConstellation(zodiacSign, accent, width, height)}
 
-          {/* Symbol ghost backdrop (zodiac/rune slides) — huge, Satori-safe centering */}
+          {/* Symbol ghost backdrop — centered */}
           {symbol && (
             <div
               style={{
