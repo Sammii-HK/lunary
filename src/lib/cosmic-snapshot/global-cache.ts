@@ -560,6 +560,9 @@ export async function detectTransitMilestones(
     // Only check milestone planets
     if (!MILESTONE_PLANETS.includes(planet)) continue;
 
+    // Don't post "X leaves Y in ~N days" when the planet is retrograde — it isn't going anywhere
+    if (position.retrograde) continue;
+
     const duration = position.duration;
     if (!duration || !duration.totalDays || !duration.remainingDays) continue;
 
