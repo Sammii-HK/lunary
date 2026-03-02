@@ -89,6 +89,9 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const force = url.searchParams.get('force') === 'true';
     const overrideDate = url.searchParams.get('date');
+    // Optional base URL override for carousel/IG image generation (local testing)
+    const carouselBaseUrl =
+      url.searchParams.get('carouselBaseUrl')?.replace(/\/$/, '') || undefined;
     // Optional comma-separated section filter, e.g. ?sections=threads,stories
     // When omitted, all sections run as normal.
     const sectionsParam = url.searchParams.get('sections');
@@ -355,7 +358,7 @@ export async function GET(request: NextRequest) {
     try {
       const { generateDailyBatch } =
         await import('@/lib/instagram/content-orchestrator');
-      const igBatch = await generateDailyBatch(dateStr);
+      const igBatch = await generateDailyBatch(dateStr, carouselBaseUrl);
 
       // Post each Instagram batch item via Ayrshare
       const igSentResults: Array<{

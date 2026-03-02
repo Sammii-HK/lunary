@@ -54,6 +54,7 @@ const DAILY_CONTENT_MIX: Record<number, IGPostType[]> = {
  */
 export async function generateDailyBatch(
   dateStr: string,
+  baseUrl?: string,
 ): Promise<IGPostBatch> {
   const date = new Date(dateStr);
   const dayOfWeek = (date.getDay() + 6) % 7; // Convert to Mon=0
@@ -63,7 +64,7 @@ export async function generateDailyBatch(
 
   for (const postType of contentMix) {
     try {
-      const post = await generatePost(postType, dateStr, dayOfWeek);
+      const post = await generatePost(postType, dateStr, dayOfWeek, baseUrl);
       if (post) {
         posts.push(post);
       }
@@ -83,6 +84,7 @@ async function generatePost(
   type: IGPostType,
   dateStr: string,
   dayOfWeek: number,
+  baseUrl?: string,
 ): Promise<IGScheduledPost | null> {
   const scheduledTime = buildScheduleTime(dateStr, POSTING_TIMES[type]);
 
@@ -90,11 +92,11 @@ async function generatePost(
     case 'meme':
       return generateMemePost(dateStr, scheduledTime);
     case 'carousel':
-      return generateCarouselPost(dateStr, scheduledTime, dayOfWeek);
+      return generateCarouselPost(dateStr, scheduledTime, dayOfWeek, baseUrl);
     case 'angel_number_carousel':
-      return generateAngelNumberPost(dateStr, scheduledTime);
+      return generateAngelNumberPost(dateStr, scheduledTime, baseUrl);
     case 'one_word':
-      return generateOneWordPost(dateStr, scheduledTime);
+      return generateOneWordPost(dateStr, scheduledTime, baseUrl);
     case 'quote':
       return generateQuotePost(dateStr, scheduledTime);
     case 'did_you_know':
@@ -147,6 +149,7 @@ async function generateCarouselPost(
   dateStr: string,
   scheduledTime: string,
   dayOfWeek?: number,
+  baseUrl?: string,
 ): Promise<IGScheduledPost | null> {
   // Cadence plan forces specific categories per day: Mon=zodiac, Sat=tarot, Sun=crystals
   const forcedCategory =
@@ -159,7 +162,7 @@ async function generateCarouselPost(
     return null;
   }
 
-  const imageUrls = getCarouselImageUrls(carousel);
+  const imageUrls = getCarouselImageUrls(carousel, baseUrl);
   const { caption, hashtags } = generateCaption('carousel', {
     category: carousel.category,
     title: carousel.title,
@@ -183,12 +186,14 @@ async function generateCarouselPost(
 async function generateAngelNumberPost(
   dateStr: string,
   scheduledTime: string,
+  baseUrl?: string,
 ): Promise<IGScheduledPost | null> {
   const batch = generateAngelNumberBatch(dateStr, 1);
   if (batch.length === 0) return null;
 
   const { number, slides } = batch[0];
   const cacheBust = Date.now().toString();
+  const base = (baseUrl || SHARE_BASE_URL).replace(/\/$/, '');
 
   const imageUrls = slides.map((slide) => {
     const params = new URLSearchParams({
@@ -203,7 +208,7 @@ async function generateAngelNumberPost(
     });
     if (slide.subtitle) params.set('subtitle', slide.subtitle);
     if (slide.symbol) params.set('symbol', slide.symbol);
-    return `${SHARE_BASE_URL}/api/og/instagram/carousel?${params.toString()}`;
+    return `${base}/api/og/instagram/carousel?${params.toString()}`;
   });
 
   const { caption, hashtags } = generateCaption('angel_number_carousel', {
@@ -228,12 +233,14 @@ async function generateAngelNumberPost(
 async function generateOneWordPost(
   dateStr: string,
   scheduledTime: string,
+  baseUrl?: string,
 ): Promise<IGScheduledPost | null> {
   const batch = generateOneWordBatch(dateStr, 1);
   if (batch.length === 0) return null;
 
   const { traitKey, traitLabel, slides } = batch[0];
   const cacheBust = Date.now().toString();
+  const base = (baseUrl || SHARE_BASE_URL).replace(/\/$/, '');
 
   const imageUrls = slides.map((slide) => {
     if (slide.variant === 'body') {
@@ -248,7 +255,7 @@ async function generateOneWordPost(
         v: '4',
         t: cacheBust,
       });
-      return `${SHARE_BASE_URL}/api/og/instagram/one-word?${params.toString()}`;
+      return `${base}/api/og/instagram/one-word?${params.toString()}`;
     }
     // Cover and CTA use the standard carousel route
     const params = new URLSearchParams({
@@ -263,7 +270,7 @@ async function generateOneWordPost(
     });
     if (slide.subtitle) params.set('subtitle', slide.subtitle);
     if (slide.symbol) params.set('symbol', slide.symbol);
-    return `${SHARE_BASE_URL}/api/og/instagram/carousel?${params.toString()}`;
+    return `${base}/api/og/instagram/carousel?${params.toString()}`;
   });
 
   const { caption, hashtags } = generateCaption('angel_number_carousel', {
