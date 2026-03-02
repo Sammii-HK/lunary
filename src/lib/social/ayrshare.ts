@@ -218,9 +218,24 @@ export async function postToAyrshare(
       };
     }
 
+    // Also check per-platform result — Ayrshare can return top-level success
+    // but embed a per-platform error (e.g. { tiktok: { status: 'error', message: '...' } })
+    const platformResult = data[ayrsharePlatform];
+    if (platformResult?.status === 'error') {
+      console.error(
+        `Ayrshare per-platform error for ${ayrsharePlatform}:`,
+        platformResult.message,
+      );
+      return {
+        success: false,
+        error: platformResult.message || `${ayrsharePlatform} post failed`,
+        rawResponse: data,
+      };
+    }
+
     return {
       success: true,
-      postId: data.id || data.refId,
+      postId: platformResult?.id || data.id || data.refId,
       rawResponse: data,
     };
   } catch (error) {
