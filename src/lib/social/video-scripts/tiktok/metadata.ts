@@ -734,19 +734,21 @@ function seededPickN<T>(items: T[], seed: string, n: number): T[] {
 }
 
 /**
- * Generate IG-native hashtag string: 7 category + 3 format tags (8-10 total)
+ * Fixed IG Reels hashtag set — these 10 tags are used on every reel.
+ * Chosen for discovery in the astrology niche + Reels algorithm signals.
+ */
+const IG_REELS_HASHTAGS =
+  '#astrologycommunity #astrology #zodiac #zodiacsigns #birthchart #astrologymemes #spiritualinstagram #reelsinstagram #explore #instagramreels';
+
+/**
+ * Generate IG-native hashtag string — returns the fixed Reels hashtag set.
  */
 function generateInstagramHashtags(
-  category: string,
-  theme: string,
-  facetTitle: string,
+  _category: string,
+  _theme: string,
+  _facetTitle: string,
 ): string {
-  const categoryPool =
-    IG_CATEGORY_HASHTAGS[category] ?? IG_CATEGORY_HASHTAGS.zodiac;
-  const categoryTags = seededPickN(categoryPool, `ig-cat-${theme}`, 7);
-  const formatTags = seededPickN(IG_FORMAT_HASHTAGS, `ig-fmt-${theme}`, 3);
-  const all = [...categoryTags, ...formatTags];
-  return all.map((t) => (t.startsWith('#') ? t : `#${t}`)).join(' ');
+  return IG_REELS_HASHTAGS;
 }
 
 export interface InstagramReelCaptionParams {

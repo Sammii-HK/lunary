@@ -1123,7 +1123,10 @@ async function generateThematicWeeklyPosts(
               hashtags = generated.hashtags || [];
             }
             let openingLine: string | null = null;
-            if (normalizedPostType.startsWith('educational')) {
+            if (
+              normalizedPostType.startsWith('educational') &&
+              post.platform !== 'threads'
+            ) {
               const weekKey = `${weekStartDate.toISOString().split('T')[0]}|${sourcePack.topic}`;
               const usedOpenings = localOpeningUsage.get(weekKey) || [];
               const preferredIntent =

@@ -1007,7 +1007,7 @@ const buildShortFormOverrides = (weekStartDate: Date): ShortFormOverride[] => {
   const seed = hashString(weekKey);
   const closingDayOffset = 6;
   const dayPool = [0, 1, 2, 3, 4, 5];
-  const [personaDayOffset, questionDayOffset] = seededShuffle(dayPool, seed);
+  const [personaDayOffset] = seededShuffle(dayPool, seed);
   const personaCount = seed % 2 === 0 ? 3 : 4;
   const personaList = seededShuffle(PERSONA_VOCAB, seed).slice(0, personaCount);
   return [
@@ -1016,11 +1016,6 @@ const buildShortFormOverrides = (weekStartDate: Date): ShortFormOverride[] => {
       postType: 'persona',
       seed,
       personaList,
-    },
-    {
-      dayOffset: questionDayOffset,
-      postType: 'question',
-      seed: seed + 1,
     },
     {
       dayOffset: closingDayOffset,

@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
       LEFT JOIN LATERAL (
         SELECT id, full_script, platform, theme_name, part_number, cover_image_url
         FROM video_scripts
-        WHERE platform = 'tiktok'
+        WHERE platform IN ('tiktok', 'instagram')
           AND scheduled_date = sp.scheduled_date::date
           AND facet_title = sp.topic
         ORDER BY id DESC
