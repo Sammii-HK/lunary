@@ -1521,13 +1521,16 @@ async function runDailyPosts(dateStr: string) {
     ).toISOString();
   };
 
-  // NEW: Detect upcoming sign changes and retrograde stations (tomorrow vs today)
-  // Post BEFORE events happen to eliminate duplicates and give followers a heads-up
+  // Detect sign changes and retrograde stations across three windows:
+  //   yesterday→today: planet entered a sign TODAY (already happened)
+  //   today→tomorrow:  planet enters a sign TOMORROW (advance notice)
   const today = new Date(dateStr);
+  const yesterday = new Date(dateStr);
+  yesterday.setDate(yesterday.getDate() - 1);
   const tomorrow = new Date(dateStr);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  // Detect retrograde/direct stations happening TOMORROW (post TODAY)
+  // Detect retrograde/direct stations happening TOMORROW (post TODAY as heads-up)
   const upcomingStations = await detectUpcomingRetrogradeStations(
     today,
     tomorrow,
@@ -1540,10 +1543,24 @@ async function runDailyPosts(dateStr: string) {
     platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
   });
-  const { ingresses, egresses } = await detectUpcomingSignChanges(
-    today,
-    tomorrow,
+
+  // Detect sign changes across two windows:
+  //   today→tomorrow:  planet enters a sign TOMORROW (advance notice, "in ~Xh")
+  //   yesterday→today: planet entered a sign TODAY (already happened, "today")
+  const [{ ingresses: tomorrowIngresses }, { ingresses: todayIngresses }] =
+    await Promise.all([
+      detectUpcomingSignChanges(today, tomorrow),
+      detectUpcomingSignChanges(yesterday, today),
+    ]);
+
+  // Merge, deduplicating by planet (today's ingress takes priority if same planet somehow fires in both)
+  const seenIngressPlanets = new Set(
+    tomorrowIngresses.map((e: any) => e.planet),
   );
+  const ingresses = [
+    ...tomorrowIngresses,
+    ...todayIngresses.filter((e: any) => !seenIngressPlanets.has(e.planet)),
+  ];
 
   // Get tomorrow's positions for duration info on slow planet ingresses
   const tomorrowData = await getGlobalCosmicData(tomorrow);
@@ -1555,13 +1572,6 @@ async function runDailyPosts(dateStr: string) {
     platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
     tomorrowPositions,
-  });
-
-  const egressTextPosts = buildEgressTextPosts({
-    dateStr,
-    egressEvents: egresses,
-    platformHashtags: transitPlatformHashtags,
-    getSchedule: getTransitSchedule,
   });
 
   // Build supermoon posts (same day is fine for visual events)
@@ -1701,7 +1711,6 @@ async function runDailyPosts(dateStr: string) {
 
   posts.push(...retrogradeTextPosts);
   posts.push(...ingressTextPosts);
-  posts.push(...egressTextPosts);
   posts.push(...supermoonTextPosts);
   posts.push(...micromoonTextPosts);
   posts.push(...eclipseTextPosts);
@@ -4311,8 +4320,9 @@ function getRetrogradeReflectionLine(focus: string, sign?: string): string {
 
 /** Format eventTime as relative hours from now */
 function formatRelativeTime(eventTime?: Date): string {
-  if (!eventTime) return 'later today';
+  if (!eventTime) return 'today';
   const hoursAway = (eventTime.getTime() - Date.now()) / (1000 * 60 * 60);
+  if (hoursAway < 0) return 'today'; // already happened
   if (hoursAway < 1) return 'in <1h';
   return `in ~${Math.round(hoursAway)}h`;
 }

@@ -192,7 +192,22 @@ export function refreshDuration(
   const totalMs = endDate.getTime() - startDate.getTime();
   const remainingMs = endDate.getTime() - now;
 
-  if (remainingMs <= 0) return null; // Transit has ended
+  // Transit has ended or is within the last few minutes — show <1h rather than
+  // dropping the badge entirely (avoids a gap during sign-change transitions
+  // when cached endDate expires before the next server refresh fires).
+  if (remainingMs <= 0) {
+    if (remainingMs > -3600000) {
+      // endDate is < 1 hour in the past — planet is mid-transition, show <1h
+      return {
+        totalDays: duration.totalDays ?? 0,
+        remainingDays: 0,
+        displayText: '<1h left',
+        startDate,
+        endDate,
+      };
+    }
+    return null; // Transit genuinely ended
+  }
 
   const totalDays =
     duration.totalDays ?? Math.ceil(totalMs / (1000 * 60 * 60 * 24));

@@ -2,6 +2,7 @@ import {
   calculateTransitDuration,
   formatDuration,
   getSlowPlanetSignTotalDays,
+  refreshDuration,
 } from '../utils/astrology/transit-duration';
 import { PLANET_DAILY_MOTION } from '../utils/astrology/transit-duration-constants';
 
@@ -288,6 +289,116 @@ describe('Transit Duration Calculation', () => {
       expect(
         Math.abs(pastDuration!.remainingDays - futureDuration!.remainingDays),
       ).toBeLessThan(0.1);
+    });
+  });
+
+  describe('refreshDuration', () => {
+    const now = Date.now();
+    const msPerHour = 3600000;
+    const msPerDay = 86400000;
+
+    function makeDuration(startMsAgo: number, endMsFromNow: number) {
+      return {
+        startDate: new Date(now - startMsAgo),
+        endDate: new Date(now + endMsFromNow),
+        totalDays: (startMsAgo + endMsFromNow) / msPerDay,
+      };
+    }
+
+    it('returns correct remainingDays for an active transit', () => {
+      const duration = makeDuration(5 * msPerDay, 3 * msPerDay);
+      const result = refreshDuration(duration);
+
+      expect(result).not.toBeNull();
+      expect(result!.remainingDays).toBeCloseTo(3, 1);
+      expect(result!.displayText).toBe('3d left');
+    });
+
+    it('returns correct displayText for a transit ending in hours', () => {
+      const duration = makeDuration(msPerDay, 6 * msPerHour);
+      const result = refreshDuration(duration);
+
+      expect(result).not.toBeNull();
+      expect(result!.remainingDays).toBeCloseTo(0.25, 2);
+      expect(result!.displayText).toBe('6h left');
+    });
+
+    it('returns <1h left when transit expired less than 1 hour ago', () => {
+      // endDate is 30 minutes in the past — mid sign-change transition
+      const duration = makeDuration(2 * msPerDay, -0.5 * msPerHour);
+      const result = refreshDuration(duration);
+
+      expect(result).not.toBeNull();
+      expect(result!.remainingDays).toBe(0);
+      expect(result!.displayText).toBe('<1h left');
+    });
+
+    it('returns <1h left when transit expired just now (endDate = now)', () => {
+      const duration = makeDuration(msPerDay, 0);
+      // endDate exactly at now — remainingMs is 0, which is <= 0 but within 1h
+      const result = refreshDuration(duration);
+
+      expect(result).not.toBeNull();
+      expect(result!.displayText).toBe('<1h left');
+    });
+
+    it('returns null when transit expired more than 1 hour ago', () => {
+      const duration = makeDuration(2 * msPerDay, -2 * msPerHour);
+      const result = refreshDuration(duration);
+
+      expect(result).toBeNull();
+    });
+
+    it('returns null when transit expired days ago', () => {
+      const duration = makeDuration(10 * msPerDay, -3 * msPerDay);
+      const result = refreshDuration(duration);
+
+      expect(result).toBeNull();
+    });
+
+    it('returns null when duration is null', () => {
+      expect(refreshDuration(null)).toBeNull();
+    });
+
+    it('returns null when duration is undefined', () => {
+      expect(refreshDuration(undefined)).toBeNull();
+    });
+
+    it('returns null when endDate is missing', () => {
+      expect(
+        refreshDuration({ startDate: new Date(), endDate: undefined as any }),
+      ).toBeNull();
+    });
+
+    it('accepts ISO string dates (JSON serialisation)', () => {
+      const duration = {
+        startDate: new Date(now - 5 * msPerDay).toISOString(),
+        endDate: new Date(now + 3 * msPerDay).toISOString(),
+        totalDays: 8,
+      };
+      const result = refreshDuration(duration as any);
+
+      expect(result).not.toBeNull();
+      expect(result!.remainingDays).toBeCloseTo(3, 1);
+    });
+
+    it('preserves totalDays from the stored duration', () => {
+      const duration = makeDuration(5 * msPerDay, 3 * msPerDay);
+      const result = refreshDuration(duration);
+
+      expect(result!.totalDays).toBe(duration.totalDays);
+    });
+
+    it('computes totalDays from start/end when not stored', () => {
+      const duration = {
+        startDate: new Date(now - 5 * msPerDay),
+        endDate: new Date(now + 3 * msPerDay),
+      };
+      const result = refreshDuration(duration);
+
+      expect(result).not.toBeNull();
+      // totalDays = 8 days, ceiled
+      expect(result!.totalDays).toBe(8);
     });
   });
 
