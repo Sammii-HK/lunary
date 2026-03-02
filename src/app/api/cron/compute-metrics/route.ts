@@ -248,6 +248,10 @@ export async function GET(request: NextRequest) {
       returningReferrerResult,
       // Signed-in product returning
       signedInProductReturningResult,
+      // 30-day product user count from events (consistent adoption denominator)
+      productMau30dResult,
+      // Horoscope all-users (anon + signed-in)
+      horoscopeAllUsersResult,
     ] = await Promise.all([
       // ── DAU (read back from snapshots) ──
       sql.query(
@@ -347,93 +351,14 @@ export async function GET(request: NextRequest) {
         [TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // ── D1 Retention ──
-      sql.query(
-        hasIdentityLinks
-          ? `WITH cohort AS (
-               SELECT id, "createdAt" FROM "user"
-               WHERE "createdAt" >= $1::date - INTERVAL '3 days'
-                 AND "createdAt" < $1::date
-                 AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
-             )
-             SELECT
-               COUNT(*) as cohort_size,
-               COUNT(*) FILTER (
-                 WHERE EXISTS (
-                   SELECT 1 FROM conversion_events ce
-                   LEFT JOIN analytics_identity_links ail
-                     ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
-                   WHERE (ce.user_id = c.id OR ail.user_id = c.id)
-                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + 1
-                 )
-               ) as returned
-             FROM cohort c`
-          : `WITH cohort AS (
-               SELECT id, "createdAt" FROM "user"
-               WHERE "createdAt" >= $1::date - INTERVAL '3 days'
-                 AND "createdAt" < $1::date
-                 AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
-             )
-             SELECT
-               COUNT(*) as cohort_size,
-               COUNT(*) FILTER (
-                 WHERE EXISTS (
-                   SELECT 1 FROM conversion_events ce
-                   WHERE ce.user_id = c.id
-                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + 1
-                 )
-               ) as returned
-             FROM cohort c`,
-        [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
-      ),
-
-      // ── D7 Retention (mature cohorts only: signed up 14-7 days ago) ──
-      sql.query(
-        hasIdentityLinks
-          ? `WITH cohort AS (
-               SELECT id, "createdAt" FROM "user"
-               WHERE "createdAt" >= $1::date - INTERVAL '14 days'
-                 AND "createdAt" < $1::date - INTERVAL '7 days'
-                 AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
-             )
-             SELECT
-               COUNT(*) as cohort_size,
-               COUNT(*) FILTER (
-                 WHERE EXISTS (
-                   SELECT 1 FROM conversion_events ce
-                   LEFT JOIN analytics_identity_links ail
-                     ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
-                   WHERE (ce.user_id = c.id OR ail.user_id = c.id)
-                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + 7
-                 )
-               ) as returned
-             FROM cohort c`
-          : `WITH cohort AS (
-               SELECT id, "createdAt" FROM "user"
-               WHERE "createdAt" >= $1::date - INTERVAL '14 days'
-                 AND "createdAt" < $1::date - INTERVAL '7 days'
-                 AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
-             )
-             SELECT
-               COUNT(*) as cohort_size,
-               COUNT(*) FILTER (
-                 WHERE EXISTS (
-                   SELECT 1 FROM conversion_events ce
-                   WHERE ce.user_id = c.id
-                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + 7
-                 )
-               ) as returned
-             FROM cohort c`,
-        [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
-      ),
-
-      // ── D30 Retention (mature cohorts only: signed up 60-30 days ago) ──
+      // ── D1/D7/D30 Retention — single cohort (signed up 31-60 days ago) ──
+      // Using one cohort for all three ensures D1 >= D7 >= D30 (no survivorship bias)
       sql.query(
         hasIdentityLinks
           ? `WITH cohort AS (
                SELECT id, "createdAt" FROM "user"
                WHERE "createdAt" >= $1::date - INTERVAL '60 days'
-                 AND "createdAt" < $1::date - INTERVAL '30 days'
+                 AND "createdAt" < $1::date - INTERVAL '31 days'
                  AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
              )
              SELECT
@@ -444,14 +369,32 @@ export async function GET(request: NextRequest) {
                    LEFT JOIN analytics_identity_links ail
                      ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
                    WHERE (ce.user_id = c.id OR ail.user_id = c.id)
-                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + 30
+                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '1 day'
                  )
-               ) as returned
+               ) as d1_returned,
+               COUNT(*) FILTER (
+                 WHERE EXISTS (
+                   SELECT 1 FROM conversion_events ce
+                   LEFT JOIN analytics_identity_links ail
+                     ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
+                   WHERE (ce.user_id = c.id OR ail.user_id = c.id)
+                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '7 days'
+                 )
+               ) as d7_returned,
+               COUNT(*) FILTER (
+                 WHERE EXISTS (
+                   SELECT 1 FROM conversion_events ce
+                   LEFT JOIN analytics_identity_links ail
+                     ON ce.anonymous_id IS NOT NULL AND ail.anonymous_id = ce.anonymous_id
+                   WHERE (ce.user_id = c.id OR ail.user_id = c.id)
+                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '30 days'
+                 )
+               ) as d30_returned
              FROM cohort c`
           : `WITH cohort AS (
                SELECT id, "createdAt" FROM "user"
                WHERE "createdAt" >= $1::date - INTERVAL '60 days'
-                 AND "createdAt" < $1::date - INTERVAL '30 days'
+                 AND "createdAt" < $1::date - INTERVAL '31 days'
                  AND (email IS NULL OR (email NOT LIKE $2 AND email != $3))
              )
              SELECT
@@ -460,12 +403,32 @@ export async function GET(request: NextRequest) {
                  WHERE EXISTS (
                    SELECT 1 FROM conversion_events ce
                    WHERE ce.user_id = c.id
-                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + 30
+                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '1 day'
                  )
-               ) as returned
+               ) as d1_returned,
+               COUNT(*) FILTER (
+                 WHERE EXISTS (
+                   SELECT 1 FROM conversion_events ce
+                   WHERE ce.user_id = c.id
+                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '7 days'
+                 )
+               ) as d7_returned,
+               COUNT(*) FILTER (
+                 WHERE EXISTS (
+                   SELECT 1 FROM conversion_events ce
+                   WHERE ce.user_id = c.id
+                     AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(c."createdAt" AT TIME ZONE 'UTC') + INTERVAL '30 days'
+                 )
+               ) as d30_returned
              FROM cohort c`,
         [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
+
+      // ── D7 placeholder (kept for result array index compat — data comes from unified query above) ──
+      Promise.resolve({ rows: [{}] }),
+
+      // ── D30 placeholder (kept for result array index compat — data comes from unified query above) ──
+      Promise.resolve({ rows: [{}] }),
 
       // ── Product D7 Retention (mature cohorts only, product actions only) ──
       sql.query(
@@ -669,6 +632,39 @@ export async function GET(request: NextRequest) {
 
       // ── Signed-in product returning users (from snapshots) ──
       returningQuery('product', mauStartStr),
+
+      // ── 30-day product user count from conversion_events (adoption denominator) ──
+      // Use this instead of snapshot-based productMau to avoid >100% adoption rates
+      sql.query(
+        `SELECT COUNT(DISTINCT ${signedInId}) as count
+         FROM conversion_events ce
+         ${idJoin}
+         WHERE ce.created_at >= $1 AND ce.created_at <= $2
+           AND ce.event_type NOT IN ('app_opened', 'page_viewed')
+           AND ${whereBase}`,
+        [
+          mauStart.toISOString(),
+          dayEnd.toISOString(),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      ),
+
+      // ── Horoscope all-users (including anon) in 30-day window ──
+      sql.query(
+        `SELECT COUNT(DISTINCT ${anyId}) as count
+         FROM conversion_events ce
+         ${idJoin}
+         WHERE ce.created_at >= $1 AND ce.created_at <= $2
+           AND ce.event_type = 'personalized_horoscope_viewed'
+           AND ${whereBase}`,
+        [
+          mauStart.toISOString(),
+          dayEnd.toISOString(),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      ),
     ]);
 
     // ─── Extract values ───
@@ -711,16 +707,29 @@ export async function GET(request: NextRequest) {
     const trialSubscriptions = Number(subscriptionsResult.rows[0]?.trial || 0);
     const newConversions = Number(conversionsResult.rows[0]?.count || 0);
 
-    // Retention calculations
-    const d1CohortSize = Number(d1RetentionResult.rows[0]?.cohort_size || 0);
-    const d1Returned = Number(d1RetentionResult.rows[0]?.returned || 0);
+    // Retention calculations — D1/D7/D30 all from same cohort (users signed up 31-60 days ago)
+    // This ensures D1 >= D7 >= D30 with no survivorship bias across different cohort windows
+    const retentionCohortSize = Number(
+      d1RetentionResult.rows[0]?.cohort_size || 0,
+    );
     const d1Retention =
-      d1CohortSize > 0 ? (d1Returned / d1CohortSize) * 100 : 0;
-
-    const d7CohortSize = Number(d7RetentionResult.rows[0]?.cohort_size || 0);
-    const d7Returned = Number(d7RetentionResult.rows[0]?.returned || 0);
+      retentionCohortSize > 0
+        ? (Number(d1RetentionResult.rows[0]?.d1_returned || 0) /
+            retentionCohortSize) *
+          100
+        : 0;
     const d7Retention =
-      d7CohortSize > 0 ? (d7Returned / d7CohortSize) * 100 : 0;
+      retentionCohortSize > 0
+        ? (Number(d1RetentionResult.rows[0]?.d7_returned || 0) /
+            retentionCohortSize) *
+          100
+        : 0;
+    const d30Retention =
+      retentionCohortSize > 0
+        ? (Number(d1RetentionResult.rows[0]?.d30_returned || 0) /
+            retentionCohortSize) *
+          100
+        : 0;
 
     const productD7CohortSize = Number(
       productD7RetentionResult.rows[0]?.cohort_size || 0,
@@ -732,11 +741,6 @@ export async function GET(request: NextRequest) {
       productD7CohortSize > 0
         ? (productD7Returned / productD7CohortSize) * 100
         : 0;
-
-    const d30CohortSize = Number(d30RetentionResult.rows[0]?.cohort_size || 0);
-    const d30Returned = Number(d30RetentionResult.rows[0]?.returned || 0);
-    const d30Retention =
-      d30CohortSize > 0 ? (d30Returned / d30CohortSize) * 100 : 0;
 
     // Derived metrics
     const stickiness = mau > 0 ? (dau / mau) * 100 : 0;
@@ -758,14 +762,27 @@ export async function GET(request: NextRequest) {
     const grimoireToAppRate =
       grimoireMau > 0 ? (grimoireToAppUsers / grimoireMau) * 100 : 0;
 
-    // Feature adoption rates (% of product MAU)
+    // Feature adoption rates — use 30-day product user count from same event data source
+    // to avoid >100% rates when snapshot-based productMau diverges from event counts
+    const productMau30d = Number(productMau30dResult.rows[0]?.count || 0);
+    const adoptionDenominator = productMau30d > 0 ? productMau30d : productMau;
     const featureAdoption: Record<string, number> = {};
     for (const row of featureAdoptionResult.rows) {
       const eventType = String(row.event_type);
       const users = Number(row.users || 0);
-      const adoptionRate = productMau > 0 ? (users / productMau) * 100 : 0;
+      const adoptionRate =
+        adoptionDenominator > 0
+          ? Math.min((users / adoptionDenominator) * 100, 100)
+          : 0;
       featureAdoption[eventType] = adoptionRate;
     }
+
+    // Horoscope all-users rate (% of all MAU, including anonymous)
+    const horoscopeAllUsers = Number(
+      horoscopeAllUsersResult.rows[0]?.count || 0,
+    );
+    const horoscopeViewsAllRate =
+      mau > 0 ? Math.min((horoscopeAllUsers / mau) * 100, 100) : 0;
 
     const computationDuration = Date.now() - startTime;
 
@@ -791,6 +808,7 @@ export async function GET(request: NextRequest) {
         chart_adoption, guide_adoption, ritual_adoption,
         returning_referrer_organic, returning_referrer_direct, returning_referrer_internal,
         signed_in_product_returning_users,
+        horoscope_views_all,
         computed_at, computation_duration_ms
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
@@ -798,7 +816,7 @@ export async function GET(request: NextRequest) {
         $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
         $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
         $41, $42, $43, $44, $45, $46, $47, $48, $49, $50,
-        $51, $52, NOW(), $53
+        $51, $52, $53, NOW(), $54
       )
       ON CONFLICT (metric_date)
       DO UPDATE SET
@@ -853,6 +871,7 @@ export async function GET(request: NextRequest) {
         returning_referrer_direct = EXCLUDED.returning_referrer_direct,
         returning_referrer_internal = EXCLUDED.returning_referrer_internal,
         signed_in_product_returning_users = EXCLUDED.signed_in_product_returning_users,
+        horoscope_views_all = EXCLUDED.horoscope_views_all,
         computed_at = NOW(),
         computation_duration_ms = EXCLUDED.computation_duration_ms`,
       [
@@ -908,7 +927,8 @@ export async function GET(request: NextRequest) {
         returningReferrerDirect, // $50
         returningReferrerInternal, // $51
         signedInProductReturningUsers, // $52
-        computationDuration, // $53
+        horoscopeViewsAllRate, // $53
+        computationDuration, // $54
       ],
     );
 

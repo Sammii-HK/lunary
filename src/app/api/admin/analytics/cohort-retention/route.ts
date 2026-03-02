@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
                 FROM conversion_events ce
                 WHERE ce.user_id = u.id
                   AND ce.event_type = ANY($3::text[])
-                  AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(u."createdAt" AT TIME ZONE 'UTC') + $4
+                  AND DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(u."createdAt" AT TIME ZONE 'UTC') + ($4::int * INTERVAL '1 day')
               )
           `,
             [
