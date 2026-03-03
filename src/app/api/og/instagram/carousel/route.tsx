@@ -7,6 +7,7 @@ import {
   IGProgressDots,
   truncateIG,
   renderIGStarfield,
+  renderConstellation,
 } from '@/lib/instagram/ig-utils';
 import {
   IG_SIZES,
@@ -90,6 +91,28 @@ export async function GET(request: NextRequest) {
     const symbol = searchParams.get('symbol') || '';
     const nextSubtitle = searchParams.get('nextSubtitle') || '';
 
+    // Reverse map: Astronomicon zodiac glyph → sign name for constellation rendering
+    const SYMBOL_TO_SIGN: Record<string, string> = {
+      A: 'aries',
+      B: 'taurus',
+      C: 'gemini',
+      D: 'cancer',
+      E: 'leo',
+      F: 'virgo',
+      G: 'libra',
+      H: 'scorpio',
+      I: 'sagittarius',
+      J: 'capricorn',
+      K: 'aquarius',
+      L: 'pisces',
+    };
+    const zodiacSign =
+      category === 'zodiac'
+        ? title.toLowerCase()
+        : symbol
+          ? SYMBOL_TO_SIGN[symbol]
+          : undefined;
+
     let accent = CATEGORY_ACCENT[category] || CATEGORY_ACCENT.tarot;
     let gradient = CATEGORY_GRADIENT[category] || CATEGORY_GRADIENT.tarot;
 
@@ -121,15 +144,19 @@ export async function GET(request: NextRequest) {
             alignItems: 'center',
             justifyContent: 'center',
             background: gradient,
-            padding: '60px',
+            paddingTop: 60,
+            paddingBottom: 60,
+            paddingLeft: 60,
+            paddingRight: 60,
             position: 'relative',
             fontFamily: 'Roboto Mono',
             overflow: 'hidden',
           }}
         >
           {renderIGStarfield(`cover-${title}`)}
+          {zodiacSign && renderConstellation(zodiacSign, accent, width, height)}
 
-          {/* Symbol ghost backdrop — huge, Satori-safe centering */}
+          {/* Symbol ghost backdrop — centered */}
           {symbol && (
             <div
               style={{
@@ -166,21 +193,28 @@ export async function GET(request: NextRequest) {
           </div>
 
           {hookText ? (
-            <>
-              {/* HERO: massive hook text dominates the frame */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
+              {/* HERO: maxWidth + textAlign center */}
               <div
                 style={{
-                  fontSize: 80,
-                  color: OG_COLORS.textPrimary,
-                  textAlign: 'center',
-                  lineHeight: 1.15,
-                  width: '88%',
                   display: 'flex',
                   flexWrap: 'wrap',
                   justifyContent: 'center',
+                  alignSelf: 'center',
+                  maxWidth: 860,
+                  fontSize: 80,
+                  color: OG_COLORS.textPrimary,
+                  lineHeight: 1.15,
                   fontWeight: 800,
                   marginBottom: 36,
-                  textShadow: `0 0 80px ${accent}60, 0 4px 24px rgba(0,0,0,0.7)`,
+                  textAlign: 'center',
                 }}
               >
                 {truncateIG(hookText, 70)}
@@ -189,36 +223,45 @@ export async function GET(request: NextRequest) {
               {/* Title — secondary, accent colour */}
               <div
                 style={{
-                  fontSize: 30,
-                  color: accent,
-                  textAlign: 'center',
-                  lineHeight: 1.3,
-                  width: '72%',
                   display: 'flex',
                   flexWrap: 'wrap',
                   justifyContent: 'center',
+                  alignSelf: 'center',
+                  maxWidth: 700,
+                  fontSize: 30,
+                  color: accent,
+                  lineHeight: 1.3,
                   fontWeight: 600,
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase',
+                  textAlign: 'center',
                 }}
               >
                 {truncateIG(title, 50)}
               </div>
-            </>
+            </div>
           ) : (
-            <>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
               {/* No hook: title is the hero */}
               <div
                 style={{
-                  fontSize: IG_TEXT.dark.title,
-                  color: OG_COLORS.textPrimary,
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  width: '85%',
                   display: 'flex',
                   flexWrap: 'wrap',
                   justifyContent: 'center',
+                  alignSelf: 'center',
+                  maxWidth: 860,
+                  fontSize: IG_TEXT.dark.title,
+                  color: OG_COLORS.textPrimary,
+                  lineHeight: 1.2,
                   fontWeight: 700,
+                  textAlign: 'center',
                 }}
               >
                 {truncateIG(title, 80)}
@@ -226,21 +269,22 @@ export async function GET(request: NextRequest) {
               {subtitle && (
                 <div
                   style={{
-                    fontSize: IG_TEXT.dark.subtitle,
-                    color: OG_COLORS.textSecondary,
-                    textAlign: 'center',
-                    lineHeight: 1.4,
-                    width: '80%',
                     display: 'flex',
                     flexWrap: 'wrap',
                     justifyContent: 'center',
+                    alignSelf: 'center',
+                    maxWidth: 800,
+                    fontSize: IG_TEXT.dark.subtitle,
+                    color: OG_COLORS.textSecondary,
+                    lineHeight: 1.4,
                     marginTop: 20,
+                    textAlign: 'center',
                   }}
                 >
                   {truncateIG(subtitle, 100)}
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {/* Swipe indicator — prominent, accent colour */}
@@ -430,8 +474,9 @@ export async function GET(request: NextRequest) {
           }}
         >
           {renderIGStarfield(`body-${title}-${slideIndex}`)}
+          {zodiacSign && renderConstellation(zodiacSign, accent, width, height)}
 
-          {/* Symbol ghost backdrop (zodiac/rune slides) — huge, Satori-safe centering */}
+          {/* Symbol ghost backdrop — centered */}
           {symbol && (
             <div
               style={{

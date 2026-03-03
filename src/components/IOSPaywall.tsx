@@ -101,10 +101,22 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
     configureIAP()
       .then(() => getIAPOfferings())
       .then((o) => {
+        const pkgCount = Object.values(o).filter(Boolean).length;
+        console.log(
+          '[IOSPaywall] offerings loaded, pkgCount:',
+          pkgCount,
+          JSON.stringify(o),
+        );
+        if (pkgCount === 0) {
+          setError(
+            `RC returned 0 packages. Check Xcode console for [Lunary] ❌ line.`,
+          );
+        }
         setOfferings(o);
       })
-      .catch(() => {
-        setError('Could not load subscription options. Please try again.');
+      .catch((e) => {
+        console.error('[IOSPaywall] configureIAP/getIAPOfferings threw:', e);
+        setError(`Load failed: ${String(e)}`);
       });
   }, []);
 

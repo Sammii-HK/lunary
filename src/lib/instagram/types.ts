@@ -137,5 +137,7 @@ export interface IGScheduledPost {
     moonPhase?: string;
     quoteText?: string;
     author?: string;
+    dateStr?: string;
+    trait?: string;
   };
 }

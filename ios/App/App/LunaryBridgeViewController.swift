@@ -6,7 +6,9 @@ class LunaryBridgeViewController: CAPBridgeViewController, WKNavigationDelegate 
 
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
-        bridge?.registerPluginType(SignInWithApplePlugin.self)
+        // SignInWithApplePlugin and PurchasesPlugin are both registered via
+        // packageClassList in capacitor.config.json using NSClassFromString at
+        // bridge startup — no manual registerPluginType needed here.
     }
 
     override func viewDidLoad() {
@@ -20,8 +22,7 @@ class LunaryBridgeViewController: CAPBridgeViewController, WKNavigationDelegate 
             WidgetDataBridge.shared,
             name: "widgetBridge"
         )
-        print("[Lunary] widgetBridge message handler registered")
-        print("[Lunary] Navigation delegate set to LunaryBridgeViewController")
+        NSLog("[Lunary] viewDidLoad complete — widgetBridge registered")
     }
 
     // MARK: - WKNavigationDelegate
@@ -39,9 +40,10 @@ class LunaryBridgeViewController: CAPBridgeViewController, WKNavigationDelegate 
             return
         }
 
-        // Allow localhost for development
-        if let host = url.host, host == "localhost" || host == "127.0.0.1" {
-            print("[Lunary] Allowing localhost navigation to: \(url.absoluteString)")
+        // Allow localhost and LAN IPs for development
+        if let host = url.host, host == "localhost" || host == "127.0.0.1"
+            || host.hasPrefix("192.168.") || host.hasPrefix("10.") || host.hasPrefix("172.") {
+            NSLog("[Lunary] Allowing dev server navigation to: \(url.absoluteString)")
             decisionHandler(.allow)
             return
         }

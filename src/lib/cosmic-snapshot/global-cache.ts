@@ -159,11 +159,14 @@ export async function getGlobalCosmicData(
 
   const data = await cached();
 
-  // Freshen fast-moving planet positions with current time.
-  // The DB/day-cache stores positions from the first request (midnight UTC),
-  // but Moon moves ~13°/day — stale by afternoon. getRealPlanetaryPositions
-  // has its own per-planet cache (Moon: 15min TTL) so this is efficient.
-  if (data?.planetaryPositions) {
+  // Freshen fast-moving planet positions with current time — but ONLY for
+  // today's data. For future dates (e.g. tomorrow in detectUpcomingSignChanges)
+  // we must preserve the midnight-UTC positions so sign-change detection works.
+  // Overwriting tomorrow's Mars with today's position would mask ingress events.
+  const todayStr = new Date().toISOString().split('T')[0];
+  const isToday = dateStr === todayStr;
+
+  if (data?.planetaryPositions && isToday) {
     const now = new Date();
     const FAST = ['Moon', 'Sun', 'Mercury', 'Venus', 'Mars'];
     const freshPositions = getRealPlanetaryPositions(now, DEFAULT_OBSERVER);
@@ -459,21 +462,25 @@ export async function detectMajorEventCountdowns(
       });
     }
 
-    // Sign change countdowns (slow planets only - frequent changes for fast planets)
-    const SLOW_PLANETS_FOR_COUNTDOWN = [
+    // Sign change countdowns for all planets except Moon (Moon changes sign every 2.5 days
+    // and has its own dedicated phase tracking system)
+    if (planet === 'Moon') continue;
+
+    const isOuterPlanet = [
       'Jupiter',
       'Saturn',
       'Uranus',
       'Neptune',
       'Pluto',
-    ];
-    if (!SLOW_PLANETS_FOR_COUNTDOWN.includes(planet)) continue;
+    ].includes(planet);
 
     // 3 days countdown for sign change
     if (in3DaysPos && todayPos.sign !== in3DaysPos.sign) {
       countdowns.push({
         name: `${planet} enters ${in3DaysPos.sign} in 3 days`,
-        energy: `Major shift approaching: ${getSignDescription(in3DaysPos.sign)}`,
+        energy: isOuterPlanet
+          ? `Major shift approaching: ${getSignDescription(in3DaysPos.sign)}`
+          : `${planet} energy shifting: ${getSignDescription(in3DaysPos.sign)}`,
         priority: 8,
         type: 'sign_change_countdown',
         planet,
@@ -488,7 +495,9 @@ export async function detectMajorEventCountdowns(
     if (!sign3DayFired && in7DaysPos && todayPos.sign !== in7DaysPos.sign) {
       countdowns.push({
         name: `${planet} enters ${in7DaysPos.sign} in 1 week`,
-        energy: `Generational shift ahead: ${getSignDescription(in7DaysPos.sign)}`,
+        energy: isOuterPlanet
+          ? `Generational shift ahead: ${getSignDescription(in7DaysPos.sign)}`
+          : `${planet} sign change ahead: ${getSignDescription(in7DaysPos.sign)}`,
         priority: 7,
         type: 'sign_change_countdown',
         planet,
@@ -559,6 +568,9 @@ export async function detectTransitMilestones(
   for (const [planet, position] of Object.entries(data.planetaryPositions)) {
     // Only check milestone planets
     if (!MILESTONE_PLANETS.includes(planet)) continue;
+
+    // Don't post "X leaves Y in ~N days" when the planet is retrograde — it isn't going anywhere
+    if (position.retrograde) continue;
 
     const duration = position.duration;
     if (!duration || !duration.totalDays || !duration.remainingDays) continue;

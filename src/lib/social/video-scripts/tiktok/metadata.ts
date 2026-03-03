@@ -681,6 +681,51 @@ const IG_CATEGORY_HASHTAGS: Record<string, string[]> = {
   ],
 };
 
+/**
+ * Value teasers for IG Reel captions — tells the viewer WHY to watch.
+ * Replaces the old SOFT_CTA_LINES (app CTAs) in the teaser slot.
+ */
+const IG_VALUE_TEASERS: Record<string, string[]> = {
+  zodiac: [
+    'Most people only know the surface. This goes deeper.',
+    'The part of astrology most people skip entirely.',
+    'This changes how you read every chart.',
+    'The piece of this nobody talks about.',
+    'Most astrology content misses this completely.',
+  ],
+  tarot: [
+    'Most people misread this card. Here is why.',
+    'The layer of this card most readers miss.',
+    'This changes how you interpret every reading.',
+    'Most tarot guides skip over this part.',
+    'The real meaning — not the oversimplified version.',
+  ],
+  lunar: [
+    'The part of moon energy most people overlook.',
+    'This changes how you work with lunar cycles.',
+    'Most moon content misses this completely.',
+    'The piece of this nobody explains properly.',
+  ],
+  crystals: [
+    'Most crystal guides barely scratch the surface.',
+    'The property most people miss with this stone.',
+    'This changes how you work with your collection.',
+    'The real metaphysical depth — not just keywords.',
+  ],
+  numerology: [
+    'Most numerology content stops at the obvious layer.',
+    'The meaning most people miss with this number.',
+    'This changes how you interpret recurring numbers.',
+    'The real depth — beyond the basic keyword list.',
+  ],
+  default: [
+    'Most people only get the surface level of this.',
+    'The piece most guides completely miss.',
+    'This changes how you understand the whole system.',
+    'The layer nobody explains properly.',
+  ],
+};
+
 /** Save CTAs — the primary IG algorithmic signal */
 const IG_SAVE_CTA_LINES = [
   'Save this for when you need it.',
@@ -768,7 +813,7 @@ export interface InstagramReelCaptionParams {
  * [Value teaser]
  * [Engagement question]
  * [CTA — save Mon/Wed/Fri, share Tue/Thu, follow Sat/Sun]
- * [Hashtags — 8-10 IG-native tags, no #fyp/#learnontiktok]
+ * [Hashtags — 5 IG-native tags, no #fyp/#learnontiktok]
  */
 export function generateInstagramReelCaption(
   params: InstagramReelCaptionParams,
@@ -782,7 +827,7 @@ export function generateInstagramReelCaption(
   const rawHook = hookText || themeName;
   const hookLine = `${rawHook.charAt(0).toUpperCase()}${rawHook.slice(1)} ${emoji}`;
 
-  const teaserPool = SOFT_CTA_LINES[category] || SOFT_CTA_LINES.default;
+  const teaserPool = IG_VALUE_TEASERS[category] || IG_VALUE_TEASERS.default;
   const teaser = pickByDate(teaserPool, date);
 
   const questionCategory =

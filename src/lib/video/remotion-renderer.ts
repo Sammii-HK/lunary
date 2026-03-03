@@ -4,6 +4,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import type { AudioSegment } from '@/remotion/utils/timing';
 import type { CategoryVisualConfig } from '@/remotion/config/category-visuals';
+import type { WhisperWord } from '@/lib/tts';
 
 // Note: @remotion/bundler and @remotion/renderer are dynamically imported
 // to avoid Next.js trying to parse the esbuild binary at compile time
@@ -110,6 +111,35 @@ export function scriptToAudioSegments(
 
     // Add pause gap before next segment
     currentTime = Math.min(endTime + chunk.pauseAfter, audioDuration);
+  }
+
+  return segments;
+}
+
+/**
+ * Convert Whisper word-level timestamps into subtitle segments.
+ * Groups words into chunks of up to maxWordsPerChunk, matching TikTok pacing.
+ * Falls back to scriptToAudioSegments if whisperWords is empty.
+ */
+export function wordTimestampsToSegments(
+  whisperWords: WhisperWord[],
+  audioDuration: number,
+  maxWordsPerChunk: number = 6,
+): AudioSegment[] {
+  if (!whisperWords.length) return [];
+
+  const segments: AudioSegment[] = [];
+  let i = 0;
+
+  while (i < whisperWords.length) {
+    const chunk = whisperWords.slice(i, i + maxWordsPerChunk);
+    const text = chunk.map((w) => w.word).join(' ');
+    const startTime = chunk[0].start;
+    // End time: use the last word's end, capped at audioDuration
+    const endTime = Math.min(chunk[chunk.length - 1].end, audioDuration);
+
+    segments.push({ text, startTime, endTime });
+    i += maxWordsPerChunk;
   }
 
   return segments;

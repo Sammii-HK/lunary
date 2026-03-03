@@ -235,11 +235,19 @@ export function AuthComponent({
             'returnTo',
           );
           const decoded = rawReturnTo ? decodeURIComponent(rawReturnTo) : null;
-          // Only allow same-site relative paths — reject anything with a host
-          const destination =
-            decoded?.startsWith('/') && !decoded.startsWith('//')
-              ? decoded
-              : '/app';
+          // Only allow same-site relative paths — reject anything with a host,
+          // and further restrict to a small set of allowed prefixes.
+          const allowedReturnToPrefixes = ['/app'];
+          const isRelativePath =
+            typeof decoded === 'string' &&
+            decoded.startsWith('/') &&
+            !decoded.startsWith('//');
+          const isAllowedPath =
+            isRelativePath &&
+            allowedReturnToPrefixes.some((prefix) =>
+              decoded.startsWith(prefix),
+            );
+          const destination = isAllowedPath ? decoded : '/app';
           setTimeout(() => {
             if (Capacitor.isNativePlatform()) {
               router.replace(destination);

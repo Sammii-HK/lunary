@@ -20,26 +20,25 @@ export async function GET(request: NextRequest) {
     const [mauResult, mrrResult, activeResult] = await Promise.all([
       // MAU: distinct users active in last 30 days
       sql`
-        SELECT COUNT(DISTINCT "userId") as count
-        FROM analytics_events
-        WHERE "createdAt" >= ${thirtyDaysIso}
-          AND "userId" IS NOT NULL
+        SELECT COUNT(DISTINCT user_id) as count
+        FROM analytics_user_activity
+        WHERE activity_date >= ${thirtyDaysIso}
+          AND user_id IS NOT NULL
       `,
-      // MRR: active subscriptions
+      // MRR: paying, non-cancelled subscriptions
       sql`
         SELECT COUNT(*) as count,
-               SUM(CASE WHEN interval = 'month' THEN amount
-                        WHEN interval = 'year' THEN amount / 12.0
-                        ELSE 0 END) as mrr
+               COALESCE(SUM(monthly_amount_due), 0) as mrr
         FROM subscriptions
-        WHERE status = 'active'
+        WHERE is_paying = true
+          AND status NOT IN ('cancelled')
       `,
       // Active today
       sql`
-        SELECT COUNT(DISTINCT "userId") as count
-        FROM analytics_events
-        WHERE "createdAt" >= ${todayIso}
-          AND "userId" IS NOT NULL
+        SELECT COUNT(DISTINCT user_id) as count
+        FROM analytics_user_activity
+        WHERE activity_date >= ${todayIso}
+          AND user_id IS NOT NULL
       `,
     ]);
 

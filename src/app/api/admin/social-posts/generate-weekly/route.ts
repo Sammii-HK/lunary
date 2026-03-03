@@ -1809,8 +1809,14 @@ async function generateThematicWeeklyPosts(
               ? imageUrls.join('|')
               : imageUrls[0] || null;
 
+          const hashtagStr =
+            post.hashtags && post.hashtags.length > 0
+              ? post.hashtags.join(' ')
+              : '';
           const postData = {
-            content: post.caption,
+            content: hashtagStr
+              ? `${post.caption}\n\n${hashtagStr}`
+              : post.caption,
             postType: isCarousel ? 'instagram_carousel' : post.type,
             scheduledDate: new Date(post.scheduledTime),
             image_url: imageUrlValue,

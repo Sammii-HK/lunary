@@ -6,8 +6,9 @@ import {
   renderRemotionVideo,
   isRemotionAvailable,
   scriptToAudioSegments,
+  wordTimestampsToSegments,
 } from '@/lib/video/remotion-renderer';
-import { generateVoiceover } from '@/lib/tts';
+import { generateVoiceover, transcribeWithWhisper } from '@/lib/tts';
 import { TTS_PRESETS } from '@/lib/tts/presets';
 import { buildThematicVideoComposition } from '@/lib/video/thematic-video';
 import { buildVideoCaption } from '@/lib/social/video-captions';
@@ -169,7 +170,7 @@ const videoHashtagConfig: Record<
   string,
   { useHashtags: boolean; count: number }
 > = {
-  instagram: { useHashtags: true, count: 10 },
+  instagram: { useHashtags: true, count: 5 },
   tiktok: { useHashtags: true, count: 3 },
   twitter: { useHashtags: true, count: 2 },
   threads: { useHashtags: false, count: 0 },
@@ -449,11 +450,32 @@ export async function POST(request: NextRequest) {
                 { access: 'public', addRandomSuffix: true },
               );
 
-              const segments = scriptToAudioSegments(
-                script.full_script,
-                audioDuration,
-                2.6,
-              );
+              // Use Whisper for exact word-level subtitle timestamps.
+              // Falls back to character-count estimation if Whisper fails.
+              let segments;
+              try {
+                const whisperWords = await transcribeWithWhisper(audioBuffer);
+                segments = whisperWords.length
+                  ? wordTimestampsToSegments(whisperWords, audioDuration)
+                  : scriptToAudioSegments(
+                      script.full_script,
+                      audioDuration,
+                      2.6,
+                    );
+                console.log(
+                  `🎙️ Whisper: ${whisperWords.length} words → ${segments.length} subtitle segments`,
+                );
+              } catch (whisperErr) {
+                console.warn(
+                  'Whisper transcription failed, falling back to estimation:',
+                  whisperErr,
+                );
+                segments = scriptToAudioSegments(
+                  script.full_script,
+                  audioDuration,
+                  2.6,
+                );
+              }
 
               const remotionFormat =
                 audioDuration > 45 ? 'MediumFormVideo' : 'ShortFormVideo';
@@ -527,10 +549,13 @@ export async function POST(request: NextRequest) {
           // to Instagram — they must not cross-post to TikTok or other platforms.
           // Threads is excluded from video cross-posting: it's a text/conversation
           // platform and receiving 3 videos/day on top of text posts is spammy.
+          // Instagram is excluded from TikTok cross-posts: it has its own dedicated
+          // Reels queue (generateWeeklyInstagramScripts, Mon-Fri at 15:00 UTC) and
+          // cross-posting caused 3-4 reels/day instead of 2/week.
           const shortVideoPlatforms =
             script.platform === 'instagram'
               ? ['instagram']
-              : ['tiktok', 'instagram', 'twitter', 'youtube'];
+              : ['tiktok', 'youtube'];
           const shortPlatformSet = new Set(['twitter']);
           const scheduledDate = new Date(script.scheduled_date);
           // Use the engagement-optimized caption from generateTikTokCaption()
@@ -597,61 +622,13 @@ export async function POST(request: NextRequest) {
             existingPlatformsResult.rows.map((row) => row.platform as string),
           );
 
-          // Instagram Reel selection: only post high-engagement formats at optimal times.
-          // Research: 3-4 reels/week optimal, DM-shareable content ranks highest.
-          // Best IG Reel types: Hot Takes, Rankings, Sign Checks, Myths, Did You Know.
-          // Skip: Deep Dives, Mirror Hours, Forecasts (poor Reels retention).
-          const IG_REEL_PRIORITY_THEMES = new Set([
-            'Hot Take',
-            'Ranking',
-            'Myth',
-            'Sign Check: Aries',
-            'Sign Check: Taurus',
-            'Sign Check: Gemini',
-            'Sign Check: Cancer',
-            'Sign Check: Leo',
-            'Sign Check: Virgo',
-            'Sign Check: Libra',
-            'Sign Check: Scorpio',
-            'Sign Check: Sagittarius',
-            'Sign Check: Capricorn',
-            'Sign Check: Aquarius',
-            'Sign Check: Pisces',
-            'Did You Know',
-          ]);
-          const MAX_INSTAGRAM_REELS_PER_WEEK = 4;
-          const igWeekCountResult = await sql`
-            SELECT COUNT(*) as count
-            FROM social_posts
-            WHERE platform = 'instagram'
-              AND post_type = 'video'
-              AND week_start = ${weekStart.toISOString().split('T')[0]}
-          `;
-          const igReelsThisWeek = Number(igWeekCountResult.rows[0]?.count || 0);
-          const igCapReached = igReelsThisWeek >= MAX_INSTAGRAM_REELS_PER_WEEK;
-          const isIgWorthy =
-            IG_REEL_PRIORITY_THEMES.has(themeName) ||
-            metadata.contentTypeKey === 'angel_numbers';
-
-          // Optimal Instagram Reel posting times (UTC): 17-19 = UK evening / US East lunch
-          // Rotate by day-of-week for stable, predictable distribution across the week
-          const IG_REEL_HOURS = [17, 12, 19, 18];
-          const igReelHour =
-            IG_REEL_HOURS[scheduledDate.getUTCDay() % IG_REEL_HOURS.length];
-
           for (const platform of shortVideoPlatforms) {
             if (existingPlatforms.has(platform)) continue;
-            // Only post priority content to Instagram, and respect weekly cap
-            if (platform === 'instagram' && (igCapReached || !isIgWorthy))
-              continue;
             // Skip series parts > 1 on Instagram — users don't see parts in order
             if (platform === 'instagram' && partNumber > 1) continue;
-            // Use optimal posting time for Instagram reels
-            let platformScheduledDate = scheduledDate;
-            if (platform === 'instagram') {
-              platformScheduledDate = new Date(scheduledDate);
-              platformScheduledDate.setUTCHours(igReelHour, 0, 0, 0);
-            }
+            // Instagram scheduling uses the scheduledDate from the dedicated IG script
+            // (already set to 15:00 UTC by generateWeeklyInstagramScripts)
+            const platformScheduledDate = scheduledDate;
             // Instagram gets its own caption optimised for saves/shares/follows
             const postCaption =
               platform === 'instagram'

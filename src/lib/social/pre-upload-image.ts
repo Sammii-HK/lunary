@@ -1,8 +1,12 @@
 import { put } from '@vercel/blob';
 
+const VALID_IMAGE_EXT = /\.(png|jpg|jpeg|gif|webp|mp4)(\?|$)/i;
+
 /**
- * Pre-upload a dynamic OG image to Vercel Blob so Ayrshare gets a fast static URL.
+ * Pre-upload a dynamic OG image to Vercel Blob so social platforms get a fast static URL.
  * Only processes URLs that point to our own /api/og routes.
+ * Returns the blob URL on success, or the original URL if it can't be uploaded
+ * (callers should validate the extension if they need a guaranteed-valid URL).
  */
 export async function preUploadImage(imageUrl: string): Promise<string> {
   try {
@@ -16,8 +20,8 @@ export async function preUploadImage(imageUrl: string): Promise<string> {
       signal: AbortSignal.timeout(15000),
     });
     if (!response.ok) {
-      console.warn(
-        `Failed to fetch OG image (${response.status}): ${imageUrl}`,
+      console.error(
+        `[preUploadImage] OG fetch failed (${response.status}): ${imageUrl}`,
       );
       return imageUrl;
     }
@@ -35,12 +39,23 @@ export async function preUploadImage(imageUrl: string): Promise<string> {
     const blob = await put(blobKey, buffer, {
       access: 'public',
       contentType,
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
     console.log(`📸 Pre-uploaded OG image to blob: ${blob.url}`);
     return blob.url;
   } catch (error) {
-    console.warn('Failed to pre-upload image, using original URL:', error);
+    console.error(
+      '[preUploadImage] Blob upload failed, returning original URL:',
+      error instanceof Error ? error.message : error,
+    );
     return imageUrl;
   }
+}
+
+/**
+ * Returns true if the URL has a file extension that social platforms accept.
+ */
+export function hasValidImageExtension(url: string): boolean {
+  return VALID_IMAGE_EXT.test(url);
 }

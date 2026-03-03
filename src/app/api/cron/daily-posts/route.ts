@@ -75,7 +75,10 @@ import {
 } from '../../../../../utils/blog/aspectInterpretations';
 import { getSlowPlanetSignTotalDays } from '../../../../../utils/astrology/transit-duration';
 import { postToSocial, postToSocialMultiPlatform } from '@/lib/social/client';
-import { preUploadImage } from '@/lib/social/pre-upload-image';
+import {
+  preUploadImage,
+  hasValidImageExtension,
+} from '@/lib/social/pre-upload-image';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -86,6 +89,9 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const force = url.searchParams.get('force') === 'true';
     const overrideDate = url.searchParams.get('date');
+    // Optional base URL override for carousel/IG image generation (local testing)
+    const carouselBaseUrl =
+      url.searchParams.get('carouselBaseUrl')?.replace(/\/$/, '') || undefined;
     // Optional comma-separated section filter, e.g. ?sections=threads,stories
     // When omitted, all sections run as normal.
     const sectionsParam = url.searchParams.get('sections');
@@ -352,7 +358,7 @@ export async function GET(request: NextRequest) {
     try {
       const { generateDailyBatch } =
         await import('@/lib/instagram/content-orchestrator');
-      const igBatch = await generateDailyBatch(dateStr);
+      const igBatch = await generateDailyBatch(dateStr, carouselBaseUrl);
 
       // Post each Instagram batch item via Ayrshare
       const igSentResults: Array<{
@@ -877,7 +883,7 @@ export async function GET(request: NextRequest) {
           AND scheduled_date::date = ${dateStr}::date
           AND status IN ('sent', 'failed')
       `;
-        if (Number(existingStories.rows[0]?.count || 0) >= 4) {
+        if (!force && Number(existingStories.rows[0]?.count || 0) >= 4) {
           console.log('📖 Stories already generated for today, skipping');
           cronResults.instagramStories = {
             success: true,
@@ -959,8 +965,11 @@ export async function GET(request: NextRequest) {
           const allStories = storyItems;
           const storyUtcHours = [9, 12, 15, 19];
 
-          const SHARE_BASE_URL =
-            process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+          const SHARE_BASE_URL = (
+            url.searchParams.get('storyBaseUrl') ||
+            process.env.NEXT_PUBLIC_BASE_URL ||
+            'https://lunary.app'
+          ).replace(/\/$/, '');
 
           const storySentResults: Array<{
             scheduledTime: string;
@@ -997,6 +1006,20 @@ export async function GET(request: NextRequest) {
             try {
               // Pre-upload dynamic OG image so Instagram gets a static blob URL
               const staticImageUrl = await preUploadImage(imageUrl);
+
+              // Skip if blob upload failed — Postiz requires a valid image extension
+              if (!hasValidImageExtension(staticImageUrl)) {
+                console.error(
+                  `[daily-cron] IG story skipped — image has no valid extension after pre-upload: ${staticImageUrl}`,
+                );
+                storySentResults.push({
+                  scheduledTime: scheduledTime.toISOString(),
+                  variant: story.variant,
+                  status: 'error',
+                  error: `Pre-upload failed: no valid extension in ${staticImageUrl}`,
+                });
+                continue;
+              }
 
               const result = await postToSocial({
                 platform: 'instagram',
@@ -1358,6 +1381,8 @@ interface DailySocialPost {
   imageUrls: string[];
   alt: string;
   scheduledDate: string;
+  postType?: string;
+  sourceId?: string;
   pinterestOptions?: {
     boardId?: string;
   };
@@ -1477,13 +1502,15 @@ async function runDailyPosts(dateStr: string) {
     getPlatformImageFormat(platform === 'x' ? 'twitter' : platform);
   const posts: DailySocialPost[] = [];
 
-  // Transit post scheduling - avoid existing content slots at 12:00, 17:00, 20:00 UTC
-  // Space evenly through the day with ~4h gaps so posts don't hammer in a burst
+  // Transit post scheduling — UK lunch/afternoon/evening + US morning/afternoon overlap
+  // Removed morning slots (7, 11 UTC) which get low engagement.
+  // 13 UTC = 1pm UK / 8am US East — UK lunch + US morning
+  // 17 UTC = 5pm UK / 12pm US East — UK late afternoon + US midday
+  // 21 UTC = 9pm UK / 4pm US East — UK evening + US afternoon peak
   const transitTimeSlots = [
-    { hour: 7, label: 'primary' }, // UK early morning
-    { hour: 11, label: 'secondary' }, // UK late morning
-    { hour: 15, label: 'tertiary' }, // UK afternoon, US East morning
-    { hour: 19, label: 'backup' }, // UK evening, US afternoon
+    { hour: 13, label: 'primary' }, // UK lunch / US morning
+    { hour: 17, label: 'secondary' }, // UK late afternoon / US midday
+    { hour: 21, label: 'tertiary' }, // UK evening / US afternoon
   ];
   let transitSlotIndex = 0;
   const getTransitSchedule = () => {
@@ -1494,13 +1521,16 @@ async function runDailyPosts(dateStr: string) {
     ).toISOString();
   };
 
-  // NEW: Detect upcoming sign changes and retrograde stations (tomorrow vs today)
-  // Post BEFORE events happen to eliminate duplicates and give followers a heads-up
+  // Detect sign changes and retrograde stations across three windows:
+  //   yesterday→today: planet entered a sign TODAY (already happened)
+  //   today→tomorrow:  planet enters a sign TOMORROW (advance notice)
   const today = new Date(dateStr);
+  const yesterday = new Date(dateStr);
+  yesterday.setDate(yesterday.getDate() - 1);
   const tomorrow = new Date(dateStr);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  // Detect retrograde/direct stations happening TOMORROW (post TODAY)
+  // Detect retrograde/direct stations happening TOMORROW (post TODAY as heads-up)
   const upcomingStations = await detectUpcomingRetrogradeStations(
     today,
     tomorrow,
@@ -1513,10 +1543,24 @@ async function runDailyPosts(dateStr: string) {
     platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
   });
-  const { ingresses, egresses } = await detectUpcomingSignChanges(
-    today,
-    tomorrow,
+
+  // Detect sign changes across two windows:
+  //   today→tomorrow:  planet enters a sign TOMORROW (advance notice, "in ~Xh")
+  //   yesterday→today: planet entered a sign TODAY (already happened, "today")
+  const [{ ingresses: tomorrowIngresses }, { ingresses: todayIngresses }] =
+    await Promise.all([
+      detectUpcomingSignChanges(today, tomorrow),
+      detectUpcomingSignChanges(yesterday, today),
+    ]);
+
+  // Merge, deduplicating by planet (today's ingress takes priority if same planet somehow fires in both)
+  const seenIngressPlanets = new Set(
+    tomorrowIngresses.map((e: any) => e.planet),
   );
+  const ingresses = [
+    ...tomorrowIngresses,
+    ...todayIngresses.filter((e: any) => !seenIngressPlanets.has(e.planet)),
+  ];
 
   // Get tomorrow's positions for duration info on slow planet ingresses
   const tomorrowData = await getGlobalCosmicData(tomorrow);
@@ -1528,13 +1572,6 @@ async function runDailyPosts(dateStr: string) {
     platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
     tomorrowPositions,
-  });
-
-  const egressTextPosts = buildEgressTextPosts({
-    dateStr,
-    egressEvents: egresses,
-    platformHashtags: transitPlatformHashtags,
-    getSchedule: getTransitSchedule,
   });
 
   // Build supermoon posts (same day is fine for visual events)
@@ -1589,20 +1626,91 @@ async function runDailyPosts(dateStr: string) {
     getSchedule: getTransitSchedule,
   });
 
-  // Build separate focused posts for significant aspects
+  // Build separate focused posts for significant aspects.
+  //
+  // Lifecycle-aware dedup: aspects are only worth posting when they're
+  // newsworthy — i.e. when they first form or when they're about to leave.
+  // A Saturn-Neptune conjunction lasting 4 months should NOT post every day.
+  //
+  // Dedup windows by planet speed:
+  //   Outer planet pair (Jupiter/Saturn/Uranus/Neptune/Pluto involved): 30 days
+  //   Inner planet pair (Sun/Mercury/Venus/Mars/Moon only): 5 days
+  //
+  // Additionally, sustained slow-planet aspects (separation > 2°) are skipped
+  // entirely — only near-exact (≤ 2°) or newly-entered slow aspects are posted.
+  const OUTER_PLANETS = new Set([
+    'Jupiter',
+    'Saturn',
+    'Uranus',
+    'Neptune',
+    'Pluto',
+  ]);
+
+  const getAspectDedupDays = (planetA: string, planetB: string): number => {
+    if (OUTER_PLANETS.has(planetA) || OUTER_PLANETS.has(planetB)) return 30;
+    return 5;
+  };
+
   const aspectSource = Array.isArray(cosmicContent.dailyAspects)
     ? cosmicContent.dailyAspects
     : (cosmicContent.aspectEvents ?? []);
+
+  // Fetch the last-posted date for each aspect key from social_posts
+  let recentAspectLastPosted = new Map<string, Date>();
+  try {
+    const thirtyDaysAgo = new Date(dateStr);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentAspects = await sql`
+      SELECT source_id, MAX(created_at) as last_posted
+      FROM social_posts
+      WHERE post_type = 'aspect'
+        AND source_id IS NOT NULL
+        AND created_at >= ${thirtyDaysAgo.toISOString()}
+      GROUP BY source_id
+    `;
+    for (const row of recentAspects.rows) {
+      recentAspectLastPosted.set(row.source_id, new Date(row.last_posted));
+    }
+  } catch {
+    // Non-fatal
+  }
+
+  const now = new Date(dateStr);
+  const deduplicatedAspects = aspectSource.filter((aspect: any) => {
+    const planetA = aspect.planetA?.name || aspect.planetA || '';
+    const planetB = aspect.planetB?.name || aspect.planetB || '';
+    const aspectType = (aspect.aspect || '').toLowerCase();
+    const separation =
+      typeof aspect.separation === 'number' ? aspect.separation : 8;
+    const key = `${planetA}-${aspectType}-${planetB}`;
+
+    // For slow outer-planet aspects, only post when near-exact (≤ 2°).
+    // The important moments are when it first tightens to near-exact
+    // and when it's about to leave. The sustained middle is not news.
+    if (OUTER_PLANETS.has(planetA) || OUTER_PLANETS.has(planetB)) {
+      if (separation > 2) return false;
+    }
+
+    // Check dedup window
+    const dedupDays = getAspectDedupDays(planetA, planetB);
+    const lastPosted = recentAspectLastPosted.get(key);
+    if (lastPosted) {
+      const daysSince = (now.getTime() - lastPosted.getTime()) / 86400000;
+      if (daysSince < dedupDays) return false;
+    }
+
+    return true;
+  });
+
   const aspectTextPosts = buildAspectTextPosts({
     dateStr,
-    aspects: aspectSource,
+    aspects: deduplicatedAspects,
     platformHashtags: transitPlatformHashtags,
     getSchedule: getTransitSchedule,
   });
 
   posts.push(...retrogradeTextPosts);
   posts.push(...ingressTextPosts);
-  posts.push(...egressTextPosts);
   posts.push(...supermoonTextPosts);
   posts.push(...micromoonTextPosts);
   posts.push(...eclipseTextPosts);
@@ -1720,6 +1828,21 @@ async function runDailyPosts(dateStr: string) {
       if (anySucceeded) {
         console.log(`✅ ${post.name} post scheduled successfully`);
         const firstSuccess = platformResults.find(([, r]) => r.success);
+
+        // Persist aspect posts to social_posts so next day's dedup check
+        // can detect them and skip re-posting the same conjunction.
+        if (post.postType === 'aspect' && post.sourceId) {
+          try {
+            await sql`
+              INSERT INTO social_posts (content, platform, post_type, source_id, status, scheduled_date)
+              VALUES (${post.content}, 'threads', 'aspect', ${post.sourceId}, 'sent', ${post.scheduledDate})
+              ON CONFLICT DO NOTHING
+            `;
+          } catch {
+            // Non-fatal
+          }
+        }
+
         postResults.push({
           name: post.name,
           platforms: post.platforms,
@@ -4197,8 +4320,9 @@ function getRetrogradeReflectionLine(focus: string, sign?: string): string {
 
 /** Format eventTime as relative hours from now */
 function formatRelativeTime(eventTime?: Date): string {
-  if (!eventTime) return 'later today';
+  if (!eventTime) return 'today';
   const hoursAway = (eventTime.getTime() - Date.now()) / (1000 * 60 * 60);
+  if (hoursAway < 0) return 'today'; // already happened
   if (hoursAway < 1) return 'in <1h';
   return `in ~${Math.round(hoursAway)}h`;
 }
@@ -4373,9 +4497,12 @@ function buildIngressTextPosts({
     const seed = `ingress-${planet}-${sign}-${dateStr}`;
     const engagementHook = getEngagementHook('ingress', seed);
 
+    // Use past tense if the ingress already happened today
+    const verb = timeStr === 'today' ? 'entered' : 'enters';
+
     // Threads: conversational with engagement hook
     const threadsBodyParts = [
-      `${planet} enters ${sign} ${timeStr}.`,
+      `${planet} ${verb} ${sign} ${timeStr}.`,
       durationText || `A shift toward ${energy} energy begins.`,
       '',
       engagementHook,
@@ -4391,7 +4518,7 @@ function buildIngressTextPosts({
     );
 
     // X/Twitter: compact with CTA
-    const xBodyParts = [`${planet} enters ${sign} ${timeStr}.`];
+    const xBodyParts = [`${planet} ${verb} ${sign} ${timeStr}.`];
     if (durationText) {
       xBodyParts.push(durationText);
     } else if (previousSign) {
@@ -4410,7 +4537,7 @@ function buildIngressTextPosts({
 
     // Bluesky: informational
     const blueskyBodyParts = [
-      `${planet} enters ${sign} ${timeStr}.`,
+      `${planet} ${verb} ${sign} ${timeStr}.`,
       durationText || `A shift toward ${energy} energy begins.`,
     ];
     const blueskyBody = blueskyBodyParts.join('\n');
@@ -4422,11 +4549,11 @@ function buildIngressTextPosts({
     );
 
     posts.push({
-      name: `Ingress • ${planet} enters ${sign} ${timeStr}`,
+      name: `Ingress • ${planet} ${verb} ${sign} ${timeStr}`,
       content: xContent,
       platforms: ['x', 'bluesky', 'threads'],
       imageUrls: [],
-      alt: `${planet} enters ${sign} ${timeStr}`,
+      alt: `${planet} ${verb} ${sign} ${timeStr}`,
       scheduledDate: getSchedule(),
       variants: {
         bluesky: { content: blueskyContent },
@@ -4463,11 +4590,13 @@ function buildAspectTextPosts({
 
   if (validAspects.length === 0) return posts;
 
-  // Sort by priority (higher first), take top 4 aspects
+  // Sort by priority (higher first), take only the top 1 aspect per day.
+  // Long-duration aspects (e.g. Saturn conj Neptune lasting months) would spam
+  // every day at top priority if we took more — dedup handles multi-day coverage.
   const sortedAspects = [...validAspects].sort(
     (a, b) => (b.priority || 5) - (a.priority || 5),
   );
-  const selectedAspects = sortedAspects.slice(0, 4);
+  const selectedAspects = sortedAspects.slice(0, 1);
 
   for (const aspect of selectedAspects) {
     const planetA = aspect.planetA?.name || aspect.planetA;
@@ -4496,11 +4625,23 @@ function buildAspectTextPosts({
     const signAEnergy = signA !== 'in transit' ? getSignDescription(signA) : '';
     const signBEnergy = signB !== 'in transit' ? getSignDescription(signB) : '';
 
+    // For conjunctions, both planets are nearly in the same position so they're
+    // usually in the same sign. Use "conjoin in [Sign]" when that's the case.
+    const sharedSign =
+      aspectType === 'conjunction' && signA === signB && signA !== 'in transit'
+        ? signA
+        : null;
+    const sharedSignEnergy = sharedSign ? getSignDescription(sharedSign) : '';
+
     // Build energy description based on aspect type
     const isTension = isTensionAspect(aspectType);
     let energyDescription = '';
 
-    if (signAEnergy && signBEnergy) {
+    if (aspectType === 'conjunction' && sharedSign) {
+      // e.g. "Saturn and Neptune merge their energies in Pisces — structure meets
+      // dissolution, rewriting what we believe is real."
+      energyDescription = `${planetAInfo.domain} and ${planetBInfo.domain} merge in ${sharedSign}: ${sharedSignEnergy}`;
+    } else if (signAEnergy && signBEnergy) {
       if (isTension) {
         energyDescription = `${planetAInfo.domain} meets resistance, challenging ${signAEnergy} drive with ${signBEnergy} force`;
       } else if (aspectType === 'conjunction') {
@@ -4522,11 +4663,17 @@ function buildAspectTextPosts({
     const seed = `aspect-${planetA}-${aspectType}-${planetB}-${dateStr}`;
     const engagementHook = getAspectHook(aspectType, seed);
 
-    // Format headline with signs
-    const headlineWithSigns =
-      signA !== 'in transit' && signB !== 'in transit'
-        ? `${planetA} in ${signA} ${aspectLabel.toLowerCase()}s ${planetB} in ${signB}`
-        : `${planetA} ${aspectLabel.toLowerCase()} ${planetB}`;
+    // Format headline: conjunctions in a shared sign get "X and Y conjoin in [Sign]"
+    // which is more natural than "X in [Sign] conjuncts Y in [Sign]"
+    const headlineWithSigns = (() => {
+      if (aspectType === 'conjunction' && sharedSign) {
+        return `${planetA} and ${planetB} conjoin in ${sharedSign}`;
+      }
+      if (signA !== 'in transit' && signB !== 'in transit') {
+        return `${planetA} in ${signA} ${aspectLabel.toLowerCase()}s ${planetB} in ${signB}`;
+      }
+      return `${planetA} ${aspectLabel.toLowerCase()} ${planetB}`;
+    })();
 
     // Threads: conversational with engagement hook
     const threadsBody = [
@@ -4567,6 +4714,7 @@ function buildAspectTextPosts({
       aspectCtx,
     );
 
+    const aspectKey = `${planetA}-${aspectType}-${planetB}`;
     posts.push({
       name: `Aspect • ${planetA} ${aspectLabel} ${planetB}`,
       content: xContent,
@@ -4574,6 +4722,8 @@ function buildAspectTextPosts({
       imageUrls: [],
       alt: `${planetA} ${aspectLabel} ${planetB}`,
       scheduledDate: getSchedule(),
+      postType: 'aspect',
+      sourceId: aspectKey,
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
