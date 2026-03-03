@@ -25,6 +25,7 @@ const customJestConfig = {
     '/playwright/',
     '/__tests__/mocks/',
     '\\.integration\\.test\\.(ts|tsx|js|jsx)$',
+    '/ios/',
   ],
   collectCoverageFrom: [
     'src/utils/**/*.{js,jsx,ts,tsx}',
