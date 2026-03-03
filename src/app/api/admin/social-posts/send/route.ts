@@ -223,6 +223,35 @@ function buildAltText(post: DbPostRow): string {
   return hook || `Lunary ${post.post_type} post`;
 }
 
+/**
+ * Normalize a dynamic OG image URL for Postiz/social platform compatibility:
+ * - Replace localhost dev-server URLs with the production URL
+ * - Append .png to /api/og/ paths (Postiz requires a file extension in the URL)
+ * The production server has a rewrite: /api/og/:path*.png → /api/og/:path*
+ */
+function normalizeOgUrl(url: string): string {
+  if (!url) return url;
+  // Replace localhost (dev server) with production URL
+  let normalized = url.replace(
+    /^https?:\/\/localhost(:\d+)?/,
+    'https://lunary.app',
+  );
+  // Add .png extension to dynamic OG routes
+  if (
+    normalized.includes('/api/og/') &&
+    !normalized.match(/\.(png|jpg|jpeg|gif|webp)(\?|$)/i)
+  ) {
+    try {
+      const u = new URL(normalized);
+      u.pathname = u.pathname + '.png';
+      normalized = u.toString();
+    } catch {
+      // keep as-is
+    }
+  }
+  return normalized;
+}
+
 const buildPlatformPayload = (
   post: DbPostRow,
   scheduleDate: Date,
@@ -245,6 +274,7 @@ const buildPlatformPayload = (
       ) {
         imageUrlForPlatform = new URL(imageUrlForPlatform, baseUrl).toString();
       }
+      imageUrlForPlatform = normalizeOgUrl(imageUrlForPlatform);
     } catch (error) {
       console.warn('Failed to normalize image URL:', error);
     }
@@ -302,6 +332,7 @@ const buildPlatformPayload = (
           if (!url.startsWith('http://') && !url.startsWith('https://')) {
             url = new URL(url, baseUrl).toString();
           }
+          url = normalizeOgUrl(url);
         } catch {
           // keep as-is
         }

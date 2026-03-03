@@ -514,6 +514,17 @@ const nextConfig = {
     ];
   },
 
+  async rewrites() {
+    return [
+      // Allow OG images to be requested with .png extension for Postiz/social platform compatibility
+      // e.g. /api/og/instagram/carousel.png?slug=... → /api/og/instagram/carousel?slug=...
+      {
+        source: '/api/og/:path*.png',
+        destination: '/api/og/:path*',
+      },
+    ];
+  },
+
   async redirects() {
     return [
       // Forecast -> Transits hub redirect
