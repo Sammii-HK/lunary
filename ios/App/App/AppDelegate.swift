@@ -2,6 +2,7 @@ import UIKit
 import Capacitor
 import AppTrackingTransparency
 import WebKit
+import CapApp_SPM
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -33,6 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Force reference to prevent linker stripping
         _ = WidgetBridgePlugin.self
         _ = SignInWithApplePlugin.self
+        _keepPurchasesPlugin()
 
         // Debug: print to verify the class exists
         print("[Lunary] WidgetBridgePlugin class loaded: \(WidgetBridgePlugin.self)")

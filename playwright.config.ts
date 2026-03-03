@@ -38,7 +38,7 @@ export default defineConfig({
         ['json', { outputFile: 'test-results/results.json' }],
       ],
   use: {
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000',
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3003',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -76,8 +76,8 @@ export default defineConfig({
   ],
   webServer: {
     command:
-      'lsof -ti:3000 | xargs kill -9 2>/dev/null || true; next dev -p 3000',
-    url: 'http://localhost:3000',
+      'lsof -ti:3003 | xargs kill -9 2>/dev/null || true; next dev -p 3003',
+    url: 'http://localhost:3003',
     reuseExistingServer: !process.env.CI, // Reuse existing server in local dev, always start fresh in CI
     timeout: 180000, // 180 seconds to allow Next.js to compile routes and generate manifest files
     stdout: process.env.CI ? 'ignore' : 'pipe',
