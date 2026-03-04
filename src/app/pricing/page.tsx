@@ -330,17 +330,17 @@ export default function PricingPage() {
   if (isNativeIOS) {
     return (
       <div
-        className='h-screen overflow-y-auto px-6 pt-12'
+        className='h-screen overflow-y-auto px-6 pt-8'
         style={{
           backgroundColor: '#0a0a0f',
-          paddingBottom: 'max(3rem, env(safe-area-inset-bottom))',
+          paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
         <div className='max-w-sm mx-auto w-full'>
           <h1 className='text-2xl font-semibold text-zinc-100 text-center mb-2'>
             Lunary+
           </h1>
-          <p className='text-sm text-zinc-400 text-center mb-8'>
+          <p className='text-sm text-zinc-400 text-center mb-4'>
             Unlock your full cosmic experience
           </p>
           <IOSPaywall
