@@ -6,6 +6,8 @@ import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { filterFields, getFieldsParam } from '@/lib/analytics/field-selection';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 const familyToEventType = (
   family: string | null,
 ): 'app_opened' | 'product_opened' | 'grimoire_viewed' => {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 function getBaseUrl() {
   if (process.env.VERCEL) {
     return 'https://lunary.app';

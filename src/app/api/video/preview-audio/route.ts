@@ -10,6 +10,8 @@ import {
 } from '@/lib/video/narrative-generator';
 import { stripHtmlTags } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 

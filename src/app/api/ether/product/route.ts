@@ -6,6 +6,8 @@ import {
 import { deterministicEventId } from '@/lib/analytics/deterministic-event-id';
 import { getCurrentUser } from '@/lib/get-user-session';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 /**

@@ -10,6 +10,8 @@ import {
   generateDeletionScheduledEmailText,
 } from '@/lib/email-components/ComplianceEmails';
 
+export const dynamic = 'force-dynamic';
+
 const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
 function generateId(): string {

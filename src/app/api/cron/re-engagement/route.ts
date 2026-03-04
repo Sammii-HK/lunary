@@ -25,6 +25,8 @@ import {
   generateReEngagementInsightsEmailText,
 } from '@/lib/email/templates/re-engagement-insights';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const isVercelCron = request.headers.get('x-vercel-cron') === '1';

@@ -4,6 +4,8 @@ import { requireUser } from '@/lib/ai/auth';
 import { hasFeatureAccess, normalizePlanType } from '../../../../utils/pricing';
 import { detectMoods } from '@/lib/journal/mood-detector';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);

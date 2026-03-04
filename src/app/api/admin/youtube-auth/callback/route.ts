@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { requireAdminAuth } from '@/lib/admin-auth';
+import { sql } from '@vercel/postgres';
+
+export const dynamic = 'force-dynamic';
 
 function getRedirectUri() {
   const base = (
@@ -9,24 +12,30 @@ function getRedirectUri() {
   return `${base}/api/admin/youtube-auth/callback`;
 }
 
-/** GET — exchange authorization code for tokens, redirect to admin with token */
+function getAdminBaseUrl() {
+  return (
+    process.env.NEXT_PUBLIC_ADMIN_APP_URL || 'https://admin.lunary.app'
+  ).replace(/\/$/, '');
+}
+
+/** GET — exchange authorization code for tokens, save refresh token to DB */
 export async function GET(request: NextRequest) {
   const authResult = await requireAdminAuth(request);
   if (authResult instanceof NextResponse) return authResult;
 
+  const adminBase = getAdminBaseUrl();
   const code = request.nextUrl.searchParams.get('code');
   const error = request.nextUrl.searchParams.get('error');
 
   if (error) {
-    const adminUrl = new URL('/admin/podcasts', request.url);
-    adminUrl.searchParams.set('auth_error', error);
-    return NextResponse.redirect(adminUrl);
+    return NextResponse.redirect(
+      `${adminBase}/podcasts?auth_error=${encodeURIComponent(error)}`,
+    );
   }
 
   if (!code) {
-    return NextResponse.json(
-      { error: 'Missing code parameter' },
-      { status: 400 },
+    return NextResponse.redirect(
+      `${adminBase}/podcasts?auth_error=Missing+code+parameter`,
     );
   }
 
@@ -34,9 +43,8 @@ export async function GET(request: NextRequest) {
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    return NextResponse.json(
-      { error: 'Missing Google OAuth credentials' },
-      { status: 500 },
+    return NextResponse.redirect(
+      `${adminBase}/podcasts?auth_error=Missing+Google+OAuth+credentials`,
     );
   }
 
@@ -49,19 +57,29 @@ export async function GET(request: NextRequest) {
 
     const { tokens } = await oauth2Client.getToken(code);
 
-    const adminUrl = new URL('/admin/podcasts', request.url);
     if (tokens.refresh_token) {
-      adminUrl.searchParams.set('refresh_token', tokens.refresh_token);
+      // Save refresh token to DB so it persists without needing Vercel env var
+      await sql`
+        CREATE TABLE IF NOT EXISTS app_settings (
+          key   TEXT PRIMARY KEY,
+          value TEXT NOT NULL,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        )
+      `;
+      await sql`
+        INSERT INTO app_settings (key, value, updated_at)
+        VALUES ('google_refresh_token', ${tokens.refresh_token}, NOW())
+        ON CONFLICT (key) DO UPDATE
+          SET value = EXCLUDED.value, updated_at = NOW()
+      `;
+      console.log('✅ Google refresh token saved to database');
     }
-    adminUrl.searchParams.set('auth_success', 'true');
 
-    return NextResponse.redirect(adminUrl);
+    return NextResponse.redirect(`${adminBase}/podcasts?auth_success=true`);
   } catch (err: any) {
-    const adminUrl = new URL('/admin/podcasts', request.url);
-    adminUrl.searchParams.set(
-      'auth_error',
-      err.message || 'Token exchange failed',
+    console.error('YouTube OAuth callback error:', err);
+    return NextResponse.redirect(
+      `${adminBase}/podcasts?auth_error=${encodeURIComponent(err.message || 'Token exchange failed')}`,
     );
-    return NextResponse.redirect(adminUrl);
   }
 }

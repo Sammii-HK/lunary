@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getYearAnalysis } from '@/lib/tarot/year-analysis';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const isVercelCron = request.headers.get('x-vercel-cron') === '1';

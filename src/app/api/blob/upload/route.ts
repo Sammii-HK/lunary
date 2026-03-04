@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 function generateRandomSlug(): string {

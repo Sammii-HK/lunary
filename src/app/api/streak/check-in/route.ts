@@ -6,6 +6,8 @@ import {
   getStreakNotification,
 } from '@/lib/notifications/streak-notifications';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request);

@@ -5,6 +5,8 @@ import { encrypt, decrypt } from '@/lib/encryption';
 import { normalizeIsoDateOnly } from '@/lib/date-only';
 import { decryptLocation, encryptLocation } from '@/lib/location-encryption';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser(request);

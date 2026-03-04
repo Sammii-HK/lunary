@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { sendEmail } from '@/lib/email';
 import { buildShareUrl, createShareToken } from '@/lib/cosmic-report/share';
 
+export const dynamic = 'force-dynamic';
+
 const emailSchema = z.object({
   email: z.string().email(),
   make_public: z.boolean().optional(),

@@ -9,6 +9,8 @@ import {
   type YouTubeVideoMetadata,
 } from '@/lib/youtube/client';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes for video upload
 

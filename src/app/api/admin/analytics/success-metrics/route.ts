@@ -12,6 +12,8 @@ import { summarizeEntitlements } from '@/lib/metrics/entitlement-metrics';
 import { ANALYTICS_HISTORICAL_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
     return null;

@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireUser, UnauthorizedError } from '@/lib/ai/auth';
 import { buildLunaryContext } from '@/lib/ai/context';
 
+export const dynamic = 'force-dynamic';
+
 const jsonResponse = (payload: unknown, status = 200) =>
   NextResponse.json(payload, { status });
 

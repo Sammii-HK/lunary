@@ -6,6 +6,8 @@ import {
 import { PrismaClient } from '@prisma/client';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 const prisma = new PrismaClient();
 
 export const runtime = 'nodejs';

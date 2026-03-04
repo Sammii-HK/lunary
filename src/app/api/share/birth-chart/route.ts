@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createBirthChartShare } from '@/lib/share/birth-chart';
 
+export const dynamic = 'force-dynamic';
+
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lunary.app';
 
 const birthChartShareSchema = z.object({

@@ -6,6 +6,8 @@ import {
   normalizePlanType,
 } from '../../../../../utils/pricing';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/history/this-time-last-year
  *

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Internal endpoint: weekly snapshot of Lunary metrics.
  * Called by content-creator's collect-context cron to fuel dynamic persona context.

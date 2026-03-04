@@ -7,6 +7,8 @@ import {
   getVideoScripts,
 } from '@/lib/social/video-scripts/database';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET — List existing Seer Sammii scripts
  */

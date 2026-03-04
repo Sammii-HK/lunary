@@ -7,6 +7,8 @@ import { STREAK_MILESTONES } from '@/lib/notifications/streak-notifications';
 import { getDailyCompatibilityTip } from '@/lib/friends/compatibility-tips';
 import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/friends/activity
  * Friend activity feed: top 3 friends by recency, milestone celebrations, received celebrations

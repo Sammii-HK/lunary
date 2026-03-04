@@ -4,6 +4,8 @@ import { kvGet, kvPut } from '@/lib/cloudflare/kv';
 import { sql } from '@vercel/postgres';
 import { getReferralCode, generateReferralCode } from '@/lib/referrals';
 
+export const dynamic = 'force-dynamic';
+
 const INVITE_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
 function createInviteCode() {

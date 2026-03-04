@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Export analytics data as CSV or JSON
  * GET /api/admin/analytics/export?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD&format=csv|json

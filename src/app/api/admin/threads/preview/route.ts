@@ -3,6 +3,8 @@ import { generateThreadsBatch } from '@/lib/threads/content-orchestrator';
 import { THREADS_CHAR_LIMITS } from '@/lib/threads/types';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/admin/threads/preview?date=YYYY-MM-DD
  *

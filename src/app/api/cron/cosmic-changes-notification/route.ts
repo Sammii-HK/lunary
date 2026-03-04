@@ -8,6 +8,8 @@ import {
 } from '@/lib/cosmic-snapshot/changes';
 import { sendEmail } from '@/lib/email';
 
+export const dynamic = 'force-dynamic';
+
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;

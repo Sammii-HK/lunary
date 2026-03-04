@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBirthChartShare } from '@/lib/share/birth-chart';
 
+export const dynamic = 'force-dynamic';
+
 type ShareBirthChartParams = {
   shareId: string;
 };

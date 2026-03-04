@@ -3,6 +3,8 @@ import { put } from '@vercel/blob';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import crypto from 'crypto';
 
+export const dynamic = 'force-dynamic';
+
 // Using Node.js runtime for better compatibility with pdf-lib
 // export const runtime = 'edge';
 

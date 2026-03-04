@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { TAROT_SPREADS } from '@/constants/tarotSpreads';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   return NextResponse.json(TAROT_SPREADS, {
     headers: {

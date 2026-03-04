@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 import { generateChallenge } from '@/utils/challenges/challenge-generator';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     // Get current Monday

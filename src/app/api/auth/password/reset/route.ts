@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { getCorsHeaders, isValidOrigin } from '@/lib/origin-validation';
 
+export const dynamic = 'force-dynamic';
+
 const requestSchema = z.object({
   token: z.string().min(1),
   newPassword: z.string().min(8).max(128),

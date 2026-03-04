@@ -3,6 +3,8 @@ import { Prisma } from '@prisma/client';
 import { requireAdminAuth } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 const MAX_LOGS = 200;
 const FETCH_LIMIT = 500;
 

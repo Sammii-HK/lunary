@@ -7,6 +7,8 @@ import {
 } from '@/lib/succulent/payload';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 type PayloadGroup = {

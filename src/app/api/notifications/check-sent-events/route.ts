@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSentEvents } from '@/app/api/cron/shared-notification-tracker';
 
+export const dynamic = 'force-dynamic';
+
 // API endpoint for Cloudflare worker to check what events have been sent
 export async function GET(request: NextRequest) {
   try {

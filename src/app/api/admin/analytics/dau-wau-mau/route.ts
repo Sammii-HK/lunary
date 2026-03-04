@@ -8,6 +8,8 @@ import {
 import { filterFields, getFieldsParam } from '@/lib/analytics/field-selection';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 

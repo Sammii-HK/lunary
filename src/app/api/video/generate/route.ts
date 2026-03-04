@@ -26,6 +26,8 @@ import { clampHueShift, getThemeHueBase } from '@/lib/video/hue';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
 import { sendDiscordNotification } from '@/lib/discord';
 
+export const dynamic = 'force-dynamic';
+
 // Version for cache invalidation - increment when prompts change
 const SCRIPT_VERSION = {
   short: 'v21',

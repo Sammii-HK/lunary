@@ -4,6 +4,8 @@ import { getCurrentUser } from '@/lib/get-user-session';
 import { encrypt } from '@/lib/encryption';
 import { normalizeIsoDateOnly } from '@/lib/date-only';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser(request);

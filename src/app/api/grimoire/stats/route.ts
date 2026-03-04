@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
+export const dynamic = 'force-dynamic';
+
 export interface GrimoirePageStats {
   pagePath: string;
   viewsLast30Days: number;

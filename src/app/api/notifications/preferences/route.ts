@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
+export const dynamic = 'force-dynamic';
+
 export interface NotificationPreferences {
   frequency?: 'realtime' | 'daily' | 'weekly' | 'digest';
   quietHours?: { start: number; end: number };

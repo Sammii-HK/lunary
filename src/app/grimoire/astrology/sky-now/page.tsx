@@ -9,8 +9,8 @@ import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 import { Heading } from '@/components/ui/Heading';
 import { ASPECT_DATA, Aspect } from '@/constants/seo/aspects';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// Force dynamic — page fetches live DB data, cannot be pre-rendered at build time
+export const dynamic = 'force-dynamic';
 const CANONICAL_PATH = '/grimoire/astrology/sky-now';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lunary.app';
 

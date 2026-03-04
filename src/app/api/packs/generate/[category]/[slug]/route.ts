@@ -44,6 +44,8 @@ import { getRetrogradePackBySlug } from '@/lib/shop/generators/retrograde-packs'
 import { PDFDocument, PDFFont, PDFImage, StandardFonts } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 
+export const dynamic = 'force-dynamic';
+
 const LOGO_URL =
   process.env.NODE_ENV === 'production'
     ? 'https://lunary.app/press-kit/lunary-logo-light.png'

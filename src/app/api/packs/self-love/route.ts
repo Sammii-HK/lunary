@@ -8,6 +8,8 @@
 import { NextResponse } from 'next/server';
 import { generateSelfLovePackPdf } from '@/lib/pdf/packs/selfLovePack';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const pdfBytes = await generateSelfLovePackPdf();

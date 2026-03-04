@@ -5,6 +5,8 @@ import {
 } from '@/lib/discord';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 const HIGH_VALUE_EVENTS = ['trial_converted', 'subscription_started'];
 
 export async function POST(request: NextRequest) {

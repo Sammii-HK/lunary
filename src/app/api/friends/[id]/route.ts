@@ -6,6 +6,8 @@ import { hasFeatureAccess } from '../../../../../utils/pricing';
 import { decrypt } from '@/lib/encryption';
 import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/friends/[id]
  * Get friend details with full synastry analysis

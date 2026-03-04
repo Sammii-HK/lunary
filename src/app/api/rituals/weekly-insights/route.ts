@@ -3,6 +3,8 @@ import { getWeeklyInsights } from '@/lib/rituals/weekly-insights';
 import { auth } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();

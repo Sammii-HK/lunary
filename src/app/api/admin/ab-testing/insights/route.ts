@@ -4,6 +4,8 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 function getAIContext(): string {
   try {
     const contextPath = join(process.cwd(), 'docs', 'AI_CONTEXT.md');

@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { regenerateApiKey } from '@/lib/api/keys';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },

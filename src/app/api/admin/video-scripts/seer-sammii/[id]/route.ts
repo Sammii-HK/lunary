@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/admin-auth';
 import { updateVideoScriptStatus } from '@/lib/social/video-scripts/database';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * PATCH — Update Seer Sammii script status
  */

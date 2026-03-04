@@ -6,6 +6,8 @@ import {
 import { requireUser } from '@/lib/ai/auth';
 import { sql } from '@vercel/postgres';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Test endpoint for eclipse tracking
  * Shows upcoming eclipses and their relevance to user's natal chart

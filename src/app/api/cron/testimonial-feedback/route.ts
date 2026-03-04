@@ -6,6 +6,8 @@ import {
   TestimonialEmailType,
 } from '@/lib/email-templates/testimonial-feedback';
 
+export const dynamic = 'force-dynamic';
+
 const INTRO_DELAY_MS = 7 * 24 * 60 * 60 * 1000;
 const FOLLOWUP_DELAY_MS = 14 * 24 * 60 * 60 * 1000;
 const MAX_EMAILS_PER_RUN = 200;

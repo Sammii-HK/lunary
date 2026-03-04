@@ -9,6 +9,8 @@ import { sendEmail } from '@/lib/email';
 import { sendDiscordNotification } from '@/lib/discord';
 import webpush from 'web-push';
 
+export const dynamic = 'force-dynamic';
+
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;

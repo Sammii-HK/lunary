@@ -1,6 +1,8 @@
 import { auth } from '@/lib/auth';
 import { withCors } from '@/lib/auth-cors';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   return withCors(request, auth.handler);
 }

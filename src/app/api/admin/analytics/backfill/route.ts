@@ -9,6 +9,8 @@ import {
 import { ensureHeaders, upsertRow, appendRows } from '@/lib/google/sheets';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 const SHEETS_ID = process.env.GOOGLE_SHEETS_ID;
 
 /**

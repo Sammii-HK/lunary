@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import { sanitizeForLog as sanitize } from '@/lib/security/log-sanitize';
 import { postToSocial } from '@/lib/social/client';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 

@@ -8,6 +8,8 @@ import {
 import { uploadCardImage, schedulePost } from '@/lib/bip-spellcast';
 import { getSearchConsoleData } from '@/lib/google/search-console';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Build in Public — Weekly card post
  * Fires Monday 02:00 UTC. Generates a metrics card image, uploads it to

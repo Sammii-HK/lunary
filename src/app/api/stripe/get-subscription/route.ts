@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import Stripe from 'stripe';
 import { pickBestSubscription } from '@/lib/stripe/subscription-utils';
 
+export const dynamic = 'force-dynamic';
+
 export const revalidate = 300;
 
 function sanitizeForLog(value: unknown): string {

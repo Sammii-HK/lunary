@@ -5,6 +5,8 @@ import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
 import { ACTIVATION_EVENTS } from '@/lib/analytics/activation-events';
 
+export const dynamic = 'force-dynamic';
+
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 const PLAN_CHANGE_EVENTS = [

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 
+export const dynamic = 'force-dynamic';
+
 function toPostgresTextArray(values: string[]): string {
   if (values.length === 0) {
     return '{}';

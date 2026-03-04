@@ -13,6 +13,8 @@ import {
 } from '../../../../../utils/astrology/astronomical-data';
 import { ASPECT_DATA } from '@/constants/seo/aspects';
 
+export const dynamic = 'force-dynamic';
+
 // Helper to convert moon phase label to key
 function getMoonPhaseKey(label: string): string {
   return label.toLowerCase().replace(' ', '_') as any;

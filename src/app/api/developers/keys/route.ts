@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { createApiKey, getUserApiKeys } from '@/lib/api/keys';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const session = await auth.api.getSession({

@@ -24,7 +24,7 @@ export interface SearchConsoleData {
  * Get authenticated Google Search Console client
  * Supports both Service Account (preferred) and OAuth2 (fallback)
  */
-function getSearchConsoleClient() {
+async function getSearchConsoleClient() {
   // Try Service Account first (never expires)
   const serviceAccountJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   if (serviceAccountJson) {
@@ -45,14 +45,15 @@ function getSearchConsoleClient() {
     }
   }
 
-  // Fallback to OAuth2 (requires manual token refresh)
+  // Fallback to OAuth2 (refresh token saved via admin OAuth flow or env var)
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+  const { getGoogleRefreshToken } = await import('./get-refresh-token');
+  const refreshToken = await getGoogleRefreshToken();
 
   if (!clientId || !clientSecret || !refreshToken) {
     const error = new Error(
-      'Missing Google Search Console credentials. Set either GOOGLE_SERVICE_ACCOUNT_JSON (recommended) or GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN.',
+      'Missing Google Search Console credentials. Set either GOOGLE_SERVICE_ACCOUNT_JSON (recommended) or authorize via Admin > Podcasts > Connect YouTube.',
     ) as Error & { code?: string };
     error.code = 'MISSING_CREDENTIALS';
     throw error;
@@ -88,7 +89,7 @@ export async function getSearchConsoleData(
   endDate: string,
   siteUrl?: string,
 ): Promise<SearchConsoleData> {
-  const searchConsole = getSearchConsoleClient();
+  const searchConsole = await getSearchConsoleClient();
   let propertyUrl = siteUrl || process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL || '';
 
   if (!propertyUrl) {
@@ -209,7 +210,7 @@ export async function getTopQueries(
   limit: number = 10,
   siteUrl?: string,
 ) {
-  const searchConsole = getSearchConsoleClient();
+  const searchConsole = await getSearchConsoleClient();
   let propertyUrl = siteUrl || process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL || '';
 
   if (!propertyUrl) {
@@ -276,7 +277,7 @@ export async function getTopPages(
   limit: number = 10,
   siteUrl?: string,
 ) {
-  const searchConsole = getSearchConsoleClient();
+  const searchConsole = await getSearchConsoleClient();
   let propertyUrl = siteUrl || process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL || '';
 
   if (!propertyUrl) {
@@ -359,7 +360,7 @@ export interface PageIndexingStatus {
 export async function getPageIndexingStatus(
   pageUrl: string,
 ): Promise<PageIndexingStatus> {
-  const searchConsole = getSearchConsoleClient();
+  const searchConsole = await getSearchConsoleClient();
   let propertyUrl = process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL || '';
 
   if (!propertyUrl) {

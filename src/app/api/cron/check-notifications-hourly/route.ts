@@ -13,6 +13,8 @@ import {
   sendTrialReminders,
 } from '@/lib/cron';
 
+export const dynamic = 'force-dynamic';
+
 // This is the SINGLE cron job for Vercel Pro tier
 // It runs every hour and handles all scheduled tasks directly (no fetch calls)
 export async function GET(request: NextRequest) {

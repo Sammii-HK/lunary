@@ -6,6 +6,8 @@ import {
   NotificationEvent,
 } from '@/lib/notifications/unified-service';
 
+export const dynamic = 'force-dynamic';
+
 // Lazy initialization of VAPID keys (only when actually needed)
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;

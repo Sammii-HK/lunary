@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import { requireAdminAuth } from '@/lib/admin-auth';
 import { spellcastFetch, isSpellcastConfigured } from '@/lib/social/spellcast';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/admin/engagement — List engagement queue items
  */

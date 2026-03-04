@@ -3,6 +3,8 @@ import { Body, GeoVector, Ecliptic, AstroTime } from 'astronomy-engine';
 import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 
+export const dynamic = 'force-dynamic';
+
 const ZODIAC_SIGNS = [
   'Aries',
   'Taurus',

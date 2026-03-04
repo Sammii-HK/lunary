@@ -4,6 +4,8 @@ import { getPlatformImageFormat } from '@/lib/social/educational-images';
 import { getPlatformHashtags } from '../../../../../utils/hashtags';
 import { postToSocialMultiPlatform } from '@/lib/social/client';
 
+export const dynamic = 'force-dynamic';
+
 interface PostContent {
   date: string;
   primaryEvent: {

@@ -5,6 +5,8 @@ import { requireAdminAuth } from '@/lib/admin-auth';
 import { saveVideoScript } from '@/lib/social/video-scripts/database';
 import type { ContentType } from '@/lib/social/video-scripts/content-types';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 export const maxDuration = 120;
 

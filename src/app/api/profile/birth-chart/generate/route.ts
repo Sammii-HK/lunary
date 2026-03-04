@@ -11,6 +11,8 @@ import { encryptLocation, decryptLocation } from '@/lib/location-encryption';
 import { Observer } from 'astronomy-engine';
 import tzLookup from 'tz-lookup';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser(request);

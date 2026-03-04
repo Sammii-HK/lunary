@@ -5,6 +5,8 @@ import { headers } from 'next/headers';
 import { getUserTourContext } from '@/lib/feature-tours/tour-helpers';
 import { normalizePlanType } from '../../../../../utils/pricing';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const session = await auth.api.getSession({

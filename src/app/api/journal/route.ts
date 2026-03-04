@@ -5,6 +5,8 @@ import { isDreamEntry } from '@/lib/journal/dream-classifier';
 import { JOURNAL_LIMITS, normalizePlanType } from '../../../../utils/pricing';
 import { conversionTracking } from '@/lib/analytics';
 
+export const dynamic = 'force-dynamic';
+
 export type JournalCategory = 'journal' | 'dream' | 'ritual';
 
 export interface JournalEntry {

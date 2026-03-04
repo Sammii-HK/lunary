@@ -7,6 +7,8 @@ import {
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 async function getUser(request: NextRequest) {
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session?.user?.id) {

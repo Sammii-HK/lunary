@@ -5,6 +5,8 @@ import { calculateSynastry } from '@/lib/astrology/synastry';
 import { getRealPlanetaryPositions } from '@utils/astrology/astronomical-data';
 import type { CompatInviteData } from '@/app/api/compatibility/invite/route';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/compatibility/calculate
  * Auth required. Calculate synastry between inviter and the signed-up user.

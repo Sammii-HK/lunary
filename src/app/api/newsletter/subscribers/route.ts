@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { addBrevoNewsletterContact } from '@/lib/brevo';
 
+export const dynamic = 'force-dynamic';
+
 // GET: List all subscribers
 export async function GET(request: NextRequest) {
   try {

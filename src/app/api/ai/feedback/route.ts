@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireUser, UnauthorizedError } from '@/lib/ai/auth';
 import { recordFeedback } from '@/lib/ai/feedback';
 
+export const dynamic = 'force-dynamic';
+
 type FeedbackRequest = {
   threadId?: string;
   messageId?: string;

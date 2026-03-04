@@ -20,6 +20,8 @@ import {
   WeeklyTheme,
 } from '@/lib/social/weekly-themes';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 

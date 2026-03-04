@@ -5,6 +5,8 @@ import {
 } from '@/lib/analytics/canonical-events';
 import { getCurrentUser } from '@/lib/get-user-session';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 const ANON_ID_COOKIE = 'lunary_anon_id';

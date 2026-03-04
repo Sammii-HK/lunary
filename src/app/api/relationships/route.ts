@@ -8,6 +8,8 @@ import {
 import { CURRENT_BIRTH_CHART_VERSION } from '../../../../utils/astrology/chart-version';
 import tzLookup from 'tz-lookup';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);

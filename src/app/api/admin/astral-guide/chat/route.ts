@@ -24,6 +24,8 @@ import { analyzeContextNeeds } from '@/lib/ai/context-optimizer';
 import { decrypt } from '@/lib/encryption';
 import { normalizePlanType } from '../../../../../../utils/pricing';
 
+export const dynamic = 'force-dynamic';
+
 const requestSchema = z.object({
   message: z.string().min(1).max(5000),
   email: z.string().email().optional(),

@@ -7,6 +7,8 @@ import {
   ACTIVATION_WINDOW_DAYS,
 } from '@/lib/analytics/activation-events';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Monthly metrics snapshot
  * Runs on the 2nd of each month at 03:00 UTC via Vercel cron.

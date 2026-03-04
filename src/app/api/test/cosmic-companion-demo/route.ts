@@ -3,6 +3,8 @@ import { buildAstralContext } from '@/lib/ai/astral-guide';
 import { requireUser } from '@/lib/ai/auth';
 import { sql } from '@vercel/postgres';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Comprehensive demo of Cosmic Companion features
  * Shows all Phase 1-3 capabilities in action

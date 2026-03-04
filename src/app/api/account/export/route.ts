@@ -4,6 +4,8 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { decrypt } from '@/lib/encryption';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const headersList = await headers();

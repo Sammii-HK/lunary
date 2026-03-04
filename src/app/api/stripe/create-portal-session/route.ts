@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 
+export const dynamic = 'force-dynamic';
+
 function getStripe(secretKey?: string) {
   const key = secretKey || process.env.STRIPE_SECRET_KEY;
   if (!key) {

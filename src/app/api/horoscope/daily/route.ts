@@ -8,6 +8,8 @@ import { getDailyCacheHeaders } from '@/lib/cache-utils';
 import { CURRENT_BIRTH_CHART_VERSION } from '../../../../../utils/astrology/chart-version';
 import { decryptLocation } from '@/lib/location-encryption';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 interface UserProfile {

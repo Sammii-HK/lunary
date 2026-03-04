@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendDiscordNotification } from '@/lib/discord';
 
+export const dynamic = 'force-dynamic';
+
 const HEALTH_CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 const SLOW_RESPONSE_MS = 3000; // 3 seconds
 const MAX_CONSECUTIVE_FAILURES = 2; // Alert after 2 consecutive failures

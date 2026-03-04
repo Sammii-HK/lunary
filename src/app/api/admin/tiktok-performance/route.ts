@@ -4,6 +4,8 @@ import { sql } from '@vercel/postgres';
 import { bulkInsertPerformance } from '@/lib/social/video-scripts/database';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 /**

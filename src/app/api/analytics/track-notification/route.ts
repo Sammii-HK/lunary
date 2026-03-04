@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { trackNotificationEvent } from '@/lib/analytics/tracking';
 
+export const dynamic = 'force-dynamic';
+
 const PIXEL = Buffer.from(
   'R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',
   'base64',

@@ -6,6 +6,8 @@ import {
 } from '@/lib/ai/astral-guide';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const requestSchema = z.object({
   query: z.string().min(1).max(500),
   mode: z.enum(['lightweight', 'full']).default('lightweight'),

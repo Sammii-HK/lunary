@@ -7,6 +7,8 @@ import {
   generateWeeklyReportEmailText,
 } from '@/lib/weekly-report/email-template';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireAdminAuth(request);

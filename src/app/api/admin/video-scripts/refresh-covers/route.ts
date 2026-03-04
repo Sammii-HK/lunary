@@ -5,6 +5,8 @@ import { requireAdminAuth } from '@/lib/admin-auth';
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import { getImageBaseUrl } from '@/lib/urls';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 function getWeekStart(date: Date): Date {

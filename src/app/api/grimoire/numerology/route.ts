@@ -4,6 +4,8 @@ import {
   lifePathNumbers,
 } from '@/constants/grimoire/numerology-data';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type');

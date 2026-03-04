@@ -5,6 +5,8 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 // Ensure conversion_events table exists
 let tableChecked = false;
 async function ensureConversionEventsTable() {

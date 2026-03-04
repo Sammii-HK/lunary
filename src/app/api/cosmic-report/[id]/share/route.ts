@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { createShareToken, buildShareUrl } from '@/lib/cosmic-report/share';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(_request: NextRequest, context: any) {
   try {
     const { params } = context as { params: { id: string } };

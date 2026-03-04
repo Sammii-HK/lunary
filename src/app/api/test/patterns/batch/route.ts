@@ -11,6 +11,8 @@ import { sql } from '@vercel/postgres';
 import { detectCosmicPatterns } from '@/lib/patterns/core/detector';
 import { saveCosmicPatterns } from '@/lib/patterns/storage/secure-storage';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 

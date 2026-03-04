@@ -6,6 +6,8 @@ import { hashForLookup } from '@/lib/encryption';
 import { hasFeatureAccess } from '../../../../../utils/pricing';
 import { FRIEND_LIMITS } from '../../../../../utils/entitlements';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/friends/invite
  * Generate a friend invite link

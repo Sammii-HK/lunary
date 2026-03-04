@@ -8,6 +8,8 @@ import {
   type RedditFormat,
 } from '@/lib/social/platform-strategies/reddit';
 
+export const dynamic = 'force-dynamic';
+
 interface BatchItem {
   subreddit: string;
   subredditDisplay: string;

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { Pool } from 'pg';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Signs a cookie value using HMAC-SHA256, matching better-call's setSignedCookie format.
  * The resulting format is `value.base64signature` (not URI-encoded — Next.js will encode it).

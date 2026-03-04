@@ -4,6 +4,8 @@ import { formatDate } from '@/lib/analytics/date-range';
 import { getSearchConsoleData, getTopPages } from '@/lib/google/search-console';
 import generateSitemap from '@/app/sitemap';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 /**

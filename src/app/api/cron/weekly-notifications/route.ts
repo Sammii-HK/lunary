@@ -6,6 +6,8 @@ import {
 } from '@/lib/notifications/tiered-service';
 import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 
+export const dynamic = 'force-dynamic';
+
 type WeeklyNotificationType = 'week_ahead' | 'weekly_tarot' | 'cosmic_reset';
 
 function getNotificationTypeForDay(

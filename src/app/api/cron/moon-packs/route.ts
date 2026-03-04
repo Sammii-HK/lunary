@@ -3,6 +3,8 @@ import { MoonPackGenerator } from '../../../../../scripts/generate-moon-packs';
 import { NotificationTemplates } from '../../../../../utils/notifications/pushNotifications';
 import { sendDiscordAdminNotification } from '@/lib/discord';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 /**

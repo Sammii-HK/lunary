@@ -8,6 +8,8 @@ import {
 import { auth } from '@/lib/auth';
 import { formatTextArray } from '@/lib/postgres/formatTextArray';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest, context: unknown) {
   try {
     // Check for demo mode header first

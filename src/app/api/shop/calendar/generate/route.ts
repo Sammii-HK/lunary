@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateCosmicCalendar } from '../../../../../../utils/calendar/cosmicCalendarGenerator';
 import { put } from '@vercel/blob';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {

@@ -13,6 +13,8 @@ import {
 } from '../../../../../utils/tarot/seed-date';
 import { getYearAnalysis } from '@/lib/tarot/year-analysis';
 
+export const dynamic = 'force-dynamic';
+
 // Don't cache this route - subscription status can change at any time
 // Analysis data is cached in database, but subscription checks must be fresh
 export const revalidate = 0;

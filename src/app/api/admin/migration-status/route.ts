@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 // Test accounts to exclude from migration checks
 const TEST_ACCOUNT_PATTERNS = [
   'samhaylock@aol.com',

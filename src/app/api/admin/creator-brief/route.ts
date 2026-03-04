@@ -6,6 +6,8 @@ import { generateDailyTalkingPoints } from '@/lib/social/video-scripts/seer-samm
 import { retrieveGrimoireContext } from '@/lib/ai/astral-guide';
 import { getVideoScripts } from '@/lib/social/video-scripts/database';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET — Returns today's creator brief (computed on request, no DB table)
  */

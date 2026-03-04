@@ -21,6 +21,8 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import ffmpeg from 'fluent-ffmpeg';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Map contentTypeKey from script metadata to a category-visuals category.
  * Engagement scripts (sign-check, ranking, angel-number, etc.) don't have a

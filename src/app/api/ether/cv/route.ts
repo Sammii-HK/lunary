@@ -7,6 +7,8 @@ import {
 import { forwardEventToPostHog, aliasPostHogUser } from '@/lib/posthog-forward';
 import { sql } from '@vercel/postgres';
 
+export const dynamic = 'force-dynamic';
+
 function normalizeEmail(email: unknown): string | null {
   if (typeof email !== 'string') return null;
   const trimmed = email.trim().toLowerCase();

@@ -8,6 +8,8 @@ import {
 } from '../../../../../utils/substack/contentFormatter';
 import { generateReelHashtags } from '@/lib/video/narrative-generator';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 

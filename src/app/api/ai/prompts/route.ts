@@ -8,6 +8,8 @@ import {
   type PromptType,
 } from '@/lib/ai/prompt-generator';
 
+export const dynamic = 'force-dynamic';
+
 const jsonResponse = (payload: unknown, status = 200, init?: ResponseInit) =>
   NextResponse.json(payload, {
     status,

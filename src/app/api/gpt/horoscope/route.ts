@@ -5,6 +5,8 @@ import {
 } from '../../../../../utils/astrology/cosmic-og';
 import { requireGptAuth } from '@/lib/gptAuth';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 export const revalidate = 86400; // minimum revalidation window (daily type)
 

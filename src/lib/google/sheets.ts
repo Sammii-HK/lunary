@@ -6,30 +6,22 @@ const SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
  * Get authenticated Google Sheets client
  * Uses OAuth2 with refresh token (same credentials as YouTube)
  */
-function getSheetsClient() {
+async function getSheetsClient() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+  const { getGoogleRefreshToken } = await import('./get-refresh-token');
+  const refreshToken = await getGoogleRefreshToken();
 
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error(
-      'Missing Google Sheets OAuth credentials. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN in environment variables.',
+      'Missing Google Sheets OAuth credentials. Authorize via Admin > Podcasts > Connect YouTube.',
     );
   }
 
   const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
 
-  // Set credentials with refresh token
-  // The OAuth2 client will automatically refresh the access token when needed
   oauth2Client.setCredentials({
     refresh_token: refreshToken,
-  });
-
-  // Add error handler for token refresh failures
-  oauth2Client.on('tokens', (tokens) => {
-    if (tokens.refresh_token) {
-      console.log('[Sheets] New refresh token received');
-    }
   });
 
   return google.sheets({
@@ -49,7 +41,7 @@ export async function getOrCreateSheet(
   spreadsheetId: string,
   sheetName: string,
 ): Promise<number> {
-  const sheets = getSheetsClient();
+  const sheets = await getSheetsClient();
 
   try {
     // Get spreadsheet metadata
@@ -105,7 +97,7 @@ export async function ensureHeaders(
   sheetName: string,
   headers: string[],
 ): Promise<void> {
-  const sheets = getSheetsClient();
+  const sheets = await getSheetsClient();
 
   try {
     // Get sheet ID
@@ -156,7 +148,7 @@ export async function upsertRow(
   row: SheetRow,
   keyColumn: string,
 ): Promise<void> {
-  const sheets = getSheetsClient();
+  const sheets = await getSheetsClient();
 
   try {
     // Ensure sheet exists
@@ -239,7 +231,7 @@ export async function appendRows(
   sheetName: string,
   rows: SheetRow[],
 ): Promise<void> {
-  const sheets = getSheetsClient();
+  const sheets = await getSheetsClient();
 
   try {
     // Ensure sheet exists
@@ -293,7 +285,7 @@ export async function updateCell(
   cell: string,
   value: string | number,
 ): Promise<void> {
-  const sheets = getSheetsClient();
+  const sheets = await getSheetsClient();
 
   try {
     await sheets.spreadsheets.values.update({
@@ -322,7 +314,7 @@ export async function clearSheet(
   spreadsheetId: string,
   sheetName: string,
 ): Promise<void> {
-  const sheets = getSheetsClient();
+  const sheets = await getSheetsClient();
 
   try {
     await sheets.spreadsheets.values.clear({

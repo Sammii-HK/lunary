@@ -4,6 +4,8 @@ import { getOpenAI, LLM_MODEL } from '@/lib/openai-client';
 import { scheduleTextPost } from '@/lib/bip-spellcast';
 import { getSearchConsoleData } from '@/lib/google/search-console';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Build in Public — Daily stat post
  * Fires daily at 07:00 UTC. Schedules a text post to Spellcast sammii account

@@ -3,6 +3,8 @@ import { getImageBaseUrl } from '@/lib/urls';
 import { getPlatformImageFormat } from '@/lib/social/educational-images';
 import { postToSocialMultiPlatform } from '@/lib/social/client';
 
+export const dynamic = 'force-dynamic';
+
 interface PostContent {
   date: string;
   primaryEvent: {

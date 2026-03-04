@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getOrGenerateWeeklyPrompt } from '@/lib/ai/prompt-generator';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Cron job: Runs weekly on Sundays to generate weekly prompts for all users
  * Schedule: Every Sunday at 8 AM UTC

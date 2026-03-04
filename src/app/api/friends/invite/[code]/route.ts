@@ -4,6 +4,8 @@ import { requireUser } from '@/lib/ai/auth';
 import { hashForLookup, decrypt } from '@/lib/encryption';
 import { hasFeatureAccess } from '../../../../../../utils/pricing';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/friends/invite/[code]
  * Get invite details (for invite page - can be accessed without auth)
