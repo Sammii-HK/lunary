@@ -1,14 +1,16 @@
 import UIKit
 import Capacitor
 import WebKit
+import RevenuecatPurchasesCapacitor
 
 class LunaryBridgeViewController: CAPBridgeViewController, WKNavigationDelegate {
 
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
-        // SignInWithApplePlugin and PurchasesPlugin are both registered via
-        // packageClassList in capacitor.config.json using NSClassFromString at
-        // bridge startup — no manual registerPluginType needed here.
+        // packageClassList uses NSClassFromString which fails for Swift SPM classes.
+        // Explicitly register PurchasesPlugin so Capacitor's JS bridge finds it.
+        bridge?.registerPluginType(PurchasesPlugin.self)
+        NSLog("[Lunary] PurchasesPlugin registered with bridge")
     }
 
     override func viewDidLoad() {

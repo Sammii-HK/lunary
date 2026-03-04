@@ -98,6 +98,18 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
     if (Capacitor.getPlatform() !== 'ios') {
       return;
     }
+    // Diagnostic: is the 'Purchases' plugin registered in the Capacitor bridge?
+    // RC registers under the name 'Purchases' (not 'PurchasesPlugin')
+    const cap = (
+      window as unknown as {
+        Capacitor?: { isPluginAvailable?: (n: string) => boolean };
+      }
+    ).Capacitor;
+    const nativeAvailable =
+      typeof cap?.isPluginAvailable === 'function'
+        ? cap.isPluginAvailable('Purchases')
+        : 'unknown';
+    console.log('[IAP] Purchases native available:', nativeAvailable);
     configureIAP()
       .then(() => getIAPOfferings())
       .then((o) => {
