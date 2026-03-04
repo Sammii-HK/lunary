@@ -211,6 +211,7 @@ export function getRealPlanetaryPositions(
       longitude,
       date,
       actualDailyMotion,
+      retrograde,
     );
 
     const positionData = {

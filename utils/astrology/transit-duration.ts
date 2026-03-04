@@ -19,6 +19,8 @@ export interface TransitDuration {
  * @param actualDailyMotion - Real observed daily motion (degrees/day) from astronomy-engine.
  *   When provided, replaces the hardcoded average for fast planets — critical for the Moon
  *   where actual speed (12.2-14.8°/day) varies ~20% from the 13.176° average.
+ * @param retrograde - Whether the planet is currently in retrograde motion.
+ *   When true, fast planets count down to 0° (re-entry into previous sign) rather than 30°.
  */
 export function calculateTransitDuration(
   planet: string,
@@ -26,6 +28,7 @@ export function calculateTransitDuration(
   currentLongitude: number,
   date: Date = new Date(),
   actualDailyMotion?: number,
+  retrograde?: boolean,
 ): TransitDuration | null {
   // Check if planet is slow or fast
   if (SLOW_PLANETS.includes(planet)) {
@@ -36,6 +39,7 @@ export function calculateTransitDuration(
       currentLongitude,
       date,
       actualDailyMotion,
+      retrograde,
     );
   }
 
@@ -126,13 +130,18 @@ export function getSlowPlanetSignTotalDays(
 
 /**
  * Fast planets (Moon-Mars): degrees remaining ÷ daily motion
- * Uses actual observed motion when available, falls back to orbital average
+ * Uses actual observed motion when available, falls back to orbital average.
+ *
+ * Retrograde-aware: when retrograde=true the planet is moving backward (toward 0°),
+ * so it will exit the sign at 0° (re-entering the previous sign) rather than at 30°.
+ * degreesRemaining and daysElapsed are calculated accordingly.
  */
 function calculateFastPlanetDuration(
   planet: string,
   currentLongitude: number,
   date: Date,
   actualDailyMotion?: number,
+  retrograde?: boolean,
 ): TransitDuration | null {
   const averageMotion =
     PLANET_DAILY_MOTION[planet as keyof typeof PLANET_DAILY_MOTION];
@@ -147,14 +156,19 @@ function calculateFastPlanetDuration(
   // Calculate degree within current sign (0-30)
   const degreeInSign = currentLongitude % 30;
 
-  // Degrees remaining in sign
-  const degreesRemaining = 30 - degreeInSign;
+  // Retrograde: planet moves toward 0° and re-enters the previous sign
+  // Direct:     planet moves toward 30° and enters the next sign
+  const degreesRemaining = retrograde ? degreeInSign : 30 - degreeInSign;
 
   // Days remaining = degrees remaining / daily motion (fractional for hour precision)
   const remainingDays = degreesRemaining / dailyMotion;
 
   // Calculate start date (when planet entered this sign)
-  const daysElapsed = degreeInSign / dailyMotion;
+  // Retrograde: entered from the high-degree end (30°), so elapsed = 30 - degreeInSign
+  // Direct:     entered from 0°, so elapsed = degreeInSign
+  const daysElapsed = retrograde
+    ? (30 - degreeInSign) / dailyMotion
+    : degreeInSign / dailyMotion;
   const msPerDay = 86400000;
   const startDate = new Date(date.getTime() - daysElapsed * msPerDay);
 
