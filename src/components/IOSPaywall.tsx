@@ -115,32 +115,7 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
       .then((o) => {
         const pkgCount = Object.values(o).filter(Boolean).length;
         if (pkgCount === 0) {
-          // Surface diagnostic info visible on TestFlight (no Xcode needed)
-          const { Purchases } = require('@revenuecat/purchases-capacitor');
-          Promise.allSettled([
-            Purchases.getCustomerInfo(),
-            Purchases.getProducts({
-              productIdentifiers: [
-                'app.lunary.plus.monthly',
-                'app.lunary.pro.annual',
-              ],
-            }),
-            Purchases.getOfferings(),
-          ]).then(([ci, sk, off]) => {
-            const rcOk =
-              ci.status === 'fulfilled'
-                ? `RC✓ uid=${ci.value?.customerInfo?.originalAppUserId?.slice(0, 8)}`
-                : `RC✗ ${String((ci as PromiseRejectedResult).reason).slice(0, 40)}`;
-            const skCount =
-              sk.status === 'fulfilled'
-                ? `SK=${sk.value?.products?.length ?? 0}`
-                : `SK✗`;
-            const offKeys =
-              off.status === 'fulfilled'
-                ? `off.current=${off.value?.current?.identifier ?? 'null'} keys=${Object.keys(off.value?.all ?? {}).join(',') || 'none'}`
-                : `off✗`;
-            setError(`0 pkgs | ${rcOk} | ${skCount} | ${offKeys}`);
-          });
+          setError('No plans available. Check your connection and try again.');
         }
         setOfferings(o);
       })
