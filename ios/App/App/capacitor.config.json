@@ -1,0 +1,28 @@
+{
+  "appId": "app.lunary",
+  "appName": "Lunary",
+  "server": {
+    "url": "https://lunary.app/app"
+  },
+  "ios": {
+    "scheme": "Lunary",
+    "contentInset": "automatic",
+    "backgroundColor": "#0a0a0f",
+    "preferredContentMode": "mobile"
+  },
+  "android": {
+    "backgroundColor": "#0a0a0f",
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "WidgetBridge": {}
+  },
+  "packageClassList": [
+    "FirebaseMessagingPlugin",
+    "HapticsPlugin",
+    "SharePlugin",
+    "PurchasesPlugin",
+    "CapacitorRateAppPlugin",
+    "SignInWithApplePlugin"
+  ]
+}
