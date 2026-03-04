@@ -6,10 +6,7 @@ const config: CapacitorConfig = {
 
   // Load from your live site - no static export needed
   server: {
-    // url: 'https://lunary.app/app',
-    // Local dev (physical device uses Mac LAN IP, not localhost):
-    url: 'http://192.168.68.133:3003/app',
-    cleartext: true,
+    url: 'https://lunary.app/app',
   },
 
   ios: {
