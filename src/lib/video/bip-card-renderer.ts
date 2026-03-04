@@ -1,96 +1,152 @@
 /**
  * Build in Public — Card Renderer
  *
- * SVG → sharp → PNG card generator for BIP posts.
- * Dimensions: 1200×675 (X/Twitter landscape, 16:9).
- * Brand: dark Lunary aesthetic (cosmicBlack bg, lunarGold accents).
+ * Uses next/og (Satori + resvg-js) to render metric cards as PNG.
+ * Fonts are read from public/fonts/ at startup — no system font dependency,
+ * no sharp, works reliably in Vercel's Node.js Lambda runtime.
  *
- * Templates: metricsCard, milestoneCard, featureLaunchCard
+ * Brand: Roboto Mono + Lunary dark cosmic palette.
+ * Dimensions: 1200×675 (X/Twitter landscape, 16:9).
  */
 
-import sharp from 'sharp';
+import { ImageResponse } from 'next/og';
+import React from 'react';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 // ---------------------------------------------------------------------------
-// Dimensions & brand constants
+// Dimensions & brand
 // ---------------------------------------------------------------------------
 
-const WIDTH = 1200;
-const HEIGHT = 675;
+const W = 1200;
+const H = 675;
 
-const COLORS = {
+const C = {
   bg: '#0a0a0a',
-  primary: '#8458d8', // Nebula Violet
-  accent: '#c77dff', // Galaxy Haze
+  primary: '#8458d8',
+  accent: '#c77dff',
   white: '#ffffff',
   secondary: '#b0b0c0',
   muted: '#6b6b80',
-  border: '#2a1f4a',
   positive: '#4ade80',
   negative: '#f87171',
 } as const;
 
-const FONT_SANS = 'Helvetica Neue, Helvetica, Arial, sans-serif';
-const WATERMARK = '@sammiihk';
-
 // ---------------------------------------------------------------------------
-// SVG helpers
+// Font loading (module-level cache — survives Lambda warm starts)
 // ---------------------------------------------------------------------------
 
-function escapeXml(str: string): string {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+let regularFont: Buffer | null = null;
+let boldFont: Buffer | null = null;
+
+function getFonts() {
+  if (!regularFont) {
+    regularFont = fs.readFileSync(
+      path.join(process.cwd(), 'public/fonts/RobotoMono-Regular.ttf'),
+    );
+  }
+  if (!boldFont) {
+    boldFont = fs.readFileSync(
+      path.join(process.cwd(), 'public/fonts/RobotoMono-Bold.ttf'),
+    );
+  }
+  return [
+    {
+      name: 'Roboto Mono',
+      data: regularFont,
+      weight: 400 as const,
+      style: 'normal' as const,
+    },
+    {
+      name: 'Roboto Mono',
+      data: boldFont,
+      weight: 700 as const,
+      style: 'normal' as const,
+    },
+  ];
 }
 
-function background(): string {
-  return `
-    <rect width="${WIDTH}" height="${HEIGHT}" fill="${COLORS.bg}"/>
-    <defs>
-      <radialGradient id="glow1" cx="10%" cy="20%" r="40%">
-        <stop offset="0%" stop-color="${COLORS.primary}" stop-opacity="0.04"/>
-        <stop offset="100%" stop-color="${COLORS.primary}" stop-opacity="0"/>
-      </radialGradient>
-      <radialGradient id="glow2" cx="90%" cy="80%" r="35%">
-        <stop offset="0%" stop-color="${COLORS.accent}" stop-opacity="0.06"/>
-        <stop offset="100%" stop-color="${COLORS.accent}" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-    <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#glow1)"/>
-    <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#glow2)"/>
-    <rect x="24" y="24" width="${WIDTH - 48}" height="${HEIGHT - 48}" rx="8" ry="8"
-          fill="none" stroke="${COLORS.primary}" stroke-width="1" opacity="0.3"/>
-  `;
+// ---------------------------------------------------------------------------
+// createElement shorthand + shared helpers
+// ---------------------------------------------------------------------------
+
+const h = React.createElement;
+
+function Separator() {
+  return h('div', {
+    style: {
+      display: 'flex',
+      width: '100%',
+      height: 1,
+      background:
+        'linear-gradient(90deg, transparent 0%, rgba(42,31,74,0.9) 15%, rgba(132,88,216,0.55) 50%, rgba(42,31,74,0.9) 85%, transparent 100%)',
+    },
+  });
 }
 
-function header(label: string, rightLabel?: string): string {
-  const right = rightLabel
-    ? `<text x="${WIDTH - 50}" y="70" text-anchor="end" font-family="${FONT_SANS}" font-size="22" fill="${COLORS.muted}">${escapeXml(rightLabel)}</text>`
-    : '';
-  return `
-    <text x="50" y="70" font-family="${FONT_SANS}" font-size="22" font-weight="600" fill="${COLORS.primary}">${escapeXml(label)}</text>
-    ${right}
-    <line x1="50" y1="86" x2="${WIDTH - 50}" y2="86" stroke="${COLORS.border}" stroke-width="1"/>
-  `;
+function formatMrr(n: number): string {
+  if (n >= 1000) return `£${(n / 1000).toFixed(1)}k`;
+  return `£${n.toFixed(2)}`;
 }
 
-function watermark(): string {
-  return `<text x="${WIDTH - 50}" y="${HEIGHT - 30}" text-anchor="end" font-family="${FONT_SANS}" font-size="20" fill="${COLORS.muted}" opacity="0.6">${WATERMARK}</text>`;
+function formatImpressions(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10_000 ? 0 : 1)}k`;
+  return String(n);
 }
 
-function deltaLabel(pct: number): string {
-  if (pct === 0) return '';
-  const sign = pct > 0 ? '↑' : '↓';
-  const color = pct > 0 ? COLORS.positive : COLORS.negative;
-  return `<tspan fill="${color}">${sign}${Math.abs(pct)}%</tspan>`;
+function heroSize(str: string): number {
+  if (str.length <= 5) return 104;
+  if (str.length <= 7) return 88;
+  return 72;
 }
 
-function divider(y: number): string {
-  return `<line x1="50" y1="${y}" x2="${WIDTH - 50}" y2="${y}" stroke="${COLORS.border}" stroke-width="1" opacity="0.6"/>`;
+function secSize(str: string): number {
+  if (str.length <= 5) return 56;
+  if (str.length <= 7) return 46;
+  return 38;
+}
+
+// Gradient overlay divs — must have display:flex or Satori ignores them
+function GradientOverlays() {
+  return [
+    h('div', {
+      key: 'g1',
+      style: {
+        display: 'flex',
+        position: 'absolute',
+        inset: 0,
+        background:
+          'radial-gradient(ellipse 70% 60% at -5% -5%, rgba(132,88,216,0.26) 0%, transparent 55%)',
+      },
+    }),
+    h('div', {
+      key: 'g2',
+      style: {
+        display: 'flex',
+        position: 'absolute',
+        inset: 0,
+        background:
+          'radial-gradient(ellipse 55% 45% at 105% 105%, rgba(199,125,255,0.16) 0%, transparent 50%)',
+      },
+    }),
+  ];
+}
+
+function rootStyle(): React.CSSProperties {
+  return {
+    display: 'flex',
+    flexDirection: 'column',
+    width: W,
+    height: H,
+    fontFamily: 'Roboto Mono',
+    background: '#0a0a0a',
+    border: '1px solid rgba(132,88,216,0.28)',
+    borderRadius: 16,
+    padding: '40px 52px 36px',
+    overflow: 'hidden',
+    position: 'relative',
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -106,11 +162,11 @@ export interface MetricsCardOptions {
   impressionsPerDay: number;
   impressionsDelta: number;
   newSignups: number;
+  dau?: number;
 }
 
-function buildMetricsSvg(opts: MetricsCardOptions): string {
-  // Auto-detect hero stat: biggest absolute % delta
-  const deltas = [
+function buildMetricsElement(opts: MetricsCardOptions): React.ReactElement {
+  const stats = [
     {
       label: 'impressions/day',
       value: opts.impressionsPerDay,
@@ -121,69 +177,270 @@ function buildMetricsSvg(opts: MetricsCardOptions): string {
       label: 'MAU',
       value: opts.mau,
       delta: opts.mauDelta,
-      fmt: (v: number) => String(v),
+      fmt: (n: number) => String(n),
     },
-    { label: 'MRR', value: opts.mrr, delta: opts.mrrDelta, fmt: formatMrr },
+    {
+      label: 'MRR',
+      value: opts.mrr,
+      delta: opts.mrrDelta,
+      fmt: formatMrr,
+    },
   ];
-  const hero = deltas.reduce((a, b) =>
-    Math.abs(a.delta) >= Math.abs(b.delta) ? a : b,
+
+  const heroIdx = stats.reduce(
+    (maxI, s, i) =>
+      Math.abs(s.delta) > Math.abs(stats[maxI].delta) ? i : maxI,
+    0,
   );
+  const hero = stats[heroIdx];
+  const secondary = stats.filter((_, i) => i !== heroIdx);
 
-  const heroValueStr = hero.fmt(hero.value);
-  const heroFontSize = heroValueStr.length > 8 ? 72 : 90;
+  const heroStr = hero.fmt(hero.value);
+  const sec0Str = secondary[0].fmt(secondary[0].value);
+  const sec1Str = secondary[1].fmt(secondary[1].value);
 
-  // Secondary stats (the other two)
-  const secondary = deltas.filter((d) => d !== hero);
+  const footerText = [
+    `${opts.newSignups} new signup${opts.newSignups !== 1 ? 's' : ''} this week`,
+    ...(opts.dau ? [`${opts.dau} DAU yesterday`] : []),
+  ].join('  ·  ');
 
-  const heroSection = `
-    <text x="${WIDTH / 2}" y="240" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="${heroFontSize}" font-weight="700" fill="${COLORS.white}">${escapeXml(heroValueStr)}</text>
-    <text x="${WIDTH / 2}" y="290" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="26" fill="${COLORS.secondary}">${escapeXml(hero.label)}</text>
-    <text x="${WIDTH / 2}" y="330" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="24" fill="${hero.delta >= 0 ? COLORS.positive : COLORS.negative}">
-      ${hero.delta !== 0 ? (hero.delta > 0 ? '↑' : '↓') + Math.abs(hero.delta) + '% this week' : 'no change this week'}
-    </text>
-  `;
+  return h(
+    'div',
+    { style: rootStyle() },
 
-  const secY = 410;
-  const col1X = WIDTH / 4;
-  const col2X = (WIDTH * 3) / 4;
+    ...GradientOverlays(),
 
-  const secondarySection = `
-    ${divider(370)}
-    <text x="${col1X}" y="${secY}" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="48" font-weight="700" fill="${COLORS.white}">${escapeXml(secondary[0].fmt(secondary[0].value))}</text>
-    <text x="${col1X}" y="${secY + 36}" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="20" fill="${COLORS.secondary}">${escapeXml(secondary[0].label)}</text>
-    <text x="${col1X}" y="${secY + 62}" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="20" fill="${secondary[0].delta >= 0 ? COLORS.positive : COLORS.negative}">
-      ${secondary[0].delta !== 0 ? (secondary[0].delta > 0 ? '↑' : '↓') + Math.abs(secondary[0].delta) + '%' : ''}
-    </text>
+    // Header
+    h(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+          marginBottom: 18,
+        },
+      },
+      h(
+        'span',
+        {
+          style: {
+            color: C.primary,
+            fontSize: 22,
+            fontWeight: 700,
+            letterSpacing: '-0.3px',
+          },
+        },
+        'lunary.app',
+      ),
+      h(
+        'span',
+        { style: { color: C.muted, fontSize: 18, fontWeight: 400 } },
+        opts.weekLabel,
+      ),
+    ),
 
-    <line x1="${WIDTH / 2}" y1="${secY - 24}" x2="${WIDTH / 2}" y2="${secY + 76}" stroke="${COLORS.border}" stroke-width="1"/>
+    Separator(),
 
-    <text x="${col2X}" y="${secY}" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="48" font-weight="700" fill="${COLORS.white}">${escapeXml(secondary[1].fmt(secondary[1].value))}</text>
-    <text x="${col2X}" y="${secY + 36}" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="20" fill="${COLORS.secondary}">${escapeXml(secondary[1].label)}</text>
-    <text x="${col2X}" y="${secY + 62}" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="20" fill="${secondary[1].delta >= 0 ? COLORS.positive : COLORS.negative}">
-      ${secondary[1].delta !== 0 ? (secondary[1].delta > 0 ? '↑' : '↓') + Math.abs(secondary[1].delta) + '%' : ''}
-    </text>
+    // Hero stat
+    h(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1,
+          gap: 10,
+          padding: '0 0 4px',
+        },
+      },
+      h(
+        'span',
+        {
+          style: {
+            color: C.white,
+            fontSize: heroSize(heroStr),
+            fontWeight: 700,
+            lineHeight: 1,
+            letterSpacing: '-2px',
+          },
+        },
+        heroStr,
+      ),
+      h(
+        'span',
+        {
+          style: {
+            color: C.secondary,
+            fontSize: 24,
+            fontWeight: 400,
+            letterSpacing: '0.5px',
+          },
+        },
+        hero.label,
+      ),
+      hero.delta !== 0
+        ? h(
+            'span',
+            {
+              style: {
+                color: hero.delta > 0 ? C.positive : C.negative,
+                fontSize: 22,
+                fontWeight: 400,
+              },
+            },
+            `${hero.delta > 0 ? '↑' : '↓'}${Math.abs(hero.delta)}% this week`,
+          )
+        : null,
+    ),
 
-    ${divider(510)}
-    <text x="${WIDTH / 2}" y="546" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="22" fill="${COLORS.muted}">${opts.newSignups} new signup${opts.newSignups !== 1 ? 's' : ''} this week</text>
-  `;
+    Separator(),
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
-    ${background()}
-    ${header('lunary.app', opts.weekLabel)}
-    ${heroSection}
-    ${secondarySection}
-    ${watermark()}
-  </svg>`;
+    // Secondary stats
+    h(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          paddingTop: 22,
+          paddingBottom: 22,
+        },
+      },
+      // Stat A
+      h(
+        'div',
+        {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            flex: 1,
+            gap: 6,
+          },
+        },
+        h(
+          'span',
+          {
+            style: {
+              color: C.white,
+              fontSize: secSize(sec0Str),
+              fontWeight: 700,
+              lineHeight: 1,
+              letterSpacing: '-1px',
+            },
+          },
+          sec0Str,
+        ),
+        h(
+          'span',
+          { style: { color: C.secondary, fontSize: 18, fontWeight: 400 } },
+          secondary[0].label,
+        ),
+        secondary[0].delta !== 0
+          ? h(
+              'span',
+              {
+                style: {
+                  color: secondary[0].delta > 0 ? C.positive : C.negative,
+                  fontSize: 18,
+                  fontWeight: 400,
+                },
+              },
+              `${secondary[0].delta > 0 ? '↑' : '↓'}${Math.abs(secondary[0].delta)}%`,
+            )
+          : null,
+      ),
+      // Vertical divider
+      h('div', {
+        style: {
+          width: 1,
+          background:
+            'linear-gradient(180deg, transparent, rgba(132,88,216,0.5), transparent)',
+          margin: '0 8px',
+          alignSelf: 'stretch',
+        },
+      }),
+      // Stat B
+      h(
+        'div',
+        {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            flex: 1,
+            gap: 6,
+          },
+        },
+        h(
+          'span',
+          {
+            style: {
+              color: C.white,
+              fontSize: secSize(sec1Str),
+              fontWeight: 700,
+              lineHeight: 1,
+              letterSpacing: '-1px',
+            },
+          },
+          sec1Str,
+        ),
+        h(
+          'span',
+          { style: { color: C.secondary, fontSize: 18, fontWeight: 400 } },
+          secondary[1].label,
+        ),
+        secondary[1].delta !== 0
+          ? h(
+              'span',
+              {
+                style: {
+                  color: secondary[1].delta > 0 ? C.positive : C.negative,
+                  fontSize: 18,
+                  fontWeight: 400,
+                },
+              },
+              `${secondary[1].delta > 0 ? '↑' : '↓'}${Math.abs(secondary[1].delta)}%`,
+            )
+          : null,
+      ),
+    ),
+
+    Separator(),
+
+    // Footer
+    h(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingTop: 14,
+        },
+      },
+      h(
+        'span',
+        { style: { color: C.muted, fontSize: 17, fontWeight: 400 } },
+        footerText,
+      ),
+      h(
+        'span',
+        {
+          style: {
+            color: C.muted,
+            fontSize: 17,
+            fontWeight: 400,
+            opacity: 0.55,
+          },
+        },
+        '@sammiihk',
+      ),
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -194,11 +451,11 @@ export interface MilestoneCardOptions {
   metric: 'mau' | 'mrr' | 'impressionsPerDay';
   value: number;
   threshold: number;
-  context?: string; // e.g. "started at 100/day in November"
-  multiplier?: string; // e.g. "123x in 3 months"
+  context?: string;
+  multiplier?: string;
 }
 
-function buildMilestoneSvg(opts: MilestoneCardOptions): string {
+function buildMilestoneElement(opts: MilestoneCardOptions): React.ReactElement {
   const metricLabels: Record<string, string> = {
     mau: 'monthly active users',
     mrr: 'monthly recurring revenue',
@@ -208,39 +465,157 @@ function buildMilestoneSvg(opts: MilestoneCardOptions): string {
   const valueStr =
     opts.metric === 'mrr'
       ? formatMrr(opts.value)
-      : opts.metric === 'impressionsPerDay'
-        ? formatImpressions(opts.value)
-        : String(opts.value);
+      : opts.value.toLocaleString('en-GB');
 
-  const valueFontSize = valueStr.length > 8 ? 80 : 110;
   const metricLabel = metricLabels[opts.metric] ?? opts.metric;
 
-  const contextY = 420;
-  const contextSection = opts.context
-    ? `
-    ${divider(390)}
-    <text x="${WIDTH / 2}" y="${contextY}" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="24" fill="${COLORS.secondary}">${escapeXml(opts.context)}</text>
-    ${
-      opts.multiplier
-        ? `<text x="${WIDTH / 2}" y="${contextY + 42}" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="32" font-weight="600" fill="${COLORS.primary}">${escapeXml(opts.multiplier)}</text>`
-        : ''
-    }
-  `
-    : '';
+  return h(
+    'div',
+    { style: rootStyle() },
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
-    ${background()}
-    ${header('lunary.app')}
-    <text x="${WIDTH / 2}" y="230" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="${valueFontSize}" font-weight="700" fill="${COLORS.white}">${escapeXml(valueStr)}</text>
-    <text x="${WIDTH / 2}" y="290" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="28" fill="${COLORS.secondary}">${escapeXml(metricLabel)}</text>
-    <line x1="${WIDTH / 2 - 100}" y1="322" x2="${WIDTH / 2 + 100}" y2="322" stroke="${COLORS.primary}" stroke-width="1.5" opacity="0.6"/>
-    ${contextSection}
-    ${watermark()}
-  </svg>`;
+    ...GradientOverlays(),
+
+    // Header
+    h(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+          marginBottom: 18,
+        },
+      },
+      h(
+        'span',
+        {
+          style: {
+            color: C.primary,
+            fontSize: 22,
+            fontWeight: 700,
+            letterSpacing: '-0.3px',
+          },
+        },
+        'lunary.app',
+      ),
+      h(
+        'span',
+        {
+          style: {
+            color: C.accent,
+            fontSize: 18,
+            fontWeight: 400,
+            letterSpacing: '1px',
+          },
+        },
+        'milestone',
+      ),
+    ),
+
+    Separator(),
+
+    // Main content
+    h(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1,
+          gap: 14,
+        },
+      },
+      h(
+        'span',
+        {
+          style: {
+            color: C.white,
+            fontSize: heroSize(valueStr),
+            fontWeight: 700,
+            lineHeight: 1,
+            letterSpacing: '-2px',
+          },
+        },
+        valueStr,
+      ),
+      h(
+        'span',
+        {
+          style: {
+            color: C.secondary,
+            fontSize: 26,
+            fontWeight: 400,
+            letterSpacing: '0.5px',
+          },
+        },
+        metricLabel,
+      ),
+      // gradient accent line
+      h('div', {
+        style: {
+          width: 200,
+          height: 2,
+          background:
+            'linear-gradient(90deg, transparent, rgba(132,88,216,0.8), rgba(199,125,255,0.8), transparent)',
+          marginTop: 4,
+        },
+      }),
+      opts.context
+        ? h(
+            'span',
+            {
+              style: {
+                color: C.muted,
+                fontSize: 22,
+                fontWeight: 400,
+                marginTop: 8,
+              },
+            },
+            opts.context,
+          )
+        : null,
+      opts.multiplier
+        ? h(
+            'span',
+            {
+              style: {
+                color: C.accent,
+                fontSize: 30,
+                fontWeight: 700,
+                letterSpacing: '-0.5px',
+              },
+            },
+            opts.multiplier,
+          )
+        : null,
+    ),
+
+    // Footer
+    h(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          justifyContent: 'flex-end',
+          paddingTop: 10,
+        },
+      },
+      h(
+        'span',
+        {
+          style: {
+            color: C.muted,
+            fontSize: 17,
+            fontWeight: 400,
+            opacity: 0.55,
+          },
+        },
+        '@sammiihk',
+      ),
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -250,76 +625,191 @@ function buildMilestoneSvg(opts: MilestoneCardOptions): string {
 export interface FeatureLaunchCardOptions {
   featureName: string;
   tagline?: string;
-  bullets?: string[]; // 2-3 short feature callouts
+  bullets?: string[];
   mau?: number;
   mrr?: number;
 }
 
-function buildFeatureLaunchSvg(opts: FeatureLaunchCardOptions): string {
+function buildFeatureLaunchElement(
+  opts: FeatureLaunchCardOptions,
+): React.ReactElement {
   const nameFontSize =
     opts.featureName.length > 20 ? 56 : opts.featureName.length > 12 ? 72 : 88;
 
-  const bulletsSection =
-    opts.bullets && opts.bullets.length > 0
-      ? `
-    <text x="${WIDTH / 2}" y="370" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="24" fill="${COLORS.secondary}">${escapeXml(opts.bullets.join(' · '))}</text>
-  `
-      : '';
+  const statsLine = [
+    opts.mau ? `${opts.mau} MAU` : null,
+    opts.mrr ? `${formatMrr(opts.mrr)} MRR` : null,
+    'free tier',
+  ]
+    .filter(Boolean)
+    .join('  ·  ');
 
-  const statsSection =
-    opts.mau || opts.mrr
-      ? `
-    ${divider(420)}
-    <text x="${WIDTH / 2}" y="460" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="22" fill="${COLORS.muted}">
-      ${opts.mau ? escapeXml(String(opts.mau) + ' MAU') : ''}${opts.mau && opts.mrr ? ' · ' : ''}${opts.mrr ? escapeXml(formatMrr(opts.mrr) + ' MRR') : ''} · free tier
-    </text>
-  `
-      : '';
+  return h(
+    'div',
+    { style: rootStyle() },
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
-    ${background()}
-    ${header('lunary.app')}
-    <text x="50" y="155" font-family="${FONT_SANS}" font-size="22" fill="${COLORS.muted}" font-style="italic">just shipped</text>
-    <text x="${WIDTH / 2}" y="270" text-anchor="middle"
-          font-family="${FONT_SANS}" font-size="${nameFontSize}" font-weight="700" fill="${COLORS.white}">${escapeXml(opts.featureName)}</text>
-    <line x1="${WIDTH / 2 - 120}" y1="300" x2="${WIDTH / 2 + 120}" y2="300" stroke="${COLORS.primary}" stroke-width="1.5" opacity="0.7"/>
-    ${opts.tagline ? `<text x="${WIDTH / 2}" y="338" text-anchor="middle" font-family="${FONT_SANS}" font-size="26" fill="${COLORS.secondary}">${escapeXml(opts.tagline)}</text>` : ''}
-    ${bulletsSection}
-    ${statsSection}
-    ${watermark()}
-  </svg>`;
+    ...GradientOverlays(),
+
+    // Header
+    h(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+          marginBottom: 18,
+        },
+      },
+      h(
+        'span',
+        {
+          style: {
+            color: C.primary,
+            fontSize: 22,
+            fontWeight: 700,
+            letterSpacing: '-0.3px',
+          },
+        },
+        'lunary.app',
+      ),
+      h(
+        'span',
+        {
+          style: {
+            color: C.accent,
+            fontSize: 16,
+            fontWeight: 400,
+            letterSpacing: '2px',
+          },
+        },
+        'just shipped',
+      ),
+    ),
+
+    Separator(),
+
+    // Main content
+    h(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1,
+          gap: 14,
+        },
+      },
+      h(
+        'span',
+        {
+          style: {
+            color: C.white,
+            fontSize: nameFontSize,
+            fontWeight: 700,
+            lineHeight: 1,
+            letterSpacing: '-1.5px',
+            textAlign: 'center',
+          },
+        },
+        opts.featureName,
+      ),
+      h('div', {
+        style: {
+          width: 180,
+          height: 2,
+          background:
+            'linear-gradient(90deg, transparent, rgba(132,88,216,0.9), rgba(199,125,255,0.9), transparent)',
+        },
+      }),
+      opts.tagline
+        ? h(
+            'span',
+            {
+              style: {
+                color: C.secondary,
+                fontSize: 24,
+                fontWeight: 400,
+                textAlign: 'center',
+                letterSpacing: '0.3px',
+              },
+            },
+            opts.tagline,
+          )
+        : null,
+      opts.bullets && opts.bullets.length > 0
+        ? h(
+            'span',
+            {
+              style: {
+                color: C.muted,
+                fontSize: 20,
+                fontWeight: 400,
+                marginTop: 4,
+              },
+            },
+            opts.bullets.join('  ·  '),
+          )
+        : null,
+    ),
+
+    Separator(),
+
+    // Footer
+    h(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingTop: 14,
+        },
+      },
+      opts.mau || opts.mrr
+        ? h(
+            'span',
+            { style: { color: C.muted, fontSize: 17, fontWeight: 400 } },
+            statsLine,
+          )
+        : h('span', {}),
+      h(
+        'span',
+        {
+          style: {
+            color: C.muted,
+            fontSize: 17,
+            fontWeight: 400,
+            opacity: 0.55,
+          },
+        },
+        '@sammiihk',
+      ),
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------
-// Format helpers
+// Render to PNG file
 // ---------------------------------------------------------------------------
 
-function formatMrr(pounds: number): string {
-  if (pounds >= 1000) return `£${(pounds / 1000).toFixed(1)}k`;
-  return `£${pounds.toFixed(2)}`;
-}
-
-function formatImpressions(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k`;
-  return String(n);
-}
-
-// ---------------------------------------------------------------------------
-// Public render functions
-// ---------------------------------------------------------------------------
-
-async function renderSvgToPng(
-  svg: string,
+async function renderToFile(
+  element: React.ReactElement,
   outputPath: string,
 ): Promise<string> {
-  const dir = path.dirname(outputPath);
-  fs.mkdirSync(dir, { recursive: true });
-
-  const svgBuffer = Buffer.from(svg);
-  await sharp(svgBuffer).resize(WIDTH, HEIGHT).png().toFile(outputPath);
+  const fonts = getFonts();
+  let response: ImageResponse;
+  try {
+    response = new ImageResponse(element, { width: W, height: H, fonts });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`IMAGE_RENDER_FAILED: ${msg}`);
+  }
+  const buffer = Buffer.from(await response.arrayBuffer());
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.writeFileSync(outputPath, buffer);
   return outputPath;
 }
 
@@ -327,22 +817,19 @@ export async function renderMetricsCard(
   opts: MetricsCardOptions,
   outputPath: string,
 ): Promise<string> {
-  const svg = buildMetricsSvg(opts);
-  return renderSvgToPng(svg, outputPath);
+  return renderToFile(buildMetricsElement(opts), outputPath);
 }
 
 export async function renderMilestoneCard(
   opts: MilestoneCardOptions,
   outputPath: string,
 ): Promise<string> {
-  const svg = buildMilestoneSvg(opts);
-  return renderSvgToPng(svg, outputPath);
+  return renderToFile(buildMilestoneElement(opts), outputPath);
 }
 
 export async function renderFeatureLaunchCard(
   opts: FeatureLaunchCardOptions,
   outputPath: string,
 ): Promise<string> {
-  const svg = buildFeatureLaunchSvg(opts);
-  return renderSvgToPng(svg, outputPath);
+  return renderToFile(buildFeatureLaunchElement(opts), outputPath);
 }

@@ -26,6 +26,10 @@ import {
   CinematicPhoneDemoProps,
 } from './compositions/CinematicPhoneDemo';
 import { DIMENSIONS } from './styles/theme';
+import {
+  LANDSCAPE_SCRIPTS,
+  MULTI_PHONE_SCRIPTS,
+} from '../lib/video/showcase-scripts';
 
 /**
  * Remotion Video Registration
@@ -185,44 +189,24 @@ const CinematicPhoneDemoComponent = CinematicPhoneDemo as unknown as React.FC<
   Record<string, unknown>
 >;
 
-// Default props for new compositions
+// Landscape showcase default: 'app-tour' script
+const appTourScript = LANDSCAPE_SCRIPTS.find((s) => s.id === 'app-tour')!;
 const defaultLandscapeShowcaseProps: LandscapeShowcaseProps = {
-  scenes: [
-    {
-      headline: 'Good morning, [name].',
-      subline: 'Personalised from the moment you open it.',
-      callout: 'Your chart. Today.',
-      videoSrc: 'app-demos/dashboard-overview.webm',
-      seekToSeconds: 1,
-      startTime: 0,
-      endTime: 7,
-      calloutSide: 'right',
-    },
-    {
-      headline: 'Every planet. Your houses.',
-      subline: 'Not generic sky positions — yours.',
-      callout: 'Sky Now expanded',
-      videoSrc: 'app-demos/dashboard-overview.webm',
-      seekToSeconds: 6,
-      startTime: 7,
-      endTime: 14,
-      calloutSide: 'right',
-    },
-  ],
-  backgroundType: 'starfield',
+  scenes: appTourScript.scenes,
+  backgroundType: appTourScript.backgroundType ?? 'starfield',
 };
 
+// Multi-phone showcase default: 'multi-phone-hero' script
+const multiPhoneHeroScript = MULTI_PHONE_SCRIPTS.find(
+  (s) => s.id === 'multi-phone-hero',
+)!;
 const defaultMultiPhoneShowcaseProps: MultiPhoneShowcaseProps = {
-  phones: [
-    { videoSrc: 'app-demos/dashboard-overview.webm', seekToSeconds: 1 },
-    { videoSrc: 'app-demos/birth-chart.webm', seekToSeconds: 1 },
-    { videoSrc: 'app-demos/horoscope-deepdive.webm', seekToSeconds: 8 },
-    { videoSrc: 'app-demos/tarot-patterns.webm', seekToSeconds: 5 },
-    { videoSrc: 'app-demos/astral-guide.webm', seekToSeconds: 4 },
-  ],
-  layout: 'arc',
-  backgroundType: 'starfield',
-  animate: false,
+  phones: multiPhoneHeroScript.phones,
+  layout: multiPhoneHeroScript.layout ?? 'arc',
+  backgroundType: multiPhoneHeroScript.backgroundType ?? 'starfield',
+  heading: multiPhoneHeroScript.heading,
+  subheading: multiPhoneHeroScript.subheading,
+  animate: multiPhoneHeroScript.animate ?? false,
 };
 
 const defaultCinematicPhoneDemoProps: CinematicPhoneDemoProps = {
@@ -318,7 +302,7 @@ export const RemotionVideo: React.FC = () => {
       <Composition
         id='LandscapeShowcase'
         component={LandscapeShowcaseComponent}
-        durationInFrames={1350} // 45 seconds default
+        durationInFrames={appTourScript.totalSeconds * 30}
         fps={30}
         width={DIMENSIONS.youtube.width}
         height={DIMENSIONS.youtube.height}

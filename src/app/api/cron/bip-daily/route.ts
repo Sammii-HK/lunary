@@ -77,8 +77,9 @@ export async function GET(request: NextRequest) {
 
     // Calculate the actual day number from a fixed start date so the counter
     // reflects real elapsed time rather than a bare incrementing DB value.
-    // BIP_START_DATE defaults to 2024-11-01 — override via env var if needed.
-    const startDateStr = process.env.BIP_START_DATE || '2024-11-01';
+    // BIP_START_DATE defaults to 2026-03-01 — the date Sammii started publicly
+    // building in public on X. Override via env var if needed.
+    const startDateStr = process.env.BIP_START_DATE || '2026-03-01';
     const startDate = new Date(startDateStr);
     const dayMs = 24 * 60 * 60 * 1000;
     const nextDay = Math.max(
@@ -127,6 +128,46 @@ export async function GET(request: NextRequest) {
     const mrr = Number(subsResult.rows[0]?.mrr || 0);
     const newSignupsToday = Number(signupsResult.rows[0]?.count || 0);
 
+    // Fetch DAU for yesterday (complete day — today's count is partial and unreliable)
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0];
+
+    let dau = 0;
+    let peakDau = 0;
+    try {
+      const [dauResult, peakDauResult] = await Promise.all([
+        sql.query(
+          `SELECT COUNT(DISTINCT user_id) as count
+           FROM conversion_events
+           WHERE DATE(created_at) = $1
+             AND user_id IS NOT NULL AND user_id NOT LIKE 'anon:%'
+             AND (user_email IS NULL OR (user_email NOT LIKE '%@test.lunary.app' AND user_email != 'test@test.lunary.app'))
+             AND event_type IN (
+               'grimoire_viewed','tarot_drawn','chart_viewed','birth_chart_viewed',
+               'personalized_horoscope_viewed','personalized_tarot_viewed',
+               'astral_chat_used','ritual_completed','horoscope_viewed',
+               'daily_dashboard_viewed','journal_entry_created','dream_entry_created',
+               'cosmic_pulse_opened'
+             )`,
+          [yesterday],
+        ),
+        sql.query(
+          `SELECT MAX(dau) as peak_dau
+           FROM daily_metrics
+           WHERE metric_date >= CURRENT_DATE - INTERVAL '30 days'
+             AND metric_date < CURRENT_DATE`,
+          [],
+        ),
+      ]);
+      dau = Number(dauResult.rows[0]?.count || 0);
+      peakDau = Number(peakDauResult.rows[0]?.peak_dau || 0);
+    } catch {
+      // Non-critical — continue without DAU
+    }
+
+    const isRecord = dau > 0 && peakDau > 0 && dau >= peakDau;
+
     // Fetch impressions/day from Search Console (7-day average)
     let impressionsPerDay = 0;
     try {
@@ -156,31 +197,36 @@ export async function GET(request: NextRequest) {
       impressionsPerDay > 0
         ? `SEO impressions/day (7-day avg): ${impressionsPerDay}`
         : null,
+      dau > 0 ? `DAU yesterday: ${dau}` : null,
+      isRecord
+        ? `All-time 30-day peak DAU: ${peakDau} — yesterday was a new record`
+        : null,
     ]
       .filter(Boolean)
       .join('\n');
 
+    const bulletCount = dataLines.split('\n').length;
+
+    const recordHookNote = isRecord
+      ? `\n- Yesterday hit a new 30-day DAU record (${dau}). Use this as the hook: the first line after "Day ${nextDay}" should celebrate this milestone naturally.`
+      : '';
+
     const captionPrompt = `Write a Build in Public daily update tweet for day ${nextDay} of building in public.
 
-Context: Lunary is a live astrology app with real users. This is NOT a brand new project — it has been building for months.
+Context: Lunary is a live astrology app with real users.
 
-Metrics for today (ONLY use what is listed here — do not invent or assume any metric not present):
+Today's metrics (ONLY use what is listed here — do not invent, assume, or paraphrase any metric not present. Do not write "signups rolling in" or "impressions rising" unless the actual number is in the list below):
 ${dataLines}
 
 Format rules:
-- First line: "Day ${nextDay} of building in public" + a short honest hook about where things are (e.g. "and the SEO numbers keep climbing", "and users are actually sticking around")
+- First line: "Day ${nextDay} of building in public" + a short honest hook (one clause, max 8 words)${recordHookNote}
 - Blank line
-- 3 bullet points using ✅ emoji, each on its own line
-- Bullets must be short and punchy (under 60 chars each), written as natural observations NOT data labels
-- Good: "✅ 229 active users this month, still growing"
-- Bad: "✅ Current MRR: £115.72, which feels like a solid foundation"
-- Only reference metrics that appear in the data above. If MRR is not in the data, do not mention MRR or revenue at all.
+- Exactly ${bulletCount} bullet points using ✅ emoji — one per metric above, nothing more
+- Each bullet states the metric as a natural observation with the real number: "✅ 241 MAU this month" not "✅ Users growing"
+- NEVER write a bullet without a specific number from the data above
 - Blank line
-- Final line: a short question or reflection that invites replies (one sentence)
-- No hashtags in the body
-- UK English. No em dashes. Sentence case.
-- Keep the whole post under 400 characters total.
-- Honest and grounded. No corporate language. Tone: real founder, daily journal.`;
+- Final line: one short question or observation that invites replies
+- No hashtags. UK English. No em dashes. Sentence case. Under 400 characters total.`;
 
     const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
@@ -193,9 +239,10 @@ Format rules:
     const caption = completion.choices[0]?.message?.content?.trim() ?? '';
     if (!caption) throw new Error('LLM returned empty caption');
 
-    // Schedule post for 09:00 UTC today (or 30 min from now if already past)
+    // Schedule post for 19:00 UTC today — 7pm UK / 2pm EST, peak UK+US crossover.
+    // If cron fires after 19:00 UTC for any reason, post 30 min from now.
     const scheduledDate = new Date();
-    scheduledDate.setUTCHours(9, 0, 0, 0);
+    scheduledDate.setUTCHours(19, 0, 0, 0);
     if (scheduledDate <= new Date()) {
       scheduledDate.setTime(Date.now() + 30 * 60 * 1000);
     }
@@ -215,7 +262,7 @@ Format rules:
       day: nextDay,
       postId,
       caption,
-      metrics: { mau, mrr, newSignupsToday, impressionsPerDay },
+      metrics: { mau, mrr, newSignupsToday, impressionsPerDay, dau, isRecord },
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';

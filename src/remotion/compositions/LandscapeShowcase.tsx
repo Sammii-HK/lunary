@@ -22,7 +22,7 @@ export interface ShowcaseScene {
   subline?: string;
   /** Callout pill label beside the phone */
   callout: string;
-  /** Path relative to public/, e.g. 'app-demos/dashboard-overview.webm' */
+  /** Path relative to public/, e.g. 'app-demos/web/dashboard-overview.mp4' */
   videoSrc: string;
   /** Seek into the recording to this second before displaying */
   seekToSeconds?: number;
@@ -39,27 +39,28 @@ export interface ShowcaseScene {
 export interface LandscapeShowcaseProps {
   scenes: ShowcaseScene[];
   backgroundType?: BackgroundAnimationType;
-  /** Optional bottom-left title (e.g. "lunary") */
+  /** Optional brand watermark label */
   brandLabel?: string;
   seed?: string;
 }
 
 const TRANSITION_FRAMES = 9;
-// Phone dimensions — fits well centred in the right panel of 1920×1080
-const PHONE_WIDTH = 310;
-const PHONE_SCALE = 1;
+
+// Phone: 420px wide — substantial presence at 1920px without crowding the left panel.
+// Aspect 9:19.5 matches the 886×1920 iPhone 6.5" recordings exactly.
+const PHONE_WIDTH = 420;
 // Right panel starts at 48% of 1920
-const LEFT_PANEL_WIDTH = 0.48;
+const LEFT_PANEL_FRAC = 0.48;
 
 /**
  * LandscapeShowcase — 1920×1080 YouTube / X marketing format.
  *
  * Layout:
- *   Left 48%  — bold headline + subline, fades between scenes
- *   Right 52% — PhoneMockup centred, FeatureCallout beside phone
+ *   Left 48%  — bold Roboto Mono headline + subline, fades between scenes
+ *   Right 52% — PhoneMockup, flat (no 3D tilt), FeatureCallout beside phone
  *
- * Each scene wraps a <Video startFrom={seekFrame}> inside a <Sequence> so
- * the phone content cuts cleanly to the right recording at the right moment.
+ * Uses the official Apple iPhone 16 Pro Max frame PNG (transparent screen area)
+ * so the hardware looks pixel-perfect with zero CSS hackery.
  */
 export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
   scenes,
@@ -70,19 +71,32 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
   const frame = useCurrentFrame();
   const { fps, width, height, durationInFrames } = useVideoConfig();
 
-  const leftPanelW = Math.round(width * LEFT_PANEL_WIDTH);
+  // Derive active scene's accent color for phone glow
+  const activeScene = scenes.find((s) => {
+    const sf = Math.round(s.startTime * fps);
+    const ef = Math.round(s.endTime * fps);
+    return frame >= sf && frame < ef;
+  });
+  const activeColor = activeScene?.highlightColor ?? '#8458D8';
+
+  const leftPanelW = Math.round(width * LEFT_PANEL_FRAC);
   const rightPanelW = width - leftPanelW;
 
-  // Phone: centred in right panel, vertically centred with slight upward bias
+  // Phone: centred in right panel, vertically centred
   const phoneHeight = PHONE_WIDTH * (19.5 / 9);
   const phoneCentreX = leftPanelW + rightPanelW / 2;
   const phoneCentreY = height * 0.5;
   const phoneLeft = phoneCentreX - PHONE_WIDTH / 2;
   const phoneTop = phoneCentreY - phoneHeight / 2;
 
-  // Normalised positions for callouts
-  const calloutRightX = (phoneLeft + PHONE_WIDTH + 40) / width;
-  const calloutLeftX = (phoneLeft - 40) / width;
+  // Callout positioned to the right of the phone.
+  // Center the pill ~120px clear of the phone right edge (60px line + ~60px pill half-width).
+  const calloutLineLength = 50;
+  const calloutPillHalfW = 70;
+  const calloutRightX =
+    (phoneLeft + PHONE_WIDTH + calloutLineLength + calloutPillHalfW) / width;
+  const calloutLeftX =
+    (phoneLeft - calloutLineLength - calloutPillHalfW) / width;
   const calloutY = phoneCentreY / height;
 
   return (
@@ -94,7 +108,51 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
         showStars
       />
 
-      {/* 2. Phone chassis — persistent across all scenes */}
+      {/* 2a. Left panel vignette — darkens the background behind the text */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: leftPanelW,
+          height,
+          background:
+            'linear-gradient(90deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 70%, transparent 100%)',
+          zIndex: 2,
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* 2b. Vertical panel separator */}
+      <div
+        style={{
+          position: 'absolute',
+          left: leftPanelW,
+          top: height * 0.1,
+          width: 1,
+          height: height * 0.8,
+          background: `linear-gradient(180deg, transparent 0%, ${activeColor}30 30%, ${activeColor}30 70%, transparent 100%)`,
+          zIndex: 6,
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* 2c. Phone aura — radial glow backdrop, changes color per scene */}
+      <div
+        style={{
+          position: 'absolute',
+          left: phoneCentreX - 500,
+          top: phoneCentreY - 500,
+          width: 1000,
+          height: 1000,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${activeColor}30 0%, ${activeColor}10 40%, transparent 68%)`,
+          zIndex: 4,
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* 2b. Phone chassis — persistent, no 3D tilt */}
       <div
         style={{
           position: 'absolute',
@@ -105,11 +163,12 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
       >
         <PhoneMockup
           width={PHONE_WIDTH}
-          scale={PHONE_SCALE}
-          glowColor='#8458D8'
-          tiltX={3}
-          tiltY={-8}
-          floatAmplitude={6}
+          scale={1}
+          glowColor={activeColor}
+          tiltX={0}
+          tiltY={0}
+          floatAmplitude={5}
+          floatPeriod={5}
         >
           {/* Phone content — each scene's video in its own Sequence */}
           {scenes.map((scene, i) => {
@@ -132,6 +191,7 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
+                    objectPosition: 'top center',
                   }}
                 />
               </Sequence>
@@ -148,11 +208,6 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
           top: 0,
           width: leftPanelW,
           height,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          paddingLeft: 80,
-          paddingRight: 40,
           zIndex: 10,
         }}
       >
@@ -172,7 +227,7 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
           const slideY = interpolate(
             localFrame,
             [0, TRANSITION_FRAMES],
-            [18, 0],
+            [20, 0],
             { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
           );
 
@@ -197,20 +252,19 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
                 flexDirection: 'column',
                 justifyContent: 'center',
                 paddingLeft: 80,
-                paddingRight: 40,
+                paddingRight: 60,
                 opacity,
                 transform: `translateY(${slideY}px)`,
               }}
             >
-              {/* Scene number indicator */}
+              {/* Accent bar */}
               <div
                 style={{
-                  width: 32,
+                  width: 40,
                   height: 3,
                   backgroundColor: accentColor,
                   borderRadius: 2,
-                  marginBottom: 24,
-                  opacity: 0.7,
+                  marginBottom: 28,
                 }}
               />
 
@@ -218,12 +272,13 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
               <div
                 style={{
                   color: '#ffffff',
-                  fontFamily: 'Roboto, sans-serif',
+                  fontFamily: 'Roboto Mono, monospace',
                   fontWeight: 700,
-                  fontSize: 64,
-                  lineHeight: 1.1,
-                  letterSpacing: -1,
-                  marginBottom: 16,
+                  fontSize: 56,
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.5px',
+                  marginBottom: 20,
+                  whiteSpace: 'pre-line',
                 }}
               >
                 {scene.headline}
@@ -234,10 +289,10 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
                 <div
                   style={{
                     color: 'rgba(255,255,255,0.6)',
-                    fontFamily: 'Roboto, sans-serif',
-                    fontWeight: 400,
-                    fontSize: 24,
-                    lineHeight: 1.4,
+                    fontFamily: 'Roboto Mono, monospace',
+                    fontWeight: 300,
+                    fontSize: 22,
+                    lineHeight: 1.5,
                     maxWidth: 440,
                   }}
                 >
@@ -264,61 +319,64 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
             frameOut={endFrame - TRANSITION_FRAMES}
             position={{ x: calloutX, y: calloutY, side }}
             color={scene.highlightColor ?? '#8458D8'}
+            lineLength={calloutLineLength}
           />
         );
       })}
 
-      {/* 5. Brand label bottom-left */}
+      {/* 5. Brand label + scene dots — bottom-left */}
       <div
         style={{
           position: 'absolute',
           bottom: 36,
           left: 80,
-          color: 'rgba(255,255,255,0.3)',
-          fontFamily: 'Roboto, sans-serif',
-          fontWeight: 400,
-          fontSize: 18,
-          letterSpacing: 1.5,
-          zIndex: 20,
-        }}
-      >
-        {brandLabel}
-      </div>
-
-      {/* 6. Subtle scene progress dots, bottom-right of left panel */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 40,
-          left: 80,
           display: 'flex',
-          gap: 8,
-          zIndex: 20,
           alignItems: 'center',
+          gap: 16,
+          zIndex: 20,
         }}
       >
-        {scenes.map((scene, i) => {
-          const startFrame = Math.round(scene.startTime * fps);
-          const endFrame = Math.round(scene.endTime * fps);
-          const isActive = frame >= startFrame && frame < endFrame;
-          return (
-            <div
-              key={i}
-              style={{
-                width: isActive ? 24 : 6,
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: isActive
-                  ? (scene.highlightColor ?? '#8458D8')
-                  : 'rgba(255,255,255,0.2)',
-                transition: 'all 0.3s ease',
-              }}
-            />
-          );
-        })}
+        <div
+          style={{
+            color: 'rgba(255,255,255,0.3)',
+            fontFamily: 'Roboto Mono, monospace',
+            fontWeight: 400,
+            fontSize: 16,
+            letterSpacing: 2,
+          }}
+        >
+          {brandLabel}
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            gap: 6,
+            alignItems: 'center',
+          }}
+        >
+          {scenes.map((scene, i) => {
+            const startFrame = Math.round(scene.startTime * fps);
+            const endFrame = Math.round(scene.endTime * fps);
+            const isActive = frame >= startFrame && frame < endFrame;
+            return (
+              <div
+                key={i}
+                style={{
+                  width: isActive ? 20 : 5,
+                  height: 5,
+                  borderRadius: 3,
+                  backgroundColor: isActive
+                    ? (scene.highlightColor ?? '#8458D8')
+                    : 'rgba(255,255,255,0.18)',
+                }}
+              />
+            );
+          })}
+        </div>
       </div>
 
-      {/* 7. Fade out */}
+      {/* 6. Fade out */}
       <TransitionEffect
         type='fade'
         startFrame={durationInFrames - 24}

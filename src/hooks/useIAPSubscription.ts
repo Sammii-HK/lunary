@@ -128,7 +128,7 @@ export async function getIAPOfferings(): Promise<IAPOfferings> {
     console.log(
       '[IAP] StoreKit direct product count:',
       storeKitResult.products.length,
-      storeKitResult.products.map((p) => p.productIdentifier).join(', '),
+      storeKitResult.products.map((p) => p.identifier).join(', '),
     );
     if (storeKitResult.products.length === 0) {
       console.error(

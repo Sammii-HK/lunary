@@ -5,7 +5,11 @@ import {
   renderMetricsCard,
   renderMilestoneCard,
 } from '@/lib/video/bip-card-renderer';
-import { uploadCardImage, schedulePost } from '@/lib/bip-spellcast';
+import {
+  uploadCardImage,
+  schedulePost,
+  scheduleTextPost,
+} from '@/lib/bip-spellcast';
 import { getSearchConsoleData } from '@/lib/google/search-console';
 
 export const dynamic = 'force-dynamic';
@@ -173,6 +177,18 @@ export async function GET(request: NextRequest) {
     const priorMrr = Number(priorMrrResult.rows[0]?.mrr || 0);
     const newSignups = Number(signupsResult.rows[0]?.count || 0);
 
+    // Fetch most recent DAU from daily_metrics — non-critical
+    let currentDau = 0;
+    try {
+      const dauResult = await sql.query(
+        `SELECT dau FROM daily_metrics WHERE dau IS NOT NULL ORDER BY metric_date DESC LIMIT 1`,
+        [],
+      );
+      currentDau = Number(dauResult.rows[0]?.dau || 0);
+    } catch {
+      // Non-critical — continue without DAU
+    }
+
     // Search Console impressions
     let impressionsPerDay = 0;
     let impressionsDelta = 0;
@@ -217,22 +233,32 @@ export async function GET(request: NextRequest) {
     const cardFilename = `bip-weekly-${today}.png`;
     const cardPath = path.join('/tmp', cardFilename);
 
-    await renderMetricsCard(
-      {
-        weekLabel,
-        mau: currentMau,
-        mauDelta: pctDelta(currentMau, priorMau),
-        mrr: currentMrr,
-        mrrDelta: pctDelta(currentMrr, priorMrr),
-        impressionsPerDay,
-        impressionsDelta,
-        newSignups,
-      },
-      cardPath,
-    );
+    let mediaId: string | null = null;
+    let imageFailed = false;
 
-    // Upload to Spellcast
-    const mediaId = await uploadCardImage(cardPath);
+    try {
+      await renderMetricsCard(
+        {
+          weekLabel,
+          mau: currentMau,
+          mauDelta: pctDelta(currentMau, priorMau),
+          mrr: currentMrr,
+          mrrDelta: pctDelta(currentMrr, priorMrr),
+          impressionsPerDay,
+          impressionsDelta,
+          newSignups,
+          dau: currentDau || undefined,
+        },
+        cardPath,
+      );
+      mediaId = await uploadCardImage(cardPath);
+    } catch (imgErr) {
+      console.error(
+        '[BIP Weekly] Image render failed, posting text fallback:',
+        imgErr,
+      );
+      imageFailed = true;
+    }
 
     // Build caption — use subscriber count when MRR is 0 (coupon subscribers)
     const monetisationBullet =
@@ -250,24 +276,30 @@ export async function GET(request: NextRequest) {
       impressionsPerDay > 0
         ? `✅ ${impressionsPerDay.toLocaleString()} impressions/day`
         : null,
+      currentDau > 0 ? `✅ ${currentDau} DAU` : null,
       '',
       'Building in public every week.',
     ]
       .filter((l) => l !== null)
       .join('\n');
 
-    // Schedule for 09:30 UTC today (cron fires at 02:00, post 7.5 hours later)
+    // Schedule for 19:00 UTC today
     const scheduledDate = new Date(now);
-    scheduledDate.setUTCHours(9, 30, 0, 0);
+    scheduledDate.setUTCHours(19, 0, 0, 0);
     if (scheduledDate <= now) {
       scheduledDate.setTime(now.getTime() + 30 * 60 * 1000);
     }
 
-    const postId = await schedulePost({
-      content: caption,
-      mediaId,
-      scheduledFor: scheduledDate.toISOString(),
-    });
+    const postId = mediaId
+      ? await schedulePost({
+          content: caption,
+          mediaId,
+          scheduledFor: scheduledDate.toISOString(),
+        })
+      : await scheduleTextPost({
+          content: caption,
+          scheduledFor: scheduledDate.toISOString(),
+        });
 
     // Check and post milestones
     const snapshot = { mau: currentMau, mrr: currentMrr, impressionsPerDay };
@@ -333,8 +365,14 @@ export async function GET(request: NextRequest) {
       success: true,
       weekLabel,
       postId,
+      imageFailed,
       milestones: milestonesPosted,
-      metrics: { mau: currentMau, mrr: currentMrr, impressionsPerDay },
+      metrics: {
+        mau: currentMau,
+        mrr: currentMrr,
+        impressionsPerDay,
+        dau: currentDau,
+      },
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
