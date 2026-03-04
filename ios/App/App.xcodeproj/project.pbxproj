@@ -31,6 +31,7 @@
 		B45BFC982F31546D00FAC877 /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45BFC972F31546C00FAC877 /* WidgetBridge.swift */; };
 		B45BFC9F2F320D6500FAC877 /* LunaryBridgeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45BFC9E2F320D6500FAC877 /* LunaryBridgeViewController.swift */; };
 		B45BFCA12F320E6F00FAC877 /* WidgetBridgePlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = B45BFCA02F320E6F00FAC877 /* WidgetBridgePlugin.m */; };
+		B463BA252F58E29200F0F06C /* LunaryProducts.storekit in Resources */ = {isa = PBXBuildFile; fileRef = B463BA242F58E29200F0F06C /* LunaryProducts.storekit */; };
 		B4FA935D2F585C720079446B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4FA935C2F585C720079446B /* StoreKit.framework */; };
 /* End PBXBuildFile section */
 
@@ -86,6 +87,7 @@
 		B45BFC992F3160B800FAC877 /* App-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "App-Bridging-Header.h"; sourceTree = "<group>"; };
 		B45BFC9E2F320D6500FAC877 /* LunaryBridgeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LunaryBridgeViewController.swift; sourceTree = "<group>"; };
 		B45BFCA02F320E6F00FAC877 /* WidgetBridgePlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WidgetBridgePlugin.m; sourceTree = "<group>"; };
+		B463BA242F58E29200F0F06C /* LunaryProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = LunaryProducts.storekit; sourceTree = "<group>"; };
 		B4FA935C2F585C720079446B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -135,6 +137,7 @@
 		504EC3061FED79650016851F /* App */ = {
 			isa = PBXGroup;
 			children = (
+				B463BA242F58E29200F0F06C /* LunaryProducts.storekit */,
 				B44A64C02F532F9500F74162 /* SignInWithApplePlugin.swift */,
 				B44A64BE2F532D1A00F74162 /* GoogleService-Info.plist */,
 				B45BFCA02F320E6F00FAC877 /* WidgetBridgePlugin.m */,
@@ -264,6 +267,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B463BA252F58E29200F0F06C /* LunaryProducts.storekit in Resources */,
 				504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
@@ -505,7 +509,9 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
+				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OBJC_BRIDGING_HEADER = "App/App-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

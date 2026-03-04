@@ -7,10 +7,11 @@ class LunaryBridgeViewController: CAPBridgeViewController, WKNavigationDelegate 
 
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
-        // packageClassList uses NSClassFromString which fails for Swift SPM classes.
-        // Explicitly register PurchasesPlugin so Capacitor's JS bridge finds it.
+        // Explicitly register plugins that may be stripped by the Release linker.
+        // NSClassFromString-based discovery fails for Swift classes in Release builds.
         bridge?.registerPluginType(PurchasesPlugin.self)
-        NSLog("[Lunary] PurchasesPlugin registered with bridge")
+        bridge?.registerPluginType(SignInWithApplePlugin.self)
+        NSLog("[Lunary] PurchasesPlugin + SignInWithApplePlugin registered with bridge")
     }
 
     override func viewDidLoad() {

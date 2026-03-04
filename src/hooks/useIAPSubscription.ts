@@ -33,27 +33,21 @@ export async function configureIAP(userId?: string): Promise<void> {
           );
           return;
         }
-        // configure() is CAPPluginReturnNone — fire-and-forget, JS resolves immediately before
-        // native has processed the call. Poll isConfigured() to know when native is ready.
+        // configure() is CAPPluginReturnNone — fire-and-forget, the Promise never resolves.
+        // Poll getCustomerInfo() (which IS CAPPluginReturnPromise) to detect when RC is ready.
         console.log('[IAP] firing Purchases.configure()…');
         Purchases.configure({ apiKey: RC_IOS_API_KEY });
 
-        // Poll until native RC SDK confirms it's configured (max 5 seconds)
+        // Poll until getCustomerInfo() succeeds — proves native RC is fully initialised
         let nativeReady = false;
         for (let i = 0; i < 50; i++) {
           await new Promise((r) => setTimeout(r, 100));
           try {
-            const result = await (
-              Purchases as unknown as {
-                isConfigured(): Promise<{ isConfigured: boolean }>;
-              }
-            ).isConfigured();
-            if (result.isConfigured) {
-              nativeReady = true;
-              break;
-            }
+            await Purchases.getCustomerInfo();
+            nativeReady = true;
+            break;
           } catch {
-            // isConfigured() may throw if plugin isn't ready yet — keep polling
+            // RC not ready yet — keep polling
           }
         }
         console.log('[IAP] native RC ready:', nativeReady);
