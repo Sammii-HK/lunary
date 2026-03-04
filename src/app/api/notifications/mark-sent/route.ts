@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { markEventAsSent } from '@/app/api/cron/shared-notification-tracker';
 
+export const dynamic = 'force-dynamic';
+
 // API endpoint for Cloudflare worker to mark events as sent
 export async function POST(request: NextRequest) {
   try {

@@ -22,6 +22,8 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 
+export const dynamic = 'force-dynamic';
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(dayOfYear);

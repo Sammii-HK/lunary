@@ -9,6 +9,8 @@ import {
 } from '@/utils/cosmic-score';
 import { hasFeatureAccess, type FeatureKey } from '../../../../utils/pricing';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const session = await auth.api.getSession({

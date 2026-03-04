@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { ACTIVATION_EVENTS } from '@/lib/analytics/activation-events';
 
+export const dynamic = 'force-dynamic';
+
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 

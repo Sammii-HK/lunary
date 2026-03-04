@@ -5,6 +5,8 @@ import { calculateSynastry } from '@/lib/astrology/synastry';
 import type { BirthChartData } from '../../../../../../utils/astrology/birthChart';
 import { ensureRelationshipChartFresh } from '../../../../../../utils/astrology/regenerateRelationshipChart';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

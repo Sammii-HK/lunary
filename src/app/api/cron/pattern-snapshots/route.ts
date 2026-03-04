@@ -18,6 +18,8 @@ import {
   shouldGenerateSnapshot,
 } from '@/lib/patterns/snapshot/storage';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 

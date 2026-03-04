@@ -3,6 +3,8 @@ import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 import { requireUser } from '@/lib/ai/auth';
 import { buildLunaryContext } from '@/lib/ai/context';
 
+export const dynamic = 'force-dynamic';
+
 const getActionableInsight = (
   moonPhase: string,
   moonSign: string,

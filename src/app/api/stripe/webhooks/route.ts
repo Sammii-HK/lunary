@@ -20,6 +20,8 @@ import {
   getTrialLevel,
 } from '@/lib/stripe/subscription-utils';
 
+export const dynamic = 'force-dynamic';
+
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error('STRIPE_SECRET_KEY is not set');

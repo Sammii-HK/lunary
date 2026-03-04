@@ -21,6 +21,8 @@ import {
 import { buildThematicVideoComposition } from '@/lib/video/thematic-video';
 import { getImageBaseUrl } from '@/lib/urls';
 
+export const dynamic = 'force-dynamic';
+
 async function getAudioDurationFromBuffer(buffer: Buffer): Promise<number> {
   const tempDir = await mkdtemp(join(tmpdir(), 'audio-'));
   const tempPath = join(tempDir, 'audio.mp3');

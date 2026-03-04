@@ -9,6 +9,8 @@ import {
   getUnlockedFeatures,
 } from '@/lib/progress/config';
 
+export const dynamic = 'force-dynamic';
+
 interface IncrementRequest {
   skillTree: SkillTreeId;
   amount?: number;

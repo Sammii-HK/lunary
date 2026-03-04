@@ -4,6 +4,8 @@ import { buildDailyThreadModules } from '@/lib/daily-thread/generator';
 import { DailyThreadModuleType } from '@/lib/daily-thread/types';
 import dayjs from 'dayjs';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/astral-chat/daily-thread?date=YYYY-MM-DD&forceRefresh=false
  * Fetch or generate modules for specified date

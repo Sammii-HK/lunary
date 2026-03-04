@@ -4,6 +4,8 @@ import { formatDate, formatTimestamp } from '@/lib/analytics/date-range';
 import { getSearchConsoleData, getTopPages } from '@/lib/google/search-console';
 import generateSitemap from '@/app/sitemap';
 
+export const dynamic = 'force-dynamic';
+
 // Test user exclusion patterns - matches filtering in conversion events
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';

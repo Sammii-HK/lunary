@@ -11,6 +11,8 @@ import {
   getMostActiveDay,
 } from '@/lib/insights/usage-patterns';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);

@@ -4,6 +4,8 @@ import {
   saveGlobalCosmicData,
 } from '@/lib/cosmic-snapshot/global-cache';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {

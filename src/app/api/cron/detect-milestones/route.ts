@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { detectMilestones } from '@/utils/milestones/detection';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const now = new Date();

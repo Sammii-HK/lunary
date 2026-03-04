@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 import { generateCosmicCalendar } from '../../../../../../utils/calendar/cosmicCalendarGenerator';
 import { put } from '@vercel/blob';
 
+export const dynamic = 'force-dynamic';
+
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error('STRIPE_SECRET_KEY is not set');

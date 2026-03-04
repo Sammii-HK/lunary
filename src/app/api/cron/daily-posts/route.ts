@@ -80,6 +80,8 @@ import {
   hasValidImageExtension,
 } from '@/lib/social/pre-upload-image';
 
+export const dynamic = 'force-dynamic';
+
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
 const executionTracker = new Map<string, boolean>();

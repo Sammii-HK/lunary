@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { trackActivity } from '@/lib/analytics/tracking';
 
+export const dynamic = 'force-dynamic';
+
 type TrackPayload = {
   userId?: string;
   user_id?: string;

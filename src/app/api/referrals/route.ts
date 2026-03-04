@@ -8,6 +8,8 @@ import {
   REFERRAL_TIERS,
 } from '@/utils/referrals/reward-tiers';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/referrals
  * Auth required. Get user's referral stats + tier progress.

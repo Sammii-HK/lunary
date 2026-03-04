@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import { getCurrentUser } from '@/lib/get-user-session';
 import { invalidateSnapshot } from '@/lib/cosmic-snapshot/cache';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser(request);

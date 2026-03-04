@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { getCorsHeaders, isValidOrigin } from '@/lib/origin-validation';
 
+export const dynamic = 'force-dynamic';
+
 const requestSchema = z.object({
   email: z.string().email(),
   redirectTo: z.string().url().optional(),

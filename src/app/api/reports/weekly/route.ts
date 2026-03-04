@@ -5,6 +5,8 @@ import {
   WeeklyReport,
 } from '@/lib/cosmic-snapshot/reports';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Get authenticated user

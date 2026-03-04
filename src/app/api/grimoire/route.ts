@@ -15,6 +15,8 @@ import { runesList } from '../../../constants/runes';
 import { wiccanWeek } from '../../../constants/weekDays';
 import { wheelOfTheYearSabbats } from '../../../constants/sabbats';
 
+export const dynamic = 'force-dynamic';
+
 const CACHE_HEADERS = {
   'Cache-Control': 'public, s-maxage=604800, stale-while-revalidate=86400',
 };

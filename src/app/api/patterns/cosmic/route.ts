@@ -20,6 +20,8 @@ import {
 } from '@/lib/patterns/storage/secure-storage';
 import type { CosmicPatternsResponse } from '@/lib/patterns/types';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const startTime = performance.now();
 

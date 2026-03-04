@@ -11,6 +11,8 @@ import {
   getMetricSnapshots,
 } from '@/lib/analytics/metric-snapshots';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Weekly metrics pipeline
  * Runs Monday 02:00 Europe/London via Vercel cron

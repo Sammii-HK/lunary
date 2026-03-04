@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import { requireAdminAuth } from '@/lib/admin-auth';
 import { auth } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireAdminAuth(request);

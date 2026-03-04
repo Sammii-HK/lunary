@@ -1,6 +1,7 @@
 import { google } from 'googleapis';
 import { Readable } from 'stream';
 import { sendDiscordNotification } from '@/lib/discord';
+import { getGoogleRefreshToken } from '@/lib/google/get-refresh-token';
 
 const YOUTUBE_SCOPES = [
   'https://www.googleapis.com/auth/youtube.upload',
@@ -19,35 +20,24 @@ export interface YouTubeVideoMetadata {
 }
 
 /**
- * Get authenticated YouTube client
- * Supports OAuth2 with refresh token
+ * Get authenticated YouTube client.
+ * Reads refresh token from env var or database (saved by OAuth callback).
  */
-function getYouTubeClient() {
+async function getYouTubeClient() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+  const refreshToken = await getGoogleRefreshToken();
 
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error(
-      'Missing YouTube OAuth credentials. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN in environment variables.',
+      'Missing YouTube OAuth credentials. Authorize via Admin > Podcasts > Connect YouTube.',
     );
   }
 
   const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
 
-  // Set credentials with refresh token
-  // The OAuth2 client will automatically refresh the access token when needed
   oauth2Client.setCredentials({
     refresh_token: refreshToken,
-  });
-
-  // Add error handler for token refresh failures
-  oauth2Client.on('tokens', (tokens) => {
-    if (tokens.refresh_token) {
-      // If a new refresh token is provided, it should be saved
-      // (though Google typically only provides this on first authorization)
-      console.log('YouTube OAuth: New refresh token received');
-    }
   });
 
   return google.youtube({
@@ -63,7 +53,7 @@ export async function uploadVideo(
   videoBuffer: Buffer,
   metadata: YouTubeVideoMetadata,
 ): Promise<{ videoId: string; url: string }> {
-  const youtube = getYouTubeClient();
+  const youtube = await getYouTubeClient();
 
   // Prepare video metadata
   const videoMetadata = {
@@ -142,7 +132,7 @@ export async function updateVideoMetadata(
   videoId: string,
   metadata: Partial<YouTubeVideoMetadata>,
 ): Promise<void> {
-  const youtube = getYouTubeClient();
+  const youtube = await getYouTubeClient();
 
   try {
     // First, get existing video details
@@ -234,7 +224,7 @@ export async function uploadCaptions(
   scriptText: string,
   languageCode: string = 'en',
 ): Promise<void> {
-  const youtube = getYouTubeClient();
+  const youtube = await getYouTubeClient();
 
   try {
     // Convert script text to SRT format (SubRip Subtitle format)
@@ -317,7 +307,7 @@ export async function addVideoToPlaylist(
   videoId: string,
   playlistId: string,
 ): Promise<void> {
-  const youtube = getYouTubeClient();
+  const youtube = await getYouTubeClient();
 
   try {
     await youtube.playlistItems.insert({

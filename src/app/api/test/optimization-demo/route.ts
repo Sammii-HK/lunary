@@ -4,6 +4,8 @@ import {
   estimateContextCost,
 } from '@/lib/ai/context-optimizer';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Comprehensive demonstration of context optimization
  * Shows before/after comparisons for various query types

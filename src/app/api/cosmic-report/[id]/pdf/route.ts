@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import { generateCosmicReportPdf } from '@/lib/cosmic-report/pdf-generator';
 import { CosmicReportData } from '@/lib/cosmic-report/types';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 export const revalidate = 604800; // Cache PDFs for 7 days (86400 * 7) - they don't change once generated
 

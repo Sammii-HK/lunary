@@ -5,6 +5,8 @@ import { hasFeatureAccess } from '../../../../utils/pricing';
 import { decrypt } from '@/lib/encryption';
 import { FRIEND_LIMITS } from '../../../../utils/entitlements';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/friends
  * List all friends with their basic profile info

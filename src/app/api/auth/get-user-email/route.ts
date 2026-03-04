@@ -2,6 +2,8 @@ import { auth } from '@/lib/auth';
 import { withCors } from '@/lib/auth-cors';
 import { cookies } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   return withCors(request, async (req) => {
     try {

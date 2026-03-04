@@ -10,6 +10,8 @@ import {
   generateDeletionCancelledEmailHTML,
 } from '@/lib/email-components/ComplianceEmails';
 
+export const dynamic = 'force-dynamic';
+
 function generateId(): string {
   return `del_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
 }

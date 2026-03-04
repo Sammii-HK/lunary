@@ -31,6 +31,10 @@
 		B45BFC982F31546D00FAC877 /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45BFC972F31546C00FAC877 /* WidgetBridge.swift */; };
 		B45BFC9F2F320D6500FAC877 /* LunaryBridgeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45BFC9E2F320D6500FAC877 /* LunaryBridgeViewController.swift */; };
 		B45BFCA12F320E6F00FAC877 /* WidgetBridgePlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = B45BFCA02F320E6F00FAC877 /* WidgetBridgePlugin.m */; };
+		B4FA935D2F585C720079446B /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4FA935C2F585C720079446B /* StoreKit.framework */; };
+		B4FA935F2F5894810079446B /* LunaryProducts.storekit in Resources */ = {isa = PBXBuildFile; fileRef = B4FA935E2F5894800079446B /* LunaryProducts.storekit */; };
+		B4FA93612F589A160079446B /* LunaryProducts.storekit in Resources */ = {isa = PBXBuildFile; fileRef = B4FA93602F589A160079446B /* LunaryProducts.storekit */; };
+		B4FA93632F58A1230079446B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FA93622F58A1230079446B /* SceneDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +89,10 @@
 		B45BFC992F3160B800FAC877 /* App-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "App-Bridging-Header.h"; sourceTree = "<group>"; };
 		B45BFC9E2F320D6500FAC877 /* LunaryBridgeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LunaryBridgeViewController.swift; sourceTree = "<group>"; };
 		B45BFCA02F320E6F00FAC877 /* WidgetBridgePlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WidgetBridgePlugin.m; sourceTree = "<group>"; };
+		B4FA935C2F585C720079446B /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		B4FA935E2F5894800079446B /* LunaryProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = LunaryProducts.storekit; sourceTree = "<group>"; };
+		B4FA93602F589A160079446B /* LunaryProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = LunaryProducts.storekit; path = App/LunaryProducts.storekit; sourceTree = "<group>"; };
+		B4FA93622F58A1230079446B /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +101,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */,
+				B4FA935D2F585C720079446B /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,6 +120,7 @@
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
+				B4FA93602F589A160079446B /* LunaryProducts.storekit */,
 				B45BFC892F31416600FAC877 /* LunaryWidgetsExtension.entitlements */,
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
@@ -132,6 +142,8 @@
 		504EC3061FED79650016851F /* App */ = {
 			isa = PBXGroup;
 			children = (
+				B4FA93622F58A1230079446B /* SceneDelegate.swift */,
+				B4FA935E2F5894800079446B /* LunaryProducts.storekit */,
 				B44A64C02F532F9500F74162 /* SignInWithApplePlugin.swift */,
 				B44A64BE2F532D1A00F74162 /* GoogleService-Info.plist */,
 				B45BFCA02F320E6F00FAC877 /* WidgetBridgePlugin.m */,
@@ -154,6 +166,7 @@
 		B45BFC3C2F3136B500FAC877 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B4FA935C2F585C720079446B /* StoreKit.framework */,
 				B45BFC3D2F3136B500FAC877 /* WidgetKit.framework */,
 				B45BFC3F2F3136B500FAC877 /* SwiftUI.framework */,
 			);
@@ -260,10 +273,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B4FA935F2F5894810079446B /* LunaryProducts.storekit in Resources */,
 				504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
 				B45BFC932F314B0B00FAC877 /* Astronomicon.ttf in Resources */,
+				B4FA93612F589A160079446B /* LunaryProducts.storekit in Resources */,
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				B45BFC902F31469000FAC877 /* RobotoMono-Bold.ttf in Resources */,
@@ -296,6 +311,7 @@
 				B44A64C12F532F9500F74162 /* SignInWithApplePlugin.swift in Sources */,
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				B45BFCA12F320E6F00FAC877 /* WidgetBridgePlugin.m in Sources */,
+				B4FA93632F58A1230079446B /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

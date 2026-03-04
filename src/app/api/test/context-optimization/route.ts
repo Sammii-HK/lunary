@@ -5,6 +5,8 @@ import {
   type ContextRequirements,
 } from '@/lib/ai/context-optimizer';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Test endpoint for context optimization system
  * Shows token savings for different query types

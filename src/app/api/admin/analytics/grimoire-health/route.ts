@@ -4,6 +4,8 @@ import { getGrimoireHealth } from '@/lib/analytics/kpis';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireAdminAuth(request);

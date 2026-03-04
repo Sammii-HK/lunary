@@ -4,6 +4,8 @@ import { sql } from '@vercel/postgres';
 import { getPlanIdFromPriceId } from '../../../../../utils/pricing';
 import { getTrialLevel } from '@/lib/stripe/subscription-utils';
 
+export const dynamic = 'force-dynamic';
+
 function getStripe(secretKey?: string) {
   const key = secretKey || process.env.STRIPE_SECRET_KEY;
   if (!key) {

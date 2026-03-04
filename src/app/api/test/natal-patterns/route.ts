@@ -4,6 +4,8 @@ import { calculatePlanetaryReturns } from '@/lib/journal/planetary-return-tracke
 import { requireUser } from '@/lib/ai/auth';
 import { sql } from '@vercel/postgres';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Test endpoint for natal pattern detection
  * Detects stelliums, aspect patterns, and planetary returns

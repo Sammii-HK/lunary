@@ -5,6 +5,8 @@ import { generateExamples } from '../../../../../scripts/generate-cta-examples';
 import { getReferenceChartWithHouses } from '../../../../../scripts/lib/reference-chart';
 import { sendDiscordNotification } from '@/lib/discord';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Cron job to regenerate CTA examples monthly
  * Runs on the 20th of each month when Sun typically changes signs

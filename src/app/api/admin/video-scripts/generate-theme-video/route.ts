@@ -18,6 +18,8 @@ import {
   generateVideoPostContent,
 } from '@/lib/video/narrative-generator';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 function getWeekStart(date: Date): Date {

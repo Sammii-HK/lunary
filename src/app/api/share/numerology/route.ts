@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { kvGet, kvPut } from '@/lib/cloudflare/kv';
 
+export const dynamic = 'force-dynamic';
+
 const SHARE_TTL_SECONDS = 60 * 60 * 24 * 90; // 90 days
 
 export type ShareNumerologyPayload = {

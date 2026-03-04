@@ -7,6 +7,8 @@ import {
 } from '@/lib/analytics/canonical-events';
 import { getCurrentUser } from '@/lib/get-user-session';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Generate deterministic eventId for deduplication
  * Same identity + date = same eventId, so DB unique constraint catches races

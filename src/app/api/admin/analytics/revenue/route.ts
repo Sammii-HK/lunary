@@ -4,6 +4,8 @@ import { resolveDateRange } from '@/lib/analytics/date-range';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Revenue endpoint for insights
  * Uses pre-computed daily_metrics for 99% cost reduction

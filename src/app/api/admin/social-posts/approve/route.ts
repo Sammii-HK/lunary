@@ -4,6 +4,8 @@ import { requireAdminAuth } from '@/lib/admin-auth';
 import { buildUtmUrl } from '@/lib/urls';
 import { POST as youtubeUploadPost } from '@/app/api/youtube/upload/route';
 
+export const dynamic = 'force-dynamic';
+
 const toIntArrayLiteral = (values: number[]) =>
   `{${values.map((value) => Number(value)).join(',')}}`;
 

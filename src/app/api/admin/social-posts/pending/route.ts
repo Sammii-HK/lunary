@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import { ensureVideoScriptsTable } from '@/lib/social/video-script-generator';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 async function ensureVideoJobsTable() {
   try {
     await sql`

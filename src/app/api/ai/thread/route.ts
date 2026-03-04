@@ -4,6 +4,8 @@ import { randomUUID } from 'crypto';
 import { requireUser, UnauthorizedError } from '@/lib/ai/auth';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 const MAX_MESSAGES = 50;
 
 export async function GET(request: NextRequest) {

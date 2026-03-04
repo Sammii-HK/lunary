@@ -11,22 +11,21 @@ export interface FeatureCalloutProps {
   position: {
     x: number;
     y: number;
+    /** 'right' = callout is to the right of the phone, connector points left toward phone */
     side: 'left' | 'right';
   };
   /** Accent colour, default lunary primary */
   color?: string;
-  /** Optional emoji/icon prefix */
-  icon?: string;
-  /** Horizontal connector line length in px, default 60 */
+  /** Horizontal connector line length in px, default 50 */
   lineLength?: number;
 }
 
 /**
  * Floating pill label that animates in beside a phone mockup.
  *
- * Spring scale-in from 0.7 → 1, fade in/out over 6 frames each.
- * Optional horizontal connector line pointing toward the screen.
- * Position is normalised 0–1 relative to the composition dimensions.
+ * The connector line always points toward the phone:
+ *   - side='right' → callout is to the right of phone → connector on LEFT of pill
+ *   - side='left'  → callout is to the left of phone  → connector on RIGHT of pill
  */
 export const FeatureCallout: React.FC<FeatureCalloutProps> = ({
   text,
@@ -34,8 +33,7 @@ export const FeatureCallout: React.FC<FeatureCalloutProps> = ({
   frameOut,
   position,
   color = '#8458D8',
-  icon,
-  lineLength = 60,
+  lineLength = 50,
 }) => {
   const frame = useCurrentFrame();
   const { fps, width: compWidth, height: compHeight } = useVideoConfig();
@@ -48,8 +46,8 @@ export const FeatureCallout: React.FC<FeatureCalloutProps> = ({
   const scaleValue = spring({
     frame: localFrame,
     fps,
-    config: { damping: 20, stiffness: 260 },
-    from: 0.7,
+    config: { damping: 22, stiffness: 280 },
+    from: 0.8,
     to: 1,
   });
 
@@ -70,6 +68,12 @@ export const FeatureCallout: React.FC<FeatureCalloutProps> = ({
   const x = position.x * compWidth;
   const y = position.y * compHeight;
 
+  // Connector draws in from 0 → lineLength over first 12 frames
+  const connectorWidth = interpolate(localFrame, [0, 12], [0, lineLength], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+
   return (
     <div
       style={{
@@ -84,14 +88,14 @@ export const FeatureCallout: React.FC<FeatureCalloutProps> = ({
         zIndex: 30,
       }}
     >
-      {/* Connector line on the left */}
-      {position.side === 'left' && (
+      {/* Connector points toward the phone.
+          side='right': callout is RIGHT of phone → connector on LEFT of pill */}
+      {position.side === 'right' && (
         <div
           style={{
-            width: lineLength,
-            height: 2,
-            backgroundColor: color,
-            opacity: 0.5,
+            width: connectorWidth,
+            height: 1.5,
+            background: `linear-gradient(90deg, transparent, ${color}99)`,
             marginRight: 8,
             flexShrink: 0,
           }}
@@ -101,38 +105,39 @@ export const FeatureCallout: React.FC<FeatureCalloutProps> = ({
       {/* Pill */}
       <div
         style={{
-          backgroundColor: 'rgba(13, 13, 20, 0.88)',
-          border: `1px solid ${color}`,
-          borderRadius: 10,
-          padding: '8px 14px',
+          backgroundColor: 'rgba(10, 10, 18, 0.92)',
+          border: `1px solid ${color}80`,
+          borderRadius: 8,
+          paddingLeft: 14,
+          paddingRight: 14,
+          paddingTop: 7,
+          paddingBottom: 7,
           display: 'flex',
           alignItems: 'center',
-          gap: 6,
           whiteSpace: 'nowrap',
+          boxShadow: `0 0 16px ${color}30`,
         }}
       >
-        {icon && <span style={{ fontSize: 14, lineHeight: 1 }}>{icon}</span>}
         <span
           style={{
             color: '#ffffff',
-            fontFamily: 'Roboto, sans-serif',
-            fontWeight: 500,
-            fontSize: 15,
-            letterSpacing: 0.3,
+            fontFamily: 'Roboto Mono, monospace',
+            fontWeight: 400,
+            fontSize: 14,
+            letterSpacing: '0.04em',
           }}
         >
           {text}
         </span>
       </div>
 
-      {/* Connector line on the right */}
-      {position.side === 'right' && (
+      {/* side='left': callout is LEFT of phone → connector on RIGHT of pill */}
+      {position.side === 'left' && (
         <div
           style={{
-            width: lineLength,
-            height: 2,
-            backgroundColor: color,
-            opacity: 0.5,
+            width: connectorWidth,
+            height: 1.5,
+            background: `linear-gradient(270deg, transparent, ${color}99)`,
             marginLeft: 8,
             flexShrink: 0,
           }}

@@ -6,6 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { decryptJSON } from '@/lib/encryption';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });

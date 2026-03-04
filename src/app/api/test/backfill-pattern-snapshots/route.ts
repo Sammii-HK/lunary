@@ -19,6 +19,8 @@ import type { LifeThemeInput } from '@/lib/life-themes/engine';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
+export const dynamic = 'force-dynamic';
+
 dayjs.extend(utc);
 
 export async function POST(request: NextRequest) {

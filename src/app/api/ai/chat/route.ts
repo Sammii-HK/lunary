@@ -36,6 +36,8 @@ import {
 } from '@/lib/ai/astral-guide';
 import { analyzeContextNeeds } from '@/lib/ai/context-optimizer';
 
+export const dynamic = 'force-dynamic';
+
 const chatRequestSchema = z.object({
   message: z.string().max(4000).optional(),
   messages: z

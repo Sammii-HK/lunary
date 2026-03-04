@@ -13,6 +13,8 @@ import {
 } from '@/lib/social/weekly-themes';
 import { getImageBaseUrl } from '@/lib/urls';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 /** Post types that are text-first and should never have images */

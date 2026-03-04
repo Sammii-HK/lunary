@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { cleanupOldThreads } from '@/lib/ai/threads';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Cron job to clean up old AI threads
  * Keeps threads updated in the last 7 days, deletes older ones

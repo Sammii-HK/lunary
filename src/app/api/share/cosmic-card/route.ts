@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/ai/auth';
 import { getCachedSnapshot } from '@/lib/cosmic-snapshot/cache';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);

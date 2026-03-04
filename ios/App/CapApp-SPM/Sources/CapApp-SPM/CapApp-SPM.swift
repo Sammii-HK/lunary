@@ -1,6 +1,11 @@
 import RevenuecatPurchasesCapacitor
 
 public let isCapacitorApp = true
-// Force the linker to include PurchasesPlugin so NSClassFromString finds it at runtime.
-// SourceKit may show a false "No such module" error here — ignore it. The build will succeed.
-public let _purchasesPluginClass: AnyClass = PurchasesPlugin.self
+
+// Keeps PurchasesPlugin linked into the binary so NSClassFromString finds it at runtime.
+// Uses @_optimize(none) to avoid a Swift 6.2 compiler crash in DeadFunctionAndGlobalElimination.
+// Called from AppDelegate.application(_:didFinishLaunchingWithOptions:).
+@_optimize(none)
+public func _keepPurchasesPlugin() {
+    _ = PurchasesPlugin.self
+}

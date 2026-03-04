@@ -9,6 +9,8 @@ import {
   cleanupOldDates,
 } from '@/app/api/cron/shared-notification-tracker';
 
+export const dynamic = 'force-dynamic';
+
 // Lazy initialization of VAPID keys (only when actually needed)
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;

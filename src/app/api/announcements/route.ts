@@ -5,6 +5,8 @@ import { headers } from 'next/headers';
 import { normalizePlanType } from '../../../../utils/pricing';
 import type { AiPlanId } from '@/lib/ai/types';
 
+export const dynamic = 'force-dynamic';
+
 type AnnouncementRow = {
   id: string;
   title: string;

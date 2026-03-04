@@ -6,6 +6,8 @@ import {
 } from '@/lib/ai/lunar-events';
 import { savePrompt } from '@/lib/ai/prompt-generator';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Cron job: Runs every 4-6 hours to check for significant lunar events
  * and generate prompts when New Moon, Full Moon, or eclipses occur

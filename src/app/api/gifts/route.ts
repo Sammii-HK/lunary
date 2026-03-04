@@ -6,6 +6,8 @@ import { sendToUser } from '@/lib/notifications/native-push-sender';
 import { GIFT_LIMITS } from '../../../../utils/entitlements';
 import { hasFeatureAccess } from '../../../../utils/pricing';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/gifts — list gifts (sent + received)
  */

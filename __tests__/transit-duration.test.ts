@@ -258,15 +258,75 @@ describe('Transit Duration Calculation', () => {
       expect(duration).toBeNull();
     });
 
-    it('handles retrograde planets (same calculation)', () => {
-      // Retrograde doesn't affect duration calculation (still based on degrees remaining)
+    it('handles retrograde planets by counting down to 0°', () => {
+      // Mercury at 10° in Virgo: longitude = 150 (Virgo start) + 10 = 160
+      // Direct:     elapsed 10° (entered from 0°), remaining 20° → ~4.9d
+      // Retrograde: elapsed 20° (entered from 30°), remaining 10° → ~2.4d
+      const direct = calculateTransitDuration(
+        'Mercury',
+        'Virgo',
+        160, // 10° into Virgo
+        new Date('2025-08-01'),
+        undefined,
+        false,
+      );
+      const retrograde = calculateTransitDuration(
+        'Mercury',
+        'Virgo',
+        160, // 10° into Virgo
+        new Date('2025-08-01'),
+        undefined,
+        true,
+      );
+
+      expect(direct).not.toBeNull();
+      expect(retrograde).not.toBeNull();
+
+      // Retrograde has fewer days remaining: 10° to exit vs 20° to exit direct
+      expect(retrograde!.remainingDays).toBeLessThan(direct!.remainingDays);
+      // Direct: ~4.9d remaining; retrograde: ~2.4d remaining
+      expect(direct!.remainingDays).toBeCloseTo(20 / 4.092, 0);
+      expect(retrograde!.remainingDays).toBeCloseTo(10 / 4.092, 0);
+
+      // startDate reflects entry from opposite side
+      // Direct entered ~2.4d ago; retrograde entered ~4.9d ago (from the 30° end)
+      expect(retrograde!.startDate.getTime()).toBeLessThan(
+        direct!.startDate.getTime(),
+      );
+    });
+
+    it('retrograde near sign entry (low degree) shows only a few days left', () => {
+      // Mercury retrograde at 3° in Virgo — will exit back into Leo very soon
+      // degreesRemaining = 3° / 4.092°/day ≈ 0.73 days
       const duration = calculateTransitDuration(
         'Mercury',
         'Virgo',
-        150,
-        new Date('2025-08-01'),
+        123, // 3° into Virgo
+        new Date('2025-08-15'),
+        undefined,
+        true,
       );
+
       expect(duration).not.toBeNull();
+      expect(duration!.remainingDays).toBeLessThan(1);
+      expect(duration!.displayText).toMatch(/h left/);
+    });
+
+    it('retrograde near sign exit (high degree) shows more days left', () => {
+      // Mercury retrograde at 28° in Virgo — entered recently, long way back to 0°
+      // degreesRemaining = 28° / 4.092°/day ≈ 6.8 days
+      const duration = calculateTransitDuration(
+        'Mercury',
+        'Virgo',
+        148, // 28° into Virgo
+        new Date('2025-08-01'),
+        undefined,
+        true,
+      );
+
+      expect(duration).not.toBeNull();
+      expect(duration!.remainingDays).toBeGreaterThan(5);
+      expect(duration!.remainingDays).toBeLessThan(10);
     });
 
     it('handles dates in past and future', () => {

@@ -9,6 +9,8 @@ import {
   saveSnapshot,
 } from '@/lib/cosmic-snapshot/cache';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 const BATCH_SIZE = 100;

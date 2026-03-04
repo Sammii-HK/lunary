@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/ai/auth';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 type InjectMessageRequest = {
   threadId: string;
   message: {

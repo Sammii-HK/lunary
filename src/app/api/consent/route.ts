@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
+
 const CURRENT_VERSIONS = {
   tos: '2024-12-06',
   privacy: '2024-12-06',

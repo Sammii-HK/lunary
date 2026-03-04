@@ -3,6 +3,8 @@ import { requireAdminAuth } from '@/lib/admin-auth';
 import { validateFetchUrl } from '@/lib/utils';
 import { SUBREDDIT_TONES } from '@/lib/social/platform-strategies/reddit';
 
+export const dynamic = 'force-dynamic';
+
 /** Allow-list of subreddit names we fetch from */
 const ALLOWED_SUBREDDITS = new Set(Object.keys(SUBREDDIT_TONES));
 

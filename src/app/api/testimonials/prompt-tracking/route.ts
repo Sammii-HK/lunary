@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const DISMISS_COOLDOWN_MS = 28 * 24 * 60 * 60 * 1000;
 

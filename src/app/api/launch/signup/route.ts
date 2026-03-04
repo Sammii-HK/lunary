@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import { z } from 'zod';
 import { sendEmail } from '@/lib/email';
 
+export const dynamic = 'force-dynamic';
+
 const signupSchema = z.object({
   email: z.string().email(),
   source: z

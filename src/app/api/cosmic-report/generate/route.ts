@@ -10,6 +10,8 @@ import {
   normalizePlanType,
 } from '../../../../../utils/pricing';
 
+export const dynamic = 'force-dynamic';
+
 const generateSchema = z.object({
   report_type: z.enum(['weekly', 'monthly', 'custom']),
   date_range: z

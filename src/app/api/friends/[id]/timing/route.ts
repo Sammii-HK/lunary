@@ -6,6 +6,8 @@ import { hasFeatureAccess } from '../../../../../../utils/pricing';
 import { getRealPlanetaryPositions } from '../../../../../../utils/astrology/astronomical-data';
 import type { BirthChartData } from '../../../../../../utils/astrology/birthChart';
 
+export const dynamic = 'force-dynamic';
+
 type TimingWindow = {
   date: string;
   endDate?: string;

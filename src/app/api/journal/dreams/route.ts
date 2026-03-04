@@ -6,6 +6,8 @@ import {
   extractAllDreamTags,
 } from '@/lib/journal/dream-classifier';
 
+export const dynamic = 'force-dynamic';
+
 export interface DreamEntry {
   id: number;
   content: string;

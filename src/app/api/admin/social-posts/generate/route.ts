@@ -14,6 +14,8 @@ import { buildScopeGuard } from '@/lib/social/topic-scope';
 import { normalizeHashtagsForPlatform } from '@/lib/social/social-copy-generator';
 import { normalizeGeneratedContent } from '@/lib/social/content-normalizer';
 
+export const dynamic = 'force-dynamic';
+
 let cachedSocialContext: string | null = null;
 let cachedAIContext: string | null = null;
 let cachedPostingStrategy: string | null = null;

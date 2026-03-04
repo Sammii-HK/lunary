@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/gifts/[id]/open — mark a gift as opened and return full content.
  */

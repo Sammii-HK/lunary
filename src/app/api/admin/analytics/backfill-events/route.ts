@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { runPostHogBackfill } from '@/lib/analytics/posthog-backfill';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 type Payload = {
   start_date?: string;
   end_date?: string;

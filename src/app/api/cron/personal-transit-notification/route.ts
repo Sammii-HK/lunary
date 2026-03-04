@@ -18,6 +18,8 @@ import {
 } from '@/lib/notifications/copy-library';
 import { getPredictiveNotifications } from '@/lib/notifications/predictive';
 
+export const dynamic = 'force-dynamic';
+
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;

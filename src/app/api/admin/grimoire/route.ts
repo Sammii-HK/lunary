@@ -62,6 +62,8 @@ import {
 
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   const authResult = await requireAdminAuth(request);
   if (authResult instanceof NextResponse) return authResult;

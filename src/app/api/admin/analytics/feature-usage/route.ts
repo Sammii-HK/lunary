@@ -4,6 +4,8 @@ import { resolveDateRange, formatTimestamp } from '@/lib/analytics/date-range';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 // Canonical event types shown in the product feature panel.
 const FEATURE_EVENTS = [
   'daily_dashboard_viewed',

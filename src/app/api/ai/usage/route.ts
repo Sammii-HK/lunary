@@ -5,6 +5,8 @@ import { resolvePlanId } from '@/lib/ai/plan-resolver';
 import { DAILY_MESSAGE_LIMITS } from '@/lib/ai/plans';
 import { loadUsage } from '@/lib/ai/usage';
 
+export const dynamic = 'force-dynamic';
+
 const jsonResponse = (payload: unknown, status = 200) =>
   NextResponse.json(payload, { status });
 

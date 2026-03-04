@@ -6,6 +6,8 @@ import {
   ensureVideoScriptsTable,
   getVideoScripts,
 } from '@/lib/social/video-script-generator';
+
+export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 function getWeekStart(date: Date): Date {

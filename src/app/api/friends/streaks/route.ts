@@ -4,6 +4,8 @@ import { requireUser } from '@/lib/ai/auth';
 import { hasFeatureAccess } from '../../../../../utils/pricing';
 import { decrypt } from '@/lib/encryption';
 
+export const dynamic = 'force-dynamic';
+
 export interface FriendStreak {
   friendId: string;
   name: string;

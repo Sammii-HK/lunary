@@ -7,6 +7,8 @@ import {
 } from '@/lib/weekly-report/email-template';
 import { sendEmail } from '@/lib/email';
 
+export const dynamic = 'force-dynamic';
+
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {

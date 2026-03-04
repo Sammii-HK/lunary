@@ -6,6 +6,8 @@ import {
   type PageIndexingStatus,
 } from '@/lib/google/search-console';
 
+export const dynamic = 'force-dynamic';
+
 // Grimoire URLs to audit - key pages
 const GRIMOIRE_URLS_TO_AUDIT = [
   // Main index pages

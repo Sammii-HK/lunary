@@ -8,6 +8,8 @@ import {
 } from '../../../../../utils/fx-drift';
 import { resolveFxDriftUpdates } from '../../../../../utils/fx-drift-resolve';
 
+export const dynamic = 'force-dynamic';
+
 function shouldRunThisMonth(cadenceMonths: number, now: Date): boolean {
   if (!Number.isFinite(cadenceMonths) || cadenceMonths <= 0) {
     return false;

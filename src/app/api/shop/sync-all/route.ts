@@ -18,6 +18,8 @@ import { generateBirthChartPacks } from '@/lib/shop/generators/birthchart-packs'
 import { generateRetrogradePacks } from '@/lib/shop/generators/retrograde-packs';
 import { ShopProduct } from '@/lib/shop/types';
 
+export const dynamic = 'force-dynamic';
+
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error('STRIPE_SECRET_KEY not configured');

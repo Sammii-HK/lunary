@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
+export const dynamic = 'force-dynamic';
+
 const MAX_NAME_LENGTH = 120;
 const MAX_MESSAGE_LENGTH = 1200;
 const FEATURED_LIMIT = 8;

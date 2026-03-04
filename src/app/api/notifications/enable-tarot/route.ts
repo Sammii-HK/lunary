@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { conversionTracking } from '@/lib/analytics';
 
+export const dynamic = 'force-dynamic';
+
 // This endpoint allows users to enable personalized tarot notifications
 // and store their personal data (birthday, name) in subscription preferences
 export async function POST(request: NextRequest) {

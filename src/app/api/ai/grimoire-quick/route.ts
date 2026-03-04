@@ -5,6 +5,8 @@ import { loadUsage, updateUsage } from '@/lib/ai/usage';
 import { resolvePlanId } from '@/lib/ai/plan-resolver';
 import { DAILY_MESSAGE_LIMITS } from '@/lib/ai/plans';
 
+export const dynamic = 'force-dynamic';
+
 type GrimoireQuickRequest = {
   message: string;
 };

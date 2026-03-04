@@ -5,7 +5,7 @@ import { MoonCirclesPreview } from '@/components/MoonCirclesPreview';
 import { CircleInviteCTA } from '@/components/CircleInviteCTA';
 import { cn } from '@/lib/utils';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 type MoonPhaseFilter = 'New Moon' | 'Full Moon' | null;
 

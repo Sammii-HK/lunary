@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sendDailyInsightNotification } from '@/lib/notifications/tiered-service';
 import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const isVercelCron = request.headers.get('x-vercel-cron') === '1';

@@ -11,6 +11,8 @@ import { postToSocialMultiPlatform } from '@/lib/social/client';
 import { preUploadImage } from '@/lib/social/pre-upload-image';
 import { captureEvent } from '@/lib/posthog-server';
 
+export const dynamic = 'force-dynamic';
+
 type DbPostRow = {
   id: number;
   content: string;

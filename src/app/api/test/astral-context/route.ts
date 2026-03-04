@@ -3,6 +3,8 @@ import { buildAstralContext } from '@/lib/ai/astral-guide';
 import { analyzeContextNeeds } from '@/lib/ai/context-optimizer';
 import { requireUser } from '@/lib/ai/auth';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Test endpoint for astral context building with optimization
  * Shows what context is actually built for different queries

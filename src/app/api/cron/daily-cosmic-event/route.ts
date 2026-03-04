@@ -11,6 +11,8 @@ import {
   checkRetrogradeIngress,
 } from '../../../../../utils/astrology/cosmic-og';
 
+export const dynamic = 'force-dynamic';
+
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;

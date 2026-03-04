@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processReferralCode } from '@/lib/referrals';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const { code, userId } = await request.json();

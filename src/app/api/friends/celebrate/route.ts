@@ -5,6 +5,8 @@ import { hasFeatureAccess } from '../../../../../utils/pricing';
 import { sendToUser } from '@/lib/notifications/native-push-sender';
 import { decrypt } from '@/lib/encryption';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/friends/celebrate
  * Send cosmic energy to a friend who hit a streak milestone

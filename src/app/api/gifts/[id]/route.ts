@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/gifts/[id] — get a single gift
  * Content is hidden if the gift is unopened and requested by the recipient.

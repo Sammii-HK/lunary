@@ -6,6 +6,8 @@ import { generateDailyStoryData } from '@/lib/instagram/story-content';
 import { format } from 'date-fns';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Debug endpoint: try posting to Instagram via Ayrshare and return raw results.
  *

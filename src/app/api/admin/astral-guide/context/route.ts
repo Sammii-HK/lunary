@@ -6,6 +6,8 @@ import { requireAdminAuth } from '@/lib/admin-auth';
 import { buildAstralContext } from '@/lib/ai/astral-guide';
 import { decrypt } from '@/lib/encryption';
 
+export const dynamic = 'force-dynamic';
+
 const requestSchema = z.object({
   email: z.string().email().optional(),
   userId: z.string().uuid().optional(),

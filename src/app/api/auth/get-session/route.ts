@@ -1,6 +1,8 @@
 import { auth } from '@/lib/auth';
 import { withCors } from '@/lib/auth-cors';
 
+export const dynamic = 'force-dynamic';
+
 // Skip auth checks ONLY in explicit test environments
 // Never activate test mode in production
 const isTestMode = (() => {

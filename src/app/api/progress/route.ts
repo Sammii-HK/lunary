@@ -9,6 +9,8 @@ import {
   getNextLevelConfig,
 } from '@/lib/progress/config';
 
+export const dynamic = 'force-dynamic';
+
 export interface SkillTreeProgress {
   skillTree: SkillTreeId;
   name: string;

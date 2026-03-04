@@ -1,0 +1,160 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "057F680B",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "5C3653FC",
+      "localizations" : [
+
+      ],
+      "name" : "Lunary",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "10CA9262",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Full birth chart, daily horoscopes, personal transit impacts",
+              "displayName" : "Lunary Plus",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "app.lunary.plus.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "app.lunary.plus.monthly",
+          "subscriptionGroupID" : "5C3653FC",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "69.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "9C59B8A3",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Full birth chart, daily horoscopes, personal transit impacts — billed yearly",
+              "displayName" : "Lunary Plus Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "app.lunary.plus.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "app.lunary.plus.annual",
+          "subscriptionGroupID" : "5C3653FC",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "12.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "9547FFBB",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Everything in Lunary Plus with AI guidance and weekly reports",
+              "displayName" : "Lunary Pro",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "app.lunary.pro.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "app.lunary.pro.monthly",
+          "subscriptionGroupID" : "5C3653FC",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "124.99",
+          "familyShareable" : false,
+          "groupNumber" : 4,
+          "internalID" : "6A981DEC",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Everything in Lunary Pro, billed yearly",
+              "displayName" : "Lunary Pro Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "app.lunary.pro.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "app.lunary.pro.annual",
+          "subscriptionGroupID" : "5C3653FC",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

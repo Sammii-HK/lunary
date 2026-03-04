@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cacheTransits } from '@/lib/ai/transit-cache';
 import { getCurrentTransits } from '@/lib/ai/providers';
 
+export const dynamic = 'force-dynamic';
+
 type TransitRequest = {
   userId?: string;
   cacheKey?: string;

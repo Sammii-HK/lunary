@@ -9,6 +9,8 @@ import {
 } from '@/lib/email-components/ComplianceEmails';
 import { checkRateLimit } from '@/lib/api/rate-limit';
 
+export const dynamic = 'force-dynamic';
+
 const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
 export async function POST(request: NextRequest) {

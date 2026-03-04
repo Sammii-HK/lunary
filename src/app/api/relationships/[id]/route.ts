@@ -10,6 +10,8 @@ import { CURRENT_BIRTH_CHART_VERSION } from '../../../../../utils/astrology/char
 import { ensureRelationshipChartFresh } from '../../../../../utils/astrology/regenerateRelationshipChart';
 import tzLookup from 'tz-lookup';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

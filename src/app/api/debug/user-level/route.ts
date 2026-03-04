@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/debug/user-level
  * Show all data used to calculate daily thread level for debugging

@@ -7,6 +7,8 @@ import {
   type RedditFormat,
 } from '@/lib/social/platform-strategies/reddit';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST — Generate Reddit content (reply or original post)
  */

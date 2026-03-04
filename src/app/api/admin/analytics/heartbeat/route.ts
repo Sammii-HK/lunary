@@ -4,6 +4,8 @@ import { EngagementEventType, getEventAudit } from '@/lib/analytics/kpis';
 import { ANALYTICS_REALTIME_TTL_SECONDS } from '@/lib/analytics-cache-config';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
+export const dynamic = 'force-dynamic';
+
 const HEARTBEAT_WINDOW_MINUTES = 30;
 
 type HeartbeatEventConfig = {

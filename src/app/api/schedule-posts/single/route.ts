@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getImageBaseUrl } from '@/lib/urls';
 import { postToSocialMultiPlatform } from '@/lib/social/client';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     console.log('🚀 Single post scheduler started');

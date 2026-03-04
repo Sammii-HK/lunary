@@ -6,6 +6,8 @@ import Stripe from 'stripe';
 import { sendEmail } from '@/lib/email';
 import { generateRefundRequestedEmailHTML } from '@/lib/email-components/ComplianceEmails';
 
+export const dynamic = 'force-dynamic';
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
 function generateId(): string {
