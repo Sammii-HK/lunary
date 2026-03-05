@@ -4,6 +4,7 @@ import {
   FAST_PLANETS,
   SLOW_PLANET_SIGN_CHANGES,
 } from './transit-duration-constants';
+import { Body, GeoVector, Ecliptic, AstroTime } from 'astronomy-engine';
 
 export interface TransitDuration {
   totalDays: number;
@@ -129,12 +130,105 @@ export function getSlowPlanetSignTotalDays(
 }
 
 /**
+ * Map planet name to astronomy-engine Body string.
+ * Moon and Sun can't retrograde so they're excluded, but included for completeness.
+ */
+const BODY_MAP: Record<string, string> = {
+  Mercury: 'Mercury',
+  Venus: 'Venus',
+  Mars: 'Mars',
+  Jupiter: 'Jupiter',
+  Saturn: 'Saturn',
+  Uranus: 'Uranus',
+  Neptune: 'Neptune',
+  Pluto: 'Pluto',
+};
+
+/**
+ * Find the date a retrograde planet stations direct by scanning forward.
+ * Uses astronomy-engine to compute ecliptic longitude day-by-day and detects
+ * when daily motion flips from negative (retrograde) to positive (direct).
+ *
+ * Also scans backward to find when the retrograde started (station retrograde).
+ *
+ * Returns { startDate, endDate } or null if the planet isn't in BODY_MAP.
+ * Max scan: 120 days forward, 60 days back (covers even outer planet retrogrades).
+ */
+function findRetrogradeBounds(
+  planet: string,
+  date: Date,
+): { startDate: Date; endDate: Date } | null {
+  const bodyName = BODY_MAP[planet];
+  if (!bodyName) return null;
+
+  const body = bodyName as Body;
+  const msPerDay = 86400000;
+
+  function getLongitude(d: Date): number {
+    const t = new AstroTime(d);
+    const vec = GeoVector(body, t, true);
+    return Ecliptic(vec).elon;
+  }
+
+  function dailyMotion(d: Date): number {
+    const lon1 = getLongitude(d);
+    const lon2 = getLongitude(new Date(d.getTime() + msPerDay));
+    let diff = lon2 - lon1;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    return diff;
+  }
+
+  // Scan forward to find station direct (motion goes from negative to positive)
+  let endDate: Date | null = null;
+  for (let i = 1; i <= 120; i++) {
+    const futureDate = new Date(date.getTime() + i * msPerDay);
+    const motion = dailyMotion(futureDate);
+    if (motion > 0) {
+      // Retrograde ended — refine to half-day precision
+      const prevDate = new Date(futureDate.getTime() - msPerDay);
+      const prevMotion = dailyMotion(prevDate);
+      // Linear interpolation between the two days
+      const fraction =
+        Math.abs(prevMotion) / (Math.abs(prevMotion) + Math.abs(motion));
+      endDate = new Date(prevDate.getTime() + fraction * msPerDay);
+      break;
+    }
+  }
+
+  // Scan backward to find station retrograde (motion goes from positive to negative)
+  let startDate: Date | null = null;
+  for (let i = 1; i <= 60; i++) {
+    const pastDate = new Date(date.getTime() - i * msPerDay);
+    const motion = dailyMotion(pastDate);
+    if (motion > 0) {
+      // Was direct here — retrograde started between this day and the next
+      const nextDate = new Date(pastDate.getTime() + msPerDay);
+      const nextMotion = dailyMotion(nextDate);
+      const fraction =
+        Math.abs(motion) / (Math.abs(motion) + Math.abs(nextMotion));
+      startDate = new Date(pastDate.getTime() + fraction * msPerDay);
+      break;
+    }
+  }
+
+  if (!endDate) return null;
+
+  return {
+    startDate: startDate ?? date,
+    endDate,
+  };
+}
+
+/**
  * Fast planets (Moon-Mars): degrees remaining ÷ daily motion
  * Uses actual observed motion when available, falls back to orbital average.
  *
- * Retrograde-aware: when retrograde=true the planet is moving backward (toward 0°),
- * so it will exit the sign at 0° (re-entering the previous sign) rather than at 30°.
- * degreesRemaining and daysElapsed are calculated accordingly.
+ * Retrograde-aware: when a planet is retrograde, we find the actual station
+ * direct date using astronomy-engine rather than estimating from sign boundaries.
+ * This gives accurate durations (e.g. Mercury retrograde ~3 weeks, not "4 days").
+ *
+ * For direct motion planets, uses the simpler degrees-to-sign-boundary calculation.
  */
 function calculateFastPlanetDuration(
   planet: string,
@@ -147,32 +241,38 @@ function calculateFastPlanetDuration(
     PLANET_DAILY_MOTION[planet as keyof typeof PLANET_DAILY_MOTION];
   if (!averageMotion) return null;
 
-  // Use actual motion if provided and reasonable (> 50% of average)
+  const msPerDay = 86400000;
+
+  // For retrograde planets, find the actual station direct date
+  if (retrograde && planet !== 'Moon' && planet !== 'Sun') {
+    const bounds = findRetrogradeBounds(planet, date);
+    if (bounds) {
+      const totalDays =
+        (bounds.endDate.getTime() - bounds.startDate.getTime()) / msPerDay;
+      const remainingDays =
+        (bounds.endDate.getTime() - date.getTime()) / msPerDay;
+      return {
+        totalDays,
+        remainingDays: Math.max(0, remainingDays),
+        displayText: formatDuration(Math.max(0, remainingDays)),
+        startDate: bounds.startDate,
+        endDate: bounds.endDate,
+      };
+    }
+  }
+
+  // Direct motion: degrees to sign boundary ÷ daily motion
   const dailyMotion =
     actualDailyMotion && actualDailyMotion > averageMotion * 0.5
       ? actualDailyMotion
       : averageMotion;
 
-  // Calculate degree within current sign (0-30)
   const degreeInSign = currentLongitude % 30;
-
-  // Retrograde: planet moves toward 0° and re-enters the previous sign
-  // Direct:     planet moves toward 30° and enters the next sign
-  const degreesRemaining = retrograde ? degreeInSign : 30 - degreeInSign;
-
-  // Days remaining = degrees remaining / daily motion (fractional for hour precision)
+  const degreesRemaining = 30 - degreeInSign;
   const remainingDays = degreesRemaining / dailyMotion;
 
-  // Calculate start date (when planet entered this sign)
-  // Retrograde: entered from the high-degree end (30°), so elapsed = 30 - degreeInSign
-  // Direct:     entered from 0°, so elapsed = degreeInSign
-  const daysElapsed = retrograde
-    ? (30 - degreeInSign) / dailyMotion
-    : degreeInSign / dailyMotion;
-  const msPerDay = 86400000;
+  const daysElapsed = degreeInSign / dailyMotion;
   const startDate = new Date(date.getTime() - daysElapsed * msPerDay);
-
-  // Calculate end date (when planet will leave this sign)
   const endDate = new Date(date.getTime() + remainingDays * msPerDay);
 
   const totalDays = daysElapsed + remainingDays;
