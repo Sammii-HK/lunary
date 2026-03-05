@@ -46,7 +46,7 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
   'primary-educational': {
     type: 'primary-educational',
     purpose: 'Daily educational content on rotating themes',
-    idealTime: 12, // Keep existing primary video time
+    idealTime: 14, // UK afternoon + US morning overlap
     targetAudience: 'discovery',
     platforms: ['tiktok', 'instagram'],
     description:
@@ -96,7 +96,7 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
   quiz: {
     type: 'quiz',
     purpose: 'Interactive identity quiz driving comments and shares',
-    idealTime: 12, // Discovery window
+    idealTime: 14, // Discovery window — UK afternoon + US morning
     targetAudience: 'discovery',
     platforms: ['tiktok', 'instagram'],
     description:
@@ -106,7 +106,7 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
   ranking: {
     type: 'ranking',
     purpose: 'Ranking signs by traits for discovery engagement',
-    idealTime: 12, // Discovery window
+    idealTime: 14, // Discovery window — UK afternoon + US morning
     targetAudience: 'discovery',
     platforms: ['tiktok', 'instagram'],
     description:
@@ -116,7 +116,7 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
   'hot-take': {
     type: 'hot-take',
     purpose: 'Debate-provoking opinions for engagement',
-    idealTime: 12, // Discovery window
+    idealTime: 14, // Discovery window — UK afternoon + US morning
     targetAudience: 'discovery',
     platforms: ['tiktok', 'instagram'],
     description:
@@ -126,7 +126,7 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
   'sign-check': {
     type: 'sign-check',
     purpose: 'Direct sign callouts for targeted engagement',
-    idealTime: 12, // Discovery window
+    idealTime: 14, // Discovery window — UK afternoon + US morning
     targetAudience: 'discovery',
     platforms: ['tiktok', 'instagram'],
     description:
@@ -136,7 +136,7 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
   myth: {
     type: 'myth',
     purpose: 'Zodiac mythology and origin stories',
-    idealTime: 12, // Discovery window
+    idealTime: 14, // Discovery window — UK afternoon + US morning
     targetAudience: 'discovery',
     platforms: ['tiktok', 'instagram'],
     description:
@@ -146,7 +146,7 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
   'transit-alert': {
     type: 'transit-alert',
     purpose: 'Timely content for major upcoming transits',
-    idealTime: 12, // Discovery window
+    idealTime: 14, // Discovery window — UK afternoon + US morning
     targetAudience: 'discovery',
     platforms: ['tiktok', 'instagram'],
     description:
@@ -166,7 +166,7 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
   'angel-number': {
     type: 'angel-number',
     purpose: 'Angel number explainers — S-tier performer (3000+ avg views)',
-    idealTime: 12,
+    idealTime: 14,
     targetAudience: 'discovery',
     platforms: ['tiktok', 'instagram'],
     description:
@@ -176,7 +176,7 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
   'sign-identity': {
     type: 'sign-identity',
     purpose: 'Sign-specific identity callouts for targeted engagement',
-    idealTime: 12,
+    idealTime: 14,
     targetAudience: 'discovery',
     platforms: ['tiktok', 'instagram'],
     description:
@@ -196,7 +196,7 @@ export const CONTENT_TYPE_CONFIGS: Record<ContentType, ContentTypeConfig> = {
   'sign-origin': {
     type: 'sign-origin',
     purpose: 'Zodiac sign origin stories',
-    idealTime: 12,
+    idealTime: 14,
     targetAudience: 'discovery',
     platforms: ['tiktok', 'instagram'],
     description:
@@ -233,8 +233,8 @@ export interface PostingTimeWindow {
 
 export const POSTING_TIME_WINDOWS: Record<TargetAudience, PostingTimeWindow> = {
   discovery: {
-    baseHour: 12,
-    windowHours: [11, 12, 13, 14], // UK lunch + US morning
+    baseHour: 14,
+    windowHours: [13, 14, 15], // UK afternoon + US morning overlap
     weekendAdjust: 1, // People scroll later on weekends
   },
   consideration: {

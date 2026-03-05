@@ -4,6 +4,12 @@ import { COLORS, STYLES } from '../styles/theme';
 import type { AudioSegment } from '../utils/timing';
 import { secondsToFrames, splitTextWithTiming } from '../utils/timing';
 
+/** Subtitle highlight style:
+ * - 'scale': original style — active word scales up with glow (subtle, polished)
+ * - 'block': CapCut-style — active word gets a coloured background pill (punchy, high contrast)
+ */
+export type SubtitleHighlightStyle = 'scale' | 'block';
+
 interface AnimatedSubtitlesProps {
   /** Audio segments with text and timing */
   segments: AudioSegment[];
@@ -21,6 +27,8 @@ interface AnimatedSubtitlesProps {
   wordHighlight?: boolean;
   /** Background opacity override for adaptive contrast (#14) */
   backgroundOpacity?: number;
+  /** Highlight style: 'scale' (original) or 'block' (coloured background pill) */
+  highlightStyle?: SubtitleHighlightStyle;
 }
 
 /**
@@ -42,6 +50,7 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
   fps = 30,
   wordHighlight = true,
   backgroundOpacity,
+  highlightStyle = 'block',
 }) => {
   const frame = useCurrentFrame();
   const currentTime = frame / fps;
@@ -106,8 +115,8 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
     );
   };
 
-  // Render text with word-level highlighting
-  const renderWordHighlight = () => {
+  // Render text with word-level scale highlighting (original style)
+  const renderWordHighlightScale = () => {
     const wordTimings = splitTextWithTiming(
       currentSegment.text,
       currentSegment.startTime,
@@ -148,6 +157,42 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
             textShadow: isActive
               ? `0 0 12px rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.6)`
               : `0 2px 6px rgba(0,0,0,0.5)`,
+          }}
+        >
+          {wt.word}
+        </span>
+      );
+    });
+  };
+
+  // Render text with coloured background block highlighting (CapCut style)
+  const renderWordHighlightBlock = () => {
+    const wordTimings = splitTextWithTiming(
+      currentSegment.text,
+      currentSegment.startTime,
+      currentSegment.endTime,
+      fps,
+    );
+
+    return wordTimings.map((wt, index) => {
+      const isActive = frame >= wt.startFrame && frame < wt.endFrame;
+      const isKeyword = isHighlightTerm(wt.word);
+
+      return (
+        <span
+          key={index}
+          style={{
+            color: '#FFFFFF',
+            fontWeight: isActive ? 800 : isKeyword ? 700 : 600,
+            display: 'inline-block',
+            marginRight: '0.2em',
+            backgroundColor: isActive ? highlightColor : 'transparent',
+            borderRadius: isActive ? 6 : 0,
+            paddingLeft: isActive ? 6 : 0,
+            paddingRight: isActive ? 6 : 0,
+            paddingTop: isActive ? 2 : 0,
+            paddingBottom: isActive ? 2 : 0,
+            textShadow: isActive ? 'none' : `0 2px 6px rgba(0,0,0,0.5)`,
           }}
         >
           {wt.word}
@@ -218,7 +263,11 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
           maxWidth: '90%',
         }}
       >
-        {wordHighlight ? renderWordHighlight() : renderText()}
+        {wordHighlight
+          ? highlightStyle === 'block'
+            ? renderWordHighlightBlock()
+            : renderWordHighlightScale()
+          : renderText()}
       </p>
     </div>
   );

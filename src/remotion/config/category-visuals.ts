@@ -84,10 +84,12 @@ const CATEGORY_ANIMATION_MAP: Record<string, BackgroundAnimationType> = {
   'jar-spells': 'candle-flames',
   protection: 'candle-flames',
 
-  // Aurora — numerology/numbers themes (switched from sacred-geometry;
-  // aurora bg consistently outperforms in TikTok engagement data)
-  numerology: 'aurora',
-  'angel-numbers': 'aurora',
+  // Ember Particles — numerology/numbers themes
+  // Distinct from zodiac (aurora) for visual identity on For You page.
+  // Was aurora (switched from sacred-geometry), but sharing bg with zodiac
+  // made angel number videos visually indistinguishable from zodiac content.
+  numerology: 'ember-particles',
+  'angel-numbers': 'ember-particles',
   'life-path': 'aurora',
   'mirror-hours': 'aurora',
   'double-hours': 'aurora',
