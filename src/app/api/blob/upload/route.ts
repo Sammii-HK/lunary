@@ -1,9 +1,23 @@
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
 export const runtime = 'nodejs';
+
+const ALLOWED_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/svg+xml',
+  'video/mp4',
+  'audio/mpeg',
+  'audio/mp3',
+]);
+
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 
 function generateRandomSlug(): string {
   const array = new Uint8Array(6);
@@ -14,6 +28,9 @@ function generateRandomSlug(): string {
 }
 
 export async function POST(req: Request) {
+  const authResult = await requireAdminAuth(req);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const contentType = req.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
@@ -30,6 +47,20 @@ export async function POST(req: Request) {
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    }
+
+    if (!ALLOWED_MIME_TYPES.has(file.type)) {
+      return NextResponse.json(
+        { error: `File type ${file.type} not allowed` },
+        { status: 400 },
+      );
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: 'File exceeds 100 MB limit' },
+        { status: 400 },
+      );
     }
 
     const safeName = file.name.replace(/[^a-z0-9.\-_]/gi, '_').toLowerCase();

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { sanitizeForLog as sanitize } from '@/lib/security/log-sanitize';
 import { postToSocial } from '@/lib/social/client';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +27,9 @@ function sanitizeForLog(value: unknown, maxLength = 200) {
 }
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     let body: PostToPlatformsRequest;
     try {

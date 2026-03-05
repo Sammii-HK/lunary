@@ -5,9 +5,35 @@ import { getCorsHeaders, isValidOrigin } from '@/lib/origin-validation';
 
 export const dynamic = 'force-dynamic';
 
+const ALLOWED_REDIRECT_HOSTS = new Set([
+  'lunary.app',
+  'www.lunary.app',
+  'admin.lunary.app',
+  'localhost',
+]);
+
 const requestSchema = z.object({
   email: z.string().email(),
-  redirectTo: z.string().url().optional(),
+  redirectTo: z
+    .string()
+    .url()
+    .optional()
+    .refine(
+      (val) => {
+        if (!val) return true;
+        try {
+          const host = new URL(val).hostname;
+          return (
+            ALLOWED_REDIRECT_HOSTS.has(host) ||
+            host.endsWith('.lunary.app') ||
+            host.endsWith('.vercel.app')
+          );
+        } catch {
+          return false;
+        }
+      },
+      { message: 'Redirect URL not allowed' },
+    ),
 });
 
 const normalizeBase = (value?: string | null) => {

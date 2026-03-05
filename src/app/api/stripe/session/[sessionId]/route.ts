@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { requireUser } from '@/lib/ai/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,11 @@ export async function GET(
   request: NextRequest,
   context: { params: Promise<{ sessionId: string }> },
 ) {
+  const authedUser = await requireUser(request).catch(() => null);
+  if (!authedUser) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const stripe = getStripe();
     const { sessionId } = await context.params;

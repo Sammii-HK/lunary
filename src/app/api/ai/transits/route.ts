@@ -14,12 +14,13 @@ const jsonResponse = (payload: unknown, status = 200) =>
   NextResponse.json(payload, { status });
 
 const isAuthorised = (request: NextRequest): boolean => {
-  const isVercelCron = request.headers.get('x-vercel-cron') === '1';
+  const isVercelCron =
+    request.headers.get('x-vercel-cron') === '1' && process.env.VERCEL === '1';
   if (isVercelCron) return true;
 
   const header = request.headers.get('authorization');
   if (!process.env.CRON_SECRET) {
-    return true;
+    return false;
   }
 
   return header === `Bearer ${process.env.CRON_SECRET}`;

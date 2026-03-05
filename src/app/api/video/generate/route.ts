@@ -26,6 +26,8 @@ import { clampHueShift, getThemeHueBase } from '@/lib/video/hue';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
 import { sendDiscordNotification } from '@/lib/discord';
 
+import { requireAdminAuth } from '@/lib/admin-auth';
+
 export const dynamic = 'force-dynamic';
 
 // Version for cache invalidation - increment when prompts change
@@ -359,6 +361,9 @@ async function scheduleVideoToPlatforms(
 }
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body: GenerateVideoRequest = await request.json();
     const { type, week, blogContent } = body;

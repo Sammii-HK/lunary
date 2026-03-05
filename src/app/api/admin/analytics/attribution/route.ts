@@ -17,124 +17,145 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('start_date');
     const endDate = searchParams.get('end_date');
 
-    // Filter test users by joining with conversion_events or subscriptions
-    const testUserFilter = `
-      AND NOT EXISTS (
-        SELECT 1 FROM subscriptions s
-        WHERE s.user_id = ua.user_id
-          AND (s.user_email LIKE '${TEST_EMAIL_PATTERN}' OR s.user_email = '${TEST_EMAIL_EXACT}')
-      )
-      AND NOT EXISTS (
-        SELECT 1 FROM conversion_events ce
-        WHERE ce.user_id = ua.user_id
-          AND (ce.user_email LIKE '${TEST_EMAIL_PATTERN}' OR ce.user_email = '${TEST_EMAIL_EXACT}')
-      )
-    `;
+    // Validate date format to prevent injection (YYYY-MM-DD only)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    const safeStartDate =
+      startDate && dateRegex.test(startDate) ? startDate : null;
+    const safeEndDate = endDate && dateRegex.test(endDate) ? endDate : null;
+    const hasDateRange = safeStartDate && safeEndDate;
 
-    const dateFilter =
-      startDate && endDate
-        ? `WHERE COALESCE(ua.first_touch_at, ua.created_at) >= '${startDate}'::date AND COALESCE(ua.first_touch_at, ua.created_at) <= '${endDate}'::date + INTERVAL '1 day'`
-        : "WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'";
+    // Use parameterized queries to prevent SQL injection.
+    // Each query variant is a separate tagged template (no string interpolation).
+    const sourceBreakdown = hasDateRange
+      ? await sql`
+          SELECT ua.first_touch_source as source, COUNT(*) as user_count,
+            ROUND(COUNT(*)::numeric / NULLIF(SUM(COUNT(*)) OVER (), 0) * 100, 1) as percentage
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= ${safeStartDate}::date
+            AND COALESCE(ua.first_touch_at, ua.created_at) <= ${safeEndDate}::date + INTERVAL '1 day'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY ua.first_touch_source ORDER BY user_count DESC`
+      : await sql`
+          SELECT ua.first_touch_source as source, COUNT(*) as user_count,
+            ROUND(COUNT(*)::numeric / NULLIF(SUM(COUNT(*)) OVER (), 0) * 100, 1) as percentage
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY ua.first_touch_source ORDER BY user_count DESC`;
 
-    const sourceBreakdown = await sql.query(`
-      SELECT 
-        ua.first_touch_source as source,
-        COUNT(*) as user_count,
-        ROUND(COUNT(*)::numeric / NULLIF(SUM(COUNT(*)) OVER (), 0) * 100, 1) as percentage
-      FROM user_attribution ua
-      ${dateFilter}
-      ${testUserFilter}
-      GROUP BY ua.first_touch_source
-      ORDER BY user_count DESC
-    `);
+    const mediumBreakdown = hasDateRange
+      ? await sql`
+          SELECT ua.first_touch_source as source, ua.first_touch_medium as medium, COUNT(*) as user_count
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= ${safeStartDate}::date
+            AND COALESCE(ua.first_touch_at, ua.created_at) <= ${safeEndDate}::date + INTERVAL '1 day'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY ua.first_touch_source, ua.first_touch_medium ORDER BY user_count DESC LIMIT 20`
+      : await sql`
+          SELECT ua.first_touch_source as source, ua.first_touch_medium as medium, COUNT(*) as user_count
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY ua.first_touch_source, ua.first_touch_medium ORDER BY user_count DESC LIMIT 20`;
 
-    const mediumBreakdown = await sql.query(`
-      SELECT 
-        ua.first_touch_source as source,
-        ua.first_touch_medium as medium,
-        COUNT(*) as user_count
-      FROM user_attribution ua
-      ${dateFilter}
-      ${testUserFilter}
-      GROUP BY ua.first_touch_source, ua.first_touch_medium
-      ORDER BY user_count DESC
-      LIMIT 20
-    `);
+    const topLandingPages = hasDateRange
+      ? await sql`
+          SELECT ua.first_touch_page as page, ua.first_touch_source as source, COUNT(*) as user_count
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= ${safeStartDate}::date
+            AND COALESCE(ua.first_touch_at, ua.created_at) <= ${safeEndDate}::date + INTERVAL '1 day'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY ua.first_touch_page, ua.first_touch_source ORDER BY user_count DESC LIMIT 20`
+      : await sql`
+          SELECT ua.first_touch_page as page, ua.first_touch_source as source, COUNT(*) as user_count
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY ua.first_touch_page, ua.first_touch_source ORDER BY user_count DESC LIMIT 20`;
 
-    const topLandingPages = await sql.query(`
-      SELECT 
-        ua.first_touch_page as page,
-        ua.first_touch_source as source,
-        COUNT(*) as user_count
-      FROM user_attribution ua
-      ${dateFilter}
-      ${testUserFilter}
-      GROUP BY ua.first_touch_page, ua.first_touch_source
-      ORDER BY user_count DESC
-      LIMIT 20
-    `);
+    const keywordBreakdown = hasDateRange
+      ? await sql`
+          SELECT ua.first_touch_keyword as keyword, COUNT(*) as user_count
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= ${safeStartDate}::date
+            AND COALESCE(ua.first_touch_at, ua.created_at) <= ${safeEndDate}::date + INTERVAL '1 day'
+            AND ua.first_touch_keyword IS NOT NULL
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY ua.first_touch_keyword ORDER BY user_count DESC LIMIT 20`
+      : await sql`
+          SELECT ua.first_touch_keyword as keyword, COUNT(*) as user_count
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'
+            AND ua.first_touch_keyword IS NOT NULL
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY ua.first_touch_keyword ORDER BY user_count DESC LIMIT 20`;
 
-    const keywordBreakdown = await sql.query(`
-      SELECT 
-        ua.first_touch_keyword as keyword,
-        COUNT(*) as user_count
-      FROM user_attribution ua
-      ${dateFilter}
-      ${testUserFilter}
-      AND ua.first_touch_keyword IS NOT NULL
-      GROUP BY ua.first_touch_keyword
-      ORDER BY user_count DESC
-      LIMIT 20
-    `);
+    const dailyTrend = hasDateRange
+      ? await sql`
+          SELECT DATE(ua.created_at) as date, ua.first_touch_source as source, COUNT(*) as user_count
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= ${safeStartDate}::date
+            AND COALESCE(ua.first_touch_at, ua.created_at) <= ${safeEndDate}::date + INTERVAL '1 day'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY DATE(ua.created_at), ua.first_touch_source ORDER BY date DESC, user_count DESC`
+      : await sql`
+          SELECT DATE(ua.created_at) as date, ua.first_touch_source as source, COUNT(*) as user_count
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY DATE(ua.created_at), ua.first_touch_source ORDER BY date DESC, user_count DESC`;
 
-    const dailyTrend = await sql.query(`
-      SELECT 
-        DATE(ua.created_at) as date,
-        ua.first_touch_source as source,
-        COUNT(*) as user_count
-      FROM user_attribution ua
-      ${dateFilter}
-      ${testUserFilter}
-      GROUP BY DATE(ua.created_at), ua.first_touch_source
-      ORDER BY date DESC, user_count DESC
-    `);
+    const organicStats = hasDateRange
+      ? await sql`
+          SELECT COUNT(*) FILTER (WHERE ua.first_touch_source = 'seo') as organic_users,
+            COUNT(*) as total_users,
+            ROUND(COUNT(*) FILTER (WHERE ua.first_touch_source = 'seo')::numeric / NULLIF(COUNT(*), 0) * 100, 1) as organic_percentage
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= ${safeStartDate}::date
+            AND COALESCE(ua.first_touch_at, ua.created_at) <= ${safeEndDate}::date + INTERVAL '1 day'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})`
+      : await sql`
+          SELECT COUNT(*) FILTER (WHERE ua.first_touch_source = 'seo') as organic_users,
+            COUNT(*) as total_users,
+            ROUND(COUNT(*) FILTER (WHERE ua.first_touch_source = 'seo')::numeric / NULLIF(COUNT(*), 0) * 100, 1) as organic_percentage
+          FROM user_attribution ua
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s WHERE s.user_id = ua.user_id AND s.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})`;
 
-    const organicStats = await sql.query(`
-      SELECT 
-        COUNT(*) FILTER (WHERE ua.first_touch_source = 'seo') as organic_users,
-        COUNT(*) as total_users,
-        ROUND(
-          COUNT(*) FILTER (WHERE ua.first_touch_source = 'seo')::numeric / 
-          NULLIF(COUNT(*), 0) * 100, 
-          1
-        ) as organic_percentage
-      FROM user_attribution ua
-      ${dateFilter}
-      ${testUserFilter}
-    `);
-
-    const conversionDateFilter =
-      startDate && endDate
-        ? `WHERE COALESCE(ua.first_touch_at, ua.created_at) >= '${startDate}'::date AND COALESCE(ua.first_touch_at, ua.created_at) <= '${endDate}'::date + INTERVAL '1 day'`
-        : "WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'";
-
-    const conversionBySource = await sql.query(`
-      SELECT 
-        ua.first_touch_source as source,
-        COUNT(DISTINCT ua.user_id) as total_users,
-        COUNT(DISTINCT s.user_id) as paying_users,
-        ROUND(
-          COUNT(DISTINCT s.user_id)::numeric / 
-          NULLIF(COUNT(DISTINCT ua.user_id), 0) * 100, 
-          1
-        ) as conversion_rate
-      FROM user_attribution ua
-      LEFT JOIN subscriptions s ON ua.user_id = s.user_id AND s.status = 'active'
-      ${conversionDateFilter}
-      ${testUserFilter}
-      GROUP BY ua.first_touch_source
-      ORDER BY total_users DESC
-    `);
+    const conversionBySource = hasDateRange
+      ? await sql`
+          SELECT ua.first_touch_source as source, COUNT(DISTINCT ua.user_id) as total_users,
+            COUNT(DISTINCT s.user_id) as paying_users,
+            ROUND(COUNT(DISTINCT s.user_id)::numeric / NULLIF(COUNT(DISTINCT ua.user_id), 0) * 100, 1) as conversion_rate
+          FROM user_attribution ua
+          LEFT JOIN subscriptions s ON ua.user_id = s.user_id AND s.status = 'active'
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= ${safeStartDate}::date
+            AND COALESCE(ua.first_touch_at, ua.created_at) <= ${safeEndDate}::date + INTERVAL '1 day'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s2 WHERE s2.user_id = ua.user_id AND s2.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY ua.first_touch_source ORDER BY total_users DESC`
+      : await sql`
+          SELECT ua.first_touch_source as source, COUNT(DISTINCT ua.user_id) as total_users,
+            COUNT(DISTINCT s.user_id) as paying_users,
+            ROUND(COUNT(DISTINCT s.user_id)::numeric / NULLIF(COUNT(DISTINCT ua.user_id), 0) * 100, 1) as conversion_rate
+          FROM user_attribution ua
+          LEFT JOIN subscriptions s ON ua.user_id = s.user_id AND s.status = 'active'
+          WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'
+            AND NOT EXISTS (SELECT 1 FROM subscriptions s2 WHERE s2.user_id = ua.user_id AND s2.user_email LIKE ${TEST_EMAIL_PATTERN})
+            AND NOT EXISTS (SELECT 1 FROM conversion_events ce WHERE ce.user_id = ua.user_id AND ce.user_email LIKE ${TEST_EMAIL_PATTERN})
+          GROUP BY ua.first_touch_source ORDER BY total_users DESC`;
 
     // Postgres ROUND() and COUNT() return numeric/bigint as strings via
     // @vercel/postgres. Coerce to JS numbers so the UI can type-check them.
