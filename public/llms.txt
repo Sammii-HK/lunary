@@ -9,7 +9,7 @@ Lunary blends birth chart astrology, real-time moon phases, tarot, and lunar cyc
 - Uses NASA-grade Astronomy Engine for real planetary calculations
 - Personalized insights based on your full birth chart, not just sun sign
 - AI companion with memory that learns your patterns over time
-- 500+ page digital grimoire covering crystals, spells, tarot, numerology, runes, chakras
+- 2,000+ article digital grimoire covering crystals, spells, tarot, numerology, runes, chakras
 - Community Moon Circles for new and full moon gatherings
 
 ## Documentation
@@ -30,7 +30,7 @@ Lunary blends birth chart astrology, real-time moon phases, tarot, and lunar cyc
 
 ## The Grimoire (Knowledge Library)
 
-- [Grimoire Home](https://lunary.app/grimoire): 500+ page digital knowledge library
+- [Grimoire Home](https://lunary.app/grimoire): 2,000+ article digital knowledge library
 - [Zodiac Signs](https://lunary.app/grimoire/zodiac): All 12 signs with deep interpretations
 - [Tarot Cards](https://lunary.app/grimoire/tarot): 78 card meanings, spreads, and guides
 - [Crystals](https://lunary.app/grimoire/crystals): 100+ crystals with properties and uses
