@@ -87,10 +87,16 @@ export default function AuthenticatedLayout({
     if (!Capacitor.isNativePlatform()) return;
     const orig = console.error.bind(console);
     console.error = (...args: unknown[]) => {
-      const msg = args.join(' ');
+      const msg = args
+        .map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a)))
+        .join(' ');
       if (
         msg.includes('not implemented') ||
-        msg.includes('FirebaseMessaging')
+        msg.includes('FirebaseMessaging') ||
+        msg.includes('APNS token') ||
+        msg.includes('FCM Token') ||
+        msg === '{}' ||
+        msg === ''
       ) {
         console.debug('[Native] Suppressed expected simulator error:', msg);
         return;

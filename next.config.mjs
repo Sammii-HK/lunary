@@ -139,18 +139,21 @@ const nextConfig = {
       }
     }
 
-    // Stub out heavy Capacitor plugin packages in web/Vercel builds.
+    // Stub out Capacitor plugin packages that are iOS-only.
     // @capacitor/core is kept — it's small and needed for platform detection.
-    // The plugins (RevenueCat, Haptics, Share, RateApp) are iOS-only and are
-    // always guarded by platform checks — safe to replace with no-op stubs.
+    // Haptics, Share, and RateApp are UI-only — safe to stub everywhere.
+    // RevenueCat is only stubbed on the SERVER — the client bundle needs the
+    // real package so it can talk to the native Capacitor bridge on iOS.
     const pluginsStub = resolve(__dirname, 'src/stubs/capacitor-plugins-stub.ts');
     const rateAppStub = resolve(__dirname, 'src/stubs/capacitor-rate-app-stub.ts');
     config.resolve.alias = {
       ...config.resolve.alias,
       '@capacitor/haptics': pluginsStub,
       '@capacitor/share': pluginsStub,
-      '@revenuecat/purchases-capacitor': pluginsStub,
       'capacitor-rate-app': rateAppStub,
+      ...(isServer
+        ? { '@revenuecat/purchases-capacitor': pluginsStub }
+        : {}),
     };
 
     // Client-side polyfills
