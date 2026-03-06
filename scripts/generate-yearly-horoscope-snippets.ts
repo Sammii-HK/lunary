@@ -26,12 +26,17 @@ interface SlowPlanetData {
 
 type AspectType = 'conjunction' | 'sextile' | 'square' | 'trine' | 'opposition' | 'quincunx' | 'semisextile' | 'none';
 
+type TransitDirection = 'sustained' | 'ingress' | 'egress' | 'bounce';
+
 interface ActiveTransit {
   planet: string;
   inSign: string;
   aspect: AspectType;
   monthsActive: string; // e.g. "Jan–Jun" or "all year"
   overlap: number; // days overlapping with the year
+  direction: TransitDirection;
+  entryMonth: string | null;
+  exitMonth: string | null;
 }
 
 interface YearSignSnippet {
@@ -175,7 +180,23 @@ function getActiveTransits(
           yearEnd,
         );
 
-        results.push({ planet, inSign, aspect, monthsActive, overlap });
+        const segStart = new Date(seg.start).getTime();
+        const segEnd = new Date(seg.end).getTime();
+        const direction: TransitDirection =
+          segStart <= yearStart && segEnd >= yearEnd ? 'sustained' :
+          segStart <= yearStart && segEnd < yearEnd ? 'egress' :
+          segStart > yearStart && segEnd >= yearEnd ? 'ingress' :
+          'bounce';
+
+        // Derive the actual ingress/egress month for cleaner sentence construction
+        const entryMonth = direction === 'ingress'
+          ? MONTHS_SHORT[new Date(seg.start).getMonth()]
+          : null;
+        const exitMonth = direction === 'egress'
+          ? MONTHS_SHORT[new Date(seg.end).getMonth()]
+          : null;
+
+        results.push({ planet, inSign, aspect, monthsActive, overlap, direction, entryMonth, exitMonth });
       }
     }
   }
@@ -224,8 +245,25 @@ function buildSnippet(sign: string, year: number, transits: ActiveTransit[]): st
       : t.monthsActive;
 
     if (t.aspect === 'conjunction') {
-      const timing = t.monthsActive === 'all year' ? `all of ${year}` : `${timeQualifier} of ${year}`;
-      sentences.push(`${t.planet} moves through ${sign} for ${timing}, ${theme}.`);
+      const egressCount = sentences.filter(s => s.includes('completes its time') || s.includes('wraps up')).length;
+      let sentence: string;
+      if (t.direction === 'sustained') {
+        sentence = `${t.planet} moves through ${sign} for all of ${year}, ${theme}.`;
+      } else if (t.direction === 'ingress') {
+        const month = t.entryMonth ?? timeQualifier;
+        sentence = `${t.planet} enters ${sign} in ${month}, ${theme}.`;
+      } else if (t.direction === 'egress') {
+        const month = t.exitMonth ?? timeQualifier;
+        if (egressCount === 0) {
+          sentence = `${t.planet} completes its time in ${sign} in ${month} — a cycle that began years ago now closes, leaving lasting change in its wake.`;
+        } else {
+          sentence = `${t.planet} also wraps up its chapter in ${sign} in ${month}, adding to a year of meaningful completions.`;
+        }
+      } else {
+        // bounce — retrograde re-entry
+        sentence = `${t.planet} briefly returns to ${sign} (${timeQualifier}), offering a final pass at the themes it has been building.`;
+      }
+      sentences.push(sentence);
     } else {
       const timing = t.monthsActive === 'all year' ? `throughout ${year}` : `from ${timeQualifier}`;
       sentences.push(`${t.planet} ${theme} ${timing}.`);
