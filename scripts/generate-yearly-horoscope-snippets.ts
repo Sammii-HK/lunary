@@ -61,48 +61,48 @@ const PLANET_THEMES: Record<string, {
 }> = {
   Jupiter: {
     inSign: 'bringing expansion, confidence, and genuine opportunity — this is a year to move boldly',
-    opposition: 'in {inSign} reflects growth back through partnerships and key relationships',
-    square: 'in {inSign} creates productive friction — the push to grow beyond your comfort zone',
-    trine: 'in {inSign} flows supportive energy your way, easing progress and opening doors',
-    sextile: 'in {inSign} offers quiet opportunity where effort is rewarded more readily than usual',
-    semisextile: 'in {inSign} sits just beside your sign, adding a background note of gentle expansion',
-    quincunx: 'in {inSign} calls for subtle adjustments — small recalibrations that quietly improve direction',
+    opposition: 'reflects growth back through your closest partnerships and key relationships',
+    square: 'creates productive friction this year — the push to grow beyond your current comfort zone',
+    trine: 'sends supportive energy your way, easing progress and opening doors',
+    sextile: 'offers quiet opportunity where effort is rewarded more readily than usual',
+    semisextile: 'adds a background note of gentle expansion to the year',
+    quincunx: 'calls for small recalibrations — subtle course corrections that quietly improve your direction',
   },
   Saturn: {
     inSign: 'calling for discipline, commitment, and long-term building — foundations laid now last',
-    opposition: 'in {inSign} creates a relational reckoning — long-standing commitments are tested and clarified',
-    square: 'in {inSign} applies pressure that demands maturity, structure, and honest self-assessment',
-    trine: 'in {inSign} rewards consistent effort and steady systems with tangible, lasting results',
-    sextile: 'in {inSign} supports careful planning and incremental progress in practical areas',
-    semisextile: 'in {inSign} sits close, lending a quiet steadying influence to daily decisions',
-    quincunx: 'in {inSign} asks for a recalibration of responsibilities and long-term commitments',
+    opposition: 'brings a relational reckoning this year — long-standing commitments are tested and clarified',
+    square: 'applies steady pressure that demands maturity, structure, and honest self-assessment',
+    trine: 'rewards consistent effort and steady systems with tangible, lasting results',
+    sextile: 'supports careful planning and incremental progress in practical areas of life',
+    semisextile: 'lends a quiet steadying influence to daily decisions throughout the year',
+    quincunx: 'asks for a recalibration of responsibilities — what you commit to now shapes the years ahead',
   },
   Uranus: {
     inSign: 'bringing disruption, liberation, and the kind of reinvention that cannot be planned for',
-    opposition: 'in {inSign} shakes up relationships and partnerships with sudden realisations or reversals',
-    square: 'in {inSign} forces a break from the past — change that resists becomes change that overwhelms',
-    trine: 'in {inSign} brings exciting breakthroughs and room to experiment without destabilising your core',
-    sextile: 'in {inSign} opens small windows of innovation and creative departure from routine',
-    semisextile: 'in {inSign} hums quietly nearby, nudging curiosity and a readiness for small experiments',
-    quincunx: 'in {inSign} introduces subtle restlessness — a background pull toward the unconventional',
+    opposition: 'shakes up partnerships and key relationships with sudden realisations or unexpected reversals',
+    square: 'forces a necessary break from the past — change that is resisted tends to arrive anyway',
+    trine: 'brings exciting breakthroughs and room to experiment without destabilising your core',
+    sextile: 'opens small windows of innovation and creative departure from routine',
+    semisextile: 'hums quietly in the background, nudging curiosity and a readiness for small experiments',
+    quincunx: 'introduces subtle restlessness — a background pull toward something more authentic',
   },
   Neptune: {
     inSign: 'dissolving old identities and deepening intuition — clarity emerges slowly but meaningfully',
-    opposition: 'in {inSign} blurs the line between self and other — clarity in relationships takes conscious effort',
-    square: 'in {inSign} creates subtle confusion or idealisation; grounding and discernment are essential',
-    trine: 'in {inSign} lifts creative and spiritual life with gentle inspiration and intuitive ease',
-    sextile: 'in {inSign} adds a quiet poetic quality to intuition, creativity, and inner reflection',
-    semisextile: 'in {inSign} drifts close, softening the edges of daily life with dreamlike sensitivity',
-    quincunx: 'in {inSign} calls for honest clarity around where idealism has become avoidance',
+    opposition: 'blurs the line between self and other this year — clarity in close relationships takes conscious effort',
+    square: 'softens boundaries in ways that require grounding — discernment is your most useful tool',
+    trine: 'lifts creative and spiritual life with gentle inspiration and intuitive ease',
+    sextile: 'adds a quiet poetic quality to intuition, creativity, and inner reflection',
+    semisextile: 'softens the edges of daily life with a dreamlike sensitivity that feeds creativity',
+    quincunx: 'calls for honest clarity around where inspiration has drifted into avoidance',
   },
   Pluto: {
-    inSign: 'in a long arc of deep transformation and power reclamation — nothing stays the same',
-    opposition: 'in {inSign} exposes power dynamics in relationships and institutions — what must change, changes',
-    square: 'in {inSign} compels confrontation with buried patterns, fear, and inherited limitations',
-    trine: 'in {inSign} supports deep, lasting change that emerges from readiness rather than crisis',
-    sextile: 'in {inSign} facilitates quiet but meaningful shifts in values, purpose, and inner authority',
-    semisextile: 'in {inSign} sits adjacent, keeping a low pressure on deeper questions of power and purpose',
-    quincunx: 'in {inSign} quietly demands integration of what has been avoided or left unresolved',
+    inSign: 'moving through a long arc of deep transformation and power reclamation — nothing stays the same',
+    opposition: 'exposes hidden power dynamics in relationships and structures — what must change, changes',
+    square: 'compels a confrontation with buried patterns and inherited limitations you have outgrown',
+    trine: 'supports deep, lasting change that emerges from a place of readiness rather than crisis',
+    sextile: 'facilitates quiet but meaningful shifts in values, purpose, and inner authority',
+    semisextile: 'keeps a low, steady pressure on deeper questions of power and purpose',
+    quincunx: 'quietly demands integration of what has been set aside or left unresolved',
   },
 };
 
@@ -223,14 +223,12 @@ function buildSnippet(sign: string, year: number, transits: ActiveTransit[]): st
       ? `all year`
       : t.monthsActive;
 
-    const resolved = theme.replace('{inSign}', t.inSign);
-
     if (t.aspect === 'conjunction') {
       const timing = t.monthsActive === 'all year' ? `all of ${year}` : `${timeQualifier} of ${year}`;
-      sentences.push(`${t.planet} moves through ${sign} for ${timing}, ${resolved}.`);
+      sentences.push(`${t.planet} moves through ${sign} for ${timing}, ${theme}.`);
     } else {
       const timing = t.monthsActive === 'all year' ? `throughout ${year}` : `from ${timeQualifier}`;
-      sentences.push(`${t.planet} ${resolved} ${timing}.`);
+      sentences.push(`${t.planet} ${theme} ${timing}.`);
     }
 
     if (CHALLENGING.includes(t.aspect)) challengingCount++;
