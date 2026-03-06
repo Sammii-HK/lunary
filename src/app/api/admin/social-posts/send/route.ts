@@ -319,7 +319,8 @@ const buildPlatformPayload = (
   const isCarouselPost =
     !shouldUseVideo &&
     (post.post_type === 'instagram_carousel' ||
-      post.post_type === 'carousel') &&
+      post.post_type === 'carousel' ||
+      post.post_type === 'one_word') &&
     typeof post.image_url === 'string' &&
     post.image_url.includes('|');
 

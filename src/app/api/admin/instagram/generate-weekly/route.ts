@@ -68,16 +68,19 @@ export async function POST(request: NextRequest) {
         }
 
         // Save to social_posts table
+        let savedCount = 0;
+        const saveErrors: string[] = [];
         for (const post of batch.posts) {
           try {
             // All platforms share one group key so they appear together in the UI
             const groupKey = `${dateStr}-${post.type}`;
 
-            // For carousels (including angel number carousels), store all
-            // image URLs pipe-delimited so buildPlatformPayload can split
-            // them into multiple media items.
+            // For multi-slide post types, store all image URLs pipe-delimited
+            // so buildPlatformPayload can split them into carousel media items.
             const isCarousel =
-              post.type === 'carousel' || post.type === 'angel_number_carousel';
+              post.type === 'carousel' ||
+              post.type === 'angel_number_carousel' ||
+              post.type === 'one_word';
             const imageUrls = post.imageUrls || [];
             const imageUrlValue =
               isCarousel && imageUrls.length > 1
@@ -121,20 +124,25 @@ export async function POST(request: NextRequest) {
                 });
               }
             }
+            savedCount++;
           } catch (dbError) {
-            console.warn(
-              `    Failed to save ${post.type} to database:`,
-              dbError instanceof Error ? dbError.message : 'Unknown error',
+            const msg =
+              dbError instanceof Error ? dbError.message : 'Unknown error';
+            console.error(
+              `    ❌ Failed to save ${post.type} to database:`,
+              msg,
             );
+            saveErrors.push(`${post.type}: ${msg}`);
           }
         }
 
-        totalPosts += batch.posts.length;
+        totalPosts += savedCount;
         results.push({
           date: dateStr,
-          success: true,
-          postsGenerated: batch.posts.length,
-        });
+          success: saveErrors.length === 0,
+          postsGenerated: savedCount,
+          ...(saveErrors.length > 0 ? { saveErrors } : {}),
+        } as (typeof results)[number]);
 
         console.log(
           `    ✅ Generated ${batch.posts.length} posts for ${dateStr}`,
