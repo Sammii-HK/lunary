@@ -55,20 +55,21 @@ export const yearMeta = (
   let title: string;
 
   if (yearNum === 2027) {
-    // 2027 hooks with specificity + emotional appeal
+    // 2027 is shaped by: Saturn in Aries (all year), Jupiter Leo→Virgo (H1→H2), Saturn Opposition (Jun-Jan)
+    // Based on actual transits from yearly-transits.ts
     const signHooks: Record<string, string> = {
-      Aries: 'Mars Season & Bold New Beginnings',
-      Taurus: 'Venus Returns & Long-Term Stability',
-      Gemini: 'Mercury Peak & Communication Excellence',
-      Cancer: 'Moon Phase Mastery & Emotional Depth',
-      Leo: 'Solar Return & Creative Peak Year',
-      Virgo: 'Mercury Clarity & Precision Growth',
-      Libra: 'Venus Harmony & Relationship Breakthrough',
-      Scorpio: 'Mars Intensity & Hidden Power Unlocked',
-      Sagittarius: 'Jupiter Expansion & Philosophical Growth',
-      Capricorn: 'Jupiter Returns & Major Life Shifts',
-      Aquarius: 'Saturn Mastery & Future Vision',
-      Pisces: 'Neptune Dreams & Spiritual Evolution',
+      Aries: 'Saturn in Aries & Mature Leadership Year',
+      Taurus: 'Saturn Opposition & Relationship Recalibration',
+      Gemini: 'Saturn Alignment & Long-Term Structure',
+      Cancer: 'Saturn Opposition & Partnership Evolution',
+      Leo: 'Jupiter in Leo & Creative Peak (Until July)',
+      Virgo: 'Jupiter Enters Virgo & Health Expansion',
+      Libra: 'Saturn Alignment & Authentic Power',
+      Scorpio: 'Saturn Foundations & Deep Transformation',
+      Sagittarius: 'Saturn Integration & Disciplined Vision',
+      Capricorn: 'Saturn Opposition & Full Circle Completion',
+      Aquarius: 'Saturn Evolution & Visionary Grounding',
+      Pisces: 'Saturn Clarity & Spiritual Integration',
     };
     const hook =
       signHooks[signName] || `${year} Yearly Forecast & Major Shifts`;
