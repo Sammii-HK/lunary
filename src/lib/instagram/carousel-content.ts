@@ -4,7 +4,9 @@ import type { ThemeCategory } from '@/lib/social/types';
 import type { IGCarouselSlide, IGCarouselContent } from './types';
 import { seededPick } from './ig-utils';
 
-const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+const SHARE_BASE_URL = (
+  process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
+).replace(/\/+$/, '');
 
 // --- Hook text for cover slides (Fix 3) ---
 

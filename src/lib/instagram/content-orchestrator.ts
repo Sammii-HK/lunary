@@ -16,7 +16,9 @@ import { generateOneWordBatch } from './one-word-content';
 import { seededRandom } from './ig-utils';
 import type { IGScheduledPost, IGPostBatch, IGPostType } from './types';
 
-const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+const SHARE_BASE_URL = (
+  process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
+).replace(/\/+$/, '');
 
 // Daily posting schedule (UTC hours)
 const POSTING_TIMES: Record<IGPostType, number> = {

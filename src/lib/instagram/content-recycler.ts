@@ -2,7 +2,9 @@ import { prisma } from '@/lib/prisma';
 import { generateCaption } from './caption-generator';
 import type { IGScheduledPost, IGPostType } from './types';
 
-const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+const SHARE_BASE_URL = (
+  process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
+).replace(/\/+$/, '');
 
 // Only recycle evergreen content types (not time-sensitive cosmic or stories)
 const RECYCLABLE_TYPES: IGPostType[] = [
