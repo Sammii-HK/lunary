@@ -202,12 +202,18 @@ function buildSnippet(sign: string, year: number, transits: ActiveTransit[]): st
 
   const sentences: string[] = [];
   const used = new Set<string>();
+  const usedPlanets = new Set<string>();
+  let challengingCount = 0;
+  const CHALLENGING: AspectType[] = ['square', 'opposition'];
 
-  // Lead with the most impactful transit (conjunction or opposition first)
-  for (const t of transits.slice(0, 3)) {
+  for (const t of transits) {
+    if (sentences.length >= 3) break;
     const key = `${t.planet}-${t.inSign}`;
     if (used.has(key)) continue;
+    if (usedPlanets.has(t.planet)) continue; // no duplicate planets
+    if (CHALLENGING.includes(t.aspect) && challengingCount >= 1) continue; // max one challenging aspect
     used.add(key);
+    usedPlanets.add(t.planet);
 
     const themeKey = t.aspect === 'conjunction' ? 'inSign' : t.aspect;
     const theme = PLANET_THEMES[t.planet]?.[themeKey];
@@ -227,7 +233,7 @@ function buildSnippet(sign: string, year: number, transits: ActiveTransit[]): st
       sentences.push(`${t.planet} ${resolved} ${timing}.`);
     }
 
-    if (sentences.length >= 3) break;
+    if (CHALLENGING.includes(t.aspect)) challengingCount++;
   }
 
   return sentences.join(' ');
