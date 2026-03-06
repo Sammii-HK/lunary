@@ -15,8 +15,12 @@ import { auth } from '@/lib/auth';
 export async function requireAdminAuth(
   request: Request,
 ): Promise<{ ok: true } | NextResponse> {
-  // 1. Vercel Cron infrastructure header
-  if (request.headers.get('x-vercel-cron') === '1') {
+  // 1. Vercel Cron infrastructure header (only trust on actual Vercel deployments
+  //    where the platform strips this header from external requests)
+  if (
+    request.headers.get('x-vercel-cron') === '1' &&
+    process.env.VERCEL === '1'
+  ) {
     return { ok: true };
   }
 

@@ -1,6 +1,5 @@
 import UIKit
 import Capacitor
-import AppTrackingTransparency
 import WebKit
 import CapApp_SPM
 
@@ -23,13 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             modifiedSince: Date(timeIntervalSince1970: 0)
         ) {}
         #endif
-
-        // Request App Tracking Transparency after a short delay (UI must be ready)
-        if #available(iOS 14, *) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                ATTrackingManager.requestTrackingAuthorization { _ in }
-            }
-        }
 
         // Force reference to prevent linker stripping
         _ = WidgetBridgePlugin.self

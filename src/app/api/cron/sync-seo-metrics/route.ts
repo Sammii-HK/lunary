@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     // Allow Vercel cron or CRON_SECRET
     if (!isVercelCron) {
       if (
-        process.env.CRON_SECRET &&
+        !process.env.CRON_SECRET ||
         authHeader !== `Bearer ${process.env.CRON_SECRET}`
       ) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

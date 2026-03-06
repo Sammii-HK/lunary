@@ -16,7 +16,9 @@ import { generateOneWordBatch } from './one-word-content';
 import { seededRandom } from './ig-utils';
 import type { IGScheduledPost, IGPostBatch, IGPostType } from './types';
 
-const SHARE_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+const SHARE_BASE_URL = (
+  process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
+).replace(/\/+$/, '');
 
 // Daily posting schedule (UTC hours)
 const POSTING_TIMES: Record<IGPostType, number> = {
@@ -32,19 +34,19 @@ const POSTING_TIMES: Record<IGPostType, number> = {
   story: 9, // 9am UTC (morning stories)
 };
 
-// Weekly cadence plan — 5 feed posts/week (optimal 3-5 range)
-// Memes drive shares (growth), carousels drive saves, rankings drive comments
-// Angel numbers, DYK, quotes moved to story rotation for better format fit
-// Stories + reels provide presence on rest days (Wed/Sun)
+// Weekly cadence plan — 7 feed posts/week (1 per day, varied formats)
+// Priority signals: saves > shares > comments > likes (per Tenfold research)
+// Carousels drive saves, memes drive shares, rankings drive comments
+// Angel numbers + compatibility are proven high-save formats
 // 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
 const DAILY_CONTENT_MIX: Record<number, IGPostType[]> = {
   0: ['carousel'], // Monday: zodiac carousel (saves)
-  1: ['meme'], // Tuesday: meme (shares — #1 growth lever)
-  2: ['did_you_know'], // Wednesday: factual DYK (saves/shares)
-  3: ['one_word'], // Thursday: one-word trait carousel (engagement)
-  4: ['did_you_know'], // Friday: factual DYK (saves/shares)
-  5: ['carousel'], // Saturday: carousel (saves — 4th carousel slot)
-  6: ['sign_ranking'], // Sunday: sign ranking (shares + reach)
+  1: ['meme'], // Tuesday: meme (shares, growth lever)
+  2: ['angel_number_carousel'], // Wednesday: angel numbers (saves, high search volume)
+  3: ['one_word'], // Thursday: one-word trait carousel (engagement + saves)
+  4: ['compatibility'], // Friday: compatibility (tags, shares, saves)
+  5: ['carousel'], // Saturday: tarot/crystal carousel (saves)
+  6: ['sign_ranking'], // Sunday: sign ranking (comments + shares)
 };
 
 /**

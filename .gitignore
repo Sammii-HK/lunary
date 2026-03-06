@@ -88,5 +88,6 @@ voice-samples/
 # Generated AI assets (large binary files)
 videos/
 images/backgrounds/
+*.mp4
 
 app-store-assets/*

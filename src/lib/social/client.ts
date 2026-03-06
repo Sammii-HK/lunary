@@ -27,6 +27,7 @@ import {
 } from './spellcast';
 import { postToYouTube } from './youtube';
 import type { YouTubePostParams } from './youtube';
+import { postVideoToYouTubeViaAyrshare } from './ayrshare-youtube';
 
 export interface SocialPostResult {
   success: boolean;
@@ -35,7 +36,7 @@ export interface SocialPostResult {
   url?: string;
   error?: string;
   rawResponse?: unknown;
-  backend: 'youtube' | 'ayrshare' | 'postiz' | 'succulent';
+  backend: 'youtube' | 'ayrshare' | 'ayrshare-youtube' | 'postiz' | 'succulent';
 }
 
 export interface SocialPostParams {
@@ -111,6 +112,10 @@ function isYouTubePlatform(platform: string): boolean {
   return platform.toLowerCase() === 'youtube';
 }
 
+function shouldRouteYouTubeViaAyrshare(): boolean {
+  return process.env.USE_AYRSHARE_FOR_YOUTUBE === 'true';
+}
+
 /**
  * Post to Succulent (legacy fallback)
  */
@@ -170,8 +175,47 @@ async function postToSucculent(
 export async function postToSocial(
   params: SocialPostParams,
 ): Promise<SocialPostResult> {
-  // YouTube always goes direct (regardless of backend)
+  // YouTube — route through Ayrshare or direct API
   if (isYouTubePlatform(params.platform)) {
+    if (shouldRouteYouTubeViaAyrshare()) {
+      const videoMedia = params.media?.find((m) => m.type === 'video');
+      if (!videoMedia) {
+        return {
+          success: false,
+          error: 'No video media found. YouTube requires video content.',
+          backend: 'ayrshare-youtube',
+        };
+      }
+      const options = params.youtubeOptions;
+      if (!options) {
+        return {
+          success: false,
+          error: 'Missing youtubeOptions. Title and visibility are required.',
+          backend: 'ayrshare-youtube',
+        };
+      }
+      const isFutureSchedule =
+        params.scheduledDate && new Date(params.scheduledDate) > new Date();
+      const result = await postVideoToYouTubeViaAyrshare({
+        content: params.content,
+        videoUrl: videoMedia.url,
+        title: options.title,
+        isShort: options.isShort,
+        visibility: isFutureSchedule
+          ? 'private'
+          : options.visibility || 'public',
+        playlistId: options.playlistId,
+        tags: options.tags,
+        madeForKids: options.madeForKids,
+        categoryId: options.categoryId,
+        publishAt: isFutureSchedule ? params.scheduledDate : undefined,
+      });
+      return {
+        ...result,
+        backend: 'ayrshare-youtube',
+      };
+    }
+
     const result = await postToYouTube({
       content: params.content,
       media: params.media || [],
@@ -275,19 +319,51 @@ export async function postToSocialMultiPlatform(
   const results: Record<string, SocialPostResult> = {};
   const platforms = params.platforms.map((p) => p.toLowerCase());
 
-  // Handle YouTube separately (always direct API)
+  // Handle YouTube separately
   if (platforms.includes('youtube')) {
     const youtubeVariant = params.variants?.youtube;
     const youtubeContent = youtubeVariant?.content || params.content;
 
-    const ytResult = await postToYouTube({
-      content: youtubeContent,
-      media: params.media || [],
-      youtubeOptions: params.youtubeOptions,
-      scheduledDate: params.scheduledDate,
-      transcript: params.transcript,
-    });
-    results.youtube = { ...ytResult, backend: 'youtube' };
+    if (shouldRouteYouTubeViaAyrshare()) {
+      const videoMedia = params.media?.find((m) => m.type === 'video');
+      const options = params.youtubeOptions;
+      if (!videoMedia || !options) {
+        results.youtube = {
+          success: false,
+          error: !videoMedia
+            ? 'No video media found for YouTube'
+            : 'Missing youtubeOptions',
+          backend: 'ayrshare-youtube',
+        };
+      } else {
+        const isFutureSchedule =
+          params.scheduledDate && new Date(params.scheduledDate) > new Date();
+        const ytResult = await postVideoToYouTubeViaAyrshare({
+          content: youtubeContent,
+          videoUrl: videoMedia.url,
+          title: options.title,
+          isShort: options.isShort,
+          visibility: isFutureSchedule
+            ? 'private'
+            : options.visibility || 'public',
+          playlistId: options.playlistId,
+          tags: options.tags,
+          madeForKids: options.madeForKids,
+          categoryId: options.categoryId,
+          publishAt: isFutureSchedule ? params.scheduledDate : undefined,
+        });
+        results.youtube = { ...ytResult, backend: 'ayrshare-youtube' };
+      }
+    } else {
+      const ytResult = await postToYouTube({
+        content: youtubeContent,
+        media: params.media || [],
+        youtubeOptions: params.youtubeOptions,
+        scheduledDate: params.scheduledDate,
+        transcript: params.transcript,
+      });
+      results.youtube = { ...ytResult, backend: 'youtube' };
+    }
   }
 
   // Handle non-YouTube platforms

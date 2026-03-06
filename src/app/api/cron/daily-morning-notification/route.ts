@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     if (!isVercelCron) {
       if (
-        process.env.CRON_SECRET &&
+        !process.env.CRON_SECRET ||
         authHeader !== `Bearer ${process.env.CRON_SECRET}`
       ) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -44,6 +44,12 @@ export async function GET(request: NextRequest) {
     console.log(
       `✅ Morning daily insight notification: ${insightResult.successful} sent, ${insightResult.failed} failed`,
     );
+
+    // Early exit if no one is opted in
+    if (insightResult.successful === 0 && insightResult.failed === 0) {
+      console.log('📭 No active notification subscribers, skipping');
+      return NextResponse.json({ success: true, notificationsSent: 0 });
+    }
 
     // Consider it successful if:
     // 1. There were successful notifications sent, OR

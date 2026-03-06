@@ -16,6 +16,9 @@ export const TTS_PRESETS = {
   // Medium-form (Reels/TikTok): balanced, warm
   medium: { model: 'tts-1-hd', voiceName: 'shimmer', speed: 1.0 },
 
+  // Slow mystical (chiron, deep personal topics): reverent, deliberate
+  slow_mystical: { model: 'tts-1-hd', voiceName: 'shimmer', speed: 0.95 },
+
   // Long-form (YouTube): warm, natural
   long: { model: 'tts-1-hd', voiceName: 'shimmer', speed: 0.96 },
   long_authoritative: { model: 'tts-1-hd', voiceName: 'shimmer', speed: 0.96 },

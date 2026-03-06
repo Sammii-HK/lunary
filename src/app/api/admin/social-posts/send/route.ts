@@ -238,6 +238,8 @@ function normalizeOgUrl(url: string): string {
     /^https?:\/\/localhost(:\d+)?/,
     'https://lunary.app',
   );
+  // Fix double-slash in path (e.g. https://www.lunary.app//api/og/...)
+  normalized = normalized.replace(/^(https?:\/\/[^/]+)\/\//, '$1/');
   // Add .png extension to dynamic OG routes
   if (
     normalized.includes('/api/og/') &&
@@ -317,7 +319,8 @@ const buildPlatformPayload = (
   const isCarouselPost =
     !shouldUseVideo &&
     (post.post_type === 'instagram_carousel' ||
-      post.post_type === 'carousel') &&
+      post.post_type === 'carousel' ||
+      post.post_type === 'one_word') &&
     typeof post.image_url === 'string' &&
     post.image_url.includes('|');
 

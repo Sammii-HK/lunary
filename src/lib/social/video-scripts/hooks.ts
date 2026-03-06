@@ -13,6 +13,7 @@ import { getFirstSentence, needsLineRewrite } from '../shared/text/truncation';
 import { validateVideoHook, isHookLikeLine } from './validation';
 import { DEBUG_VIDEO_HOOK } from './constants';
 import type { EnsureVideoHookOptions, EnsureVideoHookResult } from './types';
+import { getOrbitHookBoosts, shouldAvoidTikTokHook } from './orbit-integration';
 
 /**
  * Diverse hook templates organized by style
@@ -182,12 +183,73 @@ const AUDIENCE_STYLE_PREFERENCES: Record<
 };
 
 /**
- * Select hook style based on content aspect and target audience (#2)
+ * Get hook performance weights from video_performance table.
+ * Returns a map of hook_style -> composite score.
+ * Uses weighted average: views*0.3 + likes*1.0 + comments*3.0 + shares*2.0
  */
-export function selectHookStyle(
+async function getHookPerformanceWeights(): Promise<Map<string, number>> {
+  try {
+    const { sql } = await import('@vercel/postgres');
+    const result = await sql`
+      SELECT
+        hook_style,
+        (AVG(views) * 0.3 + AVG(likes) * 1.0 + AVG(comments) * 3.0 + AVG(shares) * 2.0) as score,
+        COUNT(*)::int as count
+      FROM video_performance
+      WHERE hook_style IS NOT NULL
+        AND recorded_at >= NOW() - INTERVAL '30 days'
+      GROUP BY hook_style
+      HAVING COUNT(*) >= 2
+      ORDER BY score DESC
+    `;
+    const weights = new Map<string, number>();
+    for (const row of result.rows) {
+      weights.set(row.hook_style, Number(row.score));
+    }
+    return weights;
+  } catch {
+    return new Map();
+  }
+}
+
+/**
+ * Weighted random selection from candidates using performance scores.
+ * 80% exploitation (performance-biased), 20% exploration (random).
+ */
+function weightedRandomSelect(
+  candidates: Array<keyof typeof HOOK_TEMPLATES>,
+  weights: Map<string, number>,
+): keyof typeof HOOK_TEMPLATES {
+  // 20% exploration: completely random
+  if (Math.random() < 0.2 || weights.size === 0) {
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+
+  // 80% exploitation: bias toward higher-performing styles
+  const scored = candidates.map((c) => ({
+    style: c,
+    score: weights.get(c) ?? 1, // Default score of 1 for unknown styles
+  }));
+
+  const totalScore = scored.reduce((sum, s) => sum + Math.max(s.score, 0.1), 0);
+  let roll = Math.random() * totalScore;
+
+  for (const item of scored) {
+    roll -= Math.max(item.score, 0.1);
+    if (roll <= 0) return item.style;
+  }
+
+  return candidates[candidates.length - 1];
+}
+
+/**
+ * Select hook style based on content aspect, target audience, and past performance.
+ * Uses 80% exploitation (top performers) / 20% exploration (random) strategy.
+ */
+export async function selectHookStyle(
   aspect: ContentAspect,
   targetAudience?: 'discovery' | 'consideration' | 'conversion',
-): keyof typeof HOOK_TEMPLATES {
+): Promise<keyof typeof HOOK_TEMPLATES> {
   const styleMap: Record<ContentAspect, Array<keyof typeof HOOK_TEMPLATES>> = {
     [ContentAspect.CORE_MEANING]: [
       'observation',
@@ -247,15 +309,24 @@ export function selectHookStyle(
   ];
 
   // Intersect with audience preferences when available
+  let candidates = aspectStyles;
   if (targetAudience && AUDIENCE_STYLE_PREFERENCES[targetAudience]) {
     const audienceStyles = AUDIENCE_STYLE_PREFERENCES[targetAudience];
     const intersection = aspectStyles.filter((s) => audienceStyles.includes(s));
     if (intersection.length > 0) {
-      return intersection[Math.floor(Math.random() * intersection.length)];
+      candidates = intersection;
     }
   }
 
-  return aspectStyles[Math.floor(Math.random() * aspectStyles.length)];
+  // Apply performance weighting (DB + orbit boosts merged)
+  const weights = await getHookPerformanceWeights();
+  const orbitBoosts = getOrbitHookBoosts();
+  for (const [style, boost] of orbitBoosts) {
+    const existing = weights.get(style) ?? 1;
+    // Orbit boosts add to existing weights, doesn't replace
+    weights.set(style, existing + boost * 2);
+  }
+  return weightedRandomSelect(candidates, weights);
 }
 
 /**
@@ -452,14 +523,29 @@ export function buildCommentBaitHook(
 /**
  * Build hook for topic
  */
-export function buildHookForTopic(
+/**
+ * Sync version of buildHookForTopic — no performance bias, pure random.
+ * Used by ensureVideoHook which must remain synchronous.
+ */
+function buildHookForTopicSync(topic: string): string {
+  const safeTopic = topic.trim();
+  const style = pickRandom(
+    Object.keys(HOOK_TEMPLATES) as Array<keyof typeof HOOK_TEMPLATES>,
+  );
+  const templates = HOOK_TEMPLATES[style];
+  const selectedTemplate =
+    templates[Math.floor(Math.random() * templates.length)];
+  return selectedTemplate.replace(/\{topic\}/g, safeTopic);
+}
+
+export async function buildHookForTopic(
   topic: string,
   aspect?: ContentAspect,
-): string {
+): Promise<string> {
   const safeTopic = topic.trim();
 
   const style = aspect
-    ? selectHookStyle(aspect)
+    ? await selectHookStyle(aspect)
     : pickRandom(
         Object.keys(HOOK_TEMPLATES) as Array<keyof typeof HOOK_TEMPLATES>,
       );
@@ -510,15 +596,20 @@ export const ensureVideoHook = (
     const normalized = normalizeHookLine(firstSentence);
     issues = validateVideoHook(normalized, topic, searchPhrase);
     if (issues.length === 0) {
-      hookLine = normalized;
+      // Check against orbit's avoid patterns
+      if (shouldAvoidTikTokHook(normalized)) {
+        issues = ['Orbit flagged hook pattern'];
+      } else {
+        hookLine = normalized;
+      }
     }
   } else {
     issues = ['Hook missing'];
   }
 
-  // Replace bad hooks with a curated template
+  // Replace bad hooks with a curated template (sync fallback — no perf bias)
   if (!hookLine) {
-    hookLine = normalizeHookLine(buildHookForTopic(topic, undefined));
+    hookLine = normalizeHookLine(buildHookForTopicSync(topic));
     modified = true;
   }
 

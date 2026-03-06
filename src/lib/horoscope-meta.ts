@@ -50,7 +50,34 @@ export const yearMeta = (
   slug: string,
   year: string,
 ): Metadata => {
-  const title = `${signName} Horoscope ${year}: All Monthly Forecasts`;
+  // Add specificity + emotional hooks for high-value years
+  const yearNum = parseInt(year);
+  let title: string;
+
+  if (yearNum === 2027) {
+    // 2027 is shaped by: Saturn in Aries (all year), Jupiter Leo→Virgo (H1→H2), Saturn Opposition (Jun-Jan)
+    // Based on actual transits from yearly-transits.ts
+    const signHooks: Record<string, string> = {
+      Aries: 'Saturn in Aries & Mature Leadership Year',
+      Taurus: 'Saturn Opposition & Relationship Recalibration',
+      Gemini: 'Saturn Alignment & Long-Term Structure',
+      Cancer: 'Saturn Opposition & Partnership Evolution',
+      Leo: 'Jupiter in Leo & Creative Peak (Until July)',
+      Virgo: 'Jupiter Enters Virgo & Health Expansion',
+      Libra: 'Saturn Alignment & Authentic Power',
+      Scorpio: 'Saturn Foundations & Deep Transformation',
+      Sagittarius: 'Saturn Integration & Disciplined Vision',
+      Capricorn: 'Saturn Opposition & Full Circle Completion',
+      Aquarius: 'Saturn Evolution & Visionary Grounding',
+      Pisces: 'Saturn Clarity & Spiritual Integration',
+    };
+    const hook =
+      signHooks[signName] || `${year} Yearly Forecast & Major Shifts`;
+    title = `${signName} Horoscope 2027: ${hook}`;
+  } else {
+    title = `${signName} Horoscope ${year}: Complete Year Guide`;
+  }
+
   const description = `Complete ${signName} horoscope for ${year}! Explore all 12 monthly forecasts, yearly themes, love & career predictions. Your full year astrological guide.`;
   const image = `${OG_BASE}?sign=${encode(signName)}&year=${encode(year)}`;
 

@@ -45,6 +45,7 @@ import {
   Quote,
   User,
   MessageCircle,
+  TrendingUp,
 } from 'lucide-react';
 
 interface AdminTool {
@@ -608,6 +609,14 @@ export default function AdminDashboard() {
 
   // Section 1: Analytics
   const analyticsTools: AdminTool[] = [
+    {
+      title: 'Activation Intelligence',
+      description: 'Real-time funnel analysis & optimization recommendations',
+      href: '/admin/activation-intelligence',
+      icon: <TrendingUp className='h-5 w-5' />,
+      category: 'monitoring',
+      status: 'new',
+    },
     {
       title: 'Dashboard',
       description: 'Main analytics dashboard with conversion metrics',

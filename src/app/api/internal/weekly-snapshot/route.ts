@@ -16,19 +16,31 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const [latestResult, signupsResult] = await Promise.all([
-    sql`
+  const [latestResult, signupsResult, seoTodayResult, seo7dResult] =
+    await Promise.all([
+      sql`
       SELECT mau, mrr, metric_date
       FROM daily_metrics
       ORDER BY metric_date DESC
       LIMIT 1
     `,
-    sql`
+      sql`
       SELECT COALESCE(SUM(new_signups), 0) AS signups_this_week
       FROM daily_metrics
       WHERE metric_date >= NOW() - INTERVAL '7 days'
     `,
-  ]);
+      sql`
+      SELECT impressions
+      FROM analytics_seo_metrics
+      ORDER BY metric_date DESC
+      LIMIT 1
+    `,
+      sql`
+      SELECT ROUND(AVG(impressions)) AS avg_impressions
+      FROM analytics_seo_metrics
+      WHERE metric_date >= NOW() - INTERVAL '7 days'
+    `,
+    ]);
 
   const latest = latestResult.rows[0];
   const mrr = Number(latest?.mrr ?? 0);
@@ -40,6 +52,8 @@ export async function GET(request: NextRequest) {
     mrrFormatted,
     signupsThisWeek: Number(signupsResult.rows[0]?.signups_this_week ?? 0),
     asOf: latest?.metric_date ?? null,
+    impressionsToday: Number(seoTodayResult.rows[0]?.impressions ?? 0),
+    impressions7dAvg: Number(seo7dResult.rows[0]?.avg_impressions ?? 0),
     generatedAt: new Date().toISOString(),
   });
 }

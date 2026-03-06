@@ -11,13 +11,13 @@ const countWords = (text: string) =>
     .filter(Boolean).length;
 
 describe('video script hook validation', () => {
-  it('builds a valid hook for New Moon', () => {
+  it('builds a valid hook for New Moon', async () => {
     // Mock Math.random to make test deterministic (fixes flakiness)
     const originalRandom = Math.random;
     Math.random = () => 0.5; // Select middle option to avoid edge cases
 
     try {
-      const hook = buildHookForTopic('New Moon');
+      const hook = await buildHookForTopic('New Moon');
       const issues = validateVideoHook(hook, 'New Moon', 'new moon meaning');
 
       expect(issues.length).toBe(0);

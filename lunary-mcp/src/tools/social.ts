@@ -370,10 +370,16 @@ export function registerSocialTools(server: McpServer) {
   server.tool(
     'get_video_performance',
     'TikTok/YouTube video performance metrics',
-    {},
-    async () => {
+    {
+      days: z
+        .number()
+        .optional()
+        .default(30)
+        .describe('Number of days to look back (default 30)'),
+    },
+    async ({ days }) => {
       try {
-        const data = await lunary('/video-performance');
+        const data = await lunary(`/video-performance?days=${days}`);
         return jsonResult(data);
       } catch (error) {
         return errorResult(error);
@@ -551,7 +557,7 @@ export function registerSocialTools(server: McpServer) {
                 {
                   content: storyCaption,
                   mediaUrls: [storyUploaded.url],
-                  postType: 'story',
+                  postType: 'post',
                   selectedAccountIds: igIds,
                 },
               ],
@@ -1057,7 +1063,7 @@ export function registerSocialTools(server: McpServer) {
           accountSetId: SAMMII_SPARKLE_ACCOUNT_SET_ID,
           scheduledFor,
           platformSettings: {},
-          postType: 'story',
+          postType: 'post',
           selectedAccountIds: [SAMMII_SPARKLE_IG_ID],
         }),
       });
@@ -1102,7 +1108,7 @@ export function registerSocialTools(server: McpServer) {
           ? {
               post_id: igStory.id,
               platform: 'instagram (@sammiisparkle)',
-              post_type: 'story',
+              post_type: 'post',
             }
           : { error: igError },
         threads: threadsPost

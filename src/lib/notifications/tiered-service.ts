@@ -27,6 +27,21 @@ function ensureVapidConfigured() {
   webpush.setVapidDetails('mailto:info@lunary.app', publicKey, privateKey);
 }
 
+/**
+ * Check if a user has already received a notification today
+ * Prevents notification spam (max 1 per day per user)
+ */
+export async function hasUserReceivedNotificationToday(
+  userId: string,
+): Promise<boolean> {
+  const today = new Date().toISOString().split('T')[0];
+  const result = await sql`
+    SELECT COUNT(*) as count FROM notification_sent_events
+    WHERE user_id = ${userId} AND date = ${today}::date AND sent_successfully = true
+  `;
+  return (result.rows[0]?.count || 0) > 0;
+}
+
 export interface UserNotificationProfile {
   userId: string;
   endpoint: string;
@@ -62,16 +77,18 @@ export interface TieredNotificationResult {
 export async function getUsersWithTierInfo(): Promise<
   UserNotificationProfile[]
 > {
-  // First, check total count of subscriptions (for debugging)
-  const totalCount = await sql`
-    SELECT COUNT(*) as total FROM push_subscriptions
-  `;
+  // Early exit: check if there are any active subscribers at all
   const activeCount = await sql`
     SELECT COUNT(*) as active FROM push_subscriptions WHERE is_active = true
   `;
-  console.log(
-    `📊 Push subscriptions: ${totalCount.rows[0]?.total || 0} total, ${activeCount.rows[0]?.active || 0} active`,
-  );
+  const active = activeCount.rows[0]?.active || 0;
+
+  if (active === 0) {
+    console.log('📭 No active push subscriptions, skipping notification');
+    return [];
+  }
+
+  console.log(`📊 Push subscriptions: ${active} active`);
 
   // Query push_subscriptions first (similar to moon circle notifications)
   // Then get subscription status separately to avoid JOIN issues
@@ -305,6 +322,17 @@ export async function sendTieredNotification(
 
     const sendPromises = users.map(async (user) => {
       try {
+        // Skip users who already received a notification today
+        const alreadyNotified = await hasUserReceivedNotificationToday(
+          user.userId,
+        );
+        if (alreadyNotified) {
+          console.log(
+            `⏭️ Skipping ${user.userId} - already got notification today`,
+          );
+          return { userId: user.userId, sent: false, skipped: true };
+        }
+
         const context = await getPersonalizedContext(user, cosmicData);
         const copy = getNotificationCopy(cadence, type, user.tier, context);
 

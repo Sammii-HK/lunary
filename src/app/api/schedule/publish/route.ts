@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     // Get current date in YYYY-MM-DD format
     const today = new Date().toISOString().split('T')[0];

@@ -218,6 +218,7 @@ export function getHoroscopeCosmicSections(
 
   if (sign) {
     const signName = SIGN_DISPLAY_NAMES[sign];
+    const isYearly = variant === 'yearly-sign';
     return [
       {
         title: `${signName} Horoscope Timeline`,
@@ -231,8 +232,28 @@ export function getHoroscopeCosmicSections(
       },
       {
         title: 'Sign Resources',
-        links: buildSignResourceLinks(sign, lunarYear),
+        links: buildSignResourceLinks(
+          sign,
+          isYearly ? resolvedYear : lunarYear,
+        ),
       },
+      ...(isYearly
+        ? [
+            {
+              title: `${resolvedYear} Astrology`,
+              links: [
+                {
+                  label: `${resolvedYear} Astrological Events`,
+                  href: `/grimoire/events/${resolvedYear}`,
+                },
+                {
+                  label: `${resolvedYear} Major Transits`,
+                  href: `/grimoire/transits/year/${resolvedYear}`,
+                },
+              ],
+            },
+          ]
+        : []),
     ];
   }
 

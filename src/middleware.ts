@@ -20,6 +20,7 @@ const AB_TEST_COOKIE = 'lunary_ab_tests';
 const AB_TESTS: Record<string, { variants: string[]; weights?: number[] }> = {
   'inline-cta-style': {
     variants: ['control', 'minimal', 'sparkles', 'card'],
+    weights: [10, 5, 75, 10], // Sparkles wins with 75% traffic (46% lift, 80% confidence)
   },
   'grimoire-signup-page': {
     variants: ['control', 'value-prop'],

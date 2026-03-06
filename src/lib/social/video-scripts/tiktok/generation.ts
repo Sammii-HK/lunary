@@ -39,6 +39,7 @@ import { sanitizeVideoScriptLines } from '../sanitization';
 import {
   getContentTypeFromCategory,
   getPerformanceBiasedStructure,
+  type ContentTypeKey,
 } from '../content-type-voices';
 import type { HookIntroVariant } from '../types';
 import { buildTikTokPrompt } from './prompts';
@@ -360,21 +361,34 @@ export async function generateTikTokScript(
     theme.category,
     `${theme.name} ${facet.title}`,
   );
-  const hookStyle = selectHookStyle(aspect as ContentAspect, targetAudience);
+  const hookStyle = await selectHookStyle(
+    aspect as ContentAspect,
+    targetAudience,
+  );
   const {
     name: scriptStructureName,
     isLoop: hasLoopStructure,
     isStitchBait: hasStitchBait,
   } = await getPerformanceBiasedStructure(contentTypeKey);
 
-  // Hook intro animation variant (#7)
-  const hookIntroVariants: HookIntroVariant[] = [
-    'slide_up',
-    'typewriter',
-    'scale_pop',
-  ];
+  // Hook intro animation variant — mapped by content type for visual identity
+  // Angel numbers: scale_pop (dramatic number reveal)
+  // Rankings/lists: typewriter (list feel)
+  // Educational/default: slide_up (clean, standard)
+  const HOOK_VARIANT_BY_TYPE: Partial<
+    Record<ContentTypeKey, HookIntroVariant>
+  > = {
+    angel_numbers: 'scale_pop',
+    mirror_hours: 'scale_pop',
+    numerology_life_path: 'scale_pop',
+    numerology_expression: 'scale_pop',
+    ranking: 'typewriter',
+    quiz: 'typewriter',
+    did_you_know: 'typewriter',
+    hot_take: 'scale_pop',
+  };
   const hookIntroVariant: HookIntroVariant =
-    hookIntroVariants[Math.floor(Math.random() * hookIntroVariants.length)];
+    HOOK_VARIANT_BY_TYPE[contentTypeKey] || 'slide_up';
 
   // Optimal posting hour from audience-based time window rotation
   const scheduledContentType =
@@ -464,10 +478,21 @@ export async function generateTikTokScript(
     });
   }
 
-  // Comment-bait identity trigger (#9) — stored on metadata for prompt injection
+  // Comment-bait identity trigger (#9)
+  // Placed at ~40-50% of the video (mid-script) for maximum retention capture.
+  // Most viewers drop off before the end, so comment bait early > comment bait late.
   const commentBait = buildCommentBaitHook(facet.title, contentTypeKey);
   if (commentBait) {
     metadata.commentBait = commentBait;
+    const estimatedDuration = wordCount / 2.6;
+    const baitStart = estimatedDuration * 0.4;
+    const baitEnd = Math.min(baitStart + 2.5, estimatedDuration * 0.55);
+    overlays.push({
+      text: commentBait,
+      startTime: baitStart,
+      endTime: baitEnd,
+      style: 'stamp',
+    });
   }
 
   // Store overlays on metadata for Remotion renderer

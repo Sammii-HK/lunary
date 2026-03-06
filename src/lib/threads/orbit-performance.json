@@ -1,0 +1,35 @@
+{
+  "lastUpdated": "2026-03-05",
+  "pillarWeights": {
+    "cosmic_timing": 0.35,
+    "conversation": 0.25,
+    "identity": 0.2,
+    "educational": 0.2
+  },
+  "hookRankings": {
+    "cosmic_timing": { "topPatterns": [], "avoidPatterns": [] },
+    "conversation": { "topPatterns": [], "avoidPatterns": [] },
+    "identity": { "topPatterns": [], "avoidPatterns": [] },
+    "educational": { "topPatterns": [], "avoidPatterns": [] }
+  },
+  "grimoireCategories": {
+    "ranked": ["numerology", "zodiac", "tarot", "crystal"],
+    "weights": {
+      "numerology": 0.35,
+      "zodiac": 0.3,
+      "tarot": 0.2,
+      "crystal": 0.15
+    }
+  },
+  "newHookSuggestions": [],
+  "timingInsights": {
+    "bestSlots": [14, 17, 21],
+    "bestDays": ["Wednesday", "Thursday"],
+    "conversionNotes": "Initial defaults. Orbit will update with real performance data."
+  },
+  "ctaInsights": {
+    "topPerformingCTAs": [],
+    "conversionRate": 0.429,
+    "recommendation": "Threads link-in-bio is top social landing page. Optimise cosmic_timing posts for app curiosity."
+  }
+}

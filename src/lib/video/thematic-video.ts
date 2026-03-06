@@ -2,6 +2,7 @@ import { getThematicImageUrl } from '@/lib/social/educational-images';
 import type { DailyFacet, WeeklyTheme } from '@/lib/social/weekly-themes';
 import { getPaletteHighlightColor } from '../../../utils/og/symbols';
 import { getCategoryVisuals } from '@/remotion/config/category-visuals';
+import { getOrbitCTAs } from '@/lib/social/video-scripts/orbit-integration';
 
 const CHAPTER_LABELS = ['Context', 'Significance', 'Reflection'];
 
@@ -14,34 +15,103 @@ const simpleHash = (str: string): number => {
   return Math.abs(hash);
 };
 
-// Engagement CTAs — designed for TikTok interaction (comments, saves, shares)
+// Topic-aware engagement CTAs — keyed by content type category
+const TOPIC_CTAS: Record<string, string[]> = {
+  'angel-numbers': [
+    'Which number do you keep seeing? Comment below',
+    'Save this for when you see it again',
+    'Tag someone who keeps seeing this number',
+    'Comment if this number has been following you',
+  ],
+  zodiac: [
+    'Drop your sign below',
+    'Tag a friend who does this',
+    'Which sign got called out? Comment',
+    'Share with someone who needs to hear this',
+  ],
+  tarot: [
+    'Have you pulled this card recently?',
+    'Save this for your next reading',
+    'Comment which card keeps following you',
+  ],
+  numerology: [
+    'Comment your life path number',
+    'Save this for when you need clarity',
+    'Does your number match? Comment below',
+  ],
+  transits: [
+    'Have you been feeling this shift?',
+    'Save this for the transit window',
+    'Comment if this explains your week',
+  ],
+  crystals: [
+    'Do you work with this crystal?',
+    'Save this for your next crystal haul',
+    'Tag someone who needs this stone',
+  ],
+};
+
+// Generic engagement CTAs (fallback pool)
 const ENGAGEMENT_CTAS = [
   'Which part hit different?',
-  'Drop your sign below',
   'Save this for later',
-  'Tag someone who needs this',
   'Does this resonate?',
   'Comment your experience',
   'Share if this was accurate',
   'Follow for more like this',
+  'Part 2 drops tomorrow',
+  'Agree or disagree? Comment your sign',
+  'Save this, you will need it later',
+  'The comments are going to be wild',
 ];
 
 // Brand CTAs — drive traffic to Lunary
 const BRAND_CTAS = [
+  'Get your full chart free at lunary.app',
+  'Your birth chart has more to say',
   'Dive deeper with Lunary',
   'Find more insights on Lunary',
-  'Learn more with Lunary',
-  'Explore more on Lunary',
-  'Discover more with Lunary',
+  'Explore your chart on lunary.app',
 ];
 
-// 70% engagement / 30% brand rotation — rotated by script hash
-function getRandomCTA(seed?: string): string {
+// 30% orbit / 40% category pool / 30% brand — when orbit data available
+// Falls back to 70% engagement / 30% brand when orbit is empty
+function getRandomCTA(seed?: string, category?: string): string {
   const hash = seed
     ? simpleHash(seed + '-cta')
     : Math.floor(Math.random() * 1000);
-  const pool = hash % 10 < 7 ? ENGAGEMENT_CTAS : BRAND_CTAS;
-  return pool[hash % pool.length];
+
+  // Orbit CTAs get priority when available
+  const orbitCtas = getOrbitCTAs();
+  if (orbitCtas.length > 0) {
+    const bucket = hash % 10;
+    if (bucket < 3) {
+      // 30% orbit CTAs
+      return orbitCtas[hash % orbitCtas.length];
+    }
+    if (bucket < 7) {
+      // 40% category/engagement pool
+      if (category) {
+        const topicPool = TOPIC_CTAS[category];
+        if (topicPool?.length) return topicPool[hash % topicPool.length];
+      }
+      return ENGAGEMENT_CTAS[hash % ENGAGEMENT_CTAS.length];
+    }
+    // 30% brand
+    return BRAND_CTAS[hash % BRAND_CTAS.length];
+  }
+
+  // Fallback: original 70/30 split
+  if (hash % 10 >= 7) {
+    return BRAND_CTAS[hash % BRAND_CTAS.length];
+  }
+
+  if (category) {
+    const topicPool = TOPIC_CTAS[category];
+    if (topicPool?.length) return topicPool[hash % topicPool.length];
+  }
+
+  return ENGAGEMENT_CTAS[hash % ENGAGEMENT_CTAS.length];
 }
 
 // Mid-video micro-CTA for engagement — rotated by script hash
@@ -298,6 +368,7 @@ export function buildThematicVideoComposition({
   slug: string;
 }) {
   const category = theme?.category || 'lunar';
+  const ctaCategory = category; // Used for topic-aware CTA selection
   const categoryVisuals = getCategoryVisuals(category);
   const partNumber = (facet.dayIndex ?? 0) + 1;
   const totalParts = theme?.facets?.length || 7;
@@ -405,7 +476,7 @@ export function buildThematicVideoComposition({
       : []),
     // CTA appears near video end
     {
-      text: getRandomCTA(script),
+      text: getRandomCTA(script, ctaCategory),
       startTime: endCtaStart,
       endTime: totalDuration - 1.5,
       style: 'cta' as const,

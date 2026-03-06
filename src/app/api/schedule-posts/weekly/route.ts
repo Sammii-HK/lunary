@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: `Scheduled ${successCount} posts for week of ${weekStart} - ${weekEndStr} at 1:00 PM daily`,
       summary: {
-        totalPosts: posts.length,
+        totalPosts: results.length,
         successful: successCount,
         failed: errorCount,
         period: `${weekStart} - ${weekEndStr}`,

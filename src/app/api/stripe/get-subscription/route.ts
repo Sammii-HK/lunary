@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import Stripe from 'stripe';
 import { pickBestSubscription } from '@/lib/stripe/subscription-utils';
+import { requireUser } from '@/lib/ai/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,6 +37,12 @@ async function findCustomerByEmail(email: string): Promise<string | null> {
 
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate: user can only query their own subscription
+    const authedUser = await requireUser(request).catch(() => null);
+    if (!authedUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     let body;
     try {
       const text = await request.text();
@@ -54,6 +61,10 @@ export async function POST(request: NextRequest) {
     }
 
     let { userId, customerId, forceRefresh, userEmail } = body;
+
+    // Enforce: users can only look up their own subscription
+    userId = authedUser.id;
+    userEmail = authedUser.email || userEmail;
 
     if (!userId && !customerId && !userEmail) {
       return NextResponse.json(

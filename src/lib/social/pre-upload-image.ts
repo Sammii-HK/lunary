@@ -8,16 +8,18 @@ const VALID_IMAGE_EXT = /\.(png|jpg|jpeg|gif|webp|mp4)(\?|$)/i;
  * Returns the blob URL on success, or the original URL if it can't be uploaded
  * (callers should validate the extension if they need a guaranteed-valid URL).
  */
-export async function preUploadImage(imageUrl: string): Promise<string> {
+export async function preUploadImage(rawImageUrl: string): Promise<string> {
   try {
+    // Fix double-slash in path (e.g. https://www.lunary.app//api/og/...)
+    const imageUrl = rawImageUrl.replace(/^(https?:\/\/[^/]+)\/\//, '$1/');
     const url = new URL(imageUrl);
     // Only pre-upload our own dynamic OG images
     if (!url.pathname.startsWith('/api/og')) {
-      return imageUrl;
+      return rawImageUrl;
     }
 
     const response = await fetch(imageUrl, {
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(45000),
     });
     if (!response.ok) {
       console.error(
@@ -49,7 +51,7 @@ export async function preUploadImage(imageUrl: string): Promise<string> {
       '[preUploadImage] Blob upload failed, returning original URL:',
       error instanceof Error ? error.message : error,
     );
-    return imageUrl;
+    return rawImageUrl;
   }
 }
 

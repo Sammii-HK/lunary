@@ -2,20 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getOpenAI, LLM_MODEL } from '@/lib/openai-client';
 import { scheduleTextPost } from '@/lib/bip-spellcast';
-import { getSearchConsoleData } from '@/lib/google/search-console';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * Build in Public — Daily stat post
- * Fires daily at 07:00 UTC. Schedules a text post to Spellcast sammii account
+ * Fires daily at 16:00 UTC. Schedules a text post to Spellcast sammii account
  * set with today's metrics in the "Day N of building Lunary" format.
  *
- * State is persisted in the bip_state table (created on first run).
+ * Data sources:
+ * - MAU, DAU, signups: daily_metrics table (same source as admin dashboard)
+ * - SEO: bip_state cache (populated by /seo skill or daily-metrics script)
+ * - MRR: hidden until > £27/month (avoids showing coupon/test revenue)
+ *
+ * Numbers are rendered via deterministic template — the LLM only generates
+ * the hook line and closing question, never the metric bullet points.
  */
 
 // ---------------------------------------------------------------------------
-// bip_state helpers (CREATE TABLE IF NOT EXISTS on first run)
+// bip_state helpers
 // ---------------------------------------------------------------------------
 
 async function ensureBipStateTable() {
@@ -49,6 +54,8 @@ async function setBipState(key: string, value: string): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export async function GET(request: NextRequest) {
+  const isDryRun = process.env.BIP_DRY_RUN === 'true';
+
   try {
     // Auth
     const isVercelCron = request.headers.get('x-vercel-cron') === '1';
@@ -56,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     if (!isVercelCron) {
       if (
-        process.env.CRON_SECRET &&
+        !process.env.CRON_SECRET ||
         authHeader !== `Bearer ${process.env.CRON_SECRET}`
       ) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -65,20 +72,19 @@ export async function GET(request: NextRequest) {
 
     await ensureBipStateTable();
 
-    // Skip if already posted today
+    // Skip if already posted today (unless dry run)
     const today = new Date().toISOString().split('T')[0];
-    const lastDailyPost = await getBipState('bip_last_daily_post');
-    if (lastDailyPost === today) {
-      return NextResponse.json({
-        skipped: true,
-        reason: 'Already posted today',
-      });
+    if (!isDryRun) {
+      const lastDailyPost = await getBipState('bip_last_daily_post');
+      if (lastDailyPost === today) {
+        return NextResponse.json({
+          skipped: true,
+          reason: 'Already posted today',
+        });
+      }
     }
 
-    // Calculate the actual day number from a fixed start date so the counter
-    // reflects real elapsed time rather than a bare incrementing DB value.
-    // BIP_START_DATE defaults to 2026-03-01 — the date Sammii started publicly
-    // building in public on X. Override via env var if needed.
+    // Calculate day number from fixed start date
     const startDateStr = process.env.BIP_START_DATE || '2026-03-01';
     const startDate = new Date(startDateStr);
     const dayMs = 24 * 60 * 60 * 1000;
@@ -87,160 +93,147 @@ export async function GET(request: NextRequest) {
       Math.round((Date.now() - startDate.getTime()) / dayMs) + 1,
     );
 
-    // Fetch current metrics (same queries as the admin dashboard)
-    const now30dAgo = new Date(
-      Date.now() - 29 * 24 * 60 * 60 * 1000,
-    ).toISOString();
-    const nowIso = new Date().toISOString();
+    // -----------------------------------------------------------------------
+    // Fetch metrics from daily_metrics (same source as admin dashboard)
+    // Uses yesterday's row for complete-day data, not partial today
+    // -----------------------------------------------------------------------
 
-    const [mauResult, subsResult, signupsResult] = await Promise.all([
-      // MAU: 30-day distinct product users (same as dashboard)
-      sql.query(
-        `SELECT COUNT(DISTINCT user_id) as count
-         FROM conversion_events
-         WHERE created_at >= $1 AND created_at <= $2
-           AND user_id IS NOT NULL AND user_id NOT LIKE 'anon:%'
-           AND (user_email IS NULL OR (user_email NOT LIKE '%@test.lunary.app' AND user_email != 'test@test.lunary.app'))`,
-        [now30dAgo, nowIso],
-      ),
-      // Active subscribers + MRR (same as dashboard)
-      sql.query(
-        `SELECT
-           COUNT(*) as subscriber_count,
-           COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as mrr
-         FROM subscriptions
-         WHERE status = 'active'
-           AND stripe_subscription_id IS NOT NULL
-           AND (user_email IS NULL OR (user_email NOT LIKE '%@test.lunary.app' AND user_email != 'test@test.lunary.app'))`,
-        [],
-      ),
-      // Today's signups
-      sql.query(
-        `SELECT COUNT(*) as count FROM "user"
-         WHERE "createdAt" >= $1 AND "createdAt" <= $2
-           AND (email IS NULL OR (email NOT LIKE '%@test.lunary.app' AND email != 'test@test.lunary.app'))`,
-        [new Date(today).toISOString(), nowIso],
-      ),
+    const [metricsResult, peakDauResult] = await Promise.all([
+      sql`SELECT signed_in_product_mau, new_signups, dau
+          FROM daily_metrics
+          WHERE metric_date = (CURRENT_DATE - INTERVAL '1 day')
+          ORDER BY metric_date DESC LIMIT 1`,
+      sql`SELECT MAX(dau) as peak_dau
+          FROM daily_metrics
+          WHERE metric_date >= CURRENT_DATE - INTERVAL '30 days'
+            AND metric_date < CURRENT_DATE`,
     ]);
 
-    const mau = Number(mauResult.rows[0]?.count || 0);
-    const subscriberCount = Number(subsResult.rows[0]?.subscriber_count || 0);
-    const mrr = Number(subsResult.rows[0]?.mrr || 0);
-    const newSignupsToday = Number(signupsResult.rows[0]?.count || 0);
-
-    // Fetch DAU for yesterday (complete day — today's count is partial and unreliable)
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split('T')[0];
-
-    let dau = 0;
-    let peakDau = 0;
-    try {
-      const [dauResult, peakDauResult] = await Promise.all([
-        sql.query(
-          `SELECT COUNT(DISTINCT user_id) as count
-           FROM conversion_events
-           WHERE DATE(created_at) = $1
-             AND user_id IS NOT NULL AND user_id NOT LIKE 'anon:%'
-             AND (user_email IS NULL OR (user_email NOT LIKE '%@test.lunary.app' AND user_email != 'test@test.lunary.app'))
-             AND event_type IN (
-               'grimoire_viewed','tarot_drawn','chart_viewed','birth_chart_viewed',
-               'personalized_horoscope_viewed','personalized_tarot_viewed',
-               'astral_chat_used','ritual_completed','horoscope_viewed',
-               'daily_dashboard_viewed','journal_entry_created','dream_entry_created',
-               'cosmic_pulse_opened'
-             )`,
-          [yesterday],
-        ),
-        sql.query(
-          `SELECT MAX(dau) as peak_dau
-           FROM daily_metrics
-           WHERE metric_date >= CURRENT_DATE - INTERVAL '30 days'
-             AND metric_date < CURRENT_DATE`,
-          [],
-        ),
-      ]);
-      dau = Number(dauResult.rows[0]?.count || 0);
-      peakDau = Number(peakDauResult.rows[0]?.peak_dau || 0);
-    } catch {
-      // Non-critical — continue without DAU
-    }
-
+    const metricsRow = metricsResult.rows[0];
+    const mau = Number(metricsRow?.signed_in_product_mau || 0);
+    const newSignupsYesterday = Number(metricsRow?.new_signups || 0);
+    const dau = Number(metricsRow?.dau || 0);
+    const peakDau = Number(peakDauResult.rows[0]?.peak_dau || 0);
     const isRecord = dau > 0 && peakDau > 0 && dau >= peakDau;
 
-    // Fetch impressions/day from Search Console (7-day average)
+    // MRR: query but only show when it exceeds £27 (hides coupon/test revenue)
+    let mrr = 0;
+    try {
+      const mrrResult = await sql`
+        SELECT COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as mrr
+        FROM subscriptions
+        WHERE status = 'active'
+          AND stripe_subscription_id IS NOT NULL
+          AND (user_email IS NULL OR (user_email NOT LIKE '%@test.lunary.app' AND user_email != 'test@test.lunary.app'))`;
+      mrr = Number(mrrResult.rows[0]?.mrr || 0);
+    } catch {
+      // Non-critical
+    }
+    const showMrr = mrr > 27;
+
+    // SEO impressions from bip_state (24hr staleness limit, omit if stale)
     let impressionsPerDay = 0;
     try {
-      const scEndDate = today;
-      const scStartDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0];
-      const scData = await getSearchConsoleData(scStartDate, scEndDate);
-      impressionsPerDay = Math.round(scData.totalImpressions / 7);
+      const storedSeo = await getBipState('seo_impressions_per_day');
+      if (storedSeo) {
+        const updatedAt =
+          await sql`SELECT updated_at FROM bip_state WHERE key = 'seo_impressions_per_day'`;
+        const lastUpdate = updatedAt.rows[0]?.updated_at;
+        if (
+          lastUpdate &&
+          Date.now() - new Date(lastUpdate).getTime() < 24 * 60 * 60 * 1000
+        ) {
+          impressionsPerDay = Number(JSON.parse(storedSeo)) || 0;
+        }
+      }
     } catch {
-      // Non-critical — post without impressions if GSC fails
+      // Non-critical — post without impressions
     }
 
-    // Build data context for the prompt
-    // When MRR is 0 (all subscribers on coupons), use subscriber count as the monetisation signal
-    const monetisationLine =
-      mrr > 0
-        ? `Current MRR: £${mrr.toFixed(2)}`
-        : subscriberCount > 0
-          ? `Active subscribers: ${subscriberCount} (early access, coupons applied)`
-          : null;
+    // -----------------------------------------------------------------------
+    // Build bullet points deterministically — LLM never touches numbers
+    // -----------------------------------------------------------------------
 
-    const dataLines = [
-      `Current MAU: ${mau}`,
-      monetisationLine,
-      newSignupsToday > 0 ? `New signups today: ${newSignupsToday}` : null,
-      impressionsPerDay > 0
-        ? `SEO impressions/day (7-day avg): ${impressionsPerDay}`
-        : null,
-      dau > 0 ? `DAU yesterday: ${dau}` : null,
-      isRecord
-        ? `All-time 30-day peak DAU: ${peakDau} — yesterday was a new record`
-        : null,
-    ]
-      .filter(Boolean)
-      .join('\n');
+    const bullets: string[] = [];
+    if (mau > 0) bullets.push(`✅ ${mau} MAU this month`);
+    if (showMrr) bullets.push(`✅ £${mrr.toFixed(2)} MRR`);
+    if (newSignupsYesterday > 0)
+      bullets.push(`✅ ${newSignupsYesterday} new signups yesterday`);
+    if (impressionsPerDay > 0)
+      bullets.push(
+        `✅ ${impressionsPerDay.toLocaleString()} SEO impressions/day`,
+      );
+    if (dau > 0) {
+      const dauLine = isRecord
+        ? `✅ ${dau} DAU yesterday — new 30-day record`
+        : `✅ ${dau} DAU yesterday`;
+      bullets.push(dauLine);
+    }
 
-    const bulletCount = dataLines.split('\n').length;
+    const bulletBlock = bullets.join('\n');
 
-    const recordHookNote = isRecord
-      ? `\n- Yesterday hit a new 30-day DAU record (${dau}). Use this as the hook: the first line after "Day ${nextDay}" should celebrate this milestone naturally.`
-      : '';
+    // -----------------------------------------------------------------------
+    // LLM generates ONLY the hook line + closing question (no numbers)
+    // -----------------------------------------------------------------------
 
-    const captionPrompt = `Write a Build in Public daily update tweet for day ${nextDay} of building in public.
+    const hookPrompt = `Write two short lines for a Build in Public tweet (day ${nextDay}):
 
-Context: Lunary is a live astrology app with real users.
+1. A hook line: 4-8 words, honest, conversational. This comes after "Day ${nextDay} of building in public —". Examples: "quiet progress today", "the dashboard finally makes sense", "small wins add up".${isRecord ? ` Yesterday was a new DAU record — incorporate that.` : ''}
 
-Today's metrics (ONLY use what is listed here — do not invent, assume, or paraphrase any metric not present. Do not write "signups rolling in" or "impressions rising" unless the actual number is in the list below):
-${dataLines}
+2. A closing line: one short question or observation that invites replies. No hashtags.
 
-Format rules:
-- First line: "Day ${nextDay} of building in public" + a short honest hook (one clause, max 8 words)${recordHookNote}
-- Blank line
-- Exactly ${bulletCount} bullet points using ✅ emoji — one per metric above, nothing more
-- Each bullet states the metric as a natural observation with the real number: "✅ 241 MAU this month" not "✅ Users growing"
-- NEVER write a bullet without a specific number from the data above
-- Blank line
-- Final line: one short question or observation that invites replies
-- No hashtags. UK English. No em dashes. Sentence case. Under 400 characters total.`;
+Reply with ONLY these two lines, nothing else. Line 1 is the hook, line 2 is the closing.
+UK English. No em dashes. Sentence case.`;
 
     const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
       model: LLM_MODEL,
-      messages: [{ role: 'user', content: captionPrompt }],
-      max_tokens: 300,
-      temperature: 0.85,
+      messages: [{ role: 'user', content: hookPrompt }],
+      max_tokens: 100,
+      temperature: 0.9,
     });
 
-    const caption = completion.choices[0]?.message?.content?.trim() ?? '';
-    if (!caption) throw new Error('LLM returned empty caption');
+    const llmOutput = completion.choices[0]?.message?.content?.trim() ?? '';
+    const llmLines = llmOutput.split('\n').filter((l) => l.trim());
+    const hookLine = llmLines[0]?.trim() || 'steady progress';
+    const closingLine =
+      llmLines[1]?.trim() || 'What are you building this week?';
 
-    // Schedule post for 19:00 UTC today — 7pm UK / 2pm EST, peak UK+US crossover.
-    // If cron fires after 19:00 UTC for any reason, post 30 min from now.
+    // Assemble the final caption — numbers are never LLM-generated
+    const caption = `Day ${nextDay} of building in public — ${hookLine}\n\n${bulletBlock}\n\n${closingLine}`;
+
+    // -----------------------------------------------------------------------
+    // Dry run: return without scheduling
+    // -----------------------------------------------------------------------
+
+    const metrics = {
+      mau,
+      mrr,
+      showMrr,
+      newSignupsYesterday,
+      impressionsPerDay,
+      dau,
+      isRecord,
+    };
+
+    if (isDryRun) {
+      console.log(`[BIP Daily] DRY RUN — Day ${nextDay}`);
+      console.log(`[BIP Daily] Caption:\n${caption}`);
+      return NextResponse.json({
+        dryRun: true,
+        day: nextDay,
+        caption,
+        metrics,
+        hookLine,
+        closingLine,
+        bulletBlock,
+      });
+    }
+
+    // -----------------------------------------------------------------------
+    // Schedule post for 19:00 UTC today
+    // -----------------------------------------------------------------------
+
     const scheduledDate = new Date();
     scheduledDate.setUTCHours(19, 0, 0, 0);
     if (scheduledDate <= new Date()) {
@@ -252,7 +245,6 @@ Format rules:
       scheduledFor: scheduledDate.toISOString(),
     });
 
-    // Persist state (day count is now derived from BIP_START_DATE, not stored)
     await setBipState('bip_last_daily_post', today);
 
     console.log(`[BIP Daily] Day ${nextDay} posted: ${postId}`);
@@ -262,7 +254,7 @@ Format rules:
       day: nextDay,
       postId,
       caption,
-      metrics: { mau, mrr, newSignupsToday, impressionsPerDay, dau, isRecord },
+      metrics,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';

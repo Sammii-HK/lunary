@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { put, head } from '@vercel/blob';
 import { generateVoiceover } from '@/lib/tts';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
 import { generateVoiceoverScriptFromWeeklyData } from '@/lib/video/composition';
 import {
@@ -16,6 +17,9 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const { type, week, blogContent } = body;

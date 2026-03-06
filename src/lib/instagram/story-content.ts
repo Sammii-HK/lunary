@@ -269,7 +269,9 @@ export function generateDailyStoryData(dateStr: string): IGStoryData[] {
  * @deprecated Use generateDailyStoryData for preview pages.
  */
 export function generateDailyStories(dateStr: string): IGStoryContent[] {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
+  ).replace(/\/+$/, '');
   return generateDailyStoryData(dateStr).map((data) => {
     const params = new URLSearchParams(data.params);
     return {

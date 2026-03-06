@@ -136,8 +136,7 @@ export async function GET(request: NextRequest) {
   const isVercelCron = request.headers.get('x-vercel-cron') === '1';
   const authHeader = request.headers.get('authorization');
   if (
-    !isVercelCron &&
-    process.env.CRON_SECRET &&
+    (!isVercelCron && !process.env.CRON_SECRET) ||
     authHeader !== `Bearer ${process.env.CRON_SECRET}`
   ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -327,11 +326,11 @@ export async function GET(request: NextRequest) {
             `Sun in ${sun}, Moon in ${moon}, ${rising} rising. Punchy, personal, under 200 chars. No hashtags. Sentence case, UK English.`,
         )) || `${label} for ${dateStr}`;
 
-      // Create Instagram Story (no text — image is the content)
+      // Create Instagram post (no text — image is the content)
       const igPost = await createPost({
         content: '',
         mediaUrl,
-        postType: 'story',
+        postType: 'post',
         accountId: SAMMII_SPARKLE_IG_ID,
         scheduledFor: scheduledForStr,
       });
@@ -346,7 +345,7 @@ export async function GET(request: NextRequest) {
       });
 
       results[ogType] = {
-        ig_story_id: igPost.id,
+        ig_post_id: igPost.id,
         threads_post_id: threadsPost.id,
         threads_caption: threadsCaption,
         media_url: mediaUrl,
