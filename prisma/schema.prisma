@@ -1912,6 +1912,27 @@ model social_engagement_queue {
   @@index([status], map: "idx_engagement_queue_status")
 }
 
+model activation_recommendations {
+  id               Int       @id @default(autoincrement())
+  recommendation   String
+  category         String    // "bottleneck", "strategy", "test", "segment"
+  priority         String    @default("medium") // "high", "medium", "low"
+  impact_estimate  String?   // "10-15% lift", "improve conversion by 2%"
+  segment          String?   // null = global, or "free-to-trial", "trial-to-paid", etc.
+  suggested_test   String?   // description of A/B test
+  status           String    @default("active") // "active", "testing", "implemented", "archived"
+  metadata         Json?     // store detailed analysis data
+  generated_by     String?   // agent name
+  generated_at     DateTime  @default(now()) @map("generated_at") @db.Timestamptz(6)
+  created_at       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([category], map: "idx_activation_rec_category")
+  @@index([priority], map: "idx_activation_rec_priority")
+  @@index([status], map: "idx_activation_rec_status")
+  @@index([generated_at(sort: Desc)], map: "idx_activation_rec_generated_at")
+}
+
 enum tour_status {
   ACTIVE
   COMPLETED

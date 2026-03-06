@@ -203,6 +203,7 @@ export async function runSync(): Promise<SyncStats> {
             SET status = 'cancelled',
                 plan_type = 'free',
                 stripe_subscription_id = NULL,
+                monthly_amount_due = 0,
                 updated_at = NOW()
             WHERE user_id = ${user.user_id}
           `;
@@ -258,6 +259,8 @@ export async function runSync(): Promise<SyncStats> {
           `✏️  ${user.user_email || user.user_id} - updating to ${newStatus}`,
         );
 
+        const monthlyAmount = extractMonthlyAmount(subscription);
+
         await sql`
           UPDATE subscriptions
           SET status = ${newStatus},
@@ -265,6 +268,7 @@ export async function runSync(): Promise<SyncStats> {
               stripe_subscription_id = ${subscription.id},
               trial_ends_at = ${trialEndsAt},
               current_period_end = ${currentPeriodEnd},
+              monthly_amount_due = ${monthlyAmount || null},
               updated_at = NOW()
           WHERE user_id = ${user.user_id}
         `;
@@ -285,6 +289,7 @@ export async function runSync(): Promise<SyncStats> {
               stripe_subscription_id = NULL,
               status = 'free',
               plan_type = 'free',
+              monthly_amount_due = 0,
               updated_at = NOW()
           WHERE user_id = ${user.user_id}
         `;
