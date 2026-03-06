@@ -62,16 +62,18 @@ export interface TieredNotificationResult {
 export async function getUsersWithTierInfo(): Promise<
   UserNotificationProfile[]
 > {
-  // First, check total count of subscriptions (for debugging)
-  const totalCount = await sql`
-    SELECT COUNT(*) as total FROM push_subscriptions
-  `;
+  // Early exit: check if there are any active subscribers at all
   const activeCount = await sql`
     SELECT COUNT(*) as active FROM push_subscriptions WHERE is_active = true
   `;
-  console.log(
-    `📊 Push subscriptions: ${totalCount.rows[0]?.total || 0} total, ${activeCount.rows[0]?.active || 0} active`,
-  );
+  const active = activeCount.rows[0]?.active || 0;
+
+  if (active === 0) {
+    console.log('📭 No active push subscriptions, skipping notification');
+    return [];
+  }
+
+  console.log(`📊 Push subscriptions: ${active} active`);
 
   // Query push_subscriptions first (similar to moon circle notifications)
   // Then get subscription status separately to avoid JOIN issues

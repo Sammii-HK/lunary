@@ -45,6 +45,12 @@ export async function GET(request: NextRequest) {
       `✅ Morning daily insight notification: ${insightResult.successful} sent, ${insightResult.failed} failed`,
     );
 
+    // Early exit if no one is opted in
+    if (insightResult.successful === 0 && insightResult.failed === 0) {
+      console.log('📭 No active notification subscribers, skipping');
+      return NextResponse.json({ success: true, notificationsSent: 0 });
+    }
+
     // Consider it successful if:
     // 1. There were successful notifications sent, OR
     // 2. There were no errors (even if 0 recipients - that's valid, just means no active subscriptions)
