@@ -238,6 +238,8 @@ function normalizeOgUrl(url: string): string {
     /^https?:\/\/localhost(:\d+)?/,
     'https://lunary.app',
   );
+  // Fix double-slash in path (e.g. https://www.lunary.app//api/og/...)
+  normalized = normalized.replace(/^(https?:\/\/[^/]+)\/\//, '$1/');
   // Add .png extension to dynamic OG routes
   if (
     normalized.includes('/api/og/') &&
