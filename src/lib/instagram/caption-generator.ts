@@ -326,7 +326,7 @@ function generateMemeCaption(options: {
   const hookIndex = hashString(options.setup || sign) % hooks.length;
   const hook = hooks[hookIndex];
 
-  return `${hook}\n\nDouble tap if this is you.\nTag someone who needs to see this.\n\nFollow for daily zodiac content and astrology facts`;
+  return `${hook}\n\nDouble tap if this is you.\nTag someone who needs to see this.\nSave this for your ${sign} collection.\n\nFollow @lunary.app for daily zodiac content`;
 }
 
 // Keyword-rich openers for zodiac sign carousels — written as things people actually search
@@ -458,13 +458,13 @@ function generateCarouselCaption(options: {
 }
 
 function generateQuoteCaption(options: { headline?: string }): string {
-  return `What resonates with you today?\n\nDrop a thought below.`;
+  return `What resonates with you today?\n\nSave this for when you need a reminder.\nDrop a thought below.\n\nFree birth chart reading at lunary.app`;
 }
 
 function generateAppFeatureCaption(options: { title?: string }): string {
   const title = options.title || 'your cosmic profile';
 
-  return `Discover ${title}\n\nPersonal birth chart readings, daily horoscopes, transit tracking, and 2,000+ articles in the grimoire.\n100% free, no ads.\n\nLink in bio`;
+  return `Discover ${title}\n\nPersonal birth chart readings, daily horoscopes, transit tracking, and 2,000+ articles in the grimoire.\n100% free, no ads.\n\nSave this so you don't forget to check it out.\n\nLink in bio`;
 }
 
 function generateDidYouKnowCaption(options: {
@@ -484,7 +484,7 @@ function generateDidYouKnowCaption(options: {
   const hookIndex = hashString(options.fact || category) % hooks.length;
   const hook = hooks[hookIndex];
 
-  return `${hook}\n\nComment below if this changes how you think about it.`;
+  return `${hook}\n\nSave this for later.\nComment below if this changes how you think about it.\n\nMore facts like this at lunary.app/grimoire`;
 }
 
 // Search-optimised opening lines per trait — written as queries people actually type
@@ -527,7 +527,7 @@ function generateSignRankingCaption(options: { trait?: string }): string {
 
   const bodyIndex = hashString(trait) % bodies.length;
 
-  return `${opener}\n\n${bodies[bodyIndex]}`;
+  return `${opener}\n\n${bodies[bodyIndex]}\n\nSave this for reference.\n\nFree birth chart and zodiac profiles at lunary.app`;
 }
 
 function generateCompatibilityCaption(options: {
@@ -559,7 +559,7 @@ function generateCompatibilityCaption(options: {
   const hookIndex = hashString(sign1 + sign2) % hooks.length;
   const hook = hooks[hookIndex];
 
-  return `${hook}\n\nTag your person and see if they agree.\nDrop your signs in the comments — let's talk about it.\n\nFull birth chart compatibility reading — link in bio`;
+  return `${hook}\n\nSave this and send it to them.\nTag your person and see if they agree.\nDrop your signs in the comments.\n\nFull compatibility reading free at lunary.app`;
 }
 
 function generateStoryCaption(options: {

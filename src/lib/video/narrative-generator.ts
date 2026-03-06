@@ -405,20 +405,25 @@ export function generateShortFormNarrative(
 
   // Add selected daily events (planetary highlights and aspects)
   dailyEvents.slice(0, 3).forEach((e) => {
+    const dayName = e.date.toLocaleDateString('en-GB', { weekday: 'long' });
     if (e.type === 'planetary') {
       const h = e.item as PlanetaryHighlight;
       if (h.event === 'enters-sign' && h.details.toSign) {
-        events.push(`${h.planet} enters ${h.details.toSign}`);
+        events.push(`${h.planet} enters ${h.details.toSign} (${dayName})`);
       }
     } else {
       const a = e.item as MajorAspect;
-      events.push(`${a.planetA} ${a.aspect} ${a.planetB}`);
+      events.push(`${a.planetA} ${a.aspect} ${a.planetB} (${dayName})`);
     }
   });
 
   // Add moon phase
   if (weeklyData.moonPhases?.length) {
-    events.push(`${weeklyData.moonPhases[0].phase} Moon`);
+    const moonDayName = weeklyData.moonPhases[0].date.toLocaleDateString(
+      'en-GB',
+      { weekday: 'long' },
+    );
+    events.push(`${weeklyData.moonPhases[0].phase} Moon (${moonDayName})`);
   }
 
   const eventList = events.slice(0, 4).join(', ');

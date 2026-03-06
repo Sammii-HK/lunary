@@ -19,6 +19,11 @@ import {
   type ThreadsPillar,
   type ThreadsPost,
 } from './types';
+import {
+  getWeightedGrimoireCategories,
+  getOrbitHookSuggestions,
+  shouldAvoidHook,
+} from './orbit-insights';
 
 const ZODIAC_SIGNS = [
   'Aries',
@@ -139,6 +144,9 @@ export function generateCosmicTimingPost(
   } else {
     const moonRng = seededRandom(`moon-${dateStr}-${slotHour}`);
 
+    // Inject orbit hook suggestions if available
+    const orbitHooks = getOrbitHookSuggestions('cosmic_timing');
+
     // Body templates — seeded selection for variety even during same phase
     const bodyTemplates = [
       moonPhase.isSignificant
@@ -177,7 +185,17 @@ export function generateCosmicTimingPost(
       `${moonPhase.name} is the energy to work with`,
     ];
 
-    hook = hookTemplates[Math.floor(moonRng() * hookTemplates.length)];
+    // Combine built-in hooks with orbit suggestions
+    const allHooks = [...hookTemplates, ...orbitHooks];
+    let selectedHook = allHooks[Math.floor(moonRng() * allHooks.length)];
+
+    // If orbit says avoid this pattern, re-pick from built-ins only
+    if (shouldAvoidHook('cosmic_timing', selectedHook)) {
+      selectedHook =
+        hookTemplates[Math.floor(moonRng() * hookTemplates.length)];
+    }
+
+    hook = selectedHook;
     body = bodyTemplates[Math.floor(moonRng() * bodyTemplates.length)];
     prompt = promptTemplates[Math.floor(moonRng() * promptTemplates.length)];
     topicTag = 'Moon';
@@ -224,7 +242,15 @@ export function generateConversationPost(
   let body: string;
   let prompt: string;
 
-  if (useThreadsAngle) {
+  // Check for orbit hook suggestions for conversation pillar
+  const orbitConvoHooks = getOrbitHookSuggestions('conversation');
+
+  if (orbitConvoHooks.length > 0 && rng() > 0.7) {
+    // 30% chance to use an orbit-suggested hook when available
+    hook = orbitConvoHooks[Math.floor(rng() * orbitConvoHooks.length)];
+    body = '';
+    prompt = '';
+  } else if (useThreadsAngle) {
     const angles = threadsAngleTemplates(category);
     const intentFilter: ThreadIntent[] = ['hot_take', 'poll'];
     const filtered = angles.filter((a) => intentFilter.includes(a.intent));
@@ -243,6 +269,15 @@ export function generateConversationPost(
     hook = angle.opener;
     body = angle.payload || '';
     prompt = angle.closer;
+  }
+
+  // Skip hooks orbit says to avoid, fall back to standard template
+  if (shouldAvoidHook('conversation', hook)) {
+    const fallbackAngles = categoryAngleTemplates(category);
+    const fallback = fallbackAngles[Math.floor(rng() * fallbackAngles.length)];
+    hook = fallback.opener;
+    body = fallback.payload || '';
+    prompt = fallback.closer;
   }
 
   return buildOriginalPost({
@@ -277,8 +312,22 @@ export function generateIdentityPost(
       ? identityAngles[Math.floor(rng() * identityAngles.length)]
       : angles[Math.floor(rng() * angles.length)];
 
+  // Check for orbit hook suggestions for identity pillar
+  const orbitIdentityHooks = getOrbitHookSuggestions('identity');
+
   // For identity callouts, swap in a random sign for personalisation
   let hook = angle.opener;
+
+  // 30% chance to use orbit-suggested hook when available
+  if (orbitIdentityHooks.length > 0 && rng() > 0.7) {
+    hook = orbitIdentityHooks[Math.floor(rng() * orbitIdentityHooks.length)];
+  }
+
+  // Skip hooks orbit says to avoid
+  if (shouldAvoidHook('identity', hook)) {
+    hook = angle.opener;
+  }
+
   if (angle.intent === 'identity_callout') {
     const sign = seededPick(
       ZODIAC_SIGNS,
@@ -316,10 +365,19 @@ export function generateEducationalPost(
   // Use the grimoire system's full entry pool
   const allEntries = getAllRichEntries();
 
-  // Weight toward best-performing categories: numerology and zodiac
-  const weighted = allEntries.filter((e) =>
-    ['zodiac', 'numerology', 'tarot', 'crystal'].includes(e.category),
-  );
+  // Use orbit-weighted categories if available, otherwise default
+  const orbitCategories = getWeightedGrimoireCategories();
+  const targetCategory =
+    orbitCategories.length > 0
+      ? orbitCategories[Math.floor(rng() * orbitCategories.length)]
+      : null;
+
+  // Filter to orbit's recommended category, fall back to broad filter
+  const weighted = targetCategory
+    ? allEntries.filter((e) => e.category === targetCategory)
+    : allEntries.filter((e) =>
+        ['zodiac', 'numerology', 'tarot', 'crystal'].includes(e.category),
+      );
   const pool = weighted.length > 0 ? weighted : allEntries;
 
   // Seeded pick from pool

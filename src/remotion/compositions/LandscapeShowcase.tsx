@@ -83,7 +83,8 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
   const rightPanelW = width - leftPanelW;
 
   // Phone: centred in right panel, vertically centred
-  const phoneHeight = PHONE_WIDTH * (19.5 / 9);
+  // Match PhoneMockup's internal ratio: frame PNG is 1470×3000
+  const phoneHeight = PHONE_WIDTH * (3000 / 1470);
   const phoneCentreX = leftPanelW + rightPanelW / 2;
   const phoneCentreY = height * 0.5;
   const phoneLeft = phoneCentreX - PHONE_WIDTH / 2;
@@ -188,6 +189,9 @@ export const LandscapeShowcase: React.FC<LandscapeShowcaseProps> = ({
                   src={staticFile(scene.videoSrc)}
                   startFrom={seekFrame}
                   style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',

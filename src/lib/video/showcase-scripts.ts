@@ -12,11 +12,14 @@
  * points to a moment where the stated UI feature is clearly visible.
  *
  * Key timestamps per recording:
- *   birth-chart.mp4:        10s = full SVG wheel, 20s = 12 Houses grid
- *   horoscope-deepdive.mp4:  5s = personalised header + numerology, 10s = Transit Wisdom
- *   tarot-patterns.mp4:      5s = 30-day selector + Dominant Themes
- *   astral-guide.mp4:        8s = AI chat conversation in progress
- *   grimoire-search.mp4:     0s = Grimoire landing with search bar, 5s = guide list
+ *   birth-chart.mp4:            10s = full SVG wheel, 20s = 12 Houses grid
+ *   horoscope-deepdive.mp4:      5s = personalised header + numerology, 10s = Transit Wisdom
+ *   tarot-patterns.mp4:          5s = 30-day selector + Dominant Themes
+ *   astral-guide.mp4:            8s = AI chat conversation in progress
+ *   grimoire-search.mp4:         0s = Grimoire landing with search bar, 5s = guide list
+ *   sky-now-deepdive.mp4:        3s = all planets with sign/degree/house/time-remaining
+ *   transit-wisdom-deepdive.mp4: 0s = Universal Day + Personal Day numerology cards, 8s = Transit Wisdom section
+ *   ritual-system.mp4:           0s = home dashboard with Cosmic Score + Today's Ritual
  */
 
 import type { ShowcaseScene } from '@/remotion/compositions/LandscapeShowcase';
@@ -76,7 +79,7 @@ export const LANDSCAPE_SCRIPTS: LandscapeScript[] = [
     totalSeconds: 45,
     backgroundType: 'starfield',
     caption:
-      'Most astrology apps give you generic horoscopes. Lunary gives you yours: every planet, your houses, personalised to the exact moment you were born.',
+      'Most astrology apps give you generic horoscopes. Lunary gives you yours: every planet in your exact houses, a personalised daily ritual, and 2,000+ articles linked to your chart.',
     scenes: [
       {
         // birth-chart at 10s: full SVG wheel visible with all planetary symbols
@@ -103,14 +106,27 @@ export const LANDSCAPE_SCRIPTS: LandscapeScript[] = [
         highlightColor: '#8458D8',
       },
       {
+        // sky-now-deepdive at 3s: every planet with exact sign/degree/house + time remaining
+        // Shows real-time sky mapped to your natal chart — strongest personalisation USP
+        headline: 'Every planet.\nIn your sky.\nRight now.',
+        subline: 'Each one mapped to your houses.',
+        callout: 'Live sky map',
+        videoSrc: 'app-demos/web/sky-now-deepdive.mp4',
+        seekToSeconds: 3,
+        startTime: 16,
+        endTime: 24,
+        calloutSide: 'right',
+        highlightColor: '#5AD7FF',
+      },
+      {
         // tarot-patterns at 5s: "30-Day Patterns" selector + "Dominant Themes: abundance"
         headline: '30 days of tarot.\nThe patterns emerge.',
         subline: 'See which themes keep showing up.',
         callout: '30-day analysis',
         videoSrc: 'app-demos/web/tarot-patterns.mp4',
         seekToSeconds: 5,
-        startTime: 16,
-        endTime: 24,
+        startTime: 24,
+        endTime: 32,
         calloutSide: 'right',
         highlightColor: '#e91e63',
       },
@@ -121,30 +137,19 @@ export const LANDSCAPE_SCRIPTS: LandscapeScript[] = [
         callout: 'Grimoire',
         videoSrc: 'app-demos/web/grimoire-search.mp4',
         seekToSeconds: 0,
-        startTime: 24,
-        endTime: 32,
-        calloutSide: 'right',
-        highlightColor: '#5AD7FF',
-      },
-      {
-        // horoscope-deepdive at 10s: scrolled down to Transit Wisdom section + "Ask the Astral Guide" CTA
-        headline: 'Ask anything.\nGet an answer\nrooted in your chart.',
-        subline: 'The Astral Guide.',
-        callout: 'AI + your transits',
-        videoSrc: 'app-demos/web/horoscope-deepdive.mp4',
-        seekToSeconds: 10,
         startTime: 32,
         endTime: 39,
         calloutSide: 'right',
         highlightColor: '#5AD7FF',
       },
       {
-        // birth-chart at 20s: "Your 12 Houses" grid (1st–6th visible)
-        headline: '12 houses.\nEvery one has a story.',
-        subline: 'Sign, planets, meaning. All here.',
-        callout: 'Your 12 houses',
-        videoSrc: 'app-demos/web/birth-chart.mp4',
-        seekToSeconds: 20,
+        // ritual-system at 0s: "Good morning, Celeste" home screen with Cosmic Score (75 Creative)
+        // + personalised reading + TODAY'S RITUAL tailored to chart + moon phase
+        headline: 'Your day.\nCosmically mapped.',
+        subline: 'Cosmic Score, ritual, and sky reading.',
+        callout: "Today's ritual",
+        videoSrc: 'app-demos/web/ritual-system.mp4',
+        seekToSeconds: 0,
         startTime: 39,
         endTime: 45,
         calloutSide: 'right',
@@ -248,12 +253,13 @@ export const LANDSCAPE_SCRIPTS: LandscapeScript[] = [
         highlightColor: '#9b59b6',
       },
       {
-        // horoscope-deepdive at 10s: Transit Wisdom section + "Ask the Astral Guide" CTA
+        // transit-wisdom-deepdive at 8s: Universal Day + Personal Day numerology cards
+        // + Transit Wisdom section with "Ask the Astral Guide" CTA — clear, visually strong
         headline: 'Ask the Astral Guide.\nGet a real answer.',
         subline: "Grounded in your chart and today's sky.",
         callout: 'AI guide',
-        videoSrc: 'app-demos/web/horoscope-deepdive.mp4',
-        seekToSeconds: 10,
+        videoSrc: 'app-demos/web/transit-wisdom-deepdive.mp4',
+        seekToSeconds: 8,
         startTime: 16,
         endTime: 24,
         calloutSide: 'right',
@@ -284,12 +290,13 @@ export const LANDSCAPE_SCRIPTS: LandscapeScript[] = [
       'Start every day knowing what the sky is actually doing: not a generic horoscope, but your chart, today.',
     scenes: [
       {
-        // horoscope-deepdive at 5s: personalised horoscope intro
-        headline: 'Open the app.\nSee your sky.',
+        // ritual-system at 0s: "Good morning, Celeste" home screen — Cosmic Score + personalised
+        // reading + TODAY'S RITUAL. Perfect opening for a morning ritual script.
+        headline: 'Open the app.\nSee your day.',
         subline: 'Personalised from the moment you were born.',
         callout: 'Your daily sky',
-        videoSrc: 'app-demos/web/horoscope-deepdive.mp4',
-        seekToSeconds: 5,
+        videoSrc: 'app-demos/web/ritual-system.mp4',
+        seekToSeconds: 0,
         startTime: 0,
         endTime: 8,
         calloutSide: 'right',

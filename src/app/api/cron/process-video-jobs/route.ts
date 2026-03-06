@@ -379,7 +379,22 @@ export async function POST(request: NextRequest) {
             throw new Error('Script text missing');
           }
 
-          const ttsPreset = TTS_PRESETS.medium;
+          // Content-type-aware TTS pacing — different speeds for different content feels
+          const contentTypeKey = (script.metadata || {}).contentTypeKey as
+            | string
+            | undefined;
+          const TTS_PRESET_BY_TYPE: Record<string, keyof typeof TTS_PRESETS> = {
+            angel_numbers: 'short_mystical',
+            mirror_hours: 'short_mystical',
+            ranking: 'short',
+            hot_take: 'short',
+            quiz: 'short',
+            did_you_know: 'short',
+            chiron_sign: 'slow_mystical',
+          };
+          const presetKey =
+            (contentTypeKey && TTS_PRESET_BY_TYPE[contentTypeKey]) || 'medium';
+          const ttsPreset = TTS_PRESETS[presetKey];
           const audioCacheKey = getAudioCacheKey(
             script.full_script,
             ttsPreset.voiceName,
@@ -598,7 +613,15 @@ export async function POST(request: NextRequest) {
             const tags = tagsByPlatform.get(platform) || '';
             const isShort = shortPlatformSet.has(platform);
             if (!isShort) {
-              return tags ? `${baseVideoCaption}\n\n${tags}` : baseVideoCaption;
+              let caption = tags
+                ? `${baseVideoCaption}\n\n${tags}`
+                : baseVideoCaption;
+              // Append grimoire link for YouTube only — TikTok penalises links
+              // in descriptions and Instagram links belong in first comments.
+              if (platform === 'youtube' && slug) {
+                caption += `\n\nLearn more: lunary.app/grimoire/${slug}`;
+              }
+              return caption;
             }
             if (!tags) {
               return trimToMax(baseVideoCaption, 180, true);

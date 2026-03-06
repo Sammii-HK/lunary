@@ -118,7 +118,7 @@ export async function postToSpellcast(
         ...(params.platformSettings
           ? { platformSettings: params.platformSettings }
           : {}),
-        ...(params.firstComment ? { first_comment: params.firstComment } : {}),
+        ...(params.firstComment ? { firstComment: params.firstComment } : {}),
       }),
     });
 
@@ -252,7 +252,7 @@ export async function postToSpellcastMultiPlatform(params: {
           ? { platformVariations }
           : {}),
         platformSettings: flatPostizSettings,
-        ...(params.firstComment ? { first_comment: params.firstComment } : {}),
+        ...(params.firstComment ? { firstComment: params.firstComment } : {}),
       }),
     });
 

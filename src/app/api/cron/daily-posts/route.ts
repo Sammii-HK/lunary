@@ -387,12 +387,11 @@ export async function GET(request: NextRequest) {
             });
           }
 
-          // Cap hashtags at 3 (Instagram sweet spot; Ayrshare max is 5)
-          const limitedHashtags = post.hashtags.slice(0, 3);
-          const caption =
-            limitedHashtags.length > 0
-              ? `${post.caption}\n\n${limitedHashtags.join(' ')}`
-              : post.caption;
+          // Move hashtags to first comment (algorithm prefers clean captions)
+          const limitedHashtags = post.hashtags.slice(0, 5);
+          const caption = post.caption;
+          const hashtagComment =
+            limitedHashtags.length > 0 ? limitedHashtags.join(' ') : undefined;
 
           const isStory = post.type === 'story';
           const isCarousel =
@@ -403,6 +402,7 @@ export async function GET(request: NextRequest) {
             content: isStory ? '' : caption,
             scheduledDate: post.scheduledTime,
             media: mediaItems,
+            firstComment: hashtagComment,
             platformSettings: {
               instagramOptions: {
                 ...(isStory ? { isStory: true } : {}),

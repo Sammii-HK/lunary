@@ -106,6 +106,8 @@ STRUCTURE (5-10 minutes, 750-1500 words):
 
 COSMIC DATA:${dataContext || '\n(Use general astronomical awareness for this week)'}
 
+CRITICAL: Always mention the specific day and date when discussing any transit, aspect, or moon phase. Viewers need to know WHEN things happen, not just what. For example: 'On Wednesday the 12th, Mercury enters Aries' rather than just 'Mercury enters Aries'.
+
 TONE:
 - Educational and grounding, not hype or fear-based
 - Use "tends to", "may influence", "often associated with" — never "will cause" or "guarantees"

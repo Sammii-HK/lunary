@@ -1,5 +1,11 @@
 # Claude Code Instructions
 
+## Context Layer — READ FIRST
+
+Read the shared context layer at `~/.claude/projects/-Users-sammii-development/memory/`. Start with `MEMORY.md` (index), then `active-work.md` (multi-agent coordination), then `projects/lunary.md`. Update these files continuously as you work. Full protocol in parent `~/development/CLAUDE.md`.
+
+---
+
 ## Tech Stack
 
 - **Framework**: Next.js 15 with App Router (not Pages Router)

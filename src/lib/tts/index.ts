@@ -1,5 +1,3 @@
-import OpenAI from 'openai';
-import { toFile } from 'openai/uploads';
 import type { TTSProvider, TTSOptions } from './types';
 import { OpenAITTSProvider } from './openai';
 import { KokoroTTSProvider } from './kokoro';
@@ -45,37 +43,66 @@ export function getTTSContentType(): string {
   return provider.contentType;
 }
 
+const WHISPER_API_URL = process.env.WHISPER_API_URL || 'http://localhost:9001';
+
 /**
- * Transcribe audio via OpenAI Whisper and return word-level timestamps.
- * Cost: ~$0.006/min (~$0.003/video at current lengths).
+ * Transcribe audio and return word-level timestamps.
+ * Uses local faster-whisper (free) with OpenAI fallback.
  */
 export async function transcribeWithWhisper(
   audioBuffer: ArrayBuffer,
 ): Promise<WhisperWord[]> {
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  try {
+    const health = await fetch(`${WHISPER_API_URL}/health`, {
+      signal: AbortSignal.timeout(2000),
+    });
+    if (!health.ok) throw new Error('unhealthy');
 
-  const file = await toFile(Buffer.from(audioBuffer), 'audio.mp3', {
-    type: 'audio/mpeg',
-  });
+    const formData = new FormData();
+    formData.append(
+      'file',
+      new Blob([audioBuffer], { type: 'audio/mpeg' }),
+      'audio.mp3',
+    );
 
-  const response = await client.audio.transcriptions.create({
-    model: 'whisper-1',
-    file,
-    response_format: 'verbose_json',
-    timestamp_granularities: ['word'],
-  });
+    const response = await fetch(`${WHISPER_API_URL}/transcribe`, {
+      method: 'POST',
+      body: formData,
+    });
 
-  // verbose_json returns words at the top level
-  const words = (
-    response as unknown as {
-      words?: Array<{ word: string; start: number; end: number }>;
-    }
-  ).words;
-  if (!words?.length) return [];
+    if (!response.ok)
+      throw new Error(`Local whisper error: ${await response.text()}`);
 
-  return words.map((w) => ({
-    word: w.word.trim(),
-    start: w.start,
-    end: w.end,
-  }));
+    const result = (await response.json()) as { words: WhisperWord[] };
+    return result.words ?? [];
+  } catch {
+    console.log('[TTS] Local whisper unavailable, falling back to OpenAI');
+    const { default: OpenAI } = await import('openai');
+    const { toFile } = await import('openai/uploads');
+
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const file = await toFile(Buffer.from(audioBuffer), 'audio.mp3', {
+      type: 'audio/mpeg',
+    });
+
+    const response = await client.audio.transcriptions.create({
+      model: 'whisper-1',
+      file,
+      response_format: 'verbose_json',
+      timestamp_granularities: ['word'],
+    });
+
+    const words = (
+      response as unknown as {
+        words?: Array<{ word: string; start: number; end: number }>;
+      }
+    ).words;
+    if (!words?.length) return [];
+
+    return words.map((w) => ({
+      word: w.word.trim(),
+      start: w.start,
+      end: w.end,
+    }));
+  }
 }

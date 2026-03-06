@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getOpenAI, LLM_MODEL } from '@/lib/openai-client';
 import { scheduleTextPost } from '@/lib/bip-spellcast';
-import { getSearchConsoleData } from '@/lib/google/search-console';
+// SEO data comes from bip_state (populated by external scrape or /seo skill)
+// instead of calling getSearchConsoleData() which needs a valid GSC OAuth token.
 
 export const dynamic = 'force-dynamic';
 
 /**
  * Build in Public — Daily stat post
- * Fires daily at 07:00 UTC. Schedules a text post to Spellcast sammii account
+ * Fires daily at 16:00 UTC. Schedules a text post to Spellcast sammii account
  * set with today's metrics in the "Day N of building Lunary" format.
  *
  * State is persisted in the bip_state table (created on first run).
@@ -168,17 +169,26 @@ export async function GET(request: NextRequest) {
 
     const isRecord = dau > 0 && peakDau > 0 && dau >= peakDau;
 
-    // Fetch impressions/day from Search Console (7-day average)
+    // Read SEO impressions from bip_state (populated by daily metrics script
+    // or Claude /seo skill, which scrape GSC via Chrome MCP).
     let impressionsPerDay = 0;
     try {
-      const scEndDate = today;
-      const scStartDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0];
-      const scData = await getSearchConsoleData(scStartDate, scEndDate);
-      impressionsPerDay = Math.round(scData.totalImpressions / 7);
+      const storedSeo = await getBipState('seo_impressions_per_day');
+      if (storedSeo) {
+        const parsed = JSON.parse(storedSeo);
+        // Only use if updated within the last 48 hours
+        const updatedAt =
+          await sql`SELECT updated_at FROM bip_state WHERE key = 'seo_impressions_per_day'`;
+        const lastUpdate = updatedAt.rows[0]?.updated_at;
+        if (
+          lastUpdate &&
+          Date.now() - new Date(lastUpdate).getTime() < 48 * 60 * 60 * 1000
+        ) {
+          impressionsPerDay = Number(parsed) || 0;
+        }
+      }
     } catch {
-      // Non-critical — post without impressions if GSC fails
+      // Non-critical — post without impressions if no cached SEO data
     }
 
     // Build data context for the prompt

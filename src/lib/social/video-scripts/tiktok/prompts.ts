@@ -15,6 +15,62 @@ import {
   type ContentTypeKey,
 } from '../content-type-voices';
 import { buildCommentBaitHook } from '../hooks';
+import { getOrbitTrendingContext } from '../orbit-integration';
+
+/**
+ * Content-type specific word count ranges.
+ * Angel numbers: punchy and short. Rankings: need space for list items.
+ * Hot takes: brevity = impact. Educational: current default.
+ */
+const WORD_COUNT_RANGES: Partial<
+  Record<ContentTypeKey, { min: number; max: number; bodyLines: string }>
+> = {
+  angel_numbers: {
+    min: 35,
+    max: 45,
+    bodyLines: '3-4 lines of 6-10 words each = 24-40 words',
+  },
+  mirror_hours: {
+    min: 35,
+    max: 45,
+    bodyLines: '3-4 lines of 6-10 words each = 24-40 words',
+  },
+  ranking: {
+    min: 55,
+    max: 75,
+    bodyLines: '5-7 lines of 8-12 words each = 40-60 words',
+  },
+  quiz: {
+    min: 55,
+    max: 75,
+    bodyLines: '5-7 lines of 8-12 words each = 40-60 words',
+  },
+  hot_take: {
+    min: 40,
+    max: 55,
+    bodyLines: '3-5 lines of 8-12 words each = 30-45 words',
+  },
+  sign_check: {
+    min: 40,
+    max: 55,
+    bodyLines: '3-5 lines of 8-12 words each = 30-45 words',
+  },
+  sign_identity: {
+    min: 40,
+    max: 55,
+    bodyLines: '3-5 lines of 8-12 words each = 30-45 words',
+  },
+};
+
+const DEFAULT_WORD_RANGE = {
+  min: 50,
+  max: 65,
+  bodyLines: '4-5 lines of 8-12 words each = 32-60 words',
+};
+
+function getWordCountRange(contentType: ContentTypeKey) {
+  return WORD_COUNT_RANGES[contentType] || DEFAULT_WORD_RANGE;
+}
 
 /**
  * Universal banned patterns that apply to ALL content types
@@ -184,12 +240,15 @@ ${buildScopeGuard(facet.title)}
 TONE: ${voiceConfig.tone}
 
 WORD BUDGET (NON-NEGOTIABLE):
-Total: 50-65 words. MINIMUM 40 words. This is a hard limit, not a suggestion.
+${(() => {
+  const range = getWordCountRange(contentType);
+  return `Total: ${range.min}-${range.max} words. MINIMUM ${range.min} words. This is a hard limit, not a suggestion.
 - Hook: 8-14 words
-- Body: 4-5 lines of 8-12 words each = 32-60 words
+- Body: ${range.bodyLines}
 - Closing line: 3-8 words (question or punchy statement)
 Analytics: 52 words -> 12.1% completion (best). 84 words -> 7.7% (worst). Every extra word costs viewers.
-Count your words before returning. If over 65, delete lines until you're under. If under 40, add another specific observation.
+Count your words before returning. If over ${range.max}, delete lines until you're under. If under ${range.min}, add another specific observation.`;
+})()}
 
 HOOK REQUIREMENTS (FIRST LINE):
 - Single sentence, 8-14 words, grammatically correct
@@ -213,8 +272,11 @@ HOOKS THAT FAILED:
 - "Feeling a bit restless, Aries?" -> 44.4 algo score
 Pattern: Generic questions, no identity trigger
 
-SCRIPT BODY (4-7 lines after hook, target 50-65 total words):
-- TARGET: 50-65 total words (hook + body). This produces 21-24 second videos.
+SCRIPT BODY (4-7 lines after hook):
+${(() => {
+  const range = getWordCountRange(contentType);
+  return `- TARGET: ${range.min}-${range.max} total words (hook + body). Shorter scripts = higher completion rates.`;
+})()}
 - Analytics proof: 52 words -> 12.1% completion. 84 words -> 7.7%. Every extra word costs viewers.
 - When in doubt, CUT. A tight 55-word script outperforms a padded 90-word script every time.
 - Follow the script structure above
@@ -293,8 +355,13 @@ ${voiceConfig.keyPhrases.map((p) => `- "${p}"`).join('\n')}
 ${guardrailNote}
 ${urgencyGuidance}
 ${dataContext ? `\nGrimoire Data (reference only):\n${dataContext}` : ''}
-
-FINAL CHECK: Count total words (hook + all body lines). Must be 50-65. Over 65 = cut lines.
+${(() => {
+  const trendingContext = getOrbitTrendingContext();
+  return trendingContext
+    ? `\nORBIT INTELLIGENCE (current niche trends):\nThese angles are currently performing in the astrology/spirituality niche. Adapt if relevant to this topic, but the grimoire content is the source of truth.\n${trendingContext}\n`
+    : '';
+})()}
+FINAL CHECK: Count total words (hook + all body lines). Must be ${getWordCountRange(contentType).min}-${getWordCountRange(contentType).max}. Over ${getWordCountRange(contentType).max} = cut lines.
 
 Return strict JSON only:
 {

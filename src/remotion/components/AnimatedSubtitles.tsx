@@ -10,6 +10,33 @@ import { secondsToFrames, splitTextWithTiming } from '../utils/timing';
  */
 export type SubtitleHighlightStyle = 'scale' | 'block';
 
+/**
+ * Group words into display lines of 2-3 words to prevent orphaned single words.
+ * Algorithm ensures no line has fewer than 2 words:
+ *   2 words → [2]
+ *   3 words → [3]
+ *   4 words → [2, 2]
+ *   5 words → [3, 2]
+ *   6 words → [3, 3]
+ */
+function groupWordsIntoLines(words: string[]): string[][] {
+  if (words.length <= 3) return [words];
+  const lines: string[][] = [];
+  let i = 0;
+  while (i < words.length) {
+    const remaining = words.length - i;
+    if (remaining <= 3) {
+      lines.push(words.slice(i));
+      break;
+    }
+    // Take 3 if remaining - 3 >= 2 (won't leave an orphan), else take 2
+    const take = remaining - 3 >= 2 ? 3 : 2;
+    lines.push(words.slice(i, i + take));
+    i += take;
+  }
+  return lines;
+}
+
 interface AnimatedSubtitlesProps {
   /** Audio segments with text and timing */
   segments: AudioSegment[];
@@ -124,45 +151,59 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
       fps,
     );
 
-    return wordTimings.map((wt, index) => {
-      const isActive = frame >= wt.startFrame && frame < wt.endFrame;
-      const isKeyword = isHighlightTerm(wt.word);
+    const words = wordTimings.map((wt) => wt.word);
+    const lines = groupWordsIntoLines(words);
 
-      // Active word: white + scale pop. Keyword: accent color. Inactive: soft white.
-      const color = isActive
-        ? '#FFFFFF'
-        : isKeyword
-          ? highlightColor
-          : 'rgba(255,255,255,0.75)';
-      const fontWeight = isActive ? 800 : isKeyword ? 700 : 600;
+    let wordIdx = 0;
+    return lines.map((lineWords, lineIndex) => (
+      <span key={lineIndex} style={{ display: 'block' }}>
+        {lineWords.map(() => {
+          const wt = wordTimings[wordIdx];
+          const idx = wordIdx;
+          wordIdx++;
+          const isActive = frame >= wt.startFrame && frame < wt.endFrame;
+          const isKeyword = isHighlightTerm(wt.word);
 
-      // Quick scale-in on word activation
-      const wordScale = isActive
-        ? interpolate(frame, [wt.startFrame, wt.startFrame + 3], [0.88, 1.06], {
-            extrapolateLeft: 'clamp',
-            extrapolateRight: 'clamp',
-          })
-        : 1;
+          const color = isActive
+            ? '#FFFFFF'
+            : isKeyword
+              ? highlightColor
+              : 'rgba(255,255,255,0.75)';
+          const fontWeight = isActive ? 800 : isKeyword ? 700 : 600;
 
-      return (
-        <span
-          key={index}
-          style={{
-            color,
-            fontWeight,
-            display: 'inline-block',
-            marginRight: '0.25em',
-            transform: `scale(${wordScale})`,
-            transformOrigin: 'bottom center',
-            textShadow: isActive
-              ? `0 0 12px rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.6)`
-              : `0 2px 6px rgba(0,0,0,0.5)`,
-          }}
-        >
-          {wt.word}
-        </span>
-      );
-    });
+          const wordScale = isActive
+            ? interpolate(
+                frame,
+                [wt.startFrame, wt.startFrame + 3],
+                [0.88, 1.06],
+                {
+                  extrapolateLeft: 'clamp',
+                  extrapolateRight: 'clamp',
+                },
+              )
+            : 1;
+
+          return (
+            <span
+              key={idx}
+              style={{
+                color,
+                fontWeight,
+                display: 'inline-block',
+                marginRight: '0.25em',
+                transform: `scale(${wordScale})`,
+                transformOrigin: 'bottom center',
+                textShadow: isActive
+                  ? `0 0 12px rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.6)`
+                  : `0 2px 6px rgba(0,0,0,0.5)`,
+              }}
+            >
+              {wt.word}
+            </span>
+          );
+        })}
+      </span>
+    ));
   };
 
   // Render text with coloured background block highlighting (CapCut style)
@@ -174,31 +215,42 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
       fps,
     );
 
-    return wordTimings.map((wt, index) => {
-      const isActive = frame >= wt.startFrame && frame < wt.endFrame;
-      const isKeyword = isHighlightTerm(wt.word);
+    const words = wordTimings.map((wt) => wt.word);
+    const lines = groupWordsIntoLines(words);
 
-      return (
-        <span
-          key={index}
-          style={{
-            color: '#FFFFFF',
-            fontWeight: isActive ? 800 : isKeyword ? 700 : 600,
-            display: 'inline-block',
-            marginRight: '0.2em',
-            backgroundColor: isActive ? highlightColor : 'transparent',
-            borderRadius: isActive ? 6 : 0,
-            paddingLeft: isActive ? 6 : 0,
-            paddingRight: isActive ? 6 : 0,
-            paddingTop: isActive ? 2 : 0,
-            paddingBottom: isActive ? 2 : 0,
-            textShadow: isActive ? 'none' : `0 2px 6px rgba(0,0,0,0.5)`,
-          }}
-        >
-          {wt.word}
-        </span>
-      );
-    });
+    let wordIdx = 0;
+    return lines.map((lineWords, lineIndex) => (
+      <span key={lineIndex} style={{ display: 'block' }}>
+        {lineWords.map(() => {
+          const wt = wordTimings[wordIdx];
+          const idx = wordIdx;
+          wordIdx++;
+          const isActive = frame >= wt.startFrame && frame < wt.endFrame;
+          const isKeyword = isHighlightTerm(wt.word);
+
+          return (
+            <span
+              key={idx}
+              style={{
+                color: '#FFFFFF',
+                fontWeight: isActive ? 800 : isKeyword ? 700 : 600,
+                display: 'inline-block',
+                marginRight: '0.2em',
+                backgroundColor: isActive ? highlightColor : 'transparent',
+                borderRadius: isActive ? 6 : 0,
+                paddingLeft: isActive ? 6 : 0,
+                paddingRight: isActive ? 6 : 0,
+                paddingTop: isActive ? 2 : 0,
+                paddingBottom: isActive ? 2 : 0,
+                textShadow: isActive ? 'none' : `0 2px 6px rgba(0,0,0,0.5)`,
+              }}
+            >
+              {wt.word}
+            </span>
+          );
+        })}
+      </span>
+    ));
   };
 
   // Legacy render: highlight terms only (no word-level)

@@ -89,7 +89,7 @@
     },
     {
       "path": "/api/cron/bip-daily",
-      "schedule": "0 7 * * *"
+      "schedule": "0 16 * * *"
     },
     {
       "path": "/api/cron/bip-weekly",
