@@ -370,10 +370,16 @@ export function registerSocialTools(server: McpServer) {
   server.tool(
     'get_video_performance',
     'TikTok/YouTube video performance metrics',
-    {},
-    async () => {
+    {
+      days: z
+        .number()
+        .optional()
+        .default(30)
+        .describe('Number of days to look back (default 30)'),
+    },
+    async ({ days }) => {
       try {
-        const data = await lunary('/video-performance');
+        const data = await lunary(`/video-performance?days=${days}`);
         return jsonResult(data);
       } catch (error) {
         return errorResult(error);

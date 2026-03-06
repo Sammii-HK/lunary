@@ -15,6 +15,13 @@ export async function GET(request: Request) {
   try {
     const authResult = await requireAdminAuth(request);
     if (authResult instanceof NextResponse) return authResult;
+
+    const { searchParams } = new URL(request.url);
+    const days = Math.max(
+      1,
+      Math.min(365, parseInt(searchParams.get('days') ?? '30', 10) || 30),
+    );
+
     // Aggregated metrics by hook style
     const byHookStyle = await sql`
       SELECT
@@ -28,6 +35,7 @@ export async function GET(request: Request) {
         AVG(completion_rate) as avg_completion_rate
       FROM video_performance
       WHERE hook_style IS NOT NULL
+        AND recorded_at >= NOW() - MAKE_INTERVAL(days => ${days})
       GROUP BY hook_style
       ORDER BY avg_views DESC
     `;
@@ -45,6 +53,7 @@ export async function GET(request: Request) {
         AVG(completion_rate) as avg_completion_rate
       FROM video_performance
       WHERE script_structure IS NOT NULL
+        AND recorded_at >= NOW() - MAKE_INTERVAL(days => ${days})
       GROUP BY script_structure
       ORDER BY avg_views DESC
     `;
@@ -62,6 +71,7 @@ export async function GET(request: Request) {
         AVG(completion_rate) as avg_completion_rate
       FROM video_performance
       WHERE content_type IS NOT NULL
+        AND recorded_at >= NOW() - MAKE_INTERVAL(days => ${days})
       GROUP BY content_type
       ORDER BY avg_views DESC
     `;
@@ -78,6 +88,7 @@ export async function GET(request: Request) {
         AVG(saves) as avg_saves,
         AVG(completion_rate) as avg_completion_rate
       FROM video_performance
+      WHERE recorded_at >= NOW() - MAKE_INTERVAL(days => ${days})
       GROUP BY has_loop_structure
       ORDER BY has_loop_structure DESC
     `;
@@ -92,6 +103,7 @@ export async function GET(request: Request) {
         AVG(completion_rate) as avg_completion_rate
       FROM video_performance
       WHERE scheduled_hour IS NOT NULL
+        AND recorded_at >= NOW() - MAKE_INTERVAL(days => ${days})
       GROUP BY scheduled_hour
       ORDER BY scheduled_hour
     `;
@@ -106,6 +118,7 @@ export async function GET(request: Request) {
         AVG(completion_rate) as avg_completion_rate
       FROM video_performance
       WHERE day_of_week IS NOT NULL
+        AND recorded_at >= NOW() - MAKE_INTERVAL(days => ${days})
       GROUP BY day_of_week
       ORDER BY day_of_week
     `;
@@ -123,6 +136,7 @@ export async function GET(request: Request) {
         AVG(completion_rate) as avg_completion_rate
       FROM video_performance
       WHERE aspect IS NOT NULL
+        AND recorded_at >= NOW() - MAKE_INTERVAL(days => ${days})
       GROUP BY aspect
       ORDER BY avg_views DESC
     `;
@@ -140,6 +154,7 @@ export async function GET(request: Request) {
         AVG(completion_rate) as avg_completion_rate
       FROM video_performance
       WHERE angle IS NOT NULL
+        AND recorded_at >= NOW() - MAKE_INTERVAL(days => ${days})
       GROUP BY angle
       ORDER BY avg_views DESC
     `;
@@ -156,6 +171,7 @@ export async function GET(request: Request) {
         AVG(saves) as avg_saves,
         AVG(completion_rate) as avg_completion_rate
       FROM video_performance
+      WHERE recorded_at >= NOW() - MAKE_INTERVAL(days => ${days})
       GROUP BY has_stitch_bait
       ORDER BY has_stitch_bait DESC
     `;
@@ -173,6 +189,7 @@ export async function GET(request: Request) {
       FROM video_performance
       WHERE script_structure IS NOT NULL
         AND retention_3s IS NOT NULL
+        AND recorded_at >= NOW() - MAKE_INTERVAL(days => ${days})
       GROUP BY script_structure
       ORDER BY avg_retention_3s DESC
     `;
