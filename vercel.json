@@ -12,27 +12,15 @@
       "schedule": "0 2 * * *"
     },
     {
-      "path": "/api/cron/compute-metrics",
-      "schedule": "0 1 * * *"
-    },
-    {
       "path": "/api/cron/update-global-cosmic-data",
       "schedule": "0 6 * * *"
     },
     {
-      "path": "/api/cron/daily-morning-notification",
+      "path": "/api/cron/daily-posts",
       "schedule": "0 8 * * *"
     },
     {
-      "path": "/api/cron/daily-cosmic-pulse",
-      "schedule": "0 10 * * *"
-    },
-    {
-      "path": "/api/cron/moon-circles",
-      "schedule": "0 10 * * *"
-    },
-    {
-      "path": "/api/cron/daily-posts",
+      "path": "/api/cron/daily-morning-notification",
       "schedule": "0 8 * * *"
     },
     {
@@ -40,12 +28,12 @@
       "schedule": "0 8 * * 0"
     },
     {
-      "path": "/api/cron/weekly-metrics",
-      "schedule": "0 2 * * 1"
+      "path": "/api/cron/daily-cosmic-pulse",
+      "schedule": "0 14 * * *"
     },
     {
-      "path": "/api/cron/check-notification-failures",
-      "schedule": "0 9 * * *"
+      "path": "/api/cron/moon-circles",
+      "schedule": "0 20 * * *"
     },
     {
       "path": "/api/cron/fx-drift",
@@ -60,14 +48,6 @@
       "schedule": "30 0 1 1 *"
     },
     {
-      "path": "/api/cron/monthly-metrics",
-      "schedule": "0 3 2 * *"
-    },
-    {
-      "path": "/api/cron/pattern-snapshots",
-      "schedule": "0 4 * * 0"
-    },
-    {
       "path": "/api/cron/activate-retrograde-spaces",
       "schedule": "0 6 * * *"
     },
@@ -78,10 +58,6 @@
     {
       "path": "/api/cron/generate-weekly-challenge",
       "schedule": "0 7 * * 1"
-    },
-    {
-      "path": "/api/cron/detect-milestones",
-      "schedule": "30 6 * * *"
     },
     {
       "path": "/api/cron/sammii-og",
@@ -98,10 +74,6 @@
     {
       "path": "/api/admin/stripe-sync",
       "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/activation-intelligence",
-      "schedule": "0 3 * * 1"
     }
   ]
 }

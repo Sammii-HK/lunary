@@ -7,6 +7,7 @@ import {
   generateCosmicPulseEmailText,
 } from '@/lib/cosmic-pulse/email-template';
 import { sendEmail } from '@/lib/email';
+import { hasUserReceivedNotificationToday } from '@/lib/notifications/tiered-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -137,6 +138,15 @@ export async function GET(request: NextRequest) {
 
         if (!birthday || !userId) {
           console.log(`⚠️ Skipping subscription ${userId} - missing data`);
+          continue;
+        }
+
+        // Skip if user already got a notification today (max 1 per day)
+        const alreadyNotified = await hasUserReceivedNotificationToday(userId);
+        if (alreadyNotified) {
+          console.log(
+            `⏭️  Skipping ${userId} - already received notification today`,
+          );
           continue;
         }
 
