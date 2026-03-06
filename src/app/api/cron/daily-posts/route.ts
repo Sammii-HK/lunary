@@ -81,6 +81,7 @@ import {
 } from '@/lib/social/pre-upload-image';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 300; // 5 minutes — this cron runs 9+ sections with image pre-uploads
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
