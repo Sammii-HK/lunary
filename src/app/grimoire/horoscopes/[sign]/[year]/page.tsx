@@ -244,7 +244,12 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       childrenPosition='after-description'
     >
       {(() => {
-        const yearSnippets = (snippetsData.years as Record<string, Record<string, { snippet: string }>>)[year];
+        const yearSnippets = (
+          snippetsData.years as Record<
+            string,
+            Record<string, { snippet: string }>
+          >
+        )[year];
         const signSnippet = yearSnippets?.[signKey]?.snippet;
         return signSnippet ? (
           <section className='mb-10 rounded-lg border border-zinc-800 bg-zinc-900/30 px-6 py-5'>
