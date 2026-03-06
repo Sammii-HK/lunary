@@ -5,6 +5,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
 import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
 import { yearMeta } from '@/lib/horoscope-meta';
+import snippetsData from '@/data/yearly-horoscope-snippets.json';
 
 import {
   ZODIAC_SIGNS,
@@ -242,6 +243,19 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       ctaHref='/horoscope'
       childrenPosition='after-description'
     >
+      {(() => {
+        const yearSnippets = (snippetsData.years as Record<string, Record<string, { snippet: string }>>)[year];
+        const signSnippet = yearSnippets?.[signKey]?.snippet;
+        return signSnippet ? (
+          <section className='mb-10 rounded-lg border border-zinc-800 bg-zinc-900/30 px-6 py-5'>
+            <p className='text-sm uppercase tracking-widest text-zinc-500 mb-3'>
+              {year} at a glance
+            </p>
+            <p className='text-zinc-300 leading-relaxed'>{signSnippet}</p>
+          </section>
+        ) : null;
+      })()}
+
       <section className='mb-12 grid gap-4 md:grid-cols-3'>
         <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
           <h2 className='text-lg font-medium text-zinc-100 mb-2'>Love</h2>
