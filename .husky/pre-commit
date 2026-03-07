@@ -5,7 +5,7 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 SW_FILE="public/sw.js"
 if git diff --cached --name-only | grep -qE '^(src/|public/|utils/|prisma/)' && \
    ! git diff --cached --name-only | grep -qx "$SW_FILE"; then
-  CURRENT=$(grep -oP "(?<=const CACHE_NAME = 'lunary-v)\d+" "$SW_FILE")
+  CURRENT=$(sed -n "s/.*const CACHE_NAME = 'lunary-v\([0-9]*\)'.*/\1/p" "$SW_FILE")
   NEXT=$((CURRENT + 1))
   sed -i '' "s/const CACHE_NAME = 'lunary-v${CURRENT}'/const CACHE_NAME = 'lunary-v${NEXT}'/" "$SW_FILE"
   git add "$SW_FILE"
