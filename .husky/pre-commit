@@ -1,4 +1,15 @@
 # Add common paths where pnpm might be installed
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
+# Auto-bump service worker cache version if source files changed
+SW_FILE="public/sw.js"
+if git diff --cached --name-only | grep -qE '^(src/|public/|utils/|prisma/)' && \
+   ! git diff --cached --name-only | grep -qx "$SW_FILE"; then
+  CURRENT=$(sed -n "s/.*const CACHE_NAME = 'lunary-v\([0-9]*\)'.*/\1/p" "$SW_FILE")
+  NEXT=$((CURRENT + 1))
+  sed -i '' "s/const CACHE_NAME = 'lunary-v${CURRENT}'/const CACHE_NAME = 'lunary-v${NEXT}'/" "$SW_FILE"
+  git add "$SW_FILE"
+  echo "🔄 Service worker cache bumped to v${NEXT}"
+fi
+
 pnpm lint-staged

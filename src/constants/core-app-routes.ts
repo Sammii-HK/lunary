@@ -7,7 +7,6 @@ export const CORE_APP_ROUTE_PREFIXES = [
   '/book-of-shadows',
   '/forecast',
   '/profile',
-  '/cosmic-state',
   '/moon-circles',
   '/moon-calendar',
 ];

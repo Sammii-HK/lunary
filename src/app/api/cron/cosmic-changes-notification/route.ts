@@ -190,9 +190,9 @@ export async function GET(request: NextRequest) {
                 html: `
                   <h2>${notificationTitle}</h2>
                   <p>${notificationText}</p>
-                  <p><a href="${baseUrl}/cosmic-state">View your cosmic state →</a></p>
+                  <p><a href="${baseUrl}/app">View your cosmic state →</a></p>
                 `,
-                text: `${notificationTitle}\n\n${notificationText}\n\nView your cosmic state: ${baseUrl}/cosmic-state`,
+                text: `${notificationTitle}\n\n${notificationText}\n\nView your cosmic state: ${baseUrl}/app`,
               });
 
               emailsSent++;

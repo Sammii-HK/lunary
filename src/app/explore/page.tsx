@@ -11,7 +11,6 @@ import {
   FolderOpen,
   Calendar,
   FileText,
-  Globe,
   ChevronRight,
   NotebookPen,
   HelpCircle,
@@ -79,12 +78,6 @@ const cosmicTools: ExploreItem[] = [
     label: 'Cosmic Report',
     description: 'Generate detailed reports',
     icon: FileText,
-  },
-  {
-    href: '/cosmic-state',
-    label: 'Cosmic State',
-    description: 'Current planetary positions',
-    icon: Globe,
   },
   {
     href: '/profile',

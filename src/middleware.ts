@@ -18,10 +18,7 @@ const AB_TEST_COOKIE = 'lunary_ab_tests';
 // A/B test definitions: test name -> variants with weights
 // All tests are assigned server-side via cookie for instant availability (no PostHog timing).
 const AB_TESTS: Record<string, { variants: string[]; weights?: number[] }> = {
-  'inline-cta-style': {
-    variants: ['control', 'minimal', 'sparkles', 'card'],
-    weights: [10, 5, 75, 10], // Sparkles wins with 75% traffic (46% lift, 80% confidence)
-  },
+  // inline-cta-style: REMOVED — sparkles won (0.79% CTR, 90% confidence). Hardcoded in components.
   'grimoire-signup-page': {
     variants: ['control', 'value-prop'],
   },

@@ -34,7 +34,6 @@ export const Navbar = () => {
     '/book-of-shadows',
     '/grimoire',
     '/profile',
-    '/cosmic-state',
     '/cosmic-report-generator',
     '/blog',
     '/pricing',
@@ -125,7 +124,6 @@ const isActive = (pathname: string | null, href: string) => {
       '/collections',
       '/forecast',
       '/cosmic-report-generator',
-      '/cosmic-state',
       '/community',
     ];
     return explorePages.some(

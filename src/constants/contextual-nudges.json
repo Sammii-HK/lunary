@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "rules": [
     { "match": "^/blog/week/", "hub": "weeklyForecast" },
     { "match": "^/blog", "hub": "weeklyForecast" },
@@ -62,6 +62,22 @@
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "You've got the concepts. Now see YOUR chart."
+      },
+      {
+        "headline": "30 seconds to calculate. A lifetime to explore.",
+        "subline": "Enter your birth details and get your complete chart with all placements and houses.",
+        "buttonLabel": "Calculate my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "30 seconds to calculate. A lifetime to explore."
+      },
+      {
+        "headline": "Every chart is unique. What does yours say?",
+        "subline": "No two birth charts are the same. See your planets, houses, and aspects.",
+        "buttonLabel": "See my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Every chart is unique. What does yours say?"
       }
     ],
 
@@ -89,6 +105,22 @@
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "There's more to you than this sign."
+      },
+      {
+        "headline": "What house is this placement in for you?",
+        "subline": "The house changes everything. Same sign, completely different life area.",
+        "buttonLabel": "Find my houses",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "What house is this placement in for you?"
+      },
+      {
+        "headline": "Your chart has aspects you've never seen",
+        "subline": "Trines, squares, oppositions between your planets. They shape how your placements interact.",
+        "buttonLabel": "See my aspects",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Your chart has aspects you've never seen."
       }
     ],
 
@@ -116,6 +148,14 @@
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "This planet sits somewhere in your chart."
+      },
+      {
+        "headline": "What aspects does this planet make in your chart?",
+        "subline": "Conjunctions, squares, trines to your other planets. These connections shape you.",
+        "buttonLabel": "See my aspects",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "What aspects does this planet make in your chart?"
       }
     ],
 
@@ -143,6 +183,14 @@
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "This house has a ruler in your chart."
+      },
+      {
+        "headline": "3 or more planets in one house? That's a stellium.",
+        "subline": "See if you have any stelliums and which life areas they concentrate your energy in.",
+        "buttonLabel": "Check for stelliums",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "3+ planets in one house? That's a stellium. Check yours."
       }
     ],
 
@@ -197,6 +245,22 @@
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "The sky moves. Your chart shows where it matters."
+      },
+      {
+        "headline": "Is this transit making an aspect to your chart?",
+        "subline": "It depends on your natal placements. Some people feel it strongly, others barely notice.",
+        "buttonLabel": "Check my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Is this transit making an aspect to your chart?"
+      },
+      {
+        "headline": "This transit lasts weeks. Your chart shows what it means for you.",
+        "subline": "Which house is it activating? Which natal planets does it aspect? See your specifics.",
+        "buttonLabel": "See my transit report",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "This transit lasts weeks. See what it means for you."
       }
     ],
 
@@ -224,6 +288,22 @@
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "Your rising sign gets a horoscope too."
+      },
+      {
+        "headline": "Which planets are transiting your chart today?",
+        "subline": "Your daily forecast based on actual planetary positions hitting your natal chart.",
+        "buttonLabel": "See today's transits",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Which planets are transiting your chart today?"
+      },
+      {
+        "headline": "Sun sign horoscopes miss 90% of the picture",
+        "subline": "Your Moon, Rising, Venus, Mars... each gets its own transits. See the full story.",
+        "buttonLabel": "Get the full picture",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Sun sign horoscopes miss 90% of the picture."
       }
     ],
 
@@ -251,6 +331,22 @@
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "Today's moon is aspecting something in your chart."
+      },
+      {
+        "headline": "Which house is the moon transiting for you right now?",
+        "subline": "It changes every 2.5 days. The house it's in shapes your mood and energy today.",
+        "buttonLabel": "Find the moon in my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Which house is the moon in for you right now?"
+      },
+      {
+        "headline": "Your natal moon sign shapes how you feel everything",
+        "subline": "Not just today's moon. Your birth moon colours your entire emotional landscape.",
+        "buttonLabel": "See my moon sign",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Your natal moon shapes how you feel everything."
       }
     ],
 
@@ -278,6 +374,22 @@
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "What would this card say to YOU today?"
+      },
+      {
+        "headline": "The cards respond differently when you ask",
+        "subline": "Reading about meanings is step one. Pulling with intention is where it gets real.",
+        "buttonLabel": "Ask a question",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "The cards respond differently when you ask."
+      },
+      {
+        "headline": "One card. One question. Right now.",
+        "subline": "No elaborate spread needed. Just pull one card and see what comes up.",
+        "buttonLabel": "Pull one card",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "One card. One question. Right now."
       }
     ],
 
