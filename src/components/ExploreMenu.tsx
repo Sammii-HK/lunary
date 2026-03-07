@@ -50,18 +50,13 @@ const exploreItems: ExploreItem[] = [
   },
   {
     href: '/forecast',
-    label: '2026 Forecast',
+    label: 'Yearly Forecast',
     icon: Calendar,
   },
   {
     href: '/cosmic-report-generator',
     label: 'Cosmic Report Generator',
     icon: FileText,
-  },
-  {
-    href: '/cosmic-state',
-    label: 'Cosmic State',
-    icon: Globe,
   },
 ];
 

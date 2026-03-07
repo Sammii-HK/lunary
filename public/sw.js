@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v21';
+const CACHE_NAME = 'lunary-v22';
 const STATIC_CACHE_URLS = [
   '/app',
   '/manifest.json?v=20251103-1',
@@ -187,24 +187,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Next.js JS/CSS chunks: stale-while-revalidate so deploys take effect
+  // Next.js JS/CSS chunks: network-first to prevent stale chunk errors after deploys
   const isNextChunk = url.pathname.startsWith('/_next/static/');
   if (isNextChunk) {
     event.respondWith(
-      caches.open(CACHE_NAME).then((cache) => {
-        return cache.match(event.request).then((cachedResponse) => {
-          const fetchPromise = fetch(event.request)
-            .then((networkResponse) => {
-              if (networkResponse.ok) {
-                cache.put(event.request, networkResponse.clone());
-              }
-              return networkResponse;
-            })
-            .catch(() => cachedResponse);
-
-          return cachedResponse || fetchPromise;
-        });
-      }),
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse.ok) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, clone);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          return caches.match(event.request);
+        }),
     );
     return;
   }
