@@ -79,7 +79,7 @@ export default defineConfig({
       'lsof -ti:3003 | xargs kill -9 2>/dev/null || true; next dev -p 3003',
     url: 'http://localhost:3003',
     reuseExistingServer: !process.env.CI, // Reuse existing server in local dev, always start fresh in CI
-    timeout: 180000, // 180 seconds to allow Next.js to compile routes and generate manifest files
+    timeout: 300000, // 300 seconds for Next.js cold compile on CI
     stdout: process.env.CI ? 'ignore' : 'pipe',
     stderr: process.env.CI ? 'ignore' : 'pipe',
     env: {
