@@ -3,13 +3,10 @@ import { sql } from '@vercel/postgres';
 import { sendEmail } from '@/lib/email';
 import { formatDate } from '@/lib/analytics/date-range';
 import {
-  generateTrialDay2EmailHTML,
-  generateTrialDay2EmailText,
-  generateTrialDay3EmailHTML,
-  generateTrialDay3EmailText,
-  generateTrialDay5EmailHTML,
-  generateTrialDay5EmailText,
-} from '@/lib/email-templates/trial-nurture';
+  renderReadYourChart,
+  renderWhatAreTransits,
+  renderHouses,
+} from '@/lib/email-components/EducationalNurtureEmails';
 import {
   renderBirthChartDay1,
   renderBirthChartDay4,
@@ -175,42 +172,35 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ─── Day 2: Birth Chart Reveals (existing) ──────────────────────
+    // ─── Day 2: How to Read Your Birth Chart (educational) ──────────
 
     const day2Date = daysAgo(2);
-    const day2Trials = await sql`
-      SELECT DISTINCT s.user_id, s.user_email as email, s.user_name as name, s.trial_ends_at
-      FROM subscriptions s
-      WHERE s.status = 'trial' AND s.trial_ends_at IS NOT NULL
-      AND DATE(s.created_at) = ${formatDate(day2Date)}
-      AND (s.trial_nurture_day2_sent = false OR s.trial_nurture_day2_sent IS NULL)
-      AND s.user_email IS NOT NULL
-      AND (s.has_discount IS NULL OR s.has_discount = false)
-      AND (s.promo_code IS NULL OR s.promo_code = '')
-    `;
+    const day2Trials = await sql.query(
+      `SELECT DISTINCT s.user_id, s.user_email as email, s.user_name as name,
+              s.trial_ends_at, up.birth_chart
+       ${TRIAL_BASE_QUERY}
+       AND DATE(s.created_at) = $1
+       AND (s.trial_nurture_day2_sent = false OR s.trial_nurture_day2_sent IS NULL)`,
+      [formatDate(day2Date)],
+    );
 
     sent.day2 = 0;
     for (const user of day2Trials.rows) {
       try {
-        const trialEnd = new Date(user.trial_ends_at);
-        const daysRemaining = Math.ceil(
-          (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-        );
+        const placements = extractPlacements(user.birth_chart);
 
-        const html = await generateTrialDay2EmailHTML(
-          user.name || 'there',
-          daysRemaining,
-        );
-        const text = await generateTrialDay2EmailText(
-          user.name || 'there',
-          daysRemaining,
-        );
+        const html = await renderReadYourChart({
+          userName: user.name || 'there',
+          sunSign: placements?.sun,
+          moonSign: placements?.moon,
+          risingSign: placements?.rising,
+          userEmail: user.email,
+        });
 
         await sendEmail({
           to: user.email,
-          subject: '🌟 Your Birth Chart Reveals...',
+          subject: 'How to read your birth chart (simpler than you think)',
           html,
-          text,
           tracking: {
             userId: user.user_id,
             notificationType: 'trial_nurture',
@@ -218,7 +208,7 @@ export async function GET(request: NextRequest) {
             utm: {
               source: 'email',
               medium: 'lifecycle',
-              campaign: 'trial_nurture',
+              campaign: 'edu_nurture',
               content: 'day2',
             },
           },
@@ -233,42 +223,33 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ─── Day 3: Daily Guidance Personalized (existing) ──────────────
+    // ─── Day 3: What Are Transits (educational) ─────────────────────
 
     const day3Date = daysAgo(3);
-    const day3Trials = await sql`
-      SELECT DISTINCT s.user_id, s.user_email as email, s.user_name as name, s.trial_ends_at
-      FROM subscriptions s
-      WHERE s.status = 'trial' AND s.trial_ends_at IS NOT NULL
-      AND DATE(s.created_at) = ${formatDate(day3Date)}
-      AND (s.trial_nurture_day3_sent = false OR s.trial_nurture_day3_sent IS NULL)
-      AND s.user_email IS NOT NULL
-      AND (s.has_discount IS NULL OR s.has_discount = false)
-      AND (s.promo_code IS NULL OR s.promo_code = '')
-    `;
+    const day3Trials = await sql.query(
+      `SELECT DISTINCT s.user_id, s.user_email as email, s.user_name as name,
+              s.trial_ends_at, up.birth_chart
+       ${TRIAL_BASE_QUERY}
+       AND DATE(s.created_at) = $1
+       AND (s.trial_nurture_day3_sent = false OR s.trial_nurture_day3_sent IS NULL)`,
+      [formatDate(day3Date)],
+    );
 
     sent.day3 = 0;
     for (const user of day3Trials.rows) {
       try {
-        const trialEnd = new Date(user.trial_ends_at);
-        const daysRemaining = Math.ceil(
-          (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-        );
+        const placements = extractPlacements(user.birth_chart);
 
-        const html = await generateTrialDay3EmailHTML(
-          user.name || 'there',
-          daysRemaining,
-        );
-        const text = await generateTrialDay3EmailText(
-          user.name || 'there',
-          daysRemaining,
-        );
+        const html = await renderWhatAreTransits({
+          userName: user.name || 'there',
+          sunSign: placements?.sun,
+          userEmail: user.email,
+        });
 
         await sendEmail({
           to: user.email,
-          subject: '🔮 Your Daily Guidance is Personalised',
+          subject: 'The planets are still moving — here is how they affect you',
           html,
-          text,
           tracking: {
             userId: user.user_id,
             notificationType: 'trial_nurture',
@@ -276,7 +257,7 @@ export async function GET(request: NextRequest) {
             utm: {
               source: 'email',
               medium: 'lifecycle',
-              campaign: 'trial_nurture',
+              campaign: 'edu_nurture',
               content: 'day3',
             },
           },
@@ -362,7 +343,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ─── Day 5: 2 Days Left (existing) ──────────────────────────────
+    // ─── Day 5: Houses — Where Life Happens (educational) ────────────
 
     const day5Date = daysAgo(5);
     const day5Trials = await sql`
@@ -379,25 +360,15 @@ export async function GET(request: NextRequest) {
     sent.day5 = 0;
     for (const user of day5Trials.rows) {
       try {
-        const trialEnd = new Date(user.trial_ends_at);
-        const daysRemaining = Math.ceil(
-          (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-        );
-
-        const html = await generateTrialDay5EmailHTML(
-          user.name || 'there',
-          daysRemaining,
-        );
-        const text = await generateTrialDay5EmailText(
-          user.name || 'there',
-          daysRemaining,
-        );
+        const html = await renderHouses({
+          userName: user.name || 'there',
+          userEmail: user.email,
+        });
 
         await sendEmail({
           to: user.email,
-          subject: "⏰ 2 Days Left—Here's What You'll Miss",
+          subject: 'The 12 houses — where the planets play out in your life',
           html,
-          text,
           tracking: {
             userId: user.user_id,
             notificationType: 'trial_nurture',
@@ -405,7 +376,7 @@ export async function GET(request: NextRequest) {
             utm: {
               source: 'email',
               medium: 'lifecycle',
-              campaign: 'trial_nurture',
+              campaign: 'edu_nurture',
               content: 'day5',
             },
           },
