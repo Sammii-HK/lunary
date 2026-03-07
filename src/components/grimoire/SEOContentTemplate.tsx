@@ -27,6 +27,7 @@ import { ReadFullGuidePrompt } from '@/app/grimoire/guides/ReadFullGuidePrompt';
 import { getInlineCtaVariant, getAnonId } from '@/lib/ab-tests-server';
 import { GrimoireSearch } from '@/app/grimoire/GrimoireSearch';
 import { StickyBottomCTA } from './StickyBottomCTA';
+import { ChartPreviewTeaser } from './ChartPreviewTeaser';
 
 /**
  * Format a URL segment into a human-readable label
@@ -430,6 +431,9 @@ export async function SEOContentTemplate({
             <p className='text-zinc-300 leading-relaxed break-words'>{intro}</p>
           </section>
         )}
+
+        {/* Chart Preview Teaser - interactive conversion widget */}
+        <ChartPreviewTeaser hub={contextualHub} />
 
         {fullGuide && (
           <ReadFullGuidePrompt
