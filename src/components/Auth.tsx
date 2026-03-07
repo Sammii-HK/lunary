@@ -29,12 +29,15 @@ interface AuthComponentProps {
   onSuccess?: () => void;
   compact?: boolean;
   defaultToSignUp?: boolean;
+  /** Pre-fill the birthday field (YYYY-MM-DD) */
+  birthDate?: string;
 }
 
 export function AuthComponent({
   onSuccess,
   compact = false,
   defaultToSignUp = false,
+  birthDate,
 }: AuthComponentProps = {}) {
   const [mode, setMode] = useState<'signIn' | 'signUp' | 'forgot'>(
     defaultToSignUp ? 'signUp' : 'signIn',
@@ -51,7 +54,7 @@ export function AuthComponent({
         email: '',
         password: '',
         name: '',
-        birthday: '',
+        birthday: birthDate || '',
       },
   );
 
