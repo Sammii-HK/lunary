@@ -173,6 +173,10 @@ export default function RootLayout({
             __html: `
               window.addEventListener('error', function(e) {
                 var msg = (e.message || '') + (e.filename || '');
+                if (msg.indexOf('not supported') !== -1 && msg.indexOf('plugin') !== -1) {
+                  e.preventDefault();
+                  return;
+                }
                 if (
                   msg.indexOf('ChunkLoadError') !== -1 ||
                   msg.indexOf('Loading chunk') !== -1 ||

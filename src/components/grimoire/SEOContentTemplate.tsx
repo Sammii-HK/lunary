@@ -24,8 +24,9 @@ import { PeopleAlsoAsk } from './PeopleAlsoAsk';
 import { ContextualNudgeSection } from '../ui/ContextualNudgeSection';
 import { InlineContextualNudge } from './InlineContextualNudge';
 import { ReadFullGuidePrompt } from '@/app/grimoire/guides/ReadFullGuidePrompt';
-import { getInlineCtaVariant } from '@/lib/ab-tests-server';
+import { getInlineCtaVariant, getAnonId } from '@/lib/ab-tests-server';
 import { GrimoireSearch } from '@/app/grimoire/GrimoireSearch';
+import { StickyBottomCTA } from './StickyBottomCTA';
 
 /**
  * Format a URL segment into a human-readable label
@@ -209,6 +210,7 @@ export async function SEOContentTemplate({
 }: SEOContentTemplateProps) {
   // Get A/B test variant for inline CTA (server-side)
   const inlineCtaVariant = await getInlineCtaVariant();
+  const anonId = await getAnonId();
 
   // Auto-generate breadcrumbs from URL if not provided
   const autoBreadcrumbs =
@@ -298,10 +300,14 @@ export async function SEOContentTemplate({
       : 'bg-zinc-900/40 border border-zinc-800 text-zinc-200';
   const shouldShowContextualNudge = !disableContextualNudge;
   const contextualNudge = shouldShowContextualNudge
-    ? getContextualNudge(canonicalPathname)
+    ? getContextualNudge(canonicalPathname, anonId)
     : null;
   const hasContextualNudge =
     Boolean(contextualNudge?.headline) && Boolean(contextualNudge?.buttonLabel);
+  // Extract the variant index from ctaVariant (e.g. "horoscopes_1" -> 1) so sticky bar avoids it
+  const inlineVariantIndex = contextualNudge?.ctaVariant
+    ? parseInt(contextualNudge.ctaVariant.split('_').pop() || '0', 10)
+    : undefined;
 
   return (
     <article className='max-w-4xl mx-auto px-4 pb-[120px]'>
@@ -758,6 +764,17 @@ export async function SEOContentTemplate({
           />
         )}
       </div>
+
+      {/* Sticky bottom CTA bar - uses a different copy variant from the inline CTA */}
+      {hasContextualNudge && contextualNudge && (
+        <StickyBottomCTA
+          nudge={getContextualNudge(
+            canonicalPathname,
+            anonId,
+            inlineVariantIndex,
+          )}
+        />
+      )}
     </article>
   );
 }

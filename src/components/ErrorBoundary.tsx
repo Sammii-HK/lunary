@@ -26,6 +26,16 @@ function isChunkLoadError(error: Error): boolean {
   );
 }
 
+/** Capacitor plugins that don't have web implementations throw this at runtime */
+function isCapacitorWebError(error: Error): boolean {
+  const msg = error.message || '';
+  return (
+    msg.includes('not supported in this plugin') ||
+    msg.includes('not implemented on web') ||
+    msg.includes('Web not supported')
+  );
+}
+
 const RELOAD_KEY = 'lunary_error_reload';
 
 class ErrorBoundary extends React.Component<
@@ -41,10 +51,21 @@ class ErrorBoundary extends React.Component<
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    // Don't crash the UI for Capacitor web stub errors
+    if (isCapacitorWebError(error)) {
+      return { hasError: false };
+    }
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Silently swallow Capacitor "not supported on web" errors
+    if (isCapacitorWebError(error)) {
+      if (isDev)
+        console.warn('[Capacitor] Suppressed web plugin error:', error.message);
+      return;
+    }
+
     console.error('ErrorBoundary caught an error:', error);
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);

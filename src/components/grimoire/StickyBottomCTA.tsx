@@ -1,0 +1,214 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Sparkles, ChevronRight, X } from 'lucide-react';
+import { useAuthStatus } from '@/components/AuthStatus';
+import { AuthComponent } from '@/components/Auth';
+import { useModal } from '@/hooks/useModal';
+import { Button } from '@/components/ui/button';
+import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
+import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
+import { Heading } from '../ui/Heading';
+import { getABTestVariantClient } from '@/lib/ab-tests-client';
+
+interface StickyBottomCTAProps {
+  nudge: ContextualNudge;
+}
+
+const DISMISS_KEY = 'lunary_sticky_cta_dismissed';
+
+export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
+  const authState = useAuthStatus();
+  const router = useRouter();
+  const pathname = usePathname() || '';
+  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const impressionTracked = useRef(false);
+  const signupPageVariant = getABTestVariantClient('grimoire-signup-page');
+
+  // Don't show to logged-in users
+  const isAuthenticated = authState.isAuthenticated;
+
+  useModal({
+    isOpen: showAuthModal,
+    onClose: () => setShowAuthModal(false),
+    closeOnClickOutside: false,
+  });
+
+  // Check session dismissal
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const dismissedAt = sessionStorage.getItem(DISMISS_KEY);
+      if (dismissedAt) {
+        setDismissed(true);
+      }
+    }
+  }, []);
+
+  // Show after 30% scroll, or after 3s delay on short pages
+  useEffect(() => {
+    if (dismissed || isAuthenticated) return;
+
+    const scrollable =
+      document.documentElement.scrollHeight - window.innerHeight;
+
+    // Short page (no scroll): show after 3 second delay
+    if (scrollable <= 50) {
+      const timer = setTimeout(() => setVisible(true), 3000);
+      return () => clearTimeout(timer);
+    }
+
+    const handleScroll = () => {
+      const scrollPercent = window.scrollY / scrollable;
+      if (scrollPercent > 0.3) {
+        setVisible(true);
+      }
+    };
+
+    // Check on mount in case user already scrolled
+    handleScroll();
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [dismissed, isAuthenticated]);
+
+  // Track impression when it becomes visible
+  useEffect(() => {
+    if (visible && !impressionTracked.current) {
+      impressionTracked.current = true;
+      trackCtaImpression({
+        hub: nudge.hub,
+        ctaId: 'sticky_bottom_cta',
+        location: 'seo_sticky_bottom',
+        label: nudge.inlineCopy || nudge.buttonLabel,
+        href: nudge.href,
+        pagePath: pathname,
+        ctaVariant: nudge.ctaVariant,
+        ctaHeadline: nudge.ctaHeadline,
+        ctaSubline: nudge.ctaSubline,
+        abTest: 'sticky_cta_copy',
+        abVariant: nudge.ctaVariant,
+      });
+    }
+  }, [visible, nudge, pathname]);
+
+  const handleDismiss = () => {
+    setDismissed(true);
+    setVisible(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(DISMISS_KEY, Date.now().toString());
+    }
+  };
+
+  const navigateToHref = () => {
+    if (nudge.href) {
+      router.push(nudge.href);
+    }
+  };
+
+  const handleClick = () => {
+    trackCtaClick({
+      hub: nudge.hub,
+      ctaId: 'sticky_bottom_cta',
+      location: 'seo_sticky_bottom',
+      label: nudge.inlineCopy || nudge.buttonLabel,
+      href: nudge.href,
+      pagePath: pathname,
+      ctaVariant: nudge.ctaVariant,
+      ctaHeadline: nudge.ctaHeadline,
+      ctaSubline: nudge.ctaSubline,
+      abTest: 'sticky_cta_copy',
+      abVariant: nudge.ctaVariant,
+    });
+
+    if (nudge.action === 'link') {
+      navigateToHref();
+      return;
+    }
+
+    if (!isAuthenticated) {
+      if (signupPageVariant === 'value-prop') {
+        const params = new URLSearchParams({
+          hub: nudge.hub,
+          headline: nudge.headline || nudge.ctaHeadline || '',
+          subline: nudge.subline || nudge.ctaSubline || '',
+          location: 'seo_sticky_bottom',
+          pagePath: pathname,
+        });
+        router.push(`/signup/chart?${params.toString()}`);
+      } else {
+        setShowAuthModal(true);
+      }
+      return;
+    }
+
+    navigateToHref();
+  };
+
+  if (!visible || dismissed || isAuthenticated) return null;
+
+  const displayText = nudge.inlineCopy || nudge.headline;
+
+  return (
+    <>
+      <div
+        className='fixed bottom-0 left-0 right-0 z-40 animate-in slide-in-from-bottom-full duration-300'
+        role='complementary'
+        aria-label='Sign up prompt'
+      >
+        <div className='bg-zinc-950/95 backdrop-blur-sm border-t border-lunary-primary-700/50'>
+          <div className='max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3'>
+            <button
+              onClick={handleClick}
+              className='flex-1 flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-lunary-accent-300 transition-colors group min-w-0'
+            >
+              <Sparkles className='w-4 h-4 flex-shrink-0' />
+              <span className='truncate'>{displayText}</span>
+              <ChevronRight className='w-4 h-4 flex-shrink-0 transition-transform group-hover:translate-x-0.5' />
+            </button>
+            <button
+              onClick={handleDismiss}
+              className='flex-shrink-0 p-1 text-zinc-500 hover:text-zinc-300 transition-colors'
+              aria-label='Dismiss'
+            >
+              <X className='w-4 h-4' />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {showAuthModal && (
+        <div className='fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
+          <div className='bg-zinc-900 rounded-xl p-6 sm:p-8 w-full max-w-md relative mx-4 sm:mx-0 shadow-lg shadow-black/50'>
+            <Button
+              variant='ghost'
+              onClick={() => setShowAuthModal(false)}
+              aria-label='Close sign in modal'
+            >
+              ×
+            </Button>
+            <div className='text-center mb-4'>
+              <Heading variant='h3' className='mb-2'>
+                Sign in to Lunary
+              </Heading>
+              <p className='text-zinc-300 text-xs sm:text-sm'>
+                Create a free account to unlock your chart, preferences, and
+                personalised guidance.
+              </p>
+            </div>
+            <AuthComponent
+              compact={false}
+              defaultToSignUp
+              onSuccess={() => {
+                setShowAuthModal(false);
+                navigateToHref();
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
