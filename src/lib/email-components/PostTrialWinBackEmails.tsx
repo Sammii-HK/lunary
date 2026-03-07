@@ -116,7 +116,7 @@ function WinBackDay3Email({
   return (
     <Html>
       <Head />
-      <Preview>{missedDays} days of personalised guidance you missed</Preview>
+      <Preview>{`${missedDays} days of personalised guidance you missed`}</Preview>
       <Body style={bodyStyle}>
         <EmailContainer>
           <Heading
