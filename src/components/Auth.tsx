@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Capacitor, registerPlugin } from '@capacitor/core';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
 import { SignOutButton } from './SignOutButton';
@@ -58,6 +59,7 @@ export function AuthComponent({
   const router = useRouter();
   const [isNative, setIsNative] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const turnstileTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     setIsNative(Capacitor.isNativePlatform());
@@ -132,6 +134,24 @@ export function AuthComponent({
         }
         if (age < 16) {
           throw new Error('You must be at least 16 years old to use Lunary.');
+        }
+
+        // Verify Turnstile token (web only — native apps skip this)
+        if (!isNative) {
+          const turnstileToken = turnstileTokenRef.current;
+          if (!turnstileToken) {
+            throw new Error('Please wait for the security check to complete.');
+          }
+          const verifyRes = await fetch('/api/auth/verify-turnstile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: turnstileToken }),
+          });
+          if (!verifyRes.ok) {
+            throw new Error('Security check failed. Please try again.');
+          }
+          // Reset token after use so it cannot be replayed
+          turnstileTokenRef.current = null;
         }
 
         // No timeout - let the request complete naturally
@@ -624,6 +644,21 @@ export function AuthComponent({
             {success}
           </div>
         )}
+
+        {isSignUp &&
+          !isNative &&
+          process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+              onSuccess={(token) => {
+                turnstileTokenRef.current = token;
+              }}
+              onExpire={() => {
+                turnstileTokenRef.current = null;
+              }}
+              options={{ theme: 'dark', size: 'invisible' }}
+            />
+          )}
 
         <button
           type='submit'

@@ -100,9 +100,15 @@ async function initializeAuth() {
       throw new Error('BETTER_AUTH_SECRET required in production');
     })(),
 
+    rateLimit: {
+      window: 60,
+      max: 5,
+      enabled: true,
+    },
+
     emailAndPassword: {
       enabled: true,
-      requireEmailVerification: false,
+      requireEmailVerification: true,
       minPasswordLength: 8,
       maxPasswordLength: 128,
       revokeSessionsOnPasswordReset: true,
@@ -141,7 +147,7 @@ async function initializeAuth() {
     },
 
     emailVerification: {
-      sendOnSignUp: false,
+      sendOnSignUp: true,
       autoSignInAfterVerification: true,
       async sendVerificationEmail({
         user,
@@ -264,41 +270,7 @@ async function initializeAuth() {
             if (pool) {
               await recordSignupConversionEvent(pool, user);
             }
-
-            // Send welcome email (transactional - no opt-in required)
-            if (user.email) {
-              try {
-                const emailModule = await import('./email');
-                const html = await (
-                  emailModule as any
-                ).generateWelcomeEmailHTML(user.email, user.name);
-                const text = (emailModule as any).generateWelcomeEmailText(
-                  user.email,
-                  user.name,
-                );
-
-                await emailModule.sendEmail({
-                  to: user.email,
-                  subject: '✨ Welcome to Lunary',
-                  html,
-                  text,
-                  tracking: {
-                    userId: user.id,
-                    notificationType: 'welcome',
-                    notificationId: `welcome-${user.id}`,
-                    utm: {
-                      source: 'email',
-                      medium: 'transactional',
-                      campaign: 'welcome',
-                    },
-                  },
-                });
-                console.log(`✅ Welcome email sent to ${user.email}`);
-              } catch (emailError) {
-                console.error('Failed to send welcome email:', emailError);
-                // Don't throw - welcome email failure shouldn't block signup
-              }
-            }
+            // Welcome email is sent after email verification to avoid emailing unverified/bot addresses
           },
         },
       },

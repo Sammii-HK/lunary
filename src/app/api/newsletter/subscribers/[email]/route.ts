@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,8 +8,11 @@ interface RouteParams {
   params: Promise<{ email: string }>;
 }
 
-// GET: Get single subscriber
+// GET: Get single subscriber (admin only)
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const { email } = await params;
     const decodedEmail = decodeURIComponent(email);
@@ -189,8 +193,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// DELETE: Remove subscriber (soft delete)
+// DELETE: Remove subscriber (admin only)
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const { email } = await params;
     const decodedEmail = decodeURIComponent(email);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { sendEmail } from '@/lib/email';
 import {
   generateTrialWelcomeEmailHTML,
@@ -8,6 +9,9 @@ import {
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const { email, userName, trialDaysRemaining, planType } =
       await request.json();

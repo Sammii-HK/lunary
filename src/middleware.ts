@@ -189,8 +189,48 @@ function buildRedirect(request: NextRequest, pathname: string, status = 301) {
   return NextResponse.redirect(new URL(pathname, request.url), status);
 }
 
+const ALLOWED_AUTH_ORIGINS = new Set([
+  'https://lunary.app',
+  'https://www.lunary.app',
+  'https://admin.lunary.app',
+]);
+
+function isAllowedAuthOrigin(origin: string | null): boolean {
+  if (!origin) return false;
+  if (ALLOWED_AUTH_ORIGINS.has(origin)) return true;
+  if (/^https:\/\/[a-z0-9][a-z0-9-]*\.vercel\.app$/i.test(origin)) return true;
+  if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return true;
+  return false;
+}
+
 export function middleware(request: NextRequest, event: NextFetchEvent) {
   const { pathname, searchParams } = request.nextUrl;
+
+  // Block test/debug routes entirely in production
+  if (
+    isProd &&
+    (pathname.startsWith('/api/test') || pathname.startsWith('/api/debug'))
+  ) {
+    return new NextResponse('Not Found', { status: 404 });
+  }
+
+  // Block direct API calls to sensitive endpoints that don't originate from our UI.
+  // Real browsers always send an Origin header — bots hitting the API directly don't.
+  const requiresOriginCheck =
+    pathname.startsWith('/api/auth/sign-up') ||
+    pathname.startsWith('/api/auth/forgot-password') ||
+    pathname.startsWith('/api/auth/send-verification-email') ||
+    pathname.startsWith('/api/auth/resend-verification') ||
+    (pathname.startsWith('/api/share/') && request.method === 'POST') ||
+    (pathname.startsWith('/api/newsletter/subscribers') &&
+      request.method === 'POST');
+
+  if (requiresOriginCheck) {
+    const origin = request.headers.get('origin');
+    if (!isAllowedAuthOrigin(origin)) {
+      return new NextResponse('Forbidden', { status: 403 });
+    }
+  }
 
   const hostname =
     request.headers.get('host')?.split(':')[0].toLowerCase() ?? '';
@@ -475,13 +515,19 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - api routes (handled by API)
-     * - _next (static files, images, etc.)
-     * - Static files with extensions
-     * - Common static assets
-     */
+    // All non-API routes (for redirects, A/B tests, tracking)
     '/((?!api|_next|.*\\.[\\w]+$|favicon\\.ico|sw\\.js|manifest\\.json|robots\\.txt|sitemap).*)',
+    // Auth routes (origin check)
+    '/api/auth/sign-up/:path*',
+    '/api/auth/forgot-password/:path*',
+    '/api/auth/send-verification-email/:path*',
+    '/api/auth/resend-verification/:path*',
+    // Share routes (origin check on POST)
+    '/api/share/:path*',
+    // Newsletter subscribe (origin check on POST)
+    '/api/newsletter/subscribers',
+    // Test/debug block
+    '/api/test/:path*',
+    '/api/debug/:path*',
   ],
 };

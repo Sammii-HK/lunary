@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { trackActivity } from '@/lib/analytics/tracking';
+import { requireAuth } from '@/lib/get-user-session';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,21 +17,18 @@ type TrackPayload = {
 };
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = (await request.json()) as TrackPayload | null;
     if (!body) {
       return NextResponse.json({ error: 'Body is required' }, { status: 400 });
     }
 
-    const userId = body.userId || body.user_id;
+    // Always use the session user — ignore any userId in the body to prevent tracking on behalf of others
+    const userId = authResult.id;
     const activityType = body.activity_type || body.activityType;
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 },
-      );
-    }
 
     if (!activityType) {
       return NextResponse.json(
