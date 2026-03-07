@@ -4,14 +4,24 @@ import { useMemo, useState } from 'react';
 import { CosmicReportPreview } from '@/components/cosmic-report/CosmicReportPreview';
 import { CosmicReportData } from '@/lib/cosmic-report/types';
 import { Paywall } from '@/components/Paywall';
+import { Heading } from '@/components/ui/Heading';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Loader2, Orbit, Moon, Sparkles, Heart, Flame } from 'lucide-react';
 
 const SECTION_OPTIONS = [
-  { key: 'transits', label: 'Transits' },
-  { key: 'moon', label: 'Moon' },
-  { key: 'tarot', label: 'Tarot' },
-  { key: 'mood', label: 'Mood' },
-  { key: 'rituals', label: 'Rituals' },
+  { key: 'transits', label: 'Transits', icon: Orbit },
+  { key: 'moon', label: 'Moon', icon: Moon },
+  { key: 'tarot', label: 'Tarot', icon: Sparkles },
+  { key: 'mood', label: 'Mood', icon: Heart },
+  { key: 'rituals', label: 'Rituals', icon: Flame },
 ];
+
+const REPORT_TYPES = [
+  { value: 'weekly', label: 'Weekly', description: 'This week' },
+  { value: 'monthly', label: 'Monthly', description: 'This month' },
+  { value: 'custom', label: 'Custom', description: 'Pick dates' },
+] as const;
 
 type ReportResponse = {
   id: number;
@@ -77,7 +87,7 @@ export function GeneratorClient() {
         return;
       }
       setReport(data.report);
-      setStatus('Report generated');
+      setStatus(null);
     } catch (error) {
       setStatus(
         error instanceof Error
@@ -117,7 +127,7 @@ export function GeneratorClient() {
             }
           : prev,
       );
-      setStatus('Share link ready');
+      setStatus(null);
     } catch (error) {
       setStatus(
         error instanceof Error
@@ -144,129 +154,179 @@ export function GeneratorClient() {
 
   return (
     <Paywall feature='downloadable_reports'>
-      <div className='w-full max-w-5xl space-y-8 px-4 py-10 text-white'>
-        <section className='rounded-3xl border border-white/10 bg-black/50 p-6'>
-          <h1 className='text-4xl font-semibold'>Cosmic Report Generator</h1>
-          <p className='text-sm text-zinc-300'>
+      <div className='w-full max-w-5xl mx-auto space-y-8 px-4 py-8 text-white'>
+        <div className='space-y-2'>
+          <Heading as='h1' variant='h1'>
+            Cosmic Report Generator
+          </Heading>
+          <p className='text-zinc-400'>
             Generate personalised cosmic reports from live astronomical data.
             Choose your sections, date range and export as PDF or shareable
             link.
           </p>
-        </section>
+        </div>
 
-        <section className='grid gap-6 rounded-3xl border border-white/10 bg-black/40 p-6 md:grid-cols-2'>
-          <div className='space-y-4'>
-            <div>
-              <p className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
+        <div className='grid gap-8 md:grid-cols-[1fr,1.2fr]'>
+          {/* Controls */}
+          <div className='space-y-6'>
+            {/* Report type */}
+            <div className='space-y-2'>
+              <label className='text-xs uppercase tracking-wider text-zinc-500'>
                 Report type
-              </p>
-              <div className='mt-3 flex flex-wrap gap-3'>
-                {['weekly', 'monthly', 'custom'].map((type) => (
+              </label>
+              <div className='grid grid-cols-3 gap-2'>
+                {REPORT_TYPES.map((type) => (
                   <button
-                    key={type}
+                    key={type.value}
                     type='button'
-                    onClick={() => setReportType(type as typeof reportType)}
-                    className={`rounded-full border px-4 py-2 text-sm capitalize ${
-                      reportType === type
-                        ? 'border-lunary-primary-400 bg-lunary-primary-400/20'
-                        : 'border-white/10'
-                    }`}
+                    onClick={() => setReportType(type.value)}
+                    className={cn(
+                      'rounded-xl border p-3 text-left transition',
+                      reportType === type.value
+                        ? 'border-lunary-primary-500 bg-lunary-primary-500/10'
+                        : 'border-zinc-800 bg-zinc-900/30 hover:border-zinc-700',
+                    )}
                   >
-                    {type}
+                    <span className='text-sm font-medium'>{type.label}</span>
+                    <span className='block text-xs text-zinc-500'>
+                      {type.description}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
-            <div className='grid gap-3 sm:grid-cols-2'>
-              <div>
-                <label className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
-                  Start date
-                </label>
-                <input
-                  type='date'
-                  value={dateRange.start}
-                  onChange={(event) =>
-                    setDateRange((prev) => ({
-                      ...prev,
-                      start: event.target.value,
-                    }))
-                  }
-                  className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white focus:border-lunary-primary-400 focus:outline-none'
-                />
+
+            {/* Date range (only for custom) */}
+            {reportType === 'custom' && (
+              <div className='grid gap-3 sm:grid-cols-2'>
+                <div className='space-y-1'>
+                  <label className='text-xs uppercase tracking-wider text-zinc-500'>
+                    Start
+                  </label>
+                  <input
+                    type='date'
+                    value={dateRange.start}
+                    onChange={(e) =>
+                      setDateRange((prev) => ({
+                        ...prev,
+                        start: e.target.value,
+                      }))
+                    }
+                    className='w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-white focus:border-lunary-primary-500 focus:outline-none'
+                  />
+                </div>
+                <div className='space-y-1'>
+                  <label className='text-xs uppercase tracking-wider text-zinc-500'>
+                    End
+                  </label>
+                  <input
+                    type='date'
+                    value={dateRange.end}
+                    onChange={(e) =>
+                      setDateRange((prev) => ({
+                        ...prev,
+                        end: e.target.value,
+                      }))
+                    }
+                    className='w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-white focus:border-lunary-primary-500 focus:outline-none'
+                  />
+                </div>
               </div>
-              <div>
-                <label className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
-                  End date
-                </label>
-                <input
-                  type='date'
-                  value={dateRange.end}
-                  onChange={(event) =>
-                    setDateRange((prev) => ({
-                      ...prev,
-                      end: event.target.value,
-                    }))
-                  }
-                  className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white focus:border-lunary-primary-400 focus:outline-none'
-                />
-              </div>
-            </div>
-            <div>
-              <label className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
+            )}
+
+            {/* Sections */}
+            <div className='space-y-2'>
+              <label className='text-xs uppercase tracking-wider text-zinc-500'>
                 Sections
               </label>
-              <div className='mt-3 grid gap-2 sm:grid-cols-2'>
-                {SECTION_OPTIONS.map((option) => (
-                  <label
-                    key={option.key}
-                    className='flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white'
-                  >
-                    <input
-                      type='checkbox'
-                      checked={selectedSections.includes(option.key)}
-                      onChange={() => handleToggleSection(option.key)}
-                      className='accent-lunary-primary-400'
-                    />
-                    {option.label}
-                  </label>
-                ))}
+              <div className='grid gap-2 sm:grid-cols-2'>
+                {SECTION_OPTIONS.map((option) => {
+                  const isSelected = selectedSections.includes(option.key);
+                  const Icon = option.icon;
+                  return (
+                    <button
+                      key={option.key}
+                      type='button'
+                      onClick={() => handleToggleSection(option.key)}
+                      className={cn(
+                        'flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm transition text-left',
+                        isSelected
+                          ? 'border-lunary-primary-500/50 bg-lunary-primary-500/10 text-white'
+                          : 'border-zinc-800 bg-zinc-900/30 text-zinc-500 hover:border-zinc-700',
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          'h-4 w-4 flex-shrink-0',
+                          isSelected
+                            ? 'text-lunary-primary-400'
+                            : 'text-zinc-600',
+                        )}
+                      />
+                      {option.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-            <div className='flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm'>
-              <span>Generate public share link</span>
-              <label className='inline-flex cursor-pointer items-center gap-2'>
-                <input
-                  type='checkbox'
-                  checked={makePublic}
-                  onChange={(event) => setMakePublic(event.target.checked)}
-                  className='accent-lunary-primary-400'
+
+            {/* Options */}
+            <div className='space-y-3'>
+              <button
+                type='button'
+                onClick={() => setMakePublic(!makePublic)}
+                className={cn(
+                  'flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition',
+                  makePublic
+                    ? 'border-lunary-primary-500/50 bg-lunary-primary-500/10'
+                    : 'border-zinc-800 bg-zinc-900/30',
+                )}
+              >
+                <span>Public share link</span>
+                <span
+                  className={cn(
+                    'h-4 w-4 rounded-full border-2 transition',
+                    makePublic
+                      ? 'border-lunary-primary-400 bg-lunary-primary-400'
+                      : 'border-zinc-600',
+                  )}
                 />
-              </label>
+              </button>
+
+              <div className='space-y-1'>
+                <label className='text-xs uppercase tracking-wider text-zinc-500'>
+                  Email (optional)
+                </label>
+                <input
+                  type='email'
+                  placeholder='Send report to email'
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className='w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-lunary-primary-500 focus:outline-none'
+                />
+              </div>
             </div>
-            <div>
-              <label className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
-                Email (optional)
-              </label>
-              <input
-                type='email'
-                placeholder='Send report to email when generating'
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className='mt-2 w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-2 text-sm text-white placeholder:text-zinc-400 focus:border-lunary-primary-400 focus:outline-none'
-              />
-            </div>
-            <button
-              type='button'
+
+            {/* Generate */}
+            <Button
               onClick={handleGenerate}
-              disabled={isGenerating}
-              className='rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition hover:scale-[1.01] disabled:opacity-50'
+              disabled={isGenerating || selectedSections.length === 0}
+              className='w-full'
             >
-              {isGenerating ? 'Generating…' : 'Generate report'}
-            </button>
-            {status && (
-              <p className='text-sm text-lunary-primary-200'>{status}</p>
-            )}
+              {isGenerating ? (
+                <>
+                  <Loader2 className='h-4 w-4 animate-spin mr-2' />
+                  Generating...
+                </>
+              ) : (
+                'Generate report'
+              )}
+            </Button>
+
+            {status && <p className='text-sm text-red-400'>{status}</p>}
           </div>
+
+          {/* Preview */}
           <div>
             <CosmicReportPreview
               report={
@@ -294,7 +354,7 @@ export function GeneratorClient() {
               }}
             />
           </div>
-        </section>
+        </div>
       </div>
     </Paywall>
   );
