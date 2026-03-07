@@ -206,6 +206,10 @@ function isAllowedAuthOrigin(origin: string | null): boolean {
 export function middleware(request: NextRequest, event: NextFetchEvent) {
   const { pathname, searchParams } = request.nextUrl;
 
+  const hostname =
+    request.headers.get('host')?.split(':')[0].toLowerCase() ?? '';
+  const isProd = isProductionHost(hostname);
+
   // Block test/debug routes entirely in production
   if (
     isProd &&
@@ -231,11 +235,6 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
       return new NextResponse('Forbidden', { status: 403 });
     }
   }
-
-  const hostname =
-    request.headers.get('host')?.split(':')[0].toLowerCase() ?? '';
-
-  const isProd = isProductionHost(hostname);
 
   // PRODUCTION: www -> apex
   if (isProd && hostname === 'www.lunary.app') {
