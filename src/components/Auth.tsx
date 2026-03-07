@@ -136,8 +136,8 @@ export function AuthComponent({
           throw new Error('You must be at least 16 years old to use Lunary.');
         }
 
-        // Verify Turnstile token (web only — native apps skip this)
-        if (!isNative) {
+        // Verify Turnstile token (web only — native apps skip this, skipped if key not configured)
+        if (!isNative && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
           const turnstileToken = turnstileTokenRef.current;
           if (!turnstileToken) {
             throw new Error('Please wait for the security check to complete.');
