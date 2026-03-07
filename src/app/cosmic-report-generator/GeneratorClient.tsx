@@ -47,7 +47,6 @@ export function GeneratorClient() {
           : undefined,
       include_sections: selectedSections,
       make_public: makePublic,
-      generated_for: 'Launch Campaign',
     }),
     [reportType, dateRange, selectedSections, makePublic],
   );
@@ -149,8 +148,9 @@ export function GeneratorClient() {
         <section className='rounded-3xl border border-white/10 bg-black/50 p-6'>
           <h1 className='text-4xl font-semibold'>Cosmic Report Generator</h1>
           <p className='text-sm text-zinc-300'>
-            Build launch-ready cosmic briefings with custom sections, optional
-            share links, and PDF exports. Available for Lunary+ Pro subscribers.
+            Generate personalised cosmic reports from live astronomical data.
+            Choose your sections, date range and export as PDF or shareable
+            link.
           </p>
         </section>
 
