@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import {
   generateSocialAssets,
   getAyrsharePayload,
@@ -7,6 +8,9 @@ import {
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const body = await request.json();
     const { week, substackUrl, includeVoiceover = false } = body;

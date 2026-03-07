@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { addBrevoNewsletterContact } from '@/lib/brevo';
+import { getCurrentUser } from '@/lib/get-user-session';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,8 +92,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Auto-verify if subscription comes from authenticated profile settings
-    const isFromProfile = source === 'profile_settings' && userId;
+    // Auto-verify only if the request comes from an authenticated session — not just a claimed source value
+    const sessionUser = await getCurrentUser(request);
+    const isFromProfile =
+      source === 'profile_settings' &&
+      !!sessionUser &&
+      sessionUser.id === userId;
     const shouldAutoVerify = isFromProfile;
 
     // Generate verification token (only needed if not auto-verifying)

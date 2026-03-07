@@ -9,8 +9,8 @@ import { getShopListingsFromStripe } from '@/lib/shop/catalogue';
 
 const PRODUCTS_PER_PAGE = 12;
 
-// Optional but recommended so this can ISR instead of re-running constantly
-export const revalidate = 2592000; // 30 days
+// Force dynamic so build doesn't call Stripe API (would fail in CI with dummy keys)
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Digital Ritual Packs & Spell Collections | Lunary Shop',

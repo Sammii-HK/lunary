@@ -1,5 +1,24 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from './auth';
+
+/**
+ * Returns a 401 NextResponse if the request has no valid session.
+ * Use this to guard any route that should only be accessible to authenticated users.
+ *
+ * @example
+ * const authResult = await requireAuth(request);
+ * if (authResult instanceof NextResponse) return authResult;
+ * const { id: userId } = authResult;
+ */
+export async function requireAuth(
+  request: NextRequest,
+): Promise<{ id: string; email: string; name: string } | NextResponse> {
+  const user = await getCurrentUser(request);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  return user;
+}
 
 export async function getCurrentUser(request: NextRequest) {
   try {

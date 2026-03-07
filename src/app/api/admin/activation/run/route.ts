@@ -1,7 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const authResult = await requireAdminAuth(req);
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     // Run activation intelligence agents
     // This would normally call external agents, but for now we'll generate analysis-based recommendations

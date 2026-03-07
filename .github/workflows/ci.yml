@@ -124,7 +124,7 @@ jobs:
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     needs: [unit-tests] # Wait for unit tests to finish first
     steps:
       - name: Checkout code
@@ -151,6 +151,22 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+
+      - name: Build for E2E
+        run: pnpm next build
+        env:
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: 1
+          PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING: 1
+          NEXT_PUBLIC_APP_URL: http://localhost:3003
+          NEXT_PUBLIC_BASE_URL: http://localhost:3003
+          NEXT_PUBLIC_SITE_URL: http://localhost:3003
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET || 'test-secret-key-for-e2e-tests-only' }}
+          POSTGRES_URL: postgresql://user:pass@localhost:5432/test
+          DATABASE_URL: postgresql://user:pass@localhost:5432/test
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_placeholder' }}
+          RESEND_API_KEY: re_placeholder
+          NEXT_PUBLIC_ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL || 'admin@lunary.app' }}
 
       - name: Run E2E smoke tests
         run: pnpm test:e2e --grep "@smoke"
