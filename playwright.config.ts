@@ -75,11 +75,12 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command:
-      'lsof -ti:3003 | xargs kill -9 2>/dev/null || true; next dev -p 3003',
+    command: process.env.CI
+      ? 'next start -p 3003' // CI: app pre-built by "Build for E2E" step — instant startup
+      : 'lsof -ti:3003 | xargs kill -9 2>/dev/null || true; next dev -p 3003',
     url: 'http://localhost:3003',
     reuseExistingServer: !process.env.CI, // Reuse existing server in local dev, always start fresh in CI
-    timeout: 300000, // 300 seconds for Next.js cold compile on CI
+    timeout: process.env.CI ? 30000 : 300000, // CI: next start is near-instant; local: allow cold compile
     stdout: process.env.CI ? 'ignore' : 'pipe',
     stderr: process.env.CI ? 'ignore' : 'pipe',
     env: {
