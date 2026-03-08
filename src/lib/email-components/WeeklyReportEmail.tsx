@@ -307,7 +307,7 @@ export function WeeklyReportEmail({
           </ReportSection>
 
           <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
-            <CTAButton href={`${appUrl}/cosmic-state`}>
+            <CTAButton href={`${appUrl}/app`}>
               View Your Full Cosmic State →
             </CTAButton>
           </Section>

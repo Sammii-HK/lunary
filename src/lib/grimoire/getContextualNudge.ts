@@ -100,7 +100,11 @@ function injectExamples(text: string, hub: string, pathname: string): string {
     .replace(/{EXAMPLE}/g, `${example.text} — ${example.interpretation}`);
 }
 
-export function getContextualNudge(pathname: string): ContextualNudge {
+export function getContextualNudge(
+  pathname: string,
+  userSeed?: string,
+  avoidIndex?: number,
+): ContextualNudge {
   const normalizedPath = pathname || '/';
   const matchingRule = config.rules?.find((rule) =>
     new RegExp(rule.match).test(normalizedPath),
@@ -112,8 +116,15 @@ export function getContextualNudge(pathname: string): ContextualNudge {
     Object.values(config.ctaNudges ?? {})?.[0] ??
     [];
 
-  const index =
-    pool.length > 0 ? Math.abs(hashString(normalizedPath)) % pool.length : 0;
+  // Use userSeed (anon ID) for per-user rotation, fall back to pathname-only for SSG
+  const hashInput = userSeed ? `${normalizedPath}-${userSeed}` : normalizedPath;
+  let index =
+    pool.length > 0 ? Math.abs(hashString(hashInput)) % pool.length : 0;
+
+  // If avoidIndex is set, pick the next variant to avoid showing duplicate copy
+  if (avoidIndex !== undefined && pool.length > 1 && index === avoidIndex) {
+    index = (index + 1) % pool.length;
+  }
   const base = pool[index] ?? {
     headline: '',
     subline: '',

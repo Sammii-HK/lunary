@@ -19,6 +19,8 @@ import {
   pickBestSubscription,
   getTrialLevel,
 } from '@/lib/stripe/subscription-utils';
+import { renderAbandonedCheckout } from '@/lib/email-components/AbandonedCheckoutEmail';
+import { renderWelcomeSubscriber } from '@/lib/email-components/WelcomeSubscriberEmail';
 
 export const dynamic = 'force-dynamic';
 
@@ -715,6 +717,45 @@ async function handleSubscriptionChange(
         monthly_amount: discountInfo.monthlyAmountDue,
         referral_code: subscription.metadata?.referralCode || null,
       });
+
+      // Send welcome email for paid subscriptions (not trial starts)
+      if (status === 'active') {
+        try {
+          const userRow = await sql`
+            SELECT user_email, user_name FROM subscriptions
+            WHERE user_id = ${userId} AND user_email IS NOT NULL
+            LIMIT 1
+          `;
+          const user = userRow.rows[0];
+          if (user?.user_email) {
+            const html = await renderWelcomeSubscriber({
+              userName: user.user_name || 'there',
+              planType,
+              userEmail: user.user_email,
+            });
+            await sendEmail({
+              to: user.user_email,
+              subject: 'Welcome to Lunary+ — here are 3 features to try first',
+              html,
+              tracking: {
+                userId,
+                notificationType: 'welcome_subscriber',
+                notificationId: `welcome-subscriber-${userId}`,
+                utm: {
+                  source: 'email',
+                  medium: 'lifecycle',
+                  campaign: 'welcome_subscriber',
+                },
+              },
+            });
+          }
+        } catch (error) {
+          console.error(
+            '[Webhook] Failed to send welcome subscriber email:',
+            error,
+          );
+        }
+      }
     } else if (
       subscription.status === 'active' &&
       previousAttributes?.status === 'trialing'
@@ -736,6 +777,43 @@ async function handleSubscriptionChange(
         daysToConvert,
         metadata: { stripeSubscriptionId: subscription.id },
       });
+
+      // Send welcome email on trial-to-paid conversion
+      try {
+        const userRow = await sql`
+          SELECT user_email, user_name FROM subscriptions
+          WHERE user_id = ${userId} AND user_email IS NOT NULL
+          LIMIT 1
+        `;
+        const user = userRow.rows[0];
+        if (user?.user_email) {
+          const html = await renderWelcomeSubscriber({
+            userName: user.user_name || 'there',
+            planType,
+            userEmail: user.user_email,
+          });
+          await sendEmail({
+            to: user.user_email,
+            subject: 'Welcome to Lunary+ — here are 3 features to try first',
+            html,
+            tracking: {
+              userId,
+              notificationType: 'welcome_subscriber',
+              notificationId: `welcome-subscriber-${userId}`,
+              utm: {
+                source: 'email',
+                medium: 'lifecycle',
+                campaign: 'welcome_subscriber',
+              },
+            },
+          });
+        }
+      } catch (error) {
+        console.error(
+          '[Webhook] Failed to send welcome subscriber email:',
+          error,
+        );
+      }
     }
   }
 
@@ -967,8 +1045,43 @@ async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
     null;
 
   if (userId) {
-    // Track checkout abandonment
     conversionTracking.checkoutAbandoned(userId, 'expired');
+
+    // Send abandoned checkout recovery email
+    try {
+      const userRow = await sql`
+        SELECT user_email, user_name FROM subscriptions
+        WHERE user_id = ${userId} AND user_email IS NOT NULL
+        LIMIT 1
+      `;
+      const user = userRow.rows[0];
+      if (user?.user_email) {
+        const html = await renderAbandonedCheckout({
+          userName: user.user_name || 'there',
+          userEmail: user.user_email,
+        });
+        await sendEmail({
+          to: user.user_email,
+          subject: 'You were almost there — your chart is ready',
+          html,
+          tracking: {
+            userId,
+            notificationType: 'abandoned_checkout',
+            notificationId: `abandoned-checkout-${userId}-${Date.now()}`,
+            utm: {
+              source: 'email',
+              medium: 'lifecycle',
+              campaign: 'abandoned_checkout',
+            },
+          },
+        });
+      }
+    } catch (error) {
+      console.error(
+        '[Webhook] Failed to send abandoned checkout email:',
+        error,
+      );
+    }
   }
 }
 

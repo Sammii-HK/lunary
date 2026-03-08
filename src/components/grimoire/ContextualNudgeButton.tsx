@@ -49,6 +49,8 @@ export function ContextualNudgeButton({
         ctaVariant: nudge.ctaVariant,
         ctaHeadline: nudge.ctaHeadline,
         ctaSubline: nudge.ctaSubline,
+        abTest: 'cta_copy',
+        abVariant: nudge.ctaVariant,
       });
     }
   }, [nudge, location, pathname]);
@@ -72,6 +74,8 @@ export function ContextualNudgeButton({
       ctaVariant: nudge.ctaVariant,
       ctaHeadline: nudge.ctaHeadline,
       ctaSubline: nudge.ctaSubline,
+      abTest: 'cta_copy',
+      abVariant: nudge.ctaVariant,
     });
 
     if (nudge.action === 'link') {

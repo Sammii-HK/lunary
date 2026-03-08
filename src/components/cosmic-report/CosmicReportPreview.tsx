@@ -38,13 +38,26 @@ const placeholderReport: CosmicReportData = {
   ],
 };
 
+const ENERGY_BADGE: Record<string, string> = {
+  high: 'bg-lunary-success-900/30 text-lunary-success-300 border-lunary-success-800/40',
+  medium:
+    'bg-lunary-accent-900/30 text-lunary-accent-300 border-lunary-accent-800/40',
+  low: 'bg-zinc-800/50 text-zinc-400 border-zinc-700/40',
+};
+
 function SectionCard({ section }: { section: CosmicReportSection }) {
   return (
     <div className='space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4'>
-      <p className='text-xs uppercase tracking-[0.3em] text-lunary-accent-200'>
-        {section.key}
-      </p>
-      <h4 className='text-xl font-semibold text-white'>{section.title}</h4>
+      <div className='flex items-center justify-between'>
+        <h4 className='text-xl font-semibold text-white'>{section.title}</h4>
+        {section.energyLevel && (
+          <span
+            className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border ${ENERGY_BADGE[section.energyLevel] || ENERGY_BADGE.medium}`}
+          >
+            {section.energyLevel}
+          </span>
+        )}
+      </div>
       <p className='text-sm text-zinc-300'>{section.summary}</p>
       <ul className='space-y-2 text-sm text-lunary-accent-100'>
         {section.highlights.map((item) => (

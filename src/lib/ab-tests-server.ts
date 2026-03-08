@@ -35,15 +35,16 @@ export async function getABTestVariant(
 
 /**
  * Get the inline CTA style variant
+ * Sparkles won the A/B test (0.79% CTR, 90% confidence) — now hardcoded.
  */
 export async function getInlineCtaVariant(): Promise<InlineCtaVariant> {
-  const variant = await getABTestVariant('inline-cta-style');
-  // Default to 'sparkles' if no variant assigned yet
-  if (
-    !variant ||
-    !['control', 'minimal', 'sparkles', 'card'].includes(variant)
-  ) {
-    return 'sparkles';
-  }
-  return variant as InlineCtaVariant;
+  return 'sparkles';
+}
+
+/**
+ * Get the anon ID from cookies (for per-user copy rotation)
+ */
+export async function getAnonId(): Promise<string | undefined> {
+  const cookieStore = await cookies();
+  return cookieStore.get('lunary_anon_id')?.value;
 }

@@ -2,16 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { sendEmail } from '@/lib/email';
 import {
-  getInactiveUsers,
   getUsersWithMissedStreaks,
   getMilestoneUsers,
   hasReceivedCampaign,
   recordCampaignSent,
 } from '@/lib/re-engagement/campaign-manager';
-import {
-  generateReEngagement7DaysEmailHTML,
-  generateReEngagement7DaysEmailText,
-} from '@/lib/email/templates/re-engagement-7days';
+import { renderChurnPrevention } from '@/lib/email-components/ChurnPreventionEmail';
 import {
   generateReEngagementStreakEmailHTML,
   generateReEngagementStreakEmailText,
@@ -49,31 +45,68 @@ export async function GET(request: NextRequest) {
     let emailsSent = 0;
     let emailsFailed = 0;
 
-    // 1. 7 days inactive
-    const inactive7Days = await getInactiveUsers(7);
-    for (const user of inactive7Days) {
+    // 1. 7 days inactive (personalised with Sun sign and transit context)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const inactive7Days = await sql`
+      SELECT DISTINCT
+        s.user_id,
+        s.user_email as email,
+        s.user_name as name,
+        up.birth_chart
+      FROM subscriptions s
+      LEFT JOIN user_profiles up ON s.user_id = up.user_id
+      WHERE s.user_email IS NOT NULL
+        AND s.status IN ('active', 'trial')
+        AND s.is_paying = true
+        AND NOT EXISTS (
+          SELECT 1 FROM user_sessions us
+          WHERE us.user_id = s.user_id
+          AND us.session_timestamp >= ${sevenDaysAgo.toISOString()}
+        )
+        AND (s.churn_prevention_sent = false OR s.churn_prevention_sent IS NULL)
+      LIMIT 50
+    `;
+
+    for (const user of inactive7Days.rows) {
       try {
-        if (await hasReceivedCampaign(user.userId, '7days_inactive', 7)) {
+        if (await hasReceivedCampaign(user.user_id, '7days_inactive', 30)) {
           continue;
         }
 
-        const emailHtml = generateReEngagement7DaysEmailHTML(
-          user.email.split('@')[0],
-          baseUrl,
+        const chart = Array.isArray(user.birth_chart) ? user.birth_chart : [];
+        const sunEntry = chart.find(
+          (p: Record<string, unknown>) => p?.body === 'Sun',
         );
-        const emailText = generateReEngagement7DaysEmailText(
-          user.email.split('@')[0],
-          baseUrl,
-        );
+        const sunSign = sunEntry?.sign as string | undefined;
+
+        const html = await renderChurnPrevention({
+          userName: user.name || 'there',
+          sunSign,
+          daysSinceLastVisit: 7,
+          userEmail: user.email,
+        });
 
         await sendEmail({
           to: user.email,
-          subject: '🌙 We miss you!',
-          html: emailHtml,
-          text: emailText,
+          subject:
+            'The planets have been busy — here is what changed in your chart',
+          html,
+          tracking: {
+            userId: user.user_id,
+            notificationType: 'churn_prevention',
+            notificationId: `churn-prevention-${user.user_id}`,
+            utm: {
+              source: 'email',
+              medium: 'lifecycle',
+              campaign: 'churn_prevention',
+            },
+          },
         });
 
-        await recordCampaignSent(user.userId, '7days_inactive');
+        await recordCampaignSent(user.user_id, '7days_inactive');
+        await sql`UPDATE subscriptions SET churn_prevention_sent = true WHERE user_id = ${user.user_id}`;
         emailsSent++;
       } catch (error) {
         console.error(
@@ -216,7 +249,7 @@ export async function GET(request: NextRequest) {
       emailsSent,
       emailsFailed,
       campaigns: {
-        '7days_inactive': inactive7Days.length,
+        '7days_inactive': inactive7Days.rows.length,
         missed_streak: missedStreaks.length,
         milestone: milestones.length,
         insights_ready: insightsReady.rows.length,

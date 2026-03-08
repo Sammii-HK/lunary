@@ -1002,24 +1002,27 @@ export async function GET(request: NextRequest) {
             );
 
             const imageParams = new URLSearchParams(story.params);
-            const imageUrl = `${SHARE_BASE_URL}${story.endpoint}?${imageParams.toString()}`;
+            const rawImageUrl = `${SHARE_BASE_URL}${story.endpoint}?${imageParams.toString()}`;
+            // Append .png so Postiz accepts the URL.
+            // next.config rewrites /api/og/:path*.png → /api/og/:path* so the image still renders.
+            // We skip preUploadImage here — calling our own OG routes from Vercel serverside causes
+            // self-referencing fetch timeouts.
+            const staticImageUrl = rawImageUrl.includes('/api/og/')
+              ? rawImageUrl.replace(/^(https?:\/\/[^/]+)\/\//, '$1/') + '.png'
+              : rawImageUrl;
             const storyCategory =
               VARIANT_TO_HIGHLIGHT[story.variant] || 'Cosmic';
 
             try {
-              // Pre-upload dynamic OG image so Instagram gets a static blob URL
-              const staticImageUrl = await preUploadImage(imageUrl);
-
-              // Skip if blob upload failed — Postiz requires a valid image extension
               if (!hasValidImageExtension(staticImageUrl)) {
                 console.error(
-                  `[daily-cron] IG story skipped — image has no valid extension after pre-upload: ${staticImageUrl}`,
+                  `[daily-cron] IG story skipped — image has no valid extension: ${staticImageUrl}`,
                 );
                 storySentResults.push({
                   scheduledTime: scheduledTime.toISOString(),
                   variant: story.variant,
                   status: 'error',
-                  error: `Pre-upload failed: no valid extension in ${staticImageUrl}`,
+                  error: `No valid extension in ${staticImageUrl}`,
                 });
                 continue;
               }
