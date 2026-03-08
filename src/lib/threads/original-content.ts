@@ -43,10 +43,10 @@ const ZODIAC_SIGNS = [
 /**
  * Generate a cosmic timing post using real-time transit/moon data.
  */
-export function generateCosmicTimingPost(
+export async function generateCosmicTimingPost(
   dateStr: string,
   slotHour: number,
-): ThreadsPost {
+): Promise<ThreadsPost> {
   // Use the actual slot time, not midnight, for accurate time-until calculations
   const postDate = new Date(dateStr);
   postDate.setUTCHours(slotHour, 0, 0, 0);
@@ -145,7 +145,7 @@ export function generateCosmicTimingPost(
     const moonRng = seededRandom(`moon-${dateStr}-${slotHour}`);
 
     // Inject orbit hook suggestions if available
-    const orbitHooks = getOrbitHookSuggestions('cosmic_timing');
+    const orbitHooks = await getOrbitHookSuggestions('cosmic_timing');
 
     // Body templates — seeded selection for variety even during same phase
     const bodyTemplates = [
@@ -190,7 +190,7 @@ export function generateCosmicTimingPost(
     let selectedHook = allHooks[Math.floor(moonRng() * allHooks.length)];
 
     // If orbit says avoid this pattern, re-pick from built-ins only
-    if (shouldAvoidHook('cosmic_timing', selectedHook)) {
+    if (await shouldAvoidHook('cosmic_timing', selectedHook)) {
       selectedHook =
         hookTemplates[Math.floor(moonRng() * hookTemplates.length)];
     }
@@ -219,11 +219,11 @@ export function generateCosmicTimingPost(
  * @param options.excludeCategory - Skip this category and fall back to 'zodiac'.
  *   Used when slot 0 already generated a transit/planetary post to avoid duplicates.
  */
-export function generateConversationPost(
+export async function generateConversationPost(
   dateStr: string,
   slotHour: number,
   options?: { excludeCategory?: ThemeCategory },
-): ThreadsPost {
+): Promise<ThreadsPost> {
   const date = new Date(dateStr);
   const { theme } = getThemeForDate(date);
   let category = theme.category as ThemeCategory;
@@ -243,7 +243,7 @@ export function generateConversationPost(
   let prompt: string;
 
   // Check for orbit hook suggestions for conversation pillar
-  const orbitConvoHooks = getOrbitHookSuggestions('conversation');
+  const orbitConvoHooks = await getOrbitHookSuggestions('conversation');
 
   if (orbitConvoHooks.length > 0 && rng() > 0.7) {
     // 30% chance to use an orbit-suggested hook when available
@@ -272,7 +272,7 @@ export function generateConversationPost(
   }
 
   // Skip hooks orbit says to avoid, fall back to standard template
-  if (shouldAvoidHook('conversation', hook)) {
+  if (await shouldAvoidHook('conversation', hook)) {
     const fallbackAngles = categoryAngleTemplates(category);
     const fallback = fallbackAngles[Math.floor(rng() * fallbackAngles.length)];
     hook = fallback.opener;
@@ -294,10 +294,10 @@ export function generateConversationPost(
 /**
  * Generate an identity callout post (sign-based engagement bait).
  */
-export function generateIdentityPost(
+export async function generateIdentityPost(
   dateStr: string,
   slotHour: number,
-): ThreadsPost {
+): Promise<ThreadsPost> {
   const date = new Date(dateStr);
   const { theme } = getThemeForDate(date);
   const category = theme.category as ThemeCategory;
@@ -313,7 +313,7 @@ export function generateIdentityPost(
       : angles[Math.floor(rng() * angles.length)];
 
   // Check for orbit hook suggestions for identity pillar
-  const orbitIdentityHooks = getOrbitHookSuggestions('identity');
+  const orbitIdentityHooks = await getOrbitHookSuggestions('identity');
 
   // For identity callouts, swap in a random sign for personalisation
   let hook = angle.opener;
@@ -324,7 +324,7 @@ export function generateIdentityPost(
   }
 
   // Skip hooks orbit says to avoid
-  if (shouldAvoidHook('identity', hook)) {
+  if (await shouldAvoidHook('identity', hook)) {
     hook = angle.opener;
   }
 
@@ -356,17 +356,17 @@ export function generateIdentityPost(
  * Uses the existing grimoire content system (getAllRichEntries + extractGrimoireSnippet)
  * with seeded random for deterministic daily selection.
  */
-export function generateEducationalPost(
+export async function generateEducationalPost(
   dateStr: string,
   slotHour: number,
-): ThreadsPost {
+): Promise<ThreadsPost> {
   const rng = seededRandom(`threads-edu-${dateStr}-${slotHour}`);
 
   // Use the grimoire system's full entry pool
   const allEntries = getAllRichEntries();
 
   // Use orbit-weighted categories if available, otherwise default
-  const orbitCategories = getWeightedGrimoireCategories();
+  const orbitCategories = await getWeightedGrimoireCategories();
   const targetCategory =
     orbitCategories.length > 0
       ? orbitCategories[Math.floor(rng() * orbitCategories.length)]
