@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getOpenAI, LLM_MODEL } from '@/lib/openai-client';
 import { scheduleTextPost } from '@/lib/bip-spellcast';
+import { syncStripeDiscounts } from '@/lib/analytics/sync-stripe-discounts';
 
 export const dynamic = 'force-dynamic';
 
@@ -115,6 +116,13 @@ export async function GET(request: NextRequest) {
     const dau = Number(metricsRow?.dau || 0);
     const peakDau = Number(peakDauResult.rows[0]?.peak_dau || 0);
     const isRecord = dau > 0 && peakDau > 0 && dau >= peakDau;
+
+    // Sync Stripe discounts before MRR calculation
+    try {
+      await syncStripeDiscounts();
+    } catch {
+      // Non-critical — MRR query still runs with cached values
+    }
 
     // MRR: query but only show when it exceeds £27 (hides coupon/test revenue)
     let mrr = 0;
