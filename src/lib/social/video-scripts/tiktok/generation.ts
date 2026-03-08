@@ -283,7 +283,7 @@ async function generateTikTokScriptContent(
       hookLine =
         fallbackScript.split('\n\n')[0]?.trim() ||
         ensureSentenceEndsWithPunctuation(
-          normalizeHookLine(buildHookForTopic(facet.title, aspect)),
+          normalizeHookLine(await buildHookForTopic(facet.title, aspect)),
         );
     } else {
       hookLine = ensureSentenceEndsWithPunctuation(

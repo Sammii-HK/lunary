@@ -146,7 +146,9 @@ Return strict JSON only:
     if (!aiHook || bodyLines.length < 3) return null;
 
     const hookLine = ensureSentenceEndsWithPunctuation(
-      normalizeHookLine(buildHookForTopic(`Chiron in ${sign}`, undefined)),
+      normalizeHookLine(
+        await buildHookForTopic(`Chiron in ${sign}`, undefined),
+      ),
     );
 
     const fullScript = normalizeGeneratedContent(

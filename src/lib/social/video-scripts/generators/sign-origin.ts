@@ -160,7 +160,7 @@ Return strict JSON only:
     if (!aiHook || bodyLines.length < 3) return null;
 
     const hookLine = ensureSentenceEndsWithPunctuation(
-      normalizeHookLine(buildHookForTopic(`${sign} origin`, undefined)),
+      normalizeHookLine(await buildHookForTopic(`${sign} origin`, undefined)),
     );
 
     const fullScript = normalizeGeneratedContent(
