@@ -1,5 +1,6 @@
 import { getPinterestBoard } from '@/lib/pinterest/boards';
 import { buildUtmUrl } from '@/lib/urls';
+import { sanitizeForLog } from '@/lib/security/log-sanitize';
 import { NextRequest, NextResponse } from 'next/server';
 import { NotificationTemplates } from '../../../../../utils/notifications/pushNotifications';
 import { sendDiscordAdminNotification } from '@/lib/discord';
@@ -1016,13 +1017,13 @@ export async function GET(request: NextRequest) {
             try {
               if (!hasValidImageExtension(staticImageUrl)) {
                 console.error(
-                  `[daily-cron] IG story skipped — image has no valid extension: ${staticImageUrl}`,
+                  `[daily-cron] IG story skipped — image has no valid extension: ${sanitizeForLog(staticImageUrl)}`,
                 );
                 storySentResults.push({
                   scheduledTime: scheduledTime.toISOString(),
                   variant: story.variant,
                   status: 'error',
-                  error: `No valid extension in ${staticImageUrl}`,
+                  error: `No valid extension in ${sanitizeForLog(staticImageUrl)}`,
                 });
                 continue;
               }

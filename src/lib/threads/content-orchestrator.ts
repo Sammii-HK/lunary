@@ -70,15 +70,15 @@ export async function generateThreadsBatch(
 
   const slots = isWeekend ? WEEKEND_SLOTS_UTC : WEEKDAY_SLOTS_UTC;
   const rawPosts: ThreadsPost[] = isWeekend
-    ? buildWeekendBatch(dateStr)
-    : buildWeekdayBatch(dateStr);
+    ? await buildWeekendBatch(dateStr)
+    : await buildWeekdayBatch(dateStr);
 
   const posts = applyMinuteOffsets(rawPosts, slots, dateStr);
 
   return { date: dateStr, posts };
 }
 
-function buildWeekdayBatch(dateStr: string): ThreadsPost[] {
+async function buildWeekdayBatch(dateStr: string): Promise<ThreadsPost[]> {
   const slots = WEEKDAY_SLOTS_UTC;
   const posts: ThreadsPost[] = [];
   const date = new Date(dateStr);
@@ -86,7 +86,7 @@ function buildWeekdayBatch(dateStr: string): ThreadsPost[] {
   const seed = date.getDate() + date.getMonth() * 31;
 
   // Slot 0 (14:00 UTC) - Cosmic timing / transit content
-  posts.push(generateCosmicTimingPost(dateStr, slots[0]));
+  posts.push(await generateCosmicTimingPost(dateStr, slots[0]));
 
   // Determine if slot 0 will use a transit post (narrow posting window).
   // If yes, exclude 'planetary' from slot 2 to avoid same-day duplicate transit content.
@@ -103,14 +103,14 @@ function buildWeekdayBatch(dateStr: string): ThreadsPost[] {
   if (dayOfWeek === 2 || dayOfWeek === 4) {
     posts.push(buildDearStylePost(dateStr, slots[1], seed));
   } else if (dayOfWeek === 3) {
-    posts.push(generateEducationalPost(dateStr, slots[1]));
+    posts.push(await generateEducationalPost(dateStr, slots[1]));
   } else {
-    posts.push(generateIdentityPost(dateStr, slots[1]));
+    posts.push(await generateIdentityPost(dateStr, slots[1]));
   }
 
   // Slot 2 (21:00 UTC) - Conversation / question (drives replies)
   posts.push(
-    generateConversationPost(dateStr, slots[2], {
+    await generateConversationPost(dateStr, slots[2], {
       excludeCategory: isTransitActive ? 'planetary' : undefined,
     }),
   );
@@ -118,20 +118,20 @@ function buildWeekdayBatch(dateStr: string): ThreadsPost[] {
   return posts;
 }
 
-function buildWeekendBatch(dateStr: string): ThreadsPost[] {
+async function buildWeekendBatch(dateStr: string): Promise<ThreadsPost[]> {
   const slots = WEEKEND_SLOTS_UTC;
   const posts: ThreadsPost[] = [];
   const date = new Date(dateStr);
   const dayOfWeek = date.getDay(); // 0=Sun, 6=Sat
 
   // Slot 0 (14:00 UTC) - Cosmic timing / conversation
-  posts.push(generateCosmicTimingPost(dateStr, slots[0]));
+  posts.push(await generateCosmicTimingPost(dateStr, slots[0]));
 
   // Slot 1 (20:00 UTC) - Rotating: Sat=identity, Sun=educational
   if (dayOfWeek === 6) {
-    posts.push(generateIdentityPost(dateStr, slots[1]));
+    posts.push(await generateIdentityPost(dateStr, slots[1]));
   } else {
-    posts.push(generateEducationalPost(dateStr, slots[1]));
+    posts.push(await generateEducationalPost(dateStr, slots[1]));
   }
 
   return posts;

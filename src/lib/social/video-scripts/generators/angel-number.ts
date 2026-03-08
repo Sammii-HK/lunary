@@ -132,7 +132,9 @@ Return strict JSON only:
     if (!aiHook || bodyLines.length < 3) return null;
 
     const hookLine = ensureSentenceEndsWithPunctuation(
-      normalizeHookLine(buildHookForTopic(`angel number ${number}`, undefined)),
+      normalizeHookLine(
+        await buildHookForTopic(`angel number ${number}`, undefined),
+      ),
     );
 
     const fullScript = normalizeGeneratedContent(

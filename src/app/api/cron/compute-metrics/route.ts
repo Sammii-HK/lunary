@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { ACTIVATION_EVENTS } from '@/lib/analytics/activation-events';
+import { syncStripeDiscounts } from '@/lib/analytics/sync-stripe-discounts';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,16 @@ export async function GET(request: NextRequest) {
     dayEnd.setUTCHours(23, 59, 59, 999);
 
     console.log(`Computing metrics for ${dateStr}...`);
+
+    // Sync Stripe discounts before MRR calculation
+    try {
+      const discountSync = await syncStripeDiscounts();
+      console.log(
+        `Discount sync: ${discountSync.updated} updated, ${discountSync.errors} errors`,
+      );
+    } catch (error) {
+      console.error('Discount sync failed (continuing):', error);
+    }
 
     // Get WAU and MAU date ranges
     const wauStart = new Date(dayEnd);

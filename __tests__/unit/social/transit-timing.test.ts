@@ -72,14 +72,14 @@ describe('getTransitThemeForDate', () => {
 });
 
 describe('generateCosmicTimingPost', () => {
-  it('uses slot hour in scheduled time', () => {
-    const post = generateCosmicTimingPost('2026-02-13', 14);
+  it('uses slot hour in scheduled time', async () => {
+    const post = await generateCosmicTimingPost('2026-02-13', 14);
     const scheduled = new Date(post.scheduledTime);
     expect(scheduled.getUTCHours()).toBe(14);
   });
 
-  it('returns a valid ThreadsPost shape', () => {
-    const post = generateCosmicTimingPost('2026-02-13', 14);
+  it('returns a valid ThreadsPost shape', async () => {
+    const post = await generateCosmicTimingPost('2026-02-13', 14);
     expect(post).toHaveProperty('hook');
     expect(post).toHaveProperty('body');
     expect(post).toHaveProperty('prompt');
@@ -89,7 +89,7 @@ describe('generateCosmicTimingPost', () => {
     expect(post.source).toBe('original');
   });
 
-  it('body says hours not days when transit is < 24h away', () => {
+  it('body says hours not days when transit is < 24h away', async () => {
     // Generate posts across multiple dates to catch a near-transit
     const dates = [
       '2026-02-13',
@@ -101,7 +101,7 @@ describe('generateCosmicTimingPost', () => {
     ];
 
     for (const dateStr of dates) {
-      const post = generateCosmicTimingPost(dateStr, 14);
+      const post = await generateCosmicTimingPost(dateStr, 14);
       // If body mentions "day" or "days", it should NOT be for < 24h transits
       // If body mentions "hour", that's the fix working
       if (post.body.includes('hour')) {
@@ -113,8 +113,8 @@ describe('generateCosmicTimingPost', () => {
     }
   });
 
-  it('never produces empty hook or body', () => {
-    const post = generateCosmicTimingPost('2026-02-13', 14);
+  it('never produces empty hook or body', async () => {
+    const post = await generateCosmicTimingPost('2026-02-13', 14);
     expect(post.hook.length).toBeGreaterThan(0);
     expect(post.body.length).toBeGreaterThan(0);
   });

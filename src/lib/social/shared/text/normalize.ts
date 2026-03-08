@@ -54,8 +54,10 @@ export const ensureSentenceEndsWithPunctuation = (text: string): string => {
 /**
  * Normalize hook line (replace dashes, collapse whitespace)
  */
-export const normalizeHookLine = (value: string): string =>
-  value.replace(/[—–]/g, '-').replace(/\s+/g, ' ').trim();
+export const normalizeHookLine = (value: string): string => {
+  if (typeof value !== 'string') return String(value ?? '');
+  return value.replace(/[—–]/g, '-').replace(/\s+/g, ' ').trim();
+};
 
 /**
  * Normalize slug for comparison

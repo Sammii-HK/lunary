@@ -11,6 +11,7 @@ import {
   ACTIVATION_EVENTS,
   ACTIVATION_WINDOW_DAYS,
 } from '@/lib/analytics/activation-events';
+import { syncStripeDiscounts } from '@/lib/analytics/sync-stripe-discounts';
 
 const TIMEZONE = 'Europe/London';
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
@@ -502,6 +503,13 @@ async function calculateRevenue(
   netRevenueWeek: number | null;
   mrrEndOfWeek: number;
 }> {
+  // Sync Stripe discounts before revenue calculation
+  try {
+    await syncStripeDiscounts();
+  } catch {
+    // Non-critical
+  }
+
   // Gross revenue: sum of subscription payments in week
   // This is approximate - we'd need Stripe webhook data for exact amounts
   // For now, use monthly_amount_due from subscriptions that started this week

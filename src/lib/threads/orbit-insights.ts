@@ -1,6 +1,8 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
 import type { ThreadsPillar } from './types';
+
+const OPEN_WEBUI_URL = process.env.OPEN_WEBUI_URL || 'http://localhost:8080';
+const OPEN_WEBUI_API_KEY = process.env.OPEN_WEBUI_API_KEY || '';
+const ORBIT_PERFORMANCE_MEMORY_ID = 'a67fc9fe-61a2-4902-b7cb-38a4481206a0';
 
 /** Shape of the orbit performance data written by the optimizer agent */
 interface OrbitPerformance {
@@ -69,18 +71,25 @@ let cachedAt = 0;
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Load orbit performance data. Cached for 5 minutes to avoid
- * reading the file on every post generation.
- * Falls back to defaults if the file is missing or malformed.
+ * Load orbit performance data from Open WebUI hive mind.
+ * Cached for 5 minutes. Falls back to defaults if unavailable.
  */
-export function getOrbitPerformance(): OrbitPerformance {
+export async function getOrbitPerformance(): Promise<OrbitPerformance> {
   const now = Date.now();
   if (cached && now - cachedAt < CACHE_TTL_MS) return cached;
 
   try {
-    const filePath = join(__dirname, 'orbit-performance.json');
-    const raw = readFileSync(filePath, 'utf-8');
-    const parsed = JSON.parse(raw) as Partial<OrbitPerformance>;
+    const res = await fetch(
+      `${OPEN_WEBUI_URL}/api/v1/memories/${ORBIT_PERFORMANCE_MEMORY_ID}`,
+      {
+        headers: { Authorization: `Bearer ${OPEN_WEBUI_API_KEY}` },
+        signal: AbortSignal.timeout(5000),
+      },
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const memory = (await res.json()) as { content: string };
+    const jsonStr = memory.content.replace(/^\[orbit-performance\]\s*/, '');
+    const parsed = JSON.parse(jsonStr) as Partial<OrbitPerformance>;
     cached = { ...DEFAULT_PERFORMANCE, ...parsed };
     cachedAt = now;
     return cached;
@@ -95,8 +104,8 @@ export function getOrbitPerformance(): OrbitPerformance {
  * Get grimoire category weights from orbit data.
  * Returns a weighted array where higher-performing categories appear more often.
  */
-export function getWeightedGrimoireCategories(): string[] {
-  const perf = getOrbitPerformance();
+export async function getWeightedGrimoireCategories(): Promise<string[]> {
+  const perf = await getOrbitPerformance();
   const weights = perf.grimoireCategories.weights;
   const result: string[] = [];
 
@@ -115,8 +124,10 @@ export function getWeightedGrimoireCategories(): string[] {
  * Get new hook suggestions for a specific pillar.
  * These come from orbit's researcher via competitor analysis.
  */
-export function getOrbitHookSuggestions(pillar: ThreadsPillar): string[] {
-  const perf = getOrbitPerformance();
+export async function getOrbitHookSuggestions(
+  pillar: ThreadsPillar,
+): Promise<string[]> {
+  const perf = await getOrbitPerformance();
   return perf.newHookSuggestions
     .filter((s) => s.pillar === pillar)
     .map((s) => s.hook);
@@ -125,8 +136,11 @@ export function getOrbitHookSuggestions(pillar: ThreadsPillar): string[] {
 /**
  * Check if a hook pattern should be avoided based on orbit data.
  */
-export function shouldAvoidHook(pillar: ThreadsPillar, hook: string): boolean {
-  const perf = getOrbitPerformance();
+export async function shouldAvoidHook(
+  pillar: ThreadsPillar,
+  hook: string,
+): Promise<boolean> {
+  const perf = await getOrbitPerformance();
   const rankings = perf.hookRankings[pillar];
   if (!rankings?.avoidPatterns.length) return false;
 
@@ -139,7 +153,7 @@ export function shouldAvoidHook(pillar: ThreadsPillar, hook: string): boolean {
 /**
  * Get the best CTA suggestions from orbit performance data.
  */
-export function getTopCTAs(): string[] {
-  const perf = getOrbitPerformance();
+export async function getTopCTAs(): Promise<string[]> {
+  const perf = await getOrbitPerformance();
   return perf.ctaInsights.topPerformingCTAs;
 }
