@@ -23,22 +23,24 @@ export const dynamic = 'force-dynamic';
  * State is persisted in the bip_state table (shared with bip-daily cron).
  */
 
-// Milestone thresholds (mirrors bip-metrics.ts)
+// Milestone thresholds — only SEO metrics that are real signals.
+// MAU milestones removed (grimoire visitors, not product signal).
+// MRR milestones removed (everyone on coupons, not meaningful yet).
+// Clicks/day is the real growth signal — post when it crosses key thresholds.
 const MILESTONES: Array<{
-  metric: 'mau' | 'mrr' | 'impressionsPerDay';
+  metric: 'impressionsPerDay' | 'clicksPerDay';
   label: string;
   values: number[];
 }> = [
   {
-    metric: 'mau',
-    label: 'monthly active users',
-    values: [500, 1000, 2500, 5000],
+    metric: 'clicksPerDay',
+    label: 'clicks/day from Google',
+    values: [100, 250, 500, 1000],
   },
-  { metric: 'mrr', label: 'MRR (£)', values: [100, 500, 1000] },
   {
     metric: 'impressionsPerDay',
     label: 'impressions/day',
-    values: [50000, 100000, 250000],
+    values: [25000, 50000, 100000, 250000],
   },
 ];
 
@@ -317,16 +319,36 @@ export async function GET(request: NextRequest) {
         });
 
     // Check and post milestones
-    const snapshot = { mau: currentMau, mrr: currentMrr, impressionsPerDay };
+    // clicksPerDay: total 7-day clicks / 7 (from Search Console data fetched above)
+    const totalClicks7d =
+      impressionsPerDay > 0
+        ? await (async () => {
+            try {
+              const scStartDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                .toISOString()
+                .split('T')[0];
+              const scData = await getSearchConsoleData(scStartDate, today);
+              return Math.round(scData.totalClicks / 7);
+            } catch {
+              return 0;
+            }
+          })()
+        : 0;
+
+    const snapshot = { impressionsPerDay, clicksPerDay: totalClicks7d };
     const milestonesPosted: string[] = [];
 
     for (const milestone of MILESTONES) {
-      const currentValue = snapshot[milestone.metric];
+      const currentValue =
+        snapshot[milestone.metric as keyof typeof snapshot] ?? 0;
       for (const threshold of milestone.values) {
         const stateKey = `bip_milestone_${milestone.metric}_${threshold}`;
         const alreadyPosted = await getBipState(stateKey);
         if (currentValue >= threshold && !alreadyPosted) {
           try {
+            // Set state BEFORE posting — prevents duplicates on Vercel cron retries
+            await setBipState(stateKey, 'posted');
+
             const milestoneCardPath = path.join(
               '/tmp',
               `bip-milestone-${milestone.metric}-${threshold}-${today}.png`,
@@ -334,7 +356,7 @@ export async function GET(request: NextRequest) {
             await renderMilestoneCard(
               {
                 metric: milestone.metric,
-                value: milestone.metric === 'mrr' ? currentMrr : currentValue,
+                value: currentValue,
                 threshold,
                 context: `${weekLabel} · lunary.app`,
               },
@@ -343,9 +365,9 @@ export async function GET(request: NextRequest) {
             const milestoneMediaId = await uploadCardImage(milestoneCardPath);
 
             const milestoneCaption = [
-              `Milestone: ${threshold}${milestone.metric === 'mrr' ? '' : ''} ${milestone.label}`,
+              `First time: ${threshold.toLocaleString()} ${milestone.label}`,
               '',
-              `Lunary just crossed ${milestone.metric === 'mrr' ? `£${threshold}` : threshold.toLocaleString()} ${milestone.label}.`,
+              `Lunary crossed ${threshold.toLocaleString()} ${milestone.label} for the first time.`,
               '',
               'Building in public.',
             ].join('\n');
@@ -359,8 +381,6 @@ export async function GET(request: NextRequest) {
               mediaId: milestoneMediaId,
               scheduledFor: milestoneDate.toISOString(),
             });
-
-            await setBipState(stateKey, 'posted');
             milestonesPosted.push(`${milestone.metric}-${threshold}`);
           } catch (milestoneError) {
             console.warn(
