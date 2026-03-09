@@ -18,21 +18,34 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
-    // FAST PATH: Query pre-computed metrics from daily_metrics table
-    const result = await sql.query(
-      `SELECT
-        MAX(mrr) as mrr,
-        SUM(new_signups) as total_signups,
-        SUM(new_conversions) as total_conversions
-      FROM daily_metrics
-      WHERE metric_date >= $1 AND metric_date <= $2`,
-      [
-        range.start.toISOString().split('T')[0],
-        range.end.toISOString().split('T')[0],
-      ],
-    );
+    // MRR: live query from subscriptions so it always reflects current
+    // discounts/coupons. daily_metrics.mrr has inconsistent historical values
+    // from before coupon sync was implemented — never use MAX() on it.
+    // Signups/conversions still aggregate from daily_metrics.
+    const [mrrResult, aggregateResult] = await Promise.all([
+      sql.query(
+        `SELECT COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as mrr
+         FROM subscriptions
+         WHERE status = 'active'
+           AND stripe_subscription_id IS NOT NULL
+           AND (user_email IS NULL OR (user_email NOT LIKE '%@test.lunary.app' AND user_email != 'test@test.lunary.app'))`,
+        [],
+      ),
+      sql.query(
+        `SELECT
+          SUM(new_signups) as total_signups,
+          SUM(new_conversions) as total_conversions
+        FROM daily_metrics
+        WHERE metric_date >= $1 AND metric_date <= $2`,
+        [
+          range.start.toISOString().split('T')[0],
+          range.end.toISOString().split('T')[0],
+        ],
+      ),
+    ]);
 
-    const mrr = Number(result.rows[0]?.mrr || 0);
+    const mrr = Number(mrrResult.rows[0]?.mrr || 0);
+    const result = { rows: [{ ...aggregateResult.rows[0] }] };
     const signups = Number(result.rows[0]?.total_signups || 0);
     const conversions = Number(result.rows[0]?.total_conversions || 0);
 

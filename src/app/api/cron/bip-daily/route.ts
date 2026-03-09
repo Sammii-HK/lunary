@@ -181,34 +181,62 @@ export async function GET(request: NextRequest) {
     const bulletBlock = bullets.join('\n');
 
     // -----------------------------------------------------------------------
+    // Guard: skip if no metrics to show — a post with no real data is useless
+    // -----------------------------------------------------------------------
+
+    if (bullets.length === 0) {
+      console.log(
+        '[BIP Daily] Skipping — no metrics available (daily_metrics row missing for yesterday)',
+      );
+      return NextResponse.json({
+        skipped: true,
+        reason: 'No metrics available',
+      });
+    }
+
+    // -----------------------------------------------------------------------
     // LLM generates ONLY the hook line + closing question (no numbers)
     // -----------------------------------------------------------------------
 
-    const hookPrompt = `Write two short lines for a Build in Public tweet (day ${nextDay}):
+    const hookPrompt = `Write two short lines for a Build in Public post (day ${nextDay}).
 
-1. A hook line: 4-8 words, honest, conversational. This comes after "Day ${nextDay} of building in public —". Examples: "quiet progress today", "the dashboard finally makes sense", "small wins add up".${isRecord ? ` Yesterday was a new DAU record — incorporate that.` : ''}
+Line 1 (hook): 4-8 words, honest, specific, lowercase. This completes the sentence "Day ${nextDay} of building in public, ". Do NOT use a dash. Examples: "quiet progress today", "the dashboard finally makes sense", "small wins add up".${isRecord ? ` Yesterday was a new DAU record, reference that specifically.` : ''}
 
-2. A closing line: one short question or observation that invites replies. No hashtags.
+Line 2 (closing): one short question or observation that invites replies. Must be specific to building a product, not generic motivation.
 
-Reply with ONLY these two lines, nothing else. Line 1 is the hook, line 2 is the closing.
-UK English. No em dashes. Sentence case.`;
+STRICT RULES — violation means failure:
+- NO hashtags of any kind
+- NO dashes or hyphens (not em dash, not hyphen, not —)
+- NO "stay motivated", "keep going", or generic hustle phrases
+- NO exclamation marks
+- UK English, sentence case
+- Reply with ONLY the two lines, no numbering, no labels, no extra text`;
 
     const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
       model: LLM_MODEL,
       messages: [{ role: 'user', content: hookPrompt }],
-      max_tokens: 100,
-      temperature: 0.9,
+      max_tokens: 80,
+      temperature: 0.85,
     });
 
     const llmOutput = completion.choices[0]?.message?.content?.trim() ?? '';
     const llmLines = llmOutput.split('\n').filter((l) => l.trim());
-    const hookLine = llmLines[0]?.trim() || 'steady progress';
-    const closingLine =
-      llmLines[1]?.trim() || 'What are you building this week?';
+    let hookLine = llmLines[0]?.trim() || 'steady progress';
+    let closingLine = llmLines[1]?.trim() || 'What shipped for you this week?';
+
+    // Post-process: strip any hashtags and em dashes the LLM snuck in
+    hookLine = hookLine
+      .replace(/#\w+/g, '')
+      .replace(/\s*[—–]\s*/g, ', ')
+      .trim();
+    closingLine = closingLine
+      .replace(/#\w+/g, '')
+      .replace(/\s*[—–]\s*/g, ', ')
+      .trim();
 
     // Assemble the final caption — numbers are never LLM-generated
-    const caption = `Day ${nextDay} of building in public — ${hookLine}\n\n${bulletBlock}\n\n${closingLine}`;
+    const caption = `Day ${nextDay} of building in public, ${hookLine}\n\n${bulletBlock}\n\n${closingLine}`;
 
     // -----------------------------------------------------------------------
     // Dry run: return without scheduling

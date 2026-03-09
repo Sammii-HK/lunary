@@ -156,11 +156,8 @@ export async function GET(request: NextRequest) {
            AND (user_email IS NULL OR (user_email NOT LIKE '%@test.lunary.app' AND user_email != 'test@test.lunary.app'))`,
         [now37dAgo, now7dAgo],
       ),
-      // Prior MRR: snapshotted from daily_metrics 7 days ago
-      sql.query(
-        `SELECT mrr FROM daily_metrics ORDER BY metric_date DESC LIMIT 1 OFFSET 7`,
-        [],
-      ),
+      // Prior MRR: not meaningful when everyone is on coupons — return 0
+      Promise.resolve({ rows: [{ mrr: 0 }] }),
       // New signups this week
       sql.query(
         `SELECT COUNT(*) as count FROM "user"
@@ -176,6 +173,24 @@ export async function GET(request: NextRequest) {
     const priorMau = Number(priorMauResult.rows[0]?.count || 0);
     const priorMrr = Number(priorMrrResult.rows[0]?.mrr || 0);
     const newSignups = Number(signupsResult.rows[0]?.count || 0);
+
+    // Pre-mark all MAU milestones that are already crossed as posted so they
+    // never fire. The MAU here is total grimoire/app users (not product-only),
+    // so 500/1000/2500/5000 thresholds are meaningless and fired incorrectly.
+    // Real product milestones will be posted manually when meaningful.
+    for (const milestone of MILESTONES) {
+      if (milestone.metric !== 'mau') continue;
+      const currentValue = currentMau;
+      for (const threshold of milestone.values) {
+        if (currentValue >= threshold) {
+          const stateKey = `bip_milestone_${milestone.metric}_${threshold}`;
+          const alreadySet = await getBipState(stateKey);
+          if (!alreadySet) {
+            await setBipState(stateKey, 'posted');
+          }
+        }
+      }
+    }
 
     // Fetch most recent DAU from daily_metrics — non-critical
     let currentDau = 0;
