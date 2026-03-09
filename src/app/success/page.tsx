@@ -91,7 +91,7 @@ export default function SuccessPage() {
             session.subscription?.metadata?.trigger_feature ||
             session.metadata?.trigger_feature;
           conversionTracking.trialStarted(
-            undefined,
+            userIdFromSession,
             session.customer_email,
             planType as 'monthly' | 'yearly',
             triggerFeature,
@@ -114,7 +114,7 @@ export default function SuccessPage() {
           }
         } else {
           conversionTracking.subscriptionStarted(
-            undefined,
+            userIdFromSession,
             session.customer_email,
             planType as 'monthly' | 'yearly',
           );

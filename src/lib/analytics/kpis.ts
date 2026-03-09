@@ -1039,7 +1039,11 @@ export async function getConversionInfluence(
 
   // Subscription influence: % of subscription_started users that had a prior grimoire view
   // Uses identity resolution so anonymous grimoire views link to signed-in users
-  const subscriptionEventTypes = ['subscription_started', 'trial_converted'];
+  const subscriptionEventTypes = [
+    'subscription_started',
+    'trial_converted',
+    'trial_started',
+  ];
   const signupEventTypes = ['signup_completed', 'signup'];
 
   const base = await sql.query(
