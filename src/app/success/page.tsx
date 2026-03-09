@@ -20,12 +20,14 @@ interface CheckoutSession {
       planType?: string;
       plan_id?: string;
       userId?: string;
+      trigger_feature?: string;
     };
   };
   metadata?: {
     planType?: string;
     plan_id?: string;
     userId?: string;
+    trigger_feature?: string;
   };
 }
 
@@ -85,10 +87,14 @@ export default function SuccessPage() {
           session.subscription.trial_end > Date.now() / 1000;
 
         if (isTrial) {
+          const triggerFeature =
+            session.subscription?.metadata?.trigger_feature ||
+            session.metadata?.trigger_feature;
           conversionTracking.trialStarted(
             undefined,
             session.customer_email,
             planType as 'monthly' | 'yearly',
+            triggerFeature,
           );
 
           try {

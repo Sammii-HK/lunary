@@ -332,6 +332,7 @@ export async function POST(request: NextRequest) {
       discountCode,
       promoCode,
       referralCode,
+      triggerFeature,
     } = requestBody;
 
     let resolvedCustomerId =
@@ -571,6 +572,13 @@ export async function POST(request: NextRequest) {
       plan_id: planId,
       planType: isMonthly ? 'monthly' : 'yearly',
     };
+
+    if (
+      typeof triggerFeature === 'string' &&
+      triggerFeature.trim().length > 0
+    ) {
+      metadata.trigger_feature = triggerFeature.trim();
+    }
 
     if (typeof userId === 'string' && userId.trim().length > 0) {
       metadata.userId = userId;

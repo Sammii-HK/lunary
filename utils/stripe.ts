@@ -6,6 +6,7 @@ export async function createCheckoutSession(
   userId?: string,
   userEmail?: string,
   promoCode?: string,
+  triggerFeature?: string,
 ) {
   const response = await fetch('/api/stripe/create-checkout-session', {
     method: 'POST',
@@ -20,6 +21,7 @@ export async function createCheckoutSession(
       promoCode,
       userId,
       userEmail,
+      triggerFeature,
     }),
   });
 

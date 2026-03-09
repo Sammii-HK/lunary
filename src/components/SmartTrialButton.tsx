@@ -86,9 +86,12 @@ export function SmartTrialButton({
       // If trial is active, they should be able to access the feature
       // So we don't show a button - the paywall shouldn't be there
       // But if it is, link to app
+      const pricingHref = feature
+        ? `/pricing?nav=app&trigger=${encodeURIComponent(feature)}`
+        : '/pricing?nav=app';
       return {
         text: isTrialActive ? 'Open app' : 'See what Lunary+ unlocks',
-        href: isTrialActive ? '/app' : '/pricing',
+        href: isTrialActive ? '/app' : pricingHref,
         action: 'link' as const,
         variant: 'lunary-soft' as const,
       };
@@ -213,7 +216,10 @@ export function SmartTrialButton({
                 if (isIOS === true) {
                   setShowIOSPaywall(true);
                 } else {
-                  window.location.href = '/pricing?nav=app';
+                  const triggerParam = feature
+                    ? `&trigger=${encodeURIComponent(feature)}`
+                    : '';
+                  window.location.href = `/pricing?nav=app${triggerParam}`;
                 }
               }}
             />
