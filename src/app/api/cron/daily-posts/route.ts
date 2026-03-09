@@ -1009,7 +1009,9 @@ export async function GET(request: NextRequest) {
             // We skip preUploadImage here — calling our own OG routes from Vercel serverside causes
             // self-referencing fetch timeouts.
             const staticImageUrl = rawImageUrl.includes('/api/og/')
-              ? rawImageUrl.replace(/^(https?:\/\/[^/]+)\/\//, '$1/') + '.png'
+              ? rawImageUrl
+                  .replace(/^(https?:\/\/[^/]+)\/\//, '$1/')
+                  .replace(/(\?.*)$/, '.png$1')
               : rawImageUrl;
             const storyCategory =
               VARIANT_TO_HIGHLIGHT[story.variant] || 'Cosmic';
