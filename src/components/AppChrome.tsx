@@ -162,6 +162,7 @@ export function AppChrome() {
     '/explore', // Explore is always app-only
     '/community',
     '/pricing', // Pricing always shows app nav (in-app paywall on iOS, Stripe on web)
+    '/referrals',
   ];
 
   // Define core marketing pages (always show marketing nav)
