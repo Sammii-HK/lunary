@@ -69,19 +69,14 @@ export async function POST(request: NextRequest) {
       metadata,
     } = data;
 
-    const safeUserId =
-      typeof userId === 'string'
-        ? userId.trim()
-        : typeof userId === 'number' || typeof userId === 'bigint'
-          ? String(userId)
-          : '';
-
     const normalizedEmail = normalizeEmail(userEmail);
 
-    const currentUser =
-      !safeUserId || !normalizedEmail ? await getCurrentUser(request) : null;
-    const resolvedUserId = safeUserId || currentUser?.id || null;
-    const resolvedEmail = normalizedEmail || currentUser?.email || null;
+    // Always resolve identity from the session — never trust userId from the
+    // request body. Accepting arbitrary body userIds was the bot attack vector:
+    // bots posted random UUIDs as userId and bypassed the session check.
+    const currentUser = await getCurrentUser(request);
+    const resolvedUserId = currentUser?.id || null;
+    const resolvedEmail = currentUser?.email || normalizedEmail || null;
 
     // Identity stitching: if we have both a real user id and an anonymous id, link them.
     // This lets retention treat anonymous "returns" as belonging to the signed-in user.
