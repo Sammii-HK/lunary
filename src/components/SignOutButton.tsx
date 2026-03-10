@@ -53,7 +53,13 @@ export function SignOutButton({
 
     // Hard reload to guarantee UI updates
     if (redirect) {
-      window.location.href = Capacitor.isNativePlatform() ? '/auth' : '/';
+      // Use /auth on native OR when already inside the app section (belt-and-suspenders
+      // guard against isNativePlatform() returning false in certain WKWebView contexts)
+      const isInApp =
+        typeof window !== 'undefined' &&
+        window.location.pathname.startsWith('/app');
+      window.location.href =
+        Capacitor.isNativePlatform() || isInApp ? '/auth' : '/';
     } else {
       window.location.reload();
     }

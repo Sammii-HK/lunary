@@ -220,7 +220,46 @@ export function AuthComponent({
           setSuccess('Account created successfully! Welcome to Lunary.');
         }
       } else {
-        // No timeout - let the request complete naturally
+        if (isNative) {
+          // On native iOS, WKWebView doesn't reliably persist Set-Cookie headers
+          // from programmatic fetch requests. Use the email-native endpoint which
+          // returns the signed session token so we can set it via document.cookie
+          // (same pattern as Apple Sign-In).
+          const response = await fetch('/api/auth/email-native', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              email: formData.email.toLowerCase().trim(),
+              password: formData.password,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Sign in failed');
+          }
+
+          // Set cookie manually so WKWebView includes it in subsequent navigation requests
+          if (data.token) {
+            const cookieName =
+              data.cookieName || '__Secure-better-auth.session_token';
+            const expires = new Date(data.expiresAt).toUTCString();
+            document.cookie = `${cookieName}=${encodeURIComponent(data.token)}; path=/; expires=${expires}; SameSite=Lax; Secure`;
+          }
+
+          invalidateAuthCache();
+
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            window.location.href = '/app';
+          }
+          return;
+        }
+
+        // Web sign-in — no timeout, let the request complete naturally
         const result = await betterAuthClient.signIn.email({
           email: formData.email.toLowerCase().trim(),
           password: formData.password,
@@ -272,11 +311,7 @@ export function AuthComponent({
             );
           const destination = isAllowedPath ? decoded : '/app';
           setTimeout(() => {
-            if (Capacitor.isNativePlatform()) {
-              router.replace(destination);
-            } else {
-              window.location.href = destination;
-            }
+            window.location.href = destination;
           }, 500);
           return;
         }
