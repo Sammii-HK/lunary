@@ -9,7 +9,6 @@ import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
 import { useABTestTracking } from '@/hooks/useABTestTracking';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
-import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 
 export default function TarotReadings() {
   const { user, loading } = useUser();
@@ -87,14 +86,6 @@ export default function TarotReadings() {
         userBirthday={user?.birthday}
         user={user}
       />
-      {authStatus.isAuthenticated && (
-        <div className='px-4 pb-6'>
-          <ReferralShareCTA
-            compact
-            message='Enjoying your readings? Give a friend 30 days of Pro free when they join Lunary.'
-          />
-        </div>
-      )}
     </>
   );
 }

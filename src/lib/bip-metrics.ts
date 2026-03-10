@@ -37,19 +37,16 @@ function loadEnvFile(filePath: string): Record<string, string> {
 function resolveEnv(): { adminKey: string; baseUrl: string } {
   // Primary: already in process.env (e.g. loaded by dotenv before import)
   let adminKey = process.env.LUNARY_ADMIN_KEY?.trim() ?? '';
-  let baseUrl = process.env.LUNARY_API_URL?.trim() ?? '';
+  // Base URL comes only from env — never from file-read values
+  const baseUrl = process.env.LUNARY_API_URL?.trim() || 'https://lunary.app';
 
   if (!adminKey) {
-    // Fallback 1: lunary-mcp/.env (same dir the MCP server uses)
+    // Fallback: lunary-mcp/.env (same dir the MCP server uses)
     const mcpEnv = loadEnvFile(resolve(process.cwd(), 'lunary-mcp', '.env'));
     adminKey = mcpEnv.LUNARY_ADMIN_KEY?.trim() ?? '';
-    baseUrl = baseUrl || (mcpEnv.LUNARY_API_URL?.trim() ?? '');
   }
 
-  return {
-    adminKey,
-    baseUrl: baseUrl || 'https://lunary.app',
-  };
+  return { adminKey, baseUrl };
 }
 
 // ---------------------------------------------------------------------------

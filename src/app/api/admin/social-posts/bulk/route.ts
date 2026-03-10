@@ -9,7 +9,8 @@ export async function POST(request: NextRequest) {
     const authResult = await requireAdminAuth(request);
     if (authResult instanceof NextResponse) return authResult;
 
-    const { action } = await request.json();
+    const body = await request.json();
+    const { action } = body;
 
     if (!action) {
       return NextResponse.json(
@@ -52,6 +53,31 @@ export async function POST(request: NextRequest) {
         success: true,
         message: `Cleared ${result.rows.length} posts and video jobs`,
         count: result.rows.length,
+      });
+    }
+
+    if (action === 'reset_sent') {
+      // Reset specific posts (by id array) from 'sent' back to 'approved'
+      const ids = Array.isArray(body.postIds)
+        ? body.postIds.map(Number).filter(Boolean)
+        : [];
+
+      if (ids.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'postIds array is required' },
+          { status: 400 },
+        );
+      }
+
+      const result = await sql.query(
+        `UPDATE social_posts SET status = 'approved', updated_at = NOW() WHERE id = ANY($1::int[]) AND status = 'sent' RETURNING id`,
+        [ids],
+      );
+
+      return NextResponse.json({
+        success: true,
+        message: `Reset ${result.rows.length} posts back to approved`,
+        ids: result.rows.map((r: { id: number }) => r.id),
       });
     }
 

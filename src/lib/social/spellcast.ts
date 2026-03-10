@@ -259,6 +259,7 @@ export async function postToSpellcastMultiPlatform(params: {
     if (!createRes.ok) {
       const errorText = await createRes.text();
       for (const platform of safePlatforms) {
+        if (!ALLOWED_PLATFORMS.has(platform)) continue;
         results[platform] = {
           success: false,
           error: `Spellcast create failed (${createRes.status}): ${errorText}`,
@@ -279,6 +280,7 @@ export async function postToSpellcastMultiPlatform(params: {
     if (!scheduleRes.ok) {
       const errorText = await scheduleRes.text();
       for (const platform of safePlatforms) {
+        if (!ALLOWED_PLATFORMS.has(platform)) continue;
         results[platform] = {
           success: false,
           error: `Spellcast schedule failed (${scheduleRes.status}): ${errorText}`,
@@ -292,6 +294,7 @@ export async function postToSpellcastMultiPlatform(params: {
     const postId = scheduled.postizPostId || scheduled.id;
 
     for (const platform of safePlatforms) {
+      if (!ALLOWED_PLATFORMS.has(platform)) continue;
       results[platform] = {
         success: true,
         postId,
@@ -301,6 +304,7 @@ export async function postToSpellcastMultiPlatform(params: {
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : 'Unknown error';
     for (const platform of safePlatforms) {
+      if (!ALLOWED_PLATFORMS.has(platform)) continue;
       results[platform] = {
         success: false,
         error: errMsg,

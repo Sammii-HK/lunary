@@ -220,7 +220,29 @@ export function AuthComponent({
           setSuccess('Account created successfully! Welcome to Lunary.');
         }
       } else {
-        // No timeout - let the request complete naturally
+        if (isNative) {
+          // On native iOS, WKWebView only reliably processes Set-Cookie on
+          // navigation responses. Submit a hidden form POST to signin-native
+          // which forwards better-auth's cookies verbatim on a 303 redirect.
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '/api/auth/signin-native';
+          const emailInput = document.createElement('input');
+          emailInput.type = 'hidden';
+          emailInput.name = 'email';
+          emailInput.value = formData.email.toLowerCase().trim();
+          const passInput = document.createElement('input');
+          passInput.type = 'hidden';
+          passInput.name = 'password';
+          passInput.value = formData.password;
+          form.appendChild(emailInput);
+          form.appendChild(passInput);
+          document.body.appendChild(form);
+          form.submit();
+          return;
+        }
+
+        // Web sign-in — no timeout, let the request complete naturally
         const result = await betterAuthClient.signIn.email({
           email: formData.email.toLowerCase().trim(),
           password: formData.password,
@@ -272,11 +294,7 @@ export function AuthComponent({
             );
           const destination = isAllowedPath ? decoded : '/app';
           setTimeout(() => {
-            if (Capacitor.isNativePlatform()) {
-              router.replace(destination);
-            } else {
-              window.location.href = destination;
-            }
+            router.push(destination);
           }, 500);
           return;
         }
@@ -388,15 +406,12 @@ export function AuthComponent({
         throw new Error(data.error || 'Apple sign-in failed');
       }
 
-      // Set cookie directly in JS so WKWebView includes it in subsequent navigation requests.
-      // data.token is already signed (token.base64sig). URI-encode it to match the server-set format.
-      // Must use __Secure- prefix with Secure flag to match better-auth's cookie name
-      // (triggered because NEXT_PUBLIC_BASE_URL starts with https://).
+      // Set cookie via document.cookie — omit Secure flag on HTTP (localhost)
       if (data.token) {
-        const cookieName =
-          data.cookieName || '__Secure-better-auth.session_token';
+        const cookieName = data.cookieName || 'better-auth.session_token';
         const expires = new Date(data.expiresAt).toUTCString();
-        document.cookie = `${cookieName}=${encodeURIComponent(data.token)}; path=/; expires=${expires}; SameSite=Lax; Secure`;
+        const isSecure = window.location.protocol === 'https:';
+        document.cookie = `${cookieName}=${encodeURIComponent(data.token)}; path=/; expires=${expires}; SameSite=Lax${isSecure ? '; Secure' : ''}`;
       }
 
       invalidateAuthCache();

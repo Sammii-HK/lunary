@@ -8,6 +8,11 @@ import {
 } from '@/lib/cosmic-pulse/email-template';
 import { sendEmail } from '@/lib/email';
 import { hasUserReceivedNotificationToday } from '@/lib/notifications/tiered-service';
+import {
+  canonicaliseEvent,
+  insertCanonicalEvent,
+} from '@/lib/analytics/canonical-events';
+import { forwardEventToPostHog } from '@/lib/posthog-forward';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +30,7 @@ function ensureVapidConfigured() {
 }
 
 async function trackConversionServer(
-  baseUrl: string,
+  _baseUrl: string,
   payload: {
     event: string;
     userId?: string;
@@ -34,11 +39,22 @@ async function trackConversionServer(
   },
 ) {
   try {
-    await fetch(`${baseUrl}/api/ether/cv`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+    const canonical = canonicaliseEvent({
+      eventType: payload.event,
+      userId: payload.userId,
+      userEmail: payload.userEmail,
+      metadata: payload.metadata,
     });
+    if (canonical.ok) {
+      const { inserted } = await insertCanonicalEvent(canonical.row);
+      if (inserted && payload.userId) {
+        forwardEventToPostHog({
+          distinctId: payload.userId,
+          event: payload.event,
+          properties: payload.metadata || {},
+        });
+      }
+    }
   } catch (error) {
     console.error('Failed to track conversion:', error);
   }

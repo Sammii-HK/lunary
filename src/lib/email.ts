@@ -1,25 +1,16 @@
-import {
-  TransactionalEmailsApi,
-  TransactionalEmailsApiApiKeys,
-  SendSmtpEmail,
-} from '@getbrevo/brevo';
-
+import { Resend } from 'resend';
 import { trackNotificationEvent } from '@/lib/analytics/tracking';
 
-let brevoApiInstance: TransactionalEmailsApi | null = null;
+let resendClient: Resend | null = null;
 
-function getBrevoClient() {
-  if (!brevoApiInstance) {
-    if (!process.env.BREVO_API_KEY) {
-      throw new Error('BREVO_API_KEY is not configured');
+function getResendClient() {
+  if (!resendClient) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
     }
-    brevoApiInstance = new TransactionalEmailsApi();
-    brevoApiInstance.setApiKey(
-      TransactionalEmailsApiApiKeys.apiKey,
-      process.env.BREVO_API_KEY,
-    );
+    resendClient = new Resend(process.env.RESEND_API_KEY);
   }
-  return brevoApiInstance;
+  return resendClient;
 }
 
 export interface EmailTrackingOptions {
@@ -40,6 +31,7 @@ export interface EmailOptions {
   subject: string;
   html?: string;
   text?: string;
+  replyTo?: string;
   tracking?: EmailTrackingOptions;
 }
 
@@ -50,17 +42,8 @@ export interface BatchEmailResult {
   errors: Array<{ email: string; error: string }>;
 }
 
-const getFromEmail = () => {
-  return process.env.EMAIL_FROM || 'Lunary <noreply@lunary.app>';
-};
-
-const parseFromEmail = (from: string) => {
-  const match = from.match(/^(.+?)\s*<(.+?)>$/);
-  if (match) {
-    return { name: match[1].trim(), email: match[2].trim() };
-  }
-  return { name: 'Lunary', email: from.replace(/[<>]/g, '') };
-};
+const FROM_EMAIL = process.env.EMAIL_FROM || 'Lunary <hello@lunary.app>';
+const REPLY_TO = process.env.EMAIL_REPLY_TO || 'hello@lunary.app';
 
 const APP_BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
@@ -72,12 +55,12 @@ export async function sendEmail({
   subject,
   html,
   text,
+  replyTo,
   tracking,
 }: EmailOptions): Promise<{ id: string } | BatchEmailResult> {
   try {
-    const brevoClient = getBrevoClient();
+    const resend = getResendClient();
     const recipients = Array.isArray(to) ? to : [to];
-    const fromInfo = parseFromEmail(getFromEmail());
     let finalHtml = html || text || 'No content provided';
 
     if (tracking) {
@@ -88,20 +71,21 @@ export async function sendEmail({
     }
 
     if (recipients.length === 1) {
-      const sendSmtpEmail = new SendSmtpEmail();
-      sendSmtpEmail.sender = { name: fromInfo.name, email: fromInfo.email };
-      sendSmtpEmail.replyTo = { email: 'noreply@lunary.app' };
-      sendSmtpEmail.to = [{ email: recipients[0] }];
-      sendSmtpEmail.subject = subject;
-      sendSmtpEmail.htmlContent = finalHtml;
-      if (text) {
-        sendSmtpEmail.textContent = text;
+      const { data, error } = await resend.emails.send({
+        from: FROM_EMAIL,
+        reply_to: replyTo || REPLY_TO,
+        to: recipients[0],
+        subject,
+        html: finalHtml,
+        text: text,
+      });
+
+      if (error) {
+        throw new Error(error.message);
       }
 
-      const data = await brevoClient.sendTransacEmail(sendSmtpEmail);
-
-      const messageId = data.body?.messageId || '';
-      console.log('✅ Email sent successfully:', messageId);
+      const messageId = data?.id || '';
+      console.log('Email sent:', messageId);
 
       if (tracking?.userId) {
         await trackNotificationEvent({
@@ -119,11 +103,12 @@ export async function sendEmail({
       return { id: messageId };
     }
 
-    return await sendBatchEmails(brevoClient, {
+    return await sendBatchEmails(resend, {
       to: recipients,
       subject,
       html: finalHtml,
       text,
+      replyTo: replyTo || REPLY_TO,
     });
   } catch (error) {
     console.error('Email sending failed:', error);
@@ -132,21 +117,24 @@ export async function sendEmail({
 }
 
 async function sendBatchEmails(
-  brevoClient: TransactionalEmailsApi,
+  resend: Resend,
   {
     to,
     subject,
     html,
     text,
+    replyTo,
   }: {
     to: string[];
     subject: string;
     html: string;
     text?: string;
+    replyTo: string;
   },
 ): Promise<BatchEmailResult> {
-  const BATCH_SIZE = 50;
-  const fromInfo = parseFromEmail(getFromEmail());
+  // Resend free tier: 100 emails/day. Send in batches of 10 with a small delay
+  // to avoid bursting and to leave headroom for transactional emails.
+  const BATCH_SIZE = 10;
   const results: BatchEmailResult = {
     success: 0,
     failed: 0,
@@ -160,24 +148,25 @@ async function sendBatchEmails(
     const totalBatches = Math.ceil(to.length / BATCH_SIZE);
 
     console.log(
-      `📧 Sending batch ${batchNumber}/${totalBatches} (${batch.length} recipients)`,
+      `Sending batch ${batchNumber}/${totalBatches} (${batch.length} recipients)`,
     );
 
     const batchPromises = batch.map(async (email) => {
       try {
-        const sendSmtpEmail = new SendSmtpEmail();
-        sendSmtpEmail.sender = { name: fromInfo.name, email: fromInfo.email };
-        sendSmtpEmail.replyTo = { email: 'noreply@lunary.app' };
-        sendSmtpEmail.to = [{ email }];
-        sendSmtpEmail.subject = subject;
-        sendSmtpEmail.htmlContent = html;
-        if (text) {
-          sendSmtpEmail.textContent = text;
+        const { data, error } = await resend.emails.send({
+          from: FROM_EMAIL,
+          reply_to: replyTo,
+          to: email,
+          subject,
+          html,
+          text,
+        });
+
+        if (error) {
+          return { success: false, email, error: error.message };
         }
 
-        const data = await brevoClient.sendTransacEmail(sendSmtpEmail);
-        const messageId = data.body?.messageId || '';
-        return { success: true, email, messageId };
+        return { success: true, email, messageId: data?.id || '' };
       } catch (error) {
         return {
           success: false,
@@ -194,7 +183,6 @@ async function sendBatchEmails(
         const emailResult = result.value;
         if (emailResult.success) {
           results.success++;
-          console.log(`✅ Sent to ${emailResult.email}`);
         } else {
           results.failed++;
           results.errors.push({
@@ -202,7 +190,7 @@ async function sendBatchEmails(
             error: emailResult.error || 'Unknown error',
           });
           console.error(
-            `❌ Failed to send to ${emailResult.email}:`,
+            `Failed to send to ${emailResult.email}:`,
             emailResult.error,
           );
         }
@@ -217,12 +205,12 @@ async function sendBatchEmails(
     });
 
     if (i + BATCH_SIZE < to.length) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
   }
 
   console.log(
-    `📊 Batch email summary: ${results.success} sent, ${results.failed} failed out of ${results.total} total`,
+    `Batch email summary: ${results.success} sent, ${results.failed} failed out of ${results.total} total`,
   );
 
   return results;

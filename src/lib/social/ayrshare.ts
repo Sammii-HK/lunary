@@ -106,13 +106,15 @@ function buildPlatformOptions(
   }
 
   if (p === 'tiktok') {
-    const ttOptions: Record<string, unknown> = {};
+    const ttOptions: Record<string, unknown> = {
+      privacyLevel: 'PUBLIC_TO_EVERYONE',
+    };
     if (settings.tiktokOptions) {
       const tt = settings.tiktokOptions as Record<string, unknown>;
       if (tt.autoAddMusic) ttOptions.autoAddMusic = true;
       if (tt.coverUrl) ttOptions.thumbNail = tt.coverUrl;
     }
-    if (Object.keys(ttOptions).length > 0) options.tikTokOptions = ttOptions;
+    options.tikTokOptions = ttOptions;
   }
 
   if (p === 'pinterest') {
@@ -334,6 +336,7 @@ export async function postToAyrshareMultiPlatform(params: {
           errorText,
         );
         for (const platform of textOnlyPlatforms) {
+          if (!ALLOWED_PLATFORMS.has(platform)) continue;
           results[platform] = {
             success: false,
             error: `Ayrshare API error (${response.status}): ${errorText}`,
@@ -342,7 +345,9 @@ export async function postToAyrshareMultiPlatform(params: {
       } else {
         const data = await response.json();
         const postId = data.id || data.refId;
+        const isScheduledAck = data.status === 'scheduled';
         for (const platform of textOnlyPlatforms) {
+          if (!ALLOWED_PLATFORMS.has(platform)) continue;
           const mapped = toAyrsharePlatform(platform);
           const platformResult = data[mapped];
           if (platformResult?.status === 'error') {
@@ -350,6 +355,12 @@ export async function postToAyrshareMultiPlatform(params: {
               success: false,
               postId,
               error: platformResult.message || `${platform} post failed`,
+            };
+          } else if (!platformResult && !isScheduledAck) {
+            results[platform] = {
+              success: false,
+              postId,
+              error: `${platform} was not included in the Ayrshare response`,
             };
           } else {
             results[platform] = {
@@ -362,6 +373,7 @@ export async function postToAyrshareMultiPlatform(params: {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       for (const platform of textOnlyPlatforms) {
+        if (!ALLOWED_PLATFORMS.has(platform)) continue;
         results[platform] = { success: false, error: errorMsg };
       }
     }
@@ -450,11 +462,14 @@ export async function postToAyrshareMultiPlatform(params: {
   }
 
   if (params.tiktokOptions) {
-    const ttOpts: Record<string, unknown> = {};
+    const ttOpts: Record<string, unknown> = {
+      // Required by TikTok API for all posts
+      privacyLevel: 'PUBLIC_TO_EVERYONE',
+    };
     if (params.tiktokOptions.autoAddMusic) ttOpts.autoAddMusic = true;
     if (params.tiktokOptions.coverUrl)
       ttOpts.thumbNail = params.tiktokOptions.coverUrl;
-    if (Object.keys(ttOpts).length > 0) payload.tikTokOptions = ttOpts;
+    payload.tikTokOptions = ttOpts;
   }
 
   if (params.instagramOptions) {
@@ -497,6 +512,7 @@ export async function postToAyrshareMultiPlatform(params: {
       const errorText = await response.text();
       console.error(`Ayrshare API error (${response.status}):`, errorText);
       for (const platform of mediaPlatforms) {
+        if (!ALLOWED_PLATFORMS.has(platform)) continue;
         results[platform] = {
           success: false,
           error: `Ayrshare API error (${response.status}): ${errorText}`,
@@ -512,23 +528,44 @@ export async function postToAyrshareMultiPlatform(params: {
       const errMsg = data.message || 'Ayrshare post failed';
       console.error('Ayrshare top-level error:', errMsg);
       for (const platform of mediaPlatforms) {
+        if (!ALLOWED_PLATFORMS.has(platform)) continue;
         results[platform] = { success: false, error: errMsg };
       }
       return { results };
     }
 
     const postId = data.id || data.refId;
+    // Ayrshare returns 'scheduled' for future-dated posts (no per-platform keys yet)
+    const isScheduledAck = data.status === 'scheduled';
+
+    console.log('Ayrshare response status:', data.status, 'postId:', postId);
 
     // Ayrshare returns per-platform status in the response
     for (const platform of mediaPlatforms) {
+      if (!ALLOWED_PLATFORMS.has(platform)) continue;
       const mapped = toAyrsharePlatform(platform);
       const platformResult = data[mapped];
 
       if (platformResult?.status === 'error') {
+        console.error(
+          `Ayrshare per-platform error for ${mapped}:`,
+          platformResult.message,
+        );
         results[platform] = {
           success: false,
           postId,
           error: platformResult.message || `${platform} post failed`,
+        };
+      } else if (!platformResult && !isScheduledAck) {
+        // Platform missing from response on an immediate post — treat as failure
+        console.error(
+          `Ayrshare: ${mapped} missing from response (status=${data.status}). Full response:`,
+          JSON.stringify(data),
+        );
+        results[platform] = {
+          success: false,
+          postId,
+          error: `${platform} was not included in the Ayrshare response`,
         };
       } else {
         results[platform] = {
@@ -542,6 +579,7 @@ export async function postToAyrshareMultiPlatform(params: {
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown error';
     for (const platform of mediaPlatforms) {
+      if (!ALLOWED_PLATFORMS.has(platform)) continue;
       results[platform] = { success: false, error: errorMsg };
     }
     return { results };

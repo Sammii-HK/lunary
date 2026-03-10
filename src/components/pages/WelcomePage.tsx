@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import Link from 'next/link';
 import {
   Telescope,
@@ -22,6 +24,7 @@ import { CTA_COPY } from '@/lib/cta-copy';
 import { FAQAccordion } from '@/components/FAQ';
 import { getHomepageFAQs } from '@/lib/faq-helpers';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { HomepageFeaturesTest } from '@/components/marketing/HomepageFeaturesTest';
 import { OptimizedDemoIframe } from '@/components/marketing/OptimizedDemoIframe';
 import {
@@ -45,6 +48,15 @@ const structuredData = {
 };
 
 export default function WelcomePage() {
+  const router = useRouter();
+
+  // Native iOS app should never see the marketing page — redirect to /auth
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      router.replace('/auth');
+    }
+  }, [router]);
+
   const [openFAQId, setOpenFAQId] = useState<string | null>(null);
   const homepageFAQs = getHomepageFAQs();
 

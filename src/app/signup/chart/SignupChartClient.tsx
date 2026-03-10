@@ -58,6 +58,8 @@ export default function SignupChartClient() {
       location,
       label: 'signup_page_view',
       pagePath,
+      abTest: 'grimoire_signup_page',
+      abVariant,
     });
 
     captureEvent('grimoire_signup_page_viewed', {
@@ -81,6 +83,8 @@ export default function SignupChartClient() {
       location,
       label: 'auth_complete',
       pagePath,
+      abTest: 'grimoire_signup_page',
+      abVariant,
     });
 
     conversionTracking.signup();

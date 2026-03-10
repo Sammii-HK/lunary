@@ -161,7 +161,7 @@ export function ShareHoroscope({
       try {
         await navigator.share({
           files: [file],
-          title: `${sunSign} Horoscope`,
+          title: `${sunSign} Transits`,
           text: headline,
         });
         shareTracking.shareCompleted(user?.id, 'horoscope', 'native');
@@ -210,8 +210,8 @@ export function ShareHoroscope({
 
   const socialUrls = shareRecord?.shareUrl
     ? {
-        x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My ${sunSign} horoscope`)}&url=${encodeURIComponent(shareRecord.shareUrl)}`,
-        threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My ${sunSign} horoscope ${shareRecord.shareUrl}`)}`,
+        x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`My ${sunSign} transits`)}&url=${encodeURIComponent(shareRecord.shareUrl)}`,
+        threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`My ${sunSign} transits ${shareRecord.shareUrl}`)}`,
       }
     : undefined;
 
@@ -224,13 +224,13 @@ export function ShareHoroscope({
             ? 'inline-flex items-center justify-center rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-2 text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-lunary-primary-900/20 transition-colors'
             : 'inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-zinc-200 transition hover:border-lunary-primary-500 hover:text-white'
         }
-        title={compact ? 'Share Horoscope' : undefined}
+        title={compact ? 'Share Transits' : undefined}
       >
         <Share2 className='w-4 h-4' />
-        {!compact && 'Share Horoscope'}
+        {!compact && 'Share Transits'}
       </button>
 
-      <ShareModal isOpen={isOpen} onClose={closeModal} title='Share Horoscope'>
+      <ShareModal isOpen={isOpen} onClose={closeModal} title='Share Transits'>
         <SharePreview
           imageBlob={imageBlob}
           loading={loading}
@@ -259,7 +259,7 @@ export function ShareHoroscope({
             />
 
             <p className='mt-4 text-xs text-zinc-400 text-center'>
-              Check your daily horoscope at lunary.app
+              Check your transits at lunary.app
             </p>
           </>
         )}

@@ -4,6 +4,22 @@
 
 * {
   box-sizing: border-box;
+  /* Prevent WKWebView link callout ("Open Link", "Add to Reading List", etc.)
+     on long-press of anchor tags in the native iOS app */
+  -webkit-touch-callout: none;
+}
+
+/* Prevent WKDeferringGestureRecognizer from blocking taps.
+   Without this, WKWebView waits 300ms on every tap to check for double-tap,
+   causing the "delayed reset" freeze seen in the gesture recogniser logs. */
+a,
+button,
+[role='button'],
+input,
+select,
+textarea,
+label {
+  touch-action: manipulation;
 }
 
 html {

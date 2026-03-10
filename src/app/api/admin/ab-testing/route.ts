@@ -4,6 +4,11 @@ import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
+// Tests that have been concluded and hardcoded — exclude from dashboard
+const CONCLUDED_TESTS = new Set([
+  'inline_cta', // sparkles won (0.79% CTR, 90% confidence). Hardcoded in components.
+]);
+
 export interface VariantMetrics {
   name: string;
   impressions: number;
@@ -59,10 +64,11 @@ export async function GET(request: NextRequest) {
       ORDER BY test_name, variant
     `;
 
-    // Group variants by test name
+    // Group variants by test name, skipping concluded tests
     const testVariantsMap = new Map<string, string[]>();
     for (const row of testsAndVariants.rows) {
       if (!row.test_name || !row.variant) continue;
+      if (CONCLUDED_TESTS.has(row.test_name)) continue;
       const variants = testVariantsMap.get(row.test_name) || [];
       variants.push(row.variant);
       testVariantsMap.set(row.test_name, variants);

@@ -20,6 +20,14 @@
       "schedule": "0 8 * * *"
     },
     {
+      "path": "/api/cron/daily-threads",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/daily-stories",
+      "schedule": "30 8 * * *"
+    },
+    {
       "path": "/api/cron/daily-morning-notification",
       "schedule": "0 8 * * *"
     },
@@ -74,6 +82,10 @@
     {
       "path": "/api/admin/stripe-sync",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/compute-metrics",
+      "schedule": "0 4 * * *"
     }
   ]
 }
