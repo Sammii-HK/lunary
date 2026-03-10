@@ -374,20 +374,20 @@ export async function GET(request: NextRequest) {
 
       for (const post of igBatch.posts) {
         try {
-          // Pre-upload all images to static blob URLs
+          // Pre-upload all images to static blob URLs — parallelised to avoid
+          // sequential timeout (6 slides × 45 s sequential = 270 s, over cron limit)
           const mediaItems: Array<{
             type: 'image';
             url: string;
             alt: string;
-          }> = [];
-          for (const imageUrl of post.imageUrls) {
-            const staticUrl = await preUploadImage(imageUrl);
-            mediaItems.push({
-              type: 'image',
-              url: staticUrl,
-              alt: `${post.type} content from Lunary`,
-            });
-          }
+          }> = await Promise.all(
+            post.imageUrls.map(async (imageUrl: string, i: number) => ({
+              type: 'image' as const,
+              url: await preUploadImage(imageUrl),
+              alt:
+                i === 0 ? `${post.type} content from Lunary` : `Slide ${i + 1}`,
+            })),
+          );
 
           // Move hashtags to first comment (algorithm prefers clean captions)
           const limitedHashtags = post.hashtags.slice(0, 5);
