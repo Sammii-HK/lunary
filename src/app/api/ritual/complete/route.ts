@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/ai/auth';
 import { completeRitual, RitualType } from '@/lib/ritual/tracker';
+import {
+  canonicaliseEvent,
+  insertCanonicalEvent,
+} from '@/lib/analytics/canonical-events';
+import { forwardEventToPostHog } from '@/lib/posthog-forward';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,24 +36,36 @@ export async function POST(request: NextRequest) {
     try {
       const { incrementProgress } = await import('@/lib/progress/server');
       await incrementProgress(userId, 'ritual', 1);
-
-      // Track ritual completion server-side via /api/ether/cv
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
-      await fetch(`${baseUrl}/api/ether/cv`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'ritual_completed',
-          userId,
-          userEmail: user.email,
-          metadata: { ritualType, ...metadata },
-        }),
-      });
     } catch (progressError) {
       console.warn(
         '[Ritual Complete] Failed to track progress:',
         progressError,
       );
+    }
+
+    // Track ritual completion directly (not via fetch — server-to-server
+    // fetch to /api/ether/cv has no session cookie, so userId resolves to
+    // null and the event gets lost)
+    try {
+      const canonical = canonicaliseEvent({
+        eventType: 'ritual_completed',
+        userId,
+        userEmail: user.email,
+        metadata: { ritualType, ...metadata },
+      });
+
+      if (canonical.ok) {
+        const { inserted } = await insertCanonicalEvent(canonical.row);
+        if (inserted) {
+          forwardEventToPostHog({
+            distinctId: userId,
+            event: 'ritual_completed',
+            properties: { ritualType, ...metadata },
+          });
+        }
+      }
+    } catch (trackError) {
+      console.warn('[Ritual Complete] Failed to track event:', trackError);
     }
 
     return NextResponse.json({
