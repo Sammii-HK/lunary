@@ -1045,7 +1045,7 @@ export function registerSocialTools(server: McpServer) {
       // Strip surrounding quotes that LLMs sometimes add
       const threadsCaption = rawThreadsCaption
         .trim()
-        .replace(/^["'"']|["'"']$/g, '')
+        .replace(/^["']|["']$/g, '')
         .trim();
 
       // 6. Schedule Instagram Story (bypass cadence — post at exact time)

@@ -121,87 +121,86 @@ export const HookIntro: React.FC<HookIntroProps> = ({
           let wordOpacity = 1;
           let transformStyle = '';
 
-          // Poster frame: all words fully visible, no animation
-          if (isPosterFrame) {
-            wordOpacity = 1;
-            transformStyle = '';
-          } else if (variant === 'typewriter') {
-            // Typewriter: left-to-right opacity fade
-            wordOpacity = interpolate(
-              localFrame,
-              [wordStart, wordStart + 2],
-              [0, 1],
-              { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-            );
-            transformStyle = highlighted
-              ? `scale(${interpolate(
-                  localFrame,
-                  [
-                    wordStart + wordEntranceDuration,
-                    wordStart + wordEntranceDuration + 6,
-                    wordStart + wordEntranceDuration + 12,
-                  ],
-                  [1.0, 1.12, 1.0],
-                  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-                )})`
-              : '';
-          } else if (variant === 'scale_pop') {
-            // Scale pop: center-out scale-from-0 with bounce
-            const scaleValue = spring({
-              frame: Math.max(0, localFrame - wordStart),
-              fps,
-              config: { damping: 8, stiffness: 150, mass: 0.5 },
-            });
-            wordOpacity = interpolate(
-              localFrame,
-              [wordStart, wordStart + 2],
-              [0, 1],
-              { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-            );
-            const highlightPop = highlighted
-              ? interpolate(
-                  localFrame,
-                  [
-                    wordStart + wordEntranceDuration,
-                    wordStart + wordEntranceDuration + 6,
-                    wordStart + wordEntranceDuration + 12,
-                  ],
-                  [1.0, 1.12, 1.0],
-                  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-                )
-              : 1.0;
-            transformStyle = `scale(${scaleValue * highlightPop})`;
-          } else {
-            // Default: slide_up (existing behavior)
-            wordOpacity = interpolate(
-              localFrame,
-              [wordStart, wordStart + wordEntranceDuration],
-              [0, 1],
-              { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-            );
-            const slideUp = interpolate(
-              localFrame,
-              [wordStart, wordStart + wordEntranceDuration],
-              [14, 0],
-              {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-                easing: Easing.out(Easing.cubic),
-              },
-            );
-            const highlightPop = highlighted
-              ? interpolate(
-                  localFrame,
-                  [
-                    wordStart + wordEntranceDuration,
-                    wordStart + wordEntranceDuration + 6,
-                    wordStart + wordEntranceDuration + 12,
-                  ],
-                  [1.0, 1.12, 1.0],
-                  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-                )
-              : 1.0;
-            transformStyle = `translateY(${slideUp}px) scale(${highlightPop})`;
+          // Poster frame: keep defaults (all words fully visible, no animation)
+          if (!isPosterFrame) {
+            if (variant === 'typewriter') {
+              // Typewriter: left-to-right opacity fade
+              wordOpacity = interpolate(
+                localFrame,
+                [wordStart, wordStart + 2],
+                [0, 1],
+                { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+              );
+              transformStyle = highlighted
+                ? `scale(${interpolate(
+                    localFrame,
+                    [
+                      wordStart + wordEntranceDuration,
+                      wordStart + wordEntranceDuration + 6,
+                      wordStart + wordEntranceDuration + 12,
+                    ],
+                    [1.0, 1.12, 1.0],
+                    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+                  )})`
+                : '';
+            } else if (variant === 'scale_pop') {
+              // Scale pop: center-out scale-from-0 with bounce
+              const scaleValue = spring({
+                frame: Math.max(0, localFrame - wordStart),
+                fps,
+                config: { damping: 8, stiffness: 150, mass: 0.5 },
+              });
+              wordOpacity = interpolate(
+                localFrame,
+                [wordStart, wordStart + 2],
+                [0, 1],
+                { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+              );
+              const highlightPop = highlighted
+                ? interpolate(
+                    localFrame,
+                    [
+                      wordStart + wordEntranceDuration,
+                      wordStart + wordEntranceDuration + 6,
+                      wordStart + wordEntranceDuration + 12,
+                    ],
+                    [1.0, 1.12, 1.0],
+                    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+                  )
+                : 1.0;
+              transformStyle = `scale(${scaleValue * highlightPop})`;
+            } else {
+              // Default: slide_up (existing behavior)
+              wordOpacity = interpolate(
+                localFrame,
+                [wordStart, wordStart + wordEntranceDuration],
+                [0, 1],
+                { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+              );
+              const slideUp = interpolate(
+                localFrame,
+                [wordStart, wordStart + wordEntranceDuration],
+                [14, 0],
+                {
+                  extrapolateLeft: 'clamp',
+                  extrapolateRight: 'clamp',
+                  easing: Easing.out(Easing.cubic),
+                },
+              );
+              const highlightPop = highlighted
+                ? interpolate(
+                    localFrame,
+                    [
+                      wordStart + wordEntranceDuration,
+                      wordStart + wordEntranceDuration + 6,
+                      wordStart + wordEntranceDuration + 12,
+                    ],
+                    [1.0, 1.12, 1.0],
+                    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+                  )
+                : 1.0;
+              transformStyle = `translateY(${slideUp}px) scale(${highlightPop})`;
+            }
           }
 
           return (

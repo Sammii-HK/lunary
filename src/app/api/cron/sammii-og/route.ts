@@ -90,7 +90,7 @@ async function generateCaption(prompt: string): Promise<string> {
     const data = (await res.json()) as { content?: string; text?: string };
     return (data.content ?? data.text ?? '')
       .trim()
-      .replace(/^["'"']|["'"']$/g, '')
+      .replace(/^["']|["']$/g, '')
       .trim();
   } catch {
     return '';

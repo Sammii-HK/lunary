@@ -101,14 +101,7 @@ export async function GET(request: NextRequest) {
     const onlySections = sectionsParam
       ? new Set(sectionsParam.split(',').map((s) => s.trim().toLowerCase()))
       : null;
-    // Optional threads slot override, e.g. ?threadsSlots=15,17,21
-    const threadsSlotsParam = url.searchParams.get('threadsSlots');
-    const threadsSlotsOverride = threadsSlotsParam
-      ? threadsSlotsParam
-          .split(',')
-          .map((s) => parseInt(s.trim(), 10))
-          .filter((n) => !isNaN(n))
-      : null;
+    // Threads slots moved to /api/cron/daily-threads
     // Verify cron request
     // Vercel cron jobs send x-vercel-cron header, allow those
     // Check both lowercase and any case variations
@@ -456,120 +449,11 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // DAILY TASKS (Every day) - Threads Content Batch
-    if (onlySections && !onlySections.has('threads')) {
-      cronResults.threadsBatch = {
-        skipped: true,
-        reason: 'Not in sections filter',
-      };
-    } else {
-      console.log('🧵 Generating Threads content batch...');
-      const threadsStartTime = Date.now();
-      try {
-        const { generateThreadsBatch } =
-          await import('@/lib/threads/content-orchestrator');
-        const threadsBatch = await generateThreadsBatch(dateStr);
-
-        // Remap scheduled times if caller provided slot overrides
-        if (threadsSlotsOverride && threadsSlotsOverride.length > 0) {
-          threadsBatch.posts.forEach((post, i) => {
-            const hour =
-              threadsSlotsOverride[i] ??
-              threadsSlotsOverride[threadsSlotsOverride.length - 1];
-            const d = new Date(`${dateStr}T00:00:00.000Z`);
-            d.setUTCHours(hour, 0, 0, 0);
-            post.scheduledTime = d.toISOString();
-          });
-        }
-
-        const threadsExecutionTime = Date.now() - threadsStartTime;
-
-        // Send each Threads post via social client as standalone threads-only posts
-        const threadsSentResults: Array<{
-          scheduledTime: string;
-          pillar: string;
-          source: string;
-          status: string;
-          error?: string;
-        }> = [];
-
-        for (const post of threadsBatch.posts) {
-          try {
-            const content = [post.hook, post.body, post.prompt]
-              .filter(Boolean)
-              .join('\n\n');
-
-            const result = await postToSocial({
-              platform: 'threads',
-              content,
-              scheduledDate: post.scheduledTime,
-              media:
-                post.hasImage && post.imageUrl
-                  ? [
-                      {
-                        type: 'image',
-                        url: post.imageUrl,
-                        alt: `${post.topicTag} content from Lunary`,
-                      },
-                    ]
-                  : [],
-              platformSettings: { topic_tag: post.topicTag },
-            });
-
-            if (result.success) {
-              threadsSentResults.push({
-                scheduledTime: post.scheduledTime,
-                pillar: post.pillar,
-                source: post.source,
-                status: 'success',
-              });
-            } else {
-              threadsSentResults.push({
-                scheduledTime: post.scheduledTime,
-                pillar: post.pillar,
-                source: post.source,
-                status: 'error',
-                error: result.error || 'Unknown error',
-              });
-            }
-          } catch (postError) {
-            threadsSentResults.push({
-              scheduledTime: post.scheduledTime,
-              pillar: post.pillar,
-              source: post.source,
-              status: 'error',
-              error:
-                postError instanceof Error
-                  ? postError.message
-                  : 'Unknown error',
-            });
-          }
-        }
-
-        const successCount = threadsSentResults.filter(
-          (r) => r.status === 'success',
-        ).length;
-        console.log(
-          `🧵 Threads batch: ${threadsBatch.posts.length} posts generated, ${successCount} sent in ${threadsExecutionTime}ms`,
-        );
-
-        cronResults.threadsBatch = {
-          success: true,
-          postCount: threadsBatch.posts.length,
-          sentCount: successCount,
-          posts: threadsSentResults,
-          executionTimeMs: threadsExecutionTime,
-        };
-      } catch (error) {
-        const threadsExecutionTime = Date.now() - threadsStartTime;
-        console.error('🧵 Threads batch failed:', error);
-        cronResults.threadsBatch = {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          executionTimeMs: threadsExecutionTime,
-        };
-      }
-    } // end threads section filter
+    // Threads batch moved to dedicated /api/cron/daily-threads route
+    cronResults.threadsBatch = {
+      skipped: true,
+      reason: 'Moved to /api/cron/daily-threads',
+    };
 
     // DAILY TASKS (Tue/Wed/Thu) - LinkedIn Standalone Posts
     console.log('💼 Checking LinkedIn posting day...');
