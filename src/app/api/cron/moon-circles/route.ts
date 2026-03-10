@@ -8,6 +8,11 @@ import {
 import { sendEmail } from '@/lib/email';
 import { sendDiscordNotification } from '@/lib/discord';
 import webpush from 'web-push';
+import {
+  canonicaliseEvent,
+  insertCanonicalEvent,
+} from '@/lib/analytics/canonical-events';
+import { forwardEventToPostHog } from '@/lib/posthog-forward';
 
 export const dynamic = 'force-dynamic';
 
@@ -357,32 +362,41 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
               emailsSentTo.add(userEmail);
               emailsSent++;
 
-              // Track conversion via API (server-side)
+              // Track conversion directly (server-to-server fetch loses session)
               try {
-                const baseUrl =
-                  process.env.NODE_ENV === 'production'
-                    ? 'https://lunary.app'
-                    : 'http://localhost:3000';
-                await fetch(`${baseUrl}/api/ether/cv`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    event: 'moon_circle_opened',
-                    userId,
-                    userEmail,
-                    metadata: {
-                      date: dateStr,
-                      phase: moonCircle.moonPhase,
-                      sign: moonCircle.moonSign,
-                      source: 'email',
-                    },
-                  }),
-                }).catch((err) => {
-                  console.error('Failed to track moon_circle_opened:', err);
+                const canonical = canonicaliseEvent({
+                  eventType: 'moon_circle_opened',
+                  userId,
+                  userEmail,
+                  metadata: {
+                    date: dateStr,
+                    phase: moonCircle.moonPhase,
+                    sign: moonCircle.moonSign,
+                    source: 'email',
+                  },
                 });
+                if (canonical.ok) {
+                  const { inserted } = await insertCanonicalEvent(
+                    canonical.row,
+                  );
+                  if (inserted) {
+                    forwardEventToPostHog({
+                      distinctId: userId,
+                      event: 'moon_circle_opened',
+                      properties: {
+                        date: dateStr,
+                        phase: moonCircle.moonPhase,
+                        sign: moonCircle.moonSign,
+                        source: 'email',
+                      },
+                    });
+                  }
+                }
               } catch (trackError) {
-                // Don't fail email sending if tracking fails
-                console.error('Failed to track conversion:', trackError);
+                console.error(
+                  'Failed to track moon_circle_opened:',
+                  trackError,
+                );
               }
             } catch (emailError) {
               console.error(
@@ -393,32 +407,36 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
             }
           }
 
-          // Track conversion via API (server-side)
+          // Track conversion directly (server-to-server fetch loses session)
           try {
-            const baseUrl =
-              process.env.NODE_ENV === 'production'
-                ? 'https://lunary.app'
-                : 'http://localhost:3000';
-            await fetch(`${baseUrl}/api/ether/cv`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                event: 'moon_circle_sent',
-                userId,
-                userEmail,
-                metadata: {
-                  date: dateStr,
-                  phase: moonCircle.moonPhase,
-                  sign: moonCircle.moonSign,
-                  source: 'push',
-                },
-              }),
-            }).catch((err) => {
-              console.error('Failed to track moon_circle_sent:', err);
+            const canonical = canonicaliseEvent({
+              eventType: 'moon_circle_sent',
+              userId,
+              userEmail,
+              metadata: {
+                date: dateStr,
+                phase: moonCircle.moonPhase,
+                sign: moonCircle.moonSign,
+                source: 'push',
+              },
             });
+            if (canonical.ok) {
+              const { inserted } = await insertCanonicalEvent(canonical.row);
+              if (inserted) {
+                forwardEventToPostHog({
+                  distinctId: userId,
+                  event: 'moon_circle_sent',
+                  properties: {
+                    date: dateStr,
+                    phase: moonCircle.moonPhase,
+                    sign: moonCircle.moonSign,
+                    source: 'push',
+                  },
+                });
+              }
+            }
           } catch (trackError) {
-            // Don't fail push sending if tracking fails
-            console.error('Failed to track conversion:', trackError);
+            console.error('Failed to track moon_circle_sent:', trackError);
           }
         } catch (pushError) {
           console.error(
