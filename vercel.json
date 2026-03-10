@@ -24,6 +24,10 @@
       "schedule": "0 9 * * *"
     },
     {
+      "path": "/api/cron/daily-stories",
+      "schedule": "30 8 * * *"
+    },
+    {
       "path": "/api/cron/daily-morning-notification",
       "schedule": "0 8 * * *"
     },
