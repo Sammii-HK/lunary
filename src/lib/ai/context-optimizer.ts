@@ -34,7 +34,14 @@ export function analyzeContextNeeds(userMessage: string): ContextRequirements {
       msg.includes('influence') ||
       msg.includes('energy') ||
       msg.includes('feeling') ||
-      msg.includes('house'),
+      msg.includes('house') ||
+      msg.includes('saturn') ||
+      msg.includes('jupiter') ||
+      msg.includes('mars') ||
+      msg.includes('venus') ||
+      msg.includes('mercury') ||
+      msg.includes('planet') ||
+      msg.includes('activat'),
 
     // Natal patterns: moderate cost, detect patterns in birth chart
     needsNatalPatterns:
