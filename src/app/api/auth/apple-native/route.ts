@@ -67,7 +67,11 @@ export async function POST(req: NextRequest) {
     });
 
     const appleSub = payload.sub as string;
-    const appleEmail = (payload.email as string | undefined) || user?.email;
+    // verifiedEmail comes from the verified JWT — trusted for DB lookups.
+    // bodyEmail comes from the request body — untrusted, only used when creating
+    // a brand new user and the JWT did not include an email.
+    const verifiedEmail = payload.email as string | undefined;
+    const bodyEmail = user?.email;
 
     if (!appleSub) {
       return NextResponse.json(
@@ -93,13 +97,15 @@ export async function POST(req: NextRequest) {
       // Existing Apple user - sign them in
       userId = existingAccount.rows[0].user_id;
     } else {
-      // New Apple sign-in - find or create user
+      // New Apple sign-in - find or create user.
+      // Only use verifiedEmail (from JWT) for account lookups to prevent
+      // an attacker from supplying an arbitrary email to take over existing accounts.
       let existingUser = null;
 
-      if (appleEmail) {
+      if (verifiedEmail) {
         const emailResult = await pool.query(
           `SELECT id FROM "user" WHERE email = $1`,
-          [appleEmail.toLowerCase()],
+          [verifiedEmail.toLowerCase()],
         );
         if (emailResult.rows.length > 0) {
           existingUser = emailResult.rows[0];
@@ -109,8 +115,9 @@ export async function POST(req: NextRequest) {
       if (existingUser) {
         userId = existingUser.id;
       } else {
-        // Create new user
-        if (!appleEmail) {
+        // Create new user — prefer verifiedEmail, fall back to bodyEmail only here.
+        const newUserEmail = verifiedEmail || bodyEmail;
+        if (!newUserEmail) {
           return NextResponse.json(
             {
               error:
@@ -124,13 +131,13 @@ export async function POST(req: NextRequest) {
           [user?.givenName, user?.familyName]
             .filter(Boolean)
             .join(' ')
-            .trim() || appleEmail.split('@')[0];
+            .trim() || newUserEmail.split('@')[0];
 
         const newUserId = crypto.randomUUID();
         await pool.query(
           `INSERT INTO "user" (id, name, email, "emailVerified", "createdAt", "updatedAt")
            VALUES ($1, $2, $3, true, NOW(), NOW())`,
-          [newUserId, name, appleEmail.toLowerCase()],
+          [newUserId, name, newUserEmail.toLowerCase()],
         );
         userId = newUserId;
       }
