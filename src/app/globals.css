@@ -4,6 +4,9 @@
 
 * {
   box-sizing: border-box;
+  /* Prevent WKWebView link callout ("Open Link", "Add to Reading List", etc.)
+     on long-press of anchor tags in the native iOS app */
+  -webkit-touch-callout: none;
 }
 
 html {
