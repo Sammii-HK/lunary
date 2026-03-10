@@ -336,6 +336,7 @@ export async function postToAyrshareMultiPlatform(params: {
           errorText,
         );
         for (const platform of textOnlyPlatforms) {
+          if (!ALLOWED_PLATFORMS.has(platform)) continue;
           results[platform] = {
             success: false,
             error: `Ayrshare API error (${response.status}): ${errorText}`,
@@ -346,6 +347,7 @@ export async function postToAyrshareMultiPlatform(params: {
         const postId = data.id || data.refId;
         const isScheduledAck = data.status === 'scheduled';
         for (const platform of textOnlyPlatforms) {
+          if (!ALLOWED_PLATFORMS.has(platform)) continue;
           const mapped = toAyrsharePlatform(platform);
           const platformResult = data[mapped];
           if (platformResult?.status === 'error') {
@@ -371,6 +373,7 @@ export async function postToAyrshareMultiPlatform(params: {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       for (const platform of textOnlyPlatforms) {
+        if (!ALLOWED_PLATFORMS.has(platform)) continue;
         results[platform] = { success: false, error: errorMsg };
       }
     }
@@ -509,6 +512,7 @@ export async function postToAyrshareMultiPlatform(params: {
       const errorText = await response.text();
       console.error(`Ayrshare API error (${response.status}):`, errorText);
       for (const platform of mediaPlatforms) {
+        if (!ALLOWED_PLATFORMS.has(platform)) continue;
         results[platform] = {
           success: false,
           error: `Ayrshare API error (${response.status}): ${errorText}`,
@@ -524,6 +528,7 @@ export async function postToAyrshareMultiPlatform(params: {
       const errMsg = data.message || 'Ayrshare post failed';
       console.error('Ayrshare top-level error:', errMsg);
       for (const platform of mediaPlatforms) {
+        if (!ALLOWED_PLATFORMS.has(platform)) continue;
         results[platform] = { success: false, error: errMsg };
       }
       return { results };
@@ -537,6 +542,7 @@ export async function postToAyrshareMultiPlatform(params: {
 
     // Ayrshare returns per-platform status in the response
     for (const platform of mediaPlatforms) {
+      if (!ALLOWED_PLATFORMS.has(platform)) continue;
       const mapped = toAyrsharePlatform(platform);
       const platformResult = data[mapped];
 
@@ -573,6 +579,7 @@ export async function postToAyrshareMultiPlatform(params: {
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown error';
     for (const platform of mediaPlatforms) {
+      if (!ALLOWED_PLATFORMS.has(platform)) continue;
       results[platform] = { success: false, error: errorMsg };
     }
     return { results };
