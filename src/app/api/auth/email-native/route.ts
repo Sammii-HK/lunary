@@ -50,10 +50,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      process.env.NEXT_PUBLIC_APP_URL ||
-      'https://lunary.app';
+    // Use the actual request origin so better-auth picks the right cookie
+    // prefix. If we used NEXT_PUBLIC_BASE_URL (https://lunary.app) on a
+    // localhost dev server, better-auth would set __Secure- prefixed cookies
+    // which WKWebView silently rejects over HTTP.
+    const baseUrl = req.nextUrl.origin;
 
     // Call better-auth's sign-in handler internally
     const signInReq = new Request(`${baseUrl}/api/auth/sign-in/email`, {

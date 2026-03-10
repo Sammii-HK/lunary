@@ -9,6 +9,19 @@
   -webkit-touch-callout: none;
 }
 
+/* Prevent WKDeferringGestureRecognizer from blocking taps.
+   Without this, WKWebView waits 300ms on every tap to check for double-tap,
+   causing the "delayed reset" freeze seen in the gesture recogniser logs. */
+a,
+button,
+[role='button'],
+input,
+select,
+textarea,
+label {
+  touch-action: manipulation;
+}
+
 html {
   scroll-behavior: smooth;
 }

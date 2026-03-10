@@ -53,13 +53,23 @@ export function SignOutButton({
 
     // Hard reload to guarantee UI updates
     if (redirect) {
-      // Use /auth on native OR when already inside the app section (belt-and-suspenders
-      // guard against isNativePlatform() returning false in certain WKWebView contexts)
+      // Always redirect to /auth on native, or when already inside app pages.
+      // Check multiple signals — isNativePlatform() can return false in WKWebView,
+      // and the user may be on non-/app pages (e.g. /horoscope, /tarot) within the app.
       const isInApp =
         typeof window !== 'undefined' &&
         window.location.pathname.startsWith('/app');
+      const isNativeUA =
+        typeof navigator !== 'undefined' &&
+        /\bCapacitor\b/.test(navigator.userAgent);
+      const isStandalone =
+        typeof window !== 'undefined' &&
+        (window.matchMedia('(display-mode: standalone)').matches ||
+          (window.navigator as any).standalone === true);
       window.location.href =
-        Capacitor.isNativePlatform() || isInApp ? '/auth' : '/';
+        Capacitor.isNativePlatform() || isInApp || isNativeUA || isStandalone
+          ? '/auth'
+          : '/';
     } else {
       window.location.reload();
     }

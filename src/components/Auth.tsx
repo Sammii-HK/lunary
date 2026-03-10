@@ -221,41 +221,24 @@ export function AuthComponent({
         }
       } else {
         if (isNative) {
-          // On native iOS, WKWebView doesn't reliably persist Set-Cookie headers
-          // from programmatic fetch requests. Use the email-native endpoint which
-          // returns the signed session token so we can set it via document.cookie
-          // (same pattern as Apple Sign-In).
-          const response = await fetch('/api/auth/email-native', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              email: formData.email.toLowerCase().trim(),
-              password: formData.password,
-            }),
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data.error || 'Sign in failed');
-          }
-
-          // Set cookie manually so WKWebView includes it in subsequent navigation requests
-          if (data.token) {
-            const cookieName =
-              data.cookieName || '__Secure-better-auth.session_token';
-            const expires = new Date(data.expiresAt).toUTCString();
-            document.cookie = `${cookieName}=${encodeURIComponent(data.token)}; path=/; expires=${expires}; SameSite=Lax; Secure`;
-          }
-
-          invalidateAuthCache();
-
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            window.location.href = '/app';
-          }
+          // On native iOS, WKWebView only reliably processes Set-Cookie on
+          // navigation responses. Submit a hidden form POST to signin-native
+          // which forwards better-auth's cookies verbatim on a 303 redirect.
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '/api/auth/signin-native';
+          const emailInput = document.createElement('input');
+          emailInput.type = 'hidden';
+          emailInput.name = 'email';
+          emailInput.value = formData.email.toLowerCase().trim();
+          const passInput = document.createElement('input');
+          passInput.type = 'hidden';
+          passInput.name = 'password';
+          passInput.value = formData.password;
+          form.appendChild(emailInput);
+          form.appendChild(passInput);
+          document.body.appendChild(form);
+          form.submit();
           return;
         }
 
@@ -423,15 +406,12 @@ export function AuthComponent({
         throw new Error(data.error || 'Apple sign-in failed');
       }
 
-      // Set cookie directly in JS so WKWebView includes it in subsequent navigation requests.
-      // data.token is already signed (token.base64sig). URI-encode it to match the server-set format.
-      // Must use __Secure- prefix with Secure flag to match better-auth's cookie name
-      // (triggered because NEXT_PUBLIC_BASE_URL starts with https://).
+      // Set cookie via document.cookie — omit Secure flag on HTTP (localhost)
       if (data.token) {
-        const cookieName =
-          data.cookieName || '__Secure-better-auth.session_token';
+        const cookieName = data.cookieName || 'better-auth.session_token';
         const expires = new Date(data.expiresAt).toUTCString();
-        document.cookie = `${cookieName}=${encodeURIComponent(data.token)}; path=/; expires=${expires}; SameSite=Lax; Secure`;
+        const isSecure = window.location.protocol === 'https:';
+        document.cookie = `${cookieName}=${encodeURIComponent(data.token)}; path=/; expires=${expires}; SameSite=Lax${isSecure ? '; Secure' : ''}`;
       }
 
       invalidateAuthCache();
