@@ -1352,7 +1352,7 @@ async function generateThematicWeeklyPosts(
             week_theme, week_start, quote_id, quote_text, quote_author,
             source_type, source_id, source_title, base_group_key, created_at
           )
-          VALUES (
+          SELECT
             ${postContent},
             ${post.platform},
             ${post.postType},
@@ -1370,10 +1370,16 @@ async function generateThematicWeeklyPosts(
             ${post.sourceTitle || null},
             ${baseGroupKey},
             NOW()
+          WHERE NOT EXISTS (
+            SELECT 1 FROM social_posts
+            WHERE base_group_key = ${baseGroupKey}
+              AND platform = ${post.platform}
           )
           RETURNING id
         `;
-        savedPostIds.push(result.rows[0].id);
+        if (result.rows[0]) {
+          savedPostIds.push(result.rows[0].id);
+        }
 
         const dayOfWeek = scheduledDate.getDay();
         const dayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
@@ -2660,10 +2666,19 @@ Return JSON: {"posts": ["Post content"]}`;
       try {
         const result = await sql`
           INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, scheduled_date, week_start, created_at)
-          VALUES (${post.content}, ${post.platform}, ${post.postType}, ${post.topic || null}, 'pending', ${imageUrl || null}, ${postDate.toISOString()}, ${weekStartDate.toISOString().split('T')[0]}, NOW())
+          SELECT ${post.content}, ${post.platform}, ${post.postType}, ${post.topic || null}, 'pending', ${imageUrl || null}, ${postDate.toISOString()}, ${weekStartDate.toISOString().split('T')[0]}, NOW()
+          WHERE NOT EXISTS (
+            SELECT 1 FROM social_posts
+            WHERE platform = ${post.platform}
+              AND post_type = ${post.postType}
+              AND topic IS NOT DISTINCT FROM ${post.topic || null}
+              AND scheduled_date = ${postDate.toISOString()}
+          )
           RETURNING id
         `;
-        savedPostIds.push(result.rows[0].id);
+        if (result.rows[0]) {
+          savedPostIds.push(result.rows[0].id);
+        }
       } catch (dbError) {
         console.error('Error saving post to database:', dbError);
       }

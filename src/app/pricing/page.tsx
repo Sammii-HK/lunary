@@ -222,6 +222,9 @@ export default function PricingPage() {
       const currentUserId = authState.user?.id || user?.id;
       const currentUserEmail = user?.email || authState.user?.email;
 
+      const triggerFeature =
+        new URLSearchParams(window.location.search).get('trigger') ?? undefined;
+
       const checkout = await createCheckoutSession(
         priceId,
         subscription.customerId,
@@ -230,6 +233,7 @@ export default function PricingPage() {
         currentUserId,
         currentUserEmail,
         promoCode.trim() || undefined,
+        triggerFeature,
       );
 
       if (checkout.portalUrl) {

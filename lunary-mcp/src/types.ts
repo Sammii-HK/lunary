@@ -31,9 +31,19 @@ export function timeQueryParams(params: {
   start?: string;
   end?: string;
 }) {
+  const end = params.end ? new Date(params.end) : new Date();
+  let start: Date | undefined;
+
+  if (params.start) {
+    start = new Date(params.start);
+  } else if (params.time_range) {
+    const days =
+      { '7d': 7, '30d': 30, '90d': 90, '365d': 365 }[params.time_range] ?? 30;
+    start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
+  }
+
   return {
-    ...(params.time_range && { range: params.time_range }),
-    ...(params.start && { start: params.start }),
-    ...(params.end && { end: params.end }),
+    ...(start && { start_date: start.toISOString().slice(0, 10) }),
+    end_date: end.toISOString().slice(0, 10),
   };
 }

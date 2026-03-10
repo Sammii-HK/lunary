@@ -729,11 +729,13 @@ export const conversionTracking = {
     userId?: string,
     email?: string,
     planType?: 'monthly' | 'yearly',
+    featureName?: string,
   ) =>
     trackConversion('trial_started', {
       userId,
       userEmail: email,
       planType,
+      featureName,
     }),
 
   trialConverted: (
