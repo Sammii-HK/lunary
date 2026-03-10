@@ -82,7 +82,7 @@ export const Navbar = () => {
         <NavLink
           href='/horoscope'
           icon={Orbit}
-          label='Horoscope'
+          label='Transits'
           activePath={pathname}
           dataNav='horoscope'
         />

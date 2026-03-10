@@ -352,13 +352,13 @@ export function HoroscopeView({
           <div className='flex-1'>
             <Heading variant='h1' as='h1'>
               {hasPaidAccess && userName
-                ? `${userName}'s Horoscope`
-                : 'Your Horoscope'}
+                ? `${userName}'s Transits`
+                : 'Your Transits'}
             </Heading>
             <p className='text-sm text-zinc-400'>
               {hasPaidAccess
-                ? 'Guidance written just for you'
-                : 'Universal reading — unlock yours for something personal'}
+                ? 'How the planets are moving through your chart right now'
+                : 'Live planetary positions — unlock your personal chart transits'}
             </p>
           </div>
           <div className='flex items-center gap-2'>
