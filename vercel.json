@@ -16,24 +16,24 @@
       "schedule": "0 6 * * *"
     },
     {
-      "path": "/api/cron/daily-posts",
-      "schedule": "0 8 * * *"
+      "path": "/api/cron/daily-morning-notification",
+      "schedule": "30 7 * * *"
     },
     {
-      "path": "/api/cron/daily-threads",
-      "schedule": "0 9 * * *"
+      "path": "/api/cron/weekly-content",
+      "schedule": "0 7 * * 0"
+    },
+    {
+      "path": "/api/cron/daily-posts",
+      "schedule": "0 8 * * *"
     },
     {
       "path": "/api/cron/daily-stories",
       "schedule": "30 8 * * *"
     },
     {
-      "path": "/api/cron/daily-morning-notification",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/weekly-content",
-      "schedule": "0 8 * * 0"
+      "path": "/api/cron/daily-threads",
+      "schedule": "15 9 * * *"
     },
     {
       "path": "/api/cron/daily-cosmic-pulse",
@@ -57,7 +57,7 @@
     },
     {
       "path": "/api/cron/activate-retrograde-spaces",
-      "schedule": "0 6 * * *"
+      "schedule": "15 6 * * *"
     },
     {
       "path": "/api/cron/weekly-subscription-sync",
@@ -69,7 +69,7 @@
     },
     {
       "path": "/api/cron/sammii-og",
-      "schedule": "30 8 * * *"
+      "schedule": "30 9 * * *"
     },
     {
       "path": "/api/cron/bip-daily",
