@@ -72,10 +72,6 @@
       "schedule": "30 9 * * *"
     },
     {
-      "path": "/api/cron/bip-daily",
-      "schedule": "0 16 * * *"
-    },
-    {
       "path": "/api/cron/bip-weekly",
       "schedule": "0 2 * * 1"
     },
