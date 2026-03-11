@@ -97,9 +97,13 @@ export async function postToSpellcast(
       params.platform,
     ]);
 
-    // Always use 'post' — Postiz instagram-standalone doesn't support postType 'story'.
-    // Story behaviour is controlled via platformSettings.instagramOptions.isStory instead.
-    const postType = 'post';
+    // Detect Instagram stories: send postType 'story' so Postiz uses the correct
+    // Instagram Stories publisher. instagramOptions.isStory is NOT forwarded because
+    // Spellcast's flatSettings filter strips nested objects before they reach Postiz.
+    const instagramOpts = (params.platformSettings as Record<string, unknown>)
+      ?.instagramOptions as Record<string, unknown> | undefined;
+    const isStory = instagramOpts?.isStory === true;
+    const postType = isStory ? 'story' : 'post';
 
     // Spellcast requires non-empty content; stories are image-only so use a space
     const content = params.content || ' ';
