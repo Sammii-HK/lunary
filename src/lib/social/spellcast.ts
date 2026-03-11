@@ -97,13 +97,18 @@ export async function postToSpellcast(
       params.platform,
     ]);
 
-    // Detect story format from platformSettings
-    const instagramOpts = (params.platformSettings as any)?.instagramOptions;
-    const isStory = instagramOpts?.isStory === true;
-    const postType = isStory ? 'story' : 'post';
+    // Always use 'post' — Postiz instagram-standalone doesn't support postType 'story'.
+    // Story behaviour is controlled via platformSettings.instagramOptions.isStory instead.
+    const postType = 'post';
 
     // Spellcast requires non-empty content; stories are image-only so use a space
     const content = params.content || ' ';
+
+    // Always set who_can_reply_post — Postiz's default is invalid and causes silent failures.
+    const platformSettings = {
+      who_can_reply_post: 'everyone',
+      ...params.platformSettings,
+    };
 
     // 1. Create draft post
     const createRes = await spellcastFetch('/api/posts', {
@@ -115,9 +120,7 @@ export async function postToSpellcast(
         accountSetId,
         postType,
         ...(selectedAccountIds ? { selectedAccountIds } : {}),
-        ...(params.platformSettings
-          ? { platformSettings: params.platformSettings }
-          : {}),
+        platformSettings,
         ...(params.firstComment ? { firstComment: params.firstComment } : {}),
       }),
     });
