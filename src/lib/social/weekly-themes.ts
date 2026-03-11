@@ -125,9 +125,8 @@ export const THEME_CATEGORY_WEIGHTS: Record<string, number> = {
 };
 
 /**
- * Select a theme for a given week.
- * Primary block is always numerology (the #1 performer).
- * Falls back to weighted selection if no numerology themes exist.
+ * Select a theme for a given week using weighted category rotation.
+ * Higher-weight categories appear more often in the rotation.
  */
 export function selectWeeklyTheme(
   weekNumber: number,
@@ -137,15 +136,6 @@ export function selectWeeklyTheme(
     return categoryThemes[customThemeIndex % categoryThemes.length];
   }
 
-  // Primary block is always numerology
-  const numerologyThemes = categoryThemes.filter(
-    (t) => t.category === 'numerology',
-  );
-  if (numerologyThemes.length > 0) {
-    return numerologyThemes[weekNumber % numerologyThemes.length];
-  }
-
-  // Fallback: weighted selection if no numerology themes
   const weightedThemes: WeeklyTheme[] = [];
   for (const theme of categoryThemes) {
     const weight = THEME_CATEGORY_WEIGHTS[theme.category] || 1;

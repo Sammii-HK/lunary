@@ -225,7 +225,8 @@ export async function generateConversationPost(
   options?: { excludeCategory?: ThemeCategory },
 ): Promise<ThreadsPost> {
   const date = new Date(dateStr);
-  const { theme } = getThemeForDate(date);
+  const weekNumber = Math.floor(date.getTime() / (7 * 24 * 60 * 60 * 1000));
+  const { theme } = getThemeForDate(date, weekNumber);
   let category = theme.category as ThemeCategory;
 
   // If this category is excluded (e.g. a transit post already covered planetary today),
@@ -299,7 +300,8 @@ export async function generateIdentityPost(
   slotHour: number,
 ): Promise<ThreadsPost> {
   const date = new Date(dateStr);
-  const { theme } = getThemeForDate(date);
+  const weekNumber = Math.floor(date.getTime() / (7 * 24 * 60 * 60 * 1000));
+  const { theme } = getThemeForDate(date, weekNumber);
   const category = theme.category as ThemeCategory;
   const rng = seededRandom(`threads-identity-${dateStr}-${slotHour}`);
 
