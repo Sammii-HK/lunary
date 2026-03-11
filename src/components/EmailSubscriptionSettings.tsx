@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Mail, CheckCircle, XCircle } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { useAuthStatus } from './AuthStatus';
 import { betterAuthClient } from '@/lib/auth-client';
 
@@ -13,6 +13,12 @@ export function EmailSubscriptionSettings() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const resolveSessionIdentity = useCallback(async () => {
     try {
@@ -23,13 +29,14 @@ export function EmailSubscriptionSettings() {
       return {
         email: (sessionUser as any)?.email ?? null,
         id: (sessionUser as any)?.id ?? null,
+        emailVerified: (sessionUser as any)?.emailVerified ?? false,
       };
     } catch (error) {
       console.error(
         'Error fetching auth session while loading newsletter preferences',
         error,
       );
-      return { email: null, id: null };
+      return { email: null, id: null, emailVerified: false };
     }
   }, []);
 
@@ -44,11 +51,14 @@ export function EmailSubscriptionSettings() {
     const resolveEmail = async () => {
       const profileEmail = (authState.user as any)?.email || null;
       const profileUserId = authUserId || null;
+      const profileEmailVerified =
+        (authState.user as any)?.emailVerified ?? false;
 
       if (profileEmail) {
         if (isMounted) {
           setUserEmail(profileEmail);
           setUserId(profileUserId);
+          setEmailVerified(profileEmailVerified);
           setAuthChecked(true);
         }
         return;
@@ -59,6 +69,7 @@ export function EmailSubscriptionSettings() {
       if (isMounted) {
         setUserEmail(sessionIdentity.email ?? null);
         setUserId(sessionIdentity.id ?? profileUserId ?? authProfileId ?? null);
+        setEmailVerified(sessionIdentity.emailVerified ?? false);
         setAuthChecked(true);
       }
     };
@@ -66,6 +77,7 @@ export function EmailSubscriptionSettings() {
     setUserEmail(null);
     setAuthChecked(false);
     setUserId(null);
+    setEmailVerified(null);
 
     resolveEmail();
 
@@ -165,6 +177,41 @@ export function EmailSubscriptionSettings() {
     }
   };
 
+  const handleResendVerificationEmail = async () => {
+    setResendLoading(true);
+    setResendMessage(null);
+
+    try {
+      const response = await fetch('/api/auth/resend-verification-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setResendMessage({
+          type: 'error',
+          text: data.error || 'Failed to resend verification email',
+        });
+      } else {
+        setResendMessage({
+          type: 'success',
+          text: 'Verification email sent! Check your inbox.',
+        });
+      }
+    } catch (error) {
+      console.error('Error resending verification email:', error);
+      setResendMessage({
+        type: 'error',
+        text: 'An error occurred. Please try again.',
+      });
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className='w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
@@ -192,60 +239,114 @@ export function EmailSubscriptionSettings() {
   }
 
   return (
-    <div className='w-full max-w-md p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
-      <h3 className='text-lg font-semibold text-white mb-3 flex items-center gap-2'>
-        <Mail className='h-5 w-5' />
-        Email Newsletter
-      </h3>
-      <p className='text-xs text-zinc-400 mb-4'>
-        Receive weekly cosmic insights, blog updates, and special offers
-      </p>
-
-      <div className='space-y-4'>
-        <div className='flex items-center justify-between'>
-          <div>
-            <p className='text-sm text-white font-medium'>
-              {isSubscribed ? (
-                <span className='flex items-center gap-2 text-lunary-success'>
-                  <CheckCircle className='h-4 w-4' />
-                  Subscribed
-                </span>
+    <div className='w-full max-w-md space-y-4'>
+      {/* Email Verification Section */}
+      {emailVerified !== null && (
+        <div
+          className={`p-4 rounded-lg border ${
+            emailVerified
+              ? 'bg-lunary-success-900/20 border-lunary-success-700'
+              : 'bg-lunary-error-900/20 border-lunary-error-700'
+          }`}
+        >
+          <div className='flex items-start gap-3'>
+            <div className='mt-0.5'>
+              {emailVerified ? (
+                <CheckCircle className='h-5 w-5 text-lunary-success' />
               ) : (
-                <span className='flex items-center gap-2 text-zinc-400'>
-                  <XCircle className='h-4 w-4' />
-                  Not Subscribed
-                </span>
+                <AlertCircle className='h-5 w-5 text-lunary-error' />
               )}
-            </p>
-            <p className='text-xs text-zinc-400 mt-1'>
-              {isSubscribed
-                ? `Receiving emails at ${userEmail}`
-                : 'You will not receive email newsletters'}
-            </p>
+            </div>
+            <div className='flex-1'>
+              <p className='text-sm font-medium text-white'>
+                {emailVerified ? 'Email Verified' : 'Email Not Verified'}
+              </p>
+              <p className='text-xs text-zinc-300 mt-1'>
+                {emailVerified
+                  ? `Your email ${userEmail} is verified.`
+                  : `We need to verify your email ${userEmail} to enable all features.`}
+              </p>
+              {!emailVerified && (
+                <button
+                  onClick={handleResendVerificationEmail}
+                  disabled={resendLoading}
+                  className='mt-3 px-3 py-1.5 text-xs font-medium bg-lunary-error-600 hover:bg-lunary-error-700 text-white rounded transition-colors disabled:opacity-50'
+                >
+                  {resendLoading ? 'Sending...' : 'Resend Verification Email'}
+                </button>
+              )}
+              {resendMessage && (
+                <p
+                  className={`text-xs mt-2 ${
+                    resendMessage.type === 'success'
+                      ? 'text-lunary-success'
+                      : 'text-lunary-error'
+                  }`}
+                >
+                  {resendMessage.text}
+                </p>
+              )}
+            </div>
           </div>
-          <button
-            onClick={toggleSubscription}
-            disabled={updating}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              isSubscribed ? 'bg-lunary-primary-600' : 'bg-zinc-600'
-            } disabled:opacity-50`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                isSubscribed ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
         </div>
+      )}
 
-        {isSubscribed && (
-          <div className='pt-3 border-t border-zinc-700'>
-            <p className='text-xs text-zinc-400'>
-              You can unsubscribe at any time by clicking the link in any email
-              or disabling this toggle.
-            </p>
+      {/* Newsletter Subscription Section */}
+      <div className='p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+        <h3 className='text-lg font-semibold text-white mb-3 flex items-center gap-2'>
+          <Mail className='h-5 w-5' />
+          Email Newsletter
+        </h3>
+        <p className='text-xs text-zinc-400 mb-4'>
+          Receive weekly cosmic insights, blog updates, and special offers
+        </p>
+
+        <div className='space-y-4'>
+          <div className='flex items-center justify-between'>
+            <div>
+              <p className='text-sm text-white font-medium'>
+                {isSubscribed ? (
+                  <span className='flex items-center gap-2 text-lunary-success'>
+                    <CheckCircle className='h-4 w-4' />
+                    Subscribed
+                  </span>
+                ) : (
+                  <span className='flex items-center gap-2 text-zinc-400'>
+                    <XCircle className='h-4 w-4' />
+                    Not Subscribed
+                  </span>
+                )}
+              </p>
+              <p className='text-xs text-zinc-400 mt-1'>
+                {isSubscribed
+                  ? `Receiving emails at ${userEmail}`
+                  : 'You will not receive email newsletters'}
+              </p>
+            </div>
+            <button
+              onClick={toggleSubscription}
+              disabled={updating}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                isSubscribed ? 'bg-lunary-primary-600' : 'bg-zinc-600'
+              } disabled:opacity-50`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isSubscribed ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
           </div>
-        )}
+
+          {isSubscribed && (
+            <div className='pt-3 border-t border-zinc-700'>
+              <p className='text-xs text-zinc-400'>
+                You can unsubscribe at any time by clicking the link in any
+                email or disabling this toggle.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
