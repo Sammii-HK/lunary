@@ -59,6 +59,14 @@ const NativeAppSettings = dynamic(
   { ssr: false },
 );
 
+const AppleAccountLink = dynamic(
+  () =>
+    import('@/components/native/AppleAccountLink').then((m) => ({
+      default: m.AppleAccountLink,
+    })),
+  { ssr: false },
+);
+
 type SettingSection = {
   id: string;
   title: string;
@@ -198,6 +206,16 @@ export function SettingsTab({
           );
         })}
       </div>
+
+      {/* Account Linking (iOS only) */}
+      {isNativeIOS && (
+        <div className='w-full max-w-3xl space-y-3'>
+          <SectionTitle as='h2'>Linked Accounts</SectionTitle>
+          <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg p-4'>
+            <AppleAccountLink />
+          </div>
+        </div>
+      )}
 
       {/* Subscription */}
       <div className='w-full max-w-3xl space-y-3'>

@@ -62,6 +62,7 @@ export function AuthComponent({
   const router = useRouter();
   const [isNative, setIsNative] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
   const turnstileTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -503,6 +504,88 @@ export function AuthComponent({
     ? 'bg-transparent'
     : 'w-full max-w-md mx-auto bg-zinc-900 rounded-lg p-6';
 
+  // Native iOS: Apple Sign In first, email form hidden behind toggle
+  if (isNative && !isForgot && !showEmailForm) {
+    return (
+      <div className={containerClasses}>
+        {!compact && (
+          <div className='text-center mb-6'>
+            <h2 className='text-2xl font-bold text-white mb-2'>
+              {isSignUp ? 'Get Started' : 'Welcome Back'}
+            </h2>
+            <p className='text-zinc-400'>
+              {isSignUp
+                ? 'Create your account to begin'
+                : 'Sign in to your cosmic journey'}
+            </p>
+          </div>
+        )}
+
+        {error && (
+          <div className='bg-red-900/30 border border-red-700 text-red-300 px-4 py-3 rounded-lg text-sm mb-4'>
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className='bg-lunary-success-900/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm mb-4'>
+            {success}
+          </div>
+        )}
+
+        <button
+          type='button'
+          onClick={handleAppleSignIn}
+          disabled={appleLoading}
+          className='w-full bg-white hover:bg-zinc-100 disabled:opacity-50 text-black font-medium rounded-xl py-3.5 px-4 flex items-center justify-center gap-3 transition-colors'
+        >
+          {appleLoading ? (
+            <Loader2 className='w-5 h-5 animate-spin text-black' />
+          ) : (
+            <svg className='w-5 h-5' viewBox='0 0 24 24' fill='currentColor'>
+              <path d='M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z' />
+            </svg>
+          )}
+          {isSignUp ? 'Sign up with Apple' : 'Sign in with Apple'}
+        </button>
+
+        <div className='mt-6 text-center'>
+          <button
+            onClick={() => {
+              setShowEmailForm(true);
+              setError(null);
+              setSuccess(null);
+            }}
+            className='text-sm text-zinc-500 hover:text-zinc-300 transition-colors'
+          >
+            Use email instead
+          </button>
+        </div>
+
+        <div className='mt-3 text-center'>
+          <button
+            onClick={() => {
+              setMode(isSignUp ? 'signIn' : 'signUp');
+              setError(null);
+              setSuccess(null);
+            }}
+            className='text-lunary-accent hover:text-lunary-accent-300 text-sm font-medium transition-colors'
+          >
+            {isSignUp
+              ? 'Already have an account? Sign in'
+              : "Don't have an account? Sign up"}
+          </button>
+        </div>
+
+        <div className='mt-4 text-center'>
+          <p className='text-xs text-zinc-400'>
+            Your data is securely encrypted and synced across devices
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={containerClasses}>
       {!compact && (
@@ -731,33 +814,19 @@ export function AuthComponent({
       </div>
 
       {isNative && !isForgot && (
-        <div className='mt-6'>
-          <div className='relative flex items-center gap-3 mb-4'>
-            <div className='flex-1 h-px bg-zinc-700' />
-            <span className='text-xs text-zinc-500'>or</span>
-            <div className='flex-1 h-px bg-zinc-700' />
-          </div>
+        <div className='mt-4 text-center'>
           <button
-            type='button'
-            onClick={handleAppleSignIn}
-            disabled={appleLoading}
-            className='w-full bg-white hover:bg-zinc-100 disabled:opacity-50 text-black font-medium rounded-lg py-3 px-4 flex items-center justify-center gap-3 transition-colors'
+            onClick={() => setShowEmailForm(false)}
+            className='text-sm text-zinc-500 hover:text-zinc-300 transition-colors'
           >
-            {appleLoading ? (
-              <Loader2 className='w-5 h-5 animate-spin text-black' />
-            ) : (
-              <svg className='w-5 h-5' viewBox='0 0 24 24' fill='currentColor'>
-                <path d='M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z' />
-              </svg>
-            )}
-            {isSignUp ? 'Sign up with Apple' : 'Sign in with Apple'}
+            Use Apple Sign In instead
           </button>
         </div>
       )}
 
       <div className='mt-4 text-center'>
         <p className='text-xs text-zinc-400'>
-          🔒 Your data is securely encrypted and synced across devices
+          Your data is securely encrypted and synced across devices
         </p>
       </div>
     </div>
