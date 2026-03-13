@@ -227,7 +227,7 @@ describe('InlineContextualNudge Component', () => {
       expect(mockPush).toHaveBeenCalledWith('/app/chart');
     });
 
-    it('shows auth modal when not authenticated', async () => {
+    it('navigates to signup page when not authenticated', async () => {
       mockUseAuthStatus.mockReturnValue({
         isAuthenticated: false,
         user: null,
@@ -241,11 +241,10 @@ describe('InlineContextualNudge Component', () => {
       const button = screen.getByRole('button');
       fireEvent.click(button);
 
-      // Should not navigate immediately
-      expect(mockPush).not.toHaveBeenCalled();
-
-      // Auth modal should appear
-      expect(screen.getByTestId('auth-component')).toBeInTheDocument();
+      // Should navigate to value-prop signup page with context params
+      expect(mockPush).toHaveBeenCalledWith(
+        expect.stringContaining('/signup/chart?'),
+      );
     });
 
     it('navigates directly for link action regardless of auth', () => {

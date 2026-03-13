@@ -145,35 +145,31 @@ export const THREADS_QUESTION_TEMPLATES = [
  */
 
 const CTA_BODIES = [
-  // Transit tracking (real differentiator vs every other app)
-  `Lunary is now on Google Play. It tracks how transits are actually affecting you, using your full birth chart. Not a generic sun sign forecast.`,
-  // Pattern recognition (unique feature)
-  `Lunary is on Google Play. It learns your patterns over time. Your tarot pulls, journal entries, and transits start connecting after a few weeks. No other app does this.`,
-  // Astronomical accuracy
-  `Lunary is now on Google Play. Every chart is calculated to within 1 arcminute, validated against the US Naval Observatory. Most apps round the numbers. We don't.`,
-  // Free grimoire (2000+ pages, no paywall)
-  `Lunary is on Google Play. There's a 2,000+ page grimoire built in. Spells, rituals, tarot meanings, correspondences. All free. No paywall on learning.`,
-  // No ads, ever
-  `Lunary is now on Google Play. No ads. Not in free, not ever. Your birth chart drives your horoscopes, transits, tarot, and crystal guidance. Not your sun sign.`,
-  // Teaches you to read your own chart
-  `I built Lunary so you can learn to read your own chart. Not depend on an app to tell you what to think. Now on Google Play.`,
-  // Real time transit updates
-  `Lunary is on Google Play. It reads your transits in real time and tells you what they actually mean for your specific chart. Updates throughout the day.`,
-  // Chart-first tarot
-  `Lunary is on Google Play. Even your tarot readings are guided by your birth chart. Nothing is generic. Everything connects back to your birth data.`,
-  // Full practice in one place
-  `Lunary is on Google Play. Astrology, tarot, moon phases, crystals, rituals, journaling. All in one place, all connected to your birth chart. Not fragments across five apps.`,
-  // Reflection over prediction
-  `Lunary is on Google Play. It's built for understanding yourself, not predicting the future. Your chart, your transits, your patterns. Everything based on real astronomy.`,
+  `Lunary is now on Google Play. Your birth chart drives everything—horoscopes, transits, tarot, crystals. No ads. Ever.`,
+  `Lunary is on Google Play. Transits + birth chart + tarot in one place. No generic sun sign nonsense.`,
+  `Lunary is on Google Play. Built for chart readers. Not sun sign predictions.`,
+  `Lunary is on Google Play. Your full chart, tracked in real time. No ads.`,
+  `Lunary is on Google Play. Astrology that actually uses your birth data.`,
 ];
 
 const CTA_CLOSINGS = [
-  `3 months free with code COSMICSEASON. Tell me what you think.`,
-  `Use code COSMICSEASON for 3 months free. Let me know how it feels.`,
-  `3 months free with code COSMICSEASON. Would love to hear your thoughts.`,
-  `Code COSMICSEASON gets you 3 months free. Drop your sign below.`,
-  `3 months on me with code COSMICSEASON. What do you think?`,
-  `Try it free for 3 months with code COSMICSEASON. Curious what you notice first.`,
+  `Code COSMICSEASON gets 3 months free. Drop your sign below.`,
+  `3 months free with code COSMICSEASON.`,
+  `Code COSMICSEASON: 3 months free.`,
+];
+
+/**
+ * Opening patterns — rotates between different audience combinations.
+ * Some include the first-date line, most don't, to avoid repetition.
+ */
+const OPENING_PATTERNS = [
+  (terms: string[]) =>
+    `dear ${terms.join(', ')}, and anyone who's ever asked "what time were you born" on a first date 🌖`,
+  (terms: string[]) => `dear ${terms.join(', ')} 🌖`,
+  (terms: string[]) => `hey ${terms.join(', ')} 🌖`,
+  (terms: string[]) =>
+    `for everyone reading their chart—${terms.join(', ')} 🌖`,
+  (terms: string[]) => `${terms.join(', ')}—this is for you 🌖`,
 ];
 
 /**
@@ -183,7 +179,8 @@ const CTA_CLOSINGS = [
 export function getDearStyleReferralPost(seed?: number): string {
   const s = seed ?? Math.floor(Math.random() * 1000);
   const terms = buildAudienceTerms(4);
-  const opening = `dear ${terms.join(', ')}, and anyone who's ever asked "what time were you born" on a first date 🌖`;
+  const openingPattern = OPENING_PATTERNS[s % OPENING_PATTERNS.length];
+  const opening = openingPattern(terms);
   const body = CTA_BODIES[s % CTA_BODIES.length];
   const closing = CTA_CLOSINGS[(s >> 3) % CTA_CLOSINGS.length];
   return `${opening}\n${body}\n${closing}`;

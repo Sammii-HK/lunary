@@ -171,7 +171,9 @@ export async function GET(request: NextRequest) {
 function formatLocationLabel(location: string): string {
   const labels: Record<string, string> = {
     seo_inline_post_tldr: 'Inline (after TL;DR)',
-    seo_contextual_nudge: 'Full CTA (bottom)',
+    seo_inline_mid_article: 'Inline (mid-article, scroll)',
+    seo_contextual_nudge: 'Full CTA block (post-FAQs)',
+    seo_sticky_bottom: 'Sticky bottom bar',
     unknown: 'Unknown',
   };
   return labels[location] || location.replace(/_/g, ' ');

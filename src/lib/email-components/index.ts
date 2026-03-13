@@ -52,3 +52,22 @@ export {
   generatePasswordResetEmailHTML,
   generatePasswordResetEmailText,
 } from './AuthEmails';
+export { renderWelcomeDay2, renderWelcomeDay5 } from './WelcomeSeriesEmails';
+export {
+  renderAbandonedCheckoutEmail2,
+  renderAbandonedCheckoutEmail3,
+} from './AbandonedCheckoutDripEmails';
+export {
+  renderBrowseAbandonEmail1,
+  renderBrowseAbandonEmail2,
+  renderBrowseAbandonEmail3,
+} from './BrowseAbandonEmails';
+export {
+  renderPostUpgradeDay3,
+  renderPostUpgradeDay7,
+} from './PostUpgradeEmails';
+export {
+  renderRenewal30d,
+  renderRenewal7d,
+  renderRenewal1d,
+} from './AnnualRenewalEmails';

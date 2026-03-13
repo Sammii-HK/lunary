@@ -40,6 +40,7 @@ export function useCTACopy() {
     chartConnection: getCopy('chartConnection'),
     transitList: getCopy('transitList'),
     crystal: getCopy('crystal'),
+    rune: getCopy('rune'),
     trackCTAClick,
   };
 }

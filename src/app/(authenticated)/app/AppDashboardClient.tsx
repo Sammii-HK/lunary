@@ -119,6 +119,19 @@ const CrystalPreview = dynamic(
   },
 );
 
+const DailyRunePreview = dynamic(
+  () =>
+    import('@/components/compact/DailyRunePreview').then((m) => ({
+      default: m.DailyRunePreview,
+    })),
+  {
+    loading: () => (
+      <div className='h-16 bg-zinc-900/50 rounded-md animate-pulse' />
+    ),
+    ssr: false,
+  },
+);
+
 const SkyNowCard = dynamic(
   () =>
     import('@/components/compact/SkyNowCard').then((m) => ({
@@ -477,12 +490,19 @@ export default function AppDashboardClient() {
             />
           </div>
           <DailyInsightCard />
-          <DailyCardPreview />
-
-          <div id='transit-of-day' className='scroll-mt-20'>
-            <TransitOfTheDay />
+          <div className='flex flex-col gap-3'>
+            <DailyCardPreview />
+            <div id='transit-of-day' className='scroll-mt-20'>
+              <TransitOfTheDay />
+            </div>
           </div>
-          <CrystalPreview />
+
+          <div
+            className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} ${isDemoMode ? '' : 'md:col-span-2'}`}
+          >
+            <CrystalPreview />
+            <DailyRunePreview />
+          </div>
 
           {authState.isAuthenticated && <WeeklyChallengeCard />}
 

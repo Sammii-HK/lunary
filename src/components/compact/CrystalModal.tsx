@@ -250,11 +250,29 @@ export const CrystalPreview = () => {
       >
         <div className='flex items-start gap-3 h-full'>
           <div className='flex-1 min-w-0 h-full mt-1 flex flex-col justify-between'>
-            <div className='flex items-center gap-2 mb-1'>
-              <Gem className='w-4 h-4 text-lunary-accent-200' />
-              <span className='text-sm text-zinc-200'>{crystalName}</span>
+            <div className='flex items-center justify-between mb-1'>
+              <div className='flex items-center gap-2'>
+                <Gem className='w-4 h-4 text-lunary-accent-200' />
+                <span className='text-sm text-zinc-200'>
+                  Crystal of the Day
+                </span>
+              </div>
+              {canAccessPersonalized && (
+                <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
+                  Personal
+                </span>
+              )}
             </div>
-            <p className='text-xs text-zinc-300 line-clamp-4 mb-2'>
+            <p className='text-sm text-lunary-primary-200'>
+              {crystalName}{' '}
+              <span className='text-zinc-500'>
+                —{' '}
+                {crystalData?.crystal?.chakra
+                  ? `${crystalData.crystal.chakra} Chakra`
+                  : 'Healing'}
+              </span>
+            </p>
+            <p className='text-xs text-zinc-400 mt-1 line-clamp-2'>
               {crystalReason}
             </p>
 
@@ -364,6 +382,24 @@ export const CrystalPreview = () => {
             </div>
 
             <div className='space-y-4'>
+              {/* Properties as keyword chips */}
+              {crystalData?.crystal && (
+                <div className='flex flex-wrap gap-1.5'>
+                  {crystalData.crystal.properties.map((prop: string) => (
+                    <span
+                      key={prop}
+                      className='text-xs bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded'
+                    >
+                      {prop}
+                    </span>
+                  ))}
+                  <span className='text-xs bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded'>
+                    {crystalData.crystal.chakra} Chakra
+                  </span>
+                </div>
+              )}
+
+              {/* Why this crystal */}
               <div>
                 <h3 className='text-xs text-zinc-400 uppercase tracking-wide mb-2'>
                   Why this crystal today
@@ -385,28 +421,19 @@ export const CrystalPreview = () => {
                 )}
               </div>
 
+              {/* Intention */}
               {crystalData?.crystal && (
-                <>
-                  <div>
-                    <h3 className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
-                      Intention
-                    </h3>
-                    <p className='text-sm text-zinc-300 italic'>
-                      "{crystalData.crystal.intention}"
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
-                      Properties
-                    </h3>
-                    <p className='text-sm text-zinc-400'>
-                      {crystalData.crystal.properties.join(' • ')} •{' '}
-                      {crystalData.crystal.chakra} Chakra
-                    </p>
-                  </div>
-                </>
+                <div>
+                  <h3 className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
+                    Intention
+                  </h3>
+                  <p className='text-sm text-zinc-300 italic'>
+                    &ldquo;{crystalData.crystal.intention}&rdquo;
+                  </p>
+                </div>
               )}
 
+              {/* Upgrade CTA for free users */}
               {!canAccessPersonalized && (
                 <Button
                   variant='lunary-soft'
@@ -424,6 +451,20 @@ export const CrystalPreview = () => {
                   <Sparkles className='w-4 h-4' />
                   Get personalized recommendations with Lunary+
                 </Button>
+              )}
+
+              {/* Journal prompt */}
+              {authStatus.isAuthenticated && (
+                <div className='bg-zinc-800/50 rounded-lg p-3'>
+                  <h3 className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
+                    Journal prompt
+                  </h3>
+                  <p className='text-sm text-zinc-300'>
+                    {crystalData?.crystal
+                      ? `${crystalData.crystal.name} invites you to focus on ${crystalData.crystal.properties[0]?.toLowerCase() || 'healing'}. How can you bring this energy into your day?`
+                      : `How can ${crystalName} support your intentions today?`}
+                  </p>
+                </div>
               )}
 
               {isInDemoMode() ? (
