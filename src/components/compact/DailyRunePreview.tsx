@@ -333,17 +333,7 @@ export const DailyRunePreview = () => {
                 </p>
               </div>
 
-              {/* Divination */}
-              <div>
-                <h3 className='text-xs text-zinc-400 uppercase tracking-wide mb-2'>
-                  Divination
-                </h3>
-                <p className='text-sm text-zinc-300 leading-relaxed'>
-                  {rune.divinationMeaning}
-                </p>
-              </div>
-
-              {/* Affirmation */}
+              {/* Intention */}
               <div>
                 <h3 className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
                   Affirmation
@@ -352,25 +342,6 @@ export const DailyRunePreview = () => {
                   &ldquo;{rune.affirmation}&rdquo;
                 </p>
               </div>
-
-              {/* Magical uses */}
-              {rune.magicalUses.length > 0 && (
-                <div>
-                  <h3 className='text-xs text-zinc-400 uppercase tracking-wide mb-2'>
-                    Magical uses
-                  </h3>
-                  <div className='flex flex-wrap gap-1.5'>
-                    {rune.magicalUses.map((use) => (
-                      <span
-                        key={use}
-                        className='text-xs bg-lunary-primary-900/50 text-lunary-primary-200 px-2 py-0.5 rounded'
-                      >
-                        {use}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Upgrade CTA for free users */}
               {!canAccessPersonalized && (
