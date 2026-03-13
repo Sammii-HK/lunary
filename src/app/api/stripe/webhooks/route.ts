@@ -1047,6 +1047,16 @@ async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
   if (userId) {
     conversionTracking.checkoutAbandoned(userId, 'expired');
 
+    // Track checkout expiry timestamp for drip email sequence
+    try {
+      await sql`UPDATE subscriptions SET last_checkout_expired_at = NOW() WHERE user_id = ${userId}`;
+    } catch (error) {
+      console.error(
+        '[Webhook] Failed to update last_checkout_expired_at:',
+        error,
+      );
+    }
+
     // Send abandoned checkout recovery email
     try {
       const userRow = await sql`

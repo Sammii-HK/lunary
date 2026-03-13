@@ -28,6 +28,7 @@ import { getInlineCtaVariant, getAnonId } from '@/lib/ab-tests-server';
 import { GrimoireSearch } from '@/app/grimoire/GrimoireSearch';
 import { StickyBottomCTA } from './StickyBottomCTA';
 import { ChartPreviewTeaser } from './ChartPreviewTeaser';
+import { MidArticleEmailCapture } from './MidArticleEmailCapture';
 
 /**
  * Format a URL segment into a human-readable label
@@ -696,6 +697,9 @@ export async function SEOContentTemplate({
             </div>
           </section>
         )}
+
+        {/* Mid-article email capture for non-logged-in readers */}
+        <MidArticleEmailCapture topic={h1} hub={contextualHub} />
 
         {/* Optional slot before FAQs */}
         {childrenPosition === 'before-faqs' && children && (

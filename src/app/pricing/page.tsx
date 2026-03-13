@@ -307,6 +307,9 @@ export default function PricingPage() {
     } else {
       conversionTracking.pageViewed('/pricing');
     }
+
+    // Track pricing view for browse-abandon email flow
+    fetch('/api/track/pricing-viewed', { method: 'POST' }).catch(() => {});
   }, [pricingCtaVariant, pricingDisplayVariant]);
 
   const productSchemas = useMemo(
