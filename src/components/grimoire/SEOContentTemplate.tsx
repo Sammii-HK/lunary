@@ -28,7 +28,7 @@ import { getInlineCtaVariant, getAnonId } from '@/lib/ab-tests-server';
 import { GrimoireSearch } from '@/app/grimoire/GrimoireSearch';
 import { StickyBottomCTA } from './StickyBottomCTA';
 import { ChartPreviewTeaser } from './ChartPreviewTeaser';
-import { MidArticleEmailCapture } from './MidArticleEmailCapture';
+import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 
 /**
  * Format a URL segment into a human-readable label
@@ -405,15 +405,6 @@ export async function SEOContentTemplate({
           </div>
         )}
 
-        {/* Inline Contextual Nudge - after TL;DR for early conversion */}
-        {hasContextualNudge && contextualNudge && (
-          <InlineContextualNudge
-            nudge={contextualNudge}
-            location='seo_inline_post_tldr'
-            serverVariant={inlineCtaVariant}
-          />
-        )}
-
         {/* What is X? - Featured Snippet Optimization */}
         {whatIs && (
           <section id='what-is' className='mb-8'>
@@ -698,8 +689,15 @@ export async function SEOContentTemplate({
           </section>
         )}
 
-        {/* Mid-article email capture for non-logged-in readers */}
-        <MidArticleEmailCapture topic={h1} hub={contextualHub} />
+        {/* Inline Contextual Nudge - scroll-triggered at 50% for mid-article conversion */}
+        {hasContextualNudge && contextualNudge && (
+          <InlineContextualNudge
+            nudge={contextualNudge}
+            location='seo_inline_mid_article'
+            serverVariant={inlineCtaVariant}
+            scrollTriggered
+          />
+        )}
 
         {/* Optional slot before FAQs */}
         {childrenPosition === 'before-faqs' && children && (
@@ -737,6 +735,16 @@ export async function SEOContentTemplate({
             <PeopleAlsoAsk questions={faqs} />
           </section>
         )}
+
+        {/* Newsletter signup - low friction capture for readers who enjoyed the article */}
+        <NewsletterSignupForm
+          compact
+          source={`grimoire_${contextualHub}`}
+          headline='Get weekly cosmic updates'
+          description='Free forecasts, transit alerts, and guides delivered every Friday.'
+          ctaLabel='Subscribe'
+          align='left'
+        />
 
         {/* Full CTA or contextual nudge - positioned after FAQs for committed readers */}
         {hasContextualNudge && contextualNudge ? (

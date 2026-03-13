@@ -32,6 +32,8 @@ interface NewsletterSignupFormProps {
   successMessage?: string;
   align?: 'left' | 'center';
   inputPlaceholder?: string;
+  /** Compact variant for inline/mid-article use */
+  compact?: boolean;
 }
 
 export function NewsletterSignupForm({
@@ -43,6 +45,7 @@ export function NewsletterSignupForm({
   successMessage = 'Check your inbox to confirm your subscription ✨',
   align = 'left',
   inputPlaceholder = 'you@example.com',
+  compact = false,
 }: NewsletterSignupFormProps) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<SignupStatus>('idle');
@@ -156,13 +159,16 @@ export function NewsletterSignupForm({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-lunary-primary-800 bg-lunary-primary-950 p-6 sm:p-8 shadow-lg shadow-lunary-primary-950 backdrop-blur-lg',
+        compact
+          ? 'rounded-xl border border-lunary-primary-800/50 bg-lunary-primary-950/60 p-4 sm:p-5'
+          : 'rounded-2xl border border-lunary-primary-800 bg-lunary-primary-950 p-6 sm:p-8 shadow-lg shadow-lunary-primary-950 backdrop-blur-lg',
         className,
       )}
     >
       <div
         className={cn(
-          'flex flex-col gap-5 sm:gap-6',
+          'flex flex-col',
+          compact ? 'gap-3' : 'gap-5 sm:gap-6',
           align === 'center' && 'items-center text-center',
         )}
       >
@@ -172,11 +178,16 @@ export function NewsletterSignupForm({
             align === 'center' && 'sm:flex-col sm:items-center',
           )}
         >
-          <div className='space-y-2'>
-            <Heading as='h2' variant='h2'>
+          <div className={compact ? 'space-y-1' : 'space-y-2'}>
+            <Heading as={compact ? 'h3' : 'h2'} variant={compact ? 'h3' : 'h2'}>
               {headline}
             </Heading>
-            <p className='text-sm sm:text-base text-lunary-accent-100/80'>
+            <p
+              className={cn(
+                'text-lunary-accent-100/80',
+                compact ? 'text-xs sm:text-sm' : 'text-sm sm:text-base',
+              )}
+            >
               {description}
             </p>
           </div>
