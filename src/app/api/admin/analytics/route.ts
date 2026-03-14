@@ -49,39 +49,43 @@ export async function GET(request: NextRequest) {
 
     const dateStartIso = dateStart.toISOString();
 
-    const signups = await sql`
-      SELECT COUNT(*) as count
+    const signups = await sql.query(
+      `SELECT COUNT(*) as count
       FROM "user"
       WHERE "createdAt" IS NOT NULL
-        AND "createdAt" >= ${dateStartIso}
-        AND ${testUserFilterUsers()}
-    `;
+        AND "createdAt" >= $1
+        AND ${testUserFilterUsers()}`,
+      [dateStartIso],
+    );
 
-    const trials = await sql`
-      SELECT COUNT(DISTINCT user_id) as count
+    const trials = await sql.query(
+      `SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
       WHERE event_type = 'trial_started'
-        AND created_at >= ${dateStartIso}
-        AND ${testUserFilter()}
-    `;
+        AND created_at >= $1
+        AND ${testUserFilter()}`,
+      [dateStartIso],
+    );
 
     // Fix: Use only subscription_started (canonical conversion event)
     // Avoids double-counting users who have both trial_converted and subscription_started events
-    const conversions = await sql`
-      SELECT COUNT(DISTINCT user_id) as count
+    const conversions = await sql.query(
+      `SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
       WHERE event_type = 'subscription_started'
-        AND created_at >= ${dateStartIso}
-        AND ${testUserFilter()}
-    `;
+        AND created_at >= $1
+        AND ${testUserFilter()}`,
+      [dateStartIso],
+    );
 
-    const trialConversions = await sql`
-      SELECT COUNT(DISTINCT user_id) as count
+    const trialConversions = await sql.query(
+      `SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
       WHERE event_type = 'trial_converted'
-        AND created_at >= ${dateStartIso}
-        AND ${testUserFilter()}
-    `;
+        AND created_at >= $1
+        AND ${testUserFilter()}`,
+      [dateStartIso],
+    );
 
     const totalSignups = parseInt(signups.rows[0]?.count || '0');
     const trialStarted = parseInt(trials.rows[0]?.count || '0');
