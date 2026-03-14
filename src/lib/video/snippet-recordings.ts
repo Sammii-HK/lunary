@@ -292,6 +292,212 @@ const snippetHoroscopeSpeed: SnippetRecordingConfig = {
   ],
 };
 
+const snippetAstralChat: SnippetRecordingConfig = {
+  scriptId: 'snippet-astral-chat',
+  viewport: TIKTOK_VIEWPORT,
+  darkMode: true,
+  scenes: [
+    // Scene 1 — Type Saturn return question into Astral Chat
+    {
+      path: '/guide',
+      waitForSelector: '[data-testid="guide-input"]',
+      actions: [
+        {
+          type: 'click',
+          selector: '[data-testid="guide-input"]',
+          duration: 300,
+        },
+        { type: 'wait', duration: 400 },
+        {
+          type: 'type',
+          selector: '[data-testid="guide-input"]',
+          value: 'What does my Saturn return mean for my career?',
+          duration: 1200,
+        },
+        { type: 'wait', duration: 300 },
+        {
+          type: 'click',
+          selector: '[data-testid="guide-submit"]',
+          duration: 300,
+        },
+      ],
+      holdDuration: 2000,
+    },
+    // Scene 2 — Wait for response to stream in and show grimoire-sourced detail
+    {
+      path: '/guide',
+      actions: [{ type: 'wait', duration: 3500 }],
+      holdDuration: 3000,
+    },
+    // Scene 3 — Scroll through response showing depth
+    {
+      path: '/guide',
+      actions: [{ type: 'scroll', scrollAmount: 200, duration: 600 }],
+      holdDuration: 2500,
+    },
+  ],
+};
+
+const snippetCosmicScore: SnippetRecordingConfig = {
+  scriptId: 'snippet-cosmic-score',
+  viewport: TIKTOK_VIEWPORT,
+  darkMode: true,
+  scenes: [
+    // Scene 1 — Dashboard with cosmic score visible
+    {
+      path: '/app',
+      waitForSelector: '[data-testid="cosmic-score"], .cosmic-score',
+      actions: [{ type: 'wait', duration: 1000 }],
+      holdDuration: 3000,
+    },
+    // Scene 2 — Scroll to pattern breakdown
+    {
+      path: '/app',
+      actions: [
+        { type: 'scroll', scrollAmount: 250, duration: 700 },
+        { type: 'wait', duration: 400 },
+      ],
+      holdDuration: 3000,
+    },
+    // Scene 3 — Hold on pattern detail
+    {
+      path: '/app',
+      actions: [{ type: 'wait', duration: 300 }],
+      holdDuration: 2500,
+    },
+  ],
+};
+
+const snippetRealAstronomy: SnippetRecordingConfig = {
+  scriptId: 'snippet-real-astronomy',
+  viewport: TIKTOK_VIEWPORT,
+  darkMode: true,
+  scenes: [
+    // Scene 1 — Sky page showing precise planetary positions
+    {
+      path: '/sky',
+      waitForSelector: '[data-testid="sky-now-widget"], .planet-position',
+      actions: [{ type: 'wait', duration: 1200 }],
+      holdDuration: 3500,
+    },
+    // Scene 2 — Scroll through planets showing exact degrees and arcminutes
+    {
+      path: '/sky',
+      actions: [
+        { type: 'scroll', scrollAmount: 250, duration: 700 },
+        { type: 'wait', duration: 400 },
+      ],
+      holdDuration: 3000,
+    },
+    // Scene 3 — Hold on precise data
+    {
+      path: '/sky',
+      actions: [{ type: 'wait', duration: 200 }],
+      holdDuration: 2500,
+    },
+  ],
+};
+
+const snippetMoonSpells: SnippetRecordingConfig = {
+  scriptId: 'snippet-moon-spells',
+  viewport: TIKTOK_VIEWPORT,
+  darkMode: true,
+  scenes: [
+    // Scene 1 — Spells page with moon phase filter visible
+    {
+      path: '/grimoire/spells',
+      waitForSelector: 'h1',
+      actions: [{ type: 'wait', duration: 1000 }],
+      holdDuration: 3500,
+    },
+    // Scene 2 — Scroll through filtered spell list
+    {
+      path: '/grimoire/spells',
+      actions: [
+        { type: 'scroll', scrollAmount: 300, duration: 800 },
+        { type: 'wait', duration: 300 },
+      ],
+      holdDuration: 3000,
+    },
+    // Scene 3 — Hold on a specific spell
+    {
+      path: '/grimoire/spells',
+      actions: [{ type: 'scroll', scrollAmount: -100, duration: 400 }],
+      holdDuration: 2500,
+    },
+  ],
+};
+
+const snippetCircleFriends: SnippetRecordingConfig = {
+  scriptId: 'snippet-circle-friends',
+  viewport: TIKTOK_VIEWPORT,
+  darkMode: true,
+  scenes: [
+    // Scene 1 — Profile page with circle / friend cards visible
+    {
+      path: '/profile',
+      waitForSelector: '[data-testid="friend-card"], .friend-card',
+      actions: [{ type: 'wait', duration: 800 }],
+      holdDuration: 3000,
+    },
+    // Scene 2 — Tap a friend card to see compatibility and aspects
+    {
+      path: '/profile',
+      actions: [
+        {
+          type: 'click',
+          selector: '[data-testid="friend-card"]',
+          duration: 300,
+        },
+        { type: 'wait', duration: 1000 },
+      ],
+      holdDuration: 3000,
+    },
+    // Scene 3 — Scroll to aspect highlights
+    {
+      path: '/profile',
+      actions: [
+        { type: 'scroll', scrollAmount: 200, duration: 600 },
+        { type: 'wait', duration: 300 },
+      ],
+      holdDuration: 2500,
+    },
+  ],
+};
+
+const snippetTarotTransits: SnippetRecordingConfig = {
+  scriptId: 'snippet-tarot-transits',
+  viewport: TIKTOK_VIEWPORT,
+  darkMode: true,
+  scenes: [
+    // Scene 1 — Tarot page with daily card visible
+    {
+      path: '/tarot',
+      waitForSelector: 'h2, .text-lg.font-medium',
+      actions: [{ type: 'wait', duration: 1000 }],
+      holdDuration: 3000,
+    },
+    // Scene 2 — Scroll to transit connection section
+    {
+      path: '/tarot',
+      actions: [
+        { type: 'scroll', scrollAmount: 300, duration: 700 },
+        { type: 'wait', duration: 400 },
+      ],
+      holdDuration: 3500,
+    },
+    // Scene 3 — Hold on transit connection detail showing card-to-transit link
+    {
+      path: '/tarot',
+      actions: [
+        { type: 'scroll', scrollAmount: 150, duration: 400 },
+        { type: 'wait', duration: 300 },
+      ],
+      holdDuration: 2500,
+    },
+  ],
+};
+
 // ---------------------------------------------------------------------------
 // Export
 // ---------------------------------------------------------------------------
@@ -304,6 +510,12 @@ export const SNIPPET_RECORDING_CONFIGS: Record<string, SnippetRecordingConfig> =
     'snippet-transit-alert': snippetTransitAlert,
     'snippet-tarot-pull': snippetTarotPull,
     'snippet-horoscope-speed': snippetHoroscopeSpeed,
+    'snippet-astral-chat': snippetAstralChat,
+    'snippet-cosmic-score': snippetCosmicScore,
+    'snippet-real-astronomy': snippetRealAstronomy,
+    'snippet-moon-spells': snippetMoonSpells,
+    'snippet-circle-friends': snippetCircleFriends,
+    'snippet-tarot-transits': snippetTarotTransits,
   };
 
 /**
