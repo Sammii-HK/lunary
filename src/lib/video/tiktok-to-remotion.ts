@@ -35,6 +35,12 @@ const TIKTOK_CATEGORY_MAP: Record<string, string> = {
   'crystals-overview': 'crystals',
   'spells-overview': 'spells',
   'grimoire-search': 'divination',
+  'snippet-birth-chart': 'birth-chart',
+  'snippet-compatibility': 'zodiac',
+  'snippet-angel-number': 'divination',
+  'snippet-transit-alert': 'transits',
+  'snippet-tarot-pull': 'tarot',
+  'snippet-horoscope-speed': 'zodiac',
 };
 
 /**
