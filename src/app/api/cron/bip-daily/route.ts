@@ -100,11 +100,11 @@ export async function GET(request: NextRequest) {
     // -----------------------------------------------------------------------
 
     const [metricsResult, peakDauResult] = await Promise.all([
-      sql`SELECT signed_in_product_mau, new_signups, dau
+      sql`SELECT signed_in_product_mau, new_signups, signed_in_product_dau
           FROM daily_metrics
           WHERE metric_date = (CURRENT_DATE - INTERVAL '1 day')
           ORDER BY metric_date DESC LIMIT 1`,
-      sql`SELECT MAX(dau) as peak_dau
+      sql`SELECT MAX(signed_in_product_dau) as peak_dau
           FROM daily_metrics
           WHERE metric_date >= CURRENT_DATE - INTERVAL '30 days'
             AND metric_date < CURRENT_DATE`,
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
     const metricsRow = metricsResult.rows[0];
     const mau = Number(metricsRow?.signed_in_product_mau || 0);
     const newSignupsYesterday = Number(metricsRow?.new_signups || 0);
-    const dau = Number(metricsRow?.dau || 0);
+    const dau = Number(metricsRow?.signed_in_product_dau || 0);
     const peakDau = Number(peakDauResult.rows[0]?.peak_dau || 0);
     const isRecord = dau > 0 && peakDau > 0 && dau >= peakDau;
 
@@ -139,23 +139,22 @@ export async function GET(request: NextRequest) {
     }
     const showMrr = mrr > 27;
 
-    // SEO impressions from bip_state (24hr staleness limit, omit if stale)
+    // SEO from bip_state (24hr staleness limit, omit if stale)
     let impressionsPerDay = 0;
+    let clicksPerDay = 0;
     try {
-      const storedSeo = await getBipState('seo_impressions_per_day');
-      if (storedSeo) {
-        const updatedAt =
-          await sql`SELECT updated_at FROM bip_state WHERE key = 'seo_impressions_per_day'`;
-        const lastUpdate = updatedAt.rows[0]?.updated_at;
-        if (
-          lastUpdate &&
-          Date.now() - new Date(lastUpdate).getTime() < 24 * 60 * 60 * 1000
-        ) {
-          impressionsPerDay = Number(JSON.parse(storedSeo)) || 0;
-        }
+      const seoResult = await sql`
+        SELECT key, value FROM bip_state
+        WHERE key IN ('seo_impressions_per_day', 'seo_clicks_per_day')
+          AND updated_at > NOW() - INTERVAL '24 hours'`;
+      for (const row of seoResult.rows) {
+        if (row.key === 'seo_impressions_per_day')
+          impressionsPerDay = Number(row.value) || 0;
+        if (row.key === 'seo_clicks_per_day')
+          clicksPerDay = Number(row.value) || 0;
       }
     } catch {
-      // Non-critical — post without impressions
+      // Non-critical — post without SEO
     }
 
     // -----------------------------------------------------------------------
@@ -167,7 +166,11 @@ export async function GET(request: NextRequest) {
     if (showMrr) bullets.push(`✅ £${mrr.toFixed(2)} MRR`);
     if (newSignupsYesterday > 0)
       bullets.push(`✅ ${newSignupsYesterday} new signups yesterday`);
-    if (impressionsPerDay > 0)
+    if (impressionsPerDay > 0 && clicksPerDay > 0)
+      bullets.push(
+        `✅ ${impressionsPerDay.toLocaleString()} impressions/day, ${clicksPerDay} clicks/day`,
+      );
+    else if (impressionsPerDay > 0)
       bullets.push(
         `✅ ${impressionsPerDay.toLocaleString()} SEO impressions/day`,
       );
