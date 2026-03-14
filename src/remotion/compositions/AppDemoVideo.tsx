@@ -213,11 +213,11 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
         />
       )}
 
-      {/* 9. Fade out at end (0.8s = 24 frames) */}
+      {/* 9. Fade out at end (shorter for short videos to preserve CTA time) */}
       <TransitionEffect
         type='fade'
-        startFrame={durationInFrames - 24}
-        durationFrames={24}
+        startFrame={durationInFrames - (durationInFrames < 450 ? 15 : 24)}
+        durationFrames={durationInFrames < 450 ? 15 : 24}
         direction='out'
       />
     </AbsoluteFill>

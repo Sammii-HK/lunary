@@ -8,6 +8,8 @@
  * real audio rather than estimates. Subtitles are perfectly synced to speech.
  */
 
+import path from 'path';
+import fs from 'fs';
 import { put } from '@vercel/blob';
 import { sql } from '@vercel/postgres';
 import { getScript, getDynamicScript } from './tiktok-scripts';
@@ -95,8 +97,16 @@ export async function generateDemoVideo(
   // Calculate effective duration: extend if audio is longer than script
   const effectiveDuration = Math.max(
     script.totalSeconds,
-    Math.ceil(voiceover.audioDuration) + 1,
+    Math.ceil(voiceover.audioDuration + 0.5),
   );
+
+  // 4b. Verify recording file exists before rendering
+  const videoPath = path.join(process.cwd(), 'public', videoSrc);
+  if (!fs.existsSync(videoPath)) {
+    throw new Error(
+      `Recording not found: ${videoSrc}. Run: pnpm record:demo ${scriptId}`,
+    );
+  }
 
   // 5. Render with Remotion
   console.log(
