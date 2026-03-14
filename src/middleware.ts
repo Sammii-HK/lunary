@@ -455,13 +455,25 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
       return response;
     }
 
+    // Detect platform from user-agent for server-side tracking
+    // Native Capacitor apps include platform markers in the UA string
+    const ua = userAgent || '';
+    let serverPlatform: string = 'web';
+    if (/Capacitor/i.test(ua)) {
+      if (/iPhone|iPad|iPod/i.test(ua)) {
+        serverPlatform = 'ios';
+      } else {
+        serverPlatform = 'android';
+      }
+    }
+
     // Track page_viewed (one per page per user per day)
     console.log('[middleware] Calling page_viewed:', { path: finalPath });
     event.waitUntil(
       fetch(trackingUrl, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ path: finalPath }),
+        body: JSON.stringify({ path: finalPath, platform: serverPlatform }),
       })
         .then((res) => {
           if (!res.ok) {
@@ -481,7 +493,7 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
       fetch(appOpenedUrl, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ path: finalPath }),
+        body: JSON.stringify({ path: finalPath, platform: serverPlatform }),
       })
         .then((res) => {
           if (!res.ok) {
@@ -501,7 +513,7 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
       fetch(productOpenedUrl, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ path: finalPath }),
+        body: JSON.stringify({ path: finalPath, platform: serverPlatform }),
       }),
     );
   }

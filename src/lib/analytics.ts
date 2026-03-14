@@ -8,6 +8,7 @@ import {
 } from '@/lib/attribution';
 import { getContextualHub } from '@/lib/grimoire/getContextualNudge';
 import { generateUUID } from '@/lib/utils';
+import { detectPlatform } from '@/lib/platform-detect';
 
 export type ConversionEvent =
   | 'signup'
@@ -478,6 +479,7 @@ export async function trackEvent(
         ...utmParams,
         ...attributionData,
         ...originMetadata,
+        platform: detectPlatform(),
         referrer:
           (typeof document !== 'undefined' ? document.referrer : undefined) ||
           existingMetadata.referrer,

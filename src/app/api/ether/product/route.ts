@@ -40,6 +40,9 @@ export async function POST(request: NextRequest) {
     // Generate deterministic eventId so DB unique constraint catches race conditions
     const eventId = deterministicEventId('product_opened', userId, today);
 
+    const platform =
+      typeof payload?.platform === 'string' ? payload.platform : undefined;
+
     const canonical = canonicaliseEvent({
       eventType: 'product_opened',
       eventId,
@@ -49,6 +52,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         source: 'server_middleware',
         referrer: request.headers.get('referer') || undefined,
+        platform,
       },
     });
 

@@ -347,6 +347,7 @@ export interface AnalyticsDataState {
   subscription30d: Subscription30dResponse | null;
   attribution: AttributionResponse | null;
   successMetrics: any | null;
+  platformBreakdown: any | null;
   discordAnalytics: any | null;
   searchConsoleData: any | null;
   userGrowth: any | null;
@@ -735,6 +736,7 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
     subscription30d,
     attribution,
     successMetrics,
+    platformBreakdown: null,
     discordAnalytics,
     searchConsoleData,
     userGrowth,
