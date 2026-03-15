@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { postToSocial } from '@/lib/social/client';
 import { hasValidImageExtension } from '@/lib/social/pre-upload-image';
+import { sendDiscordNotification } from '@/lib/discord';
 
 /**
  * Fetch an OG image and upload it to Spellcast media storage.
@@ -70,20 +71,20 @@ export async function GET(request: NextRequest) {
         ? overrideDate
         : now.toISOString().split('T')[0];
 
-    // Dedup guard: skip if stories already attempted today
+    // Dedup guard: skip if stories already SENT today (not failed — failures should retry)
     if (!force) {
       const existingStories = await sql`
         SELECT COUNT(*) as count FROM social_posts
         WHERE post_type = 'story' AND platform = 'instagram'
           AND scheduled_date::date = ${dateStr}::date
-          AND status IN ('sent', 'failed')
+          AND status = 'sent'
       `;
       if (Number(existingStories.rows[0]?.count || 0) >= 4) {
-        console.log(`📖 Stories already generated for ${dateStr}, skipping`);
+        console.log(`📖 Stories already sent for ${dateStr}, skipping`);
         return NextResponse.json({
           success: true,
           skipped: true,
-          message: `Stories already generated for ${dateStr}`,
+          message: `Stories already sent for ${dateStr}`,
         });
       }
     }
@@ -277,11 +278,30 @@ export async function GET(request: NextRequest) {
     }
 
     const successCount = results.filter((r) => r.status === 'success').length;
+    const failedCount = results.filter((r) => r.status === 'error').length;
     const executionTimeMs = Date.now() - startTime;
 
     console.log(
       `📖 Stories: ${storyItems.length} generated, ${successCount} sent in ${executionTimeMs}ms`,
     );
+
+    // Discord notification on failure
+    if (failedCount > 0) {
+      const failedStories = results.filter((r) => r.status === 'error');
+      try {
+        await sendDiscordNotification({
+          title: 'Daily Stories — Failures',
+          description: [
+            `**${dateStr}**: ${successCount}/${results.length} sent, ${failedCount} failed`,
+            ...failedStories.map((r) => `- ${r.variant}: ${r.error}`),
+          ].join('\n'),
+          color: successCount === 0 ? 'error' : 'warning',
+          category: 'general',
+        });
+      } catch {
+        console.warn('[daily-stories] Discord notification failed');
+      }
+    }
 
     return NextResponse.json({
       success: successCount > 0,
@@ -293,6 +313,16 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('📖 Daily Stories cron failed:', error);
+    try {
+      await sendDiscordNotification({
+        title: 'Daily Stories — Fatal Error',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        color: 'error',
+        category: 'general',
+      });
+    } catch {
+      // Discord itself failed, already logged above
+    }
     return NextResponse.json(
       {
         success: false,
