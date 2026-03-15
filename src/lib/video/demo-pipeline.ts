@@ -70,8 +70,11 @@ export async function generateDemoVideo(
     `[demo-pipeline] Starting pipeline for "${script.title}" (${script.id})`,
   );
 
-  // Default video source path
-  const videoSrc = options.videoSrc ?? `app-demos/${scriptId}.webm`;
+  // Default video source path — try webm first, fall back to mp4
+  let videoSrc = options.videoSrc ?? `app-demos/${scriptId}.webm`;
+  if (!fs.existsSync(path.join(process.cwd(), 'public', videoSrc))) {
+    videoSrc = `app-demos/${scriptId}.mp4`;
+  }
 
   // 2. Generate voiceover with real timestamps
   console.log('[demo-pipeline] Step 1/4: Generating voiceover...');

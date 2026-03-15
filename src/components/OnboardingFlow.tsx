@@ -78,6 +78,7 @@ export function OnboardingFlow({
     string | null
   >(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [showBirthChartConfirmation, setShowBirthChartConfirmation] =
@@ -748,7 +749,7 @@ export function OnboardingFlow({
       setCurrentStep('complete');
     } catch (error) {
       console.error('Failed to save birthday:', error);
-      alert('Failed to save birthday. Please try again.');
+      setSaveError('Failed to save birthday. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -1226,8 +1227,16 @@ export function OnboardingFlow({
             </div>
 
             <div className='pt-4 space-y-3'>
+              {saveError && (
+                <p className='text-xs text-red-400 text-center mb-2'>
+                  {saveError}
+                </p>
+              )}
               <Button
-                onClick={handleSaveBirthday}
+                onClick={() => {
+                  setSaveError(null);
+                  handleSaveBirthday();
+                }}
                 disabled={!birthday || saving}
                 variant='lunary-soft'
                 className='w-full'

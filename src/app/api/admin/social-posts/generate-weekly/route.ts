@@ -751,9 +751,12 @@ async function generateThematicWeeklyPosts(
         AND scheduled_date::date < ${weekEndKeyVideo}
     `;
 
-    // Generate all scripts in parallel (primary + YouTube + engagement A + B + Instagram)
-    const { generateWeeklySecondaryScripts, generateWeeklyEngagementBScripts } =
-      await import('@/lib/social/video-scripts/generators/weekly-secondary');
+    // Generate all scripts in parallel (primary + YouTube + engagement A + B + C + Instagram)
+    const {
+      generateWeeklySecondaryScripts,
+      generateWeeklyEngagementBScripts,
+      generateWeeklyEngagementCScripts,
+    } = await import('@/lib/social/video-scripts/generators/weekly-secondary');
     const { generateWeeklyInstagramScripts } =
       await import('@/lib/social/video-scripts/generators/instagram-reels');
     const { saveVideoScript } =
@@ -764,6 +767,7 @@ async function generateThematicWeeklyPosts(
       primaryScripts,
       engagementAScripts,
       engagementBScripts,
+      engagementCScripts,
       instagramScripts,
     ] = await Promise.all([
       generateAndSaveWeeklyScripts(
@@ -774,6 +778,7 @@ async function generateThematicWeeklyPosts(
       ),
       generateWeeklySecondaryScripts(weekStartDate),
       generateWeeklyEngagementBScripts(weekStartDate),
+      generateWeeklyEngagementCScripts(weekStartDate),
       generateWeeklyInstagramScripts(weekStartDate),
     ]);
 
@@ -781,7 +786,11 @@ async function generateThematicWeeklyPosts(
     videoScriptsGenerated = true;
 
     // Save engagement scripts to DB so they have IDs for video jobs + queue
-    const allEngagementScripts = [...engagementAScripts, ...engagementBScripts];
+    const allEngagementScripts = [
+      ...engagementAScripts,
+      ...engagementBScripts,
+      ...engagementCScripts,
+    ];
     for (const script of allEngagementScripts) {
       try {
         const id = await saveVideoScript(script);
@@ -801,7 +810,7 @@ async function generateThematicWeeklyPosts(
     };
 
     console.log(
-      `🎬 [VIDEO] Generated ${videoScripts.tiktokScripts.length} total scripts (primary + ${engagementAScripts.length} engA + ${engagementBScripts.length} engB) + 1 YouTube`,
+      `🎬 [VIDEO] Generated ${videoScripts.tiktokScripts.length} total scripts (primary + ${engagementAScripts.length} engA + ${engagementBScripts.length} engB + ${engagementCScripts.length} engC) + 1 YouTube`,
     );
 
     // Save Instagram-dedicated scripts and create their social posts + video jobs.

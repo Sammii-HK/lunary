@@ -65,7 +65,7 @@ export function FrequentCardsSection({
               className={cn(
                 'w-full flex items-center justify-between p-3 rounded-lg transition',
                 'bg-zinc-800/40',
-                allowDrillDown && 'hover:bg-zinc-800/60 cursor-pointer',
+                allowDrillDown && 'hover:bg-zinc-800/60',
                 !allowDrillDown && 'cursor-default',
               )}
             >

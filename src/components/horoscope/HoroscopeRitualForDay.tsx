@@ -5,6 +5,8 @@ import { ChevronDown, Moon } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
 import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 
 interface HoroscopeRitualForDayProps {
   sunSign: string;
@@ -181,6 +183,7 @@ export function HoroscopeRitualForDay({
   dailyAffirmation,
   className = '',
 }: HoroscopeRitualForDayProps) {
+  const isNativeIOS = useIsNativeIOS();
   const subscription = useSubscription();
   const hasPaidAccess = hasFeatureAccess(
     subscription.status,
@@ -215,7 +218,7 @@ export function HoroscopeRitualForDay({
           <div>
             <p className='text-sm font-medium text-zinc-100'>{ritual.title}</p>
             <p className='text-xs text-zinc-400'>
-              Today&apos;s moon-timed ritual
+              {iosLabel("Today's moon-timed ritual", isNativeIOS)}
             </p>
           </div>
         </div>

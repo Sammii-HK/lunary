@@ -279,7 +279,6 @@ export function ChartWheelSvg({
           to { opacity: 1; transform: translateY(0); }
         }
         .planet-node {
-          cursor: pointer;
           animation: planetAppear 0.3s ease-out both;
         }
         .planet-node:nth-child(1) { animation-delay: 0.05s; }

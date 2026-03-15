@@ -2,91 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { bulkInsertPerformance } from '@/lib/social/video-scripts/database';
+import { categorisePost } from '@/lib/social/video-scripts/categorise';
 import { requireAdminAuth } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
 export const runtime = 'nodejs';
-
-/**
- * Auto-categorise a TikTok post by keyword matching in description.
- */
-function categorisePost(description: string): string {
-  const lower = description.toLowerCase();
-
-  // Angel numbers
-  if (
-    /\b(111|222|333|444|555|666|777|888|999|000|1010|1111|1212|angel\s*number)\b/.test(
-      lower,
-    )
-  ) {
-    return 'angel_numbers';
-  }
-
-  // Chiron + sign
-  if (/\bchiron\b/.test(lower)) return 'chiron_sign';
-
-  // Sign origin
-  if (
-    /\bwhy is\b.*\b(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth)\s*sign\b/.test(
-      lower,
-    )
-  ) {
-    return 'sign_origin';
-  }
-
-  // Sign identity ("if you're a [sign]")
-  if (/\bif you'?re a\b/.test(lower)) return 'sign_identity';
-
-  // Sign check ("stop scrolling")
-  if (/\bstop scrolling\b/.test(lower)) return 'sign_check';
-
-  // Rankings
-  if (/\branking\b|\btier list\b|\btop 3\b|\bbottom 3\b/.test(lower)) {
-    return 'ranking';
-  }
-
-  // Hot take
-  if (/\bunpopular opinion\b|\bhot take\b/.test(lower)) return 'hot_take';
-
-  // Quiz
-  if (/\bwhich one are you\b|\bwhich .* are you\b/.test(lower)) return 'quiz';
-
-  // Transit alert
-  if (/\btransit\b|\bretrograde\b/.test(lower)) return 'transit_alert';
-
-  // Did you know
-  if (/\bdid you know\b/.test(lower)) return 'did_you_know';
-
-  // Myth
-  if (/\bthe real reason\b|\bnobody tells you\b/.test(lower)) return 'myth';
-
-  // Saturn return (suppressed)
-  if (/\bsaturn return\b/.test(lower)) return 'saturn_return';
-
-  // Spells
-  if (/\bspell\b|\britual\b/.test(lower)) return 'spells';
-
-  // Generic zodiac content
-  if (
-    /\b(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b/.test(
-      lower,
-    )
-  ) {
-    return 'zodiac_sun';
-  }
-
-  // Numerology
-  if (/\bnumerology\b|\blife path\b/.test(lower)) return 'numerology_life_path';
-
-  // Moon
-  if (/\bmoon\b|\blunar\b/.test(lower)) return 'moon_phases';
-
-  // Crystal
-  if (/\bcrystal\b|\bstone\b/.test(lower)) return 'crystals';
-
-  return 'default';
-}
 
 const BulkImportSchema = z.array(
   z.object({

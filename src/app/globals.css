@@ -22,6 +22,29 @@ label {
   touch-action: manipulation;
 }
 
+/* Native app feel: prevent text selection on interactive elements */
+a,
+button,
+[role='button'],
+nav,
+label,
+[class*='card'] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Keep text selection enabled on readable content */
+p,
+article,
+textarea,
+input,
+[contenteditable],
+.grimoire p,
+.grimoire article {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -345,4 +368,15 @@ html {
 /* Grimoire hash navigation - account for sticky header */
 [id] {
   scroll-margin-top: calc(var(--global-nav-offset, 0px) + 60px);
+}
+
+/* iOS native feel: selection color, text rendering */
+::selection {
+  background-color: rgba(132, 88, 216, 0.3);
+}
+
+/* Prevent long-press context menus on images in iOS app */
+img {
+  -webkit-user-drag: none;
+  user-select: none;
 }

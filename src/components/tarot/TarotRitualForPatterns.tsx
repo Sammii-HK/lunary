@@ -4,6 +4,8 @@ import { useState, useMemo } from 'react';
 import { ChevronDown, Moon } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
 
 interface Ritual {
@@ -135,6 +137,7 @@ export function TarotRitualForPatterns({
   trendAnalysis,
   className = '',
 }: TarotRitualForPatternsProps) {
+  const isNativeIOS = useIsNativeIOS();
   const subscription = useSubscription();
   const hasTarotPatternsAccess = hasFeatureAccess(
     subscription.status,
@@ -167,7 +170,9 @@ export function TarotRitualForPatterns({
             <Moon className='w-4 h-4 text-lunary-secondary-400' />
           </div>
           <div>
-            <p className='text-sm font-medium text-zinc-100'>{ritual.title}</p>
+            <p className='text-sm font-medium text-zinc-100'>
+              {iosLabel(ritual.title, isNativeIOS)}
+            </p>
             <p className='text-xs text-zinc-400'>Ritual for your patterns</p>
           </div>
         </div>

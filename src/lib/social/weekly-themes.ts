@@ -84,6 +84,21 @@ export const WITCHTOK_ROTATION_CATEGORIES = [
 ];
 
 /**
+ * All grimoire categories eligible for primary slot rotation.
+ * Weighted toward high-intent, high-reach categories.
+ * Niche categories (runes, chakras, glossary) excluded — they dilute reach.
+ */
+export const GRIMOIRE_CATEGORIES = [
+  'numerology',
+  'tarot',
+  'zodiac',
+  'crystals',
+  'spells',
+  'planetary',
+  'lunar',
+];
+
+/**
  * Select a secondary theme (witchtok category) for Block B (Fri-Sun).
  * Rotates through witchtok categories week by week.
  */
@@ -111,17 +126,27 @@ export function selectSecondaryTheme(weekNumber: number): WeeklyTheme {
  * tarot (#tarot 73.9B views), zodiac (#astrology 84.2B), numerology (fast-growing)
  * Sabbat seasonal only (handled by getSabbatForDate), chakras/runes too niche
  */
+/**
+ * Theme category weights for primary slot selection.
+ *
+ * Optimised for follower growth — heavily weighted toward:
+ * 1. Sign-specific content ("this is about ME" = shares + follows)
+ * 2. High-intent search topics (tarot meanings, numerology = SEO traffic)
+ * 3. Large TikTok audiences (#astrology 84.2B, #tarot 73.9B)
+ *
+ * Niche categories (runes, chakras, sabbats) = 0, too small an audience.
+ */
 export const THEME_CATEGORY_WEIGHTS: Record<string, number> = {
-  tarot: 4, // 73.9B views — massively underserved
-  zodiac: 3, // 84.2B views — largest audience
-  numerology: 4, // Fast-growing, high per-video engagement
-  spells: 3, // 201 spells, #witchtok growing, practical 'how to' content
-  planetary: 2, // Feeds into #astrology, transit content
-  lunar: 2, // Dedicated audience
-  crystals: 2, // Growing via #witchtok
+  zodiac: 5, // 84.2B views — sign-specific = highest shares + follows
+  numerology: 5, // High-intent search ("life path number"), best per-video engagement
+  tarot: 4, // 73.9B views — "what does X card mean" = high search intent
+  planetary: 3, // Transit content is time-sensitive + searchable
+  lunar: 2, // Dedicated audience, moon phase searches
+  crystals: 2, // "What crystal for X" = high purchase intent, drives site visits
+  spells: 0, // 5 avg views historically — suppressed until proven otherwise
   sabbat: 0, // Seasonal only — handled by getSabbatForDate()
   chakras: 0, // Too niche for TikTok rotation
-  runes: 0, // Extremely niche
+  runes: 0, // Too niche — dilutes reach
 };
 
 /**

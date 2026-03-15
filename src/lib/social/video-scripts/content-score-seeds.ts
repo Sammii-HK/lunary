@@ -132,6 +132,25 @@ export const SEED_WEIGHTS: Record<string, SeedWeight> = {
     avgViews: 231,
     maxPerWeek: 0,
   },
+  // Grimoire categories for primary slot rotation
+  tarot: {
+    weight: 0.6,
+    tier: 'B',
+    avgViews: 300,
+    maxPerWeek: 3,
+  },
+  glossary: {
+    weight: 0.2,
+    tier: 'C',
+    avgViews: 200,
+    maxPerWeek: 1,
+  },
+  sabbat: {
+    weight: 0.25,
+    tier: 'C',
+    avgViews: 250,
+    maxPerWeek: 1,
+  },
 };
 
 /**
@@ -142,6 +161,7 @@ export const SUPPRESS_LIST = new Set([
   'saturn-return',
   'spells',
   'generic-educational',
+  'rune',
 ]);
 
 /**

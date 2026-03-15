@@ -152,7 +152,7 @@ class ErrorBoundary extends React.Component<
             </p>
             {this.state.error && (
               <details className='text-left text-xs text-zinc-400 mt-4 mb-4 p-3 bg-zinc-900 rounded'>
-                <summary className='cursor-pointer mb-2'>
+                <summary className='mb-2'>
                   Error details (click to expand)
                 </summary>
                 <pre className='overflow-auto text-[10px]'>

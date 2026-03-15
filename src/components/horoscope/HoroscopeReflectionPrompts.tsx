@@ -13,6 +13,8 @@ import { useSubscription } from '@/hooks/useSubscription';
 import Link from 'next/link';
 import { hasFeatureAccess } from '../../../utils/pricing';
 import { JOURNAL_PROMPT_LIMITS } from '../../../utils/entitlements';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 import { useProgress } from '@/components/progress/useProgress';
 import { ProgressBar } from '@/components/progress/ProgressBar';
 import { mutate } from 'swr';
@@ -146,6 +148,7 @@ export function HoroscopeReflectionPrompts({
   moonPhase,
   className = '',
 }: HoroscopeReflectionPromptsProps) {
+  const isNativeIOS = useIsNativeIOS();
   const subscription = useSubscription();
   const hasAccess = hasFeatureAccess(
     subscription.status,
@@ -252,7 +255,7 @@ export function HoroscopeReflectionPrompts({
           </div>
           <div>
             <p className='text-sm font-medium text-zinc-100'>
-              Cosmic Reflection Prompts
+              {iosLabel('Cosmic Reflection Prompts', isNativeIOS)}
             </p>
             <p className='text-xs text-zinc-400'>
               {prompts.length} {prompts.length === 1 ? 'prompt' : 'prompts'} for

@@ -198,4 +198,137 @@ export function weightedSelect(
   return candidates[candidates.length - 1].category;
 }
 
+/**
+ * Exploration windows for each slot — the hours we'll test within.
+ * 80% of the time we pick the proven best hour (exploit).
+ * 20% of the time we test a random hour from the window (explore).
+ * This ensures we gather comparison data while mostly using what works.
+ */
+const SLOT_HOUR_WINDOWS: Record<string, number[]> = {
+  engagementC: [10, 11, 12],
+  primary: [13, 14, 15],
+  engagementA: [16, 17, 18],
+  engagementB: [19, 20, 21, 22],
+};
+
+/** Probability of exploring a new hour vs exploiting the known best */
+const EXPLORE_RATE = 0.2;
+
+/**
+ * Get the optimal posting hour for a given engagement slot based on
+ * actual performance data. Uses an explore/exploit strategy:
+ *
+ * - When a proven best hour exists (10+ data points), use it 80% of the time
+ * - 20% of the time, test a different hour from the slot's window
+ * - When no proven best exists, rotate through the window to gather data
+ *
+ * @param slot - The video slot to optimise
+ * @param minDataPoints - Minimum records per hour before trusting the result (default 10)
+ */
+export async function getOptimalHourBySlot(
+  slot: string,
+  minDataPoints: number = 10,
+): Promise<number> {
+  const { VIDEO_POSTING_HOURS } = await import('@/utils/posting-times');
+  const defaultHour =
+    VIDEO_POSTING_HOURS[slot as keyof typeof VIDEO_POSTING_HOURS];
+  const window = SLOT_HOUR_WINDOWS[slot];
+
+  if (!window) return defaultHour ?? 14;
+
+  try {
+    const { sql } = await import('@vercel/postgres');
+
+    // Get performance for all hours in this slot
+    const result = await sql`
+      SELECT
+        scheduled_hour,
+        AVG(comments * 3.0 + shares * 2.0 + likes * 1.0 + views * 0.3) as avg_engagement,
+        COUNT(*)::int as sample_count
+      FROM video_performance
+      WHERE slot = ${slot}
+        AND scheduled_hour IS NOT NULL
+      GROUP BY scheduled_hour
+      ORDER BY avg_engagement DESC
+    `;
+
+    // Find the proven best hour (enough data to trust)
+    const provenBest = result.rows.find((r) => r.sample_count >= minDataPoints);
+
+    if (provenBest) {
+      // Exploit/explore: 80% best hour, 20% test a different hour
+      if (Math.random() > EXPLORE_RATE) {
+        console.log(
+          `[Time A/B] ${slot}: exploiting best hour ${provenBest.scheduled_hour} (engagement: ${Math.round(provenBest.avg_engagement)}, n=${provenBest.sample_count})`,
+        );
+        return provenBest.scheduled_hour;
+      }
+
+      // Explore: pick a random hour from the window that ISN'T the best
+      const alternatives = window.filter(
+        (h) => h !== provenBest.scheduled_hour,
+      );
+      const exploreHour =
+        alternatives[Math.floor(Math.random() * alternatives.length)];
+      console.log(
+        `[Time A/B] ${slot}: exploring hour ${exploreHour} (best is ${provenBest.scheduled_hour})`,
+      );
+      return exploreHour;
+    }
+
+    // No proven winner yet — find the least-tested hour to gather data
+    const hourCounts = new Map<number, number>();
+    for (const row of result.rows) {
+      hourCounts.set(row.scheduled_hour, row.sample_count);
+    }
+    const leastTested = window.reduce((best, hour) =>
+      (hourCounts.get(hour) ?? 0) < (hourCounts.get(best) ?? 0) ? hour : best,
+    );
+    console.log(
+      `[Time A/B] ${slot}: no proven best yet, testing least-tried hour ${leastTested}`,
+    );
+    return leastTested;
+  } catch {
+    // Query failed, use default
+  }
+
+  return defaultHour ?? 14;
+}
+
+/**
+ * Get aggregated performance data grouped by platform.
+ * Shows which platform performs best for views and engagement overall.
+ */
+export async function getPlatformPerformance(): Promise<
+  Map<string, { avgViews: number; avgEngagement: number; count: number }>
+> {
+  const { sql } = await import('@vercel/postgres');
+
+  const result = await sql`
+    SELECT
+      platform,
+      AVG(views)::int as avg_views,
+      AVG(comments * 3.0 + shares * 2.0 + likes * 1.0 + views * 0.3)::int as avg_engagement,
+      COUNT(*)::int as count
+    FROM video_performance
+    WHERE recorded_at >= NOW() - INTERVAL '30 days'
+      AND platform IS NOT NULL
+    GROUP BY platform
+    ORDER BY avg_engagement DESC
+  `;
+
+  const map = new Map<
+    string,
+    { avgViews: number; avgEngagement: number; count: number }
+  >();
+  for (const row of result.rows) {
+    map.set(row.platform, {
+      avgViews: row.avg_views,
+      avgEngagement: row.avg_engagement,
+      count: row.count,
+    });
+  }
+  return map;
+}
+
 export { PERFORMANCE_RULES };

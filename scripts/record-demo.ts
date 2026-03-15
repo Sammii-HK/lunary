@@ -446,6 +446,86 @@ async function executeAction(
 }
 
 // ---------------------------------------------------------------------------
+// Dismiss announcement modals
+// ---------------------------------------------------------------------------
+
+/**
+ * Dismiss any "New Feature" announcement modals that appear after auth.
+ * Uses three strategies:
+ * 1. Mark all announcements as seen via API
+ * 2. Click "Got it" buttons
+ * 3. Click close/X buttons
+ * 4. Click backdrop overlay
+ */
+async function dismissAnnouncementModals(page: Page): Promise<void> {
+  // Strategy 1: Mark all announcements as seen via the API
+  try {
+    const dismissed = await page.evaluate(async () => {
+      let count = 0;
+      // Keep fetching and dismissing until no more announcements
+      for (let i = 0; i < 10; i++) {
+        const res = await fetch('/api/announcements');
+        if (!res.ok) break;
+        const data = await res.json();
+        if (!data?.announcement?.id) break;
+        await fetch('/api/announcements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ announcementId: data.announcement.id }),
+        });
+        count++;
+      }
+      return count;
+    });
+    if (dismissed > 0) {
+      console.log(`   Dismissed ${dismissed} announcement(s) via API`);
+    }
+  } catch {
+    // API not available, fall through to UI clicks
+  }
+
+  // Strategy 2: Click "Got it" buttons (modal might still be rendered)
+  for (let i = 0; i < 3; i++) {
+    try {
+      const gotItBtn = page.locator('button:has-text("Got it")');
+      await gotItBtn.waitFor({ state: 'visible', timeout: 2000 });
+      await gotItBtn.click();
+      console.log(`   Clicked "Got it" button (${i + 1})`);
+      await page.waitForTimeout(500);
+    } catch {
+      break;
+    }
+  }
+
+  // Strategy 3: Click close button
+  try {
+    const closeBtn = page.locator('button[aria-label="Close"]');
+    await closeBtn.waitFor({ state: 'visible', timeout: 1000 });
+    await closeBtn.click();
+    console.log('   Clicked close button');
+    await page.waitForTimeout(500);
+  } catch {
+    // No close button
+  }
+
+  // Strategy 4: Click backdrop (the modal closes on backdrop click)
+  try {
+    const backdrop = page.locator('.fixed.inset-0.bg-black\\/80');
+    if (await backdrop.isVisible({ timeout: 500 })) {
+      // Click the edge of the backdrop (outside the modal content)
+      await page.click('.fixed.inset-0', {
+        position: { x: 10, y: 10 },
+        force: true,
+      });
+      console.log('   Clicked backdrop to dismiss modal');
+      await page.waitForTimeout(500);
+    }
+  } catch {
+    // No backdrop
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Recording
 // ---------------------------------------------------------------------------
 
@@ -515,6 +595,10 @@ async function recordDemo(
       /* fallback */
     }
     await warmupPage.waitForTimeout(1000);
+
+    // Dismiss any "New Feature" announcement modals
+    await dismissAnnouncementModals(warmupPage);
+
     const warmedStorage = await warmupCtx.storageState();
     await warmupCtx.close();
 
@@ -619,6 +703,9 @@ async function recordDemo(
     }
     await page.waitForTimeout(3000);
 
+    // Dismiss any "New Feature" announcement modals before recording
+    await dismissAnnouncementModals(page);
+
     // Wait for data-dependent widgets
     await page
       .waitForSelector('[data-testid="sky-now-widget"]', {
@@ -628,7 +715,18 @@ async function recordDemo(
       .catch(() => {});
 
     // Reveal page
-    await page.evaluate(() => document.body.classList.add('__loaded'));
+    await page.evaluate(() => {
+      document.body.classList.add('__loaded');
+      // Ensure we start at the top of the page
+      window.scrollTo(0, 0);
+      // Also scroll any main/content containers to top
+      const main = document.querySelector('main');
+      if (main) main.scrollTop = 0;
+      const scrollable = document.querySelector(
+        '[data-radix-scroll-area-viewport]',
+      );
+      if (scrollable) scrollable.scrollTop = 0;
+    });
     await page.waitForTimeout(400);
     await page.unroute('**/*', cloakHandler);
 

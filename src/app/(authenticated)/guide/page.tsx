@@ -36,6 +36,8 @@ import {
   trackRitualEngaged,
 } from '@/hooks/useRitualBadge';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 import { WeeklyInsights } from '@/lib/rituals/engine';
 import { useModal } from '@/hooks/useModal';
 import {
@@ -344,6 +346,7 @@ const MessageBubble = ({
 
 function BookOfShadowsContent() {
   const authState = useAuthStatus();
+  const isNativeIOS = useIsNativeIOS();
   const searchParams = useSafeSearchParams();
   const { user } = useUser();
   const router = useRouter();
@@ -767,7 +770,7 @@ function BookOfShadowsContent() {
         addMessage({
           id: `journal-${Date.now()}`,
           role: 'assistant',
-          content: `✨ Journal entry saved to your Book of Shadows${moonPhase ? ` (${moonPhase})` : ''}`,
+          content: `✨ Journal entry saved to your ${iosLabel('Book of Shadows', isNativeIOS)}${moonPhase ? ` (${moonPhase})` : ''}`,
         });
         // Refresh skill progress (journal keeper)
         mutate('/api/progress');
@@ -1150,7 +1153,7 @@ function BookOfShadowsContent() {
                         onClick={() => router.push('/book-of-shadows')}
                         className='px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg border border-zinc-700 text-zinc-200 transition hover:border-lunary-primary/80 hover:text-lunary-primary-200'
                       >
-                        Book of Shadows
+                        {iosLabel('Book of Shadows', isNativeIOS)}
                       </button>
                       <button
                         type='button'

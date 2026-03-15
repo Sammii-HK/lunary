@@ -32,6 +32,8 @@ import { HoroscopeSection } from '../../horoscope/components/HoroscopeSection';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 import { getTarotCard } from '../../../../../utils/tarot/tarot';
 import { getImprovedTarotReading } from '../../../../../utils/tarot/improvedTarot';
 import { getGeneralTarotReading } from '../../../../../utils/tarot/generalTarot';
@@ -77,6 +79,7 @@ export function TarotView({
   user,
 }: TarotViewProps) {
   const router = useRouter();
+  const isNativeIOS = useIsNativeIOS();
   const authStatus = useAuthStatus();
   const { currentAstrologicalChart } = usePlanetaryChart();
   const subscription = useSubscription();
@@ -515,7 +518,7 @@ export function TarotView({
             </h2>
             <p className='text-xs md:text-sm text-zinc-400 leading-relaxed'>
               To get personalized tarot readings, we need your birthday to
-              calculate your cosmic signature.
+              {iosLabel('calculate your cosmic signature', isNativeIOS)}.
             </p>
           </div>
           <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-6 space-y-4'>
@@ -524,8 +527,9 @@ export function TarotView({
                 Add Your Birthday
               </h3>
               <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
-                Your birthday helps us personalize your tarot readings and
-                provide more accurate cosmic insights.
+                Your birthday helps us personalize your tarot readings and{' '}
+                {iosLabel('provide more accurate cosmic insights', isNativeIOS)}
+                .
               </p>
             </div>
             <Link
@@ -579,8 +583,14 @@ export function TarotView({
         </Heading>
         <p className='text-xs md:text-sm text-zinc-400'>
           {hasPaidAccess
-            ? 'Personalized guidance based on your cosmic signature'
-            : 'General cosmic guidance based on universal energies'}
+            ? iosLabel(
+                'Personalized guidance based on your cosmic signature',
+                isNativeIOS,
+              )
+            : iosLabel(
+                'General cosmic guidance based on universal energies',
+                isNativeIOS,
+              )}
         </p>
       </div>
       {/* Moon Phase

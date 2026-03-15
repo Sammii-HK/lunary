@@ -9,8 +9,11 @@ export const dynamic = 'force-dynamic';
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
-const ENGAGEMENT_EVENTS = [
-  'grimoire_viewed',
+// Retention events: only meaningful product actions count.
+// Excludes grimoire_viewed (passive SEO traffic), page_viewed, and app_opened
+// to avoid inflating D30 retention with users who land on content via search
+// but never engage with the product.
+const RETENTION_EVENTS = [
   'tarot_drawn',
   'chart_viewed',
   'birth_chart_viewed',
@@ -118,7 +121,7 @@ export async function GET(request: NextRequest) {
             [
               formatTimestamp(cursor),
               formatTimestamp(cohortEndDate),
-              ENGAGEMENT_EVENTS,
+              RETENTION_EVENTS,
               30,
               TEST_EMAIL_PATTERN,
               TEST_EMAIL_EXACT,

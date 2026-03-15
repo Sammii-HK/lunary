@@ -57,16 +57,16 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
   const getYPosition = (style: string) => {
     switch (style) {
       case 'hook':
-        return '40%'; // TikTok safe zone - centered upper
+        return '35%'; // TikTok safe zone - upper-mid
       case 'cta':
-        return '18%'; // TikTok safe zone - upper third, well clear of stars
+        return '18%'; // TikTok safe zone - upper third
       case 'stamp':
-        return '60%'; // TikTok safe zone - well above subtitles (which are at 78%)
+        return '55%'; // TikTok safe zone - above subtitles (at ~86%)
       case 'series_badge':
         return '15%'; // TikTok safe zone - just below top UI
       case 'chapter':
       default:
-        return '40%'; // TikTok safe zone - centered upper
+        return '35%'; // TikTok safe zone - upper-mid, clear of subtitles
     }
   };
 
@@ -175,7 +175,7 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
               transform: `translateY(calc(-50% + ${slideUp}px))`,
               textAlign: 'center',
               opacity,
-              zIndex: 15,
+              zIndex: 20,
             }}
           >
             {/* CTA: full-width card with gradient + accent glow */}
@@ -201,7 +201,7 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
                   <p
                     key={lineIndex}
                     style={{
-                      fontFamily: 'Roboto Mono, monospace',
+                      fontFamily: 'Roboto, sans-serif',
                       fontSize: fontSize + 2,
                       fontWeight: 700,
                       color: '#ffffff',
@@ -220,7 +220,7 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({
                 <p
                   key={lineIndex}
                   style={{
-                    fontFamily: 'Roboto Mono, monospace',
+                    fontFamily: 'Roboto, sans-serif',
                     fontSize,
                     fontWeight: style === 'chapter' ? 600 : 400,
                     color: '#ffffff',

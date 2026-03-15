@@ -513,7 +513,7 @@ export async function generateTikTokScript(
     estimatedDuration: estimateDuration(wordCount),
     scheduledDate,
     status: 'draft',
-    metadata: { ...metadata, targetAudience, scheduledHour },
+    metadata: { ...metadata, targetAudience, scheduledHour, slot: 'primary' },
     coverImageUrl,
     partNumber: safePartNumber,
     writtenPostContent: generateTikTokCaption(facet, theme, generatedHook, {

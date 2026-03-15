@@ -334,7 +334,7 @@ export const TransitOfTheDay = () => {
                     );
                   }
                 }}
-                className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300 cursor-pointer hover:bg-lunary-primary-800/80 transition-colors'
+                className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300 hover:bg-lunary-primary-800/80 transition-colors'
               >
                 <Sparkles className='w-2.5 h-2.5' />
                 Lunary+
@@ -347,7 +347,7 @@ export const TransitOfTheDay = () => {
                 e.stopPropagation();
                 ctaCopy.trackCTAClick('transitList', 'dashboard');
               }}
-              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
+              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0'
             >
               {ctaCopy.transitList}
             </button>

@@ -473,7 +473,12 @@ export async function POST(request: NextRequest) {
               try {
                 const whisperWords = await transcribeWithWhisper(audioBuffer);
                 segments = whisperWords.length
-                  ? wordTimestampsToSegments(whisperWords, audioDuration)
+                  ? wordTimestampsToSegments(
+                      whisperWords,
+                      audioDuration,
+                      6,
+                      script.full_script,
+                    )
                   : scriptToAudioSegments(
                       script.full_script,
                       audioDuration,
@@ -575,6 +580,11 @@ export async function POST(request: NextRequest) {
               : ['tiktok', 'youtube'];
           const shortPlatformSet = new Set(['twitter']);
           const scheduledDate = new Date(script.scheduled_date);
+          // Apply slot-specific posting hour from metadata
+          const scriptMetadata = script.metadata || {};
+          if (scriptMetadata.scheduledHour != null) {
+            scheduledDate.setUTCHours(scriptMetadata.scheduledHour, 0, 0, 0);
+          }
           // Use the engagement-optimized caption from generateTikTokCaption()
           // (stored in written_post_content) when available. Fall back to
           // buildVideoCaption() only for legacy scripts without it.

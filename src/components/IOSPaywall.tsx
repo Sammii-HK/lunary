@@ -204,8 +204,9 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
               )}
 
               <div
+                role='button'
                 onClick={() => setSelected(config.key)}
-                className={`w-full text-left rounded-xl border p-3.5 transition-colors cursor-pointer ${
+                className={`w-full text-left rounded-xl border p-3.5 transition-colors ${
                   isSelected
                     ? 'border-lunary-primary bg-zinc-950'
                     : 'border-zinc-800 bg-zinc-950 hover:border-zinc-600'

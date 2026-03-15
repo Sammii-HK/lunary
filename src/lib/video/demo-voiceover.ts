@@ -235,19 +235,42 @@ export async function generateDemoVoiceover(
     segments = scriptToAudioSegments(voiceoverText, audioDuration);
   }
 
-  // 6. Upload audio to Vercel Blob
+  // 6. Upload audio to Vercel Blob (or save locally if Blob not configured)
+  let audioUrl: string;
   const timestamp = Date.now();
-  const blobKey = `videos/demos/audio/${script.id}-${timestamp}.mp3`;
 
-  console.log(`[demo-voiceover] Uploading audio to Blob: ${blobKey}`);
-  const { url: audioUrl } = await put(blobKey, Buffer.from(audioBuffer), {
-    access: 'public',
-    addRandomSuffix: false,
-    contentType: 'audio/mpeg',
-  });
-
-  // 7. Clean up temp file
-  await unlink(tempPath).catch(() => {});
+  try {
+    const blobKey = `videos/demos/audio/${script.id}-${timestamp}.mp3`;
+    console.log(`[demo-voiceover] Uploading audio to Blob: ${blobKey}`);
+    const { url } = await put(blobKey, Buffer.from(audioBuffer), {
+      access: 'public',
+      addRandomSuffix: false,
+      contentType: 'audio/mpeg',
+    });
+    audioUrl = url;
+    // Clean up temp file since Blob upload succeeded
+    await unlink(tempPath).catch(() => {});
+  } catch {
+    // Blob not available (local dev) — save to public/ for Remotion to pick up
+    const localPath = join(
+      process.cwd(),
+      'public',
+      'app-demos',
+      'audio',
+      `${script.id}.mp3`,
+    );
+    const { mkdir } = await import('fs/promises');
+    await mkdir(join(process.cwd(), 'public', 'app-demos', 'audio'), {
+      recursive: true,
+    });
+    const { copyFile } = await import('fs/promises');
+    await copyFile(tempPath, localPath);
+    await unlink(tempPath).catch(() => {});
+    audioUrl = `/app-demos/audio/${script.id}.mp3`;
+    console.log(
+      `[demo-voiceover] Blob unavailable, saved locally: ${localPath}`,
+    );
+  }
 
   console.log(`[demo-voiceover] Complete. Audio: ${audioUrl}`);
 

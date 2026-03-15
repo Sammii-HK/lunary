@@ -5,6 +5,8 @@ import { ChevronDown, Sparkles } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
 import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 
 interface HoroscopeSeasonReadingProps {
   sunSign: string;
@@ -98,6 +100,7 @@ export function HoroscopeSeasonReading({
   focusAreas,
   className = '',
 }: HoroscopeSeasonReadingProps) {
+  const isNativeIOS = useIsNativeIOS();
   const subscription = useSubscription();
   const hasPaidAccess = hasFeatureAccess(
     subscription.status,
@@ -138,9 +141,12 @@ export function HoroscopeSeasonReading({
           </div>
           <div>
             <p className='text-sm font-medium text-zinc-100'>
-              Your Cosmic Season: {seasonData.seasonName}
+              {iosLabel('Your Cosmic Season', isNativeIOS)}:{' '}
+              {seasonData.seasonName}
             </p>
-            <p className='text-xs text-zinc-400'>Moon-guided energy reading</p>
+            <p className='text-xs text-zinc-400'>
+              {iosLabel('Moon-guided energy reading', isNativeIOS)}
+            </p>
           </div>
         </div>
         <ChevronDown

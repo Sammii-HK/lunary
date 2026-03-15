@@ -97,6 +97,8 @@ export const HookIntro: React.FC<HookIntroProps> = ({
         pointerEvents: 'none',
         paddingLeft: '6%',
         paddingRight: '6%',
+        display: 'flex',
+        justifyContent: 'center',
       }}
     >
       <div
@@ -105,6 +107,12 @@ export const HookIntro: React.FC<HookIntroProps> = ({
           flexWrap: 'wrap',
           justifyContent: 'center',
           gap: '4px 16px',
+          backgroundColor: 'rgba(0, 0, 0, 0.65)',
+          borderRadius: 16,
+          paddingLeft: 28,
+          paddingRight: 28,
+          paddingTop: 16,
+          paddingBottom: 16,
         }}
       >
         {words.map((word, idx) => {
@@ -207,7 +215,7 @@ export const HookIntro: React.FC<HookIntroProps> = ({
             <span
               key={idx}
               style={{
-                fontFamily: 'Roboto Mono, monospace',
+                fontFamily: 'Roboto, sans-serif',
                 fontSize: words.length <= 4 ? 76 : words.length <= 7 ? 64 : 54,
                 fontWeight: highlighted ? 800 : 700,
                 color: highlighted ? accentColor : COLORS.primaryText,
@@ -239,7 +247,7 @@ export const HookIntro: React.FC<HookIntroProps> = ({
           localFrame >= words.length * wordEntranceDuration && (
             <span
               style={{
-                fontFamily: 'Roboto Mono, monospace',
+                fontFamily: 'Roboto, sans-serif',
                 fontSize: words.length <= 4 ? 76 : words.length <= 7 ? 64 : 54,
                 fontWeight: 400,
                 color: COLORS.primaryText,

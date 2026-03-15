@@ -112,7 +112,20 @@ export default function EphemerisPrivacyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              4. Astronomical Data
+              4. Location Services (Optional)
+            </h2>
+            <p className='text-zinc-300 leading-relaxed'>
+              Ephemeris may access your device location with your permission to
+              automatically determine your timezone for accurate astronomical
+              calculations. Your location data is never stored, transmitted to
+              servers, or used for any other purpose. You can manually enter
+              your timezone instead of enabling location access.
+            </p>
+          </section>
+
+          <section>
+            <h2 className='text-2xl font-semibold text-white mb-4'>
+              5. Astronomical Data
             </h2>
             <p className='text-zinc-300 leading-relaxed'>
               Ephemeris calculations are performed locally on your device using
@@ -124,7 +137,7 @@ export default function EphemerisPrivacyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              5. Third-Party Services
+              6. Third-Party Services
             </h2>
             <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
               <li>
@@ -143,7 +156,7 @@ export default function EphemerisPrivacyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              6. Do We Sell Your Data?
+              7. Do We Sell Your Data?
             </h2>
             <p className='text-zinc-300 leading-relaxed'>
               No. We do not sell, share, or monetize your personal data. Your
@@ -154,7 +167,7 @@ export default function EphemerisPrivacyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              7. Your Rights
+              8. Your Rights
             </h2>
             <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
               <li>
@@ -183,7 +196,7 @@ export default function EphemerisPrivacyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              8. Contact Us
+              9. Contact Us
             </h2>
             <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
               <p className='text-zinc-300'>

@@ -233,7 +233,7 @@ export function TarotOfWeek({
 
         {/* Symbolism for deeper exploration */}
         <details className='mt-4'>
-          <summary className='text-sm text-zinc-400 cursor-pointer hover:text-zinc-300'>
+          <summary className='text-sm text-zinc-400 hover:text-zinc-300'>
             Explore the Symbolism
           </summary>
           <p className='text-sm text-zinc-500 mt-2 leading-relaxed'>

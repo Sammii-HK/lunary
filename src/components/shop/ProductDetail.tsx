@@ -13,15 +13,18 @@ interface ProductDetailProps {
 
 export function ProductDetail({ product }: ProductDetailProps) {
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const searchParams = useSafeSearchParams();
   const fromParam = searchParams?.get('from');
   const linkSuffix = fromParam ? `?from=${fromParam}` : '';
 
   const handlePurchase = async () => {
     if (!product.stripePriceId) {
-      alert('This product is coming soon.');
+      setPurchaseError('This product is coming soon.');
       return;
     }
+
+    setPurchaseError(null);
 
     try {
       setIsPurchasing(true);
@@ -46,8 +49,12 @@ export function ProductDetail({ product }: ProductDetailProps) {
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       }
-    } catch (error: any) {
-      alert(error.message || 'Something went wrong. Please try again.');
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Something went wrong. Please try again.';
+      setPurchaseError(message);
     } finally {
       setIsPurchasing(false);
     }
@@ -156,6 +163,18 @@ export function ProductDetail({ product }: ProductDetailProps) {
                   )}
                 </Button>
               </div>
+
+              {purchaseError && (
+                <div className='mt-4 flex items-start justify-between gap-2 rounded-lg bg-red-950/40 border border-red-800/50 px-4 py-3'>
+                  <p className='text-sm text-red-300'>{purchaseError}</p>
+                  <button
+                    onClick={() => setPurchaseError(null)}
+                    className='flex-shrink-0 text-red-400 hover:text-red-200'
+                  >
+                    &times;
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -90,3 +90,23 @@ export {
   generateWeeklyVideoScripts,
   generateAndSaveWeeklyScripts,
 } from './generation';
+
+// Engagement slot generators
+export {
+  generateWeeklySecondaryScripts,
+  generateWeeklyEngagementBScripts,
+  generateWeeklyEngagementCScripts,
+} from './generators/weekly-secondary';
+
+// Performance collection + feedback loop
+export {
+  collectVideoPerformance,
+  backfillAllPerformance,
+  formatPerformanceMarkdown,
+} from './collect-performance';
+
+// Content scoring engine
+export { getOptimalHourBySlot, getPlatformPerformance } from './content-scores';
+
+// Unified categorisation
+export { categorisePost } from './categorise';

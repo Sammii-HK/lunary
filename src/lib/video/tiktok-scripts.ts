@@ -15,7 +15,7 @@
  * CONTENT RULES:
  * - Hooks: 5-8 words max. Must work on mute.
  * - Text overlays: 6 words max. Pattern interrupts > explanations.
- * - Voiceover: 3.0-4.0 words/sec. Conversational, not list-y.
+ * - Voiceover: 2.2-2.7 words/sec (Jess/Orpheus). Budget pauses ~0.5s between sentences.
  * - Captions: End with question or challenge. Under 150 chars first line.
  * - Hashtags: 3-5 max. 1 broad + 1 niche + 1 branded + 1-2 topic.
  */
@@ -170,7 +170,6 @@ const dashboardOverview: TikTokScript = {
       target: '[data-testid="sky-now-widget"]',
       focusPoint: 'Planet list expanding with houses',
       voiceoverLine: 'Every planet. Which house.',
-      zoomTo: { x: 0.5, y: 0.32, scale: 1.28 },
       tapPosition: { x: 0.5, y: 0.32 },
     },
     {
@@ -258,7 +257,6 @@ const horoscopeDeepDive: TikTokScript = {
       action: 'click',
       target: '[data-testid="numerology-day"]',
       focusPoint: 'Full breakdown of YOUR day energy',
-      zoomTo: { x: 0.5, y: 0.52, scale: 1.3 },
       tapPosition: { x: 0.5, y: 0.52 },
       // No voiceoverLine — silent interaction moment
     },
@@ -366,7 +364,6 @@ const tarotPatterns: TikTokScript = {
       target: '[data-testid="pattern-30days"]',
       focusPoint: 'Themes, frequent cards, recurring suits - visible proof',
       voiceoverLine: 'Every daily card... is connected to your transits.',
-      zoomTo: { x: 0.5, y: 0.48, scale: 1.25 },
       tapPosition: { x: 0.5, y: 0.48 },
     },
     {
@@ -407,7 +404,6 @@ const tarotPatterns: TikTokScript = {
       focusPoint:
         'Themes shifting over 3 months - your personal textbook forming',
       voiceoverLine: 'At 90 days... undeniable.',
-      zoomTo: { x: 0.5, y: 0.48, scale: 1.25 },
       tapPosition: { x: 0.5, y: 0.48 },
     },
     {
@@ -610,7 +606,6 @@ const birthChart: TikTokScript = {
         'Full birth chart wheel - visually stunning, stops the scroll',
       voiceoverLine:
         'Your astrology app shows 10 planets... this one? Twenty-four plus.',
-      zoomTo: { x: 0.5, y: 0.42, scale: 1.15 },
     },
     {
       description: 'Scroll to planet list - the count escalation begins',
@@ -651,7 +646,6 @@ const birthChart: TikTokScript = {
       focusPoint: 'Aspect grid appears with real orbs',
       voiceoverLine:
         'Aspects tab... how your planets actually interact. Real orbs.',
-      zoomTo: { x: 0.5, y: 0.28, scale: 1.2 },
       tapPosition: { x: 0.5, y: 0.28 },
     },
     {
@@ -671,7 +665,6 @@ const birthChart: TikTokScript = {
       target: '[data-testid="tab-houses"], button:has-text("Houses")',
       focusPoint: 'All 12 houses with signs and rulers',
       voiceoverLine: 'Houses tab maps every area of your life.',
-      zoomTo: { x: 0.5, y: 0.28, scale: 1.2 },
       tapPosition: { x: 0.5, y: 0.28 },
     },
     {
@@ -1860,32 +1853,40 @@ const snippetBirthChart: TikTokScript = {
   },
   scenes: [
     {
-      description: 'Chart wheel animating in, all placements visible',
-      path: '/birth-chart',
-      durationSeconds: 3.5,
-      action: 'show',
-      focusPoint: 'Full birth chart wheel rendering with all celestial bodies',
-      voiceoverLine:
-        'Twenty-four placements. Not ten. Every asteroid, every node.',
-      zoomTo: { x: 0.5, y: 0.42, scale: 1.15 },
+      description: 'Scroll past intro to reveal the birth chart wheel',
+      path: '/app/birth-chart',
+      durationSeconds: 2,
+      action: 'scroll',
+      scrollDistance: 900,
+      focusPoint: 'Chart wheel with all planetary glyphs and houses visible',
+      voiceoverLine: 'Twenty-four placements, not ten.',
     },
     {
-      description: 'Zoom into a specific placement like Lilith or Chiron',
-      path: '/birth-chart',
+      description:
+        'Hold on the full chart wheel showing all planetary positions',
+      path: '/app/birth-chart',
+      durationSeconds: 2.5,
+      action: 'show',
+      focusPoint:
+        'Full birth chart wheel with zodiac signs, houses, and planet glyphs',
+      voiceoverLine: 'Every asteroid, every node.',
+    },
+    {
+      description: 'Scroll down to the planetary positions table',
+      path: '/app/birth-chart',
       durationSeconds: 2.5,
       action: 'scroll',
-      scrollDistance: 350,
-      focusPoint: 'Chiron or Lilith placement with sign and house',
-      voiceoverLine: 'Chiron in the sixth house. That explains a lot.',
-      zoomTo: { x: 0.5, y: 0.55, scale: 1.35 },
+      scrollDistance: 600,
+      focusPoint: 'Planetary Positions table with Chiron, Lilith rows',
+      voiceoverLine: 'Chiron in the sixth house?',
     },
     {
-      description: 'Hold on the chart overview',
-      path: '/birth-chart',
-      durationSeconds: 1.5,
+      description: 'Hold on the placement details',
+      path: '/app/birth-chart',
+      durationSeconds: 1,
       action: 'show',
-      focusPoint: 'Full chart visible, letting the viewer absorb it',
-      voiceoverLine: 'Yeah. That tracks.',
+      focusPoint: 'Asteroid placements visible with houses and degrees',
+      voiceoverLine: 'That tracks.',
     },
   ],
   outro: {
@@ -1893,7 +1894,7 @@ const snippetBirthChart: TikTokScript = {
     durationSeconds: 1.5,
   },
   voiceover:
-    'Twenty-four placements. Not ten. Every asteroid, every node. Chiron in the sixth house. That explains a lot. Yeah. That tracks.',
+    'Twenty-four placements, not ten. Every asteroid, every node. Chiron in the sixth house? That tracks.',
   textOverlays: [
     {
       text: '24 placements, not 10',
@@ -1922,30 +1923,28 @@ const snippetCompatibility: TikTokScript = {
   scenes: [
     {
       description: 'Synastry score reveal, overall percentage visible',
-      path: '/compatibility',
+      path: '/grimoire/compatibility',
       durationSeconds: 3,
       action: 'show',
       focusPoint: 'Compatibility score front and centre',
-      voiceoverLine: 'So I ran our charts through synastry and... oh.',
-      zoomTo: { x: 0.5, y: 0.38, scale: 1.2 },
+      voiceoverLine: 'Ran our charts through synastry and... oh.',
     },
     {
       description: 'Zoom into a specific aspect or timing detail',
-      path: '/compatibility',
+      path: '/grimoire/compatibility',
       durationSeconds: 2.5,
       action: 'scroll',
       scrollDistance: 250,
       focusPoint: 'Key aspect detail between the two charts',
       voiceoverLine: 'Venus square Mars. That explains the tension.',
-      zoomTo: { x: 0.5, y: 0.52, scale: 1.3 },
     },
     {
       description: 'Hold on the score, let it sink in',
-      path: '/compatibility',
+      path: '/grimoire/compatibility',
       durationSeconds: 2,
       action: 'show',
       focusPoint: 'Overall score still visible, reaction moment',
-      voiceoverLine: 'Should I tell them or...',
+      voiceoverLine: 'Should I tell them?',
     },
   ],
   outro: {
@@ -1953,7 +1952,7 @@ const snippetCompatibility: TikTokScript = {
     durationSeconds: 1.5,
   },
   voiceover:
-    'So I ran our charts through synastry and... oh. Venus square Mars. That explains the tension. Should I tell them or...',
+    'Ran our charts through synastry and... oh. Venus square Mars. That explains the tension. Should I tell them?',
   textOverlays: [
     {
       text: 'synastry says...',
@@ -1981,27 +1980,26 @@ const snippetAngelNumber: TikTokScript = {
   },
   scenes: [
     {
-      description: 'Grimoire search loading with 444 angel number result',
+      description: 'Type 444 in search, results appear',
       path: '/grimoire',
       durationSeconds: 3,
       action: 'type',
       target: '[data-testid="grimoire-search"]',
       typeText: '444',
       focusPoint: 'Search results showing angel number 444 meaning',
-      voiceoverLine: "It's not random. Your guides are confirming the path.",
+      voiceoverLine: 'Not random. Your guides are confirming the path.',
     },
     {
-      description: 'Scroll to the key insight in the article',
+      description: 'Click into the angel number 444 article',
       path: '/grimoire',
       durationSeconds: 3,
-      action: 'scroll',
-      scrollDistance: 300,
-      focusPoint: 'The core meaning of 444: protection, foundation',
-      voiceoverLine: 'Protection. Foundations are solid. Keep building.',
-      zoomTo: { x: 0.5, y: 0.5, scale: 1.25 },
+      action: 'click',
+      target: '#grimoire-search-results a, .max-h-80 a',
+      focusPoint: 'Full angel number article with meaning revealed',
+      voiceoverLine: 'Foundations are solid, keep building.',
     },
     {
-      description: 'Hold on the key line',
+      description: 'Hold on the article content',
       path: '/grimoire',
       durationSeconds: 1.5,
       action: 'show',
@@ -2014,7 +2012,7 @@ const snippetAngelNumber: TikTokScript = {
     durationSeconds: 1.5,
   },
   voiceover:
-    "It's not random. Your guides are confirming the path. Protection. Foundations are solid. Keep building. Save this.",
+    'Not random. Your guides are confirming the path. Foundations are solid, keep building. Save this.',
   textOverlays: [
     {
       text: 'your guides are confirming',
@@ -2042,32 +2040,30 @@ const snippetTransitAlert: TikTokScript = {
   },
   scenes: [
     {
-      description: 'Transit tracker showing Mercury position and status',
-      path: '/sky',
+      description: 'Personal transits view showing current planetary movements',
+      path: '/horoscope',
       durationSeconds: 3.5,
       action: 'show',
-      focusPoint: 'Mercury highlighted in the transit view with status',
+      focusPoint: 'Transit wisdom section with personal planetary positions',
       voiceoverLine:
-        'If everything felt stuck, that ends tomorrow. Mercury goes direct.',
-      zoomTo: { x: 0.5, y: 0.4, scale: 1.2 },
+        'Everything felt stuck? That ends tomorrow. Mercury goes direct.',
     },
     {
-      description: 'Zoom into the house Mercury is transiting',
-      path: '/sky',
+      description: 'Scroll to show transit details and house activations',
+      path: '/horoscope',
       durationSeconds: 2.5,
       action: 'scroll',
-      scrollDistance: 200,
-      focusPoint: 'Which house Mercury is activating for the user',
-      voiceoverLine: 'Whatever you held back? Green light.',
-      zoomTo: { x: 0.5, y: 0.55, scale: 1.3 },
+      scrollDistance: 300,
+      focusPoint:
+        'Personal transit breakdown showing which houses are activated',
+      voiceoverLine: 'Green light. Check which house it hits.',
     },
     {
       description: 'Hold on the transit detail',
-      path: '/sky',
+      path: '/horoscope',
       durationSeconds: 2,
       action: 'show',
-      focusPoint: 'Personal implication visible',
-      voiceoverLine: 'Check which house it hits.',
+      focusPoint: 'Personal transit implications visible',
     },
   ],
   outro: {
@@ -2075,7 +2071,7 @@ const snippetTransitAlert: TikTokScript = {
     durationSeconds: 1.5,
   },
   voiceover:
-    'If everything felt stuck, that ends tomorrow. Mercury goes direct. Whatever you held back? Green light. Check which house it hits.',
+    'Everything felt stuck? That ends tomorrow. Mercury goes direct. Green light. Check which house it hits.',
   textOverlays: [
     {
       text: 'green light incoming',
@@ -2114,8 +2110,7 @@ const snippetTarotPull: TikTokScript = {
       durationSeconds: 3,
       action: 'show',
       focusPoint: 'The revealed card front and centre',
-      voiceoverLine: 'One card. The Tower. Okay then.',
-      zoomTo: { x: 0.5, y: 0.4, scale: 1.2 },
+      voiceoverLine: 'One card. The Tower.',
     },
     {
       description: 'Zoom into the reading interpretation',
@@ -2124,9 +2119,7 @@ const snippetTarotPull: TikTokScript = {
       action: 'scroll',
       scrollDistance: 250,
       focusPoint: 'The reading connected to current transits',
-      voiceoverLine:
-        'Connected to Pluto transiting my tenth house. Career shake-up.',
-      zoomTo: { x: 0.5, y: 0.52, scale: 1.25 },
+      voiceoverLine: 'Connected to Pluto in my tenth house.',
     },
     {
       description: 'Hold on the reading, reaction beat',
@@ -2142,7 +2135,7 @@ const snippetTarotPull: TikTokScript = {
     durationSeconds: 1.5,
   },
   voiceover:
-    'One card. The Tower. Okay then. Connected to Pluto transiting my tenth house. Career shake-up. Not what I wanted to hear.',
+    'One card. The Tower. Connected to Pluto in my tenth house. Not what I wanted to hear.',
   textOverlays: [
     {
       text: 'connected to your transits',
@@ -2176,8 +2169,7 @@ const snippetHoroscopeSpeed: TikTokScript = {
       action: 'scroll',
       scrollDistance: 600,
       focusPoint: 'Horoscope content flying past, showing depth',
-      voiceoverLine:
-        'Career peak mid-month. Relationship tension around the 18th.',
+      voiceoverLine: 'Career peak mid-month. Tension around the 18th.',
     },
     {
       description: 'Hard pause on the key sentence',
@@ -2185,8 +2177,7 @@ const snippetHoroscopeSpeed: TikTokScript = {
       durationSeconds: 3,
       action: 'show',
       focusPoint: 'The one line that hits hardest',
-      voiceoverLine: "But the 25th? That's your window. Don't miss it.",
-      zoomTo: { x: 0.5, y: 0.48, scale: 1.3 },
+      voiceoverLine: 'The 25th is your window.',
     },
     {
       description: 'Hold, save energy',
@@ -2194,7 +2185,7 @@ const snippetHoroscopeSpeed: TikTokScript = {
       durationSeconds: 2,
       action: 'show',
       focusPoint: 'Key line still visible, save prompt energy',
-      voiceoverLine: "Save this. You'll need it.",
+      voiceoverLine: 'Save this.',
     },
   ],
   outro: {
@@ -2202,7 +2193,7 @@ const snippetHoroscopeSpeed: TikTokScript = {
     durationSeconds: 1.5,
   },
   voiceover:
-    "Career peak mid-month. Relationship tension around the 18th. But the 25th? That's your window. Don't miss it. Save this. You'll need it.",
+    'Career peak mid-month. Tension around the 18th. The 25th is your window. Save this.',
   textOverlays: [
     {
       text: 'the 25th is your window',
@@ -2244,7 +2235,7 @@ const snippetAstralChat: TikTokScript = {
       target: '[data-testid="guide-input"]',
       typeText: 'What does my Saturn return mean for my career?',
       focusPoint: 'Real question being typed, personal and specific',
-      voiceoverLine: 'Asked about my Saturn return. Expected generic waffle.',
+      voiceoverLine: 'Asked about my Saturn return. Expected waffle.',
     },
     {
       description: 'Response streams in with grimoire-sourced detail',
@@ -2253,9 +2244,7 @@ const snippetAstralChat: TikTokScript = {
       action: 'wait',
       focusPoint:
         'Response showing specific transit data, house placements, timing',
-      voiceoverLine:
-        'Got specific houses, real degrees, actual grimoire sources.',
-      zoomTo: { x: 0.5, y: 0.55, scale: 1.25 },
+      voiceoverLine: 'Got real houses, real degrees, grimoire sources.',
     },
     {
       description: 'Hold on the response showing depth',
@@ -2263,7 +2252,7 @@ const snippetAstralChat: TikTokScript = {
       durationSeconds: 1.5,
       action: 'show',
       focusPoint: 'Grimoire-sourced content visible in the response',
-      voiceoverLine: 'It... actually knew.',
+      voiceoverLine: 'It actually knew.',
     },
   ],
   outro: {
@@ -2271,7 +2260,7 @@ const snippetAstralChat: TikTokScript = {
     durationSeconds: 1.5,
   },
   voiceover:
-    'Asked about my Saturn return. Expected generic waffle. Got specific houses, real degrees, actual grimoire sources. It... actually knew.',
+    'Asked about my Saturn return. Expected waffle. Got real houses, real degrees, grimoire sources. It actually knew.',
   textOverlays: [
     {
       text: '2,000+ grimoire articles',
@@ -2305,7 +2294,6 @@ const snippetCosmicScore: TikTokScript = {
       action: 'show',
       focusPoint: 'Cosmic score number visible with pattern type indicator',
       voiceoverLine: 'Cosmic score dropped to 3.8. Checked why.',
-      zoomTo: { x: 0.5, y: 0.35, scale: 1.2 },
     },
     {
       description: 'Scroll to pattern breakdown showing what caused the drop',
@@ -2315,7 +2303,6 @@ const snippetCosmicScore: TikTokScript = {
       scrollDistance: 250,
       focusPoint: 'Pattern types visible: which cosmic conditions are active',
       voiceoverLine: 'Saturn doing its thing.',
-      zoomTo: { x: 0.5, y: 0.5, scale: 1.25 },
     },
     {
       description: 'Hold on the breakdown',
@@ -2361,27 +2348,25 @@ const snippetRealAstronomy: TikTokScript = {
     {
       description:
         'Sky Now showing precise planetary positions with degrees and minutes',
-      path: '/sky',
+      path: '/grimoire/astrology/sky-now',
       durationSeconds: 3.5,
       action: 'show',
       focusPoint: 'Exact degree and arcminute positions for each planet',
       voiceoverLine:
         'Most apps round your placements. This calculates to the arcminute.',
-      zoomTo: { x: 0.5, y: 0.4, scale: 1.25 },
     },
     {
       description: 'Scroll through planets showing specific positions',
-      path: '/sky',
+      path: '/grimoire/astrology/sky-now',
       durationSeconds: 3,
       action: 'scroll',
       scrollDistance: 250,
       focusPoint: 'Multiple planets with precise degrees, signs, houses',
       voiceoverLine: 'Your Moon might not be where you think it is.',
-      zoomTo: { x: 0.5, y: 0.52, scale: 1.3 },
     },
     {
       description: 'Hold on the precision',
-      path: '/sky',
+      path: '/grimoire/astrology/sky-now',
       durationSeconds: 1.5,
       action: 'show',
       focusPoint: 'Precise data visible, differentiating from competitors',
@@ -2426,8 +2411,7 @@ const snippetMoonSpells: TikTokScript = {
       durationSeconds: 3.5,
       action: 'show',
       focusPoint: 'Spells filtered by current moon phase, count visible',
-      voiceoverLine: "A hundred and twelve spells. Filtered by tonight's moon.",
-      zoomTo: { x: 0.5, y: 0.4, scale: 1.15 },
+      voiceoverLine: "A hundred and twelve spells filtered by tonight's moon.",
     },
     {
       description: 'Scroll through the spell list showing variety',
@@ -2436,8 +2420,7 @@ const snippetMoonSpells: TikTokScript = {
       action: 'scroll',
       scrollDistance: 300,
       focusPoint: 'Multiple spells scrolling past, each matched to lunar phase',
-      voiceoverLine: 'Different moon, different spells. Changes every night.',
-      zoomTo: { x: 0.5, y: 0.5, scale: 1.2 },
+      voiceoverLine: 'Different moon, different magic.',
     },
     {
       description: 'Hold on a specific spell',
@@ -2453,7 +2436,7 @@ const snippetMoonSpells: TikTokScript = {
     durationSeconds: 1.5,
   },
   voiceover:
-    "A hundred and twelve spells. Filtered by tonight's moon. Different moon, different spells. Changes every night. Which one are you casting?",
+    "A hundred and twelve spells filtered by tonight's moon. Different moon, different magic. Which one are you casting?",
   textOverlays: [
     {
       text: 'changes every night',
@@ -2482,28 +2465,25 @@ const snippetCircleFriends: TikTokScript = {
   scenes: [
     {
       description: 'Circle view showing friend compatibility scores',
-      path: '/profile',
+      path: '/profile?tab=circle',
       durationSeconds: 3,
       action: 'show',
       focusPoint:
         'Circle with multiple friends and their compatibility percentages',
-      voiceoverLine: 'Your friend group as birth charts. Side by side.',
-      zoomTo: { x: 0.5, y: 0.4, scale: 1.15 },
+      voiceoverLine: 'Your friend group as birth charts, side by side.',
     },
     {
-      description: 'Tap into a friend to see aspect highlights',
-      path: '/profile',
+      description: 'Scroll through the friend list showing synastry data',
+      path: '/profile?tab=circle',
       durationSeconds: 3,
-      action: 'click',
-      target: '[data-testid="friend-card"]',
-      focusPoint: 'Synastry aspects between the two charts',
-      voiceoverLine: 'Thirty-six aspects mapped. The tension? Explained.',
-      zoomTo: { x: 0.5, y: 0.5, scale: 1.25 },
-      tapPosition: { x: 0.5, y: 0.4 },
+      action: 'scroll',
+      scrollDistance: 250,
+      focusPoint: 'Synastry aspects between the charts',
+      voiceoverLine: 'Thirty-six aspects mapped between you.',
     },
     {
       description: 'Hold on the aspect detail',
-      path: '/profile',
+      path: '/profile?tab=circle',
       durationSeconds: 2,
       action: 'show',
       focusPoint: 'Key aspect visible between the charts',
@@ -2515,7 +2495,7 @@ const snippetCircleFriends: TikTokScript = {
     durationSeconds: 1.5,
   },
   voiceover:
-    "Your friend group as birth charts. Side by side. Thirty-six aspects mapped. The tension? Explained. Now she gets why I'm like this.",
+    "Your friend group as birth charts, side by side. Thirty-six aspects mapped between you. Now she gets why I'm like this.",
   textOverlays: [
     {
       text: '36 aspects mapped',
@@ -2549,7 +2529,6 @@ const snippetTarotTransits: TikTokScript = {
       action: 'show',
       focusPoint: 'Card revealed with reading text visible',
       voiceoverLine: 'Pulled the Tower during Pluto square my Moon.',
-      zoomTo: { x: 0.5, y: 0.4, scale: 1.2 },
     },
     {
       description:
@@ -2561,7 +2540,6 @@ const snippetTarotTransits: TikTokScript = {
       focusPoint:
         'Transit connection: Pluto aspect with natal Moon, degrees visible',
       voiceoverLine: 'The transit connection showed exactly why.',
-      zoomTo: { x: 0.5, y: 0.55, scale: 1.3 },
     },
     {
       description: 'Hold on the transit connection',

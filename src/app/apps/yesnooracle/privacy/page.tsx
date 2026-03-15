@@ -97,7 +97,21 @@ export default function YesNoOraclePrivacyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              3. Data Storage and CloudKit
+              3. Reading History
+            </h2>
+            <p className='text-zinc-300 leading-relaxed'>
+              Your yes/no readings are stored locally on your device using
+              SwiftData. This history is used to display your reading streak and
+              past readings. Your reading history is synced to your iCloud
+              account via CloudKit for safekeeping and to keep your history in
+              sync across your Apple devices. You can delete any reading from
+              your history at any time.
+            </p>
+          </section>
+
+          <section>
+            <h2 className='text-2xl font-semibold text-white mb-4'>
+              4. Data Storage and CloudKit
             </h2>
             <p className='text-zinc-300 leading-relaxed'>
               Your reading history is stored securely using Apple&apos;s
@@ -110,7 +124,7 @@ export default function YesNoOraclePrivacyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              4. Third-Party Services
+              5. Third-Party Services
             </h2>
             <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
               <li>
@@ -129,7 +143,7 @@ export default function YesNoOraclePrivacyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              5. Do We Sell Your Data?
+              6. Do We Sell Your Data?
             </h2>
             <p className='text-zinc-300 leading-relaxed'>
               No. We do not sell, share, or monetize your personal data. Your
@@ -140,7 +154,7 @@ export default function YesNoOraclePrivacyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              6. Your Rights
+              7. Your Rights
             </h2>
             <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
               <li>
@@ -169,7 +183,7 @@ export default function YesNoOraclePrivacyPage() {
 
           <section>
             <h2 className='text-2xl font-semibold text-white mb-4'>
-              7. Contact Us
+              8. Contact Us
             </h2>
             <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
               <p className='text-zinc-300'>

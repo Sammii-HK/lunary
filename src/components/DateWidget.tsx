@@ -35,7 +35,7 @@ export const DateWidget = () => {
     <>
       <div className='flex flex-col items-center gap-1'>
         <button
-          className='flex items-center gap-2 cursor-pointer hover:text-lunary-accent transition-colors text-zinc-300'
+          className='flex items-center gap-2 hover:text-lunary-accent transition-colors text-zinc-300'
           onClick={() => setIsOpen(!isOpen)}
         >
           <CalendarIcon className='w-4 h-4' />

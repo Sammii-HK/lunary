@@ -7,13 +7,14 @@ import {
 } from '@/lib/social/video-script-generator';
 import { sendDiscordAdminNotification } from '@/lib/discord';
 import { categoryThemes } from '@/lib/social/weekly-themes';
+import type { VideoScript } from '@/lib/social/video-scripts/types';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/admin/video-scripts/generate
  *
- * Generate video scripts for a week.
+ * Generate video scripts for a week (4 slots/day = 28 TikTok + 1 YouTube).
  * Body: { week?: 'current' | 'next', themeIndex?: number }
  */
 export async function POST(request: Request) {
@@ -72,32 +73,78 @@ export async function POST(request: Request) {
       }
     }
 
-    // Generate and save scripts
-    const scripts = await generateAndSaveWeeklyScripts(
-      weekStartDate,
-      currentThemeIndex,
-    );
+    // Generate primary + engagement scripts in parallel
+    const {
+      generateWeeklySecondaryScripts,
+      generateWeeklyEngagementBScripts,
+      generateWeeklyEngagementCScripts,
+    } = await import('@/lib/social/video-scripts/generators/weekly-secondary');
+    const { saveVideoScript } =
+      await import('@/lib/social/video-scripts/database');
+
+    const [
+      primaryScripts,
+      engagementAScripts,
+      engagementBScripts,
+      engagementCScripts,
+    ] = await Promise.all([
+      generateAndSaveWeeklyScripts(weekStartDate, currentThemeIndex),
+      generateWeeklySecondaryScripts(weekStartDate),
+      generateWeeklyEngagementBScripts(weekStartDate),
+      generateWeeklyEngagementCScripts(weekStartDate),
+    ]);
+
+    // Save engagement scripts to DB
+    const allEngagementScripts = [
+      ...engagementAScripts,
+      ...engagementBScripts,
+      ...engagementCScripts,
+    ];
+    for (const script of allEngagementScripts) {
+      try {
+        const id = await saveVideoScript(script);
+        script.id = id;
+      } catch (saveError) {
+        console.error(
+          `Failed to save engagement script: ${script.facetTitle}`,
+          saveError,
+        );
+      }
+    }
+
+    const allTiktokScripts = [
+      ...primaryScripts.tiktokScripts,
+      ...allEngagementScripts,
+    ];
 
     // Send Discord notification
-    await sendScriptsToDiscord(scripts, weekStartDate);
+    await sendScriptsToDiscord(
+      primaryScripts,
+      engagementAScripts,
+      engagementBScripts,
+      engagementCScripts,
+      weekStartDate,
+    );
 
     return NextResponse.json({
       success: true,
-      message: `Generated ${scripts.tiktokScripts.length} daily shorts and 1 YouTube script`,
-      theme: scripts.theme.name,
+      message: `Generated ${allTiktokScripts.length} daily shorts and 1 YouTube script`,
+      theme: primaryScripts.theme.name,
       weekStartDate: weekStartDate.toISOString(),
       scripts: {
-        tiktok: scripts.tiktokScripts.map((s) => ({
+        tiktok: allTiktokScripts.map((s) => ({
           facetTitle: s.facetTitle,
           wordCount: s.wordCount,
           estimatedDuration: s.estimatedDuration,
           scheduledDate: s.scheduledDate.toISOString(),
+          slot: s.metadata?.slot ?? 'primary',
         })),
         youtube: {
-          facetTitle: scripts.youtubeScript.facetTitle,
-          wordCount: scripts.youtubeScript.wordCount,
-          estimatedDuration: scripts.youtubeScript.estimatedDuration,
-          scheduledDate: scripts.youtubeScript.scheduledDate.toISOString(),
+          facetTitle: primaryScripts.youtubeScript.facetTitle,
+          wordCount: primaryScripts.youtubeScript.wordCount,
+          estimatedDuration: primaryScripts.youtubeScript.estimatedDuration,
+          scheduledDate:
+            primaryScripts.youtubeScript.scheduledDate.toISOString(),
         },
       },
     });
@@ -114,10 +161,13 @@ export async function POST(request: Request) {
 }
 
 /**
- * Send generated scripts to Discord
+ * Send generated scripts to Discord with all 4 slots per day
  */
 async function sendScriptsToDiscord(
-  scripts: WeeklyVideoScripts,
+  primaryScripts: WeeklyVideoScripts,
+  engagementA: VideoScript[],
+  engagementB: VideoScript[],
+  engagementC: VideoScript[],
   weekStartDate: Date,
 ): Promise<void> {
   const weekLabel = weekStartDate.toLocaleDateString('en-US', {
@@ -126,31 +176,57 @@ async function sendScriptsToDiscord(
     year: 'numeric',
   });
 
-  // Format TikTok scripts summary
-  const tiktokSummary = scripts.tiktokScripts
-    .map((s) => {
-      const day = s.scheduledDate.toLocaleDateString('en-US', {
-        weekday: 'short',
-      });
-      return `**${day}**: ${s.facetTitle} (${s.estimatedDuration})`;
-    })
-    .join('\n');
+  const formatSlotSummary = (
+    scripts: VideoScript[],
+    slotName: string,
+    hour: number,
+  ) => {
+    if (scripts.length === 0) return '';
+    const lines = scripts
+      .map((s) => {
+        const day = s.scheduledDate.toLocaleDateString('en-US', {
+          weekday: 'short',
+        });
+        return `  ${day}: ${s.facetTitle} (${s.estimatedDuration})`;
+      })
+      .join('\n');
+    return `**${slotName} (${hour}:00 UTC)**:\n${lines}`;
+  };
 
-  // Format YouTube summary
-  const youtubeSummary = `**Sun**: ${scripts.youtubeScript.facetTitle} (${scripts.youtubeScript.estimatedDuration})`;
+  const primarySummary = formatSlotSummary(
+    primaryScripts.tiktokScripts,
+    'Primary',
+    14,
+  );
+  const engCSummary = formatSlotSummary(engagementC, 'Engagement C', 11);
+  const engASummary = formatSlotSummary(engagementA, 'Engagement A', 17);
+  const engBSummary = formatSlotSummary(engagementB, 'Engagement B', 21);
 
-  const message = `**Weekly Theme**: ${scripts.theme.name}
+  const youtubeSummary = `**YouTube Script (3-4min)**:\n  Sun: ${primaryScripts.youtubeScript.facetTitle} (${primaryScripts.youtubeScript.estimatedDuration})`;
 
-**Daily Shorts (30-45s)**:
-${tiktokSummary}
+  const totalScripts =
+    primaryScripts.tiktokScripts.length +
+    engagementA.length +
+    engagementB.length +
+    engagementC.length;
 
-**YouTube Script (3-4min)**:
+  const message = `**Weekly Theme**: ${primaryScripts.theme.name}
+**Total**: ${totalScripts} TikTok scripts (4/day) + 1 YouTube
+
+${engCSummary}
+
+${primarySummary}
+
+${engASummary}
+
+${engBSummary}
+
 ${youtubeSummary}
 
 View full scripts in the admin dashboard.`;
 
   await sendDiscordAdminNotification({
-    title: `📹 Video Scripts Generated - Week of ${weekLabel}`,
+    title: `Video Scripts Generated - Week of ${weekLabel}`,
     message,
     url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://lunary.app'}/admin/video-scripts`,
     priority: 'normal',

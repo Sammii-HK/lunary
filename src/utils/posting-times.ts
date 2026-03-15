@@ -144,15 +144,17 @@ export function getPlatformPostingInfo(
 }
 
 /**
- * Video posting times (UTC) — 3-slot daily schedule, ~3-4hr gaps
+ * Video posting times (UTC) — 4-slot daily schedule
  *
  * | Slot         | UTC  | UK    | US ET  | Purpose                                    |
  * |--------------|------|-------|--------|--------------------------------------------|
+ * | engagementC  | 11   | 11am  | 6am    | Early discovery / trending                 |
  * | primary      | 14   | 2pm   | 9am    | Educational (grimoire themes)              |
  * | engagementA  | 17   | 5pm   | 12pm   | Engagement format (UK evening / US lunch)  |
  * | engagementB  | 21   | 9pm   | 4pm    | Engagement format (UK leisure / US peak)   |
  */
 export const VIDEO_POSTING_HOURS = {
+  engagementC: 11,
   primary: 14,
   engagementA: 17,
   engagementB: 21,
@@ -160,10 +162,14 @@ export const VIDEO_POSTING_HOURS = {
   secondary: 21,
 } as const;
 
-export type VideoSlot = 'primary' | 'engagementA' | 'engagementB';
+export type VideoSlot =
+  | 'primary'
+  | 'engagementA'
+  | 'engagementB'
+  | 'engagementC';
 
 export function getVideoSlotHour(slot: VideoSlot): number {
-  return VIDEO_POSTING_HOURS[slot];
+  return VIDEO_POSTING_HOURS[slot] as number;
 }
 
 /** @deprecated Use getVideoSlotHour — kept for backward compatibility */

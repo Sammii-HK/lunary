@@ -1,15 +1,21 @@
 /**
  * Main video script generation functions
  *
- * Primary slot uses a dual mini-series structure:
- * - Block A (Mon-Thu): 4 facets from a numerology theme (totalParts=4)
- * - Block B (Fri-Sun): 3 facets from a rotating witchtok category (totalParts=3)
+ * Primary slot uses weighted category rotation across ALL grimoire categories.
+ * Each day picks a category from the grimoire pool using performance-weighted
+ * selection, with diversity guarantees:
+ * - No category appears more than 2 days in a row
+ * - Each week covers at least 4 different categories
+ * - Mini-series kept to 2-3 parts max per category per week
  *
- * This keeps series at the optimal 3-5 part length (research shows 7 is too long)
- * while guaranteeing numerology (the #1 performer) appears every week.
+ * When weekPlan is provided, themes/facets come from the content plan (sync mode).
  */
 
-import { categoryThemes, WITCHTOK_ROTATION_CATEGORIES } from '../weekly-themes';
+import {
+  categoryThemes,
+  GRIMOIRE_CATEGORIES,
+  THEME_CATEGORY_WEIGHTS,
+} from '../weekly-themes';
 import type { DailyFacet, WeeklyTheme, SabbatTheme } from '../weekly-themes';
 import type { WeeklyVideoScripts } from './types';
 import { ensureVideoScriptsTable, saveVideoScript } from './database';
@@ -25,14 +31,83 @@ export interface WeekPlanDay {
 }
 
 /**
+ * Select 7 categories for the week using weighted rotation.
+ * Guarantees: no more than 2 consecutive same-category days,
+ * at least 4 different categories per week.
+ */
+function selectWeeklyCategoryRotation(weekStartDate: Date): string[] {
+  const daySeed =
+    weekStartDate.getFullYear() * 10000 +
+    (weekStartDate.getMonth() + 1) * 100 +
+    weekStartDate.getDate();
+
+  // Build weighted pool from GRIMOIRE_CATEGORIES + THEME_CATEGORY_WEIGHTS
+  const weightedPool: string[] = [];
+  for (const cat of GRIMOIRE_CATEGORIES) {
+    const weight = THEME_CATEGORY_WEIGHTS[cat] ?? 1;
+    if (weight <= 0) continue;
+    for (let i = 0; i < weight; i++) {
+      weightedPool.push(cat);
+    }
+  }
+
+  const selected: string[] = [];
+  const categoryCounts = new Map<string, number>();
+
+  for (let day = 0; day < 7; day++) {
+    const seed = daySeed + day * 37;
+    const exclude = new Set<string>();
+
+    // No more than 2 consecutive same-category days
+    if (day >= 2 && selected[day - 1] === selected[day - 2]) {
+      exclude.add(selected[day - 1]);
+    }
+
+    // No more than 3 of same category per week (keeps mini-series to 2-3 parts)
+    for (const [cat, count] of categoryCounts) {
+      if (count >= 3) exclude.add(cat);
+    }
+
+    // Filter pool
+    let candidates = weightedPool.filter((c) => !exclude.has(c));
+    if (candidates.length === 0) candidates = weightedPool;
+
+    // Deterministic pick
+    const pick =
+      candidates[((seed * 9301 + 49297) % 233280) % candidates.length];
+    selected.push(pick);
+    categoryCounts.set(pick, (categoryCounts.get(pick) ?? 0) + 1);
+  }
+
+  // Diversity check: if fewer than 4 unique categories, force substitution
+  const unique = new Set(selected);
+  if (unique.size < 4) {
+    const unused = GRIMOIRE_CATEGORIES.filter((c) => !unique.has(c));
+    // Replace duplicates from the end with unused categories
+    for (
+      let i = selected.length - 1;
+      i >= 0 && unique.size < 4 && unused.length > 0;
+      i--
+    ) {
+      const cat = selected[i];
+      const count = selected.filter((c) => c === cat).length;
+      if (count > 1) {
+        const replacement = unused.shift()!;
+        selected[i] = replacement;
+        unique.add(replacement);
+      }
+    }
+  }
+
+  return selected;
+}
+
+/**
  * Generate all video scripts for a week
- * Returns 7 TikTok scripts (4 from Block A + 3 from Block B) and 1 YouTube script
+ * Returns 7 TikTok scripts (one per day, diverse categories) and 1 YouTube script
  *
  * When weekPlan is provided, themes and facets are taken directly from the
  * content plan so video scripts always match the post copy.
- *
- * Block A (Mon-Thu): 4 facets from a numerology theme
- * Block B (Fri-Sun): 3 facets from a rotating witchtok category
  */
 export async function generateWeeklyVideoScripts(
   weekStartDate: Date,
@@ -40,52 +115,107 @@ export async function generateWeeklyVideoScripts(
   baseUrl: string = '',
   weekPlan?: WeekPlanDay[],
 ): Promise<WeeklyVideoScripts> {
-  let themeA: WeeklyTheme | SabbatTheme;
-  let facetsA: DailyFacet[];
-  let themeB: WeeklyTheme | SabbatTheme;
-  let facetsB: DailyFacet[];
-
-  if (weekPlan && weekPlan.length >= 7) {
-    // Use the exact themes/facets from the content plan to stay in sync
-    const blockADays = weekPlan.slice(0, 4); // Mon-Thu
-    const blockBDays = weekPlan.slice(4, 7); // Fri-Sun
-    themeA = blockADays[0].theme;
-    facetsA = blockADays.map((d) => d.facet);
-    themeB = blockBDays[0].theme;
-    facetsB = blockBDays.map((d) => d.facet);
-  } else {
-    // Fallback: independent selection (legacy behaviour)
-    const numerologyThemes = categoryThemes.filter(
-      (t) => t.category === 'numerology',
-    );
-    themeA =
-      numerologyThemes.length > 0
-        ? numerologyThemes[themeIndex % numerologyThemes.length]
-        : categoryThemes[themeIndex % categoryThemes.length];
-    facetsA = (themeA as WeeklyTheme).facets.slice(0, 4);
-
-    const witchtokCategory =
-      WITCHTOK_ROTATION_CATEGORIES[
-        themeIndex % WITCHTOK_ROTATION_CATEGORIES.length
-      ];
-    const witchtokThemes = categoryThemes.filter(
-      (t) => t.category === witchtokCategory,
-    );
-    themeB =
-      witchtokThemes.length > 0
-        ? witchtokThemes[themeIndex % witchtokThemes.length]
-        : categoryThemes[(themeIndex + 1) % categoryThemes.length];
-    facetsB = (themeB as WeeklyTheme).facets.slice(0, 3);
-  }
-
   // Rotate angles across the week - each day gets a different angle
   const shuffledAngles = [...VIDEO_ANGLE_OPTIONS].sort(
     () => Math.random() - 0.5,
   );
 
-  // Generate Block A scripts (Mon-Thu, parts 1-4)
-  const blockAScripts = await Promise.all(
-    facetsA.map(async (facet, dayOffset) => {
+  let dailyThemes: Array<{ theme: WeeklyTheme; facet: DailyFacet }>;
+  let primaryTheme: WeeklyTheme;
+
+  if (weekPlan && weekPlan.length >= 7) {
+    // Sync mode: use exact themes/facets from the content plan
+    dailyThemes = weekPlan.slice(0, 7).map((d) => ({
+      theme: d.theme as WeeklyTheme,
+      facet: d.facet,
+    }));
+    primaryTheme = dailyThemes[0].theme;
+  } else {
+    // Weighted category rotation across all grimoire categories
+    const categorySchedule = selectWeeklyCategoryRotation(weekStartDate);
+
+    dailyThemes = categorySchedule.map((category, i) => {
+      const themesForCategory = categoryThemes.filter(
+        (t) => t.category === category,
+      );
+      const seed = themeIndex + i;
+      const theme =
+        themesForCategory.length > 0
+          ? themesForCategory[seed % themesForCategory.length]
+          : categoryThemes[seed % categoryThemes.length];
+      const facets =
+        theme.facetPool && theme.facetPool.length > 0
+          ? theme.facetPool
+          : theme.facets;
+      const facet = facets[seed % facets.length];
+      return { theme, facet };
+    });
+
+    // Primary theme for YouTube = most frequently used category this week
+    const categoryCounts = new Map<string, number>();
+    for (const { theme } of dailyThemes) {
+      categoryCounts.set(
+        theme.category,
+        (categoryCounts.get(theme.category) ?? 0) + 1,
+      );
+    }
+    const topCategory = [...categoryCounts.entries()].sort(
+      (a, b) => b[1] - a[1],
+    )[0][0];
+    primaryTheme =
+      dailyThemes.find((d) => d.theme.category === topCategory)?.theme ??
+      dailyThemes[0].theme;
+  }
+
+  // Group consecutive same-category days into mini-series
+  const seriesTracker = new Map<string, { start: number; count: number }>();
+  const partNumbers: number[] = [];
+  const totalPartsPerDay: number[] = [];
+
+  // First pass: count consecutive runs
+  for (let i = 0; i < dailyThemes.length; i++) {
+    const cat = dailyThemes[i].theme.category;
+    if (i === 0 || dailyThemes[i - 1].theme.category !== cat) {
+      // Start of new run
+      let runLength = 1;
+      for (
+        let j = i + 1;
+        j < dailyThemes.length && dailyThemes[j].theme.category === cat;
+        j++
+      ) {
+        runLength++;
+      }
+      seriesTracker.set(`${cat}-${i}`, { start: i, count: runLength });
+    }
+  }
+
+  // Second pass: assign part numbers
+  let currentRunKey = '';
+  let currentPartNum = 0;
+  for (let i = 0; i < dailyThemes.length; i++) {
+    const cat = dailyThemes[i].theme.category;
+    const key = [...seriesTracker.entries()].find(
+      ([, v]) => i >= v.start && i < v.start + v.count,
+    );
+    if (key) {
+      const [runKey, runData] = key;
+      if (runKey !== currentRunKey) {
+        currentRunKey = runKey;
+        currentPartNum = 1;
+      } else {
+        currentPartNum++;
+      }
+      partNumbers.push(currentPartNum);
+      totalPartsPerDay.push(runData.count);
+    } else {
+      partNumbers.push(1);
+      totalPartsPerDay.push(1);
+    }
+  }
+
+  // Generate scripts for each day
+  const tiktokScripts = await Promise.all(
+    dailyThemes.map(async ({ theme, facet }, dayOffset) => {
       const scriptDate = new Date(weekStartDate);
       scriptDate.setDate(scriptDate.getDate() + dayOffset);
 
@@ -94,34 +224,10 @@ export async function generateWeeklyVideoScripts(
 
       return await generateTikTokScript(
         facet,
-        themeA as WeeklyTheme,
+        theme,
         scriptDate,
-        dayOffset + 1,
-        4, // totalParts=4 for Block A
-        baseUrl,
-        {
-          angleOverride: angleForDay,
-          aspectOverride: aspectForDay,
-        },
-      );
-    }),
-  );
-
-  // Generate Block B scripts (Fri-Sun, parts 1-3)
-  const blockBScripts = await Promise.all(
-    facetsB.map(async (facet, i) => {
-      const scriptDate = new Date(weekStartDate);
-      scriptDate.setDate(scriptDate.getDate() + 4 + i); // Day 4,5,6 = Fri,Sat,Sun
-
-      const angleForDay = shuffledAngles[(4 + i) % shuffledAngles.length];
-      const aspectForDay = mapAngleToAspect(angleForDay);
-
-      return await generateTikTokScript(
-        facet,
-        themeB as WeeklyTheme,
-        scriptDate,
-        i + 1,
-        3, // totalParts=3 for Block B
+        partNumbers[dayOffset],
+        totalPartsPerDay[dayOffset],
         baseUrl,
         {
           angleOverride: angleForDay,
@@ -134,15 +240,15 @@ export async function generateWeeklyVideoScripts(
   const youtubeDate = new Date(weekStartDate);
   youtubeDate.setDate(youtubeDate.getDate() + 6);
   const youtubeScript = await generateYouTubeScript(
-    themeA as WeeklyTheme,
-    facetsA,
+    primaryTheme,
+    dailyThemes.map((d) => d.facet).slice(0, 4),
     youtubeDate,
     baseUrl,
   );
 
   return {
-    theme: themeA as WeeklyTheme, // Primary theme for YouTube summary
-    tiktokScripts: [...blockAScripts, ...blockBScripts],
+    theme: primaryTheme,
+    tiktokScripts,
     youtubeScript,
     weekStartDate,
   };
@@ -151,7 +257,7 @@ export async function generateWeeklyVideoScripts(
 /**
  * Generate and save scripts to database
  *
- * Primary slot: Block A (4 numerology) + Block B (3 witchtok)
+ * Primary slot: weighted category rotation across all grimoire categories
  */
 export async function generateAndSaveWeeklyScripts(
   weekStartDate: Date,

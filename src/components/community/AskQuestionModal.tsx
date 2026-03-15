@@ -93,7 +93,7 @@ export function AskQuestionModal({
         />
 
         <div className='flex items-center justify-between mt-3'>
-          <label className='flex items-center gap-2 text-xs text-zinc-400 cursor-pointer'>
+          <label className='flex items-center gap-2 text-xs text-zinc-400'>
             <input
               type='checkbox'
               checked={isAnonymous}

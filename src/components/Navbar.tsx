@@ -14,6 +14,7 @@ import { useRitualBadge } from '@/hooks/useRitualBadge';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hapticService } from '@/services/native/haptic-service';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -63,8 +64,8 @@ export const Navbar = () => {
   }
 
   return (
-    <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
-      <div className='flex w-full h-12 md:h-14 items-center justify-around px-2 py-2 text-white max-w-lg'>
+    <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-zinc-800/80 bg-zinc-950/98 backdrop-blur-xl'>
+      <div className='flex w-full items-center justify-around px-2 pb-[env(safe-area-inset-bottom,8px)] pt-2 text-white max-w-lg'>
         <NavLink
           href='/app'
           icon={Home}
@@ -75,7 +76,7 @@ export const Navbar = () => {
         <NavLink
           href='/tarot'
           icon={Layers}
-          label='Tarot'
+          label={iosLabel('Tarot', isNativeIOS)}
           activePath={pathname}
           dataNav='tarot'
         />
@@ -163,20 +164,20 @@ const NavLink = ({
       href={href}
       data-nav={dataNav}
       onClick={handleClick}
-      className={`relative flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition ${
-        active ? 'text-lunary-secondary' : 'text-zinc-400 hover:text-zinc-300'
+      className={`relative flex flex-col items-center gap-0.5 px-4 py-1 text-xs transition-colors ${
+        active ? 'text-lunary-secondary' : 'text-zinc-500'
       }`}
     >
       <div className='relative'>
         <Icon
-          className='h-4 w-4 md:h-5 md:w-5'
+          className='h-[22px] w-[22px] md:h-6 md:w-6'
           strokeWidth={active ? 2 : 1.5}
         />
         {showBadge && (
           <span className='absolute -top-1 -right-1 h-2 w-2 rounded-full bg-lunary-primary' />
         )}
       </div>
-      <span className='text-[10px] uppercase tracking-wide'>{label}</span>
+      <span className='text-[10px] tracking-wide'>{label}</span>
     </Link>
   );
 };

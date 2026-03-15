@@ -9,6 +9,8 @@ import { SmartTrialButton } from './SmartTrialButton';
 import { conversionTracking, trackEvent } from '@/lib/analytics';
 import { Sparkles, Zap, Star, X } from 'lucide-react';
 import { Button } from './ui/button';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { getABTestMetadataFromVariant } from '@/lib/ab-test-tracking';
 
@@ -56,6 +58,7 @@ export function UpgradePrompt({
   className = '',
   onShow,
 }: UpgradePromptProps) {
+  const isNativeIOS = useIsNativeIOS();
   const subscription = useSubscription();
   const authState = useAuthStatus();
   const [isDismissed, setIsDismissed] = useState(false);
@@ -156,8 +159,11 @@ export function UpgradePrompt({
       ? `This feature requires ${planLabel}. Upgrade to unlock it.`
       : 'Readings personalized to your name, birthday, birth chart, birth time and location';
 
-  const promptTitle = title || defaultTitle;
-  const promptDescription = description || defaultDescription;
+  const promptTitle = iosLabel(title || defaultTitle, isNativeIOS);
+  const promptDescription = iosLabel(
+    description || defaultDescription,
+    isNativeIOS,
+  );
 
   const handleUpgradeClick = () => {
     // Track with A/B test metadata if available
