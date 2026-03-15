@@ -7,5 +7,27 @@
     "@typescript-eslint/no-unused-vars": "off",
     "unused-imports/no-unused-imports": "error",
     "unused-imports/no-unused-vars": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/app/api/**/*.ts", "src/app/api/**/*.tsx"],
+      "rules": {
+        "no-restricted-properties": [
+          "error",
+          {
+            "object": "Math",
+            "property": "random",
+            "message": "Use crypto.randomUUID() or crypto.getRandomValues() instead of Math.random() in API routes."
+          }
+        ],
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "Literal[regex.pattern=/\\<\\[\\^\\>\\]/]",
+            "message": "Potential ReDoS: use stripHtmlTags() from @/lib/utils instead of regex HTML stripping."
+          }
+        ]
+      }
+    }
+  ]
 }
