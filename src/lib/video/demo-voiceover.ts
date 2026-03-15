@@ -175,7 +175,8 @@ export async function generateDemoVoiceover(
   );
 
   // 2. Write to temp file for duration measurement
-  const tempPath = join(tmpdir(), `demo-vo-${script.id}-${Date.now()}.mp3`);
+  const safeId = script.id.replace(/[^a-zA-Z0-9_-]/g, '');
+  const tempPath = join(tmpdir(), `demo-vo-${safeId}-${Date.now()}.mp3`);
   await writeFile(tempPath, Buffer.from(audioBuffer));
 
   // 3. Get actual audio duration

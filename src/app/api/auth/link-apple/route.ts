@@ -33,14 +33,25 @@ function getPool() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { identityToken } = body as { identityToken: string };
+    const rawToken = (body as { identityToken?: unknown }).identityToken;
 
-    if (typeof identityToken !== 'string' || identityToken.length === 0) {
+    if (typeof rawToken !== 'string' || rawToken.length === 0) {
       return NextResponse.json(
         { error: 'identityToken required' },
         { status: 400 },
       );
     }
+
+    // Validate token format: Apple identity tokens are JWTs (three base64url segments)
+    const JWT_PATTERN = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+    if (!JWT_PATTERN.test(rawToken)) {
+      return NextResponse.json(
+        { error: 'Invalid token format' },
+        { status: 400 },
+      );
+    }
+
+    const identityToken = rawToken;
 
     // Get the current user from their session cookie
     const pool = getPool();

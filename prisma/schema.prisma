@@ -1015,6 +1015,32 @@ model subscriptions {
   welcome_day2_sent              Boolean? @default(false)
   welcome_day5_sent              Boolean? @default(false)
 
+  // Welcome series drip (post-signup, any status)
+  welcome_day2_sent        Boolean?  @default(false)
+  welcome_day5_sent        Boolean?  @default(false)
+
+  // Abandoned checkout drip (checkout.session.expired)
+  abandoned_checkout_email2_sent Boolean? @default(false)
+  abandoned_checkout_email3_sent Boolean? @default(false)
+
+  // Post-upgrade celebration (status = active)
+  post_upgrade_day3_sent   Boolean?  @default(false)
+  post_upgrade_day7_sent   Boolean?  @default(false)
+
+  // Annual renewal reminders
+  renewal_30d_sent         Boolean?  @default(false)
+  renewal_7d_sent          Boolean?  @default(false)
+  renewal_1d_sent          Boolean?  @default(false)
+
+  // Browse abandon (viewed pricing, no checkout)
+  browse_abandon_email1_sent Boolean? @default(false)
+  browse_abandon_email2_sent Boolean? @default(false)
+  browse_abandon_email3_sent Boolean? @default(false)
+
+  // Timestamps for abandoned checkout tracking
+  last_checkout_expired_at DateTime? @db.Timestamptz(6)
+  last_pricing_viewed_at   DateTime? @db.Timestamptz(6)
+
   @@index([status], map: "idx_subscriptions_status")
   @@index([trial_ends_at], map: "idx_subscriptions_trial_ends_at")
   @@index([user_email], map: "idx_subscriptions_user_email")

@@ -57,6 +57,11 @@ export const CTA_COPY = {
       mystical: 'Your crystal reading', // Same - don't need verb
       simple: 'Crystal reading',
     },
+    rune: {
+      noVerb: 'Your personal rune', // Invitation
+      mystical: 'Draw your personal rune', // Ritual-focused
+      simple: 'Personal rune',
+    },
   },
 } as const;
 

@@ -4,13 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Sparkles, ChevronRight, X } from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
-import { AuthComponent } from '@/components/Auth';
-import { useModal } from '@/hooks/useModal';
-import { Button } from '@/components/ui/button';
 import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
 import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
-import { Heading } from '../ui/Heading';
-import { getABTestVariantClient } from '@/lib/ab-tests-client';
 
 interface StickyBottomCTAProps {
   nudge: ContextualNudge;
@@ -24,18 +19,10 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
   const pathname = usePathname() || '';
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const impressionTracked = useRef(false);
-  const signupPageVariant = getABTestVariantClient('grimoire-signup-page');
 
   // Don't show to logged-in users
   const isAuthenticated = authState.isAuthenticated;
-
-  useModal({
-    isOpen: showAuthModal,
-    onClose: () => setShowAuthModal(false),
-    closeOnClickOutside: false,
-  });
 
   // Check session dismissal
   useEffect(() => {
@@ -129,18 +116,14 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
     }
 
     if (!isAuthenticated) {
-      if (signupPageVariant === 'value-prop') {
-        const params = new URLSearchParams({
-          hub: nudge.hub,
-          headline: nudge.headline || nudge.ctaHeadline || '',
-          subline: nudge.subline || nudge.ctaSubline || '',
-          location: 'seo_sticky_bottom',
-          pagePath: pathname,
-        });
-        router.push(`/signup/chart?${params.toString()}`);
-      } else {
-        setShowAuthModal(true);
-      }
+      const params = new URLSearchParams({
+        hub: nudge.hub,
+        headline: nudge.headline || nudge.ctaHeadline || '',
+        subline: nudge.subline || nudge.ctaSubline || '',
+        location: 'seo_sticky_bottom',
+        pagePath: pathname,
+      });
+      router.push(`/signup/chart?${params.toString()}`);
       return;
     }
 
@@ -178,37 +161,6 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
           </div>
         </div>
       </div>
-
-      {showAuthModal && (
-        <div className='fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
-          <div className='bg-zinc-900 rounded-xl p-6 sm:p-8 w-full max-w-md relative mx-4 sm:mx-0 shadow-lg shadow-black/50'>
-            <Button
-              variant='ghost'
-              onClick={() => setShowAuthModal(false)}
-              aria-label='Close sign in modal'
-            >
-              ×
-            </Button>
-            <div className='text-center mb-4'>
-              <Heading variant='h3' className='mb-2'>
-                Sign in to Lunary
-              </Heading>
-              <p className='text-zinc-300 text-xs sm:text-sm'>
-                Create a free account to unlock your chart, preferences, and
-                personalised guidance.
-              </p>
-            </div>
-            <AuthComponent
-              compact={false}
-              defaultToSignUp
-              onSuccess={() => {
-                setShowAuthModal(false);
-                navigateToHref();
-              }}
-            />
-          </div>
-        </div>
-      )}
     </>
   );
 }
