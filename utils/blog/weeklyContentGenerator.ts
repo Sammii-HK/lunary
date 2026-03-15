@@ -2295,15 +2295,16 @@ function generateWeeklySummary(
     }
   });
 
+  type Element = 'fire' | 'earth' | 'air' | 'water' | 'mixed';
   const dominantElement = (
     Object.entries(elementCounts) as [
       'fire' | 'earth' | 'air' | 'water',
       number,
     ][]
-  ).reduce(
+  ).reduce<{ element: Element; count: number }>(
     (max, [element, count]) => (count > max.count ? { element, count } : max),
-    { element: 'mixed' as const, count: 0 },
-  ).element as 'fire' | 'earth' | 'air' | 'water' | 'mixed';
+    { element: 'mixed', count: 0 },
+  ).element;
 
   // Generate closing statement
   const closing = generateClosingStatement(
