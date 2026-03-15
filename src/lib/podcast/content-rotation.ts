@@ -355,7 +355,6 @@ export function selectPodcastTopics(
   const now = new Date();
   const coveredSlugs = new Set(recentGrimoireSlugs);
 
-  let primaryCategory: PodcastCategory = PODCAST_CATEGORIES[0];
   let primaryEntry: GrimoireEntry | undefined;
 
   // 1. Check for seasonal/holiday override
@@ -366,7 +365,6 @@ export function selectPodcastTopics(
       e.slug.includes(seasonalOverride.slugKeyword),
     );
     if (match && !coveredSlugs.has(match.slug)) {
-      primaryCategory = seasonalOverride.category;
       primaryEntry = match;
     }
   }
@@ -386,7 +384,6 @@ export function selectPodcastTopics(
           (e) => e.slug.includes(sabbatName) && !coveredSlugs.has(e.slug),
         ) || sabbatEntries.find((e) => !coveredSlugs.has(e.slug));
       if (sabbatEntry) {
-        primaryCategory = 'sabbats';
         primaryEntry = sabbatEntry;
       }
     }
@@ -395,7 +392,7 @@ export function selectPodcastTopics(
   if (!primaryEntry) {
     // Deterministic category cycling
     const categoryIndex = (episodeNumber - 1) % PODCAST_CATEGORIES.length;
-    primaryCategory = PODCAST_CATEGORIES[categoryIndex];
+    const primaryCategory = PODCAST_CATEGORIES[categoryIndex];
     const categoryEntries = (allEntries.get(primaryCategory) || []).filter(
       (e) => isPodcastWorthy(e) && !coveredSlugs.has(e.slug),
     );

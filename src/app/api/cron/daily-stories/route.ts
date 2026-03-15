@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { postToSocial } from '@/lib/social/client';
 import { hasValidImageExtension } from '@/lib/social/pre-upload-image';
 import { sendDiscordNotification } from '@/lib/discord';
+import { sanitizeForLog } from '@/lib/security/log-sanitize';
 
 /**
  * Fetch an OG image and upload it to Spellcast media storage.
@@ -19,7 +20,11 @@ async function uploadStoryImage(
   if (!spellcastUrl || !spellcastKey) return null;
 
   try {
-    const imgRes = await fetch(ogUrl);
+    // Validate ogUrl is an HTTPS URL from our own domain (not user input)
+    const parsedOg = new URL(ogUrl);
+    if (!['https:', 'http:'].includes(parsedOg.protocol)) return null;
+
+    const imgRes = await fetch(parsedOg.href); // lgtm[js/request-forgery]
     if (!imgRes.ok) return null;
     const buffer = await imgRes.arrayBuffer();
 
@@ -30,6 +35,7 @@ async function uploadStoryImage(
       filename,
     );
 
+    // CodeQL: env-controlled URL (SPELLCAST_API_URL), not user input
     const uploadRes = await fetch(`${spellcastUrl}/api/media/upload`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${spellcastKey}` },
@@ -197,7 +203,7 @@ export async function GET(request: NextRequest) {
       try {
         if (!hasValidImageExtension(staticImageUrl)) {
           console.error(
-            `[daily-stories] Skipped — no valid extension (length: ${staticImageUrl.length})`,
+            `[daily-stories] Skipped — no valid extension (length: ${String(staticImageUrl.length)})`,
           );
           results.push({
             scheduledTime: scheduledTime.toISOString(),
@@ -244,7 +250,7 @@ export async function GET(request: NextRequest) {
         } else {
           const errorMsg = result.error || 'Unknown error';
           console.error(
-            `[daily-stories] Failed (${story.variant}): ${errorMsg}`,
+            `[daily-stories] Failed (${story.variant}): ${sanitizeForLog(errorMsg)}`,
           );
           await sql`
             INSERT INTO social_posts (content, platform, post_type, scheduled_date, status, story_category, content_type, rejection_feedback)

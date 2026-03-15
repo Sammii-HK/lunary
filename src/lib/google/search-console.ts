@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import { sanitizeForLog } from '@/lib/security/log-sanitize';
 
 const SCOPES = ['https://www.googleapis.com/auth/webmasters.readonly'];
 
@@ -488,7 +489,7 @@ export async function auditUrlsIndexing(
       }
     } catch (error) {
       console.error(
-        `[Indexing Audit] Error checking URL ${i + 1}/${urls.length}:`,
+        `[Indexing Audit] Error checking URL ${i + 1}/${urls.length} (${sanitizeForLog(url)}):`,
         error,
       );
       results.push({

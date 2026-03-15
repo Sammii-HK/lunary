@@ -70,11 +70,14 @@ export function normalizeScriptForTTS(text: string): string {
     .join(' and ');
   output = output.replace(/\s{2,}/g, ' ');
 
-  output = output.replace(/(\d+)\s{0,3}-\s{0,3}(\d+)/g, (_match, a, b) => {
-    const left = toWordsUnder100(Number(a));
-    const right = toWordsUnder100(Number(b));
-    return `${left} to ${right}`;
-  });
+  output = output.replace(
+    /(\d{1,10})\s{0,3}-\s{0,3}(\d{1,10})/g,
+    (_match, a, b) => {
+      const left = toWordsUnder100(Number(a));
+      const right = toWordsUnder100(Number(b));
+      return `${left} to ${right}`;
+    },
+  );
 
   output = output.replace(/\b(20\d{2})\b/g, (_match, year) =>
     normalizeYear(Number(year)),

@@ -851,8 +851,6 @@ async function generateThematicWeeklyPosts(
           scheduledDate: igScheduledDate,
         });
 
-        const noImageUrl: string | null = null;
-        const noVideoUrl: string | null = null;
         await sql`
           INSERT INTO social_posts (
             content, platform, post_type, topic, status, image_url, video_url,
@@ -860,7 +858,7 @@ async function generateThematicWeeklyPosts(
             source_title, created_at
           )
           SELECT ${igCaption}, 'instagram', 'video', ${igScript.facetTitle}, 'pending',
-                 ${noImageUrl}, ${noVideoUrl}, ${igScheduledDate.toISOString()},
+                 ${null}, ${null}, ${igScheduledDate.toISOString()},
                  ${igScript.themeName}, ${weekStartKeyVideo},
                  'video_script', ${igId}, ${igScript.facetTitle}, NOW()
           WHERE NOT EXISTS (

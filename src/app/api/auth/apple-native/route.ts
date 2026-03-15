@@ -53,7 +53,12 @@ export async function POST(req: NextRequest) {
     };
 
     // Verify Apple identity token — jwtVerify throws on missing/invalid tokens
-    if (typeof identityToken !== 'string' || identityToken.length === 0) {
+    // Validate format: must be a non-empty string matching JWT structure (three base64url segments)
+    if (
+      typeof identityToken !== 'string' ||
+      identityToken.length === 0 ||
+      !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(identityToken)
+    ) {
       return NextResponse.json(
         { error: 'identityToken required' },
         { status: 400 },

@@ -12,6 +12,7 @@ import { generateVoiceoverScriptFromWeeklyData } from '@/lib/video/composition';
 import { TTS_PRESETS } from '@/lib/tts/presets';
 import { normalizeScriptForTTS } from '@/lib/tts/normalize-script';
 import { stripHtmlTags } from '@/lib/utils';
+import { sanitizeForLog } from '@/lib/security/log-sanitize';
 import {
   generateNarrativeFromWeeklyData,
   generateShortFormNarrative,
@@ -760,7 +761,7 @@ export async function POST(request: NextRequest) {
               script = undefined; // Force regeneration
             } else {
               console.log(
-                `♻️ Reusing validated cached script for ${weekKey} (title: ${weekTitle.length} chars)`,
+                `♻️ Reusing validated cached script for ${sanitizeForLog(weekKey)} (title: ${String(weekTitle.length)} chars)`,
               );
             }
           } else {

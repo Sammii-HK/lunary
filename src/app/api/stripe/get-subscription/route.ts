@@ -266,7 +266,7 @@ function getPlanTypeFromSub(sub: Stripe.Subscription): string {
 }
 
 async function checkStripeForSubscription(
-  customerId: string,
+  initialCustomerId: string,
   userId?: string,
   userEmail?: string,
 ): Promise<any | null> {
@@ -274,6 +274,7 @@ async function checkStripeForSubscription(
   if (!stripe) return null;
 
   let subscription: Stripe.Subscription | null = null;
+  let customerId = initialCustomerId;
 
   // Try new Stripe account — fetch multiple subs to pick the best one
   try {

@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { trackNotificationEvent } from '@/lib/analytics/tracking';
+import { sanitizeForLog } from '@/lib/security/log-sanitize';
 
 let resendClient: Resend | null = null;
 
@@ -148,7 +149,7 @@ async function sendBatchEmails(
     const totalBatches = Math.ceil(to.length / BATCH_SIZE);
 
     console.log(
-      `Sending batch ${batchNumber}/${totalBatches} (${batch.length} recipients)`,
+      `Sending batch ${String(batchNumber)}/${String(totalBatches)} (${String(batch.length)} recipients)`,
     );
 
     const batchPromises = batch.map(async (email) => {
@@ -190,8 +191,8 @@ async function sendBatchEmails(
             error: emailResult.error || 'Unknown error',
           });
           console.error(
-            `Failed to send to ${emailResult.email}:`,
-            emailResult.error,
+            `Failed to send to ${sanitizeForLog(emailResult.email)}:`,
+            sanitizeForLog(emailResult.error || ''),
           );
         }
       } else {
@@ -210,7 +211,7 @@ async function sendBatchEmails(
   }
 
   console.log(
-    `Batch email summary: ${results.success} sent, ${results.failed} failed out of ${results.total} total`,
+    `Batch email summary: ${String(results.success)} sent, ${String(results.failed)} failed out of ${String(results.total)} total`,
   );
 
   return results;

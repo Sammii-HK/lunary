@@ -678,7 +678,6 @@ export async function POST(request: NextRequest) {
                     scheduledDate: platformScheduledDate,
                   })
                 : buildCaptionForPlatform(platform);
-            const imageUrl: string | null = null;
             await sql`
               INSERT INTO social_posts (
                 content,
@@ -699,7 +698,7 @@ export async function POST(request: NextRequest) {
                 'video',
                 ${script.facet_title},
                 'pending',
-                ${imageUrl ?? null},
+                ${null},
                 ${videoUrl},
                 ${platformScheduledDate.toISOString()},
                 ${postWeekTheme || themeName || null},
