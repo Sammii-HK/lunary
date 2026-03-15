@@ -19,6 +19,10 @@ export function EmailSubscriptionSettings() {
     type: 'success' | 'error';
     text: string;
   } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error' | 'info';
+    text: string;
+  } | null>(null);
 
   const resolveSessionIdentity = useCallback(async () => {
     try {
@@ -118,9 +122,15 @@ export function EmailSubscriptionSettings() {
   const toggleSubscription = async () => {
     if (!userEmail) {
       if (!authState.isAuthenticated) {
-        alert('Please sign in to manage email subscriptions');
+        setStatusMessage({
+          type: 'info',
+          text: 'Please sign in to manage email subscriptions.',
+        });
       } else {
-        alert('We could not find an email for your account yet.');
+        setStatusMessage({
+          type: 'info',
+          text: 'We could not find an email for your account yet.',
+        });
       }
       return;
     }
@@ -173,7 +183,10 @@ export function EmailSubscriptionSettings() {
       console.error('Error toggling subscription:', error);
       // Revert on failure
       setIsSubscribed(previousValue);
-      alert('Failed to update subscription. Please try again.');
+      setStatusMessage({
+        type: 'error',
+        text: 'Failed to update subscription. Please try again.',
+      });
     }
   };
 
@@ -300,6 +313,26 @@ export function EmailSubscriptionSettings() {
         <p className='text-xs text-zinc-400 mb-4'>
           Receive weekly cosmic insights, blog updates, and special offers
         </p>
+
+        {statusMessage && (
+          <div
+            className={`mb-4 rounded-lg border px-3 py-2 text-xs flex items-start justify-between gap-2 ${
+              statusMessage.type === 'success'
+                ? 'bg-green-950/40 border-green-800/50 text-green-300'
+                : statusMessage.type === 'error'
+                  ? 'bg-red-950/40 border-red-800/50 text-red-300'
+                  : 'bg-blue-950/40 border-blue-800/50 text-blue-300'
+            }`}
+          >
+            <span>{statusMessage.text}</span>
+            <button
+              onClick={() => setStatusMessage(null)}
+              className='flex-shrink-0 text-zinc-500 hover:text-zinc-300'
+            >
+              &times;
+            </button>
+          </div>
+        )}
 
         <div className='space-y-4'>
           <div className='flex items-center justify-between'>

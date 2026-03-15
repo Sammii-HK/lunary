@@ -452,8 +452,15 @@ const buildPlatformPayload = (
 
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await requireAdminAuth(request);
-    if (authResult instanceof NextResponse) return authResult;
+    // Allow CRON_SECRET bearer auth for autopilot cron, otherwise require admin auth
+    const authHeader = request.headers.get('authorization');
+    const isCronAuth =
+      process.env.CRON_SECRET &&
+      authHeader === `Bearer ${process.env.CRON_SECRET}`;
+    if (!isCronAuth) {
+      const authResult = await requireAdminAuth(request);
+      if (authResult instanceof NextResponse) return authResult;
+    }
 
     const {
       postId,

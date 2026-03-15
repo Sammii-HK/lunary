@@ -3,7 +3,9 @@
 import { useState, useEffect, ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { Capacitor } from '@capacitor/core';
+import { ChevronDown } from 'lucide-react';
 import { SectionTitle } from '@/components/ui/SectionTitle';
+import { hapticService } from '@/services/native/haptic-service';
 
 const SkeletonCard = () => (
   <div className='h-32 bg-zinc-800 animate-pulse rounded-xl' />
@@ -59,6 +61,14 @@ const NativeAppSettings = dynamic(
   { ssr: false },
 );
 
+const AppleAccountLink = dynamic(
+  () =>
+    import('@/components/native/AppleAccountLink').then((m) => ({
+      default: m.AppleAccountLink,
+    })),
+  { ssr: false },
+);
+
 type SettingSection = {
   id: string;
   title: string;
@@ -107,12 +117,17 @@ export function SettingsTab({
       description: 'Manage horoscope updates and product news.',
       content: <EmailSubscriptionSettings />,
     },
-    {
-      id: 'notifications',
-      title: 'Push Notifications',
-      description: 'Control reminders and device alerts.',
-      content: <NotificationSettings />,
-    },
+    // Web push notifications — hidden on iOS (NativeAppSettings has its own push toggle)
+    ...(!isNativeIOS
+      ? [
+          {
+            id: 'notifications',
+            title: 'Push Notifications',
+            description: 'Control reminders and device alerts.',
+            content: <NotificationSettings />,
+          },
+        ]
+      : []),
     {
       id: 'referrals',
       title: 'Referral Program',
@@ -127,15 +142,18 @@ export function SettingsTab({
     },
   ];
 
-  const handleDeleteAccount = async () => {
-    if (
-      !confirm(
-        'Are you sure you want to delete your account? This will schedule your account for deletion in 30 days. You can cancel during this period.',
-      )
-    ) {
-      return;
-    }
+  const [deleteState, setDeleteState] = useState<
+    'idle' | 'confirming' | 'deleting' | 'success' | 'error'
+  >('idle');
+  const [deleteMessage, setDeleteMessage] = useState('');
 
+  const handleDeleteAccount = () => {
+    hapticService.warning();
+    setDeleteState('confirming');
+  };
+
+  const confirmDeleteAccount = async () => {
+    setDeleteState('deleting');
     try {
       const response = await fetch('/api/account/delete', {
         method: 'POST',
@@ -149,16 +167,27 @@ export function SettingsTab({
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || 'Failed to request deletion');
+        hapticService.error();
+        setDeleteMessage(data.error || 'Failed to request deletion');
+        setDeleteState('error');
         return;
       }
 
-      alert(
+      hapticService.success();
+      setDeleteMessage(
         `Account deletion scheduled for ${new Date(data.scheduledFor).toLocaleDateString()}. You can cancel this from your profile within 30 days.`,
       );
-    } catch (error) {
-      alert('Failed to request account deletion');
+      setDeleteState('success');
+    } catch {
+      hapticService.error();
+      setDeleteMessage('Failed to request account deletion');
+      setDeleteState('error');
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteState('idle');
+    setDeleteMessage('');
   };
 
   return (
@@ -166,38 +195,50 @@ export function SettingsTab({
       {/* Preferences */}
       <div className='w-full max-w-3xl space-y-3'>
         <SectionTitle as='h2'>Preferences</SectionTitle>
-        {settingsSections.map((section) => {
-          const open = isSectionOpen(section.id);
-          return (
-            <div
-              key={section.id}
-              className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg'
-            >
-              <button
-                onClick={() => toggleSection(section.id)}
-                className='flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium text-white transition-colors hover:bg-zinc-800/80'
-              >
-                <div>
-                  <p>{section.title}</p>
-                  {section.description && (
-                    <p className='text-xs font-normal text-zinc-400'>
-                      {section.description}
-                    </p>
-                  )}
-                </div>
-                <span className='text-lg font-semibold text-lunary-accent-200'>
-                  {open ? '-' : '+'}
-                </span>
-              </button>
-              {open && (
-                <div className='border-t border-zinc-700/60 px-4 py-4 text-sm text-zinc-200'>
-                  {section.content}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        <div className='rounded-xl border border-zinc-700/60 bg-zinc-900/70 overflow-hidden'>
+          {settingsSections.map((section, index) => {
+            const open = isSectionOpen(section.id);
+            return (
+              <div key={section.id}>
+                {index > 0 && (
+                  <div className='mx-4 border-t border-zinc-800/80' />
+                )}
+                <button
+                  onClick={() => toggleSection(section.id)}
+                  className='flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-sm font-medium text-white active:bg-zinc-800/60'
+                >
+                  <div>
+                    <p>{section.title}</p>
+                    {section.description && (
+                      <p className='text-xs font-normal text-zinc-500'>
+                        {section.description}
+                      </p>
+                    )}
+                  </div>
+                  <ChevronDown
+                    className={`h-4 w-4 flex-shrink-0 text-zinc-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {open && (
+                  <div className='border-t border-zinc-800/60 px-4 py-4 text-sm text-zinc-200'>
+                    {section.content}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Account Linking (iOS only) */}
+      {isNativeIOS && (
+        <div className='w-full max-w-3xl space-y-3'>
+          <SectionTitle as='h2'>Linked Accounts</SectionTitle>
+          <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg p-4'>
+            <AppleAccountLink />
+          </div>
+        </div>
+      )}
 
       {/* Subscription */}
       <div className='w-full max-w-3xl space-y-3'>
@@ -213,47 +254,119 @@ export function SettingsTab({
       </div>
 
       {/* Data & Privacy */}
-      <div className='w-full max-w-3xl'>
+      <div className='w-full max-w-3xl space-y-3'>
         <SectionTitle as='h2'>Data & Privacy</SectionTitle>
-        <div className='mt-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4'>
-          <div className='space-y-4'>
-            {/* Export Data */}
-            <div className='flex items-center justify-between p-4 rounded-lg bg-zinc-800/50'>
-              <div>
-                <h4 className='text-sm font-medium text-zinc-200'>
-                  Export Your Data
-                </h4>
-                <p className='text-xs text-zinc-400'>
-                  Download all your Lunary data as JSON
-                </p>
-              </div>
-              <a
-                href='/api/account/export'
-                download
-                className='px-4 py-2 text-sm font-medium text-lunary-accent hover:text-lunary-accent-300 border border-lunary-primary-700 rounded-lg hover:bg-lunary-primary-950 transition-colors'
-              >
-                Download
-              </a>
+        <div className='rounded-xl border border-zinc-700/60 bg-zinc-900/70 overflow-hidden'>
+          {/* Export Data */}
+          <div className='flex items-center justify-between px-4 py-3.5'>
+            <div>
+              <p className='text-sm font-medium text-zinc-200'>
+                Export Your Data
+              </p>
+              <p className='text-xs text-zinc-500'>
+                Download all your Lunary data as JSON
+              </p>
             </div>
+            <a
+              href='/api/account/export'
+              download
+              className='px-3 py-1.5 text-sm font-medium text-lunary-accent border border-lunary-primary-700 rounded-lg active:bg-lunary-primary-950 transition-colors'
+            >
+              Download
+            </a>
+          </div>
 
-            {/* Delete Account */}
-            <div className='flex items-center justify-between p-4 rounded-lg bg-lunary-error-900/10 border border-lunary-error-700'>
-              <div>
-                <h4 className='text-sm font-medium text-lunary-error-300'>
-                  Delete Account
-                </h4>
+          <div className='mx-4 border-t border-zinc-800/80' />
+
+          {/* Delete Account */}
+          <div className='px-4 py-3.5'>
+            {deleteState === 'idle' && (
+              <div className='flex items-center justify-between'>
+                <div>
+                  <p className='text-sm font-medium text-lunary-error-300'>
+                    Delete Account
+                  </p>
+                  <p className='text-xs text-zinc-500'>
+                    Permanently remove your account (30-day grace period)
+                  </p>
+                </div>
+                <button
+                  onClick={handleDeleteAccount}
+                  className='px-3 py-1.5 text-sm font-medium text-lunary-error border border-lunary-error-700 rounded-lg active:bg-lunary-error-900 transition-colors'
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+
+            {deleteState === 'confirming' && (
+              <div className='space-y-3'>
+                <p className='text-sm text-lunary-error-300 font-medium'>
+                  Are you sure you want to delete your account?
+                </p>
                 <p className='text-xs text-zinc-400'>
-                  Permanently delete your account and all data (30-day grace
-                  period)
+                  This will schedule your account for deletion in 30 days. You
+                  can cancel during this period.
+                </p>
+                <div className='flex gap-2'>
+                  <button
+                    onClick={cancelDelete}
+                    className='flex-1 px-3 py-2 text-sm font-medium text-zinc-300 border border-zinc-600 rounded-lg active:bg-zinc-800 transition-colors'
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDeleteAccount}
+                    className='flex-1 px-3 py-2 text-sm font-medium text-white bg-lunary-error-700 rounded-lg active:bg-lunary-error-800 transition-colors'
+                  >
+                    Yes, delete my account
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {deleteState === 'deleting' && (
+              <div className='flex items-center gap-2 py-1'>
+                <div className='h-4 w-4 border-2 border-zinc-500 border-t-zinc-200 rounded-full animate-spin' />
+                <p className='text-sm text-zinc-400'>
+                  Processing deletion request...
                 </p>
               </div>
-              <button
-                onClick={handleDeleteAccount}
-                className='px-4 py-2 text-sm font-medium text-lunary-error hover:text-lunary-error-300 border border-lunary-error-700 rounded-lg hover:bg-lunary-error-900 transition-colors'
-              >
-                Delete
-              </button>
-            </div>
+            )}
+
+            {deleteState === 'success' && (
+              <div className='space-y-2'>
+                <p className='text-sm text-lunary-success font-medium'>
+                  {deleteMessage}
+                </p>
+                <button
+                  onClick={cancelDelete}
+                  className='text-xs text-zinc-500 underline'
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
+
+            {deleteState === 'error' && (
+              <div className='space-y-2'>
+                <p className='text-sm text-lunary-error-300'>{deleteMessage}</p>
+                <div className='flex gap-2'>
+                  <button
+                    onClick={cancelDelete}
+                    className='text-xs text-zinc-500 underline'
+                  >
+                    Dismiss
+                  </button>
+                  <button
+                    onClick={confirmDeleteAccount}
+                    className='text-xs text-lunary-error underline'
+                  >
+                    Try again
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

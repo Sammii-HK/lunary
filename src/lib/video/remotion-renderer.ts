@@ -117,15 +117,113 @@ export function scriptToAudioSegments(
 }
 
 /**
+ * Align original script text to Whisper word-level timestamps.
+ *
+ * Uses the ORIGINAL script words for display (avoiding Whisper misspellings
+ * of mystical terms like grimoire, samhain, etc.) while using Whisper's
+ * timestamps for accurate timing.
+ *
+ * Groups words into segments of up to maxWordsPerChunk, breaking early at:
+ * - Natural pauses (gap > 300ms between consecutive Whisper words)
+ * - Sentence boundaries (word ends with . ! ?)
+ */
+export function alignScriptToWhisperTiming(
+  scriptText: string,
+  whisperWords: WhisperWord[],
+  audioDuration: number,
+  maxWordsPerChunk: number = 6,
+): AudioSegment[] {
+  if (!whisperWords.length) {
+    return scriptToAudioSegments(scriptText, audioDuration);
+  }
+
+  const scriptWords = scriptText
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .filter((w) => w.length > 0);
+  if (scriptWords.length === 0) return [];
+
+  const segments: AudioSegment[] = [];
+  let currentWords: string[] = [];
+  let segStartTime = 0;
+  let segEndTime = 0;
+
+  for (let i = 0; i < scriptWords.length; i++) {
+    // Map script word index to Whisper word index by position ratio
+    const whisperIdx = Math.min(
+      Math.round((i / scriptWords.length) * whisperWords.length),
+      whisperWords.length - 1,
+    );
+    const timing = whisperWords[whisperIdx];
+
+    if (currentWords.length === 0) {
+      segStartTime = timing.start;
+    }
+
+    currentWords.push(scriptWords[i]);
+    segEndTime = timing.end;
+
+    // Check if we should break here
+    const isLastWord = i === scriptWords.length - 1;
+    const hitMaxWords = currentWords.length >= maxWordsPerChunk;
+
+    // Check for natural pause (gap > 300ms to next word)
+    const nextWhisperIdx = Math.min(
+      Math.round(((i + 1) / scriptWords.length) * whisperWords.length),
+      whisperWords.length - 1,
+    );
+    const hasNaturalPause =
+      !isLastWord &&
+      nextWhisperIdx < whisperWords.length &&
+      whisperWords[nextWhisperIdx].start - timing.end > 0.3;
+
+    // Check for sentence boundary
+    const endsWithPunctuation = /[.!?]$/.test(scriptWords[i]);
+    const isSentenceBreak = endsWithPunctuation && currentWords.length >= 2;
+
+    if (
+      isLastWord ||
+      hitMaxWords ||
+      (hasNaturalPause && currentWords.length >= 2) ||
+      isSentenceBreak
+    ) {
+      segments.push({
+        text: currentWords.join(' '),
+        startTime: segStartTime,
+        endTime: Math.min(segEndTime, audioDuration),
+      });
+      currentWords = [];
+    }
+  }
+
+  return segments;
+}
+
+/**
  * Convert Whisper word-level timestamps into subtitle segments.
  * Groups words into chunks of up to maxWordsPerChunk, matching TikTok pacing.
- * Falls back to scriptToAudioSegments if whisperWords is empty.
+ *
+ * When scriptText is provided, delegates to alignScriptToWhisperTiming to use
+ * the original script words (avoiding Whisper misspellings) with Whisper timing.
  */
 export function wordTimestampsToSegments(
   whisperWords: WhisperWord[],
   audioDuration: number,
   maxWordsPerChunk: number = 6,
+  scriptText?: string,
 ): AudioSegment[] {
+  // If we have the original script, use it for text (avoids Whisper misspellings)
+  if (scriptText && whisperWords.length > 0) {
+    return alignScriptToWhisperTiming(
+      scriptText,
+      whisperWords,
+      audioDuration,
+      maxWordsPerChunk,
+    );
+  }
+
+  // Fallback: Whisper-only (original behavior)
   if (!whisperWords.length) return [];
 
   const segments: AudioSegment[] = [];
@@ -418,6 +516,7 @@ export async function renderRemotionVideo(
       backgroundMusicVolume: props.backgroundMusicVolume,
       zoomPoints: props.zoomPoints || [],
       tapPoints: props.tapPoints || [],
+      zodiacSign: props.zodiacSign,
     };
   } else if (props.format === 'ShortFormVideo') {
     inputProps = {
@@ -511,7 +610,7 @@ export async function renderRemotionVideo(
     pixelFormat: 'yuv420p', // Web-compatible
     // Progress logging
     onProgress: ({ progress }) => {
-      if (progress % 10 === 0) {
+      if (Math.round(progress * 100) % 10 === 0) {
         console.log(`⏳ Remotion: ${Math.round(progress * 100)}% complete`);
       }
     },

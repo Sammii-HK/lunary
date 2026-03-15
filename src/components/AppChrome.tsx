@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/modal';
 import { TestimonialForm } from '@/components/TestimonialForm';
 import { RateApp } from 'capacitor-rate-app';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { useAuthStatus } from './AuthStatus';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
@@ -31,6 +32,7 @@ export function AppChrome() {
   const [cameFromApp, setCameFromApp] = useState(false);
   const [isNativeApp, setIsNativeApp] = useState(false);
   const navOverride = searchParams?.get('nav');
+  const isNativeIOS = useIsNativeIOS();
 
   useEffect(() => {
     setIsNativeApp(Capacitor.isNativePlatform());
@@ -310,8 +312,11 @@ export function AppChrome() {
 
   // Marketing nav: core marketing pages OR contextual pages without app context
   // Never show on native app — the app has its own native nav
+  // Also hide on /auth when running in native iOS Capacitor shell
+  const isAuthPage = pathname === '/auth' || pathname?.startsWith('/auth/');
   const showMarketingNav =
     !isNativeApp &&
+    !(isNativeIOS && isAuthPage) &&
     (navOverride === 'marketing' ||
       isCoreMarketingRoute ||
       (isContextualPage && !cameFromApp)) &&

@@ -191,7 +191,7 @@ export function ShareInsightForm({
         <div className='flex-1'>
           <Label
             htmlFor='share-anonymous'
-            className='text-sm font-medium text-white cursor-pointer'
+            className='text-sm font-medium text-white'
           >
             Share anonymously
           </Label>

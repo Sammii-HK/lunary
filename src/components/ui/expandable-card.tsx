@@ -101,7 +101,7 @@ export const ExpandableCard = ({
           }
         }}
         className={cn(
-          'w-full py-3 px-4 text-left hover:bg-zinc-900/50 transition-colors group',
+          'w-full py-3 px-4 text-left hover:bg-zinc-900/50 active:bg-zinc-900/50 transition-colors group',
           previewClassName,
         )}
       >
@@ -110,7 +110,7 @@ export const ExpandableCard = ({
           {isExpanded ? (
             <ChevronUp className='w-4 h-4 text-zinc-500' />
           ) : (
-            <ChevronDown className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent transition-colors' />
+            <ChevronDown className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent group-active:text-lunary-accent transition-colors' />
           )}
         </div>
       </div>

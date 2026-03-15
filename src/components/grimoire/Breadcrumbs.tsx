@@ -64,9 +64,9 @@ export function Breadcrumbs({
       >
         <Link
           href={resolvedHomeHref}
-          className='hover:text-lunary-primary-400 transition-colors flex items-center gap-1 flex-shrink-0'
+          className='hover:text-lunary-primary-400 transition-colors flex items-center gap-1 flex-shrink-0 py-2 px-1'
         >
-          <Home className='w-3.5 h-3.5 md:w-4 md:h-4' />
+          <Home className='w-4 h-4 md:w-4 md:h-4' />
           <span className='sr-only'>Home</span>
         </Link>
         {items.map((item, index) => (
@@ -74,15 +74,15 @@ export function Breadcrumbs({
             key={item.href || item.label}
             className='flex items-center gap-1.5 md:gap-2 flex-shrink-0'
           >
-            <ChevronRight className='w-3.5 h-3.5 md:w-4 md:h-4 text-zinc-600 flex-shrink-0' />
+            <ChevronRight className='w-4 h-4 md:w-5 md:h-5 text-zinc-600 flex-shrink-0' />
             {index === items.length - 1 || !item.href ? (
-              <span className='text-zinc-300 font-medium truncate max-w-[120px] md:max-w-none'>
+              <span className='text-zinc-300 font-medium truncate max-w-[120px] md:max-w-none py-2 px-1'>
                 {item.label}
               </span>
             ) : (
               <Link
                 href={item.href}
-                className='hover:text-lunary-primary-400 transition-colors truncate max-w-[120px] md:max-w-none'
+                className='hover:text-lunary-primary-400 transition-colors truncate max-w-[120px] md:max-w-none py-2 px-1'
               >
                 {item.label}
               </Link>

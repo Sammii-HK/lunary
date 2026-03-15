@@ -22,7 +22,7 @@ export function ShareCustomization({
       <p className='text-xs text-zinc-400 uppercase tracking-wider'>Options</p>
       <div className='flex flex-col gap-2'>
         {onShowNameChange && (
-          <label className='flex items-center gap-3 cursor-pointer'>
+          <label className='flex items-center gap-3'>
             <input
               type='checkbox'
               checked={showName}
@@ -33,7 +33,7 @@ export function ShareCustomization({
           </label>
         )}
         {onShowPersonalizedBadgeChange && (
-          <label className='flex items-center gap-3 cursor-pointer'>
+          <label className='flex items-center gap-3'>
             <input
               type='checkbox'
               checked={showPersonalizedBadge}

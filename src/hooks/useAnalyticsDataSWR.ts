@@ -236,6 +236,14 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
       SWR_CONFIGS.DISABLED,
     );
 
+  const { data: platformBreakdown } = useSWR(
+    operationalTabActive
+      ? `/api/admin/analytics/platform-breakdown?${queryParams}`
+      : null,
+    fetcher,
+    SWR_CONFIGS.STANDARD,
+  );
+
   const { data: discordAnalytics } = useSWR(
     operationalTabActive
       ? `/api/analytics/discord-interactions?range=7d`
@@ -347,6 +355,7 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     subscription30d,
     attribution: attribution || null,
     successMetrics: successMetrics || null,
+    platformBreakdown: platformBreakdown || null,
     discordAnalytics: discordAnalytics || null,
     searchConsoleData: searchConsoleResponse?.success
       ? searchConsoleResponse.data

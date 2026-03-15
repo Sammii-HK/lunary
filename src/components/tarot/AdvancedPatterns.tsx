@@ -530,7 +530,8 @@ export function AdvancedPatterns({
                       {recentReadings.map((reading) => (
                         <div
                           key={reading.date}
-                          className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-2 flex justify-between items-center hover:bg-zinc-900/50 transition-colors cursor-pointer'
+                          className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-2 flex justify-between items-center hover:bg-zinc-900/50 transition-colors'
+                          role='button'
                           onClick={() => {
                             if (onCardClick) {
                               onCardClick(reading.card);

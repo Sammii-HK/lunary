@@ -24,6 +24,8 @@ import type { BirthChartPlacement } from '@/context/UserContext';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { isInDemoMode } from '@/lib/demo-mode';
 import { useHaptic } from '@/hooks/useHaptic';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 
 export type SubscriptionStatus =
   | 'free'
@@ -159,6 +161,7 @@ export function TarotSpreadExperience({
   onShareReading,
 }: TarotSpreadExperienceProps) {
   const { currentAstrologicalChart } = usePlanetaryChart();
+  const isNativeIOS = useIsNativeIOS();
   const haptic = useHaptic();
   const [selectedSpreadSlug, setSelectedSpreadSlug] = useState<string | null>(
     null,
@@ -536,7 +539,7 @@ export function TarotSpreadExperience({
         )}
       >
         {isLocked && <LockIcon className='h-3 w-3' />}
-        {PLAN_LABEL[minimumPlan]}
+        {iosLabel(PLAN_LABEL[minimumPlan], isNativeIOS)}
       </span>
     );
   };
@@ -618,7 +621,7 @@ export function TarotSpreadExperience({
                         disabled={isLocked && !isSelected}
                         title={
                           isLocked
-                            ? `Upgrade to ${PLAN_LABEL[spread.minimumPlan]} to unlock this spread`
+                            ? `Upgrade to ${iosLabel(PLAN_LABEL[spread.minimumPlan], isNativeIOS)} to unlock this spread`
                             : undefined
                         }
                       >
@@ -675,7 +678,10 @@ export function TarotSpreadExperience({
                   <div className='flex-1'>
                     <h4 className='text-sm font-medium text-lunary-accent-200 mb-1'>
                       This spread requires{' '}
-                      {PLAN_LABEL[selectedSpread.minimumPlan]}
+                      {iosLabel(
+                        PLAN_LABEL[selectedSpread.minimumPlan],
+                        isNativeIOS,
+                      )}
                     </h4>
                     <p className='text-xs text-lunary-accent-300/80 mb-3'>
                       Upgrade to unlock {selectedSpread.name} and access all

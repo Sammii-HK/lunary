@@ -36,6 +36,8 @@ import { ShareWeeklyPattern } from '@/components/share/ShareWeeklyPattern';
 import { ThisTimeLastYear } from '@/components/patterns/ThisTimeLastYear';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
 import { IntentionsTab } from '@/components/book-of-shadows/IntentionsTab';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 
 interface JournalEntry {
   id: number;
@@ -244,6 +246,7 @@ const normalizeTab = (tab: string | null): TabId =>
 
 export default function BookOfShadowsPage() {
   const { user, loading: authLoading } = useAuthStatus();
+  const isNativeIOS = useIsNativeIOS();
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryTabParam = searchParams.get('tab');
@@ -420,7 +423,7 @@ export default function BookOfShadowsPage() {
     return (
       <div className='min-h-screen bg-zinc-950 flex items-center justify-center'>
         <div className='animate-pulse text-zinc-400'>
-          Opening your Book of Shadows...
+          {iosLabel('Opening your Book of Shadows...', isNativeIOS)}
         </div>
       </div>
     );
@@ -431,7 +434,9 @@ export default function BookOfShadowsPage() {
       <div className='min-h-screen bg-zinc-950 flex items-center justify-center p-4'>
         <div className='text-center max-w-sm'>
           <BookOpen className='w-12 h-12 text-lunary-primary-400 mx-auto mb-4' />
-          <h1 className='text-xl font-bold text-white mb-2'>Book of Shadows</h1>
+          <h1 className='text-xl font-bold text-white mb-2'>
+            {iosLabel('Book of Shadows', isNativeIOS)}
+          </h1>
           <p className='text-zinc-400 mb-6'>
             Your personal journal of insights, reflections, and cosmic wisdom
           </p>
@@ -499,7 +504,7 @@ export default function BookOfShadowsPage() {
             <div>
               <h1 className='text-lg font-bold text-white flex items-center gap-2'>
                 <BookOpen className='w-5 h-5 text-lunary-primary-400' />
-                Book of Shadows
+                {iosLabel('Book of Shadows', isNativeIOS)}
               </h1>
               <p className='text-xs text-zinc-400'>Your living journal</p>
             </div>

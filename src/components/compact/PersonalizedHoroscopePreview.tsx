@@ -20,6 +20,8 @@ import { useCTACopy } from '@/hooks/useCTACopy';
 import { shouldRedactWord } from '@/constants/redactedWords';
 import { isInDemoMode } from '@/lib/demo-mode';
 import { IntentionPrompt } from '@/components/rituals/IntentionPrompt';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 
 type FocusArea = {
   area: 'love' | 'work' | 'inner';
@@ -50,6 +52,7 @@ export const PersonalizedHoroscopePreview = () => {
   const { user } = useUser();
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
+  const isNativeIOS = useIsNativeIOS();
   const hasPersonalizedAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
@@ -397,12 +400,12 @@ export const PersonalizedHoroscopePreview = () => {
 
             <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/60 px-3 py-2 text-[0.7rem] uppercase text-zinc-400'>
               <div className='flex items-center gap-1 justify-between tracking-[0.25em]'>
-                Today's ritual
+                {iosLabel("Today's ritual", isNativeIOS)}
                 <div className='flex items-center gap-1 text-[0.55rem] uppercase tracking-[0.3em] text-zinc-500'>
                   <button
                     type='button'
                     aria-pressed={ritualComplete}
-                    aria-label='Mark ritual complete'
+                    aria-label={iosLabel('Mark ritual complete', isNativeIOS)}
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();

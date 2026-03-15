@@ -25,6 +25,9 @@ interface ProgressContextType {
   isIncrementing: boolean;
 }
 
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
+
 const ProgressContext = createContext<ProgressContextType | null>(null);
 
 const SKILL_TREE_INFO: Record<SkillTreeId, { name: string; icon: string }> = {
@@ -35,6 +38,7 @@ const SKILL_TREE_INFO: Record<SkillTreeId, { name: string; icon: string }> = {
 };
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
+  const isNativeIOS = useIsNativeIOS();
   const [pendingLevelUp, setPendingLevelUp] = useState<LevelUpData | null>(
     null,
   );
@@ -64,7 +68,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         if (result.levelUp?.leveledUp) {
           const info = SKILL_TREE_INFO[skillTree];
           setPendingLevelUp({
-            skillTreeName: info.name,
+            skillTreeName: iosLabel(info.name, isNativeIOS),
             skillTreeIcon: info.icon,
             newLevel: result.levelUp.newLevel,
             unlockMessage: result.levelUp.unlockMessage,

@@ -295,11 +295,12 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
         zIndex: 15,
         paddingLeft: '5%',
         paddingRight: '5%',
+        pointerEvents: 'none',
       }}
     >
       <p
         style={{
-          fontFamily: 'Roboto Mono, monospace',
+          fontFamily: 'Roboto, sans-serif',
           fontSize,
           fontWeight: 600,
           color: COLORS.primaryText,
@@ -313,6 +314,8 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
           paddingBottom: 10,
           display: 'inline-block',
           maxWidth: '90%',
+          width: 'fit-content',
+          margin: '0 auto',
         }}
       >
         {wordHighlight

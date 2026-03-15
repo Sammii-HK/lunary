@@ -218,7 +218,7 @@ export const CrystalPreview = () => {
             );
           }
         }}
-        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group min-h-16 cursor-pointer'
+        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group min-h-16'
       >
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
@@ -245,7 +245,7 @@ export const CrystalPreview = () => {
             setIsModalOpen(true);
           }
         }}
-        className='w-full h-full py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group text-left min-h-16 cursor-pointer'
+        className='w-full h-full py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group text-left min-h-16'
         data-testid='crystal-card'
       >
         <div className='flex items-start gap-3 h-full'>
@@ -302,7 +302,7 @@ export const CrystalPreview = () => {
                       );
                     }
                   }}
-                  className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300 cursor-pointer hover:bg-lunary-primary-800/80 transition-colors'
+                  className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300 hover:bg-lunary-primary-800/80 transition-colors'
                 >
                   <Sparkles className='w-2.5 h-2.5' />
                   Lunary+
@@ -340,7 +340,7 @@ export const CrystalPreview = () => {
                     }
                   }
                 }}
-                className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
+                className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0'
               >
                 {ctaCopy.crystal}
               </span>
@@ -476,7 +476,7 @@ export const CrystalPreview = () => {
                       }),
                     );
                   }}
-                  className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors cursor-pointer'
+                  className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors'
                 >
                   Explore all crystals
                 </button>
@@ -495,7 +495,7 @@ export const CrystalPreview = () => {
                       setIsModalOpen(false);
                     }
                   }}
-                  className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors cursor-pointer'
+                  className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors'
                 >
                   Explore all crystals
                 </span>

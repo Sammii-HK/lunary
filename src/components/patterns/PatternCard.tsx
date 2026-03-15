@@ -102,9 +102,9 @@ export function PatternCard({
       <div
         className={cn(
           'flex items-center justify-between',
-          collapsible && !locked && 'cursor-pointer',
           !isCollapsed && 'mb-4',
         )}
+        role={collapsible && !locked ? 'button' : undefined}
         onClick={handleHeaderClick}
       >
         <div className='flex items-center gap-2'>

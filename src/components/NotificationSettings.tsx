@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
+import { cn } from '@/lib/utils';
 
 interface NotificationPermission {
   granted: boolean;
@@ -23,6 +24,10 @@ export function NotificationSettings() {
   const [tarotLoading, setTarotLoading] = useState(false);
   const [weeklyReportEnabled, setWeeklyReportEnabled] = useState(false);
   const [weeklyReportLoading, setWeeklyReportLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error' | 'info';
+    text: string;
+  } | null>(null);
 
   const checkTarotNotificationStatus = useCallback(async () => {
     if (!subscription) {
@@ -187,15 +192,19 @@ export function NotificationSettings() {
 
   const toggleTarotNotifications = async () => {
     if (!subscription) {
-      alert('Please enable push notifications first');
+      setStatusMessage({
+        type: 'info',
+        text: 'Please enable push notifications first.',
+      });
       return;
     }
 
     const birthday = user?.birthday;
     if (!birthday && !tarotEnabled) {
-      alert(
-        'Please add your birthday to your profile to enable personalized tarot notifications',
-      );
+      setStatusMessage({
+        type: 'info',
+        text: 'Please add your birthday to your profile to enable personalised tarot notifications.',
+      });
       return;
     }
 
@@ -252,17 +261,22 @@ export function NotificationSettings() {
       console.error('Error toggling tarot notifications:', error);
       // Revert on failure
       setTarotEnabled(previousValue);
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Failed to update tarot notification settings',
-      );
+      setStatusMessage({
+        type: 'error',
+        text:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update tarot notification settings.',
+      });
     }
   };
 
   const requestPermission = async () => {
     if (!('Notification' in window)) {
-      alert('This browser does not support notifications');
+      setStatusMessage({
+        type: 'error',
+        text: 'This browser does not support notifications.',
+      });
       return;
     }
 
@@ -284,13 +298,19 @@ export function NotificationSettings() {
 
   const subscribeToPush = async () => {
     if (!('serviceWorker' in navigator)) {
-      alert('Service Worker is not supported in this browser');
+      setStatusMessage({
+        type: 'error',
+        text: 'Service Worker is not supported in this browser.',
+      });
       console.error('Service Worker not supported');
       return;
     }
 
     if (!('PushManager' in window)) {
-      alert('Push messaging is not supported in this browser');
+      setStatusMessage({
+        type: 'error',
+        text: 'Push messaging is not supported in this browser.',
+      });
       console.error('PushManager not supported');
       return;
     }
@@ -320,7 +340,10 @@ export function NotificationSettings() {
         const errorMsg =
           'VAPID public key not configured. Please set NEXT_PUBLIC_VAPID_PUBLIC_KEY in your environment variables.';
         console.error(errorMsg);
-        alert(errorMsg);
+        setStatusMessage({
+          type: 'error',
+          text: 'Push notification configuration is missing. Please contact support.',
+        });
         return;
       }
 
@@ -329,7 +352,10 @@ export function NotificationSettings() {
         const errorMsg =
           'VAPID public key appears to be invalid (too short). Please check your environment variables.';
         console.error(errorMsg, 'Key length:', vapidPublicKey.length);
-        alert(errorMsg);
+        setStatusMessage({
+          type: 'error',
+          text: 'Push notification configuration is invalid. Please contact support.',
+        });
         return;
       }
 
@@ -352,9 +378,10 @@ export function NotificationSettings() {
       await sendSubscriptionToServer(subscription);
 
       // Show success message
-      alert(
-        '✅ Notifications enabled successfully! You can now receive push notifications on this device.',
-      );
+      setStatusMessage({
+        type: 'success',
+        text: 'Notifications enabled successfully! You can now receive push notifications on this device.',
+      });
     } catch (error) {
       console.error('❌ Error subscribing to push:', error);
 
@@ -402,7 +429,7 @@ export function NotificationSettings() {
           window.location.hostname === 'localhost',
       });
 
-      alert(errorMessage + detailedError);
+      setStatusMessage({ type: 'error', text: errorMessage });
     }
   };
 
@@ -412,7 +439,10 @@ export function NotificationSettings() {
     try {
       if (!user) {
         console.error('No user account available');
-        alert('Please log in to enable notifications');
+        setStatusMessage({
+          type: 'info',
+          text: 'Please log in to enable notifications.',
+        });
         return;
       }
 
@@ -523,7 +553,10 @@ export function NotificationSettings() {
       });
     } catch (error) {
       console.error('Error unsubscribing:', error);
-      alert('Failed to disable notifications. Please try again.');
+      setStatusMessage({
+        type: 'error',
+        text: 'Failed to disable notifications. Please try again.',
+      });
     }
   };
 
@@ -579,6 +612,28 @@ export function NotificationSettings() {
         Get notified about moon phases, planetary transits, retrogrades,
         sabbats, and eclipses
       </p>
+
+      {statusMessage && (
+        <div
+          className={cn(
+            'mb-4 rounded-lg border px-3 py-2 text-xs flex items-start justify-between gap-2',
+            statusMessage.type === 'success' &&
+              'bg-green-950/40 border-green-800/50 text-green-300',
+            statusMessage.type === 'error' &&
+              'bg-red-950/40 border-red-800/50 text-red-300',
+            statusMessage.type === 'info' &&
+              'bg-blue-950/40 border-blue-800/50 text-blue-300',
+          )}
+        >
+          <span>{statusMessage.text}</span>
+          <button
+            onClick={() => setStatusMessage(null)}
+            className='flex-shrink-0 text-zinc-500 hover:text-zinc-300'
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       {/* Diagnostic info (only show if there's an issue) */}
       {(!hasVapidKey || !hasServiceWorker || !hasPushManager) && (

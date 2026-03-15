@@ -16,6 +16,8 @@ import { isInDemoMode } from '@/lib/demo-mode';
 import { DailyCache } from '@/lib/cache/dailyCache';
 import { getZodiacSymbol } from 'utils/astrology/cosmic-og';
 import { ShareMoonPhase } from '@/components/share/ShareMoonPhase';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 
 const ZODIAC_ELEMENTS: Record<string, string> = {
   aries: 'Fire',
@@ -245,6 +247,7 @@ export const MoonPreview = ({
   onToggle,
 }: MoonPreviewProps = {}) => {
   const { user } = useUser();
+  const isNativeIOS = useIsNativeIOS();
   const {
     currentMoonPhase,
     currentMoonConstellationPosition,
@@ -445,7 +448,7 @@ export const MoonPreview = ({
       ) : spells.length > 0 ? (
         <div>
           <h4 className='text-xs text-lunary-accent-300 capitalize tracking-wide mb-2'>
-            Recommended Spells
+            {iosLabel('Recommended Spells', isNativeIOS)}
           </h4>
           <div className='space-y-2'>
             {spells.slice(0, isMobile ? 1 : 3).map((spell) => (
@@ -463,7 +466,7 @@ export const MoonPreview = ({
             href='/grimoire/spells'
             className='inline-block text-xs text-lunary-accent hover:text-lunary-accent-300 transition-colors mt-2'
           >
-            Browse all spells
+            {iosLabel('Browse all spells', isNativeIOS)}
           </Link>
         </div>
       ) : null}

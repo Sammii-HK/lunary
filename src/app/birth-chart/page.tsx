@@ -439,7 +439,7 @@ export default async function BirthChartLandingPage() {
                 key={faq.question}
                 className='group bg-zinc-900/50 border border-zinc-800 rounded-lg'
               >
-                <summary className='flex items-center justify-between cursor-pointer p-4 text-sm text-zinc-200 font-medium list-none'>
+                <summary className='flex items-center justify-between p-4 text-sm text-zinc-200 font-medium list-none'>
                   {faq.question}
                   <ChevronDown className='w-4 h-4 text-zinc-500 transition-transform group-open:rotate-180' />
                 </summary>

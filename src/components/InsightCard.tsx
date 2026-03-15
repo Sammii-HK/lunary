@@ -79,6 +79,8 @@ export const InsightCard = memo(function InsightCard({
   const sourceLabel = sourceLabels[sourceKey] || 'Shared insight';
   const isAdmin = useIsAdmin();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     // Track insight access for weekly usage counter
@@ -87,11 +89,17 @@ export const InsightCard = memo(function InsightCard({
     }
   }, []);
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!moonCircleId || !isAdmin) return;
-    if (!confirm('Are you sure you want to delete this insight?')) return;
+    setDeleteError(null);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!moonCircleId || !isAdmin) return;
 
     setIsDeleting(true);
+    setShowDeleteConfirm(false);
     try {
       const response = await fetch(
         `/api/moon-circles/${moonCircleId}/insights?insightId=${insight.id}`,
@@ -115,7 +123,7 @@ export const InsightCard = memo(function InsightCard({
       }
     } catch (error) {
       console.error('Failed to delete insight:', error);
-      alert(
+      setDeleteError(
         error instanceof Error
           ? error.message
           : 'Failed to delete insight. Please try again.',
@@ -156,7 +164,7 @@ export const InsightCard = memo(function InsightCard({
             </time>
           )}
         </div>
-        {isAdmin && moonCircleId && (
+        {isAdmin && moonCircleId && !showDeleteConfirm && (
           <button
             onClick={handleDelete}
             disabled={isDeleting}
@@ -164,10 +172,45 @@ export const InsightCard = memo(function InsightCard({
             aria-label='Delete insight'
             title='Delete insight (admin only)'
           >
-            <Trash2 className='h-4 w-4' />
+            {isDeleting ? (
+              <div className='h-4 w-4 border-2 border-zinc-500 border-t-zinc-200 rounded-full animate-spin' />
+            ) : (
+              <Trash2 className='h-4 w-4' />
+            )}
           </button>
         )}
       </div>
+
+      {showDeleteConfirm && (
+        <div className='mt-2 flex items-center gap-2 rounded-lg bg-red-950/40 border border-red-800/50 px-3 py-2'>
+          <p className='text-xs text-red-300 flex-1'>Delete this insight?</p>
+          <button
+            onClick={() => setShowDeleteConfirm(false)}
+            className='px-2 py-1 text-xs text-zinc-400 rounded hover:bg-zinc-800 transition-colors'
+          >
+            Cancel
+          </button>
+          <button
+            onClick={confirmDelete}
+            className='px-2 py-1 text-xs text-white bg-red-700 rounded hover:bg-red-600 transition-colors'
+          >
+            Delete
+          </button>
+        </div>
+      )}
+
+      {deleteError && (
+        <div className='mt-2 flex items-center gap-2 rounded-lg bg-red-950/30 border border-red-800/40 px-3 py-2'>
+          <p className='text-xs text-red-300 flex-1'>{deleteError}</p>
+          <button
+            onClick={() => setDeleteError(null)}
+            className='text-xs text-zinc-500 underline'
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <p className='mt-3 text-sm leading-relaxed text-white'>
         {insight.insight_text}
       </p>

@@ -60,7 +60,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { customerId, forceRefresh } = body;
+    let { customerId } = body;
+    const { forceRefresh } = body;
     let { userEmail } = body;
 
     // Enforce: users can only look up their own subscription

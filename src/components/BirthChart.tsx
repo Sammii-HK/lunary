@@ -325,7 +325,6 @@ export const BirthChart = ({
           )}
         >
           <style>{`
-            .planet-node { cursor: pointer; }
             .planet-glyph { transition: fill 0.2s ease; }
           `}</style>
           <circle

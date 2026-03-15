@@ -1,6 +1,7 @@
 import type { TTSProvider, TTSOptions } from './types';
 import { OpenAITTSProvider } from './openai';
 import { KokoroTTSProvider } from './kokoro';
+import { OrpheusTTSProvider } from './orpheus';
 
 export interface WhisperWord {
   word: string;
@@ -8,10 +9,12 @@ export interface WhisperWord {
   end: number; // seconds
 }
 
-const TTS_PROVIDER: 'kokoro' | 'openai' = 'kokoro';
+const TTS_PROVIDER: 'kokoro' | 'openai' | 'orpheus' = 'orpheus';
 
 function getTTSProvider(): TTSProvider {
   switch (TTS_PROVIDER) {
+    case 'orpheus':
+      return new OrpheusTTSProvider();
     case 'kokoro':
       return new KokoroTTSProvider();
     case 'openai':

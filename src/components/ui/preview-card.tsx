@@ -24,7 +24,7 @@ export const PreviewCard = ({
 }: PreviewCardProps) => {
   const cardClasses = cn(
     'block py-3 px-4 border border-stone-800 rounded-md w-full',
-    'hover:border-lunary-primary-600 transition-colors group',
+    'hover:border-lunary-primary-600 active:border-lunary-primary-600 transition-colors group',
     className,
   );
 
@@ -34,7 +34,7 @@ export const PreviewCard = ({
       {showArrow && (
         <ArrowRight
           className={cn(
-            'w-4 h-4 text-zinc-600 group-hover:text-lunary-accent transition-colors flex-shrink-0 mt-1',
+            'w-4 h-4 text-zinc-600 group-hover:text-lunary-accent group-active:text-lunary-accent transition-colors flex-shrink-0 mt-1',
             arrowClassName,
           )}
         />

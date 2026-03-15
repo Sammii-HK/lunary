@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Create a lightweight subscription record for the email capture
     // The user hasn't fully signed up yet, but we can send them the welcome series
-    const userId = `grimoire_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const userId = `grimoire_${Date.now()}_${crypto.randomUUID()}`;
 
     await sql`
       INSERT INTO subscriptions (user_id, user_email, status, plan_type, created_at)

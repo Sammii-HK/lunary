@@ -15,7 +15,7 @@
  * CONTENT RULES:
  * - Hooks: 5-8 words max. Must work on mute.
  * - Text overlays: 6 words max. Pattern interrupts > explanations.
- * - Voiceover: 3.0-4.0 words/sec. Conversational, not list-y.
+ * - Voiceover: 2.2-2.7 words/sec (Jess/Orpheus). Budget pauses ~0.5s between sentences.
  * - Captions: End with question or challenge. Under 150 chars first line.
  * - Hashtags: 3-5 max. 1 broad + 1 niche + 1 branded + 1-2 topic.
  */
@@ -39,7 +39,8 @@ export interface TikTokScript {
     | 'deep-dive'
     | 'did-you-know'
     | 'how-to'
-    | 'comparison';
+    | 'comparison'
+    | 'snippet';
   /** Total video duration in seconds */
   totalSeconds: number;
   /** The hook - what stops the scroll (first 1-3s) */
@@ -169,7 +170,6 @@ const dashboardOverview: TikTokScript = {
       target: '[data-testid="sky-now-widget"]',
       focusPoint: 'Planet list expanding with houses',
       voiceoverLine: 'Every planet. Which house.',
-      zoomTo: { x: 0.5, y: 0.32, scale: 1.28 },
       tapPosition: { x: 0.5, y: 0.32 },
     },
     {
@@ -257,7 +257,6 @@ const horoscopeDeepDive: TikTokScript = {
       action: 'click',
       target: '[data-testid="numerology-day"]',
       focusPoint: 'Full breakdown of YOUR day energy',
-      zoomTo: { x: 0.5, y: 0.52, scale: 1.3 },
       tapPosition: { x: 0.5, y: 0.52 },
       // No voiceoverLine — silent interaction moment
     },
@@ -365,7 +364,6 @@ const tarotPatterns: TikTokScript = {
       target: '[data-testid="pattern-30days"]',
       focusPoint: 'Themes, frequent cards, recurring suits - visible proof',
       voiceoverLine: 'Every daily card... is connected to your transits.',
-      zoomTo: { x: 0.5, y: 0.48, scale: 1.25 },
       tapPosition: { x: 0.5, y: 0.48 },
     },
     {
@@ -406,7 +404,6 @@ const tarotPatterns: TikTokScript = {
       focusPoint:
         'Themes shifting over 3 months - your personal textbook forming',
       voiceoverLine: 'At 90 days... undeniable.',
-      zoomTo: { x: 0.5, y: 0.48, scale: 1.25 },
       tapPosition: { x: 0.5, y: 0.48 },
     },
     {
@@ -609,7 +606,6 @@ const birthChart: TikTokScript = {
         'Full birth chart wheel - visually stunning, stops the scroll',
       voiceoverLine:
         'Your astrology app shows 10 planets... this one? Twenty-four plus.',
-      zoomTo: { x: 0.5, y: 0.42, scale: 1.15 },
     },
     {
       description: 'Scroll to planet list - the count escalation begins',
@@ -650,7 +646,6 @@ const birthChart: TikTokScript = {
       focusPoint: 'Aspect grid appears with real orbs',
       voiceoverLine:
         'Aspects tab... how your planets actually interact. Real orbs.',
-      zoomTo: { x: 0.5, y: 0.28, scale: 1.2 },
       tapPosition: { x: 0.5, y: 0.28 },
     },
     {
@@ -670,7 +665,6 @@ const birthChart: TikTokScript = {
       target: '[data-testid="tab-houses"], button:has-text("Houses")',
       focusPoint: 'All 12 houses with signs and rulers',
       voiceoverLine: 'Houses tab maps every area of your life.',
-      zoomTo: { x: 0.5, y: 0.28, scale: 1.2 },
       tapPosition: { x: 0.5, y: 0.28 },
     },
     {
@@ -1844,6 +1838,759 @@ const grimoireSearch: TikTokScript = {
 };
 
 // ============================================================================
+// SNIPPETS: 10-12s SHORT-FORM IDENTITY HOOKS
+// ============================================================================
+
+const snippetBirthChart: TikTokScript = {
+  id: 'snippet-birth-chart',
+  title: 'POV: your full birth chart loads',
+  tier: 1,
+  category: 'snippet',
+  totalSeconds: 11,
+  hook: {
+    text: 'POV: you see your full birth chart',
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description: 'Scroll past intro to reveal the birth chart wheel',
+      path: '/app/birth-chart',
+      durationSeconds: 2,
+      action: 'scroll',
+      scrollDistance: 900,
+      focusPoint: 'Chart wheel with all planetary glyphs and houses visible',
+      voiceoverLine: 'Twenty-four placements, not ten.',
+    },
+    {
+      description:
+        'Hold on the full chart wheel showing all planetary positions',
+      path: '/app/birth-chart',
+      durationSeconds: 2.5,
+      action: 'show',
+      focusPoint:
+        'Full birth chart wheel with zodiac signs, houses, and planet glyphs',
+      voiceoverLine: 'Every asteroid, every node.',
+    },
+    {
+      description: 'Scroll down to the planetary positions table',
+      path: '/app/birth-chart',
+      durationSeconds: 2.5,
+      action: 'scroll',
+      scrollDistance: 600,
+      focusPoint: 'Planetary Positions table with Chiron, Lilith rows',
+      voiceoverLine: 'Chiron in the sixth house?',
+    },
+    {
+      description: 'Hold on the placement details',
+      path: '/app/birth-chart',
+      durationSeconds: 1,
+      action: 'show',
+      focusPoint: 'Asteroid placements visible with houses and degrees',
+      voiceoverLine: 'That tracks.',
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    'Twenty-four placements, not ten. Every asteroid, every node. Chiron in the sixth house? That tracks.',
+  textOverlays: [
+    {
+      text: '24 placements, not 10',
+      startSeconds: 2,
+      durationSeconds: 3,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    'POV: you finally see your full birth chart and suddenly everything makes sense. What placement surprised you most?',
+  hashtags: ['birthchart', 'astrology', 'lunary', 'chiron', 'witchtok'],
+  playwrightNotes:
+    'Navigate to /birth-chart. Let wheel animate in (3.5s), scroll to Chiron or Lilith row (2.5s), hold on chart (1.5s). Recording: birth-chart.webm.',
+};
+
+const snippetCompatibility: TikTokScript = {
+  id: 'snippet-compatibility',
+  title: 'I checked our compatibility and',
+  tier: 1,
+  category: 'snippet',
+  totalSeconds: 11,
+  hook: {
+    text: 'I checked our compatibility and...',
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description: 'Synastry score reveal, overall percentage visible',
+      path: '/grimoire/compatibility',
+      durationSeconds: 3,
+      action: 'show',
+      focusPoint: 'Compatibility score front and centre',
+      voiceoverLine: 'Ran our charts through synastry and... oh.',
+    },
+    {
+      description: 'Zoom into a specific aspect or timing detail',
+      path: '/grimoire/compatibility',
+      durationSeconds: 2.5,
+      action: 'scroll',
+      scrollDistance: 250,
+      focusPoint: 'Key aspect detail between the two charts',
+      voiceoverLine: 'Venus square Mars. That explains the tension.',
+    },
+    {
+      description: 'Hold on the score, let it sink in',
+      path: '/grimoire/compatibility',
+      durationSeconds: 2,
+      action: 'show',
+      focusPoint: 'Overall score still visible, reaction moment',
+      voiceoverLine: 'Should I tell them?',
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    'Ran our charts through synastry and... oh. Venus square Mars. That explains the tension. Should I tell them?',
+  textOverlays: [
+    {
+      text: 'synastry says...',
+      startSeconds: 2,
+      durationSeconds: 2.5,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    'Ran our synastry and now I have questions. Would you check your compatibility or is ignorance bliss?',
+  hashtags: ['synastry', 'compatibility', 'astrology', 'lunary', 'venus'],
+  playwrightNotes:
+    'Navigate to /compatibility with a saved profile. Show score reveal (3s), scroll to aspect detail (2.5s), hold on score (2s). Recording: profile-circle.webm.',
+};
+
+const snippetAngelNumber: TikTokScript = {
+  id: 'snippet-angel-number',
+  title: 'If you keep seeing 444',
+  tier: 1,
+  category: 'snippet',
+  totalSeconds: 11,
+  hook: {
+    text: 'If you keep seeing 444...',
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description: 'Type 444 in search, results appear',
+      path: '/grimoire',
+      durationSeconds: 3,
+      action: 'type',
+      target: '[data-testid="grimoire-search"]',
+      typeText: '444',
+      focusPoint: 'Search results showing angel number 444 meaning',
+      voiceoverLine: 'Not random. Your guides are confirming the path.',
+    },
+    {
+      description: 'Click into the angel number 444 article',
+      path: '/grimoire',
+      durationSeconds: 3,
+      action: 'click',
+      target: '#grimoire-search-results a, .max-h-80 a',
+      focusPoint: 'Full angel number article with meaning revealed',
+      voiceoverLine: 'Foundations are solid, keep building.',
+    },
+    {
+      description: 'Hold on the article content',
+      path: '/grimoire',
+      durationSeconds: 1.5,
+      action: 'show',
+      focusPoint: 'The insight that resonates',
+      voiceoverLine: 'Save this.',
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    'Not random. Your guides are confirming the path. Foundations are solid, keep building. Save this.',
+  textOverlays: [
+    {
+      text: 'your guides are confirming',
+      startSeconds: 2,
+      durationSeconds: 2.5,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    "If 444 keeps showing up, here's what your guides are telling you. What number do you keep seeing?",
+  hashtags: ['angelnumbers', '444', 'spiritualtok', 'lunary', 'witchtok'],
+  playwrightNotes:
+    'Navigate to /grimoire. Type "444" in search (3s), scroll to key meaning section (3s), hold on key line (1.5s). Recording: grimoire-search.webm.',
+};
+
+const snippetTransitAlert: TikTokScript = {
+  id: 'snippet-transit-alert',
+  title: 'Mercury stations direct tomorrow',
+  tier: 2,
+  category: 'snippet',
+  totalSeconds: 11.5,
+  hook: {
+    text: "If this week felt weird, here's why",
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description: 'Personal transits view showing current planetary movements',
+      path: '/horoscope',
+      durationSeconds: 3.5,
+      action: 'show',
+      focusPoint: 'Transit wisdom section with personal planetary positions',
+      voiceoverLine:
+        'Everything felt stuck? That ends tomorrow. Mercury goes direct.',
+    },
+    {
+      description: 'Scroll to show transit details and house activations',
+      path: '/horoscope',
+      durationSeconds: 2.5,
+      action: 'scroll',
+      scrollDistance: 300,
+      focusPoint:
+        'Personal transit breakdown showing which houses are activated',
+      voiceoverLine: 'Green light. Check which house it hits.',
+    },
+    {
+      description: 'Hold on the transit detail',
+      path: '/horoscope',
+      durationSeconds: 2,
+      action: 'show',
+      focusPoint: 'Personal transit implications visible',
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    'Everything felt stuck? That ends tomorrow. Mercury goes direct. Green light. Check which house it hits.',
+  textOverlays: [
+    {
+      text: 'green light incoming',
+      startSeconds: 2,
+      durationSeconds: 3,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    "Mercury stations direct tomorrow. Check which house it activates in your chart because that's where everything unsticks.",
+  hashtags: [
+    'mercuryretrograde',
+    'mercurydirect',
+    'astrology',
+    'lunary',
+    'transits',
+  ],
+  playwrightNotes:
+    'Navigate to /sky. Show Mercury in transit tracker (3.5s), scroll to house detail (2.5s), hold on detail (2s). Recording: sky-now-deepdive.webm.',
+};
+
+const snippetTarotPull: TikTokScript = {
+  id: 'snippet-tarot-pull',
+  title: 'I pulled one card for spring',
+  tier: 1,
+  category: 'snippet',
+  totalSeconds: 11,
+  hook: {
+    text: 'I pulled one card for spring and...',
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description: 'Card reveal animation, card face visible',
+      path: '/tarot',
+      durationSeconds: 3,
+      action: 'show',
+      focusPoint: 'The revealed card front and centre',
+      voiceoverLine: 'One card. The Tower.',
+    },
+    {
+      description: 'Zoom into the reading interpretation',
+      path: '/tarot',
+      durationSeconds: 3,
+      action: 'scroll',
+      scrollDistance: 250,
+      focusPoint: 'The reading connected to current transits',
+      voiceoverLine: 'Connected to Pluto in my tenth house.',
+    },
+    {
+      description: 'Hold on the reading, reaction beat',
+      path: '/tarot',
+      durationSeconds: 1.5,
+      action: 'show',
+      focusPoint: 'Key line of the reading',
+      voiceoverLine: 'Not what I wanted to hear.',
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    'One card. The Tower. Connected to Pluto in my tenth house. Not what I wanted to hear.',
+  textOverlays: [
+    {
+      text: 'connected to your transits',
+      startSeconds: 5,
+      durationSeconds: 2.5,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    'Pulled one card for spring and the Tower came out swinging. What card would you pull right now?',
+  hashtags: ['tarot', 'thetower', 'tarottok', 'lunary', 'pluto'],
+  playwrightNotes:
+    'Navigate to /tarot. Show card reveal (3s), scroll to transit-connected reading (3s), hold on key line (1.5s). Recording: tarot-patterns.webm.',
+};
+
+const snippetHoroscopeSpeed: TikTokScript = {
+  id: 'snippet-horoscope-speed',
+  title: 'Your March horoscope in 10 seconds',
+  tier: 1,
+  category: 'snippet',
+  totalSeconds: 11.5,
+  hook: {
+    text: 'Your March horoscope in 10 seconds',
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description: 'Speed scroll through the horoscope content',
+      path: '/horoscope',
+      durationSeconds: 3,
+      action: 'scroll',
+      scrollDistance: 600,
+      focusPoint: 'Horoscope content flying past, showing depth',
+      voiceoverLine: 'Career peak mid-month. Tension around the 18th.',
+    },
+    {
+      description: 'Hard pause on the key sentence',
+      path: '/horoscope',
+      durationSeconds: 3,
+      action: 'show',
+      focusPoint: 'The one line that hits hardest',
+      voiceoverLine: 'The 25th is your window.',
+    },
+    {
+      description: 'Hold, save energy',
+      path: '/horoscope',
+      durationSeconds: 2,
+      action: 'show',
+      focusPoint: 'Key line still visible, save prompt energy',
+      voiceoverLine: 'Save this.',
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    'Career peak mid-month. Tension around the 18th. The 25th is your window. Save this.',
+  textOverlays: [
+    {
+      text: 'the 25th is your window',
+      startSeconds: 5,
+      durationSeconds: 3,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    'Your March horoscope speed run. The 25th is the date to watch. Save this and come back then.',
+  hashtags: [
+    'horoscope',
+    'marchhoroscope',
+    'astrology',
+    'lunary',
+    'cosmicenergy',
+  ],
+  playwrightNotes:
+    'Navigate to /horoscope. Fast scroll through content (3s, 600px), hard stop on key prediction (3s with zoom), hold (2s). Recording: horoscope-deepdive.webm.',
+  zodiacSign: 'scorpio',
+};
+
+const snippetAstralChat: TikTokScript = {
+  id: 'snippet-astral-chat',
+  title: 'I asked about my Saturn return and it knew',
+  tier: 1,
+  category: 'snippet',
+  totalSeconds: 12,
+  hook: {
+    text: 'I asked about my Saturn return and it actually knew',
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description: 'Type a Saturn return question into Astral Chat',
+      path: '/guide',
+      durationSeconds: 3.5,
+      action: 'type',
+      target: '[data-testid="guide-input"]',
+      typeText: 'What does my Saturn return mean for my career?',
+      focusPoint: 'Real question being typed, personal and specific',
+      voiceoverLine: 'Asked about my Saturn return. Expected waffle.',
+    },
+    {
+      description: 'Response streams in with grimoire-sourced detail',
+      path: '/guide',
+      durationSeconds: 3.5,
+      action: 'wait',
+      focusPoint:
+        'Response showing specific transit data, house placements, timing',
+      voiceoverLine: 'Got real houses, real degrees, grimoire sources.',
+    },
+    {
+      description: 'Hold on the response showing depth',
+      path: '/guide',
+      durationSeconds: 1.5,
+      action: 'show',
+      focusPoint: 'Grimoire-sourced content visible in the response',
+      voiceoverLine: 'It actually knew.',
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    'Asked about my Saturn return. Expected waffle. Got real houses, real degrees, grimoire sources. It actually knew.',
+  textOverlays: [
+    {
+      text: '2,000+ grimoire articles',
+      startSeconds: 2,
+      durationSeconds: 3,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    'Asked about my Saturn return. It pulled real transits, real houses, sourced from 2,000+ grimoire articles. What would you ask?',
+  hashtags: ['saturnreturn', 'astrology', 'grimoire', 'lunary', 'witchtok'],
+  playwrightNotes:
+    'Navigate to /guide. Type Saturn return question (3.5s), wait for streaming response (3.5s with zoom), hold on response (1.5s). Recording: astral-guide.webm.',
+};
+
+const snippetCosmicScore: TikTokScript = {
+  id: 'snippet-cosmic-score',
+  title: 'My cosmic score tanked and then I checked why',
+  tier: 1,
+  category: 'snippet',
+  totalSeconds: 11.5,
+  hook: {
+    text: 'My cosmic score tanked and honestly? Fair.',
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description: 'Dashboard showing the cosmic score prominently',
+      path: '/app',
+      durationSeconds: 3,
+      action: 'show',
+      focusPoint: 'Cosmic score number visible with pattern type indicator',
+      voiceoverLine: 'Cosmic score dropped to 3.8. Checked why.',
+    },
+    {
+      description: 'Scroll to pattern breakdown showing what caused the drop',
+      path: '/app',
+      durationSeconds: 3,
+      action: 'scroll',
+      scrollDistance: 250,
+      focusPoint: 'Pattern types visible: which cosmic conditions are active',
+      voiceoverLine: 'Saturn doing its thing.',
+    },
+    {
+      description: 'Hold on the breakdown',
+      path: '/app',
+      durationSeconds: 2,
+      action: 'show',
+      focusPoint: 'Pattern detail explaining the score',
+      voiceoverLine: 'Now I know why the whole week felt heavy.',
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    'Cosmic score dropped to 3.8. Checked why. Saturn doing its thing. Now I know why the whole week felt heavy.',
+  textOverlays: [
+    {
+      text: '12 pattern types',
+      startSeconds: 5,
+      durationSeconds: 2.5,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    "My cosmic score tanked and the pattern breakdown explained everything. What's your cosmic score today?",
+  hashtags: ['cosmicscore', 'astrology', 'lunary', 'witchtok', 'cosmicenergy'],
+  playwrightNotes:
+    'Navigate to /app. Show cosmic score on dashboard (3s with zoom), scroll to pattern breakdown (3s), hold on detail (2s). Recording: dashboard-overview.webm.',
+};
+
+const snippetRealAstronomy: TikTokScript = {
+  id: 'snippet-real-astronomy',
+  title: 'Your astrology app guesses. This one calculates.',
+  tier: 1,
+  category: 'snippet',
+  totalSeconds: 11.5,
+  hook: {
+    text: 'Wait. Your birth chart might be wrong.',
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description:
+        'Sky Now showing precise planetary positions with degrees and minutes',
+      path: '/grimoire/astrology/sky-now',
+      durationSeconds: 3.5,
+      action: 'show',
+      focusPoint: 'Exact degree and arcminute positions for each planet',
+      voiceoverLine:
+        'Most apps round your placements. This calculates to the arcminute.',
+    },
+    {
+      description: 'Scroll through planets showing specific positions',
+      path: '/grimoire/astrology/sky-now',
+      durationSeconds: 3,
+      action: 'scroll',
+      scrollDistance: 250,
+      focusPoint: 'Multiple planets with precise degrees, signs, houses',
+      voiceoverLine: 'Your Moon might not be where you think it is.',
+    },
+    {
+      description: 'Hold on the precision',
+      path: '/grimoire/astrology/sky-now',
+      durationSeconds: 1.5,
+      action: 'show',
+      focusPoint: 'Precise data visible, differentiating from competitors',
+      voiceoverLine: 'Check yours.',
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    'Most apps round your placements. This calculates to the arcminute. Your Moon might not be where you think it is. Check yours.',
+  textOverlays: [
+    {
+      text: '+/- 1 arcminute precision',
+      startSeconds: 2,
+      durationSeconds: 3,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    'Most astrology apps use the same generic content for 600 million people. This one calculates every position in real time. What degree is your Moon at right now?',
+  hashtags: ['astrology', 'ephemeris', 'lunary', 'witchtok', 'transits'],
+  playwrightNotes:
+    'Navigate to /sky. Show precise positions (3.5s with zoom), scroll through planets (3s), hold on data (1.5s). Recording: sky-now-deepdive.webm.',
+};
+
+const snippetMoonSpells: TikTokScript = {
+  id: 'snippet-moon-spells',
+  title: "112 spells filtered by tonight's moon",
+  tier: 1,
+  category: 'snippet',
+  totalSeconds: 11.5,
+  hook: {
+    text: "112 spells. Filtered by tonight's moon.",
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description: 'Spell list with moon phase filter active',
+      path: '/grimoire/spells',
+      durationSeconds: 3.5,
+      action: 'show',
+      focusPoint: 'Spells filtered by current moon phase, count visible',
+      voiceoverLine: "A hundred and twelve spells filtered by tonight's moon.",
+    },
+    {
+      description: 'Scroll through the spell list showing variety',
+      path: '/grimoire/spells',
+      durationSeconds: 3,
+      action: 'scroll',
+      scrollDistance: 300,
+      focusPoint: 'Multiple spells scrolling past, each matched to lunar phase',
+      voiceoverLine: 'Different moon, different magic.',
+    },
+    {
+      description: 'Hold on a specific spell',
+      path: '/grimoire/spells',
+      durationSeconds: 1.5,
+      action: 'show',
+      focusPoint: 'One spell visible with moon phase connection',
+      voiceoverLine: 'Which one are you casting?',
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    "A hundred and twelve spells filtered by tonight's moon. Different moon, different magic. Which one are you casting?",
+  textOverlays: [
+    {
+      text: 'changes every night',
+      startSeconds: 5.5,
+      durationSeconds: 2.5,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    "A hundred and twelve spells, filtered by tonight's moon phase. Different moon, different magic. Which spell are you casting tonight?",
+  hashtags: ['spells', 'moonphase', 'witchtok', 'lunary', 'moonmagic'],
+  playwrightNotes:
+    'Navigate to /grimoire/spells. Show filtered spell list (3.5s with zoom), scroll through spells (3s), hold on specific spell (1.5s). Recording: spells-overview.webm.',
+};
+
+const snippetCircleFriends: TikTokScript = {
+  id: 'snippet-circle-friends',
+  title: 'We compared our birth charts and',
+  tier: 1,
+  category: 'snippet',
+  totalSeconds: 11.5,
+  hook: {
+    text: 'We compared our birth charts and...',
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description: 'Circle view showing friend compatibility scores',
+      path: '/profile?tab=circle',
+      durationSeconds: 3,
+      action: 'show',
+      focusPoint:
+        'Circle with multiple friends and their compatibility percentages',
+      voiceoverLine: 'Your friend group as birth charts, side by side.',
+    },
+    {
+      description: 'Scroll through the friend list showing synastry data',
+      path: '/profile?tab=circle',
+      durationSeconds: 3,
+      action: 'scroll',
+      scrollDistance: 250,
+      focusPoint: 'Synastry aspects between the charts',
+      voiceoverLine: 'Thirty-six aspects mapped between you.',
+    },
+    {
+      description: 'Hold on the aspect detail',
+      path: '/profile?tab=circle',
+      durationSeconds: 2,
+      action: 'show',
+      focusPoint: 'Key aspect visible between the charts',
+      voiceoverLine: "Now she gets why I'm like this.",
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    "Your friend group as birth charts, side by side. Thirty-six aspects mapped between you. Now she gets why I'm like this.",
+  textOverlays: [
+    {
+      text: '36 aspects mapped',
+      startSeconds: 5,
+      durationSeconds: 2.5,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    'Compared our birth charts and suddenly the group dynamic makes sense. Who in your circle would you check first?',
+  hashtags: ['synastry', 'birthchart', 'astrology', 'lunary', 'witchtok'],
+  playwrightNotes:
+    'Navigate to /profile. Show circle view (3s with zoom), tap friend card for aspect detail (3s), hold on aspect (2s). Recording: profile-circle.webm.',
+};
+
+const snippetTarotTransits: TikTokScript = {
+  id: 'snippet-tarot-transits',
+  title: 'I pulled the Tower during Pluto square my Moon',
+  tier: 1,
+  category: 'snippet',
+  totalSeconds: 12,
+  hook: {
+    text: 'Tarot plus your birth chart hits different',
+    durationSeconds: 2,
+  },
+  scenes: [
+    {
+      description: 'Daily tarot card visible with the reading',
+      path: '/tarot',
+      durationSeconds: 3,
+      action: 'show',
+      focusPoint: 'Card revealed with reading text visible',
+      voiceoverLine: 'Pulled the Tower during Pluto square my Moon.',
+    },
+    {
+      description:
+        'Scroll to transit connection section showing why this card appeared',
+      path: '/tarot',
+      durationSeconds: 3.5,
+      action: 'scroll',
+      scrollDistance: 300,
+      focusPoint:
+        'Transit connection: Pluto aspect with natal Moon, degrees visible',
+      voiceoverLine: 'The transit connection showed exactly why.',
+    },
+    {
+      description: 'Hold on the transit connection',
+      path: '/tarot',
+      durationSeconds: 2,
+      action: 'show',
+      focusPoint: 'Transit data linking the card to current cosmic conditions',
+      voiceoverLine: 'Coincidence? No.',
+    },
+  ],
+  outro: {
+    text: 'lunary.app',
+    durationSeconds: 1.5,
+  },
+  voiceover:
+    'Pulled the Tower during Pluto square my Moon. The transit connection showed exactly why. Coincidence? No.',
+  textOverlays: [
+    {
+      text: 'tarot + transits connected',
+      startSeconds: 5,
+      durationSeconds: 3,
+      position: 'top' as const,
+    },
+  ],
+  caption:
+    'Pulled the Tower while Pluto was squaring my Moon. The app showed me exactly why that card appeared. What card keeps finding you?',
+  hashtags: ['tarot', 'pluto', 'transits', 'lunary', 'thetower'],
+  playwrightNotes:
+    'Navigate to /tarot. Show card reveal (3s with zoom), scroll to transit connection section (3.5s), hold on transit data (2s). Recording: tarot-patterns.webm.',
+};
+
+// ============================================================================
+// SNIPPET SCRIPTS COLLECTION
+// ============================================================================
+
+export const SNIPPET_SCRIPTS: TikTokScript[] = [
+  snippetBirthChart,
+  snippetCompatibility,
+  snippetAngelNumber,
+  snippetTransitAlert,
+  snippetTarotPull,
+  snippetHoroscopeSpeed,
+  snippetAstralChat,
+  snippetCosmicScore,
+  snippetRealAstronomy,
+  snippetMoonSpells,
+  snippetCircleFriends,
+  snippetTarotTransits,
+];
+
+// ============================================================================
 // EXPORT ALL SCRIPTS
 // ============================================================================
 
@@ -1867,6 +2614,8 @@ export const TIKTOK_SCRIPTS: TikTokScript[] = [
   crystalsOverview,
   spellsOverview,
   grimoireSearch,
+  // Snippets: 10-12s short-form identity hooks
+  ...SNIPPET_SCRIPTS,
 ];
 
 /**

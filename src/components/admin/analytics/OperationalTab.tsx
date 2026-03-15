@@ -6,6 +6,7 @@ import {
   CheckCircle,
   Info,
   Loader2,
+  Smartphone,
   Sparkles,
   Target,
   Users,
@@ -91,6 +92,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
     planBreakdown,
     apiCosts,
     cohorts,
+    platformBreakdown,
     discordAnalytics,
     searchConsoleData,
     grimoireTopPages,
@@ -224,6 +226,77 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
           </div>
         </StatSection>
       </section>
+
+      {/* Platform Breakdown */}
+      {platformBreakdown && (
+        <section className='space-y-3'>
+          <StatSection
+            eyebrow='Device mix'
+            title='Platform breakdown'
+            description='Sessions and unique users by platform (web, Android, iOS, PWA).'
+          >
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2 text-base font-medium'>
+                  <Smartphone className='h-4 w-4 text-lunary-primary-300' />
+                  Platform sessions
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Based on app_opened and product_opened events in the selected
+                  range.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {platformBreakdown.platforms?.length > 0 ? (
+                  <div className='space-y-3'>
+                    {platformBreakdown.platforms.map(
+                      (p: {
+                        platform: string;
+                        sessions: number;
+                        unique_users: number;
+                      }) => {
+                        const maxSessions = Math.max(
+                          ...platformBreakdown.platforms.map(
+                            (x: { sessions: number }) => x.sessions,
+                          ),
+                        );
+                        const pct =
+                          maxSessions > 0
+                            ? (p.sessions / maxSessions) * 100
+                            : 0;
+                        return (
+                          <div key={p.platform} className='space-y-1'>
+                            <div className='flex items-center justify-between text-sm'>
+                              <span className='font-medium capitalize text-zinc-200'>
+                                {p.platform}
+                              </span>
+                              <span className='text-zinc-400'>
+                                {p.sessions.toLocaleString()} sessions /{' '}
+                                {p.unique_users.toLocaleString()} users
+                              </span>
+                            </div>
+                            <div className='h-2 w-full rounded-full bg-zinc-800'>
+                              <div
+                                className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
+                                style={{ width: `${pct.toFixed(1)}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      },
+                    )}
+                  </div>
+                ) : (
+                  <p className='text-sm text-zinc-500'>
+                    No platform data recorded yet. Platform tracking starts
+                    collecting once the client-side detection is deployed.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </StatSection>
+        </section>
+      )}
 
       {/* SEO & Attribution */}
       <section className='space-y-3'>

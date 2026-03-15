@@ -25,17 +25,13 @@ export function SocialShareButtons({
   const [isOpen, setIsOpen] = useState(false);
   const shareText = `${title} ${url}`;
 
-  const handleCopyLink = async (customMessage?: string) => {
+  const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(url);
       haptic.success();
       conversionTracking.contentShared(user?.id, 'clipboard');
-      if (customMessage) {
-        alert(customMessage);
-      } else {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
     }
@@ -63,9 +59,7 @@ export function SocialShareButtons({
   };
 
   const handleInstagramShare = async () => {
-    await handleCopyLink(
-      'Link copied! Paste it into your Instagram story or bio.',
-    );
+    await handleCopyLink();
     window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
   };
 

@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { HappeningNowSection } from '@/components/explore/HappeningNowSection';
+import { HideOnNativeIOS } from '@/components/explore/NativeIOSFilter';
+import { IOSLabel } from '@/components/explore/IOSLabel';
 import { CircleInviteCTA } from '@/components/CircleInviteCTA';
 import { Heading } from '@/components/ui/Heading';
 
@@ -38,6 +40,7 @@ type ExploreItem = {
   icon: React.ComponentType<{ className?: string }>;
   highlighted?: boolean;
   badge?: string;
+  hideOnNativeIOS?: boolean;
 };
 
 const withNavParam = (href: string) => {
@@ -138,8 +141,9 @@ const learnConnectItems: ExploreItem[] = [
   {
     href: '/shop?from=explore',
     label: 'Shop',
-    description: 'Spell packs, crystal guides, and more',
+    description: 'Practice guides, crystal reference, and more',
     icon: Store,
+    hideOnNativeIOS: true,
   },
   {
     href: '/blog?from=explore',
@@ -162,6 +166,7 @@ const accountItems: ExploreItem[] = [
     label: 'Pricing',
     description: 'Subscription plans',
     icon: Tag,
+    hideOnNativeIOS: true,
   },
   {
     href: '/help',
@@ -191,7 +196,7 @@ export default function ExplorePage() {
           {/* Section 2: Your Cosmic Tools */}
           <section>
             <h2 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
-              Your Cosmic Tools
+              <IOSLabel>Your Cosmic Tools</IOSLabel>
             </h2>
             <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
               {cosmicTools.map((item) => (
@@ -209,28 +214,40 @@ export default function ExplorePage() {
               Learn & Connect
             </h2>
             <div className='space-y-2'>
-              {learnConnectItems.map((item) =>
-                item.highlighted ? (
+              {learnConnectItems.map((item) => {
+                const node = item.highlighted ? (
                   <HighlightedLink key={item.href} item={item} />
                 ) : (
                   <ResourceLink key={item.href} item={item} />
-                ),
-              )}
+                );
+                return item.hideOnNativeIOS ? (
+                  <HideOnNativeIOS key={item.href}>{node}</HideOnNativeIOS>
+                ) : (
+                  node
+                );
+              })}
             </div>
           </section>
 
           {/* Section 4: Account */}
           <section className='pt-2'>
             <div className='flex flex-wrap items-center gap-x-4 gap-y-2 text-sm'>
-              {accountItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={withNavParam(item.href)}
-                  className='text-zinc-400 hover:text-zinc-200 transition-colors'
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {accountItems.map((item) => {
+                const node = (
+                  <Link
+                    key={item.href}
+                    href={withNavParam(item.href)}
+                    className='text-zinc-400 hover:text-zinc-200 active:text-zinc-200 transition-colors'
+                  >
+                    {item.label}
+                  </Link>
+                );
+                return item.hideOnNativeIOS ? (
+                  <HideOnNativeIOS key={item.href}>{node}</HideOnNativeIOS>
+                ) : (
+                  node
+                );
+              })}
             </div>
           </section>
         </div>
@@ -245,17 +262,17 @@ function CosmicToolCard({ item }: { item: ExploreItem }) {
   return (
     <Link
       href={withNavParam(item.href)}
-      className='flex flex-col items-center gap-2 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-colors group text-center'
+      className='flex flex-col items-center gap-2 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 active:border-lunary-primary-600 active:bg-zinc-900 transition-colors group text-center'
     >
       <div className='p-2 rounded-lg bg-lunary-primary-900/10 text-lunary-primary-400'>
         <Icon className='w-5 h-5' />
       </div>
       <div className='min-w-0'>
-        <h3 className='text-sm font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
-          {item.label}
+        <h3 className='text-sm font-medium text-zinc-100 group-hover:text-lunary-primary-300 group-active:text-lunary-primary-300 transition-colors'>
+          <IOSLabel>{item.label}</IOSLabel>
         </h3>
         <p className='text-[11px] text-zinc-500 leading-tight'>
-          {item.description}
+          <IOSLabel>{item.description}</IOSLabel>
         </p>
       </div>
     </Link>
@@ -267,15 +284,15 @@ function HighlightedLink({ item }: { item: ExploreItem }) {
   return (
     <Link
       href={withNavParam(item.href)}
-      className='flex items-center gap-4 p-4 rounded-lg border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-950/60 to-zinc-900 hover:border-lunary-primary-500 hover:from-lunary-primary-900/60 transition-all group'
+      className='flex items-center gap-4 p-4 rounded-lg border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-950/60 to-zinc-900 hover:border-lunary-primary-500 hover:from-lunary-primary-900/60 active:border-lunary-primary-500 active:from-lunary-primary-900/60 transition-all group'
     >
       <div className='p-2 rounded-lg bg-lunary-primary-900/30 text-lunary-primary-400'>
         <Icon className='w-5 h-5' />
       </div>
       <div className='flex-1 min-w-0'>
         <div className='flex items-center gap-2'>
-          <span className='text-sm font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
-            {item.label}
+          <span className='text-sm font-medium text-zinc-100 group-hover:text-lunary-primary-300 group-active:text-lunary-primary-300 transition-colors'>
+            <IOSLabel>{item.label}</IOSLabel>
           </span>
           {item.badge && (
             <span className='px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide rounded-full bg-lunary-primary-900/50 text-lunary-primary-300 border border-lunary-primary-700/50'>
@@ -283,9 +300,11 @@ function HighlightedLink({ item }: { item: ExploreItem }) {
             </span>
           )}
         </div>
-        <p className='text-xs text-zinc-400'>{item.description}</p>
+        <p className='text-xs text-zinc-400'>
+          <IOSLabel>{item.description}</IOSLabel>
+        </p>
       </div>
-      <ChevronRight className='w-4 h-4 text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors' />
+      <ChevronRight className='w-4 h-4 text-lunary-primary-400 group-hover:text-lunary-primary-300 group-active:text-lunary-primary-300 transition-colors' />
     </Link>
   );
 }
@@ -295,16 +314,18 @@ function ResourceLink({ item }: { item: ExploreItem }) {
   return (
     <Link
       href={withNavParam(item.href)}
-      className='flex items-center gap-4 p-3 rounded-lg border border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50 transition-colors group'
+      className='flex items-center gap-4 p-3 rounded-lg border border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50 active:border-zinc-700 active:bg-zinc-900/50 transition-colors group'
     >
-      <Icon className='w-4 h-4 text-zinc-400 group-hover:text-lunary-primary-400 transition-colors' />
+      <Icon className='w-4 h-4 text-zinc-400 group-hover:text-lunary-primary-400 group-active:text-lunary-primary-400 transition-colors' />
       <div className='flex-1 min-w-0'>
-        <span className='text-sm text-zinc-300 group-hover:text-zinc-100 transition-colors'>
-          {item.label}
+        <span className='text-sm text-zinc-300 group-hover:text-zinc-100 group-active:text-zinc-100 transition-colors'>
+          <IOSLabel>{item.label}</IOSLabel>
         </span>
-        <p className='text-xs text-zinc-500'>{item.description}</p>
+        <p className='text-xs text-zinc-500'>
+          <IOSLabel>{item.description}</IOSLabel>
+        </p>
       </div>
-      <ChevronRight className='w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors' />
+      <ChevronRight className='w-4 h-4 text-zinc-600 group-hover:text-zinc-400 group-active:text-zinc-400 transition-colors' />
     </Link>
   );
 }

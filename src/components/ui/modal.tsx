@@ -74,7 +74,7 @@ export function Modal({
 
   return (
     <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'
+      className='fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:p-4'
       onClick={handleBackdropClick}
       role='dialog'
       aria-modal='true'
@@ -82,13 +82,19 @@ export function Modal({
       <div
         ref={contentRef}
         className={cn(
-          'relative w-full rounded-2xl border border-zinc-700/50 bg-zinc-900/70 backdrop-blur-xl shadow-2xl',
-          'animate-in fade-in-0 zoom-in-95 duration-200',
-          'max-h-[85vh] flex flex-col',
+          'relative w-full border border-zinc-700/50 bg-zinc-900/95 backdrop-blur-xl shadow-2xl',
+          'rounded-t-2xl sm:rounded-2xl',
+          'animate-in fade-in-0 slide-in-from-bottom-4 sm:zoom-in-95 duration-200',
+          'max-h-[90vh] sm:max-h-[85vh] flex flex-col',
+          'pb-[env(safe-area-inset-bottom,0px)]',
           sizeClasses[size],
           className,
         )}
       >
+        {/* iOS-style drag handle on mobile */}
+        <div className='flex justify-center pt-2 pb-0 sm:hidden'>
+          <div className='h-1 w-10 rounded-full bg-zinc-600' />
+        </div>
         {showCloseButton && (
           <button
             onClick={onClose}

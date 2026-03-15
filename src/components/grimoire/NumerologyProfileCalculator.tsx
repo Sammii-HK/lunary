@@ -374,7 +374,7 @@ export function NumerologyProfileCalculator({
                           shareNumber(card.title, value, meaning);
                         }
                       }}
-                      className='flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/80 text-zinc-300 transition hover:border-lunary-primary-500 hover:text-white'
+                      className='flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/80 text-zinc-300 transition hover:border-lunary-primary-500 hover:text-white'
                     >
                       <Share2 className='h-4 w-4' />
                     </span>

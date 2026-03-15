@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { postToSocial } from '@/lib/social/client';
+import { sendDiscordNotification } from '@/lib/discord';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -129,8 +130,9 @@ export async function GET(request: NextRequest) {
     const successCount = results.filter((r) => r.status === 'success').length;
     const executionTimeMs = Date.now() - startTime;
 
-    // Record that we ran today
-    if (successCount > 0) {
+    // Only record dedup event when ALL posts succeed — partial success should allow retry
+    const failedCount = results.filter((r) => r.status === 'error').length;
+    if (successCount > 0 && failedCount === 0) {
       await sql`
         INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
         VALUES (${dateStr}::date, ${eventKey}, 'daily_threads', 'Daily Threads Batch', 3, 'cron')
@@ -142,6 +144,24 @@ export async function GET(request: NextRequest) {
       `🧵 Threads batch: ${threadsBatch.posts.length} generated, ${successCount} sent in ${executionTimeMs}ms`,
     );
 
+    // Discord notification on failure
+    if (failedCount > 0) {
+      const failedPosts = results.filter((r) => r.status === 'error');
+      try {
+        await sendDiscordNotification({
+          title: 'Daily Threads — Failures',
+          description: [
+            `**${dateStr}**: ${successCount}/${results.length} sent, ${failedCount} failed`,
+            ...failedPosts.map((r) => `- ${r.pillar}: ${r.error}`),
+          ].join('\n'),
+          color: successCount === 0 ? 'error' : 'warning',
+          category: 'general',
+        });
+      } catch {
+        console.warn('[daily-threads] Discord notification failed');
+      }
+    }
+
     return NextResponse.json({
       success: successCount > 0,
       date: dateStr,
@@ -152,6 +172,16 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('🧵 Daily Threads cron failed:', error);
+    try {
+      await sendDiscordNotification({
+        title: 'Daily Threads — Fatal Error',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        color: 'error',
+        category: 'general',
+      });
+    } catch {
+      // Discord itself failed, already logged above
+    }
     return NextResponse.json(
       {
         success: false,

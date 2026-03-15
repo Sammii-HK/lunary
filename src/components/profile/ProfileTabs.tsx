@@ -10,6 +10,12 @@ type ProfileTabsProps = {
   onTabChange: (tab: ProfileTab) => void;
 };
 
+const tabs: { id: ProfileTab; label: string; icon: typeof User }[] = [
+  { id: 'profile', label: 'Profile', icon: User },
+  { id: 'circle', label: 'Circle', icon: Users },
+  { id: 'settings', label: 'Settings', icon: Settings },
+];
+
 export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
   const haptic = useHaptic();
 
@@ -22,40 +28,30 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
 
   return (
     <div className='w-full max-w-3xl mb-8'>
-      <div className='flex gap-1 p-1 rounded-lg bg-zinc-800/50 border border-zinc-700/50'>
-        <button
-          onClick={() => handleTabChange('profile')}
-          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors inline-flex items-center justify-center gap-1.5 ${
-            activeTab === 'profile'
-              ? 'bg-lunary-primary-900/50 text-white border border-lunary-primary-700/50'
-              : 'text-zinc-400 hover:text-zinc-200'
-          }`}
-        >
-          <User className='w-4 h-4' />
-          Profile
-        </button>
-        <button
-          onClick={() => handleTabChange('circle')}
-          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors inline-flex items-center justify-center gap-1.5 ${
-            activeTab === 'circle'
-              ? 'bg-lunary-primary-900/50 text-white border border-lunary-primary-700/50'
-              : 'text-zinc-400 hover:text-zinc-200'
-          }`}
-        >
-          <Users className='w-4 h-4' />
-          Circle
-        </button>
-        <button
-          onClick={() => handleTabChange('settings')}
-          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors inline-flex items-center justify-center gap-1.5 ${
-            activeTab === 'settings'
-              ? 'bg-lunary-primary-900/50 text-white border border-lunary-primary-700/50'
-              : 'text-zinc-400 hover:text-zinc-200'
-          }`}
-        >
-          <Settings className='w-4 h-4' />
-          Settings
-        </button>
+      <div className='relative flex p-0.5 rounded-xl bg-zinc-800/60 border border-zinc-700/40'>
+        {/* Animated background indicator */}
+        <div
+          className='absolute top-0.5 bottom-0.5 rounded-[10px] bg-zinc-700/80 transition-all duration-200 ease-out'
+          style={{
+            width: `calc(${100 / tabs.length}% - 2px)`,
+            left: `calc(${(tabs.findIndex((t) => t.id === activeTab) * 100) / tabs.length}% + 1px)`,
+          }}
+        />
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              className={`relative z-10 flex-1 px-3 py-2 text-sm font-medium rounded-[10px] transition-colors inline-flex items-center justify-center gap-1.5 ${
+                activeTab === tab.id ? 'text-white' : 'text-zinc-500'
+              }`}
+            >
+              <Icon className='w-3.5 h-3.5' />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

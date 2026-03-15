@@ -64,8 +64,7 @@ export function SkillTreeCard({
       <div
         className={cn(
           'flex items-center gap-3 p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50',
-          featureRoute &&
-            'hover:border-zinc-700/50 transition-colors cursor-pointer',
+          featureRoute && 'hover:border-zinc-700/50 transition-colors',
           className,
         )}
       >
@@ -101,7 +100,6 @@ export function SkillTreeCard({
     <div
       className={cn(
         'p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50 hover:border-zinc-700/50 transition-colors',
-        featureRoute && 'cursor-pointer',
         className,
       )}
     >

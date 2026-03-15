@@ -11,9 +11,12 @@ import { useEffect } from 'react';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { useABTestTracking } from '@/hooks/useABTestTracking';
 import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 
 export default function HoroscopePage() {
   const { user, loading } = useUser();
+  const isNativeIOS = useIsNativeIOS();
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
   useNotificationDeepLink(); // Handle push notification deep links
@@ -61,7 +64,9 @@ export default function HoroscopePage() {
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>
           <div className='w-8 h-8 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-zinc-400'>Loading your horoscope...</p>
+          <p className='text-zinc-400'>
+            {iosLabel('Loading your horoscope...', isNativeIOS)}
+          </p>
         </div>
       </div>
     );
@@ -73,7 +78,9 @@ export default function HoroscopePage() {
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>
           <div className='w-8 h-8 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-zinc-400'>Loading your horoscope...</p>
+          <p className='text-zinc-400'>
+            {iosLabel('Loading your horoscope...', isNativeIOS)}
+          </p>
         </div>
       </div>
     );

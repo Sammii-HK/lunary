@@ -26,6 +26,7 @@ const customJestConfig = {
     '/__tests__/mocks/',
     '\\.integration\\.test\\.(ts|tsx|js|jsx)$',
     '/ios/',
+    '/\\.claude/',
   ],
   collectCoverageFrom: [
     'src/utils/**/*.{js,jsx,ts,tsx}',
@@ -59,6 +60,7 @@ const customJestConfig = {
     '/e2e/',
     '/playwright/',
   ],
+  modulePathIgnorePatterns: ['/\\.claude/'],
   moduleDirectories: ['node_modules', '<rootDir>/'],
   testTimeout: 10000,
   transformIgnorePatterns: [

@@ -38,11 +38,8 @@ import { getTodaysTransitVideo } from './transit-integration';
 import type { VideoScript } from '../types';
 import type { ContentType } from '../content-types';
 import { getContentTypeConfig } from '../content-types';
-import {
-  getOptimalPostingHour,
-  getVideoSlotHour,
-  type VideoSlot,
-} from '@/utils/posting-times';
+import { getOptimalPostingHour, type VideoSlot } from '@/utils/posting-times';
+import { getOptimalHourBySlot } from '../content-scores';
 import {
   getContentTypeWeights,
   getSuppressedCategories,
@@ -120,15 +117,27 @@ const SIGN_SPECIFIC_TYPES = new Set<ContentType>([
   'sign-origin',
 ]);
 
+/** Static fallback for engagement C */
+const ENGAGEMENT_C_SCHEDULE: Record<string, DayConfig> = {
+  monday: { contentType: 'transit-alert', label: 'Transit Alert' },
+  tuesday: { contentType: 'sign-identity', label: 'Sign Identity' },
+  wednesday: { contentType: 'angel-number', label: 'Angel Number' },
+  thursday: { contentType: 'ranking', label: 'Rankings' },
+  friday: { contentType: 'hot-take', label: 'Hot Take' },
+  saturday: { contentType: 'sign-check', label: 'Sign Check' },
+  sunday: { contentType: 'did-you-know', label: 'Did You Know' },
+};
+
 /**
  * Build a dynamic weekly schedule using performance-weighted content selection.
  *
- * Returns schedules for both engagement slots (A and B) for 7 days.
+ * Returns schedules for engagement slots A, B, and C for 7 days.
  * Falls back to static schedules if scoring engine fails.
  */
 export async function buildWeeklySchedule(weekStartDate: Date): Promise<{
   slotA: Record<string, DayConfig>;
   slotB: Record<string, DayConfig>;
+  slotC: Record<string, DayConfig>;
 }> {
   let weights: Map<string, CategoryScore>;
   let suppressed: Set<string>;
@@ -140,15 +149,21 @@ export async function buildWeeklySchedule(weekStartDate: Date): Promise<{
     ]);
   } catch {
     console.log('Dynamic scheduling unavailable, using static fallback');
-    return { slotA: ENGAGEMENT_A_SCHEDULE, slotB: ENGAGEMENT_B_SCHEDULE };
+    return {
+      slotA: ENGAGEMENT_A_SCHEDULE,
+      slotB: ENGAGEMENT_B_SCHEDULE,
+      slotC: ENGAGEMENT_C_SCHEDULE,
+    };
   }
 
   const slotA: Record<string, DayConfig> = {};
   const slotB: Record<string, DayConfig> = {};
+  const slotC: Record<string, DayConfig> = {};
 
   // Track weekly usage counts per type per slot
   const weeklyCountA = new Map<string, number>();
   const weeklyCountB = new Map<string, number>();
+  const weeklyCountC = new Map<string, number>();
   let angelNumberCount = 0;
 
   for (let i = 0; i < 7; i++) {
@@ -205,9 +220,31 @@ export async function buildWeeklySchedule(weekStartDate: Date): Promise<{
     slotB[dayName] = { contentType: typeB, label: formatLabel(typeB) };
     weeklyCountB.set(typeB, (weeklyCountB.get(typeB) || 0) + 1);
     if (typeB === 'angel-number') angelNumberCount++;
+
+    // Build exclusion set for Slot C (includes both Slot A and B picks)
+    const excludeC = new Set<string>(suppressed);
+    excludeC.add(typeA);
+    excludeC.add(typeB);
+    for (const [type, count] of weeklyCountC) {
+      const maxPerWeek = SEED_WEIGHTS[type]?.maxPerWeek ?? 4;
+      if (count >= maxPerWeek) excludeC.add(type);
+    }
+    if (angelNumberCount >= 2) excludeC.add('angel-number');
+
+    // Slot C: bias toward transit-alert on days with active transits
+    let typeC: ContentType;
+    if (!excludeC.has('transit-alert') && i % 3 === 0) {
+      typeC = 'transit-alert';
+    } else {
+      typeC = selectContentType(weights, excludeC, daySeed + 200, i);
+    }
+
+    slotC[dayName] = { contentType: typeC, label: formatLabel(typeC) };
+    weeklyCountC.set(typeC, (weeklyCountC.get(typeC) || 0) + 1);
+    if (typeC === 'angel-number') angelNumberCount++;
   }
 
-  return { slotA, slotB };
+  return { slotA, slotB, slotC };
 }
 
 /**
@@ -306,7 +343,9 @@ async function generateWeeklyEngagementScripts(
   slot: VideoSlot,
 ): Promise<VideoScript[]> {
   const scripts: VideoScript[] = [];
-  const slotHour = getVideoSlotHour(slot);
+  // Use performance-derived optimal hour when enough data exists,
+  // otherwise fall back to the static slot default
+  const slotHour = await getOptimalHourBySlot(slot);
 
   console.log(`Generating weekly ${slot} scripts (${slotHour}:00 UTC)...`);
 
@@ -379,6 +418,17 @@ export async function generateWeeklyEngagementBScripts(
 ): Promise<VideoScript[]> {
   const { slotB } = await buildWeeklySchedule(weekStartDate);
   return generateWeeklyEngagementScripts(weekStartDate, slotB, 'engagementB');
+}
+
+/**
+ * Generate Engagement C scripts for the week (11 UTC slot)
+ * Early discovery / trending content with transit priority.
+ */
+export async function generateWeeklyEngagementCScripts(
+  weekStartDate: Date,
+): Promise<VideoScript[]> {
+  const { slotC } = await buildWeeklySchedule(weekStartDate);
+  return generateWeeklyEngagementScripts(weekStartDate, slotC, 'engagementC');
 }
 
 /**

@@ -60,6 +60,9 @@ export async function POST(request: NextRequest) {
     const identity = userId || anonymousId || 'unknown';
     const eventId = deterministicEventId('app_opened', identity, today);
 
+    const platform =
+      typeof payload?.platform === 'string' ? payload.platform : undefined;
+
     const canonical = canonicaliseEvent({
       eventType: 'app_opened',
       eventId,
@@ -71,6 +74,7 @@ export async function POST(request: NextRequest) {
         source: 'server_middleware',
         referrer: request.headers.get('referer') || undefined,
         user_agent: request.headers.get('user-agent') || undefined,
+        platform,
       },
     });
 

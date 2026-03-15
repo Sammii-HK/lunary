@@ -60,7 +60,8 @@ export function NotificationManager() {
 
   const requestPermission = async () => {
     if (!('Notification' in window)) {
-      alert('This browser does not support notifications');
+      // Silently skip — the UI won't render a prompt if notifications aren't supported
+      console.warn('This browser does not support notifications');
       return;
     }
 

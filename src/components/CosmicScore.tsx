@@ -9,6 +9,8 @@ import { Sparkles, Lock, Star, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import type { CosmicScoreCategories } from '@/utils/cosmic-score';
 import { ShareCosmicScore } from '@/components/share/ShareCosmicScore';
+import { useIsNativeIOS } from '@/hooks/useNativePlatform';
+import { iosLabel } from '@/lib/ios-labels';
 
 interface ScoreData {
   overall: number;
@@ -96,6 +98,8 @@ export function CosmicScore() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const isNativeIOS = useIsNativeIOS();
 
   const isPaid = hasFeatureAccess(
     subscription.status,
@@ -185,7 +189,7 @@ export function CosmicScore() {
           </div>
           <div>
             <h3 className='text-sm font-medium text-zinc-100'>
-              Unlock Your Cosmic Score
+              {iosLabel('Unlock Your Cosmic Score', isNativeIOS)}
             </h3>
             <p className='text-xs text-zinc-400'>
               {!user?.birthday
@@ -222,7 +226,7 @@ export function CosmicScore() {
           </div>
           <div>
             <h3 className='text-sm font-medium text-zinc-300'>
-              Today's Cosmic Score
+              {iosLabel("Today's Cosmic Score", isNativeIOS)}
             </h3>
             <p className='text-xs text-zinc-500'>
               {fetchError || 'Score unavailable right now'}
@@ -274,7 +278,7 @@ export function CosmicScore() {
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-1.5'>
             <h3 className='text-xs font-medium text-zinc-100 truncate'>
-              Cosmic Score
+              {iosLabel('Cosmic Score', isNativeIOS)}
             </h3>
             <span className='ml-auto' />
             <span

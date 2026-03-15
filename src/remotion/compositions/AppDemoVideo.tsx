@@ -159,6 +159,21 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
 
       {/* No fade-in — TikTok needs visible content on frame 0 for previews */}
 
+      {/* 3b. Bottom gradient scrim — ensures subtitles always have contrast */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '35%',
+          background:
+            'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.85) 100%)',
+          zIndex: 12,
+          pointerEvents: 'none',
+        }}
+      />
+
       {/* 4. Animated hook intro with background bar */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 16 }}>
         <HookIntro
@@ -182,17 +197,19 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
           segments={shiftedSegments}
           highlightTerms={highlightTerms}
           highlightColor={categoryVisuals?.highlightColor}
-          fontSize={46}
-          bottomPosition={22}
+          fontSize={48}
+          bottomPosition={8}
           fps={fps}
-          backgroundOpacity={0.6}
+          backgroundOpacity={0.7}
         />
       )}
 
       {/* 7. TTS voiceover (delayed by audioStartOffset to sync with recording) */}
       {audioUrl && (
         <Sequence from={Math.round(audioStartOffset * fps)}>
-          <Audio src={staticFile(audioUrl)} />
+          <Audio
+            src={audioUrl.startsWith('http') ? audioUrl : staticFile(audioUrl)}
+          />
         </Sequence>
       )}
 
@@ -213,11 +230,11 @@ export const AppDemoVideo: React.FC<AppDemoVideoProps> = ({
         />
       )}
 
-      {/* 9. Fade out at end (0.8s = 24 frames) */}
+      {/* 9. Fade out at end (shorter for short videos to preserve CTA time) */}
       <TransitionEffect
         type='fade'
-        startFrame={durationInFrames - 24}
-        durationFrames={24}
+        startFrame={durationInFrames - (durationInFrames < 450 ? 15 : 24)}
+        durationFrames={durationInFrames < 450 ? 15 : 24}
         direction='out'
       />
     </AbsoluteFill>

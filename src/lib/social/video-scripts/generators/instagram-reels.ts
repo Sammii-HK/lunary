@@ -93,7 +93,10 @@ function replaceCtaForInstagram(fullScript: string, ctaLine: string): string {
  * 2. Replace the closing CTA with an IG-appropriate one (save/comment/share)
  * 3. Set platform = 'instagram' and scheduledHour = 15
  */
-function adaptScriptForInstagram(script: VideoScript): VideoScript {
+function adaptScriptForInstagram(
+  script: VideoScript,
+  hour: number = 15,
+): VideoScript {
   const ctKey = script.metadata?.contentTypeKey as ContentTypeKey | undefined;
   const override = ctKey ? INSTAGRAM_VOICE_OVERRIDES[ctKey] : undefined;
 
@@ -114,7 +117,7 @@ function adaptScriptForInstagram(script: VideoScript): VideoScript {
     fullScript: adapted,
     wordCount: countWords(adapted),
     metadata: script.metadata
-      ? { ...script.metadata, scheduledHour: 15 }
+      ? { ...script.metadata, scheduledHour: hour }
       : script.metadata,
   };
 }
@@ -137,6 +140,79 @@ function pickIgContentType(
   const pool = available.length > 0 ? available : IG_CONTENT_TYPES;
 
   return pool[seed % pool.length];
+}
+
+/**
+ * Generate Instagram scripts for a single day across multiple time slots.
+ *
+ * Each slot picks a different content type (seeded by slot offset to avoid
+ * same-day duplicates). Used by the daily content pipeline.
+ *
+ * @param date - The target date (midnight UTC)
+ * @param hours - UTC hours for each slot (default: [11, 15, 19])
+ */
+export async function generateDailyInstagramScripts(
+  date: Date,
+  hours: number[] = [11, 15, 19],
+): Promise<VideoScript[]> {
+  const scripts: VideoScript[] = [];
+  const usedTypes = new Set<string>();
+
+  console.log(
+    `📸 [IG Daily] Generating ${hours.length} Instagram scripts for ${date.toISOString().split('T')[0]}...`,
+  );
+
+  for (let slotIndex = 0; slotIndex < hours.length; slotIndex++) {
+    const hour = hours[slotIndex];
+    const slotDate = new Date(date);
+    slotDate.setUTCHours(hour, 0, 0, 0);
+
+    // Seed offset per slot avoids same-day duplicates
+    const slotSeed =
+      date.getFullYear() * 10000 +
+      (date.getMonth() + 1) * 100 +
+      date.getDate() +
+      slotIndex * 17;
+
+    // Pick a content type not yet used today
+    const available = IG_CONTENT_TYPES.filter((t) => !usedTypes.has(t));
+    const pool = available.length > 0 ? available : IG_CONTENT_TYPES;
+    const contentType = pool[slotSeed % pool.length];
+    usedTypes.add(contentType);
+
+    console.log(`  📸 [IG Daily] Slot ${hour}:00 UTC: ${contentType}`);
+
+    try {
+      const baseDate = new Date(date);
+      baseDate.setUTCHours(0, 0, 0, 0);
+
+      const script = await generateScriptForContentType(contentType, baseDate);
+      if (!script) {
+        console.error(
+          `  📸 [IG Daily] generateScriptForContentType returned null for ${contentType}`,
+        );
+        continue;
+      }
+
+      // Set scheduled time to the specific hour
+      script.scheduledDate = slotDate;
+      if (script.metadata) {
+        script.metadata.scheduledHour = hour;
+      }
+      const adapted = adaptScriptForInstagram(script, hour);
+      scripts.push(adapted);
+    } catch (error) {
+      console.error(
+        `  📸 [IG Daily] Slot ${hour}:00: Failed to generate ${contentType}:`,
+        error,
+      );
+    }
+  }
+
+  console.log(
+    `📸 [IG Daily] Generated ${scripts.length}/${hours.length} Instagram scripts`,
+  );
+  return scripts;
 }
 
 /**

@@ -346,9 +346,19 @@ export async function ensureVideoPerformanceTable(): Promise<void> {
     await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS retention_15s REAL`;
     await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS retention_30s REAL`;
     await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS retention_60s REAL`;
+    // Slot tracking for engagement slot A/B testing
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS slot VARCHAR(20)`;
+    // Ayrshare post ID for deduplication
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS ayrshare_id TEXT`;
   } catch {
     // Columns may already exist
   }
+
+  // Unique index on ayrshare_id for dedup (nulls allowed — only Ayrshare-sourced rows have it)
+  await sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_video_perf_ayrshare_id
+    ON video_performance(ayrshare_id) WHERE ayrshare_id IS NOT NULL
+  `;
 
   await sql`
     CREATE INDEX IF NOT EXISTS idx_video_perf_hour ON video_performance(scheduled_hour)
@@ -562,8 +572,11 @@ export async function getContentCategoryScores(days: number = 30): Promise<
 }
 
 /**
- * Bulk insert performance records (for TikTok Studio data import).
+ * Bulk insert performance records (for TikTok Studio / Ayrshare data import).
  * Inserts directly without requiring a linked video_script.
+ *
+ * When ayrshareId is provided, uses ON CONFLICT to upsert (update metrics
+ * on re-run instead of creating duplicates).
  */
 export async function bulkInsertPerformance(
   records: Array<{
@@ -576,6 +589,10 @@ export async function bulkInsertPerformance(
     contentCategory: string;
     postedAt: string;
     description?: string;
+    slot?: string;
+    ayrshareId?: string;
+    scheduledHour?: number;
+    dayOfWeek?: number;
   }>,
 ): Promise<number> {
   const { sql } = await import('@vercel/postgres');
@@ -583,21 +600,61 @@ export async function bulkInsertPerformance(
 
   for (const record of records) {
     try {
-      await sql`
-        INSERT INTO video_performance (
-          platform, views, likes, comments, shares, saves,
-          content_type, recorded_at
-        ) VALUES (
-          ${record.platform || 'tiktok'},
-          ${record.views},
-          ${record.likes},
-          ${record.comments},
-          ${record.shares},
-          ${record.saves ?? 0},
-          ${record.contentCategory},
-          ${record.postedAt}
-        )
-      `;
+      if (record.ayrshareId) {
+        // Upsert: insert or update existing record by ayrshare_id
+        await sql`
+          INSERT INTO video_performance (
+            platform, views, likes, comments, shares, saves,
+            content_type, recorded_at, slot, ayrshare_id,
+            scheduled_hour, day_of_week
+          ) VALUES (
+            ${record.platform || 'tiktok'},
+            ${record.views},
+            ${record.likes},
+            ${record.comments},
+            ${record.shares},
+            ${record.saves ?? 0},
+            ${record.contentCategory},
+            ${record.postedAt},
+            ${record.slot ?? null},
+            ${record.ayrshareId},
+            ${record.scheduledHour ?? null},
+            ${record.dayOfWeek ?? null}
+          )
+          ON CONFLICT (ayrshare_id) WHERE ayrshare_id IS NOT NULL
+          DO UPDATE SET
+            views = EXCLUDED.views,
+            likes = EXCLUDED.likes,
+            comments = EXCLUDED.comments,
+            shares = EXCLUDED.shares,
+            saves = EXCLUDED.saves,
+            slot = COALESCE(EXCLUDED.slot, video_performance.slot),
+            scheduled_hour = COALESCE(EXCLUDED.scheduled_hour, video_performance.scheduled_hour),
+            day_of_week = COALESCE(EXCLUDED.day_of_week, video_performance.day_of_week),
+            recorded_at = EXCLUDED.recorded_at
+        `;
+      } else {
+        // Legacy insert without dedup (no ayrshare_id)
+        await sql`
+          INSERT INTO video_performance (
+            platform, views, likes, comments, shares, saves,
+            content_type, recorded_at, slot,
+            scheduled_hour, day_of_week
+          ) VALUES (
+            ${record.platform || 'tiktok'},
+            ${record.views},
+            ${record.likes},
+            ${record.comments},
+            ${record.shares},
+            ${record.saves ?? 0},
+            ${record.contentCategory},
+            ${record.postedAt},
+            ${record.slot ?? null},
+            ${record.scheduledHour ?? null},
+            ${record.dayOfWeek ?? null}
+          )
+        `;
+      }
       inserted++;
     } catch {
       // Skip individual record failures
