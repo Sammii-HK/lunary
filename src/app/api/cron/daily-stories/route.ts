@@ -4,46 +4,6 @@ import { postToSocial } from '@/lib/social/client';
 import { hasValidImageExtension } from '@/lib/social/pre-upload-image';
 import { sendDiscordNotification } from '@/lib/discord';
 
-/**
- * Fetch an OG image and upload it to Spellcast media storage.
- * Instagram requires a publicly accessible, static CDN URL — the dynamic
- * lunary.app OG endpoints fail Instagram's media fetch with code 9004.
- * Returns the uploaded URL on success, or null if upload fails.
- */
-async function uploadStoryImage(
-  ogUrl: string,
-  filename: string,
-): Promise<string | null> {
-  const spellcastUrl = process.env.SPELLCAST_API_URL;
-  const spellcastKey = process.env.SPELLCAST_API_KEY;
-  if (!spellcastUrl || !spellcastKey) return null;
-
-  try {
-    const imgRes = await fetch(ogUrl);
-    if (!imgRes.ok) return null;
-    const buffer = await imgRes.arrayBuffer();
-
-    const formData = new FormData();
-    formData.append(
-      'file',
-      new Blob([buffer], { type: 'image/png' }),
-      filename,
-    );
-
-    const uploadRes = await fetch(`${spellcastUrl}/api/media/upload`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${spellcastKey}` },
-      body: formData,
-    });
-    if (!uploadRes.ok) return null;
-
-    const data = (await uploadRes.json()) as { url?: string; path?: string };
-    return data.url ?? data.path ?? null;
-  } catch {
-    return null;
-  }
-}
-
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
@@ -208,18 +168,10 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        // Pre-upload to Spellcast so Instagram gets a static CDN URL.
-        // Instagram's media fetch fails on dynamic OG endpoints (error 9004).
-        const uploadedUrl = await uploadStoryImage(
-          staticImageUrl,
-          `lunary-story-${story.variant}-${dateStr}.png`,
-        );
-        const mediaUrl = uploadedUrl ?? staticImageUrl;
-        if (!uploadedUrl) {
-          console.warn(
-            `[daily-stories] Upload failed for ${story.variant}, falling back to OG URL`,
-          );
-        }
+        // Use the OG URL directly — it returns image/png with immutable caching
+        // headers, which Instagram accepts. The Postiz upload endpoint returns
+        // URLs that 404 (files don't persist to the volume), so skip it.
+        const mediaUrl = staticImageUrl;
 
         const result = await postToSocial({
           platform: 'instagram',
