@@ -452,7 +452,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
             ]
           : [
               `${moonPhase.trend === 'waxing' ? 'Building momentum' : 'Time to release'}. Work with it, not against it.`,
-              `The Moon shifts into ${moonPhase.name}. ${moonPhase.energy}.`,
+              `${moonPhase.energy}. Adjust your pace accordingly.`,
             ];
         return {
           hook: `${moonPhase.name} begins today`,
@@ -553,13 +553,17 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
       type: 'moon_position',
       generate: (rng) => {
         const bodies = [
-          `Moon in ${moonSign} at ${moonPhase.illumination}% illumination. ${moonPhase.trend === 'waxing' ? 'Building' : 'Releasing'}.`,
-          `The Moon is in ${moonSign} during a ${moonPhase.name}. That combination shapes the emotional weather today.`,
+          `${moonPhase.trend === 'waxing' ? 'Energy is building' : 'Time to let go of what is not working'}. ${moonSign} decides where that lands.`,
+          `Your emotional defaults shift under this sign. Notice what triggers you differently today.`,
+        ];
+        const prompts = [
+          `What is ${moonSign} stirring up for you?`,
+          `Where do you feel this in your chart?`,
         ];
         return {
           hook: `Moon in ${moonSign} (${moonPhase.name})`,
           body: bodies[Math.floor(rng() * bodies.length)],
-          prompt: `How does Moon in ${moonSign} feel for you?`,
+          prompt: prompts[Math.floor(rng() * prompts.length)],
           topicTag: 'Moon',
         };
       },

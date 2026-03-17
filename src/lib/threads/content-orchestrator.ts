@@ -64,10 +64,20 @@ export async function generateThreadsBatch(
     generateCosmicTimingPost(dateStr, slots[2], 2),
   ]);
 
+  // Deduplicate: if fewer cosmic events exist than slots, ranks collapse
+  // to the same event. Drop duplicates so we don't post the same thing twice.
+  const seenHooks = new Set<string>();
+  const cosmicPosts: ThreadsPost[] = [];
+  for (const post of [post0, post1, post2]) {
+    if (seenHooks.has(post.hook)) continue;
+    seenHooks.add(post.hook);
+    cosmicPosts.push(post);
+  }
+
   // Slot 3: dear-style referral CTA (drives follower growth)
   const post3 = buildDearStylePost(dateStr, slots[3], seed);
 
-  const rawPosts = [post0, post1, post2, post3];
+  const rawPosts = [...cosmicPosts, post3];
   const posts = applyMinuteOffsets(rawPosts, slots, dateStr);
 
   return { date: dateStr, posts };
