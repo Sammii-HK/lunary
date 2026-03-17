@@ -26,10 +26,14 @@ export async function GET(request: NextRequest) {
     const overrideDate = url.searchParams.get('date');
 
     const now = new Date();
-    const dateStr =
-      overrideDate && /^\d{4}-\d{2}-\d{2}$/.test(overrideDate)
-        ? overrideDate
-        : now.toISOString().split('T')[0];
+    const dateStr = (() => {
+      if (overrideDate && /^\d{4}-\d{2}-\d{2}$/.test(overrideDate)) {
+        return overrideDate;
+      }
+      const target = new Date(now);
+      target.setDate(target.getDate() + 7);
+      return target.toISOString().split('T')[0];
+    })();
 
     // Dedup guard: skip if stories already SENT today (not failed — failures should retry)
     if (!force) {

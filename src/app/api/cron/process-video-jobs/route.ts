@@ -15,6 +15,7 @@ import { buildVideoCaption } from '@/lib/social/video-captions';
 import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
 import { generateInstagramReelCaption } from '@/lib/social/video-scripts/tiktok/metadata';
 import { getImageBaseUrl } from '@/lib/urls';
+import { postToSocial } from '@/lib/social/client';
 import { createHash } from 'crypto';
 import { writeFile, unlink, mkdtemp } from 'fs/promises';
 import { join } from 'path';
@@ -716,6 +717,62 @@ export async function POST(request: NextRequest) {
               AND scheduled_date::date = ${dateKey}
               AND post_type = 'video'
           `;
+
+          // ─── Auto-scheduling bridge ───
+          // Push newly created video posts to the appropriate social backend
+          // (Spellcast for IG reels, Ayrshare for TikTok, etc.)
+          const pendingPosts = await sql`
+            SELECT id, content, platform, scheduled_date, video_url
+            FROM social_posts
+            WHERE topic = ${script.facet_title}
+              AND scheduled_date::date = ${dateKey}
+              AND post_type = 'video'
+              AND status = 'pending'
+              AND video_url IS NOT NULL
+          `;
+          for (const post of pendingPosts.rows) {
+            try {
+              const scheduledIso = new Date(post.scheduled_date).toISOString();
+              const isFuture = new Date(post.scheduled_date) > new Date();
+              const result = await postToSocial({
+                platform: post.platform as string,
+                content: post.content as string,
+                scheduledDate: scheduledIso,
+                media: [{ type: 'video', url: post.video_url as string }],
+                platformSettings:
+                  post.platform === 'tiktok'
+                    ? {
+                        privacyLevel: 'PUBLIC_TO_EVERYONE',
+                      }
+                    : undefined,
+              });
+              if (result.success) {
+                await sql`
+                  UPDATE social_posts
+                  SET status = ${isFuture ? 'scheduled' : 'published'},
+                      updated_at = NOW()
+                  WHERE id = ${post.id}
+                `;
+                console.log(
+                  `[bridge] ${post.platform} post ${post.id} → ${result.backend} (${result.postId})`,
+                );
+              } else {
+                console.warn(
+                  `[bridge] ${post.platform} post ${post.id} failed: ${result.error}`,
+                );
+                await sql`
+                  UPDATE social_posts
+                  SET status = 'failed', updated_at = NOW()
+                  WHERE id = ${post.id}
+                `;
+              }
+            } catch (bridgeErr) {
+              console.warn(
+                `[bridge] ${post.platform} post ${post.id} error:`,
+                bridgeErr instanceof Error ? bridgeErr.message : bridgeErr,
+              );
+            }
+          }
         }
 
         await sql`

@@ -205,10 +205,10 @@ export function weightedSelect(
  * This ensures we gather comparison data while mostly using what works.
  */
 const SLOT_HOUR_WINDOWS: Record<string, number[]> = {
-  engagementC: [10, 11, 12],
-  primary: [13, 14, 15],
-  engagementA: [16, 17, 18],
-  engagementB: [19, 20, 21, 22],
+  primary: [14, 15, 16],
+  engagementA: [17, 18, 19],
+  engagementB: [21, 22, 23],
+  engagementC: [0, 1, 2],
 };
 
 /** Probability of exploring a new hour vs exploiting the known best */

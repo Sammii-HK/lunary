@@ -37,7 +37,7 @@ export function ContextualNudgeButton({
         ctaVariant: nudge.ctaVariant,
         ctaHeadline: nudge.ctaHeadline,
         ctaSubline: nudge.ctaSubline,
-        abTest: 'cta_copy',
+        abTest: 'seo_cta_copy',
         abVariant: nudge.ctaVariant,
       });
     }
@@ -62,7 +62,7 @@ export function ContextualNudgeButton({
       ctaVariant: nudge.ctaVariant,
       ctaHeadline: nudge.ctaHeadline,
       ctaSubline: nudge.ctaSubline,
-      abTest: 'cta_copy',
+      abTest: 'seo_cta_copy',
       abVariant: nudge.ctaVariant,
     });
 

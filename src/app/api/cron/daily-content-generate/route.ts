@@ -170,10 +170,15 @@ export async function GET(request: NextRequest) {
 
     await ensureVideoScriptsTable();
 
-    // Tomorrow's date
-    const tomorrow = new Date();
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-    tomorrow.setUTCHours(0, 0, 0, 0);
+    // Target date: ?date=YYYY-MM-DD or tomorrow by default
+    const dateParam = request.nextUrl.searchParams.get('date');
+    const tomorrow = dateParam
+      ? new Date(`${dateParam}T00:00:00.000Z`)
+      : new Date();
+    if (!dateParam) {
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+      tomorrow.setUTCHours(0, 0, 0, 0);
+    }
     const tomorrowKey = tomorrow.toISOString().split('T')[0];
     const dayOfWeek = (tomorrow.getDay() + 6) % 7; // Mon=0
     const dayName = DAY_NAMES[dayOfWeek];
@@ -191,45 +196,63 @@ export async function GET(request: NextRequest) {
     };
     const errors: string[] = [];
 
+    // Pre-check: which slots already have scripts for this date (safe re-run)
+    const existingScripts = await sql`
+      SELECT metadata->>'slot' as slot, platform FROM video_scripts
+      WHERE scheduled_date::date = ${tomorrowKey}
+    `;
+    const existingSlots = new Set(
+      existingScripts.rows.map((r) => `${r.platform}:${r.slot || 'default'}`),
+    );
+
     // --- 1. TikTok Primary Script ---
     try {
-      const category = selectPrimaryCategoryForDate(tomorrow);
-      const themesForCategory = categoryThemes.filter(
-        (t) => t.category === category,
-      );
-      const dateSeed =
-        tomorrow.getFullYear() * 10000 +
-        (tomorrow.getMonth() + 1) * 100 +
-        tomorrow.getDate();
-      const theme =
-        themesForCategory.length > 0
-          ? themesForCategory[dateSeed % themesForCategory.length]
-          : categoryThemes[dateSeed % categoryThemes.length];
-
-      const weights = await getContentTypeWeights();
-      const exclude = new Set<string>();
-      const contentType =
-        (weightedSelect(weights, exclude, dateSeed) as ContentType) ||
-        'sign-identity';
-
-      const primaryHour = await getOptimalHourBySlot('primary');
-      const script = await generateScriptForContentType(contentType, tomorrow);
-      const validated = await validateAndRetry(contentType, tomorrow, script);
-
-      if (validated) {
-        validated.scheduledDate = new Date(
-          `${tomorrowKey}T${String(primaryHour).padStart(2, '0')}:00:00.000Z`,
+      if (existingSlots.has('tiktok:primary')) {
+        console.log(
+          `[Daily] Skipping TikTok primary — already exists for ${tomorrowKey}`,
         );
-        validated.platform = 'tiktok';
-        if (validated.metadata) {
-          validated.metadata.scheduledHour = primaryHour;
-          validated.metadata.slot = 'primary';
-        }
-        const id = await saveVideoScript(validated);
-        validated.id = id;
+        results.tiktokPrimary = 1;
+      } else {
+        const category = selectPrimaryCategoryForDate(tomorrow);
+        const themesForCategory = categoryThemes.filter(
+          (t) => t.category === category,
+        );
+        const dateSeed =
+          tomorrow.getFullYear() * 10000 +
+          (tomorrow.getMonth() + 1) * 100 +
+          tomorrow.getDate();
+        const theme =
+          themesForCategory.length > 0
+            ? themesForCategory[dateSeed % themesForCategory.length]
+            : categoryThemes[dateSeed % categoryThemes.length];
 
-        // Create social_post + video_job
-        await sql`
+        const weights = await getContentTypeWeights();
+        const exclude = new Set<string>();
+        const contentType =
+          (weightedSelect(weights, exclude, dateSeed) as ContentType) ||
+          'sign-identity';
+
+        const primaryHour = await getOptimalHourBySlot('primary');
+        const script = await generateScriptForContentType(
+          contentType,
+          tomorrow,
+        );
+        const validated = await validateAndRetry(contentType, tomorrow, script);
+
+        if (validated) {
+          validated.scheduledDate = new Date(
+            `${tomorrowKey}T${String(primaryHour).padStart(2, '0')}:00:00.000Z`,
+          );
+          validated.platform = 'tiktok';
+          if (validated.metadata) {
+            validated.metadata.scheduledHour = primaryHour;
+            validated.metadata.slot = 'primary';
+          }
+          const id = await saveVideoScript(validated);
+          validated.id = id;
+
+          // Create social_post + video_job
+          await sql`
           INSERT INTO social_posts (
             content, platform, post_type, topic, status, image_url, video_url,
             scheduled_date, week_theme, week_start, source_type, source_id,
@@ -247,18 +270,19 @@ export async function GET(request: NextRequest) {
           )
         `;
 
-        await sql`
+          await sql`
           INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
           VALUES (${id}, ${tomorrowKey}, ${tomorrowKey}, ${validated.facetTitle}, 'pending', NOW(), NOW())
           ON CONFLICT (script_id)
           DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
         `;
 
-        results.tiktokPrimary = 1;
-        console.log(
-          `[Daily] Primary TikTok: ${contentType} at ${primaryHour}:00`,
-        );
-      }
+          results.tiktokPrimary = 1;
+          console.log(
+            `[Daily] Primary TikTok: ${contentType} at ${primaryHour}:00`,
+          );
+        }
+      } // close else (skip-if-exists)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       errors.push(`TikTok Primary: ${msg}`);
@@ -281,6 +305,15 @@ export async function GET(request: NextRequest) {
 
       for (const slot of engagementSlots) {
         try {
+          if (existingSlots.has(`tiktok:${slot}`)) {
+            console.log(
+              `[Daily] Skipping ${slot} — already exists for ${tomorrowKey}`,
+            );
+            const resultKey =
+              `tiktok${slot.charAt(0).toUpperCase() + slot.slice(1)}` as keyof typeof results;
+            (results as Record<string, number>)[resultKey] = 1;
+            continue;
+          }
           const schedule = schedules[slot];
           const dayConfig = schedule[dayName];
           if (!dayConfig) continue;
@@ -354,32 +387,41 @@ export async function GET(request: NextRequest) {
 
     // --- 3. Instagram Reel Scripts (3 per day) ---
     try {
-      const igScripts = await generateDailyInstagramScripts(
-        tomorrow,
-        [11, 15, 19],
-      );
+      const existingIgReels = existingScripts.rows.filter(
+        (r) => r.platform === 'instagram',
+      ).length;
+      if (existingIgReels >= 3) {
+        console.log(
+          `[Daily] Skipping IG Reels — ${existingIgReels} already exist for ${tomorrowKey}`,
+        );
+        results.igReels = existingIgReels;
+      } else {
+        const igScripts = await generateDailyInstagramScripts(
+          tomorrow,
+          [15, 17, 21],
+        );
 
-      for (const igScript of igScripts) {
-        try {
-          const id = await saveVideoScript(igScript);
-          igScript.id = id;
+        for (const igScript of igScripts) {
+          try {
+            const id = await saveVideoScript(igScript);
+            igScript.id = id;
 
-          const dateKey = igScript.scheduledDate.toISOString().split('T')[0];
-          const igCategory = igContentTypeToCategory(
-            igScript.metadata?.contentTypeKey as string | undefined,
-          );
-          const igCaption = generateInstagramReelCaption({
-            category: igCategory,
-            themeName: igScript.themeName,
-            facetTitle: igScript.facetTitle,
-            hookText:
-              typeof igScript.hookText === 'string'
-                ? igScript.hookText
-                : undefined,
-            scheduledDate: igScript.scheduledDate,
-          });
+            const dateKey = igScript.scheduledDate.toISOString().split('T')[0];
+            const igCategory = igContentTypeToCategory(
+              igScript.metadata?.contentTypeKey as string | undefined,
+            );
+            const igCaption = generateInstagramReelCaption({
+              category: igCategory,
+              themeName: igScript.themeName,
+              facetTitle: igScript.facetTitle,
+              hookText:
+                typeof igScript.hookText === 'string'
+                  ? igScript.hookText
+                  : undefined,
+              scheduledDate: igScript.scheduledDate,
+            });
 
-          await sql`
+            await sql`
             INSERT INTO social_posts (
               content, platform, post_type, topic, status, image_url, video_url,
               scheduled_date, week_theme, week_start, source_type, source_id,
@@ -397,21 +439,22 @@ export async function GET(request: NextRequest) {
             )
           `;
 
-          await sql`
+            await sql`
             INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
             VALUES (${id}, ${tomorrowKey}, ${dateKey}, ${igScript.facetTitle}, 'pending', NOW(), NOW())
             ON CONFLICT (script_id)
             DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
           `;
 
-          results.igReels++;
-          console.log(
-            `[Daily] IG Reel: ${igScript.facetTitle} at ${igScript.metadata?.scheduledHour}:00`,
-          );
-        } catch (igErr) {
-          console.error(`[Daily] IG Reel save failed:`, igErr);
+            results.igReels++;
+            console.log(
+              `[Daily] IG Reel: ${igScript.facetTitle} at ${igScript.metadata?.scheduledHour}:00`,
+            );
+          } catch (igErr) {
+            console.error(`[Daily] IG Reel save failed:`, igErr);
+          }
         }
-      }
+      } // close else (skip-if-exists for IG Reels)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       errors.push(`IG Reels: ${msg}`);
