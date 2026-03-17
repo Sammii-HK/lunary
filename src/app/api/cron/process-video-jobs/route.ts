@@ -447,112 +447,148 @@ export async function POST(request: NextRequest) {
 
           let videoBuffer: Buffer | undefined;
 
-          // Try Remotion first
-          const remotionAvailable = await isRemotionAvailable();
-          let useFFmpegFallback = !remotionAvailable || !audioDuration;
-
-          console.log(
-            `🎥 Remotion available: ${remotionAvailable}, audio duration: ${audioDuration}s`,
+          // Upload audio to Blob so the render server can download it
+          const audioBlob = await put(
+            `temp/audio-${Date.now()}.mp3`,
+            audioNodeBuffer,
+            { access: 'public', addRandomSuffix: true },
           );
 
-          if (!useFFmpegFallback) {
-            try {
-              console.log(
-                `🎬 Using Remotion for video generation (script ${script.id})...`,
-              );
+          const contentCreatorUrl = process.env.CONTENT_CREATOR_API_URL;
+          if (contentCreatorUrl) {
+            // Delegate rendering to Content Creator server (Hetzner)
+            console.log(
+              `🎬 Sending script ${script.id} to Content Creator for rendering...`,
+            );
+            const renderSecret =
+              process.env.LUNARY_RENDER_SECRET || process.env.CRON_SECRET;
+            const renderResponse = await fetch(
+              `${contentCreatorUrl}/api/lunary-render`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(renderSecret
+                    ? { Authorization: `Bearer ${renderSecret}` }
+                    : {}),
+                },
+                body: JSON.stringify({
+                  scriptText: script.full_script,
+                  audioUrl: audioBlob.url,
+                  images: images.map(
+                    (img: string | { url: string; [k: string]: unknown }) => {
+                      const url = typeof img === 'string' ? img : img?.url;
+                      if (!url) return img;
+                      return url.startsWith('http') ? url : `${baseUrl}${url}`;
+                    },
+                  ),
+                  slug: safeSlug,
+                  facetTitle: script.facet_title,
+                  dateKey,
+                }),
+              },
+            );
 
-              // Upload audio to a temporary URL for Remotion
-              const audioBlob = await put(
-                `temp/audio-${Date.now()}.mp3`,
-                audioNodeBuffer,
-                { access: 'public', addRandomSuffix: true },
+            if (!renderResponse.ok) {
+              const errorBody = await renderResponse.text();
+              throw new Error(
+                `Content Creator render failed (${renderResponse.status}): ${errorBody}`,
               );
+            }
 
-              // Use Whisper for exact word-level subtitle timestamps.
-              // Falls back to character-count estimation if Whisper fails.
-              let segments;
+            const renderResult = await renderResponse.json();
+            if (!renderResult.videoData) {
+              throw new Error('Content Creator returned no video data');
+            }
+
+            videoBuffer = Buffer.from(renderResult.videoData, 'base64');
+            console.log(
+              `✅ Content Creator rendered ${(videoBuffer.length / 1024 / 1024).toFixed(1)}MB video for script ${script.id}`,
+            );
+          } else {
+            // Local rendering fallback (development only)
+            const remotionAvailable = await isRemotionAvailable();
+            let useFFmpegFallback = !remotionAvailable || !audioDuration;
+
+            console.log(
+              `🎥 Remotion available: ${remotionAvailable}, audio duration: ${audioDuration}s`,
+            );
+
+            if (!useFFmpegFallback) {
               try {
-                const whisperWords = await transcribeWithWhisper(audioBuffer);
-                segments = whisperWords.length
-                  ? wordTimestampsToSegments(
-                      whisperWords,
-                      audioDuration,
-                      6,
-                      script.full_script,
-                    )
-                  : scriptToAudioSegments(
-                      script.full_script,
-                      audioDuration,
-                      2.6,
-                    );
                 console.log(
-                  `🎙️ Whisper: ${whisperWords.length} words → ${segments.length} subtitle segments`,
+                  `🎬 Using Remotion for video generation (script ${script.id})...`,
                 );
-              } catch (whisperErr) {
-                console.warn(
-                  'Whisper transcription failed, falling back to estimation:',
-                  whisperErr,
+
+                let segments;
+                try {
+                  const whisperWords = await transcribeWithWhisper(audioBuffer);
+                  segments = whisperWords.length
+                    ? wordTimestampsToSegments(
+                        whisperWords,
+                        audioDuration,
+                        6,
+                        script.full_script,
+                      )
+                    : scriptToAudioSegments(
+                        script.full_script,
+                        audioDuration,
+                        2.6,
+                      );
+                } catch {
+                  segments = scriptToAudioSegments(
+                    script.full_script,
+                    audioDuration,
+                    2.6,
+                  );
+                }
+
+                const remotionFormat =
+                  audioDuration > 45 ? 'MediumFormVideo' : 'ShortFormVideo';
+                const videoSeed = `${safeSlug}-${script.id}-${Date.now()}`;
+                const symbolContent = `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`;
+
+                videoBuffer = await renderRemotionVideo({
+                  format: remotionFormat,
+                  outputPath: '',
+                  segments,
+                  audioUrl: audioBlob.url,
+                  backgroundMusicUrl: '/audio/series/lunary-bed-v1.mp3',
+                  highlightTerms: highlightTerms || [],
+                  durationSeconds: audioDuration + 2,
+                  overlays: overlays || [],
+                  categoryVisuals,
+                  seed: videoSeed,
+                  zodiacSign: symbolContent,
+                });
+
+                console.log(
+                  `✅ Remotion: Video rendered for script ${script.id}`,
                 );
-                segments = scriptToAudioSegments(
-                  script.full_script,
-                  audioDuration,
-                  2.6,
+              } catch (remotionError) {
+                console.error(
+                  `❌ Remotion render failed for script ${script.id}:`,
+                  remotionError,
                 );
-              }
-
-              const remotionFormat =
-                audioDuration > 45 ? 'MediumFormVideo' : 'ShortFormVideo';
-              const videoSeed = `${safeSlug}-${script.id}-${Date.now()}`;
-              const symbolContent = `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`;
-
-              videoBuffer = await renderRemotionVideo({
-                format: remotionFormat,
-                outputPath: '',
-                segments,
-                audioUrl: audioBlob.url,
-                backgroundMusicUrl: '/audio/series/lunary-bed-v1.mp3',
-                highlightTerms: highlightTerms || [],
-                durationSeconds: audioDuration + 2,
-                overlays: overlays || [],
-                categoryVisuals,
-                seed: videoSeed,
-                zodiacSign: symbolContent,
-              });
-
-              console.log(
-                `✅ Remotion: Video rendered for script ${script.id}`,
-              );
-            } catch (remotionError) {
-              const errMsg =
-                remotionError instanceof Error
-                  ? remotionError.message
-                  : String(remotionError);
-              console.error(
-                `❌ Remotion render failed for script ${script.id}: ${errMsg}`,
-              );
-              // Only fall back to FFmpeg on Vercel where Chromium may not be available.
-              // Locally, surface the real error so it can be fixed.
-              if (process.env.VERCEL) {
-                console.warn(`⚠️ Falling back to FFmpeg (Vercel environment)`);
                 useFFmpegFallback = true;
-              } else {
-                throw remotionError;
               }
             }
-          }
 
-          if (useFFmpegFallback) {
-            console.log(`⚠️ Using FFmpeg fallback for script ${script.id}...`);
-            videoBuffer = await composeVideo({
-              images,
-              audioBuffer,
-              format: 'story',
-              outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
-              subtitlesText: script.full_script,
-              subtitlesHighlightTerms: highlightTerms,
-              subtitlesHighlightColor: highlightColor,
-              overlays,
-            });
+            if (useFFmpegFallback) {
+              console.log(
+                `⚠️ Using FFmpeg fallback for script ${script.id}...`,
+              );
+              videoBuffer = await composeVideo({
+                images,
+                audioBuffer,
+                format: 'story',
+                outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
+                subtitlesText: script.full_script,
+                subtitlesHighlightTerms: highlightTerms,
+                subtitlesHighlightColor: highlightColor,
+                overlays,
+              });
+            }
           }
 
           if (!videoBuffer) {

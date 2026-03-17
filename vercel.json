@@ -130,6 +130,14 @@
     {
       "path": "/api/cron/pipeline-health",
       "schedule": "0 22 * * *"
+    },
+    {
+      "path": "/api/cron/cosmic-forecast",
+      "schedule": "0 7 * * 1"
+    },
+    {
+      "path": "/api/cron/weekly-wrapup",
+      "schedule": "0 7 * * 0"
     }
   ]
 }
