@@ -192,7 +192,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
 
   // --- 2b. Zodiac season countdown (Sun approaching sign change) ---
   if (sunSign && positions.Sun?.duration) {
-    const remaining = positions.Sun.duration.remainingDays;
+    const remaining = Math.round(positions.Sun.duration.remainingDays);
     const nextSign = ZODIAC_SIGNS[(ZODIAC_SIGNS.indexOf(sunSign) + 1) % 12];
     const nextSeason = ZODIAC_SEASON_NAMES[nextSign] || `${nextSign} season`;
 
@@ -219,13 +219,17 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
         type: 'season_countdown',
         generate: (rng) => {
           const bodies = [
-            `${ZODIAC_SEASON_NAMES[sunSign]} has ${remaining} days left. The energy is already shifting.`,
-            `Final days of ${sunSign}. You can feel ${nextSign} building.`,
+            `The collective mood is about to change. Use the last of this ${sunSign} energy while you have it.`,
+            `Whatever ${sunSign} has been teaching you, the final lesson lands this week.`,
+          ];
+          const prompts = [
+            `What are you carrying into ${nextSeason}?`,
+            `What did ${ZODIAC_SEASON_NAMES[sunSign]} change for you?`,
           ];
           return {
-            hook: `${nextSeason} is ${remaining} days away`,
+            hook: `${remaining} days left of ${ZODIAC_SEASON_NAMES[sunSign]}`,
             body: bodies[Math.floor(rng() * bodies.length)],
-            prompt: `Can you feel ${nextSign} approaching?`,
+            prompt: prompts[Math.floor(rng() * prompts.length)],
             topicTag: 'Zodiac',
           };
         },
@@ -294,7 +298,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
         generate: (rng) => {
           const bodies = [
             `${planet} retrograde is backing into ${prevSign}. Themes from that transit are returning for review.`,
-            `${planet} at ${pos.degree}° ${pos.sign} retrograde. ${prevSign} is pulling it back. Unfinished business.`,
+            `${planet} at ${Math.round(pos.degree)}° ${pos.sign} retrograde. ${prevSign} is pulling it back. Unfinished business.`,
             `When a retrograde planet re-enters the previous sign, it reopens whatever you thought was closed.`,
           ];
           return {
@@ -469,7 +473,8 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
     const pos = positions[planet];
     if (!pos?.duration || pos.retrograde) continue;
 
-    const { totalDays, remainingDays } = pos.duration;
+    const totalDays = Math.round(pos.duration.totalDays);
+    const remainingDays = Math.round(pos.duration.remainingDays);
     const elapsed = totalDays - remainingDays;
     const halfway = Math.floor(totalDays / 2);
 
@@ -523,17 +528,17 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
 
       const retroLabel = pos.retrograde ? ' retrograde' : '';
       const durationNote = pos.duration
-        ? ` (${pos.duration.remainingDays} days left)`
+        ? ` (${Math.round(pos.duration.remainingDays)} days left)`
         : '';
 
       const bodies = [
-        `${planetName} at ${pos.degree}° ${pos.sign}${retroLabel}${durationNote}. This colours everything ${planetName} rules.`,
+        `${planetName} at ${Math.round(pos.degree)}° ${pos.sign}${retroLabel}${durationNote}. This colours everything ${planetName} rules.`,
         `Wherever ${pos.sign} falls in your chart, ${planetName} is activating it${retroLabel ? ' in retrograde' : ''}.`,
         `${planetName} in ${pos.sign} shapes how you ${planetName === 'Mars' ? 'act' : planetName === 'Venus' ? 'love' : planetName === 'Mercury' ? 'think' : planetName === 'Jupiter' ? 'grow' : 'build'} right now.`,
       ];
 
       return {
-        hook: `${planetName} is at ${pos.degree}° ${pos.sign}${retroLabel}`,
+        hook: `${planetName} is at ${Math.round(pos.degree)}° ${pos.sign}${retroLabel}`,
         body: bodies[Math.floor(rng() * bodies.length)],
         prompt: `Where does ${pos.sign} fall in your chart?`,
         topicTag: 'Astrology',
