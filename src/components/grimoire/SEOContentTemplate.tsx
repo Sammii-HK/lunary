@@ -31,6 +31,7 @@ import { MidArticleEmailCapture } from './MidArticleEmailCapture';
 import { ChartPreviewTeaser } from './ChartPreviewTeaser';
 import { SignTransitTeaser } from './SignTransitTeaser';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
+import { GrimoireExitIntent } from './GrimoireExitIntent';
 
 /**
  * Format a URL segment into a human-readable label
@@ -827,6 +828,9 @@ export async function SEOContentTemplate({
           )}
         />
       )}
+
+      {/* Exit intent popup for anonymous grimoire readers */}
+      <GrimoireExitIntent hub={contextualHub} />
     </article>
   );
 }
