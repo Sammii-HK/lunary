@@ -14,11 +14,11 @@ import { captureEvent } from '@/lib/posthog-client';
 import { getABTestVariantClient } from '@/lib/ab-tests-client';
 
 const FEATURES = [
-  'Your personal birth chart overview and key placements',
-  'Daily moon phase insights + general horoscope',
-  'Tarot card of the day + basic lunar calendar',
-  'Grimoire library for astrology, tarot, and rituals',
-  'Weekly AI ritual/reading to get started',
+  'Your full birth chart with all placements and aspects',
+  '7 days of personalised daily tarot, transits, and horoscopes',
+  'Astral Guide — ask questions about your chart',
+  'Moon phase rituals personalised to your natal Moon',
+  '2,000+ grimoire articles on astrology, tarot, and crystals',
 ];
 
 const SIGNUP_SOURCE_KEY = 'lunary.signup.source';
