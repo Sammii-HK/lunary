@@ -52,11 +52,26 @@ export function PostTrialMessaging() {
             Your daily tarot pulls, personalised horoscopes, and transit
             insights have been waiting. Pick up where you left off.
           </p>
+          {missedInsights >= 3 && (
+            <p className='text-lunary-primary-300 text-sm font-medium mb-4'>
+              Come back with 20% off — use code COSMICSEASON at checkout
+            </p>
+          )}
           <div className='flex flex-col sm:flex-row gap-3'>
-            <SmartTrialButton size='default' />
-            <Button variant='outline' size='sm' asChild>
-              <Link href='/pricing?nav=app'>View plans</Link>
+            <Button variant='lunary-soft' size='default' asChild>
+              <Link
+                href={
+                  missedInsights >= 3
+                    ? '/pricing?nav=app&promo=COSMICSEASON'
+                    : '/pricing?nav=app'
+                }
+              >
+                {missedInsights >= 3
+                  ? 'Get 20% off'
+                  : 'See what Lunary+ unlocks'}
+              </Link>
             </Button>
+            <SmartTrialButton size='default' />
           </div>
         </div>
       </div>

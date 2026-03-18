@@ -73,6 +73,7 @@ export default function PricingPage() {
     'monthly',
   );
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [urlPromoCode, setUrlPromoCode] = useState<string | undefined>();
   const [pendingCheckout, setPendingCheckout] = useState<{
     priceId: string;
     planId: string;
@@ -120,6 +121,11 @@ export default function PricingPage() {
     const ref = params.get('ref');
     if (ref) {
       localStorage.setItem('lunary_referral_code', ref);
+    }
+
+    const promo = params.get('promo') || params.get('coupon');
+    if (promo) {
+      setUrlPromoCode(promo.trim().toUpperCase());
     }
 
     loadPricingPlans();
@@ -217,7 +223,7 @@ export default function PricingPage() {
         undefined,
         currentUserId,
         currentUserEmail,
-        undefined,
+        urlPromoCode,
         triggerFeature,
       );
 
