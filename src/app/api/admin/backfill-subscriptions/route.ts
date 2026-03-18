@@ -16,8 +16,56 @@ export async function POST(request: NextRequest) {
     if (authResult instanceof NextResponse) return authResult;
 
     const body = await request.json().catch(() => ({}));
-    const dryRun = (body as { dryRun?: boolean }).dryRun !== false;
+    const { dryRun: dryRunParam, mode } = body as {
+      dryRun?: boolean;
+      mode?: string;
+    };
+    const dryRun = dryRunParam !== false;
 
+    // ─── Mode: grant-trials ──────────────────────────────────────
+    if (mode === 'grant-trials') {
+      const eligible = await sql`
+        SELECT s.user_id, s.user_email as email
+        FROM subscriptions s
+        WHERE s.status = 'free'
+          AND s.plan_type = 'free'
+          AND s.trial_ends_at IS NULL
+        ORDER BY s.created_at DESC
+      `;
+
+      if (dryRun) {
+        return NextResponse.json({
+          dryRun: true,
+          mode: 'grant-trials',
+          eligibleCount: eligible.rows.length,
+          users: eligible.rows.map((u) => ({
+            userId: u.user_id,
+            email: u.email,
+          })),
+          message:
+            'Send { "mode": "grant-trials", "dryRun": false } to grant trials.',
+        });
+      }
+
+      const result = await sql`
+        UPDATE subscriptions
+        SET status = 'trial',
+            plan_type = 'lunary_plus',
+            trial_ends_at = NOW() + INTERVAL '7 days'
+        WHERE status = 'free'
+          AND plan_type = 'free'
+          AND trial_ends_at IS NULL
+      `;
+
+      return NextResponse.json({
+        success: true,
+        mode: 'grant-trials',
+        updatedCount: result.rowCount,
+        message: `Granted 7-day trials to ${result.rowCount} free users.`,
+      });
+    }
+
+    // ─── Default mode: backfill missing subscription rows ────────
     // Find users missing a subscription row
     const missing = await sql`
       SELECT u.id, u.email, u.name, u."createdAt"

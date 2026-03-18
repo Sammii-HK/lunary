@@ -163,10 +163,10 @@ export function TrialWelcomeEmail({
   return (
     <Html>
       <Head>
-        <title>Welcome to Your Free Trial - Lunary</title>
+        <title>Your 7-day trial starts now - Lunary</title>
       </Head>
       <Preview>
-        {`Your Astral Guide is ready. You have ${trialDaysRemaining} days to explore Lunary!`}
+        {`You have ${trialDaysRemaining} days of full Lunary+ access. Here are the 3 things worth trying first.`}
       </Preview>
       <Body
         style={{
@@ -195,27 +195,15 @@ export function TrialWelcomeEmail({
               as='h1'
               style={{ color: '#6366f1', fontSize: '28px', margin: 0 }}
             >
-              Welcome to Lunary!
+              Your trial starts now
             </Heading>
           </Section>
 
           <Section style={{ margin: '30px 0' }}>
             <Text>Hi {greeting},</Text>
-            <Text
-              style={{
-                fontSize: '20px',
-                fontWeight: '600',
-                color: '#6366f1',
-                textAlign: 'center' as const,
-                margin: '30px 0',
-              }}
-            >
-              Your Astral Guide is ready. ✨
-            </Text>
             <Text>
-              Your cosmic journey begins now! You have{' '}
-              <strong>{trialDaysRemaining} days</strong> to explore all the
-              personalized features Lunary has to offer.
+              You have <strong>{trialDaysRemaining} days</strong> of full
+              Lunary+ access. Here are the 3 things worth trying first:
             </Text>
 
             <Section
@@ -223,40 +211,198 @@ export function TrialWelcomeEmail({
                 background: '#f3f4f6',
                 padding: '20px',
                 borderRadius: '6px',
-                margin: '20px 0',
+                margin: '16px 0',
               }}
             >
               <Heading
                 as='h3'
                 style={{ marginTop: 0, color: '#6366f1', fontSize: '16px' }}
               >
-                What&apos;s Included:
+                🎴 Pull your personalised card of the day
               </Heading>
-              <Text style={{ margin: 0 }}>
-                🌟 Personalized birth chart analysis
-                <br />
-                🔮 Daily horoscopes tailored to your chart
-                <br />
-                ✨ Personalized tarot readings
-                <br />
-                🌙 Transit calendar and cosmic insights
-                <br />
-                📚 Complete digital grimoire
+              <Text style={{ margin: '8px 0 12px' }}>
+                Your daily tarot is drawn based on your birth chart and current
+                transits — no two pulls are the same.
               </Text>
+              <Link
+                href={`${baseUrl}/tarot`}
+                style={{ color: '#6366f1', fontWeight: '600' }}
+              >
+                Pull today&apos;s card →
+              </Link>
             </Section>
 
-            <Section style={{ textAlign: 'center' as const }}>
-              <CTAButton href={`${baseUrl}/birth-chart`}>
-                Explore Your Birth Chart →
+            <Section
+              style={{
+                background: '#f3f4f6',
+                padding: '20px',
+                borderRadius: '6px',
+                margin: '16px 0',
+              }}
+            >
+              <Heading
+                as='h3'
+                style={{ marginTop: 0, color: '#6366f1', fontSize: '16px' }}
+              >
+                💬 Ask your Astral Guide anything
+              </Heading>
+              <Text style={{ margin: '8px 0 12px' }}>
+                Your AI companion knows your chart. Ask it about your week, a
+                relationship, or what a transit means for you.
+              </Text>
+              <Link
+                href={`${baseUrl}/guide`}
+                style={{ color: '#6366f1', fontWeight: '600' }}
+              >
+                Start a conversation →
+              </Link>
+            </Section>
+
+            <Section
+              style={{
+                background: '#f3f4f6',
+                padding: '20px',
+                borderRadius: '6px',
+                margin: '16px 0',
+              }}
+            >
+              <Heading
+                as='h3'
+                style={{ marginTop: 0, color: '#6366f1', fontSize: '16px' }}
+              >
+                🪐 See your transits today
+              </Heading>
+              <Text style={{ margin: '8px 0 12px' }}>
+                Which planets are activating your chart right now? Your
+                personalised horoscope breaks it down.
+              </Text>
+              <Link
+                href={`${baseUrl}/horoscope`}
+                style={{ color: '#6366f1', fontWeight: '600' }}
+              >
+                Check today&apos;s transits →
+              </Link>
+            </Section>
+
+            <Text
+              style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                marginTop: '20px',
+              }}
+            >
+              Your full birth chart is ready too —{' '}
+              <Link
+                href={`${baseUrl}/birth-chart`}
+                style={{ color: '#6366f1' }}
+              >
+                explore it here
+              </Link>
+              .
+            </Text>
+          </Section>
+
+          <EmailFooter userEmail={userEmail} baseUrl={baseUrl} />
+        </EmailContainer>
+      </Body>
+    </Html>
+  );
+}
+
+export function TrialDay3ActionEmail({
+  userName,
+  trialDaysRemaining,
+  userEmail,
+}: TrialEmailProps) {
+  const baseUrl = getBaseUrl();
+  const greeting = userName || 'there';
+
+  return (
+    <Html>
+      <Head>
+        <title>Did you pull your card today? - Lunary</title>
+      </Head>
+      <Preview>
+        Your personalised tarot card is waiting. Pull it now and see what the
+        day has in store.
+      </Preview>
+      <Body
+        style={{
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          lineHeight: '1.6',
+          color: '#333',
+          maxWidth: '600px',
+          margin: '0 auto',
+          padding: '20px',
+          backgroundColor: '#f8f9fa',
+        }}
+      >
+        <EmailContainer>
+          <Section
+            style={{ textAlign: 'center' as const, marginBottom: '30px' }}
+          >
+            <Img
+              src={`${baseUrl}/logo.png`}
+              alt='Lunary'
+              width='120'
+              style={{ margin: '0 auto 20px', display: 'block' }}
+            />
+            <UrgencyBadge daysRemaining={trialDaysRemaining} variant='purple' />
+            <Heading
+              as='h1'
+              style={{ color: '#6366f1', fontSize: '28px', margin: 0 }}
+            >
+              Did you pull your card today?
+            </Heading>
+          </Section>
+
+          <Section style={{ margin: '30px 0' }}>
+            <Text>Hi {greeting},</Text>
+            <Text>
+              Your personalised tarot card is waiting. Each daily pull is unique
+              to your chart and the current cosmic energy — the longer you leave
+              it, the more you miss.
+            </Text>
+
+            <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
+              <CTAButton href={`${baseUrl}/tarot`}>
+                Pull today&apos;s card →
               </CTAButton>
             </Section>
 
-            <Text style={{ marginTop: '20px' }}>
-              <strong>Pro Tip:</strong> Complete your profile with your birthday
-              to unlock all personalized features!
-            </Text>
-            <Text>
-              Questions? Just reply to this email - we&apos;re here to help.
+            <Section
+              style={{
+                background: 'linear-gradient(135deg, #e0e7ff, #c7d2fe)',
+                borderLeft: '4px solid #6366f1',
+                padding: '20px',
+                borderRadius: '6px',
+                margin: '20px 0',
+              }}
+            >
+              <Heading
+                as='h3'
+                style={{ marginTop: 0, color: '#4338ca', fontSize: '16px' }}
+              >
+                Meanwhile, in your chart today...
+              </Heading>
+              <Text style={{ color: '#3730a3', margin: 0 }}>
+                The planets keep moving and your transits shift daily. Check
+                what&apos;s activating your chart right now.
+              </Text>
+              <Text style={{ margin: '12px 0 0' }}>
+                <Link
+                  href={`${baseUrl}/horoscope`}
+                  style={{ color: '#4338ca', fontWeight: '600' }}
+                >
+                  See today&apos;s transits →
+                </Link>
+              </Text>
+            </Section>
+
+            <Text style={{ fontSize: '14px', color: '#6b7280' }}>
+              Building a daily practice with your cards and transits is the
+              fastest way to make the most of your trial.
             </Text>
           </Section>
 
@@ -736,26 +882,25 @@ export function generateTrialWelcomeEmailText(
     : `${baseUrl}/unsubscribe`;
 
   return `
-Welcome to Lunary! 🌙
+Your 7-day trial starts now - Lunary 🌙
 
 Hi ${userName || 'there'},
 
-Your Astral Guide is ready. ✨
+You have ${trialDaysRemaining} days of full Lunary+ access. Here are the 3 things worth trying first:
 
-Your cosmic journey begins now! You have ${trialDaysRemaining} days to explore all the personalized features Lunary has to offer.
+🎴 Pull your personalised card of the day
+Your daily tarot is drawn based on your birth chart and current transits — no two pulls are the same.
+→ ${baseUrl}/tarot
 
-What's Included:
-- 🌟 Personalized birth chart analysis
-- 🔮 Daily horoscopes tailored to your chart
-- ✨ Personalized tarot readings
-- 🌙 Transit calendar and cosmic insights
-- 📚 Complete digital grimoire
+💬 Ask your Astral Guide anything
+Your AI companion knows your chart. Ask it about your week, a relationship, or what a transit means for you.
+→ ${baseUrl}/guide
 
-Explore your birth chart: ${baseUrl}/birth-chart
+🪐 See your transits today
+Which planets are activating your chart right now? Your personalised horoscope breaks it down.
+→ ${baseUrl}/horoscope
 
-Pro Tip: Complete your profile with your birthday to unlock all personalized features!
-
-Questions? Just reply to this email - we're here to help.
+Your full birth chart is ready too → ${baseUrl}/birth-chart
 
 ---
 Unsubscribe: ${unsubscribeUrl}
@@ -915,6 +1060,53 @@ Every morning, receive insights that speak directly to your cosmic blueprint. No
 Get your daily guidance: ${baseUrl}/horoscope
 
 Check in daily to build your cosmic rhythm and track patterns over time.
+
+---
+Unsubscribe: ${unsubscribeUrl}
+Manage Preferences: ${baseUrl}/profile
+
+© ${new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for your cosmic journey.
+  `.trim();
+}
+
+export async function generateTrialDay3ActionEmailHTML(
+  userName: string,
+  trialDaysRemaining: number,
+  userEmail?: string,
+): Promise<string> {
+  return await render(
+    <TrialDay3ActionEmail
+      userName={userName}
+      trialDaysRemaining={trialDaysRemaining}
+      userEmail={userEmail}
+    />,
+  );
+}
+
+export function generateTrialDay3ActionEmailText(
+  userName: string,
+  trialDaysRemaining: number,
+  userEmail?: string,
+): string {
+  const baseUrl = getBaseUrl();
+  const unsubscribeUrl = userEmail
+    ? `${baseUrl}/unsubscribe?email=${encodeURIComponent(userEmail)}`
+    : `${baseUrl}/unsubscribe`;
+
+  return `
+Did you pull your card today? - Lunary 🎴
+
+Hi ${userName || 'there'},
+
+Your personalised tarot card is waiting. Each daily pull is unique to your chart and the current cosmic energy — the longer you leave it, the more you miss.
+
+Pull today's card: ${baseUrl}/tarot
+
+Meanwhile, in your chart today...
+The planets keep moving and your transits shift daily. Check what's activating your chart right now.
+→ ${baseUrl}/horoscope
+
+Building a daily practice with your cards and transits is the fastest way to make the most of your trial.
 
 ---
 Unsubscribe: ${unsubscribeUrl}

@@ -3,17 +3,15 @@ import { sql } from '@vercel/postgres';
 import { sendEmail } from '@/lib/email';
 import { formatDate } from '@/lib/analytics/date-range';
 import {
-  renderReadYourChart,
-  renderWhatAreTransits,
-  renderHouses,
-} from '@/lib/email-components/EducationalNurtureEmails';
-import {
   renderBirthChartDay1,
   renderBirthChartDay4,
   renderBirthChartDay6,
-  renderBirthChartDay7,
   renderCompleteBirthChartCta,
 } from '@/lib/email-components/BirthChartDripEmails';
+import {
+  generateTrialDay3ActionEmailHTML,
+  generateTrialReminderEmailHTML,
+} from '@/lib/email-components/TrialNurtureEmails';
 import sunPlacements from '@/data/sun-placements.json';
 import venusPlacements from '@/data/venus-placements.json';
 
@@ -101,7 +99,16 @@ export async function GET(request: NextRequest) {
       return d;
     };
 
-    // ─── Day 1: Sun Sign (birth chart drip) ─────────────────────────
+    // ─── NEW SEQUENCE (action-first) ───────────────────────────────
+    // Day 0 (signup): Welcome "Try these 3 things" — sent by auth hook
+    // Day 1: Sun in [Sign] (personalised)
+    // Day 2: "Did you pull your card today?" (tarot action + transit nudge)
+    // Day 3: Venus in [Sign] (personalised)
+    // Day 4: "3 days left" (urgency + feature recap)
+    // Day 5: Big 3 summary (personalised)
+    // Day 6: "Last day" (strong urgency + upgrade CTA)
+
+    // ─── Day 1: Sun Sign (personalised) ─────────────────────────────
 
     const day1Date = daysAgo(1);
     const day1Trials = await sql.query(
@@ -172,12 +179,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ─── Day 2: How to Read Your Birth Chart (educational) ──────────
+    // ─── Day 2: "Did you pull your card today?" (action) ────────────
 
     const day2Date = daysAgo(2);
     const day2Trials = await sql.query(
       `SELECT DISTINCT s.user_id, s.user_email as email, s.user_name as name,
-              s.trial_ends_at, up.birth_chart
+              s.trial_ends_at
        ${TRIAL_BASE_QUERY}
        AND DATE(s.created_at) = $1
        AND (s.trial_nurture_day2_sent = false OR s.trial_nurture_day2_sent IS NULL)`,
@@ -187,19 +194,25 @@ export async function GET(request: NextRequest) {
     sent.day2 = 0;
     for (const user of day2Trials.rows) {
       try {
-        const placements = extractPlacements(user.birth_chart);
+        const daysLeft = user.trial_ends_at
+          ? Math.max(
+              1,
+              Math.ceil(
+                (new Date(user.trial_ends_at).getTime() - now.getTime()) /
+                  (1000 * 60 * 60 * 24),
+              ),
+            )
+          : 5;
 
-        const html = await renderReadYourChart({
-          userName: user.name || 'there',
-          sunSign: placements?.sun,
-          moonSign: placements?.moon,
-          risingSign: placements?.rising,
-          userEmail: user.email,
-        });
+        const html = await generateTrialDay3ActionEmailHTML(
+          user.name || 'there',
+          daysLeft,
+          user.email,
+        );
 
         await sendEmail({
           to: user.email,
-          subject: 'How to read your birth chart (simpler than you think)',
+          subject: 'Did you pull your card today?',
           html,
           tracking: {
             userId: user.user_id,
@@ -208,7 +221,7 @@ export async function GET(request: NextRequest) {
             utm: {
               source: 'email',
               medium: 'lifecycle',
-              campaign: 'edu_nurture',
+              campaign: 'trial_action',
               content: 'day2',
             },
           },
@@ -223,7 +236,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ─── Day 3: What Are Transits (educational) ─────────────────────
+    // ─── Day 3: Venus in [Sign] (personalised) ─────────────────────
 
     const day3Date = daysAgo(3);
     const day3Trials = await sql.query(
@@ -237,55 +250,6 @@ export async function GET(request: NextRequest) {
 
     sent.day3 = 0;
     for (const user of day3Trials.rows) {
-      try {
-        const placements = extractPlacements(user.birth_chart);
-
-        const html = await renderWhatAreTransits({
-          userName: user.name || 'there',
-          sunSign: placements?.sun,
-          userEmail: user.email,
-        });
-
-        await sendEmail({
-          to: user.email,
-          subject: 'The planets are still moving — here is how they affect you',
-          html,
-          tracking: {
-            userId: user.user_id,
-            notificationType: 'trial_nurture',
-            notificationId: `trial-nurture-day3-${user.user_id}`,
-            utm: {
-              source: 'email',
-              medium: 'lifecycle',
-              campaign: 'edu_nurture',
-              content: 'day3',
-            },
-          },
-        });
-
-        await sql`UPDATE subscriptions SET trial_nurture_day3_sent = true WHERE user_id = ${user.user_id} AND status = 'trial'`;
-        sent.day3++;
-      } catch (error) {
-        errors.push(
-          `Day 3 → ${user.email}: ${error instanceof Error ? error.message : 'Unknown'}`,
-        );
-      }
-    }
-
-    // ─── Day 4: Venus (birth chart drip) ────────────────────────────
-
-    const day4Date = daysAgo(4);
-    const day4Trials = await sql.query(
-      `SELECT DISTINCT s.user_id, s.user_email as email, s.user_name as name,
-              s.trial_ends_at, up.birth_chart
-       ${TRIAL_BASE_QUERY}
-       AND DATE(s.created_at) = $1
-       AND (s.trial_nurture_day4_sent = false OR s.trial_nurture_day4_sent IS NULL)`,
-      [formatDate(day4Date)],
-    );
-
-    sent.day4 = 0;
-    for (const user of day4Trials.rows) {
       try {
         const placements = extractPlacements(user.birth_chart);
 
@@ -324,11 +288,58 @@ export async function GET(request: NextRequest) {
           tracking: {
             userId: user.user_id,
             notificationType: 'trial_nurture',
-            notificationId: `trial-nurture-day4-${user.user_id}`,
+            notificationId: `trial-nurture-day3-${user.user_id}`,
             utm: {
               source: 'email',
               medium: 'lifecycle',
               campaign: 'birth_drip',
+              content: 'day3',
+            },
+          },
+        });
+
+        await sql`UPDATE subscriptions SET trial_nurture_day3_sent = true WHERE user_id = ${user.user_id} AND status = 'trial'`;
+        sent.day3++;
+      } catch (error) {
+        errors.push(
+          `Day 3 → ${user.email}: ${error instanceof Error ? error.message : 'Unknown'}`,
+        );
+      }
+    }
+
+    // ─── Day 4: "3 days left" (urgency) ─────────────────────────────
+
+    const day4Date = daysAgo(4);
+    const day4Trials = await sql.query(
+      `SELECT DISTINCT s.user_id, s.user_email as email, s.user_name as name,
+              s.trial_ends_at
+       ${TRIAL_BASE_QUERY}
+       AND DATE(s.created_at) = $1
+       AND (s.trial_nurture_day4_sent = false OR s.trial_nurture_day4_sent IS NULL)`,
+      [formatDate(day4Date)],
+    );
+
+    sent.day4 = 0;
+    for (const user of day4Trials.rows) {
+      try {
+        const html = await generateTrialReminderEmailHTML(
+          user.name || 'there',
+          3,
+          user.email,
+        );
+
+        await sendEmail({
+          to: user.email,
+          subject: 'Your trial ends in 3 days',
+          html,
+          tracking: {
+            userId: user.user_id,
+            notificationType: 'trial_nurture',
+            notificationId: `trial-nurture-day4-${user.user_id}`,
+            utm: {
+              source: 'email',
+              medium: 'lifecycle',
+              campaign: 'trial_urgency',
               content: 'day4',
             },
           },
@@ -343,68 +354,20 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ─── Day 5: Houses — Where Life Happens (educational) ────────────
+    // ─── Day 5: Big 3 Summary (personalised) ────────────────────────
 
     const day5Date = daysAgo(5);
-    const day5Trials = await sql`
-      SELECT DISTINCT s.user_id, s.user_email as email, s.user_name as name, s.trial_ends_at
-      FROM subscriptions s
-      WHERE s.status = 'trial' AND s.trial_ends_at IS NOT NULL
-      AND DATE(s.created_at) = ${formatDate(day5Date)}
-      AND (s.trial_nurture_day5_sent = false OR s.trial_nurture_day5_sent IS NULL)
-      AND s.user_email IS NOT NULL
-      AND (s.has_discount IS NULL OR s.has_discount = false)
-      AND (s.promo_code IS NULL OR s.promo_code = '')
-    `;
-
-    sent.day5 = 0;
-    for (const user of day5Trials.rows) {
-      try {
-        const html = await renderHouses({
-          userName: user.name || 'there',
-          userEmail: user.email,
-        });
-
-        await sendEmail({
-          to: user.email,
-          subject: 'The 12 houses — where the planets play out in your life',
-          html,
-          tracking: {
-            userId: user.user_id,
-            notificationType: 'trial_nurture',
-            notificationId: `trial-nurture-day5-${user.user_id}`,
-            utm: {
-              source: 'email',
-              medium: 'lifecycle',
-              campaign: 'edu_nurture',
-              content: 'day5',
-            },
-          },
-        });
-
-        await sql`UPDATE subscriptions SET trial_nurture_day5_sent = true WHERE user_id = ${user.user_id} AND status = 'trial'`;
-        sent.day5++;
-      } catch (error) {
-        errors.push(
-          `Day 5 → ${user.email}: ${error instanceof Error ? error.message : 'Unknown'}`,
-        );
-      }
-    }
-
-    // ─── Day 6: Big 3 Summary (birth chart drip) ────────────────────
-
-    const day6Date = daysAgo(6);
-    const day6Trials = await sql.query(
+    const day5Trials = await sql.query(
       `SELECT DISTINCT s.user_id, s.user_email as email, s.user_name as name,
               s.trial_ends_at, up.birth_chart
        ${TRIAL_BASE_QUERY}
        AND DATE(s.created_at) = $1
-       AND (s.trial_nurture_day6_sent = false OR s.trial_nurture_day6_sent IS NULL)`,
-      [formatDate(day6Date)],
+       AND (s.trial_nurture_day5_sent = false OR s.trial_nurture_day5_sent IS NULL)`,
+      [formatDate(day5Date)],
     );
 
-    sent.day6 = 0;
-    for (const user of day6Trials.rows) {
+    sent.day5 = 0;
+    for (const user of day5Trials.rows) {
       try {
         const placements = extractPlacements(user.birth_chart);
 
@@ -435,11 +398,58 @@ export async function GET(request: NextRequest) {
           tracking: {
             userId: user.user_id,
             notificationType: 'trial_nurture',
-            notificationId: `trial-nurture-day6-${user.user_id}`,
+            notificationId: `trial-nurture-day5-${user.user_id}`,
             utm: {
               source: 'email',
               medium: 'lifecycle',
               campaign: 'birth_drip',
+              content: 'day5',
+            },
+          },
+        });
+
+        await sql`UPDATE subscriptions SET trial_nurture_day5_sent = true WHERE user_id = ${user.user_id} AND status = 'trial'`;
+        sent.day5++;
+      } catch (error) {
+        errors.push(
+          `Day 5 → ${user.email}: ${error instanceof Error ? error.message : 'Unknown'}`,
+        );
+      }
+    }
+
+    // ─── Day 6: "Last day" (strong urgency + upgrade CTA) ──────────
+
+    const day6Date = daysAgo(6);
+    const day6Trials = await sql.query(
+      `SELECT DISTINCT s.user_id, s.user_email as email, s.user_name as name,
+              s.trial_ends_at
+       ${TRIAL_BASE_QUERY}
+       AND DATE(s.created_at) = $1
+       AND (s.trial_nurture_day6_sent = false OR s.trial_nurture_day6_sent IS NULL)`,
+      [formatDate(day6Date)],
+    );
+
+    sent.day6 = 0;
+    for (const user of day6Trials.rows) {
+      try {
+        const html = await generateTrialReminderEmailHTML(
+          user.name || 'there',
+          1,
+          user.email,
+        );
+
+        await sendEmail({
+          to: user.email,
+          subject: 'Last day of your Lunary+ trial',
+          html,
+          tracking: {
+            userId: user.user_id,
+            notificationType: 'trial_nurture',
+            notificationId: `trial-nurture-day6-${user.user_id}`,
+            utm: {
+              source: 'email',
+              medium: 'lifecycle',
+              campaign: 'trial_urgency',
               content: 'day6',
             },
           },
@@ -450,54 +460,6 @@ export async function GET(request: NextRequest) {
       } catch (error) {
         errors.push(
           `Day 6 → ${user.email}: ${error instanceof Error ? error.message : 'Unknown'}`,
-        );
-      }
-    }
-
-    // ─── Day 7: Current Transits (birth chart drip) ─────────────────
-
-    const day7Date = daysAgo(7);
-    const day7Trials = await sql`
-      SELECT DISTINCT s.user_id, s.user_email as email, s.user_name as name, s.trial_ends_at
-      FROM subscriptions s
-      WHERE s.status = 'trial' AND s.trial_ends_at IS NOT NULL
-      AND DATE(s.created_at) = ${formatDate(day7Date)}
-      AND (s.trial_nurture_day7_sent = false OR s.trial_nurture_day7_sent IS NULL)
-      AND s.user_email IS NOT NULL
-      AND (s.has_discount IS NULL OR s.has_discount = false)
-      AND (s.promo_code IS NULL OR s.promo_code = '')
-    `;
-
-    sent.day7 = 0;
-    for (const user of day7Trials.rows) {
-      try {
-        const html = await renderBirthChartDay7({
-          userName: user.name || 'there',
-          userEmail: user.email,
-        });
-
-        await sendEmail({
-          to: user.email,
-          subject: "What's ahead — your current transits",
-          html,
-          tracking: {
-            userId: user.user_id,
-            notificationType: 'trial_nurture',
-            notificationId: `trial-nurture-day7-${user.user_id}`,
-            utm: {
-              source: 'email',
-              medium: 'lifecycle',
-              campaign: 'birth_drip',
-              content: 'day7',
-            },
-          },
-        });
-
-        await sql`UPDATE subscriptions SET trial_nurture_day7_sent = true WHERE user_id = ${user.user_id} AND status = 'trial'`;
-        sent.day7++;
-      } catch (error) {
-        errors.push(
-          `Day 7 → ${user.email}: ${error instanceof Error ? error.message : 'Unknown'}`,
         );
       }
     }
