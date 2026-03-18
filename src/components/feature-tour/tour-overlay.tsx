@@ -13,7 +13,7 @@ interface TourOverlayProps {
   onNext: () => void;
   onPrev: () => void;
   onDismiss: () => void;
-  onComplete: () => void;
+  onComplete: () => void | Promise<void>;
   userTier: PlanKey;
 }
 
@@ -50,11 +50,18 @@ export function TourOverlay({
     setPosition({ top: '50%', left: '50%' });
   }, [step.target, step.placement, currentStep]);
 
-  const handleAction = () => {
+  const handleAction = async () => {
     if (step.action?.onClick) step.action.onClick();
+
+    // Complete/advance BEFORE navigating so the API call isn't aborted
+    if (isLastStep) {
+      await onComplete();
+    } else {
+      onNext();
+    }
+
+    // Navigate after completion is persisted
     if (step.action?.href) window.location.href = step.action.href;
-    if (isLastStep) onComplete();
-    else onNext();
   };
 
   const getTransformClass = () => {
@@ -145,11 +152,14 @@ export function TourOverlay({
           </div>
         </div>
 
-        {/* Secondary action */}
+        {/* Secondary action — always dismisses the tour */}
         {step.secondaryAction && (
           <button
             className='mt-3 text-sm text-purple-600 hover:underline dark:text-purple-400'
-            onClick={step.secondaryAction.onClick}
+            onClick={() => {
+              step.secondaryAction?.onClick?.();
+              onDismiss();
+            }}
           >
             {step.secondaryAction.label}
           </button>
