@@ -170,7 +170,7 @@ async function initializeAuth() {
           );
           await emailModule.sendEmail({
             to: user.email,
-            subject: '✨ Verify Your Email - Lunary',
+            subject: 'One click to start your trial — Lunary',
             html,
             text,
             tracking: {
