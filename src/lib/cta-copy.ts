@@ -13,7 +13,7 @@ export const CTA_COPY = {
 
   // Pricing & Conversion
   pricing: {
-    startTrial: "See what's included", // Clear value, not pushy
+    startTrial: 'Start free trial', // Direct action, communicates no-cost
     viewPricing: 'Explore plans', // Softer than "Plans & Pricing"
     currentPlan: 'Your plan',
     openApp: 'Open app',
