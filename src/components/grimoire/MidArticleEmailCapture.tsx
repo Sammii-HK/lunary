@@ -54,10 +54,17 @@ export function MidArticleEmailCapture({
     setError('');
 
     try {
-      const res = await fetch('/api/grimoire/email-capture', {
+      const res = await fetch('/api/newsletter/subscribers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, birthday: birthday || undefined, hub }),
+        body: JSON.stringify({
+          email,
+          source: hub ? `grimoire_${hub}` : 'grimoire_capture',
+          preferences: {
+            horoscopes: hub === 'horoscopes',
+            birthday: birthday || undefined,
+          },
+        }),
       });
 
       if (!res.ok) {
