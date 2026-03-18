@@ -177,7 +177,7 @@ function AbandonedCheckoutEmail2Component({
           </Text>
 
           <CtaButton
-            href={`${baseUrl}/pricing?utm_source=email&utm_medium=lifecycle&utm_campaign=abandoned_checkout_drip2`}
+            href={`${baseUrl}/pricing?nav=app&utm_source=email&utm_medium=lifecycle&utm_campaign=abandoned_checkout_drip2`}
             label='Continue to Checkout'
           />
           <Text
@@ -300,7 +300,7 @@ function AbandonedCheckoutEmail3Component({
           </Section>
 
           <CtaButton
-            href={`${baseUrl}/pricing?coupon=${encodeURIComponent(couponCode)}&utm_source=email&utm_medium=lifecycle&utm_campaign=abandoned_checkout_drip3`}
+            href={`${baseUrl}/pricing?nav=app&promo=${encodeURIComponent(couponCode)}&utm_source=email&utm_medium=lifecycle&utm_campaign=abandoned_checkout_drip3`}
             label={`Claim Your ${discountPercent}% Off`}
           />
           <Text

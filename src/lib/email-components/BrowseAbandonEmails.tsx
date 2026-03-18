@@ -394,7 +394,7 @@ function BrowseAbandonEmail1({ userName, userEmail }: BrowseAbandonProps) {
           </Text>
 
           <CtaButton
-            href={`${baseUrl}/pricing?utm_source=email&utm_medium=lifecycle&utm_campaign=browse_abandon&utm_content=24hr`}
+            href={`${baseUrl}/pricing?nav=app&utm_source=email&utm_medium=lifecycle&utm_campaign=browse_abandon&utm_content=24hr`}
             label='Compare Plans'
           />
 
@@ -488,7 +488,7 @@ function BrowseAbandonEmail2({
           </Text>
 
           <CtaButton
-            href={`${baseUrl}/pricing?utm_source=email&utm_medium=lifecycle&utm_campaign=browse_abandon&utm_content=72hr`}
+            href={`${baseUrl}/pricing?nav=app&utm_source=email&utm_medium=lifecycle&utm_campaign=browse_abandon&utm_content=72hr`}
             label='See What They Discovered'
           />
 
@@ -578,7 +578,7 @@ function BrowseAbandonEmail3({ userName, userEmail }: BrowseAbandonProps) {
           </Text>
 
           <CtaButton
-            href={`${baseUrl}/pricing?coupon=CURIOUS10&utm_source=email&utm_medium=lifecycle&utm_campaign=browse_abandon&utm_content=7day`}
+            href={`${baseUrl}/pricing?nav=app&promo=CURIOUS10&utm_source=email&utm_medium=lifecycle&utm_campaign=browse_abandon&utm_content=7day`}
             label='Claim Your 10% Off'
           />
 
