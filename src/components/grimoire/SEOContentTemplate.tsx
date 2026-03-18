@@ -27,6 +27,7 @@ import { ReadFullGuidePrompt } from '@/app/grimoire/guides/ReadFullGuidePrompt';
 import { getInlineCtaVariant, getAnonId } from '@/lib/ab-tests-server';
 import { GrimoireSearch } from '@/app/grimoire/GrimoireSearch';
 import { StickyBottomCTA } from './StickyBottomCTA';
+import { MidArticleEmailCapture } from './MidArticleEmailCapture';
 import { ChartPreviewTeaser } from './ChartPreviewTeaser';
 import { SignTransitTeaser } from './SignTransitTeaser';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
@@ -714,6 +715,14 @@ export async function SEOContentTemplate({
           />
         )}
 
+        {/* Email capture for horoscope readers - personalised daily horoscope offer */}
+        {contextualHub === 'horoscopes' && (
+          <MidArticleEmailCapture
+            topic="today's horoscope"
+            hub={contextualHub}
+          />
+        )}
+
         {/* Optional slot before FAQs */}
         {childrenPosition === 'before-faqs' && children && (
           <div id='explore-practices' className='mt-8'>
@@ -755,9 +764,21 @@ export async function SEOContentTemplate({
         <NewsletterSignupForm
           compact
           source={`grimoire_${contextualHub}`}
-          headline='Get weekly cosmic updates'
-          description='Free forecasts, transit alerts, and guides delivered every Friday.'
-          ctaLabel='Subscribe'
+          headline={
+            contextualHub === 'horoscopes'
+              ? 'Get your daily horoscope by email'
+              : 'Get weekly cosmic updates'
+          }
+          description={
+            contextualHub === 'horoscopes'
+              ? 'Personalised to your sign. Free daily readings, transit alerts, and guidance in your inbox every morning.'
+              : 'Free forecasts, transit alerts, and guides delivered every Friday.'
+          }
+          ctaLabel={
+            contextualHub === 'horoscopes'
+              ? 'Send me my horoscope'
+              : 'Subscribe'
+          }
           align='left'
         />
 
