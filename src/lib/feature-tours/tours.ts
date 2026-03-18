@@ -62,18 +62,6 @@ export const FEATURE_TOURS: FeatureTour[] = [
         },
       },
       {
-        target: '[data-nav="tarot"]',
-        title: 'Personal Tarot',
-        content: (tier) =>
-          `Draw personalized tarot cards seeded from your birth chart. ${getTarotLimit(tier)} spreads.`,
-        icon: 'Sparkles',
-        placement: 'right',
-        action: {
-          label: 'Next',
-          variant: 'primary',
-        },
-      },
-      {
         target: '[data-nav="explore"]',
         title: (tier) =>
           tier === 'free' ? 'Explore Features' : 'Your Toolkit',
@@ -84,8 +72,21 @@ export const FEATURE_TOURS: FeatureTour[] = [
         icon: 'FolderOpen',
         placement: 'right',
         action: {
-          label: 'Got it',
+          label: 'Next',
           variant: 'primary',
+        },
+      },
+      {
+        target: '[data-nav="tarot"]',
+        title: 'Pull your first card',
+        content:
+          'Your daily tarot card is waiting. Pull it now and see what the cards have for you today.',
+        icon: 'Sparkles',
+        placement: 'right',
+        action: {
+          label: 'Pull a card',
+          variant: 'primary',
+          href: '/tarot',
         },
       },
     ],

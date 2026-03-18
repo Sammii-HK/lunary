@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
       WHERE s.user_email IS NOT NULL
       AND s.last_pricing_viewed_at IS NOT NULL
       AND s.last_pricing_viewed_at BETWEEN ${twoDaysAgo.toISOString()} AND ${oneDayAgo.toISOString()}
-      AND s.status = 'free'
+      AND s.status IN ('free', 'trial')
+      AND s.is_paying = false
       AND s.last_checkout_expired_at IS NULL
       AND (s.browse_abandon_email1_sent = false OR s.browse_abandon_email1_sent IS NULL)
     `;
@@ -84,7 +85,8 @@ export async function GET(request: NextRequest) {
       WHERE s.user_email IS NOT NULL
       AND s.last_pricing_viewed_at IS NOT NULL
       AND s.last_pricing_viewed_at BETWEEN ${fourDaysAgo.toISOString()} AND ${threeDaysAgo.toISOString()}
-      AND s.status = 'free'
+      AND s.status IN ('free', 'trial')
+      AND s.is_paying = false
       AND s.last_checkout_expired_at IS NULL
       AND (s.browse_abandon_email2_sent = false OR s.browse_abandon_email2_sent IS NULL)
     `;
@@ -134,7 +136,8 @@ export async function GET(request: NextRequest) {
       WHERE s.user_email IS NOT NULL
       AND s.last_pricing_viewed_at IS NOT NULL
       AND s.last_pricing_viewed_at BETWEEN ${eightDaysAgo.toISOString()} AND ${sevenDaysAgo.toISOString()}
-      AND s.status = 'free'
+      AND s.status IN ('free', 'trial')
+      AND s.is_paying = false
       AND s.last_checkout_expired_at IS NULL
       AND (s.browse_abandon_email3_sent = false OR s.browse_abandon_email3_sent IS NULL)
     `;

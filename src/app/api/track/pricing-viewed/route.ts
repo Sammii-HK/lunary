@@ -19,7 +19,8 @@ export async function POST(request: NextRequest) {
       UPDATE subscriptions
       SET last_pricing_viewed_at = NOW()
       WHERE user_id = ${session.user.id}
-      AND status = 'free'
+      AND status IN ('free', 'trial')
+      AND is_paying = false
     `;
 
     return NextResponse.json({ ok: true });
