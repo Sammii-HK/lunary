@@ -270,17 +270,32 @@ async function initializeAuth() {
             if (pool) {
               await recordSignupConversionEvent(pool, user);
 
-              // Create a free subscription row so lifecycle drip emails can find this user
+              // Auto-enroll every new user in a 7-day Lunary+ trial so they
+              // experience the full product immediately. All existing trial
+              // nurture, reminder, and win-back email crons key off
+              // status='trial' + trial_ends_at, so they fire automatically.
               try {
+                const trialEndsAt = new Date();
+                trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+
                 await pool.query(
-                  `INSERT INTO subscriptions (user_id, user_email, user_name, status, plan_type, created_at)
-                   VALUES ($1, $2, $3, 'free', 'free', NOW())
+                  `INSERT INTO subscriptions (
+                     user_id, user_email, user_name,
+                     status, plan_type, trial_ends_at, trial_used,
+                     created_at
+                   )
+                   VALUES ($1, $2, $3, 'trial', 'lunary_plus', $4, true, NOW())
                    ON CONFLICT (user_id) DO NOTHING`,
-                  [user.id, user.email || null, user.name || null],
+                  [
+                    user.id,
+                    user.email || null,
+                    user.name || null,
+                    trialEndsAt.toISOString(),
+                  ],
                 );
               } catch (subError) {
                 console.error(
-                  'Failed to create free subscription row:',
+                  'Failed to create auto-trial subscription:',
                   subError,
                 );
               }

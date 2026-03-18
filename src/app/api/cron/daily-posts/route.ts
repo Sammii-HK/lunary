@@ -2584,6 +2584,27 @@ async function runNotificationCheck(dateStr: string) {
         );
       }
 
+      // Catch-all: flip any trial with trial_ends_at in the past to 'free'
+      // (without a Stripe subscription backing it). This covers auto-trials
+      // that may have been missed by the yesterday-only expired email check.
+      try {
+        const expiredAutoTrials = await sql`
+          UPDATE subscriptions
+          SET status = 'free', plan_type = 'free'
+          WHERE status = 'trial'
+          AND trial_ends_at < NOW()
+          AND (stripe_subscription_id IS NULL OR stripe_subscription_id = '')
+          AND trial_expired_email_sent = true
+        `;
+        if (expiredAutoTrials.rowCount && expiredAutoTrials.rowCount > 0) {
+          console.log(
+            `✅ Cleaned up ${expiredAutoTrials.rowCount} expired auto-trials`,
+          );
+        }
+      } catch (cleanupError) {
+        console.error('Failed to clean up expired auto-trials:', cleanupError);
+      }
+
       // Send trial expired emails (trials that ended yesterday)
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
@@ -2644,12 +2665,21 @@ async function runNotificationCheck(dateStr: string) {
             },
           });
 
-          // Mark as sent and update status
+          // Mark as sent and update status.
+          // Auto-trials (no Stripe sub) revert to 'free'.
+          // Stripe-managed trials become 'cancelled' (Stripe handles reactivation).
           await sql`
             UPDATE subscriptions
-            SET 
+            SET
               trial_expired_email_sent = true,
-              status = 'cancelled'
+              status = CASE
+                WHEN stripe_subscription_id IS NOT NULL AND stripe_subscription_id != '' THEN 'cancelled'
+                ELSE 'free'
+              END,
+              plan_type = CASE
+                WHEN stripe_subscription_id IS NOT NULL AND stripe_subscription_id != '' THEN plan_type
+                ELSE 'free'
+              END
             WHERE user_id = ${user.user_id}
             AND status = 'trial'
           `;

@@ -427,6 +427,20 @@ function formatResponse(sub: any, forceRefresh?: boolean) {
     Expires: '0',
   };
 
+  // Auto-expire trials: if status is 'trial' but trial_ends_at has passed,
+  // treat as 'free'. This prevents auto-trial users getting perpetual access.
+  let effectiveStatus = sub.status || 'free';
+  let effectivePlan = sub.plan_type || 'free';
+  if (
+    effectiveStatus === 'trial' &&
+    sub.trial_ends_at &&
+    new Date(sub.trial_ends_at) < new Date() &&
+    !sub.stripe_subscription_id // Don't touch Stripe-managed trials
+  ) {
+    effectiveStatus = 'free';
+    effectivePlan = 'free';
+  }
+
   // cancel_at_period_end might not be in DB, default to false
   const cancelAtPeriodEnd =
     sub.cancel_at_period_end !== undefined ? sub.cancel_at_period_end : false;
@@ -436,11 +450,11 @@ function formatResponse(sub: any, forceRefresh?: boolean) {
       success: true,
       subscription: {
         id: sub.stripe_subscription_id,
-        status: sub.status,
+        status: effectiveStatus,
         customerId: sub.stripe_customer_id,
         customer: sub.stripe_customer_id,
-        plan: sub.plan_type,
-        planName: sub.plan_type,
+        plan: effectivePlan,
+        planName: effectivePlan,
         cancelAtPeriodEnd,
         current_period_end: sub.current_period_end
           ? Math.floor(new Date(sub.current_period_end).getTime() / 1000)
@@ -455,9 +469,9 @@ function formatResponse(sub: any, forceRefresh?: boolean) {
           ? Math.floor(new Date(sub.trial_ends_at).getTime() / 1000)
           : null,
       },
-      plan: sub.plan_type || 'free',
-      status: sub.status || 'free',
-      message: `Found ${sub.status} subscription`,
+      plan: effectivePlan,
+      status: effectiveStatus,
+      message: `Found ${effectiveStatus} subscription`,
     },
     { headers: cacheHeaders },
   );
