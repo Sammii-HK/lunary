@@ -6,6 +6,7 @@ import {
 } from '@/lib/analytics/canonical-events';
 import { forwardEventToPostHog, aliasPostHogUser } from '@/lib/posthog-forward';
 import { sql } from '@vercel/postgres';
+import { detectBot } from '@/lib/analytics/bot-detection';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,16 @@ function extractOriginMetadata(
 
 export async function POST(request: NextRequest) {
   try {
+    // Bot detection — reject before any DB work
+    const botReason = detectBot(request.headers);
+    if (botReason) {
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: botReason,
+      });
+    }
+
     // Handle empty body gracefully
     const bodyText = await request.text();
     if (!bodyText || bodyText.trim() === '') {

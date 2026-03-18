@@ -6,6 +6,7 @@ import {
 } from '@/lib/analytics/canonical-events';
 import { deterministicEventId } from '@/lib/analytics/deterministic-event-id';
 import { getCurrentUser } from '@/lib/get-user-session';
+import { detectBot } from '@/lib/analytics/bot-detection';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,9 +16,18 @@ const ANON_ID_COOKIE = 'lunary_anon_id';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  console.log('[page_viewed] Request received');
 
   try {
+    // Bot detection (second layer — middleware already filters, but direct calls bypass it)
+    const botReason = detectBot(request.headers);
+    if (botReason) {
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: botReason,
+      });
+    }
+
     const payload = await request.json().catch(() => ({}));
     const path = typeof payload?.path === 'string' ? payload.path.trim() : '';
 
@@ -36,14 +46,6 @@ export async function POST(request: NextRequest) {
     const currentUser = await getCurrentUser(request);
     const userId = currentUser?.id;
     const userEmail = currentUser?.email;
-
-    console.log('[page_viewed] Identity check:', {
-      userId: userId ? 'present' : 'none',
-      anonymousId: anonymousId ? 'present' : 'none',
-      anonHeader: anonHeader ? 'present' : 'none',
-      anonCookie: anonCookie ? 'present' : 'none',
-      path,
-    });
 
     // Generate deterministic eventId so DB unique constraint handles dedup
     const today = new Date().toISOString().split('T')[0];
@@ -106,15 +108,9 @@ export async function POST(request: NextRequest) {
     const { inserted } = await insertCanonicalEvent(canonical.row);
 
     if (!inserted) {
-      console.log('[page_viewed] SKIPPED - duplicate (conflict on event_id)');
       return NextResponse.json({ status: 'skipped', reason: 'duplicate' });
     }
 
-    console.log('[page_viewed] INSERT success', {
-      duration: Date.now() - startTime,
-      userId: userId ? 'present' : 'none',
-      anonymousId: anonymousId ? 'present' : 'none',
-    });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('[page_viewed] ERROR:', {
