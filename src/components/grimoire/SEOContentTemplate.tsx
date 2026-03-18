@@ -28,6 +28,7 @@ import { getInlineCtaVariant, getAnonId } from '@/lib/ab-tests-server';
 import { GrimoireSearch } from '@/app/grimoire/GrimoireSearch';
 import { StickyBottomCTA } from './StickyBottomCTA';
 import { ChartPreviewTeaser } from './ChartPreviewTeaser';
+import { SignTransitTeaser } from './SignTransitTeaser';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 
 /**
@@ -157,6 +158,10 @@ export interface SEOContentTemplateProps {
 
   // Components
   components?: React.ReactNode;
+
+  // Sign for transit teaser (shows live transits affecting this sign)
+  transitSign?: string;
+  transitSignDisplay?: string;
 }
 
 export async function SEOContentTemplate({
@@ -209,6 +214,8 @@ export async function SEOContentTemplate({
   contextualCopy,
   contextualCopyVariant = 'note',
   components,
+  transitSign,
+  transitSignDisplay,
 }: SEOContentTemplateProps) {
   // Get A/B test variant for inline CTA (server-side)
   const inlineCtaVariant = await getInlineCtaVariant();
@@ -424,8 +431,16 @@ export async function SEOContentTemplate({
           </section>
         )}
 
-        {/* Chart Preview Teaser - interactive conversion widget */}
-        <ChartPreviewTeaser hub={contextualHub} />
+        {/* Sign Transit Teaser - shows live transits + birthday input for this sign */}
+        {transitSign && transitSignDisplay && (
+          <SignTransitTeaser
+            sign={transitSign}
+            signDisplay={transitSignDisplay}
+          />
+        )}
+
+        {/* Chart Preview Teaser - only on non-horoscope pages (transit teaser handles it) */}
+        {!transitSign && <ChartPreviewTeaser hub={contextualHub} />}
 
         {fullGuide && (
           <ReadFullGuidePrompt
