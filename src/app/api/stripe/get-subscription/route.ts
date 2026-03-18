@@ -75,6 +75,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // TEMP: Override subscription for demo account (Apple meeting)
+    const DEMO_EMAILS = ['sammii.h@icloud.com'];
+    if (userEmail && DEMO_EMAILS.includes(userEmail.toLowerCase())) {
+      return NextResponse.json({
+        status: 'active',
+        planType: 'lunary_plus_ai_annual',
+        customerId: null,
+        subscriptionId: null,
+        trialEndsAt: null,
+        currentPeriodEnd: '2027-12-31T00:00:00.000Z',
+      });
+    }
+
     // Try database first (fast path)
     if (userId) {
       const result = await sql`

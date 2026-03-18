@@ -429,6 +429,12 @@ const buildPlatformPayload = (
   if (platformStr === 'tiktok' && shouldUseVideo) {
     const question = extractTikTokEngagementQuestion(content);
     if (question) payload.firstComment = question;
+    // Check: warn if TikTok caption has no hashtags
+    if (!content.includes('#')) {
+      console.warn(
+        `[send] TikTok video post missing hashtags — content length: ${content.length}`,
+      );
+    }
   } else if (platformStr === 'instagram') {
     const hashtags = extractInstagramHashtags(content);
     if (hashtags) {
@@ -436,6 +442,20 @@ const buildPlatformPayload = (
       // Strip trailing hashtag block from caption body
       const parts = content.split('\n\n');
       payload.content = parts.slice(0, -1).join('\n\n').trim();
+    } else if (content.includes('#')) {
+      // Hashtags exist but weren't in a clean trailing block — still move to first comment
+      const allHashtags = content.match(/#[a-zA-Z0-9_]+/g);
+      if (allHashtags && allHashtags.length >= 2) {
+        payload.firstComment = allHashtags.join(' ');
+        payload.content = content
+          .replace(/#[a-zA-Z0-9_]+/g, '')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+      }
+    } else {
+      console.warn(
+        `[send] Instagram post missing hashtags — content length: ${content.length}`,
+      );
     }
   } else if (platformStr === 'facebook' || platformStr === 'linkedin') {
     const question = extractEngagementQuestion(content);

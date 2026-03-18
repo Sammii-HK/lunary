@@ -43,18 +43,19 @@ interface SpellcastPostParams {
 
 export async function spellcastFetch(
   path: string,
-  options: RequestInit = {},
+  options: RequestInit & { timeoutMs?: number } = {},
 ): Promise<Response> {
   const { url, apiKey } = getSpellcastConfig();
+  const { timeoutMs, ...fetchOptions } = options;
 
   return fetch(`${url}${path}`, {
-    ...options,
+    ...fetchOptions,
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
-      ...options.headers,
+      ...fetchOptions.headers,
     },
-    signal: AbortSignal.timeout(15000),
+    signal: AbortSignal.timeout(timeoutMs ?? 15000),
   });
 }
 
@@ -93,9 +94,15 @@ export async function postToSpellcast(
   const { accountSetId } = getSpellcastConfig();
 
   try {
+    console.log(
+      `[spellcast] postToSpellcast: platform=${params.platform}, media=${params.media?.length ?? 0}`,
+    );
     const selectedAccountIds = await resolveSelectedAccountIds(accountSetId, [
       params.platform,
     ]);
+    console.log(
+      `[spellcast] selectedAccountIds: ${JSON.stringify(selectedAccountIds)}`,
+    );
 
     // Detect Instagram stories: send postType 'story' so Postiz uses the correct
     // Instagram Stories publisher. instagramOptions.isStory is NOT forwarded because
@@ -115,8 +122,11 @@ export async function postToSpellcast(
     };
 
     // 1. Create draft post
+    // Longer timeout when media is included — OG images may need on-demand generation
+    const hasMedia = params.media && params.media.length > 0;
     const createRes = await spellcastFetch('/api/posts', {
       method: 'POST',
+      timeoutMs: hasMedia ? 60000 : 15000,
       body: JSON.stringify({
         content,
         mediaUrls: params.media?.map((m) => m.url) ?? [],
@@ -131,6 +141,9 @@ export async function postToSpellcast(
 
     if (!createRes.ok) {
       const errorText = await createRes.text();
+      console.error(
+        `[spellcast] Create failed: ${createRes.status} ${errorText.slice(0, 200)}`,
+      );
       return {
         success: false,
         error: `Spellcast create failed (${createRes.status}): ${errorText}`,
@@ -139,11 +152,13 @@ export async function postToSpellcast(
     }
 
     const draft = await createRes.json();
+    console.log(`[spellcast] Draft created: ${draft.id}, scheduling...`);
 
     // 2. Schedule the draft
+    // Longer timeout — Postiz downloads + processes media during scheduling
     const scheduleRes = await spellcastFetch(
       `/api/posts/${draft.id}/schedule`,
-      { method: 'POST' },
+      { method: 'POST', timeoutMs: hasMedia ? 60000 : 15000 },
     );
 
     if (!scheduleRes.ok) {

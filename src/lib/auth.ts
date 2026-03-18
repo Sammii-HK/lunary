@@ -269,6 +269,21 @@ async function initializeAuth() {
 
             if (pool) {
               await recordSignupConversionEvent(pool, user);
+
+              // Create a free subscription row so lifecycle drip emails can find this user
+              try {
+                await pool.query(
+                  `INSERT INTO subscriptions (user_id, user_email, user_name, status, plan_type, created_at)
+                   VALUES ($1, $2, $3, 'free', 'free', NOW())
+                   ON CONFLICT (user_id) DO NOTHING`,
+                  [user.id, user.email || null, user.name || null],
+                );
+              } catch (subError) {
+                console.error(
+                  'Failed to create free subscription row:',
+                  subError,
+                );
+              }
             }
             // Welcome email is sent after email verification to avoid emailing unverified/bot addresses
           },

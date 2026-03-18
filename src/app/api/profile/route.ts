@@ -29,7 +29,19 @@ export async function GET(request: NextRequest) {
     ]);
 
     const profile = profileResult.rows[0] || null;
-    const subscription = subscriptionResult.rows[0] || null;
+    let subscription = subscriptionResult.rows[0] || null;
+
+    // TEMP: Override subscription for demo account (Apple meeting)
+    const DEMO_EMAILS = ['sammii.h@icloud.com'];
+    if (user.email && DEMO_EMAILS.includes(user.email.toLowerCase())) {
+      subscription = {
+        ...(subscription || {}),
+        status: 'active',
+        plan_type: 'lunary_plus_ai_annual',
+        trial_ends_at: null,
+        current_period_end: '2027-12-31T00:00:00.000Z',
+      };
+    }
 
     // Decrypt sensitive PII fields (name and birthday are encrypted)
     const decryptedName = profile?.name ? decrypt(profile.name) : null;

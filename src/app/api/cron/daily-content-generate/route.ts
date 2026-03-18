@@ -21,7 +21,10 @@ import {
   getCriticalIssues,
 } from '@/lib/social/video-scripts/validation';
 import { generateDailyBatch } from '@/lib/instagram/content-orchestrator';
-import { generateInstagramReelCaption } from '@/lib/social/video-scripts/tiktok/metadata';
+import {
+  generateInstagramReelCaption,
+  generateTikTokHashtags,
+} from '@/lib/social/video-scripts/tiktok/metadata';
 import {
   categoryThemes,
   GRIMOIRE_CATEGORIES,
@@ -50,6 +53,29 @@ const DAY_NAMES = [
 function igContentTypeToCategory(contentTypeKey: string | undefined): string {
   if (contentTypeKey === 'angel_numbers') return 'angel-numbers';
   return 'zodiac';
+}
+
+/**
+ * Map content type key to a visual/hashtag category
+ */
+function contentTypeKeyToCategory(
+  contentTypeKey: string | undefined,
+): string | undefined {
+  if (!contentTypeKey) return undefined;
+  const map: Record<string, string> = {
+    'angel-number': 'angel-numbers',
+    'sign-check': 'zodiac',
+    'sign-identity': 'zodiac',
+    'sign-origin': 'zodiac',
+    'chiron-sign': 'zodiac',
+    ranking: 'zodiac',
+    'hot-take': 'zodiac',
+    quiz: 'zodiac',
+    myth: 'zodiac',
+    'did-you-know': 'zodiac',
+    'transit-alert': 'transits',
+  };
+  return map[contentTypeKey];
 }
 
 /**
@@ -248,6 +274,30 @@ export async function GET(request: NextRequest) {
             validated.metadata.scheduledHour = primaryHour;
             validated.metadata.slot = 'primary';
           }
+
+          // Generate TikTok caption with hashtags if missing
+          if (!validated.writtenPostContent) {
+            const hookLine =
+              validated.hookText || validated.fullScript.split('\n')[0] || '';
+            const cat = contentTypeKeyToCategory(contentType) || 'zodiac';
+            const fakeFacet = {
+              title: validated.facetTitle,
+              slug: validated.facetTitle
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-'),
+            };
+            const fakeTheme = {
+              category: cat,
+              name: validated.themeName || '',
+            };
+            const hashtags = generateTikTokHashtags(
+              fakeFacet as Parameters<typeof generateTikTokHashtags>[0],
+              fakeTheme as Parameters<typeof generateTikTokHashtags>[1],
+              validated.scheduledDate,
+            );
+            validated.writtenPostContent = `${hookLine}\n\n${hashtags.join(' ')}`;
+          }
+
           const id = await saveVideoScript(validated);
           validated.id = id;
 
@@ -338,6 +388,31 @@ export async function GET(request: NextRequest) {
               validated.metadata.scheduledHour = hour;
               validated.metadata.slot = slot;
             }
+
+            // Generate TikTok caption with hashtags if missing
+            if (!validated.writtenPostContent) {
+              const hookLine =
+                validated.hookText || validated.fullScript.split('\n')[0] || '';
+              const contentTypeKey = (
+                validated.metadata as Record<string, unknown>
+              )?.contentTypeKey as string | undefined;
+              const category =
+                contentTypeKeyToCategory(contentTypeKey) || 'zodiac';
+              const fakeFacet = {
+                title: validated.facetTitle,
+                slug: validated.facetTitle
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, '-'),
+              };
+              const fakeTheme = { category, name: validated.themeName || '' };
+              const hashtags = generateTikTokHashtags(
+                fakeFacet as Parameters<typeof generateTikTokHashtags>[0],
+                fakeTheme as Parameters<typeof generateTikTokHashtags>[1],
+                validated.scheduledDate,
+              );
+              validated.writtenPostContent = `${hookLine}\n\n${hashtags.join(' ')}`;
+            }
+
             const id = await saveVideoScript(validated);
             validated.id = id;
 
@@ -372,11 +447,129 @@ export async function GET(request: NextRequest) {
             console.log(
               `[Daily] ${slot}: ${dayConfig.contentType} at ${hour}:00`,
             );
+          } else {
+            console.warn(
+              `[Daily] ${slot}: ${dayConfig.contentType} failed validation, skipped`,
+            );
+            errors.push(
+              `${slot}: ${dayConfig.contentType} failed validation after retry`,
+            );
           }
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Unknown error';
           errors.push(`${slot}: ${msg}`);
           console.error(`[Daily] ${slot} failed:`, err);
+        }
+      }
+
+      // Ensure we have 4 TikToks — backfill if any slot was dropped
+      const tiktokTotal =
+        results.tiktokPrimary +
+        results.tiktokEngagementA +
+        results.tiktokEngagementB +
+        results.tiktokEngagementC;
+      if (tiktokTotal < 4) {
+        const missing = 4 - tiktokTotal;
+        console.log(
+          `[Daily] Only ${tiktokTotal}/4 TikToks generated, backfilling ${missing}`,
+        );
+        const fallbackTypes: ContentType[] = [
+          'sign-check',
+          'did-you-know',
+          'hot-take',
+          'myth',
+          'ranking',
+          'sign-identity',
+          'quiz',
+        ];
+        const usedTopics = new Set<string>();
+        for (let fi = 0; fi < missing; fi++) {
+          let fbScript: VideoScript | null = null;
+          // Try multiple content types to get a unique topic
+          for (let ti = 0; ti < fallbackTypes.length && !fbScript; ti++) {
+            const fbTypeIdx = (fi + ti) % fallbackTypes.length;
+            const candidateType = fallbackTypes[fbTypeIdx];
+            const candidate = await generateScriptForContentType(
+              candidateType,
+              tomorrow,
+            );
+            if (candidate && !usedTopics.has(candidate.facetTitle)) {
+              fbScript = candidate;
+              if (fbScript.metadata) {
+                (fbScript.metadata as Record<string, unknown>).contentTypeKey =
+                  candidateType;
+              }
+            }
+          }
+          if (!fbScript) continue;
+          usedTopics.add(fbScript.facetTitle);
+          try {
+            const fbHour = 10 + fi * 3; // space them out
+            fbScript.scheduledDate = new Date(
+              `${tomorrowKey}T${String(fbHour).padStart(2, '0')}:00:00.000Z`,
+            );
+            fbScript.platform = 'tiktok';
+
+            // Generate caption with hashtags
+            if (!fbScript.writtenPostContent) {
+              const hookLine =
+                fbScript.hookText || fbScript.fullScript.split('\n')[0] || '';
+              const fbContentType =
+                ((fbScript.metadata as Record<string, unknown>)
+                  ?.contentTypeKey as string) || 'sign-check';
+              const cat = contentTypeKeyToCategory(fbContentType) || 'zodiac';
+              const fakeFacet = {
+                title: fbScript.facetTitle,
+                slug: fbScript.facetTitle
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, '-'),
+              };
+              const fakeTheme = {
+                category: cat,
+                name: fbScript.themeName || '',
+              };
+              const hashtags = generateTikTokHashtags(
+                fakeFacet as Parameters<typeof generateTikTokHashtags>[0],
+                fakeTheme as Parameters<typeof generateTikTokHashtags>[1],
+                fbScript.scheduledDate,
+              );
+              fbScript.writtenPostContent = `${hookLine}\n\n${hashtags.join(' ')}`;
+            }
+
+            const fbId = await saveVideoScript(fbScript);
+            await sql`
+              INSERT INTO social_posts (
+                content, platform, post_type, topic, status, image_url, video_url,
+                scheduled_date, week_theme, week_start, source_type, source_id,
+                source_title, created_at
+              )
+              SELECT ${fbScript.writtenPostContent || fbScript.fullScript}, 'tiktok', 'video',
+                     ${fbScript.facetTitle}, 'pending', ${null}, ${null},
+                     ${fbScript.scheduledDate.toISOString()}, ${fbScript.themeName}, ${tomorrowKey},
+                     'video_script', ${fbId}, ${fbScript.facetTitle}, NOW()
+              WHERE NOT EXISTS (
+                SELECT 1 FROM social_posts
+                WHERE platform = 'tiktok' AND post_type = 'video'
+                  AND topic = ${fbScript.facetTitle}
+                  AND scheduled_date = ${fbScript.scheduledDate.toISOString()}
+              )
+            `;
+            await sql`
+              INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
+              VALUES (${fbId}, ${tomorrowKey}, ${tomorrowKey}, ${fbScript.facetTitle}, 'pending', NOW(), NOW())
+              ON CONFLICT (script_id)
+              DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
+            `;
+            console.log(
+              `[Daily] Backfill TikTok ${fi + 1}: ${fbScript.facetTitle} at ${fbHour}:00`,
+            );
+            // Count in the first empty slot
+            if (!results.tiktokEngagementA) results.tiktokEngagementA = 1;
+            else if (!results.tiktokEngagementB) results.tiktokEngagementB = 1;
+            else if (!results.tiktokEngagementC) results.tiktokEngagementC = 1;
+          } catch (fbErr) {
+            console.error(`[Daily] Backfill TikTok ${fi + 1} failed:`, fbErr);
+          }
         }
       }
     } catch (err) {
@@ -472,8 +665,11 @@ export async function GET(request: NextRequest) {
           const imageUrl = Array.isArray(post.imageUrls)
             ? post.imageUrls.join('|')
             : null;
+          const hashtagStr = Array.isArray(post.hashtags)
+            ? post.hashtags.join(' ')
+            : post.hashtags || '';
           const caption =
-            post.caption + (post.hashtags ? `\n\n${post.hashtags}` : '');
+            post.caption + (hashtagStr ? `\n\n${hashtagStr}` : '');
 
           await sql`
             INSERT INTO social_posts (

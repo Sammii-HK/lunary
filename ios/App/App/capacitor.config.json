@@ -22,7 +22,6 @@
     "HapticsPlugin",
     "SharePlugin",
     "PurchasesPlugin",
-    "CapacitorRateAppPlugin",
-    "SignInWithApplePlugin"
+    "CapacitorRateAppPlugin"
   ]
 }

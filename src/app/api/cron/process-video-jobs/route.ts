@@ -169,6 +169,233 @@ function trimToMax(text: string, maxChars: number, addEllipsis = true) {
 
 // Avoid passing array literals as strings; use parameterized arrays instead.
 
+/**
+ * Map contentTypeKey (from script metadata) to a theme category
+ * so we can generate hashtags even when theme/facet lookup fails.
+ */
+const CONTENT_TYPE_TO_CATEGORY: Record<string, string> = {
+  angel_numbers: 'numerology',
+  sign_identity: 'zodiac',
+  zodiac_sun: 'zodiac',
+  zodiac_moon: 'zodiac',
+  zodiac_rising: 'zodiac',
+  zodiac_compatibility: 'zodiac',
+  zodiac_ranking: 'zodiac',
+  zodiac_hot_take: 'zodiac',
+  birth_chart: 'zodiac',
+  transit: 'planetary',
+  retrograde: 'planetary',
+  retrogrades: 'planetary',
+  moon_phase: 'lunar',
+  moon_phases: 'lunar',
+  new_moon: 'lunar',
+  full_moon: 'lunar',
+  tarot_card: 'tarot',
+  tarot_reading: 'tarot',
+  tarot_spread: 'tarot',
+  crystal: 'crystals',
+  crystal_healing: 'crystals',
+  spell: 'spells',
+  spellwork: 'spells',
+  ritual: 'spells',
+  chakra: 'chakras',
+  rune: 'runes',
+  sabbat: 'sabbat',
+  eclipse: 'planetary',
+  eclipses: 'planetary',
+};
+
+/**
+ * Fallback hashtag pools by category for when theme/facet resolution fails.
+ * TikTok: 3-5 varied, on-topic tags (no brand tag — stunts TikTok reach).
+ * Instagram: 5 IG-native tags (no #fyp/#learnontiktok).
+ */
+const FALLBACK_HASHTAGS: Record<
+  string,
+  { tiktok: string[]; instagram: string[] }
+> = {
+  zodiac: {
+    tiktok: [
+      '#astrology',
+      '#zodiac',
+      '#zodiacsigns',
+      '#astrologytiktok',
+      '#spiritualtiktok',
+    ],
+    instagram: [
+      '#astrology',
+      '#zodiac',
+      '#zodiacsigns',
+      '#birthchart',
+      '#astrologycommunity',
+    ],
+  },
+  tarot: {
+    tiktok: [
+      '#tarot',
+      '#tarotreading',
+      '#tarottok',
+      '#tarotcards',
+      '#witchtok',
+    ],
+    instagram: [
+      '#tarot',
+      '#tarotreading',
+      '#tarotcommunity',
+      '#tarotcards',
+      '#witchesofinstagram',
+    ],
+  },
+  lunar: {
+    tiktok: [
+      '#moonphases',
+      '#moon',
+      '#moonmagic',
+      '#witchtok',
+      '#spiritualtiktok',
+    ],
+    instagram: [
+      '#moonphases',
+      '#moonmagic',
+      '#newmoon',
+      '#fullmoon',
+      '#witchesofinstagram',
+    ],
+  },
+  planetary: {
+    tiktok: [
+      '#astrology',
+      '#zodiac',
+      '#astrologytiktok',
+      '#spiritualtiktok',
+      '#witchtok',
+    ],
+    instagram: [
+      '#astrology',
+      '#zodiac',
+      '#zodiacsigns',
+      '#birthchart',
+      '#spiritualinstagram',
+    ],
+  },
+  numerology: {
+    tiktok: [
+      '#numerology',
+      '#angelnumbers',
+      '#manifestation',
+      '#spiritualtiktok',
+      '#spiritualawakening',
+    ],
+    instagram: [
+      '#numerology',
+      '#angelnumbers',
+      '#manifestation',
+      '#spiritualawakening',
+      '#spiritualinstagram',
+    ],
+  },
+  crystals: {
+    tiktok: [
+      '#crystals',
+      '#crystaltok',
+      '#crystalhealing',
+      '#witchtok',
+      '#spiritualtiktok',
+    ],
+    instagram: [
+      '#crystals',
+      '#crystalhealing',
+      '#crystalcollection',
+      '#witchesofinstagram',
+      '#spiritualinstagram',
+    ],
+  },
+  spells: {
+    tiktok: ['#witchtok', '#spells', '#witchcraft', '#spellwork', '#babywitch'],
+    instagram: [
+      '#witchesofinstagram',
+      '#spells',
+      '#witchcraft',
+      '#spellcasting',
+      '#witchyvibes',
+    ],
+  },
+  chakras: {
+    tiktok: [
+      '#chakras',
+      '#spiritual',
+      '#meditation',
+      '#healing',
+      '#spiritualtiktok',
+    ],
+    instagram: [
+      '#chakras',
+      '#spiritual',
+      '#meditation',
+      '#healing',
+      '#spiritualinstagram',
+    ],
+  },
+  runes: {
+    tiktok: ['#runes', '#norse', '#viking', '#elderfuthark', '#witchtok'],
+    instagram: [
+      '#runes',
+      '#norsemythology',
+      '#elderfuthark',
+      '#divination',
+      '#witchesofinstagram',
+    ],
+  },
+  sabbat: {
+    tiktok: [
+      '#pagan',
+      '#wicca',
+      '#witchtok',
+      '#witchcraft',
+      '#spiritualtiktok',
+    ],
+    instagram: [
+      '#pagan',
+      '#wicca',
+      '#witchesofinstagram',
+      '#witchcraft',
+      '#sabbat',
+    ],
+  },
+};
+
+const DEFAULT_FALLBACK_HASHTAGS = {
+  tiktok: [
+    '#spiritualtiktok',
+    '#witchtok',
+    '#spiritual',
+    '#spiritualawakening',
+  ],
+  instagram: [
+    '#spiritualinstagram',
+    '#witchesofinstagram',
+    '#spiritual',
+    '#mystical',
+    '#cosmicenergy',
+  ],
+};
+
+/**
+ * Generate fallback hashtags from script metadata when theme/facet lookup fails.
+ */
+function getFallbackHashtags(
+  platform: string,
+  metadata: Record<string, unknown>,
+): string {
+  const contentTypeKey = String(metadata?.contentTypeKey || '');
+  const category = CONTENT_TYPE_TO_CATEGORY[contentTypeKey] || '';
+  const pool = FALLBACK_HASHTAGS[category];
+  const platformKey = platform === 'instagram' ? 'instagram' : 'tiktok';
+  const tags = pool?.[platformKey] || DEFAULT_FALLBACK_HASHTAGS[platformKey];
+  const count = platform === 'instagram' ? 5 : 3;
+  return tags.slice(0, count).join(' ');
+}
+
 const videoHashtagConfig: Record<
   string,
   { useHashtags: boolean; count: number }
@@ -460,6 +687,28 @@ export async function POST(request: NextRequest) {
             console.log(
               `🎬 Sending script ${script.id} to Content Creator for rendering...`,
             );
+
+            // Whisper transcription for accurate subtitle timing
+            let wordTimestamps: Array<{
+              word: string;
+              start: number;
+              end: number;
+            }> = [];
+            try {
+              const whisperWords = await transcribeWithWhisper(audioBuffer);
+              if (whisperWords.length > 0) {
+                wordTimestamps = whisperWords;
+                console.log(
+                  `🎙️ Whisper: ${whisperWords.length} word timestamps for script ${script.id}`,
+                );
+              }
+            } catch (whisperErr) {
+              console.warn(
+                `⚠️ Whisper transcription failed, render server will use fallback timing:`,
+                whisperErr instanceof Error ? whisperErr.message : whisperErr,
+              );
+            }
+
             const renderSecret =
               process.env.LUNARY_RENDER_SECRET || process.env.CRON_SECRET;
             const renderResponse = await fetch(
@@ -485,6 +734,9 @@ export async function POST(request: NextRequest) {
                   slug: safeSlug,
                   facetTitle: script.facet_title,
                   dateKey,
+                  wordTimestamps:
+                    wordTimestamps.length > 0 ? wordTimestamps : undefined,
+                  audioDuration,
                 }),
               },
             );
@@ -653,6 +905,27 @@ export async function POST(request: NextRequest) {
                 [tags.domain, tags.topic, tags.brand]
                   .slice(0, config.count)
                   .join(' '),
+              );
+            }
+          } else {
+            // Fallback: derive hashtags from script metadata when theme/facet
+            // lookup fails (common for scripts generated by daily-content-generate)
+            const scriptMeta = (script.metadata || {}) as Record<
+              string,
+              unknown
+            >;
+            for (const platform of shortVideoPlatforms) {
+              const config = videoHashtagConfig[platform] || {
+                useHashtags: false,
+                count: 0,
+              };
+              if (!config.useHashtags || config.count <= 0) {
+                tagsByPlatform.set(platform, '');
+                continue;
+              }
+              tagsByPlatform.set(
+                platform,
+                getFallbackHashtags(platform, scriptMeta),
               );
             }
           }
