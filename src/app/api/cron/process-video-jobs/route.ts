@@ -737,6 +737,12 @@ export async function POST(request: NextRequest) {
                   wordTimestamps:
                     wordTimestamps.length > 0 ? wordTimestamps : undefined,
                   audioDuration,
+                  // Remotion composition props
+                  overlays: overlays || [],
+                  highlightTerms: highlightTerms || [],
+                  categoryVisuals,
+                  seed: `${safeSlug}-${script.id}-${Date.now()}`,
+                  zodiacSign: `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`,
                 }),
               },
             );
