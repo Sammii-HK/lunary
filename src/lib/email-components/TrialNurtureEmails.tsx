@@ -484,25 +484,32 @@ export function TrialReminderEmail({
               📚 Complete digital grimoire
             </Text>
 
+            <Text style={{ fontWeight: '600' }}>
+              {trialDaysRemaining <= 1
+                ? "After today, you'll lose access to:"
+                : "When your trial ends, you'll lose access to:"}
+            </Text>
+            <Text style={{ margin: '15px 0' }}>
+              • 🎴 Your personalised daily tarot pulls
+              <br />
+              • 💬 Unlimited Astral Guide conversations
+              <br />
+              • 🪐 Real-time transit alerts for your chart
+              <br />• ✨ Personalised rituals and grimoire deep dives
+            </Text>
+
             <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
-              <CTAButton href={`${baseUrl}/profile?source=trial-reminder`}>
-                Add Payment Method to Secure Access →
+              <CTAButton href={`${baseUrl}/pricing?nav=app`}>
+                {trialDaysRemaining <= 1
+                  ? 'Keep my access'
+                  : 'See Lunary+ plans'}
               </CTAButton>
             </Section>
 
-            <Text style={{ fontWeight: '600' }}>
-              After your trial ends you will revert to the free plan, and the
-              following premium tools will disappear:
-            </Text>
-            <Text style={{ margin: '15px 0' }}>
-              • 🎯 Personalized birth chart interpretations <br />
-              • 🔮 Daily tarot + horoscope guides tailored to you
-              <br />• ✨ Personalised rituals, grimoire deep dives, and transit
-              alerts
-            </Text>
-            <Text>
-              Lock in your Lunary+ access today and keep all the insights, no
-              payment will be taken until the trial expires.
+            <Text style={{ fontSize: '14px', color: '#6b7280' }}>
+              {trialDaysRemaining <= 1
+                ? 'Upgrade today and your access continues without interruption.'
+                : 'No payment is taken until your trial expires.'}
             </Text>
           </Section>
 
@@ -942,20 +949,15 @@ Hi ${userName || 'there'},
 
 Your free trial ends in ${trialDaysRemaining} ${dayLabel}!
 
-Continue your cosmic journey with full access to personalized features (within plan limits):
-- 🌟 Personalized birth chart insights
-- 🔮 Daily horoscopes and tarot readings
-- 🌙 Transit calendars and cosmic guidance
-- 📚 Complete digital grimoire
+When your trial ends, you'll lose access to:
+- 🎴 Your personalised daily tarot pulls
+- 💬 Unlimited Astral Guide conversations
+- 🪐 Real-time transit alerts for your chart
+- ✨ Personalised rituals and grimoire deep dives
 
-Continue your journey: ${baseUrl}/profile?source=trial-reminder
+See Lunary+ plans: ${baseUrl}/pricing?nav=app
 
-After your trial ends, you automatically switch back to the free tier and lose:
-- 🎯 personalized birth chart interpretations
-- 🔮 your tailored tarot + horoscope guidance
-- ✨ Personalised rituals, grimoire deep dives, and transit alerts
-
-Add a payment method now so the plan continues seamlessly after the trial.
+No payment is taken until your trial expires.
 
 ---
 Unsubscribe: ${unsubscribeUrl}
