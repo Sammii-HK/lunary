@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useId, useRef, FormEvent } from 'react';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,6 +55,8 @@ export function NewsletterSignupForm({
   const resetStatusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+  const turnstileTokenRef = useRef<string | null>(null);
+  const honeypotRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -99,6 +102,24 @@ export function NewsletterSignupForm({
       return;
     }
 
+    // Honeypot check: if the hidden field has a value, silently reject
+    if (honeypotRef.current?.value) {
+      setStatus('success');
+      setMessage(successMessage);
+      setEmail('');
+      return;
+    }
+
+    // Turnstile check
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+      const turnstileToken = turnstileTokenRef.current;
+      if (!turnstileToken) {
+        setStatus('error');
+        setMessage('Please wait for the security check to complete.');
+        return;
+      }
+    }
+
     // Save email for rollback before clearing
     const submittedEmail = email.trim();
 
@@ -116,6 +137,7 @@ export function NewsletterSignupForm({
         body: JSON.stringify({
           email: submittedEmail,
           source,
+          turnstileToken: turnstileTokenRef.current,
           preferences: {
             weeklyNewsletter: true,
             blogUpdates: true,
@@ -124,6 +146,9 @@ export function NewsletterSignupForm({
           },
         }),
       });
+
+      // Reset Turnstile token after use so it cannot be replayed
+      turnstileTokenRef.current = null;
 
       const data = await response.json();
 
@@ -201,6 +226,21 @@ export function NewsletterSignupForm({
           )}
           noValidate
         >
+          {/* Honeypot field: hidden from real users, bots fill it */}
+          <div
+            aria-hidden='true'
+            className='absolute -left-[9999px] -top-[9999px]'
+          >
+            <label htmlFor={`${inputId}-website`}>Website</label>
+            <input
+              ref={honeypotRef}
+              id={`${inputId}-website`}
+              type='text'
+              name='website'
+              tabIndex={-1}
+              autoComplete='off'
+            />
+          </div>
           <div className='flex-1'>
             <label htmlFor={`${inputId}-email`} className='sr-only'>
               Email address
@@ -238,6 +278,19 @@ export function NewsletterSignupForm({
             )}
           </Button>
         </form>
+
+        {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+            onSuccess={(token) => {
+              turnstileTokenRef.current = token;
+            }}
+            onExpire={() => {
+              turnstileTokenRef.current = null;
+            }}
+            options={{ theme: 'dark', size: 'invisible' }}
+          />
+        )}
 
         {message && (
           <div

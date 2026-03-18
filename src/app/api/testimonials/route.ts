@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { checkRateLimit } from '@/lib/api/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,15 +52,59 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  let payload: { name?: string; message?: string };
+  // Rate limit: 3 submissions per IP per 10 minutes
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0] ||
+    request.headers.get('x-real-ip') ||
+    'unknown';
+  const { allowed } = checkRateLimit(`testimonial:${ip}`, 3, 10 * 60 * 1000);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429 },
+    );
+  }
+
+  let payload: { name?: string; message?: string; turnstileToken?: string };
 
   try {
-    payload = (await request.json()) as { name?: string; message?: string };
+    payload = (await request.json()) as {
+      name?: string;
+      message?: string;
+      turnstileToken?: string;
+    };
   } catch (error) {
     return NextResponse.json(
       { error: 'Unable to parse request body.' },
       { status: 400 },
     );
+  }
+
+  // Verify Turnstile token
+  if (process.env.TURNSTILE_SECRET_KEY) {
+    if (!payload.turnstileToken) {
+      return NextResponse.json(
+        { error: 'Security check required' },
+        { status: 403 },
+      );
+    }
+
+    const formData = new FormData();
+    formData.append('secret', process.env.TURNSTILE_SECRET_KEY);
+    formData.append('response', payload.turnstileToken);
+
+    const cfResponse = await fetch(
+      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+      { method: 'POST', body: formData },
+    );
+    const cfResult = (await cfResponse.json()) as { success: boolean };
+
+    if (!cfResult.success) {
+      return NextResponse.json(
+        { error: 'Security check failed. Please try again.' },
+        { status: 403 },
+      );
+    }
   }
 
   const name = (payload.name ?? '').toString().trim();

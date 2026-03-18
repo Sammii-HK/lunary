@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { z } from 'zod';
 import { sendEmail } from '@/lib/email';
+import { checkRateLimit } from '@/lib/api/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,7 @@ const signupSchema = z.object({
   source: z
     .enum(['product_hunt', 'launch_page', 'press_kit', 'tiktok'])
     .default('launch_page'),
+  turnstileToken: z.string().optional(),
   metadata: z
     .object({
       name: z.string().optional(),
@@ -58,10 +60,56 @@ Questions? Reply to this email.`,
   };
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 5 signups per IP per 10 minutes
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0] ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+    const { allowed } = checkRateLimit(`launch:${ip}`, 5, 10 * 60 * 1000);
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Too many requests. Please try again later.',
+        },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
     const parsed = signupSchema.parse(body);
+
+    // Verify Turnstile token
+    if (process.env.TURNSTILE_SECRET_KEY) {
+      if (!parsed.turnstileToken) {
+        return NextResponse.json(
+          { success: false, message: 'Security check required' },
+          { status: 403 },
+        );
+      }
+
+      const formData = new FormData();
+      formData.append('secret', process.env.TURNSTILE_SECRET_KEY);
+      formData.append('response', parsed.turnstileToken);
+
+      const cfResponse = await fetch(
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+        { method: 'POST', body: formData },
+      );
+      const cfResult = (await cfResponse.json()) as { success: boolean };
+
+      if (!cfResult.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Security check failed. Please try again.',
+          },
+          { status: 403 },
+        );
+      }
+    }
 
     const metadata = parsed.metadata ? JSON.stringify(parsed.metadata) : null;
     const normalizedEmail = parsed.email.toLowerCase();
