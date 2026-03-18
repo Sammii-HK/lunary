@@ -206,9 +206,21 @@ export function AuthComponent({
           }
         }
 
-        setSuccess('Account created successfully! You are now signed in.');
         cachedAuthFormData = null;
         setFormData({ email: '', password: '', name: '', birthday: '' });
+
+        // Check if we have a session (email verification may block it)
+        const hasSession = !!(result.data as any)?.session;
+
+        if (!hasSession) {
+          // Email verification required — don't try to redirect
+          setSuccess(
+            'Check your email — we sent you a verification link. Click it to finish signing up.',
+          );
+          return;
+        }
+
+        setSuccess('Account created successfully! Welcome to Lunary.');
 
         await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -217,8 +229,6 @@ export function AuthComponent({
 
         if (onSuccess) {
           onSuccess();
-        } else {
-          setSuccess('Account created successfully! Welcome to Lunary.');
         }
       } else {
         if (isNative) {
