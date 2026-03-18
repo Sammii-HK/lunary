@@ -81,7 +81,10 @@ export default function AuthPage() {
                 Lunary
               </h1>
             </div>
-            <p className='text-zinc-400'>Your Personal Cosmic Journey</p>
+            <p className='text-zinc-400'>
+              Your birth chart, daily transits, and personalised tarot — free
+              for 7 days
+            </p>
           </div>
 
           <AuthComponent defaultToSignUp={defaultToSignUp} />
