@@ -126,17 +126,16 @@ export function TransitBirthdayInput() {
     router.push('/birth-chart');
   };
 
-  // TODO: restore after preview — logged-in users get a link instead
-  // if (authState.isAuthenticated) {
-  //   return (
-  //     <button
-  //       onClick={() => router.push('/horoscope')}
-  //       className="w-full text-left text-xs text-lunary-accent-400 hover:text-lunary-accent-300 transition-colors"
-  //     >
-  //       See how these transits hit your chart →
-  //     </button>
-  //   );
-  // }
+  if (authState.isAuthenticated) {
+    return (
+      <button
+        onClick={() => router.push('/horoscope')}
+        className='w-full text-left text-xs text-lunary-accent-400 hover:text-lunary-accent-300 transition-colors'
+      >
+        See how these transits hit your chart →
+      </button>
+    );
+  }
 
   if (!placements) {
     return (
@@ -257,8 +256,8 @@ export function TransitBirthdayInput() {
           <ChevronRight className='w-4 h-4 transition-transform group-hover:translate-x-0.5' />
         </button>
         <p className='text-xs text-zinc-500 text-center'>
-          Free account — personalised daily transits, full chart, and
-          interpretations
+          7 days of full access — personalised transits, chart readings, and
+          more. No card needed.
         </p>
       </div>
 
@@ -277,8 +276,8 @@ export function TransitBirthdayInput() {
                 See your full transit report
               </Heading>
               <p className='text-zinc-300 text-xs sm:text-sm'>
-                Create a free account to unlock personalised daily transits,
-                your full chart, and detailed interpretations.
+                Sign up to unlock 7 days of personalised daily transits, your
+                full chart, and detailed interpretations. No card needed.
               </p>
             </div>
             <AuthComponent

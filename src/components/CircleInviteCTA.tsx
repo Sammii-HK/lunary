@@ -126,7 +126,7 @@ export function CircleInviteCTA() {
           href='/auth/signup'
           className='block w-full rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-center text-sm font-semibold text-white hover:opacity-90 transition-opacity'
         >
-          Create your free account
+          Create your account
         </a>
       </div>
     );

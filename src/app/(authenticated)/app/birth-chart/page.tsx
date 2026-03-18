@@ -73,10 +73,10 @@ const BirthChartPage = () => {
             </h1>
             <div className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 rounded-lg p-6 border border-lunary-primary-700 mb-6'>
               <p className='text-zinc-300 mb-4'>
-                Sign up for a free account and unlock your complete cosmic
-                blueprint with our comprehensive birth chart. We calculate 24+
-                celestial bodies including all planets, asteroids, nodes, and
-                sensitive points for the most detailed astrological analysis.
+                Sign up and unlock your complete cosmic blueprint with our
+                comprehensive birth chart. We calculate 24+ celestial bodies
+                including all planets, asteroids, nodes, and sensitive points
+                for the most detailed astrological analysis.
               </p>
               <ul className='text-sm text-zinc-400 space-y-2 mb-6 text-left'>
                 <li className='flex items-start gap-2'>

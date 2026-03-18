@@ -632,16 +632,14 @@ export default function BestPersonalizedAstrologyAppsPage() {
                 chart
               </li>
               <li>
-                <strong className='text-zinc-100'>
-                  No Ads, Generous Free Tier:
-                </strong>{' '}
-                Unlike Co-Star, free tier has zero ads. Upgrade when you want
-                full personalization.
+                <strong className='text-zinc-100'>No Ads, Free Trial:</strong>{' '}
+                Unlike Co-Star, trial has zero ads. Upgrade when you want full
+                personalization.
               </li>
             </ol>
             <p className='text-sm text-zinc-300 leading-relaxed mt-4'>
-              Start free today with no credit card required, upgrade when you
-              want personalization to your specific chart.
+              Start your free trial today with no credit card required, upgrade
+              when you want personalization to your specific chart.
             </p>
           </div>
         </section>

@@ -36,7 +36,7 @@ export default function SignupChartClient() {
   const headline = searchParams.get('headline') || 'Unlock your personal chart';
   const subline =
     searchParams.get('subline') ||
-    'Create a free account to see your full birth chart, placements, and personalised insights.';
+    'Sign up to see your full birth chart, placements, and 7 days of personalised insights.';
   const location = searchParams.get('location') || 'seo_contextual_nudge';
   const pagePath = searchParams.get('pagePath') || '';
 
@@ -115,7 +115,7 @@ export default function SignupChartClient() {
           <p className='text-zinc-400 text-sm mb-6'>{subline}</p>
 
           <p className='text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3'>
-            Included free
+            What you get
           </p>
           <ul className='space-y-3'>
             {FEATURES.map((feature) => (
@@ -139,7 +139,7 @@ export default function SignupChartClient() {
         {/* Auth form panel */}
         <div>
           <Heading variant='h2' className='mb-4 text-white'>
-            Create your free account
+            Start your free trial
           </Heading>
           <AuthComponent
             compact={false}

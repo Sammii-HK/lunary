@@ -49,14 +49,14 @@ export function SignupGate({ referralCode, inviteCode }: SignupGateProps) {
           Your results are ready!
         </h2>
         <p className='text-sm text-zinc-400 max-w-sm mx-auto'>
-          Create a free account to reveal your cosmic compatibility
+          Create an account to reveal your cosmic compatibility
         </p>
 
         <Link
           href={signupUrl}
           className='inline-flex items-center justify-center px-8 py-3 text-sm font-medium rounded-lg bg-lunary-primary-600 hover:bg-lunary-primary-500 text-white transition-colors'
         >
-          Sign Up Free to See Results
+          Sign Up to See Results
         </Link>
       </div>
     </div>

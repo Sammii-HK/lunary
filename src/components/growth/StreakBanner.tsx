@@ -65,7 +65,7 @@ export function StreakBanner({
       >
         <Flame className='w-4 h-4 text-zinc-500 group-hover:text-lunary-rose' />
         <span className='text-sm text-zinc-400 group-hover:text-zinc-200'>
-          Start your cosmic streak — create a free Lunary profile
+          Start your cosmic streak — create your Lunary profile
         </span>
       </Link>
     );
