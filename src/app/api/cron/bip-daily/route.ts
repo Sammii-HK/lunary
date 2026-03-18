@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { getOpenAI, LLM_MODEL } from '@/lib/openai-client';
 import { scheduleTextPost } from '@/lib/bip-spellcast';
 import { syncStripeDiscounts } from '@/lib/analytics/sync-stripe-discounts';
+import { getSearchConsoleData } from '@/lib/google/search-console';
 
 export const dynamic = 'force-dynamic';
 
@@ -139,21 +140,51 @@ export async function GET(request: NextRequest) {
     }
     const showMrr = mrr > 27;
 
-    // SEO from bip_state (24hr staleness limit, omit if stale)
+    // SEO: fetch directly from Google Search Console API
+    // Current 7d vs previous 7d for week-on-week trend
+    // Also fetch 28d-ago 7d window for month-on-month comparison
     let impressionsPerDay = 0;
     let clicksPerDay = 0;
+    let avgPosition = 0;
+    let ctr = 0;
+    let prevImpressionsPerDay = 0;
+    let monthAgoImpressionsPerDay = 0;
     try {
-      const seoResult = await sql`
-        SELECT key, value FROM bip_state
-        WHERE key IN ('seo_impressions_per_day', 'seo_clicks_per_day')
-          AND updated_at > NOW() - INTERVAL '24 hours'`;
-      for (const row of seoResult.rows) {
-        if (row.key === 'seo_impressions_per_day')
-          impressionsPerDay = Number(row.value) || 0;
-        if (row.key === 'seo_clicks_per_day')
-          clicksPerDay = Number(row.value) || 0;
+      const now = new Date();
+      const fmt = (d: Date) => d.toISOString().split('T')[0];
+
+      // GSC data has ~3 day lag
+      const currentEnd = new Date(now.getTime() - 3 * dayMs);
+      const currentStart = new Date(currentEnd.getTime() - 7 * dayMs);
+      const prevEnd = new Date(currentStart.getTime() - 1 * dayMs);
+      const prevStart = new Date(prevEnd.getTime() - 7 * dayMs);
+      const monthAgoEnd = new Date(currentEnd.getTime() - 28 * dayMs);
+      const monthAgoStart = new Date(monthAgoEnd.getTime() - 7 * dayMs);
+
+      const [current, prev, monthAgo] = await Promise.all([
+        getSearchConsoleData(fmt(currentStart), fmt(currentEnd)),
+        getSearchConsoleData(fmt(prevStart), fmt(prevEnd)),
+        getSearchConsoleData(fmt(monthAgoStart), fmt(monthAgoEnd)),
+      ]);
+
+      if (current) {
+        impressionsPerDay = Math.round((current.totalImpressions || 0) / 7);
+        clicksPerDay = Math.round((current.totalClicks || 0) / 7);
+        avgPosition = current.averagePosition || 0;
+        ctr = current.averageCtr
+          ? Math.round(current.averageCtr * 100 * 10) / 10
+          : 0;
       }
-    } catch {
+      if (prev) {
+        prevImpressionsPerDay = Math.round((prev.totalImpressions || 0) / 7);
+      }
+      if (monthAgo) {
+        monthAgoImpressionsPerDay = Math.round(
+          (monthAgo.totalImpressions || 0) / 7,
+        );
+      }
+    } catch (e) {
+      console.error('[BIP Daily] Search Console fetch failed:', e);
       // Non-critical — post without SEO
     }
 
@@ -164,22 +195,40 @@ export async function GET(request: NextRequest) {
     const bullets: string[] = [];
     if (mau > 0) bullets.push(`✅ ${mau} MAU this month`);
     if (showMrr) bullets.push(`✅ £${mrr.toFixed(2)} MRR`);
-    if (newSignupsYesterday > 0)
+    if (newSignupsYesterday >= 5)
       bullets.push(`✅ ${newSignupsYesterday} new signups yesterday`);
-    if (impressionsPerDay > 0 && clicksPerDay > 0)
-      bullets.push(
-        `✅ ${impressionsPerDay.toLocaleString()} impressions/day, ${clicksPerDay} clicks/day`,
-      );
-    else if (impressionsPerDay > 0)
-      bullets.push(
-        `✅ ${impressionsPerDay.toLocaleString()} SEO impressions/day`,
-      );
-    if (dau > 0) {
-      const dauLine = isRecord
-        ? `✅ ${dau} DAU yesterday — new 30-day record`
-        : `✅ ${dau} DAU yesterday`;
-      bullets.push(dauLine);
+    if (impressionsPerDay > 0) {
+      // Impressions with trend comparison
+      let impBullet = `✅ ${impressionsPerDay.toLocaleString()} impressions/day`;
+      const compareBase =
+        monthAgoImpressionsPerDay > 0
+          ? monthAgoImpressionsPerDay
+          : prevImpressionsPerDay;
+      const compareLabel =
+        monthAgoImpressionsPerDay > 0 ? 'a month ago' : 'last week';
+      if (compareBase > 0 && compareBase !== impressionsPerDay) {
+        const ratio = impressionsPerDay / compareBase;
+        if (ratio >= 1.5) {
+          impBullet += ` (${ratio.toFixed(1)}x from ${compareBase.toLocaleString()} ${compareLabel})`;
+        } else {
+          const pctChange = Math.round((ratio - 1) * 100);
+          if (pctChange !== 0) {
+            impBullet += ` (${pctChange > 0 ? '+' : ''}${pctChange}% vs ${compareLabel})`;
+          }
+        }
+      }
+      bullets.push(impBullet);
+
+      // Clicks
+      if (clicksPerDay > 0) bullets.push(`✅ ${clicksPerDay} clicks/day`);
+
+      // Average position
+      if (avgPosition > 0)
+        bullets.push(
+          `✅ avg position ${avgPosition.toFixed(1)} (page ${Math.ceil(avgPosition / 10)})`,
+        );
     }
+    // DAU omitted — too volatile and not impressive yet at current scale
 
     const bulletBlock = bullets.join('\n');
 
@@ -201,17 +250,59 @@ export async function GET(request: NextRequest) {
     // LLM generates ONLY the hook line + closing question (no numbers)
     // -----------------------------------------------------------------------
 
+    // Determine Google ranking phase context for closing line
+    let seoContext = '';
+    if (impressionsPerDay > 0) {
+      const impressionsGrew =
+        prevImpressionsPerDay > 0 &&
+        impressionsPerDay > prevImpressionsPerDay * 1.3;
+      const ctrLow = ctr > 0 && ctr < 1.5;
+      const positionHigh = avgPosition > 20;
+      const positionMid = avgPosition > 10 && avgPosition <= 20;
+
+      if (impressionsGrew && ctrLow) {
+        seoContext = `SEO context: impressions are growing fast but CTR is low (${ctr}%). This is the Google Dance phase — Google is testing the site in new positions. Rising impressions with flat CTR is a GOOD sign, not a problem. The closing should reference this: e.g. "Google's testing us in new positions. Low CTR is expected — clicks follow once rankings stabilise."`;
+      } else if (positionHigh) {
+        seoContext = `SEO context: average position is ${avgPosition.toFixed(1)} (page ${Math.ceil(avgPosition / 10)}). Nobody clicks that far down, but the trajectory matters. The closing should be honest about this: e.g. "Average position ${avgPosition.toFixed(1)}. Nobody clicks page ${Math.ceil(avgPosition / 10)}. But last week it was worse."`;
+      } else if (positionMid) {
+        seoContext = `SEO context: average position is ${avgPosition.toFixed(1)} — approaching page 1. The closing should reference the progress: e.g. "Getting closer to page 1. Position ${avgPosition.toFixed(1)} and trending down."`;
+      } else if (avgPosition > 0 && avgPosition <= 10) {
+        seoContext = `SEO context: average position is ${avgPosition.toFixed(1)} — on page 1. The closing should reference this milestone and what it means for clicks.`;
+      }
+    }
+
+    // Build context string so the LLM knows what's actually happening
+    const metricsContext: string[] = [];
+    if (mau > 0) metricsContext.push(`${mau} MAU`);
+    if (impressionsPerDay > 0) {
+      let impCtx = `${impressionsPerDay.toLocaleString()} SEO impressions/day`;
+      if (monthAgoImpressionsPerDay > 0) {
+        const ratio = impressionsPerDay / monthAgoImpressionsPerDay;
+        impCtx += ` (${ratio.toFixed(1)}x from a month ago)`;
+      } else if (prevImpressionsPerDay > 0) {
+        const ratio = impressionsPerDay / prevImpressionsPerDay;
+        impCtx += ` (${ratio.toFixed(1)}x from last week)`;
+      }
+      metricsContext.push(impCtx);
+    }
+    if (avgPosition > 0)
+      metricsContext.push(`avg Google position ${avgPosition.toFixed(1)}`);
+
     const hookPrompt = `Write two short lines for a Build in Public post (day ${nextDay}).
 
-Line 1 (hook): 4-8 words, honest, specific, lowercase. This completes the sentence "Day ${nextDay} of building in public, ". Do NOT use a dash. Examples: "quiet progress today", "the dashboard finally makes sense", "small wins add up".${isRecord ? ` Yesterday was a new DAU record, reference that specifically.` : ''}
+Today's metrics: ${metricsContext.join(', ') || 'modest progress'}
 
-Line 2 (closing): one short question or observation that invites replies. Must be specific to building a product, not generic motivation.
+Line 1 (hook): 4-8 words, honest, specific, lowercase. This completes the sentence "Day ${nextDay} of building in public, ". Do NOT use a dash. The hook should reflect what the metrics actually show. If impressions are growing fast, say so. If things are flat, be honest about that too. Examples: "SEO just tripled in a month", "impressions are compounding now", "Google is finally noticing".${isRecord ? ` Yesterday was a new DAU record, reference that specifically.` : ''}
+
+Line 2 (closing): one short, specific observation based on the data. NOT a generic question. NOT "excited to see where this goes" or "what's next". Must be a concrete, data-backed takeaway.${seoContext ? `\n\n${seoContext}` : ' Reference any notable metric from the bullet points.'}
 
 STRICT RULES — violation means failure:
 - NO hashtags of any kind
 - NO dashes or hyphens (not em dash, not hyphen, not —)
 - NO "stay motivated", "keep going", or generic hustle phrases
 - NO exclamation marks
+- NO "excited to see", "what's next", "stay tuned", "follow for more"
+- NO generic questions like "what are you building?" or "how's your week going?"
 - UK English, sentence case
 - Reply with ONLY the two lines, no numbering, no labels, no extra text`;
 
@@ -251,6 +342,11 @@ STRICT RULES — violation means failure:
       showMrr,
       newSignupsYesterday,
       impressionsPerDay,
+      clicksPerDay,
+      avgPosition,
+      ctr,
+      prevImpressionsPerDay,
+      monthAgoImpressionsPerDay,
       dau,
       isRecord,
     };

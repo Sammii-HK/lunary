@@ -61,6 +61,33 @@ export async function POST(request: NextRequest) {
     updated.push(`seo_avg_position=${val}`);
   }
 
+  if (body.ctr != null) {
+    const val = String(Number(body.ctr).toFixed(2));
+    await sql`
+      INSERT INTO bip_state (key, value, updated_at) VALUES ('seo_ctr', ${val}, NOW())
+      ON CONFLICT (key) DO UPDATE SET value = ${val}, updated_at = NOW()
+    `;
+    updated.push(`seo_ctr=${val}`);
+  }
+
+  if (body.prev_impressions_per_day != null) {
+    const val = String(Math.round(Number(body.prev_impressions_per_day)));
+    await sql`
+      INSERT INTO bip_state (key, value, updated_at) VALUES ('seo_prev_impressions_per_day', ${val}, NOW())
+      ON CONFLICT (key) DO UPDATE SET value = ${val}, updated_at = NOW()
+    `;
+    updated.push(`seo_prev_impressions_per_day=${val}`);
+  }
+
+  if (body.prev_clicks_per_day != null) {
+    const val = String(Math.round(Number(body.prev_clicks_per_day)));
+    await sql`
+      INSERT INTO bip_state (key, value, updated_at) VALUES ('seo_prev_clicks_per_day', ${val}, NOW())
+      ON CONFLICT (key) DO UPDATE SET value = ${val}, updated_at = NOW()
+    `;
+    updated.push(`seo_prev_clicks_per_day=${val}`);
+  }
+
   if (updated.length === 0) {
     return NextResponse.json(
       { error: 'No valid metrics provided' },
