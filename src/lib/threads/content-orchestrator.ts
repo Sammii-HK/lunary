@@ -6,6 +6,12 @@ import {
   type ThreadsPost,
   type ThreadsPostBatch,
 } from './types';
+import {
+  getWinningPatterns,
+  getBestHookPattern,
+  getTopThemeWords,
+  type WinningPatterns,
+} from '@/lib/social/winning-patterns';
 
 /**
  * Daily schedule (4 slots, same every day):
@@ -57,11 +63,12 @@ export async function generateThreadsBatch(
   const date = new Date(dateStr);
   const seed = date.getDate() + date.getMonth() * 31;
 
-  // Slots 0-2: cosmic transit content, each a different event
-  const [post0, post1, post2] = await Promise.all([
+  // Fetch winning patterns in parallel with cosmic generation (non-blocking)
+  const [post0, post1, post2, winningPatterns] = await Promise.all([
     generateCosmicTimingPost(dateStr, slots[0], 0),
     generateCosmicTimingPost(dateStr, slots[1], 1),
     generateCosmicTimingPost(dateStr, slots[2], 2),
+    getWinningPatterns().catch(() => null),
   ]);
 
   // Deduplicate: if fewer cosmic events exist than slots, ranks collapse
@@ -75,7 +82,7 @@ export async function generateThreadsBatch(
   }
 
   // Slot 3: dear-style referral CTA (drives follower growth)
-  const post3 = buildDearStylePost(dateStr, slots[3], seed);
+  const post3 = buildDearStylePost(dateStr, slots[3], seed, winningPatterns);
 
   const rawPosts = [...cosmicPosts, post3];
   const posts = applyMinuteOffsets(rawPosts, slots, dateStr);
@@ -85,11 +92,13 @@ export async function generateThreadsBatch(
 
 /**
  * Build a dear-style referral CTA post for the orchestrator.
+ * Optionally uses winning patterns to pick a proven hook style.
  */
 function buildDearStylePost(
   dateStr: string,
   slotHour: number,
   seed: number,
+  winningPatterns?: WinningPatterns | null,
 ): ThreadsPost {
   const content = getDearStyleReferralPost(seed);
 
@@ -98,12 +107,25 @@ function buildDearStylePost(
 
   // Split into hook + body (first sentence = hook, rest = body)
   const firstSentenceEnd = content.search(/[.!?]\s/);
-  const hook =
+  let hook =
     firstSentenceEnd > 0
       ? content.slice(0, firstSentenceEnd + 1)
       : content.slice(0, THREADS_CHAR_LIMITS.hook);
   const body =
     firstSentenceEnd > 0 ? content.slice(firstSentenceEnd + 2).trim() : '';
+
+  // If winning patterns show questions outperform, convert statement hooks to questions
+  if (winningPatterns && winningPatterns.confidence > 0.3) {
+    const bestPattern = getBestHookPattern(winningPatterns);
+    if (bestPattern === 'question' && !hook.endsWith('?')) {
+      // Wrap statement hooks as questions where natural
+      const themes = getTopThemeWords(winningPatterns, 3);
+      if (themes.length > 0 && hook.length < THREADS_CHAR_LIMITS.hook - 20) {
+        // Append a related question to boost engagement
+        hook = hook.replace(/\.$/, '') + ' -- what do you think?';
+      }
+    }
+  }
 
   return {
     hook,

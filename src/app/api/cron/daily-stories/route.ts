@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       await import('@/lib/instagram/story-content');
     const { seededRandom } = await import('@/lib/instagram/ig-utils');
 
-    const storyItems = generateDailyStoryData(dateStr);
+    const storyItems = await generateDailyStoryData(dateStr);
 
     // Fill quote slots from DB if today's rotation includes a quote
     const hasQuoteSlot = storyItems.some(

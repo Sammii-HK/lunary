@@ -29,6 +29,10 @@ import {
   getOrbitHookSuggestions,
   shouldAvoidHook,
 } from './orbit-insights';
+import {
+  getEventCalendarForDate,
+  type CalendarEvent,
+} from '@/lib/astro/event-calendar';
 
 const ZODIAC_SIGNS = [
   'Aries',
@@ -66,6 +70,8 @@ const ZODIAC_SEASON_NAMES: Record<string, string> = {
 type CosmicEvent = {
   priority: number;
   type: string;
+  /** Optional reference to the source CalendarEvent for rarity/historical context */
+  calendarEvent?: CalendarEvent;
   generate: (rng: () => number) => {
     hook: string;
     body: string;
@@ -77,8 +83,14 @@ type CosmicEvent = {
 /**
  * Build a ranked list of cosmic events happening on this date.
  * Returns all events sorted by priority — caller picks the top one.
+ *
+ * Integrates with the Event Calendar for CRITICAL/HIGH events
+ * (sabbats, rare ingresses, convergence days) alongside existing detection.
  */
-function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
+async function buildCosmicEvents(
+  dateStr: string,
+  slotHour: number,
+): Promise<CosmicEvent[]> {
   const postDate = new Date(dateStr);
   postDate.setUTCHours(slotHour, 0, 0, 0);
 
@@ -109,6 +121,15 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
       priority: 100,
       type: 'planetary_ingress',
       generate: (rng) => {
+        // Conversation-starting questions that reward replies over likes
+        const engagementPrompts = [
+          `Where does 0° ${transit.toSign} fall in your chart?`,
+          `Drop your rising sign below`,
+          `Which house does ${transit.toSign} rule for you?`,
+          `What are you feeling as ${transit.planet} shifts?`,
+          `Has anyone else noticed the energy change?`,
+        ];
+
         if (transit.hoursUntil > 12) {
           const bodies = [
             'This kind of shift changes the energy for weeks. Pay attention to what starts to surface.',
@@ -116,15 +137,11 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
             'The pressure you have been feeling is about to make more sense.',
             'Energy is already building around this. You might feel it before you can name it.',
           ];
-          const prompts = [
-            `Are you already feeling ${transit.planet} energy building?`,
-            'What has been shifting for you lately?',
-            `What do you expect to change when ${transit.planet} moves into ${transit.toSign}?`,
-          ];
           return {
             hook: `${transit.planet} moves into ${transit.toSign} tomorrow`,
             body: bodies[Math.floor(rng() * bodies.length)],
-            prompt: prompts[Math.floor(rng() * prompts.length)],
+            prompt:
+              engagementPrompts[Math.floor(rng() * engagementPrompts.length)],
             topicTag: 'Astrology',
           };
         } else if (transit.hoursUntil >= 0) {
@@ -141,7 +158,8 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
           return {
             hook: `${transit.planet} is moving into ${transit.toSign}`,
             body: bodies[Math.floor(rng() * bodies.length)],
-            prompt: 'Can you feel the shift?',
+            prompt:
+              engagementPrompts[Math.floor(rng() * engagementPrompts.length)],
             topicTag: 'Astrology',
           };
         } else {
@@ -153,7 +171,8 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
           return {
             hook: `${transit.planet} is now in ${transit.toSign}`,
             body: bodies[Math.floor(rng() * bodies.length)],
-            prompt: `What shifted for you when ${transit.planet} moved into ${transit.toSign}?`,
+            prompt:
+              engagementPrompts[Math.floor(rng() * engagementPrompts.length)],
             topicTag: 'Astrology',
           };
         }
@@ -570,6 +589,226 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
     });
   }
 
+  // --- 11. Event Calendar integration (sabbats, rare ingresses, convergence) ---
+  // Supplements existing detection with scored calendar events.
+  // CRITICAL events (score >= 90) get priority 105+, HIGH events (score >= 60) get 92.
+  try {
+    const calendarEvents = await getEventCalendarForDate(dateStr);
+
+    // Track which event types the existing detection already covers
+    // to avoid duplicating ingress/retrograde/moon events
+    const existingTypes = new Set(events.map((e) => e.type));
+
+    for (const calEvent of calendarEvents) {
+      // Skip LOW/MEDIUM events the existing pipeline already handles well
+      if (calEvent.score < 60) continue;
+
+      // Skip event types already detected by the existing pipeline
+      // (ingress is handled above, retrograde stations too, moon phases too)
+      if (
+        calEvent.eventType === 'ingress' &&
+        existingTypes.has('planetary_ingress')
+      ) {
+        // For CRITICAL or HIGH ingresses with rarity framing,
+        // upgrade the existing ingress event's priority and enhance its hook.
+        // CRITICAL (score >= 90): priority 105+ (above max 100 for generic ingress)
+        // HIGH (score >= 60): priority stays 100 but gets rarity-enriched content
+        if (calEvent.score >= 60 && calEvent.rarityFrame) {
+          const existingIngress = events.find(
+            (e) => e.type === 'planetary_ingress',
+          );
+          if (existingIngress) {
+            if (calEvent.score >= 90) {
+              existingIngress.priority = 105;
+            }
+            existingIngress.calendarEvent = calEvent;
+            // Wrap the existing generate to use rarity-enriched hooks
+            const originalGenerate = existingIngress.generate;
+            existingIngress.generate = (rng) => {
+              const original = originalGenerate(rng);
+
+              // Use convergence narrative when multiple HIGH+ events align
+              if (
+                calEvent.convergenceMultiplier >= 1.5 &&
+                calEvent.hookSuggestions.length > 0
+              ) {
+                const convergenceHook =
+                  calEvent.hookSuggestions[calEvent.hookSuggestions.length - 1];
+                if (convergenceHook.length <= 80) {
+                  original.hook = convergenceHook;
+                }
+              } else if (calEvent.hookSuggestions.length > 0) {
+                // Even without convergence, use the calendar's rarity-aware hooks
+                // instead of generic "[Planet] moves into [Sign] tomorrow" framing.
+                // Pick from shorter hooks that fit the 80-char limit.
+                const shortHooks = calEvent.hookSuggestions.filter(
+                  (h) => h.length <= 80,
+                );
+                if (shortHooks.length > 0) {
+                  original.hook =
+                    shortHooks[Math.floor(rng() * shortHooks.length)];
+                }
+              }
+
+              // Enrich body with rarity framing
+              if (calEvent.rarityFrame) {
+                original.body = `${calEvent.rarityFrame}. ${original.body}`;
+              }
+              // Add historical context when available
+              if (calEvent.historicalContext) {
+                original.body = `${original.body} Theme: ${calEvent.historicalContext}.`;
+              }
+              // Use rarity-enriched prompts for engagement
+              if (calEvent.lastInThisSign) {
+                original.prompt = `First time since ${calEvent.lastInThisSign}. ${original.prompt}`;
+              } else if (
+                calEvent.orbitalPeriodYears &&
+                calEvent.orbitalPeriodYears >= 10
+              ) {
+                // For slower planets without exact lastInThisSign data,
+                // use orbital period framing for engagement
+                original.prompt = `This only happens every ~${Math.round(calEvent.orbitalPeriodYears)} years. ${original.prompt}`;
+              }
+              return original;
+            };
+          }
+        }
+        continue;
+      }
+
+      if (
+        calEvent.eventType === 'retrograde_station' &&
+        (existingTypes.has('retrograde_station') ||
+          existingTypes.has('direct_station'))
+      ) {
+        continue;
+      }
+
+      if (
+        calEvent.eventType === 'moon_phase' &&
+        existingTypes.has('moon_phase_change')
+      ) {
+        continue;
+      }
+
+      if (
+        calEvent.eventType === 'moon_sign_change' &&
+        existingTypes.has('moon_sign_change')
+      ) {
+        continue;
+      }
+
+      if (calEvent.eventType === 'stellium' && existingTypes.has('stellium')) {
+        continue;
+      }
+
+      // Determine priority based on score
+      let priority: number;
+      if (calEvent.score >= 90) {
+        // CRITICAL events: above the current max of 100 for ingress
+        priority = 105 + Math.min(calEvent.score - 90, 10);
+      } else if (calEvent.score >= 60) {
+        // HIGH events: between ingress=100 and zodiac_season=95
+        priority = 92;
+      } else {
+        priority = 80;
+      }
+
+      // Map calendar event types to Threads-compatible types
+      const typeMap: Record<string, string> = {
+        sabbat: 'sabbat',
+        equinox: 'sabbat',
+        solstice: 'sabbat',
+        eclipse: 'calendar_eclipse',
+        aspect: 'calendar_aspect',
+        ingress: 'calendar_ingress',
+        active_retrograde: 'calendar_retrograde',
+      };
+      const cosmicType =
+        typeMap[calEvent.eventType] || `calendar_${calEvent.eventType}`;
+
+      events.push({
+        priority,
+        type: cosmicType,
+        calendarEvent: calEvent,
+        generate: (rng) => {
+          // Use the calendar event's pre-built hook suggestions
+          const hookPool = calEvent.hookSuggestions.filter(
+            (h) => h.length <= 80,
+          );
+          const hook =
+            hookPool.length > 0
+              ? hookPool[Math.floor(rng() * hookPool.length)]
+              : calEvent.name;
+
+          // Build body from rarity frame and historical context
+          const bodyParts: string[] = [];
+          if (calEvent.rarityFrame) {
+            bodyParts.push(calEvent.rarityFrame);
+          }
+          if (calEvent.historicalContext) {
+            bodyParts.push(calEvent.historicalContext);
+          }
+          // For sabbats, include the sabbat description if available
+          if (calEvent.sabbatData?.description) {
+            bodyParts.push(calEvent.sabbatData.description);
+          }
+          const body =
+            bodyParts.length > 0
+              ? bodyParts[Math.floor(rng() * bodyParts.length)]
+              : `${calEvent.name}. The energy shifts today.`;
+
+          // Engagement-first prompts (algorithm rewards replies > likes)
+          const defaultPrompts = [
+            `How are you feeling this shift?`,
+            `What is this bringing up for you?`,
+            `Drop your sign below`,
+          ];
+          const sabbatPrompts = calEvent.sabbatData
+            ? [
+                `How are you marking ${calEvent.name}?`,
+                `What are you releasing this ${calEvent.name}?`,
+                `What ritual feels right for ${calEvent.name}?`,
+              ]
+            : [];
+          const ingressPrompts =
+            calEvent.planet && calEvent.sign
+              ? [
+                  `Where does 0° ${calEvent.sign} fall in your chart?`,
+                  `Drop your rising sign below`,
+                  `Which house does ${calEvent.sign} rule for you?`,
+                ]
+              : [];
+
+          const promptPool = [
+            ...sabbatPrompts,
+            ...ingressPrompts,
+            ...defaultPrompts,
+          ];
+          const prompt = promptPool[Math.floor(rng() * promptPool.length)];
+
+          // Topic tag mapping
+          const tagMap: Record<string, string> = {
+            sabbat: 'Spirituality',
+            equinox: 'Astrology',
+            solstice: 'Astrology',
+            eclipse: 'Astrology',
+            transit: 'Astrology',
+            retrograde: 'Astrology',
+            moon: 'Moon',
+            aspect: 'Astrology',
+          };
+          const topicTag = tagMap[calEvent.category] || 'Astrology';
+
+          return { hook, body, prompt, topicTag };
+        },
+      });
+    }
+  } catch {
+    // Event calendar can throw on edge cases -- degrade gracefully,
+    // the existing detection continues to work without it.
+  }
+
   return events.sort((a, b) => b.priority - a.priority);
 }
 
@@ -577,11 +816,11 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
  * Collect the top N event types that were (or would have been) used on a given day.
  * Since buildCosmicEvents is deterministic, we can replay previous days cheaply.
  */
-function getRecentEventTypes(
+async function getRecentEventTypes(
   dateStr: string,
   slotHour: number,
   lookbackDays: number = 2,
-): Map<string, number> {
+): Promise<Map<string, number>> {
   const counts = new Map<string, number>();
   const baseDate = new Date(dateStr);
 
@@ -591,7 +830,7 @@ function getRecentEventTypes(
     const pastStr = pastDate.toISOString().split('T')[0];
 
     // Check all 3 cosmic slots for each past day
-    const pastEvents = buildCosmicEvents(pastStr, slotHour);
+    const pastEvents = await buildCosmicEvents(pastStr, slotHour);
     // The top 3 events are what would have been posted
     for (let rank = 0; rank < Math.min(3, pastEvents.length); rank++) {
       const type = pastEvents[rank].type;
@@ -644,10 +883,10 @@ export async function generateCosmicTimingPost(
   rank: number = 0,
 ): Promise<ThreadsPost> {
   const rng = seededRandom(`cosmic-${dateStr}-${slotHour}-r${rank}`);
-  const rawEvents = buildCosmicEvents(dateStr, slotHour);
+  const rawEvents = await buildCosmicEvents(dateStr, slotHour);
 
   // Remove any event type that was used in the last 2 days — no repeats in a 3-day window
-  const recentTypes = getRecentEventTypes(dateStr, slotHour);
+  const recentTypes = await getRecentEventTypes(dateStr, slotHour);
   const events = removeStaleSameTypeEvents(rawEvents, recentTypes);
 
   // Pick the Nth ranked event (fall back to last if rank exceeds list)
@@ -655,17 +894,10 @@ export async function generateCosmicTimingPost(
   const event = events[eventIndex];
   const content = event.generate(rng);
 
-  // Check orbit hook suggestions — may override the hook
-  const orbitHooks = await getOrbitHookSuggestions('cosmic_timing');
-  let hook = content.hook;
-
-  if (orbitHooks.length > 0 && rng() > 0.8) {
-    // 20% chance to use an orbit-suggested hook when available
-    const orbitHook = orbitHooks[Math.floor(rng() * orbitHooks.length)];
-    if (!(await shouldAvoidHook('cosmic_timing', orbitHook))) {
-      hook = orbitHook;
-    }
-  }
+  // Transit-specific hooks must never be overridden by generic orbit suggestions.
+  // Cosmic timing posts are tied to real astronomical events — replacing their hooks
+  // with unrelated orbit-suggested hooks breaks the content–transit link.
+  const hook = content.hook;
 
   return buildOriginalPost({
     hook,
@@ -682,8 +914,11 @@ export async function generateCosmicTimingPost(
  * Returns the number of cosmic events available for a given date.
  * Used by the orchestrator to decide how many cosmic slots to fill.
  */
-export function getCosmicEventCount(dateStr: string, slotHour: number): number {
-  const events = buildCosmicEvents(dateStr, slotHour);
+export async function getCosmicEventCount(
+  dateStr: string,
+  slotHour: number,
+): Promise<number> {
+  const events = await buildCosmicEvents(dateStr, slotHour);
   // Only count events with priority above the fallback threshold (planet spotlight / moon position)
   return events.filter((e) => e.priority > 30).length;
 }
@@ -692,12 +927,12 @@ export function getCosmicEventCount(dateStr: string, slotHour: number): number {
  * Returns the type of event that a given rank will generate for dedup purposes.
  * Used by the orchestrator to avoid duplicate transit content across slots.
  */
-export function getCosmicTimingEventType(
+export async function getCosmicTimingEventType(
   dateStr: string,
   slotHour: number,
   rank: number = 0,
-): string {
-  const events = buildCosmicEvents(dateStr, slotHour);
+): Promise<string> {
+  const events = await buildCosmicEvents(dateStr, slotHour);
   const eventIndex = Math.min(rank, events.length - 1);
   return events[eventIndex]?.type || 'unknown';
 }
