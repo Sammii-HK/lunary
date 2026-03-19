@@ -16,9 +16,10 @@ import {
   getCriticalIssues,
 } from '@/lib/social/video-scripts/validation';
 import { generateDailyBatch } from '@/lib/instagram/content-orchestrator';
+import { generateTikTokCarouselCaption } from '@/lib/instagram/caption-generator';
 import {
   generateInstagramReelCaption,
-  generateTikTokHashtags,
+  generateTikTokCaption,
 } from '@/lib/social/video-scripts/tiktok/metadata';
 import {
   categoryThemes,
@@ -499,10 +500,8 @@ export async function GET(request: NextRequest) {
             validated.metadata.slot = 'slot1';
           }
 
-          // --- TikTok caption (keyword/SEO-heavy) ---
+          // --- TikTok caption (full: hook + engagement Q + CTA + hashtags) ---
           if (!validated.writtenPostContent) {
-            const hookLine =
-              validated.hookText || validated.fullScript.split('\n')[0] || '';
             const cat = contentTypeKeyToCategory(contentType) || 'zodiac';
             const fakeFacet = {
               title: validated.facetTitle,
@@ -514,14 +513,18 @@ export async function GET(request: NextRequest) {
               category: cat,
               name: validated.themeName || '',
             };
-            const hashtags = generateTikTokHashtags(
+            validated.writtenPostContent = generateTikTokCaption(
               fakeFacet as unknown as Parameters<
-                typeof generateTikTokHashtags
+                typeof generateTikTokCaption
               >[0],
-              fakeTheme as Parameters<typeof generateTikTokHashtags>[1],
-              validated.scheduledDate,
+              fakeTheme as Parameters<typeof generateTikTokCaption>[1],
+              validated.hookText || validated.fullScript.split('\n')[0] || '',
+              {
+                scheduledDate: validated.scheduledDate,
+                contentTypeKey: contentType,
+                targetAudience: 'discovery',
+              },
             );
-            validated.writtenPostContent = `${hookLine}\n\n${hashtags.join(' ')}`;
           }
 
           const id = await saveVideoScript(validated);
@@ -707,13 +710,34 @@ export async function GET(request: NextRequest) {
               )
             `;
 
-            // TikTok carousel (same slides, cross-posted)
+            // TikTok carousel (same slides, TikTok-specific caption)
+            // Extract clean title from slug (e.g. "zodiac/aries" → "aries",
+            // "crystals/rose-quartz" → "rose quartz", "angel-number-111" → "111")
+            const rawSlug = post.metadata?.slug || '';
+            const slugTail = rawSlug.includes('/')
+              ? rawSlug.split('/').pop() || ''
+              : rawSlug;
+            const cleanTitle = slugTail
+              .replace(/^(angel-number-|one-word-|sign-ranking-)/, '')
+              .replace(/-/g, ' ');
+
+            const tiktokCarousel = generateTikTokCarouselCaption(post.type, {
+              category: post.metadata?.category,
+              title: cleanTitle || undefined,
+              sign: post.metadata?.sign,
+              trait: post.metadata?.trait,
+            });
+            const tiktokHashtagStr = tiktokCarousel.hashtags.join(' ');
+            const tiktokCaption =
+              tiktokCarousel.caption +
+              (tiktokHashtagStr ? `\n\n${tiktokHashtagStr}` : '');
+
             await sql`
               INSERT INTO social_posts (
                 content, platform, post_type, topic, status, image_url,
                 scheduled_date, week_start, created_at
               )
-              SELECT ${caption}, 'tiktok', 'carousel',
+              SELECT ${tiktokCaption}, 'tiktok', 'carousel',
                      ${post.type}, 'pending', ${imageUrl},
                      ${scheduledDate.toISOString()}, ${tomorrowKey}, NOW()
               WHERE NOT EXISTS (
@@ -794,10 +818,8 @@ export async function GET(request: NextRequest) {
             validated.metadata.slot = 'slot3';
           }
 
-          // TikTok SEO caption
+          // TikTok caption (full: hook + engagement Q + CTA + hashtags)
           if (!validated.writtenPostContent) {
-            const hookLine =
-              validated.hookText || validated.fullScript.split('\n')[0] || '';
             const cat = contentTypeKeyToCategory(contentType) || 'zodiac';
             const fakeFacet = {
               title: validated.facetTitle,
@@ -809,14 +831,18 @@ export async function GET(request: NextRequest) {
               category: cat,
               name: validated.themeName || '',
             };
-            const hashtags = generateTikTokHashtags(
+            validated.writtenPostContent = generateTikTokCaption(
               fakeFacet as unknown as Parameters<
-                typeof generateTikTokHashtags
+                typeof generateTikTokCaption
               >[0],
-              fakeTheme as Parameters<typeof generateTikTokHashtags>[1],
-              validated.scheduledDate,
+              fakeTheme as Parameters<typeof generateTikTokCaption>[1],
+              validated.hookText || validated.fullScript.split('\n')[0] || '',
+              {
+                scheduledDate: validated.scheduledDate,
+                contentTypeKey: contentType,
+                targetAudience: 'discovery',
+              },
             );
-            validated.writtenPostContent = `${hookLine}\n\n${hashtags.join(' ')}`;
           }
 
           const id = await saveVideoScript(validated);
@@ -859,135 +885,38 @@ export async function GET(request: NextRequest) {
       console.error('[Daily] Slot 3 failed:', err);
     }
 
-    // --- 5. Text Posts (all platforms) ---
+    // --- 5. Text Posts (LinkedIn, Pinterest, Bluesky) ---
     try {
-      const { generateThematicPostsForWeek, getNextThemeIndex } =
-        await import('@/lib/social/thematic-generator');
-      const { selectWeeklyTheme } = await import('@/lib/social/weekly-themes');
-      const {
-        generateCatchyQuote,
-        getQuoteImageUrl,
-        getQuoteWithInterpretation,
-      } = await import('@/lib/social/quote-generator');
-      const { getEducationalImageUrl, getPlatformImageFormat } =
-        await import('@/lib/social/educational-images');
-      const { generateEducationalPost } =
-        await import('@/lib/social/educational-generator');
-      const { getDefaultPostingTime } = await import('@/utils/posting-times');
-      const { getImageBaseUrl: getBaseUrl } = await import('@/lib/urls');
+      const { generateDailyTextPosts } =
+        await import('@/lib/social/daily-text-posts');
 
-      // Find Monday of tomorrow's week
-      const mondayOffset = dayOfWeek; // dayOfWeek is Mon=0 based
-      const weekMonday = new Date(tomorrow);
-      weekMonday.setUTCDate(tomorrow.getUTCDate() - mondayOffset);
-      weekMonday.setUTCHours(0, 0, 0, 0);
-
-      const themeIndex = await getNextThemeIndex(sql);
-      const allPosts = await generateThematicPostsForWeek(
-        weekMonday,
-        themeIndex,
-      );
-
-      // Filter to just tomorrow's posts
-      const tomorrowPosts = allPosts.filter((post) => {
-        const postDate = post.scheduledDate.toISOString().split('T')[0];
-        return postDate === tomorrowKey;
-      });
+      const textPosts = await generateDailyTextPosts(tomorrowKey);
 
       console.log(
-        `[Daily] Text posts: ${tomorrowPosts.length} for ${tomorrowKey} (filtered from ${allPosts.length} weekly)`,
+        `[Daily] Text posts: ${textPosts.length} for ${tomorrowKey} (source: ${textPosts[0]?.source || 'none'})`,
       );
 
-      const baseUrl = getBaseUrl();
-
-      const platformsNeedingImages = [
-        'pinterest',
-        'reddit',
-        'twitter',
-        'facebook',
-        'linkedin',
-      ];
-
-      for (const post of tomorrowPosts) {
+      for (const post of textPosts) {
         try {
-          // Set posting hour
-          const hour = getDefaultPostingTime(post.platform);
-          const postDate = new Date(tomorrow);
-          postDate.setUTCHours(hour, 0, 0, 0);
-
-          // Generate image for platforms that support them
-          let imageUrl: string | null = null;
-          if (platformsNeedingImages.includes(post.platform)) {
-            const platformFormat = getPlatformImageFormat(post.platform);
-            if (post.postType.startsWith('educational')) {
-              try {
-                const educationalPost = await generateEducationalPost(
-                  post.platform,
-                  'mixed',
-                );
-                if (educationalPost?.grimoireSnippet) {
-                  imageUrl = getEducationalImageUrl(
-                    educationalPost.grimoireSnippet,
-                    baseUrl,
-                    post.platform,
-                  );
-                }
-              } catch {
-                // Fall through to quote image
-              }
-            }
-            if (!imageUrl) {
-              try {
-                const quoteWithInterp = await getQuoteWithInterpretation(
-                  post.content,
-                  post.postType,
-                );
-                if (quoteWithInterp) {
-                  imageUrl = getQuoteImageUrl(quoteWithInterp.quote, baseUrl, {
-                    format: platformFormat,
-                    interpretation: quoteWithInterp.interpretation || undefined,
-                    author: quoteWithInterp.author || undefined,
-                  });
-                } else {
-                  const quote = await generateCatchyQuote(
-                    post.content,
-                    post.postType,
-                  );
-                  imageUrl = quote
-                    ? getQuoteImageUrl(quote, baseUrl, {
-                        format: platformFormat,
-                      })
-                    : null;
-                }
-              } catch {
-                const quote = await generateCatchyQuote(
-                  post.content,
-                  post.postType,
-                );
-                imageUrl = quote
-                  ? getQuoteImageUrl(quote, baseUrl, {
-                      format: getPlatformImageFormat(post.platform),
-                    })
-                  : null;
-              }
-            }
-          }
+          const postType = post.source === 'transit' ? 'transit' : 'thematic';
+          const hashtagStr = post.hashtags?.join(' ') || null;
+          const contentWithTags = hashtagStr
+            ? `${post.content}\n\n${hashtagStr}`
+            : post.content;
 
           await sql`
             INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, scheduled_date, week_start, created_at)
-            SELECT ${post.content}, ${post.platform}, ${post.postType}, ${post.topic || null}, 'pending', ${imageUrl || null}, ${postDate.toISOString()}, ${tomorrowKey}, NOW()
+            SELECT ${contentWithTags}, ${post.platform}, ${postType}, ${post.source}, 'pending', ${SQL_NULL}, ${post.scheduledTime}, ${tomorrowKey}, NOW()
             WHERE NOT EXISTS (
               SELECT 1 FROM social_posts
               WHERE platform = ${post.platform}
-                AND post_type = ${post.postType}
-                AND topic IS NOT DISTINCT FROM ${post.topic || null}
-                AND scheduled_date = ${postDate.toISOString()}
+                AND scheduled_date = ${post.scheduledTime}
             )
           `;
           results.textPosts++;
         } catch (postErr) {
           console.error(
-            `[Daily] Text post save failed (${post.platform}/${post.postType}):`,
+            `[Daily] Text post save failed (${post.platform}):`,
             postErr,
           );
         }
