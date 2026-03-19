@@ -118,11 +118,24 @@ export async function GET(request: NextRequest) {
     }
 
     const storyUtcHours = [9, 12, 15, 19];
-    const SHARE_BASE_URL = (
+    const ALLOWED_BASE_URLS = new Set(
+      [
+        'https://lunary.app',
+        'https://www.lunary.app',
+        process.env.NEXT_PUBLIC_BASE_URL,
+        process.env.NEXT_PUBLIC_APP_URL,
+      ].filter(Boolean),
+    );
+
+    const requestedBaseUrl = (
       url.searchParams.get('storyBaseUrl') ||
       process.env.NEXT_PUBLIC_BASE_URL ||
       'https://lunary.app'
     ).replace(/\/$/, '');
+
+    const SHARE_BASE_URL = ALLOWED_BASE_URLS.has(requestedBaseUrl)
+      ? requestedBaseUrl
+      : 'https://lunary.app';
 
     const VARIANT_TO_HIGHLIGHT: Record<string, string> = {
       daily_moon: 'Moon',

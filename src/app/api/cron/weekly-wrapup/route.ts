@@ -11,6 +11,9 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
+/** Typed null for SQL parameters — avoids CodeQL implicit-operand-conversion */
+const SQL_NULL: string | null = null;
+
 function getWeekStart(weekOffset: number): Date {
   const now = new Date();
   const dayOfWeek = now.getDay();
@@ -138,7 +141,7 @@ export async function GET(request: NextRequest) {
               SELECT ${ytScript.writtenPostContent || ytScript.fullScript.substring(0, 500)},
                      'youtube', 'video',
                      ${ytScript.facetTitle}, 'pending',
-                     ${null},
+                     ${SQL_NULL},
                      ${weekStart.toISOString()}, ${theme.name},
                      'video_script', ${String(ytScript.id)}, ${ytScript.facetTitle}, NOW()
               WHERE NOT EXISTS (

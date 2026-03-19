@@ -30,12 +30,22 @@ import {
   GRIMOIRE_CATEGORIES,
   THEME_CATEGORY_WEIGHTS,
 } from '@/lib/social/weekly-themes';
+import {
+  getEventCalendarForDate,
+  type CalendarEvent,
+  type EventRarity,
+} from '@/lib/astro/event-calendar';
+import { generateTransitAlertScript } from '@/lib/social/video-scripts/generators/transit-alert';
+import type { TransitEvent } from '@/lib/social/video-scripts/generators/transit-alert';
 import type { VideoScript } from '@/lib/social/video-scripts/types';
 import type { ContentType } from '@/lib/social/video-scripts/content-types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
+
+/** Typed null for SQL parameters — avoids CodeQL implicit-operand-conversion */
+const SQL_NULL: string | null = null;
 
 const DAY_NAMES = [
   'monday',
@@ -106,6 +116,127 @@ function selectPrimaryCategoryForDate(date: Date): string {
   const pick =
     weightedPool[((seed * 9301 + 49297) % 233280) % weightedPool.length];
   return pick;
+}
+
+// ---------------------------------------------------------------------------
+// Event Calendar Integration
+// ---------------------------------------------------------------------------
+
+/**
+ * Convert a CalendarEvent to a TransitEvent for use with generateTransitAlertScript.
+ */
+function calendarEventToTransitEvent(event: CalendarEvent): TransitEvent {
+  const rarityMap: Record<EventRarity, TransitEvent['rarity']> = {
+    CRITICAL: 'very-rare',
+    HIGH: 'very-rare',
+    MEDIUM: 'rare',
+    LOW: 'common',
+  };
+
+  return {
+    type: event.eventType === 'retrograde_station' ? 'station' : 'ingress',
+    planet: event.planet || 'Transit',
+    fromSign: undefined,
+    toSign: event.sign,
+    date: new Date(event.date),
+    rarity: rarityMap[event.rarity],
+    significance: [event.name, event.historicalContext, event.rarityFrame]
+      .filter(Boolean)
+      .join('. '),
+  };
+}
+
+/**
+ * Get the highest-priority CRITICAL or HIGH event for a date, if any.
+ * Returns null when the existing rotation should be used.
+ */
+async function getSignificantEventForDate(
+  dateStr: string,
+): Promise<{ event: CalendarEvent; allEvents: CalendarEvent[] } | null> {
+  try {
+    const events = await getEventCalendarForDate(dateStr);
+    const significant = events
+      .filter((e) => e.rarity === 'CRITICAL' || e.rarity === 'HIGH')
+      .sort((a, b) => b.score - a.score);
+
+    if (significant.length === 0) return null;
+    return { event: significant[0], allEvents: significant };
+  } catch (err) {
+    console.warn(
+      '[Daily] Event calendar lookup failed, continuing with normal rotation:',
+      err instanceof Error ? err.message : err,
+    );
+    return null;
+  }
+}
+
+/**
+ * Generate a transit-driven video script from a CalendarEvent.
+ * Adjusts word count targets based on event rarity:
+ *   CRITICAL: 150-225 words (60-90s, MediumFormVideo)
+ *   HIGH:     100-150 words (30-60s, ShortFormVideo/MediumFormVideo)
+ */
+async function generateEventDrivenScript(
+  event: CalendarEvent,
+  scheduledDate: Date,
+  angle: 'primary' | 'engagement' | 'reel' = 'primary',
+): Promise<VideoScript | null> {
+  const transitEvent = calendarEventToTransitEvent(event);
+  const script = await generateTransitAlertScript(
+    transitEvent,
+    scheduledDate,
+    'https://lunary.app',
+  );
+
+  if (!script) return null;
+
+  // Enrich metadata with event calendar data
+  if (script.metadata) {
+    (script.metadata as Record<string, unknown>).eventRarity = event.rarity;
+    (script.metadata as Record<string, unknown>).eventScore = event.score;
+    (script.metadata as Record<string, unknown>).eventId = event.id;
+    (script.metadata as Record<string, unknown>).eventCategory = event.category;
+    (script.metadata as Record<string, unknown>).hookSuggestions =
+      event.hookSuggestions;
+    (script.metadata as Record<string, unknown>).historicalContext =
+      event.historicalContext;
+    (script.metadata as Record<string, unknown>).convergenceMultiplier =
+      event.convergenceMultiplier;
+    (script.metadata as Record<string, unknown>).contentTypeKey =
+      'transit-alert';
+    (script.metadata as Record<string, unknown>).eventDriven = true;
+    (script.metadata as Record<string, unknown>).eventAngle = angle;
+  }
+
+  // Duration override based on rarity
+  if (event.rarity === 'CRITICAL') {
+    script.estimatedDuration = '60-90s';
+    if (script.metadata) {
+      (script.metadata as Record<string, unknown>).compositionId =
+        'MediumFormVideo';
+      (script.metadata as Record<string, unknown>).durationInFrames = 1800; // 60s at 30fps
+      (script.metadata as Record<string, unknown>).targetWordCount = '150-225';
+    }
+  } else if (event.rarity === 'HIGH') {
+    script.estimatedDuration = '30-60s';
+    if (script.metadata) {
+      (script.metadata as Record<string, unknown>).compositionId =
+        'ShortFormVideo';
+      (script.metadata as Record<string, unknown>).durationInFrames = 900; // 30s at 30fps
+      (script.metadata as Record<string, unknown>).targetWordCount = '100-150';
+    }
+  }
+
+  // Vary the angle label for engagement/reel variants
+  if (angle === 'engagement') {
+    script.facetTitle = `${event.name} -- what it means for you`;
+    script.topic = `Personal impact: ${event.name}`;
+  } else if (angle === 'reel') {
+    script.facetTitle = `${event.name} -- quick guide`;
+    script.topic = `IG guide: ${event.name}`;
+  }
+
+  return script;
 }
 
 /**
@@ -211,6 +342,24 @@ export async function GET(request: NextRequest) {
 
     console.log(`[Daily] Generating content for ${tomorrowKey} (${dayName})`);
 
+    // --- Event Calendar Detection ---
+    // Check for significant astronomical events tomorrow
+    const eventData = await getSignificantEventForDate(tomorrowKey);
+    const significantEvent = eventData?.event ?? null;
+    const allSignificantEvents = eventData?.allEvents ?? [];
+    const hasEventOverride = significantEvent !== null;
+
+    if (hasEventOverride) {
+      console.log(
+        `[Daily] EVENT OVERRIDE: ${significantEvent!.rarity} event detected -- "${significantEvent!.name}" (score: ${significantEvent!.score})`,
+      );
+      if (allSignificantEvents.length > 1) {
+        console.log(
+          `[Daily] ${allSignificantEvents.length} total CRITICAL/HIGH events: ${allSignificantEvents.map((e) => e.name).join(', ')}`,
+        );
+      }
+    }
+
     const results = {
       tiktokPrimary: 0,
       tiktokEngagementA: 0,
@@ -239,31 +388,60 @@ export async function GET(request: NextRequest) {
         );
         results.tiktokPrimary = 1;
       } else {
-        const category = selectPrimaryCategoryForDate(tomorrow);
-        const themesForCategory = categoryThemes.filter(
-          (t) => t.category === category,
-        );
-        const dateSeed =
-          tomorrow.getFullYear() * 10000 +
-          (tomorrow.getMonth() + 1) * 100 +
-          tomorrow.getDate();
-        const theme =
-          themesForCategory.length > 0
-            ? themesForCategory[dateSeed % themesForCategory.length]
-            : categoryThemes[dateSeed % categoryThemes.length];
-
-        const weights = await getContentTypeWeights();
-        const exclude = new Set<string>();
-        const contentType =
-          (weightedSelect(weights, exclude, dateSeed) as ContentType) ||
-          'sign-identity';
-
+        // When a CRITICAL/HIGH event is detected, override normal rotation
+        // with a transit-driven script; otherwise use seeded category rotation
         const primaryHour = await getOptimalHourBySlot('primary');
-        const script = await generateScriptForContentType(
-          contentType,
-          tomorrow,
-        );
-        const validated = await validateAndRetry(contentType, tomorrow, script);
+        let validated: VideoScript | null = null;
+        let contentType: ContentType = 'sign-identity';
+        let themeName = '';
+
+        if (hasEventOverride && significantEvent) {
+          // --- Event-driven primary TikTok ---
+          console.log(
+            `[Daily] Primary TikTok: event override -> transit-alert for "${significantEvent.name}"`,
+          );
+          contentType = 'transit-alert';
+          themeName = 'Transit Alert';
+          const eventScript = await generateEventDrivenScript(
+            significantEvent,
+            tomorrow,
+            'primary',
+          );
+          validated = await validateAndRetry(
+            contentType,
+            tomorrow,
+            eventScript,
+          );
+        }
+
+        if (!validated) {
+          // --- Normal seeded rotation (fallback or no event) ---
+          const category = selectPrimaryCategoryForDate(tomorrow);
+          const themesForCategory = categoryThemes.filter(
+            (t) => t.category === category,
+          );
+          const dateSeed =
+            tomorrow.getFullYear() * 10000 +
+            (tomorrow.getMonth() + 1) * 100 +
+            tomorrow.getDate();
+          const theme =
+            themesForCategory.length > 0
+              ? themesForCategory[dateSeed % themesForCategory.length]
+              : categoryThemes[dateSeed % categoryThemes.length];
+          themeName = theme.name;
+
+          const weights = await getContentTypeWeights();
+          const exclude = new Set<string>();
+          contentType =
+            (weightedSelect(weights, exclude, dateSeed) as ContentType) ||
+            'sign-identity';
+
+          const script = await generateScriptForContentType(
+            contentType,
+            tomorrow,
+          );
+          validated = await validateAndRetry(contentType, tomorrow, script);
+        }
 
         if (validated) {
           validated.scheduledDate = new Date(
@@ -309,8 +487,8 @@ export async function GET(request: NextRequest) {
             source_title, created_at
           )
           SELECT ${validated.writtenPostContent || validated.fullScript}, 'tiktok', 'video',
-                 ${validated.facetTitle}, 'pending', ${null}, ${null},
-                 ${validated.scheduledDate.toISOString()}, ${theme.name}, ${tomorrowKey},
+                 ${validated.facetTitle}, 'pending', ${SQL_NULL}, ${SQL_NULL},
+                 ${validated.scheduledDate.toISOString()}, ${themeName}, ${tomorrowKey},
                  'video_script', ${id}, ${validated.facetTitle}, NOW()
           WHERE NOT EXISTS (
             SELECT 1 FROM social_posts
@@ -329,7 +507,7 @@ export async function GET(request: NextRequest) {
 
           results.tiktokPrimary = 1;
           console.log(
-            `[Daily] Primary TikTok: ${contentType} at ${primaryHour}:00`,
+            `[Daily] Primary TikTok: ${contentType}${hasEventOverride ? ' (EVENT OVERRIDE)' : ''} at ${primaryHour}:00`,
           );
         }
       } // close else (skip-if-exists)
@@ -353,6 +531,10 @@ export async function GET(request: NextRequest) {
         engagementC: slotC,
       };
 
+      // When CRITICAL/HIGH event detected, override engagementA with
+      // an event-driven script from a different angle
+      let eventEngagementSlotUsed = false;
+
       for (const slot of engagementSlots) {
         try {
           if (existingSlots.has(`tiktok:${slot}`)) {
@@ -364,20 +546,57 @@ export async function GET(request: NextRequest) {
             (results as Record<string, number>)[resultKey] = 1;
             continue;
           }
-          const schedule = schedules[slot];
-          const dayConfig = schedule[dayName];
-          if (!dayConfig) continue;
 
           const hour = await getOptimalHourBySlot(slot);
-          const script = await generateScriptForContentType(
-            dayConfig.contentType,
-            tomorrow,
-          );
-          const validated = await validateAndRetry(
-            dayConfig.contentType,
-            tomorrow,
-            script,
-          );
+          let validated: VideoScript | null = null;
+          let slotContentType: ContentType;
+
+          // Override engagementA with event-driven content (different angle)
+          if (
+            hasEventOverride &&
+            significantEvent &&
+            slot === 'engagementA' &&
+            !eventEngagementSlotUsed
+          ) {
+            console.log(
+              `[Daily] ${slot}: event override -> engagement angle for "${significantEvent.name}"`,
+            );
+            slotContentType = 'transit-alert';
+            // Use a secondary event if available, otherwise same event different angle
+            const engagementEvent =
+              allSignificantEvents.length > 1
+                ? allSignificantEvents[1]
+                : significantEvent;
+            const eventScript = await generateEventDrivenScript(
+              engagementEvent,
+              tomorrow,
+              'engagement',
+            );
+            validated = await validateAndRetry(
+              slotContentType,
+              tomorrow,
+              eventScript,
+            );
+            if (validated) eventEngagementSlotUsed = true;
+          }
+
+          // Normal engagement slot (or fallback if event override failed)
+          if (!validated) {
+            const schedule = schedules[slot];
+            const dayConfig = schedule[dayName];
+            if (!dayConfig) continue;
+            slotContentType = dayConfig.contentType;
+
+            const script = await generateScriptForContentType(
+              slotContentType,
+              tomorrow,
+            );
+            validated = await validateAndRetry(
+              slotContentType,
+              tomorrow,
+              script,
+            );
+          }
 
           if (validated) {
             validated.scheduledDate = new Date(
@@ -423,7 +642,7 @@ export async function GET(request: NextRequest) {
                 source_title, created_at
               )
               SELECT ${validated.writtenPostContent || validated.fullScript}, 'tiktok', 'video',
-                     ${validated.facetTitle}, 'pending', ${null}, ${null},
+                     ${validated.facetTitle}, 'pending', ${SQL_NULL}, ${SQL_NULL},
                      ${validated.scheduledDate.toISOString()}, ${validated.themeName}, ${tomorrowKey},
                      'video_script', ${id}, ${validated.facetTitle}, NOW()
               WHERE NOT EXISTS (
@@ -445,14 +664,14 @@ export async function GET(request: NextRequest) {
               `tiktok${slot.charAt(0).toUpperCase() + slot.slice(1)}` as keyof typeof results;
             (results as Record<string, number>)[resultKey] = 1;
             console.log(
-              `[Daily] ${slot}: ${dayConfig.contentType} at ${hour}:00`,
+              `[Daily] ${slot}: ${slotContentType}${eventEngagementSlotUsed && slot === 'engagementA' ? ' (EVENT OVERRIDE)' : ''} at ${hour}:00`,
             );
           } else {
             console.warn(
-              `[Daily] ${slot}: ${dayConfig.contentType} failed validation, skipped`,
+              `[Daily] ${slot}: ${slotContentType} failed validation, skipped`,
             );
             errors.push(
-              `${slot}: ${dayConfig.contentType} failed validation after retry`,
+              `${slot}: ${slotContentType} failed validation after retry`,
             );
           }
         } catch (err) {
@@ -544,7 +763,7 @@ export async function GET(request: NextRequest) {
                 source_title, created_at
               )
               SELECT ${fbScript.writtenPostContent || fbScript.fullScript}, 'tiktok', 'video',
-                     ${fbScript.facetTitle}, 'pending', ${null}, ${null},
+                     ${fbScript.facetTitle}, 'pending', ${SQL_NULL}, ${SQL_NULL},
                      ${fbScript.scheduledDate.toISOString()}, ${fbScript.themeName}, ${tomorrowKey},
                      'video_script', ${fbId}, ${fbScript.facetTitle}, NOW()
               WHERE NOT EXISTS (
@@ -594,6 +813,40 @@ export async function GET(request: NextRequest) {
           [15, 17, 21],
         );
 
+        // When CRITICAL/HIGH event detected, prepend an event-driven IG Reel
+        // and drop the last generated reel to keep the count at 3
+        if (hasEventOverride && significantEvent && igScripts.length > 0) {
+          try {
+            const eventReelScript = await generateEventDrivenScript(
+              significantEvent,
+              tomorrow,
+              'reel',
+            );
+            if (eventReelScript) {
+              eventReelScript.platform = 'instagram';
+              eventReelScript.scheduledDate = new Date(
+                `${tomorrowKey}T15:00:00.000Z`,
+              );
+              if (eventReelScript.metadata) {
+                eventReelScript.metadata.scheduledHour = 15;
+                eventReelScript.metadata.slot = 'primary';
+              }
+              // Replace the first reel slot with the event-driven one
+              igScripts[0] = eventReelScript;
+              console.log(
+                `[Daily] IG Reel slot 0: event override -> "${significantEvent.name}"`,
+              );
+            }
+          } catch (eventReelErr) {
+            console.warn(
+              '[Daily] Event-driven IG Reel failed, using normal rotation:',
+              eventReelErr instanceof Error
+                ? eventReelErr.message
+                : eventReelErr,
+            );
+          }
+        }
+
         for (const igScript of igScripts) {
           try {
             const id = await saveVideoScript(igScript);
@@ -621,7 +874,7 @@ export async function GET(request: NextRequest) {
               source_title, created_at
             )
             SELECT ${igCaption}, 'instagram', 'video', ${igScript.facetTitle}, 'pending',
-                   ${null}, ${null}, ${igScript.scheduledDate.toISOString()},
+                   ${SQL_NULL}, ${SQL_NULL}, ${igScript.scheduledDate.toISOString()},
                    ${igScript.themeName}, ${tomorrowKey},
                    'video_script', ${id}, ${igScript.facetTitle}, NOW()
             WHERE NOT EXISTS (
@@ -655,8 +908,59 @@ export async function GET(request: NextRequest) {
     }
 
     // --- 4. Instagram Carousel/Meme ---
+    // For CRITICAL events, force a transit-themed carousel override
+    // by passing 'planetary' as a forced category hint
     try {
-      const igBatch = await generateDailyBatch(tomorrowKey);
+      const igBatch = await generateDailyBatch(tomorrowKey, undefined);
+
+      // When a CRITICAL event is detected, inject an event-awareness text post
+      // as an additional carousel-style item about the transit
+      if (significantEvent?.rarity === 'CRITICAL' && igBatch.posts.length > 0) {
+        const eventCaption = [
+          significantEvent.name,
+          '',
+          significantEvent.historicalContext || '',
+          '',
+          significantEvent.hookSuggestions?.[0] || '',
+          '',
+          '#astrology #transit #lunary',
+        ]
+          .filter((line) => line !== undefined)
+          .join('\n')
+          .trim();
+
+        const eventCarouselPost = {
+          type: 'carousel' as const,
+          format: 'square' as const,
+          imageUrls: [] as string[],
+          caption: eventCaption,
+          hashtags: [
+            '#astrology',
+            '#transit',
+            `#${(significantEvent.planet || 'cosmic').toLowerCase()}`,
+          ],
+          scheduledTime: `${tomorrowKey}T10:00:00.000Z`,
+          metadata: {
+            category: 'planetary',
+            slug: significantEvent.id,
+            eventDriven: true,
+            eventRarity: significantEvent.rarity,
+          },
+        };
+
+        // Replace the first carousel post with the event-driven one
+        const carouselIdx = igBatch.posts.findIndex(
+          (p) => p.type === 'carousel',
+        );
+        if (carouselIdx >= 0) {
+          console.log(
+            `[Daily] IG Carousel: CRITICAL event override -> "${significantEvent.name}"`,
+          );
+          igBatch.posts[carouselIdx] =
+            eventCarouselPost as (typeof igBatch.posts)[0];
+        }
+      }
+
       if (igBatch.posts.length > 0) {
         for (const post of igBatch.posts) {
           const scheduledDate = new Date(
@@ -849,11 +1153,19 @@ export async function GET(request: NextRequest) {
     const duration = Date.now() - startTime;
 
     // Discord notification
+    const eventOverrideLine =
+      hasEventOverride && significantEvent
+        ? `\n**Event Override: ${significantEvent.rarity}** -- ${significantEvent.name} (score: ${significantEvent.score})`
+        : '';
+
     try {
       await sendDiscordNotification({
-        title: 'Daily Content Generated',
+        title: hasEventOverride
+          ? `Daily Content Generated (${significantEvent!.rarity} EVENT)`
+          : 'Daily Content Generated',
         description: [
           `**${tomorrowKey} (${dayName})**`,
+          eventOverrideLine,
           `TikTok: ${results.tiktokPrimary} primary + ${results.tiktokEngagementA + results.tiktokEngagementB + results.tiktokEngagementC} engagement`,
           `IG Reels: ${results.igReels}/3`,
           `IG Carousel: ${results.igCarousel}`,
@@ -877,6 +1189,14 @@ export async function GET(request: NextRequest) {
       day: dayName,
       results,
       total: totalScripts,
+      eventOverride: hasEventOverride
+        ? {
+            rarity: significantEvent!.rarity,
+            name: significantEvent!.name,
+            score: significantEvent!.score,
+            eventCount: allSignificantEvents.length,
+          }
+        : undefined,
       errors: errors.length > 0 ? errors : undefined,
       duration: `${duration}ms`,
     });
