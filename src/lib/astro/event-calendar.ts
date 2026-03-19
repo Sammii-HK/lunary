@@ -497,6 +497,99 @@ function buildRarityFrame(
 }
 
 // ---------------------------------------------------------------------------
+// Retrograde sign context
+// ---------------------------------------------------------------------------
+
+/** Sign-specific context for retrograde events — WHY this sign matters */
+const RETROGRADE_SIGN_CONTEXT: Record<
+  string,
+  Record<string, { meaning: string; dignity?: string }>
+> = {
+  Mercury: {
+    Pisces: {
+      meaning:
+        'Mercury is in its detriment AND fall in Pisces — the hardest sign for Mercury. Communication becomes intuitive rather than logical. Boundaries between memory and imagination blur. Old feelings resurface as if they are happening now.',
+      dignity: 'detriment + fall',
+    },
+    Virgo: {
+      meaning:
+        'Mercury retrogrades in its own sign. Details that were overlooked demand attention. Systems and routines need revision.',
+      dignity: 'domicile',
+    },
+    Gemini: {
+      meaning:
+        'Mercury retrogrades in its own sign. Conversations revisit old ground. Ideas you dismissed may deserve a second look.',
+      dignity: 'domicile',
+    },
+    Aries: {
+      meaning:
+        'Mercury retrograde in Aries slows impulsive decisions. Words spoken in haste come back. Patience replaces speed.',
+    },
+    Taurus: {
+      meaning:
+        'Mercury retrograde in Taurus revisits financial decisions and values. What you thought was settled may need renegotiation.',
+    },
+    Cancer: {
+      meaning:
+        'Mercury retrograde in Cancer brings family conversations and emotional processing back to the surface.',
+    },
+    Leo: {
+      meaning:
+        'Mercury retrograde in Leo revisits creative projects and matters of the heart. Self-expression needs refinement.',
+    },
+    Scorpio: {
+      meaning:
+        'Mercury retrograde in Scorpio uncovers hidden information. Secrets surface. Deep conversations demand honesty.',
+    },
+    Sagittarius: {
+      meaning:
+        'Mercury retrograde in Sagittarius is in its detriment. Big-picture thinking needs grounding. Travel plans may shift.',
+      dignity: 'detriment',
+    },
+    Capricorn: {
+      meaning:
+        'Mercury retrograde in Capricorn revisits career plans and professional commitments. Structure needs reassessment.',
+    },
+    Aquarius: {
+      meaning:
+        'Mercury retrograde in Aquarius challenges group dynamics and future plans. Innovation needs a pause for reflection.',
+    },
+    Libra: {
+      meaning:
+        'Mercury retrograde in Libra revisits relationship conversations. Agreements need clarification. Balance requires honesty.',
+    },
+  },
+};
+
+function getRetrogradeSignContext(
+  planet: string,
+  sign: string,
+): { hooks: string[]; rarityFrame: string; meaning: string } {
+  const ctx = RETROGRADE_SIGN_CONTEXT[planet]?.[sign];
+  const dignityNote = ctx?.dignity ? ` (${ctx.dignity})` : '';
+
+  const meaning =
+    ctx?.meaning ||
+    `${planet} retrograde in ${sign} invites reflection on ${sign}-ruled themes.`;
+
+  const hooks = [
+    `${planet} retrograde in ${sign}${dignityNote}. Here is why this one hits different.`,
+    `${planet} is retrograde in ${sign}. What that actually means for your week.`,
+  ];
+
+  if (ctx?.dignity) {
+    hooks.unshift(
+      `${planet} is in its ${ctx.dignity} in ${sign} AND retrograde. This is the toughest Mercury retrograde of the year.`,
+    );
+  }
+
+  return {
+    hooks,
+    rarityFrame: `${planet} retrograde in ${sign}${dignityNote}`,
+    meaning,
+  };
+}
+
 // Hook suggestions generator
 // ---------------------------------------------------------------------------
 
@@ -973,6 +1066,9 @@ export async function getEventCalendarForDate(
     );
     const score = isMercury ? Math.min(baseScore + 10, 80) : baseScore;
 
+    // Sign-specific context for retrogrades
+    const signContext = getRetrogradeSignContext(planet, sign);
+
     addEvent({
       id: `active-retrograde-${planet.toLowerCase()}-${dateStr}`,
       name: `${planet} Retrograde in ${sign}`,
@@ -981,12 +1077,10 @@ export async function getEventCalendarForDate(
       score,
       orbitalPeriodYears: ORBITAL_PERIOD_YEARS[planet],
       convergenceMultiplier: 1.0,
-      hookSuggestions: [
-        `${planet} is still retrograde in ${sign}. Here is what that means today.`,
-        `${planet} retrograde in ${sign} continues. What to watch for.`,
-      ],
+      hookSuggestions: signContext.hooks,
       category: 'retrograde',
-      rarityFrame: `${planet} retrograde period in ${sign}`,
+      rarityFrame: signContext.rarityFrame,
+      historicalContext: signContext.meaning,
       eventType: 'active_retrograde',
       planet,
       sign,

@@ -128,16 +128,35 @@ function calendarEventToTransitEvent(event: CalendarEvent): TransitEvent {
     LOW: 'common',
   };
 
+  // Determine type and retrograde phase from eventType
+  const isRetrograde =
+    event.eventType === 'retrograde_station' ||
+    event.eventType === 'active_retrograde';
+
+  let retrogradePhase: TransitEvent['retrogradePhase'];
+  if (event.eventType === 'active_retrograde') {
+    retrogradePhase = 'active';
+  } else if (event.eventType === 'retrograde_station') {
+    retrogradePhase = event.name?.includes('direct')
+      ? 'stations_direct'
+      : 'stations_retrograde';
+  }
+
+  // Active retrogrades are frequent (Mercury 3-4x/year) — don't label as 'very-rare'
+  // even if event calendar rates them HIGH. The sign context is what makes them notable.
+  const effectiveRarity = isRetrograde ? 'rare' : rarityMap[event.rarity];
+
   return {
-    type: event.eventType === 'retrograde_station' ? 'station' : 'ingress',
+    type: isRetrograde ? 'retrograde' : 'ingress',
     planet: event.planet || 'Transit',
     fromSign: undefined,
     toSign: event.sign,
     date: new Date(event.date),
-    rarity: rarityMap[event.rarity],
+    rarity: effectiveRarity,
     significance: [event.name, event.historicalContext, event.rarityFrame]
       .filter(Boolean)
       .join('. '),
+    retrogradePhase,
   };
 }
 
@@ -175,8 +194,21 @@ async function generateEventDrivenScript(
   event: CalendarEvent,
   scheduledDate: Date,
   angle: 'primary' | 'engagement' | 'reel' = 'primary',
+  allEvents?: CalendarEvent[],
 ): Promise<VideoScript | null> {
   const transitEvent = calendarEventToTransitEvent(event);
+
+  // Add convergence context — what else is happening today/tomorrow
+  if (allEvents && allEvents.length > 1) {
+    const otherEvents = allEvents
+      .filter((e) => e.id !== event.id)
+      .map((e) => e.name)
+      .slice(0, 3);
+    if (otherEvents.length > 0) {
+      transitEvent.significance += `. Also happening around this time: ${otherEvents.join(', ')}`;
+    }
+  }
+
   const script = await generateTransitAlertScript(
     transitEvent,
     scheduledDate,
@@ -419,6 +451,7 @@ export async function GET(request: NextRequest) {
             significantEvent,
             tomorrow,
             'primary',
+            allSignificantEvents,
           );
           validated = await validateAndRetry(
             contentType,
@@ -734,7 +767,24 @@ export async function GET(request: NextRequest) {
           contentType,
           tomorrow,
         );
+
+        if (!script) {
+          console.warn(
+            `[Daily] Slot 3: generateScriptForContentType('${contentType}') returned null`,
+          );
+          errors.push(
+            `Slot 3: script generation returned null for ${contentType}`,
+          );
+        }
+
         const validated = await validateAndRetry(contentType, tomorrow, script);
+
+        if (!validated && script) {
+          console.warn(
+            `[Daily] Slot 3 validation failed for ${contentType} — word count: ${script.wordCount ?? 'N/A'}, hook: ${script.hookText?.slice(0, 60) ?? 'none'}`,
+          );
+          errors.push(`Slot 3: validation failed for ${contentType}`);
+        }
 
         if (validated) {
           validated.scheduledDate = new Date(`${slot3Key}T01:00:00.000Z`);
