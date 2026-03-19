@@ -36,7 +36,14 @@ export interface SocialPostResult {
   url?: string;
   error?: string;
   rawResponse?: unknown;
-  backend: 'youtube' | 'ayrshare' | 'ayrshare-youtube' | 'postiz' | 'succulent';
+  backend:
+    | 'youtube'
+    | 'ayrshare'
+    | 'ayrshare-youtube'
+    | 'postiz'
+    | 'succulent'
+    | 'spellcast'
+    | 'none';
 }
 
 export interface SocialPostParams {
@@ -175,6 +182,16 @@ async function postToSucculent(
 export async function postToSocial(
   params: SocialPostParams,
 ): Promise<SocialPostResult> {
+  // Guard: reject empty/whitespace content (prevents ghost posts)
+  const trimmedContent = String(params.content || '').trim();
+  if (!trimmedContent) {
+    return {
+      success: false,
+      error: 'Empty content — refusing to publish a blank post',
+      backend: 'none',
+    };
+  }
+
   // YouTube — route through Ayrshare or direct API
   if (isYouTubePlatform(params.platform)) {
     if (shouldRouteYouTubeViaAyrshare()) {
@@ -316,6 +333,21 @@ export async function postToSocial(
 export async function postToSocialMultiPlatform(
   params: MultiPlatformPostParams,
 ): Promise<{ results: Record<string, SocialPostResult> }> {
+  // Guard: reject empty/whitespace content (prevents ghost posts)
+  const trimmedContent = String(params.content || '').trim();
+  if (!trimmedContent) {
+    const emptyResult: SocialPostResult = {
+      success: false,
+      error: 'Empty content — refusing to publish a blank post',
+      backend: 'none',
+    };
+    return {
+      results: Object.fromEntries(
+        params.platforms.map((p) => [p.toLowerCase(), emptyResult]),
+      ),
+    };
+  }
+
   const results: Record<string, SocialPostResult> = {};
   const platforms = params.platforms.map((p) => p.toLowerCase());
 

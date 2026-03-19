@@ -114,8 +114,14 @@ export async function postToSpellcast(
     const hasVideoMedia = params.media?.some((m) => m.type === 'video');
     const postType = isStory ? 'story' : hasVideoMedia ? 'video' : 'post';
 
-    // Spellcast requires non-empty content; stories are image-only so use a space
-    const content = params.content || ' ';
+    // Stories are image-only so a placeholder is acceptable.
+    // For all other post types, reject truly empty content.
+    const isImageOnly = isStory;
+    const content = params.content?.trim()
+      ? params.content
+      : isImageOnly
+        ? ' '
+        : '';
 
     // Always set who_can_reply_post — Postiz's default is invalid and causes silent failures.
     const platformSettings = {
@@ -219,6 +225,21 @@ export async function postToSpellcastMultiPlatform(params: {
   firstComment?: string;
 }): Promise<{ results: Record<string, SocialPostResult> }> {
   const results: Record<string, SocialPostResult> = {};
+
+  // Guard: reject empty/whitespace content
+  if (!params.content?.trim()) {
+    const emptyResult: SocialPostResult = {
+      success: false,
+      error: 'Empty content — refusing to publish a blank post to Spellcast',
+      backend: 'spellcast',
+    };
+    return {
+      results: Object.fromEntries(
+        params.platforms.map((p) => [p, emptyResult]),
+      ),
+    };
+  }
+
   const { accountSetId } = getSpellcastConfig();
 
   // Validate all platforms against allow-list before use as object keys

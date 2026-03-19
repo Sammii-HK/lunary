@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { head, put } from '@vercel/blob';
-import { composeVideo } from '@/lib/video/compose-video';
 import {
   renderRemotionVideo,
   isRemotionAvailable,
@@ -770,95 +769,87 @@ export async function POST(request: NextRequest) {
               `✅ Content Creator rendered ${(videoBuffer.length / 1024 / 1024).toFixed(1)}MB video for script ${script.id}`,
             );
           } else {
-            // Local rendering fallback (development only)
+            // Local Remotion rendering (no FFmpeg fallback — unstyled videos must never publish)
             const remotionAvailable = await isRemotionAvailable();
-            let useFFmpegFallback = !remotionAvailable || !audioDuration;
+            if (!remotionAvailable) {
+              throw new Error(
+                'Remotion is not available and CONTENT_CREATOR_API_URL is not set. ' +
+                  'Cannot render styled video. FFmpeg fallback has been removed — ' +
+                  'configure either Remotion locally or CONTENT_CREATOR_API_URL.',
+              );
+            }
+            if (!audioDuration) {
+              throw new Error(
+                'Could not determine audio duration — cannot render video.',
+              );
+            }
 
             console.log(
-              `🎥 Remotion available: ${remotionAvailable}, audio duration: ${audioDuration}s`,
+              `🎥 Remotion available, audio duration: ${audioDuration}s`,
             );
 
-            if (!useFFmpegFallback) {
-              try {
-                console.log(
-                  `🎬 Using Remotion for video generation (script ${script.id})...`,
-                );
-
-                let segments;
-                try {
-                  const whisperWords = await transcribeWithWhisper(audioBuffer);
-                  segments = whisperWords.length
-                    ? wordTimestampsToSegments(
-                        whisperWords,
-                        audioDuration,
-                        6,
-                        script.full_script,
-                      )
-                    : scriptToAudioSegments(
-                        script.full_script,
-                        audioDuration,
-                        2.6,
-                      );
-                } catch {
-                  segments = scriptToAudioSegments(
-                    script.full_script,
+            let segments;
+            try {
+              const whisperWords = await transcribeWithWhisper(audioBuffer);
+              segments = whisperWords.length
+                ? wordTimestampsToSegments(
+                    whisperWords,
                     audioDuration,
-                    2.6,
-                  );
-                }
-
-                const remotionFormat =
-                  audioDuration > 45 ? 'MediumFormVideo' : 'ShortFormVideo';
-                const videoSeed = `${safeSlug}-${script.id}-${Date.now()}`;
-                const symbolContent = `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`;
-
-                videoBuffer = await renderRemotionVideo({
-                  format: remotionFormat,
-                  outputPath: '',
-                  segments,
-                  audioUrl: audioBlob.url,
-                  backgroundMusicUrl:
-                    'https://lunary.app/audio/series/lunary-bed-v1.mp3',
-                  highlightTerms: highlightTerms || [],
-                  durationSeconds: audioDuration + 2,
-                  overlays: overlays || [],
-                  categoryVisuals,
-                  seed: videoSeed,
-                  zodiacSign: symbolContent,
-                });
-
-                console.log(
-                  `✅ Remotion: Video rendered for script ${script.id}`,
-                );
-              } catch (remotionError) {
-                console.error(
-                  `❌ Remotion render failed for script ${script.id}:`,
-                  remotionError,
-                );
-                useFFmpegFallback = true;
-              }
-            }
-
-            if (useFFmpegFallback) {
-              console.log(
-                `⚠️ Using FFmpeg fallback for script ${script.id}...`,
+                    6,
+                    script.full_script,
+                  )
+                : scriptToAudioSegments(script.full_script, audioDuration, 2.6);
+            } catch {
+              segments = scriptToAudioSegments(
+                script.full_script,
+                audioDuration,
+                2.6,
               );
-              videoBuffer = await composeVideo({
-                images,
-                audioBuffer,
-                format: 'story',
-                outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
-                subtitlesText: script.full_script,
-                subtitlesHighlightTerms: highlightTerms,
-                subtitlesHighlightColor: highlightColor,
-                overlays,
-              });
             }
+
+            const remotionFormat =
+              audioDuration > 45 ? 'MediumFormVideo' : 'ShortFormVideo';
+            const videoSeed = `${safeSlug}-${script.id}-${Date.now()}`;
+            const symbolContent = `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`;
+
+            videoBuffer = await renderRemotionVideo({
+              format: remotionFormat,
+              outputPath: '',
+              segments,
+              audioUrl: audioBlob.url,
+              backgroundMusicUrl:
+                'https://lunary.app/audio/series/lunary-bed-v1.mp3',
+              highlightTerms: highlightTerms || [],
+              durationSeconds: audioDuration + 2,
+              overlays: overlays || [],
+              categoryVisuals,
+              seed: videoSeed,
+              zodiacSign: symbolContent,
+            });
+
+            console.log(`✅ Remotion: Video rendered for script ${script.id}`);
           }
 
           if (!videoBuffer) {
             throw new Error('Video generation failed - no buffer produced');
           }
+
+          // ─── Quality gates ───
+          // Styled Remotion videos are typically 3-15MB+.
+          // FFmpeg fallback renders were 300-850KB and looked terrible.
+          // Reject anything under 2MB as likely broken/unstyled.
+          const MIN_VIDEO_SIZE = 2 * 1024 * 1024; // 2MB
+          const videoSizeMB = (videoBuffer.length / 1024 / 1024).toFixed(1);
+          if (videoBuffer.length < MIN_VIDEO_SIZE) {
+            throw new Error(
+              `Video quality gate failed: ${videoSizeMB}MB is below minimum ${(MIN_VIDEO_SIZE / 1024 / 1024).toFixed(0)}MB. ` +
+                `This likely means the render produced an unstyled or broken video. ` +
+                `Script ${script.id} will not be published.`,
+            );
+          }
+          console.log(
+            `✅ Quality gate passed: ${videoSizeMB}MB video for script ${script.id}`,
+          );
 
           const blobKey = `videos/shorts/daily/${dateKey}-${safeSlug}-${Date.now()}.mp4`;
           const uploadResult = await put(blobKey, videoBuffer, {
@@ -1054,6 +1045,20 @@ export async function POST(request: NextRequest) {
           `;
           for (const post of pendingPosts.rows) {
             try {
+              // Guard: never publish posts with empty/whitespace content
+              const postContent = String(post.content || '').trim();
+              if (!postContent) {
+                console.warn(
+                  `[bridge] Skipping ${post.platform} post ${post.id} — empty content`,
+                );
+                await sql`
+                  UPDATE social_posts
+                  SET status = 'failed', rejection_feedback = 'Empty content — blocked by quality gate',
+                      updated_at = NOW()
+                  WHERE id = ${post.id}
+                `;
+                continue;
+              }
               const scheduledIso = new Date(post.scheduled_date).toISOString();
               const isFuture = new Date(post.scheduled_date) > new Date();
               const result = await postToSocial({
