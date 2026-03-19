@@ -107,6 +107,85 @@ const OUTER_PLANETS = new Set([
   'Pluto',
 ]);
 
+/**
+ * Essential dignities for all planets.
+ *
+ * Maps each planet to the signs where it is in domicile (rules), exalted,
+ * detriment (opposite domicile) and fall (opposite exaltation). Used by
+ * getRetrogradeSignContext() to dynamically determine dignity for any
+ * planet/sign combination, and exported for use elsewhere in the codebase.
+ */
+export const PLANETARY_DIGNITIES: Record<
+  string,
+  {
+    rules: string[];
+    exalted: string[];
+    detriment: string[];
+    fall: string[];
+  }
+> = {
+  Sun: {
+    rules: ['Leo'],
+    exalted: ['Aries'],
+    detriment: ['Aquarius'],
+    fall: ['Libra'],
+  },
+  Moon: {
+    rules: ['Cancer'],
+    exalted: ['Taurus'],
+    detriment: ['Capricorn'],
+    fall: ['Scorpio'],
+  },
+  Mercury: {
+    rules: ['Gemini', 'Virgo'],
+    exalted: ['Virgo'],
+    detriment: ['Sagittarius', 'Pisces'],
+    fall: ['Pisces'],
+  },
+  Venus: {
+    rules: ['Taurus', 'Libra'],
+    exalted: ['Pisces'],
+    detriment: ['Scorpio', 'Aries'],
+    fall: ['Virgo'],
+  },
+  Mars: {
+    rules: ['Aries', 'Scorpio'],
+    exalted: ['Capricorn'],
+    detriment: ['Libra', 'Taurus'],
+    fall: ['Cancer'],
+  },
+  Jupiter: {
+    rules: ['Sagittarius', 'Pisces'],
+    exalted: ['Cancer'],
+    detriment: ['Gemini', 'Virgo'],
+    fall: ['Capricorn'],
+  },
+  Saturn: {
+    rules: ['Capricorn', 'Aquarius'],
+    exalted: ['Libra'],
+    detriment: ['Cancer', 'Leo'],
+    fall: ['Aries'],
+  },
+  Uranus: {
+    rules: ['Aquarius'],
+    exalted: ['Scorpio'],
+    detriment: ['Leo'],
+    fall: ['Taurus'],
+  },
+  Neptune: {
+    rules: ['Pisces'],
+    exalted: ['Cancer'],
+    detriment: ['Virgo'],
+    fall: ['Capricorn'],
+  },
+  Pluto: {
+    rules: ['Scorpio'],
+    exalted: ['Aries'],
+    detriment: ['Taurus'],
+    fall: ['Libra'],
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Historical Context Map
 // ---------------------------------------------------------------------------
@@ -565,21 +644,55 @@ function getRetrogradeSignContext(
   planet: string,
   sign: string,
 ): { hooks: string[]; rarityFrame: string; meaning: string } {
+  // Prefer hand-written Mercury context when available
   const ctx = RETROGRADE_SIGN_CONTEXT[planet]?.[sign];
-  const dignityNote = ctx?.dignity ? ` (${ctx.dignity})` : '';
 
-  const meaning =
-    ctx?.meaning ||
-    `${planet} retrograde in ${sign} invites reflection on ${sign}-ruled themes.`;
+  // Determine dignity from PLANETARY_DIGNITIES table (works for any planet)
+  let dignity = ctx?.dignity || '';
+  if (!dignity) {
+    const pd = PLANETARY_DIGNITIES[planet];
+    if (pd) {
+      const isDetriment = pd.detriment.includes(sign);
+      const isFall = pd.fall.includes(sign);
+      const isDomicile = pd.rules.includes(sign);
+      const isExalted = pd.exalted.includes(sign);
+
+      if (isDetriment && isFall) dignity = 'detriment + fall';
+      else if (isDetriment) dignity = 'detriment';
+      else if (isFall) dignity = 'fall';
+      else if (isDomicile) dignity = 'domicile';
+      else if (isExalted) dignity = 'exalted';
+    }
+  }
+
+  const dignityNote = dignity ? ` (${dignity})` : '';
+
+  // Use hand-written meaning when available, generate from dignity otherwise
+  let meaning = ctx?.meaning || '';
+  if (!meaning) {
+    if (dignity === 'detriment + fall') {
+      meaning = `${planet} is in its detriment AND fall in ${sign} -- the hardest sign for ${planet}. Its energy is deeply challenged, making this retrograde particularly intense.`;
+    } else if (dignity === 'detriment') {
+      meaning = `${planet} retrograde in ${sign} (detriment) struggles to express its energy naturally. Themes ruled by ${planet} feel friction and demand conscious effort.`;
+    } else if (dignity === 'fall') {
+      meaning = `${planet} retrograde in ${sign} (fall) weakens ${planet}'s usual confidence. What normally comes easily now requires deliberate attention.`;
+    } else if (dignity === 'domicile') {
+      meaning = `${planet} retrogrades in its own sign of ${sign}. It is powerful here but turned inward -- a deep internal audit of ${planet}-ruled themes.`;
+    } else if (dignity === 'exalted') {
+      meaning = `${planet} retrograde in ${sign} (exalted) turns elevated energy inward. High potential meets forced reflection.`;
+    } else {
+      meaning = `${planet} retrograde in ${sign} invites reflection on ${sign}-ruled themes.`;
+    }
+  }
 
   const hooks = [
     `${planet} retrograde in ${sign}${dignityNote}. Here is why this one hits different.`,
     `${planet} is retrograde in ${sign}. What that actually means for your week.`,
   ];
 
-  if (ctx?.dignity) {
+  if (dignity) {
     hooks.unshift(
-      `${planet} is in its ${ctx.dignity} in ${sign} AND retrograde. This is the toughest Mercury retrograde of the year.`,
+      `${planet} is in its ${dignity} in ${sign} AND retrograde. This is the toughest ${planet} retrograde of the year.`,
     );
   }
 

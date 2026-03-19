@@ -1728,7 +1728,7 @@ export async function generateThematicPostsForWeek(
   // Long-form platforms (educational depth, images)
   const longFormPlatforms = ['linkedin', 'pinterest'];
   // Short-form platforms (1-2 sentences, optional hashtags)
-  const shortFormPlatforms = ['twitter', 'bluesky', 'threads'];
+  const shortFormPlatforms = ['bluesky', 'threads'];
 
   for (const dayContent of weekContent) {
     const sourceInfo = resolveSourceForFacet(

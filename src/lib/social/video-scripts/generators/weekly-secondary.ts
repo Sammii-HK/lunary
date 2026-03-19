@@ -328,9 +328,20 @@ export async function generateScriptForContentType(
     case 'sign-origin':
       return generateSignOriginScript(date);
 
-    default:
+    default: {
+      // numerology-sign is in SEED_WEIGHTS (tier A, weight 0.75) but has no
+      // dedicated generator yet. Fall back to sign-identity (closest high-
+      // performing format) rather than returning null and breaking the cron.
+      const typeStr = contentType as string;
+      if (typeStr === 'numerology-sign') {
+        console.log(
+          `  numerology-sign selected but no generator exists -- falling back to sign-identity`,
+        );
+        return generateSignIdentityScript(date);
+      }
       console.error(`  Unknown content type: ${contentType}`);
       return null;
+    }
   }
 }
 

@@ -649,7 +649,13 @@ export async function POST(request: NextRequest) {
           }
 
           if (!audioBuffer) {
-            audioBuffer = await generateVoiceover(script.full_script, {
+            // Strip any remaining section markers (e.g. [HOOK] (0-3s)) before TTS
+            // so they are never read aloud in the voiceover
+            const ttsScript = (script.full_script as string).replace(
+              /\[(?:HOOK|MEANING|WHAT TO EXPECT|CTA)\]\s*\([^)]*\)\.?\s*/gi,
+              '',
+            );
+            audioBuffer = await generateVoiceover(ttsScript, {
               voiceName: ttsPreset.voiceName,
               model: ttsPreset.model,
               speed: ttsPreset.speed,
@@ -811,7 +817,8 @@ export async function POST(request: NextRequest) {
                   outputPath: '',
                   segments,
                   audioUrl: audioBlob.url,
-                  backgroundMusicUrl: '/audio/series/lunary-bed-v1.mp3',
+                  backgroundMusicUrl:
+                    'https://lunary.app/audio/series/lunary-bed-v1.mp3',
                   highlightTerms: highlightTerms || [],
                   durationSeconds: audioDuration + 2,
                   overlays: overlays || [],

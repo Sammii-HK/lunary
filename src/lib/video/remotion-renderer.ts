@@ -178,14 +178,16 @@ export function alignScriptToWhisperTiming(
       nextWhisperIdx < whisperWords.length &&
       whisperWords[nextWhisperIdx].start - timing.end > 0.3;
 
-    // Check for sentence boundary
+    // Check for sentence boundary (enforce 4-word minimum per subtitle line)
+    const minWordsPerLine = 4;
     const endsWithPunctuation = /[.!?]$/.test(scriptWords[i]);
-    const isSentenceBreak = endsWithPunctuation && currentWords.length >= 2;
+    const isSentenceBreak =
+      endsWithPunctuation && currentWords.length >= minWordsPerLine;
 
     if (
       isLastWord ||
       hitMaxWords ||
-      (hasNaturalPause && currentWords.length >= 2) ||
+      (hasNaturalPause && currentWords.length >= minWordsPerLine) ||
       isSentenceBreak
     ) {
       segments.push({

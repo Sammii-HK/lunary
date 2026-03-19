@@ -61,19 +61,19 @@ export async function generateTransitAlertScript(
 
   const rarityNote =
     transit.rarity === 'very-rare'
-      ? "This doesn't happen often — it's a generational shift"
+      ? "This doesn't happen often. It's a generational shift"
       : transit.rarity === 'rare' && isRetrograde
-        ? `Mercury retrogrades happen 3-4 times a year, but the SIGN matters. ${transit.toSign} is where Mercury struggles most — it's in its detriment and fall here, meaning communication becomes intuitive rather than logical`
+        ? `Mercury retrogrades happen 3-4 times a year, but the SIGN matters. ${transit.toSign} is where Mercury struggles most. It's in its detriment and fall here, meaning communication becomes intuitive rather than logical`
         : transit.rarity === 'rare'
           ? 'This is a significant transit worth paying attention to'
           : '';
   const timingContext = isActiveRx
-    ? `${transit.planet} is currently retrograde in ${transit.toSign}. This is an active retrograde period — the planet stationed retrograde earlier and is still moving backward.`
+    ? `${transit.planet} is currently retrograde in ${transit.toSign}. This is an active retrograde period. The planet stationed retrograde earlier and is still moving backward.`
     : daysUntil > 0
       ? `${transitDesc} on ${dateStr} (${daysUntil} days from now).`
       : daysUntil === 0
-        ? `${transitDesc} — happening today, ${dateStr}.`
-        : `${transitDesc} — this started on ${dateStr} and is still active.`;
+        ? `${transitDesc}, happening today, ${dateStr}.`
+        : `${transitDesc}. This started on ${dateStr} and is still active.`;
 
   const prompt = `Create a 30-second TikTok script about ${isRetrograde ? `${transit.planet} retrograde` : 'an astrological transit'}.
 
@@ -99,6 +99,7 @@ DO NOT:
 - Make definitive predictions
 - Focus only on the date (make it evergreen)
 - Use the words: cosmic magic, cosmic energy, celestial, universe has a plan, pretty rare, rare event
+- Use em dashes. Use commas, full stops, or semicolons instead
 
 Format as sections:
 
@@ -124,10 +125,17 @@ Write naturally and make complex astrology feel accessible.`;
     maxTokens: 600,
   });
 
-  // Parse sections
-  const sections = parseTransitSections(scriptText);
+  // Parse sections and strip em dashes (TTS reads them awkwardly)
+  const sections = parseTransitSections(scriptText.replace(/\s*—\s*/g, ', '));
 
-  const wordCount = scriptText.split(/\s+/).length;
+  // Rebuild fullScript from section content only, strip [HOOK], [MEANING] etc.
+  // so TTS never reads the section markers aloud
+  const cleanScript = sections
+    .map((s) => s.content)
+    .join('\n\n')
+    .trim();
+
+  const wordCount = cleanScript.split(/\s+/).length;
 
   return {
     themeId: 'transit-alert',
@@ -143,7 +151,7 @@ Write naturally and make complex astrology feel accessible.`;
     contentType: 'transit-alert',
     platform: 'tiktok',
     sections,
-    fullScript: scriptText,
+    fullScript: cleanScript,
     wordCount,
     estimatedDuration: '30s',
     scheduledDate,

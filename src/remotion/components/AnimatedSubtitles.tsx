@@ -236,13 +236,13 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
                 fontWeight: isActive ? 800 : isKeyword ? 700 : 600,
                 display: 'inline-block',
                 marginRight: '0.2em',
-                backgroundColor: isActive ? highlightColor : 'transparent',
                 borderRadius: 6,
-                paddingLeft: 6,
-                paddingRight: 6,
-                paddingTop: 2,
-                paddingBottom: 2,
                 textShadow: isActive ? 'none' : `0 2px 6px rgba(0,0,0,0.5)`,
+                // Highlight background via box-shadow so it doesn't affect layout
+                boxShadow: isActive
+                  ? `0 0 0 6px ${highlightColor}, 0 0 0 6px ${highlightColor}`
+                  : 'none',
+                backgroundColor: isActive ? highlightColor : 'transparent',
               }}
             >
               {wt.word}

@@ -110,7 +110,9 @@ export async function postToSpellcast(
     const instagramOpts = (params.platformSettings as Record<string, unknown>)
       ?.instagramOptions as Record<string, unknown> | undefined;
     const isStory = instagramOpts?.isStory === true;
-    const postType = isStory ? 'story' : 'post';
+    // TikTok requires postType 'video' when media contains video
+    const hasVideoMedia = params.media?.some((m) => m.type === 'video');
+    const postType = isStory ? 'story' : hasVideoMedia ? 'video' : 'post';
 
     // Spellcast requires non-empty content; stories are image-only so use a space
     const content = params.content || ' ';
