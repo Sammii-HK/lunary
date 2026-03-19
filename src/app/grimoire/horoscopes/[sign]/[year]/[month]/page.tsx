@@ -15,7 +15,6 @@ import {
 } from '@/constants/seo/monthly-horoscope';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
-import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
 import { monthMeta, articleSchema } from '@/lib/horoscope-meta';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
@@ -162,6 +161,8 @@ export default async function MonthlyHoroscopePage({
       imageAlt={`${signName} ${monthName} ${year} Horoscope | Lunary`}
       datePublished={`${year}-${String(monthNumber).padStart(2, '0')}-01`}
       articleSection='Monthly Horoscopes'
+      transitSign={signName}
+      transitSignDisplay={signName}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Horoscopes', href: '/grimoire/horoscopes' },
@@ -248,7 +249,7 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
           ],
         },
       ]}
-      components={<PlacementSelector signName={signName} />}
+      components={null}
       cosmicConnections={
         <HoroscopeCosmicConnections
           variant='monthly-sign'

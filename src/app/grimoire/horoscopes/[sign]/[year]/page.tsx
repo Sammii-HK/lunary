@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
-import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
 import { yearMeta } from '@/lib/horoscope-meta';
 import snippetsData from '@/data/yearly-horoscope-snippets.json';
 
@@ -200,6 +199,8 @@ export default async function YearHoroscopePage({
       datePublished={`${year}-01-01`}
       image={image}
       imageAlt={`${signName} Horoscope ${year} | Lunary`}
+      transitSign={signName}
+      transitSignDisplay={signName}
       whatIs={{
         question: `What does the ${signName} horoscope for ${year} include?`,
         answer: `The ${signName} horoscope for ${year} provides complete monthly forecasts covering love, career, health, and personal growth. As a ${element} sign ruled by ${ruler}, ${signName} experiences ${year} through themes of consistency and growth. This guide includes all 12 monthly predictions, key transits, and practical guidance for the year ahead.`,
@@ -236,7 +237,7 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
           currentYear={currentYear}
         />
       }
-      components={<PlacementSelector signName={signName} />}
+      components={null}
       faqs={faqItems}
       tldr={`${year} keeps ${signName} rooted in ${element.toLowerCase()} consistency while ${ruler} asks you to tell a longer story with your choices.`}
       ctaText='See your full birth-chart horoscope in the app'

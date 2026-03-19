@@ -27,8 +27,11 @@ import { ReadFullGuidePrompt } from '@/app/grimoire/guides/ReadFullGuidePrompt';
 import { getInlineCtaVariant, getAnonId } from '@/lib/ab-tests-server';
 import { GrimoireSearch } from '@/app/grimoire/GrimoireSearch';
 import { StickyBottomCTA } from './StickyBottomCTA';
+import { MidArticleEmailCapture } from './MidArticleEmailCapture';
 import { ChartPreviewTeaser } from './ChartPreviewTeaser';
+import { SignTransitTeaser } from './SignTransitTeaser';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
+import { GrimoireExitIntent } from './GrimoireExitIntent';
 
 /**
  * Format a URL segment into a human-readable label
@@ -157,6 +160,10 @@ export interface SEOContentTemplateProps {
 
   // Components
   components?: React.ReactNode;
+
+  // Sign for transit teaser (shows live transits affecting this sign)
+  transitSign?: string;
+  transitSignDisplay?: string;
 }
 
 export async function SEOContentTemplate({
@@ -209,6 +216,8 @@ export async function SEOContentTemplate({
   contextualCopy,
   contextualCopyVariant = 'note',
   components,
+  transitSign,
+  transitSignDisplay,
 }: SEOContentTemplateProps) {
   // Get A/B test variant for inline CTA (server-side)
   const inlineCtaVariant = await getInlineCtaVariant();
@@ -424,8 +433,16 @@ export async function SEOContentTemplate({
           </section>
         )}
 
-        {/* Chart Preview Teaser - interactive conversion widget */}
-        <ChartPreviewTeaser hub={contextualHub} />
+        {/* Sign Transit Teaser - shows live transits + birthday input for this sign */}
+        {transitSign && transitSignDisplay && (
+          <SignTransitTeaser
+            sign={transitSign}
+            signDisplay={transitSignDisplay}
+          />
+        )}
+
+        {/* Chart Preview Teaser - only on non-horoscope pages (transit teaser handles it) */}
+        {!transitSign && <ChartPreviewTeaser hub={contextualHub} />}
 
         {fullGuide && (
           <ReadFullGuidePrompt
@@ -699,6 +716,14 @@ export async function SEOContentTemplate({
           />
         )}
 
+        {/* Email capture for horoscope readers - personalised daily horoscope offer */}
+        {contextualHub === 'horoscopes' && (
+          <MidArticleEmailCapture
+            topic="today's horoscope"
+            hub={contextualHub}
+          />
+        )}
+
         {/* Optional slot before FAQs */}
         {childrenPosition === 'before-faqs' && children && (
           <div id='explore-practices' className='mt-8'>
@@ -740,9 +765,21 @@ export async function SEOContentTemplate({
         <NewsletterSignupForm
           compact
           source={`grimoire_${contextualHub}`}
-          headline='Get weekly cosmic updates'
-          description='Free forecasts, transit alerts, and guides delivered every Friday.'
-          ctaLabel='Subscribe'
+          headline={
+            contextualHub === 'horoscopes'
+              ? 'Get your daily horoscope by email'
+              : 'Get weekly cosmic updates'
+          }
+          description={
+            contextualHub === 'horoscopes'
+              ? 'Personalised to your sign. Free daily readings, transit alerts, and guidance in your inbox every morning.'
+              : 'Free forecasts, transit alerts, and guides delivered every Friday.'
+          }
+          ctaLabel={
+            contextualHub === 'horoscopes'
+              ? 'Send me my horoscope'
+              : 'Subscribe'
+          }
           align='left'
         />
 
@@ -791,6 +828,9 @@ export async function SEOContentTemplate({
           )}
         />
       )}
+
+      {/* Exit intent popup for anonymous grimoire readers */}
+      <GrimoireExitIntent hub={contextualHub} />
     </article>
   );
 }

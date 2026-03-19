@@ -170,7 +170,7 @@ async function initializeAuth() {
           );
           await emailModule.sendEmail({
             to: user.email,
-            subject: '✨ Verify Your Email - Lunary',
+            subject: 'One click to start your trial — Lunary',
             html,
             text,
             tracking: {
@@ -269,6 +269,36 @@ async function initializeAuth() {
 
             if (pool) {
               await recordSignupConversionEvent(pool, user);
+
+              // Auto-enroll every new user in a 7-day Lunary+ trial so they
+              // experience the full product immediately. All existing trial
+              // nurture, reminder, and win-back email crons key off
+              // status='trial' + trial_ends_at, so they fire automatically.
+              try {
+                const trialEndsAt = new Date();
+                trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+
+                await pool.query(
+                  `INSERT INTO subscriptions (
+                     user_id, user_email, user_name,
+                     status, plan_type, trial_ends_at, trial_used,
+                     created_at
+                   )
+                   VALUES ($1, $2, $3, 'trial', 'lunary_plus', $4, true, NOW())
+                   ON CONFLICT (user_id) DO NOTHING`,
+                  [
+                    user.id,
+                    user.email || null,
+                    user.name || null,
+                    trialEndsAt.toISOString(),
+                  ],
+                );
+              } catch (subError) {
+                console.error(
+                  'Failed to create auto-trial subscription:',
+                  subError,
+                );
+              }
             }
             // Welcome email is sent after email verification to avoid emailing unverified/bot addresses
           },

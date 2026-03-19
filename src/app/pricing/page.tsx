@@ -13,14 +13,7 @@ import {
   type PricingPlan,
 } from '../../../utils/pricing';
 import { createCheckoutSession } from '../../../utils/stripe';
-import {
-  Check,
-  Sparkles,
-  Star,
-  ChevronDown,
-  ChevronUp,
-  Tag,
-} from 'lucide-react';
+import { Check, Sparkles, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useCurrency, formatPrice } from '../../hooks/useCurrency';
@@ -80,8 +73,7 @@ export default function PricingPage() {
     'monthly',
   );
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showPromoInput, setShowPromoInput] = useState(false);
-  const [promoCode, setPromoCode] = useState('');
+  const [urlPromoCode, setUrlPromoCode] = useState<string | undefined>();
   const [pendingCheckout, setPendingCheckout] = useState<{
     priceId: string;
     planId: string;
@@ -133,8 +125,7 @@ export default function PricingPage() {
 
     const promo = params.get('promo') || params.get('coupon');
     if (promo) {
-      setPromoCode(promo.toUpperCase());
-      setShowPromoInput(true);
+      setUrlPromoCode(promo.trim().toUpperCase());
     }
 
     loadPricingPlans();
@@ -232,7 +223,7 @@ export default function PricingPage() {
         undefined,
         currentUserId,
         currentUserEmail,
-        promoCode.trim() || undefined,
+        urlPromoCode,
         triggerFeature,
       );
 
@@ -441,39 +432,6 @@ export default function PricingPage() {
                 </span>
               </button>
             </div>
-          </div>
-        </section>
-
-        {/* Promo Code */}
-        <section className='relative pb-4'>
-          <div className='flex justify-center'>
-            {showPromoInput ? (
-              <div className='flex items-center gap-2'>
-                <div className='relative'>
-                  <Tag className='absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500' />
-                  <input
-                    type='text'
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                    placeholder='Enter code'
-                    className='pl-9 pr-3 py-2 w-44 rounded-lg bg-zinc-900/80 border border-zinc-700 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-lunary-primary-600 transition-colors'
-                  />
-                </div>
-                {promoCode && (
-                  <span className='text-xs text-lunary-primary-400'>
-                    Applied at checkout
-                  </span>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowPromoInput(true)}
-                className='text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1.5'
-              >
-                <Tag className='w-3 h-3' />
-                Have a promo code?
-              </button>
-            )}
           </div>
         </section>
 

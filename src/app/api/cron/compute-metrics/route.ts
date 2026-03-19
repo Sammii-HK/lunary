@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { ACTIVATION_EVENTS } from '@/lib/analytics/activation-events';
 import { syncStripeDiscounts } from '@/lib/analytics/sync-stripe-discounts';
+import {
+  TEST_EMAIL_PATTERN,
+  TEST_EMAIL_EXACT,
+} from '@/lib/analytics/test-filter';
 
 export const dynamic = 'force-dynamic';
-
-const TEST_EMAIL_PATTERN = '%@test.lunary.app';
-const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
 /**
  * Compute daily metrics and store in daily_metrics table
@@ -119,7 +120,7 @@ export async function GET(request: NextRequest) {
         snapshotParams,
       ),
 
-      // product: signed-in users with product events (not app_opened/page_viewed)
+      // product: verified signed-in users with product events (excludes bots)
       sql.query(
         `INSERT INTO daily_unique_users (metric_date, segment, user_ids, user_count)
          SELECT $5::date, 'product',
@@ -131,6 +132,11 @@ export async function GET(request: NextRequest) {
            WHERE ce.created_at >= $1 AND ce.created_at <= $2
              AND ce.event_type NOT IN ('app_opened', 'page_viewed')
              AND ${whereBase}
+             AND EXISTS (
+               SELECT 1 FROM "user" u
+               WHERE u.id = ${signedInId}
+                 AND u."emailVerified" = true
+             )
          ) sub
          ON CONFLICT (metric_date, segment) DO UPDATE SET
            user_ids = EXCLUDED.user_ids, user_count = EXCLUDED.user_count`,
@@ -357,10 +363,11 @@ export async function GET(request: NextRequest) {
         [mauStartStr, dateStr],
       ),
 
-      // ── Total accounts (all-time) ──
+      // ── Total accounts (verified only — excludes bots) ──
       sql.query(
         `SELECT COUNT(*) as count FROM "user"
-         WHERE (email IS NULL OR (email NOT LIKE $1 AND email != $2))`,
+         WHERE "emailVerified" = true
+           AND (email IS NULL OR (email NOT LIKE $1 AND email != $2))`,
         [TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
@@ -374,6 +381,7 @@ export async function GET(request: NextRequest) {
                SELECT u.id, u."createdAt" FROM "user" u
                WHERE u."createdAt" >= $1::date - INTERVAL '60 days'
                  AND u."createdAt" < $1::date - INTERVAL '31 days'
+                 AND u."emailVerified" = true
                  AND (u.email IS NULL OR (u.email NOT LIKE $2 AND u.email != $3))
                  AND EXISTS (
                    SELECT 1 FROM conversion_events ce
@@ -422,6 +430,7 @@ export async function GET(request: NextRequest) {
                SELECT u.id, u."createdAt" FROM "user" u
                WHERE u."createdAt" >= $1::date - INTERVAL '60 days'
                  AND u."createdAt" < $1::date - INTERVAL '31 days'
+                 AND u."emailVerified" = true
                  AND (u.email IS NULL OR (u.email NOT LIKE $2 AND u.email != $3))
                  AND EXISTS (
                    SELECT 1 FROM conversion_events ce
@@ -467,13 +476,14 @@ export async function GET(request: NextRequest) {
       // ── D30 placeholder (kept for result array index compat — data comes from unified query above) ──
       Promise.resolve({ rows: [{}] }),
 
-      // ── Product D7 Retention — signed-in product users only ──
+      // ── Product D7 Retention — signed-in verified users only ──
       sql.query(
         hasIdentityLinks
           ? `WITH cohort AS (
                SELECT u.id, u."createdAt" FROM "user" u
                WHERE u."createdAt" >= $1::date - INTERVAL '14 days'
                  AND u."createdAt" < $1::date - INTERVAL '7 days'
+                 AND u."emailVerified" = true
                  AND (u.email IS NULL OR (u.email NOT LIKE $2 AND u.email != $3))
                  AND EXISTS (
                    SELECT 1 FROM conversion_events ce
@@ -502,6 +512,7 @@ export async function GET(request: NextRequest) {
                SELECT u.id, u."createdAt" FROM "user" u
                WHERE u."createdAt" >= $1::date - INTERVAL '14 days'
                  AND u."createdAt" < $1::date - INTERVAL '7 days'
+                 AND u."emailVerified" = true
                  AND (u.email IS NULL OR (u.email NOT LIKE $2 AND u.email != $3))
                  AND EXISTS (
                    SELECT 1 FROM conversion_events ce
@@ -525,10 +536,11 @@ export async function GET(request: NextRequest) {
         [dateStr, TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // ── New signups ──
+      // ── New signups (verified only — excludes bots) ──
       sql.query(
         `SELECT COUNT(*) as count FROM "user"
          WHERE "createdAt" >= $1 AND "createdAt" <= $2
+           AND "emailVerified" = true
            AND (email IS NULL OR (email NOT LIKE $3 AND email != $4))`,
         [
           dayStart.toISOString(),
@@ -538,12 +550,13 @@ export async function GET(request: NextRequest) {
         ],
       ),
 
-      // ── Activated users ──
+      // ── Activated users (verified only — excludes bots) ──
       sql.query(
         hasIdentityLinks
           ? `SELECT COUNT(DISTINCT u.id) as count
              FROM "user" u
              WHERE u."createdAt" >= $1 AND u."createdAt" <= $2
+               AND u."emailVerified" = true
                AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
                AND EXISTS (
                  SELECT 1 FROM conversion_events ce
@@ -558,6 +571,7 @@ export async function GET(request: NextRequest) {
              FROM "user" u
              INNER JOIN conversion_events ce ON ce.user_id = u.id
              WHERE u."createdAt" >= $1 AND u."createdAt" <= $2
+               AND u."emailVerified" = true
                AND ce.event_type = ANY($5::text[])
                AND ce.created_at >= u."createdAt"
                AND ce.created_at <= u."createdAt" + INTERVAL '7 days'
@@ -592,12 +606,13 @@ export async function GET(request: NextRequest) {
         [TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
 
-      // ── New conversions ──
+      // ── New conversions (verified users only) ──
       sql.query(
         `SELECT COUNT(DISTINCT s.user_id) as count
          FROM subscriptions s
          INNER JOIN "user" u ON u.id = s.user_id
          WHERE s.created_at >= $1 AND s.created_at <= $2
+           AND u."emailVerified" = true
            AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))`,
         [
           dayStart.toISOString(),
@@ -607,7 +622,7 @@ export async function GET(request: NextRequest) {
         ],
       ),
 
-      // ── Feature adoption (MAU window, still scans conversion_events — bounded query) ──
+      // ── Feature adoption (MAU window, verified users only) ──
       // horoscope_viewed and personalized_horoscope_viewed are merged into 'horoscope_viewed'
       // because free users fire horoscope_viewed and paid users fire personalized_horoscope_viewed
       sql.query(
@@ -629,6 +644,11 @@ export async function GET(request: NextRequest) {
              'ritual_completed'
            )
            AND ${whereBase}
+           AND EXISTS (
+             SELECT 1 FROM "user" u
+             WHERE u.id = ${signedInId}
+               AND u."emailVerified" = true
+           )
          GROUP BY 1`,
         [
           mauStart.toISOString(),
@@ -691,7 +711,7 @@ export async function GET(request: NextRequest) {
       // ── Signed-in product returning users (from snapshots) ──
       returningQuery('product', mauStartStr),
 
-      // ── 30-day product user count from conversion_events (adoption denominator) ──
+      // ── 30-day product user count (verified only — adoption denominator) ──
       // Use this instead of snapshot-based productMau to avoid >100% adoption rates
       sql.query(
         `SELECT COUNT(DISTINCT ${signedInId}) as count
@@ -699,7 +719,12 @@ export async function GET(request: NextRequest) {
          ${idJoin}
          WHERE ce.created_at >= $1 AND ce.created_at <= $2
            AND ce.event_type NOT IN ('app_opened', 'page_viewed')
-           AND ${whereBase}`,
+           AND ${whereBase}
+           AND EXISTS (
+             SELECT 1 FROM "user" u
+             WHERE u.id = ${signedInId}
+               AND u."emailVerified" = true
+           )`,
         [
           mauStart.toISOString(),
           dayEnd.toISOString(),

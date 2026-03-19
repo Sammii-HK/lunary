@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Personalized Astrology App [Based on YOUR Birth Chart] | Lunary',
   description:
-    'Get daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data, not generic zodiac signs. Join 10,000+ cosmic explorers. Try a free monthly or annual trial.',
+    'Get daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data, not generic zodiac signs. Join 10,000+ cosmic explorers. Try a free 7-day trial.',
   keywords: [
     'AI astrology',
     'personalized astrology',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Personalized Astrology App [Based on YOUR Birth Chart] | Lunary',
     description:
-      'Daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data, not generic zodiac signs. Try a free monthly or annual trial.',
+      'Daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data, not generic zodiac signs. Try a free 7-day trial.',
     url: 'https://lunary.app/welcome',
     siteName: 'Lunary',
     images: [
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Personalized Astrology App [Based on YOUR Birth Chart] | Lunary',
     description:
-      'Daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data. Try a free monthly or annual trial.',
+      'Daily horoscopes, tarot readings & cosmic insights calculated from YOUR exact birth time. Real astronomical data. Try a free 7-day trial.',
     images: ['/api/og/cosmic'],
   },
   robots: {

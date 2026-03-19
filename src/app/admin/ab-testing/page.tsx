@@ -144,7 +144,9 @@ export default function ABTestingPage() {
 
   const getTestDisplayName = (testName: string): string => {
     const names: Record<string, string> = {
-      cta_copy: 'CTA Copy Variations',
+      cta_copy: 'CTA Copy (In-App, PostHog)',
+      seo_cta_copy: 'SEO CTA Copy (Contextual Nudge)',
+      seo_sticky_cta_copy: 'SEO Sticky CTA Copy',
       paywall_preview: 'Paywall Preview Style',
       homepage_features: 'Homepage Features',
       feature_preview: 'Feature Preview Blur',

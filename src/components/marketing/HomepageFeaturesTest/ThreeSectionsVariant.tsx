@@ -137,7 +137,7 @@ export function ThreeSectionsVariant() {
       {/* Overall CTA */}
       <div className='text-center pt-8'>
         <Button variant='lunary' size='lg' asChild>
-          <Link href='/auth?signup=true'>Start your practice free</Link>
+          <Link href='/auth?signup=true'>Start your free trial</Link>
         </Button>
       </div>
     </div>

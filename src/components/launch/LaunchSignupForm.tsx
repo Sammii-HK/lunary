@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useRef, useState } from 'react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import clsx from 'clsx';
 
 interface LaunchSignupFormProps {
@@ -18,10 +19,31 @@ export function LaunchSignupForm({
     'idle' | 'loading' | 'success' | 'error'
   >('idle');
   const [message, setMessage] = useState('');
+  const turnstileTokenRef = useRef<string | null>(null);
+  const honeypotRef = useRef<HTMLInputElement>(null);
+  const formId = useId();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!email) return;
+
+    // Honeypot check
+    if (honeypotRef.current?.value) {
+      setStatus('success');
+      setMessage('You are on the list! Watch your inbox for launch updates.');
+      setEmail('');
+      return;
+    }
+
+    // Turnstile check
+    if (
+      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY &&
+      !turnstileTokenRef.current
+    ) {
+      setStatus('error');
+      setMessage('Please wait for the security check to complete.');
+      return;
+    }
 
     setStatus('loading');
     setMessage('');
@@ -35,9 +57,12 @@ export function LaunchSignupForm({
         body: JSON.stringify({
           email,
           source,
+          turnstileToken: turnstileTokenRef.current,
           metadata: name ? { name } : undefined,
         }),
       });
+
+      turnstileTokenRef.current = null;
 
       const data = await response.json();
       if (!response.ok || !data.success) {
@@ -66,6 +91,18 @@ export function LaunchSignupForm({
         className,
       )}
     >
+      {/* Honeypot */}
+      <div aria-hidden='true' className='absolute -left-[9999px] -top-[9999px]'>
+        <label htmlFor={`${formId}-website`}>Website</label>
+        <input
+          ref={honeypotRef}
+          id={`${formId}-website`}
+          type='text'
+          name='website'
+          tabIndex={-1}
+          autoComplete='off'
+        />
+      </div>
       <div>
         <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
           Launch Waitlist
@@ -106,6 +143,18 @@ export function LaunchSignupForm({
           </button>
         </div>
       </div>
+      {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+        <Turnstile
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+          onSuccess={(token) => {
+            turnstileTokenRef.current = token;
+          }}
+          onExpire={() => {
+            turnstileTokenRef.current = null;
+          }}
+          options={{ theme: 'dark', size: 'invisible' }}
+        />
+      )}
       {message && (
         <p
           className={clsx('text-sm', {

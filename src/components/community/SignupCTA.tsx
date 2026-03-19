@@ -13,7 +13,7 @@ export function SignupCTA() {
             Join the Circle to ask questions
           </p>
           <p className='text-xs text-zinc-400'>
-            Create a free account to participate in the cosmic community
+            Create an account to participate in the cosmic community
           </p>
         </div>
         <Link

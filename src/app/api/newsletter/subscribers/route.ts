@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { addBrevoNewsletterContact } from '@/lib/brevo';
 import { getCurrentUser } from '@/lib/get-user-session';
+import { checkRateLimit } from '@/lib/api/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,14 +83,63 @@ export async function GET(request: NextRequest) {
 // POST: Add new subscriber
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 5 signups per IP per 10 minutes
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0] ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+    const { allowed } = checkRateLimit(`newsletter:${ip}`, 5, 10 * 60 * 1000);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
-    const { email, userId, preferences, source } = body;
+    const { email, userId, preferences, source, turnstileToken } = body;
 
     if (!email || !email.includes('@')) {
       return NextResponse.json(
         { error: 'Valid email address is required' },
         { status: 400 },
       );
+    }
+
+    // Stricter email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'Valid email address is required' },
+        { status: 400 },
+      );
+    }
+
+    // Verify Turnstile token (skip if key not configured)
+    if (process.env.TURNSTILE_SECRET_KEY) {
+      if (!turnstileToken) {
+        return NextResponse.json(
+          { error: 'Security check required' },
+          { status: 403 },
+        );
+      }
+
+      const formData = new FormData();
+      formData.append('secret', process.env.TURNSTILE_SECRET_KEY);
+      formData.append('response', turnstileToken);
+
+      const cfResponse = await fetch(
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+        { method: 'POST', body: formData },
+      );
+      const cfResult = (await cfResponse.json()) as { success: boolean };
+
+      if (!cfResult.success) {
+        return NextResponse.json(
+          { error: 'Security check failed. Please try again.' },
+          { status: 403 },
+        );
+      }
     }
 
     // Auto-verify only if the request comes from an authenticated session — not just a claimed source value

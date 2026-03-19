@@ -82,9 +82,12 @@ export function MidArticleEmailCapture({
 
   if (dismissed || (!visible && !submitted)) return null;
 
-  const headline = topic
-    ? `See how ${topic} affects YOUR chart`
-    : 'See how this affects YOUR chart';
+  const isHoroscope = hub === 'horoscopes';
+  const headline = isHoroscope
+    ? 'Get your daily horoscope by email'
+    : topic
+      ? `See how ${topic} affects YOUR chart`
+      : 'See how this affects YOUR chart';
 
   return (
     <div
@@ -97,10 +100,12 @@ export function MidArticleEmailCapture({
         <div className='px-6 py-8 text-center'>
           <Sparkles className='mx-auto mb-3 h-6 w-6 text-lunary-primary-400' />
           <p className='text-lg font-medium text-lunary-primary-200'>
-            Check your inbox
+            {isHoroscope ? 'You are in' : 'Check your inbox'}
           </p>
           <p className='mt-1 text-sm text-lunary-primary-400'>
-            We have sent you a link to see your personalised chart.
+            {isHoroscope
+              ? 'Your personalised daily horoscope will land in your inbox tomorrow morning.'
+              : 'We have sent you a link to see your personalised chart.'}
           </p>
         </div>
       ) : (
@@ -127,8 +132,9 @@ export function MidArticleEmailCapture({
             </button>
           </div>
           <p className='mb-4 text-sm text-lunary-primary-400'>
-            Enter your birth date to get a free personalised reading. No account
-            needed.
+            {isHoroscope
+              ? 'Personalised to your sign and birth chart. Free, every morning.'
+              : 'Enter your birth date to get a free personalised reading. No account needed.'}
           </p>
 
           <form onSubmit={handleSubmit} className='space-y-3'>
@@ -157,7 +163,7 @@ export function MidArticleEmailCapture({
                 'Sending...'
               ) : (
                 <>
-                  Show me my chart
+                  {isHoroscope ? 'Send me my horoscope' : 'Show me my chart'}
                   <ArrowRight className='h-4 w-4' />
                 </>
               )}

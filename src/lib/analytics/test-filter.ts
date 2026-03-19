@@ -24,3 +24,18 @@ export const testUserFilterSubscriptions = () =>
  */
 export const testUserFilterUsers = () =>
   `(email IS NULL OR (email NOT LIKE '${TEST_EMAIL_PATTERN}' AND email != '${TEST_EMAIL_EXACT}'))`;
+
+/**
+ * Exclude unverified users (bots) from signed-in metrics.
+ * Only applies to queries joining the "user" table — anonymous visitors are unaffected.
+ * Alias: u = "user" table.
+ */
+export const verifiedUserFilter = (alias = 'u') =>
+  `${alias}."emailVerified" = true`;
+
+/**
+ * Combined filter: exclude test users AND unverified users.
+ * For direct user table queries where alias = the user table.
+ */
+export const realUserFilter = (alias = 'u') =>
+  `${testUserFilterUsers()} AND ${verifiedUserFilter(alias)}`;

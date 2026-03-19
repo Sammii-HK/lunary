@@ -41,6 +41,8 @@ export const SPELLCAST_URL =
   'https://api.spellcast.sammii.dev';
 export const SPELLCAST_KEY =
   process.env.SPELLCAST_API_KEY || fallback.SPELLCAST_API_KEY || '';
+export const CRON_SECRET =
+  process.env.LUNARY_CRON_SECRET || fallback.LUNARY_CRON_SECRET || ADMIN_KEY;
 
 const keySource = process.env.LUNARY_ADMIN_KEY
   ? 'env'

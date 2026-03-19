@@ -5,7 +5,18 @@ import { Observer } from 'astronomy-engine';
 
 export const dynamic = 'force-dynamic';
 
-const NATAL_BODIES = new Set(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars']);
+const NATAL_BODIES = new Set([
+  'Sun',
+  'Moon',
+  'Mercury',
+  'Venus',
+  'Mars',
+  'Jupiter',
+  'Saturn',
+  'Uranus',
+  'Neptune',
+  'Pluto',
+]);
 const TRANSIT_BODIES = new Set([
   'Sun',
   'Moon',
@@ -14,6 +25,9 @@ const TRANSIT_BODIES = new Set([
   'Mars',
   'Jupiter',
   'Saturn',
+  'Uranus',
+  'Neptune',
+  'Pluto',
 ]);
 
 type AspectName = 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile';
@@ -42,6 +56,9 @@ const TRANSIT_FLAVOUR: Record<string, string> = {
   Mercury: 'communication and ideas',
   Sun: 'identity and purpose',
   Moon: 'emotions and instincts',
+  Uranus: 'disruption and breakthroughs',
+  Neptune: 'dreams and intuition',
+  Pluto: 'transformation and power',
 };
 
 export async function GET(request: NextRequest) {
@@ -112,9 +129,22 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Sort by intensity (tightest aspects first), take top 3
+    // Sort by intensity (tightest aspects first)
     transits.sort((a, b) => b.intensity - a.intensity);
-    const topTransits = transits.slice(0, 3);
+
+    // Pick 1 of each aspect type first for variety, then fill to 3 with duplicates
+    const seenAspects = new Set<string>();
+    const diverse: typeof transits = [];
+    const rest: typeof transits = [];
+    for (const t of transits) {
+      if (!seenAspects.has(t.aspect)) {
+        seenAspects.add(t.aspect);
+        diverse.push(t);
+      } else {
+        rest.push(t);
+      }
+    }
+    const topTransits = [...diverse, ...rest].slice(0, 3);
 
     // 4. Return natal preview + active transits
     const preview = natalFiltered.map((p) => ({

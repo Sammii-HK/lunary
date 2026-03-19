@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { sendEmail } from '@/lib/email';
 import { renderWelcomeDay2 } from '@/lib/email-components/WelcomeSeriesEmails';
 import { trackConversionEvent } from '@/lib/analytics/tracking';
+import { checkRateLimit } from '@/lib/api/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,23 @@ const emailCaptureSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 3 captures per IP per 10 minutes
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0] ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+    const { allowed } = checkRateLimit(
+      `grimoire-capture:${ip}`,
+      3,
+      10 * 60 * 1000,
+    );
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
     const parsed = emailCaptureSchema.safeParse(body);
 

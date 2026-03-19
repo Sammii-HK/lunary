@@ -107,20 +107,26 @@ export function TrialExpiredEmail({
               </Text>
             </Section>
 
-            <Text>Rejoin Lunary to continue receiving:</Text>
+            <Text style={{ fontWeight: '600' }}>
+              You no longer have access to:
+            </Text>
             <Text style={{ margin: '15px 0' }}>
-              🌟 Personalized birth chart insights
+              • 🎴 Your personalised daily tarot pulls
               <br />
-              🔮 Daily horoscopes tailored to your chart
+              • 💬 Astral Guide conversations about your chart
               <br />
-              ✨ Personalized tarot readings
-              <br />
-              🌙 Transit calendars and cosmic guidance
+              • 🪐 Real-time transit alerts for your placements
+              <br />• ✨ Personalised rituals and grimoire deep dives
+            </Text>
+
+            <Text>
+              You can still use the free features — but your readings will no
+              longer be personalised to your birth chart.
             </Text>
 
             <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
               <Link
-                href={`${baseUrl}/pricing`}
+                href={`${baseUrl}/pricing?nav=app&utm_source=email&utm_medium=lifecycle&utm_campaign=trial_expired`}
                 style={{
                   display: 'inline-block',
                   background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
@@ -132,7 +138,7 @@ export function TrialExpiredEmail({
                   fontSize: '16px',
                 }}
               >
-                Continue Your Journey →
+                Get Lunary+ from $4.99/mo →
               </Link>
             </Section>
           </Section>
@@ -203,13 +209,15 @@ You've missed ${missedInsights} personalized insight${insightLabel} 🌙
 
 Your birth chart analysis, daily horoscopes, and tarot patterns are waiting for you.
 
-Rejoin Lunary to continue receiving:
-- 🌟 Personalized birth chart insights
-- 🔮 Daily horoscopes tailored to your chart
-- ✨ Personalized tarot readings
-- 🌙 Transit calendars and cosmic guidance
+You no longer have access to:
+- 🎴 Your personalised daily tarot pulls
+- 💬 Astral Guide conversations about your chart
+- 🪐 Real-time transit alerts for your placements
+- ✨ Personalised rituals and grimoire deep dives
 
-Continue your journey: ${baseUrl}/pricing
+You can still use the free features — but your readings will no longer be personalised to your birth chart.
+
+Get Lunary+ from $4.99/mo: ${baseUrl}/pricing?nav=app
 
 ---
 Unsubscribe: ${unsubscribeUrl}

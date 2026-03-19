@@ -4,6 +4,7 @@ import {
   insertCanonicalEvent,
 } from '@/lib/analytics/canonical-events';
 import { getCurrentUser } from '@/lib/get-user-session';
+import { detectBot } from '@/lib/analytics/bot-detection';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,15 @@ const resolvePathFromReferer = (referer: string | null): string | null => {
 
 export async function POST(request: NextRequest) {
   try {
+    const botReason = detectBot(request.headers);
+    if (botReason) {
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: botReason,
+      });
+    }
+
     const payload = await request.json().catch(() => ({}));
     const pagePath =
       typeof payload?.pagePath === 'string' &&

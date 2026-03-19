@@ -1,6 +1,7 @@
 'use client';
 
-import { FormEvent, ReactNode, useState } from 'react';
+import { FormEvent, ReactNode, useId, useRef, useState } from 'react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { Button } from '@/components/ui/button';
 
 const MAX_NAME_LENGTH = 120;
@@ -27,6 +28,9 @@ export function TestimonialForm({
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<SubmissionStatus>('idle');
   const [error, setError] = useState<string | null>(null);
+  const turnstileTokenRef = useRef<string | null>(null);
+  const honeypotRef = useRef<HTMLInputElement>(null);
+  const formId = useId();
 
   const resetForm = () => {
     setName('');
@@ -41,6 +45,21 @@ export function TestimonialForm({
       return;
     }
 
+    // Honeypot check
+    if (honeypotRef.current?.value) {
+      setStatus('success');
+      return;
+    }
+
+    // Turnstile check
+    if (
+      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY &&
+      !turnstileTokenRef.current
+    ) {
+      setError('Please wait for the security check to complete.');
+      return;
+    }
+
     setError(null);
     setStatus('saving');
 
@@ -48,8 +67,14 @@ export function TestimonialForm({
       const response = await fetch('/api/testimonials', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, message }),
+        body: JSON.stringify({
+          name,
+          message,
+          turnstileToken: turnstileTokenRef.current,
+        }),
       });
+
+      turnstileTokenRef.current = null;
 
       if (!response.ok) {
         const data = await response.json().catch(() => null);
@@ -76,6 +101,21 @@ export function TestimonialForm({
   return (
     <div className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-8 shadow-[0px_20px_40px_rgba(0,0,0,0.45)] backdrop-blur'>
       <form onSubmit={handleSubmit} className='space-y-6'>
+        {/* Honeypot */}
+        <div
+          aria-hidden='true'
+          className='absolute -left-[9999px] -top-[9999px]'
+        >
+          <label htmlFor={`${formId}-website`}>Website</label>
+          <input
+            ref={honeypotRef}
+            id={`${formId}-website`}
+            type='text'
+            name='website'
+            tabIndex={-1}
+            autoComplete='off'
+          />
+        </div>
         <div className='space-y-1'>
           <label
             htmlFor='testimonial-name'
@@ -142,6 +182,19 @@ export function TestimonialForm({
             </p>
           )}
         </div>
+
+        {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+            onSuccess={(token) => {
+              turnstileTokenRef.current = token;
+            }}
+            onExpire={() => {
+              turnstileTokenRef.current = null;
+            }}
+            options={{ theme: 'dark', size: 'invisible' }}
+          />
+        )}
 
         <div className='flex items-center justify-between gap-4'>
           <Button type='submit' variant='lunary' disabled={status === 'saving'}>

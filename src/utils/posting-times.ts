@@ -144,22 +144,22 @@ export function getPlatformPostingInfo(
 }
 
 /**
- * Video posting times (UTC) — 4-slot daily schedule
+ * Video posting times (UTC) — 4-slot daily schedule, optimised for US audience
  *
- * | Slot         | UTC  | UK    | US ET  | Purpose                                    |
- * |--------------|------|-------|--------|--------------------------------------------|
- * | engagementC  | 11   | 11am  | 6am    | Early discovery / trending                 |
- * | primary      | 14   | 2pm   | 9am    | Educational (grimoire themes)              |
- * | engagementA  | 17   | 5pm   | 12pm   | Engagement format (UK evening / US lunch)  |
- * | engagementB  | 21   | 9pm   | 4pm    | Engagement format (UK leisure / US peak)   |
+ * | Slot         | UTC  | UK     | US ET   | Purpose                                    |
+ * |--------------|------|--------|---------|-------------------------------------------|
+ * | primary      | 15   | 3pm    | 11am    | Educational (grimoire themes, late morning)|
+ * | engagementA  | 18   | 6pm    | 2pm     | Engagement format (US afternoon browse)    |
+ * | engagementB  | 22   | 10pm   | 6pm     | Engagement format (US evening peak)        |
+ * | engagementC  | 1    | 1am+1  | 9pm     | Late night discovery (US prime time)       |
  */
 export const VIDEO_POSTING_HOURS = {
-  engagementC: 11,
-  primary: 14,
-  engagementA: 17,
-  engagementB: 21,
+  primary: 15,
+  engagementA: 18,
+  engagementB: 22,
+  engagementC: 1,
   /** @deprecated Use engagementB — kept for backward compatibility */
-  secondary: 21,
+  secondary: 22,
 } as const;
 
 export type VideoSlot =
@@ -181,11 +181,11 @@ export function getVideoPostingHour(isSecondary: boolean): number {
 
 /**
  * Instagram Reels posting times for engagement video cross-posts (UTC)
- * Staggered from TikTok times to hit Instagram's optimal hours.
+ * Staggered from TikTok times, targeting US afternoon/evening.
  */
 export const INSTAGRAM_REELS_HOURS = {
-  engagementA: 15,
-  engagementB: 19,
+  engagementA: 17,
+  engagementB: 21,
 } as const;
 
 export function getInstagramReelsHour(
@@ -231,16 +231,15 @@ function simplePostingHash(str: string): number {
 }
 
 /**
- * Threads posting schedule (UTC)
- * Research-backed schedule for optimal engagement:
- * - 12:00 UTC: Question/engagement post (morning scroll, algorithm boost)
- * - 17:00 UTC: Educational deep-dive (UK evening, US lunch - value content)
- * - 20:00 UTC: Dear-style beta CTA (peak app usage, leisure time = signups)
+ * Threads posting schedule (UTC), optimised for US audience
+ * - 15:00 UTC (11am ET): Question/engagement post (US late morning scroll)
+ * - 20:00 UTC (4pm ET): Educational deep-dive (US afternoon, UK evening)
+ * - 23:00 UTC (7pm ET): Dear-style beta CTA (US evening prime time)
  */
 export const THREADS_POST_HOURS = {
-  question: 12,
-  deepDive: 17,
-  betaCta: 20,
+  question: 15,
+  deepDive: 20,
+  betaCta: 23,
 } as const;
 
 export type ThreadsPostType = 'question' | 'deepDive' | 'betaCta';

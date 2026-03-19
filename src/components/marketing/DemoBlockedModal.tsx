@@ -72,8 +72,8 @@ export function DemoBlockedModal({
               Unavailable in Demo
             </h3>
             <p className='text-sm text-zinc-400'>
-              {action} is not available in the demo preview. Create a free
-              account to unlock all features.
+              {action} is not available in the demo preview. Create an account
+              to unlock all features.
             </p>
           </div>
 
@@ -95,7 +95,7 @@ export function DemoBlockedModal({
             className='w-full mt-6 bg-gradient-to-r from-lunary-primary-600 to-lunary-accent-600 hover:from-lunary-primary-500 hover:to-lunary-accent-500 text-white font-medium px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-lunary-primary-600/20'
           >
             <Sparkles className='w-4 h-4' />
-            Create Free Account
+            Create Account
           </button>
 
           {/* Dismiss button */}

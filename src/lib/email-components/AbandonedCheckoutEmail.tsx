@@ -161,7 +161,7 @@ function AbandonedCheckoutEmailComponent({
           </Section>
 
           <CtaButton
-            href={`${baseUrl}/pricing?utm_source=email&utm_medium=lifecycle&utm_campaign=abandoned_checkout`}
+            href={`${baseUrl}/pricing?nav=app&utm_source=email&utm_medium=lifecycle&utm_campaign=abandoned_checkout`}
             label='Continue to Checkout'
           />
           <Text

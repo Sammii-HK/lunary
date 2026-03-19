@@ -21,6 +21,7 @@ export {
   TrialReminderEmail,
   TrialDay2Email,
   TrialDay3Email,
+  TrialDay3ActionEmail,
   TrialDay5Email,
   generateTrialWelcomeEmailHTML,
   generateTrialWelcomeEmailText,
@@ -30,6 +31,8 @@ export {
   generateTrialDay2EmailText,
   generateTrialDay3EmailHTML,
   generateTrialDay3EmailText,
+  generateTrialDay3ActionEmailHTML,
+  generateTrialDay3ActionEmailText,
   generateTrialDay5EmailHTML,
   generateTrialDay5EmailText,
 } from './TrialNurtureEmails';

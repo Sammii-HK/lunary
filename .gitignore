@@ -91,3 +91,4 @@ images/backgrounds/
 *.mp4
 
 app-store-assets/*
+.build-ok

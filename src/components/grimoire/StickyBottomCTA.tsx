@@ -75,7 +75,7 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
         ctaVariant: nudge.ctaVariant,
         ctaHeadline: nudge.ctaHeadline,
         ctaSubline: nudge.ctaSubline,
-        abTest: 'sticky_cta_copy',
+        abTest: 'seo_sticky_cta_copy',
         abVariant: nudge.ctaVariant,
       });
     }
@@ -106,7 +106,7 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
       ctaVariant: nudge.ctaVariant,
       ctaHeadline: nudge.ctaHeadline,
       ctaSubline: nudge.ctaSubline,
-      abTest: 'sticky_cta_copy',
+      abTest: 'seo_sticky_cta_copy',
       abVariant: nudge.ctaVariant,
     });
 

@@ -42,14 +42,14 @@
       {
         "headline": "Generic meanings only go so far",
         "subline": "Lunary shows everything through YOUR birth chart, not one-size-fits-all descriptions.",
-        "buttonLabel": "Get my free chart",
+        "buttonLabel": "Get my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "Generic meanings only go so far → see YOUR chart"
       },
       {
         "headline": "This is reference. Your chart makes it personal.",
-        "subline": "Create a free account to see your full birth chart with all placements and houses.",
+        "subline": "Create an account to see your full birth chart with all placements and houses.",
         "buttonLabel": "Make it personal",
         "href": "/auth?signup=true",
         "action": "authOrLink",
@@ -57,8 +57,8 @@
       },
       {
         "headline": "You've got the concepts. Now see your chart.",
-        "subline": "Your full birth chart, today's transits, and lunar timing. All free.",
-        "buttonLabel": "Get my free chart",
+        "subline": "Your full birth chart, today's transits, and lunar timing. No card needed.",
+        "buttonLabel": "Get my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "You've got the concepts. Now see YOUR chart."
@@ -84,7 +84,7 @@
     "astrology": [
       {
         "headline": "This is your sun sign. Your chart has 10 more.",
-        "subline": "See your full birth chart with all your placements, houses, and aspects. Free.",
+        "subline": "See your full birth chart with all your placements, houses, and aspects.",
         "buttonLabel": "See my full chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
@@ -100,8 +100,8 @@
       },
       {
         "headline": "There's more to you than this sign",
-        "subline": "Your full birth chart shows where every planet was when you were born. Free to calculate.",
-        "buttonLabel": "Get my free chart",
+        "subline": "Your full birth chart shows where every planet was when you were born.",
+        "buttonLabel": "Get my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "There's more to you than this sign."
@@ -143,7 +143,7 @@
       },
       {
         "headline": "This planet sits somewhere in your chart",
-        "subline": "Which sign? Which house? What aspects does it make? Find out free.",
+        "subline": "Which sign? Which house? What aspects does it make? See yours.",
         "buttonLabel": "Find it in my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
@@ -267,7 +267,7 @@
     "horoscopes": [
       {
         "headline": "This is your sun sign. Your chart has 10 more.",
-        "subline": "See your full birth chart with all your placements, houses, and aspects. Free.",
+        "subline": "See your full birth chart with all your placements, houses, and aspects.",
         "buttonLabel": "See my full chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
@@ -361,7 +361,7 @@
       },
       {
         "headline": "Card meanings are theory. Your pull is practice.",
-        "subline": "Shuffle, ask your question, see what lands. Free to try.",
+        "subline": "Shuffle, ask your question, see what lands.",
         "buttonLabel": "Try a reading",
         "href": "/auth?signup=true",
         "action": "authOrLink",
@@ -629,7 +629,7 @@
       {
         "headline": "Your path isn't generic",
         "subline": "See your chart, your transits, your timing. Build from there.",
-        "buttonLabel": "Get my free chart",
+        "buttonLabel": "Get my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "Your path isn't generic. See your chart."
@@ -666,7 +666,7 @@
     "personalContext": [
       {
         "headline": "You've got the concepts. Now see YOUR chart.",
-        "subline": "All your placements, houses, and aspects in one place. Free.",
+        "subline": "All your placements, houses, and aspects in one place.",
         "buttonLabel": "View my full chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
@@ -674,15 +674,15 @@
       },
       {
         "headline": "Theory learned. Time to see yours.",
-        "subline": "Your complete birth chart with all placements and houses. Free to calculate.",
-        "buttonLabel": "Get my free chart",
+        "subline": "Your complete birth chart with all placements and houses.",
+        "buttonLabel": "Get my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "Theory learned. Time to see yours."
       },
       {
         "headline": "This is how birth charts work. Here's yours.",
-        "subline": "See your placements, houses, and aspects. Free.",
+        "subline": "See your placements, houses, and aspects.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
@@ -720,16 +720,16 @@
     "integratedGuidance": [
       {
         "headline": "You've got the concepts. Now see your chart.",
-        "subline": "Your full birth chart, today's transits, and lunar timing. All free.",
-        "buttonLabel": "Get my free chart",
+        "subline": "Your full birth chart, today's transits, and lunar timing. No card needed.",
+        "buttonLabel": "Get my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "You've got the concepts. Now see your chart."
       },
       {
         "headline": "Reference is a starting point. Your chart is the map.",
-        "subline": "See your full birth chart and what's active in the sky today. Free.",
-        "buttonLabel": "Get my free chart",
+        "subline": "See your full birth chart and what's active in the sky today.",
+        "buttonLabel": "Get my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "Reference is a starting point. Your chart is the map."
@@ -801,16 +801,16 @@
     "grimoireReference": [
       {
         "headline": "Reference is a starting point. Your chart is the map.",
-        "subline": "See your full birth chart and what's active in the sky today. Free.",
-        "buttonLabel": "Get my free chart",
+        "subline": "See your full birth chart and what's active in the sky today.",
+        "buttonLabel": "Get my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "Reference is a starting point. Your chart is the map."
       },
       {
         "headline": "You've been reading. Now see your chart.",
-        "subline": "Your birth chart with all placements, houses, and today's transits. Free.",
-        "buttonLabel": "Get my free chart",
+        "subline": "Your birth chart with all placements, houses, and today's transits.",
+        "buttonLabel": "Get my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
         "inlineCopy": "You've been reading. Now see your chart."

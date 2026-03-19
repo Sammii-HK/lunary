@@ -182,14 +182,7 @@ const COMMUNITY_HASHTAGS = [
   '#healing',
 ];
 
-const FORMAT_HASHTAGS = [
-  '#learnontiktok',
-  '#fyp',
-  '#foryou',
-  '#edutok',
-  '#tiktoktaught',
-  '#viral',
-];
+const FORMAT_HASHTAGS = ['#learnontiktok', '#edutok', '#tiktoktaught'];
 
 /**
  * Category-specific emoji pools (#4)

@@ -21,6 +21,7 @@ import { TestimonialForm } from '@/components/TestimonialForm';
 import { RateApp } from 'capacitor-rate-app';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { useAuthStatus } from './AuthStatus';
+import { TrialCountdownBanner } from './TrialCountdownBanner';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
 
@@ -394,7 +395,7 @@ export function AppChrome() {
           {showMarketingNav && <MarketingNavbar />}
           {showAppNav && (
             <>
-              {/* <TrialCountdownBanner /> */}
+              <TrialCountdownBanner />
               <Navbar />
             </>
           )}

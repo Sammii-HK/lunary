@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from './SmartTrialButton';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
@@ -9,17 +10,30 @@ import Link from 'next/link';
 
 export function PostTrialMessaging() {
   const subscription = useSubscription();
-  const [missedInsights, setMissedInsights] = useState<number | null>(null);
+  const { user } = useUser();
 
-  const hadTrialButExpired = subscription.status === 'cancelled';
+  // Show for users who had a trial that expired and didn't convert
+  const trialExpired = useMemo(() => {
+    if (subscription.status === 'active') return false;
+    if (subscription.isTrialActive) return false;
 
-  useEffect(() => {
-    if (hadTrialButExpired) {
-      setMissedInsights(7);
-    }
-  }, [hadTrialButExpired]);
+    // Check if user had a trial that ended (trialEndsAt in the past)
+    const trialEndsAt = user?.trialEndsAt;
+    if (!trialEndsAt) return false;
 
-  if (!hadTrialButExpired || !missedInsights) {
+    return new Date(trialEndsAt) < new Date();
+  }, [subscription.status, subscription.isTrialActive, user?.trialEndsAt]);
+
+  const missedInsights = useMemo(() => {
+    if (!trialExpired || !user?.trialEndsAt) return 0;
+    const daysSince = Math.floor(
+      (Date.now() - new Date(user.trialEndsAt).getTime()) /
+        (1000 * 60 * 60 * 24),
+    );
+    return Math.max(1, daysSince);
+  }, [trialExpired, user?.trialEndsAt]);
+
+  if (!trialExpired || missedInsights === 0) {
     return null;
   }
 
@@ -31,19 +45,23 @@ export function PostTrialMessaging() {
         </div>
         <div className='flex-1'>
           <h3 className='text-lg font-semibold text-white mb-2'>
-            You've missed {missedInsights} cosmic insight
-            {missedInsights !== 1 ? 's' : ''} 🌙
+            You&apos;ve missed {missedInsights} day
+            {missedInsights !== 1 ? 's' : ''} of personalised guidance
           </h3>
           <p className='text-zinc-300 text-sm mb-4'>
-            Your personalized horoscopes, birth chart insights, and tarot
-            patterns are waiting for you. Rejoin to continue your cosmic
-            journey.
+            Your daily tarot pulls, personalised horoscopes, and transit
+            insights have been waiting. Pick up where you left off.
+          </p>
+          <p className='text-lunary-primary-300 text-sm font-medium mb-4'>
+            Come back with 20% off — use code COSMICSEASON at checkout
           </p>
           <div className='flex flex-col sm:flex-row gap-3'>
-            <SmartTrialButton size='default' />
-            <Button variant='outline' size='sm' asChild>
-              <Link href='/pricing?nav=app'>View Plans</Link>
+            <Button variant='lunary-soft' size='default' asChild>
+              <Link href='/pricing?nav=app&promo=COSMICSEASON'>
+                Get 20% off
+              </Link>
             </Button>
+            <SmartTrialButton size='default' />
           </div>
         </div>
       </div>

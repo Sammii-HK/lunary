@@ -334,7 +334,7 @@ export function DemoClient() {
                                 }}
                                 className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-500 text-white text-xs rounded-md transition-colors'
                               >
-                                Create your free account →
+                                Create your account →
                               </button>
                             </div>
                           </div>
@@ -374,7 +374,7 @@ export function DemoClient() {
                                 }}
                                 className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-500 text-white text-xs rounded-md transition-colors'
                               >
-                                Create your free account →
+                                Create your account →
                               </button>
                             </div>
                           </div>

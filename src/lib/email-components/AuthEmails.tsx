@@ -35,10 +35,11 @@ export function VerificationEmail({
   return (
     <Html>
       <Head>
-        <title>Verify Your Email - Lunary</title>
+        <title>One click to start your trial - Lunary</title>
       </Head>
       <Preview>
-        Welcome to Lunary! Verify your email to start your cosmic journey.
+        Your birth chart and 7 days of personalised readings are ready. Click to
+        verify and start.
       </Preview>
       <Body
         style={{
@@ -76,18 +77,17 @@ export function VerificationEmail({
               as='h1'
               style={{ color: '#a78bfa', fontSize: '28px', margin: 0 }}
             >
-              Welcome to Lunary
+              One click to start
             </Heading>
             <Text
               style={{ color: '#d1c4ff', fontSize: '16px', margin: '12px 0 0' }}
             >
-              Your Cosmic Journey Begins
+              Your 7-day trial is waiting
             </Text>
           </Section>
 
           <Text style={{ color: '#d1c4ff', margin: '16px 0' }}>
-            Thank you for joining Lunary! To complete your registration and
-            start your cosmic journey, please verify your email address.
+            Click below to verify your email and unlock your full Lunary+ trial:
           </Text>
 
           <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
@@ -104,38 +104,75 @@ export function VerificationEmail({
                 fontSize: '16px',
               }}
             >
-              Verify Your Email
+              Start my trial
             </Link>
           </Section>
 
-          <Text style={{ color: '#d1c4ff', margin: '16px 0' }}>
-            This link will expire in 24 hours for security reasons.
+          <Text
+            style={{ color: '#9ca3af', fontSize: '13px', margin: '8px 0 24px' }}
+          >
+            This also verifies your email. Link expires in 24 hours.
           </Text>
 
-          <Text style={{ color: '#d1c4ff', margin: '16px 0' }}>
-            If clicking the button doesn&apos;t work, copy and paste this URL
-            into your browser:
+          <Section
+            style={{
+              background: 'rgba(99, 102, 241, 0.08)',
+              padding: '20px',
+              borderRadius: '12px',
+              margin: '0 0 20px',
+            }}
+          >
+            <Text
+              style={{
+                color: '#d1c4ff',
+                fontSize: '14px',
+                fontWeight: '600',
+                margin: '0 0 12px',
+              }}
+            >
+              Here&apos;s what&apos;s included:
+            </Text>
+            <Text
+              style={{ color: '#d1c4ff', fontSize: '14px', margin: '4px 0' }}
+            >
+              Your full birth chart with all placements
+            </Text>
+            <Text
+              style={{ color: '#d1c4ff', fontSize: '14px', margin: '4px 0' }}
+            >
+              Daily tarot pulled for your specific energy
+            </Text>
+            <Text
+              style={{ color: '#d1c4ff', fontSize: '14px', margin: '4px 0' }}
+            >
+              Personalised horoscope and transit alerts
+            </Text>
+            <Text
+              style={{ color: '#d1c4ff', fontSize: '14px', margin: '4px 0' }}
+            >
+              Astral Guide — ask anything about your chart
+            </Text>
+          </Section>
+
+          <Text
+            style={{ color: '#9ca3af', margin: '16px 0', fontSize: '13px' }}
+          >
+            If the button doesn&apos;t work, paste this URL in your browser:
           </Text>
           <Section
             style={{
               background: 'rgba(99, 102, 241, 0.1)',
-              padding: '16px',
-              borderRadius: '12px',
-              margin: '20px 0',
+              padding: '12px',
+              borderRadius: '8px',
+              margin: '8px 0 20px',
               wordBreak: 'break-all' as const,
-              fontSize: '14px',
+              fontSize: '12px',
               border: '1px dashed rgba(167, 139, 250, 0.35)',
               color: '#e1d9ff',
             }}
           >
             <Text style={{ margin: 0 }}>{verificationUrl}</Text>
           </Section>
-
-          <Text style={{ color: '#d1c4ff', margin: '16px 0' }}>
-            Once verified, you&apos;ll have access to personalized moon phase
-            guidance, daily tarot insights, astrological horoscopes, and your
-            digital grimoire synced across all devices.
-          </Text>
 
           <Section
             style={{
@@ -326,30 +363,26 @@ export function generateVerificationEmailText(
   const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(userEmail)}`;
 
   return `
-Welcome to Lunary! 🌙
+Your 7-day Lunary+ trial is ready.
 
-Thank you for joining us. To complete your registration and start your cosmic journey, please verify your email address by clicking the link below:
-
+Click this link to verify your email and start:
 ${verificationUrl}
 
-This link will expire in 24 hours for security reasons.
+Here's what's included:
+- Your full birth chart with all placements
+- Daily tarot pulled for your specific energy
+- Personalised horoscope and transit alerts
+- Astral Guide — ask anything about your chart
 
-Once verified, you'll have access to:
-- 🌙 Personalized moon phase guidance
-- ✨ Daily tarot insights  
-- 🔮 Astrological horoscopes
-- 📚 Digital grimoire and spells
-- ☁️ Cross-device sync
+This link expires in 24 hours.
 
-If you didn't create an account with Lunary, you can safely ignore this email.
-
-Questions? Reply to this email or visit our support page.
+If you didn't create an account, you can safely ignore this email.
 
 ---
 Unsubscribe: ${unsubscribeUrl}
 Manage Preferences: ${baseUrl}/profile
 
-© ${new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for your cosmic journey.
+© ${new Date().getFullYear()} Lunar Computing, Inc.
   `.trim();
 }
 

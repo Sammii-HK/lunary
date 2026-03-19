@@ -184,7 +184,7 @@ function WinBackDay3Email({
           </Text>
 
           <CtaButton
-            href={`${baseUrl}/pricing?utm_source=email&utm_medium=lifecycle&utm_campaign=winback&utm_content=day3`}
+            href={`${baseUrl}/pricing?nav=app&utm_source=email&utm_medium=lifecycle&utm_campaign=winback&utm_content=day3`}
             label='Pick Up Where You Left Off'
           />
           <Text
@@ -287,7 +287,7 @@ function WinBackDay7Email({ userName, sunSign, userEmail }: WinBackDay7Props) {
           </Section>
 
           <CtaButton
-            href={`${baseUrl}/pricing?promo=RETURN20&utm_source=email&utm_medium=lifecycle&utm_campaign=winback&utm_content=day7`}
+            href={`${baseUrl}/pricing?nav=app&promo=RETURN20&utm_source=email&utm_medium=lifecycle&utm_campaign=winback&utm_content=day7`}
             label='Reactivate with 20% Off'
           />
           <Text

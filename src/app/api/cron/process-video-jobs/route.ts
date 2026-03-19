@@ -15,6 +15,7 @@ import { buildVideoCaption } from '@/lib/social/video-captions';
 import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
 import { generateInstagramReelCaption } from '@/lib/social/video-scripts/tiktok/metadata';
 import { getImageBaseUrl } from '@/lib/urls';
+import { postToSocial } from '@/lib/social/client';
 import { createHash } from 'crypto';
 import { writeFile, unlink, mkdtemp } from 'fs/promises';
 import { join } from 'path';
@@ -167,6 +168,233 @@ function trimToMax(text: string, maxChars: number, addEllipsis = true) {
 }
 
 // Avoid passing array literals as strings; use parameterized arrays instead.
+
+/**
+ * Map contentTypeKey (from script metadata) to a theme category
+ * so we can generate hashtags even when theme/facet lookup fails.
+ */
+const CONTENT_TYPE_TO_CATEGORY: Record<string, string> = {
+  angel_numbers: 'numerology',
+  sign_identity: 'zodiac',
+  zodiac_sun: 'zodiac',
+  zodiac_moon: 'zodiac',
+  zodiac_rising: 'zodiac',
+  zodiac_compatibility: 'zodiac',
+  zodiac_ranking: 'zodiac',
+  zodiac_hot_take: 'zodiac',
+  birth_chart: 'zodiac',
+  transit: 'planetary',
+  retrograde: 'planetary',
+  retrogrades: 'planetary',
+  moon_phase: 'lunar',
+  moon_phases: 'lunar',
+  new_moon: 'lunar',
+  full_moon: 'lunar',
+  tarot_card: 'tarot',
+  tarot_reading: 'tarot',
+  tarot_spread: 'tarot',
+  crystal: 'crystals',
+  crystal_healing: 'crystals',
+  spell: 'spells',
+  spellwork: 'spells',
+  ritual: 'spells',
+  chakra: 'chakras',
+  rune: 'runes',
+  sabbat: 'sabbat',
+  eclipse: 'planetary',
+  eclipses: 'planetary',
+};
+
+/**
+ * Fallback hashtag pools by category for when theme/facet resolution fails.
+ * TikTok: 3-5 varied, on-topic tags (no brand tag — stunts TikTok reach).
+ * Instagram: 5 IG-native tags (no #fyp/#learnontiktok).
+ */
+const FALLBACK_HASHTAGS: Record<
+  string,
+  { tiktok: string[]; instagram: string[] }
+> = {
+  zodiac: {
+    tiktok: [
+      '#astrology',
+      '#zodiac',
+      '#zodiacsigns',
+      '#astrologytiktok',
+      '#spiritualtiktok',
+    ],
+    instagram: [
+      '#astrology',
+      '#zodiac',
+      '#zodiacsigns',
+      '#birthchart',
+      '#astrologycommunity',
+    ],
+  },
+  tarot: {
+    tiktok: [
+      '#tarot',
+      '#tarotreading',
+      '#tarottok',
+      '#tarotcards',
+      '#witchtok',
+    ],
+    instagram: [
+      '#tarot',
+      '#tarotreading',
+      '#tarotcommunity',
+      '#tarotcards',
+      '#witchesofinstagram',
+    ],
+  },
+  lunar: {
+    tiktok: [
+      '#moonphases',
+      '#moon',
+      '#moonmagic',
+      '#witchtok',
+      '#spiritualtiktok',
+    ],
+    instagram: [
+      '#moonphases',
+      '#moonmagic',
+      '#newmoon',
+      '#fullmoon',
+      '#witchesofinstagram',
+    ],
+  },
+  planetary: {
+    tiktok: [
+      '#astrology',
+      '#zodiac',
+      '#astrologytiktok',
+      '#spiritualtiktok',
+      '#witchtok',
+    ],
+    instagram: [
+      '#astrology',
+      '#zodiac',
+      '#zodiacsigns',
+      '#birthchart',
+      '#spiritualinstagram',
+    ],
+  },
+  numerology: {
+    tiktok: [
+      '#numerology',
+      '#angelnumbers',
+      '#manifestation',
+      '#spiritualtiktok',
+      '#spiritualawakening',
+    ],
+    instagram: [
+      '#numerology',
+      '#angelnumbers',
+      '#manifestation',
+      '#spiritualawakening',
+      '#spiritualinstagram',
+    ],
+  },
+  crystals: {
+    tiktok: [
+      '#crystals',
+      '#crystaltok',
+      '#crystalhealing',
+      '#witchtok',
+      '#spiritualtiktok',
+    ],
+    instagram: [
+      '#crystals',
+      '#crystalhealing',
+      '#crystalcollection',
+      '#witchesofinstagram',
+      '#spiritualinstagram',
+    ],
+  },
+  spells: {
+    tiktok: ['#witchtok', '#spells', '#witchcraft', '#spellwork', '#babywitch'],
+    instagram: [
+      '#witchesofinstagram',
+      '#spells',
+      '#witchcraft',
+      '#spellcasting',
+      '#witchyvibes',
+    ],
+  },
+  chakras: {
+    tiktok: [
+      '#chakras',
+      '#spiritual',
+      '#meditation',
+      '#healing',
+      '#spiritualtiktok',
+    ],
+    instagram: [
+      '#chakras',
+      '#spiritual',
+      '#meditation',
+      '#healing',
+      '#spiritualinstagram',
+    ],
+  },
+  runes: {
+    tiktok: ['#runes', '#norse', '#viking', '#elderfuthark', '#witchtok'],
+    instagram: [
+      '#runes',
+      '#norsemythology',
+      '#elderfuthark',
+      '#divination',
+      '#witchesofinstagram',
+    ],
+  },
+  sabbat: {
+    tiktok: [
+      '#pagan',
+      '#wicca',
+      '#witchtok',
+      '#witchcraft',
+      '#spiritualtiktok',
+    ],
+    instagram: [
+      '#pagan',
+      '#wicca',
+      '#witchesofinstagram',
+      '#witchcraft',
+      '#sabbat',
+    ],
+  },
+};
+
+const DEFAULT_FALLBACK_HASHTAGS = {
+  tiktok: [
+    '#spiritualtiktok',
+    '#witchtok',
+    '#spiritual',
+    '#spiritualawakening',
+  ],
+  instagram: [
+    '#spiritualinstagram',
+    '#witchesofinstagram',
+    '#spiritual',
+    '#mystical',
+    '#cosmicenergy',
+  ],
+};
+
+/**
+ * Generate fallback hashtags from script metadata when theme/facet lookup fails.
+ */
+function getFallbackHashtags(
+  platform: string,
+  metadata: Record<string, unknown>,
+): string {
+  const contentTypeKey = String(metadata?.contentTypeKey || '');
+  const category = CONTENT_TYPE_TO_CATEGORY[contentTypeKey] || '';
+  const pool = FALLBACK_HASHTAGS[category];
+  const platformKey = platform === 'instagram' ? 'instagram' : 'tiktok';
+  const tags = pool?.[platformKey] || DEFAULT_FALLBACK_HASHTAGS[platformKey];
+  const count = platform === 'instagram' ? 5 : 3;
+  return tags.slice(0, count).join(' ');
+}
 
 const videoHashtagConfig: Record<
   string,
@@ -446,112 +674,179 @@ export async function POST(request: NextRequest) {
 
           let videoBuffer: Buffer | undefined;
 
-          // Try Remotion first
-          const remotionAvailable = await isRemotionAvailable();
-          let useFFmpegFallback = !remotionAvailable || !audioDuration;
-
-          console.log(
-            `🎥 Remotion available: ${remotionAvailable}, audio duration: ${audioDuration}s`,
+          // Upload audio to Blob so the render server can download it
+          const audioBlob = await put(
+            `temp/audio-${Date.now()}.mp3`,
+            audioNodeBuffer,
+            { access: 'public', addRandomSuffix: true },
           );
 
-          if (!useFFmpegFallback) {
+          const contentCreatorUrl = process.env.CONTENT_CREATOR_API_URL;
+          if (contentCreatorUrl) {
+            // Delegate rendering to Content Creator server (Hetzner)
+            console.log(
+              `🎬 Sending script ${script.id} to Content Creator for rendering...`,
+            );
+
+            // Whisper transcription for accurate subtitle timing
+            let wordTimestamps: Array<{
+              word: string;
+              start: number;
+              end: number;
+            }> = [];
             try {
-              console.log(
-                `🎬 Using Remotion for video generation (script ${script.id})...`,
-              );
-
-              // Upload audio to a temporary URL for Remotion
-              const audioBlob = await put(
-                `temp/audio-${Date.now()}.mp3`,
-                audioNodeBuffer,
-                { access: 'public', addRandomSuffix: true },
-              );
-
-              // Use Whisper for exact word-level subtitle timestamps.
-              // Falls back to character-count estimation if Whisper fails.
-              let segments;
-              try {
-                const whisperWords = await transcribeWithWhisper(audioBuffer);
-                segments = whisperWords.length
-                  ? wordTimestampsToSegments(
-                      whisperWords,
-                      audioDuration,
-                      6,
-                      script.full_script,
-                    )
-                  : scriptToAudioSegments(
-                      script.full_script,
-                      audioDuration,
-                      2.6,
-                    );
+              const whisperWords = await transcribeWithWhisper(audioBuffer);
+              if (whisperWords.length > 0) {
+                wordTimestamps = whisperWords;
                 console.log(
-                  `🎙️ Whisper: ${whisperWords.length} words → ${segments.length} subtitle segments`,
-                );
-              } catch (whisperErr) {
-                console.warn(
-                  'Whisper transcription failed, falling back to estimation:',
-                  whisperErr,
-                );
-                segments = scriptToAudioSegments(
-                  script.full_script,
-                  audioDuration,
-                  2.6,
+                  `🎙️ Whisper: ${whisperWords.length} word timestamps for script ${script.id}`,
                 );
               }
-
-              const remotionFormat =
-                audioDuration > 45 ? 'MediumFormVideo' : 'ShortFormVideo';
-              const videoSeed = `${safeSlug}-${script.id}-${Date.now()}`;
-              const symbolContent = `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`;
-
-              videoBuffer = await renderRemotionVideo({
-                format: remotionFormat,
-                outputPath: '',
-                segments,
-                audioUrl: audioBlob.url,
-                backgroundMusicUrl: '/audio/series/lunary-bed-v1.mp3',
-                highlightTerms: highlightTerms || [],
-                durationSeconds: audioDuration + 2,
-                overlays: overlays || [],
-                categoryVisuals,
-                seed: videoSeed,
-                zodiacSign: symbolContent,
-              });
-
-              console.log(
-                `✅ Remotion: Video rendered for script ${script.id}`,
+            } catch (whisperErr) {
+              console.warn(
+                `⚠️ Whisper transcription failed, render server will use fallback timing:`,
+                whisperErr instanceof Error ? whisperErr.message : whisperErr,
               );
-            } catch (remotionError) {
-              const errMsg =
-                remotionError instanceof Error
-                  ? remotionError.message
-                  : String(remotionError);
-              console.error(
-                `❌ Remotion render failed for script ${script.id}: ${errMsg}`,
+            }
+
+            const renderSecret =
+              process.env.LUNARY_RENDER_SECRET || process.env.CRON_SECRET;
+            const renderResponse = await fetch(
+              `${contentCreatorUrl}/api/lunary-render`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(renderSecret
+                    ? { Authorization: `Bearer ${renderSecret}` }
+                    : {}),
+                },
+                body: JSON.stringify({
+                  scriptText: script.full_script,
+                  audioUrl: audioBlob.url,
+                  images: images.map(
+                    (img: string | { url: string; [k: string]: unknown }) => {
+                      const url = typeof img === 'string' ? img : img?.url;
+                      if (!url) return img;
+                      return url.startsWith('http') ? url : `${baseUrl}${url}`;
+                    },
+                  ),
+                  slug: safeSlug,
+                  facetTitle: script.facet_title,
+                  dateKey,
+                  wordTimestamps:
+                    wordTimestamps.length > 0 ? wordTimestamps : undefined,
+                  audioDuration,
+                  // Remotion composition props
+                  overlays: overlays || [],
+                  highlightTerms: highlightTerms || [],
+                  categoryVisuals,
+                  seed: `${safeSlug}-${script.id}-${Date.now()}`,
+                  zodiacSign: `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`,
+                }),
+              },
+            );
+
+            if (!renderResponse.ok) {
+              const errorBody = await renderResponse.text();
+              throw new Error(
+                `Content Creator render failed (${renderResponse.status}): ${errorBody}`,
               );
-              // Only fall back to FFmpeg on Vercel where Chromium may not be available.
-              // Locally, surface the real error so it can be fixed.
-              if (process.env.VERCEL) {
-                console.warn(`⚠️ Falling back to FFmpeg (Vercel environment)`);
+            }
+
+            const renderResult = await renderResponse.json();
+            if (!renderResult.videoData) {
+              throw new Error('Content Creator returned no video data');
+            }
+
+            videoBuffer = Buffer.from(renderResult.videoData, 'base64');
+            console.log(
+              `✅ Content Creator rendered ${(videoBuffer.length / 1024 / 1024).toFixed(1)}MB video for script ${script.id}`,
+            );
+          } else {
+            // Local rendering fallback (development only)
+            const remotionAvailable = await isRemotionAvailable();
+            let useFFmpegFallback = !remotionAvailable || !audioDuration;
+
+            console.log(
+              `🎥 Remotion available: ${remotionAvailable}, audio duration: ${audioDuration}s`,
+            );
+
+            if (!useFFmpegFallback) {
+              try {
+                console.log(
+                  `🎬 Using Remotion for video generation (script ${script.id})...`,
+                );
+
+                let segments;
+                try {
+                  const whisperWords = await transcribeWithWhisper(audioBuffer);
+                  segments = whisperWords.length
+                    ? wordTimestampsToSegments(
+                        whisperWords,
+                        audioDuration,
+                        6,
+                        script.full_script,
+                      )
+                    : scriptToAudioSegments(
+                        script.full_script,
+                        audioDuration,
+                        2.6,
+                      );
+                } catch {
+                  segments = scriptToAudioSegments(
+                    script.full_script,
+                    audioDuration,
+                    2.6,
+                  );
+                }
+
+                const remotionFormat =
+                  audioDuration > 45 ? 'MediumFormVideo' : 'ShortFormVideo';
+                const videoSeed = `${safeSlug}-${script.id}-${Date.now()}`;
+                const symbolContent = `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`;
+
+                videoBuffer = await renderRemotionVideo({
+                  format: remotionFormat,
+                  outputPath: '',
+                  segments,
+                  audioUrl: audioBlob.url,
+                  backgroundMusicUrl: '/audio/series/lunary-bed-v1.mp3',
+                  highlightTerms: highlightTerms || [],
+                  durationSeconds: audioDuration + 2,
+                  overlays: overlays || [],
+                  categoryVisuals,
+                  seed: videoSeed,
+                  zodiacSign: symbolContent,
+                });
+
+                console.log(
+                  `✅ Remotion: Video rendered for script ${script.id}`,
+                );
+              } catch (remotionError) {
+                console.error(
+                  `❌ Remotion render failed for script ${script.id}:`,
+                  remotionError,
+                );
                 useFFmpegFallback = true;
-              } else {
-                throw remotionError;
               }
             }
-          }
 
-          if (useFFmpegFallback) {
-            console.log(`⚠️ Using FFmpeg fallback for script ${script.id}...`);
-            videoBuffer = await composeVideo({
-              images,
-              audioBuffer,
-              format: 'story',
-              outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
-              subtitlesText: script.full_script,
-              subtitlesHighlightTerms: highlightTerms,
-              subtitlesHighlightColor: highlightColor,
-              overlays,
-            });
+            if (useFFmpegFallback) {
+              console.log(
+                `⚠️ Using FFmpeg fallback for script ${script.id}...`,
+              );
+              videoBuffer = await composeVideo({
+                images,
+                audioBuffer,
+                format: 'story',
+                outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
+                subtitlesText: script.full_script,
+                subtitlesHighlightTerms: highlightTerms,
+                subtitlesHighlightColor: highlightColor,
+                overlays,
+              });
+            }
           }
 
           if (!videoBuffer) {
@@ -616,6 +911,27 @@ export async function POST(request: NextRequest) {
                 [tags.domain, tags.topic, tags.brand]
                   .slice(0, config.count)
                   .join(' '),
+              );
+            }
+          } else {
+            // Fallback: derive hashtags from script metadata when theme/facet
+            // lookup fails (common for scripts generated by daily-content-generate)
+            const scriptMeta = (script.metadata || {}) as Record<
+              string,
+              unknown
+            >;
+            for (const platform of shortVideoPlatforms) {
+              const config = videoHashtagConfig[platform] || {
+                useHashtags: false,
+                count: 0,
+              };
+              if (!config.useHashtags || config.count <= 0) {
+                tagsByPlatform.set(platform, '');
+                continue;
+              }
+              tagsByPlatform.set(
+                platform,
+                getFallbackHashtags(platform, scriptMeta),
               );
             }
           }
@@ -716,6 +1032,62 @@ export async function POST(request: NextRequest) {
               AND scheduled_date::date = ${dateKey}
               AND post_type = 'video'
           `;
+
+          // ─── Auto-scheduling bridge ───
+          // Push newly created video posts to the appropriate social backend
+          // (Spellcast for IG reels, Ayrshare for TikTok, etc.)
+          const pendingPosts = await sql`
+            SELECT id, content, platform, scheduled_date, video_url
+            FROM social_posts
+            WHERE topic = ${script.facet_title}
+              AND scheduled_date::date = ${dateKey}
+              AND post_type = 'video'
+              AND status = 'pending'
+              AND video_url IS NOT NULL
+          `;
+          for (const post of pendingPosts.rows) {
+            try {
+              const scheduledIso = new Date(post.scheduled_date).toISOString();
+              const isFuture = new Date(post.scheduled_date) > new Date();
+              const result = await postToSocial({
+                platform: post.platform as string,
+                content: post.content as string,
+                scheduledDate: scheduledIso,
+                media: [{ type: 'video', url: post.video_url as string }],
+                platformSettings:
+                  post.platform === 'tiktok'
+                    ? {
+                        privacyLevel: 'PUBLIC_TO_EVERYONE',
+                      }
+                    : undefined,
+              });
+              if (result.success) {
+                await sql`
+                  UPDATE social_posts
+                  SET status = ${isFuture ? 'scheduled' : 'published'},
+                      updated_at = NOW()
+                  WHERE id = ${post.id}
+                `;
+                console.log(
+                  `[bridge] ${post.platform} post ${post.id} → ${result.backend} (${result.postId})`,
+                );
+              } else {
+                console.warn(
+                  `[bridge] ${post.platform} post ${post.id} failed: ${result.error}`,
+                );
+                await sql`
+                  UPDATE social_posts
+                  SET status = 'failed', updated_at = NOW()
+                  WHERE id = ${post.id}
+                `;
+              }
+            } catch (bridgeErr) {
+              console.warn(
+                `[bridge] ${post.platform} post ${post.id} error:`,
+                bridgeErr instanceof Error ? bridgeErr.message : bridgeErr,
+              );
+            }
+          }
         }
 
         await sql`

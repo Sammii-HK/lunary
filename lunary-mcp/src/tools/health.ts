@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { lunary, BASE_URL, ADMIN_KEY } from '../client.js';
+import { lunary, BASE_URL, ADMIN_KEY, CRON_SECRET } from '../client.js';
 import { jsonResult, errorResult } from '../types.js';
 
 const CRON_JOBS = [
@@ -156,7 +156,7 @@ export function registerHealthTools(server: McpServer) {
     async ({ job }) => {
       try {
         const res = await fetch(`${BASE_URL}/api/cron/${job}`, {
-          headers: { Authorization: `Bearer ${ADMIN_KEY}` },
+          headers: { Authorization: `Bearer ${CRON_SECRET}` },
         });
         const data = await res.json().catch(() => ({ status: res.status }));
         return jsonResult({ triggered: job, status: res.status, ...data });

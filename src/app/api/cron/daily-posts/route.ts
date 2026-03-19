@@ -189,26 +189,28 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ Auth check passed - proceeding with cron execution');
 
-    // Calculate target date: create posts for today
+    // Calculate target date: generate posts 7 days ahead for buffer
+    // If ?date= is passed, use that instead (for manual triggers / backfill)
     const now = new Date();
     const targetDateStr = (() => {
       if (overrideDate && /^\d{4}-\d{2}-\d{2}$/.test(overrideDate)) {
         return overrideDate;
       }
-      return now.toISOString().split('T')[0];
+      const target = new Date(now);
+      target.setDate(target.getDate() + 7);
+      return target.toISOString().split('T')[0];
     })();
     const dailyPostsKey = `daily-posts-${targetDateStr}`;
 
     if (!force) {
       try {
-        const gateResult = await sql`
-          INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
-          VALUES (${targetDateStr}::date, ${dailyPostsKey}, 'daily_posts', 'Daily Posts', 1, 'cron')
-          ON CONFLICT (date, event_key) DO NOTHING
-          RETURNING id
+        const alreadySent = await sql`
+          SELECT id FROM notification_sent_events
+          WHERE date = ${targetDateStr}::date
+          AND event_key = ${dailyPostsKey}
         `;
 
-        if (gateResult.rows.length === 0) {
+        if (alreadySent.rows.length > 0) {
           console.log(
             `⚠️ Daily posts already generated for ${targetDateStr}, skipping duplicate execution`,
           );
@@ -675,8 +677,18 @@ export async function GET(request: NextRequest) {
       `✅ Master cron completed: ${successfulTasks}/${totalTasks} task groups successful`,
     );
 
-    // Clear the execution flag for today on success (but keep it to prevent retries)
-    // We don't delete it so if there's a retry, it's still blocked
+    // Record dedup event only on success — partial failure allows retry
+    if (successfulTasks > 0 && !force) {
+      try {
+        await sql`
+          INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
+          VALUES (${targetDateStr}::date, ${dailyPostsKey}, 'daily_posts', 'Daily Posts', 1, 'cron')
+          ON CONFLICT (date, event_key) DO NOTHING
+        `;
+      } catch (dedupError: unknown) {
+        console.warn('Failed to record dedup event:', dedupError);
+      }
+    }
 
     return NextResponse.json({
       success: successfulTasks > 0,
@@ -2572,6 +2584,27 @@ async function runNotificationCheck(dateStr: string) {
         );
       }
 
+      // Catch-all: flip any trial with trial_ends_at in the past to 'free'
+      // (without a Stripe subscription backing it). This covers auto-trials
+      // that may have been missed by the yesterday-only expired email check.
+      try {
+        const expiredAutoTrials = await sql`
+          UPDATE subscriptions
+          SET status = 'free', plan_type = 'free'
+          WHERE status = 'trial'
+          AND trial_ends_at < NOW()
+          AND (stripe_subscription_id IS NULL OR stripe_subscription_id = '')
+          AND trial_expired_email_sent = true
+        `;
+        if (expiredAutoTrials.rowCount && expiredAutoTrials.rowCount > 0) {
+          console.log(
+            `✅ Cleaned up ${expiredAutoTrials.rowCount} expired auto-trials`,
+          );
+        }
+      } catch (cleanupError) {
+        console.error('Failed to clean up expired auto-trials:', cleanupError);
+      }
+
       // Send trial expired emails (trials that ended yesterday)
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
@@ -2632,12 +2665,21 @@ async function runNotificationCheck(dateStr: string) {
             },
           });
 
-          // Mark as sent and update status
+          // Mark as sent and update status.
+          // Auto-trials (no Stripe sub) revert to 'free'.
+          // Stripe-managed trials become 'cancelled' (Stripe handles reactivation).
           await sql`
             UPDATE subscriptions
-            SET 
+            SET
               trial_expired_email_sent = true,
-              status = 'cancelled'
+              status = CASE
+                WHEN stripe_subscription_id IS NOT NULL AND stripe_subscription_id != '' THEN 'cancelled'
+                ELSE 'free'
+              END,
+              plan_type = CASE
+                WHEN stripe_subscription_id IS NOT NULL AND stripe_subscription_id != '' THEN plan_type
+                ELSE 'free'
+              END
             WHERE user_id = ${user.user_id}
             AND status = 'trial'
           `;

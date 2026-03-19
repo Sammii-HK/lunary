@@ -1,7 +1,35 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+# Add common paths where pnpm might be installed
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+# Block direct pushes to main — must use a PR
+while read local_ref local_oid remote_ref remote_oid; do
+  if echo "$remote_ref" | grep -qE "refs/heads/main$"; then
+    echo "❌ Direct push to main is blocked. Create a branch and open a PR instead."
+    echo "   To fix: git push origin $(git symbolic-ref --short HEAD) && gh pr create"
+    exit 1
+  fi
+done
+
+# Require a green build before pushing.
+# The build takes ~8min which kills SSH, so we check a stamp file instead.
+# Run: pnpm build (or npx next build) before pushing. The pre-commit hook
+# or a manual run creates .build-ok with the HEAD commit hash.
+BUILD_STAMP=".build-ok"
+HEAD_SHA=$(git rev-parse HEAD)
+
+if [ ! -f "$BUILD_STAMP" ] || [ "$(cat "$BUILD_STAMP")" != "$HEAD_SHA" ]; then
+  echo "❌ No green build for current commit."
+  echo "   Run 'npx next build && git rev-parse HEAD > .build-ok' first."
+  echo "   Expected: $HEAD_SHA"
+  if [ -f "$BUILD_STAMP" ]; then
+    echo "   Found:    $(cat "$BUILD_STAMP")"
+  else
+    echo "   Found:    (no .build-ok file)"
+  fi
+  exit 1
+fi
+
+echo "✅ Build stamp matches HEAD. Push allowed."
 
 # Check if cloudflare-worker has changes and deploy if needed
-# Pass stdin to the script so it can read the refs being pushed
-cat | ./scripts/check-and-deploy-worker.sh "$@"
-
+git diff --stat HEAD@{1}..HEAD 2>/dev/null | grep -q cloudflare-worker && ./scripts/check-and-deploy-worker.sh "$@" || true

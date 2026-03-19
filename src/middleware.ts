@@ -82,16 +82,25 @@ function assignVariant(
 }
 
 const BOT_UA_PATTERN =
-  /bot|crawler|spider|crawling|preview|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|pinterest|embedly|quora|tumblr|redditbot|gpt|openai|anthropic|gemini|perplexity|cohere|googlebot|baiduspider|yandexbot|ccbot|duckduckbot|bingbot|python-requests|libcurl|scrapy|wget|curl\//i;
+  /bot|crawler|spider|crawling|preview|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|pinterest|embedly|quora|tumblr|redditbot|gpt|openai|anthropic|gemini|perplexity|cohere|googlebot|baiduspider|yandexbot|ccbot|duckduckbot|bingbot|python-requests|libcurl|scrapy|wget|curl\/|httrack|ahrefsbot|semrushbot|mj12bot|dotbot|petalbot|bytespider|sogou|applebot|dataforseo|zoominfobot|gptbot|claudebot|go-http-client|java\/|okhttp|axios|node-fetch|undici|headlesschrome|phantomjs|selenium|puppeteer|playwright/i;
 
 const shouldSkipTracking = (request: NextRequest, hostname: string) => {
   if (request.method !== 'GET') return true;
 
   const ua = request.headers.get('user-agent') || '';
+  if (!ua || ua.length < 20) return true;
   if (BOT_UA_PATTERN.test(ua)) return true;
 
   const acceptLang = request.headers.get('accept-language');
   if (!acceptLang) return true;
+
+  // Modern browsers send sec-fetch-dest. Bots using fake Chrome/Firefox UAs don't.
+  const secFetchDest = request.headers.get('sec-fetch-dest');
+  if (!secFetchDest) {
+    const isModernChrome = /Chrome\/(?:7[6-9]|[89]\d|1\d\d)/.test(ua);
+    const isModernFirefox = /Firefox\/(?:9\d|1\d\d)/.test(ua);
+    if (isModernChrome || isModernFirefox) return true;
+  }
 
   const pathname = request.nextUrl.pathname;
   if (pathname.startsWith('/admin')) return true;
@@ -443,18 +452,6 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     const realIp = request.headers.get('x-real-ip');
     if (realIp) headers.set('x-real-ip', realIp);
 
-    // Skip tracking for bots and prefetch requests
-    const isPrefetch =
-      request.headers.get('purpose') === 'prefetch' ||
-      request.headers.get('sec-purpose') === 'prefetch';
-    const isBot = /bot|crawler|spider|googlebot|bingbot|yandex|baidu/i.test(
-      userAgent || '',
-    );
-
-    if (isPrefetch || isBot) {
-      return response;
-    }
-
     // Detect platform from user-agent for server-side tracking
     // Native Capacitor apps include platform markers in the UA string
     const ua = userAgent || '';
@@ -468,7 +465,6 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     }
 
     // Track page_viewed (one per page per user per day)
-    console.log('[middleware] Calling page_viewed:', { path: finalPath });
     event.waitUntil(
       fetch(trackingUrl, {
         method: 'POST',
@@ -488,7 +484,6 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
 
     // Track app_opened (one per user per UTC day) - server-side for reliability
     const appOpenedUrl = new URL('/api/ether/open', request.url);
-    console.log('[middleware] Calling app_opened:', { path: finalPath });
     event.waitUntil(
       fetch(appOpenedUrl, {
         method: 'POST',

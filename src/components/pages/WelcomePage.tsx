@@ -145,7 +145,8 @@ export default function WelcomePage() {
                 </Link>
               </p>
               <p className='text-xs text-zinc-500 mt-2'>
-                Start free • Give a friend 30 days of Pro, earn a bonus week
+                Start with 7 days free • Give a friend 30 days of Pro, earn a
+                bonus week
               </p>
             </div>
           </div>

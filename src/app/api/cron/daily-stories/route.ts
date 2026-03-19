@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { put } from '@vercel/blob';
 import { postToSocial } from '@/lib/social/client';
 import { hasValidImageExtension } from '@/lib/social/pre-upload-image';
 import { sendDiscordNotification } from '@/lib/discord';
@@ -26,10 +27,14 @@ export async function GET(request: NextRequest) {
     const overrideDate = url.searchParams.get('date');
 
     const now = new Date();
-    const dateStr =
-      overrideDate && /^\d{4}-\d{2}-\d{2}$/.test(overrideDate)
-        ? overrideDate
-        : now.toISOString().split('T')[0];
+    const dateStr = (() => {
+      if (overrideDate && /^\d{4}-\d{2}-\d{2}$/.test(overrideDate)) {
+        return overrideDate;
+      }
+      const target = new Date(now);
+      target.setDate(target.getDate() + 7);
+      return target.toISOString().split('T')[0];
+    })();
 
     // Dedup guard: skip if stories already SENT today (not failed — failures should retry)
     if (!force) {
@@ -168,10 +173,30 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        // Use the OG URL directly — it returns image/png with immutable caching
-        // headers, which Instagram accepts. The Postiz upload endpoint returns
-        // URLs that 404 (files don't persist to the volume), so skip it.
-        const mediaUrl = staticImageUrl;
+        // Pre-render OG image and upload to Blob so Spellcast/Postiz can
+        // download it instantly instead of triggering on-demand generation (~15s).
+        let mediaUrl = staticImageUrl;
+        try {
+          const ogRes = await fetch(staticImageUrl, {
+            signal: AbortSignal.timeout(30000),
+          });
+          if (ogRes.ok) {
+            const imageBuffer = await ogRes.arrayBuffer();
+            const blobPath = `stories/${dateStr}/${story.variant}-${i}.png`;
+            const blob = await put(blobPath, Buffer.from(imageBuffer), {
+              access: 'public',
+              contentType: 'image/png',
+            });
+            mediaUrl = blob.url;
+            console.log(
+              `[daily-stories] Pre-rendered ${story.variant} → ${blob.url} (${(imageBuffer.byteLength / 1024).toFixed(0)}KB)`,
+            );
+          }
+        } catch (preRenderErr) {
+          console.warn(
+            `[daily-stories] Pre-render failed for ${story.variant}, using OG URL directly`,
+          );
+        }
 
         const result = await postToSocial({
           platform: 'instagram',

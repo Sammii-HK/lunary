@@ -181,34 +181,42 @@ export function ChartPreviewTeaser({
 
         <div className='px-5 py-4'>
           {!placements ? (
-            <div className='flex flex-col sm:flex-row gap-3'>
-              <input
-                type='date'
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                min='1900-01-01'
-                max='2030-12-31'
-                className='flex-1 rounded-lg bg-zinc-800/80 border border-zinc-700 px-3 py-2.5 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500/50 focus:border-lunary-primary-500'
-                aria-label='Birth date'
-              />
-              <Button
-                onClick={handleSubmit}
-                disabled={!birthDate || loading}
-                variant='lunary-soft'
-                className='whitespace-nowrap'
+            <div className='space-y-3'>
+              <div className='flex flex-col sm:flex-row gap-3'>
+                <input
+                  type='date'
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  min='1900-01-01'
+                  max='2030-12-31'
+                  className='flex-1 rounded-lg bg-zinc-800/80 border border-zinc-700 px-3 py-2.5 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500/50 focus:border-lunary-primary-500'
+                  aria-label='Birth date'
+                />
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!birthDate || loading}
+                  variant='lunary-soft'
+                  className='whitespace-nowrap'
+                >
+                  {loading ? (
+                    <span className='flex items-center gap-2'>
+                      <span className='animate-spin h-4 w-4 border-2 border-lunary-primary-400 border-t-transparent rounded-full' />
+                      Calculating...
+                    </span>
+                  ) : (
+                    <span className='flex items-center gap-2'>
+                      <Sparkles className='w-4 h-4' />
+                      Show my transits
+                    </span>
+                  )}
+                </Button>
+              </div>
+              <button
+                onClick={handleUnlock}
+                className='text-xs text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
               >
-                {loading ? (
-                  <span className='flex items-center gap-2'>
-                    <span className='animate-spin h-4 w-4 border-2 border-lunary-primary-400 border-t-transparent rounded-full' />
-                    Calculating...
-                  </span>
-                ) : (
-                  <span className='flex items-center gap-2'>
-                    <Sparkles className='w-4 h-4' />
-                    Show my transits
-                  </span>
-                )}
-              </Button>
+                Skip — just show me my full chart
+              </button>
             </div>
           ) : (
             <div className='space-y-4'>
@@ -302,13 +310,25 @@ export function ChartPreviewTeaser({
                 <ChevronRight className='w-4 h-4 transition-transform group-hover:translate-x-0.5' />
               </button>
               <p className='text-xs text-zinc-500 text-center'>
-                Free account — personalised daily transits, full chart, and
-                interpretations
+                7 days of full access — personalised transits, chart readings,
+                and more. No card needed.
               </p>
             </div>
           )}
 
-          {error && <p className='text-sm text-red-400 mt-2'>{error}</p>}
+          {error && (
+            <div className='mt-3 space-y-2'>
+              <p className='text-sm text-red-400'>{error}</p>
+              <button
+                onClick={handleUnlock}
+                className='flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-lunary-accent-300 transition-colors group'
+              >
+                <Sparkles className='w-4 h-4' />
+                <span>See your full birth chart instead</span>
+                <ChevronRight className='w-4 h-4 transition-transform group-hover:translate-x-0.5' />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -327,8 +347,8 @@ export function ChartPreviewTeaser({
                 See your full transit report
               </Heading>
               <p className='text-zinc-300 text-xs sm:text-sm'>
-                Create a free account to unlock personalised daily transits,
-                your full chart, and detailed interpretations.
+                Sign up to unlock 7 days of personalised daily transits, your
+                full chart, and detailed interpretations. No card needed.
               </p>
             </div>
             <AuthComponent

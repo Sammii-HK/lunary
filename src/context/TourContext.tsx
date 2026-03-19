@@ -114,6 +114,16 @@ export function TourProvider({
     startTour,
   } = useFeatureTour(tourContext, markTourSeen);
 
+  // Expose to console for testing: window.__lunary.startTour('first_time_onboarding')
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as Record<string, unknown>).__lunary = {
+        startTour,
+        hasSeenOnboarding,
+      };
+    }
+  }, [startTour, hasSeenOnboarding]);
+
   const value = {
     startTour,
     hasSeenOnboarding,

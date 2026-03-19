@@ -1,29 +1,18 @@
-import {
-  generateConversationPost,
-  generateCosmicTimingPost,
-  generateIdentityPost,
-  generateEducationalPost,
-} from './original-content';
+import { generateCosmicTimingPost } from './original-content';
 import { getDearStyleReferralPost } from '@/lib/social/shared/constants/persona-templates';
-import { getTransitThemeForDate } from '@/lib/social/weekly-themes';
 import {
-  WEEKDAY_SLOTS_UTC,
-  WEEKEND_SLOTS_UTC,
+  DAILY_SLOTS_UTC,
   THREADS_CHAR_LIMITS,
   type ThreadsPost,
   type ThreadsPostBatch,
 } from './types';
 
 /**
- * Weekday schedule (3 slots — UK/US crossover window):
- * Slot 0 (14:00 UTC) - Original: cosmic timing / transit text — 9am EST morning
- * Slot 1 (17:00 UTC) - Rotating: Mon=identity, Tue=referral, Wed=educational,
- *                       Thu=identity, Fri=referral — peak 12pm EST engagement
- * Slot 2 (21:00 UTC) - Original: conversation / question — 4pm EST all timezones active
- *
- * Weekend schedule (2 slots):
- * Slot 0 (14:00 UTC) - Original: cosmic timing / conversation
- * Slot 1 (20:00 UTC) - Rotating: Sat=identity, Sun=educational
+ * Daily schedule (4 slots, same every day):
+ * Slot 0 (14:00 UTC) - Cosmic event #1 (highest priority) — 9am EST
+ * Slot 1 (17:00 UTC) - Cosmic event #2 (second priority) — 12pm EST
+ * Slot 2 (21:00 UTC) - Cosmic event #3 (third priority) — 4pm EST
+ * Slot 3 (23:00 UTC) - Dear-style referral CTA (follower growth) — 6pm EST
  */
 
 /**
@@ -59,82 +48,39 @@ function applyMinuteOffsets(
 
 /**
  * Generate a full day's Threads content batch.
- * Text-first posts only, no IG cross-posts.
+ * 3 cosmic transit posts + 1 dear-style referral, every day.
  */
 export async function generateThreadsBatch(
   dateStr: string,
 ): Promise<ThreadsPostBatch> {
+  const slots = DAILY_SLOTS_UTC;
   const date = new Date(dateStr);
-  const dayOfWeek = date.getDay(); // 0=Sun, 6=Sat
-  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+  const seed = date.getDate() + date.getMonth() * 31;
 
-  const slots = isWeekend ? WEEKEND_SLOTS_UTC : WEEKDAY_SLOTS_UTC;
-  const rawPosts: ThreadsPost[] = isWeekend
-    ? await buildWeekendBatch(dateStr)
-    : await buildWeekdayBatch(dateStr);
+  // Slots 0-2: cosmic transit content, each a different event
+  const [post0, post1, post2] = await Promise.all([
+    generateCosmicTimingPost(dateStr, slots[0], 0),
+    generateCosmicTimingPost(dateStr, slots[1], 1),
+    generateCosmicTimingPost(dateStr, slots[2], 2),
+  ]);
 
+  // Deduplicate: if fewer cosmic events exist than slots, ranks collapse
+  // to the same event. Drop duplicates so we don't post the same thing twice.
+  const seenHooks = new Set<string>();
+  const cosmicPosts: ThreadsPost[] = [];
+  for (const post of [post0, post1, post2]) {
+    if (seenHooks.has(post.hook)) continue;
+    seenHooks.add(post.hook);
+    cosmicPosts.push(post);
+  }
+
+  // Slot 3: dear-style referral CTA (drives follower growth)
+  const post3 = buildDearStylePost(dateStr, slots[3], seed);
+
+  const rawPosts = [...cosmicPosts, post3];
   const posts = applyMinuteOffsets(rawPosts, slots, dateStr);
 
   return { date: dateStr, posts };
-}
-
-async function buildWeekdayBatch(dateStr: string): Promise<ThreadsPost[]> {
-  const slots = WEEKDAY_SLOTS_UTC;
-  const posts: ThreadsPost[] = [];
-  const date = new Date(dateStr);
-  const dayOfWeek = date.getDay(); // 1=Mon .. 5=Fri
-  const seed = date.getDate() + date.getMonth() * 31;
-
-  // Slot 0 (14:00 UTC) - Cosmic timing / transit content
-  posts.push(await generateCosmicTimingPost(dateStr, slots[0]));
-
-  // Determine if slot 0 will use a transit post (narrow posting window).
-  // If yes, exclude 'planetary' from slot 2 to avoid same-day duplicate transit content.
-  const slot0Date = new Date(dateStr);
-  slot0Date.setUTCHours(slots[0], 0, 0, 0);
-  const transitCheck = getTransitThemeForDate(slot0Date);
-  const isTransitActive =
-    transitCheck !== null &&
-    transitCheck.hoursUntil >= -12 &&
-    transitCheck.hoursUntil <= 36;
-
-  // Slot 1 (17:00 UTC) - Rotating by day of week
-  // Mon(1)=identity, Tue(2)=referral, Wed(3)=educational, Thu(4)=referral, Fri(5)=identity
-  if (dayOfWeek === 2 || dayOfWeek === 4) {
-    posts.push(buildDearStylePost(dateStr, slots[1], seed));
-  } else if (dayOfWeek === 3) {
-    posts.push(await generateEducationalPost(dateStr, slots[1]));
-  } else {
-    posts.push(await generateIdentityPost(dateStr, slots[1]));
-  }
-
-  // Slot 2 (21:00 UTC) - Conversation / question (drives replies)
-  posts.push(
-    await generateConversationPost(dateStr, slots[2], {
-      excludeCategory: isTransitActive ? 'planetary' : undefined,
-    }),
-  );
-
-  return posts;
-}
-
-async function buildWeekendBatch(dateStr: string): Promise<ThreadsPost[]> {
-  const slots = WEEKEND_SLOTS_UTC;
-  const posts: ThreadsPost[] = [];
-  const date = new Date(dateStr);
-  const dayOfWeek = date.getDay(); // 0=Sun, 6=Sat
-
-  // Slot 0 (14:00 UTC) - Cosmic timing / conversation
-  posts.push(await generateCosmicTimingPost(dateStr, slots[0]));
-
-  // Slot 1 (20:00 UTC) - Rotating: Sat=identity, Sun=educational
-  if (dayOfWeek === 6) {
-    posts.push(await generateIdentityPost(dateStr, slots[1]));
-  } else {
-    posts.push(await generateEducationalPost(dateStr, slots[1]));
-  }
-
-  return posts;
 }
 
 /**

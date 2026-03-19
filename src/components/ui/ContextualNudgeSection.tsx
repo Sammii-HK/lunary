@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ContextualNudgeButton } from '../grimoire/ContextualNudgeButton';
 import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
 import { Heading } from './Heading';
@@ -29,6 +30,15 @@ export function ContextualNudgeSection({
           </p>
         </div>
         <ContextualNudgeButton nudge={nudge} location={location} />
+        <p className='mt-4 text-xs text-zinc-500'>
+          or{' '}
+          <Link
+            href='/demo-preview?v=2'
+            className='text-lunary-primary-400 hover:text-lunary-primary-300 underline underline-offset-2'
+          >
+            try the interactive demo
+          </Link>
+        </p>
       </div>
     </section>
   );
