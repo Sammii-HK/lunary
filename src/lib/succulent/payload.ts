@@ -23,7 +23,7 @@ export type PlatformPayload = {
   media: Array<{ type: 'image' | 'video'; url: string; alt: string }>;
   reddit?: { title?: string; subreddit?: string };
   pinterestOptions?: { boardId: string; boardName: string };
-  tiktokOptions?: { type: string; coverUrl?: string };
+  tiktokOptions?: { type: string; coverUrl?: string; autoAddMusic?: boolean };
   instagramOptions?: { type: string; coverUrl?: string };
   youtubeOptions?: {
     title: string;
@@ -183,7 +183,7 @@ export const buildPlatformPayload = (
 
   if (platformStr === 'tiktok' && media.length > 0) {
     if (tiktokPhotoTypes.includes(post.post_type)) {
-      payload.tiktokOptions = { type: 'photo' };
+      payload.tiktokOptions = { type: 'photo', autoAddMusic: true };
     } else if (post.post_type === 'instagram_carousel' && post.image_url) {
       // TikTok photo carousel: split pipe-delimited images
       const carouselUrls = post.image_url.split('|').filter(Boolean);
@@ -206,10 +206,11 @@ export const buildPlatformPayload = (
             alt: 'Carousel slide',
           };
         });
-        payload.tiktokOptions = { type: 'photo' };
+        payload.tiktokOptions = { type: 'photo', autoAddMusic: true };
       } else {
         payload.tiktokOptions = {
           type: 'post',
+          autoAddMusic: !shouldUseVideo,
           ...(shouldUseVideo && imageUrlForPlatform
             ? { coverUrl: imageUrlForPlatform }
             : {}),
@@ -218,6 +219,7 @@ export const buildPlatformPayload = (
     } else {
       payload.tiktokOptions = {
         type: 'post',
+        autoAddMusic: !shouldUseVideo,
         ...(shouldUseVideo && imageUrlForPlatform
           ? { coverUrl: imageUrlForPlatform }
           : {}),
