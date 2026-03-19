@@ -205,7 +205,11 @@ export function weightedSelect(
  * This ensures we gather comparison data while mostly using what works.
  */
 const SLOT_HOUR_WINDOWS: Record<string, number[]> = {
-  primary: [14, 15, 16],
+  slot1: [15, 16, 17],
+  slot2: [21, 22, 23],
+  slot3: [0, 1, 2],
+  // Legacy aliases
+  primary: [15, 16, 17],
   engagementA: [17, 18, 19],
   engagementB: [21, 22, 23],
   engagementC: [0, 1, 2],

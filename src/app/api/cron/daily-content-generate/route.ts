@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { sendDiscordNotification } from '@/lib/discord';
-import {
-  generateScriptForContentType,
-  buildWeeklySchedule,
-} from '@/lib/social/video-scripts/generators/weekly-secondary';
-import { generateDailyInstagramScripts } from '@/lib/social/video-scripts/generators/instagram-reels';
+import { generateScriptForContentType } from '@/lib/social/video-scripts/generators/weekly-secondary';
 import {
   getContentTypeWeights,
-  getOptimalHourBySlot,
   weightedSelect,
 } from '@/lib/social/video-scripts/content-scores';
 import {
@@ -192,38 +187,35 @@ async function generateEventDrivenScript(
 
   // Enrich metadata with event calendar data
   if (script.metadata) {
-    (script.metadata as Record<string, unknown>).eventRarity = event.rarity;
-    (script.metadata as Record<string, unknown>).eventScore = event.score;
-    (script.metadata as Record<string, unknown>).eventId = event.id;
-    (script.metadata as Record<string, unknown>).eventCategory = event.category;
-    (script.metadata as Record<string, unknown>).hookSuggestions =
-      event.hookSuggestions;
-    (script.metadata as Record<string, unknown>).historicalContext =
-      event.historicalContext;
-    (script.metadata as Record<string, unknown>).convergenceMultiplier =
-      event.convergenceMultiplier;
-    (script.metadata as Record<string, unknown>).contentTypeKey =
-      'transit-alert';
-    (script.metadata as Record<string, unknown>).eventDriven = true;
-    (script.metadata as Record<string, unknown>).eventAngle = angle;
+    const meta = script.metadata as unknown as Record<string, unknown>;
+    meta.eventRarity = event.rarity;
+    meta.eventScore = event.score;
+    meta.eventId = event.id;
+    meta.eventCategory = event.category;
+    meta.hookSuggestions = event.hookSuggestions;
+    meta.historicalContext = event.historicalContext;
+    meta.convergenceMultiplier = event.convergenceMultiplier;
+    meta.contentTypeKey = 'transit-alert';
+    meta.eventDriven = true;
+    meta.eventAngle = angle;
   }
 
   // Duration override based on rarity
   if (event.rarity === 'CRITICAL') {
     script.estimatedDuration = '60-90s';
     if (script.metadata) {
-      (script.metadata as Record<string, unknown>).compositionId =
-        'MediumFormVideo';
-      (script.metadata as Record<string, unknown>).durationInFrames = 1800; // 60s at 30fps
-      (script.metadata as Record<string, unknown>).targetWordCount = '150-225';
+      const meta = script.metadata as unknown as Record<string, unknown>;
+      meta.compositionId = 'MediumFormVideo';
+      meta.durationInFrames = 1800; // 60s at 30fps
+      meta.targetWordCount = '150-225';
     }
   } else if (event.rarity === 'HIGH') {
     script.estimatedDuration = '30-60s';
     if (script.metadata) {
-      (script.metadata as Record<string, unknown>).compositionId =
-        'ShortFormVideo';
-      (script.metadata as Record<string, unknown>).durationInFrames = 900; // 30s at 30fps
-      (script.metadata as Record<string, unknown>).targetWordCount = '100-150';
+      const meta = script.metadata as unknown as Record<string, unknown>;
+      meta.compositionId = 'ShortFormVideo';
+      meta.durationInFrames = 900; // 30s at 30fps
+      meta.targetWordCount = '100-150';
     }
   }
 
@@ -242,13 +234,34 @@ async function generateEventDrivenScript(
 /**
  * Validate a script, retry once if critical issues found.
  * Returns the script if valid, null if failed after retry.
+ *
+ * Event-driven scripts (CRITICAL/HIGH transits) use relaxed validation
+ * because they target longer formats (60-90s MediumFormVideo).
  */
 async function validateAndRetry(
   contentType: ContentType,
   date: Date,
   script: VideoScript | null,
+  eventDriven?: {
+    event: CalendarEvent;
+    angle: 'primary' | 'engagement' | 'reel';
+  },
 ): Promise<VideoScript | null> {
   if (!script) return null;
+
+  // Event-driven scripts use a different generator format ([HOOK]/[MEANING] sections)
+  // so skip the strict hook-word-count / body-line-count validation.
+  // Only check for banned phrases and empty scripts.
+  if (eventDriven) {
+    const text = script.fullScript || '';
+    if (!text.trim()) {
+      console.error(
+        `[Daily] ${contentType} event-driven script is empty, skipping`,
+      );
+      return null;
+    }
+    return script;
+  }
 
   const hookText = script.hookText || script.fullScript.split('\n')[0] || '';
   const bodyLines = script.fullScript
@@ -361,16 +374,14 @@ export async function GET(request: NextRequest) {
     }
 
     const results = {
-      tiktokPrimary: 0,
-      tiktokEngagementA: 0,
-      tiktokEngagementB: 0,
-      tiktokEngagementC: 0,
-      igReels: 0,
-      igCarousel: 0,
+      slot1Video: 0, // Deep-dive video — TikTok + IG Reel (same video, different captions)
+      slot2Carousel: 0, // Carousel — IG Feed + TikTok (same slides, different captions)
+      slot3QuickHit: 0, // Quick-hit video — TikTok only
       textPosts: 0,
     };
     const errors: string[] = [];
 
+    // Pre-check: which slots already have scripts for this date (safe re-run)
     // Pre-check: which slots already have scripts for this date (safe re-run)
     const existingScripts = await sql`
       SELECT metadata->>'slot' as slot, platform FROM video_scripts
@@ -380,25 +391,27 @@ export async function GET(request: NextRequest) {
       existingScripts.rows.map((r) => `${r.platform}:${r.slot || 'default'}`),
     );
 
-    // --- 1. TikTok Primary Script ---
+    // =====================================================================
+    // SLOT 1 — Deep-dive video (16:00 UTC / 12pm ET)
+    // Same video posted to TikTok AND IG Reels with platform-specific captions.
+    // On CRITICAL/HIGH event days: 60-90s transit explainer (MediumFormVideo).
+    // On normal days: 30-45s category rotation (ShortFormVideo).
+    // =====================================================================
     try {
-      if (existingSlots.has('tiktok:primary')) {
+      if (existingSlots.has('tiktok:slot1')) {
         console.log(
-          `[Daily] Skipping TikTok primary — already exists for ${tomorrowKey}`,
+          `[Daily] Skipping Slot 1 — already exists for ${tomorrowKey}`,
         );
-        results.tiktokPrimary = 1;
+        results.slot1Video = 1;
       } else {
-        // When a CRITICAL/HIGH event is detected, override normal rotation
-        // with a transit-driven script; otherwise use seeded category rotation
-        const primaryHour = await getOptimalHourBySlot('primary');
+        const slot1Hour = 16; // 12pm ET
         let validated: VideoScript | null = null;
         let contentType: ContentType = 'sign-identity';
         let themeName = '';
 
         if (hasEventOverride && significantEvent) {
-          // --- Event-driven primary TikTok ---
           console.log(
-            `[Daily] Primary TikTok: event override -> transit-alert for "${significantEvent.name}"`,
+            `[Daily] Slot 1: event override -> transit-alert for "${significantEvent.name}"`,
           );
           contentType = 'transit-alert';
           themeName = 'Transit Alert';
@@ -411,11 +424,11 @@ export async function GET(request: NextRequest) {
             contentType,
             tomorrow,
             eventScript,
+            { event: significantEvent, angle: 'primary' },
           );
         }
 
         if (!validated) {
-          // --- Normal seeded rotation (fallback or no event) ---
           const category = selectPrimaryCategoryForDate(tomorrow);
           const themesForCategory = categoryThemes.filter(
             (t) => t.category === category,
@@ -445,15 +458,15 @@ export async function GET(request: NextRequest) {
 
         if (validated) {
           validated.scheduledDate = new Date(
-            `${tomorrowKey}T${String(primaryHour).padStart(2, '0')}:00:00.000Z`,
+            `${tomorrowKey}T${String(slot1Hour).padStart(2, '0')}:00:00.000Z`,
           );
           validated.platform = 'tiktok';
           if (validated.metadata) {
-            validated.metadata.scheduledHour = primaryHour;
-            validated.metadata.slot = 'primary';
+            validated.metadata.scheduledHour = slot1Hour;
+            validated.metadata.slot = 'slot1';
           }
 
-          // Generate TikTok caption with hashtags if missing
+          // --- TikTok caption (keyword/SEO-heavy) ---
           if (!validated.writtenPostContent) {
             const hookLine =
               validated.hookText || validated.fullScript.split('\n')[0] || '';
@@ -469,7 +482,9 @@ export async function GET(request: NextRequest) {
               name: validated.themeName || '',
             };
             const hashtags = generateTikTokHashtags(
-              fakeFacet as Parameters<typeof generateTikTokHashtags>[0],
+              fakeFacet as unknown as Parameters<
+                typeof generateTikTokHashtags
+              >[0],
               fakeTheme as Parameters<typeof generateTikTokHashtags>[1],
               validated.scheduledDate,
             );
@@ -479,526 +494,319 @@ export async function GET(request: NextRequest) {
           const id = await saveVideoScript(validated);
           validated.id = id;
 
-          // Create social_post + video_job
+          // TikTok social_post + video_job
           await sql`
-          INSERT INTO social_posts (
-            content, platform, post_type, topic, status, image_url, video_url,
-            scheduled_date, week_theme, week_start, source_type, source_id,
-            source_title, created_at
-          )
-          SELECT ${validated.writtenPostContent || validated.fullScript}, 'tiktok', 'video',
-                 ${validated.facetTitle}, 'pending', ${SQL_NULL}, ${SQL_NULL},
-                 ${validated.scheduledDate.toISOString()}, ${themeName}, ${tomorrowKey},
-                 'video_script', ${id}, ${validated.facetTitle}, NOW()
-          WHERE NOT EXISTS (
-            SELECT 1 FROM social_posts
-            WHERE platform = 'tiktok' AND post_type = 'video'
-              AND topic = ${validated.facetTitle}
-              AND scheduled_date::date = ${tomorrowKey}
-          )
-        `;
-
-          await sql`
-          INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
-          VALUES (${id}, ${tomorrowKey}, ${tomorrowKey}, ${validated.facetTitle}, 'pending', NOW(), NOW())
-          ON CONFLICT (script_id)
-          DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
-        `;
-
-          results.tiktokPrimary = 1;
-          console.log(
-            `[Daily] Primary TikTok: ${contentType}${hasEventOverride ? ' (EVENT OVERRIDE)' : ''} at ${primaryHour}:00`,
-          );
-        }
-      } // close else (skip-if-exists)
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      errors.push(`TikTok Primary: ${msg}`);
-      console.error('[Daily] Primary TikTok failed:', err);
-    }
-
-    // --- 2. TikTok Engagement Scripts (A, B, C) ---
-    const engagementSlots = [
-      'engagementA',
-      'engagementB',
-      'engagementC',
-    ] as const;
-    try {
-      const { slotA, slotB, slotC } = await buildWeeklySchedule(tomorrow);
-      const schedules = {
-        engagementA: slotA,
-        engagementB: slotB,
-        engagementC: slotC,
-      };
-
-      // When CRITICAL/HIGH event detected, override engagementA with
-      // an event-driven script from a different angle
-      let eventEngagementSlotUsed = false;
-
-      for (const slot of engagementSlots) {
-        try {
-          if (existingSlots.has(`tiktok:${slot}`)) {
-            console.log(
-              `[Daily] Skipping ${slot} — already exists for ${tomorrowKey}`,
-            );
-            const resultKey =
-              `tiktok${slot.charAt(0).toUpperCase() + slot.slice(1)}` as keyof typeof results;
-            (results as Record<string, number>)[resultKey] = 1;
-            continue;
-          }
-
-          const hour = await getOptimalHourBySlot(slot);
-          let validated: VideoScript | null = null;
-          let slotContentType: ContentType;
-
-          // Override engagementA with event-driven content (different angle)
-          if (
-            hasEventOverride &&
-            significantEvent &&
-            slot === 'engagementA' &&
-            !eventEngagementSlotUsed
-          ) {
-            console.log(
-              `[Daily] ${slot}: event override -> engagement angle for "${significantEvent.name}"`,
-            );
-            slotContentType = 'transit-alert';
-            // Use a secondary event if available, otherwise same event different angle
-            const engagementEvent =
-              allSignificantEvents.length > 1
-                ? allSignificantEvents[1]
-                : significantEvent;
-            const eventScript = await generateEventDrivenScript(
-              engagementEvent,
-              tomorrow,
-              'engagement',
-            );
-            validated = await validateAndRetry(
-              slotContentType,
-              tomorrow,
-              eventScript,
-            );
-            if (validated) eventEngagementSlotUsed = true;
-          }
-
-          // Normal engagement slot (or fallback if event override failed)
-          if (!validated) {
-            const schedule = schedules[slot];
-            const dayConfig = schedule[dayName];
-            if (!dayConfig) continue;
-            slotContentType = dayConfig.contentType;
-
-            const script = await generateScriptForContentType(
-              slotContentType,
-              tomorrow,
-            );
-            validated = await validateAndRetry(
-              slotContentType,
-              tomorrow,
-              script,
-            );
-          }
-
-          if (validated) {
-            validated.scheduledDate = new Date(
-              `${tomorrowKey}T${String(hour).padStart(2, '0')}:00:00.000Z`,
-            );
-            validated.platform = 'tiktok';
-            if (validated.metadata) {
-              validated.metadata.scheduledHour = hour;
-              validated.metadata.slot = slot;
-            }
-
-            // Generate TikTok caption with hashtags if missing
-            if (!validated.writtenPostContent) {
-              const hookLine =
-                validated.hookText || validated.fullScript.split('\n')[0] || '';
-              const contentTypeKey = (
-                validated.metadata as Record<string, unknown>
-              )?.contentTypeKey as string | undefined;
-              const category =
-                contentTypeKeyToCategory(contentTypeKey) || 'zodiac';
-              const fakeFacet = {
-                title: validated.facetTitle,
-                slug: validated.facetTitle
-                  .toLowerCase()
-                  .replace(/[^a-z0-9]+/g, '-'),
-              };
-              const fakeTheme = { category, name: validated.themeName || '' };
-              const hashtags = generateTikTokHashtags(
-                fakeFacet as Parameters<typeof generateTikTokHashtags>[0],
-                fakeTheme as Parameters<typeof generateTikTokHashtags>[1],
-                validated.scheduledDate,
-              );
-              validated.writtenPostContent = `${hookLine}\n\n${hashtags.join(' ')}`;
-            }
-
-            const id = await saveVideoScript(validated);
-            validated.id = id;
-
-            await sql`
-              INSERT INTO social_posts (
-                content, platform, post_type, topic, status, image_url, video_url,
-                scheduled_date, week_theme, week_start, source_type, source_id,
-                source_title, created_at
-              )
-              SELECT ${validated.writtenPostContent || validated.fullScript}, 'tiktok', 'video',
-                     ${validated.facetTitle}, 'pending', ${SQL_NULL}, ${SQL_NULL},
-                     ${validated.scheduledDate.toISOString()}, ${validated.themeName}, ${tomorrowKey},
-                     'video_script', ${id}, ${validated.facetTitle}, NOW()
-              WHERE NOT EXISTS (
-                SELECT 1 FROM social_posts
-                WHERE platform = 'tiktok' AND post_type = 'video'
-                  AND topic = ${validated.facetTitle}
-                  AND scheduled_date = ${validated.scheduledDate.toISOString()}
-              )
-            `;
-
-            await sql`
-              INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
-              VALUES (${id}, ${tomorrowKey}, ${tomorrowKey}, ${validated.facetTitle}, 'pending', NOW(), NOW())
-              ON CONFLICT (script_id)
-              DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
-            `;
-
-            const resultKey =
-              `tiktok${slot.charAt(0).toUpperCase() + slot.slice(1)}` as keyof typeof results;
-            (results as Record<string, number>)[resultKey] = 1;
-            console.log(
-              `[Daily] ${slot}: ${slotContentType}${eventEngagementSlotUsed && slot === 'engagementA' ? ' (EVENT OVERRIDE)' : ''} at ${hour}:00`,
-            );
-          } else {
-            console.warn(
-              `[Daily] ${slot}: ${slotContentType} failed validation, skipped`,
-            );
-            errors.push(
-              `${slot}: ${slotContentType} failed validation after retry`,
-            );
-          }
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Unknown error';
-          errors.push(`${slot}: ${msg}`);
-          console.error(`[Daily] ${slot} failed:`, err);
-        }
-      }
-
-      // Ensure we have 4 TikToks — backfill if any slot was dropped
-      const tiktokTotal =
-        results.tiktokPrimary +
-        results.tiktokEngagementA +
-        results.tiktokEngagementB +
-        results.tiktokEngagementC;
-      if (tiktokTotal < 4) {
-        const missing = 4 - tiktokTotal;
-        console.log(
-          `[Daily] Only ${tiktokTotal}/4 TikToks generated, backfilling ${missing}`,
-        );
-        const fallbackTypes: ContentType[] = [
-          'sign-check',
-          'did-you-know',
-          'hot-take',
-          'myth',
-          'ranking',
-          'sign-identity',
-          'quiz',
-        ];
-        const usedTopics = new Set<string>();
-        for (let fi = 0; fi < missing; fi++) {
-          let fbScript: VideoScript | null = null;
-          // Try multiple content types to get a unique topic
-          for (let ti = 0; ti < fallbackTypes.length && !fbScript; ti++) {
-            const fbTypeIdx = (fi + ti) % fallbackTypes.length;
-            const candidateType = fallbackTypes[fbTypeIdx];
-            const candidate = await generateScriptForContentType(
-              candidateType,
-              tomorrow,
-            );
-            if (candidate && !usedTopics.has(candidate.facetTitle)) {
-              fbScript = candidate;
-              if (fbScript.metadata) {
-                (fbScript.metadata as Record<string, unknown>).contentTypeKey =
-                  candidateType;
-              }
-            }
-          }
-          if (!fbScript) continue;
-          usedTopics.add(fbScript.facetTitle);
-          try {
-            const fbHour = 10 + fi * 3; // space them out
-            fbScript.scheduledDate = new Date(
-              `${tomorrowKey}T${String(fbHour).padStart(2, '0')}:00:00.000Z`,
-            );
-            fbScript.platform = 'tiktok';
-
-            // Generate caption with hashtags
-            if (!fbScript.writtenPostContent) {
-              const hookLine =
-                fbScript.hookText || fbScript.fullScript.split('\n')[0] || '';
-              const fbContentType =
-                ((fbScript.metadata as Record<string, unknown>)
-                  ?.contentTypeKey as string) || 'sign-check';
-              const cat = contentTypeKeyToCategory(fbContentType) || 'zodiac';
-              const fakeFacet = {
-                title: fbScript.facetTitle,
-                slug: fbScript.facetTitle
-                  .toLowerCase()
-                  .replace(/[^a-z0-9]+/g, '-'),
-              };
-              const fakeTheme = {
-                category: cat,
-                name: fbScript.themeName || '',
-              };
-              const hashtags = generateTikTokHashtags(
-                fakeFacet as Parameters<typeof generateTikTokHashtags>[0],
-                fakeTheme as Parameters<typeof generateTikTokHashtags>[1],
-                fbScript.scheduledDate,
-              );
-              fbScript.writtenPostContent = `${hookLine}\n\n${hashtags.join(' ')}`;
-            }
-
-            const fbId = await saveVideoScript(fbScript);
-            await sql`
-              INSERT INTO social_posts (
-                content, platform, post_type, topic, status, image_url, video_url,
-                scheduled_date, week_theme, week_start, source_type, source_id,
-                source_title, created_at
-              )
-              SELECT ${fbScript.writtenPostContent || fbScript.fullScript}, 'tiktok', 'video',
-                     ${fbScript.facetTitle}, 'pending', ${SQL_NULL}, ${SQL_NULL},
-                     ${fbScript.scheduledDate.toISOString()}, ${fbScript.themeName}, ${tomorrowKey},
-                     'video_script', ${fbId}, ${fbScript.facetTitle}, NOW()
-              WHERE NOT EXISTS (
-                SELECT 1 FROM social_posts
-                WHERE platform = 'tiktok' AND post_type = 'video'
-                  AND topic = ${fbScript.facetTitle}
-                  AND scheduled_date = ${fbScript.scheduledDate.toISOString()}
-              )
-            `;
-            await sql`
-              INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
-              VALUES (${fbId}, ${tomorrowKey}, ${tomorrowKey}, ${fbScript.facetTitle}, 'pending', NOW(), NOW())
-              ON CONFLICT (script_id)
-              DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
-            `;
-            console.log(
-              `[Daily] Backfill TikTok ${fi + 1}: ${fbScript.facetTitle} at ${fbHour}:00`,
-            );
-            // Count in the first empty slot
-            if (!results.tiktokEngagementA) results.tiktokEngagementA = 1;
-            else if (!results.tiktokEngagementB) results.tiktokEngagementB = 1;
-            else if (!results.tiktokEngagementC) results.tiktokEngagementC = 1;
-          } catch (fbErr) {
-            console.error(`[Daily] Backfill TikTok ${fi + 1} failed:`, fbErr);
-          }
-        }
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      errors.push(`Engagement slots: ${msg}`);
-      console.error('[Daily] Engagement schedule failed:', err);
-    }
-
-    // --- 3. Instagram Reel Scripts (3 per day) ---
-    try {
-      const existingIgReels = existingScripts.rows.filter(
-        (r) => r.platform === 'instagram',
-      ).length;
-      if (existingIgReels >= 3) {
-        console.log(
-          `[Daily] Skipping IG Reels — ${existingIgReels} already exist for ${tomorrowKey}`,
-        );
-        results.igReels = existingIgReels;
-      } else {
-        const igScripts = await generateDailyInstagramScripts(
-          tomorrow,
-          [15, 17, 21],
-        );
-
-        // When CRITICAL/HIGH event detected, prepend an event-driven IG Reel
-        // and drop the last generated reel to keep the count at 3
-        if (hasEventOverride && significantEvent && igScripts.length > 0) {
-          try {
-            const eventReelScript = await generateEventDrivenScript(
-              significantEvent,
-              tomorrow,
-              'reel',
-            );
-            if (eventReelScript) {
-              eventReelScript.platform = 'instagram';
-              eventReelScript.scheduledDate = new Date(
-                `${tomorrowKey}T15:00:00.000Z`,
-              );
-              if (eventReelScript.metadata) {
-                eventReelScript.metadata.scheduledHour = 15;
-                eventReelScript.metadata.slot = 'primary';
-              }
-              // Replace the first reel slot with the event-driven one
-              igScripts[0] = eventReelScript;
-              console.log(
-                `[Daily] IG Reel slot 0: event override -> "${significantEvent.name}"`,
-              );
-            }
-          } catch (eventReelErr) {
-            console.warn(
-              '[Daily] Event-driven IG Reel failed, using normal rotation:',
-              eventReelErr instanceof Error
-                ? eventReelErr.message
-                : eventReelErr,
-            );
-          }
-        }
-
-        for (const igScript of igScripts) {
-          try {
-            const id = await saveVideoScript(igScript);
-            igScript.id = id;
-
-            const dateKey = igScript.scheduledDate.toISOString().split('T')[0];
-            const igCategory = igContentTypeToCategory(
-              igScript.metadata?.contentTypeKey as string | undefined,
-            );
-            const igCaption = generateInstagramReelCaption({
-              category: igCategory,
-              themeName: igScript.themeName,
-              facetTitle: igScript.facetTitle,
-              hookText:
-                typeof igScript.hookText === 'string'
-                  ? igScript.hookText
-                  : undefined,
-              scheduledDate: igScript.scheduledDate,
-            });
-
-            await sql`
             INSERT INTO social_posts (
               content, platform, post_type, topic, status, image_url, video_url,
               scheduled_date, week_theme, week_start, source_type, source_id,
               source_title, created_at
             )
-            SELECT ${igCaption}, 'instagram', 'video', ${igScript.facetTitle}, 'pending',
-                   ${SQL_NULL}, ${SQL_NULL}, ${igScript.scheduledDate.toISOString()},
-                   ${igScript.themeName}, ${tomorrowKey},
-                   'video_script', ${id}, ${igScript.facetTitle}, NOW()
+            SELECT ${validated.writtenPostContent || validated.fullScript}, 'tiktok', 'video',
+                   ${validated.facetTitle}, 'pending', ${SQL_NULL}, ${SQL_NULL},
+                   ${validated.scheduledDate.toISOString()}, ${themeName}, ${tomorrowKey},
+                   'video_script', ${id}, ${validated.facetTitle}, NOW()
             WHERE NOT EXISTS (
               SELECT 1 FROM social_posts
-              WHERE platform = 'instagram' AND post_type = 'video'
-                AND topic = ${igScript.facetTitle}
-                AND scheduled_date = ${igScript.scheduledDate.toISOString()}
-            )
-          `;
-
-            await sql`
-            INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
-            VALUES (${id}, ${tomorrowKey}, ${dateKey}, ${igScript.facetTitle}, 'pending', NOW(), NOW())
-            ON CONFLICT (script_id)
-            DO UPDATE SET status = 'pending', last_error = NULL, updated_at = NOW()
-          `;
-
-            results.igReels++;
-            console.log(
-              `[Daily] IG Reel: ${igScript.facetTitle} at ${igScript.metadata?.scheduledHour}:00`,
-            );
-          } catch (igErr) {
-            console.error(`[Daily] IG Reel save failed:`, igErr);
-          }
-        }
-      } // close else (skip-if-exists for IG Reels)
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      errors.push(`IG Reels: ${msg}`);
-      console.error('[Daily] IG Reels failed:', err);
-    }
-
-    // --- 4. Instagram Carousel/Meme ---
-    // For CRITICAL events, force a transit-themed carousel override
-    // by passing 'planetary' as a forced category hint
-    try {
-      const igBatch = await generateDailyBatch(tomorrowKey, undefined);
-
-      // When a CRITICAL event is detected, inject an event-awareness text post
-      // as an additional carousel-style item about the transit
-      if (significantEvent?.rarity === 'CRITICAL' && igBatch.posts.length > 0) {
-        const eventCaption = [
-          significantEvent.name,
-          '',
-          significantEvent.historicalContext || '',
-          '',
-          significantEvent.hookSuggestions?.[0] || '',
-          '',
-          '#astrology #transit #lunary',
-        ]
-          .filter((line) => line !== undefined)
-          .join('\n')
-          .trim();
-
-        const eventCarouselPost = {
-          type: 'carousel' as const,
-          format: 'square' as const,
-          imageUrls: [] as string[],
-          caption: eventCaption,
-          hashtags: [
-            '#astrology',
-            '#transit',
-            `#${(significantEvent.planet || 'cosmic').toLowerCase()}`,
-          ],
-          scheduledTime: `${tomorrowKey}T10:00:00.000Z`,
-          metadata: {
-            category: 'planetary',
-            slug: significantEvent.id,
-            eventDriven: true,
-            eventRarity: significantEvent.rarity,
-          },
-        };
-
-        // Replace the first carousel post with the event-driven one
-        const carouselIdx = igBatch.posts.findIndex(
-          (p) => p.type === 'carousel',
-        );
-        if (carouselIdx >= 0) {
-          console.log(
-            `[Daily] IG Carousel: CRITICAL event override -> "${significantEvent.name}"`,
-          );
-          igBatch.posts[carouselIdx] =
-            eventCarouselPost as (typeof igBatch.posts)[0];
-        }
-      }
-
-      if (igBatch.posts.length > 0) {
-        for (const post of igBatch.posts) {
-          const scheduledDate = new Date(
-            post.scheduledTime || `${tomorrowKey}T12:00:00.000Z`,
-          );
-          const imageUrl = Array.isArray(post.imageUrls)
-            ? post.imageUrls.join('|')
-            : null;
-          const hashtagStr = Array.isArray(post.hashtags)
-            ? post.hashtags.join(' ')
-            : post.hashtags || '';
-          const caption =
-            post.caption + (hashtagStr ? `\n\n${hashtagStr}` : '');
-
-          await sql`
-            INSERT INTO social_posts (
-              content, platform, post_type, topic, status, image_url,
-              scheduled_date, week_start, created_at
-            )
-            SELECT ${caption}, 'instagram', ${post.type === 'meme' ? 'meme' : 'instagram_carousel'},
-                   ${post.type}, 'pending', ${imageUrl},
-                   ${scheduledDate.toISOString()}, ${tomorrowKey}, NOW()
-            WHERE NOT EXISTS (
-              SELECT 1 FROM social_posts
-              WHERE platform = 'instagram'
-                AND post_type = ${post.type === 'meme' ? 'meme' : 'instagram_carousel'}
+              WHERE platform = 'tiktok' AND post_type = 'video'
+                AND topic = ${validated.facetTitle}
                 AND scheduled_date::date = ${tomorrowKey}
             )
           `;
 
-          results.igCarousel++;
+          await sql`
+            INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
+            VALUES (${id}, ${tomorrowKey}, ${tomorrowKey}, ${validated.facetTitle}, 'pending', NOW(), NOW())
+            ON CONFLICT (week_start, date_key, topic)
+            DO UPDATE SET script_id = ${id}, status = 'pending', last_error = NULL, updated_at = NOW()
+          `;
+
+          // --- IG Reel: same video, save-focused caption ---
+          const igCategory = igContentTypeToCategory(contentType) || 'zodiac';
+          const igCaption = generateInstagramReelCaption({
+            category: igCategory,
+            themeName: validated.themeName || themeName,
+            facetTitle: validated.facetTitle,
+            hookText:
+              typeof validated.hookText === 'string'
+                ? validated.hookText
+                : undefined,
+            scheduledDate: validated.scheduledDate,
+          });
+
+          // Save IG version of the same script
+          const igScript: VideoScript = {
+            ...validated,
+            platform: 'instagram',
+            writtenPostContent: igCaption,
+            metadata: validated.metadata
+              ? { ...validated.metadata, slot: 'slot1-reel' as const }
+              : undefined,
+          };
+          const igId = await saveVideoScript(igScript);
+
+          await sql`
+            INSERT INTO social_posts (
+              content, platform, post_type, topic, status, image_url, video_url,
+              scheduled_date, week_theme, week_start, source_type, source_id,
+              source_title, created_at
+            )
+            SELECT ${igCaption}, 'instagram', 'video', ${validated.facetTitle}, 'pending',
+                   ${SQL_NULL}, ${SQL_NULL}, ${validated.scheduledDate.toISOString()},
+                   ${themeName}, ${tomorrowKey},
+                   'video_script', ${igId}, ${validated.facetTitle}, NOW()
+            WHERE NOT EXISTS (
+              SELECT 1 FROM social_posts
+              WHERE platform = 'instagram' AND post_type = 'video'
+                AND topic = ${validated.facetTitle}
+                AND scheduled_date::date = ${tomorrowKey}
+            )
+          `;
+
+          // No separate video_job for IG — renderer produces one video file
+          // that gets reused for both TikTok and IG Reel.
+
+          results.slot1Video = 1;
+          console.log(
+            `[Daily] Slot 1: ${contentType}${hasEventOverride ? ' (EVENT OVERRIDE)' : ''} at ${slot1Hour}:00 (TikTok + IG Reel)`,
+          );
         }
-        console.log(`[Daily] IG Carousel: ${igBatch.posts.length} posts`);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      errors.push(`IG Carousel: ${msg}`);
-      console.error('[Daily] IG Carousel failed:', err);
+      errors.push(`Slot 1 Video: ${msg}`);
+      console.error('[Daily] Slot 1 failed:', err);
+    }
+
+    // =====================================================================
+    // SLOT 2 — Carousel (22:00 UTC / 6pm ET)
+    // IG Feed carousel + TikTok carousel (same slides, different captions).
+    // On CRITICAL event days: transit-themed carousel override.
+    // =====================================================================
+    try {
+      const existingCarousel = existingScripts.rows.some(
+        (r) => r.platform === 'instagram' && r.slot === 'slot2',
+      );
+      if (existingCarousel) {
+        console.log(
+          `[Daily] Skipping Slot 2 carousel — already exists for ${tomorrowKey}`,
+        );
+        results.slot2Carousel = 1;
+      } else {
+        const igBatch = await generateDailyBatch(tomorrowKey, undefined);
+
+        // CRITICAL event: override carousel content
+        if (
+          significantEvent?.rarity === 'CRITICAL' &&
+          igBatch.posts.length > 0
+        ) {
+          const eventCaption = [
+            significantEvent.name,
+            '',
+            significantEvent.historicalContext || '',
+            '',
+            significantEvent.hookSuggestions?.[0] || '',
+            '',
+            '#astrology #transit #lunary',
+          ]
+            .filter((line) => line !== undefined)
+            .join('\n')
+            .trim();
+
+          const eventCarouselPost = {
+            type: 'carousel' as const,
+            format: 'square' as const,
+            imageUrls: [] as string[],
+            caption: eventCaption,
+            hashtags: [
+              '#astrology',
+              '#transit',
+              `#${(significantEvent.planet || 'cosmic').toLowerCase()}`,
+            ],
+            scheduledTime: `${tomorrowKey}T22:00:00.000Z`,
+            metadata: {
+              category: 'planetary',
+              slug: significantEvent.id,
+              eventDriven: true,
+              eventRarity: significantEvent.rarity,
+            },
+          };
+
+          const carouselIdx = igBatch.posts.findIndex(
+            (p) => p.type === 'carousel',
+          );
+          if (carouselIdx >= 0) {
+            console.log(
+              `[Daily] Slot 2: CRITICAL event override -> "${significantEvent.name}"`,
+            );
+            igBatch.posts[carouselIdx] =
+              eventCarouselPost as (typeof igBatch.posts)[0];
+          }
+        }
+
+        if (igBatch.posts.length > 0) {
+          for (const post of igBatch.posts) {
+            const scheduledDate = new Date(
+              post.scheduledTime || `${tomorrowKey}T22:00:00.000Z`,
+            );
+            const imageUrl = Array.isArray(post.imageUrls)
+              ? post.imageUrls.join('|')
+              : null;
+            const hashtagStr = Array.isArray(post.hashtags)
+              ? post.hashtags.join(' ')
+              : post.hashtags || '';
+            const caption =
+              post.caption + (hashtagStr ? `\n\n${hashtagStr}` : '');
+
+            // IG Feed carousel
+            await sql`
+              INSERT INTO social_posts (
+                content, platform, post_type, topic, status, image_url,
+                scheduled_date, week_start, created_at
+              )
+              SELECT ${caption}, 'instagram', ${post.type === 'meme' ? 'meme' : 'instagram_carousel'},
+                     ${post.type}, 'pending', ${imageUrl},
+                     ${scheduledDate.toISOString()}, ${tomorrowKey}, NOW()
+              WHERE NOT EXISTS (
+                SELECT 1 FROM social_posts
+                WHERE platform = 'instagram'
+                  AND post_type = ${post.type === 'meme' ? 'meme' : 'instagram_carousel'}
+                  AND scheduled_date::date = ${tomorrowKey}
+              )
+            `;
+
+            // TikTok carousel (same slides, cross-posted)
+            await sql`
+              INSERT INTO social_posts (
+                content, platform, post_type, topic, status, image_url,
+                scheduled_date, week_start, created_at
+              )
+              SELECT ${caption}, 'tiktok', 'carousel',
+                     ${post.type}, 'pending', ${imageUrl},
+                     ${scheduledDate.toISOString()}, ${tomorrowKey}, NOW()
+              WHERE NOT EXISTS (
+                SELECT 1 FROM social_posts
+                WHERE platform = 'tiktok' AND post_type = 'carousel'
+                  AND scheduled_date::date = ${tomorrowKey}
+              )
+            `;
+
+            results.slot2Carousel++;
+          }
+          console.log(
+            `[Daily] Slot 2: ${igBatch.posts.length} carousel posts at 22:00 (IG + TikTok)`,
+          );
+        }
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      errors.push(`Slot 2 Carousel: ${msg}`);
+      console.error('[Daily] Slot 2 failed:', err);
+    }
+
+    // =====================================================================
+    // SLOT 3 — Quick-hit video (01:00 UTC+1 / 9pm ET)
+    // Short, punchy TikTok-only video (24-38s). Viral reach play.
+    // =====================================================================
+    try {
+      if (existingSlots.has('tiktok:slot3')) {
+        console.log(
+          `[Daily] Skipping Slot 3 — already exists for ${tomorrowKey}`,
+        );
+        results.slot3QuickHit = 1;
+      } else {
+        // Slot 3 is 01:00 UTC the NEXT day (9pm ET same evening)
+        const slot3DateKey = new Date(tomorrow);
+        slot3DateKey.setUTCDate(slot3DateKey.getUTCDate() + 1);
+        const slot3Key = slot3DateKey.toISOString().split('T')[0];
+
+        const dateSeed =
+          tomorrow.getFullYear() * 10000 +
+          (tomorrow.getMonth() + 1) * 100 +
+          tomorrow.getDate() +
+          7; // offset from slot 1 seed
+        const weights = await getContentTypeWeights();
+        const exclude = new Set<string>();
+        const contentType =
+          (weightedSelect(weights, exclude, dateSeed) as ContentType) ||
+          'sign-check';
+
+        const script = await generateScriptForContentType(
+          contentType,
+          tomorrow,
+        );
+        const validated = await validateAndRetry(contentType, tomorrow, script);
+
+        if (validated) {
+          validated.scheduledDate = new Date(`${slot3Key}T01:00:00.000Z`);
+          validated.platform = 'tiktok';
+          if (validated.metadata) {
+            validated.metadata.scheduledHour = 1;
+            validated.metadata.slot = 'slot3';
+          }
+
+          // TikTok SEO caption
+          if (!validated.writtenPostContent) {
+            const hookLine =
+              validated.hookText || validated.fullScript.split('\n')[0] || '';
+            const cat = contentTypeKeyToCategory(contentType) || 'zodiac';
+            const fakeFacet = {
+              title: validated.facetTitle,
+              slug: validated.facetTitle
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-'),
+            };
+            const fakeTheme = {
+              category: cat,
+              name: validated.themeName || '',
+            };
+            const hashtags = generateTikTokHashtags(
+              fakeFacet as unknown as Parameters<
+                typeof generateTikTokHashtags
+              >[0],
+              fakeTheme as Parameters<typeof generateTikTokHashtags>[1],
+              validated.scheduledDate,
+            );
+            validated.writtenPostContent = `${hookLine}\n\n${hashtags.join(' ')}`;
+          }
+
+          const id = await saveVideoScript(validated);
+          validated.id = id;
+
+          await sql`
+            INSERT INTO social_posts (
+              content, platform, post_type, topic, status, image_url, video_url,
+              scheduled_date, week_theme, week_start, source_type, source_id,
+              source_title, created_at
+            )
+            SELECT ${validated.writtenPostContent || validated.fullScript}, 'tiktok', 'video',
+                   ${validated.facetTitle}, 'pending', ${SQL_NULL}, ${SQL_NULL},
+                   ${validated.scheduledDate.toISOString()}, ${validated.themeName}, ${tomorrowKey},
+                   'video_script', ${id}, ${validated.facetTitle}, NOW()
+            WHERE NOT EXISTS (
+              SELECT 1 FROM social_posts
+              WHERE platform = 'tiktok' AND post_type = 'video'
+                AND topic = ${validated.facetTitle}
+                AND scheduled_date::date = ${slot3Key}
+            )
+          `;
+
+          await sql`
+            INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
+            VALUES (${id}, ${tomorrowKey}, ${slot3Key}, ${validated.facetTitle}, 'pending', NOW(), NOW())
+            ON CONFLICT (week_start, date_key, topic)
+            DO UPDATE SET script_id = ${id}, status = 'pending', last_error = NULL, updated_at = NOW()
+          `;
+
+          results.slot3QuickHit = 1;
+          console.log(
+            `[Daily] Slot 3: ${contentType} at 01:00+1 (TikTok only)`,
+          );
+        }
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      errors.push(`Slot 3 QuickHit: ${msg}`);
+      console.error('[Daily] Slot 3 failed:', err);
     }
 
     // --- 5. Text Posts (all platforms) ---
@@ -1142,12 +950,9 @@ export async function GET(request: NextRequest) {
     }
 
     const totalScripts =
-      results.tiktokPrimary +
-      results.tiktokEngagementA +
-      results.tiktokEngagementB +
-      results.tiktokEngagementC +
-      results.igReels +
-      results.igCarousel +
+      results.slot1Video +
+      results.slot2Carousel +
+      results.slot3QuickHit +
       results.textPosts;
 
     const duration = Date.now() - startTime;
@@ -1166,9 +971,9 @@ export async function GET(request: NextRequest) {
         description: [
           `**${tomorrowKey} (${dayName})**`,
           eventOverrideLine,
-          `TikTok: ${results.tiktokPrimary} primary + ${results.tiktokEngagementA + results.tiktokEngagementB + results.tiktokEngagementC} engagement`,
-          `IG Reels: ${results.igReels}/3`,
-          `IG Carousel: ${results.igCarousel}`,
+          `Slot 1 (16:00): ${results.slot1Video} video (TikTok + IG Reel)`,
+          `Slot 2 (22:00): ${results.slot2Carousel} carousel (IG + TikTok)`,
+          `Slot 3 (01:00): ${results.slot3QuickHit} quick-hit (TikTok)`,
           `Text posts: ${results.textPosts}`,
           `**Total: ${totalScripts} pieces**`,
           errors.length > 0 ? `\nErrors:\n${errors.join('\n')}` : '',
