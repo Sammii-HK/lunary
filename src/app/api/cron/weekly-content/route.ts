@@ -232,6 +232,9 @@ export async function GET(request: NextRequest) {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': 'Lunary-Weekly-Content-Cron/1.0',
+            ...(process.env.CRON_SECRET
+              ? { Authorization: `Bearer ${process.env.CRON_SECRET}` }
+              : {}),
           },
           body: JSON.stringify({
             weekStart: weekStartMonday.toISOString(),
@@ -282,30 +285,22 @@ export async function GET(request: NextRequest) {
     }
 
     // 5. Generate Instagram content for the week ahead (7 days in advance)
+    //    Called directly (not via HTTP self-fetch) to avoid auth issues
+    //    when CRON_SECRET bearer gets stripped by CDN/edge.
     console.log(
       '📸 Generating Instagram content for the week ahead (7 days in advance)...',
     );
     let instagramResult = null;
     try {
-      // Generate for the same week as social posts (7 days ahead)
-      const instagramResponse = await fetch(
-        `${baseUrl}/api/admin/instagram/generate-weekly`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Lunary-Weekly-Content-Cron/1.0',
-          },
-          body: JSON.stringify({
-            startDate: new Date(
-              new Date().getTime() + 7 * 24 * 60 * 60 * 1000,
-            ).toISOString(),
-          }),
-        },
-      );
+      const { generateWeeklyInstagramContent } =
+        await import('@/lib/instagram/generate-weekly');
+      const igStartDate = new Date(
+        new Date().getTime() + 7 * 24 * 60 * 60 * 1000,
+      ).toISOString();
 
-      if (instagramResponse.ok) {
-        instagramResult = await instagramResponse.json();
+      instagramResult = await generateWeeklyInstagramContent(igStartDate);
+
+      if (instagramResult.success) {
         console.log(
           `✅ Generated ${instagramResult.totalPosts || 0} Instagram posts for next week`,
         );
@@ -320,16 +315,13 @@ export async function GET(request: NextRequest) {
           },
         });
       } else {
-        console.error(
-          '❌ Instagram generation failed:',
-          instagramResponse.status,
-        );
+        console.error('❌ Instagram generation failed:', instagramResult.error);
         await logActivity({
           activityType: 'content_creation',
           activityCategory: 'content',
           status: 'failed',
           message: 'Instagram generation failed',
-          errorMessage: `HTTP ${instagramResponse.status}`,
+          errorMessage: instagramResult.error || 'Unknown error',
         });
       }
     } catch (instagramError) {
