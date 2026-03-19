@@ -84,6 +84,36 @@ export function scriptToAudioSegments(
     }
   }
 
+  // Merge short chunks (under 3 words) with the next chunk to avoid
+  // tiny subtitle lines that flash by too quickly
+  const minWordsPerChunk = 3;
+  for (let i = chunks.length - 1; i >= 0; i--) {
+    if (chunks[i].words.length < minWordsPerChunk) {
+      if (i + 1 < chunks.length) {
+        // Merge into next chunk (if combined total is within limit)
+        const combined = [...chunks[i].words, ...chunks[i + 1].words];
+        if (combined.length <= maxWordsPerChunk) {
+          chunks[i + 1].words = combined;
+          chunks[i + 1].text = combined.join(' ');
+          chunks[i + 1].complexity = chunks[i + 1].text.length;
+          chunks.splice(i, 1);
+          continue;
+        }
+      }
+      if (i > 0) {
+        // Merge into previous chunk (if combined total is within limit)
+        const combined = [...chunks[i - 1].words, ...chunks[i].words];
+        if (combined.length <= maxWordsPerChunk) {
+          chunks[i - 1].words = combined;
+          chunks[i - 1].text = combined.join(' ');
+          chunks[i - 1].complexity = chunks[i - 1].text.length;
+          chunks[i - 1].pauseAfter = chunks[i].pauseAfter;
+          chunks.splice(i, 1);
+        }
+      }
+    }
+  }
+
   // Second pass: calculate timing based on complexity (character count) and pauses
   const totalComplexity = chunks.reduce((sum, c) => sum + c.complexity, 0);
   const totalPauses = chunks.reduce((sum, c) => sum + c.pauseAfter, 0);
