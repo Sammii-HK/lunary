@@ -107,6 +107,20 @@ const OUTER_PLANETS = new Set([
   'Pluto',
 ]);
 
+/** Short descriptions of what each planet rules — used in aspect bodies */
+const PLANET_RULES_SHORT: Record<string, string> = {
+  Sun: 'identity and purpose',
+  Moon: 'emotions and instincts',
+  Mercury: 'communication and thinking',
+  Venus: 'love and values',
+  Mars: 'action and drive',
+  Jupiter: 'growth and expansion',
+  Saturn: 'discipline and boundaries',
+  Uranus: 'disruption and freedom',
+  Neptune: 'dreams and intuition',
+  Pluto: 'transformation and power',
+};
+
 /**
  * Essential dignities for all planets.
  *
@@ -685,14 +699,27 @@ function getRetrogradeSignContext(
     }
   }
 
-  const hooks = [
-    `${planet} retrograde in ${sign}${dignityNote}. Here is why this one hits different.`,
-    `${planet} is retrograde in ${sign}. What that actually means for your week.`,
-  ];
+  const hooks: string[] = [];
 
-  if (dignity) {
-    hooks.unshift(
-      `${planet} is in its ${dignity} in ${sign} AND retrograde. This is the toughest ${planet} retrograde of the year.`,
+  if (dignity === 'detriment + fall') {
+    hooks.push(
+      `${planet} retrograde in its worst sign. ${sign} makes this one brutal.`,
+      `${planet} in ${sign} (${dignity}) AND retrograde. Double difficulty.`,
+    );
+  } else if (dignity === 'detriment' || dignity === 'fall') {
+    hooks.push(
+      `${planet} retrograde in ${sign} (${dignity}). This one has teeth.`,
+      `${planet} struggles in ${sign}. Add retrograde and it gets harder.`,
+    );
+  } else if (dignity === 'domicile' || dignity === 'exalted') {
+    hooks.push(
+      `${planet} retrograde in ${sign} (${dignity}). Powerful but turned inward.`,
+      `${planet} retrogrades in its strongest sign. Intense internal audit.`,
+    );
+  } else {
+    hooks.push(
+      `${planet} retrograde in ${sign}. The review period continues.`,
+      `${planet} is still retrograde in ${sign}. Notice what keeps resurfacing.`,
     );
   }
 
@@ -1341,6 +1368,41 @@ export async function getEventCalendarForDate(
     // Tighter orbs get higher scores
     aspectScore += Math.round((2 - (aspect.separation as number)) * 5);
 
+    // Build substantive context for aspects
+    const rulesA = PLANET_RULES_SHORT[pA] || pA;
+    const rulesB = PLANET_RULES_SHORT[pB] || pB;
+    const signA = positions[pA]?.sign || '';
+    const signB = positions[pB]?.sign || '';
+    const signNote =
+      signA && signB && signA !== signB
+        ? ` ${pA} in ${signA}, ${pB} in ${signB}.`
+        : signA
+          ? ` Both in ${signA}.`
+          : '';
+
+    const aspectMeanings: Record<string, string> = {
+      conjunction: `${pA} (${rulesA}) and ${pB} (${rulesB}) merge into a single pulse.${signNote} Both domains activate at once -- whatever one triggers, the other amplifies.`,
+      opposition: `${pA} (${rulesA}) and ${pB} (${rulesB}) pull in opposite directions.${signNote} The tension is the point. Neither side can be ignored.`,
+      square: `${pA} (${rulesA}) squares ${pB} (${rulesB}).${signNote} Friction that forces a decision. Something has to give.`,
+      trine: `${pA} (${rulesA}) trines ${pB} (${rulesB}).${signNote} Flow and support between these areas. Use it while it lasts.`,
+    };
+    const aspectContext =
+      aspectMeanings[aspectName] ||
+      `${pA} (${rulesA}) and ${pB} (${rulesB}) form a significant alignment.${signNote}`;
+
+    const hookCandidates: string[] = [];
+    if (bothOuter) {
+      hookCandidates.push(
+        `${pA} ${aspectName} ${pB} is exact. This alignment is rare.`,
+        `Rare aspect: ${pA} meets ${pB} by ${aspectName} today.`,
+      );
+    } else {
+      hookCandidates.push(
+        `${pA} ${aspectName} ${pB} is exact today`,
+        `${pA} and ${pB} form an exact ${aspectName} right now`,
+      );
+    }
+
     addEvent({
       id: `aspect-${pA.toLowerCase()}-${aspectName}-${pB.toLowerCase()}-${dateStr}`,
       name: `${pA} ${aspectName} ${pB}`,
@@ -1348,14 +1410,12 @@ export async function getEventCalendarForDate(
       rarity: aspectRarity,
       score: aspectScore,
       convergenceMultiplier: 1.0,
-      hookSuggestions: [
-        `${pA} ${aspectName} ${pB} is exact today. Here is what it means.`,
-        `A ${aspectName} between ${pA} and ${pB} peaks today.`,
-      ],
+      hookSuggestions: hookCandidates,
       category: 'aspect',
       rarityFrame: bothOuter
         ? `a rare alignment between two slow-moving planets`
-        : `a notable aspect highlighting the interplay of ${pA} and ${pB}`,
+        : `exact within ${Math.round((aspect.separation as number) * 10) / 10}°`,
+      historicalContext: aspectContext,
       eventType: 'aspect',
       planet: pA,
       sign: positions[pA]?.sign,
