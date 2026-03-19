@@ -626,6 +626,165 @@ function generateOneWordCaption(options: {
 }
 
 /**
+ * Generate a TikTok-specific carousel caption.
+ *
+ * TikTok carousel captions differ from IG:
+ * - SEO keywords in the first 10 words (TikTok search discovery)
+ * - Shorter, punchier (no "link in bio", no "save this")
+ * - Comment-driving CTA (TikTok rewards comment quality/length)
+ * - 3-5 hashtags (1 broad + 2 niche, never #fyp)
+ */
+export function generateTikTokCarouselCaption(
+  postType: IGPostType,
+  options: {
+    category?: ThemeCategory;
+    title?: string;
+    sign?: string;
+    trait?: string;
+    sign1?: string;
+    sign2?: string;
+    score?: number;
+    fact?: string;
+  },
+): CaptionResult {
+  const title = options.title || 'Astrology';
+  const category = options.category || 'zodiac';
+  const seed = options.title || options.sign || options.trait || postType;
+  const hash = hashString(seed);
+
+  let caption: string;
+
+  switch (postType) {
+    case 'carousel': {
+      const titleKey = title.toLowerCase();
+      if (category === 'zodiac') {
+        const opener =
+          ZODIAC_SIGN_OPENERS[titleKey] ||
+          `${title} personality traits you need to know`;
+        caption = `${opener}\n\nSwipe through all the slides. Which part is most accurate?\n\nComment your sign below`;
+      } else if (category === 'tarot') {
+        const opener =
+          TAROT_CARD_OPENERS[titleKey] ||
+          `${title} tarot card — full meaning breakdown`;
+        caption = `${opener}\n\nSwipe for the complete guide. What card keeps coming up for you?`;
+      } else {
+        caption = `${title} — the full breakdown you need\n\nSwipe through. Drop a comment if this resonates`;
+      }
+      break;
+    }
+    case 'sign_ranking': {
+      const trait = options.trait || 'patience';
+      const opener =
+        TRAIT_SEARCH_OPENERS[trait] || `All 12 zodiac signs ranked by ${trait}`;
+      caption = `${opener}\n\nSwipe to see the ranking. Comment your sign — do you agree?`;
+      break;
+    }
+    case 'angel_number_carousel': {
+      const hooks = [
+        `You keep seeing ${title}. This is what it means`,
+        `${title} keeps appearing? Pay attention`,
+        `${title} meaning — the universe is signalling you`,
+      ];
+      caption = `${hooks[hash % hooks.length]}\n\nSwipe for the full breakdown. What number do you keep seeing?`;
+      break;
+    }
+    case 'compatibility': {
+      const s1 = options.sign1
+        ? options.sign1.charAt(0).toUpperCase() + options.sign1.slice(1)
+        : 'Your sign';
+      const s2 = options.sign2
+        ? options.sign2.charAt(0).toUpperCase() + options.sign2.slice(1)
+        : 'their sign';
+      const score = options.score ?? 75;
+      const hook =
+        score >= 75
+          ? `${s1} + ${s2} compatibility is off the charts`
+          : `${s1} + ${s2} — can it work? Swipe to find out`;
+      caption = `${hook}\n\nTag them and see if they agree`;
+      break;
+    }
+    case 'meme': {
+      const sign = options.sign
+        ? options.sign.charAt(0).toUpperCase() + options.sign.slice(1)
+        : 'zodiac';
+      const hooks = [
+        `${sign} energy explained in one post`,
+        `Every ${sign} knows exactly what this means`,
+        `This is the most ${sign} thing ever`,
+      ];
+      caption = `${hooks[hash % hooks.length]}\n\nTag a ${sign} who needs to see this`;
+      break;
+    }
+    case 'did_you_know': {
+      const catLabel = category.charAt(0).toUpperCase() + category.slice(1);
+      const hooks = [
+        `${catLabel} fact most people get wrong`,
+        `Bet you didn't know this about ${catLabel}`,
+      ];
+      caption = `${hooks[hash % hooks.length]}\n\nComment if this changed how you think about it`;
+      break;
+    }
+    case 'one_word': {
+      const trait = options.trait;
+      if (trait) {
+        const traitLabel = trait.replace(/_/g, ' ');
+        caption = `Every sign's ${traitLabel} in one word. How accurate is yours?\n\nSwipe through all 12. Comment your sign below`;
+      } else {
+        const sign = options.sign
+          ? options.sign.charAt(0).toUpperCase() + options.sign.slice(1)
+          : 'zodiac';
+        caption = `One word for ${sign} and it says everything\n\nComment if you agree`;
+      }
+      break;
+    }
+    default:
+      caption = `${title}\n\nSwipe through. Comment your sign below`;
+  }
+
+  // TikTok hashtags: 3-5, niche-focused, never #fyp
+  const hashtags = buildTikTokCarouselHashtags(postType, category, seed);
+
+  return { caption, hashtags };
+}
+
+/**
+ * TikTok carousel hashtags: 3-5 tags, niche-focused.
+ * Formula: 1 broad + 2 category + 1-2 post-type specific.
+ */
+function buildTikTokCarouselHashtags(
+  postType: IGPostType,
+  category?: ThemeCategory,
+  seed?: string,
+): string[] {
+  const hash = hashString(seed || postType);
+  const tags: string[] = [];
+
+  // 1 broad tag
+  const broadTags = ['#astrology', '#zodiac', '#spirituality', '#horoscope'];
+  tags.push(broadTags[hash % broadTags.length]);
+
+  // 2 category tags (rotated)
+  if (category && CATEGORY_HASHTAGS[category]) {
+    const pool = CATEGORY_HASHTAGS[category];
+    const start = hash % pool.length;
+    tags.push(pool[start % pool.length]);
+    if (pool.length > 1) tags.push(pool[(start + 1) % pool.length]);
+  }
+
+  // 1-2 post-type tags
+  const ptTags = POST_TYPE_HASHTAGS[postType] || [];
+  if (ptTags.length > 0) {
+    const ptStart = (hash + 3) % ptTags.length;
+    tags.push(ptTags[ptStart % ptTags.length]);
+    if (ptTags.length > 1 && tags.length < 5) {
+      tags.push(ptTags[(ptStart + 1) % ptTags.length]);
+    }
+  }
+
+  return [...new Set(tags)].slice(0, 5);
+}
+
+/**
  * Build topically relevant hashtags.
  *
  * Merges post-type tags + category tags into one pool of related tags,
