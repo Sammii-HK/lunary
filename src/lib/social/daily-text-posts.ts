@@ -23,6 +23,11 @@ import {
   searchGrimoireForTopic,
   type GrimoireSnippet,
 } from '@/lib/social/grimoire-content';
+import {
+  getThematicImageUrl,
+  getEducationalImageUrl,
+} from '@/lib/social/educational-images';
+import { getImageBaseUrl } from '@/lib/urls';
 
 export interface DailyTextPost {
   platform: 'linkedin' | 'pinterest' | 'bluesky';
@@ -439,15 +444,51 @@ function makePost(
   source: DailyTextPost['source'],
   hashtags?: string[],
   eventScore?: number,
+  imageUrl?: string,
 ): DailyTextPost {
   return {
     platform,
     content,
     hashtags,
+    imageUrl,
     scheduledTime: isoTime(dateStr, PLATFORM_TIMES_UTC[platform]),
     source,
     eventScore,
   };
+}
+
+/** Generate an OG image URL for a transit event. */
+function transitImageUrl(
+  event: CalendarEvent,
+  snippet: GrimoireSnippet | null,
+  platform: string,
+): string {
+  const baseUrl = getImageBaseUrl();
+  // If we have a real article snippet, use its category/slug for the image
+  if (isArticleSnippet(snippet)) {
+    return getEducationalImageUrl(snippet, baseUrl, platform);
+  }
+  // Build from event data
+  const category =
+    event.category === 'retrograde' ? 'planetary' : event.category;
+  const slug =
+    event.planet && event.sign
+      ? `${event.planet.toLowerCase()}-in-${event.sign.toLowerCase()}`
+      : event.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  return getThematicImageUrl(category, event.name, baseUrl, platform, slug);
+}
+
+/** Generate an OG image URL for a category rotation post. */
+function categoryImageUrl(
+  snippet: GrimoireSnippet | null,
+  category: string,
+  platform: string,
+): string {
+  const baseUrl = getImageBaseUrl();
+  if (snippet) {
+    return getEducationalImageUrl(snippet, baseUrl, platform);
+  }
+  return getThematicImageUrl(category, capitalise(category), baseUrl, platform);
 }
 
 function transitPostForPlatform(
@@ -456,6 +497,7 @@ function transitPostForPlatform(
   snippet: GrimoireSnippet | null,
   dateStr: string,
 ): DailyTextPost {
+  const image = transitImageUrl(event, snippet, platform);
   switch (platform) {
     case 'linkedin':
       return makePost(
@@ -465,6 +507,7 @@ function transitPostForPlatform(
         'transit',
         undefined,
         event.score,
+        image,
       );
     case 'pinterest': {
       const pin = pinterestTransit(event, snippet);
@@ -475,6 +518,7 @@ function transitPostForPlatform(
         'transit',
         pin.hashtags,
         event.score,
+        image,
       );
     }
     case 'bluesky':
@@ -485,6 +529,7 @@ function transitPostForPlatform(
         'transit',
         undefined,
         event.score,
+        image,
       );
   }
 }
@@ -497,6 +542,7 @@ function hybridPostForPlatform(
   dateStr: string,
   variety: Variety | null,
 ): DailyTextPost {
+  const image = categoryImageUrl(catSnippet, category, platform);
   switch (platform) {
     case 'linkedin': {
       const base = linkedinCategory(catSnippet, category, variety);
@@ -510,6 +556,7 @@ function hybridPostForPlatform(
         'transit',
         undefined,
         event.score,
+        image,
       );
     }
     case 'pinterest': {
@@ -521,6 +568,7 @@ function hybridPostForPlatform(
         'transit',
         pin.hashtags,
         event.score,
+        image,
       );
     }
     case 'bluesky': {
@@ -534,6 +582,7 @@ function hybridPostForPlatform(
         'transit',
         undefined,
         event.score,
+        image,
       );
     }
   }
@@ -548,6 +597,7 @@ function categoryPostForPlatform(
 ): DailyTextPost {
   const source: DailyTextPost['source'] =
     variety?.type === 'persona' ? 'persona' : 'category-rotation';
+  const image = categoryImageUrl(snippet, category, platform);
   switch (platform) {
     case 'linkedin':
       return makePost(
@@ -555,10 +605,21 @@ function categoryPostForPlatform(
         linkedinCategory(snippet, category, variety),
         dateStr,
         source,
+        undefined,
+        undefined,
+        image,
       );
     case 'pinterest': {
       const pin = pinterestCategory(snippet, category);
-      return makePost(platform, pin.content, dateStr, source, pin.hashtags);
+      return makePost(
+        platform,
+        pin.content,
+        dateStr,
+        source,
+        pin.hashtags,
+        undefined,
+        image,
+      );
     }
     case 'bluesky':
       return makePost(
@@ -566,6 +627,9 @@ function categoryPostForPlatform(
         blueskyCategory(snippet, category, variety),
         dateStr,
         source,
+        undefined,
+        undefined,
+        image,
       );
   }
 }

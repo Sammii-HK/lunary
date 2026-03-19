@@ -904,9 +904,10 @@ export async function GET(request: NextRequest) {
             ? `${post.content}\n\n${hashtagStr}`
             : post.content;
 
+          const imageUrl = post.imageUrl || null;
           await sql`
             INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, scheduled_date, week_start, created_at)
-            SELECT ${contentWithTags}, ${post.platform}, ${postType}, ${post.source}, 'pending', ${SQL_NULL}, ${post.scheduledTime}, ${tomorrowKey}, NOW()
+            SELECT ${contentWithTags}, ${post.platform}, ${postType}, ${post.source}, 'pending', ${imageUrl}, ${post.scheduledTime}, ${tomorrowKey}, NOW()
             WHERE NOT EXISTS (
               SELECT 1 FROM social_posts
               WHERE platform = ${post.platform}
