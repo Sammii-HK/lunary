@@ -1722,13 +1722,14 @@ export async function generateThematicPostsForWeek(
   const overrideByDayOffset = new Map(
     shortFormOverrides.map((override) => [override.dayOffset, override]),
   );
-  const shortFormOverridePlatforms = new Set(['threads']);
-  const ctaPlatforms = new Set(['threads']);
+  const shortFormOverridePlatforms = new Set<string>();
+  const ctaPlatforms = new Set<string>();
 
   // Long-form platforms (educational depth, images)
   const longFormPlatforms = ['linkedin', 'pinterest'];
   // Short-form platforms (1-2 sentences, optional hashtags)
-  const shortFormPlatforms = ['bluesky', 'threads'];
+  // Threads removed — daily-threads cron handles Threads with transit-aware content
+  const shortFormPlatforms = ['bluesky'];
 
   for (const dayContent of weekContent) {
     const sourceInfo = resolveSourceForFacet(
