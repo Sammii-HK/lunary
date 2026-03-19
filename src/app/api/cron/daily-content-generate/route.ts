@@ -885,7 +885,7 @@ export async function GET(request: NextRequest) {
       console.error('[Daily] Slot 3 failed:', err);
     }
 
-    // --- 5. Text Posts (LinkedIn, Pinterest, Bluesky) ---
+    // --- 5. Text Posts (Pinterest, Bluesky) ---
     try {
       const { generateDailyTextPosts } =
         await import('@/lib/social/daily-text-posts');

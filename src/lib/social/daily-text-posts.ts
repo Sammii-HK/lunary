@@ -30,7 +30,7 @@ import {
 import { getImageBaseUrl } from '@/lib/urls';
 
 export interface DailyTextPost {
-  platform: 'linkedin' | 'pinterest' | 'bluesky';
+  platform: 'pinterest' | 'bluesky';
   content: string;
   hashtags?: string[];
   imageUrl?: string;
@@ -43,16 +43,11 @@ type VarietyType = 'persona' | 'question' | 'closing';
 type Variety = { type: VarietyType; text: string };
 
 const PLATFORM_TIMES_UTC: Record<DailyTextPost['platform'], number> = {
-  linkedin: 14, // 10 am ET
   pinterest: 17, // 1 pm ET
   bluesky: 16, // 12 pm ET
 };
 
-const TEXT_PLATFORMS: DailyTextPost['platform'][] = [
-  'linkedin',
-  'pinterest',
-  'bluesky',
-];
+const TEXT_PLATFORMS: DailyTextPost['platform'][] = ['pinterest', 'bluesky'];
 
 const PERSONA_HOOKS = [
   'As someone who has spent the last decade building design systems, I keep noticing how cosmic patterns mirror software architecture.',
