@@ -630,9 +630,10 @@ export async function GET(request: NextRequest) {
       } else {
         const igBatch = await generateDailyBatch(tomorrowKey, undefined);
 
-        // CRITICAL event: override carousel content
+        // HIGH or CRITICAL event: override carousel with event-themed content
         if (
-          significantEvent?.rarity === 'CRITICAL' &&
+          (significantEvent?.rarity === 'CRITICAL' ||
+            significantEvent?.rarity === 'HIGH') &&
           igBatch.posts.length > 0
         ) {
           const eventCaption = [
@@ -667,12 +668,14 @@ export async function GET(request: NextRequest) {
             },
           };
 
+          // Match any carousel-like type (carousel, compatibility, one_word, sign_ranking, angel_number_carousel)
           const carouselIdx = igBatch.posts.findIndex(
-            (p) => p.type === 'carousel',
+            (p) =>
+              p.type !== 'meme' && p.type !== 'quote' && p.type !== 'story',
           );
           if (carouselIdx >= 0) {
             console.log(
-              `[Daily] Slot 2: CRITICAL event override -> "${significantEvent.name}"`,
+              `[Daily] Slot 2: ${significantEvent.rarity} event override -> "${significantEvent.name}"`,
             );
             igBatch.posts[carouselIdx] =
               eventCarouselPost as (typeof igBatch.posts)[0];
