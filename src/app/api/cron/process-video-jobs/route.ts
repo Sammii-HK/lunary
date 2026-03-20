@@ -9,6 +9,7 @@ import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
 import { generateInstagramReelCaption } from '@/lib/social/video-scripts/tiktok/metadata';
 import { getImageBaseUrl } from '@/lib/urls';
 import { postToSocial } from '@/lib/social/client';
+import { buildShortVideoMetadata } from '@/lib/youtube/metadata';
 import { createHash } from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -978,11 +979,50 @@ export async function POST(request: NextRequest) {
               }
               const scheduledIso = new Date(post.scheduled_date).toISOString();
               const isFuture = new Date(post.scheduled_date) > new Date();
+
+              // Build YouTube SEO metadata for YouTube uploads
+              const isYouTube = post.platform === 'youtube';
+              let youtubeOptions:
+                | {
+                    title: string;
+                    isShort: boolean;
+                    tags: string[];
+                    visibility: string;
+                    categoryId: string;
+                  }
+                | undefined;
+              if (isYouTube) {
+                const ytMeta = buildShortVideoMetadata({
+                  facetTitle: script.facet_title,
+                  category,
+                  themeName: postWeekTheme || themeName || undefined,
+                  scriptText: script.full_script,
+                  contentTypeKey: metadata.contentTypeKey as string | undefined,
+                });
+                youtubeOptions = {
+                  title: ytMeta.title,
+                  isShort: true,
+                  tags: ytMeta.tags,
+                  visibility: 'public',
+                  categoryId: '22',
+                };
+              }
+
               const result = await postToSocial({
                 platform: post.platform as string,
-                content: post.content as string,
+                content: isYouTube
+                  ? buildShortVideoMetadata({
+                      facetTitle: script.facet_title,
+                      category,
+                      scriptText: script.full_script,
+                      contentTypeKey: metadata.contentTypeKey as
+                        | string
+                        | undefined,
+                    }).description
+                  : (post.content as string),
                 scheduledDate: scheduledIso,
                 media: [{ type: 'video', url: post.video_url as string }],
+                youtubeOptions,
                 platformSettings:
                   post.platform === 'tiktok'
                     ? {
