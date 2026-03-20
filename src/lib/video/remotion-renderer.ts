@@ -220,10 +220,13 @@ export function alignScriptToWhisperTiming(
       (hasNaturalPause && currentWords.length >= minWordsPerLine) ||
       isSentenceBreak
     ) {
+      // Add 250ms buffer after last word so subtitle fade-out (200ms) doesn't
+      // cut into the word while it's still being spoken
+      const fadeBuffer = 0.25;
       segments.push({
         text: currentWords.join(' '),
         startTime: segStartTime,
-        endTime: Math.min(segEndTime, audioDuration),
+        endTime: Math.min(segEndTime + fadeBuffer, audioDuration),
       });
       currentWords = [];
     }
@@ -640,6 +643,8 @@ export async function renderRemotionVideo(
     // Quality settings
     crf: props.crf ?? 20, // Good balance of quality and file size
     pixelFormat: 'yuv420p', // Web-compatible
+    // Increase timeout for longer videos (default 30s can be too short)
+    timeoutInMilliseconds: 120000,
     // Progress logging
     onProgress: ({ progress }) => {
       if (Math.round(progress * 100) % 10 === 0) {

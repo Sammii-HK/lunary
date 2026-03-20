@@ -165,9 +165,11 @@ function calendarEventToTransitEvent(event: CalendarEvent): TransitEvent {
  * Get the highest-priority CRITICAL or HIGH event for a date, if any.
  * Returns null when the existing rotation should be used.
  */
-async function getSignificantEventForDate(
-  dateStr: string,
-): Promise<{ event: CalendarEvent; allEvents: CalendarEvent[] } | null> {
+async function getSignificantEventForDate(dateStr: string): Promise<{
+  event: CalendarEvent;
+  allEvents: CalendarEvent[];
+  allCalendarEvents: CalendarEvent[];
+} | null> {
   try {
     const events = await getEventCalendarForDate(dateStr);
     const significant = events
@@ -175,7 +177,11 @@ async function getSignificantEventForDate(
       .sort((a, b) => b.score - a.score);
 
     if (significant.length === 0) return null;
-    return { event: significant[0], allEvents: significant };
+    return {
+      event: significant[0],
+      allEvents: significant,
+      allCalendarEvents: events,
+    };
   } catch (err) {
     console.warn(
       '[Daily] Event calendar lookup failed, continuing with normal rotation:',
@@ -196,24 +202,26 @@ async function generateEventDrivenScript(
   scheduledDate: Date,
   angle: 'primary' | 'engagement' | 'reel' = 'primary',
   allEvents?: CalendarEvent[],
+  allCalendarEvents?: CalendarEvent[],
+  spokeAngle?: string,
 ): Promise<VideoScript | null> {
   const transitEvent = calendarEventToTransitEvent(event);
 
-  // Add convergence context — what else is happening today/tomorrow
-  if (allEvents && allEvents.length > 1) {
-    const otherEvents = allEvents
-      .filter((e) => e.id !== event.id)
-      .map((e) => e.name)
-      .slice(0, 3);
-    if (otherEvents.length > 0) {
-      transitEvent.significance += `. Also happening around this time: ${otherEvents.join(', ')}`;
-    }
-  }
+  // Use all calendar events (score >= 50) for convergence context, not just CRITICAL/HIGH
+  const convergenceSource = allCalendarEvents || allEvents || [];
+  const convergenceEvents = convergenceSource
+    .filter((e) => e.id !== event.id && e.score >= 50)
+    .sort((a, b) => b.score - a.score);
 
   const script = await generateTransitAlertScript(
     transitEvent,
     scheduledDate,
     'https://lunary.app',
+    {
+      calendarEvent: event,
+      convergenceEvents,
+      spokeAngle,
+    },
   );
 
   if (!script) return null;
@@ -393,6 +401,7 @@ export async function GET(request: NextRequest) {
     const eventData = await getSignificantEventForDate(tomorrowKey);
     const significantEvent = eventData?.event ?? null;
     const allSignificantEvents = eventData?.allEvents ?? [];
+    const allCalendarEvents = eventData?.allCalendarEvents ?? [];
     const hasEventOverride = significantEvent !== null;
 
     if (hasEventOverride) {
@@ -453,6 +462,8 @@ export async function GET(request: NextRequest) {
             tomorrow,
             'primary',
             allSignificantEvents,
+            allCalendarEvents,
+            'Deep dive: what this transit means, historical context, and why this specific date matters',
           );
           validated = await validateAndRetry(
             contentType,
@@ -779,21 +790,46 @@ export async function GET(request: NextRequest) {
         slot3DateKey.setUTCDate(slot3DateKey.getUTCDate() + 1);
         const slot3Key = slot3DateKey.toISOString().split('T')[0];
 
-        const dateSeed =
-          tomorrow.getFullYear() * 10000 +
-          (tomorrow.getMonth() + 1) * 100 +
-          tomorrow.getDate() +
-          7; // offset from slot 1 seed
-        const weights = await getContentTypeWeights();
-        const exclude = new Set<string>();
-        const contentType =
-          (weightedSelect(weights, exclude, dateSeed) as ContentType) ||
-          'sign-check';
+        let script: VideoScript | null = null;
+        let contentType: ContentType = 'sign-check';
 
-        const script = await generateScriptForContentType(
-          contentType,
-          tomorrow,
-        );
+        // On event days, generate a spoke video with a different angle
+        if (hasEventOverride && significantEvent) {
+          // Pick a secondary event if available, otherwise use a different angle on the primary
+          const secondaryEvent =
+            allSignificantEvents.length > 1
+              ? allSignificantEvents[1]
+              : significantEvent;
+          const spokeAngle =
+            secondaryEvent !== significantEvent
+              ? 'Practical quick guide: what to do and what to avoid during this transit'
+              : 'Quick hit: how this transit affects your daily routine, relationships, and decisions right now';
+
+          contentType = 'transit-alert';
+          script = await generateEventDrivenScript(
+            secondaryEvent,
+            tomorrow,
+            'reel',
+            allSignificantEvents,
+            allCalendarEvents,
+            spokeAngle,
+          );
+        }
+
+        if (!script) {
+          const dateSeed =
+            tomorrow.getFullYear() * 10000 +
+            (tomorrow.getMonth() + 1) * 100 +
+            tomorrow.getDate() +
+            7; // offset from slot 1 seed
+          const weights = await getContentTypeWeights();
+          const exclude = new Set<string>();
+          contentType =
+            (weightedSelect(weights, exclude, dateSeed) as ContentType) ||
+            'sign-check';
+
+          script = await generateScriptForContentType(contentType, tomorrow);
+        }
 
         if (!script) {
           console.warn(
@@ -804,7 +840,22 @@ export async function GET(request: NextRequest) {
           );
         }
 
-        const validated = await validateAndRetry(contentType, tomorrow, script);
+        const isSlot3Event =
+          hasEventOverride && contentType === 'transit-alert';
+        const validated = await validateAndRetry(
+          contentType,
+          tomorrow,
+          script,
+          isSlot3Event && significantEvent
+            ? {
+                event:
+                  allSignificantEvents.length > 1
+                    ? allSignificantEvents[1]
+                    : significantEvent!,
+                angle: 'reel' as const,
+              }
+            : undefined,
+        );
 
         if (!validated && script) {
           console.warn(

@@ -8,6 +8,7 @@ export interface AudioSegment {
   endTime: number; // in seconds
   topic?: string;
   item?: string;
+  wordTimings?: Array<{ word: string; start: number; end: number }>;
 }
 
 /**
@@ -91,26 +92,52 @@ export function calculateWordsPerSecond(
 }
 
 /**
- * Split text into word-by-word timing for subtitle animation
+ * Split text into word-by-word timing for subtitle animation.
+ * When wordTimings (from Whisper) are provided, uses real timestamps
+ * for accurate sync. Falls back to equal distribution otherwise.
  */
 export function splitTextWithTiming(
   text: string,
   startTime: number,
   endTime: number,
   fps: number = 30,
+  wordTimings?: Array<{ word: string; start: number; end: number }>,
 ): Array<{ word: string; startFrame: number; endFrame: number }> {
   const words = text.split(/\s+/).filter((w) => w.length > 0);
   if (words.length === 0) return [];
 
+  // Use Whisper word timestamps when available
+  if (wordTimings && wordTimings.length > 0) {
+    const leadTime = 0.05; // 50ms lead for highlight to appear just before speech
+
+    return words.map((word, index) => {
+      // Map display word index to Whisper word index by position ratio
+      // (display text may differ from Whisper transcript due to pronunciation fixes)
+      const whisperIdx = Math.min(
+        Math.round((index / words.length) * wordTimings.length),
+        wordTimings.length - 1,
+      );
+      const timing = wordTimings[whisperIdx];
+
+      return {
+        word,
+        startFrame: secondsToFrames(
+          Math.max(startTime, timing.start - leadTime),
+          fps,
+        ),
+        endFrame: secondsToFrames(Math.min(endTime, timing.end), fps),
+      };
+    });
+  }
+
+  // Fallback: distribute time equally across words
   const totalDuration = endTime - startTime;
   const durationPerWord = totalDuration / words.length;
-
-  // Lead time: highlight appears slightly before word is spoken (100ms)
   const leadTime = 0.1;
 
   return words.map((word, index) => {
     const wordStart = startTime + index * durationPerWord - leadTime;
-    const wordEnd = wordStart + durationPerWord + leadTime * 0.5; // Extended slightly
+    const wordEnd = wordStart + durationPerWord + leadTime * 0.5;
 
     return {
       word,

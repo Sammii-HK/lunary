@@ -299,7 +299,7 @@ const SOFT_CTA_LINES: Record<string, string[]> = {
   ],
   planetary: [
     'Get your personalized transits at lunary.app',
-    'Track this transit in Lunary — link in bio',
+    'Track this transit in Lunary',
   ],
   crystals: [
     'Explore crystal properties at lunary.app/grimoire',
