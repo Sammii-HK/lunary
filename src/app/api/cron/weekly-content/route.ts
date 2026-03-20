@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   }
 
   console.log('📅 Running weekly content generation (morning)...');
-  const baseUrl = getBaseUrl(request);
+  const BASE_URL = getBaseUrl(request);
   const startTime = Date.now();
 
   try {
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     weekStartDate.setHours(0, 0, 0, 0);
 
     const blogResponse = await fetch(
-      `${baseUrl}/api/blog/weekly?date=${weekStartDate.toISOString()}`,
+      `${BASE_URL}/api/blog/weekly?date=${weekStartDate.toISOString()}`,
       {
         headers: { 'User-Agent': 'Lunary-Weekly-Content-Cron/1.0' },
       },
@@ -87,17 +87,20 @@ export async function GET(request: NextRequest) {
     });
 
     // 2. Send weekly newsletter
-    const newsletterResponse = await fetch(`${baseUrl}/api/newsletter/weekly`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Lunary-Weekly-Content-Cron/1.0',
+    const newsletterResponse = await fetch(
+      `${BASE_URL}/api/newsletter/weekly`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Lunary-Weekly-Content-Cron/1.0',
+        },
+        body: JSON.stringify({
+          send: true,
+          customSubject: `🌟 ${blogData.data?.title}`,
+        }),
       },
-      body: JSON.stringify({
-        send: true,
-        customSubject: `🌟 ${blogData.data?.title}`,
-      }),
-    });
+    );
 
     const newsletterData = await newsletterResponse.json();
     console.log('📧 Weekly newsletter result:', newsletterData.message);
@@ -140,7 +143,7 @@ export async function GET(request: NextRequest) {
     );
     let substackResult = null;
     try {
-      const substackResponse = await fetch(`${baseUrl}/api/substack/publish`, {
+      const substackResponse = await fetch(`${BASE_URL}/api/substack/publish`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -226,7 +229,7 @@ export async function GET(request: NextRequest) {
       );
 
       const socialPostsResponse = await fetch(
-        `${baseUrl}/api/admin/social-posts/generate-weekly`,
+        `${BASE_URL}/api/admin/social-posts/generate-weekly`,
         {
           method: 'POST',
           headers: {
@@ -343,7 +346,7 @@ export async function GET(request: NextRequest) {
     let podcastResult = null;
     try {
       const podcastResponse = await fetch(
-        `${baseUrl}/api/podcast/generate-weekly`,
+        `${BASE_URL}/api/podcast/generate-weekly`,
         {
           method: 'POST',
           headers: {
@@ -402,7 +405,7 @@ export async function GET(request: NextRequest) {
       console.log('🎬 Uploading podcast episode to YouTube...');
       try {
         const ytResponse = await fetch(
-          `${baseUrl}/api/youtube/podcast-upload`,
+          `${BASE_URL}/api/youtube/podcast-upload`,
           {
             method: 'POST',
             headers: {
@@ -464,7 +467,7 @@ export async function GET(request: NextRequest) {
     } = {};
     try {
       // Medium-form (1-3 min) for TikTok/IG Reels/YouTube Shorts
-      const mediumResponse = await fetch(`${baseUrl}/api/video/generate`, {
+      const mediumResponse = await fetch(`${BASE_URL}/api/video/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -481,7 +484,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Long-form (5-10 min) for YouTube main channel
-      const longResponse = await fetch(`${baseUrl}/api/video/generate`, {
+      const longResponse = await fetch(`${BASE_URL}/api/video/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -528,7 +531,7 @@ export async function GET(request: NextRequest) {
     const blogWeekStartDate = blogData.data?.weekStart
       ? new Date(blogData.data.weekStart).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0];
-    const blogPreviewUrl = `${baseUrl}/api/og/cosmic/${blogWeekStartDate}`;
+    const blogPreviewUrl = `${BASE_URL}/api/og/cosmic/${blogWeekStartDate}`;
 
     // Send Discord notification for weekly content with blog preview and social posts info
     try {
@@ -602,7 +605,7 @@ export async function GET(request: NextRequest) {
         title: weeklyTemplate.title,
         message: weeklyTemplate.message,
         priority: weeklyTemplate.priority,
-        url: `${baseUrl}/admin/social-posts`,
+        url: `${BASE_URL}/admin/social-posts`,
         fields: weeklyFields,
         category: 'todo',
         dedupeKey: `weekly-digest-${new Date().toISOString().split('T')[0]}`,

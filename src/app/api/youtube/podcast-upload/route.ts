@@ -26,9 +26,9 @@ async function composePodcastVideo(
   coverImage: Buffer,
   audioBuffer: Buffer,
 ): Promise<Buffer> {
-  const contentCreatorUrl = process.env.CONTENT_CREATOR_API_URL;
+  const CONTENT_CREATOR_URL = process.env.CONTENT_CREATOR_API_URL;
 
-  if (process.env.VERCEL && !contentCreatorUrl) {
+  if (process.env.VERCEL && !CONTENT_CREATOR_URL) {
     throw new Error(
       'CONTENT_CREATOR_API_URL is not set. ' +
         'Video rendering is not allowed on Vercel.',
@@ -56,7 +56,7 @@ async function composePodcastVideo(
 
     const renderSecret =
       process.env.LUNARY_RENDER_SECRET || process.env.CRON_SECRET;
-    const response = await fetch(`${contentCreatorUrl}/api/podcast-compose`, {
+    const response = await fetch(`${CONTENT_CREATOR_URL}/api/podcast-compose`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
