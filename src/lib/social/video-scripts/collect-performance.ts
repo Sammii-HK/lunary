@@ -18,6 +18,8 @@ import { bulkInsertPerformance, ensureVideoPerformanceTable } from './database';
 import { categorisePost } from './categorise';
 import { getPlatformPerformance } from './content-scores';
 
+import { ayrshareFetch } from '../ayrshare-fetch';
+
 const AYRSHARE_API_URL = 'https://api.ayrshare.com/api';
 
 function getAyrshareHeaders(): Record<string, string> {
@@ -83,7 +85,7 @@ async function fetchAyrshareHistory(
 ): Promise<AyrshareHistoryPost[]> {
   const headers = getAyrshareHeaders();
 
-  const response = await fetch(
+  const response = await ayrshareFetch(
     `${AYRSHARE_API_URL}/history?platform=${platform}&limit=${limit}`,
     { headers, signal: AbortSignal.timeout(30000) },
   );
@@ -120,7 +122,7 @@ async function fetchPostAnalytics(
   const headers = getAyrshareHeaders();
 
   try {
-    const response = await fetch(`${AYRSHARE_API_URL}/analytics/post`, {
+    const response = await ayrshareFetch(`${AYRSHARE_API_URL}/analytics/post`, {
       method: 'POST',
       headers,
       body: JSON.stringify({ id: postId, platforms: [platform] }),
@@ -376,7 +378,7 @@ export async function backfillAllPerformance(): Promise<{
 
   while (true) {
     const headers = getAyrshareHeaders();
-    const response = await fetch(
+    const response = await ayrshareFetch(
       `${AYRSHARE_API_URL}/history?platform=tiktok&limit=${pageSize}&offset=${page * pageSize}&status=success`,
       { headers, signal: AbortSignal.timeout(30000) },
     );

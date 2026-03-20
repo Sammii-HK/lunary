@@ -7,6 +7,8 @@
  * Supports scheduling, per-platform content variants, and platform-specific options.
  */
 
+import { ayrshareFetch } from './ayrshare-fetch';
+
 const AYRSHARE_API_URL = 'https://api.ayrshare.com/api';
 
 function getAyrshareConfig() {
@@ -186,7 +188,7 @@ export async function postToAyrshare(
   Object.assign(payload, platformOptions);
 
   try {
-    const response = await fetch(`${AYRSHARE_API_URL}/post`, {
+    const response = await ayrshareFetch(`${AYRSHARE_API_URL}/post`, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
@@ -322,7 +324,7 @@ export async function postToAyrshareMultiPlatform(params: {
     };
 
     try {
-      const response = await fetch(`${AYRSHARE_API_URL}/post`, {
+      const response = await ayrshareFetch(`${AYRSHARE_API_URL}/post`, {
         method: 'POST',
         headers,
         body: JSON.stringify(textPayload),
@@ -501,7 +503,7 @@ export async function postToAyrshareMultiPlatform(params: {
   }
 
   try {
-    const response = await fetch(`${AYRSHARE_API_URL}/post`, {
+    const response = await ayrshareFetch(`${AYRSHARE_API_URL}/post`, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
