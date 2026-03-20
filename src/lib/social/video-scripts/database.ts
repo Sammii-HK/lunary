@@ -708,6 +708,51 @@ export interface ContentEDASignals {
   totalPosts: number;
   /** Data confidence */
   confidence: 'high' | 'medium' | 'low';
+
+  // ── Cross-channel signals ──────────────────────────────────────────────
+
+  /** Spellcast social performance by content type (Threads, IG, all platforms) */
+  spellcastPerformance: {
+    available: boolean;
+    contentTypePerformance: Record<
+      string,
+      {
+        count: number;
+        avgEngagement: number;
+        avgSaves: number;
+        avgReach: number;
+      }
+    >;
+    bestPostingTimes: Array<{
+      day: string;
+      hour: number;
+      avgEngagement: number;
+    }>;
+    hookPatterns: Record<string, { count: number; avgEng: number }>;
+    platformMix: Record<string, number>;
+  };
+
+  /** GSC organic traffic signals by grimoire content category */
+  seoPerformance: {
+    available: boolean;
+    /** Top grimoire pages by clicks (category derived from URL path) */
+    categoryClicks: Array<{
+      category: string;
+      clicks: number;
+      impressions: number;
+      ctr: number;
+      position: number;
+    }>;
+  };
+
+  /** Unified cross-channel score: blends video + social + SEO signals per category */
+  crossChannelScores: Array<{
+    category: string;
+    videoScore: number;
+    socialScore: number;
+    seoScore: number;
+    unifiedScore: number;
+  }>;
 }
 
 /**
@@ -869,6 +914,117 @@ export async function getContentEDASignals(
   const confidence: 'high' | 'medium' | 'low' =
     totalPosts >= 50 ? 'high' : totalPosts >= 20 ? 'medium' : 'low';
 
+  // ── 6. Cross-channel: Spellcast social performance ──────────────────────
+
+  let spellcastPerformance: ContentEDASignals['spellcastPerformance'] = {
+    available: false,
+    contentTypePerformance: {},
+    bestPostingTimes: [],
+    hookPatterns: {},
+    platformMix: {},
+  };
+
+  try {
+    const { getWinningPatterns } = await import('../winning-patterns');
+    // Lunary account set ID
+    const patterns = await getWinningPatterns(
+      'a190e806-5bac-497b-88bd-b1d96ed1f2e8',
+      days,
+    );
+    if (patterns && patterns.sampleSize >= 3) {
+      spellcastPerformance = {
+        available: true,
+        contentTypePerformance: patterns.contentTypePerformance,
+        bestPostingTimes: patterns.bestPostingTimes.map((t) => ({
+          day: t.day,
+          hour: t.hour,
+          avgEngagement: t.avgEngagement,
+        })),
+        hookPatterns: patterns.hookPatterns,
+        platformMix: patterns.summary.platformMix,
+      };
+    }
+  } catch {
+    // Spellcast unavailable — continue with video-only signals
+  }
+
+  // ── 7. Cross-channel: GSC organic traffic by grimoire category ──────────
+
+  let seoPerformance: ContentEDASignals['seoPerformance'] = {
+    available: false,
+    categoryClicks: [],
+  };
+
+  try {
+    const { getTopPages } = await import('@/lib/google/search-console');
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate = new Date(Date.now() - days * 86400000)
+      .toISOString()
+      .split('T')[0];
+
+    const pages = await getTopPages(startDate, endDate, 50);
+
+    if (pages?.rows?.length) {
+      // Map grimoire URLs to content categories
+      const categoryMap = new Map<
+        string,
+        {
+          clicks: number;
+          impressions: number;
+          ctrSum: number;
+          posSum: number;
+          count: number;
+        }
+      >();
+
+      for (const page of pages.rows) {
+        const url = String(page.keys?.[0] ?? '');
+        const cat = deriveGrimoireCategoryFromUrl(url);
+        if (!cat) continue;
+
+        const existing = categoryMap.get(cat) ?? {
+          clicks: 0,
+          impressions: 0,
+          ctrSum: 0,
+          posSum: 0,
+          count: 0,
+        };
+        existing.clicks += Number(page.clicks ?? 0);
+        existing.impressions += Number(page.impressions ?? 0);
+        existing.ctrSum += Number(page.ctr ?? 0);
+        existing.posSum += Number(page.position ?? 0);
+        existing.count++;
+        categoryMap.set(cat, existing);
+      }
+
+      seoPerformance = {
+        available: true,
+        categoryClicks: Array.from(categoryMap.entries())
+          .map(([category, data]) => ({
+            category,
+            clicks: data.clicks,
+            impressions: data.impressions,
+            ctr:
+              Math.round((data.ctrSum / Math.max(data.count, 1)) * 10000) /
+              10000,
+            position:
+              Math.round((data.posSum / Math.max(data.count, 1)) * 10) / 10,
+          }))
+          .sort((a, b) => b.clicks - a.clicks),
+      };
+    }
+  } catch {
+    // GSC unavailable — continue without SEO signals
+  }
+
+  // ── 8. Unified cross-channel score ──────────────────────────────────────
+
+  const crossChannelScores = computeCrossChannelScores(
+    categoryViralScores,
+    spellcastPerformance,
+    seoPerformance,
+  );
+
   return {
     categoryViralScores,
     categorySlotProfile,
@@ -878,7 +1034,160 @@ export async function getContentEDASignals(
     categoryShares,
     totalPosts,
     confidence,
+    spellcastPerformance,
+    seoPerformance,
+    crossChannelScores,
   };
+}
+
+/**
+ * Derive a grimoire content category from a lunary.app URL path.
+ * Maps paths like /grimoire/crystals/amethyst → crystal-healing,
+ * /grimoire/tarot/the-fool → tarot, etc.
+ */
+function deriveGrimoireCategoryFromUrl(url: string): string | null {
+  const path = url.replace(/^https?:\/\/[^/]+/, '').toLowerCase();
+
+  if (path.includes('/grimoire/crystals') || path.includes('/crystal'))
+    return 'crystal-healing';
+  if (path.includes('/grimoire/tarot') || path.includes('/tarot'))
+    return 'tarot';
+  if (path.includes('/grimoire/runes') || path.includes('/rune')) return 'rune';
+  if (path.includes('/grimoire/spells') || path.includes('/spell'))
+    return 'spells';
+  if (path.includes('/grimoire/numerology') || path.includes('/numerology'))
+    return 'numerology-sign';
+  if (
+    path.includes('/grimoire/transits') ||
+    path.includes('/retrograde') ||
+    path.includes('/transit')
+  )
+    return 'transit-alert';
+  if (
+    path.includes('/grimoire/placements') ||
+    path.includes('/houses') ||
+    path.includes('/aspects')
+  )
+    return 'aspect-educational';
+  if (path.includes('/horoscope')) return 'sign-identity';
+  if (path.includes('/zodiac') || path.includes('/signs'))
+    return 'sign-identity';
+  if (path.includes('/chiron')) return 'chiron-sign';
+  if (path.includes('/angel-number')) return 'angel-number';
+  if (path.includes('/sabbat') || path.includes('/wheel-of-the-year'))
+    return 'sabbat';
+  if (path.includes('/glossary')) return 'glossary';
+  if (path.includes('/grimoire')) return 'did-you-know'; // generic grimoire
+  return null;
+}
+
+/**
+ * Compute a unified cross-channel score per category.
+ * Blends video performance (50%), social performance (30%), SEO (20%).
+ * Each channel's scores are normalised to 0-1 before blending.
+ */
+function computeCrossChannelScores(
+  viralScores: ContentEDASignals['categoryViralScores'],
+  spellcast: ContentEDASignals['spellcastPerformance'],
+  seo: ContentEDASignals['seoPerformance'],
+): ContentEDASignals['crossChannelScores'] {
+  const allCategories = new Set(viralScores.map((v) => v.category));
+
+  // Normalise viral scores to 0-1
+  const viralMin = Math.min(...viralScores.map((v) => v.viralScore));
+  const viralMax = Math.max(...viralScores.map((v) => v.viralScore));
+  const viralRange = viralMax - viralMin || 1;
+  const viralNorm = new Map(
+    viralScores.map((v) => [
+      v.category,
+      (v.viralScore - viralMin) / viralRange,
+    ]),
+  );
+
+  // Normalise Spellcast content type performance to 0-1
+  const socialNorm = new Map<string, number>();
+  if (spellcast.available) {
+    const entries = Object.entries(spellcast.contentTypePerformance);
+    // Map Spellcast content types to our categories where possible
+    for (const [type, data] of entries) {
+      const cat = mapSpellcastTypeToCategory(type);
+      if (cat) {
+        allCategories.add(cat);
+        socialNorm.set(cat, data.avgEngagement);
+      }
+    }
+    // Normalise
+    const socialValues = Array.from(socialNorm.values());
+    const sMax = Math.max(...socialValues, 1);
+    for (const [k, v] of socialNorm) {
+      socialNorm.set(k, v / sMax);
+    }
+  }
+
+  // Normalise SEO clicks to 0-1
+  const seoNorm = new Map<string, number>();
+  if (seo.available && seo.categoryClicks.length > 0) {
+    const maxClicks = Math.max(...seo.categoryClicks.map((c) => c.clicks), 1);
+    for (const c of seo.categoryClicks) {
+      allCategories.add(c.category);
+      seoNorm.set(c.category, c.clicks / maxClicks);
+    }
+  }
+
+  // Blend: 50% video, 30% social, 20% SEO
+  const results: ContentEDASignals['crossChannelScores'] = [];
+  for (const category of allCategories) {
+    const videoScore = viralNorm.get(category) ?? 0;
+    const socialScore = socialNorm.get(category) ?? 0;
+    const seoScore = seoNorm.get(category) ?? 0;
+
+    // Adjust weights based on data availability
+    let vW = 0.5,
+      sW = 0.3,
+      eW = 0.2;
+    if (!spellcast.available) {
+      vW = 0.7;
+      sW = 0;
+      eW = 0.3;
+    }
+    if (!seo.available) {
+      vW = spellcast.available ? 0.6 : 1.0;
+      sW = spellcast.available ? 0.4 : 0;
+      eW = 0;
+    }
+
+    const unifiedScore =
+      Math.round((videoScore * vW + socialScore * sW + seoScore * eW) * 100) /
+      100;
+
+    results.push({ category, videoScore, socialScore, seoScore, unifiedScore });
+  }
+
+  results.sort((a, b) => b.unifiedScore - a.unifiedScore);
+  return results;
+}
+
+/**
+ * Map Spellcast content type names to Lunary category keys.
+ * Spellcast uses descriptive names; we need to match our category taxonomy.
+ */
+function mapSpellcastTypeToCategory(type: string): string | null {
+  const lower = type.toLowerCase();
+  if (lower.includes('carousel')) return null; // format, not category
+  if (lower.includes('thread')) return null;
+  if (lower.includes('reel')) return null;
+  if (lower.includes('crystal')) return 'crystal-healing';
+  if (lower.includes('tarot')) return 'tarot';
+  if (lower.includes('transit') || lower.includes('retrograde'))
+    return 'transit-alert';
+  if (lower.includes('numerology') || lower.includes('angel'))
+    return 'angel-number';
+  if (lower.includes('zodiac') || lower.includes('sign'))
+    return 'sign-identity';
+  if (lower.includes('ranking')) return 'ranking';
+  if (lower.includes('quiz')) return 'quiz';
+  if (lower.includes('rune')) return 'rune';
+  return null;
 }
 
 /**

@@ -137,13 +137,20 @@ export async function getContentTypeWeights(
 
       let computedWeight = normalizedScore + trendBoost + trendPenalty;
 
-      // Blend in viral score: engagement quality boost/penalty
-      // Categories with high saves+comments relative to views get boosted
-      // Categories with only raw views but low engagement get penalised
-      if (viral && eda && eda.confidence !== 'low') {
-        const normalizedViral = (viral.viralScore - minViral) / viralRange;
-        // 70% legacy score, 30% viral score
-        computedWeight = computedWeight * 0.7 + normalizedViral * 0.3;
+      // Blend in cross-channel score when available (video + social + SEO)
+      // Falls back to viral-only score if cross-channel data missing
+      if (eda && eda.confidence !== 'low') {
+        const crossChannel = eda.crossChannelScores.find(
+          (c) => c.category === category,
+        );
+        if (crossChannel) {
+          // 70% legacy score, 30% unified cross-channel score
+          computedWeight =
+            computedWeight * 0.7 + crossChannel.unifiedScore * 0.3;
+        } else if (viral) {
+          const normalizedViral = (viral.viralScore - minViral) / viralRange;
+          computedWeight = computedWeight * 0.7 + normalizedViral * 0.3;
+        }
       }
 
       weights.set(category, {
