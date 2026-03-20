@@ -947,34 +947,58 @@ export async function POST(request: NextRequest) {
 
     // Get actual audio duration for timestamp scaling
     // We need to write audio to temp file to get duration
-    const { writeFile, unlink } = await import('fs/promises');
-    const { join } = await import('path');
-    const { tmpdir } = await import('os');
-    const tempDir = tmpdir();
-    const audioTimestamp = Date.now();
-    const tempAudioPath = join(tempDir, `audio-${audioTimestamp}.mp3`);
     let actualAudioDuration: number | null = null;
 
-    try {
-      await writeFile(tempAudioPath, Buffer.from(audioBuffer));
-      // Use ffprobe to get duration (same as compose-video.ts does)
-      const ffmpeg = (await import('fluent-ffmpeg')).default;
-      actualAudioDuration = await new Promise<number>((resolve, reject) => {
-        ffmpeg.ffprobe(tempAudioPath, (err, metadata) => {
-          if (err) {
-            console.warn('Could not get audio duration:', err);
-            resolve(null as any);
-          } else {
-            resolve(metadata.format.duration || (null as any));
-          }
+    if (process.env.VERCEL) {
+      // On Vercel: use Whisper timestamps for audio duration (no ffprobe)
+      try {
+        const { transcribeWithWhisper } = await import('@/lib/tts');
+        const whisperWords = await transcribeWithWhisper(audioBuffer);
+        if (whisperWords.length > 0) {
+          actualAudioDuration = whisperWords[whisperWords.length - 1].end;
+          console.log(
+            `🎙️ Whisper: duration ${actualAudioDuration}s from ${whisperWords.length} words`,
+          );
+        }
+      } catch (whisperErr) {
+        console.warn(
+          'Whisper transcription failed:',
+          whisperErr instanceof Error ? whisperErr.message : whisperErr,
+        );
+      }
+      if (!actualAudioDuration) {
+        // Word count estimate fallback
+        actualAudioDuration = (script.split(/\s+/).length || 100) / 2.5;
+        console.log(`⏱️ Estimated audio duration: ${actualAudioDuration}s`);
+      }
+    } else {
+      // Local dev: use ffprobe for precise duration
+      try {
+        const { writeFile, unlink } = await import('fs/promises');
+        const { join } = await import('path');
+        const { tmpdir } = await import('os');
+        const tempDir = tmpdir();
+        const audioTimestamp = Date.now();
+        const tempAudioPath = join(tempDir, `audio-${audioTimestamp}.mp3`);
+        await writeFile(tempAudioPath, Buffer.from(audioBuffer));
+        const ffmpeg = (await import('fluent-ffmpeg')).default;
+        actualAudioDuration = await new Promise<number>((resolve, reject) => {
+          ffmpeg.ffprobe(tempAudioPath, (err, metadata) => {
+            if (err) {
+              console.warn('Could not get audio duration:', err);
+              resolve(null as any);
+            } else {
+              resolve(metadata.format.duration || (null as any));
+            }
+          });
         });
-      });
-      await unlink(tempAudioPath).catch(() => {});
-    } catch (error) {
-      console.warn(
-        'Failed to get audio duration, will use estimated timestamps:',
-        error,
-      );
+        await unlink(tempAudioPath).catch(() => {});
+      } catch (error) {
+        console.warn(
+          'Failed to get audio duration, will use estimated timestamps:',
+          error,
+        );
+      }
     }
 
     // Ensure imageUrl is set before composing video
@@ -1048,28 +1072,28 @@ export async function POST(request: NextRequest) {
           ? hookMatch[0].trim().substring(0, 60) // Max 60 chars for readability
           : undefined;
 
-        // Check if Remotion is available
-        const remotionAvailable = await isRemotionAvailable();
+        if (process.env.VERCEL) {
+          // On Vercel: no local rendering — reject
+          throw new Error(
+            'Video rendering is not allowed on Vercel. ' +
+              'Use the Content Creator server or run locally.',
+          );
+        }
 
+        // Local dev: Remotion with ffmpeg fallback
+        const remotionAvailable = await isRemotionAvailable();
         let useFFmpegFallback = !remotionAvailable || !actualAudioDuration;
 
         if (!useFFmpegFallback) {
           try {
-            // Use Remotion for smooth animations and shooting stars
             const remotionFormat =
               type === 'medium' ? 'MediumFormVideo' : 'LongFormVideo';
-
-            // Convert script to audio segments for subtitles
             const segments = scriptToAudioSegments(
               script,
               actualAudioDuration!,
               2.6,
             );
-
-            // Add background music for all blog video types (long, medium, short)
             const backgroundMusicUrl = `${baseUrl}/audio/series/lunary-bed-v1.mp3`;
-
-            // Create symbol content for overlay detection (title + key topics)
             const symbolContent = weeklyData
               ? `${title} ${description} ${topicImages.map((img) => img.topic).join(' ')}`
               : undefined;
@@ -1084,20 +1108,20 @@ export async function POST(request: NextRequest) {
               audioUrl: audioUrl!,
               backgroundMusicUrl,
               images: topicImages.map((img) => ({
-                url: '', // No image URLs needed - Remotion generates visuals
+                url: '',
                 startTime: img.startTime,
                 endTime: img.endTime,
                 topic: img.topic,
               })),
               highlightTerms: [],
-              durationSeconds: actualAudioDuration! + 2, // Add buffer at end
+              durationSeconds: actualAudioDuration! + 2,
               seed: `${weekKey}-${type}-${Date.now()}`,
               symbolContent,
               zodiacSign: symbolContent,
-              showBrandedIntro: type === 'medium', // Enable branded intro for medium-form cosmic forecast videos
+              showBrandedIntro: type === 'medium',
             });
             console.log(
-              `✅ Remotion: Video rendered with ${topicImages.length} images, shooting stars, animated subtitles`,
+              `✅ Remotion: Video rendered with ${topicImages.length} images`,
             );
           } catch (remotionError) {
             console.error(
@@ -1109,20 +1133,15 @@ export async function POST(request: NextRequest) {
         }
 
         if (useFFmpegFallback) {
-          // Fallback to FFmpeg if Remotion not available
           console.log(
             `⚠️ Remotion not available or failed, falling back to FFmpeg`,
           );
-
-          // Build overlays for hook and CTA
           const videoOverlays: Array<{
             text: string;
             startTime: number;
             endTime: number;
             style: 'chapter' | 'stamp' | 'title';
           }> = [];
-
-          // Hook overlay at the beginning
           if (hookText && hookText.length > 10) {
             videoOverlays.push({
               text: hookText,
@@ -1131,8 +1150,6 @@ export async function POST(request: NextRequest) {
               style: 'title',
             });
           }
-
-          // CTA overlay at the end (random from bank)
           if (actualAudioDuration && actualAudioDuration > 8) {
             videoOverlays.push({
               text: getRandomCTA(),
@@ -1141,7 +1158,6 @@ export async function POST(request: NextRequest) {
               style: 'stamp',
             });
           }
-
           videoBuffer = await composeVideo({
             images: topicImages.map((img) => ({
               url: img.imageUrl,
@@ -1157,7 +1173,7 @@ export async function POST(request: NextRequest) {
             lockIntroHue: true,
           });
           console.log(
-            `✅ FFmpeg: Video composed with ${topicImages.length} images, subtitles, ${videoOverlays.length} overlays`,
+            `✅ FFmpeg: Video composed with ${topicImages.length} images`,
           );
         }
       } catch (error) {
@@ -1192,21 +1208,25 @@ export async function POST(request: NextRequest) {
         ? hookMatch[0].trim().substring(0, 50) // Max 50 chars for short-form
         : undefined;
 
-      // Check if Remotion is available
-      const remotionAvailable = await isRemotionAvailable();
+      if (process.env.VERCEL) {
+        // On Vercel: no local rendering — reject
+        throw new Error(
+          'Video rendering is not allowed on Vercel. ' +
+            'Use the Content Creator server or run locally.',
+        );
+      }
 
+      // Local dev: Remotion with ffmpeg fallback
+      const remotionAvailable = await isRemotionAvailable();
       let useFFmpegFallback = !remotionAvailable || !actualAudioDuration;
 
       if (!useFFmpegFallback) {
         try {
-          // Use Remotion for smooth animations and shooting stars
           const segments = scriptToAudioSegments(
             script,
             actualAudioDuration!,
             2.6,
           );
-
-          // Create symbol content for short-form (title + description)
           const shortSymbolContent = weeklyData
             ? `${title} ${description}`
             : undefined;
@@ -1225,11 +1245,9 @@ export async function POST(request: NextRequest) {
             durationSeconds: actualAudioDuration! + 2,
             seed: `${weekKey}-short-${Date.now()}`,
             zodiacSign: shortSymbolContent,
-            showBrandedIntro: true, // Enable branded intro for cosmic forecast videos
+            showBrandedIntro: true,
           });
-          console.log(
-            `✅ Remotion: Short-form video rendered with shooting stars, animated subtitles`,
-          );
+          console.log(`✅ Remotion: Short-form video rendered`);
         } catch (remotionError) {
           console.error(
             `❌ Remotion render failed, falling back to FFmpeg:`,
@@ -1240,20 +1258,15 @@ export async function POST(request: NextRequest) {
       }
 
       if (useFFmpegFallback) {
-        // Fallback to FFmpeg if Remotion not available
         console.log(
           `⚠️ Remotion not available, falling back to FFmpeg for short-form`,
         );
-
-        // Build overlays for hook and CTA
         const videoOverlays: Array<{
           text: string;
           startTime: number;
           endTime: number;
           style: 'chapter' | 'stamp' | 'title';
         }> = [];
-
-        // Hook overlay at the beginning
         if (hookText && hookText.length > 10) {
           videoOverlays.push({
             text: hookText,
@@ -1262,8 +1275,6 @@ export async function POST(request: NextRequest) {
             style: 'title',
           });
         }
-
-        // CTA overlay at the end (random from bank)
         if (actualAudioDuration && actualAudioDuration > 8) {
           videoOverlays.push({
             text: getRandomCTA(),
@@ -1272,7 +1283,6 @@ export async function POST(request: NextRequest) {
             style: 'stamp',
           });
         }
-
         videoBuffer = await composeVideo({
           imageUrl,
           audioBuffer,
@@ -1283,9 +1293,7 @@ export async function POST(request: NextRequest) {
           hueShiftMaxDelta: 12,
           lockIntroHue: true,
         });
-        console.log(
-          `✅ FFmpeg: Short-form video composed with subtitles, ${videoOverlays.length} overlays`,
-        );
+        console.log(`✅ FFmpeg: Short-form video composed`);
       }
     }
 

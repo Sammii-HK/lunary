@@ -76,6 +76,10 @@ import {
 import { getSlowPlanetSignTotalDays } from '../../../../../utils/astrology/transit-duration';
 import { postToSocial, postToSocialMultiPlatform } from '@/lib/social/client';
 import { preUploadImage } from '@/lib/social/pre-upload-image';
+import {
+  getEventCalendarForDate,
+  type CalendarEvent,
+} from '@/lib/astro/event-calendar';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes — this cron runs 9+ sections with image pre-uploads
@@ -282,12 +286,45 @@ export async function GET(request: NextRequest) {
 
     const cronResults: any = {};
 
-    // Cosmic OG posts removed — transit/retrograde/aspect content now handled
-    // by standalone platform sections below and /api/cron/daily-threads
-    cronResults.dailyPosts = {
-      skipped: true,
-      reason: 'Cosmic OG posts retired',
-    };
+    // Fetch event calendar for the day — used by Bluesky standalone and
+    // Pinterest sections to add CRITICAL event posts and transit briefs
+    let calendarEvents: CalendarEvent[] = [];
+    try {
+      calendarEvents = await getEventCalendarForDate(dateStr);
+      const criticalCount = calendarEvents.filter(
+        (e) => e.rarity === 'CRITICAL',
+      ).length;
+      const highCount = calendarEvents.filter(
+        (e) => e.rarity === 'HIGH',
+      ).length;
+      console.log(
+        `📅 Event calendar: ${calendarEvents.length} events (${criticalCount} CRITICAL, ${highCount} HIGH)`,
+      );
+    } catch (calendarError) {
+      console.warn(
+        '[DailyPosts] Failed to fetch event calendar:',
+        calendarError,
+      );
+    }
+
+    // Transit posts: retrogrades, ingresses, moon phases, aspects, milestones,
+    // eclipses, countdowns — posted to X, Threads, and Bluesky
+    try {
+      const dailyPostsResult = await runDailyPosts(dateStr);
+      cronResults.dailyPosts = dailyPostsResult;
+      console.log(
+        `✅ Daily transit posts: ${dailyPostsResult?.posts?.length ?? 0} posts scheduled`,
+      );
+    } catch (dailyPostsError) {
+      console.error('❌ Daily transit posts failed:', dailyPostsError);
+      cronResults.dailyPosts = {
+        success: false,
+        error:
+          dailyPostsError instanceof Error
+            ? dailyPostsError.message
+            : 'Unknown error',
+      };
+    }
 
     // Instagram batch removed — weekly content cron handles IG generation
     cronResults.instagramBatch = {
@@ -304,80 +341,8 @@ export async function GET(request: NextRequest) {
     // LinkedIn standalone removed — handled by Spellcast/Orbit
     cronResults.linkedinPost = { skipped: true, reason: 'Retired' };
 
-    // DAILY TASKS (Every day) - Twitter Standalone Posts
-    console.log('🐦 Generating Twitter standalone posts...');
-    const twitterStartTime = Date.now();
-    try {
-      const { generateTwitterPosts } =
-        await import('@/lib/social/standalone-content');
-      const twitterPosts = generateTwitterPosts(dateStr);
-      const twitterExecutionTime = Date.now() - twitterStartTime;
-
-      const twitterResults: Array<{
-        scheduledTime: string;
-        postType: string;
-        category: string;
-        status: string;
-        error?: string;
-      }> = [];
-
-      for (const post of twitterPosts) {
-        try {
-          const scheduledTime = new Date(
-            `${dateStr}T${String(post.scheduledHour).padStart(2, '0')}:00:00Z`,
-          );
-
-          const result = await postToSocial({
-            platform: 'x',
-            content: post.content,
-            scheduledDate: scheduledTime.toISOString(),
-            media: [],
-          });
-
-          twitterResults.push({
-            scheduledTime: scheduledTime.toISOString(),
-            postType: post.postType,
-            category: post.category,
-            status: result.success ? 'success' : 'error',
-            ...(result.success
-              ? {}
-              : { error: result.error || 'Unknown error' }),
-          });
-        } catch (postError) {
-          twitterResults.push({
-            scheduledTime: '',
-            postType: post.postType,
-            category: post.category,
-            status: 'error',
-            error:
-              postError instanceof Error ? postError.message : 'Unknown error',
-          });
-        }
-      }
-
-      const successCount = twitterResults.filter(
-        (r) => r.status === 'success',
-      ).length;
-      console.log(
-        `🐦 Twitter: ${twitterPosts.length} posts generated, ${successCount} sent in ${twitterExecutionTime}ms`,
-      );
-
-      cronResults.twitterStandalone = {
-        success: true,
-        postCount: twitterPosts.length,
-        sentCount: successCount,
-        posts: twitterResults,
-        executionTimeMs: twitterExecutionTime,
-      };
-    } catch (error) {
-      const twitterExecutionTime = Date.now() - twitterStartTime;
-      console.error('🐦 Twitter standalone posts failed:', error);
-      cronResults.twitterStandalone = {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        executionTimeMs: twitterExecutionTime,
-      };
-    }
+    // Twitter/X standalone removed — Lunary is not on X/Twitter
+    cronResults.twitterStandalone = { skipped: true, reason: 'Retired' };
 
     // DAILY TASKS (Every day) - Bluesky Standalone Posts
     console.log('🦋 Generating Bluesky standalone posts...');
@@ -385,7 +350,35 @@ export async function GET(request: NextRequest) {
     try {
       const { generateBlueskyPosts } =
         await import('@/lib/social/standalone-content');
-      const blueskyPosts = generateBlueskyPosts(dateStr);
+      const blueskyPosts = await generateBlueskyPosts(dateStr);
+
+      // Generate additional Bluesky posts for CRITICAL events from the
+      // event calendar. Bluesky allows links without reach suppression,
+      // so these include historical context and rarity framing with a
+      // link back to the relevant Lunary page.
+      const criticalEvents = calendarEvents.filter(
+        (e) => e.rarity === 'CRITICAL',
+      );
+      const criticalBlueskyPosts = buildCriticalEventBlueskyPosts(
+        dateStr,
+        criticalEvents,
+      );
+
+      // Build a transit brief for the day (top 3 events) to append to
+      // existing standalone posts so they reference current transits
+      const transitBrief = buildTransitBrief(calendarEvents);
+
+      const allBlueskyPosts = [
+        // Enrich existing standalone posts with today's transit brief
+        ...blueskyPosts.map((post) => ({
+          ...post,
+          content: transitBrief
+            ? `${post.content}\n\n${transitBrief}`
+            : post.content,
+        })),
+        ...criticalBlueskyPosts,
+      ];
+
       const blueskyExecutionTime = Date.now() - blueskyStartTime;
 
       const blueskyResults: Array<{
@@ -396,7 +389,7 @@ export async function GET(request: NextRequest) {
         error?: string;
       }> = [];
 
-      for (const post of blueskyPosts) {
+      for (const post of allBlueskyPosts) {
         try {
           const scheduledTime = new Date(
             `${dateStr}T${String(post.scheduledHour).padStart(2, '0')}:00:00Z`,
@@ -434,13 +427,14 @@ export async function GET(request: NextRequest) {
         (r) => r.status === 'success',
       ).length;
       console.log(
-        `🦋 Bluesky: ${blueskyPosts.length} posts generated, ${successCount} sent in ${blueskyExecutionTime}ms`,
+        `🦋 Bluesky: ${allBlueskyPosts.length} posts generated (${criticalBlueskyPosts.length} critical event posts), ${successCount} sent in ${blueskyExecutionTime}ms`,
       );
 
       cronResults.blueskyStandalone = {
         success: true,
-        postCount: blueskyPosts.length,
+        postCount: allBlueskyPosts.length,
         sentCount: successCount,
+        criticalEventPosts: criticalBlueskyPosts.length,
         posts: blueskyResults,
         executionTimeMs: blueskyExecutionTime,
       };
@@ -461,6 +455,15 @@ export async function GET(request: NextRequest) {
       const { generatePinterestPins } =
         await import('@/lib/pinterest/evergreen-content');
       const pinterestPins = generatePinterestPins(dateStr);
+
+      // Generate transit-themed Pinterest pins for CRITICAL events.
+      // Pinterest is SEO-driven — rarity framing helps discoverability.
+      const criticalPinterestPins = buildCriticalEventPinterestPins(
+        dateStr,
+        calendarEvents.filter((e) => e.rarity === 'CRITICAL'),
+      );
+
+      const allPinterestPins = [...pinterestPins, ...criticalPinterestPins];
       const pinterestExecutionTime = Date.now() - pinterestStartTime;
 
       const pinterestResults: Array<{
@@ -471,7 +474,7 @@ export async function GET(request: NextRequest) {
         error?: string;
       }> = [];
 
-      for (const pin of pinterestPins) {
+      for (const pin of allPinterestPins) {
         try {
           const scheduledTime = new Date(
             `${dateStr}T${String(pin.scheduledHour).padStart(2, '0')}:00:00Z`,
@@ -525,13 +528,14 @@ export async function GET(request: NextRequest) {
         (r) => r.status === 'success',
       ).length;
       console.log(
-        `📌 Pinterest: ${pinterestPins.length} pins generated, ${successCount} sent in ${pinterestExecutionTime}ms`,
+        `📌 Pinterest: ${allPinterestPins.length} pins generated (${criticalPinterestPins.length} critical event pins), ${successCount} sent in ${pinterestExecutionTime}ms`,
       );
 
       cronResults.pinterestEvergreen = {
         success: true,
-        pinCount: pinterestPins.length,
+        pinCount: allPinterestPins.length,
         sentCount: successCount,
+        criticalEventPins: criticalPinterestPins.length,
         pins: pinterestResults,
         executionTimeMs: pinterestExecutionTime,
       };
@@ -789,10 +793,10 @@ interface DailySocialPost {
 async function runDailyPosts(dateStr: string) {
   console.log('📱 Generating daily social media posts...');
 
-  const productionUrl = 'https://lunary.app';
+  const PRODUCTION_URL = 'https://lunary.app';
 
   try {
-    await ensurePinterestQuoteQueue(dateStr, productionUrl);
+    await ensurePinterestQuoteQueue(dateStr, PRODUCTION_URL);
   } catch (queueError) {
     console.warn(
       '[DailyPosts] Failed to prepare Pinterest quote queue:',
@@ -826,7 +830,7 @@ async function runDailyPosts(dateStr: string) {
       : '';
 
   const [cosmicResponse] = await Promise.all([
-    fetch(`${productionUrl}/api/og/cosmic-post/${dateStr}${excludeParam}`, {
+    fetch(`${PRODUCTION_URL}/api/og/cosmic-post/${dateStr}${excludeParam}`, {
       headers: { 'User-Agent': 'Lunary-Cron/1.0' },
     }),
   ]);
@@ -838,7 +842,7 @@ async function runDailyPosts(dateStr: string) {
     const errorDetails = {
       status: cosmicResponse.status,
       statusText: cosmicResponse.statusText,
-      url: `${productionUrl}/api/og/cosmic-post/${dateStr}`,
+      url: `${PRODUCTION_URL}/api/og/cosmic-post/${dateStr}`,
       responseBody: errorText.substring(0, 500), // Limit response body size
     };
 
@@ -1123,7 +1127,7 @@ async function runDailyPosts(dateStr: string) {
       const format = getCosmicFormat('pinterest');
       const baseImageUrl =
         pinterestQuoteSlot.imageUrl ??
-        getQuoteImageUrl(pinterestQuoteSlot.quoteText, productionUrl, {
+        getQuoteImageUrl(pinterestQuoteSlot.quoteText, PRODUCTION_URL, {
           author: pinterestQuoteSlot.quoteAuthor || undefined,
           format,
         });
@@ -1387,7 +1391,7 @@ async function runDailyPosts(dateStr: string) {
         title: dailyPreview.title,
         message: dailyPreview.message,
         priority: dailyPreview.priority,
-        url: `${productionUrl}/admin/social-posts`,
+        url: `${PRODUCTION_URL}/admin/social-posts`,
         category: 'general',
         dedupeKey: `daily-preview-${dateStr}`,
       });
@@ -1416,7 +1420,7 @@ async function runDailyPosts(dateStr: string) {
         title: successTemplate.title,
         message: successTemplate.message,
         priority: successTemplate.priority,
-        url: `${productionUrl}/admin/social-posts`,
+        url: `${PRODUCTION_URL}/admin/social-posts`,
         fields: successFields,
         category: 'general',
         dedupeKey: `daily-posts-success-${dateStr}`,
@@ -1450,7 +1454,7 @@ async function runDailyPosts(dateStr: string) {
         title: failureTemplate.title,
         message: failureTemplate.message,
         priority: failureTemplate.priority,
-        url: `${productionUrl}/admin/cron-monitor`,
+        url: `${PRODUCTION_URL}/admin/cron-monitor`,
         fields: failureFields,
         category: 'urgent',
         dedupeKey: `daily-posts-failure-${dateStr}`,
@@ -1471,7 +1475,7 @@ async function runDailyPosts(dateStr: string) {
 // WEEKLY TASKS (Sundays)
 async function runWeeklyTasks(request: NextRequest) {
   console.log('📅 Running weekly tasks...');
-  const baseUrl = getBaseUrl(request);
+  const BASE_URL = getBaseUrl(request);
   const startTime = Date.now();
 
   try {
@@ -1484,7 +1488,7 @@ async function runWeeklyTasks(request: NextRequest) {
     });
 
     // 1. Generate weekly blog content
-    const blogResponse = await fetch(`${baseUrl}/api/blog/weekly`, {
+    const blogResponse = await fetch(`${BASE_URL}/api/blog/weekly`, {
       headers: { 'User-Agent': 'Lunary-Master-Cron/1.0' },
     });
 
@@ -1507,17 +1511,20 @@ async function runWeeklyTasks(request: NextRequest) {
     });
 
     // 2. Send weekly newsletter
-    const newsletterResponse = await fetch(`${baseUrl}/api/newsletter/weekly`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Lunary-Master-Cron/1.0',
+    const newsletterResponse = await fetch(
+      `${BASE_URL}/api/newsletter/weekly`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Lunary-Master-Cron/1.0',
+        },
+        body: JSON.stringify({
+          send: true,
+          customSubject: `🌟 ${blogData.data?.title}`,
+        }),
       },
-      body: JSON.stringify({
-        send: true,
-        customSubject: `🌟 ${blogData.data?.title}`,
-      }),
-    });
+    );
 
     const newsletterData = await newsletterResponse.json();
     console.log('📧 Weekly newsletter result:', newsletterData.message);
@@ -1538,7 +1545,7 @@ async function runWeeklyTasks(request: NextRequest) {
     console.log('📬 Publishing to Substack...');
     let substackResult = null;
     try {
-      const substackResponse = await fetch(`${baseUrl}/api/substack/publish`, {
+      const substackResponse = await fetch(`${BASE_URL}/api/substack/publish`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1616,7 +1623,7 @@ async function runWeeklyTasks(request: NextRequest) {
       );
 
       const socialPostsResponse = await fetch(
-        `${baseUrl}/api/admin/social-posts/generate-weekly`,
+        `${BASE_URL}/api/admin/social-posts/generate-weekly`,
         {
           method: 'POST',
           headers: {
@@ -1675,7 +1682,7 @@ async function runWeeklyTasks(request: NextRequest) {
     const weekStartDate = blogData.data?.weekStart
       ? new Date(blogData.data.weekStart).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0];
-    const blogPreviewUrl = `${baseUrl}/api/og/cosmic/${weekStartDate}`;
+    const blogPreviewUrl = `${BASE_URL}/api/og/cosmic/${weekStartDate}`;
 
     // Send push notification for weekly content with blog preview and social posts info
     try {
@@ -1723,7 +1730,7 @@ async function runWeeklyTasks(request: NextRequest) {
         title: weeklyTemplate.title,
         message: weeklyTemplate.message,
         priority: weeklyTemplate.priority,
-        url: `${baseUrl}/admin/social-posts`,
+        url: `${BASE_URL}/admin/social-posts`,
         fields: weeklyFields,
         category: 'todo',
         dedupeKey: `weekly-digest-${new Date().toISOString().split('T')[0]}`,
@@ -1831,7 +1838,7 @@ async function runWeeklyTasks(request: NextRequest) {
 // MONTHLY TASKS (15th of each month)
 async function runMonthlyTasks(request: NextRequest) {
   console.log('📅 Running monthly tasks...');
-  const baseUrl = getBaseUrl(request);
+  const BASE_URL = getBaseUrl(request);
   const startTime = Date.now();
 
   try {
@@ -1844,7 +1851,7 @@ async function runMonthlyTasks(request: NextRequest) {
     });
 
     const response = await fetch(
-      `${baseUrl}/api/cron/moon-packs?type=monthly`,
+      `${BASE_URL}/api/cron/moon-packs?type=monthly`,
       {
         method: 'POST',
         headers: {
@@ -1933,7 +1940,7 @@ async function runMonthlyTasks(request: NextRequest) {
 // QUARTERLY TASKS (15th of Jan, Apr, Jul, Oct)
 async function runQuarterlyTasks(request: NextRequest) {
   console.log('📅 Running quarterly tasks...');
-  const baseUrl = getBaseUrl(request);
+  const BASE_URL = getBaseUrl(request);
   const startTime = Date.now();
 
   try {
@@ -1946,7 +1953,7 @@ async function runQuarterlyTasks(request: NextRequest) {
     });
 
     const response = await fetch(
-      `${baseUrl}/api/cron/moon-packs?type=quarterly`,
+      `${BASE_URL}/api/cron/moon-packs?type=quarterly`,
       {
         method: 'POST',
         headers: {
@@ -2035,7 +2042,7 @@ async function runQuarterlyTasks(request: NextRequest) {
 // YEARLY TASKS (July 1st)
 async function runYearlyTasks(request: NextRequest) {
   console.log('📅 Running yearly tasks...');
-  const baseUrl = getBaseUrl(request);
+  const BASE_URL = getBaseUrl(request);
   const startTime = Date.now();
 
   try {
@@ -2049,7 +2056,7 @@ async function runYearlyTasks(request: NextRequest) {
 
     // Generate yearly moon packs
     const packResponse = await fetch(
-      `${baseUrl}/api/cron/moon-packs?type=yearly`,
+      `${BASE_URL}/api/cron/moon-packs?type=yearly`,
       {
         method: 'POST',
         headers: {
@@ -2067,7 +2074,7 @@ async function runYearlyTasks(request: NextRequest) {
     const nextYear = new Date().getFullYear() + 1;
     try {
       const calendarResponse = await fetch(
-        `${baseUrl}/api/shop/calendar/generate-and-sync`,
+        `${BASE_URL}/api/shop/calendar/generate-and-sync`,
         {
           method: 'POST',
           headers: {
@@ -2203,7 +2210,7 @@ async function runNotificationCheck(dateStr: string) {
   try {
     // First, get the cosmic data to determine what notifications to send
     const cosmicResponse = await fetch(
-      `${baseUrl}/api/og/cosmic-post/${dateStr}`,
+      `${BASE_URL}/api/og/cosmic-post/${dateStr}`,
       {
         headers: { 'User-Agent': 'Lunary-Notification-Service/1.0' },
       },
@@ -2406,7 +2413,7 @@ async function runNotificationCheck(dateStr: string) {
           title: '📊 Weekly Conversion Digest',
           message: 'Weekly conversion statistics for the past 7 and 30 days.',
           priority: 'normal',
-          url: `${baseUrl}/admin/analytics`,
+          url: `${BASE_URL}/admin/analytics`,
           fields,
           category: 'analytics',
           dedupeKey: `weekly-conversion-digest-${new Date().toISOString().split('T')[0]}`,
@@ -4937,6 +4944,202 @@ function buildCountdownTextPosts({
   }
 
   return posts;
+}
+
+// ---------------------------------------------------------------------------
+// Event Calendar Integration — Bluesky + Pinterest helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Build a short transit brief from today's top events (max 3 lines).
+ * Appended to existing Bluesky standalone posts so they reference
+ * what is happening in the sky. Returns empty string when no notable
+ * events exist.
+ */
+function buildTransitBrief(events: CalendarEvent[]): string {
+  const notable = events.filter(
+    (e) => e.rarity === 'CRITICAL' || e.rarity === 'HIGH',
+  );
+  if (notable.length === 0) return '';
+
+  const lines = notable.slice(0, 3).map((e) => {
+    if (e.rarityFrame) return `${e.name} — ${e.rarityFrame}`;
+    return e.name;
+  });
+
+  return `Today in the sky:\n${lines.join('\n')}`;
+}
+
+/**
+ * Generate additional Bluesky posts for CRITICAL calendar events.
+ * These use hookSuggestions, historical context, and rarity framing.
+ * Links are OK on Bluesky (no algorithmic suppression).
+ */
+function buildCriticalEventBlueskyPosts(
+  dateStr: string,
+  criticalEvents: CalendarEvent[],
+): Array<{
+  content: string;
+  category: string;
+  postType: string;
+  scheduledHour: number;
+}> {
+  if (criticalEvents.length === 0) return [];
+
+  const posts: Array<{
+    content: string;
+    category: string;
+    postType: string;
+    scheduledHour: number;
+  }> = [];
+
+  // Stagger critical event posts at 12, 14, 18 UTC to avoid clustering
+  const criticalHours = [12, 14, 18];
+
+  for (let i = 0; i < criticalEvents.length; i++) {
+    const event = criticalEvents[i];
+    const hour = criticalHours[i % criticalHours.length];
+
+    // Pick the best hook suggestion
+    const hook = event.hookSuggestions[0] || event.name;
+
+    // Build the post body with historical context and rarity framing
+    const bodyParts: string[] = [hook];
+
+    if (event.historicalContext) {
+      bodyParts.push(event.historicalContext);
+    }
+
+    if (event.rarityFrame) {
+      bodyParts.push(
+        event.rarityFrame.charAt(0).toUpperCase() +
+          event.rarityFrame.slice(1) +
+          '.',
+      );
+    }
+
+    // Add a second hook if available for engagement
+    if (event.hookSuggestions.length > 1) {
+      bodyParts.push(event.hookSuggestions[1]);
+    }
+
+    // Link back to the relevant grimoire page (Bluesky allows links)
+    const slug =
+      event.planet && event.sign
+        ? `${event.planet.toLowerCase()}-in-${event.sign.toLowerCase()}`
+        : event.category;
+    const link = `https://lunary.app/grimoire/transits/${slug}`;
+    bodyParts.push(`Read more: ${link}`);
+
+    // Add transit-specific hashtags
+    bodyParts.push('#astrology #transit #cosmic');
+
+    const content = bodyParts.filter(Boolean).join('\n\n');
+
+    posts.push({
+      content,
+      category: event.category || 'zodiac',
+      postType: 'critical_event',
+      scheduledHour: hour,
+    });
+  }
+
+  return posts;
+}
+
+/**
+ * Generate transit-themed Pinterest pins for CRITICAL calendar events.
+ * Pinterest is SEO-driven so rarity framing helps discoverability.
+ * Returns pins that match the PinterestPin interface shape.
+ */
+function buildCriticalEventPinterestPins(
+  dateStr: string,
+  criticalEvents: CalendarEvent[],
+): Array<{
+  title: string;
+  description: string;
+  category: string;
+  fact: string;
+  source: string;
+  scheduledHour: number;
+}> {
+  if (criticalEvents.length === 0) return [];
+
+  const pins: Array<{
+    title: string;
+    description: string;
+    category: string;
+    fact: string;
+    source: string;
+    scheduledHour: number;
+  }> = [];
+
+  // Schedule critical event pins at 13, 17 UTC (high-traffic Pinterest hours)
+  const pinHours = [13, 17];
+
+  for (let i = 0; i < criticalEvents.length; i++) {
+    const event = criticalEvents[i];
+    const hour = pinHours[i % pinHours.length];
+
+    // SEO-optimized title with rarity framing
+    const titleParts: string[] = [];
+    if (event.planet && event.sign) {
+      titleParts.push(`${event.planet} in ${event.sign}`);
+    } else {
+      titleParts.push(event.name);
+    }
+    if (event.orbitalPeriodYears && event.orbitalPeriodYears >= 25) {
+      titleParts.push(
+        `Once Every ${Math.round(event.orbitalPeriodYears)} Years`,
+      );
+    }
+    const title = titleParts.join(' — ');
+
+    // Keyword-rich description with rarity framing for SEO
+    const descParts: string[] = [];
+    descParts.push(event.name + '.');
+
+    if (event.rarityFrame) {
+      descParts.push(
+        event.rarityFrame.charAt(0).toUpperCase() +
+          event.rarityFrame.slice(1) +
+          '.',
+      );
+    }
+
+    if (event.lastInThisSign) {
+      descParts.push(`Last time: ${event.lastInThisSign}.`);
+    }
+
+    if (event.historicalContext) {
+      // Truncate historical context for pin description length
+      const truncated =
+        event.historicalContext.length > 120
+          ? event.historicalContext.substring(0, 117) + '...'
+          : event.historicalContext;
+      descParts.push(truncated);
+    }
+
+    descParts.push('Save this for later. Learn more at lunary.app');
+    const description = descParts.join(' ');
+
+    // Map event category to a Pinterest board category
+    const boardCategory =
+      event.eventType === 'ingress' || event.eventType === 'retrograde_station'
+        ? 'zodiac'
+        : event.category || 'zodiac';
+
+    pins.push({
+      title,
+      description,
+      category: boardCategory,
+      fact: event.name,
+      source: 'event-calendar',
+      scheduledHour: hour,
+    });
+  }
+
+  return pins;
 }
 
 function formatTransitAspectLine(aspect: any): string {

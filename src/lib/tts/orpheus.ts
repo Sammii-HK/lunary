@@ -37,7 +37,7 @@ const TTS_PRONUNCIATIONS: [RegExp, string][] = [
   [/\bmabon\b/gi, 'may-bon'],
   [/\bimbolc\b/gi, 'im-olk'],
   [/\blitha\b/gi, 'lee-thah'],
-  [/\bostara\b/gi, 'oh-star-ah'],
+  // Ostara: Orpheus handles this naturally — phonetic replacements make it worse
   [/\bbeltane\b/gi, 'bell-tayn'],
   [/\bathame\b/gi, 'ah-thah-may'],
   [/\bdeosil\b/gi, 'jess-ul'],

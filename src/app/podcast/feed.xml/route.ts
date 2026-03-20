@@ -36,8 +36,9 @@ export async function GET() {
   });
 
   const rssItems = episodes
-    .map(
-      (ep) => `
+    .map((ep) => {
+      const coverUrl = `${BASE_URL}/api/og/podcast-cover?title=${encodeURIComponent(ep.title)}&episode=${ep.episodeNumber}`;
+      return `
     <item>
       <title>${escapeXml(ep.title)}</title>
       <link>${BASE_URL}/podcast/${escapeXml(ep.slug)}</link>
@@ -48,8 +49,9 @@ export async function GET() {
       <itunes:episode>${ep.episodeNumber}</itunes:episode>
       <itunes:duration>${formatDuration(ep.durationSecs)}</itunes:duration>
       <itunes:summary>${escapeXml(ep.description)}</itunes:summary>
-    </item>`,
-    )
+      <itunes:image href="${escapeXml(coverUrl)}"/>
+    </item>`;
+    })
     .join('');
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>

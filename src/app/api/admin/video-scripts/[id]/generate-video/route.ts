@@ -2,17 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { put } from '@vercel/blob';
 import { requireAdminAuth } from '@/lib/admin-auth';
-import { writeFile, unlink, mkdtemp } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
-import ffmpeg from 'fluent-ffmpeg';
-import { composeVideo } from '@/lib/video/compose-video';
-import {
-  renderRemotionVideo,
-  isRemotionAvailable,
-  scriptToAudioSegments,
-} from '@/lib/video/remotion-renderer';
-import { generateVoiceover } from '@/lib/tts';
+import { generateVoiceover, transcribeWithWhisper } from '@/lib/tts';
 import {
   categoryThemes,
   type WeeklyTheme,
@@ -23,26 +13,70 @@ import { getImageBaseUrl } from '@/lib/urls';
 
 export const dynamic = 'force-dynamic';
 
-async function getAudioDurationFromBuffer(buffer: Buffer): Promise<number> {
-  const tempDir = await mkdtemp(join(tmpdir(), 'audio-'));
-  const tempPath = join(tempDir, 'audio.mp3');
-  await writeFile(tempPath, buffer);
-
-  return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(tempPath, async (err, metadata) => {
-      await unlink(tempPath).catch(() => {});
-      if (err) {
-        reject(err);
-      } else if (metadata.format.duration) {
-        resolve(metadata.format.duration);
-      } else {
-        reject(new Error('Could not determine audio duration'));
-      }
-    });
-  });
-}
-
 export const runtime = 'nodejs';
+
+/**
+ * Pick the best hook for a video first-frame overlay.
+ * Prefers short, punchy hooks that are readable at a glance on a phone.
+ * Scoring: shorter is better, but penalise if too vague (under 20 chars).
+ * Bonus for pattern interrupts, bold claims, curiosity gaps.
+ */
+function pickBestVideoHook(
+  hookSuggestions: string[] | undefined,
+  facetTitle: string,
+): string {
+  if (!hookSuggestions || hookSuggestions.length === 0) {
+    return facetTitle || 'Did you know?';
+  }
+
+  // Expand candidates: for long hooks, also consider their sub-clauses
+  // e.g. "X AND Y. This is the Z" → also try "This is the Z"
+  const candidates = [...hookSuggestions];
+  for (const hook of hookSuggestions) {
+    if (hook.length > 70) {
+      // Split on sentence boundaries and try the second sentence
+      const sentences = hook.split(/\.\s+/).filter((s) => s.length > 15);
+      if (sentences.length >= 2) {
+        candidates.push(
+          sentences[sentences.length - 1].replace(/\.+$/, '') + '.',
+        );
+      }
+    }
+  }
+
+  const scored = candidates.map((hook) => {
+    let score = 0;
+    const len = hook.length;
+
+    // Sweet spot: 30-60 chars (readable on phone, enough context)
+    if (len >= 30 && len <= 60) score += 30;
+    else if (len >= 20 && len <= 80) score += 15;
+    else if (len > 80) score -= 10;
+
+    // Bonus for curiosity/engagement patterns
+    if (/not what you think|here is why|hits different/i.test(hook))
+      score += 15;
+    if (/toughest|hardest|worst|biggest|rarest|first time/i.test(hook))
+      score += 10;
+    if (/\?$/.test(hook)) score += 5; // Questions create curiosity
+
+    // Penalise hooks that start with technical details
+    if (/^[A-Z][a-z]+ is in its/i.test(hook)) score -= 10;
+
+    // Penalise sub-clauses that need context (start with "Here is", "What that", "That is")
+    if (/^(Here is|What that|That is|That's|And |But )/i.test(hook))
+      score -= 15;
+
+    // Penalise hooks with too many clauses (AND, +, commas)
+    const clauseCount = (hook.match(/\band\b|[\+,]/gi) || []).length;
+    if (clauseCount >= 2) score -= clauseCount * 5;
+
+    return { hook, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0].hook;
+}
 
 function getFacetInfo(
   theme: WeeklyTheme | undefined,
@@ -191,6 +225,27 @@ export async function POST(
       highlightTerms = [...zodiacSigns, ...planets].filter((term) =>
         scriptLower.includes(term),
       );
+
+      // Add hook overlay so the first frame shows readable hook text.
+      // Pick the best hook for a video thumbnail: short, punchy, readable at a glance.
+      const hookSuggestions = script.metadata?.hookSuggestions as
+        | string[]
+        | undefined;
+      const hookText = pickBestVideoHook(hookSuggestions, script.facetTitle);
+      // Calculate hook duration so all words animate in + 2.5s hold + 0.4s fade
+      // wordEntranceDuration=4 frames at 30fps = 0.133s per word
+      const wordCount = hookText.split(/\s+/).length;
+      const entranceTime = wordCount * 0.133;
+      const holdTime = 2.5;
+      const fadeTime = 0.4;
+      const hookDuration = Math.ceil(entranceTime + holdTime + fadeTime);
+      overlays.push({
+        text: hookText,
+        startTime: 0,
+        endTime: hookDuration,
+        style:
+          hookText.length <= 50 ? ('hook_large' as const) : ('hook' as const),
+      });
     } else {
       // Educational videos: use thematic composition with OG images
       const composition = buildThematicVideoComposition({
@@ -222,92 +277,109 @@ export async function POST(
       speed: 1.0,
     });
 
-    // Get audio duration for Remotion
-    const audioNodeBuffer = Buffer.from(audioBuffer);
-    const audioDuration = await getAudioDurationFromBuffer(audioNodeBuffer);
+    // Audio duration from Whisper timestamps or word count estimate
+    // Content Creator will also get the true duration via ffprobe
+    let wordTimestamps: Array<{ word: string; start: number; end: number }> =
+      [];
+    try {
+      const whisperWords = await transcribeWithWhisper(audioBuffer);
+      if (whisperWords.length > 0) {
+        wordTimestamps = whisperWords;
+        console.log(`🎙️ Whisper: ${whisperWords.length} word timestamps`);
+      }
+    } catch (whisperErr) {
+      console.warn(
+        `⚠️ Whisper transcription failed, render server will use fallback timing:`,
+        whisperErr instanceof Error ? whisperErr.message : whisperErr,
+      );
+    }
+
+    const audioDuration =
+      wordTimestamps.length > 0
+        ? wordTimestamps[wordTimestamps.length - 1].end
+        : (script.fullScript?.split(/\s+/).length || 100) / 2.5;
     console.log(`🎵 Audio duration: ${audioDuration}s`);
 
     const dateKey = script.scheduledDate.toISOString().split('T')[0];
     let videoBuffer: Buffer | undefined;
 
-    // Try Remotion first for beautiful shooting stars animation
-    const remotionAvailable = await isRemotionAvailable();
-    let useFFmpegFallback = !remotionAvailable || !audioDuration;
+    // Upload audio to Vercel Blob for content-creator to access
+    const audioBlob = await put(`temp/audio-${Date.now()}.mp3`, audioBuffer, {
+      access: 'public',
+      addRandomSuffix: true,
+    });
 
-    console.log(
-      `🎥 Remotion available: ${remotionAvailable}, audio duration: ${audioDuration}s`,
-    );
-    console.log(
-      `🎥 Will use: ${useFFmpegFallback ? 'FFmpeg fallback' : 'Remotion'}`,
-    );
+    const videoSeed = `${safeSlug}-${scriptId}-${Date.now()}`;
+    const symbolContent = `${script.facetTitle || ''} ${script.fullScript?.substring(0, 200) || ''}`;
 
-    if (!useFFmpegFallback) {
-      try {
-        console.log(`🎬 Using Remotion for video generation...`);
+    // Primary: Content Creator (Hetzner). Fallback: local ffmpeg (dev only, never Vercel).
+    const contentCreatorUrl = process.env.CONTENT_CREATOR_API_URL;
+    if (contentCreatorUrl) {
+      console.log(
+        `🎬 Rendering via Content Creator at ${contentCreatorUrl}...`,
+      );
+      const renderSecret =
+        process.env.LUNARY_RENDER_SECRET || process.env.CRON_SECRET;
 
-        // Upload audio to a temporary URL for Remotion
-        const audioBlob = await put(
-          `temp/audio-${Date.now()}.mp3`,
-          audioBuffer,
-          { access: 'public', addRandomSuffix: true },
+      const renderResponse = await fetch(
+        `${contentCreatorUrl}/api/lunary-render`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(renderSecret
+              ? { Authorization: `Bearer ${renderSecret}` }
+              : {}),
+          },
+          body: JSON.stringify({
+            scriptText: script.fullScript,
+            audioUrl: audioBlob.url,
+            slug: safeSlug,
+            facetTitle: script.facetTitle,
+            dateKey,
+            wordTimestamps:
+              wordTimestamps.length > 0 ? wordTimestamps : undefined,
+            audioDuration,
+            overlays: overlays || [],
+            highlightTerms: highlightTerms || [],
+            categoryVisuals,
+            seed: videoSeed,
+            zodiacSign: symbolContent,
+            backgroundMusicUrl:
+              'https://lunary.app/audio/series/lunary-bed-v1.mp3',
+          }),
+        },
+      );
+
+      if (!renderResponse.ok) {
+        const errorBody = await renderResponse.text();
+        throw new Error(
+          `Content Creator render failed (${renderResponse.status}): ${errorBody}`,
         );
-
-        // Build subtitle segments from script
-        const segments = scriptToAudioSegments(
-          script.fullScript,
-          audioDuration,
-          2.6,
-        );
-
-        // Use MediumFormVideo for thematic videos (multi-segment), ShortFormVideo for short
-        const remotionFormat =
-          audioDuration > 45 ? 'MediumFormVideo' : 'ShortFormVideo';
-
-        // Unique seed per render — same script + timestamp = different background each time
-        const videoSeed = `${safeSlug}-${scriptId}-${Date.now()}`;
-
-        // Extract symbol content (zodiac, planet, numerology, tarot) for overlay
-        // Pass facetTitle + beginning of script for detection
-        const symbolContent = `${script.facetTitle || ''} ${script.fullScript?.substring(0, 200) || ''}`;
-
-        // Background music for ambient atmosphere
-        const musicBaseUrl =
-          process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
-        const backgroundMusicUrl = `${musicBaseUrl}/audio/series/lunary-bed-v1.mp3`;
-
-        videoBuffer = await renderRemotionVideo({
-          format: remotionFormat,
-          outputPath: '',
-          segments,
-          audioUrl: audioBlob.url,
-          highlightTerms: highlightTerms || [],
-          durationSeconds: audioDuration + 2,
-          overlays: overlays || [],
-          categoryVisuals,
-          seed: videoSeed,
-          zodiacSign: symbolContent,
-          backgroundMusicUrl,
-        });
-
-        console.log(`✅ Remotion: Video rendered with shooting stars`);
-      } catch (remotionError) {
-        const errMsg =
-          remotionError instanceof Error
-            ? remotionError.message
-            : String(remotionError);
-        const errStack =
-          remotionError instanceof Error ? remotionError.stack : '';
-        console.error(
-          `❌ Remotion render failed, falling back to FFmpeg:\n  Message: ${errMsg}\n  Stack: ${errStack}`,
-        );
-        useFFmpegFallback = true;
       }
-    }
 
-    if (useFFmpegFallback) {
-      console.log(`⚠️ Using FFmpeg fallback for video generation...`);
-      // FFmpeg doesn't support series_badge style, filter it out
-      const ffmpegOverlays = overlays.filter((o) => o.style !== 'series_badge');
+      const renderResult = await renderResponse.json();
+      if (!renderResult.videoData) {
+        throw new Error('Content Creator returned no video data');
+      }
+
+      videoBuffer = Buffer.from(renderResult.videoData, 'base64');
+      console.log(
+        `✅ Content Creator rendered ${(videoBuffer.length / 1024 / 1024).toFixed(1)}MB video`,
+      );
+    } else if (process.env.VERCEL) {
+      throw new Error(
+        'CONTENT_CREATOR_API_URL is not set. ' +
+          'Video rendering is not allowed on Vercel. ' +
+          'Set CONTENT_CREATOR_API_URL to your Hetzner server.',
+      );
+    } else {
+      // Local dev fallback — ffmpeg compose
+      console.log(
+        `⚠️ No CONTENT_CREATOR_API_URL — using local FFmpeg fallback (dev only)`,
+      );
+      const { composeVideo } = await import('@/lib/video/compose-video');
+      const localOverlays = overlays.filter((o) => o.style !== 'series_badge');
       videoBuffer = await composeVideo({
         images,
         audioBuffer,
@@ -316,12 +388,8 @@ export async function POST(
         subtitlesText: script.fullScript,
         subtitlesHighlightTerms: highlightTerms,
         subtitlesHighlightColor: highlightColor,
-        overlays: ffmpegOverlays as any,
+        overlays: localOverlays as any,
       });
-    }
-
-    if (!videoBuffer) {
-      throw new Error('Video generation failed - no video buffer produced');
     }
 
     const blobKey = `videos/shorts/daily/manual-${dateKey}-${safeSlug}-${Date.now()}.mp4`;

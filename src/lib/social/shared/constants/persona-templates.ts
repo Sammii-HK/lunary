@@ -145,17 +145,28 @@ export const THREADS_QUESTION_TEMPLATES = [
  */
 
 const CTA_BODIES = [
-  `Lunary is now on Google Play. Your birth chart drives everything—horoscopes, transits, tarot, crystals. No ads. Ever.`,
-  `Lunary is on Google Play. Transits + birth chart + tarot in one place. No generic sun sign nonsense.`,
-  `Lunary is on Google Play. Built for chart readers. Not sun sign predictions.`,
-  `Lunary is on Google Play. Your full chart, tracked in real time. No ads.`,
-  `Lunary is on Google Play. Astrology that actually uses your birth data.`,
+  `Lunary uses your full birth chart for everything. Horoscopes, transits, tarot, crystals. Not just your sun sign. Code COSMICSEASON for 3 months free.`,
+  `Your birth chart has 10 planets, 12 houses, and dozens of aspects. Lunary tracks all of it in real time. 3 months free with code COSMICSEASON.`,
+  `Most astrology apps give you the same horoscope as everyone born in your month. Lunary uses your actual chart. Try it free: code COSMICSEASON.`,
+  `Transits hit different when they are mapped to your natal placements. That is what Lunary does. COSMICSEASON = 3 months free.`,
+  `Lunary tells you which transits are affecting YOUR chart today. Not generic forecasts. Yours. Code COSMICSEASON for 3 months free.`,
+  `Your rising sign matters. Your moon sign matters. Lunary reads them all, together, in real time. 3 months free with COSMICSEASON.`,
+  `One app for your birth chart, daily transits, tarot, and crystals. All personalised to your exact chart. COSMICSEASON gets you 3 months free.`,
+  `Astrology that knows your chart. Horoscopes that reflect your placements. No ads. No fluff. Try free: code COSMICSEASON.`,
 ];
 
-const CTA_CLOSINGS = [
-  `Code COSMICSEASON gets 3 months free. Drop your sign below.`,
-  `3 months free with code COSMICSEASON.`,
-  `Code COSMICSEASON: 3 months free.`,
+/** Conversation-ending questions — every dear-style post ends with one */
+const CTA_QUESTIONS = [
+  `Which placement surprised you most when you first read your chart?`,
+  `Do you relate more to your sun sign or your rising sign?`,
+  `What part of your chart took the longest to understand?`,
+  `Has a transit ever completely blindsided you?`,
+  `What is the one placement in your chart that explains everything?`,
+  `When did astrology shift from casual interest to something deeper for you?`,
+  `What is the first thing you check in your chart each morning?`,
+  `Which planet do you think runs your life the most?`,
+  `Have you ever read someone else's chart and understood them instantly?`,
+  `What is the most underrated placement in your chart?`,
 ];
 
 /**
@@ -182,14 +193,14 @@ export function getDearStyleReferralPost(seed?: number): string {
   const openingPattern = OPENING_PATTERNS[s % OPENING_PATTERNS.length];
   const opening = openingPattern(terms);
   const body = CTA_BODIES[s % CTA_BODIES.length];
-  const closing = CTA_CLOSINGS[(s >> 3) % CTA_CLOSINGS.length];
-  return `${opening}\n${body}\n${closing}`;
+  const question = CTA_QUESTIONS[(s * 7 + 3) % CTA_QUESTIONS.length];
+  return `${opening}\n${body}\n${question}`;
 }
 
 /** @deprecated kept for backwards compat, use getDearStyleReferralPost() */
 export const DEAR_STYLE_REFERRAL_TEMPLATES = CTA_BODIES.map(
   (body, i) =>
-    `dear astrologers, witches, tarot readers, stargazers, crystal lovers, and anyone who's ever asked "what time were you born" on a first date 🌖\n${body}\n${CTA_CLOSINGS[i % CTA_CLOSINGS.length]}`,
+    `dear astrologers, witches, tarot readers, stargazers, crystal lovers, and anyone who's ever asked "what time were you born" on a first date 🌖\n${body}\n${CTA_QUESTIONS[i % CTA_QUESTIONS.length]}`,
 );
 
 /**

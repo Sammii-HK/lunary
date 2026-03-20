@@ -11,29 +11,31 @@ import { secondsToFrames, splitTextWithTiming } from '../utils/timing';
 export type SubtitleHighlightStyle = 'scale' | 'block';
 
 /**
- * Group words into display lines of 2-3 words to prevent orphaned single words.
- * Algorithm ensures no line has fewer than 2 words:
- *   2 words → [2]
- *   3 words → [3]
- *   4 words → [2, 2]
- *   5 words → [3, 2]
- *   6 words → [3, 3]
+ * Group words into display lines that fit within the subtitle container.
+ * Uses character count to prevent long words from being cut off at edges.
+ * Also prevents orphaned single-word lines.
  */
-function groupWordsIntoLines(words: string[]): string[][] {
-  if (words.length <= 3) return [words];
+function groupWordsIntoLines(
+  words: string[],
+  maxWordsPerLine: number = 2,
+): string[][] {
+  if (words.length === 0) return [];
+  if (words.length <= maxWordsPerLine) return [words];
+
   const lines: string[][] = [];
   let i = 0;
   while (i < words.length) {
     const remaining = words.length - i;
-    if (remaining <= 3) {
-      lines.push(words.slice(i));
-      break;
+    if (remaining === maxWordsPerLine + 1) {
+      lines.push(words.slice(i, i + maxWordsPerLine));
+      i += maxWordsPerLine;
+    } else {
+      const take = Math.min(maxWordsPerLine, remaining);
+      lines.push(words.slice(i, i + take));
+      i += take;
     }
-    // Take 3 if remaining - 3 >= 2 (won't leave an orphan), else take 2
-    const take = remaining - 3 >= 2 ? 3 : 2;
-    lines.push(words.slice(i, i + take));
-    i += take;
   }
+
   return lines;
 }
 
@@ -149,6 +151,7 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
       currentSegment.startTime,
       currentSegment.endTime,
       fps,
+      currentSegment.wordTimings,
     );
 
     const words = wordTimings.map((wt) => wt.word);
@@ -213,6 +216,7 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
       currentSegment.startTime,
       currentSegment.endTime,
       fps,
+      currentSegment.wordTimings,
     );
 
     const words = wordTimings.map((wt) => wt.word);
@@ -236,13 +240,13 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
                 fontWeight: isActive ? 800 : isKeyword ? 700 : 600,
                 display: 'inline-block',
                 marginRight: '0.2em',
-                backgroundColor: isActive ? highlightColor : 'transparent',
-                borderRadius: isActive ? 6 : 0,
-                paddingLeft: isActive ? 6 : 0,
-                paddingRight: isActive ? 6 : 0,
-                paddingTop: isActive ? 2 : 0,
-                paddingBottom: isActive ? 2 : 0,
+                borderRadius: 6,
                 textShadow: isActive ? 'none' : `0 2px 6px rgba(0,0,0,0.5)`,
+                // Highlight background via box-shadow so it doesn't affect layout
+                boxShadow: isActive
+                  ? `0 0 0 6px ${highlightColor}, 0 0 0 6px ${highlightColor}`
+                  : 'none',
+                backgroundColor: isActive ? highlightColor : 'transparent',
               }}
             >
               {wt.word}
@@ -305,8 +309,7 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
           fontWeight: 600,
           color: COLORS.primaryText,
           lineHeight: 1.45,
-          margin: 0,
-          backgroundColor: `rgba(0, 0, 0, ${backgroundOpacity ?? 0.55})`,
+          backgroundColor: `rgba(0, 0, 0, ${backgroundOpacity ?? 0.15})`,
           borderRadius: 10,
           paddingLeft: 20,
           paddingRight: 20,
@@ -316,6 +319,8 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
           maxWidth: '90%',
           width: 'fit-content',
           margin: '0 auto',
+          overflowWrap: 'break-word' as const,
+          wordBreak: 'break-word' as const,
         }}
       >
         {wordHighlight

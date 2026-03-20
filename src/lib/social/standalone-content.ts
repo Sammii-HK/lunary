@@ -1,30 +1,40 @@
 /**
- * Standalone Content Generator for Twitter and Bluesky
+ * Standalone Content Generator for Bluesky
  *
  * Generates platform-specific standalone posts (no series framing).
  * Research findings:
- * - Twitter: Questions outperform statements 13-27x. 70-100 chars optimal.
- * - Bluesky: Authentic conversational tone, different from Twitter. 1-2x/day.
+ * - Bluesky: Authentic conversational tone. 1-2x/day.
  *
  * Content mix:
- * - Twitter: 40% facts, 40% questions, 20% contrarian statements
  * - Bluesky: 50% facts, 30% questions, 20% observations/reflections
+ *
+ * Transit awareness:
+ * - CRITICAL events: skip standalone entirely (transit content takes priority)
+ * - HIGH events: reduce to 1 post, inject transit context
+ * - MEDIUM events: inject transit context where natural
+ * - LOW / none: normal rotation
  */
 
 import { FACT_POOLS } from '@/lib/instagram/did-you-know-content';
 import { seededRandom } from '@/lib/instagram/ig-utils';
 import type { ThemeCategory } from '@/lib/social/types';
+import {
+  getEventCalendarForDate,
+  type CalendarEvent,
+  type EventRarity,
+} from '@/lib/astro/event-calendar';
 
 const CATEGORIES: ThemeCategory[] = [
   'tarot',
   'crystals',
   'spells',
   'numerology',
+  'runes',
   'chakras',
   'zodiac',
 ];
 
-// Engaging questions by category (Twitter-optimised: short, punchy)
+// Engaging questions by category
 const QUESTION_POOLS: Record<string, string[]> = {
   tarot: [
     'What tarot card do you pull most often?',
@@ -98,52 +108,6 @@ const QUESTION_POOLS: Record<string, string[]> = {
   ],
 };
 
-// Contrarian/surprising statements (Twitter-optimised: provocative but not mean)
-const CONTRARIAN_POOLS: Record<string, string[]> = {
-  tarot: [
-    'The Death card is one of the most positive cards in the deck.',
-    'Reading tarot for yourself is not less valid than paying someone.',
-    "You don't need to be psychic to read tarot. You need to be honest.",
-    'The "scary" cards are usually the most helpful ones.',
-  ],
-  crystals: [
-    'The most expensive crystal is not always the most powerful one.',
-    "You don't need 50 crystals. You need 3 that you actually use.",
-    "Crystals don't do the work for you. They amplify what you bring.",
-    'That crystal you keep losing? It might be done with you.',
-  ],
-  spells: [
-    'The most powerful spell is the one you do consistently, not perfectly.',
-    "You don't need fancy ingredients. Kitchen spices work just fine.",
-    "Magic is not about control. It's about alignment.",
-    'The hardest part of any spell is letting go of the outcome.',
-  ],
-  numerology: [
-    '11:11 is not a coincidence. But you already knew that.',
-    "Your Life Path number doesn't limit you. It challenges you.",
-    "666 is not evil. It's a rebalancing message.",
-    'Angel numbers mean more when you stop looking for them.',
-  ],
-  runes: [
-    'Runes were never just an alphabet. They were always magic.',
-    'The blank rune is not traditional. It was added in the 1980s.',
-    'Viking leaders used rune casting the way CEOs use strategy consultants.',
-    'Runes carved in the wrong direction still carry power. Intent matters.',
-  ],
-  chakras: [
-    'An overactive chakra is just as problematic as a blocked one.',
-    'You cannot "fix" your chakras once and be done forever.',
-    'Your favourite chakra to work on is probably not the one that needs attention.',
-    'Burnout is almost always a Root Chakra issue, not a Crown one.',
-  ],
-  zodiac: [
-    'Your Sun sign is the least interesting part of your birth chart.',
-    'Mercury retrograde affects everyone differently. Check your natal Mercury.',
-    'Compatibility is about the full chart, not matching Sun signs.',
-    'The most "difficult" placements produce the most interesting people.',
-  ],
-};
-
 // Bluesky observation/reflection templates (authentic, conversational)
 const OBSERVATION_POOLS: Record<string, string[]> = {
   tarot: [
@@ -193,94 +157,143 @@ const OBSERVATION_POOLS: Record<string, string[]> = {
 export interface StandalonePost {
   content: string;
   category: ThemeCategory;
-  postType: 'fact' | 'question' | 'contrarian' | 'observation';
+  postType: 'fact' | 'question' | 'observation';
   source?: string;
   scheduledHour: number;
 }
 
-// Twitter posting hours (UTC): spread across day for engagement
-const TWITTER_HOURS = [9, 13, 18];
 // Bluesky posting hours (UTC): 1-2x daily
 const BLUESKY_HOURS = [10, 16];
+
+/** Rarity priority order for sorting/comparison */
+const RARITY_PRIORITY: Record<EventRarity, number> = {
+  CRITICAL: 4,
+  HIGH: 3,
+  MEDIUM: 2,
+  LOW: 1,
+};
+
+/**
+ * Get the highest-rarity event from a list of calendar events.
+ */
+function getHighestRarityEvent(
+  events: CalendarEvent[],
+): CalendarEvent | undefined {
+  if (events.length === 0) return undefined;
+  return events.reduce((highest, current) =>
+    RARITY_PRIORITY[current.rarity] > RARITY_PRIORITY[highest.rarity]
+      ? current
+      : highest,
+  );
+}
+
+/**
+ * Get the highest rarity level present in a list of events.
+ * Returns 'LOW' as default when no events exist.
+ */
+function getHighestRarity(events: CalendarEvent[]): EventRarity {
+  const top = getHighestRarityEvent(events);
+  return top?.rarity ?? 'LOW';
+}
+
+/**
+ * Inject transit context into standalone content where it fits naturally.
+ *
+ * Only modifies observations and certain fact posts that mention energy,
+ * vibes, shifts, or cosmic themes. Questions are left untouched to keep
+ * them conversational.
+ */
+function injectTransitContext(
+  content: string,
+  postType: StandalonePost['postType'],
+  event: CalendarEvent,
+): string {
+  // Don't modify questions -- keep them pure engagement hooks
+  if (postType === 'question') return content;
+
+  // Only inject into content that touches on energy/cosmic themes
+  const cosmicKeywords =
+    /energy|vibe|shift|cosmos|cosmic|universe|power|intention|ritual|magic|season|cycle|phase|moment|time|change|transform/i;
+  if (!cosmicKeywords.test(content)) return content;
+
+  // Build a brief, natural transit reference
+  const transitNote = buildTransitNote(event);
+  if (!transitNote) return content;
+
+  // Append the transit note before hashtags (hashtags are on the last line after \n\n)
+  const hashtagSplit = content.lastIndexOf('\n\n#');
+  if (hashtagSplit !== -1) {
+    const body = content.slice(0, hashtagSplit);
+    const tags = content.slice(hashtagSplit);
+    return `${body}\n\n${transitNote}${tags}`;
+  }
+
+  // Fallback: just append
+  return `${content}\n\n${transitNote}`;
+}
+
+/**
+ * Build a brief, natural-sounding transit note from a calendar event.
+ */
+function buildTransitNote(event: CalendarEvent): string | null {
+  const { eventType, name } = event;
+
+  switch (eventType) {
+    case 'retrograde_station':
+      return `With ${name.includes('direct') ? name.replace(/stations?\s*/i, '').trim() + ' stationing direct' : name.replace(/stations?\s*/i, '').trim() + ' stationing retrograde'} today, that feeling has an astronomical basis.`;
+    case 'ingress':
+      return `${name} today -- a shift worth paying attention to.`;
+    case 'moon_phase':
+      return `Today's ${name.toLowerCase()} amplifies this energy.`;
+    case 'eclipse':
+      return `With ${name.toLowerCase()} today, this feels especially potent.`;
+    case 'sabbat':
+    case 'equinox':
+    case 'solstice':
+      return `${name} marks this turning point in the wheel of the year.`;
+    case 'aspect':
+      return `${name} today adds another layer to this.`;
+    default:
+      return null;
+  }
+}
 
 function pickCategory(rng: () => number): ThemeCategory {
   return CATEGORIES[Math.floor(rng() * CATEGORIES.length)];
 }
 
-function trimToLength(text: string, maxLen: number): string {
-  if (text.length <= maxLen) return text;
-  // Find last sentence break within limit
-  const trimmed = text.slice(0, maxLen);
-  const lastPeriod = trimmed.lastIndexOf('.');
-  if (lastPeriod > maxLen * 0.5) return trimmed.slice(0, lastPeriod + 1);
-  return trimmed.slice(0, maxLen - 1) + '\u2026';
-}
-
-export function generateTwitterPosts(dateStr: string): StandalonePost[] {
-  const posts: StandalonePost[] = [];
-
-  for (let slot = 0; slot < TWITTER_HOURS.length; slot++) {
-    const rng = seededRandom(`twitter-${dateStr}-${slot}`);
-    const category = pickCategory(rng);
-    const roll = rng();
-
-    let content: string;
-    let postType: StandalonePost['postType'];
-    let source: string | undefined;
-
-    if (roll < 0.4) {
-      // 40% educational fact (trimmed to 70-100 chars)
-      const pool = FACT_POOLS[category] ?? FACT_POOLS.tarot;
-      const entry = pool[Math.floor(rng() * pool.length)];
-      content = trimToLength(entry.fact, 100);
-      postType = 'fact';
-      source = entry.source;
-    } else if (roll < 0.8) {
-      // 40% questions
-      const questions = QUESTION_POOLS[category] ?? QUESTION_POOLS.tarot;
-      content = questions[Math.floor(rng() * questions.length)];
-      postType = 'question';
-    } else {
-      // 20% contrarian
-      const statements = CONTRARIAN_POOLS[category] ?? CONTRARIAN_POOLS.tarot;
-      content = statements[Math.floor(rng() * statements.length)];
-      postType = 'contrarian';
-    }
-
-    // Add 1-2 hashtags for Twitter
-    const hashtag =
-      category === 'zodiac'
-        ? '#astrology'
-        : category === 'tarot'
-          ? '#tarot'
-          : category === 'crystals'
-            ? '#crystals'
-            : category === 'numerology'
-              ? '#numerology'
-              : category === 'runes'
-                ? '#runes'
-                : category === 'chakras'
-                  ? '#chakras'
-                  : '#witchcraft';
-
-    content = `${content}\n\n${hashtag}`;
-
-    posts.push({
-      content,
-      category,
-      postType,
-      source,
-      scheduledHour: TWITTER_HOURS[slot],
-    });
+export async function generateBlueskyPosts(
+  dateStr: string,
+): Promise<StandalonePost[]> {
+  // --- Transit awareness: check what's happening today ---
+  let events: CalendarEvent[] = [];
+  try {
+    events = await getEventCalendarForDate(dateStr);
+  } catch (err) {
+    // If event calendar fails, proceed with normal generation
+    console.warn(
+      '[standalone-content] Failed to fetch event calendar, proceeding normally:',
+      err instanceof Error ? err.message : err,
+    );
   }
 
-  return posts;
-}
+  const highestRarity = getHighestRarity(events);
+  const topEvent = getHighestRarityEvent(events);
 
-export function generateBlueskyPosts(dateStr: string): StandalonePost[] {
+  // CRITICAL: Skip standalone entirely -- transit content from other crons takes priority
+  if (highestRarity === 'CRITICAL') {
+    console.log(
+      `[standalone-content] Skipping standalone generation: CRITICAL event today (${topEvent?.name ?? 'unknown'})`,
+    );
+    return [];
+  }
+
+  // HIGH: Reduce to 1 post instead of the usual 2
+  const slotsToGenerate = highestRarity === 'HIGH' ? 1 : BLUESKY_HOURS.length;
+
   const posts: StandalonePost[] = [];
 
-  for (let slot = 0; slot < BLUESKY_HOURS.length; slot++) {
+  for (let slot = 0; slot < slotsToGenerate; slot++) {
     const rng = seededRandom(`bluesky-${dateStr}-${slot}`);
     const category = pickCategory(rng);
     const roll = rng();
@@ -307,6 +320,11 @@ export function generateBlueskyPosts(dateStr: string): StandalonePost[] {
         OBSERVATION_POOLS[category] ?? OBSERVATION_POOLS.tarot;
       content = observations[Math.floor(rng() * observations.length)];
       postType = 'observation';
+    }
+
+    // Inject transit context for MEDIUM+ events where natural
+    if (topEvent && (highestRarity === 'HIGH' || highestRarity === 'MEDIUM')) {
+      content = injectTransitContext(content, postType, topEvent);
     }
 
     // Add 3 structured discovery hashtags for Bluesky

@@ -66,7 +66,8 @@ export type StoryVariant =
   | 'ritual_tip'
   | 'sign_of_the_day'
   | 'transit_alert'
-  | 'numerology';
+  | 'numerology'
+  | 'calendar_event';
 
 // Rotating pool story types (2 slots/day, change daily)
 export type RotatingStoryType =
@@ -76,7 +77,8 @@ export type RotatingStoryType =
   | 'transit_alert'
   | 'did_you_know'
   | 'numerology'
-  | 'quote';
+  | 'quote'
+  | 'calendar_event';
 
 // --- New Content Structures ---
 

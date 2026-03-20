@@ -4,6 +4,9 @@
  * Generates first-person, talking-to-camera video scripts grounded in:
  * - Real planetary positions and active retrogrades
  * - Moon phase and moon sign
+ * - Event calendar: rarity scoring, historical context, convergence detection
+ * - Sabbat / Wheel of the Year proximity
+ * - Planetary dignities (rulership, exaltation, detriment, fall)
  * - Grimoire spells, crystals, and teachings matched to the transit
  *
  * Content varies across 5 types: transit_report, teaching, spell_suggestion,
@@ -22,6 +25,12 @@ import {
   getAccurateMoonPhase,
   getRealPlanetaryPositions,
 } from '../../../../../utils/astrology/astronomical-data';
+import {
+  getEventCalendarForDate,
+  PLANETARY_DIGNITIES,
+  type CalendarEvent,
+} from '@/lib/astro/event-calendar';
+import { getSabbatForDate } from '@/lib/social/weekly-themes';
 import { buildSeerSammiiPrompt, buildTalkingPointsPrompt } from './prompts';
 import type {
   SeerSammiiScript,
@@ -55,6 +64,30 @@ interface TransitSummary {
   moonSign: string;
   moonPhase: string;
   retrogrades: string[];
+  /** Significant calendar events for the date (rarity-scored) */
+  calendarEvents: CalendarEvent[];
+  /** Sabbat context if within 3 days of a sabbat */
+  sabbatContext: string | null;
+  /** Planetary dignity context for key planets */
+  dignityContext: string | null;
+}
+
+/**
+ * Get the dignity status for a planet in a sign.
+ * Returns e.g. "Mars is in domicile in Aries" or null if no special dignity.
+ */
+function getDignityForPlanet(planet: string, sign: string): string | null {
+  const dignity = PLANETARY_DIGNITIES[planet];
+  if (!dignity) return null;
+  if (dignity.rules.includes(sign))
+    return `${planet} is in domicile (rules) in ${sign} — at full power`;
+  if (dignity.exalted.includes(sign))
+    return `${planet} is exalted in ${sign} — elevated expression`;
+  if (dignity.detriment.includes(sign))
+    return `${planet} is in detriment in ${sign} — working against its nature`;
+  if (dignity.fall.includes(sign))
+    return `${planet} is in fall in ${sign} — weakest expression`;
+  return null;
 }
 
 /**
@@ -62,8 +95,11 @@ interface TransitSummary {
  * - Current moon phase, sign, and trend
  * - Active planet sign positions with retrograde flags
  * - Upcoming transit events (next 3 days)
+ * - Event calendar: rarity scores, historical context, convergence
+ * - Sabbat proximity (Wheel of the Year)
+ * - Planetary dignity context
  */
-function buildRichTransitContext(date: Date): TransitSummary {
+async function buildRichTransitContext(date: Date): Promise<TransitSummary> {
   const transits = getUpcomingTransits(dayjs(date));
   const moonData = getAccurateMoonPhase(date);
   const positions = getRealPlanetaryPositions(date);
@@ -126,9 +162,121 @@ function buildRichTransitContext(date: Date): TransitSummary {
     );
   }
 
+  // --- Event Calendar: rarity, historical context, convergence ---
+  const dateStr = dayjs(date).format('YYYY-MM-DD');
+  let calendarEvents: CalendarEvent[] = [];
+  try {
+    calendarEvents = await getEventCalendarForDate(dateStr);
+  } catch (err) {
+    console.warn('[seer-sammii] Event calendar lookup failed:', err);
+  }
+
+  const significantEvents = calendarEvents.filter((e) => e.score >= 30);
+  if (significantEvents.length > 0) {
+    parts.push('\nSIGNIFICANT COSMIC EVENTS TODAY:');
+    for (const event of significantEvents.slice(0, 5)) {
+      parts.push(
+        `  [${event.rarity}] ${event.name} (score: ${event.score}/100)`,
+      );
+      if (event.rarityFrame) {
+        parts.push(`    Rarity: ${event.rarityFrame}`);
+      }
+      if (event.historicalContext) {
+        parts.push(`    History: ${event.historicalContext}`);
+      }
+      if (event.lastInThisSign) {
+        parts.push(`    Last occurrence: ${event.lastInThisSign}`);
+      }
+      if (event.hookSuggestions?.length > 0) {
+        parts.push(
+          `    Hook ideas: ${event.hookSuggestions.slice(0, 2).join(' | ')}`,
+        );
+      }
+    }
+
+    // Convergence detection
+    const convergenceMultiplier = Math.max(
+      ...significantEvents.map((e) => e.convergenceMultiplier),
+    );
+    if (convergenceMultiplier > 1) {
+      parts.push(
+        `  CONVERGENCE: Multiple significant events align today (${convergenceMultiplier}x multiplier). This is rare.`,
+      );
+    }
+  }
+
+  // --- Sabbat context ---
+  let sabbatContext: string | null = null;
+  const sabbatMatch = getSabbatForDate(date);
+  if (sabbatMatch) {
+    const { sabbat, daysUntil } = sabbatMatch;
+    const timing =
+      daysUntil === 0
+        ? 'TODAY'
+        : `in ${daysUntil} day${daysUntil > 1 ? 's' : ''}`;
+    sabbatContext = `SABBAT: ${sabbat.name} is ${timing}`;
+    parts.push(`\n${sabbatContext}`);
+
+    // Look for rich sabbat data from the calendar events
+    const sabbatEvent = calendarEvents.find(
+      (e) => e.eventType === 'sabbat' && e.sabbatData,
+    );
+    if (sabbatEvent?.sabbatData) {
+      const sd = sabbatEvent.sabbatData;
+      parts.push(`  Meaning: ${sd.spiritualMeaning}`);
+      if (sd.crystals?.length)
+        parts.push(`  Crystals: ${sd.crystals.slice(0, 4).join(', ')}`);
+      if (sd.herbs?.length)
+        parts.push(`  Herbs: ${sd.herbs.slice(0, 4).join(', ')}`);
+      if (sd.rituals?.length)
+        parts.push(`  Rituals: ${sd.rituals.slice(0, 3).join(', ')}`);
+      if (sd.traditions?.length)
+        parts.push(`  Traditions: ${sd.traditions.slice(0, 3).join(', ')}`);
+      if (sd.deities?.length)
+        parts.push(`  Deities: ${sd.deities.slice(0, 3).join(', ')}`);
+      if (sd.history) parts.push(`  History: ${sd.history}`);
+    }
+  }
+
+  // --- Planetary dignity context ---
+  const dignities: string[] = [];
+  for (const planet of keyPlanets) {
+    const pos = positions[planet] as any;
+    if (!pos?.sign) continue;
+    const dignity = getDignityForPlanet(planet, pos.sign);
+    if (dignity) dignities.push(dignity);
+  }
+  // Also check retrograde planets
+  for (const planet of retrogrades) {
+    const pos = positions[planet] as any;
+    if (!pos?.sign) continue;
+    const dignity = getDignityForPlanet(planet, pos.sign);
+    if (dignity && !dignities.some((d) => d.startsWith(planet))) {
+      dignities.push(dignity);
+    }
+  }
+
+  let dignityContext: string | null = null;
+  if (dignities.length > 0) {
+    dignityContext = dignities.join('. ');
+    parts.push(`\nPLANETARY DIGNITIES: ${dignityContext}`);
+  }
+
   // Identify the primary planet for grimoire searches
   const highPriorityTransit = relevant.find((t) => t.significance === 'high');
-  const primaryPlanet = highPriorityTransit?.planet || retrogrades[0] || 'Moon';
+  // Prefer critical/high-rarity event planets over generic transits
+  const criticalEvent = significantEvents.find(
+    (e) => e.rarity === 'CRITICAL' && e.planet,
+  );
+  const highEvent = significantEvents.find(
+    (e) => e.rarity === 'HIGH' && e.planet,
+  );
+  const primaryPlanet =
+    criticalEvent?.planet ||
+    highEvent?.planet ||
+    highPriorityTransit?.planet ||
+    retrogrades[0] ||
+    'Moon';
 
   return {
     summary: parts.join('\n'),
@@ -136,18 +284,38 @@ function buildRichTransitContext(date: Date): TransitSummary {
     moonSign,
     moonPhase: moonData.name,
     retrogrades,
+    calendarEvents,
+    sabbatContext,
+    dignityContext,
   };
 }
 
 /**
  * Selects a content type based on what's cosmically interesting today.
- * Weighted toward variety so scripts don't all feel the same.
+ * Accounts for sabbats, rare events, moon phase, and retrogrades.
  */
 function selectContentType(
   moonPhase: string,
   retrogrades: string[],
+  calendarEvents: CalendarEvent[],
+  sabbatContext: string | null,
 ): ScriptContentType {
   const phase = moonPhase.toLowerCase();
+
+  // Sabbat within range → spell work (rituals are the core of sabbat practice)
+  if (sabbatContext) {
+    return Math.random() > 0.3 ? 'spell_suggestion' : 'teaching';
+  }
+
+  // Critical/high rarity event → transit report to frame the significance
+  const hasCriticalEvent = calendarEvents.some((e) => e.rarity === 'CRITICAL');
+  const hasHighEvent = calendarEvents.some((e) => e.rarity === 'HIGH');
+  if (hasCriticalEvent) {
+    return 'transit_report'; // Once-in-a-lifetime events demand a report
+  }
+  if (hasHighEvent) {
+    return Math.random() > 0.4 ? 'transit_report' : 'teaching';
+  }
 
   // New moon → spell work is most relevant
   if (phase.includes('new')) {
@@ -183,12 +351,14 @@ function selectContentType(
  * - Spell/ritual search for spell_suggestion content
  * - Crystal search for crystal_recommendation content
  * - Teaching/meaning search for teaching content
+ * - Sabbat-specific search when near a sabbat
  */
 async function buildRichGrimoireContext(
   topic: string,
   primaryPlanet: string,
   moonSign: string,
   contentType: ScriptContentType,
+  sabbatContext: string | null,
 ): Promise<string> {
   const searches: Promise<{ context: string }>[] = [
     retrieveGrimoireContext(topic, 3),
@@ -211,6 +381,19 @@ async function buildRichGrimoireContext(
     );
   }
 
+  // Sabbat-specific grimoire search
+  if (sabbatContext) {
+    const sabbatName = sabbatContext
+      .replace(/^SABBAT:\s*/, '')
+      .split(' is ')[0];
+    searches.push(
+      retrieveGrimoireContext(
+        `${sabbatName} sabbat ritual wheel of the year`,
+        2,
+      ),
+    );
+  }
+
   const results = await Promise.all(searches);
 
   return results
@@ -221,7 +404,7 @@ async function buildRichGrimoireContext(
 
 /**
  * Auto-generates a specific, angle-driven topic based on what's happening cosmically.
- * Falls back to a generic topic only if nothing more interesting is available.
+ * Prioritises rare events, sabbats, and historical context over generic transits.
  */
 function autoSelectTopic(
   primaryPlanet: string,
@@ -230,9 +413,38 @@ function autoSelectTopic(
   retrogrades: string[],
   contentType: ScriptContentType,
   date: Date,
+  calendarEvents: CalendarEvent[],
+  sabbatContext: string | null,
 ): string {
   const dateStr = dayjs(date).format('MMMM D, YYYY');
   const phase = moonPhase.toLowerCase();
+
+  // If there's a CRITICAL or HIGH event, lead with that
+  const criticalEvent = calendarEvents.find((e) => e.rarity === 'CRITICAL');
+  const highEvent = calendarEvents.find((e) => e.rarity === 'HIGH');
+  const topEvent = criticalEvent || highEvent;
+
+  // Sabbat-driven topics
+  if (sabbatContext) {
+    const sabbatName = sabbatContext
+      .replace(/^SABBAT:\s*/, '')
+      .split(' is ')[0];
+    if (contentType === 'spell_suggestion') {
+      return `${sabbatName} ritual — what to do and why it matters this year`;
+    }
+    if (topEvent) {
+      return `${sabbatName} with ${topEvent.name} — why this one is different`;
+    }
+    return `${sabbatName} — the real meaning and what to do with it`;
+  }
+
+  // Rare event-driven topics
+  if (topEvent && contentType === 'transit_report') {
+    if (topEvent.historicalContext) {
+      return `${topEvent.name} — last time this happened: ${topEvent.lastInThisSign || 'decades ago'}`;
+    }
+    return `${topEvent.name} — what it means and why it's ${topEvent.rarity === 'CRITICAL' ? 'once in a lifetime' : 'rare'}`;
+  }
 
   switch (contentType) {
     case 'spell_suggestion':
@@ -245,6 +457,8 @@ function autoSelectTopic(
       return `${primaryPlanet} in ${moonSign} — spell work for this transit`;
 
     case 'teaching':
+      if (topEvent)
+        return `What ${topEvent.name} actually means (not what you think)`;
       if (retrogrades.length > 0)
         return `What ${retrogrades[0]} retrograde actually does (not what you think)`;
       if (phase.includes('new'))
@@ -268,18 +482,24 @@ function autoSelectTopic(
 
 /**
  * Generate a full Seer Sammii script for a given date.
- * Uses real planetary positions, moon phase, and multi-search grimoire context.
+ * Uses real planetary positions, moon phase, event calendar (rarity/history),
+ * sabbat context, planetary dignities, and multi-search grimoire context.
  */
 export async function generateSeerSammiiScript(
   date: Date,
   topic?: string,
   contentType?: ScriptContentType,
 ): Promise<SeerSammiiScript> {
-  const transitData = buildRichTransitContext(date);
+  const transitData = await buildRichTransitContext(date);
 
   const resolvedContentType =
     contentType ||
-    selectContentType(transitData.moonPhase, transitData.retrogrades);
+    selectContentType(
+      transitData.moonPhase,
+      transitData.retrogrades,
+      transitData.calendarEvents,
+      transitData.sabbatContext,
+    );
 
   const scriptTopic =
     topic ||
@@ -290,6 +510,8 @@ export async function generateSeerSammiiScript(
       transitData.retrogrades,
       resolvedContentType,
       date,
+      transitData.calendarEvents,
+      transitData.sabbatContext,
     );
 
   // Pull grimoire context with multiple targeted searches
@@ -298,6 +520,7 @@ export async function generateSeerSammiiScript(
     transitData.primaryPlanet,
     transitData.moonSign,
     resolvedContentType,
+    transitData.sabbatContext,
   );
 
   const prompt = buildSeerSammiiPrompt(
@@ -311,7 +534,7 @@ export async function generateSeerSammiiScript(
     prompt,
     schema: SeerSammiiScriptSchema,
     systemPrompt:
-      'You are writing scripts for Seer Sammii — a first-person TikTok astrology creator who teaches real astrological mechanics, spells, and crystal correspondences. Write with substance and specificity.',
+      'You are writing scripts for Seer Sammii — a first-person TikTok astrology creator who teaches real astrological mechanics, spells, and crystal correspondences. Ground scripts in historical context, event rarity, and sabbat traditions when available. Write with substance and specificity.',
     temperature: 0.7,
     maxTokens: 900,
   });
@@ -343,7 +566,7 @@ export async function generateSeerSammiiScript(
 export async function generateDailyTalkingPoints(
   date: Date,
 ): Promise<SeerSammiiTalkingPoints[]> {
-  const transitData = buildRichTransitContext(date);
+  const transitData = await buildRichTransitContext(date);
 
   // Get grimoire context seeded by the most interesting current event
   const { context: grimoireContext } = await retrieveGrimoireContext(

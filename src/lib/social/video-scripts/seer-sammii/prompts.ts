@@ -109,6 +109,44 @@ This is what makes Sammii's content different: she's teaching FROM a real knowle
 Don't say "the grimoire says" — just weave the knowledge in naturally as fact.
 `;
 
+const EVENT_SIGNIFICANCE = `
+EVENT SIGNIFICANCE — USE RARITY AND HISTORY:
+The cosmic context may include SIGNIFICANT COSMIC EVENTS with rarity scores and historical context.
+This is GOLD for content. Use it:
+
+- CRITICAL events (score 80+): Once-in-a-lifetime. Lead with this. "This hasn't happened since [year]."
+  Frame the significance: orbital periods, historical parallels, why your audience has never experienced this.
+- HIGH events (score 50-79): Rare, generational. Worth framing: "The last time [planet] was in [sign]..."
+- Convergence: When multiple significant events align on the same day, call it out explicitly.
+  "Three major shifts on the same day. This doesn't happen."
+
+HISTORICAL CONTEXT: When provided (e.g., "last time was 1861-1875, Civil War era"), weave it in naturally.
+Don't lecture about history — use it to create weight: "The last time Neptune did this, the entire world changed."
+
+RARITY FRAMES: Pre-built framing strings are provided. You can use them directly or adapt them.
+
+PLANETARY DIGNITIES: When a planet is in domicile, exalted, detriment, or fall, this changes everything
+about how it operates. If dignity info is provided, USE IT:
+- Domicile: "Mars is HOME in Aries right now — pure, unfiltered drive"
+- Exalted: "Venus is exalted in Pisces — love at its most transcendent"
+- Detriment: "Mercury in Sagittarius is in detriment — communication gets sloppy, big-picture at the cost of detail"
+- Fall: "Saturn in fall — discipline wobbles, structures feel shaky"
+`;
+
+const SABBAT_CONTEXT = `
+SABBAT / WHEEL OF THE YEAR:
+If a sabbat is approaching or happening today, this IS the content. Sabbats are:
+- Samhain (Oct 31), Yule (Dec 21), Imbolc (Feb 1), Ostara (Mar 21)
+- Beltane (May 1), Litha (Jun 21), Lammas (Aug 1), Mabon (Sep 21)
+
+When sabbat data is provided (spiritual meaning, crystals, herbs, rituals, traditions, deities):
+- Reference the SPECIFIC traditions and correspondences — not generic "seasonal energy"
+- Name the crystals, herbs, and deities associated with this sabbat
+- Connect the sabbat to what's happening astronomically: "Ostara falls on the equinox — light and dark balanced"
+- If a rare transit coincides with a sabbat, frame the combination: "This isn't just any Ostara"
+- Reference the historical/pagan context naturally — Sammii knows this stuff
+`;
+
 const UNIVERSAL_BANS = `
 UNIVERSAL BANS — NEVER USE:
 - "gentle nudge" / "cosmic wink" / "like the universe is"
@@ -153,6 +191,10 @@ ${CONTENT_TYPES}
 ${SCRIPT_STRUCTURE}
 
 ${GRIMOIRE_USAGE}
+
+${EVENT_SIGNIFICANCE}
+
+${SABBAT_CONTEXT}
 
 ${UNIVERSAL_BANS}
 

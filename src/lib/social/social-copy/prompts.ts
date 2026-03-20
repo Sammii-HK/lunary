@@ -7,6 +7,174 @@ import { POST_TYPE_SPECS } from './constants';
 import { SOCIAL_POST_STYLE_INSTRUCTION } from './style-instructions';
 import { buildNoveltyInstruction } from './novelty';
 
+// ---------------------------------------------------------------------------
+// Hook formulas - per-category database of proven hook structures
+// ---------------------------------------------------------------------------
+
+export const HOOK_FORMULAS: Record<
+  string,
+  { formula: string; example: string }[]
+> = {
+  cosmic_event: [
+    {
+      formula: 'RARITY + TIMING',
+      example:
+        "Mercury stations direct once every 4 months. Here's what shifts in the next 48 hours.",
+    },
+    {
+      formula: 'CONVERGENCE + SCALE',
+      example:
+        'Three major shifts align on one day. The last time the sky looked like this was 9,000 years ago.',
+    },
+  ],
+  zodiac: [
+    {
+      formula: 'OBSERVATION + SPECIFICITY',
+      example:
+        "Sagittarius risings overshare within 5 minutes. It's the Jupiter effect.",
+    },
+    {
+      formula: 'CHALLENGE + IDENTITY',
+      example: 'Only a real Scorpio would admit to this.',
+    },
+  ],
+  tarot: [
+    {
+      formula: 'MISCONCEPTION FLIP',
+      example:
+        "The Tower isn't destruction - it's destruction of what was never built solid.",
+    },
+    {
+      formula: 'HIDDEN MEANING',
+      example:
+        '3 out of 5 tarot readers miss what the Lovers card actually means.',
+    },
+  ],
+  numerology: [
+    {
+      formula: 'APPEARANCE TRIGGER',
+      example:
+        "Seeing 444 most doesn't mean protected. It means: ground yourself, now.",
+    },
+  ],
+  sabbat: [
+    {
+      formula: 'HISTORICAL + SENSORY',
+      example:
+        'Samhain is the one night the veil thins. Historically: bonfires, apples, remembrance.',
+    },
+  ],
+  crystals: [
+    {
+      formula: 'UNEXPECTED PROPERTY',
+      example: "Black tourmaline doesn't just protect. It transmutes.",
+    },
+  ],
+  planetary: [
+    {
+      formula: 'RARITY + HISTORY',
+      example:
+        'Neptune returns to Aries for the first time since 1861. The Civil War started within 24 hours of its last ingress.',
+    },
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// Engagement intent mapping - what action each content style engineers
+// ---------------------------------------------------------------------------
+
+const ENGAGEMENT_INTENT_GUIDE = `
+ENGAGEMENT INTENT (optimise for saves first, shares second):
+- SAVES (most valuable signal): tips, frameworks, rarity facts, repeatable rules of thumb, historical details most sources skip, practical frameworks people can apply immediately
+- SHARES: identity-affirming content + surprising facts people want to credit themselves for finding
+- COMMENTS: rankings, polls, relatable confessions, specific questions people can answer from experience
+- LIKES (least valuable): inspirational, aesthetic - avoid optimising purely for this`;
+
+// ---------------------------------------------------------------------------
+// Save-worthiness requirement
+// ---------------------------------------------------------------------------
+
+const SAVE_WORTHINESS_RULE = `SAVE-WORTHINESS: Every post must include ONE element people want to reference later: a repeatable rule of thumb, a historical detail most sources don't mention, or a practical framework they can apply immediately.`;
+
+// ---------------------------------------------------------------------------
+// Rarity extraction rule
+// ---------------------------------------------------------------------------
+
+const RARITY_EXTRACTION_RULE = `RARITY LEAD: Find the ONE rarest fact most people don't know about this topic. Lead with that. If this involves a transit, lead with how rarely it occurs.`;
+
+// ---------------------------------------------------------------------------
+// Reference posts - examples of what high-quality Lunary content looks like
+// ---------------------------------------------------------------------------
+
+const REFERENCE_POSTS = `
+REFERENCE POSTS (study the structure and specificity, do not copy these):
+1. "Neptune enters Aries for the first time since 1861. Here's what happened every time this transit occurred."
+2. "March 20 has THREE major shifts in one day - equinox, Neptune ingress, Mercury direct. This hasn't happened in your lifetime."
+3. "The Death card isn't an ending. It's the moment you stop pretending nothing needs to change."
+4. "Saturn in Gemini lasts until 2027. The last time it happened (2000-2003), the dot-com bubble burst and people rebuilt from scratch."
+5. "Full Moon in Virgo tonight. If your to-do list suddenly feels urgent, that's the transit, not you."\n`;
+
+// ---------------------------------------------------------------------------
+// Helper: build hook formula hint for the prompt
+// ---------------------------------------------------------------------------
+
+function getHookHint(pack: SourcePack): string {
+  const domain = pack.contentDomain?.toLowerCase() ?? '';
+  const category = pack.categoryLabel?.toLowerCase() ?? '';
+
+  // Match against known hook formula categories
+  const key =
+    Object.keys(HOOK_FORMULAS).find(
+      (k) => domain.includes(k) || category.includes(k),
+    ) ??
+    (pack.transitBrief ? 'cosmic_event' : undefined) ??
+    (category.includes('sign') || category.includes('zodiac')
+      ? 'zodiac'
+      : undefined);
+
+  if (!key || !HOOK_FORMULAS[key]) return '';
+
+  const formulas = HOOK_FORMULAS[key];
+  const picked = formulas[hashSeed(pack) % formulas.length];
+  return `\nHOOK FORMULA to consider (adapt, don't copy): ${picked.formula}
+Example: "${picked.example}"`;
+}
+
+// ---------------------------------------------------------------------------
+// Helper: build transit brief context for the prompt
+// ---------------------------------------------------------------------------
+
+function buildTransitBriefBlock(pack: SourcePack): string {
+  const brief = pack.transitBrief;
+  if (!brief) return '';
+
+  const lines: string[] = ['TRANSIT/EVENT DATA (use these facts):'];
+  lines.push(`- Event: ${brief.eventName}`);
+  lines.push(`- Date: ${brief.date}`);
+  lines.push(`- Rarity: ${brief.rarity} (score ${brief.score}/100)`);
+
+  if (brief.orbitalPeriodYears) {
+    lines.push(`- Full orbital period: ${brief.orbitalPeriodYears} years`);
+  }
+  if (brief.yearsPerSign) {
+    lines.push(`- Time in each sign: ~${brief.yearsPerSign} years`);
+  }
+  if (brief.lastInThisSign) {
+    lines.push(`- Last in this sign: ${brief.lastInThisSign}`);
+  }
+  if (brief.historicalContext) {
+    lines.push(`- Historical context: ${brief.historicalContext}`);
+  }
+  if (brief.rarityFrame) {
+    lines.push(`- Rarity frame: ${brief.rarityFrame}`);
+  }
+  if (brief.hookSuggestions?.length) {
+    lines.push(`- Hook suggestions: ${brief.hookSuggestions.join(' | ')}`);
+  }
+
+  return '\n' + lines.join('\n');
+}
+
 /**
  * Simple hash for deterministic seeding
  */
@@ -113,6 +281,9 @@ export const buildEducationalPrompt = (pack: SourcePack): string => {
 
   const noveltyNote = buildNoveltyInstruction(pack.noveltyContext);
 
+  const transitBlock = buildTransitBriefBlock(pack);
+  const hookHint = getHookHint(pack);
+
   return `Write a social post about "${pack.topicTitle}" in UK English.
 
 What you know:
@@ -122,18 +293,28 @@ ${pack.grimoireFacts
   .slice(0, 2)
   .map((fact) => `- ${fact}`)
   .join('\n')}
+${transitBlock}
 
 ${domainContext}
 
 Tone: ${spec.toneNote}
 ${styleGuidance}
+${hookHint}
 
 ${timingNote}
 ${reflectionNote}
 
 ${CRITICAL_RULES}
 
+${RARITY_EXTRACTION_RULE}
+
+${SAVE_WORTHINESS_RULE}
+
+${ENGAGEMENT_INTENT_GUIDE}
+
 ${BANNED_PATTERNS}
+
+${REFERENCE_POSTS}
 
 Important:
 - Use natural, conversational language
@@ -178,6 +359,9 @@ export const buildVideoCaptionPrompt = (pack: SourcePack): string => {
     ? `\nEnd with a natural soft CTA like "Get your personalised chart on Lunary" or "Lunary breaks this down for your exact chart". Make it feel like a natural extension of the insight, not an ad.`
     : '\nDo not mention Lunary or the Grimoire.';
 
+  const transitBlock = buildTransitBriefBlock(pack);
+  const hookHint = getHookHint(pack);
+
   return `Write a video caption about "${pack.topicTitle}" in UK English.
 
 What you know:
@@ -187,15 +371,23 @@ ${pack.grimoireFacts
   .slice(0, 2)
   .map((fact) => `- ${fact}`)
   .join('\n')}
+${transitBlock}
 
 ${domainContext}
 
 ${styleGuidance}
+${hookHint}
 
 ${captionInstructions}
 ${ctaInstruction}
 
 ${CRITICAL_RULES}
+
+${RARITY_EXTRACTION_RULE}
+
+${SAVE_WORTHINESS_RULE}
+
+${ENGAGEMENT_INTENT_GUIDE}
 
 ${BANNED_PATTERNS}
 
@@ -228,10 +420,13 @@ export const buildQuestionPrompt = (pack: SourcePack): string => {
 
   const noveltyNote = buildNoveltyInstruction(pack.noveltyContext);
 
+  const transitBlock = buildTransitBriefBlock(pack);
+
   return `Write an engaging question about "${pack.topicTitle}" in UK English.
 
 What you know:
 ${pack.grimoireExcerpt}
+${transitBlock}
 
 ${domainContext}
 
@@ -244,8 +439,11 @@ Ask a genuine question that:
 - Avoids "What is..." definitions
 - Should inspire CONCRETE, SPECIFIC responses - not vague reflection
 - Is answerable, not rhetorical
+- Optimises for COMMENTS: use rankings, relatable confessions, or specific "which one are you?" style questions
 
 ${CRITICAL_RULES}
+
+${SAVE_WORTHINESS_RULE}
 
 Optionally add a short follow-up line to encourage responses (keep it under 7 words).
 

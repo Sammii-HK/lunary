@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     if (type === 'story') {
       // Generate a story for today
-      const stories = generateDailyStoryData(dateStr);
+      const stories = await generateDailyStoryData(dateStr);
       addLog(`Generated ${stories.length} stories for ${dateStr}`);
 
       const story = stories[0]; // Use the first one (moon phase)
@@ -351,7 +351,7 @@ export async function POST(request: NextRequest) {
 
     if (type === 'all-stories') {
       // Generate and post all stories for today
-      const stories = generateDailyStoryData(dateStr);
+      const stories = await generateDailyStoryData(dateStr);
       addLog(`Generated ${stories.length} stories for ${dateStr}`);
 
       const storyUtcHours = [9, 12, 15, 19];

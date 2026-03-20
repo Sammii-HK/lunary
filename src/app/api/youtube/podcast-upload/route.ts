@@ -8,11 +8,6 @@ import {
 } from '@/lib/youtube/client';
 import { buildPodcastYouTubeMetadata } from '@/lib/youtube/metadata';
 import { logActivity } from '@/lib/admin-activity';
-import { getFfmpegPath } from '@/lib/video/compose-video';
-import ffmpeg from 'fluent-ffmpeg';
-import { writeFile, readFile, mkdtemp, rm } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,12 +19,77 @@ const COVER_IMAGE_URL =
 
 /**
  * Compose a simple podcast video: static cover image + audio → MP4
- * This is the standard approach for podcast YouTube uploads.
+ * On Vercel: delegates to Content Creator server.
+ * Locally: uses ffmpeg directly.
  */
 async function composePodcastVideo(
   coverImage: Buffer,
   audioBuffer: Buffer,
 ): Promise<Buffer> {
+  const CONTENT_CREATOR_URL = process.env.CONTENT_CREATOR_API_URL;
+
+  if (process.env.VERCEL && !CONTENT_CREATOR_URL) {
+    throw new Error(
+      'CONTENT_CREATOR_API_URL is not set. ' +
+        'Video rendering is not allowed on Vercel.',
+    );
+  }
+
+  if (contentCreatorUrl) {
+    // Delegate to Content Creator for podcast video composition
+    const audioBlob = await put(
+      `temp/podcast-audio-${Date.now()}.mp3`,
+      audioBuffer,
+      {
+        access: 'public',
+        addRandomSuffix: true,
+      },
+    );
+    const coverBlob = await put(
+      `temp/podcast-cover-${Date.now()}.png`,
+      coverImage,
+      {
+        access: 'public',
+        addRandomSuffix: true,
+      },
+    );
+
+    const renderSecret =
+      process.env.LUNARY_RENDER_SECRET || process.env.CRON_SECRET;
+    const response = await fetch(`${CONTENT_CREATOR_URL}/api/podcast-compose`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(renderSecret ? { Authorization: `Bearer ${renderSecret}` } : {}),
+      },
+      body: JSON.stringify({
+        audioUrl: audioBlob.url,
+        coverUrl: coverBlob.url,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(
+        `Content Creator podcast compose failed (${response.status}): ${errorBody}`,
+      );
+    }
+
+    const result = await response.json();
+    if (!result.videoData) {
+      throw new Error('Content Creator returned no video data');
+    }
+
+    return Buffer.from(result.videoData, 'base64');
+  }
+
+  // Local dev fallback: use ffmpeg directly
+  const { getFfmpegPath } = await import('@/lib/video/compose-video');
+  const ffmpeg = (await import('fluent-ffmpeg')).default;
+  const { writeFile, readFile, mkdtemp, rm } = await import('fs/promises');
+  const { join } = await import('path');
+  const { tmpdir } = await import('os');
+
   await getFfmpegPath();
 
   const tempDir = await mkdtemp(join(tmpdir(), 'podcast-video-'));
@@ -58,7 +118,6 @@ async function composePodcastVideo(
           '-pix_fmt',
           'yuv420p',
           '-shortest',
-          // Scale cover to 1920x1080 (YouTube landscape), pad if needed
           '-vf',
           'scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black',
         ])

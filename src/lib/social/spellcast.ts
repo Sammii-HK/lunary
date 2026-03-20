@@ -45,10 +45,10 @@ export async function spellcastFetch(
   path: string,
   options: RequestInit & { timeoutMs?: number } = {},
 ): Promise<Response> {
-  const { url, apiKey } = getSpellcastConfig();
+  const { url: SPELLCAST_BASE, apiKey } = getSpellcastConfig();
   const { timeoutMs, ...fetchOptions } = options;
 
-  return fetch(`${url}${path}`, {
+  return fetch(`${SPELLCAST_BASE}${path}`, {
     ...fetchOptions,
     headers: {
       'Content-Type': 'application/json',
@@ -110,10 +110,28 @@ export async function postToSpellcast(
     const instagramOpts = (params.platformSettings as Record<string, unknown>)
       ?.instagramOptions as Record<string, unknown> | undefined;
     const isStory = instagramOpts?.isStory === true;
-    const postType = isStory ? 'story' : 'post';
+    // TikTok requires postType 'video' when media contains video
+    const hasVideoMedia = params.media?.some((m) => m.type === 'video');
+    // Multiple images → carousel (Instagram rejects >1 image as regular 'post')
+    const imageCount =
+      params.media?.filter((m) => m.type === 'image').length ?? 0;
+    const isCarousel = imageCount > 1;
+    const postType = isStory
+      ? 'story'
+      : hasVideoMedia
+        ? 'video'
+        : isCarousel
+          ? 'carousel'
+          : 'post';
 
-    // Spellcast requires non-empty content; stories are image-only so use a space
-    const content = params.content || ' ';
+    // Stories are image-only so a placeholder is acceptable.
+    // For all other post types, reject truly empty content.
+    const isImageOnly = isStory;
+    const content = params.content?.trim()
+      ? params.content
+      : isImageOnly
+        ? ' '
+        : '';
 
     // Always set who_can_reply_post — Postiz's default is invalid and causes silent failures.
     const platformSettings = {
@@ -217,6 +235,21 @@ export async function postToSpellcastMultiPlatform(params: {
   firstComment?: string;
 }): Promise<{ results: Record<string, SocialPostResult> }> {
   const results: Record<string, SocialPostResult> = {};
+
+  // Guard: reject empty/whitespace content
+  if (!params.content?.trim()) {
+    const emptyResult: SocialPostResult = {
+      success: false,
+      error: 'Empty content — refusing to publish a blank post to Spellcast',
+      backend: 'spellcast',
+    };
+    return {
+      results: Object.fromEntries(
+        params.platforms.map((p) => [p, emptyResult]),
+      ),
+    };
+  }
+
   const { accountSetId } = getSpellcastConfig();
 
   // Validate all platforms against allow-list before use as object keys
@@ -260,6 +293,16 @@ export async function postToSpellcastMultiPlatform(params: {
       }
     }
 
+    // Auto-detect post type from media
+    const imageCount =
+      params.media?.filter((m) => m.type === 'image').length ?? 0;
+    const hasVideoMedia = params.media?.some((m) => m.type === 'video');
+    const postType = hasVideoMedia
+      ? 'video'
+      : imageCount > 1
+        ? 'carousel'
+        : 'post';
+
     // 1. Create draft
     const createRes = await spellcastFetch('/api/posts', {
       method: 'POST',
@@ -268,7 +311,7 @@ export async function postToSpellcastMultiPlatform(params: {
         mediaUrls: params.media?.map((m) => m.url) ?? [],
         scheduledFor: params.scheduledDate,
         accountSetId,
-        postType: 'post',
+        postType,
         ...(selectedAccountIds ? { selectedAccountIds } : {}),
         ...(Object.keys(platformVariations).length > 0
           ? { platformVariations }

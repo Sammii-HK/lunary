@@ -260,12 +260,17 @@ export const validateScriptBody = (
   lines: string[],
   topic: string,
   searchPhrase: string,
+  opts?: { maxWords?: number; maxLines?: number },
 ): string[] => {
   const reasons: string[] = [];
+  const maxWords = opts?.maxWords ?? 65;
+  const maxLines = opts?.maxLines ?? 7;
 
   // CRITICAL: Line count
-  if (lines.length < 4 || lines.length > 7) {
-    reasons.push(`Script body must be 4-7 lines (got ${lines.length})`);
+  if (lines.length < 4 || lines.length > maxLines) {
+    reasons.push(
+      `Script body must be 4-${maxLines} lines (got ${lines.length})`,
+    );
   }
 
   const combined = lines.join(' ').trim();
@@ -307,9 +312,9 @@ export const validateScriptBody = (
 
   // CRITICAL: Word count - analytics-driven hard limit
   const totalWords = lines.reduce((sum, line) => sum + countWords(line), 0);
-  if (totalWords > 65) {
+  if (totalWords > maxWords) {
     reasons.push(
-      `Script is ${totalWords} words - must be under 65. Cut lines from the middle.`,
+      `Script is ${totalWords} words - must be under ${maxWords}. Cut lines from the middle.`,
     );
   }
   if (totalWords < 35) {

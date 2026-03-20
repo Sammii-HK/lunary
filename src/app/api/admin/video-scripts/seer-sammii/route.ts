@@ -73,6 +73,11 @@ export async function POST(request: Request) {
         title: script.topic,
         series: '',
         summary: script.caption,
+        talkingPoints: script.talkingPoints,
+        hashtags: script.hashtags,
+        cta: script.cta,
+        contentType: script.contentType,
+        transitContext: script.transitContext,
       },
     });
 

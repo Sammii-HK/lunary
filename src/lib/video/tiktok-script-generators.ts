@@ -151,7 +151,7 @@ function generateDashboardOverview(_sky: SkyData): TikTokScript {
       },
     ],
     outro: {
-      text: 'link in bio',
+      text: 'lunary.app',
       durationSeconds: 2,
     },
     voiceover:

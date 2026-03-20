@@ -1,0 +1,226 @@
+import {
+  generateDailyBatch,
+  generateLinkedInDidYouKnowBatch,
+} from '@/lib/instagram/content-orchestrator';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export interface WeeklyGenerationResult {
+  success: boolean;
+  totalPosts: number;
+  daysGenerated: number;
+  weekStart: string;
+  results: Array<{
+    date: string;
+    success: boolean;
+    postsGenerated: number;
+    error?: string;
+    saveErrors?: string[];
+  }>;
+  error?: string;
+}
+
+/**
+ * Generate Instagram + LinkedIn content for a full week (7 days).
+ *
+ * Extracted from the admin endpoint so both the HTTP route and the
+ * weekly-content cron can call it directly — no self-fetch needed.
+ */
+export async function generateWeeklyInstagramContent(
+  startDate: string,
+): Promise<WeeklyGenerationResult> {
+  console.log(
+    `[Instagram Weekly] Generating content for week starting ${startDate}`,
+  );
+
+  const startDateObj = new Date(startDate);
+  const results: WeeklyGenerationResult['results'] = [];
+  let totalPosts = 0;
+
+  // Generate content for 7 consecutive days
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(startDateObj);
+    date.setDate(startDateObj.getDate() + i);
+    const dateStr = date.toISOString().split('T')[0];
+
+    try {
+      console.log(`  [Day ${i + 1}/7] Generating content for ${dateStr}...`);
+
+      // Generate content batch for this day
+      const batch = await generateDailyBatch(dateStr);
+
+      // Rest days (Wed/Sun) intentionally return 0 posts — skip gracefully
+      if (!batch || !batch.posts || batch.posts.length === 0) {
+        results.push({ date: dateStr, success: true, postsGenerated: 0 });
+        continue;
+      }
+
+      // Save to social_posts table
+      let savedCount = 0;
+      const saveErrors: string[] = [];
+      for (const post of batch.posts) {
+        try {
+          // All platforms share one group key so they appear together in the UI
+          const groupKey = `${dateStr}-${post.type}`;
+
+          // For multi-slide post types, store all image URLs pipe-delimited
+          // so buildPlatformPayload can split them into carousel media items.
+          const isCarousel =
+            post.type === 'carousel' ||
+            post.type === 'angel_number_carousel' ||
+            post.type === 'one_word';
+          const imageUrls = post.imageUrls || [];
+          const imageUrlValue =
+            isCarousel && imageUrls.length > 1
+              ? imageUrls.join('|')
+              : imageUrls[0] || null;
+
+          const postData = {
+            content: post.caption,
+            postType: isCarousel ? 'instagram_carousel' : post.type,
+            scheduledDate: new Date(post.scheduledTime),
+            image_url: imageUrlValue,
+            video_metadata: {
+              hashtags: post.hashtags || [],
+              metadata: post.metadata || {},
+              imageUrls: imageUrls,
+            },
+          };
+
+          for (const platform of [
+            'instagram',
+            'facebook',
+            'pinterest',
+          ] as const) {
+            const existingPost = await prisma.socialPost.findFirst({
+              where: { base_group_key: groupKey, platform },
+            });
+
+            if (existingPost) {
+              await prisma.socialPost.update({
+                where: { id: existingPost.id },
+                data: postData,
+              });
+            } else {
+              await prisma.socialPost.create({
+                data: {
+                  ...postData,
+                  platform,
+                  status: 'pending',
+                  base_group_key: groupKey,
+                },
+              });
+            }
+          }
+          savedCount++;
+        } catch (dbError) {
+          const msg =
+            dbError instanceof Error ? dbError.message : 'Unknown error';
+          console.error(`    Failed to save ${post.type} to database:`, msg);
+          saveErrors.push(`${post.type}: ${msg}`);
+        }
+      }
+
+      totalPosts += savedCount;
+      results.push({
+        date: dateStr,
+        success: saveErrors.length === 0,
+        postsGenerated: savedCount,
+        ...(saveErrors.length > 0 ? { saveErrors } : {}),
+      });
+
+      console.log(`    Generated ${batch.posts.length} posts for ${dateStr}`);
+    } catch (error) {
+      console.error(`    Failed to generate content for ${dateStr}:`, error);
+      results.push({
+        date: dateStr,
+        success: false,
+        postsGenerated: 0,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+
+    // Rate limit between days (1 second)
+    if (i < 6) {
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+
+  // Generate LinkedIn "Did You Know" image posts (Mon, Wed, Fri)
+  try {
+    const linkedInDykPosts = generateLinkedInDidYouKnowBatch(startDate);
+    for (const post of linkedInDykPosts) {
+      const dykDateStr = post.scheduledTime.split('T')[0];
+      const groupKey = `linkedin-${dykDateStr}-did_you_know`;
+
+      const imageUrlValue = post.imageUrls[0] || null;
+
+      const postData = {
+        content: post.caption,
+        postType: post.type,
+        scheduledDate: new Date(post.scheduledTime),
+        image_url: imageUrlValue,
+        video_metadata: {
+          hashtags: post.hashtags || [],
+          metadata: post.metadata || {},
+          imageUrls: post.imageUrls,
+        },
+      };
+
+      const existingPost = await prisma.socialPost.findFirst({
+        where: { base_group_key: groupKey },
+      });
+
+      if (existingPost) {
+        await prisma.socialPost.update({
+          where: { id: existingPost.id },
+          data: postData,
+        });
+      } else {
+        await prisma.socialPost.create({
+          data: {
+            ...postData,
+            platform: 'linkedin',
+            status: 'pending',
+            base_group_key: groupKey,
+          },
+        });
+      }
+    }
+    totalPosts += linkedInDykPosts.length;
+    console.log(`  Generated ${linkedInDykPosts.length} LinkedIn DYK posts`);
+  } catch (linkedInError) {
+    console.warn(
+      '[Instagram Weekly] Failed to generate LinkedIn DYK posts:',
+      linkedInError instanceof Error ? linkedInError.message : 'Unknown error',
+    );
+  }
+
+  const successfulDays = results.filter((r) => r.success).length;
+  const failedDays = results.filter((r) => !r.success);
+
+  console.log(
+    `[Instagram Weekly] Generated ${totalPosts} posts across ${successfulDays}/7 days`,
+  );
+
+  if (totalPosts === 0) {
+    const errors = failedDays.map((r) => `${r.date}: ${r.error}`).join('; ');
+    return {
+      success: false,
+      totalPosts: 0,
+      daysGenerated: 0,
+      weekStart: startDate,
+      error: `No Instagram posts generated. Errors: ${errors}`,
+      results,
+    };
+  }
+
+  return {
+    success: true,
+    totalPosts,
+    daysGenerated: successfulDays,
+    weekStart: startDate,
+    results,
+  };
+}

@@ -321,6 +321,40 @@ export const FACT_POOLS: Record<
       source: 'chakras/third-eye',
     },
   ],
+  runes: [
+    {
+      fact: 'The Elder Futhark is the oldest runic alphabet, with 24 symbols dating back to the 2nd century. Each rune is both a letter and a complete concept.',
+      source: 'runes/elder-futhark',
+    },
+    {
+      fact: "The word 'rune' comes from the Old Norse 'run', meaning secret or mystery. Runes were never just an alphabet: they were considered sacred knowledge.",
+      source: 'runes/history',
+    },
+    {
+      fact: 'In Norse mythology, Odin hung from Yggdrasil for nine days and nights to discover the runes. He sacrificed himself to himself for wisdom.',
+      source: 'runes/odin',
+    },
+    {
+      fact: "Fehu, the first rune of the Elder Futhark, represents wealth and abundance. In Old Norse, it literally means 'cattle', which was the primary measure of wealth.",
+      source: 'runes/fehu',
+    },
+    {
+      fact: 'Runes were carved into wood, bone, and stone, not written with ink. The angular shapes exist because straight lines are easier to carve than curves.',
+      source: 'runes/history',
+    },
+    {
+      fact: "The Elder Futhark is divided into three groups of eight called 'aettir'. Each aett is named after a Norse deity: Freya, Hagal, and Tyr.",
+      source: 'runes/elder-futhark',
+    },
+    {
+      fact: 'Runecasting is the practice of drawing runes for guidance. Unlike tarot, each rune carries a single powerful concept rather than a scene or narrative.',
+      source: 'runes/runecasting',
+    },
+    {
+      fact: "The rune Algiz looks like a person with arms raised. It's the most recognised protection symbol in the Elder Futhark and was carved on shields and doorways.",
+      source: 'runes/algiz',
+    },
+  ],
   zodiac: [
     {
       fact: 'Your Sun sign is only one piece of the puzzle. Your Moon sign rules your emotions, and your Rising sign is how others perceive you.',

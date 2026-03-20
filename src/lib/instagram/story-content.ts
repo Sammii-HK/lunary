@@ -11,6 +11,8 @@ import {
   generateNumerologyStory,
 } from './rotating-story-content';
 import { generateDidYouKnow } from './did-you-know-content';
+import { getEventCalendarForDate } from '@/lib/astro/event-calendar';
+import type { CalendarEvent } from '@/lib/astro/event-calendar';
 
 // Weekly rotation schedule: day-of-week (0=Sun) → [slot3, slot4]
 // Frequency: Quote (2), Affirmation (2), Numerology (2), Ritual Tip (2),
@@ -122,6 +124,11 @@ function buildRotatingStory(
         endpoint: '/api/og/instagram/story-rotating',
       };
     }
+    case 'calendar_event':
+      // calendar_event is built separately via buildCalendarEventStory()
+      // because it needs async CalendarEvent data passed in.
+      // This case is a no-op; the actual story is injected in generateDailyStoryData.
+      return null;
     case 'quote':
       // Quote requires a DB call — return placeholder that cron will replace
       return null;
@@ -131,11 +138,62 @@ function buildRotatingStory(
 }
 
 /**
+ * Build an IGStoryData item from a CalendarEvent.
+ * Formats the event headline, rarity frame, and hook into story params
+ * that the OG image endpoint and AI caption generator can consume.
+ */
+function buildCalendarEventStory(event: CalendarEvent): IGStoryData {
+  const hook = event.hookSuggestions[0] || event.name;
+
+  // For sabbats, include correspondences as extra context
+  let extra = event.rarityFrame;
+  if (event.sabbatData) {
+    const parts: string[] = [];
+    if (event.sabbatData.crystals.length > 0) {
+      parts.push(
+        `Crystals: ${event.sabbatData.crystals.slice(0, 3).join(', ')}`,
+      );
+    }
+    if (event.sabbatData.herbs.length > 0) {
+      parts.push(`Herbs: ${event.sabbatData.herbs.slice(0, 3).join(', ')}`);
+    }
+    if (event.sabbatData.colors.length > 0) {
+      parts.push(`Colours: ${event.sabbatData.colors.slice(0, 3).join(', ')}`);
+    }
+    extra = parts.join(' · ');
+  }
+
+  return {
+    variant: 'calendar_event',
+    title: event.name,
+    subtitle: hook,
+    params: {
+      type: 'calendar_event',
+      main: hook,
+      secondary: event.name,
+      extra,
+      rarity: event.rarity,
+      eventType: event.eventType,
+      score: String(event.score),
+      ...(event.planet ? { planet: event.planet } : {}),
+      ...(event.sign ? { sign: event.sign } : {}),
+    },
+    endpoint: '/api/og/instagram/story-rotating',
+  };
+}
+
+/**
  * Generate daily story data for a given date.
  * Returns exactly 4 stories: [moon, tarot, rotating1, rotating2].
  * If a slot is `quote`, it returns a placeholder that the cron fills from DB.
+ *
+ * When the Event Calendar has CRITICAL or HIGH events for the date,
+ * slot 4 is overridden with a `calendar_event` story. For CRITICAL events,
+ * a `transit_alert` is also forced into slot 3 if it is not already there.
  */
-export function generateDailyStoryData(dateStr: string): IGStoryData[] {
+export async function generateDailyStoryData(
+  dateStr: string,
+): Promise<IGStoryData[]> {
   // Use noon UTC for moon phase calculation — midnight can straddle phase
   // boundaries and show the previous phase for most of the day
   const date = new Date(`${dateStr}T12:00:00Z`);
@@ -227,11 +285,41 @@ export function generateDailyStoryData(dateStr: string): IGStoryData[] {
     endpoint: '/api/og/instagram/story-tarot',
   });
 
-  // 3 & 4. Rotating pool stories
-  const [slot3Type, slot4Type] = WEEKLY_ROTATION[dayOfWeek] || [
+  // 3 & 4. Rotating pool stories — start with default day-of-week schedule
+  let [slot3Type, slot4Type] = WEEKLY_ROTATION[dayOfWeek] || [
     'affirmation',
     'quote',
   ];
+
+  // --- Event Calendar integration ---
+  // Check for significant cosmic events and override rotating slots when needed.
+  let calendarEventStory: IGStoryData | null = null;
+
+  try {
+    const events = await getEventCalendarForDate(dateStr);
+    const topEvent = events[0]; // Already sorted by score descending
+
+    if (
+      topEvent &&
+      (topEvent.rarity === 'CRITICAL' || topEvent.rarity === 'HIGH')
+    ) {
+      // Build the calendar_event story from the highest-scoring event
+      calendarEventStory = buildCalendarEventStory(topEvent);
+
+      if (topEvent.rarity === 'CRITICAL') {
+        // CRITICAL events: force transit_alert into slot 3 (every day, regardless
+        // of rotation) so both slots reinforce the major event
+        if (slot3Type !== 'transit_alert') {
+          slot3Type = 'transit_alert';
+        }
+      }
+      // Both CRITICAL and HIGH: override slot 4 with the calendar event
+      slot4Type = 'calendar_event';
+    }
+  } catch {
+    // Event calendar can fail on edge-case dates or missing data.
+    // Degrade gracefully — existing rotation continues unchanged.
+  }
 
   const rotating1 = buildRotatingStory(slot3Type, dateStr);
   if (rotating1) {
@@ -247,18 +335,23 @@ export function generateDailyStoryData(dateStr: string): IGStoryData[] {
     });
   }
 
-  const rotating2 = buildRotatingStory(slot4Type, dateStr);
-  if (rotating2) {
-    stories.push(rotating2);
+  // Slot 4: use calendar event story if available, otherwise normal rotation
+  if (calendarEventStory && slot4Type === 'calendar_event') {
+    stories.push(calendarEventStory);
   } else {
-    // quote placeholder
-    stories.push({
-      variant: 'quote',
-      title: '',
-      subtitle: '',
-      params: { text: '', format: 'story', v: '4' },
-      endpoint: '/api/og/social-quote',
-    });
+    const rotating2 = buildRotatingStory(slot4Type, dateStr);
+    if (rotating2) {
+      stories.push(rotating2);
+    } else {
+      // quote placeholder
+      stories.push({
+        variant: 'quote',
+        title: '',
+        subtitle: '',
+        params: { text: '', format: 'story', v: '4' },
+        endpoint: '/api/og/social-quote',
+      });
+    }
   }
 
   return stories;
@@ -268,11 +361,14 @@ export function generateDailyStoryData(dateStr: string): IGStoryData[] {
  * Legacy: Generate daily stories with absolute imageUrl.
  * @deprecated Use generateDailyStoryData for preview pages.
  */
-export function generateDailyStories(dateStr: string): IGStoryContent[] {
+export async function generateDailyStories(
+  dateStr: string,
+): Promise<IGStoryContent[]> {
   const baseUrl = (
     process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
   ).replace(/\/+$/, '');
-  return generateDailyStoryData(dateStr).map((data) => {
+  const storyData = await generateDailyStoryData(dateStr);
+  return storyData.map((data) => {
     const params = new URLSearchParams(data.params);
     return {
       variant: data.variant,

@@ -299,7 +299,7 @@ const SOFT_CTA_LINES: Record<string, string[]> = {
   ],
   planetary: [
     'Get your personalized transits at lunary.app',
-    'Track this transit in Lunary — link in bio',
+    'Track this transit in Lunary',
   ],
   crystals: [
     'Explore crystal properties at lunary.app/grimoire',
@@ -558,6 +558,71 @@ const URGENCY_LINES: Record<string, string[]> = {
 // ─── Instagram Reel caption helpers ─────────────────────────────────────────
 
 /**
+ * Build IG keyword context line — natural-language sentence with searchable terms.
+ * IG keyword SEO overtook hashtags in 2026. This line appears after the hook
+ * and before the value teaser, giving IG's search indexer the terms it needs.
+ */
+const IG_KEYWORD_CONTEXT: Record<string, string[]> = {
+  zodiac: [
+    "Here's the full {topic} personality breakdown — strengths, shadow side, and compatibility.",
+    '{topic} zodiac traits, love compatibility, and career energy — the complete guide.',
+    'Everything about {topic} — personality, element, ruling planet, and what makes them tick.',
+  ],
+  tarot: [
+    '{topic} tarot card — upright meaning, reversed meaning, love and career guidance.',
+    'Full {topic} tarot breakdown — what this card means in your reading.',
+    '{topic} tarot meaning explained — upright, reversed, and spiritual guidance.',
+  ],
+  lunar: [
+    '{topic} moon phase — energy, rituals, and what to focus on right now.',
+    'How {topic} affects your energy, mood, and what you should be doing.',
+    '{topic} lunar energy — meaning, rituals, and how to work with it.',
+  ],
+  planetary: [
+    '{topic} transit — how it affects every zodiac sign and what to expect.',
+    '{topic} astrology — what this transit means for your chart right now.',
+    '{topic} explained — the transit, the energy shift, and what to watch for.',
+  ],
+  crystals: [
+    '{topic} crystal — healing properties, chakra connections, and how to use it.',
+    '{topic} crystal meaning — metaphysical properties and spiritual uses.',
+    '{topic} crystal guide — properties, cleansing methods, and energy work.',
+  ],
+  numerology: [
+    '{topic} meaning — why this number keeps showing up and what the universe is saying.',
+    '{topic} angel number — spiritual meaning, love, and life path connections.',
+    '{topic} numerology meaning — the message behind the pattern.',
+  ],
+  spells: [
+    '{topic} spell — ingredients, best timing, and step-by-step casting guide.',
+    'How to cast {topic} — everything you need for the ritual.',
+  ],
+  runes: [
+    '{topic} rune — meaning, divination reading, and magical applications.',
+    '{topic} Elder Futhark rune meaning — upright, reversed, and spiritual use.',
+  ],
+  chakras: [
+    '{topic} chakra — signs of imbalance, healing practices, and affirmations.',
+    '{topic} chakra healing — what it controls and how to balance it.',
+  ],
+  sabbat: [
+    '{topic} — history, traditions, rituals, and how to celebrate.',
+    '{topic} sabbat — meaning and modern celebration guide.',
+  ],
+};
+
+function buildIgKeywordContext(
+  topic: string,
+  category: string,
+  date: Date,
+): string {
+  const templates =
+    IG_KEYWORD_CONTEXT[category] || IG_KEYWORD_CONTEXT.planetary;
+  const template = pickByDate(templates, date);
+  return template.replace(/\{topic\}/g, topic);
+}
+
+/**
  * IG-native format hashtag pool (no TikTok-specific tags)
  */
 const IG_FORMAT_HASHTAGS = [
@@ -801,12 +866,16 @@ export interface InstagramReelCaptionParams {
 /**
  * Generate Instagram Reel caption
  *
- * Structure (IG-optimised):
- * [Hook line + emoji]
- * [Value teaser]
- * [Engagement question]
+ * Structure (IG-optimised, 2026 keyword SEO era):
+ * [Hook line + emoji]              — emotional hook (before the fold)
+ * [Keyword context line]           — searchable terms for IG keyword discovery
+ * [Value teaser]                   — why to keep watching
+ * [Engagement question]            — comment trigger
  * [CTA — save Mon/Wed/Fri, share Tue/Thu, follow Sat/Sun]
  * [Hashtags — 5 IG-native tags, no #fyp/#learnontiktok]
+ *
+ * 2026: IG keyword SEO in captions has overtaken hashtags as primary
+ * discovery mechanism. Keywords are woven into the body naturally.
  */
 export function generateInstagramReelCaption(
   params: InstagramReelCaptionParams,
@@ -819,6 +888,9 @@ export function generateInstagramReelCaption(
   const emoji = pickByDate(emojiPool, date);
   const rawHook = hookText || themeName;
   const hookLine = `${rawHook.charAt(0).toUpperCase()}${rawHook.slice(1)} ${emoji}`;
+
+  // Keyword context line — IG search discovery (2026: keywords > hashtags)
+  const keywordLine = buildIgKeywordContext(facetTitle, category, date);
 
   const teaserPool = IG_VALUE_TEASERS[category] || IG_VALUE_TEASERS.default;
   const teaser = pickByDate(teaserPool, date);
@@ -842,7 +914,19 @@ export function generateInstagramReelCaption(
 
   const hashtags = generateInstagramHashtags(category, themeName, facetTitle);
 
-  return [hookLine, '', teaser, '', question, '', cta, '', hashtags].join('\n');
+  return [
+    hookLine,
+    '',
+    keywordLine,
+    '',
+    teaser,
+    '',
+    question,
+    '',
+    cta,
+    '',
+    hashtags,
+  ].join('\n');
 }
 
 // ─── End Instagram Reel helpers ───────────────────────────────────────────────
@@ -955,14 +1039,86 @@ export interface TikTokCaptionOptions {
 }
 
 /**
+ * Build a TikTok SEO keyword opener from topic + category.
+ * TikTok's search algorithm indexes the first ~10 words heavily,
+ * so we front-load searchable terms (topic name, category, year).
+ * The emotional hook belongs in the VIDEO (first 1.7s), not the caption.
+ */
+const TIKTOK_SEO_TEMPLATES: Record<string, string[]> = {
+  zodiac: [
+    '{topic} personality traits — the ones nobody talks about',
+    '{topic} zodiac sign explained — strengths, weaknesses, compatibility',
+    '{topic} astrology breakdown — what your sign really means',
+    '{topic} personality — why this sign is so misunderstood',
+  ],
+  tarot: [
+    '{topic} tarot card meaning — upright and reversed explained',
+    '{topic} tarot meaning — what this card is really telling you',
+    '{topic} tarot card — full meaning breakdown for readings',
+    '{topic} in a tarot reading — what you need to know',
+  ],
+  lunar: [
+    '{topic} moon phase — how it affects your energy and emotions',
+    '{topic} lunar energy — what to do during this phase',
+    '{topic} moon meaning — rituals and energy explained',
+  ],
+  planetary: [
+    '{topic} transit — what it means for every sign',
+    '{topic} astrology — how this transit affects you',
+    '{topic} explained — what every sign needs to know',
+  ],
+  crystals: [
+    '{topic} crystal properties — healing, chakra, and how to use it',
+    '{topic} crystal meaning — everything you need to know',
+    '{topic} crystal guide — properties, cleansing, and energy',
+  ],
+  numerology: [
+    '{topic} meaning — why you keep seeing this number',
+    '{topic} angel number meaning explained',
+    '{topic} numerology — what the universe is telling you',
+  ],
+  spells: [
+    '{topic} spell — ingredients, timing, and how to cast it',
+    'How to cast {topic} — full step-by-step guide',
+  ],
+  runes: [
+    '{topic} rune meaning — upright, reversed, and magical uses',
+    '{topic} Elder Futhark rune — full meaning explained',
+  ],
+  chakras: [
+    '{topic} chakra — signs of imbalance and how to heal it',
+    '{topic} chakra healing — what you need to know',
+  ],
+  sabbat: [
+    '{topic} — traditions, rituals, and how to celebrate',
+    '{topic} sabbat — meaning and rituals explained',
+  ],
+};
+
+function buildTikTokSeoOpener(
+  topic: string,
+  category: string,
+  date: Date,
+): string {
+  const templates =
+    TIKTOK_SEO_TEMPLATES[category] || TIKTOK_SEO_TEMPLATES.planetary;
+  const template = pickByDate(templates, date);
+  return template.replace(/\{topic\}/g, topic);
+}
+
+/**
  * Generate TikTok caption with engagement question + layered hashtags
  *
+ * TikTok captions are SEO-first: searchable keywords in the first 10 words
+ * for TikTok search discovery. The emotional hook belongs in the VIDEO
+ * (first 1.7 seconds), not the caption.
+ *
  * Caption structure:
- * [Hook line]
- * [Engagement question]          — always present
- * [Series follow trigger]        — mid-series or end-of-series
- * [Soft CTA line]                — when shouldIncludeCta() returns true
- * [Urgency line]                 — when content type is time-sensitive
+ * [SEO keyword opener]            — searchable terms first 10 words
+ * [Engagement question]           — always present
+ * [Series follow trigger]         — mid-series or end-of-series
+ * [Soft CTA line]                 — when shouldIncludeCta() returns true
+ * [Urgency line]                  — when content type is time-sensitive
  * [Hashtags]
  */
 export function generateTikTokCaption(
@@ -991,12 +1147,13 @@ export function generateTikTokCaption(
   const shiftedDate = new Date(date.getTime() + 86400000);
   const emoji2 = pickByDate(emojiPool, shiftedDate);
 
-  // Caption format: hook → emoji → engagement → series follow → CTA → urgency → hashtags
+  // Build SEO keyword opener (TikTok search discovery — keywords in first 10 words)
+  const seoOpener = buildTikTokSeoOpener(facet.title, theme.category, date);
+
+  // Caption format: SEO opener → engagement → series follow → CTA → urgency → hashtags
   const parts: string[] = [];
 
-  if (hookText) {
-    parts.push(`${hookText} ${emoji1}`);
-  }
+  parts.push(`${seoOpener} ${emoji1}`);
   parts.push('');
   parts.push(question);
 

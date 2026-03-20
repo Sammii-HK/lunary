@@ -84,6 +84,36 @@ export function scriptToAudioSegments(
     }
   }
 
+  // Merge short chunks (under 3 words) with the next chunk to avoid
+  // tiny subtitle lines that flash by too quickly
+  const minWordsPerChunk = 3;
+  for (let i = chunks.length - 1; i >= 0; i--) {
+    if (chunks[i].words.length < minWordsPerChunk) {
+      if (i + 1 < chunks.length) {
+        // Merge into next chunk (if combined total is within limit)
+        const combined = [...chunks[i].words, ...chunks[i + 1].words];
+        if (combined.length <= maxWordsPerChunk) {
+          chunks[i + 1].words = combined;
+          chunks[i + 1].text = combined.join(' ');
+          chunks[i + 1].complexity = chunks[i + 1].text.length;
+          chunks.splice(i, 1);
+          continue;
+        }
+      }
+      if (i > 0) {
+        // Merge into previous chunk (if combined total is within limit)
+        const combined = [...chunks[i - 1].words, ...chunks[i].words];
+        if (combined.length <= maxWordsPerChunk) {
+          chunks[i - 1].words = combined;
+          chunks[i - 1].text = combined.join(' ');
+          chunks[i - 1].complexity = chunks[i - 1].text.length;
+          chunks[i - 1].pauseAfter = chunks[i].pauseAfter;
+          chunks.splice(i, 1);
+        }
+      }
+    }
+  }
+
   // Second pass: calculate timing based on complexity (character count) and pauses
   const totalComplexity = chunks.reduce((sum, c) => sum + c.complexity, 0);
   const totalPauses = chunks.reduce((sum, c) => sum + c.pauseAfter, 0);
@@ -178,20 +208,25 @@ export function alignScriptToWhisperTiming(
       nextWhisperIdx < whisperWords.length &&
       whisperWords[nextWhisperIdx].start - timing.end > 0.3;
 
-    // Check for sentence boundary
+    // Check for sentence boundary (enforce 4-word minimum per subtitle line)
+    const minWordsPerLine = 4;
     const endsWithPunctuation = /[.!?]$/.test(scriptWords[i]);
-    const isSentenceBreak = endsWithPunctuation && currentWords.length >= 2;
+    const isSentenceBreak =
+      endsWithPunctuation && currentWords.length >= minWordsPerLine;
 
     if (
       isLastWord ||
       hitMaxWords ||
-      (hasNaturalPause && currentWords.length >= 2) ||
+      (hasNaturalPause && currentWords.length >= minWordsPerLine) ||
       isSentenceBreak
     ) {
+      // Add 250ms buffer after last word so subtitle fade-out (200ms) doesn't
+      // cut into the word while it's still being spoken
+      const fadeBuffer = 0.25;
       segments.push({
         text: currentWords.join(' '),
         startTime: segStartTime,
-        endTime: Math.min(segEndTime, audioDuration),
+        endTime: Math.min(segEndTime + fadeBuffer, audioDuration),
       });
       currentWords = [];
     }
@@ -608,6 +643,8 @@ export async function renderRemotionVideo(
     // Quality settings
     crf: props.crf ?? 20, // Good balance of quality and file size
     pixelFormat: 'yuv420p', // Web-compatible
+    // Increase timeout for longer videos (default 30s can be too short)
+    timeoutInMilliseconds: 120000,
     // Progress logging
     onProgress: ({ progress }) => {
       if (Math.round(progress * 100) % 10 === 0) {

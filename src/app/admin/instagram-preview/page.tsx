@@ -506,24 +506,43 @@ export default function InstagramPreviewPage() {
   }, [selectedDate, cacheBuster]);
 
   // Story previews — construct URLs directly (no absolute URL parsing)
-  const storyPreviews = useMemo(() => {
-    const stories = generateDailyStoryData(selectedDate);
-    return stories.map((story) => {
-      const params = new URLSearchParams({
-        ...story.params,
-        t: String(cacheBuster),
-      });
-      return { ...story, url: `${story.endpoint}?${params.toString()}` };
+  const [storyPreviews, setStoryPreviews] = useState<
+    Array<{
+      variant: string;
+      title: string;
+      subtitle: string;
+      params: Record<string, string>;
+      endpoint: string;
+      url: string;
+    }>
+  >([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    generateDailyStoryData(selectedDate).then((stories) => {
+      if (cancelled) return;
+      setStoryPreviews(
+        stories.map((story) => {
+          const params = new URLSearchParams({
+            ...story.params,
+            t: String(cacheBuster),
+          });
+          return { ...story, url: `${story.endpoint}?${params.toString()}` };
+        }),
+      );
     });
+    return () => {
+      cancelled = true;
+    };
   }, [selectedDate, cacheBuster]);
 
   // All story types preview — one of each type regardless of rotation
   const allStoryTypePreviews = useMemo(() => {
+    if (storyPreviews.length === 0) return [];
+
     const t = String(cacheBuster);
-    const stories = generateDailyStoryData(selectedDate);
-    // Moon and Tarot are always first two
-    const moon = stories[0];
-    const tarot = stories[1];
+    const moon = storyPreviews[0];
+    const tarot = storyPreviews[1];
 
     // Build one of each rotating type
     const affData = generateAffirmation(selectedDate);
@@ -590,7 +609,7 @@ export default function InstagramPreviewPage() {
       },
     ];
     return items;
-  }, [selectedDate, cacheBuster]);
+  }, [storyPreviews, selectedDate, cacheBuster]);
 
   return (
     <div className='min-h-screen bg-black text-white p-8'>

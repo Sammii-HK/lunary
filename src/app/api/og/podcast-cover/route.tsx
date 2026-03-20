@@ -87,9 +87,13 @@ function loadAssets() {
   }
 }
 
-export async function GET(): Promise<Response> {
+export async function GET(request: Request): Promise<Response> {
   try {
     loadAssets();
+
+    const { searchParams } = new URL(request.url);
+    const episodeTitle = searchParams.get('title');
+    const episodeNumber = searchParams.get('episode');
 
     const fonts: {
       name: string;
@@ -119,6 +123,9 @@ export async function GET(): Promise<Response> {
       ? `data:image/png;base64,${logoData.toString('base64')}`
       : null;
 
+    // Use episode title as starfield seed for unique star patterns per episode
+    const starSeed = episodeTitle || 'podcast-cover';
+
     const response = new ImageResponse(
       <div
         style={{
@@ -136,8 +143,8 @@ export async function GET(): Promise<Response> {
           overflow: 'hidden',
         }}
       >
-        {/* Starfield */}
-        {generateStarfield('podcast-cover', 200).map((star, i) => (
+        {/* Starfield — unique per episode */}
+        {generateStarfield(starSeed, 200).map((star, i) => (
           <div
             key={i}
             style={{
@@ -190,19 +197,23 @@ export async function GET(): Promise<Response> {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '60px',
+            gap: episodeTitle ? '40px' : '60px',
           }}
         >
           {/* Logo */}
           {logoSrc && (
             // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
-            <img src={logoSrc} width={360} height={360} />
+            <img
+              src={logoSrc}
+              width={episodeTitle ? 280 : 360}
+              height={episodeTitle ? 280 : 360}
+            />
           )}
 
           {/* Show title */}
           <div
             style={{
-              fontSize: '220px',
+              fontSize: episodeTitle ? '160px' : '220px',
               fontFamily: 'Roboto Mono',
               color: '#fafafa',
               letterSpacing: '0.08em',
@@ -226,40 +237,81 @@ export async function GET(): Promise<Response> {
             }}
           />
 
-          {/* Tagline */}
-          <div
-            style={{
-              fontSize: '72px',
-              color: 'rgba(216, 180, 254, 0.7)',
-              letterSpacing: '0.25em',
-              textTransform: 'uppercase',
-              display: 'flex',
-              gap: '48px',
-              alignItems: 'center',
-            }}
-          >
-            <span style={{ display: 'flex' }}>Astrology</span>
-            <span
+          {episodeTitle ? (
+            /* Per-episode: show episode title + number */
+            <div
               style={{
                 display: 'flex',
-                color: 'rgba(132, 88, 216, 0.5)',
-                fontSize: '48px',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '30px',
+                maxWidth: '2400px',
               }}
             >
-              +
-            </span>
-            <span style={{ display: 'flex' }}>Tarot</span>
-            <span
-              style={{
-                display: 'flex',
-                color: 'rgba(132, 88, 216, 0.5)',
-                fontSize: '48px',
-              }}
-            >
-              +
-            </span>
-            <span style={{ display: 'flex' }}>Crystals</span>
-          </div>
+              {episodeNumber && (
+                <div
+                  style={{
+                    fontSize: '56px',
+                    color: 'rgba(132, 88, 216, 0.7)',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                  }}
+                >
+                  Episode {episodeNumber}
+                </div>
+              )}
+              <div
+                style={{
+                  fontSize: episodeTitle.length > 40 ? '80px' : '100px',
+                  color: 'rgba(216, 180, 254, 0.9)',
+                  textAlign: 'center',
+                  lineHeight: 1.2,
+                  display: 'flex',
+                  textShadow: '0 0 60px rgba(132, 88, 216, 0.3)',
+                }}
+              >
+                {episodeTitle}
+              </div>
+            </div>
+          ) : (
+            /* Default: show tagline */
+            <>
+              <div
+                style={{
+                  fontSize: '72px',
+                  color: 'rgba(216, 180, 254, 0.7)',
+                  letterSpacing: '0.25em',
+                  textTransform: 'uppercase',
+                  display: 'flex',
+                  gap: '48px',
+                  alignItems: 'center',
+                }}
+              >
+                <span style={{ display: 'flex' }}>Astrology</span>
+                <span
+                  style={{
+                    display: 'flex',
+                    color: 'rgba(132, 88, 216, 0.5)',
+                    fontSize: '48px',
+                  }}
+                >
+                  +
+                </span>
+                <span style={{ display: 'flex' }}>Tarot</span>
+                <span
+                  style={{
+                    display: 'flex',
+                    color: 'rgba(132, 88, 216, 0.5)',
+                    fontSize: '48px',
+                  }}
+                >
+                  +
+                </span>
+                <span style={{ display: 'flex' }}>Crystals</span>
+              </div>
+            </>
+          )}
 
           {/* Brand */}
           <div

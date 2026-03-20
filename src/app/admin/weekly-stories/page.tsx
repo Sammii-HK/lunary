@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { format, addDays, startOfWeek } from 'date-fns';
 import { generateDailyStoryData } from '@/lib/instagram/story-content';
 import { generateStoryAltText } from '@/lib/instagram/alt-text';
@@ -29,6 +29,7 @@ const VARIANT_COLORS: Record<string, string> = {
   did_you_know: 'bg-cyan-900 text-cyan-300 border-cyan-700',
   numerology: 'bg-violet-900 text-violet-300 border-violet-700',
   quote: 'bg-zinc-800 text-zinc-300 border-zinc-600',
+  calendar_event: 'bg-amber-900 text-amber-300 border-amber-700',
 };
 
 function getWeekDates(weekOffset: number): string[] {
@@ -72,23 +73,45 @@ export default function WeeklyStoriesPage() {
     return `${format(start, 'MMM d')} – ${format(end, 'MMM d, yyyy')}`;
   }, [weekDates]);
 
-  const weekStories = useMemo(() => {
-    return weekDates.map((dateStr) => {
-      const stories = generateDailyStoryData(dateStr);
-      return {
-        dateStr,
-        stories: stories.map((story) => {
-          const params = new URLSearchParams({
-            ...story.params,
-            t: String(cacheBuster),
-          });
-          return {
-            ...story,
-            url: `${story.endpoint}?${params.toString()}`,
-          };
-        }),
-      };
+  const [weekStories, setWeekStories] = useState<
+    Array<{
+      dateStr: string;
+      stories: Array<{
+        variant: string;
+        title: string;
+        subtitle: string;
+        params: Record<string, string>;
+        endpoint: string;
+        url: string;
+      }>;
+    }>
+  >([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all(
+      weekDates.map(async (dateStr) => {
+        const stories = await generateDailyStoryData(dateStr);
+        return {
+          dateStr,
+          stories: stories.map((story) => {
+            const params = new URLSearchParams({
+              ...story.params,
+              t: String(cacheBuster),
+            });
+            return {
+              ...story,
+              url: `${story.endpoint}?${params.toString()}`,
+            };
+          }),
+        };
+      }),
+    ).then((result) => {
+      if (!cancelled) setWeekStories(result);
     });
+    return () => {
+      cancelled = true;
+    };
   }, [weekDates, cacheBuster]);
 
   const handleRefresh = useCallback(() => {

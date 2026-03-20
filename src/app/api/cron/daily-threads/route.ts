@@ -43,14 +43,26 @@ export async function GET(request: NextRequest) {
 
     const eventKey = `daily-threads-${dateStr}`;
 
-    // Dedup gate
+    // Per-post dedup: check which individual posts have already been sent
+    // so retries after partial failure only resend the failed ones.
+    const alreadySentPosts = new Set<string>();
     if (!force) {
-      const alreadySent = await sql`
+      const sentRows = await sql`
+        SELECT event_key FROM notification_sent_events
+        WHERE date = ${dateStr}::date
+        AND event_key LIKE ${`daily-threads-${dateStr}-%`}
+      `;
+      for (const row of sentRows.rows) {
+        alreadySentPosts.add(row.event_key);
+      }
+
+      // Also check the legacy batch-level key for backwards compatibility
+      const batchSent = await sql`
         SELECT id FROM notification_sent_events
         WHERE date = ${dateStr}::date
         AND event_key = ${eventKey}
       `;
-      if (alreadySent.rows.length > 0) {
+      if (batchSent.rows.length > 0) {
         console.log(`🧵 Threads already generated for ${dateStr}, skipping`);
         return NextResponse.json({
           success: true,
@@ -89,7 +101,22 @@ export async function GET(request: NextRequest) {
       error?: string;
     }> = [];
 
-    for (const post of threadsBatch.posts) {
+    for (let i = 0; i < threadsBatch.posts.length; i++) {
+      const post = threadsBatch.posts[i];
+      const postKey = `daily-threads-${dateStr}-${i}-${post.pillar}`;
+
+      // Skip posts that were already sent in a previous (partial) run
+      if (alreadySentPosts.has(postKey)) {
+        results.push({
+          scheduledTime: post.scheduledTime,
+          pillar: post.pillar,
+          source: post.source,
+          status: 'success',
+          error: undefined,
+        });
+        continue;
+      }
+
       try {
         const content = [post.hook, post.body, post.prompt]
           .filter(Boolean)
@@ -111,6 +138,15 @@ export async function GET(request: NextRequest) {
               : [],
           platformSettings: { topic_tag: post.topicTag },
         });
+
+        if (result.success) {
+          // Record per-post dedup immediately so retries skip this post
+          await sql`
+            INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
+            VALUES (${dateStr}::date, ${postKey}, 'daily_threads_post', ${`Threads ${post.pillar} #${i}`}, 3, 'cron')
+            ON CONFLICT (date, event_key) DO NOTHING
+          `;
+        }
 
         results.push({
           scheduledTime: post.scheduledTime,
@@ -134,7 +170,7 @@ export async function GET(request: NextRequest) {
     const successCount = results.filter((r) => r.status === 'success').length;
     const executionTimeMs = Date.now() - startTime;
 
-    // Only record dedup event when ALL posts succeed — partial success should allow retry
+    // Record batch-level dedup when ALL posts succeed so future runs skip entirely
     const failedCount = results.filter((r) => r.status === 'error').length;
     if (successCount > 0 && failedCount === 0) {
       await sql`
