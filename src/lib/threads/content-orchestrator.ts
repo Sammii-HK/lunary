@@ -1,8 +1,4 @@
-import {
-  generateCosmicTimingPost,
-  generateConversationPost,
-  generateIdentityPost,
-} from './original-content';
+import { generateCosmicTimingPost } from './original-content';
 import { getDearStyleReferralPost } from '@/lib/social/shared/constants/persona-templates';
 import {
   DAILY_SLOTS_UTC,
@@ -10,20 +6,13 @@ import {
   type ThreadsPost,
   type ThreadsPostBatch,
 } from './types';
-import {
-  getWinningPatterns,
-  getBestHookPattern,
-  getTopThemeWords,
-  type WinningPatterns,
-} from '@/lib/social/winning-patterns';
 
 /**
- * Daily schedule (5 slots):
- * Slot 0 (14:00 UTC / 10am ET) - Cosmic event #1 (highest priority)
- * Slot 1 (16:00 UTC / 12pm ET) - Cosmic event #2 (second priority)
- * Slot 2 (19:00 UTC / 3pm ET)  - Conversation or identity post (engagement)
- * Slot 3 (21:00 UTC / 5pm ET)  - Cosmic event #3 (third priority)
- * Slot 4 (23:00 UTC / 7pm ET)  - Dear-style referral CTA (follower growth)
+ * Daily schedule (4 slots, same every day):
+ * Slot 0 (14:00 UTC) - Cosmic event #1 (highest priority) — 9am EST
+ * Slot 1 (17:00 UTC) - Cosmic event #2 (second priority) — 12pm EST
+ * Slot 2 (21:00 UTC) - Cosmic event #3 (third priority) — 4pm EST
+ * Slot 3 (23:00 UTC) - Dear-style referral CTA (follower growth) — 6pm EST
  */
 
 /**
@@ -32,12 +21,14 @@ import {
  */
 function slotMinuteOffset(dateStr: string, slotIndex: number): number {
   const date = new Date(dateStr);
+  // Combine date parts + slot to get a repeatable but varied number
   const seed = date.getUTCDate() * 17 + date.getUTCMonth() * 31 + slotIndex * 7;
   return seed % 15;
 }
 
 /**
  * Applies per-slot minute offsets to a list of posts so they don't all fire at :00.
+ * Slots are identified by their hour component; each gets a different deterministic offset.
  */
 function applyMinuteOffsets(
   posts: ThreadsPost[],
@@ -57,7 +48,7 @@ function applyMinuteOffsets(
 
 /**
  * Generate a full day's Threads content batch.
- * 3 cosmic transit posts + 1 conversation/identity + 1 dear-style referral.
+ * 3 cosmic transit posts + 1 dear-style referral, every day.
  */
 export async function generateThreadsBatch(
   dateStr: string,
@@ -66,90 +57,53 @@ export async function generateThreadsBatch(
   const date = new Date(dateStr);
   const seed = date.getDate() + date.getMonth() * 31;
 
-  // Use the first slot hour as reference for all ranks — avoids event priority
-  // shifting between hours (e.g. Moon aspects tightening) causing duplicate hooks.
-  const refHour = slots[0];
+  // Slots 0-2: cosmic transit content, each a different event
+  const [post0, post1, post2] = await Promise.all([
+    generateCosmicTimingPost(dateStr, slots[0], 0),
+    generateCosmicTimingPost(dateStr, slots[1], 1),
+    generateCosmicTimingPost(dateStr, slots[2], 2),
+  ]);
 
-  // Alternate between conversation and identity posts for the engagement slot
-  const engagementGenerator =
-    seed % 2 === 0
-      ? generateConversationPost(dateStr, slots[2])
-      : generateIdentityPost(dateStr, slots[2]);
-
-  const [post0, post1, post2, engagementPost, winningPatterns] =
-    await Promise.all([
-      generateCosmicTimingPost(dateStr, refHour, 0),
-      generateCosmicTimingPost(dateStr, refHour, 1),
-      generateCosmicTimingPost(dateStr, refHour, 2),
-      engagementGenerator,
-      getWinningPatterns().catch(() => null),
-    ]);
-
-  // Deduplicate cosmic posts
+  // Deduplicate: if fewer cosmic events exist than slots, ranks collapse
+  // to the same event. Drop duplicates so we don't post the same thing twice.
   const seenHooks = new Set<string>();
-  const cosmicSlots = [slots[0], slots[1], slots[3]]; // slots 0, 1, 3 are cosmic
   const cosmicPosts: ThreadsPost[] = [];
-  for (const [i, post] of [post0, post1, post2].entries()) {
+  for (const post of [post0, post1, post2]) {
     if (seenHooks.has(post.hook)) continue;
     seenHooks.add(post.hook);
-    const slotDate = new Date(dateStr);
-    slotDate.setUTCHours(cosmicSlots[i], 0, 0, 0);
-    cosmicPosts.push({ ...post, scheduledTime: slotDate.toISOString() });
+    cosmicPosts.push(post);
   }
 
-  // Slot 4: dear-style referral CTA
-  const referralPost = buildDearStylePost(
-    dateStr,
-    slots[4],
-    seed,
-    winningPatterns,
-  );
+  // Slot 3: dear-style referral CTA (drives follower growth)
+  const post3 = buildDearStylePost(dateStr, slots[3], seed);
 
-  const rawPosts = [...cosmicPosts, engagementPost, referralPost];
+  const rawPosts = [...cosmicPosts, post3];
   const posts = applyMinuteOffsets(rawPosts, slots, dateStr);
-
-  // Sort by scheduled time
-  posts.sort(
-    (a, b) =>
-      new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime(),
-  );
 
   return { date: dateStr, posts };
 }
 
 /**
  * Build a dear-style referral CTA post for the orchestrator.
- * Optionally uses winning patterns to pick a proven hook style.
  */
 function buildDearStylePost(
   dateStr: string,
   slotHour: number,
   seed: number,
-  winningPatterns?: WinningPatterns | null,
 ): ThreadsPost {
   const content = getDearStyleReferralPost(seed);
 
   const scheduledDate = new Date(dateStr);
   scheduledDate.setUTCHours(slotHour, 0, 0, 0);
 
-  // Split into hook + body (first line break = split point)
-  const firstBreak = content.indexOf('\n');
-  let hook =
-    firstBreak > 0
-      ? content.slice(0, firstBreak)
+  // Split into hook + body (first sentence = hook, rest = body)
+  const firstSentenceEnd = content.search(/[.!?]\s/);
+  const hook =
+    firstSentenceEnd > 0
+      ? content.slice(0, firstSentenceEnd + 1)
       : content.slice(0, THREADS_CHAR_LIMITS.hook);
-  const body = firstBreak > 0 ? content.slice(firstBreak + 1).trim() : '';
-
-  // If winning patterns show questions outperform, convert statement hooks to questions
-  if (winningPatterns && winningPatterns.confidence > 0.3) {
-    const bestPattern = getBestHookPattern(winningPatterns);
-    if (bestPattern === 'question' && !hook.endsWith('?')) {
-      const themes = getTopThemeWords(winningPatterns, 3);
-      if (themes.length > 0 && hook.length < THREADS_CHAR_LIMITS.hook - 20) {
-        hook = hook.replace(/\.$/, '') + ' -- what do you think?';
-      }
-    }
-  }
+  const body =
+    firstSentenceEnd > 0 ? content.slice(firstSentenceEnd + 2).trim() : '';
 
   return {
     hook,

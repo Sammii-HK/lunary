@@ -8,8 +8,7 @@
  * Falls back to hardcoded seed weights when insufficient data.
  */
 
-import { getContentCategoryScores, getContentEDASignals } from './database';
-import type { ContentEDASignals } from './database';
+import { getContentCategoryScores } from './database';
 import {
   SEED_WEIGHTS,
   SUPPRESS_LIST,
@@ -23,28 +22,6 @@ export interface CategoryScore {
   avgViews: number;
   trend: number; // Positive = improving, negative = declining
   weight: number; // 0-1 scheduling probability
-  viralScore?: number; // z-score composite (reach + engagement quality)
-}
-
-/** Cached EDA signals (refreshed every 30 minutes) */
-let edaCache: { signals: ContentEDASignals; fetchedAt: number } | null = null;
-const EDA_CACHE_TTL = 30 * 60 * 1000;
-
-/**
- * Get EDA signals with caching (30-min TTL).
- * Never throws — returns null on failure.
- */
-export async function getCachedEDASignals(): Promise<ContentEDASignals | null> {
-  if (edaCache && Date.now() - edaCache.fetchedAt < EDA_CACHE_TTL) {
-    return edaCache.signals;
-  }
-  try {
-    const signals = await getContentEDASignals(30);
-    edaCache = { signals, fetchedAt: Date.now() };
-    return signals;
-  } catch {
-    return edaCache?.signals ?? null;
-  }
 }
 
 /**
@@ -62,12 +39,6 @@ export async function getContentTypeWeights(
   const liveScores = await getContentCategoryScores(days);
   const liveMap = new Map(liveScores.map((s) => [s.category, s]));
 
-  // Load EDA viral scores (non-blocking, cached)
-  const eda = await getCachedEDASignals();
-  const viralMap = new Map(
-    eda?.categoryViralScores.map((v) => [v.category, v]) ?? [],
-  );
-
   const weights = new Map<string, CategoryScore>();
 
   // Process all known categories (seed + live)
@@ -82,20 +53,9 @@ export async function getContentTypeWeights(
     if (live.score > maxScore) maxScore = live.score;
   }
 
-  // Find viral score range for normalisation
-  const viralScores = eda?.categoryViralScores ?? [];
-  const maxViral = viralScores.length
-    ? Math.max(...viralScores.map((v) => v.viralScore))
-    : 0;
-  const minViral = viralScores.length
-    ? Math.min(...viralScores.map((v) => v.viralScore))
-    : 0;
-  const viralRange = maxViral - minViral || 1;
-
   for (const category of allCategories) {
     const seed = SEED_WEIGHTS[category];
     const live = liveMap.get(category);
-    const viral = viralMap.get(category);
 
     // Suppressed categories always get zero weight
     if (SUPPRESS_LIST.has(category)) {
@@ -105,7 +65,6 @@ export async function getContentTypeWeights(
         avgViews: live?.avgViews ?? seed?.avgViews ?? 0,
         trend: live?.trend ?? 0,
         weight: 0,
-        viralScore: viral?.viralScore,
       });
       continue;
     }
@@ -124,10 +83,9 @@ export async function getContentTypeWeights(
         avgViews: live?.avgViews ?? seed?.avgViews ?? 0,
         trend: live?.trend ?? 0,
         weight: Math.min(1, seedWeight + liveAdjust),
-        viralScore: viral?.viralScore,
       });
     } else {
-      // Enough live data — compute weight blending legacy score with viral score
+      // Enough live data — compute weight from performance
       const normalizedScore = live.score / maxScore;
 
       // Boost trending content, penalise declining
@@ -135,31 +93,17 @@ export async function getContentTypeWeights(
       const trendPenalty =
         live.trend < -0.3 ? Math.max(live.trend * 0.1, -0.15) : 0;
 
-      let computedWeight = normalizedScore + trendBoost + trendPenalty;
-
-      // Blend in cross-channel score when available (video + social + SEO)
-      // Falls back to viral-only score if cross-channel data missing
-      if (eda && eda.confidence !== 'low') {
-        const crossChannel = eda.crossChannelScores.find(
-          (c) => c.category === category,
-        );
-        if (crossChannel) {
-          // 70% legacy score, 30% unified cross-channel score
-          computedWeight =
-            computedWeight * 0.7 + crossChannel.unifiedScore * 0.3;
-        } else if (viral) {
-          const normalizedViral = (viral.viralScore - minViral) / viralRange;
-          computedWeight = computedWeight * 0.7 + normalizedViral * 0.3;
-        }
-      }
+      const computedWeight = Math.min(
+        1,
+        Math.max(0, normalizedScore + trendBoost + trendPenalty),
+      );
 
       weights.set(category, {
         score: live.score,
         count: live.count,
         avgViews: live.avgViews,
         trend: live.trend,
-        weight: Math.min(1, Math.max(0, computedWeight)),
-        viralScore: viral?.viralScore,
+        weight: computedWeight,
       });
     }
   }
@@ -168,43 +112,22 @@ export async function getContentTypeWeights(
 }
 
 /**
- * Get categories that should be suppressed.
- * Uses viral score when available (suppress bottom quartile with enough data),
- * falls back to avg views < 100 threshold.
+ * Get categories that should be suppressed (avg views < 100 over window).
+ * Combines the static suppress list with dynamically detected poor performers.
  */
 export async function getSuppressedCategories(
   days: number = 30,
 ): Promise<Set<string>> {
   const suppressed = new Set(SUPPRESS_LIST);
 
-  const eda = await getCachedEDASignals();
   const liveScores = await getContentCategoryScores(days);
-
-  if (eda && eda.confidence !== 'low' && eda.categoryViralScores.length >= 4) {
-    // Use viral score: suppress categories in bottom quartile with enough data
-    const sorted = [...eda.categoryViralScores].sort(
-      (a, b) => a.viralScore - b.viralScore,
-    );
-    const q25Index = Math.floor(sorted.length * 0.25);
-    const q25Threshold = sorted[q25Index]?.viralScore ?? -Infinity;
-
-    for (const cat of sorted) {
-      if (
-        cat.viralScore <= q25Threshold &&
-        cat.count >= MIN_DATA_POINTS_FOR_LIVE_WEIGHTS
-      ) {
-        suppressed.add(cat.category);
-      }
-    }
-  } else {
-    // Fallback: raw views threshold
-    for (const score of liveScores) {
-      if (
-        score.avgViews < 100 &&
-        score.count >= MIN_DATA_POINTS_FOR_LIVE_WEIGHTS
-      ) {
-        suppressed.add(score.category);
-      }
+  for (const score of liveScores) {
+    // Auto-suppress if consistently below 100 views with enough data
+    if (
+      score.avgViews < 100 &&
+      score.count >= MIN_DATA_POINTS_FOR_LIVE_WEIGHTS
+    ) {
+      suppressed.add(score.category);
     }
   }
 
@@ -212,36 +135,17 @@ export async function getSuppressedCategories(
 }
 
 /**
- * Get categories performing well enough for heavy rotation.
- * Uses viral score when available (top quartile), falls back to avg views > 400.
+ * Get categories performing well enough for heavy rotation (avg views > 400).
  */
 export async function getPromotedCategories(
   days: number = 30,
 ): Promise<Set<string>> {
   const promoted = new Set<string>();
 
-  const eda = await getCachedEDASignals();
   const liveScores = await getContentCategoryScores(days);
-
-  if (eda && eda.confidence !== 'low' && eda.categoryViralScores.length >= 4) {
-    // Use viral score: promote categories in top quartile
-    const sorted = [...eda.categoryViralScores].sort(
-      (a, b) => b.viralScore - a.viralScore,
-    );
-    const q75Index = Math.floor(sorted.length * 0.25);
-    const q75Threshold = sorted[q75Index]?.viralScore ?? Infinity;
-
-    for (const cat of sorted) {
-      if (cat.viralScore >= q75Threshold && cat.count >= 3) {
-        promoted.add(cat.category);
-      }
-    }
-  } else {
-    // Fallback: raw views threshold
-    for (const score of liveScores) {
-      if (score.avgViews > 400 && score.count >= 3) {
-        promoted.add(score.category);
-      }
+  for (const score of liveScores) {
+    if (score.avgViews > 400 && score.count >= 3) {
+      promoted.add(score.category);
     }
   }
 
@@ -301,11 +205,7 @@ export function weightedSelect(
  * This ensures we gather comparison data while mostly using what works.
  */
 const SLOT_HOUR_WINDOWS: Record<string, number[]> = {
-  slot1: [15, 16, 17],
-  slot2: [21, 22, 23],
-  slot3: [0, 1, 2],
-  // Legacy aliases
-  primary: [15, 16, 17],
+  primary: [14, 15, 16],
   engagementA: [17, 18, 19],
   engagementB: [21, 22, 23],
   engagementC: [0, 1, 2],
@@ -429,67 +329,6 @@ export async function getPlatformPerformance(): Promise<
     });
   }
   return map;
-}
-
-/**
- * Get the best category for a specific slot based on EDA category x slot profile.
- * Returns categories ranked by median engagement in that slot.
- *
- * Falls back to null if no slot-specific data exists.
- */
-export async function getBestCategoriesForSlot(
-  slot: string,
-  exclude: Set<string>,
-): Promise<string[] | null> {
-  const eda = await getCachedEDASignals();
-  if (!eda || eda.confidence === 'low') return null;
-
-  const slotData = eda.categorySlotProfile
-    .filter((s) => s.slot === slot && !exclude.has(s.category) && s.count >= 3)
-    .sort((a, b) => b.medianEngagement - a.medianEngagement);
-
-  return slotData.length >= 2 ? slotData.map((s) => s.category) : null;
-}
-
-/**
- * Get the best category for a specific day of week based on EDA data.
- * 0 = Sunday, 1 = Monday, etc.
- */
-export async function getBestCategoriesForDay(
-  dayOfWeek: number,
-  exclude: Set<string>,
-): Promise<string[] | null> {
-  const eda = await getCachedEDASignals();
-  if (!eda || eda.confidence === 'low') return null;
-
-  const dayData = eda.categoryDayProfile
-    .filter(
-      (d) =>
-        d.dayOfWeek === dayOfWeek && !exclude.has(d.category) && d.count >= 3,
-    )
-    .sort((a, b) => b.medianEngagement - a.medianEngagement);
-
-  return dayData.length >= 2 ? dayData.map((d) => d.category) : null;
-}
-
-/**
- * Check if the content calendar is over-concentrated on one category.
- * Returns true if HHI > 0.25 (one category dominates > ~50% of posts).
- */
-export async function isOverConcentrated(): Promise<{
-  concentrated: boolean;
-  hhi: number;
-  dominantCategory?: string;
-}> {
-  const eda = await getCachedEDASignals();
-  if (!eda) return { concentrated: false, hhi: 0 };
-
-  const dominant = eda.categoryShares.sort((a, b) => b.share - a.share)[0];
-  return {
-    concentrated: eda.concentrationHHI > 0.25,
-    hhi: eda.concentrationHHI,
-    dominantCategory: dominant?.category,
-  };
 }
 
 export { PERFORMANCE_RULES };

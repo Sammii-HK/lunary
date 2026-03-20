@@ -148,36 +148,28 @@ export function getPlatformPostingInfo(
  *
  * | Slot         | UTC  | UK     | US ET   | Purpose                                    |
  * |--------------|------|--------|---------|-------------------------------------------|
- * | slot1  | 16   | 4pm    | 12pm    | US lunch scroll — deep-dive video (TikTok + IG Reel) |
- * | slot2  | 22   | 10pm   | 6pm     | US after-work — carousel (TikTok + IG Feed)           |
- * | slot3  | 1    | 1am+1  | 9pm     | US evening prime — quick-hit video (TikTok only)      |
+ * | primary      | 15   | 3pm    | 11am    | Educational (grimoire themes, late morning)|
+ * | engagementA  | 18   | 6pm    | 2pm     | Engagement format (US afternoon browse)    |
+ * | engagementB  | 22   | 10pm   | 6pm     | Engagement format (US evening peak)        |
+ * | engagementC  | 1    | 1am+1  | 9pm     | Late night discovery (US prime time)       |
  */
 export const VIDEO_POSTING_HOURS = {
-  slot1: 16,
-  slot2: 22,
-  slot3: 1,
-  /** @deprecated Old slot names — kept for backward compatibility */
-  primary: 16,
+  primary: 15,
   engagementA: 18,
   engagementB: 22,
   engagementC: 1,
+  /** @deprecated Use engagementB — kept for backward compatibility */
   secondary: 22,
 } as const;
 
 export type VideoSlot =
-  | 'slot1'
-  | 'slot1-reel'
-  | 'slot2'
-  | 'slot3'
   | 'primary'
   | 'engagementA'
   | 'engagementB'
   | 'engagementC';
 
 export function getVideoSlotHour(slot: VideoSlot): number {
-  // slot1-reel uses the same hour as slot1
-  const key = slot === 'slot1-reel' ? 'slot1' : slot;
-  return VIDEO_POSTING_HOURS[key] as number;
+  return VIDEO_POSTING_HOURS[slot] as number;
 }
 
 /** @deprecated Use getVideoSlotHour — kept for backward compatibility */

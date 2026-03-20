@@ -29,10 +29,6 @@ import {
   getOrbitHookSuggestions,
   shouldAvoidHook,
 } from './orbit-insights';
-import {
-  getEventCalendarForDate,
-  type CalendarEvent,
-} from '@/lib/astro/event-calendar';
 
 const ZODIAC_SIGNS = [
   'Aries',
@@ -50,87 +46,6 @@ const ZODIAC_SIGNS = [
 ];
 
 const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
-
-// What each planet rules (for substantive body text)
-const PLANET_RULES: Record<string, string> = {
-  Sun: 'identity, vitality, and purpose',
-  Moon: 'emotions, instincts, and needs',
-  Mercury: 'communication, thinking, and travel',
-  Venus: 'love, beauty, and values',
-  Mars: 'action, drive, and conflict',
-  Jupiter: 'growth, luck, and expansion',
-  Saturn: 'discipline, boundaries, and responsibility',
-  Uranus: 'disruption, freedom, and innovation',
-  Neptune: 'dreams, intuition, and illusion',
-  Pluto: 'transformation, power, and depth',
-};
-
-// Essential dignities: where planets are strongest/weakest
-const PLANET_DIGNITY: Record<string, Record<string, string>> = {
-  Mercury: {
-    Gemini: 'domicile',
-    Virgo: 'domicile and exaltation',
-    Sagittarius: 'detriment',
-    Pisces: 'detriment and fall',
-  },
-  Venus: {
-    Taurus: 'domicile',
-    Libra: 'domicile',
-    Pisces: 'exaltation',
-    Aries: 'detriment',
-    Scorpio: 'detriment',
-    Virgo: 'fall',
-  },
-  Mars: {
-    Aries: 'domicile',
-    Scorpio: 'domicile',
-    Capricorn: 'exaltation',
-    Taurus: 'detriment',
-    Libra: 'detriment',
-    Cancer: 'fall',
-  },
-  Jupiter: {
-    Sagittarius: 'domicile',
-    Pisces: 'domicile',
-    Cancer: 'exaltation',
-    Gemini: 'detriment',
-    Virgo: 'detriment',
-    Capricorn: 'fall',
-  },
-  Saturn: {
-    Capricorn: 'domicile',
-    Aquarius: 'domicile',
-    Libra: 'exaltation',
-    Cancer: 'detriment',
-    Leo: 'detriment',
-    Aries: 'fall',
-  },
-  Sun: {
-    Leo: 'domicile',
-    Aries: 'exaltation',
-    Aquarius: 'detriment',
-    Libra: 'fall',
-  },
-  Moon: {
-    Cancer: 'domicile',
-    Taurus: 'exaltation',
-    Capricorn: 'detriment',
-    Scorpio: 'fall',
-  },
-};
-
-function getDignityNote(planet: string, sign: string): string | null {
-  const dignities = PLANET_DIGNITY[planet];
-  if (!dignities || !dignities[sign]) return null;
-  const dignity = dignities[sign];
-  if (dignity.includes('detriment') || dignity.includes('fall')) {
-    return `${planet} is in its ${dignity} in ${sign}, meaning it operates at its weakest here`;
-  }
-  if (dignity.includes('domicile') || dignity.includes('exaltation')) {
-    return `${planet} is in its ${dignity} in ${sign}, meaning it operates at full strength here`;
-  }
-  return null;
-}
 
 // Zodiac season names (Sun sign → season label)
 const ZODIAC_SEASON_NAMES: Record<string, string> = {
@@ -151,8 +66,6 @@ const ZODIAC_SEASON_NAMES: Record<string, string> = {
 type CosmicEvent = {
   priority: number;
   type: string;
-  /** Optional reference to the source CalendarEvent for rarity/historical context */
-  calendarEvent?: CalendarEvent;
   generate: (rng: () => number) => {
     hook: string;
     body: string;
@@ -164,14 +77,8 @@ type CosmicEvent = {
 /**
  * Build a ranked list of cosmic events happening on this date.
  * Returns all events sorted by priority — caller picks the top one.
- *
- * Integrates with the Event Calendar for CRITICAL/HIGH events
- * (sabbats, rare ingresses, convergence days) alongside existing detection.
  */
-async function buildCosmicEvents(
-  dateStr: string,
-  slotHour: number,
-): Promise<CosmicEvent[]> {
+function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
   const postDate = new Date(dateStr);
   postDate.setUTCHours(slotHour, 0, 0, 0);
 
@@ -202,15 +109,6 @@ async function buildCosmicEvents(
       priority: 100,
       type: 'planetary_ingress',
       generate: (rng) => {
-        // Conversation-starting questions that reward replies over likes
-        const engagementPrompts = [
-          `Where does ${transit.toSign} fall in your chart?`,
-          `Which house does ${transit.toSign} rule for you?`,
-          `What are you feeling as ${transit.planet} shifts?`,
-          `Has anyone else noticed the energy change?`,
-          `Drop your rising sign below`,
-        ];
-
         if (transit.hoursUntil > 12) {
           const bodies = [
             'This kind of shift changes the energy for weeks. Pay attention to what starts to surface.',
@@ -218,11 +116,15 @@ async function buildCosmicEvents(
             'The pressure you have been feeling is about to make more sense.',
             'Energy is already building around this. You might feel it before you can name it.',
           ];
+          const prompts = [
+            `Are you already feeling ${transit.planet} energy building?`,
+            'What has been shifting for you lately?',
+            `What do you expect to change when ${transit.planet} moves into ${transit.toSign}?`,
+          ];
           return {
             hook: `${transit.planet} moves into ${transit.toSign} tomorrow`,
             body: bodies[Math.floor(rng() * bodies.length)],
-            prompt:
-              engagementPrompts[Math.floor(rng() * engagementPrompts.length)],
+            prompt: prompts[Math.floor(rng() * prompts.length)],
             topicTag: 'Astrology',
           };
         } else if (transit.hoursUntil >= 0) {
@@ -239,8 +141,7 @@ async function buildCosmicEvents(
           return {
             hook: `${transit.planet} is moving into ${transit.toSign}`,
             body: bodies[Math.floor(rng() * bodies.length)],
-            prompt:
-              engagementPrompts[Math.floor(rng() * engagementPrompts.length)],
+            prompt: 'Can you feel the shift?',
             topicTag: 'Astrology',
           };
         } else {
@@ -252,8 +153,7 @@ async function buildCosmicEvents(
           return {
             hook: `${transit.planet} is now in ${transit.toSign}`,
             body: bodies[Math.floor(rng() * bodies.length)],
-            prompt:
-              engagementPrompts[Math.floor(rng() * engagementPrompts.length)],
+            prompt: `What shifted for you when ${transit.planet} moved into ${transit.toSign}?`,
             topicTag: 'Astrology',
           };
         }
@@ -270,46 +170,19 @@ async function buildCosmicEvents(
       type: 'zodiac_season',
       generate: (rng) => {
         const season = ZODIAC_SEASON_NAMES[sunSign] || `${sunSign} season`;
-
-        // Sign-specific context: what this season is actually about
-        const seasonContext: Record<string, string> = {
-          Aries:
-            'Aries is cardinal fire. The energy turns direct, initiating, and impatient. New projects, fresh starts, and bold moves feel natural now.',
-          Taurus:
-            'Taurus is fixed earth. The pace slows down. Comfort, security, and what you actually value take centre stage for the next 30 days.',
-          Gemini:
-            'Gemini is mutable air. Curiosity spikes. Conversations multiply. The collective mind wants variety, connection, and new information.',
-          Cancer:
-            'Cancer is cardinal water. The focus turns inward to home, family, and emotional foundations. What you need to feel safe surfaces now.',
-          Leo: 'Leo is fixed fire. Self-expression, creativity, and visibility take the lead. The collective energy becomes warmer and more generous.',
-          Virgo:
-            'Virgo is mutable earth. The party winds down. Systems, health, and getting things in order take priority for the next 30 days.',
-          Libra:
-            'Libra is cardinal air. Relationships, fairness, and aesthetics move to the foreground. What is out of balance becomes obvious.',
-          Scorpio:
-            'Scorpio is fixed water. The surface level stops being enough. Depth, honesty, and transformation define the next 30 days.',
-          Sagittarius:
-            'Sagittarius is mutable fire. The mood lifts. Travel, big questions, and a hunger for meaning replace the intensity of Scorpio season.',
-          Capricorn:
-            'Capricorn is cardinal earth. Ambition, structure, and long-term goals demand attention. The collective mood becomes serious and disciplined.',
-          Aquarius:
-            'Aquarius is fixed air. Community, innovation, and doing things differently take priority. The collective pushes against the status quo.',
-          Pisces:
-            'Pisces is mutable water. Boundaries soften. Intuition sharpens. The collective energy becomes more empathic, creative, and spiritually attuned.',
-        };
-
-        const context =
-          seasonContext[sunSign] ||
-          `${sunSign} energy reshapes the collective mood for the next 30 days.`;
-
+        const bodies = [
+          `The Sun has moved into ${sunSign}. The collective energy shifts today.`,
+          `A new chapter opens. ${season} brings a different flavour to everything.`,
+          `The sky is changing. ${sunSign} energy will colour the next 30 days.`,
+        ];
         const prompts = [
           `What are you bringing into ${season}?`,
           `How does ${sunSign} energy show up in your life?`,
-          `What did ${ZODIAC_SEASON_NAMES[yesterdaySunSign]} teach you?`,
+          `Ready for ${season}?`,
         ];
         return {
           hook: `${season} starts today`,
-          body: context,
+          body: bodies[Math.floor(rng() * bodies.length)],
           prompt: prompts[Math.floor(rng() * prompts.length)],
           topicTag: 'Zodiac',
         };
@@ -375,19 +248,11 @@ async function buildCosmicEvents(
         priority: 90,
         type: 'retrograde_station',
         generate: (rng) => {
-          const rules = PLANET_RULES[planet] || 'its domain';
-          const dignityNote = getDignityNote(planet, pos.sign);
-          const bodies = dignityNote
-            ? [
-                `${planet} rules ${rules}. ${dignityNote}. Retrograde here intensifies the difficulty.`,
-                `${dignityNote}. A retrograde in this sign means the usual disruptions hit harder than normal.`,
-                `${planet} governs ${rules}. In ${pos.sign}, it is already working at a disadvantage, and now it is retrograde on top of that.`,
-              ]
-            : [
-                `${planet} rules ${rules}. All of that is up for review now. Expect delays, revisions, and second thoughts in these areas.`,
-                `${planet} retrograde in ${pos.sign} asks you to slow down and reconsider everything related to ${rules}.`,
-                `${planet} governs ${rules}. Retrograde does not break these things, it forces you to revisit them properly.`,
-              ];
+          const bodies = [
+            `Time to slow down and review everything ${planet} rules. This is not a punishment, it is a reset.`,
+            `Things may feel like they are going backwards. They are not. You are being asked to look again.`,
+            `${planet} retrograde is not about things breaking. It is about things realigning.`,
+          ];
           return {
             hook: `${planet} is now retrograde in ${pos.sign}`,
             body: bodies[Math.floor(rng() * bodies.length)],
@@ -403,18 +268,10 @@ async function buildCosmicEvents(
         priority: 88,
         type: 'direct_station',
         generate: (rng) => {
-          const rules = PLANET_RULES[planet] || 'its domain';
-          const dignityNote = getDignityNote(planet, pos.sign);
-          const capRules = rules.charAt(0).toUpperCase() + rules.slice(1);
-          const bodies = dignityNote
-            ? [
-                `${dignityNote}. The retrograde is over. ${capRules} start to unstick.`,
-                `${planet} retrogrades in its weakest sign. Direct now. Clarity returns but the shadow period lasts another week or two.`,
-              ]
-            : [
-                `${planet} rules ${rules}. The review period is over. What was stuck starts moving forward.`,
-                `Momentum returns to ${rules}. ${planet} stations direct and the fog lifts.`,
-              ];
+          const bodies = [
+            `Momentum returns. What was stuck during the retrograde can start moving again.`,
+            `The review period is over. ${planet} is moving forward and so can you.`,
+          ];
           return {
             hook: `${planet} stations direct in ${pos.sign}`,
             body: bodies[Math.floor(rng() * bodies.length)],
@@ -426,74 +283,7 @@ async function buildCosmicEvents(
     }
   }
 
-  // --- 3b. Retrograde countdown (X days until direct station) ---
-  for (const planet of NOTABLE_PLANETS) {
-    const pos = positions[planet];
-    if (!pos || !pos.retrograde || pos.newRetrograde || pos.newDirect) continue;
-
-    // Check if this planet goes direct within the next 1-5 days
-    for (let dayOffset = 1; dayOffset <= 5; dayOffset++) {
-      const futureDate = new Date(postDate);
-      futureDate.setDate(futureDate.getDate() + dayOffset);
-      const futurePositions = getRealPlanetaryPositions(
-        futureDate,
-        DEFAULT_OBSERVER,
-      );
-      const futurePos = futurePositions[planet];
-
-      if (futurePos && !futurePos.retrograde) {
-        // This planet goes direct in `dayOffset` days
-        events.push({
-          priority: 82 + (5 - dayOffset), // Closer = higher priority
-          type: 'retrograde_countdown',
-          generate: (rng) => {
-            const rules = PLANET_RULES[planet] || 'its domain';
-            const dignityNote = getDignityNote(planet, pos.sign);
-            const dayWord =
-              dayOffset === 1 ? 'tomorrow' : `in ${dayOffset} days`;
-
-            // Different angle per dayOffset so consecutive days don't repeat
-            let body: string;
-            if (dayOffset <= 2) {
-              // Close to direct: focus on what changes
-              body = dignityNote
-                ? `${dignityNote}. Direct station ${dayWord}. The fog around ${rules} starts to lift.`
-                : `${planet} rules ${rules}. Direct station ${dayWord}. What was stuck starts to move again.`;
-            } else if (dayOffset <= 3) {
-              // Mid countdown: focus on the review
-              body = dignityNote
-                ? `${dignityNote}. The retrograde forced a review of ${rules}. ${dayOffset} days until that pressure eases.`
-                : `${planet} retrograde in ${pos.sign} revisited ${rules}. ${dayOffset} days until it stations direct.`;
-            } else {
-              // Early countdown: set the scene
-              body = dignityNote
-                ? `${dignityNote}. ${planet} stations direct ${dayWord}. Use the remaining days to finish the review.`
-                : `${planet} retrograde in ${pos.sign} ends ${dayWord}. Wrap up any unfinished business around ${rules}.`;
-            }
-
-            // Index by dayOffset so consecutive days always get a different prompt
-            const prompts = [
-              `What has this ${planet} retrograde brought up for you?`,
-              `What are you ready to move forward on after ${planet} goes direct?`,
-              `Has ${planet} retrograde changed anything for you?`,
-              `What is ${planet} retrograde forcing you to revisit?`,
-              `Anyone else feeling ${planet} retrograde right now?`,
-            ];
-
-            return {
-              hook: `${planet} goes direct ${dayWord}`,
-              body,
-              prompt: prompts[dayOffset % prompts.length],
-              topicTag: 'Astrology',
-            };
-          },
-        });
-        break; // Only add one countdown per planet
-      }
-    }
-  }
-
-  // --- 3c. Retrograde sign re-entry (planet backing into previous sign) ---
+  // --- 3b. Retrograde sign re-entry (planet backing into previous sign) ---
   for (const planet of NOTABLE_PLANETS) {
     const pos = positions[planet];
     if (!pos || !pos.retrograde) continue;
@@ -530,44 +320,19 @@ async function buildCosmicEvents(
       priority: 80,
       type: 'moon_sign_change',
       generate: (rng) => {
-        // Sign-specific emotional context
-        const moonContext: Record<string, string> = {
-          Aries:
-            'Moon in Aries wants action, not deliberation. Emotions flash hot and fast. Patience drops. The instinct is to start something, fix something, or fight something.',
-          Taurus:
-            'Moon in Taurus craves comfort and routine. Emotions stabilise. You want good food, familiar surroundings, and no surprises for the next couple of days.',
-          Gemini:
-            'Moon in Gemini makes the mind restless. Emotions process through talking. You want stimulation, conversation, and variety.',
-          Cancer:
-            'Moon in Cancer is the Moon at home. Emotions run deep and protective. Family, nostalgia, and the need to feel safe become loud.',
-          Leo: 'Moon in Leo wants to be seen. Emotions become dramatic and generous. Creativity spikes. The need for recognition and warmth is real.',
-          Virgo:
-            'Moon in Virgo turns emotions into problem-solving. The instinct is to fix, organise, and improve. Anxiety shows up as over-analysis.',
-          Libra:
-            'Moon in Libra needs harmony. Conflict feels unbearable. The instinct is to smooth things over, seek balance, and avoid being alone.',
-          Scorpio:
-            'Moon in Scorpio intensifies everything. Emotions go deep and private. Surface-level interactions feel pointless. Trust issues surface.',
-          Sagittarius:
-            'Moon in Sagittarius lightens the mood. The emotional need is for freedom, meaning, and something to look forward to.',
-          Capricorn:
-            'Moon in Capricorn suppresses vulnerability. Emotions get channelled into productivity. The instinct is to push through, not process.',
-          Aquarius:
-            'Moon in Aquarius detaches from emotion to observe it. The instinct is to intellectualise feelings. Community matters more than intimacy.',
-          Pisces:
-            'Moon in Pisces dissolves boundaries. Emotions absorb from everyone around you. Intuition sharpens but so does overwhelm.',
-        };
-
-        const body =
-          moonContext[moonSign] ||
-          `The emotional tone shifts to ${moonSign}. Your instincts, reactions, and needs take on different qualities.`;
+        const bodies = [
+          `The emotional tone shifts today. ${moonSign} brings a different kind of feeling.`,
+          `Your instincts, reactions, and needs all take on ${moonSign} qualities now.`,
+          `The Moon moves fast. But each sign it passes through changes how things land.`,
+        ];
         const prompts = [
           `How does Moon in ${moonSign} feel for you?`,
-          `What does ${moonSign} Moon bring up?`,
+          `What does ${moonSign} Moon energy bring up?`,
           `Notice a shift in your mood today?`,
         ];
         return {
           hook: `The Moon moves into ${moonSign} today`,
-          body,
+          body: bodies[Math.floor(rng() * bodies.length)],
           prompt: prompts[Math.floor(rng() * prompts.length)],
           topicTag: 'Moon',
         };
@@ -598,54 +363,15 @@ async function buildCosmicEvents(
                   ' and ' +
                   notable[notable.length - 1]
                 : `${notable.length} planets`;
-
-            // Build a meaningful description of what this combination rules
-            const rulesDescriptions = notable
-              .map((p) => PLANET_RULES[p])
-              .filter(Boolean);
-            const combinedRules =
-              rulesDescriptions.length > 0
-                ? rulesDescriptions.slice(0, 3).join('; ')
-                : 'multiple areas of life';
-
-            // Sign-specific stellium context
-            const signFlavour: Record<string, string> = {
-              Aries:
-                'Action, identity, and new beginnings are all activated at once. Impatience and initiative spike.',
-              Taurus:
-                'Security, comfort, and finances are all demanding attention simultaneously.',
-              Gemini:
-                'Communication, curiosity, and social connections are all firing at once.',
-              Cancer:
-                'Home, family, and emotional security are all being activated together.',
-              Leo: 'Self-expression, creativity, and recognition are all concentrated in one place.',
-              Virgo:
-                'Health, routine, and detailed work are all under the spotlight together.',
-              Libra:
-                'Relationships, fairness, and aesthetics are all being activated at once.',
-              Scorpio:
-                'Intensity, transformation, and hidden truths are all surfacing together.',
-              Sagittarius:
-                'Adventure, meaning, and big-picture thinking are all concentrated in one place.',
-              Capricorn:
-                'Ambition, structure, and long-term goals are all demanding attention at once.',
-              Aquarius:
-                'Community, innovation, and independence are all being activated together.',
-              Pisces:
-                'Intuition, empathy, and creativity are all flooding in at once. Boundaries blur.',
-            };
-            const flavour =
-              signFlavour[sign] ||
-              `${sign} themes dominate. Check which house it rules in your chart.`;
-
             const bodies = [
-              `That is a stellium. ${flavour}`,
-              `${notable.length} planets concentrated in ${sign}. ${flavour}`,
+              `That is a lot of energy concentrated in one place. ${sign} themes are impossible to ignore right now.`,
+              `When this many planets gather in one sign, that area of life demands attention.`,
+              `${sign} is packed. Whatever this sign rules in your chart is getting a major activation.`,
             ];
             const prompts = [
               `Which ${sign} themes are showing up strongest for you?`,
               `Can you feel ${sign} running the show right now?`,
-              `Are you feeling the ${sign} weight or riding it?`,
+              `How is all this ${sign} energy landing?`,
             ];
             return {
               hook: `${list} are all in ${sign} right now`,
@@ -660,78 +386,51 @@ async function buildCosmicEvents(
   }
 
   // --- 6. Tight aspects (conjunction, opposition, square — within 2° orb) ---
-  const aspectNames = ['conjunction', 'opposition', 'square', 'trine'];
   const tightAspects = aspects.filter(
-    (a) => a.separation <= 2 && aspectNames.includes(a.aspect),
+    (a) =>
+      a.separation <= 2 &&
+      ['Conjunction', 'Opposition', 'Square', 'Trine'].includes(a.aspect),
   );
 
   for (const aspect of tightAspects.slice(0, 2)) {
-    // planetA/planetB are strings (planet names), not objects
-    const pA =
-      (typeof aspect.planetA === 'string'
-        ? aspect.planetA
-        : aspect.planetA?.name) || 'unknown';
-    const pB =
-      (typeof aspect.planetB === 'string'
-        ? aspect.planetB
-        : aspect.planetB?.name) || 'unknown';
-
     // Skip Moon aspects (too frequent) unless it's a conjunction with an outer planet
-    const isMoonAspect = pA === 'Moon' || pB === 'Moon';
-    if (isMoonAspect && aspect.aspect !== 'conjunction') continue;
+    const isMoonAspect =
+      aspect.planetA?.name === 'Moon' || aspect.planetB?.name === 'Moon';
+    if (isMoonAspect && aspect.aspect !== 'Conjunction') continue;
 
-    // Look up signs from the positions data
-    const signA = positions[pA]?.sign || '';
-    const signB = positions[pB]?.sign || '';
-    const signContext =
-      signA && signB && signA !== signB
-        ? ` ${pA} in ${signA}, ${pB} in ${signB}.`
-        : signA
-          ? ` Both in ${signA}.`
-          : '';
+    const pA = aspect.planetA?.name || 'unknown';
+    const pB = aspect.planetB?.name || 'unknown';
 
     events.push({
       priority: 65 + (10 - aspect.separation) * 2,
       type: 'tight_aspect',
       generate: (rng) => {
-        const rulesA = PLANET_RULES[pA] || pA;
-        const rulesB = PLANET_RULES[pB] || pB;
-
-        // Bodies kept under ~190 chars to avoid truncation
         const aspectDescriptions: Record<string, string[]> = {
-          conjunction: [
-            `${pA} (${rulesA}) meets ${pB} (${rulesB}).${signContext} Both domains activate at once.`,
-            `${pA} and ${pB} fuse into one signal.${signContext} ${rulesA} and ${rulesB} become inseparable.`,
+          Conjunction: [
+            `Their energies merge. Whatever they both rule is amplified right now.`,
+            `Two forces combining. This is not subtle.`,
+            `A conjunction means fusion. These two are speaking as one.`,
           ],
-          opposition: [
-            `${pA} (${rulesA}) opposes ${pB} (${rulesB}).${signContext} Neither side can be ignored.`,
-            `Tension between ${rulesA} and ${rulesB}.${signContext} The challenge is holding both.`,
+          Opposition: [
+            `Tension between two forces. The challenge is finding balance, not picking sides.`,
+            `An opposition asks you to hold two truths at once.`,
           ],
-          square: [
-            `${pA} (${rulesA}) squares ${pB} (${rulesB}).${signContext} Friction that forces a decision.`,
-            `Pressure between ${rulesA} and ${rulesB}.${signContext} Something has to give.`,
+          Square: [
+            `Friction that demands action. This aspect does not let you sit still.`,
+            `Squares create pressure. Pressure creates change.`,
           ],
-          trine: [
-            `${pA} (${rulesA}) trines ${pB} (${rulesB}).${signContext} Natural flow between these areas.`,
-            `${rulesA} and ${rulesB} connect effortlessly.${signContext} Use it while it lasts.`,
+          Trine: [
+            `Flow and ease between these two. Things that align with this energy move effortlessly.`,
+            `A trine is support. Use it before it passes.`,
           ],
         };
         const bodies = aspectDescriptions[aspect.aspect] || [
-          `${pA} and ${pB} form a significant alignment.${signContext}`,
+          'A significant alignment in the sky today.',
         ];
-
-        const prompts = [
-          `How are you feeling ${pA}-${pB} energy today?`,
-          signA
-            ? `Where does ${signA} fall in your chart?`
-            : `Drop your rising sign below`,
-          `What is this bringing up for you?`,
-        ];
-
         return {
-          hook: `${pA} ${aspect.aspect} ${pB} is exact today`,
+          hook: `${pA} ${aspect.aspect.toLowerCase()} ${pB} is exact today`,
           body: bodies[Math.floor(rng() * bodies.length)],
-          prompt: prompts[Math.floor(rng() * prompts.length)],
+          prompt: `How are you feeling ${pA} and ${pB} energy right now?`,
           topicTag: 'Astrology',
         };
       },
@@ -871,266 +570,6 @@ async function buildCosmicEvents(
     });
   }
 
-  // --- 11. Event Calendar integration (sabbats, rare ingresses, convergence) ---
-  // Supplements existing detection with scored calendar events.
-  // CRITICAL events (score >= 90) get priority 105+, HIGH events (score >= 60) get 92.
-  try {
-    const calendarEvents = await getEventCalendarForDate(dateStr);
-
-    // Track which event types the existing detection already covers
-    // to avoid duplicating ingress/retrograde/moon events
-    const existingTypes = new Set(events.map((e) => e.type));
-
-    for (const calEvent of calendarEvents) {
-      // Skip LOW/MEDIUM events the existing pipeline already handles well
-      if (calEvent.score < 60) continue;
-
-      // Skip event types already detected by the existing pipeline
-      // (ingress is handled above, retrograde stations too, moon phases too)
-      if (
-        calEvent.eventType === 'ingress' &&
-        existingTypes.has('planetary_ingress')
-      ) {
-        // For CRITICAL or HIGH ingresses with rarity framing,
-        // upgrade the existing ingress event's priority and enhance its hook.
-        // CRITICAL (score >= 90): priority 105+ (above max 100 for generic ingress)
-        // HIGH (score >= 60): priority stays 100 but gets rarity-enriched content
-        if (calEvent.score >= 60 && calEvent.rarityFrame) {
-          const existingIngress = events.find(
-            (e) => e.type === 'planetary_ingress',
-          );
-          if (existingIngress) {
-            if (calEvent.score >= 90) {
-              existingIngress.priority = 105;
-            }
-            existingIngress.calendarEvent = calEvent;
-            // Wrap the existing generate to use rarity-enriched hooks
-            const originalGenerate = existingIngress.generate;
-            existingIngress.generate = (rng) => {
-              const original = originalGenerate(rng);
-
-              // Use convergence narrative when multiple HIGH+ events align
-              if (
-                calEvent.convergenceMultiplier >= 1.5 &&
-                calEvent.hookSuggestions.length > 0
-              ) {
-                const convergenceHook =
-                  calEvent.hookSuggestions[calEvent.hookSuggestions.length - 1];
-                if (convergenceHook.length <= 80) {
-                  original.hook = convergenceHook;
-                }
-              } else if (calEvent.hookSuggestions.length > 0) {
-                // Even without convergence, use the calendar's rarity-aware hooks
-                // instead of generic "[Planet] moves into [Sign] tomorrow" framing.
-                // Pick from shorter hooks that fit the 80-char limit.
-                const shortHooks = calEvent.hookSuggestions.filter(
-                  (h) => h.length <= 80,
-                );
-                if (shortHooks.length > 0) {
-                  original.hook =
-                    shortHooks[Math.floor(rng() * shortHooks.length)];
-                }
-              }
-
-              // Enrich body with rarity framing
-              if (calEvent.rarityFrame) {
-                original.body = `${calEvent.rarityFrame}. ${original.body}`;
-              }
-              // Add historical context when available
-              if (calEvent.historicalContext) {
-                original.body = `${original.body} Theme: ${calEvent.historicalContext}.`;
-              }
-              // Use rarity-enriched prompts for engagement
-              if (calEvent.lastInThisSign) {
-                original.prompt = `First time since ${calEvent.lastInThisSign}. ${original.prompt}`;
-              } else if (
-                calEvent.orbitalPeriodYears &&
-                calEvent.orbitalPeriodYears >= 10
-              ) {
-                // For slower planets without exact lastInThisSign data,
-                // use orbital period framing for engagement
-                original.prompt = `This only happens every ~${Math.round(calEvent.orbitalPeriodYears)} years. ${original.prompt}`;
-              }
-              return original;
-            };
-          }
-        }
-        continue;
-      }
-
-      if (
-        calEvent.eventType === 'retrograde_station' &&
-        (existingTypes.has('retrograde_station') ||
-          existingTypes.has('direct_station'))
-      ) {
-        continue;
-      }
-
-      // Active retrogrades are already covered by retrograde/countdown detection.
-      // Enrich the existing event with calendar context instead of duplicating.
-      if (
-        calEvent.eventType === 'active_retrograde' &&
-        (existingTypes.has('retrograde_station') ||
-          existingTypes.has('direct_station') ||
-          existingTypes.has('retrograde_countdown') ||
-          existingTypes.has('retrograde_reentry'))
-      ) {
-        // Find the existing retrograde event and enrich it with sign context
-        const existingRetro = events.find(
-          (e) =>
-            e.type === 'retrograde_countdown' ||
-            e.type === 'retrograde_reentry' ||
-            e.type === 'retrograde_station' ||
-            e.type === 'direct_station',
-        );
-        // Don't override — the countdown/station bodies already vary by dayOffset
-        // and include dignity notes. Calendar enrichment would make consecutive days
-        // identical. Let the existing templates handle the content variety.
-        continue;
-      }
-
-      // Aspects are already covered by tight_aspect detection with better bodies.
-      // The tight_aspect templates include planet rules, sign context, and aspect meaning.
-      // Calendar rarityFrame for aspects ("exact within X°") is jargon — skip it.
-      if (
-        calEvent.eventType === 'aspect' &&
-        existingTypes.has('tight_aspect')
-      ) {
-        continue;
-      }
-
-      if (
-        calEvent.eventType === 'moon_phase' &&
-        existingTypes.has('moon_phase_change')
-      ) {
-        continue;
-      }
-
-      if (
-        calEvent.eventType === 'moon_sign_change' &&
-        existingTypes.has('moon_sign_change')
-      ) {
-        continue;
-      }
-
-      if (calEvent.eventType === 'stellium' && existingTypes.has('stellium')) {
-        continue;
-      }
-
-      // Determine priority based on score
-      let priority: number;
-      if (calEvent.score >= 90) {
-        // CRITICAL events: above the current max of 100 for ingress
-        priority = 105 + Math.min(calEvent.score - 90, 10);
-      } else if (calEvent.score >= 60) {
-        // HIGH events: between ingress=100 and zodiac_season=95
-        priority = 92;
-      } else {
-        priority = 80;
-      }
-
-      // Map calendar event types to Threads-compatible types
-      const typeMap: Record<string, string> = {
-        sabbat: 'sabbat',
-        equinox: 'sabbat',
-        solstice: 'sabbat',
-        eclipse: 'calendar_eclipse',
-        aspect: 'calendar_aspect',
-        ingress: 'calendar_ingress',
-        active_retrograde: 'calendar_retrograde',
-      };
-      const cosmicType =
-        typeMap[calEvent.eventType] || `calendar_${calEvent.eventType}`;
-
-      events.push({
-        priority,
-        type: cosmicType,
-        calendarEvent: calEvent,
-        generate: (rng) => {
-          // Use the calendar event's pre-built hook suggestions
-          const hookPool = calEvent.hookSuggestions.filter(
-            (h) => h.length <= 80,
-          );
-          const hook =
-            hookPool.length > 0
-              ? hookPool[Math.floor(rng() * hookPool.length)]
-              : calEvent.name;
-
-          // Build body: historicalContext is the substance, rarityFrame is the framing.
-          // Never use rarityFrame alone as body — it's a label, not content.
-          let body: string;
-          if (calEvent.historicalContext && calEvent.rarityFrame) {
-            // Combine rarity framing with substantive context
-            body = `${calEvent.rarityFrame}. ${calEvent.historicalContext}`;
-          } else if (calEvent.historicalContext) {
-            body = calEvent.historicalContext;
-          } else if (calEvent.sabbatData?.description) {
-            // Sabbat descriptions can be long — truncate at a sentence boundary
-            const desc = calEvent.sabbatData.description;
-            if (desc.length <= 190) {
-              body = desc;
-            } else {
-              const cut = desc.slice(0, 190).lastIndexOf('.');
-              body = cut > 60 ? desc.slice(0, cut + 1) : desc.slice(0, 190);
-            }
-          } else if (calEvent.rarityFrame) {
-            // Last resort: at least frame it as context, not a dead label
-            body = `${calEvent.rarityFrame}. Pay attention to what shifts.`;
-          } else {
-            body = `${calEvent.name}. The energy shifts today.`;
-          }
-
-          // Engagement-first prompts (algorithm rewards replies > likes)
-          const defaultPrompts = [
-            `How are you feeling this shift?`,
-            `What is this bringing up for you?`,
-            `Drop your sign below`,
-          ];
-          const sabbatPrompts = calEvent.sabbatData
-            ? [
-                `How are you marking ${calEvent.name}?`,
-                `What are you releasing this ${calEvent.name}?`,
-                `What ritual feels right for ${calEvent.name}?`,
-              ]
-            : [];
-          const ingressPrompts =
-            calEvent.planet && calEvent.sign
-              ? [
-                  `Where does ${calEvent.sign} fall in your chart?`,
-                  `Which house does ${calEvent.sign} rule for you?`,
-                  `What are you feeling as ${calEvent.planet} shifts?`,
-                ]
-              : [];
-
-          const promptPool = [
-            ...sabbatPrompts,
-            ...ingressPrompts,
-            ...defaultPrompts,
-          ];
-          const prompt = promptPool[Math.floor(rng() * promptPool.length)];
-
-          // Topic tag mapping
-          const tagMap: Record<string, string> = {
-            sabbat: 'Spirituality',
-            equinox: 'Astrology',
-            solstice: 'Astrology',
-            eclipse: 'Astrology',
-            transit: 'Astrology',
-            retrograde: 'Astrology',
-            moon: 'Moon',
-            aspect: 'Astrology',
-          };
-          const topicTag = tagMap[calEvent.category] || 'Astrology';
-
-          return { hook, body, prompt, topicTag };
-        },
-      });
-    }
-  } catch {
-    // Event calendar can throw on edge cases -- degrade gracefully,
-    // the existing detection continues to work without it.
-  }
-
   return events.sort((a, b) => b.priority - a.priority);
 }
 
@@ -1138,11 +577,11 @@ async function buildCosmicEvents(
  * Collect the top N event types that were (or would have been) used on a given day.
  * Since buildCosmicEvents is deterministic, we can replay previous days cheaply.
  */
-async function getRecentEventTypes(
+function getRecentEventTypes(
   dateStr: string,
   slotHour: number,
   lookbackDays: number = 2,
-): Promise<Map<string, number>> {
+): Map<string, number> {
   const counts = new Map<string, number>();
   const baseDate = new Date(dateStr);
 
@@ -1152,7 +591,7 @@ async function getRecentEventTypes(
     const pastStr = pastDate.toISOString().split('T')[0];
 
     // Check all 3 cosmic slots for each past day
-    const pastEvents = await buildCosmicEvents(pastStr, slotHour);
+    const pastEvents = buildCosmicEvents(pastStr, slotHour);
     // The top 3 events are what would have been posted
     for (let rank = 0; rank < Math.min(3, pastEvents.length); rank++) {
       const type = pastEvents[rank].type;
@@ -1166,34 +605,14 @@ async function getRecentEventTypes(
 /**
  * Remove events that appeared in the last 2 days entirely.
  * No same event type should repeat within a 3-day window.
- *
- * Exceptions:
- * - Time-sensitive events (ingress, retrograde stations, countdowns, direct stations,
- *   season changes, sabbats, eclipses) are NEVER filtered — they're the story of the day.
- * - If removing everything leaves nothing, keep fallbacks as a safety net.
+ * The only exception: if removing everything leaves us with nothing,
+ * keep the fallbacks (planet_spotlight, moon_position) as a safety net.
  */
 function removeStaleSameTypeEvents(
   events: CosmicEvent[],
   recentTypes: Map<string, number>,
 ): CosmicEvent[] {
-  // These event types are time-sensitive and must always appear when active
-  const timeSensitiveTypes = new Set([
-    'planetary_ingress',
-    'retrograde_station',
-    'direct_station',
-    'retrograde_countdown',
-    'retrograde_reentry',
-    'zodiac_season',
-    'season_countdown',
-    'moon_phase_change',
-    'moon_sign_change',
-    'sabbat',
-    'calendar_eclipse',
-  ]);
-
-  const fresh = events.filter(
-    (e) => timeSensitiveTypes.has(e.type) || !recentTypes.has(e.type),
-  );
+  const fresh = events.filter((e) => !recentTypes.has(e.type));
 
   // If we filtered out everything, keep low-priority fallbacks
   if (fresh.length === 0) {
@@ -1225,10 +644,10 @@ export async function generateCosmicTimingPost(
   rank: number = 0,
 ): Promise<ThreadsPost> {
   const rng = seededRandom(`cosmic-${dateStr}-${slotHour}-r${rank}`);
-  const rawEvents = await buildCosmicEvents(dateStr, slotHour);
+  const rawEvents = buildCosmicEvents(dateStr, slotHour);
 
   // Remove any event type that was used in the last 2 days — no repeats in a 3-day window
-  const recentTypes = await getRecentEventTypes(dateStr, slotHour);
+  const recentTypes = getRecentEventTypes(dateStr, slotHour);
   const events = removeStaleSameTypeEvents(rawEvents, recentTypes);
 
   // Pick the Nth ranked event (fall back to last if rank exceeds list)
@@ -1236,10 +655,17 @@ export async function generateCosmicTimingPost(
   const event = events[eventIndex];
   const content = event.generate(rng);
 
-  // Transit-specific hooks must never be overridden by generic orbit suggestions.
-  // Cosmic timing posts are tied to real astronomical events — replacing their hooks
-  // with unrelated orbit-suggested hooks breaks the content–transit link.
-  const hook = content.hook;
+  // Check orbit hook suggestions — may override the hook
+  const orbitHooks = await getOrbitHookSuggestions('cosmic_timing');
+  let hook = content.hook;
+
+  if (orbitHooks.length > 0 && rng() > 0.8) {
+    // 20% chance to use an orbit-suggested hook when available
+    const orbitHook = orbitHooks[Math.floor(rng() * orbitHooks.length)];
+    if (!(await shouldAvoidHook('cosmic_timing', orbitHook))) {
+      hook = orbitHook;
+    }
+  }
 
   return buildOriginalPost({
     hook,
@@ -1256,11 +682,8 @@ export async function generateCosmicTimingPost(
  * Returns the number of cosmic events available for a given date.
  * Used by the orchestrator to decide how many cosmic slots to fill.
  */
-export async function getCosmicEventCount(
-  dateStr: string,
-  slotHour: number,
-): Promise<number> {
-  const events = await buildCosmicEvents(dateStr, slotHour);
+export function getCosmicEventCount(dateStr: string, slotHour: number): number {
+  const events = buildCosmicEvents(dateStr, slotHour);
   // Only count events with priority above the fallback threshold (planet spotlight / moon position)
   return events.filter((e) => e.priority > 30).length;
 }
@@ -1269,12 +692,12 @@ export async function getCosmicEventCount(
  * Returns the type of event that a given rank will generate for dedup purposes.
  * Used by the orchestrator to avoid duplicate transit content across slots.
  */
-export async function getCosmicTimingEventType(
+export function getCosmicTimingEventType(
   dateStr: string,
   slotHour: number,
   rank: number = 0,
-): Promise<string> {
-  const events = await buildCosmicEvents(dateStr, slotHour);
+): string {
+  const events = buildCosmicEvents(dateStr, slotHour);
   const eventIndex = Math.min(rank, events.length - 1);
   return events[eventIndex]?.type || 'unknown';
 }

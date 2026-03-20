@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { head, put } from '@vercel/blob';
+import { composeVideo } from '@/lib/video/compose-video';
+import {
+  renderRemotionVideo,
+  isRemotionAvailable,
+  scriptToAudioSegments,
+  wordTimestampsToSegments,
+} from '@/lib/video/remotion-renderer';
 import { generateVoiceover, transcribeWithWhisper } from '@/lib/tts';
 import { TTS_PRESETS } from '@/lib/tts/presets';
 import { buildThematicVideoComposition } from '@/lib/video/thematic-video';
@@ -9,8 +16,11 @@ import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
 import { generateInstagramReelCaption } from '@/lib/social/video-scripts/tiktok/metadata';
 import { getImageBaseUrl } from '@/lib/urls';
 import { postToSocial } from '@/lib/social/client';
-import { buildShortVideoMetadata } from '@/lib/youtube/metadata';
 import { createHash } from 'crypto';
+import { writeFile, unlink, mkdtemp } from 'fs/promises';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import ffmpeg from 'fluent-ffmpeg';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,6 +64,33 @@ function contentTypeKeyToCategory(
     chakras: 'chakras',
   };
   return map[contentTypeKey];
+}
+
+function getAudioDurationFromBuffer(buffer: Buffer): Promise<number> {
+  return new Promise(async (resolve, reject) => {
+    // Validate buffer size (max 50MB for audio)
+    const MAX_AUDIO_SIZE = 50 * 1024 * 1024;
+    if (buffer.length > MAX_AUDIO_SIZE) {
+      reject(new Error('Audio buffer too large'));
+      return;
+    }
+
+    // Validate buffer is not empty
+    if (buffer.length === 0) {
+      reject(new Error('Audio buffer is empty'));
+      return;
+    }
+
+    const tempDir = await mkdtemp(join(tmpdir(), 'audio-dur-'));
+    const tempPath = join(tempDir, 'audio.mp3');
+    await writeFile(tempPath, buffer);
+    ffmpeg.ffprobe(tempPath, async (err, metadata) => {
+      await unlink(tempPath).catch(() => {});
+      if (err) reject(err);
+      else if (metadata.format.duration) resolve(metadata.format.duration);
+      else reject(new Error('Could not determine audio duration'));
+    });
+  });
 }
 
 export const runtime = 'nodejs';
@@ -612,13 +649,7 @@ export async function POST(request: NextRequest) {
           }
 
           if (!audioBuffer) {
-            // Strip any remaining section markers (e.g. [HOOK] (0-3s)) before TTS
-            // so they are never read aloud in the voiceover
-            const ttsScript = (script.full_script as string).replace(
-              /\[(?:HOOK|MEANING|WHAT TO EXPECT|CTA)\]\s*\([^)]*\)\.?\s*/gi,
-              '',
-            );
-            audioBuffer = await generateVoiceover(ttsScript, {
+            audioBuffer = await generateVoiceover(script.full_script, {
               voiceName: ttsPreset.voiceName,
               model: ttsPreset.model,
               speed: ttsPreset.speed,
@@ -635,7 +666,12 @@ export async function POST(request: NextRequest) {
 
           const safeSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '-');
 
+          // Get audio duration for Remotion timing
           const audioNodeBuffer = Buffer.from(audioBuffer);
+          const audioDuration =
+            await getAudioDurationFromBuffer(audioNodeBuffer);
+          console.log(`🎵 Audio duration: ${audioDuration}s`);
+
           let videoBuffer: Buffer | undefined;
 
           // Upload audio to Blob so the render server can download it
@@ -646,128 +682,176 @@ export async function POST(request: NextRequest) {
           );
 
           const contentCreatorUrl = process.env.CONTENT_CREATOR_API_URL;
-          if (!contentCreatorUrl) {
-            if (process.env.VERCEL) {
-              throw new Error(
-                'CONTENT_CREATOR_API_URL is not set. ' +
-                  'Video rendering is not allowed on Vercel. ' +
-                  'Set CONTENT_CREATOR_API_URL to your Hetzner server.',
+          if (contentCreatorUrl) {
+            // Delegate rendering to Content Creator server (Hetzner)
+            console.log(
+              `🎬 Sending script ${script.id} to Content Creator for rendering...`,
+            );
+
+            // Whisper transcription for accurate subtitle timing
+            let wordTimestamps: Array<{
+              word: string;
+              start: number;
+              end: number;
+            }> = [];
+            try {
+              const whisperWords = await transcribeWithWhisper(audioBuffer);
+              if (whisperWords.length > 0) {
+                wordTimestamps = whisperWords;
+                console.log(
+                  `🎙️ Whisper: ${whisperWords.length} word timestamps for script ${script.id}`,
+                );
+              }
+            } catch (whisperErr) {
+              console.warn(
+                `⚠️ Whisper transcription failed, render server will use fallback timing:`,
+                whisperErr instanceof Error ? whisperErr.message : whisperErr,
               );
             }
-            throw new Error(
-              'CONTENT_CREATOR_API_URL is not set. ' +
-                'All video rendering must happen on Content Creator (Hetzner).',
-            );
-          }
 
-          // Delegate rendering to Content Creator server (Hetzner)
-          console.log(
-            `🎬 Sending script ${script.id} to Content Creator for rendering...`,
-          );
-
-          // Whisper transcription for accurate subtitle timing
-          let wordTimestamps: Array<{
-            word: string;
-            start: number;
-            end: number;
-          }> = [];
-          try {
-            const whisperWords = await transcribeWithWhisper(audioBuffer);
-            if (whisperWords.length > 0) {
-              wordTimestamps = whisperWords;
-              console.log(
-                `🎙️ Whisper: ${whisperWords.length} word timestamps for script ${script.id}`,
-              );
-            }
-          } catch (whisperErr) {
-            console.warn(
-              `⚠️ Whisper transcription failed, render server will use fallback timing:`,
-              whisperErr instanceof Error ? whisperErr.message : whisperErr,
-            );
-          }
-
-          // Audio duration from Whisper timestamps or word count estimate
-          // Content Creator will also get the true duration via ffprobe
-          const audioDuration =
-            wordTimestamps.length > 0
-              ? wordTimestamps[wordTimestamps.length - 1].end
-              : (script.full_script?.split(/\s+/).length || 100) / 2.5;
-
-          const renderSecret =
-            process.env.LUNARY_RENDER_SECRET || process.env.CRON_SECRET;
-          const renderResponse = await fetch(
-            `${contentCreatorUrl}/api/lunary-render`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                ...(renderSecret
-                  ? { Authorization: `Bearer ${renderSecret}` }
-                  : {}),
+            const renderSecret =
+              process.env.LUNARY_RENDER_SECRET || process.env.CRON_SECRET;
+            const renderResponse = await fetch(
+              `${contentCreatorUrl}/api/lunary-render`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(renderSecret
+                    ? { Authorization: `Bearer ${renderSecret}` }
+                    : {}),
+                },
+                body: JSON.stringify({
+                  scriptText: script.full_script,
+                  audioUrl: audioBlob.url,
+                  images: images.map(
+                    (img: string | { url: string; [k: string]: unknown }) => {
+                      const url = typeof img === 'string' ? img : img?.url;
+                      if (!url) return img;
+                      return url.startsWith('http') ? url : `${baseUrl}${url}`;
+                    },
+                  ),
+                  slug: safeSlug,
+                  facetTitle: script.facet_title,
+                  dateKey,
+                  wordTimestamps:
+                    wordTimestamps.length > 0 ? wordTimestamps : undefined,
+                  audioDuration,
+                  // Remotion composition props
+                  overlays: overlays || [],
+                  highlightTerms: highlightTerms || [],
+                  categoryVisuals,
+                  seed: `${safeSlug}-${script.id}-${Date.now()}`,
+                  zodiacSign: `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`,
+                }),
               },
-              body: JSON.stringify({
-                scriptText: script.full_script,
-                audioUrl: audioBlob.url,
-                images: images.map(
-                  (img: string | { url: string; [k: string]: unknown }) => {
-                    const url = typeof img === 'string' ? img : img?.url;
-                    if (!url) return img;
-                    return url.startsWith('http') ? url : `${baseUrl}${url}`;
-                  },
-                ),
-                slug: safeSlug,
-                facetTitle: script.facet_title,
-                dateKey,
-                wordTimestamps:
-                  wordTimestamps.length > 0 ? wordTimestamps : undefined,
-                audioDuration,
-                // Remotion composition props
-                overlays: overlays || [],
-                highlightTerms: highlightTerms || [],
-                categoryVisuals,
-                seed: `${safeSlug}-${script.id}-${Date.now()}`,
-                zodiacSign: `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`,
-              }),
-            },
-          );
-
-          if (!renderResponse.ok) {
-            const errorBody = await renderResponse.text();
-            throw new Error(
-              `Content Creator render failed (${renderResponse.status}): ${errorBody}`,
             );
-          }
 
-          const renderResult = await renderResponse.json();
-          if (!renderResult.videoData) {
-            throw new Error('Content Creator returned no video data');
-          }
+            if (!renderResponse.ok) {
+              const errorBody = await renderResponse.text();
+              throw new Error(
+                `Content Creator render failed (${renderResponse.status}): ${errorBody}`,
+              );
+            }
 
-          videoBuffer = Buffer.from(renderResult.videoData, 'base64');
-          console.log(
-            `✅ Content Creator rendered ${(videoBuffer.length / 1024 / 1024).toFixed(1)}MB video for script ${script.id}`,
-          );
+            const renderResult = await renderResponse.json();
+            if (!renderResult.videoData) {
+              throw new Error('Content Creator returned no video data');
+            }
+
+            videoBuffer = Buffer.from(renderResult.videoData, 'base64');
+            console.log(
+              `✅ Content Creator rendered ${(videoBuffer.length / 1024 / 1024).toFixed(1)}MB video for script ${script.id}`,
+            );
+          } else {
+            // Local rendering fallback (development only)
+            const remotionAvailable = await isRemotionAvailable();
+            let useFFmpegFallback = !remotionAvailable || !audioDuration;
+
+            console.log(
+              `🎥 Remotion available: ${remotionAvailable}, audio duration: ${audioDuration}s`,
+            );
+
+            if (!useFFmpegFallback) {
+              try {
+                console.log(
+                  `🎬 Using Remotion for video generation (script ${script.id})...`,
+                );
+
+                let segments;
+                try {
+                  const whisperWords = await transcribeWithWhisper(audioBuffer);
+                  segments = whisperWords.length
+                    ? wordTimestampsToSegments(
+                        whisperWords,
+                        audioDuration,
+                        6,
+                        script.full_script,
+                      )
+                    : scriptToAudioSegments(
+                        script.full_script,
+                        audioDuration,
+                        2.6,
+                      );
+                } catch {
+                  segments = scriptToAudioSegments(
+                    script.full_script,
+                    audioDuration,
+                    2.6,
+                  );
+                }
+
+                const remotionFormat =
+                  audioDuration > 45 ? 'MediumFormVideo' : 'ShortFormVideo';
+                const videoSeed = `${safeSlug}-${script.id}-${Date.now()}`;
+                const symbolContent = `${script.facet_title || ''} ${script.full_script?.substring(0, 200) || ''}`;
+
+                videoBuffer = await renderRemotionVideo({
+                  format: remotionFormat,
+                  outputPath: '',
+                  segments,
+                  audioUrl: audioBlob.url,
+                  backgroundMusicUrl: '/audio/series/lunary-bed-v1.mp3',
+                  highlightTerms: highlightTerms || [],
+                  durationSeconds: audioDuration + 2,
+                  overlays: overlays || [],
+                  categoryVisuals,
+                  seed: videoSeed,
+                  zodiacSign: symbolContent,
+                });
+
+                console.log(
+                  `✅ Remotion: Video rendered for script ${script.id}`,
+                );
+              } catch (remotionError) {
+                console.error(
+                  `❌ Remotion render failed for script ${script.id}:`,
+                  remotionError,
+                );
+                useFFmpegFallback = true;
+              }
+            }
+
+            if (useFFmpegFallback) {
+              console.log(
+                `⚠️ Using FFmpeg fallback for script ${script.id}...`,
+              );
+              videoBuffer = await composeVideo({
+                images,
+                audioBuffer,
+                format: 'story',
+                outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
+                subtitlesText: script.full_script,
+                subtitlesHighlightTerms: highlightTerms,
+                subtitlesHighlightColor: highlightColor,
+                overlays,
+              });
+            }
+          }
 
           if (!videoBuffer) {
             throw new Error('Video generation failed - no buffer produced');
           }
-
-          // ─── Quality gates ───
-          // Styled Remotion videos are typically 3-15MB+.
-          // FFmpeg fallback renders were 300-850KB and looked terrible.
-          // Reject anything under 2MB as likely broken/unstyled.
-          const MIN_VIDEO_SIZE = 2 * 1024 * 1024; // 2MB
-          const videoSizeMB = (videoBuffer.length / 1024 / 1024).toFixed(1);
-          if (videoBuffer.length < MIN_VIDEO_SIZE) {
-            throw new Error(
-              `Video quality gate failed: ${videoSizeMB}MB is below minimum ${(MIN_VIDEO_SIZE / 1024 / 1024).toFixed(0)}MB. ` +
-                `This likely means the render produced an unstyled or broken video. ` +
-                `Script ${script.id} will not be published.`,
-            );
-          }
-          console.log(
-            `✅ Quality gate passed: ${videoSizeMB}MB video for script ${script.id}`,
-          );
 
           const blobKey = `videos/shorts/daily/${dateKey}-${safeSlug}-${Date.now()}.mp4`;
           const uploadResult = await put(blobKey, videoBuffer, {
@@ -963,66 +1047,13 @@ export async function POST(request: NextRequest) {
           `;
           for (const post of pendingPosts.rows) {
             try {
-              // Guard: never publish posts with empty/whitespace content
-              const postContent = String(post.content || '').trim();
-              if (!postContent) {
-                console.warn(
-                  `[bridge] Skipping ${post.platform} post ${post.id} — empty content`,
-                );
-                await sql`
-                  UPDATE social_posts
-                  SET status = 'failed', rejection_feedback = 'Empty content — blocked by quality gate',
-                      updated_at = NOW()
-                  WHERE id = ${post.id}
-                `;
-                continue;
-              }
               const scheduledIso = new Date(post.scheduled_date).toISOString();
               const isFuture = new Date(post.scheduled_date) > new Date();
-
-              // Build YouTube SEO metadata for YouTube uploads
-              const isYouTube = post.platform === 'youtube';
-              let youtubeOptions:
-                | {
-                    title: string;
-                    isShort: boolean;
-                    tags: string[];
-                    visibility: string;
-                    categoryId: string;
-                  }
-                | undefined;
-              if (isYouTube) {
-                const ytMeta = buildShortVideoMetadata({
-                  facetTitle: script.facet_title,
-                  category,
-                  themeName: postWeekTheme || themeName || undefined,
-                  scriptText: script.full_script,
-                  contentTypeKey: metadata.contentTypeKey as string | undefined,
-                });
-                youtubeOptions = {
-                  title: ytMeta.title,
-                  isShort: true,
-                  tags: ytMeta.tags,
-                  visibility: 'public',
-                  categoryId: '22',
-                };
-              }
-
               const result = await postToSocial({
                 platform: post.platform as string,
-                content: isYouTube
-                  ? buildShortVideoMetadata({
-                      facetTitle: script.facet_title,
-                      category,
-                      scriptText: script.full_script,
-                      contentTypeKey: metadata.contentTypeKey as
-                        | string
-                        | undefined,
-                    }).description
-                  : (post.content as string),
+                content: post.content as string,
                 scheduledDate: scheduledIso,
                 media: [{ type: 'video', url: post.video_url as string }],
-                youtubeOptions,
                 platformSettings:
                   post.platform === 'tiktok'
                     ? {

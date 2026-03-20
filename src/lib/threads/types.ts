@@ -42,8 +42,8 @@ export const THREADS_TOPIC_TAGS: Record<ThemeCategory, string> = {
   spells: 'Spirituality',
 };
 
-/** Daily posting slots (5 posts/day) in UTC hours — UK/US crossover window */
-export const DAILY_SLOTS_UTC = [14, 16, 19, 21, 23];
+/** Daily posting slots (4 posts/day) in UTC hours — UK/US crossover window */
+export const DAILY_SLOTS_UTC = [14, 17, 21, 23];
 
 /** Character limits for Threads posts */
 export const THREADS_CHAR_LIMITS = {

@@ -12,9 +12,6 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
-/** Typed null for SQL parameters — avoids CodeQL implicit-operand-conversion */
-const SQL_NULL: string | null = null;
-
 function getWeekStart(weekOffset: number): Date {
   const now = new Date();
   const dayOfWeek = now.getDay();
@@ -123,7 +120,7 @@ export async function GET(request: NextRequest) {
             )
             SELECT ${postContent}, ${platform}, 'video',
                    ${'Cosmic Forecast: ' + dateKey}, 'pending',
-                   ${SQL_NULL},
+                   ${null},
                    ${weekStart.toISOString()}, 'Cosmic Forecast',
                    'video_script', ${String(scriptId)}, ${'Cosmic Forecast: ' + dateKey}, NOW()
             WHERE NOT EXISTS (
@@ -202,7 +199,7 @@ export async function GET(request: NextRequest) {
           )
           SELECT ${postContent}, 'youtube', 'video',
                  ${'Cosmic Forecast Long: ' + dateKey}, 'pending',
-                 ${SQL_NULL},
+                 ${null},
                  ${weekStart.toISOString()}, 'Cosmic Forecast',
                  'video_script', ${String(scriptId)}, ${'Cosmic Forecast Long: ' + dateKey}, NOW()
           WHERE NOT EXISTS (
