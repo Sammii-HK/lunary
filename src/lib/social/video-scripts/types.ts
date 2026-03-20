@@ -29,6 +29,12 @@ export interface TikTokMetadata {
   hookIntroVariant?: HookIntroVariant;
   ctaType?: string;
   commentBait?: string;
+  // Seer Sammii fields (stored on save, read by admin page)
+  talkingPoints?: string[];
+  hashtags?: string[];
+  cta?: string;
+  contentType?: string;
+  transitContext?: string;
   overlays?: Array<{
     text: string;
     startTime: number;
