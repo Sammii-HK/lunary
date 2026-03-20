@@ -307,6 +307,36 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
           </Link>
         ))}
       </div>
+
+      <div className='mt-8 p-5 bg-zinc-900/50 border border-zinc-800/50 rounded-xl'>
+        <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+          Explore {signName} placements
+        </h3>
+        <p className='text-sm text-zinc-400 mb-4'>
+          Your horoscope depends on where {signName} falls in your chart.
+          Explore each placement for deeper insight.
+        </p>
+        <div className='flex flex-wrap gap-3'>
+          <Link
+            href={`/grimoire/zodiac/${sign}`}
+            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+          >
+            {signName} Sun sign &rarr;
+          </Link>
+          <Link
+            href={`/grimoire/moon-in/${sign}`}
+            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+          >
+            Moon in {signName} &rarr;
+          </Link>
+          <Link
+            href={`/grimoire/rising/${sign}`}
+            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+          >
+            {signName} rising &rarr;
+          </Link>
+        </div>
+      </div>
     </SEOContentTemplate>
   );
 }

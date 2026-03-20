@@ -138,20 +138,20 @@ function buildSignResourceLinks(sign: ZodiacSign, lunarYear: number) {
 
   return [
     {
-      label: 'Birth Chart Guide',
-      href: '/grimoire/guides/birth-chart-complete-guide',
-    },
-    {
       label: `${signName} Zodiac Sign`,
       href: `/grimoire/zodiac/${sign}`,
     },
     {
-      label: `${ruler} in Astrology`,
-      href: `/grimoire/astronomy/planets/${ruler.toLowerCase()}`,
+      label: `${signName} Rising Sign`,
+      href: `/grimoire/rising/${sign}`,
     },
     {
-      label: `${lunarYear} Lunar Events`,
-      href: `/grimoire/moon/${lunarYear}`,
+      label: `Moon in ${signName}`,
+      href: `/grimoire/moon-in/${sign}`,
+    },
+    {
+      label: `${ruler} in Astrology`,
+      href: `/grimoire/astronomy/planets/${ruler.toLowerCase()}`,
     },
   ];
 }

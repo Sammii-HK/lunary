@@ -58,6 +58,7 @@ const PLACEMENT_INFO: Record<
 export function PlacementSelector({ signName }: PlacementSelectorProps) {
   const [selected, setSelected] = useState<Placement | null>(null);
   const posthog = usePostHog();
+  const signSlug = signName.toLowerCase();
 
   const handleSelect = (placement: Placement) => {
     setSelected(selected === placement ? null : placement);
@@ -68,6 +69,13 @@ export function PlacementSelector({ signName }: PlacementSelectorProps) {
   };
 
   const info = selected ? PLACEMENT_INFO[selected] : null;
+
+  const ctaHrefs: Record<Placement, string> = {
+    sun: `/grimoire/zodiac/${signSlug}`,
+    moon: `/grimoire/moon-in/${signSlug}`,
+    rising: `/grimoire/rising/${signSlug}`,
+    not_sure: '/grimoire/guides/birth-chart-complete-guide',
+  };
 
   return (
     <div className='bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4 sm:p-5'>
@@ -105,13 +113,13 @@ export function PlacementSelector({ signName }: PlacementSelectorProps) {
         })}
       </div>
 
-      {info && (
+      {info && selected && (
         <div className='mt-3 pt-3 border-t border-zinc-800/50'>
           <p className='text-sm text-zinc-300 leading-relaxed'>
             {info.explanation}
           </p>
           <Link
-            href='/app/birth-chart'
+            href={ctaHrefs[selected]}
             className='inline-block mt-2 text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
           >
             {info.cta} &rarr;
