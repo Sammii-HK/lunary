@@ -793,10 +793,10 @@ interface DailySocialPost {
 async function runDailyPosts(dateStr: string) {
   console.log('📱 Generating daily social media posts...');
 
-  const productionUrl = 'https://lunary.app';
+  const PRODUCTION_URL = 'https://lunary.app';
 
   try {
-    await ensurePinterestQuoteQueue(dateStr, productionUrl);
+    await ensurePinterestQuoteQueue(dateStr, PRODUCTION_URL);
   } catch (queueError) {
     console.warn(
       '[DailyPosts] Failed to prepare Pinterest quote queue:',
@@ -830,7 +830,7 @@ async function runDailyPosts(dateStr: string) {
       : '';
 
   const [cosmicResponse] = await Promise.all([
-    fetch(`${productionUrl}/api/og/cosmic-post/${dateStr}${excludeParam}`, {
+    fetch(`${PRODUCTION_URL}/api/og/cosmic-post/${dateStr}${excludeParam}`, {
       headers: { 'User-Agent': 'Lunary-Cron/1.0' },
     }),
   ]);
@@ -842,7 +842,7 @@ async function runDailyPosts(dateStr: string) {
     const errorDetails = {
       status: cosmicResponse.status,
       statusText: cosmicResponse.statusText,
-      url: `${productionUrl}/api/og/cosmic-post/${dateStr}`,
+      url: `${PRODUCTION_URL}/api/og/cosmic-post/${dateStr}`,
       responseBody: errorText.substring(0, 500), // Limit response body size
     };
 
@@ -1127,7 +1127,7 @@ async function runDailyPosts(dateStr: string) {
       const format = getCosmicFormat('pinterest');
       const baseImageUrl =
         pinterestQuoteSlot.imageUrl ??
-        getQuoteImageUrl(pinterestQuoteSlot.quoteText, productionUrl, {
+        getQuoteImageUrl(pinterestQuoteSlot.quoteText, PRODUCTION_URL, {
           author: pinterestQuoteSlot.quoteAuthor || undefined,
           format,
         });
@@ -1391,7 +1391,7 @@ async function runDailyPosts(dateStr: string) {
         title: dailyPreview.title,
         message: dailyPreview.message,
         priority: dailyPreview.priority,
-        url: `${productionUrl}/admin/social-posts`,
+        url: `${PRODUCTION_URL}/admin/social-posts`,
         category: 'general',
         dedupeKey: `daily-preview-${dateStr}`,
       });
@@ -1420,7 +1420,7 @@ async function runDailyPosts(dateStr: string) {
         title: successTemplate.title,
         message: successTemplate.message,
         priority: successTemplate.priority,
-        url: `${productionUrl}/admin/social-posts`,
+        url: `${PRODUCTION_URL}/admin/social-posts`,
         fields: successFields,
         category: 'general',
         dedupeKey: `daily-posts-success-${dateStr}`,
@@ -1454,7 +1454,7 @@ async function runDailyPosts(dateStr: string) {
         title: failureTemplate.title,
         message: failureTemplate.message,
         priority: failureTemplate.priority,
-        url: `${productionUrl}/admin/cron-monitor`,
+        url: `${PRODUCTION_URL}/admin/cron-monitor`,
         fields: failureFields,
         category: 'urgent',
         dedupeKey: `daily-posts-failure-${dateStr}`,
@@ -1475,7 +1475,7 @@ async function runDailyPosts(dateStr: string) {
 // WEEKLY TASKS (Sundays)
 async function runWeeklyTasks(request: NextRequest) {
   console.log('📅 Running weekly tasks...');
-  const baseUrl = getBaseUrl(request);
+  const BASE_URL = getBaseUrl(request);
   const startTime = Date.now();
 
   try {
@@ -1488,7 +1488,7 @@ async function runWeeklyTasks(request: NextRequest) {
     });
 
     // 1. Generate weekly blog content
-    const blogResponse = await fetch(`${baseUrl}/api/blog/weekly`, {
+    const blogResponse = await fetch(`${BASE_URL}/api/blog/weekly`, {
       headers: { 'User-Agent': 'Lunary-Master-Cron/1.0' },
     });
 
@@ -1511,17 +1511,20 @@ async function runWeeklyTasks(request: NextRequest) {
     });
 
     // 2. Send weekly newsletter
-    const newsletterResponse = await fetch(`${baseUrl}/api/newsletter/weekly`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Lunary-Master-Cron/1.0',
+    const newsletterResponse = await fetch(
+      `${BASE_URL}/api/newsletter/weekly`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Lunary-Master-Cron/1.0',
+        },
+        body: JSON.stringify({
+          send: true,
+          customSubject: `🌟 ${blogData.data?.title}`,
+        }),
       },
-      body: JSON.stringify({
-        send: true,
-        customSubject: `🌟 ${blogData.data?.title}`,
-      }),
-    });
+    );
 
     const newsletterData = await newsletterResponse.json();
     console.log('📧 Weekly newsletter result:', newsletterData.message);
@@ -1542,7 +1545,7 @@ async function runWeeklyTasks(request: NextRequest) {
     console.log('📬 Publishing to Substack...');
     let substackResult = null;
     try {
-      const substackResponse = await fetch(`${baseUrl}/api/substack/publish`, {
+      const substackResponse = await fetch(`${BASE_URL}/api/substack/publish`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1620,7 +1623,7 @@ async function runWeeklyTasks(request: NextRequest) {
       );
 
       const socialPostsResponse = await fetch(
-        `${baseUrl}/api/admin/social-posts/generate-weekly`,
+        `${BASE_URL}/api/admin/social-posts/generate-weekly`,
         {
           method: 'POST',
           headers: {
@@ -1679,7 +1682,7 @@ async function runWeeklyTasks(request: NextRequest) {
     const weekStartDate = blogData.data?.weekStart
       ? new Date(blogData.data.weekStart).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0];
-    const blogPreviewUrl = `${baseUrl}/api/og/cosmic/${weekStartDate}`;
+    const blogPreviewUrl = `${BASE_URL}/api/og/cosmic/${weekStartDate}`;
 
     // Send push notification for weekly content with blog preview and social posts info
     try {
@@ -1727,7 +1730,7 @@ async function runWeeklyTasks(request: NextRequest) {
         title: weeklyTemplate.title,
         message: weeklyTemplate.message,
         priority: weeklyTemplate.priority,
-        url: `${baseUrl}/admin/social-posts`,
+        url: `${BASE_URL}/admin/social-posts`,
         fields: weeklyFields,
         category: 'todo',
         dedupeKey: `weekly-digest-${new Date().toISOString().split('T')[0]}`,
@@ -1835,7 +1838,7 @@ async function runWeeklyTasks(request: NextRequest) {
 // MONTHLY TASKS (15th of each month)
 async function runMonthlyTasks(request: NextRequest) {
   console.log('📅 Running monthly tasks...');
-  const baseUrl = getBaseUrl(request);
+  const BASE_URL = getBaseUrl(request);
   const startTime = Date.now();
 
   try {
@@ -1848,7 +1851,7 @@ async function runMonthlyTasks(request: NextRequest) {
     });
 
     const response = await fetch(
-      `${baseUrl}/api/cron/moon-packs?type=monthly`,
+      `${BASE_URL}/api/cron/moon-packs?type=monthly`,
       {
         method: 'POST',
         headers: {
@@ -1937,7 +1940,7 @@ async function runMonthlyTasks(request: NextRequest) {
 // QUARTERLY TASKS (15th of Jan, Apr, Jul, Oct)
 async function runQuarterlyTasks(request: NextRequest) {
   console.log('📅 Running quarterly tasks...');
-  const baseUrl = getBaseUrl(request);
+  const BASE_URL = getBaseUrl(request);
   const startTime = Date.now();
 
   try {
@@ -1950,7 +1953,7 @@ async function runQuarterlyTasks(request: NextRequest) {
     });
 
     const response = await fetch(
-      `${baseUrl}/api/cron/moon-packs?type=quarterly`,
+      `${BASE_URL}/api/cron/moon-packs?type=quarterly`,
       {
         method: 'POST',
         headers: {
@@ -2039,7 +2042,7 @@ async function runQuarterlyTasks(request: NextRequest) {
 // YEARLY TASKS (July 1st)
 async function runYearlyTasks(request: NextRequest) {
   console.log('📅 Running yearly tasks...');
-  const baseUrl = getBaseUrl(request);
+  const BASE_URL = getBaseUrl(request);
   const startTime = Date.now();
 
   try {
@@ -2053,7 +2056,7 @@ async function runYearlyTasks(request: NextRequest) {
 
     // Generate yearly moon packs
     const packResponse = await fetch(
-      `${baseUrl}/api/cron/moon-packs?type=yearly`,
+      `${BASE_URL}/api/cron/moon-packs?type=yearly`,
       {
         method: 'POST',
         headers: {
@@ -2071,7 +2074,7 @@ async function runYearlyTasks(request: NextRequest) {
     const nextYear = new Date().getFullYear() + 1;
     try {
       const calendarResponse = await fetch(
-        `${baseUrl}/api/shop/calendar/generate-and-sync`,
+        `${BASE_URL}/api/shop/calendar/generate-and-sync`,
         {
           method: 'POST',
           headers: {
@@ -2207,7 +2210,7 @@ async function runNotificationCheck(dateStr: string) {
   try {
     // First, get the cosmic data to determine what notifications to send
     const cosmicResponse = await fetch(
-      `${baseUrl}/api/og/cosmic-post/${dateStr}`,
+      `${BASE_URL}/api/og/cosmic-post/${dateStr}`,
       {
         headers: { 'User-Agent': 'Lunary-Notification-Service/1.0' },
       },
@@ -2410,7 +2413,7 @@ async function runNotificationCheck(dateStr: string) {
           title: '📊 Weekly Conversion Digest',
           message: 'Weekly conversion statistics for the past 7 and 30 days.',
           priority: 'normal',
-          url: `${baseUrl}/admin/analytics`,
+          url: `${BASE_URL}/admin/analytics`,
           fields,
           category: 'analytics',
           dedupeKey: `weekly-conversion-digest-${new Date().toISOString().split('T')[0]}`,

@@ -137,15 +137,15 @@ async function scheduleXPost(params: {
   scheduledFor: string;
   firstComment?: string;
 }): Promise<{ id: string; success: boolean }> {
-  const spellcastUrl = process.env.SPELLCAST_API_URL;
+  const SPELLCAST_URL = process.env.SPELLCAST_API_URL;
   const spellcastKey = process.env.SPELLCAST_API_KEY;
 
-  if (!spellcastUrl || !spellcastKey) {
+  if (!SPELLCAST_URL || !spellcastKey) {
     throw new Error('Spellcast env vars not configured');
   }
 
   // Create the post
-  const createRes = await fetch(`${spellcastUrl}/api/posts`, {
+  const createRes = await fetch(`${SPELLCAST_URL}/api/posts`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ async function scheduleXPost(params: {
 
   // Schedule the post
   const scheduleRes = await fetch(
-    `${spellcastUrl}/api/posts/${post.id}/schedule`,
+    `${SPELLCAST_URL}/api/posts/${post.id}/schedule`,
     {
       method: 'POST',
       headers: {
