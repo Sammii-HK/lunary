@@ -323,6 +323,38 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       </section>
 
       <section className='mb-12'>
+        <div className='p-5 bg-zinc-900/50 border border-zinc-800/50 rounded-xl'>
+          <h2 className='text-lg font-medium text-zinc-100 mb-3'>
+            Explore {signName} placements
+          </h2>
+          <p className='text-sm text-zinc-400 mb-4'>
+            Your {year} horoscope shifts depending on where {signName} sits in
+            your chart. Explore each placement for deeper insight.
+          </p>
+          <div className='flex flex-wrap gap-3'>
+            <Link
+              href={`/grimoire/zodiac/${sign}`}
+              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+            >
+              {signName} Sun sign &rarr;
+            </Link>
+            <Link
+              href={`/grimoire/moon-in/${sign}`}
+              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+            >
+              Moon in {signName} &rarr;
+            </Link>
+            <Link
+              href={`/grimoire/rising/${sign}`}
+              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+            >
+              {signName} rising &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className='mb-12'>
         <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
           Other Signs for {year}
         </h2>

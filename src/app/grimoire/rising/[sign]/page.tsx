@@ -142,16 +142,23 @@ ${rising.compatibility}`;
       ]}
       faqs={faqs}
       internalLinks={[
-        { text: 'All Rising Signs', href: '/grimoire/rising' },
         {
           text: `${rising.sign} Sun Sign`,
           href: `/grimoire/zodiac/${rising.sign.toLowerCase()}`,
         },
         {
+          text: `Moon in ${rising.sign}`,
+          href: `/grimoire/moon-in/${rising.sign.toLowerCase()}`,
+        },
+        {
+          text: `${rising.sign} Horoscopes`,
+          href: `/grimoire/horoscopes/${rising.sign.toLowerCase()}`,
+        },
+        { text: 'All Rising Signs', href: '/grimoire/rising' },
+        {
           text: 'Birth Chart Guide',
           href: '/grimoire/guides/birth-chart-complete-guide',
         },
-        { text: 'Calculate Your Chart', href: '/birth-chart' },
       ]}
       ctaText='Discover Your Rising Sign'
       ctaHref='/birth-chart'

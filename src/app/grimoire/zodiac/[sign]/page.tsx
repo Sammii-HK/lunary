@@ -280,18 +280,21 @@ Tarot Card: ${signData.tarotCard}`}
             href: `/grimoire/horoscopes/${signKey.toLowerCase()}`,
           },
           {
-            text: `${signData.name} Compatibility`,
-            href: `/grimoire/compatibility/${signKey.toLowerCase()}`,
+            text: `${signData.name} Rising Sign`,
+            href: `/grimoire/rising/${signKey.toLowerCase()}`,
           },
           {
             text: `Moon in ${signData.name}`,
             href: `/grimoire/moon-in/${signKey.toLowerCase()}`,
           },
           {
+            text: `${signData.name} Compatibility`,
+            href: `/grimoire/compatibility/${signKey.toLowerCase()}`,
+          },
+          {
             text: `${signData.name} Crystals`,
             href: `/grimoire/crystals?sign=${signKey.toLowerCase()}`,
           },
-          { text: 'Calculate Birth Chart', href: '/birth-chart' },
           { text: 'All Zodiac Signs', href: '/grimoire/zodiac' },
         ]}
         ctaText={`Want personalized insights for your ${signData.name} chart?`}

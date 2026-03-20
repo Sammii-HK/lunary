@@ -213,10 +213,20 @@ Emotional Expression: ${signData.element.toLowerCase()}`}
           },
         ]}
         internalLinks={[
-          { text: "View Today's Moon Sign", href: '/horoscope' },
+          {
+            text: `${signData.name} Sun Sign`,
+            href: `/grimoire/zodiac/${sign}`,
+          },
+          {
+            text: `${signData.name} Rising Sign`,
+            href: `/grimoire/rising/${sign}`,
+          },
+          {
+            text: `${signData.name} Horoscopes`,
+            href: `/grimoire/horoscopes/${sign}`,
+          },
           { text: 'Explore Moon Phases', href: '/grimoire/moon' },
-          { text: 'Calculate Birth Chart', href: '/birth-chart' },
-          { text: 'Grimoire Home', href: '/grimoire' },
+          { text: 'All Moon Signs', href: '/grimoire/moon-in' },
         ]}
         ctaText={`Want to see Moon in ${signData.name} in your birth chart?`}
         ctaHref='/pricing'
