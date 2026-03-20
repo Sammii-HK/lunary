@@ -664,6 +664,223 @@ export async function bulkInsertPerformance(
   return inserted;
 }
 
+// ── EDA Signals ─────────────────────────────────────────────────────────────
+
+export interface ContentEDASignals {
+  /** Per-category viral score using z-score normalisation */
+  categoryViralScores: Array<{
+    category: string;
+    viralScore: number;
+    zViews: number;
+    zEngagement: number;
+    avgViews: number;
+    avgSaves: number;
+    avgComments: number;
+    avgShares: number;
+    count: number;
+  }>;
+  /** Per-category x slot performance (which categories work in which time slots) */
+  categorySlotProfile: Array<{
+    category: string;
+    slot: string;
+    medianEngagement: number;
+    count: number;
+  }>;
+  /** Per-category x day-of-week performance */
+  categoryDayProfile: Array<{
+    category: string;
+    dayOfWeek: number;
+    medianEngagement: number;
+    count: number;
+  }>;
+  /** Per-category x hour performance */
+  categoryHourProfile: Array<{
+    category: string;
+    scheduledHour: number;
+    medianEngagement: number;
+    count: number;
+  }>;
+  /** Concentration: how evenly distributed are recent posts across categories */
+  concentrationHHI: number;
+  /** Category share breakdown */
+  categoryShares: Array<{ category: string; share: number; count: number }>;
+  /** Total posts in window */
+  totalPosts: number;
+  /** Data confidence */
+  confidence: 'high' | 'medium' | 'low';
+}
+
+/**
+ * Compute deep EDA signals from video_performance data.
+ *
+ * Uses z-score normalisation to rank categories by a composite viral score
+ * that balances reach (views) and engagement quality (saves + comments + shares).
+ * Also computes category x slot, category x day, and concentration metrics.
+ */
+export async function getContentEDASignals(
+  days: number = 30,
+): Promise<ContentEDASignals> {
+  const { sql } = await import('@vercel/postgres');
+
+  // 1. Per-category aggregates with saves
+  const catResult = await sql`
+    SELECT
+      content_type as category,
+      COUNT(*)::int as count,
+      AVG(views) as avg_views,
+      AVG(likes) as avg_likes,
+      AVG(comments) as avg_comments,
+      AVG(shares) as avg_shares,
+      AVG(COALESCE(saves, 0)) as avg_saves,
+      AVG(LN(GREATEST(views, 1) + 1)) as log_views,
+      AVG(LN(GREATEST(likes + comments * 3 + shares * 2 + COALESCE(saves, 0) * 1.5, 1) + 1)) as log_engagement
+    FROM video_performance
+    WHERE content_type IS NOT NULL
+      AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+    GROUP BY content_type
+    HAVING COUNT(*) >= 2
+    ORDER BY count DESC
+  `;
+
+  // Compute z-scores across categories
+  const rows = catResult.rows;
+  const totalPosts = rows.reduce((s, r) => s + Number(r.count), 0);
+
+  // Mean and std of log values
+  const logViewsArr = rows.map((r) => Number(r.log_views));
+  const logEngArr = rows.map((r) => Number(r.log_engagement));
+
+  const mean = (arr: number[]) =>
+    arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+  const std = (arr: number[]) => {
+    const m = mean(arr);
+    const variance =
+      arr.length > 1
+        ? arr.reduce((sum, v) => sum + (v - m) ** 2, 0) / (arr.length - 1)
+        : 0;
+    return Math.sqrt(variance);
+  };
+
+  const meanLogViews = mean(logViewsArr);
+  const stdLogViews = std(logViewsArr) || 1;
+  const meanLogEng = mean(logEngArr);
+  const stdLogEng = std(logEngArr) || 1;
+
+  const categoryViralScores = rows.map((r) => {
+    const zViews = (Number(r.log_views) - meanLogViews) / stdLogViews;
+    const zEng = (Number(r.log_engagement) - meanLogEng) / stdLogEng;
+    return {
+      category: r.category,
+      viralScore: Math.round((zViews + zEng) * 100) / 100,
+      zViews: Math.round(zViews * 100) / 100,
+      zEngagement: Math.round(zEng * 100) / 100,
+      avgViews: Math.round(Number(r.avg_views)),
+      avgSaves: Math.round(Number(r.avg_saves)),
+      avgComments: Math.round(Number(r.avg_comments)),
+      avgShares: Math.round(Number(r.avg_shares)),
+      count: Number(r.count),
+    };
+  });
+  categoryViralScores.sort((a, b) => b.viralScore - a.viralScore);
+
+  // 2. Category x slot profile
+  const slotResult = await sql`
+    SELECT
+      content_type as category,
+      slot,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY comments * 3.0 + shares * 2.0 + likes + COALESCE(saves, 0) * 1.5) as median_engagement,
+      COUNT(*)::int as count
+    FROM video_performance
+    WHERE content_type IS NOT NULL
+      AND slot IS NOT NULL
+      AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+    GROUP BY content_type, slot
+    HAVING COUNT(*) >= 2
+    ORDER BY median_engagement DESC
+  `;
+
+  const categorySlotProfile = slotResult.rows.map((r) => ({
+    category: r.category,
+    slot: r.slot,
+    medianEngagement: Math.round(Number(r.median_engagement)),
+    count: Number(r.count),
+  }));
+
+  // 3. Category x day-of-week profile
+  const dayResult = await sql`
+    SELECT
+      content_type as category,
+      day_of_week,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY comments * 3.0 + shares * 2.0 + likes + COALESCE(saves, 0) * 1.5) as median_engagement,
+      COUNT(*)::int as count
+    FROM video_performance
+    WHERE content_type IS NOT NULL
+      AND day_of_week IS NOT NULL
+      AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+    GROUP BY content_type, day_of_week
+    HAVING COUNT(*) >= 2
+    ORDER BY median_engagement DESC
+  `;
+
+  const categoryDayProfile = dayResult.rows.map((r) => ({
+    category: r.category,
+    dayOfWeek: Number(r.day_of_week),
+    medianEngagement: Math.round(Number(r.median_engagement)),
+    count: Number(r.count),
+  }));
+
+  // 4. Category x hour profile
+  const hourResult = await sql`
+    SELECT
+      content_type as category,
+      scheduled_hour,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY comments * 3.0 + shares * 2.0 + likes + COALESCE(saves, 0) * 1.5) as median_engagement,
+      COUNT(*)::int as count
+    FROM video_performance
+    WHERE content_type IS NOT NULL
+      AND scheduled_hour IS NOT NULL
+      AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+    GROUP BY content_type, scheduled_hour
+    HAVING COUNT(*) >= 2
+    ORDER BY median_engagement DESC
+  `;
+
+  const categoryHourProfile = hourResult.rows.map((r) => ({
+    category: r.category,
+    scheduledHour: Number(r.scheduled_hour),
+    medianEngagement: Math.round(Number(r.median_engagement)),
+    count: Number(r.count),
+  }));
+
+  // 5. Concentration (HHI)
+  const categoryShares = rows.map((r) => ({
+    category: r.category,
+    share:
+      totalPosts > 0
+        ? Math.round((Number(r.count) / totalPosts) * 1000) / 1000
+        : 0,
+    count: Number(r.count),
+  }));
+  const concentrationHHI =
+    Math.round(
+      categoryShares.reduce((sum, c) => sum + c.share ** 2, 0) * 1000,
+    ) / 1000;
+
+  const confidence: 'high' | 'medium' | 'low' =
+    totalPosts >= 50 ? 'high' : totalPosts >= 20 ? 'medium' : 'low';
+
+  return {
+    categoryViralScores,
+    categorySlotProfile,
+    categoryDayProfile,
+    categoryHourProfile,
+    concentrationHHI,
+    categoryShares,
+    totalPosts,
+    confidence,
+  };
+}
+
 /**
  * Update video script written post content
  */
