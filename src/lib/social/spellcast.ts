@@ -45,10 +45,10 @@ export async function spellcastFetch(
   path: string,
   options: RequestInit & { timeoutMs?: number } = {},
 ): Promise<Response> {
-  const { url, apiKey } = getSpellcastConfig();
+  const { url: SPELLCAST_BASE, apiKey } = getSpellcastConfig();
   const { timeoutMs, ...fetchOptions } = options;
 
-  return fetch(`${url}${path}`, {
+  return fetch(`${SPELLCAST_BASE}${path}`, {
     ...fetchOptions,
     headers: {
       'Content-Type': 'application/json',
@@ -112,7 +112,17 @@ export async function postToSpellcast(
     const isStory = instagramOpts?.isStory === true;
     // TikTok requires postType 'video' when media contains video
     const hasVideoMedia = params.media?.some((m) => m.type === 'video');
-    const postType = isStory ? 'story' : hasVideoMedia ? 'video' : 'post';
+    // Multiple images → carousel (Instagram rejects >1 image as regular 'post')
+    const imageCount =
+      params.media?.filter((m) => m.type === 'image').length ?? 0;
+    const isCarousel = imageCount > 1;
+    const postType = isStory
+      ? 'story'
+      : hasVideoMedia
+        ? 'video'
+        : isCarousel
+          ? 'carousel'
+          : 'post';
 
     // Stories are image-only so a placeholder is acceptable.
     // For all other post types, reject truly empty content.
@@ -283,6 +293,16 @@ export async function postToSpellcastMultiPlatform(params: {
       }
     }
 
+    // Auto-detect post type from media
+    const imageCount =
+      params.media?.filter((m) => m.type === 'image').length ?? 0;
+    const hasVideoMedia = params.media?.some((m) => m.type === 'video');
+    const postType = hasVideoMedia
+      ? 'video'
+      : imageCount > 1
+        ? 'carousel'
+        : 'post';
+
     // 1. Create draft
     const createRes = await spellcastFetch('/api/posts', {
       method: 'POST',
@@ -291,7 +311,7 @@ export async function postToSpellcastMultiPlatform(params: {
         mediaUrls: params.media?.map((m) => m.url) ?? [],
         scheduledFor: params.scheduledDate,
         accountSetId,
-        postType: 'post',
+        postType,
         ...(selectedAccountIds ? { selectedAccountIds } : {}),
         ...(Object.keys(platformVariations).length > 0
           ? { platformVariations }
