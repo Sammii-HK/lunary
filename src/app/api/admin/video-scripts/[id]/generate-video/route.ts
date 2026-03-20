@@ -2,13 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { put } from '@vercel/blob';
 import { requireAdminAuth } from '@/lib/admin-auth';
-import { writeFile, unlink, mkdtemp } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
-import ffmpeg from 'fluent-ffmpeg';
-import { composeVideo } from '@/lib/video/compose-video';
-// Remotion rendering delegated to content-creator server
-import { generateVoiceover } from '@/lib/tts';
+import { generateVoiceover, transcribeWithWhisper } from '@/lib/tts';
 import {
   categoryThemes,
   type WeeklyTheme,
@@ -18,25 +12,6 @@ import { buildThematicVideoComposition } from '@/lib/video/thematic-video';
 import { getImageBaseUrl } from '@/lib/urls';
 
 export const dynamic = 'force-dynamic';
-
-async function getAudioDurationFromBuffer(buffer: Buffer): Promise<number> {
-  const tempDir = await mkdtemp(join(tmpdir(), 'audio-'));
-  const tempPath = join(tempDir, 'audio.mp3');
-  await writeFile(tempPath, buffer);
-
-  return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(tempPath, async (err, metadata) => {
-      await unlink(tempPath).catch(() => {});
-      if (err) {
-        reject(err);
-      } else if (metadata.format.duration) {
-        resolve(metadata.format.duration);
-      } else {
-        reject(new Error('Could not determine audio duration'));
-      }
-    });
-  });
-}
 
 export const runtime = 'nodejs';
 
@@ -302,9 +277,27 @@ export async function POST(
       speed: 1.0,
     });
 
-    // Get audio duration for Remotion
-    const audioNodeBuffer = Buffer.from(audioBuffer);
-    const audioDuration = await getAudioDurationFromBuffer(audioNodeBuffer);
+    // Audio duration from Whisper timestamps or word count estimate
+    // Content Creator will also get the true duration via ffprobe
+    let wordTimestamps: Array<{ word: string; start: number; end: number }> =
+      [];
+    try {
+      const whisperWords = await transcribeWithWhisper(audioBuffer);
+      if (whisperWords.length > 0) {
+        wordTimestamps = whisperWords;
+        console.log(`🎙️ Whisper: ${whisperWords.length} word timestamps`);
+      }
+    } catch (whisperErr) {
+      console.warn(
+        `⚠️ Whisper transcription failed, render server will use fallback timing:`,
+        whisperErr instanceof Error ? whisperErr.message : whisperErr,
+      );
+    }
+
+    const audioDuration =
+      wordTimestamps.length > 0
+        ? wordTimestamps[wordTimestamps.length - 1].end
+        : (script.fullScript?.split(/\s+/).length || 100) / 2.5;
     console.log(`🎵 Audio duration: ${audioDuration}s`);
 
     const dateKey = script.scheduledDate.toISOString().split('T')[0];
@@ -319,7 +312,7 @@ export async function POST(
     const videoSeed = `${safeSlug}-${scriptId}-${Date.now()}`;
     const symbolContent = `${script.facetTitle || ''} ${script.fullScript?.substring(0, 200) || ''}`;
 
-    // Render via content-creator (Hetzner) for Remotion rendering
+    // Primary: Content Creator (Hetzner). Fallback: local ffmpeg (dev only, never Vercel).
     const contentCreatorUrl = process.env.CONTENT_CREATOR_API_URL;
     if (contentCreatorUrl) {
       console.log(
@@ -344,6 +337,8 @@ export async function POST(
             slug: safeSlug,
             facetTitle: script.facetTitle,
             dateKey,
+            wordTimestamps:
+              wordTimestamps.length > 0 ? wordTimestamps : undefined,
             audioDuration,
             overlays: overlays || [],
             highlightTerms: highlightTerms || [],
@@ -372,12 +367,19 @@ export async function POST(
       console.log(
         `✅ Content Creator rendered ${(videoBuffer.length / 1024 / 1024).toFixed(1)}MB video`,
       );
-    } else {
-      // Local fallback — no content-creator configured
-      console.log(
-        `⚠️ No CONTENT_CREATOR_API_URL — using local FFmpeg fallback`,
+    } else if (process.env.VERCEL) {
+      throw new Error(
+        'CONTENT_CREATOR_API_URL is not set. ' +
+          'Video rendering is not allowed on Vercel. ' +
+          'Set CONTENT_CREATOR_API_URL to your Hetzner server.',
       );
-      const ffmpegOverlays = overlays.filter((o) => o.style !== 'series_badge');
+    } else {
+      // Local dev fallback — ffmpeg compose
+      console.log(
+        `⚠️ No CONTENT_CREATOR_API_URL — using local FFmpeg fallback (dev only)`,
+      );
+      const { composeVideo } = await import('@/lib/video/compose-video');
+      const localOverlays = overlays.filter((o) => o.style !== 'series_badge');
       videoBuffer = await composeVideo({
         images,
         audioBuffer,
@@ -386,12 +388,8 @@ export async function POST(
         subtitlesText: script.fullScript,
         subtitlesHighlightTerms: highlightTerms,
         subtitlesHighlightColor: highlightColor,
-        overlays: ffmpegOverlays as any,
+        overlays: localOverlays as any,
       });
-    }
-
-    if (!videoBuffer) {
-      throw new Error('Video generation failed - no video buffer produced');
     }
 
     const blobKey = `videos/shorts/daily/manual-${dateKey}-${safeSlug}-${Date.now()}.mp4`;
