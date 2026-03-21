@@ -81,15 +81,34 @@ function getAudioDurationFromBuffer(buffer: Buffer): Promise<number> {
       return;
     }
 
-    const tempDir = await mkdtemp(join(tmpdir(), 'audio-dur-'));
-    const tempPath = join(tempDir, 'audio.mp3');
-    await writeFile(tempPath, buffer);
-    ffmpeg.ffprobe(tempPath, async (err, metadata) => {
-      await unlink(tempPath).catch(() => {});
-      if (err) reject(err);
-      else if (metadata.format.duration) resolve(metadata.format.duration);
-      else reject(new Error('Could not determine audio duration'));
-    });
+    try {
+      const tempDir = await mkdtemp(join(tmpdir(), 'audio-dur-'));
+      const tempPath = join(tempDir, 'audio.mp3');
+      await writeFile(tempPath, buffer);
+      ffmpeg.ffprobe(tempPath, async (err, metadata) => {
+        await unlink(tempPath).catch(() => {});
+        if (err) {
+          // ffprobe not available (e.g. Vercel) — estimate from MP3 bitrate
+          // Assume 128kbps MP3: duration = fileSize(bytes) / (128000/8)
+          const estimatedDuration = buffer.length / (128000 / 8);
+          console.warn(
+            `ffprobe unavailable, estimating audio duration: ${estimatedDuration.toFixed(1)}s`,
+          );
+          resolve(estimatedDuration);
+        } else if (metadata.format.duration) {
+          resolve(metadata.format.duration);
+        } else {
+          reject(new Error('Could not determine audio duration'));
+        }
+      });
+    } catch {
+      // ffmpeg/ffprobe not installed at all — estimate from buffer size
+      const estimatedDuration = buffer.length / (128000 / 8);
+      console.warn(
+        `ffprobe not found, estimating audio duration: ${estimatedDuration.toFixed(1)}s`,
+      );
+      resolve(estimatedDuration);
+    }
   });
 }
 
