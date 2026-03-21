@@ -191,7 +191,7 @@ export async function GET(request: NextRequest) {
         let mediaUrl = staticImageUrl;
         try {
           const ogRes = await fetch(staticImageUrl, {
-            signal: AbortSignal.timeout(30000),
+            signal: AbortSignal.timeout(60000),
           });
           if (ogRes.ok) {
             const imageBuffer = await ogRes.arrayBuffer();
