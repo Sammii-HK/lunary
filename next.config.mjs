@@ -352,6 +352,16 @@ const nextConfig = {
             },
           ]
         : []),
+      // Embeddable widgets — allow iframing from any origin
+      {
+        source: '/widgets/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors *",
+          },
+        ],
+      },
       // Security headers for all routes
       {
         source: '/:path*',

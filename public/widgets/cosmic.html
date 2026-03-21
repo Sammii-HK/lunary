@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cosmic Weather · Lunary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="./lib/astronomy.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: #0a0a0a;
+      color: #ffffff;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    body {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #0f0f57;
+      margin: 12px 0;
+    }
+
+    /* Header */
+    .header-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #8e8eeb;
+      margin-bottom: 4px;
+    }
+
+    .header-date {
+      font-size: 12px;
+      color: #a1a1aa;
+      font-weight: 400;
+    }
+
+    /* Moon headline */
+    .moon-headline {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+    }
+
+    .moon-headline img {
+      flex-shrink: 0;
+    }
+
+    .moon-headline-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .moon-headline-main {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+
+    .moon-illumination {
+      font-size: 12px;
+      color: #8e8eeb;
+      font-weight: 400;
+    }
+
+    /* Sun/Moon strip */
+    .sun-moon-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .body-card {
+      background: rgba(5, 5, 26, 0.4);
+      border: 1px solid #0f0f57;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .body-card-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8e8eeb;
+      margin-bottom: 5px;
+    }
+
+    .body-card-value {
+      font-size: 13px;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    /* Retrograde section */
+    .retro-line {
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .retro-line.has-retro {
+      color: #ee789e;
+    }
+
+    .retro-line.all-direct {
+      color: #6b9b7a;
+    }
+
+    /* Keywords */
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #8e8eeb;
+      margin-bottom: 8px;
+    }
+
+    .keywords-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .keyword-pill {
+      background: rgba(9, 9, 52, 0.5);
+      border: 1px solid #0f0f57;
+      color: #8e8eeb;
+      font-size: 11px;
+      font-weight: 400;
+      padding: 4px 10px;
+      border-radius: 50px;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    /* Activities */
+    .activity-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .activity-list li {
+      font-size: 12px;
+      color: #a1a1aa;
+      line-height: 1.4;
+    }
+
+    /* CTA */
+    .cta-link {
+      display: block;
+      text-align: center;
+      font-size: 12px;
+      color: #8458d8;
+      text-decoration: none;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .cta-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+  window.addEventListener('load', function () {
+
+    var SIGNS = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+    var SIGN_GLYPHS = ['\u2648','\u2649','\u264A','\u264B','\u264C','\u264D','\u264E','\u264F','\u2650','\u2651','\u2652','\u2653'];
+
+    var MOON_KEYWORDS = {
+      Aries:       ['Bold Energy','Action','Independence'],
+      Taurus:      ['Grounded','Sensual','Patient'],
+      Gemini:      ['Curious','Social','Adaptable'],
+      Cancer:      ['Nurturing','Intuitive','Emotional'],
+      Leo:         ['Creative','Generous','Confident'],
+      Virgo:       ['Detail-Oriented','Analytical','Service'],
+      Libra:       ['Balanced','Harmonious','Diplomatic'],
+      Scorpio:     ['Transformative','Intense','Psychic'],
+      Sagittarius: ['Expansive','Philosophical','Free'],
+      Capricorn:   ['Ambitious','Disciplined','Structured'],
+      Aquarius:    ['Innovative','Humanitarian','Detached'],
+      Pisces:      ['Dreamy','Compassionate','Spiritual'],
+    };
+
+    var MOON_ACTIVITIES = {
+      Aries:       ['Start new projects','Physical exercise','Take the lead'],
+      Taurus:      ['Tend to your body','Cook something beautiful','Rest and pleasure'],
+      Gemini:      ['Write or journal','Network and connect','Learn something new'],
+      Cancer:      ['Spend time with loved ones','Cook for others','Home rituals'],
+      Leo:         ['Express your creativity','Celebrate yourself','Date night'],
+      Virgo:       ['Organise and declutter','Health routines','Detailed work'],
+      Libra:       ['Social gatherings','Art and beauty','Partnerships'],
+      Scorpio:     ['Deep shadow work','Research and investigate','Transformation rituals'],
+      Sagittarius: ['Explore or plan travel','Study philosophy','Teach others'],
+      Capricorn:   ['Career planning','Long-term goals','Financial review'],
+      Aquarius:    ['Community projects','Innovation','Break routines'],
+      Pisces:      ['Meditation','Creative arts','Dream journaling'],
+    };
+
+    function signFromLon(lon) {
+      return SIGNS[Math.floor(((lon % 360) + 360) % 360 / 30)];
+    }
+
+    function signGlyphFromLon(lon) {
+      return SIGN_GLYPHS[Math.floor(((lon % 360) + 360) % 360 / 30)];
+    }
+
+    function getMoonPhaseIcon(angle) {
+      var a = ((angle % 360) + 360) % 360;
+      if (a < 22.5 || a >= 337.5) return 'new-moon.svg';
+      if (a < 67.5)  return 'waxing-cresent-moon.svg';
+      if (a < 112.5) return 'first-quarter.svg';
+      if (a < 157.5) return 'waxing-gibbous-moon.svg';
+      if (a < 202.5) return 'full-moon.svg';
+      if (a < 247.5) return 'waning-gibbous-moon.svg';
+      if (a < 292.5) return 'last-quarter.svg';
+      return 'waning-cresent-moon.svg';
+    }
+
+    function getMoonPhaseName(angle) {
+      var a = ((angle % 360) + 360) % 360;
+      if (a < 22.5 || a >= 337.5) return 'New Moon';
+      if (a < 67.5)  return 'Waxing Crescent';
+      if (a < 112.5) return 'First Quarter';
+      if (a < 157.5) return 'Waxing Gibbous';
+      if (a < 202.5) return 'Full Moon';
+      if (a < 247.5) return 'Waning Gibbous';
+      if (a < 292.5) return 'Last Quarter';
+      return 'Waning Crescent';
+    }
+
+    function getMoonIllumination(angle) {
+      return Math.round(50 * (1 - Math.cos(angle * Math.PI / 180)));
+    }
+
+    function isRetrograde(bodyName, date) {
+      var lon1 = Astronomy.EclipticLongitude(Astronomy.Body[bodyName], date);
+      var tomorrow = new Date(date.getTime() + 86400000);
+      var lon2 = Astronomy.EclipticLongitude(Astronomy.Body[bodyName], tomorrow);
+      var delta = lon2 - lon1;
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+      return delta < -0.001;
+    }
+
+    function formatDate(d) {
+      return d.toLocaleDateString('en-GB', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      });
+    }
+
+    function el(tag, className) {
+      var e = document.createElement(tag);
+      if (className) e.className = className;
+      return e;
+    }
+
+    function append(parent, child) {
+      parent.appendChild(child);
+      return child;
+    }
+
+    function addDivider(parent) {
+      append(parent, el('hr', 'divider'));
+    }
+
+    function render() {
+      var now = new Date();
+      var app = document.getElementById('app');
+      app.textContent = '';
+
+      // --- Astronomy calculations ---
+      var moonAngle  = Astronomy.MoonPhase(now);
+      var sunLon     = Astronomy.SunPosition(now).elon;
+      var moonLon    = Astronomy.EclipticLongitude(Astronomy.Body.Moon, now);
+
+      var sunSign    = signFromLon(sunLon);
+      var sunGlyph   = signGlyphFromLon(sunLon);
+      var moonSign   = signFromLon(moonLon);
+      var moonGlyph  = signGlyphFromLon(moonLon);
+
+      var phaseName  = getMoonPhaseName(moonAngle);
+      var phaseIcon  = getMoonPhaseIcon(moonAngle);
+      var illum      = getMoonIllumination(moonAngle);
+
+      var RETRO_BODIES = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
+      var RETRO_SYMBOLS = { Mercury: '\u263F', Venus: '\u2640', Mars: '\u2642', Jupiter: '\u2643', Saturn: '\u2644' };
+      var retros = RETRO_BODIES.filter(function (b) { return isRetrograde(b, now); });
+
+      // --- Section 1: Header ---
+      var header = append(app, el('div'));
+
+      var headerLabel = append(header, el('div', 'header-label'));
+      headerLabel.textContent = 'COSMIC WEATHER';
+
+      var headerDate = append(header, el('div', 'header-date'));
+      headerDate.textContent = formatDate(now);
+
+      addDivider(app);
+
+      // --- Section 2: Sun headline (unique to Cosmic Weather) ---
+      var sunHl = append(app, el('div', 'moon-headline'));
+
+      var sunHlImg = append(sunHl, el('img'));
+      sunHlImg.src = '/icons/moon-phases/' + phaseIcon;
+      sunHlImg.width = 36;
+      sunHlImg.height = 36;
+      sunHlImg.alt = phaseName;
+
+      var sunHlText = append(sunHl, el('div', 'moon-headline-text'));
+
+      var sunHlMain = append(sunHlText, el('div', 'moon-headline-main'));
+      sunHlMain.textContent = '\u2609 Sun in ' + sunSign + ' ' + sunGlyph;
+
+      var sunHlSub = append(sunHlText, el('div', 'moon-illumination'));
+      sunHlSub.textContent = phaseName + ' \u00B7 Moon in ' + moonSign + ' ' + moonGlyph;
+
+      addDivider(app);
+
+      // --- Section 3: Sun + Moon strip ---
+      var strip = append(app, el('div', 'sun-moon-strip'));
+
+      var sunCard = append(strip, el('div', 'body-card'));
+      var sunLabel = append(sunCard, el('div', 'body-card-label'));
+      sunLabel.textContent = '\u2609 Sun';
+      var sunVal = append(sunCard, el('div', 'body-card-value'));
+      sunVal.textContent = sunSign + ' ' + sunGlyph;
+
+      var moonCard = append(strip, el('div', 'body-card'));
+      var moonLabel = append(moonCard, el('div', 'body-card-label'));
+      moonLabel.textContent = '\u263D Moon';
+      var moonVal = append(moonCard, el('div', 'body-card-value'));
+      moonVal.textContent = moonSign + ' ' + moonGlyph + ' ' + illum + '%';
+
+      addDivider(app);
+
+      // --- Section 4: Retrogrades ---
+      var retroLine = append(app, el('div', 'retro-line'));
+
+      if (retros.length > 0) {
+        retroLine.className = 'retro-line has-retro';
+        var retroParts = retros.map(function (b) { return RETRO_SYMBOLS[b] + ' ' + b; });
+        retroLine.textContent = retroParts.join(' \u00B7 ') + ' in retrograde';
+      } else {
+        retroLine.className = 'retro-line all-direct';
+        retroLine.textContent = '\u2713 All planets direct';
+      }
+
+      addDivider(app);
+
+      // --- Section 5: Keywords ---
+      var kwSection = append(app, el('div'));
+
+      var kwLabel = append(kwSection, el('div', 'section-label'));
+      kwLabel.textContent = 'Today\'s keywords';
+
+      var kwRow = append(kwSection, el('div', 'keywords-row'));
+      var keywords = MOON_KEYWORDS[moonSign] || [];
+      for (var i = 0; i < keywords.length; i++) {
+        var pill = append(kwRow, el('span', 'keyword-pill'));
+        pill.textContent = keywords[i];
+      }
+
+      addDivider(app);
+
+      // --- Section 6: Activities ---
+      var actSection = append(app, el('div'));
+
+      var actLabel = append(actSection, el('div', 'section-label'));
+      actLabel.textContent = 'Best activities today';
+
+      var actList = append(actSection, el('ul', 'activity-list'));
+      var activities = MOON_ACTIVITIES[moonSign] || [];
+      for (var j = 0; j < activities.length; j++) {
+        var li = append(actList, el('li'));
+        li.textContent = '\u2022 ' + activities[j];
+      }
+
+      addDivider(app);
+
+      // --- Section 7: CTA ---
+      var cta = append(app, el('a', 'cta-link'));
+      cta.href = 'https://lunary.app';
+      cta.target = '_blank';
+      cta.rel = 'noopener noreferrer';
+      cta.textContent = 'Get your personal daily reading on Lunary \u2192';
+    }
+
+    if (typeof Astronomy !== 'undefined') {
+      render();
+    } else {
+      console.error('Astronomy library not loaded');
+    }
+  });
+  </script>
+</body>
+</html>
