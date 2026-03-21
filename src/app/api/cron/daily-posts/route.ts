@@ -3858,7 +3858,7 @@ function buildRetrogradeTextPosts({
     posts.push({
       name: `Retrograde • ${planet} ${isRetrograde ? 'Retrograde' : 'Direct'} ${timeStr}`,
       content: xContent,
-      platforms: ['x', 'bluesky', 'threads'],
+      platforms: ['x', 'bluesky', 'mastodon'],
       imageUrls: [],
       alt: `${planet} ${isRetrograde ? 'retrograde' : 'direct'} station ${timeStr}`,
       scheduledDate: getSchedule(),
@@ -3978,7 +3978,7 @@ function buildIngressTextPosts({
     posts.push({
       name: `Ingress • ${planet} ${verb} ${sign} ${timeStr}`,
       content: xContent,
-      platforms: ['x', 'bluesky', 'threads'],
+      platforms: ['x', 'bluesky', 'mastodon'],
       imageUrls: [],
       alt: `${planet} ${verb} ${sign} ${timeStr}`,
       scheduledDate: getSchedule(),
@@ -4145,7 +4145,7 @@ function buildAspectTextPosts({
     posts.push({
       name: `Aspect • ${planetA} ${aspectLabel} ${planetB}`,
       content: xContent,
-      platforms: ['x', 'bluesky', 'threads'],
+      platforms: ['x', 'bluesky', 'mastodon'],
       imageUrls: [],
       alt: `${planetA} ${aspectLabel} ${planetB}`,
       scheduledDate: getSchedule(),
@@ -4237,7 +4237,7 @@ function buildEgressTextPosts({
     posts.push({
       name: `Egress • ${planet}'s last hours in ${sign}`,
       content: xContent,
-      platforms: ['x', 'bluesky', 'threads'],
+      platforms: ['x', 'bluesky', 'mastodon'],
       imageUrls: [],
       alt: `${planet}'s last hours in ${sign}`,
       scheduledDate: getSchedule(),
@@ -4495,7 +4495,7 @@ function buildEclipseTextPosts({
     posts.push({
       name: `Eclipse • ${kindLabel} ${eclipseLabel} in ${eclipse.sign}`,
       content: xContent,
-      platforms: ['x', 'bluesky', 'threads'],
+      platforms: ['x', 'bluesky', 'mastodon'],
       imageUrls: [],
       alt: `${kindLabel} ${eclipseLabel} in ${eclipse.sign} in ${hoursAway}`,
       scheduledDate: getSchedule(),
@@ -4834,7 +4834,7 @@ function buildTransitMilestoneTextPosts({
     posts.push({
       name: postName,
       content: xContent,
-      platforms: ['x', 'bluesky', 'threads'],
+      platforms: ['x', 'bluesky', 'mastodon'],
       imageUrls: [],
       alt: `${planet} in ${sign} - ${milestoneLabel}`,
       scheduledDate: getSchedule(),
@@ -4931,7 +4931,7 @@ function buildCountdownTextPosts({
     posts.push({
       name: `Countdown • ${countdown.name}`,
       content: xContent,
-      platforms: ['x', 'bluesky', 'threads'],
+      platforms: ['x', 'bluesky', 'mastodon'],
       imageUrls: [],
       alt: countdown.name,
       scheduledDate: getSchedule(),

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { sendDiscordNotification } from '@/lib/discord';
 import {
@@ -217,26 +217,44 @@ async function validateAndRetry(
  * Yesterday's performance data (collected at 06:00) feeds into content type selection.
  */
 export async function GET(request: NextRequest) {
+  // Auth check (fast, returns before Cloudflare timeout)
+  const isVercelCron = request.headers.get('x-vercel-cron') === '1';
+  const authHeader = request.headers.get('authorization');
+
+  if (!isVercelCron) {
+    if (
+      !process.env.CRON_SECRET ||
+      authHeader !== `Bearer ${process.env.CRON_SECRET}`
+    ) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  }
+
+  // Capture params before returning response
+  const dateParam = request.nextUrl.searchParams.get('date');
+
+  // Return immediately — heavy work runs in background via after()
+  after(async () => {
+    await runContentGeneration(dateParam);
+  });
+
+  return NextResponse.json({
+    accepted: true,
+    message: 'Content generation started in background',
+    date: dateParam || 'tomorrow',
+  });
+}
+
+/**
+ * The actual content generation logic, extracted so it can run in after().
+ */
+async function runContentGeneration(dateParam: string | null) {
   const startTime = Date.now();
 
   try {
-    // Auth check
-    const isVercelCron = request.headers.get('x-vercel-cron') === '1';
-    const authHeader = request.headers.get('authorization');
-
-    if (!isVercelCron) {
-      if (
-        !process.env.CRON_SECRET ||
-        authHeader !== `Bearer ${process.env.CRON_SECRET}`
-      ) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    }
-
     await ensureVideoScriptsTable();
 
     // Target date: ?date=YYYY-MM-DD or tomorrow by default
-    const dateParam = request.nextUrl.searchParams.get('date');
     const tomorrow = dateParam
       ? new Date(`${dateParam}T00:00:00.000Z`)
       : new Date();
@@ -958,23 +976,21 @@ export async function GET(request: NextRequest) {
       console.warn('[Daily] Discord notification failed');
     }
 
-    return NextResponse.json({
-      success: true,
-      date: tomorrowKey,
-      day: dayName,
-      results,
-      total: totalScripts,
-      errors: errors.length > 0 ? errors : undefined,
-      duration: `${duration}ms`,
-    });
+    console.log(
+      `[Daily] Complete: ${tomorrowKey} (${dayName}) — ${totalScripts} pieces in ${duration}ms`,
+      errors.length > 0 ? `Errors: ${errors.join(', ')}` : '',
+    );
   } catch (error) {
     console.error('[Daily] Fatal error:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to generate daily content',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 },
-    );
+    try {
+      await sendDiscordNotification({
+        title: 'Daily Content — Fatal Error',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        color: 'error',
+        category: 'general',
+      });
+    } catch {
+      // Discord itself failed
+    }
   }
 }
