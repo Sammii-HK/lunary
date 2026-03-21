@@ -66,6 +66,9 @@ const ZODIAC_SEASON_NAMES: Record<string, string> = {
 type CosmicEvent = {
   priority: number;
   type: string;
+  /** Unique key for this specific event (e.g., "tight_aspect:Sun-Conjunction-Neptune").
+   *  Used for cross-day dedup so the same specific event doesn't repeat. */
+  eventKey: string;
   generate: (rng: () => number) => {
     hook: string;
     body: string;
@@ -108,6 +111,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
     events.push({
       priority: 100,
       type: 'planetary_ingress',
+      eventKey: `planetary_ingress:${transit.planet}-${transit.toSign}`,
       generate: (rng) => {
         if (transit.hoursUntil > 12) {
           const bodies = [
@@ -168,6 +172,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
     events.push({
       priority: 95,
       type: 'zodiac_season',
+      eventKey: `zodiac_season:${sunSign}`,
       generate: (rng) => {
         const season = ZODIAC_SEASON_NAMES[sunSign] || `${sunSign} season`;
         const bodies = [
@@ -200,6 +205,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
       events.push({
         priority: 70,
         type: 'season_countdown',
+        eventKey: `season_countdown:${nextSign}-1week`,
         generate: (rng) => {
           const bodies = [
             `${ZODIAC_SEASON_NAMES[sunSign]} is winding down. Start preparing for what comes next.`,
@@ -217,6 +223,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
       events.push({
         priority: 75,
         type: 'season_countdown',
+        eventKey: `season_countdown:${nextSign}-final`,
         generate: (rng) => {
           const bodies = [
             `The collective mood is about to change. Use the last of this ${sunSign} energy while you have it.`,
@@ -247,6 +254,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
       events.push({
         priority: 90,
         type: 'retrograde_station',
+        eventKey: `retrograde_station:${planet}-retrograde`,
         generate: (rng) => {
           const bodies = [
             `Time to slow down and review everything ${planet} rules. This is not a punishment, it is a reset.`,
@@ -267,6 +275,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
       events.push({
         priority: 88,
         type: 'direct_station',
+        eventKey: `direct_station:${planet}-direct`,
         generate: (rng) => {
           const bodies = [
             `Momentum returns. What was stuck during the retrograde can start moving again.`,
@@ -295,6 +304,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
       events.push({
         priority: 85,
         type: 'retrograde_reentry',
+        eventKey: `retrograde_reentry:${planet}-${prevSign}`,
         generate: (rng) => {
           const bodies = [
             `${planet} retrograde is backing into ${prevSign}. Themes from that transit are returning for review.`,
@@ -319,6 +329,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
     events.push({
       priority: 80,
       type: 'moon_sign_change',
+      eventKey: `moon_sign_change:${moonSign}`,
       generate: (rng) => {
         const bodies = [
           `The emotional tone shifts today. ${moonSign} brings a different kind of feeling.`,
@@ -356,6 +367,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
         events.push({
           priority: 72 + notable.length, // More planets = higher priority
           type: 'stellium',
+          eventKey: `stellium:${sign}-${notable.sort().join('+')}`,
           generate: (rng) => {
             const list =
               notable.length <= 4
@@ -404,6 +416,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
     events.push({
       priority: 65 + (10 - aspect.separation) * 2,
       type: 'tight_aspect',
+      eventKey: `tight_aspect:${pA}-${aspect.aspect}-${pB}`,
       generate: (rng) => {
         const aspectDescriptions: Record<string, string[]> = {
           Conjunction: [
@@ -443,6 +456,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
     events.push({
       priority: isMainPhase ? 78 : 60,
       type: 'moon_phase_change',
+      eventKey: `moon_phase_change:${moonPhase.name}`,
       generate: (rng) => {
         const bodies = isMainPhase
           ? [
@@ -496,6 +510,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
       events.push({
         priority: 55,
         type: 'transit_milestone',
+        eventKey: `transit_milestone:${planet}-${pos.sign}`,
         generate: () => ({
           hook: milestoneHook!,
           body: milestoneBody!,
@@ -513,6 +528,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
   events.push({
     priority: 30,
     type: 'planet_spotlight',
+    eventKey: `planet_spotlight:${dateStr}`,
     generate: (rng) => {
       const planetName =
         spotlightPlanets[Math.floor(rng() * spotlightPlanets.length)];
@@ -551,6 +567,7 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
     events.push({
       priority: 25,
       type: 'moon_position',
+      eventKey: `moon_position:${moonSign}`,
       generate: (rng) => {
         const bodies = [
           `${moonPhase.trend === 'waxing' ? 'Energy is building' : 'Time to let go of what is not working'}. ${moonSign} decides where that lands.`,
@@ -574,15 +591,17 @@ function buildCosmicEvents(dateStr: string, slotHour: number): CosmicEvent[] {
 }
 
 /**
- * Collect the top N event types that were (or would have been) used on a given day.
- * Since buildCosmicEvents is deterministic, we can replay previous days cheaply.
+ * Collect event keys that were (or would have been) used on recent days.
+ * Since buildCosmicEvents is deterministic, we replay previous days cheaply.
+ * Tracks both event types AND specific event keys for granular dedup.
  */
-function getRecentEventTypes(
+function getRecentEventKeys(
   dateStr: string,
   slotHour: number,
-  lookbackDays: number = 2,
-): Map<string, number> {
-  const counts = new Map<string, number>();
+  lookbackDays: number = 3,
+): { types: Map<string, number>; keys: Set<string> } {
+  const types = new Map<string, number>();
+  const keys = new Set<string>();
   const baseDate = new Date(dateStr);
 
   for (let d = 1; d <= lookbackDays; d++) {
@@ -592,27 +611,29 @@ function getRecentEventTypes(
 
     // Check all 3 cosmic slots for each past day
     const pastEvents = buildCosmicEvents(pastStr, slotHour);
-    // The top 3 events are what would have been posted
-    for (let rank = 0; rank < Math.min(3, pastEvents.length); rank++) {
-      const type = pastEvents[rank].type;
-      counts.set(type, (counts.get(type) || 0) + 1);
+    // Track ALL events that would have been in contention (top 5, not just 3)
+    for (let rank = 0; rank < Math.min(5, pastEvents.length); rank++) {
+      const event = pastEvents[rank];
+      types.set(event.type, (types.get(event.type) || 0) + 1);
+      keys.add(event.eventKey);
     }
   }
 
-  return counts;
+  return { types, keys };
 }
 
 /**
- * Remove events that appeared in the last 2 days entirely.
- * No same event type should repeat within a 3-day window.
- * The only exception: if removing everything leaves us with nothing,
- * keep the fallbacks (planet_spotlight, moon_position) as a safety net.
+ * Remove events whose specific event key appeared in the lookback window.
+ * This prevents the same specific transit (e.g., Sun conjunct Neptune) from
+ * repeating on consecutive days, even if the broader event type is different.
+ * Falls back to type-based dedup as a secondary filter.
  */
 function removeStaleSameTypeEvents(
   events: CosmicEvent[],
-  recentTypes: Map<string, number>,
+  recent: { types: Map<string, number>; keys: Set<string> },
 ): CosmicEvent[] {
-  const fresh = events.filter((e) => !recentTypes.has(e.type));
+  // Primary filter: remove events whose specific key was used recently
+  const fresh = events.filter((e) => !recent.keys.has(e.eventKey));
 
   // If we filtered out everything, keep low-priority fallbacks
   if (fresh.length === 0) {
@@ -646,9 +667,9 @@ export async function generateCosmicTimingPost(
   const rng = seededRandom(`cosmic-${dateStr}-${slotHour}-r${rank}`);
   const rawEvents = buildCosmicEvents(dateStr, slotHour);
 
-  // Remove any event type that was used in the last 2 days — no repeats in a 3-day window
-  const recentTypes = getRecentEventTypes(dateStr, slotHour);
-  const events = removeStaleSameTypeEvents(rawEvents, recentTypes);
+  // Remove any event that was used in the last 3 days — no repeats in a 4-day window
+  const recent = getRecentEventKeys(dateStr, slotHour);
+  const events = removeStaleSameTypeEvents(rawEvents, recent);
 
   // Pick the Nth ranked event (fall back to last if rank exceeds list)
   const eventIndex = Math.min(rank, events.length - 1);
