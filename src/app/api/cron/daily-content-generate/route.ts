@@ -10,6 +10,7 @@ import {
   getContentTypeWeights,
   getOptimalHourBySlot,
   weightedSelect,
+  selectSmartCategory,
 } from '@/lib/social/video-scripts/content-scores';
 import {
   ensureVideoScriptsTable,
@@ -79,21 +80,56 @@ function contentTypeKeyToCategory(
 }
 
 /**
- * Select a primary category for a given date using weighted rotation.
- * Seeded by the Monday of that week for consistency.
+ * Deterministic seed for a date — reproducible across re-runs.
  */
-function selectPrimaryCategoryForDate(date: Date): string {
-  // Find Monday of the week
+function dateSeedFor(date: Date): number {
   const dayOfWeek = (date.getDay() + 6) % 7; // Mon=0
   const monday = new Date(date);
   monday.setDate(date.getDate() - dayOfWeek);
-
-  const seed =
+  return (
     monday.getFullYear() * 10000 +
     (monday.getMonth() + 1) * 100 +
     monday.getDate() +
-    dayOfWeek * 37;
+    dayOfWeek * 37
+  );
+}
 
+/**
+ * Select a primary category for a given date.
+ *
+ * When EDA signals are available, uses selectSmartCategory which:
+ * - Picks the best category for this day-of-week x slot combo (80% exploit)
+ * - Explores underrepresented categories to gather data (20% explore)
+ * - Forces diversity when HHI concentration is too high
+ *
+ * Falls back to deterministic weighted rotation when no EDA data exists.
+ */
+async function selectPrimaryCategoryForDate(
+  date: Date,
+  weights: Map<
+    string,
+    {
+      score: number;
+      count: number;
+      avgViews: number;
+      trend: number;
+      weight: number;
+    }
+  >,
+): Promise<string> {
+  const seed = dateSeedFor(date);
+
+  // Try EDA-informed smart selection first
+  const smartPick = await selectSmartCategory(
+    weights,
+    new Set<string>(),
+    seed,
+    date.getDay(), // JS day: 0=Sun
+    'primary',
+  );
+  if (smartPick) return smartPick;
+
+  // Fallback: deterministic weighted pool (original behaviour)
   const weightedPool: string[] = [];
   for (const cat of GRIMOIRE_CATEGORIES) {
     const weight = THEME_CATEGORY_WEIGHTS[cat] ?? 1;
@@ -103,9 +139,7 @@ function selectPrimaryCategoryForDate(date: Date): string {
     }
   }
 
-  const pick =
-    weightedPool[((seed * 9301 + 49297) % 233280) % weightedPool.length];
-  return pick;
+  return weightedPool[((seed * 9301 + 49297) % 233280) % weightedPool.length];
 }
 
 /**
@@ -239,7 +273,8 @@ export async function GET(request: NextRequest) {
         );
         results.tiktokPrimary = 1;
       } else {
-        const category = selectPrimaryCategoryForDate(tomorrow);
+        const weights = await getContentTypeWeights();
+        const category = await selectPrimaryCategoryForDate(tomorrow, weights);
         const themesForCategory = categoryThemes.filter(
           (t) => t.category === category,
         );
@@ -252,13 +287,23 @@ export async function GET(request: NextRequest) {
             ? themesForCategory[dateSeed % themesForCategory.length]
             : categoryThemes[dateSeed % categoryThemes.length];
 
-        const weights = await getContentTypeWeights();
         const exclude = new Set<string>();
         const contentType =
+          ((await selectSmartCategory(
+            weights,
+            exclude,
+            dateSeed,
+            tomorrow.getDay(),
+            'primary',
+          )) as ContentType) ||
           (weightedSelect(weights, exclude, dateSeed) as ContentType) ||
           'sign-identity';
 
-        const primaryHour = await getOptimalHourBySlot('primary');
+        const primaryHour = await getOptimalHourBySlot(
+          'primary',
+          10,
+          contentType,
+        );
         const script = await generateScriptForContentType(
           contentType,
           tomorrow,
@@ -368,7 +413,11 @@ export async function GET(request: NextRequest) {
           const dayConfig = schedule[dayName];
           if (!dayConfig) continue;
 
-          const hour = await getOptimalHourBySlot(slot);
+          const hour = await getOptimalHourBySlot(
+            slot,
+            10,
+            dayConfig.contentType,
+          );
           const script = await generateScriptForContentType(
             dayConfig.contentType,
             tomorrow,

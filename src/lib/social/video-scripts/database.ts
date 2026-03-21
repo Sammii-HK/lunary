@@ -964,7 +964,7 @@ export async function getContentEDASignals(
 
     const pages = await getTopPages(startDate, endDate, 50);
 
-    if (pages?.rows?.length) {
+    if (pages?.length) {
       // Map grimoire URLs to content categories
       const categoryMap = new Map<
         string,
@@ -977,8 +977,8 @@ export async function getContentEDASignals(
         }
       >();
 
-      for (const page of pages.rows) {
-        const url = String(page.keys?.[0] ?? '');
+      for (const page of pages) {
+        const url = String(page.page ?? '');
         const cat = deriveGrimoireCategoryFromUrl(url);
         if (!cat) continue;
 

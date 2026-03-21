@@ -6,9 +6,14 @@
  * that the dynamic scheduler uses to pick content types for each slot.
  *
  * Falls back to hardcoded seed weights when insufficient data.
+ *
+ * EDA layer: viral z-scores, cross-channel blending (video + social + SEO),
+ * category x slot/day/hour profiling, HHI concentration, and explore/exploit
+ * for both timing and category selection.
  */
 
-import { getContentCategoryScores } from './database';
+import { getContentCategoryScores, getContentEDASignals } from './database';
+import type { ContentEDASignals } from './database';
 import {
   SEED_WEIGHTS,
   SUPPRESS_LIST,
@@ -22,14 +27,40 @@ export interface CategoryScore {
   avgViews: number;
   trend: number; // Positive = improving, negative = declining
   weight: number; // 0-1 scheduling probability
+  viralScore?: number; // z-score composite (reach + engagement quality)
 }
+
+// ── EDA Signal Cache ──────────────────────────────────────────────────────
+
+/** Cached EDA signals (refreshed every 30 minutes) */
+let edaCache: { signals: ContentEDASignals; fetchedAt: number } | null = null;
+const EDA_CACHE_TTL = 30 * 60 * 1000;
+
+/**
+ * Get EDA signals with caching (30-min TTL).
+ * Never throws — returns null on failure.
+ */
+export async function getCachedEDASignals(): Promise<ContentEDASignals | null> {
+  if (edaCache && Date.now() - edaCache.fetchedAt < EDA_CACHE_TTL) {
+    return edaCache.signals;
+  }
+  try {
+    const signals = await getContentEDASignals(30);
+    edaCache = { signals, fetchedAt: Date.now() };
+    return signals;
+  } catch {
+    return edaCache?.signals ?? null;
+  }
+}
+
+// ── Content Type Weights ──────────────────────────────────────────────────
 
 /**
  * Compute scheduling weights for all content categories.
  *
  * Blends live performance data with seed weights based on data availability.
- * Categories with more data points lean more on live scores; categories with
- * few or zero records lean on the 109-post seed analysis.
+ * When EDA signals are available, blends in cross-channel scores (video 50%
+ * + social 30% + SEO 20%) for a unified view of what content actually works.
  *
  * @param days - Rolling window in days (default 30)
  */
@@ -38,6 +69,12 @@ export async function getContentTypeWeights(
 ): Promise<Map<string, CategoryScore>> {
   const liveScores = await getContentCategoryScores(days);
   const liveMap = new Map(liveScores.map((s) => [s.category, s]));
+
+  // Load EDA viral scores (non-blocking, cached)
+  const eda = await getCachedEDASignals();
+  const viralMap = new Map(
+    eda?.categoryViralScores.map((v) => [v.category, v]) ?? [],
+  );
 
   const weights = new Map<string, CategoryScore>();
 
@@ -53,9 +90,20 @@ export async function getContentTypeWeights(
     if (live.score > maxScore) maxScore = live.score;
   }
 
+  // Find viral score range for normalisation
+  const viralScores = eda?.categoryViralScores ?? [];
+  const maxViral = viralScores.length
+    ? Math.max(...viralScores.map((v) => v.viralScore))
+    : 0;
+  const minViral = viralScores.length
+    ? Math.min(...viralScores.map((v) => v.viralScore))
+    : 0;
+  const viralRange = maxViral - minViral || 1;
+
   for (const category of allCategories) {
     const seed = SEED_WEIGHTS[category];
     const live = liveMap.get(category);
+    const viral = viralMap.get(category);
 
     // Suppressed categories always get zero weight
     if (SUPPRESS_LIST.has(category)) {
@@ -65,6 +113,7 @@ export async function getContentTypeWeights(
         avgViews: live?.avgViews ?? seed?.avgViews ?? 0,
         trend: live?.trend ?? 0,
         weight: 0,
+        viralScore: viral?.viralScore,
       });
       continue;
     }
@@ -83,9 +132,10 @@ export async function getContentTypeWeights(
         avgViews: live?.avgViews ?? seed?.avgViews ?? 0,
         trend: live?.trend ?? 0,
         weight: Math.min(1, seedWeight + liveAdjust),
+        viralScore: viral?.viralScore,
       });
     } else {
-      // Enough live data — compute weight from performance
+      // Enough live data — compute weight blending legacy score with viral score
       const normalizedScore = live.score / maxScore;
 
       // Boost trending content, penalise declining
@@ -93,17 +143,31 @@ export async function getContentTypeWeights(
       const trendPenalty =
         live.trend < -0.3 ? Math.max(live.trend * 0.1, -0.15) : 0;
 
-      const computedWeight = Math.min(
-        1,
-        Math.max(0, normalizedScore + trendBoost + trendPenalty),
-      );
+      let computedWeight = normalizedScore + trendBoost + trendPenalty;
+
+      // Blend in cross-channel score when available (video + social + SEO)
+      // Falls back to viral-only score if cross-channel data missing
+      if (eda && eda.confidence !== 'low') {
+        const crossChannel = eda.crossChannelScores.find(
+          (c) => c.category === category,
+        );
+        if (crossChannel) {
+          // 70% legacy score, 30% unified cross-channel score
+          computedWeight =
+            computedWeight * 0.7 + crossChannel.unifiedScore * 0.3;
+        } else if (viral) {
+          const normalizedViral = (viral.viralScore - minViral) / viralRange;
+          computedWeight = computedWeight * 0.7 + normalizedViral * 0.3;
+        }
+      }
 
       weights.set(category, {
         score: live.score,
         count: live.count,
         avgViews: live.avgViews,
         trend: live.trend,
-        weight: computedWeight,
+        weight: Math.min(1, Math.max(0, computedWeight)),
+        viralScore: viral?.viralScore,
       });
     }
   }
@@ -111,23 +175,46 @@ export async function getContentTypeWeights(
   return weights;
 }
 
+// ── Suppress / Promote ────────────────────────────────────────────────────
+
 /**
- * Get categories that should be suppressed (avg views < 100 over window).
- * Combines the static suppress list with dynamically detected poor performers.
+ * Get categories that should be suppressed.
+ * Uses viral score when available (suppress bottom quartile with enough data),
+ * falls back to avg views < 100 threshold.
  */
 export async function getSuppressedCategories(
   days: number = 30,
 ): Promise<Set<string>> {
   const suppressed = new Set(SUPPRESS_LIST);
 
+  const eda = await getCachedEDASignals();
   const liveScores = await getContentCategoryScores(days);
-  for (const score of liveScores) {
-    // Auto-suppress if consistently below 100 views with enough data
-    if (
-      score.avgViews < 100 &&
-      score.count >= MIN_DATA_POINTS_FOR_LIVE_WEIGHTS
-    ) {
-      suppressed.add(score.category);
+
+  if (eda && eda.confidence !== 'low' && eda.categoryViralScores.length >= 4) {
+    // Use viral score: suppress categories in bottom quartile with enough data
+    const sorted = [...eda.categoryViralScores].sort(
+      (a, b) => a.viralScore - b.viralScore,
+    );
+    const q25Index = Math.floor(sorted.length * 0.25);
+    const q25Threshold = sorted[q25Index]?.viralScore ?? -Infinity;
+
+    for (const cat of sorted) {
+      if (
+        cat.viralScore <= q25Threshold &&
+        cat.count >= MIN_DATA_POINTS_FOR_LIVE_WEIGHTS
+      ) {
+        suppressed.add(cat.category);
+      }
+    }
+  } else {
+    // Fallback: raw views threshold
+    for (const score of liveScores) {
+      if (
+        score.avgViews < 100 &&
+        score.count >= MIN_DATA_POINTS_FOR_LIVE_WEIGHTS
+      ) {
+        suppressed.add(score.category);
+      }
     }
   }
 
@@ -135,17 +222,36 @@ export async function getSuppressedCategories(
 }
 
 /**
- * Get categories performing well enough for heavy rotation (avg views > 400).
+ * Get categories performing well enough for heavy rotation.
+ * Uses viral score when available (top quartile), falls back to avg views > 400.
  */
 export async function getPromotedCategories(
   days: number = 30,
 ): Promise<Set<string>> {
   const promoted = new Set<string>();
 
+  const eda = await getCachedEDASignals();
   const liveScores = await getContentCategoryScores(days);
-  for (const score of liveScores) {
-    if (score.avgViews > 400 && score.count >= 3) {
-      promoted.add(score.category);
+
+  if (eda && eda.confidence !== 'low' && eda.categoryViralScores.length >= 4) {
+    // Use viral score: promote categories in top quartile
+    const sorted = [...eda.categoryViralScores].sort(
+      (a, b) => b.viralScore - a.viralScore,
+    );
+    const q75Index = Math.floor(sorted.length * 0.25);
+    const q75Threshold = sorted[q75Index]?.viralScore ?? Infinity;
+
+    for (const cat of sorted) {
+      if (cat.viralScore >= q75Threshold && cat.count >= 3) {
+        promoted.add(cat.category);
+      }
+    }
+  } else {
+    // Fallback: raw views threshold
+    for (const score of liveScores) {
+      if (score.avgViews > 400 && score.count >= 3) {
+        promoted.add(score.category);
+      }
     }
   }
 
@@ -160,6 +266,8 @@ export async function getPromotedCategories(
 
   return promoted;
 }
+
+// ── Category Selection ────────────────────────────────────────────────────
 
 /**
  * Select a content type using weighted random selection.
@@ -199,6 +307,122 @@ export function weightedSelect(
 }
 
 /**
+ * Smart category selection using EDA signals.
+ *
+ * Uses an explore/exploit strategy informed by:
+ * - Category x day-of-week performance (what works on this day)
+ * - Category x slot performance (what works in this time slot)
+ * - Concentration (HHI) to force diversity when one category dominates
+ * - 80% exploit proven winners, 20% explore underrepresented categories
+ *
+ * Falls back to weightedSelect when EDA data is unavailable.
+ *
+ * @param weights - Pre-computed category weights
+ * @param exclude - Categories to skip
+ * @param seed - Deterministic seed
+ * @param dayOfWeek - JS day (0=Sun, 6=Sat)
+ * @param slot - Optional slot name (primary, engagementA, etc.)
+ */
+export async function selectSmartCategory(
+  weights: Map<string, CategoryScore>,
+  exclude: Set<string>,
+  seed: number,
+  dayOfWeek: number,
+  slot?: string,
+): Promise<string | null> {
+  const eda = await getCachedEDASignals();
+
+  // No EDA data — fall back to basic weighted selection
+  if (!eda || eda.confidence === 'low') {
+    return weightedSelect(weights, exclude, seed);
+  }
+
+  // Check concentration — if one category dominates, force diversity
+  const concentration = eda.concentrationHHI;
+  const forceExplore = concentration > 0.25;
+
+  // 80/20 explore/exploit (forced explore if HHI too high)
+  const exploreRoll = ((seed * 7919 + 104729) % 233280) / 233280;
+  const shouldExplore = forceExplore || exploreRoll < 0.2;
+
+  if (!shouldExplore) {
+    // EXPLOIT: pick the best category for this day + slot combo
+    const dayBest = await getBestCategoriesForDay(dayOfWeek, exclude);
+    const slotBest = slot
+      ? await getBestCategoriesForSlot(slot, exclude)
+      : null;
+
+    // Intersect day-best and slot-best if both available
+    if (dayBest && slotBest) {
+      const slotSet = new Set(slotBest);
+      const intersection = dayBest.filter((c) => slotSet.has(c));
+      if (intersection.length > 0) {
+        // Pick top from intersection, weighted by score
+        const topPick = intersection[0];
+        if (weights.has(topPick) && (weights.get(topPick)?.weight ?? 0) > 0) {
+          return topPick;
+        }
+      }
+    }
+
+    // Use day-best alone
+    if (dayBest) {
+      for (const cat of dayBest) {
+        if (weights.has(cat) && (weights.get(cat)?.weight ?? 0) > 0) {
+          return cat;
+        }
+      }
+    }
+
+    // Fall back to weighted selection
+    return weightedSelect(weights, exclude, seed);
+  }
+
+  // EXPLORE: pick an underrepresented category to test
+  // Find categories with low post count (bottom half by volume)
+  const categoryCounts = new Map(
+    eda.categoryShares.map((s) => [s.category, s.count]),
+  );
+  const medianCount = eda.totalPosts / Math.max(eda.categoryShares.length, 1);
+
+  const underrepresented: Array<{ category: string; weight: number }> = [];
+  for (const [category, data] of weights) {
+    if (exclude.has(category) || data.weight <= 0) continue;
+    const count = categoryCounts.get(category) ?? 0;
+    if (count < medianCount) {
+      // Boost weight for exploration — less-tested categories get more chance
+      const explorationBoost = 1 + (1 - count / Math.max(medianCount, 1));
+      underrepresented.push({
+        category,
+        weight: data.weight * explorationBoost,
+      });
+    }
+  }
+
+  if (underrepresented.length > 0) {
+    // Weighted random from underrepresented pool
+    const totalWeight = underrepresented.reduce((s, c) => s + c.weight, 0);
+    const target = (((seed * 3571 + 49297) % 233280) / 233280) * totalWeight;
+    let cumulative = 0;
+    for (const c of underrepresented) {
+      cumulative += c.weight;
+      if (cumulative >= target) {
+        console.log(
+          `[EDA Explore] Picking underrepresented category: ${c.category} (count: ${categoryCounts.get(c.category) ?? 0}, median: ${Math.round(medianCount)}, HHI: ${concentration.toFixed(3)})`,
+        );
+        return c.category;
+      }
+    }
+    return underrepresented[underrepresented.length - 1].category;
+  }
+
+  // No underrepresented candidates — standard weighted selection
+  return weightedSelect(weights, exclude, seed);
+}
+
+// ── Timing Optimisation ───────────────────────────────────────────────────
+
+/**
  * Exploration windows for each slot — the hours we'll test within.
  * 80% of the time we pick the proven best hour (exploit).
  * 20% of the time we test a random hour from the window (explore).
@@ -222,12 +446,20 @@ const EXPLORE_RATE = 0.2;
  * - 20% of the time, test a different hour from the slot's window
  * - When no proven best exists, rotate through the window to gather data
  *
+ * Level 4 enhancement: when a category is provided, checks the EDA
+ * category x hour profile for category-specific optimal hours. If the
+ * category has a proven best hour (different from the slot default),
+ * that takes priority — the same content type may perform differently
+ * at different times.
+ *
  * @param slot - The video slot to optimise
  * @param minDataPoints - Minimum records per hour before trusting the result (default 10)
+ * @param category - Optional content category for category-specific hour optimisation
  */
 export async function getOptimalHourBySlot(
   slot: string,
   minDataPoints: number = 10,
+  category?: string,
 ): Promise<number> {
   const { VIDEO_POSTING_HOURS } = await import('@/utils/posting-times');
   const defaultHour =
@@ -236,6 +468,45 @@ export async function getOptimalHourBySlot(
 
   if (!window) return defaultHour ?? 14;
 
+  // Level 4: check category-specific hour profile from EDA
+  if (category) {
+    const eda = await getCachedEDASignals();
+    if (eda && eda.confidence !== 'low') {
+      const catHours = eda.categoryHourProfile
+        .filter(
+          (h) =>
+            h.category === category &&
+            window.includes(h.scheduledHour) &&
+            h.count >= 3,
+        )
+        .sort((a, b) => b.medianEngagement - a.medianEngagement);
+
+      if (catHours.length > 0) {
+        const bestCatHour = catHours[0];
+        // Exploit/explore: 80% category-specific best hour, 20% test
+        if (Math.random() > EXPLORE_RATE) {
+          console.log(
+            `[Time A/B] ${slot}/${category}: exploiting category-best hour ${bestCatHour.scheduledHour} (median: ${bestCatHour.medianEngagement}, n=${bestCatHour.count})`,
+          );
+          return bestCatHour.scheduledHour;
+        }
+        // Explore: pick a different hour from the window
+        const alternatives = window.filter(
+          (h) => h !== bestCatHour.scheduledHour,
+        );
+        if (alternatives.length > 0) {
+          const exploreHour =
+            alternatives[Math.floor(Math.random() * alternatives.length)];
+          console.log(
+            `[Time A/B] ${slot}/${category}: exploring hour ${exploreHour} (category-best is ${bestCatHour.scheduledHour})`,
+          );
+          return exploreHour;
+        }
+      }
+    }
+  }
+
+  // Standard slot-level optimisation (no category data or fallback)
   try {
     const { sql } = await import('@vercel/postgres');
 
@@ -294,6 +565,70 @@ export async function getOptimalHourBySlot(
 
   return defaultHour ?? 14;
 }
+
+// ── EDA Signal Accessors ──────────────────────────────────────────────────
+
+/**
+ * Get the best categories for a specific slot based on EDA category x slot profile.
+ * Returns categories ranked by median engagement in that slot.
+ * Falls back to null if no slot-specific data exists.
+ */
+export async function getBestCategoriesForSlot(
+  slot: string,
+  exclude: Set<string>,
+): Promise<string[] | null> {
+  const eda = await getCachedEDASignals();
+  if (!eda || eda.confidence === 'low') return null;
+
+  const slotData = eda.categorySlotProfile
+    .filter((s) => s.slot === slot && !exclude.has(s.category) && s.count >= 3)
+    .sort((a, b) => b.medianEngagement - a.medianEngagement);
+
+  return slotData.length >= 2 ? slotData.map((s) => s.category) : null;
+}
+
+/**
+ * Get the best categories for a specific day of week based on EDA data.
+ * 0 = Sunday, 1 = Monday, ..., 6 = Saturday (JS convention)
+ */
+export async function getBestCategoriesForDay(
+  dayOfWeek: number,
+  exclude: Set<string>,
+): Promise<string[] | null> {
+  const eda = await getCachedEDASignals();
+  if (!eda || eda.confidence === 'low') return null;
+
+  const dayData = eda.categoryDayProfile
+    .filter(
+      (d) =>
+        d.dayOfWeek === dayOfWeek && !exclude.has(d.category) && d.count >= 3,
+    )
+    .sort((a, b) => b.medianEngagement - a.medianEngagement);
+
+  return dayData.length >= 2 ? dayData.map((d) => d.category) : null;
+}
+
+/**
+ * Check if the content calendar is over-concentrated on one category.
+ * Returns true if HHI > 0.25 (one category dominates ~50%+ of posts).
+ */
+export async function isOverConcentrated(): Promise<{
+  concentrated: boolean;
+  hhi: number;
+  dominantCategory?: string;
+}> {
+  const eda = await getCachedEDASignals();
+  if (!eda) return { concentrated: false, hhi: 0 };
+
+  const dominant = eda.categoryShares.sort((a, b) => b.share - a.share)[0];
+  return {
+    concentrated: eda.concentrationHHI > 0.25,
+    hhi: eda.concentrationHHI,
+    dominantCategory: dominant?.category,
+  };
+}
+
+// ── Platform Performance ──────────────────────────────────────────────────
 
 /**
  * Get aggregated performance data grouped by platform.
