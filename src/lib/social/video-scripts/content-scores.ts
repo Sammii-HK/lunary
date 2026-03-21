@@ -269,6 +269,18 @@ export async function getPromotedCategories(
 
 // ── Category Selection ────────────────────────────────────────────────────
 
+export type SelectionMethod =
+  | 'eda-exploit-day-slot'
+  | 'eda-exploit-day'
+  | 'eda-explore'
+  | 'fallback-weighted'
+  | 'fallback-deterministic';
+
+export interface SmartSelection {
+  category: string | null;
+  method: SelectionMethod;
+}
+
 /**
  * Select a content type using weighted random selection.
  * Higher-weighted categories are more likely to be picked.
@@ -329,12 +341,15 @@ export async function selectSmartCategory(
   seed: number,
   dayOfWeek: number,
   slot?: string,
-): Promise<string | null> {
+): Promise<SmartSelection> {
   const eda = await getCachedEDASignals();
 
   // No EDA data — fall back to basic weighted selection
   if (!eda || eda.confidence === 'low') {
-    return weightedSelect(weights, exclude, seed);
+    return {
+      category: weightedSelect(weights, exclude, seed),
+      method: 'fallback-weighted',
+    };
   }
 
   // Check concentration — if one category dominates, force diversity
@@ -360,7 +375,7 @@ export async function selectSmartCategory(
         // Pick top from intersection, weighted by score
         const topPick = intersection[0];
         if (weights.has(topPick) && (weights.get(topPick)?.weight ?? 0) > 0) {
-          return topPick;
+          return { category: topPick, method: 'eda-exploit-day-slot' };
         }
       }
     }
@@ -369,13 +384,16 @@ export async function selectSmartCategory(
     if (dayBest) {
       for (const cat of dayBest) {
         if (weights.has(cat) && (weights.get(cat)?.weight ?? 0) > 0) {
-          return cat;
+          return { category: cat, method: 'eda-exploit-day' };
         }
       }
     }
 
     // Fall back to weighted selection
-    return weightedSelect(weights, exclude, seed);
+    return {
+      category: weightedSelect(weights, exclude, seed),
+      method: 'fallback-weighted',
+    };
   }
 
   // EXPLORE: pick an underrepresented category to test
@@ -410,14 +428,20 @@ export async function selectSmartCategory(
         console.log(
           `[EDA Explore] Picking underrepresented category: ${c.category} (count: ${categoryCounts.get(c.category) ?? 0}, median: ${Math.round(medianCount)}, HHI: ${concentration.toFixed(3)})`,
         );
-        return c.category;
+        return { category: c.category, method: 'eda-explore' as const };
       }
     }
-    return underrepresented[underrepresented.length - 1].category;
+    return {
+      category: underrepresented[underrepresented.length - 1].category,
+      method: 'eda-explore' as const,
+    };
   }
 
   // No underrepresented candidates — standard weighted selection
-  return weightedSelect(weights, exclude, seed);
+  return {
+    category: weightedSelect(weights, exclude, seed),
+    method: 'fallback-weighted' as const,
+  };
 }
 
 // ── Timing Optimisation ───────────────────────────────────────────────────

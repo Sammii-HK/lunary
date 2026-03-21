@@ -12,6 +12,7 @@ import {
   weightedSelect,
   selectSmartCategory,
 } from '@/lib/social/video-scripts/content-scores';
+import type { SelectionMethod } from '@/lib/social/video-scripts/content-scores';
 import {
   ensureVideoScriptsTable,
   saveVideoScript,
@@ -116,18 +117,18 @@ async function selectPrimaryCategoryForDate(
       weight: number;
     }
   >,
-): Promise<string> {
+): Promise<{ category: string; method: SelectionMethod }> {
   const seed = dateSeedFor(date);
 
   // Try EDA-informed smart selection first
-  const smartPick = await selectSmartCategory(
+  const { category, method } = await selectSmartCategory(
     weights,
     new Set<string>(),
     seed,
     date.getDay(), // JS day: 0=Sun
     'primary',
   );
-  if (smartPick) return smartPick;
+  if (category) return { category, method };
 
   // Fallback: deterministic weighted pool (original behaviour)
   const weightedPool: string[] = [];
@@ -139,7 +140,11 @@ async function selectPrimaryCategoryForDate(
     }
   }
 
-  return weightedPool[((seed * 9301 + 49297) % 233280) % weightedPool.length];
+  return {
+    category:
+      weightedPool[((seed * 9301 + 49297) % 233280) % weightedPool.length],
+    method: 'fallback-deterministic',
+  };
 }
 
 /**
@@ -256,6 +261,9 @@ export async function GET(request: NextRequest) {
     };
     const errors: string[] = [];
 
+    // Level 7: Cross-slot topic dedup — prevent same facet appearing twice in one day
+    const usedTopics = new Set<string>();
+
     // Pre-check: which slots already have scripts for this date (safe re-run)
     const existingScripts = await sql`
       SELECT metadata->>'slot' as slot, platform FROM video_scripts
@@ -274,7 +282,8 @@ export async function GET(request: NextRequest) {
         results.tiktokPrimary = 1;
       } else {
         const weights = await getContentTypeWeights();
-        const category = await selectPrimaryCategoryForDate(tomorrow, weights);
+        const { category, method: categoryMethod } =
+          await selectPrimaryCategoryForDate(tomorrow, weights);
         const themesForCategory = categoryThemes.filter(
           (t) => t.category === category,
         );
@@ -288,14 +297,16 @@ export async function GET(request: NextRequest) {
             : categoryThemes[dateSeed % categoryThemes.length];
 
         const exclude = new Set<string>();
-        const contentType =
-          ((await selectSmartCategory(
+        const { category: smartType, method: contentMethod } =
+          await selectSmartCategory(
             weights,
             exclude,
             dateSeed,
             tomorrow.getDay(),
             'primary',
-          )) as ContentType) ||
+          );
+        const contentType =
+          (smartType as ContentType) ||
           (weightedSelect(weights, exclude, dateSeed) as ContentType) ||
           'sign-identity';
 
@@ -318,7 +329,12 @@ export async function GET(request: NextRequest) {
           if (validated.metadata) {
             validated.metadata.scheduledHour = primaryHour;
             validated.metadata.slot = 'primary';
+            (validated.metadata as Record<string, unknown>).selectionMethod =
+              contentMethod;
+            (validated.metadata as Record<string, unknown>).categoryMethod =
+              categoryMethod;
           }
+          usedTopics.add(validated.facetTitle);
 
           // Generate TikTok caption with hashtags if missing
           if (!validated.writtenPostContent) {
@@ -422,11 +438,30 @@ export async function GET(request: NextRequest) {
             dayConfig.contentType,
             tomorrow,
           );
-          const validated = await validateAndRetry(
+          let validated = await validateAndRetry(
             dayConfig.contentType,
             tomorrow,
             script,
           );
+
+          // Level 7: Cross-slot topic dedup — retry once if topic already used today
+          if (validated && usedTopics.has(validated.facetTitle)) {
+            console.log(
+              `[Daily] ${slot}: "${validated.facetTitle}" already used today, retrying`,
+            );
+            const retryScript = await generateScriptForContentType(
+              dayConfig.contentType,
+              tomorrow,
+            );
+            const retry = await validateAndRetry(
+              dayConfig.contentType,
+              tomorrow,
+              retryScript,
+            );
+            if (retry && !usedTopics.has(retry.facetTitle)) {
+              validated = retry;
+            }
+          }
 
           if (validated) {
             validated.scheduledDate = new Date(
@@ -436,7 +471,10 @@ export async function GET(request: NextRequest) {
             if (validated.metadata) {
               validated.metadata.scheduledHour = hour;
               validated.metadata.slot = slot;
+              (validated.metadata as Record<string, unknown>).selectionMethod =
+                'weekly-schedule';
             }
+            usedTopics.add(validated.facetTitle);
 
             // Generate TikTok caption with hashtags if missing
             if (!validated.writtenPostContent) {
@@ -531,7 +569,7 @@ export async function GET(request: NextRequest) {
           'sign-identity',
           'quiz',
         ];
-        const usedTopics = new Set<string>();
+        // usedTopics is shared across all slots (Level 7 cross-slot dedup)
         for (let fi = 0; fi < missing; fi++) {
           let fbScript: VideoScript | null = null;
           // Try multiple content types to get a unique topic
