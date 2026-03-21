@@ -16,7 +16,8 @@ const ALLOWED_BASE_URLS = new Set(
 );
 
 // Platforms that receive carousel/image content
-const TARGET_PLATFORMS = ['instagram', 'bluesky', 'mastodon'];
+// Note: mastodon not in Spellcast's ALLOWED_PLATFORMS yet — add when supported
+const TARGET_PLATFORMS = ['instagram', 'bluesky'];
 
 export async function GET(request: NextRequest) {
   try {
@@ -193,6 +194,10 @@ export async function GET(request: NextRequest) {
           url: blobUrl,
         }));
 
+        console.log(
+          `[daily-carousels] Blob URLs: ${blobUrls.map((u) => u.slice(-60)).join(' | ')}`,
+        );
+
         const spellcastResult = await postToSpellcastMultiPlatform({
           platforms: TARGET_PLATFORMS,
           content: igCaption,
@@ -222,14 +227,30 @@ export async function GET(request: NextRequest) {
         }
 
         const platformResults = Object.entries(spellcastResult.results)
-          .map(([p, r]) => `${p}:${r.success ? 'ok' : 'fail'}`)
-          .join(' ');
+          .map(([p, r]) => `${p}:${r.success ? 'ok' : r.error || 'fail'}`)
+          .join(' | ');
+
+        if (!anySuccess) {
+          const firstError = Object.values(spellcastResult.results).find(
+            (r) => !r.success,
+          );
+          console.error(
+            `[daily-carousels] Spellcast failed for ${post.type}: ${firstError?.error}`,
+          );
+        }
 
         results.push({
           type: post.type,
           slides: blobUrls.length,
           status: allSuccess ? 'success' : anySuccess ? 'partial' : 'error',
           platforms: platformResults,
+          ...(anySuccess
+            ? {}
+            : {
+                error: Object.values(spellcastResult.results).find(
+                  (r) => !r.success,
+                )?.error,
+              }),
         });
       } catch (postError) {
         const errorMsg =

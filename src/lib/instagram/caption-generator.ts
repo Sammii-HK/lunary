@@ -221,6 +221,22 @@ const POST_TYPE_HASHTAGS: Record<IGPostType, string[]> = {
     '#astrologymemes',
     '#zodiacvibes',
   ],
+  transit_spotlight: [
+    '#astrotransits',
+    '#planetarytransit',
+    '#cosmicenergy',
+    '#astrologytransit',
+    '#celestialevents',
+    '#astrologytoday',
+  ],
+  myth_vs_reality: [
+    '#astrologyfacts',
+    '#mythbusting',
+    '#zodiacfacts',
+    '#astrologymyths',
+    '#didyouknow',
+    '#learnastrology',
+  ],
 };
 
 // --- Caption Generators ---
@@ -250,6 +266,11 @@ export function generateCaption(
     sign1?: string;
     sign2?: string;
     score?: number;
+    transitEvent?: string;
+    transitPlanet?: string;
+    transitSign?: string;
+    mythTopic?: string;
+    transitReason?: string;
   },
 ): CaptionResult {
   let caption: string;
@@ -288,6 +309,12 @@ export function generateCaption(
         trait: options.trait,
       });
       break;
+    case 'transit_spotlight':
+      caption = generateTransitSpotlightCaption(options);
+      break;
+    case 'myth_vs_reality':
+      caption = generateMythVsRealityCaption(options);
+      break;
     default:
       caption = 'Explore the cosmos with Lunary \u2728';
   }
@@ -309,6 +336,7 @@ function generateMemeCaption(options: {
   sign?: string;
   setup?: string;
   punchline?: string;
+  transitReason?: string;
 }): string {
   const sign = options.sign
     ? options.sign.charAt(0).toUpperCase() + options.sign.slice(1)
@@ -326,7 +354,12 @@ function generateMemeCaption(options: {
   const hookIndex = hashString(options.setup || sign) % hooks.length;
   const hook = hooks[hookIndex];
 
-  return `${hook}\n\nDouble tap if this is you.\nTag someone who needs to see this.\nSave this for your ${sign} collection.\n\nFollow @lunary.app for daily zodiac content`;
+  // Add transit context when the sign was chosen because of current sky activity
+  const transitLine = options.transitReason
+    ? `\n\n${options.transitReason}`
+    : '';
+
+  return `${hook}${transitLine}\n\nDouble tap if this is you.\nTag someone who needs to see this.\nSave this for your ${sign} collection.\n\nFollow @lunary.app for daily zodiac content`;
 }
 
 // Keyword-rich openers for zodiac sign carousels — written as things people actually search
@@ -737,6 +770,20 @@ export function generateTikTokCarouselCaption(
       }
       break;
     }
+    case 'transit_spotlight': {
+      const event = options.title || 'Cosmic shift happening now';
+      caption = `${event}\n\nSwipe for what it means and what to do. Comment your sign below`;
+      break;
+    }
+    case 'myth_vs_reality': {
+      const mythTopic = options.title || 'astrology';
+      const hooks = [
+        `Everything you think you know about ${mythTopic} is wrong`,
+        `${mythTopic}: myth vs reality. Were you right?`,
+      ];
+      caption = `${hooks[hash % hooks.length]}\n\nSwipe for the truth. Comment if you believed the myth`;
+      break;
+    }
     default:
       caption = `${title}\n\nSwipe through. Comment your sign below`;
   }
@@ -821,6 +868,61 @@ export function buildHashtags(
   const rotated = [...unique.slice(startIndex), ...unique.slice(0, startIndex)];
 
   return rotated.slice(0, 5);
+}
+
+function generateTransitSpotlightCaption(options: {
+  transitEvent?: string;
+  transitPlanet?: string;
+  transitSign?: string;
+}): string {
+  const event = options.transitEvent || 'A cosmic shift is happening';
+  const planet = options.transitPlanet;
+  const sign = options.transitSign
+    ? options.transitSign.charAt(0).toUpperCase() + options.transitSign.slice(1)
+    : '';
+
+  const hooks = planet
+    ? [
+        `${event}. Here's what it means for you.`,
+        `${planet} energy is shifting. This changes everything.`,
+        `Major transit alert: ${event}.`,
+      ]
+    : [
+        `${event}. Here's what it means for you.`,
+        'The sky is shifting. Pay attention to this.',
+        'A cosmic event worth knowing about.',
+      ];
+
+  const hookIndex =
+    hashString(options.transitEvent || 'transit') % hooks.length;
+  const hook = hooks[hookIndex];
+
+  const signLine = sign
+    ? `\n${sign} and surrounding signs feel this most.`
+    : '';
+
+  return `${hook}${signLine}\n\nSwipe for the full breakdown: what it means, who feels it most, and what to do about it.\n\nSave this so you can come back to it.\n\nTrack all transits free at lunary.app`;
+}
+
+function generateMythVsRealityCaption(options: {
+  mythTopic?: string;
+  category?: ThemeCategory;
+}): string {
+  const topic = options.mythTopic || 'astrology';
+  const category = options.category || 'zodiac';
+  const categoryLabel = category.charAt(0).toUpperCase() + category.slice(1);
+
+  const hooks = [
+    `Most people get ${topic} completely wrong. Here's the truth.`,
+    `Everything you think you know about ${topic} might be a myth.`,
+    `${topic}: myth vs reality. Which side were you on?`,
+    `Stop spreading this myth about ${topic}. The reality is more interesting.`,
+  ];
+
+  const hookIndex = hashString(topic) % hooks.length;
+  const hook = hooks[hookIndex];
+
+  return `${hook}\n\nSwipe through to see the common myth, the actual truth, and what it means for you.\n\nComment below: did you believe the myth?\n\nMore ${categoryLabel.toLowerCase()} facts at lunary.app/grimoire`;
 }
 
 /**

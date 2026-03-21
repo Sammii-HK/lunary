@@ -13,6 +13,8 @@ export type IGPostType =
   | 'did_you_know'
   | 'sign_ranking'
   | 'compatibility'
+  | 'transit_spotlight'
+  | 'myth_vs_reality'
   | 'story';
 
 // Meme template variants
@@ -141,5 +143,9 @@ export interface IGScheduledPost {
     author?: string;
     dateStr?: string;
     trait?: string;
+    transitEvent?: string;
+    transitPlanet?: string;
+    transitSign?: string;
+    mythTopic?: string;
   };
 }

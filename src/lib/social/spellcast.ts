@@ -112,17 +112,9 @@ export async function postToSpellcast(
     const isStory = instagramOpts?.isStory === true;
     // TikTok requires postType 'video' when media contains video
     const hasVideoMedia = params.media?.some((m) => m.type === 'video');
-    // Multiple images → carousel (Instagram rejects >1 image as regular 'post')
-    const imageCount =
-      params.media?.filter((m) => m.type === 'image').length ?? 0;
-    const isCarousel = imageCount > 1;
-    const postType = isStory
-      ? 'story'
-      : hasVideoMedia
-        ? 'video'
-        : isCarousel
-          ? 'carousel'
-          : 'post';
+    // Spellcast/Postiz doesn't accept 'carousel' — use 'post' with multiple
+    // mediaUrls and the platform auto-creates a carousel.
+    const postType = isStory ? 'story' : hasVideoMedia ? 'video' : 'post';
 
     // Stories are image-only so a placeholder is acceptable.
     // For all other post types, reject truly empty content.
@@ -294,14 +286,10 @@ export async function postToSpellcastMultiPlatform(params: {
     }
 
     // Auto-detect post type from media
-    const imageCount =
-      params.media?.filter((m) => m.type === 'image').length ?? 0;
+    // Note: Spellcast/Postiz doesn't accept 'carousel' — use 'post' with
+    // multiple mediaUrls and the platform auto-creates a carousel.
     const hasVideoMedia = params.media?.some((m) => m.type === 'video');
-    const postType = hasVideoMedia
-      ? 'video'
-      : imageCount > 1
-        ? 'carousel'
-        : 'post';
+    const postType = hasVideoMedia ? 'video' : 'post';
 
     // 1. Create draft
     const createRes = await spellcastFetch('/api/posts', {
