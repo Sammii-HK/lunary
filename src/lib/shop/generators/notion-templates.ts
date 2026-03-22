@@ -404,6 +404,80 @@ const NOTION_TEMPLATE_CONFIGS: NotionTemplateConfig[] = [
     ],
     badge: 'new',
   },
+  {
+    id: 'astrology-birth-chart-journal',
+    slug: 'astrology-birth-chart-journal',
+    title: 'Astrology Birth Chart Journal',
+    tagline: 'Understand your natal chart. Track how transits shape your life.',
+    description:
+      'A complete birth chart companion with 15 pre-filled natal placements, a transit tracker, planetary returns log, and house activations journal. Understand every planet in your chart and track how current transits activate it.',
+    whatInside: [
+      '15 pre-filled natal placements: all 10 planets, Chiron, North Node, South Node, Ascendant, and Midheaven with keywords and themes',
+      'Transit Tracker with 10 example 2026 entries — aspect, natal planet, area of life, journal entry, and star rating',
+      'Planetary Returns Log covering Solar, Lunar, Saturn, Jupiter, and Chiron returns with intention fields',
+      'House Activations Journal — all 12 houses with life area descriptions and journal prompts',
+      'Understanding your chart guide: elements, modalities, chart shapes, dignities, and houses at a glance',
+      'Quick reference callout for your Big Three: Sun, Moon, and Rising',
+    ],
+    perfectFor: [
+      'Anyone who wants to go beyond sun sign horoscopes and truly understand their chart.',
+      'Those tracking how current transits are affecting their life and decisions.',
+      'Astrology students building a personal reference and reflection log.',
+    ],
+    price: 1200,
+    gradient: SHOP_GRADIENTS.nebulaToComet,
+    tags: [
+      'notion',
+      'template',
+      'digital download',
+      'astrology',
+      'birth chart',
+      'spirituality',
+    ],
+    keywords: [
+      'astrology birth chart journal notion',
+      'natal chart tracker notion',
+      'transit journal template',
+    ],
+    badge: 'new',
+  },
+  {
+    id: 'manifestation-journal',
+    slug: 'manifestation-journal',
+    title: 'Manifestation Journal',
+    tagline: 'Align your energy. Script your reality. Track the evidence.',
+    description:
+      'A complete manifestation system with a scripting database, monthly intentions tracker, evidence log, gratitude log, and 30-affirmation library. 5 pre-filled scripts, 15 evidence entries, and 3 months of example intentions show you exactly how to use it.',
+    whatInside: [
+      '5 vivid pre-filled scripts across career, love, abundance, health, and home — written in present-tense "as if" style',
+      'Monthly Intentions database with 3 months pre-filled: New Moon sign, intentions, releasing, mid-month check-in, and Full Moon reflection',
+      'Evidence Log with 15 example sightings: synchronicities, number patterns, unexpected money, and emotional shifts',
+      'Gratitude Log with 10 entries across relationships, body, time, creativity, and the practice itself',
+      '30-affirmation library across 7 categories with moon phase recommendations and personalisation notes',
+      'The 369 Method guide, scripting tips, and moon phase manifestation guide',
+    ],
+    perfectFor: [
+      'Anyone building a consistent manifestation practice who wants more than a blank journal.',
+      'Those who work with new and full moons and want a structured intentions system.',
+      'People exploring law of attraction who want a searchable, trackable digital system.',
+    ],
+    price: 1200,
+    gradient: SHOP_GRADIENTS.hazeToRose,
+    tags: [
+      'notion',
+      'template',
+      'digital download',
+      'manifestation',
+      'law of attraction',
+      'spirituality',
+    ],
+    keywords: [
+      'manifestation journal notion',
+      'scripting template notion',
+      'law of attraction journal notion',
+    ],
+    badge: 'new',
+  },
 ];
 
 export function generateNotionTemplates(): ShopProduct[] {
