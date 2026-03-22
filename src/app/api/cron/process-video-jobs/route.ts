@@ -81,6 +81,20 @@ function getAudioDurationFromBuffer(buffer: Buffer): Promise<number> {
       return;
     }
 
+    // Validate magic bytes: MP3 (ID3 header or sync word) or WAV (RIFF)
+    const isID3 =
+      buffer[0] === 0x49 && buffer[1] === 0x44 && buffer[2] === 0x33; // "ID3"
+    const isMp3Sync = buffer[0] === 0xff && (buffer[1] & 0xe0) === 0xe0; // 0xFFEx sync
+    const isWav =
+      buffer[0] === 0x52 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x46; // "RIFF"
+    if (!isID3 && !isMp3Sync && !isWav) {
+      reject(new Error('Buffer does not appear to be a valid audio file'));
+      return;
+    }
+
     try {
       const tempDir = await mkdtemp(join(tmpdir(), 'audio-dur-'));
       const tempPath = join(tempDir, 'audio.mp3');
