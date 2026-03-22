@@ -48,6 +48,8 @@ export default async function ShopPage() {
     birthchart: allProducts.filter((p) => p.category === 'birthchart').length,
     bundle: allProducts.filter((p) => p.category === 'bundle').length,
     retrograde: allProducts.filter((p) => p.category === 'retrograde').length,
+    notion_template: allProducts.filter((p) => p.category === 'notion_template')
+      .length,
   } as const;
 
   return (

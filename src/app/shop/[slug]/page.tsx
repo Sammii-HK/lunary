@@ -10,7 +10,7 @@ import { ProductDetail } from '@/components/shop/ProductDetail';
 import { RelatedProducts } from '@/components/shop/RelatedProducts';
 import { UpsellSidebar } from '@/components/shop/UpsellSidebar';
 import {
-  createProductSchema,
+  createShopProductSchema,
   createBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema';
@@ -42,10 +42,13 @@ export async function generateMetadata({
   }
 
   const categoryLabel = CATEGORY_LABELS[product.category];
-  const title = `${product.title} | ${categoryLabel} | Lunary`;
+  const downloadSuffix =
+    product.category === 'notion_template'
+      ? 'Duplicate to Notion after purchase.'
+      : 'Instant digital download.';
+  const title = `${product.title} | Digital Download | Lunary`;
   const description =
-    product.metaDescription ||
-    `${product.tagline} ${product.description.slice(0, 120)}...`;
+    product.metaDescription || `${product.tagline} ${downloadSuffix}`;
 
   // Build keywords from product data
   const keywords = [
@@ -127,14 +130,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const categoryLabel = CATEGORY_LABELS[product.category];
 
-  const productSchema = createProductSchema({
+  const productSchema = createShopProductSchema({
     name: product.title,
     description: product.description,
-    price: product.price,
-    stripePriceId: product.stripePriceId || '',
-    priceCurrency: 'USD',
-    sku: product.slug,
-    features: product.whatInside || [],
+    slug: product.slug,
+    category: product.category,
+    tagline: product.tagline,
+    stripePriceCents: stripe?.stripePriceCents,
+    stripeCurrency: stripe?.stripeCurrency,
+    stripeImageUrl: stripe?.stripeImageUrl,
   });
 
   const breadcrumbSchema = createBreadcrumbSchema([

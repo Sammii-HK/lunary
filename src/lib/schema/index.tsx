@@ -630,6 +630,100 @@ export function createAggregateRatingSchema({
   };
 }
 
+interface ShopProductSchemaProps {
+  name: string;
+  description: string;
+  slug: string;
+  category: string;
+  tagline: string;
+  stripePriceCents?: number | null;
+  stripeCurrency?: string | null;
+  stripeImageUrl?: string | null;
+}
+
+export function createShopProductSchema({
+  name,
+  description,
+  slug,
+  category,
+  tagline,
+  stripePriceCents,
+  stripeCurrency,
+  stripeImageUrl,
+}: ShopProductSchemaProps) {
+  const googleCategory =
+    category === 'notion_template'
+      ? 'Software > Templates'
+      : 'Health, Beauty & Personal Care > Health Care > Alternative & Homeopathic Remedies';
+
+  const imageUrl = stripeImageUrl || `${BASE_URL}/images/og-shop.png`;
+
+  const schema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name,
+    description,
+    image: [imageUrl],
+    brand: {
+      '@type': 'Brand',
+      name: 'Lunary',
+    },
+    sku: slug,
+    category: googleCategory,
+  };
+
+  if (stripePriceCents != null) {
+    const currency = (stripeCurrency ?? 'GBP').toUpperCase();
+    schema.offers = {
+      '@type': 'Offer',
+      url: `${BASE_URL}/shop/${slug}`,
+      priceCurrency: currency,
+      price: (stripePriceCents / 100).toFixed(2),
+      availability: 'https://schema.org/InStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'Lunary',
+      },
+      // Digital delivery — no physical shipping
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: '0',
+          currency,
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 0,
+            unitCode: 'DAY',
+          },
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 0,
+            unitCode: 'DAY',
+          },
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'GB',
+        },
+      },
+      // No returns on digital products
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'GB',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+      },
+    };
+  }
+
+  return schema;
+}
+
 function stringifySafe(data: object) {
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }

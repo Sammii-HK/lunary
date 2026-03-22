@@ -2,6 +2,7 @@
   "buildCommand": "pnpm run build:deploy",
   "framework": "nextjs",
   "ignoreCommand": "if [[ \"$VERCEL_GIT_COMMIT_AUTHOR_LOGIN\" == \"dependabot[bot]\" ]]; then exit 0; else exit 1; fi",
+  "disabled_crons": [],
   "crons": [
     {
       "path": "/api/cron/generate-daily-tarot",

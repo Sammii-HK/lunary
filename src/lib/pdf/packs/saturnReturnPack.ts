@@ -8,6 +8,7 @@ import { PDFDocument, PDFFont, PDFImage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import { StandardFonts } from 'pdf-lib';
 import { PdfAstrologyPack, PdfAstrologySection } from '../schema';
+import { watermarkTemplate } from '@/utils/steganography';
 import { generateAstrologyPackPdf } from '../templates/AstrologyPackTemplate';
 
 const LOGO_URL =
@@ -170,8 +171,10 @@ function buildSaturnReturnPack(): PdfAstrologyPack {
       'What am I finally ready to take full responsibility for?',
       'What legacy do I want to build over the next 29 years?',
     ],
-    closingText:
+    closingText: watermarkTemplate(
       'Thank you for navigating your Saturn Return with Lunary. This is not an ending; it is a powerful new beginning. You are building the foundation for the rest of your life. Trust the process, do the work, and know that you are exactly where you need to be.',
+      'saturn-return',
+    ),
     optionalAffirmation:
       'I embrace the lessons of Saturn. I am building a life of integrity, purpose, and authentic alignment.',
   };

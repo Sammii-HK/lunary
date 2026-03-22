@@ -109,6 +109,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Fetch customer email from Stripe session (best-effort, non-blocking)
+    let customerEmail: string | null = null;
+    try {
+      const stripeSession = await stripe.checkout.sessions.retrieve(sessionId, {
+        expand: ['customer_details'],
+      });
+      customerEmail =
+        stripeSession.customer_details?.email ||
+        stripeSession.customer_email ||
+        null;
+    } catch {
+      // Non-fatal — email pre-fill is optional
+    }
+
     return NextResponse.json({
       purchase: {
         id: row.id,
@@ -118,6 +132,7 @@ export async function GET(request: NextRequest) {
         downloadToken: row.download_token,
       },
       downloadUrl: `/api/shop/download/${row.download_token}`,
+      customerEmail,
     });
   } catch (err) {
     console.error('❌ Failed to fetch purchase:', err);

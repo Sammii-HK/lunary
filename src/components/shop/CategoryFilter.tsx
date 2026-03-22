@@ -18,6 +18,7 @@ const CATEGORIES: (ShopCategory | 'all')[] = [
   'astrology',
   'birthchart',
   'bundle',
+  'notion_template',
 ];
 
 export function CategoryFilter({

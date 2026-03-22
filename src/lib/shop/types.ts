@@ -8,7 +8,8 @@ export type ShopCategory =
   | 'astrology'
   | 'birthchart'
   | 'retrograde'
-  | 'bundle';
+  | 'bundle'
+  | 'notion_template';
 
 export type ShopProduct = {
   id: string;
@@ -168,6 +169,7 @@ export const CATEGORY_LABELS: Record<ShopCategory, string> = {
   birthchart: 'Birth Chart Packs',
   bundle: 'Bundles',
   retrograde: 'Retrograde',
+  notion_template: 'Notion Templates',
 };
 
 export const CATEGORY_GRADIENTS: Record<ShopCategory, string> = {
@@ -179,6 +181,7 @@ export const CATEGORY_GRADIENTS: Record<ShopCategory, string> = {
   birthchart: SHOP_GRADIENTS.nebulaSupernovaRose,
   bundle: SHOP_GRADIENTS.fullSpectrum,
   retrograde: SHOP_GRADIENTS.cometToSupernova,
+  notion_template: SHOP_GRADIENTS.roseToHaze,
 };
 
 export function formatPrice(pence: number): string {

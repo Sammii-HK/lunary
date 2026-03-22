@@ -5,3 +5,4 @@ export { SeasonalHighlight } from './SeasonalHighlight';
 export { RelatedProducts } from './RelatedProducts';
 export { UpsellSidebar } from './UpsellSidebar';
 export { Pagination } from './Pagination';
+export { NewsletterCapture } from './NewsletterCapture';

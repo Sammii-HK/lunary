@@ -8,6 +8,7 @@ import { PDFDocument, PDFFont, PDFImage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import { StandardFonts } from 'pdf-lib';
 import { PdfCrystalPack, PdfCrystal } from '../schema';
+import { watermarkTemplate } from '@/utils/steganography';
 import { generateCrystalPackPdf } from '../templates/CrystalPackTemplate';
 import { getCrystalsByIntention, Crystal } from '@/constants/grimoire/crystals';
 
@@ -147,8 +148,10 @@ function buildAnxietyReliefPack(): PdfCrystalPack {
     introText:
       'Anxiety can feel all-encompassing, yet you are not alone. These crystals offer gentle support as you navigate challenging moments. Use them as companions for presence, not as substitutes for professional care.',
     crystals: selectedCrystals.map(crystalToPdfCrystal),
-    closingText:
+    closingText: watermarkTemplate(
       'Thank you for exploring these crystals with Lunary. Remember: healing is not linear. These stones are companions on your journey, offering support as you learn to find calm within yourself.',
+      'anxiety-relief-crystals',
+    ),
     optionalAffirmation:
       'I am safe in this moment. I breathe in peace and release what I cannot control.',
   };

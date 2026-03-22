@@ -21,6 +21,10 @@ import {
   getBirthChartPackBySlug,
 } from './birthchart-packs';
 import { generateBundles, getBundleBySlug } from './bundles';
+import {
+  generateNotionTemplates,
+  getNotionTemplateBySlug,
+} from './notion-templates';
 
 let cachedProducts: ShopProduct[] | null = null;
 
@@ -47,6 +51,7 @@ function interleaveProducts(products: ShopProduct[]): ShopProduct[] {
     'seasonal',
     'birthchart',
     'bundle',
+    'notion_template',
   ];
 
   // Create interleaved array
@@ -86,6 +91,7 @@ export function getAllProducts(): ShopProduct[] {
     ...generateAstrologyPacks(),
     ...generateBirthChartPacks(),
     ...generateBundles(),
+    ...generateNotionTemplates(),
   ];
 
   // Interleave products so each page has variety
@@ -102,7 +108,8 @@ export function getProductBySlug(slug: string): ShopProduct | undefined {
     getRetrogradePackBySlug(slug) ||
     getAstrologyPackBySlug(slug) ||
     getBirthChartPackBySlug(slug) ||
-    getBundleBySlug(slug)
+    getBundleBySlug(slug) ||
+    getNotionTemplateBySlug(slug)
   );
 }
 
@@ -220,6 +227,7 @@ export function getProductStats(): {
     birthchart: 0,
     bundle: 0,
     retrograde: 0,
+    notion_template: 0,
   };
 
   products.forEach((p) => {
@@ -241,6 +249,7 @@ export {
   generateAstrologyPacks,
   generateBirthChartPacks,
   generateBundles,
+  generateNotionTemplates,
   getCurrentSeasonalPack,
   getCurrentSunSeasonPack,
 };

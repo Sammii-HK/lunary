@@ -135,6 +135,115 @@ export function ProductDetail({ product }: ProductDetailProps) {
               </div>
             )}
 
+            <div className='mb-10 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
+              <h2 className='text-sm font-medium text-white/50 uppercase tracking-wider mb-5'>
+                Questions?
+              </h2>
+              <div className='space-y-5'>
+                {product.category === 'notion_template' ? (
+                  <>
+                    <div>
+                      <p className='text-sm font-medium text-white mb-1'>
+                        What format is this?
+                      </p>
+                      <p className='text-sm text-zinc-400'>
+                        A Notion template — once purchased, you&apos;ll receive
+                        a unique link to duplicate it directly into your Notion
+                        workspace.
+                      </p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-white mb-1'>
+                        Do I need a Notion account?
+                      </p>
+                      <p className='text-sm text-zinc-400'>
+                        Yes, a free Notion account is all you need. The template
+                        works with any Notion plan.
+                      </p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-white mb-1'>
+                        How do I duplicate it?
+                      </p>
+                      <p className='text-sm text-zinc-400'>
+                        Click the link in your purchase email, make sure
+                        you&apos;re logged into Notion, then click
+                        &apos;Duplicate page&apos; in the top right.
+                      </p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-white mb-1'>
+                        Is the template mine to keep?
+                      </p>
+                      <p className='text-sm text-zinc-400'>
+                        Yes — once duplicated, it lives in your workspace
+                        forever. You can edit it however you like.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <p className='text-sm font-medium text-white mb-1'>
+                        What format is this?
+                      </p>
+                      <p className='text-sm text-zinc-400'>
+                        A beautifully designed PDF, optimised for screen and
+                        print. You&apos;ll receive an instant download link
+                        after purchase.
+                      </p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-white mb-1'>
+                        How do I access it after buying?
+                      </p>
+                      <p className='text-sm text-zinc-400'>
+                        You&apos;ll be redirected to a download page immediately
+                        after checkout. You can download up to 5 times within 30
+                        days.
+                      </p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-white mb-1'>
+                        Do I need any special software?
+                      </p>
+                      <p className='text-sm text-zinc-400'>
+                        Just a PDF reader — any device works. Adobe Acrobat,
+                        Apple Preview, or your browser&apos;s built-in viewer
+                        all work perfectly.
+                      </p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-white mb-1'>
+                        Can I print it?
+                      </p>
+                      <p className='text-sm text-zinc-400'>
+                        Yes, all packs are print-ready at A4 and US Letter
+                        sizes.
+                      </p>
+                    </div>
+                  </>
+                )}
+                <div>
+                  <p className='text-sm font-medium text-white mb-1'>
+                    What&apos;s your refund policy?
+                  </p>
+                  <p className='text-sm text-zinc-400'>
+                    As these are instant digital downloads, we don&apos;t offer
+                    refunds once the file has been accessed. If you have an
+                    issue, email{' '}
+                    <a
+                      href='mailto:hello@lunary.app'
+                      className='text-lunary-primary hover:text-white transition-colors'
+                    >
+                      hello@lunary.app
+                    </a>
+                    .
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className='border-t border-white/10 pt-8 mt-8'>
               <div className='flex flex-col sm:flex-row items-center justify-between gap-4'>
                 <div>
@@ -142,7 +251,9 @@ export function ProductDetail({ product }: ProductDetailProps) {
                     {formatPrice(product.price)}
                   </span>
                   <p className='text-white/40 text-sm mt-1'>
-                    Instant digital access
+                    {product.category === 'notion_template'
+                      ? 'Duplicate to Notion after purchase'
+                      : 'Instant digital access'}
                   </p>
                 </div>
 
@@ -158,6 +269,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
                       <span className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
                       Processing...
                     </span>
+                  ) : product.category === 'notion_template' ? (
+                    'Get Template'
                   ) : (
                     'Add to Library'
                   )}
