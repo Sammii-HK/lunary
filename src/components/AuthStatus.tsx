@@ -148,38 +148,48 @@ export function AuthStatusProvider({
       }
 
       authPromise = (async () => {
-        try {
-          // No timeout - let the request complete naturally
-          const session = await betterAuthClient.getSession();
+        // Retry once on error — transient network failures (PostHog timeouts, cold
+        // starts, SW update races) must not kick the user out of the app.
+        let lastError: unknown;
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            const session = await betterAuthClient.getSession();
 
-          const user =
-            session && typeof session === 'object'
-              ? 'user' in session
-                ? (session as any).user
-                : ((session as any)?.data?.user ?? null)
-              : null;
+            const user =
+              session && typeof session === 'object'
+                ? 'user' in session
+                  ? (session as any).user
+                  : ((session as any)?.data?.user ?? null)
+                : null;
 
-          const newState: AuthState = {
-            isAuthenticated: !!user,
-            user,
-            profile: user || null,
-            loading: false,
-          };
-          cachedAuthState = newState;
-          return newState;
-        } catch (error) {
-          console.error('Auth check failed:', error);
-          const newState: AuthState = {
-            isAuthenticated: false,
-            user: null,
-            profile: null,
-            loading: false,
-          };
-          cachedAuthState = newState;
-          return newState;
-        } finally {
-          authPromise = null;
+            const newState: AuthState = {
+              isAuthenticated: !!user,
+              user,
+              profile: user || null,
+              loading: false,
+            };
+            // Only cache a definitive result (success or confirmed-no-session).
+            cachedAuthState = newState;
+            return newState;
+          } catch (error) {
+            lastError = error;
+            if (attempt === 0) {
+              // Brief pause before retry so transient issues can clear.
+              await new Promise((r) => setTimeout(r, 800));
+            }
+          }
         }
+        // Both attempts failed — log but do NOT cache the failure so the next
+        // mount gets a fresh check rather than a persisted "logged out" state.
+        console.error('Auth check failed after retry:', lastError);
+        const errorState: AuthState = {
+          isAuthenticated: false,
+          user: null,
+          profile: null,
+          loading: false,
+        };
+        // Intentionally NOT setting cachedAuthState here.
+        return errorState;
       })();
 
       const result = await authPromise;

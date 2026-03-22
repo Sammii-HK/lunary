@@ -8,6 +8,7 @@ import { PDFDocument, PDFFont, PDFImage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import { StandardFonts } from 'pdf-lib';
 import { PdfBirthChartPack, PdfBirthChartSection } from '../schema';
+import { watermarkTemplate } from '@/utils/steganography';
 import { generateBirthChartPackPdf } from '../templates/BirthChartPackTemplate';
 
 const LOGO_URL =
@@ -274,8 +275,10 @@ function buildRisingSignPack(): PdfBirthChartPack {
       'How does my rising sign energy work with (or against) my Sun sign?',
       'What unique strengths and challenges does my rising sign bring to my life?',
     ],
-    closingText:
+    closingText: watermarkTemplate(
       'Thank you for exploring your rising sign with Lunary. Understanding your Ascendant adds valuable depth to your astrological portrait. You are not just one sign—you are a complex and beautiful blend of cosmic influences.',
+      'rising-sign',
+    ),
     optionalAffirmation:
       'I embrace how I show up in the world. My first impression is authentic, and I move through life with intention and presence.',
   };

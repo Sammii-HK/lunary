@@ -12,6 +12,7 @@ import {
   PdfSeasonalRitual,
   PdfCorrespondence,
 } from '../schema';
+import { watermarkTemplate } from '@/utils/steganography';
 import { generateSeasonalPackPdf } from '../templates/SeasonalPackTemplate';
 
 const LOGO_URL =
@@ -60,85 +61,152 @@ async function loadFonts(
 }
 
 const SAMHAIN_CORRESPONDENCES: PdfCorrespondence[] = [
-  { type: 'Colors', items: ['Black', 'Orange', 'Purple', 'Silver', 'Gold'] },
+  {
+    type: 'Colours',
+    items: ['Black', 'Deep orange', 'Burgundy', 'Silver', 'Gold'],
+  },
   {
     type: 'Crystals',
-    items: ['Obsidian', 'Smoky Quartz', 'Black Tourmaline', 'Amethyst'],
+    items: [
+      'Obsidian (psychic protection)',
+      'Smoky quartz (grounding)',
+      'Black tourmaline (warding)',
+      'Amethyst (spirit communication)',
+      'Labradorite (thinning the veil)',
+    ],
   },
-  { type: 'Herbs', items: ['Mugwort', 'Rosemary', 'Sage', 'Apple', 'Pumpkin'] },
   {
-    type: 'Themes',
-    items: ['Ancestor work', 'Divination', 'Shadow integration', 'Letting go'],
+    type: 'Herbs and plants',
+    items: [
+      'Mugwort (prophetic dreams, divination)',
+      'Rosemary (remembrance of the dead)',
+      'Sage (clearing and protection)',
+      'Apple (the fruit of the otherworld)',
+      'Hawthorn (a hedge between worlds)',
+    ],
+  },
+  {
+    type: 'Altar items',
+    items: [
+      'Photographs of ancestors and departed loved ones',
+      'Personal objects that belonged to those you are honouring',
+      'A black or white pillar candle as a beacon',
+      'A bowl of apples, pomegranate seeds, or dark berries',
+      'Your tarot or oracle deck for Samhain divination',
+      'A cup of water or whisky as an offering',
+    ],
+  },
+  {
+    type: "Journal prompts for the year's end",
+    items: [
+      'What is the most significant thing I learned about myself this year?',
+      'What have I been carrying that I am finally ready to put down?',
+      'Which relationships grew me and which ones diminished me?',
+      'What am I proud of that I never said aloud?',
+      'What do I want to carry forward into the new cycle, and what do I leave at this threshold?',
+      'If my ancestors could see the life I am living, what would they most want me to know?',
+    ],
+  },
+  {
+    type: 'What to release vs carry forward',
+    items: [
+      'Release: guilt that has already taught you its lesson',
+      'Release: relationships you have outgrown',
+      'Release: the version of yourself you no longer are',
+      "Carry forward: hard-won wisdom from this year's struggles",
+      'Carry forward: the people who showed up when it mattered',
+      'Carry forward: the parts of yourself you are still becoming',
+    ],
   },
 ];
 
 const SAMHAIN_RITUALS: PdfSeasonalRitual[] = [
   {
-    title: 'Ancestor Altar Ritual',
-    timing: 'Samhain Eve or during the three-day veil thinning period',
+    title: 'Building Your Ancestor Altar',
+    timing: 'October 29-31, leaving it up through November 1',
     description:
-      'Create a sacred space to honour those who have passed before you. This ritual strengthens your connection to ancestral wisdom and offers a meaningful moment of remembrance.',
+      'The ancestor altar is the heart of Samhain. It creates a focal point for your remembrance and a welcoming space for those who have passed to draw near. You do not need to have had a perfect relationship with your ancestors to honour them -- you can also call in chosen ancestors, spiritual lineages, or those who came before in your community.',
     activities: [
-      'Choose a small table, shelf, or dedicated corner to serve as your altar.',
-      'Gather photos, mementos, or written names of the ancestors you wish to honour.',
-      'Light a white or black candle to act as a beacon for their presence.',
-      'Place offerings of food or drink that your ancestors would have enjoyed.',
-      'Sit quietly with the altar, speaking to your ancestors if it feels right.',
-      'When you feel complete, thank them for their guidance and gently close the ritual.',
+      'Choose a small table, shelf, or windowsill and cover it with a dark cloth -- black, deep purple, or burgundy works well.',
+      'Place photographs of ancestors and departed loved ones at the centre. If you have no photos, write their names on paper and fold them neatly.',
+      'Add personal objects: a piece of jewellery, a handwritten letter, a coin from their time -- anything that carries their energy.',
+      'Light a white pillar candle to serve as a beacon. White calls them home without inviting anything uninvited.',
+      'Fill a small offering dish with something they would have enjoyed -- a favourite food, a shot of whisky, a cup of tea left to cool.',
+      'Place protective crystals around the perimeter: black tourmaline at the four corners, obsidian or smoky quartz at the centre.',
+      'Sit before the altar for at least five minutes in silence each day of the Samhain period. You do not need to speak aloud -- presence is the offering.',
+      'On November 1, remove the food offerings, thank your ancestors, and close the altar with gratitude. The photos and objects may remain if you want to keep the connection open.',
     ],
     correspondences: [
       {
-        type: 'Tools',
-        items: ['Candles', 'Photos', 'Food offerings', 'Incense'],
+        type: 'Materials needed',
+        items: [
+          'Dark altar cloth (black, burgundy, or purple)',
+          'Photographs or written names of ancestors',
+          'White pillar candle',
+          'Food and drink offerings',
+          'Black tourmaline and obsidian',
+          'Rosemary or frankincense incense',
+        ],
       },
     ],
   },
   {
     title: 'Releasing the Old Year',
-    timing: 'Samhain evening, as the sun sets',
+    timing: 'Samhain evening, at or after sunset on October 31',
     description:
-      'Samhain marks the Celtic new year. This ritual supports you in releasing what no longer serves you, creating space for new growth in the coming cycle.',
+      'Samhain is the Celtic new year -- the old cycle ends and the new one begins in darkness, not light. Before anything new can take root, you must consciously release what belongs to the year that is ending. This is not about pretending things were easy. It is about acknowledging what happened, finding the lesson, and choosing to travel lighter.',
     activities: [
-      'Write down what you are ready to release on small pieces of paper.',
-      'Light a fire or place a candle safely in a fireproof container.',
-      'Read each item aloud, acknowledging the role it has played in your life.',
-      'Safely burn each paper while visualising the energy transforming.',
-      'Once cooled, scatter the ashes outside or bury them in the earth.',
-      'Close by stating an intention for what you wish to welcome in.',
+      'Gather several small strips of paper, a pen, and a fireproof bowl or cauldron. If you cannot safely burn paper, a bowl of water works for dissolving.',
+      'Sit quietly for five minutes and let the year pass through your mind -- the losses, the disappointments, the patterns you kept repeating.',
+      'On each strip of paper, write one specific thing you are releasing. Not "negativity" but the belief underneath it. Not "bad relationships" but the pattern or the person.',
+      'Light a black or dark candle. Read each strip aloud before burning or tearing it. Say: "I acknowledge you. I release you. You have served your purpose."',
+      'Burn each strip safely in your fireproof bowl, or tear the paper into small pieces and dissolve them in water.',
+      'Once the fire is out or the water is still, sit quietly for a few moments. Notice how you feel -- lighter, perhaps sad, perhaps both.',
+      'Close by writing three things you are choosing to carry into the new cycle. Keep these in your journal.',
     ],
     correspondences: [
       {
-        type: 'Elements',
-        items: ['Fire for transformation', 'Earth for grounding'],
+        type: 'Elements at work',
+        items: [
+          'Fire: transformation and release',
+          'Earth: grounding and burial',
+          'Water: dissolution and cleansing',
+          'Air: the breath of intention',
+        ],
       },
     ],
   },
   {
-    title: 'Dumb Supper',
-    timing: 'Samhain night, preferably in candlelight',
+    title: 'The Dumb Supper',
+    timing: 'Samhain night, by candlelight, ideally after dark',
     description:
-      'A silent meal shared with the spirits of the departed. This ancient tradition honours those who have passed by setting a place for them at your table.',
+      'The Dumb Supper is one of the oldest Samhain traditions: a silent meal shared with those who have died. "Dumb" here means silent. The meal is eaten in complete quiet, creating space for the dead to draw near. You are not summoning anything. You are simply setting a place and being open. This ritual is particularly meaningful for those who have lost someone recently, or who feel disconnected from their lineage.',
     activities: [
-      'Prepare a meal that your ancestors would have enjoyed.',
-      'Set an extra place at the table to welcome the spirits.',
-      'Eat the meal in complete silence, allowing memories to surface.',
-      'Serve the ancestors first, before taking your own portion.',
-      "After the meal, leave the ancestor's plate outside as an offering.",
-      'Break the silence only once the meal is fully complete.',
+      'Prepare a simple meal -- something that connects you to your family or heritage, or simply something warm and honest.',
+      'Set your table and add one extra place setting for the ancestors. This plate will receive a small portion of everything you eat.',
+      'Light candles only -- no electric lights. The meal should be dim and soft.',
+      'Before you sit, speak aloud: "I set this place for those who came before me. You are welcome at my table tonight."',
+      "Serve the ancestors' plate first, before your own.",
+      'Eat in complete silence. Let memories arise without chasing them. If emotion surfaces, let it move through you.',
+      "When the meal is complete, take the ancestors' plate outside and leave it on the earth -- a doorstep, a windowsill, anywhere between inside and out.",
+      'Break the silence with something simple: "Thank you for coming. Travel well." Then clear the table.',
     ],
   },
   {
-    title: 'Divination Night',
-    timing: 'Samhain, when the veil is thinnest',
+    title: 'Samhain Divination',
+    timing: 'Samhain night, between 11pm and midnight if possible',
     description:
-      'Samhain is considered the most powerful night of the year for divination. The thinning veil allows clearer messages to pass between realms.',
+      'The hours around midnight on Samhain are considered the most potent time of year for divination. The veil is at its thinnest, intuition is sharpest, and messages tend to be unusually clear. Work with whatever tool you trust most -- tarot, oracle, runes, scrying, or journalling with open questions. The key is to ask from genuine curiosity rather than anxiety.',
     activities: [
-      'Cleanse your divination tools with smoke, moonlight, or sound.',
-      'Create sacred space by lighting candles and placing protective crystals nearby.',
-      'Ask open-ended questions about the year ahead, remaining receptive to answers.',
-      'Use tarot cards, oracle decks, scrying, or a pendulum—whatever feels natural.',
-      'Record all messages and impressions in your journal as they arise.',
-      'Close the session by thanking any spirits or guides who offered insight.',
+      'Cleanse your tools the night before: pass them through mugwort smoke, leave them under moonlight, or sound-cleanse with a singing bowl.',
+      'Create a contained space. Sit at a cleared table with a candle in front of you and protective crystals on either side -- obsidian and labradorite work well together.',
+      'Ground yourself first. Feel your feet on the floor. Take seven slow breaths before you begin.',
+      'Call in only what is benevolent: "I ask only for guidance that is truthful, loving, and serves my highest good."',
+      'Work with one focused question rather than many scattered ones. Strong Samhain questions: "What is most important for me to understand about the year ahead?" or "What has this year been trying to teach me?"',
+      'For tarot: pull a three-card spread -- the year ending, the threshold you stand at now, and what the new cycle holds.',
+      'For scrying: sit with a dark mirror or a bowl of still dark water. Soften your gaze and note whatever arises -- images, words, impressions, feelings.',
+      'Record everything in your journal immediately after, without editing. Meaning often surfaces in the days that follow.',
+      'Close by thanking your guides and snuffing the candle -- do not blow it out. Snuffing keeps the energy contained.',
     ],
   },
 ];
@@ -149,24 +217,26 @@ function buildSamhainPack(): PdfSeasonalPack {
     slug: 'samhain',
     title: 'Samhain',
     subtitle: 'Honouring the ancestors',
-    sabbatDate: 'October 31 – November 1',
+    sabbatDate: 'October 31 - November 1',
     theme: 'Endings, Ancestors, Divination',
     moodText:
-      'As the veil thins between worlds, we honour those who walked before us. Samhain is a time for quiet reflection, conscious release, and connection with the unseen.',
+      'As the veil thins between worlds, we remember those who walked before us. Samhain is a time for honest reflection, conscious release, and the kind of stillness that only comes when you stop pretending the dead are entirely gone.',
     perfectFor: [
-      'Those who wish to honour ancestors and departed loved ones',
-      'Anyone seeking powerful divination and spirit communication',
-      'Those ready to release what no longer serves before the new cycle',
-      'Deep shadow work and personal transformation',
+      'Those who want to honour ancestors and departed loved ones with real intention',
+      'Anyone seeking powerful divination on the most potent night of the year',
+      'Those ready to consciously release what has weighed on them all year',
+      'People drawn to shadow work and honest year-end reckoning',
     ],
     introText:
-      'Samhain (pronounced SOW-in) marks the Celtic new year and the final harvest. It is a liminal time when the veil between worlds is at its thinnest, making it ideal for ancestral work, divination, and the conscious release of what belongs to the past.',
+      'Samhain is pronounced "SAH-win" or "SOW-in." It falls on October 31 and marks the Celtic new year: the final harvest, the end of the growing season, and the beginning of the dark half of the year. At Samhain, the veil between the living and the dead is at its thinnest. This is not a metaphor for most practitioners -- it is an observable shift in the quality of the nights, the sharpness of dreams, and the ease with which memory surfaces unbidden. This pack contains four rituals to work with that thinning: building an ancestor altar, releasing the old year, sharing a silent meal with the dead, and divining by candlelight. You do not need to believe in any particular cosmology to find these practices meaningful. Grief is real. Memory is real. The need to mark endings is deeply human. Samhain gives those things a container.',
     rituals: SAMHAIN_RITUALS,
     correspondences: SAMHAIN_CORRESPONDENCES,
-    closingText:
-      'Thank you for celebrating Samhain with Lunary. As the wheel turns and the year draws to a close, may you find peace in release and comfort in the presence of those who guide you from beyond the veil.',
+    closingText: watermarkTemplate(
+      'Thank you for celebrating Samhain with Lunary. As the wheel turns and the year closes, may you find some peace in what you are releasing and some warmth in the company of those you are remembering. The new cycle begins in darkness, which means it begins with potential. Trust that.',
+      'samhain',
+    ),
     optionalAffirmation:
-      'I honour my ancestors and the wisdom they carry. I release what no longer serves me and welcome the new cycle with an open heart.',
+      'I honour those who came before me and carry their wisdom forward. I release what this year asked me to carry, and I cross the threshold into the new cycle lighter, and more myself.',
   };
 }
 

@@ -3,7 +3,7 @@ import type { IGPostType } from './types';
 
 // --- Hashtag Sets ---
 
-// Broad astrology discovery tags — used to fill remaining slots
+// Broad astrology discovery tags - used to fill remaining slots
 const DISCOVERY_HASHTAGS = [
   '#astrology',
   '#zodiacsigns',
@@ -221,6 +221,22 @@ const POST_TYPE_HASHTAGS: Record<IGPostType, string[]> = {
     '#astrologymemes',
     '#zodiacvibes',
   ],
+  transit_spotlight: [
+    '#astrotransits',
+    '#planetarytransit',
+    '#cosmicenergy',
+    '#astrologytransit',
+    '#celestialevents',
+    '#astrologytoday',
+  ],
+  myth_vs_reality: [
+    '#astrologyfacts',
+    '#mythbusting',
+    '#zodiacfacts',
+    '#astrologymyths',
+    '#didyouknow',
+    '#learnastrology',
+  ],
 };
 
 // --- Caption Generators ---
@@ -250,6 +266,11 @@ export function generateCaption(
     sign1?: string;
     sign2?: string;
     score?: number;
+    transitEvent?: string;
+    transitPlanet?: string;
+    transitSign?: string;
+    mythTopic?: string;
+    transitReason?: string;
   },
 ): CaptionResult {
   let caption: string;
@@ -288,6 +309,12 @@ export function generateCaption(
         trait: options.trait,
       });
       break;
+    case 'transit_spotlight':
+      caption = generateTransitSpotlightCaption(options);
+      break;
+    case 'myth_vs_reality':
+      caption = generateMythVsRealityCaption(options);
+      break;
     default:
       caption = 'Explore the cosmos with Lunary \u2728';
   }
@@ -309,6 +336,7 @@ function generateMemeCaption(options: {
   sign?: string;
   setup?: string;
   punchline?: string;
+  transitReason?: string;
 }): string {
   const sign = options.sign
     ? options.sign.charAt(0).toUpperCase() + options.sign.slice(1)
@@ -326,80 +354,85 @@ function generateMemeCaption(options: {
   const hookIndex = hashString(options.setup || sign) % hooks.length;
   const hook = hooks[hookIndex];
 
-  return `${hook}\n\nDouble tap if this is you.\nTag someone who needs to see this.\nSave this for your ${sign} collection.\n\nFollow @lunary.app for daily zodiac content`;
+  // Add transit context when the sign was chosen because of current sky activity
+  const transitLine = options.transitReason
+    ? `\n\n${options.transitReason}`
+    : '';
+
+  return `${hook}${transitLine}\n\nDouble tap if this is you.\nTag someone who needs to see this.\nSave this for your ${sign} collection.\n\nFollow @lunary.app for daily zodiac content`;
 }
 
-// Keyword-rich openers for zodiac sign carousels — written as things people actually search
+// Keyword-rich openers for zodiac sign carousels (written as things people actually search)
 const ZODIAC_SIGN_OPENERS: Record<string, string> = {
   aries:
     'Aries personality traits: why they lead, explode, and somehow always win.',
   taurus:
     'Taurus personality: why the most stubborn sign is also the most loyal.',
   gemini:
-    "Gemini personality traits — why they're the most misunderstood sign in the zodiac.",
+    "Gemini personality traits: why they're the most misunderstood sign in the zodiac.",
   cancer:
     'Cancer zodiac: the emotional intelligence most people completely miss.',
   leo: 'Leo personality traits: why every room feels different when they walk in.',
   virgo:
-    "Virgo personality — why they're not uptight, they just have higher standards.",
+    "Virgo personality: why they're not uptight, they just have higher standards.",
   libra:
     'Libra personality traits: the charming, calculated truth behind the balance.',
   scorpio:
-    'Scorpio personality — why everyone is either obsessed with them or terrified.',
+    'Scorpio personality: why everyone is either obsessed with them or terrified.',
   sagittarius:
     "Sagittarius personality traits: the freedom-chaser who can't be contained.",
   capricorn:
-    "Capricorn personality — why they're always five steps ahead of everyone else.",
+    "Capricorn personality: why they're always five steps ahead of everyone else.",
   aquarius:
     "Aquarius personality traits: why they're the most original sign in the zodiac.",
   pisces:
-    'Pisces personality — the most emotionally complex sign, fully explained.',
+    'Pisces personality: the most emotionally complex sign, fully explained.',
 };
 
 // Keyword-rich openers for tarot card carousels
 const TAROT_CARD_OPENERS: Record<string, string> = {
   'the fool':
-    "The Fool tarot card meaning — it's not about naivety. Here's what it's really saying.",
+    "The Fool tarot card meaning:it's not about naivety. Here's what it's really saying.",
   'the magician':
     "The Magician tarot card: you already have everything you need. Here's why.",
   'the high priestess':
-    'The High Priestess tarot meaning — trust what you already know.',
+    'The High Priestess tarot meaning:trust what you already know.',
   'the empress':
     'The Empress tarot card meaning: abundance, creation, and what it means for you.',
   'the emperor':
-    'The Emperor tarot card — authority, structure, and when it shows up in a reading.',
+    'The Emperor tarot card:authority, structure, and when it shows up in a reading.',
   'the hierophant':
     'The Hierophant tarot meaning: tradition, institutions, and breaking from them.',
   'the lovers':
     "The Lovers tarot card doesn't just mean romance. Full meaning inside.",
   'the chariot':
-    "The Chariot tarot meaning — willpower, momentum, and when you're close to winning.",
+    "The Chariot tarot meaning:willpower, momentum, and when you're close to winning.",
   strength:
     "Strength tarot card: this isn't about force. Here's the real meaning.",
   'the hermit':
-    'The Hermit tarot card meaning — solitude, wisdom, and inner guidance.',
+    'The Hermit tarot card meaning:solitude, wisdom, and inner guidance.',
   'wheel of fortune':
     'Wheel of Fortune tarot: what it actually means when cycles shift.',
   justice:
-    "Justice tarot card meaning — karma, truth, and what's coming back around.",
+    "Justice tarot card meaning:karma, truth, and what's coming back around.",
   'the hanged man':
     "The Hanged Man tarot: he chose to hang upside down. Here's what that means for your reading.",
   death:
     "Death tarot card doesn't mean what you think. The real meaning, fully explained.",
   temperance:
-    'Temperance tarot card meaning — balance, alchemy, and the long game.',
+    'Temperance tarot card meaning:balance, alchemy, and the long game.',
   'the devil':
     "The Devil tarot card: it's not evil. Here's what it's actually showing you.",
   'the tower':
-    "The Tower tarot card meaning — most people fear this pull. Here's why you shouldn't.",
+    "The Tower tarot card meaning:most people fear this pull. Here's why you shouldn't.",
   'the star':
     'The Star tarot card: hope after collapse. Full meaning and what it means for you.',
   'the moon':
-    "The Moon tarot card meaning — illusion, anxiety, and what's hidden in the shadows.",
+    "The Moon tarot card meaning:illusion, anxiety, and what's hidden in the shadows.",
   'the sun':
     'The Sun tarot card: the most positive card in the deck. Full breakdown inside.',
   judgement:
-    "Judgement tarot card meaning — a calling, not a verdict. Here's the full guide.",
+    "Judgement tarot card meaning:a calling, not a verdict. Here's the full guide.",
   'the world':
     'The World tarot card: completion, achievement, and what comes next.',
 };
@@ -417,44 +450,44 @@ function generateCarouselCaption(options: {
     const hook =
       ZODIAC_SIGN_OPENERS[titleKey] ||
       `${title} personality traits, compatibility, and the full astrology breakdown.`;
-    return `${hook}\n\nSwipe through for everything — personality, strengths, shadow side, love compatibility, and career energy.\n\nSave this if you're a ${title} or know one.\n\nFull grimoire — link in bio`;
+    return `${hook}\n\nSwipe through for everything: personality, strengths, shadow side, love compatibility, and career energy.\n\nSave this if you're a ${title} or know one.\n\nFull grimoire at lunary.app`;
   }
 
   // Tarot card: use card-specific keyword hook
   if (category === 'tarot') {
     const hook =
       TAROT_CARD_OPENERS[titleKey] ||
-      `${title} tarot card — upright, reversed, love, career, and spirituality. Full breakdown.`;
-    return `${hook}\n\nSwipe for the complete guide — upright meaning, reversed, love, career, and spiritual guidance.\n\nSave this for your next reading.\n\nFull grimoire — link in bio`;
+      `${title} tarot card:upright, reversed, love, career, and spirituality. Full breakdown.`;
+    return `${hook}\n\nSwipe for the complete guide: upright meaning, reversed, love, career, and spiritual guidance.\n\nSave this for your next reading.\n\nFull grimoire at lunary.app`;
   }
 
   // Other categories: specific but concise
   const hooks: Record<string, string> = {
     spells: `How to cast: ${title}`,
-    crystals: `${title} crystal — properties, chakra connections, and how to work with its energy.`,
-    numerology: `${title} — the meaning most people overlook.`,
-    runes: `${title} rune — meaning, divination, and magical uses.`,
-    chakras: `${title} — signs of imbalance and how to heal it.`,
-    sabbat: `${title} — history, traditions, and how to mark it properly.`,
-    lunar: `${title} — what the lunar cycle is telling you.`,
-    planetary: `${title} — how this planetary energy affects you.`,
+    crystals: `${title} crystal:properties, chakra connections, and how to work with its energy.`,
+    numerology: `${title}: the meaning most people overlook.`,
+    runes: `${title} rune:meaning, divination, and magical uses.`,
+    chakras: `${title}: signs of imbalance and how to heal it.`,
+    sabbat: `${title}: history, traditions, and how to mark it properly.`,
+    lunar: `${title}: what the lunar cycle is telling you.`,
+    planetary: `${title}: how this planetary energy affects you.`,
   };
 
   const bodies: Record<string, string> = {
-    crystals: `Swipe for the full guide — healing properties, how to cleanse it, and how to work with its energy.\n\nKnowing your crystals is one of the most practical parts of any spiritual practice.`,
-    runes: `Swipe for the full meaning — upright, reversed, and how to work with this rune in readings and daily life.\n\nThe Elder Futhark holds ancient wisdom. Each rune has layers.`,
-    spells: `Swipe for the full ritual — ingredients, timing, and step-by-step method.\n\nIntention is everything. Read the full guide before casting.`,
-    numerology: `Swipe for the complete breakdown — core meaning, life path connections, and spiritual significance.\n\nNumerology reveals patterns most people miss entirely.`,
-    chakras: `Swipe for the full guide — location, signs of imbalance, and practices to heal and activate this energy centre.\n\nChakra work is ongoing, not a one-time fix.`,
-    sabbat: `Swipe for the full breakdown — the history, traditions, rituals, and how to mark this point on the Wheel of the Year.\n\nThe sabbats are about alignment with natural cycles.`,
+    crystals: `Swipe for the full guide:healing properties, how to cleanse it, and how to work with its energy.\n\nKnowing your crystals is one of the most practical parts of any spiritual practice.`,
+    runes: `Swipe for the full meaning:upright, reversed, and how to work with this rune in readings and daily life.\n\nThe Elder Futhark holds ancient wisdom. Each rune has layers.`,
+    spells: `Swipe for the full ritual:ingredients, timing, and step-by-step method.\n\nIntention is everything. Read the full guide before casting.`,
+    numerology: `Swipe for the complete breakdown:core meaning, life path connections, and spiritual significance.\n\nNumerology reveals patterns most people miss entirely.`,
+    chakras: `Swipe for the full guide:location, signs of imbalance, and practices to heal and activate this energy centre.\n\nChakra work is ongoing, not a one-time fix.`,
+    sabbat: `Swipe for the full breakdown:the history, traditions, rituals, and how to mark this point on the Wheel of the Year.\n\nThe sabbats are about alignment with natural cycles.`,
   };
 
-  const hook = hooks[category] || `${title} — the full guide.`;
+  const hook = hooks[category] || `${title}: the full guide.`;
   const body =
     bodies[category] ||
-    `Swipe through for the complete breakdown.\n\nSave this — you'll want to come back to it.`;
+    `Swipe through for the complete breakdown.\n\nSave this. You'll want to come back to it.`;
 
-  return `${hook}\n\n${body}\n\nFull grimoire — link in bio`;
+  return `${hook}\n\n${body}\n\nFull grimoire at lunary.app`;
 }
 
 function generateQuoteCaption(options: { headline?: string }): string {
@@ -464,7 +497,7 @@ function generateQuoteCaption(options: { headline?: string }): string {
 function generateAppFeatureCaption(options: { title?: string }): string {
   const title = options.title || 'your cosmic profile';
 
-  return `Discover ${title}\n\nPersonal birth chart readings, daily horoscopes, transit tracking, and 2,000+ articles in the grimoire.\n100% free, no ads.\n\nSave this so you don't forget to check it out.\n\nLink in bio`;
+  return `Discover ${title}\n\nPersonal birth chart readings, daily horoscopes, transit tracking, and 2,000+ articles in the grimoire.\n100% free, no ads.\n\nSave this so you don't forget to check it out.\n\nlunary.app`;
 }
 
 function generateDidYouKnowCaption(options: {
@@ -487,7 +520,7 @@ function generateDidYouKnowCaption(options: {
   return `${hook}\n\nSave this for later.\nComment below if this changes how you think about it.\n\nMore facts like this at lunary.app/grimoire`;
 }
 
-// Search-optimised opening lines per trait — written as queries people actually type
+// Search-optimised opening lines per trait (written as queries people actually type)
 const TRAIT_SEARCH_OPENERS: Record<string, string> = {
   patience: 'Which zodiac sign has the most patience? We ranked all 12.',
   loyalty: 'Most loyal zodiac signs ranked from #1 to #12.',
@@ -582,7 +615,7 @@ function generateAngelNumberCaption(options: { title?: string }): string {
   const hookIndex = hashString(title) % hooks.length;
   const hook = hooks[hookIndex];
 
-  return `${hook}\n\nSave this for next time it appears.\nWhat number do YOU keep seeing? Comment below.\n\nFull angel number guide — link in bio`;
+  return `${hook}\n\nSave this for next time it appears.\nWhat number do YOU keep seeing? Comment below.\n\nFull angel number guide at lunary.app`;
 }
 
 function generateOneWordCaption(options: {
@@ -665,10 +698,10 @@ export function generateTikTokCarouselCaption(
       } else if (category === 'tarot') {
         const opener =
           TAROT_CARD_OPENERS[titleKey] ||
-          `${title} tarot card — full meaning breakdown`;
+          `${title} tarot card:full meaning breakdown`;
         caption = `${opener}\n\nSwipe for the complete guide. What card keeps coming up for you?`;
       } else {
-        caption = `${title} — the full breakdown you need\n\nSwipe through. Drop a comment if this resonates`;
+        caption = `${title}: the full breakdown you need\n\nSwipe through. Drop a comment if this resonates`;
       }
       break;
     }
@@ -676,14 +709,14 @@ export function generateTikTokCarouselCaption(
       const trait = options.trait || 'patience';
       const opener =
         TRAIT_SEARCH_OPENERS[trait] || `All 12 zodiac signs ranked by ${trait}`;
-      caption = `${opener}\n\nSwipe to see the ranking. Comment your sign — do you agree?`;
+      caption = `${opener}\n\nSwipe to see the ranking. Comment your sign. Do you agree?`;
       break;
     }
     case 'angel_number_carousel': {
       const hooks = [
         `You keep seeing ${title}. This is what it means`,
         `${title} keeps appearing? Pay attention`,
-        `${title} meaning — the universe is signalling you`,
+        `${title} meaning: the universe is signalling you`,
       ];
       caption = `${hooks[hash % hooks.length]}\n\nSwipe for the full breakdown. What number do you keep seeing?`;
       break;
@@ -699,7 +732,7 @@ export function generateTikTokCarouselCaption(
       const hook =
         score >= 75
           ? `${s1} + ${s2} compatibility is off the charts`
-          : `${s1} + ${s2} — can it work? Swipe to find out`;
+          : `${s1} + ${s2}: can it work? Swipe to find out`;
       caption = `${hook}\n\nTag them and see if they agree`;
       break;
     }
@@ -735,6 +768,20 @@ export function generateTikTokCarouselCaption(
           : 'zodiac';
         caption = `One word for ${sign} and it says everything\n\nComment if you agree`;
       }
+      break;
+    }
+    case 'transit_spotlight': {
+      const event = options.title || 'Cosmic shift happening now';
+      caption = `${event}\n\nSwipe for what it means and what to do. Comment your sign below`;
+      break;
+    }
+    case 'myth_vs_reality': {
+      const mythTopic = options.title || 'astrology';
+      const hooks = [
+        `Everything you think you know about ${mythTopic} is wrong`,
+        `${mythTopic}: myth vs reality. Were you right?`,
+      ];
+      caption = `${hooks[hash % hooks.length]}\n\nSwipe for the truth. Comment if you believed the myth`;
       break;
     }
     default:
@@ -821,6 +868,61 @@ export function buildHashtags(
   const rotated = [...unique.slice(startIndex), ...unique.slice(0, startIndex)];
 
   return rotated.slice(0, 5);
+}
+
+function generateTransitSpotlightCaption(options: {
+  transitEvent?: string;
+  transitPlanet?: string;
+  transitSign?: string;
+}): string {
+  const event = options.transitEvent || 'A cosmic shift is happening';
+  const planet = options.transitPlanet;
+  const sign = options.transitSign
+    ? options.transitSign.charAt(0).toUpperCase() + options.transitSign.slice(1)
+    : '';
+
+  const hooks = planet
+    ? [
+        `${event}. Here's what it means for you.`,
+        `${planet} energy is shifting. This changes everything.`,
+        `Major transit alert: ${event}.`,
+      ]
+    : [
+        `${event}. Here's what it means for you.`,
+        'The sky is shifting. Pay attention to this.',
+        'A cosmic event worth knowing about.',
+      ];
+
+  const hookIndex =
+    hashString(options.transitEvent || 'transit') % hooks.length;
+  const hook = hooks[hookIndex];
+
+  const signLine = sign
+    ? `\n${sign} and surrounding signs feel this most.`
+    : '';
+
+  return `${hook}${signLine}\n\nSwipe for the full breakdown: what it means, who feels it most, and what to do about it.\n\nSave this so you can come back to it.\n\nTrack all transits free at lunary.app`;
+}
+
+function generateMythVsRealityCaption(options: {
+  mythTopic?: string;
+  category?: ThemeCategory;
+}): string {
+  const topic = options.mythTopic || 'astrology';
+  const category = options.category || 'zodiac';
+  const categoryLabel = category.charAt(0).toUpperCase() + category.slice(1);
+
+  const hooks = [
+    `Most people get ${topic} completely wrong. Here's the truth.`,
+    `Everything you think you know about ${topic} might be a myth.`,
+    `${topic}: myth vs reality. Which side were you on?`,
+    `Stop spreading this myth about ${topic}. The reality is more interesting.`,
+  ];
+
+  const hookIndex = hashString(topic) % hooks.length;
+  const hook = hooks[hookIndex];
+
+  return `${hook}\n\nSwipe through to see the common myth, the actual truth, and what it means for you.\n\nComment below: did you believe the myth?\n\nMore ${categoryLabel.toLowerCase()} facts at lunary.app/grimoire`;
 }
 
 /**

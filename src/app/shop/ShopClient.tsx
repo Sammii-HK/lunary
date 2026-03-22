@@ -118,6 +118,7 @@ export function ShopClient({
       birthchart: 0,
       retrograde: 0,
       bundle: 0,
+      notion_template: 0,
     };
 
     products.forEach((p) => {

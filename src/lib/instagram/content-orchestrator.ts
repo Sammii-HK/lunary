@@ -3,18 +3,30 @@ import {
   buildCarouselFromSlug,
   getCarouselImageUrls,
 } from './carousel-content';
-import {
-  selectCarouselForDate,
-  getCarouselCategoryForDay,
-} from './carousel-scheduler';
+import { selectCarouselForDate } from './carousel-scheduler';
 import { generateCaption } from './caption-generator';
-import { generateDidYouKnow } from './did-you-know-content';
+import {
+  generateDidYouKnow,
+  generateDidYouKnowCarousel,
+} from './did-you-know-content';
 import { generateRankingCarousel } from './ranking-content';
 import { generateCompatibility } from './compatibility-content';
 import { generateAngelNumberBatch } from './angel-number-content';
-import { generateOneWordBatch } from './one-word-content';
+import { generateOneWordBatch, AVAILABLE_TRAITS } from './one-word-content';
 import { seededRandom } from './ig-utils';
+import {
+  getTransitContext,
+  getRetrogradeBiasedTraits,
+  getTransitCategoryBias,
+  type TransitContext,
+} from './transit-context';
+import { generateTransitSpotlight } from './transit-spotlight-content';
+import { generateMythVsReality } from './myth-vs-reality-content';
 import type { IGScheduledPost, IGPostBatch, IGPostType } from './types';
+
+// Quality infrastructure (same systems used by Threads + video scripts)
+import { validateSocialCopy } from '@/lib/social/social-copy/validation';
+import { getWeightedGrimoireCategories } from '@/lib/threads/orbit-insights';
 
 const SHARE_BASE_URL = (
   process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
@@ -29,98 +41,227 @@ const POSTING_TIMES: Record<IGPostType, number> = {
   did_you_know: 14, // 2pm UTC (afternoon education)
   sign_ranking: 12, // noon UTC (engagement slot)
   compatibility: 12, // noon UTC (engagement slot)
-  quote: 19, // 7pm UTC (evening reflection — stories/bonus)
+  transit_spotlight: 10, // 10am UTC (timely, saves)
+  myth_vs_reality: 12, // noon UTC (contrarian, saves)
+  quote: 19, // 7pm UTC (evening reflection -- stories/bonus)
   app_feature: 14, // 2pm UTC (when scheduled)
   story: 9, // 9am UTC (morning stories)
 };
 
-// Weekly cadence plan — 7 feed posts/week (1 per day, varied formats)
-// Priority signals: saves > shares > comments > likes (per Tenfold research)
-// Carousels drive saves, memes drive shares, rankings drive comments
-// Angel numbers + compatibility are proven high-save formats
-// 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
-const DAILY_CONTENT_MIX: Record<number, IGPostType[]> = {
-  0: ['carousel'], // Monday: zodiac carousel (saves)
-  1: ['meme'], // Tuesday: meme (shares, growth lever)
-  2: ['angel_number_carousel'], // Wednesday: angel numbers (saves, high search volume)
-  3: ['one_word'], // Thursday: one-word trait carousel (engagement + saves)
-  4: ['compatibility'], // Friday: compatibility (tags, shares, saves)
-  5: ['carousel'], // Saturday: tarot/crystal carousel (saves)
-  6: ['sign_ranking'], // Sunday: sign ranking (comments + shares)
-};
+// ---------------------------------------------------------------------------
+// 8-type rotation pool (replaces fixed DAILY_CONTENT_MIX)
+//
+// dayOfYear % 8 selects the position. 8-day cycle means content shifts
+// by 1 day each week -- no more "always memes on Tuesday" fatigue.
+//
+// Priority signals: saves > shares > comments > likes
+// ---------------------------------------------------------------------------
+
+const ROTATION_POOL: IGPostType[] = [
+  'one_word', // Position 0: saves + engagement
+  'carousel', // Position 1: grimoire deep-dives
+  'meme', // Position 2: shares + growth
+  'transit_spotlight', // Position 3: timely + saves
+  'compatibility', // Position 4: tags + shares
+  'sign_ranking', // Position 5: comments + shares
+  'angel_number_carousel', // Position 6: saves + search volume
+  'myth_vs_reality', // Position 7: contrarian + saves
+];
+
+/**
+ * Select content type for a given date using the 8-type rotation,
+ * with transit override and DYK insertion.
+ */
+function selectContentType(
+  dateStr: string,
+  transitContext: TransitContext,
+): IGPostType {
+  const date = new Date(dateStr);
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date.getTime() - start.getTime();
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+  // Transit override: CRITICAL/HIGH events (score >= 70) force transit_spotlight
+  if (transitContext.highPriorityEvent) {
+    return 'transit_spotlight';
+  }
+
+  // DYK carousel insertion: every 3rd cycle (positions 16-23 in a 24-day supercycle)
+  // replaces the carousel slot with did_you_know carousel (~1x every 3 weeks)
+  const superPosition = dayOfYear % 24;
+  const rotationPosition = dayOfYear % 8;
+
+  if (superPosition >= 16 && rotationPosition === 1) {
+    return 'did_you_know';
+  }
+
+  return ROTATION_POOL[rotationPosition];
+}
 
 /**
  * Generate a full day's Instagram content batch.
- * Follows the weekly cadence plan (6 posts/week):
- * Mon=carousel, Tue=meme, Wed=DYK, Thu=one_word, Fri=DYK, Sat=carousel, Sun=sign_ranking
+ *
+ * Uses an 8-type rotation pool with transit context awareness:
+ * - Transit override for CRITICAL/HIGH events
+ * - Transit biasing for sign/trait/category selection
+ * - DYK carousel insertion every ~3 weeks
+ * - Orbit insights for grimoire category weighting
+ * - Caption validation (same quality gate as Threads + video scripts)
+ * - Cross-day cosmic event dedup (3-day lookback via shared engine)
  */
 export async function generateDailyBatch(
   dateStr: string,
   baseUrl?: string,
 ): Promise<IGPostBatch> {
-  const date = new Date(dateStr);
-  const dayOfWeek = (date.getDay() + 6) % 7; // Convert to Mon=0
+  // Fetch transit context (real astronomical data + cosmic events)
+  let transitContext: TransitContext;
+  try {
+    transitContext = await getTransitContext(dateStr);
+  } catch (error) {
+    console.warn(
+      '[IG Orchestrator] Transit context failed, using defaults:',
+      error,
+    );
+    transitContext = {
+      sunSign: 'aries',
+      moonPhase: { name: 'Waxing Crescent', energy: 'Building momentum' },
+      retrogradePlanets: [],
+      highPriorityEvent: null,
+      hotSign: 'aries',
+      hotSignPlanetCount: 1,
+      todayEvents: [],
+      cosmicEvents: [],
+    };
+  }
 
-  const contentMix = DAILY_CONTENT_MIX[dayOfWeek] || ['carousel'];
+  const postType = selectContentType(dateStr, transitContext);
   const posts: IGScheduledPost[] = [];
 
-  for (const postType of contentMix) {
-    try {
-      const post = await generatePost(postType, dateStr, dayOfWeek, baseUrl);
-      if (post) {
-        posts.push(post);
+  try {
+    const post = await generatePost(postType, dateStr, transitContext, baseUrl);
+    if (post) {
+      // Quality gate: validate caption (same check as Threads + video scripts)
+      const validationIssues = validatePostCaption(post);
+      if (validationIssues.length > 0) {
+        console.warn(
+          `[IG Orchestrator] Caption validation issues for ${postType}:`,
+          validationIssues,
+        );
+        // Fix issues inline rather than rejecting the post
+        post.caption = sanitiseCaption(post.caption);
       }
-    } catch (error) {
-      console.error(`[IG Orchestrator] Failed to generate ${postType}:`, error);
+      posts.push(post);
     }
+  } catch (error) {
+    console.error(`[IG Orchestrator] Failed to generate ${postType}:`, error);
   }
 
   return { date: dateStr, posts };
 }
 
 /**
- * Generate a single Instagram post by type.
- * dayOfWeek (Mon=0) is used to determine forced carousel category.
+ * Validate a post's caption using the shared quality gate.
+ * Same validation used by Threads and video scripts.
+ */
+function validatePostCaption(post: IGScheduledPost): string[] {
+  const topic = post.metadata?.category || post.type || 'astrology';
+  return validateSocialCopy(post.caption, topic);
+}
+
+/**
+ * Fix common validation issues in captions.
+ * Strips banned patterns rather than rejecting the whole post.
+ */
+function sanitiseCaption(caption: string): string {
+  // Remove em dashes (banned)
+  let clean = caption.replace(/\u2014/g, ',').replace(/--/g, ',');
+  // Remove trailing punctuation issues
+  clean = clean.replace(/\.\.\s*$/g, '.').replace(/:\s*$/g, '.');
+  return clean;
+}
+
+/**
+ * Generate a single Instagram post by type, with transit context biasing.
  */
 async function generatePost(
   type: IGPostType,
   dateStr: string,
-  dayOfWeek: number,
+  transitContext: TransitContext,
   baseUrl?: string,
 ): Promise<IGScheduledPost | null> {
   const scheduledTime = buildScheduleTime(dateStr, POSTING_TIMES[type]);
 
   switch (type) {
     case 'meme':
-      return generateMemePost(dateStr, scheduledTime);
+      return generateMemePost(dateStr, scheduledTime, transitContext);
     case 'carousel':
-      return generateCarouselPost(dateStr, scheduledTime, dayOfWeek, baseUrl);
+      return generateCarouselPost(
+        dateStr,
+        scheduledTime,
+        transitContext,
+        baseUrl,
+      );
     case 'angel_number_carousel':
       return generateAngelNumberPost(dateStr, scheduledTime, baseUrl);
     case 'one_word':
-      return generateOneWordPost(dateStr, scheduledTime, baseUrl);
+      return generateOneWordPost(
+        dateStr,
+        scheduledTime,
+        transitContext,
+        baseUrl,
+      );
     case 'quote':
       return generateQuotePost(dateStr, scheduledTime);
     case 'did_you_know':
-      return generateDidYouKnowPost(dateStr, scheduledTime);
+      return generateDidYouKnowCarouselPost(dateStr, scheduledTime, baseUrl);
     case 'sign_ranking':
-      return generateSignRankingPost(dateStr, scheduledTime);
+      return generateSignRankingPost(dateStr, scheduledTime, transitContext);
     case 'compatibility':
       return generateCompatibilityPost(dateStr, scheduledTime);
+    case 'transit_spotlight':
+      return generateTransitSpotlightPost(
+        dateStr,
+        scheduledTime,
+        transitContext,
+        baseUrl,
+      );
+    case 'myth_vs_reality':
+      return generateMythVsRealityPost(dateStr, scheduledTime, baseUrl);
     default:
       return null;
   }
 }
 
+// ---------------------------------------------------------------------------
+// Post generators
+// ---------------------------------------------------------------------------
+
 async function generateMemePost(
   dateStr: string,
   scheduledTime: string,
+  transitContext: TransitContext,
 ): Promise<IGScheduledPost> {
-  const meme = generateMemeContent(dateStr);
+  // Transit bias: prefer the hotSign (sign with most transiting planets)
+  const preferredSign = transitContext.hotSign;
+  const meme = generateMemeContent(dateStr, preferredSign);
+
+  // Build transit reason when the meme used the hot sign
+  let transitReason: string | undefined;
+  if (
+    meme.sign.toLowerCase() === transitContext.hotSign.toLowerCase() &&
+    transitContext.hotSignPlanetCount >= 3
+  ) {
+    const cap =
+      transitContext.hotSign.charAt(0).toUpperCase() +
+      transitContext.hotSign.slice(1);
+    transitReason = `${transitContext.hotSignPlanetCount} planets in ${cap} right now. This energy is everywhere.`;
+  }
+
   const { caption, hashtags } = generateCaption('meme', {
     sign: meme.sign,
     setup: meme.setup,
     punchline: meme.punchline,
+    transitReason,
   });
 
   const params = new URLSearchParams({
@@ -129,8 +270,8 @@ async function generateMemePost(
     punchline: meme.punchline,
     template: meme.template,
     category: meme.category,
-    v: '4', // Design version
-    t: Date.now().toString(), // Timestamp cache bust
+    v: '4',
+    t: Date.now().toString(),
   });
 
   return {
@@ -150,13 +291,32 @@ async function generateMemePost(
 async function generateCarouselPost(
   dateStr: string,
   scheduledTime: string,
-  dayOfWeek?: number,
+  transitContext: TransitContext,
   baseUrl?: string,
 ): Promise<IGScheduledPost | null> {
-  // Cadence plan forces specific categories per day: Mon=zodiac, Sat=tarot, Sun=crystals
-  const forcedCategory =
-    dayOfWeek !== undefined ? getCarouselCategoryForDay(dayOfWeek) : undefined;
-  const { category, slug } = selectCarouselForDate(dateStr, forcedCategory);
+  // Layer 1: Transit bias from current astronomical context
+  const transitBias = getTransitCategoryBias(transitContext);
+
+  // Layer 2: Orbit performance weights (same system as Threads)
+  // If orbit has category data, use it to override transit bias when applicable
+  let effectiveBias = transitBias;
+  if (!transitBias) {
+    try {
+      const orbitCategories = await getWeightedGrimoireCategories();
+      if (orbitCategories.length > 0) {
+        const rng = seededRandom(`carousel-orbit-${dateStr}`);
+        effectiveBias =
+          orbitCategories[Math.floor(rng() * orbitCategories.length)];
+      }
+    } catch {
+      // Orbit unavailable -- proceed without bias
+    }
+  }
+
+  const { category, slug } = selectCarouselForDate(
+    dateStr,
+    effectiveBias as any,
+  );
   const carousel = await buildCarouselFromSlug(slug);
 
   if (!carousel) {
@@ -235,9 +395,46 @@ async function generateAngelNumberPost(
 async function generateOneWordPost(
   dateStr: string,
   scheduledTime: string,
+  transitContext: TransitContext,
   baseUrl?: string,
 ): Promise<IGScheduledPost | null> {
-  const batch = generateOneWordBatch(dateStr, 1);
+  // Transit bias: prefer retrograde-relevant traits
+  const biasedTraits = getRetrogradeBiasedTraits(
+    transitContext.retrogradePlanets,
+  );
+
+  let batch;
+  if (biasedTraits.length > 0) {
+    // Check if any biased trait is in the available traits
+    const validBiased = biasedTraits.filter((t) =>
+      AVAILABLE_TRAITS.includes(t),
+    );
+    if (validBiased.length > 0) {
+      // Use seeded random to pick from biased traits deterministically
+      const rng = seededRandom(`oneword-bias-${dateStr}`);
+      const pickedTrait = validBiased[Math.floor(rng() * validBiased.length)];
+      // Generate with that specific trait by creating a batch seeded to land on it
+      batch = generateOneWordBatch(dateStr, 1);
+      // Override if the picked trait differs from what was randomly selected
+      if (batch.length > 0 && batch[0].traitKey !== pickedTrait) {
+        const { generateOneWordCarousel } = await import('./one-word-content');
+        const slides = generateOneWordCarousel(pickedTrait);
+        const trait = AVAILABLE_TRAITS.find((t) => t === pickedTrait);
+        batch = [
+          {
+            traitKey: pickedTrait,
+            traitLabel: pickedTrait.replace(/_/g, ' '),
+            slides,
+          },
+        ];
+      }
+    } else {
+      batch = generateOneWordBatch(dateStr, 1);
+    }
+  } else {
+    batch = generateOneWordBatch(dateStr, 1);
+  }
+
   if (batch.length === 0) return null;
 
   const { traitKey, traitLabel, slides } = batch[0];
@@ -246,7 +443,6 @@ async function generateOneWordPost(
 
   const imageUrls = slides.map((slide) => {
     if (slide.variant === 'body') {
-      // Dedicated hero layout: word is the centrepiece
       const params = new URLSearchParams({
         sign: slide.title,
         word: slide.content,
@@ -259,7 +455,6 @@ async function generateOneWordPost(
       });
       return `${base}/api/og/instagram/one-word?${params.toString()}`;
     }
-    // Cover and CTA use the standard carousel route
     const params = new URLSearchParams({
       title: slide.title,
       slideIndex: String(slide.slideIndex),
@@ -302,8 +497,6 @@ async function generateQuotePost(
   let author = 'Carl Sagan';
 
   try {
-    // Get ALL available quotes and select one deterministically based on date
-    // This ensures: different quotes for different dates, same quote for same date
     const { sql } = await import('@vercel/postgres');
     const result = await sql`
       SELECT id, quote_text, author
@@ -314,7 +507,6 @@ async function generateQuotePost(
     `;
 
     if (result.rows.length > 0) {
-      // Select quote deterministically based on date
       const rng = seededRandom(`quote-${dateStr}`);
       const index = Math.floor(rng() * result.rows.length);
       const quote = result.rows[index];
@@ -322,7 +514,6 @@ async function generateQuotePost(
       quoteText = quote.quote_text;
       author = quote.author || 'Lunary';
 
-      // Mark as used (increment use_count)
       await sql`
         UPDATE social_quotes
         SET use_count = use_count + 1,
@@ -333,7 +524,6 @@ async function generateQuotePost(
     }
   } catch (error) {
     console.warn('[Quote] Failed to fetch quote, using fallback:', error);
-    // Use fallback quote
   }
 
   const params = new URLSearchParams({
@@ -358,37 +548,46 @@ async function generateQuotePost(
   };
 }
 
-async function generateDidYouKnowPost(
+async function generateDidYouKnowCarouselPost(
   dateStr: string,
   scheduledTime: string,
+  baseUrl?: string,
 ): Promise<IGScheduledPost> {
-  const content = generateDidYouKnow(dateStr);
+  const { slides, category } = generateDidYouKnowCarousel(dateStr);
+  const cacheBust = Date.now().toString();
+  const base = (baseUrl || SHARE_BASE_URL).replace(/\/$/, '');
 
-  const params = new URLSearchParams({
-    fact: content.fact,
-    category: content.category,
-    source: content.source,
-    v: '4',
-    t: Date.now().toString(),
+  const imageUrls = slides.map((slide) => {
+    const params = new URLSearchParams({
+      title: slide.title,
+      slideIndex: String(slide.slideIndex),
+      totalSlides: String(slide.totalSlides),
+      content: slide.content,
+      category: slide.category,
+      variant: slide.variant,
+      v: '4',
+      t: cacheBust,
+    });
+    if (slide.subtitle) params.set('subtitle', slide.subtitle);
+    return `${base}/api/og/instagram/carousel?${params.toString()}`;
   });
 
+  const categoryLabel = category.charAt(0).toUpperCase() + category.slice(1);
   const { caption, hashtags } = generateCaption('did_you_know', {
-    fact: content.fact,
-    category: content.category,
+    fact: `3 ${categoryLabel} facts you need to know`,
+    category,
   });
 
   return {
     type: 'did_you_know',
-    format: 'portrait',
-    imageUrls: [
-      `${SHARE_BASE_URL}/api/og/instagram/did-you-know?${params.toString()}`,
-    ],
+    format: 'square',
+    imageUrls,
     caption,
     hashtags,
     scheduledTime,
     metadata: {
-      category: content.category,
-      slug: content.source,
+      category,
+      slug: `dyk-carousel-${dateStr}`,
     },
   };
 }
@@ -396,7 +595,10 @@ async function generateDidYouKnowPost(
 async function generateSignRankingPost(
   dateStr: string,
   scheduledTime: string,
+  transitContext: TransitContext,
 ): Promise<IGScheduledPost> {
+  // Transit bias: the ranking generator uses seeded random for trait selection,
+  // but we can influence by checking if retrograde-relevant traits are available
   const { trait, slides, rankings } = generateRankingCarousel(dateStr);
 
   const carouselContent = {
@@ -459,6 +661,104 @@ async function generateCompatibilityPost(
     hashtags,
     scheduledTime,
     metadata: {},
+  };
+}
+
+async function generateTransitSpotlightPost(
+  dateStr: string,
+  scheduledTime: string,
+  transitContext: TransitContext,
+  baseUrl?: string,
+): Promise<IGScheduledPost> {
+  const { slides, eventName, planet, sign } = generateTransitSpotlight(
+    dateStr,
+    transitContext,
+  );
+
+  const cacheBust = Date.now().toString();
+  const base = (baseUrl || SHARE_BASE_URL).replace(/\/$/, '');
+
+  const imageUrls = slides.map((slide) => {
+    const params = new URLSearchParams({
+      title: slide.title,
+      slideIndex: String(slide.slideIndex),
+      totalSlides: String(slide.totalSlides),
+      content: slide.content,
+      category: slide.category,
+      variant: slide.variant,
+      v: '4',
+      t: cacheBust,
+    });
+    if (slide.subtitle) params.set('subtitle', slide.subtitle);
+    if (slide.symbol) params.set('symbol', slide.symbol);
+    return `${base}/api/og/instagram/carousel?${params.toString()}`;
+  });
+
+  const { caption, hashtags } = generateCaption('transit_spotlight', {
+    transitEvent: eventName,
+    transitPlanet: planet,
+    transitSign: sign,
+    category: slides[0]?.category,
+  });
+
+  return {
+    type: 'transit_spotlight',
+    format: 'square',
+    imageUrls,
+    caption,
+    hashtags,
+    scheduledTime,
+    metadata: {
+      transitEvent: eventName,
+      transitPlanet: planet,
+      transitSign: sign,
+      category: slides[0]?.category,
+    },
+  };
+}
+
+async function generateMythVsRealityPost(
+  dateStr: string,
+  scheduledTime: string,
+  baseUrl?: string,
+): Promise<IGScheduledPost> {
+  const { slides, topic, category } = generateMythVsReality(dateStr);
+
+  const cacheBust = Date.now().toString();
+  const base = (baseUrl || SHARE_BASE_URL).replace(/\/$/, '');
+
+  const imageUrls = slides.map((slide) => {
+    const params = new URLSearchParams({
+      title: slide.title,
+      slideIndex: String(slide.slideIndex),
+      totalSlides: String(slide.totalSlides),
+      content: slide.content,
+      category: slide.category,
+      variant: slide.variant,
+      v: '4',
+      t: cacheBust,
+    });
+    if (slide.subtitle) params.set('subtitle', slide.subtitle);
+    if (slide.symbol) params.set('symbol', slide.symbol);
+    return `${base}/api/og/instagram/carousel?${params.toString()}`;
+  });
+
+  const { caption, hashtags } = generateCaption('myth_vs_reality', {
+    mythTopic: topic,
+    category,
+  });
+
+  return {
+    type: 'myth_vs_reality',
+    format: 'square',
+    imageUrls,
+    caption,
+    hashtags,
+    scheduledTime,
+    metadata: {
+      mythTopic: topic,
+      category,
+    },
   };
 }
 

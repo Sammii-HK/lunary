@@ -23,6 +23,14 @@ export const runtime = 'nodejs';
  * - Monthly (July+) for yearly packs
  */
 export async function POST(request: NextRequest) {
+  return NextResponse.json(
+    {
+      error:
+        'Moon pack auto-generation is paused. Packs are now curated manually.',
+    },
+    { status: 503 },
+  );
+
   const startTime = Date.now();
   const { searchParams } = new URL(request.url);
   const type =

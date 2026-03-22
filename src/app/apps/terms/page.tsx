@@ -6,7 +6,7 @@ import { MarketingBreadcrumbs } from '@/components/MarketingBreadcrumbs';
 export const metadata: Metadata = {
   title: 'Terms of Service | Lunary iOS Apps',
   description:
-    "Terms and conditions for Lunary iOS apps (Yes/No Oracle, Spell Book, Astrologer's Ephemeris).",
+    "Terms and conditions for Lunary iOS apps (iPrep, Yes/No Oracle, Spell Book, Astrologer's Ephemeris).",
   robots: 'index, follow',
   alternates: {
     canonical: 'https://lunary.app/apps/terms',
@@ -31,9 +31,9 @@ export default function AppsTermsOfServicePage() {
           <section>
             <p className='text-zinc-300 leading-relaxed'>
               These Terms of Service (&quot;Terms&quot;) govern your access to
-              and use of the Lunary iOS applications, including Yes/No Oracle,
-              Spell Book, and Astrologer&apos;s Ephemeris (collectively, the
-              &quot;Apps&quot;) provided by Lunar Computing, Inc.
+              and use of the Lunary iOS applications, including iPrep, Yes/No
+              Oracle, Spell Book, and Astrologer&apos;s Ephemeris (collectively,
+              the &quot;Apps&quot;) provided by Lunar Computing, Inc.
               (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;).
             </p>
             <p className='text-zinc-300 leading-relaxed'>
@@ -272,6 +272,12 @@ export default function AppsTermsOfServicePage() {
               Related Policies
             </h2>
             <div className='flex flex-wrap gap-4'>
+              <Link
+                href='/apps/iprep/privacy'
+                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+              >
+                iPrep Privacy
+              </Link>
               <Link
                 href='/apps/yesnooracle/privacy'
                 className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'

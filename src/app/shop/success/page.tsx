@@ -5,6 +5,7 @@ import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
+import { NewsletterCapture } from '@/components/shop/NewsletterCapture';
 
 interface PurchaseDetails {
   purchase: {
@@ -15,6 +16,7 @@ interface PurchaseDetails {
     currency?: string | null;
   };
   downloadUrl: string;
+  customerEmail?: string | null;
 }
 
 async function safeReadResponse(response: Response) {
@@ -217,7 +219,9 @@ export default function ShopSuccessPage() {
             </Button>
           </div>
 
-          <div className='flex flex-col sm:flex-row gap-4 justify-center'>
+          <NewsletterCapture initialEmail={purchaseDetails?.customerEmail} />
+
+          <div className='flex flex-col sm:flex-row gap-4 justify-center mt-8'>
             <Link
               href='/shop'
               className='px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors'

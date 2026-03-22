@@ -8,6 +8,7 @@ import { PDFDocument, PDFFont, PDFImage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import { StandardFonts } from 'pdf-lib';
 import { PdfTarotPack, PdfTarotSpread } from '../schema';
+import { watermarkTemplate } from '@/utils/steganography';
 import { generateTarotPackPdf } from '../templates/TarotPackTemplate';
 
 const LOGO_URL =
@@ -233,8 +234,10 @@ function buildShadowWorkTarotPack(): PdfTarotPack {
       'What patterns keep repeating in my life, and what might they be teaching me?',
       'What do I criticise in others that I have yet to accept in myself?',
     ],
-    closingText:
+    closingText: watermarkTemplate(
       'Thank you for doing this meaningful work with Lunary. Shadow work is not about fixing what is broken; it is about welcoming home what has been hidden. Every part of you belongs.',
+      'shadow-work-tarot',
+    ),
     optionalAffirmation:
       'I embrace all parts of myself with compassion. My shadow holds wisdom, and I am brave enough to look within.',
   };

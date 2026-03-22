@@ -4,6 +4,10 @@
  * Single source of truth for categorising posts by caption keywords.
  * Uses kebab-case consistently (e.g. 'angel-number' not 'angel_numbers').
  *
+ * Order matters: astrology categories are checked FIRST (specific keywords
+ * that won't false-positive on non-astrology content), then cross-persona
+ * categories (broader patterns that would otherwise swallow astrology posts).
+ *
  * Used by:
  * - collect-performance.ts (daily cron + backfill)
  * - tiktok-performance/route.ts (admin bulk import)
@@ -16,6 +20,8 @@
  */
 export function categorisePost(description: string): string {
   const lower = description.toLowerCase();
+
+  // ── Astrology categories (checked first — specific, no false positives) ──
 
   // Angel numbers
   if (
@@ -38,7 +44,7 @@ export function categorisePost(description: string): string {
   if (/\branking\b|\btier list\b|\btop 3\b|\bbottom 3\b/.test(lower))
     return 'ranking';
 
-  // Hot take
+  // Hot take (astrology-specific)
   if (/\bunpopular opinion\b|\bhot take\b/.test(lower)) return 'hot-take';
 
   // Quiz
@@ -96,6 +102,96 @@ export function categorisePost(description: string): string {
     )
   )
     return 'sign-identity';
+
+  // Horoscope catch-all (astrology posts that don't match specific categories)
+  if (
+    /\b(horoscope|zodiac|astrology|birth chart|natal chart|rising sign|moon sign|sun sign|ascendant|midheaven)\b/.test(
+      lower,
+    )
+  )
+    return 'generic-astrology';
+
+  // ── Cross-persona categories (checked after astrology) ──────────────────
+
+  // sammii (BIP/founder) — multi-word phrases to avoid false positives
+  if (
+    /\b(building in public|bip\b|just shipped|indie hacker|bootstrapped|solo founder)\b/.test(
+      lower,
+    )
+  )
+    return 'build-in-public';
+
+  if (
+    /\b(founder journey|startup journey|founder story|lesson.{0,5}learned|as a founder)\b/.test(
+      lower,
+    )
+  )
+    return 'founder-story';
+
+  if (
+    /\b(machine learning|mcp server|llm|ai agent|tech stack|typescript|next\.js|nextjs|vercel)\b/.test(
+      lower,
+    )
+  )
+    return 'tech-insight';
+
+  if (/\b(claude code|chatgpt|cursor ai|copilot|ai tool)\b/.test(lower))
+    return 'ai-tools';
+
+  if (
+    /\b(new feature|just released|changelog|shipped v\d|beta launch)\b/.test(
+      lower,
+    )
+  )
+    return 'product-update';
+
+  if (
+    /\b(monthly active|daily active|mau\b|dau\b|mrr\b|conversion rate|retention rate|revenue growth)\b/.test(
+      lower,
+    )
+  )
+    return 'growth-metrics';
+
+  // sammii sparkle (creative/AI art)
+  if (
+    /\b(ai art|ai generated|ai image|midjourney|stable diffusion|flux\b|comfyui|nano banana|generated with)\b/.test(
+      lower,
+    )
+  )
+    return 'ai-art';
+
+  if (
+    /\b(creative process|behind the scenes|making of|how i made)\b/.test(lower)
+  )
+    return 'creative-process';
+
+  if (/\b(glitch art|aesthetic|vaporwave|surreal)\b/.test(lower))
+    return 'visual-experiment';
+
+  if (
+    /\b(ar filter|augmented reality|face filter|instagram filter)\b/.test(lower)
+  )
+    return 'ar-filter';
+
+  // scape² (photography) — multi-word phrases
+  if (
+    /\b(landscape photo|nature photo|sunset photo|golden hour|mountain view)\b/.test(
+      lower,
+    )
+  )
+    return 'landscape-photo';
+
+  if (/\b(street photo|urban photo|architecture photo|cityscape)\b/.test(lower))
+    return 'urban-photo';
+
+  if (/\b(abstract photo|minimal photo|texture study)\b/.test(lower))
+    return 'abstract-photo';
+
+  // General/cross-persona engagement
+  if (
+    /\b(agree\?|thoughts\?|what do you think|controversial take)\b/.test(lower)
+  )
+    return 'engagement-hook';
 
   return 'generic-educational';
 }

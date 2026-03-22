@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moon Phase — Lunary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0a0a0a;
+      color: #ffffff;
+      font-family: 'Roboto Mono', monospace;
+      padding: 20px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .widget-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #8e8eeb;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .widget-date {
+      font-size: 12px;
+      color: #a1a1aa;
+      font-weight: 400;
+      margin-bottom: 16px;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: #0f0f57;
+      margin: 14px 0;
+    }
+
+    /* Moon image + phase name row */
+    .phase-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .moon-img {
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+    }
+
+    .phase-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .phase-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .illum-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      color: #8e8eeb;
+      background: rgba(9, 9, 52, 0.5);
+      border: 1px solid #0f0f57;
+      border-radius: 9999px;
+      padding: 2px 8px;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat-block {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #8e8eeb;
+      font-weight: 400;
+    }
+
+    .stat-value {
+      font-size: 13px;
+      color: #ffffff;
+      font-weight: 500;
+    }
+
+    .zodiac-glyph {
+      color: #8458d8;
+    }
+
+    /* Keywords */
+    .keywords {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .keyword-pill {
+      font-size: 11px;
+      color: #8e8eeb;
+      background: rgba(9, 9, 52, 0.5);
+      border: 1px solid #0f0f57;
+      border-radius: 9999px;
+      padding: 2px 8px;
+      font-weight: 400;
+    }
+
+    /* Phase description */
+    .phase-desc {
+      font-size: 12px;
+      color: #a1a1aa;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    /* Next events */
+    .next-events {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .event-card {
+      background: rgba(5, 5, 26, 0.4);
+      border: 1px solid #0f0f57;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .event-title {
+      font-size: 11px;
+      color: #8e8eeb;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+
+    .event-days {
+      font-size: 13px;
+      color: #ffffff;
+      font-weight: 500;
+    }
+
+    /* CTA */
+    .cta-link {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      color: #8458d8;
+      padding-top: 4px;
+    }
+    .cta-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="widget-label">Moon Phase</div>
+  <div class="widget-date" id="widget-date">Loading...</div>
+
+  <div class="divider"></div>
+
+  <div class="phase-row">
+    <img class="moon-img" id="moon-img" src="/icons/moon-phases/full-moon.svg" alt="Moon phase">
+    <div class="phase-info">
+      <div class="phase-name" id="phase-name">Full Moon</div>
+      <span class="illum-badge" id="illum-badge">100%</span>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-block">
+      <div class="stat-label">Moon sign</div>
+      <div class="stat-value" id="moon-sign">—</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-label">Moon age</div>
+      <div class="stat-value" id="moon-age">—</div>
+    </div>
+  </div>
+
+  <div class="keywords" id="keywords"></div>
+
+  <div class="phase-desc" id="phase-desc">—</div>
+
+  <div class="divider"></div>
+
+  <div class="next-events">
+    <div class="event-card">
+      <div class="event-title"><img src="/icons/moon-phases/new-moon.svg" width="14" height="14" style="vertical-align:middle;margin-right:4px">New Moon</div>
+      <div class="event-days" id="next-new">—</div>
+    </div>
+    <div class="event-card">
+      <div class="event-title"><img src="/icons/moon-phases/full-moon.svg" width="14" height="14" style="vertical-align:middle;margin-right:4px">Full Moon</div>
+      <div class="event-days" id="next-full">—</div>
+    </div>
+  </div>
+
+  <a class="cta-link" href="https://lunary.app" target="_blank" rel="noopener noreferrer">Full lunar forecast on lunary.app →</a>
+
+  <script src="./lib/astronomy.min.js"></script>
+  <script>
+    var SIGNS = [
+      'Aries ♈', 'Taurus ♉', 'Gemini ♊', 'Cancer ♋',
+      'Leo ♌', 'Virgo ♍', 'Libra ♎', 'Scorpio ♏',
+      'Sagittarius ♐', 'Capricorn ♑', 'Aquarius ♒', 'Pisces ♓'
+    ];
+
+    var PHASES = {
+      'New Moon':        { energy: 'A potent time for setting intentions and beginning new cycles.',         keywords: ['Beginnings', 'Intentions', 'Rest'] },
+      'Waxing Crescent': { energy: 'Your intentions are taking root — stay committed and take small actions.', keywords: ['Growth', 'Commitment', 'Action'] },
+      'First Quarter':   { energy: 'Obstacles arise to test your resolve — push through with courage.',       keywords: ['Decision', 'Momentum', 'Courage'] },
+      'Waxing Gibbous':  { energy: "Refine and adjust — the full moon's illumination is nearly upon you.",    keywords: ['Refinement', 'Trust', 'Patience'] },
+      'Full Moon':       { energy: 'Peak energy for release, celebration, and bringing things to completion.', keywords: ['Release', 'Clarity', 'Gratitude'] },
+      'Waning Gibbous':  { energy: 'Share your wisdom and harvest the fruits of your full moon peak.',        keywords: ['Reflection', 'Sharing', 'Wisdom'] },
+      'Last Quarter':    { energy: 'Release what no longer serves, forgive, and prepare to begin again.',     keywords: ['Letting Go', 'Forgiveness', 'Review'] },
+      'Waning Crescent': { energy: 'Rest, restore, and surrender — the cycle is completing itself.',          keywords: ['Rest', 'Surrender', 'Prepare'] }
+    };
+
+    function getMoonIcon(angle) {
+      if (angle >= 337.5 || angle < 22.5)  return 'new-moon.svg';
+      if (angle < 67.5)   return 'waxing-cresent-moon.svg';
+      if (angle < 112.5)  return 'first-quarter.svg';
+      if (angle < 157.5)  return 'waxing-gibbous-moon.svg';
+      if (angle < 202.5)  return 'full-moon.svg';
+      if (angle < 247.5)  return 'waning-gibbous-moon.svg';
+      if (angle < 292.5)  return 'last-quarter.svg';
+      return 'waning-cresent-moon.svg';
+    }
+
+    function getPhaseName(angle) {
+      if (angle >= 337.5 || angle < 22.5)  return 'New Moon';
+      if (angle < 67.5)   return 'Waxing Crescent';
+      if (angle < 112.5)  return 'First Quarter';
+      if (angle < 157.5)  return 'Waxing Gibbous';
+      if (angle < 202.5)  return 'Full Moon';
+      if (angle < 247.5)  return 'Waning Gibbous';
+      if (angle < 292.5)  return 'Last Quarter';
+      return 'Waning Crescent';
+    }
+
+    function lunarAge(date) {
+      var lookback = new Date(date.getTime() - 30 * 86400000);
+      var prev = Astronomy.SearchMoonPhase(0, lookback, 31);
+      if (!prev) return 0;
+      return Math.floor((date.getTime() - prev.date.getTime()) / 86400000);
+    }
+
+    function daysUntil(futureDate, now) {
+      var diff = futureDate.getTime() - now.getTime();
+      return Math.max(0, Math.round(diff / 86400000));
+    }
+
+    function formatDays(n) {
+      if (n === 0) return 'Today';
+      if (n === 1) return 'in 1 day';
+      return 'in ' + n + ' days';
+    }
+
+    window.addEventListener('load', function() {
+      var now = new Date();
+
+      // Header date
+      var dateStr = now.toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+      document.getElementById('widget-date').textContent = dateStr;
+
+      // Moon phase angle
+      var angle = Astronomy.MoonPhase(now);
+
+      // Phase name + icon
+      var phaseName = getPhaseName(angle);
+      var iconFile = getMoonIcon(angle);
+      document.getElementById('phase-name').textContent = phaseName;
+      document.getElementById('moon-img').src = '/icons/moon-phases/' + iconFile;
+      document.getElementById('moon-img').alt = phaseName;
+
+      // Illumination
+      var illumination = (1 - Math.cos(angle * Math.PI / 180)) / 2;
+      var illumPct = Math.round(illumination * 100);
+      document.getElementById('illum-badge').textContent = illumPct + '%';
+
+      // Moon sign via ecliptic longitude
+      var moonLon = Astronomy.EclipticLongitude(Astronomy.Body.Moon, now);
+      var signIndex = Math.floor(moonLon / 30) % 12;
+      var moonSignFull = SIGNS[signIndex];
+      // Split name from glyph — glyph is always last 2 chars (Unicode char)
+      var lastSpace = moonSignFull.lastIndexOf(' ');
+      var signName = moonSignFull.substring(0, lastSpace);
+      var signGlyph = moonSignFull.substring(lastSpace + 1);
+
+      var signEl = document.getElementById('moon-sign');
+      signEl.textContent = '';
+      var nameNode = document.createTextNode(signName + ' ');
+      var glyphSpan = document.createElement('span');
+      glyphSpan.className = 'zodiac-glyph';
+      glyphSpan.textContent = signGlyph;
+      signEl.appendChild(nameNode);
+      signEl.appendChild(glyphSpan);
+
+      // Moon age
+      var age = lunarAge(now);
+      document.getElementById('moon-age').textContent = 'Day ' + age + ' of cycle';
+
+      // Keywords
+      var phaseData = PHASES[phaseName] || PHASES['Full Moon'];
+      var keywordsEl = document.getElementById('keywords');
+      for (var i = 0; i < phaseData.keywords.length; i++) {
+        var pill = document.createElement('span');
+        pill.className = 'keyword-pill';
+        pill.textContent = phaseData.keywords[i];
+        keywordsEl.appendChild(pill);
+      }
+
+      // Description
+      document.getElementById('phase-desc').textContent = phaseData.energy;
+
+      // Next new moon
+      var nextNew = Astronomy.SearchMoonPhase(0, now, 40);
+      document.getElementById('next-new').textContent =
+        nextNew ? formatDays(daysUntil(nextNew.date, now)) : '—';
+
+      // Next full moon
+      var nextFull = Astronomy.SearchMoonPhase(180, now, 40);
+      document.getElementById('next-full').textContent =
+        nextFull ? formatDays(daysUntil(nextFull.date, now)) : '—';
+    });
+  </script>
+</body>
+</html>

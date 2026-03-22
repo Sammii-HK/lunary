@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v123';
+const CACHE_NAME = 'lunary-v145';
 const STATIC_CACHE_URLS = [
   '/app',
   '/manifest.json?v=20251103-1',
@@ -69,11 +69,14 @@ self.addEventListener('install', (event) => {
       })
       .then(() => {
         console.log('✅ Service worker installed');
-        return self.skipWaiting();
+        // Do NOT call skipWaiting() here — letting the new SW wait until the
+        // user closes all tabs prevents mid-session disruptions (broken chunks,
+        // lost RSC state, interrupted auth fetches) that appeared as random
+        // "404s" in the PWA. The client can still call SKIP_WAITING via
+        // postMessage when a reload is acceptable (e.g. after a user action).
       })
       .catch((err) => {
         console.error('Service worker install error:', err);
-        return self.skipWaiting();
       }),
   );
 });

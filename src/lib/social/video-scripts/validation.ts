@@ -125,13 +125,32 @@ export const hasOverusedContentPattern = (text: string): boolean =>
  * Validate video hook
  * Returns array of issues - empty means valid
  */
+// Engagement content types use punchy, provocative hooks that don't
+// need strict keyword matching or tight word counts.
+const ENGAGEMENT_CONTENT_TYPES = new Set([
+  'sign-check',
+  'ranking',
+  'hot-take',
+  'sign-origin',
+  'sign-identity',
+]);
+
+export interface HookValidationOptions {
+  /** Content type - engagement types get relaxed keyword/wordcount rules */
+  contentType?: string;
+}
+
 export const validateVideoHook = (
   hook: string,
   topic: string,
   searchPhrase: string,
+  options?: HookValidationOptions,
 ): string[] => {
   const reasons: string[] = [];
   const trimmed = hook.trim();
+  const isEngagement = options?.contentType
+    ? ENGAGEMENT_CONTENT_TYPES.has(options.contentType)
+    : false;
 
   if (!trimmed) {
     return ['Hook is empty'];
@@ -148,16 +167,30 @@ export const validateVideoHook = (
     reasons.push('Hook must end with punctuation');
   }
 
-  // CRITICAL: Word count in range
+  // CRITICAL: Word count in range (wider for engagement types)
   const wordCount = countWords(trimmed);
-  if (wordCount < 8 || wordCount > 14) {
+  const maxWords = isEngagement ? 20 : 14;
+  if (wordCount < 5 || wordCount > maxWords) {
     reasons.push(`Hook word count out of range (${wordCount})`);
   }
 
-  // CRITICAL: Must include keyword
+  // Keyword check: engagement types only need a partial match (sign name or trait)
+  // Educational types need the full topic/searchPhrase
   const hasTopic = trimmed.toLowerCase().includes(topic.toLowerCase());
   const hasSearch = trimmed.toLowerCase().includes(searchPhrase.toLowerCase());
-  if (!hasTopic && !hasSearch) {
+  if (isEngagement) {
+    // For engagement, check if ANY word from the topic appears (sign name, trait, etc.)
+    const topicWords = topic
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length > 3);
+    const hookLower = trimmed.toLowerCase();
+    const hasAnyKeyword =
+      hasTopic || hasSearch || topicWords.some((w) => hookLower.includes(w));
+    if (!hasAnyKeyword) {
+      reasons.push('SOFT: Hook missing keyword');
+    }
+  } else if (!hasTopic && !hasSearch) {
     reasons.push('Hook missing keyword');
   } else {
     const keyword = hasTopic ? topic : searchPhrase;

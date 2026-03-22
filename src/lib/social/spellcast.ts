@@ -236,8 +236,10 @@ export async function postToSpellcastMultiPlatform(params: {
 }): Promise<{ results: Record<string, SocialPostResult> }> {
   const results: Record<string, SocialPostResult> = {};
 
-  // Guard: reject empty/whitespace content
-  if (!params.content?.trim()) {
+  // Guard: reject truly blank posts (no content AND no media).
+  // Stories are image-only -- allow posts with media even if content is empty.
+  const hasMediaContent = params.media && params.media.length > 0;
+  if (!params.content?.trim() && !hasMediaContent) {
     const emptyResult: SocialPostResult = {
       success: false,
       error: 'Empty content — refusing to publish a blank post to Spellcast',

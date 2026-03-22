@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { sendDiscordNotification } from '@/lib/discord';
 import {
@@ -10,7 +10,9 @@ import {
   getContentTypeWeights,
   getOptimalHourBySlot,
   weightedSelect,
+  selectSmartCategory,
 } from '@/lib/social/video-scripts/content-scores';
+import type { SelectionMethod } from '@/lib/social/video-scripts/content-scores';
 import {
   ensureVideoScriptsTable,
   saveVideoScript,
@@ -79,21 +81,56 @@ function contentTypeKeyToCategory(
 }
 
 /**
- * Select a primary category for a given date using weighted rotation.
- * Seeded by the Monday of that week for consistency.
+ * Deterministic seed for a date — reproducible across re-runs.
  */
-function selectPrimaryCategoryForDate(date: Date): string {
-  // Find Monday of the week
+function dateSeedFor(date: Date): number {
   const dayOfWeek = (date.getDay() + 6) % 7; // Mon=0
   const monday = new Date(date);
   monday.setDate(date.getDate() - dayOfWeek);
-
-  const seed =
+  return (
     monday.getFullYear() * 10000 +
     (monday.getMonth() + 1) * 100 +
     monday.getDate() +
-    dayOfWeek * 37;
+    dayOfWeek * 37
+  );
+}
 
+/**
+ * Select a primary category for a given date.
+ *
+ * When EDA signals are available, uses selectSmartCategory which:
+ * - Picks the best category for this day-of-week x slot combo (80% exploit)
+ * - Explores underrepresented categories to gather data (20% explore)
+ * - Forces diversity when HHI concentration is too high
+ *
+ * Falls back to deterministic weighted rotation when no EDA data exists.
+ */
+async function selectPrimaryCategoryForDate(
+  date: Date,
+  weights: Map<
+    string,
+    {
+      score: number;
+      count: number;
+      avgViews: number;
+      trend: number;
+      weight: number;
+    }
+  >,
+): Promise<{ category: string; method: SelectionMethod }> {
+  const seed = dateSeedFor(date);
+
+  // Try EDA-informed smart selection first
+  const { category, method } = await selectSmartCategory(
+    weights,
+    new Set<string>(),
+    seed,
+    date.getDay(), // JS day: 0=Sun
+    'primary',
+  );
+  if (category) return { category, method };
+
+  // Fallback: deterministic weighted pool (original behaviour)
   const weightedPool: string[] = [];
   for (const cat of GRIMOIRE_CATEGORIES) {
     const weight = THEME_CATEGORY_WEIGHTS[cat] ?? 1;
@@ -103,9 +140,11 @@ function selectPrimaryCategoryForDate(date: Date): string {
     }
   }
 
-  const pick =
-    weightedPool[((seed * 9301 + 49297) % 233280) % weightedPool.length];
-  return pick;
+  return {
+    category:
+      weightedPool[((seed * 9301 + 49297) % 233280) % weightedPool.length],
+    method: 'fallback-deterministic',
+  };
 }
 
 /**
@@ -127,7 +166,8 @@ async function validateAndRetry(
   const topic = script.topic || script.facetTitle || '';
   const searchPhrase = topic;
 
-  const hookIssues = validateVideoHook(hookText, topic, searchPhrase);
+  const hookOpts = { contentType };
+  const hookIssues = validateVideoHook(hookText, topic, searchPhrase, hookOpts);
   const bodyIssues = validateScriptBody(bodyLines, topic, searchPhrase);
   const criticalHook = getCriticalIssues(hookIssues);
   const criticalBody = getCriticalIssues(bodyIssues);
@@ -150,7 +190,7 @@ async function validateAndRetry(
     .slice(1);
   const retryTopic = retry.topic || retry.facetTitle || '';
   const retryHookIssues = getCriticalIssues(
-    validateVideoHook(retryHook, retryTopic, retryTopic),
+    validateVideoHook(retryHook, retryTopic, retryTopic, hookOpts),
   );
   const retryBodyIssues = getCriticalIssues(
     validateScriptBody(retryBody, retryTopic, retryTopic),
@@ -178,26 +218,44 @@ async function validateAndRetry(
  * Yesterday's performance data (collected at 06:00) feeds into content type selection.
  */
 export async function GET(request: NextRequest) {
+  // Auth check (fast, returns before Cloudflare timeout)
+  const isVercelCron = request.headers.get('x-vercel-cron') === '1';
+  const authHeader = request.headers.get('authorization');
+
+  if (!isVercelCron) {
+    if (
+      !process.env.CRON_SECRET ||
+      authHeader !== `Bearer ${process.env.CRON_SECRET}`
+    ) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  }
+
+  // Capture params before returning response
+  const dateParam = request.nextUrl.searchParams.get('date');
+
+  // Return immediately — heavy work runs in background via after()
+  after(async () => {
+    await runContentGeneration(dateParam);
+  });
+
+  return NextResponse.json({
+    accepted: true,
+    message: 'Content generation started in background',
+    date: dateParam || 'tomorrow',
+  });
+}
+
+/**
+ * The actual content generation logic, extracted so it can run in after().
+ */
+async function runContentGeneration(dateParam: string | null) {
   const startTime = Date.now();
 
   try {
-    // Auth check
-    const isVercelCron = request.headers.get('x-vercel-cron') === '1';
-    const authHeader = request.headers.get('authorization');
-
-    if (!isVercelCron) {
-      if (
-        !process.env.CRON_SECRET ||
-        authHeader !== `Bearer ${process.env.CRON_SECRET}`
-      ) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    }
-
     await ensureVideoScriptsTable();
 
     // Target date: ?date=YYYY-MM-DD or tomorrow by default
-    const dateParam = request.nextUrl.searchParams.get('date');
     const tomorrow = dateParam
       ? new Date(`${dateParam}T00:00:00.000Z`)
       : new Date();
@@ -222,6 +280,9 @@ export async function GET(request: NextRequest) {
     };
     const errors: string[] = [];
 
+    // Level 7: Cross-slot topic dedup — prevent same facet appearing twice in one day
+    const usedTopics = new Set<string>();
+
     // Pre-check: which slots already have scripts for this date (safe re-run)
     const existingScripts = await sql`
       SELECT metadata->>'slot' as slot, platform FROM video_scripts
@@ -239,7 +300,9 @@ export async function GET(request: NextRequest) {
         );
         results.tiktokPrimary = 1;
       } else {
-        const category = selectPrimaryCategoryForDate(tomorrow);
+        const weights = await getContentTypeWeights();
+        const { category, method: categoryMethod } =
+          await selectPrimaryCategoryForDate(tomorrow, weights);
         const themesForCategory = categoryThemes.filter(
           (t) => t.category === category,
         );
@@ -252,13 +315,25 @@ export async function GET(request: NextRequest) {
             ? themesForCategory[dateSeed % themesForCategory.length]
             : categoryThemes[dateSeed % categoryThemes.length];
 
-        const weights = await getContentTypeWeights();
         const exclude = new Set<string>();
+        const { category: smartType, method: contentMethod } =
+          await selectSmartCategory(
+            weights,
+            exclude,
+            dateSeed,
+            tomorrow.getDay(),
+            'primary',
+          );
         const contentType =
+          (smartType as ContentType) ||
           (weightedSelect(weights, exclude, dateSeed) as ContentType) ||
           'sign-identity';
 
-        const primaryHour = await getOptimalHourBySlot('primary');
+        const primaryHour = await getOptimalHourBySlot(
+          'primary',
+          10,
+          contentType,
+        );
         const script = await generateScriptForContentType(
           contentType,
           tomorrow,
@@ -273,7 +348,12 @@ export async function GET(request: NextRequest) {
           if (validated.metadata) {
             validated.metadata.scheduledHour = primaryHour;
             validated.metadata.slot = 'primary';
+            (validated.metadata as Record<string, unknown>).selectionMethod =
+              contentMethod;
+            (validated.metadata as Record<string, unknown>).categoryMethod =
+              categoryMethod;
           }
+          usedTopics.add(validated.facetTitle);
 
           // Generate TikTok caption with hashtags if missing
           if (!validated.writtenPostContent) {
@@ -368,16 +448,39 @@ export async function GET(request: NextRequest) {
           const dayConfig = schedule[dayName];
           if (!dayConfig) continue;
 
-          const hour = await getOptimalHourBySlot(slot);
+          const hour = await getOptimalHourBySlot(
+            slot,
+            10,
+            dayConfig.contentType,
+          );
           const script = await generateScriptForContentType(
             dayConfig.contentType,
             tomorrow,
           );
-          const validated = await validateAndRetry(
+          let validated = await validateAndRetry(
             dayConfig.contentType,
             tomorrow,
             script,
           );
+
+          // Level 7: Cross-slot topic dedup — retry once if topic already used today
+          if (validated && usedTopics.has(validated.facetTitle)) {
+            console.log(
+              `[Daily] ${slot}: "${validated.facetTitle}" already used today, retrying`,
+            );
+            const retryScript = await generateScriptForContentType(
+              dayConfig.contentType,
+              tomorrow,
+            );
+            const retry = await validateAndRetry(
+              dayConfig.contentType,
+              tomorrow,
+              retryScript,
+            );
+            if (retry && !usedTopics.has(retry.facetTitle)) {
+              validated = retry;
+            }
+          }
 
           if (validated) {
             validated.scheduledDate = new Date(
@@ -387,7 +490,10 @@ export async function GET(request: NextRequest) {
             if (validated.metadata) {
               validated.metadata.scheduledHour = hour;
               validated.metadata.slot = slot;
+              (validated.metadata as Record<string, unknown>).selectionMethod =
+                'weekly-schedule';
             }
+            usedTopics.add(validated.facetTitle);
 
             // Generate TikTok caption with hashtags if missing
             if (!validated.writtenPostContent) {
@@ -482,7 +588,7 @@ export async function GET(request: NextRequest) {
           'sign-identity',
           'quiz',
         ];
-        const usedTopics = new Set<string>();
+        // usedTopics is shared across all slots (Level 7 cross-slot dedup)
         for (let fi = 0; fi < missing; fi++) {
           let fbScript: VideoScript | null = null;
           // Try multiple content types to get a unique topic
@@ -871,23 +977,21 @@ export async function GET(request: NextRequest) {
       console.warn('[Daily] Discord notification failed');
     }
 
-    return NextResponse.json({
-      success: true,
-      date: tomorrowKey,
-      day: dayName,
-      results,
-      total: totalScripts,
-      errors: errors.length > 0 ? errors : undefined,
-      duration: `${duration}ms`,
-    });
+    console.log(
+      `[Daily] Complete: ${tomorrowKey} (${dayName}) — ${totalScripts} pieces in ${duration}ms`,
+      errors.length > 0 ? `Errors: ${errors.join(', ')}` : '',
+    );
   } catch (error) {
     console.error('[Daily] Fatal error:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to generate daily content',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 },
-    );
+    try {
+      await sendDiscordNotification({
+        title: 'Daily Content — Fatal Error',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        color: 'error',
+        category: 'general',
+      });
+    } catch {
+      // Discord itself failed
+    }
   }
 }

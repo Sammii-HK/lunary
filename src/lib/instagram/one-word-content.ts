@@ -334,7 +334,7 @@ const TRAIT_DATA: TraitData = {
       Aries:
         'You lose all attraction the moment someone refuses to match your energy.',
       Taurus:
-        "You'll forgive almost anything except being lied to — trust is non-negotiable.",
+        "You'll forgive almost anything except being lied to. Trust is non-negotiable.",
       Gemini:
         "You'd rather be alone forever than stuck with someone who has nothing to say.",
       Cancer:
@@ -343,7 +343,7 @@ const TRAIT_DATA: TraitData = {
       Virgo:
         'You cannot respect anyone who consistently chooses shortcuts over doing things right.',
       Libra:
-        'You draw hard lines at unkindness — cruelty disgusts you on a primal level.',
+        'You draw hard lines at unkindness. Cruelty disgusts you on a primal level.',
       Scorpio:
         "You can forgive chaos, but one lie and you'll never see that person the same.",
       Sagittarius:
@@ -353,7 +353,7 @@ const TRAIT_DATA: TraitData = {
       Aquarius:
         'You immediately distance yourself from anyone who tries to shame your individuality.',
       Pisces:
-        "You can't stay with someone who feels nothing deeply — coldness repels you.",
+        "You can't stay with someone who feels nothing deeply. Coldness repels you.",
     },
   },
   emotional_weapon: {
@@ -386,8 +386,7 @@ const TRAIT_DATA: TraitData = {
         'You disassemble their argument point by point until they wish they never spoke.',
       Libra:
         'You stay so graceful during conflict that the other person looks unhinged by comparison.',
-      Scorpio:
-        "You don't get mad — you get even, and they never see it coming.",
+      Scorpio: "You don't get mad. You get even, and they never see it coming.",
       Sagittarius:
         'You move on so quickly it makes them question if you ever cared at all.',
       Capricorn:
@@ -460,12 +459,12 @@ const TRAIT_DATA: TraitData = {
       Aries:
         'You charge into situations that terrify everyone else and somehow come out winning.',
       Taurus:
-        'You ground everyone around you just by being present — your calm is contagious.',
+        'You ground everyone around you just by being present. Your calm is contagious.',
       Gemini:
         'You explain complicated things simply and make anyone feel instantly understood.',
       Cancer:
         "You feel what others feel before they've even found the words for it themselves.",
-      Leo: 'You walk into a room and the energy shifts — people gravitate to you without trying.',
+      Leo: 'You walk into a room and the energy shifts. People gravitate to you without trying.',
       Virgo:
         'You spot patterns and flaws that are invisible to everyone else in the room.',
       Libra:

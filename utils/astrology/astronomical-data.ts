@@ -34,25 +34,37 @@ const aspectsCache = new Map<string, { data: any; expiresAt: number }>();
 const MAX_CACHE_SIZE = 1000;
 
 /**
- * Calculate dynamic TTL based on proximity to sign boundary
- * Near boundaries (28-29° or 0-1°): Use shorter TTL for accuracy
- * Mid-sign: Use base TTL for performance
+ * Calculate dynamic TTL based on proximity to sign boundary OR retrograde station.
+ *
+ * Sign boundary: shorten TTL at 28-29° (exiting) or 0-1° (just entered).
+ * Retrograde station: shorten TTL as station direct/retrograde time approaches —
+ * mirrors the sign-boundary system so the retrograde flag flips promptly.
+ *
+ *   > 12h to station  → base TTL (normal)
+ *   ≤ 12h to station  → 25% of base TTL
+ *   ≤  4h to station  → 10% of base TTL  (~6 min for Mercury)
+ *   ≤  1h to station  → 5% of base TTL   (~3 min for Mercury)
  */
-function getDynamicTTL(planet: string, longitude: number): number {
+function getDynamicTTL(
+  planet: string,
+  longitude: number,
+  retrogradeRemainingHours?: number,
+): number {
   const degreeInSign = longitude % 30;
   const baseTTL =
     PLANET_BASE_TTL[planet as keyof typeof PLANET_BASE_TTL] || 3600;
 
   // Near sign exit (28-29°) or just entered (0-1°)
   const nearBoundary = degreeInSign >= 28 || degreeInSign <= 1;
-
   if (nearBoundary) {
-    // Reduce TTL by 75% when near boundaries for timing accuracy
     return Math.floor(baseTTL * 0.25);
-    // Examples:
-    // - Moon at 29° Aries: 900s → 225s (3.75 min refresh)
-    // - Mars at 0° Taurus: 21600s → 5400s (1.5 hr refresh)
-    // - Saturn at 28° Pisces: 604800s → 151200s (1.75 day refresh)
+  }
+
+  // Near retrograde station — shorten TTL so the flag flips promptly
+  if (retrogradeRemainingHours !== undefined && retrogradeRemainingHours >= 0) {
+    if (retrogradeRemainingHours <= 1) return Math.floor(baseTTL * 0.05);
+    if (retrogradeRemainingHours <= 4) return Math.floor(baseTTL * 0.1);
+    if (retrogradeRemainingHours <= 12) return Math.floor(baseTTL * 0.25);
   }
 
   return baseTTL;
@@ -129,13 +141,14 @@ export function getRealPlanetaryPositions(
   date: Date,
   observer: Observer = new Observer(51.4769, 0.0005, 0),
 ) {
+  // Use 4-hour window for retrograde detection on fast planets (Moon–Mars).
+  // 24h was too coarse — on station days it lagged up to ~20h behind the
+  // actual station direct/retrograde time. 4h gives sub-hourly precision
+  // while still being well above floating-point noise for all fast planets.
+  const FAST_WINDOW_MS = 4 * 60 * 60 * 1000;
+  const SLOW_WINDOW_MS = 24 * 60 * 60 * 1000;
+
   const astroTime = new AstroTime(date);
-  const astroTimePast = new AstroTime(
-    new Date(date.getTime() - 24 * 60 * 60 * 1000),
-  );
-  const astroTimePastPast = new AstroTime(
-    new Date(date.getTime() - 24 * 60 * 60 * 1000 * 2),
-  );
 
   const planets = [
     { body: Body.Sun, name: 'Sun' },
@@ -152,6 +165,8 @@ export function getRealPlanetaryPositions(
 
   const positions: Record<string, any> = {};
 
+  const FAST_PLANETS = new Set(['Moon', 'Sun', 'Mercury', 'Venus', 'Mars']);
+
   planets.forEach(({ body, name: planetName }) => {
     // Check per-planet cache with variable TTL
     const cacheKey = `${planetName}:${Math.floor(date.getTime() / 1000)}`;
@@ -161,6 +176,15 @@ export function getRealPlanetaryPositions(
       positions[planetName] = cached.data;
       return;
     }
+
+    const windowMs = FAST_PLANETS.has(planetName)
+      ? FAST_WINDOW_MS
+      : SLOW_WINDOW_MS;
+
+    const astroTimePast = new AstroTime(new Date(date.getTime() - windowMs));
+    const astroTimePastPast = new AstroTime(
+      new Date(date.getTime() - windowMs * 2),
+    );
 
     // Calculate position (same logic as cosmic-og.ts)
     const vectorNow = GeoVector(body, astroTime, true);
@@ -198,10 +222,12 @@ export function getRealPlanetaryPositions(
     const newDirect = !retrograde && wasRetrograde;
 
     // Calculate actual daily motion from real positions (no extra astronomy calls)
+    // Normalise to degrees/day regardless of window size
+    const hoursInWindow = windowMs / (60 * 60 * 1000);
     let actualMotion = longitude - longitudePast;
     if (actualMotion < -180) actualMotion += 360;
     if (actualMotion > 180) actualMotion -= 360;
-    const actualDailyMotion = Math.abs(actualMotion);
+    const actualDailyMotion = Math.abs(actualMotion) * (24 / hoursInWindow);
 
     // Calculate transit duration using real observed speed
     const sign = getZodiacSign(longitude);
@@ -233,8 +259,13 @@ export function getRealPlanetaryPositions(
         : undefined,
     };
 
-    // Cache with dynamic TTL (shorter near sign boundaries)
-    const ttl = getDynamicTTL(planetName, longitude);
+    // Cache with dynamic TTL (shorter near sign boundaries OR retrograde stations)
+    const retrogradeRemainingHours =
+      retrograde && positionData.duration?.endDate
+        ? (new Date(positionData.duration.endDate).getTime() - date.getTime()) /
+          (60 * 60 * 1000)
+        : undefined;
+    const ttl = getDynamicTTL(planetName, longitude, retrogradeRemainingHours);
     positionCache.set(cacheKey, {
       data: positionData,
       expiresAt: Date.now() + ttl * 1000,

@@ -439,6 +439,82 @@ export function generateDidYouKnow(dateStr: string): IGDidYouKnowContent {
 }
 
 /**
+ * Generate a multi-slide "Did You Know" carousel.
+ * Picks 3 facts from the same category and builds a 5-slide carousel:
+ * cover + 3 fact slides + CTA.
+ */
+export function generateDidYouKnowCarousel(dateStr: string): {
+  slides: Array<{
+    slideIndex: number;
+    totalSlides: number;
+    title: string;
+    content: string;
+    subtitle?: string;
+    category: ThemeCategory;
+    variant: 'cover' | 'body' | 'cta';
+  }>;
+  category: ThemeCategory;
+} {
+  const rng = seededRandom(`dyk-carousel-${dateStr}`);
+
+  // Pick a category
+  const category = CATEGORIES[Math.floor(rng() * CATEGORIES.length)];
+  const pool = FACT_POOLS[category] || FACT_POOLS.tarot;
+
+  // Pick 3 unique facts from this category
+  const shuffled = [...pool].sort(() => rng() - 0.5);
+  const selected = shuffled.slice(0, Math.min(3, pool.length));
+
+  const categoryLabel = category.charAt(0).toUpperCase() + category.slice(1);
+  const totalSlides = selected.length + 2; // cover + facts + CTA
+
+  const slides: Array<{
+    slideIndex: number;
+    totalSlides: number;
+    title: string;
+    content: string;
+    subtitle?: string;
+    category: ThemeCategory;
+    variant: 'cover' | 'body' | 'cta';
+  }> = [];
+
+  // Slide 1: Cover
+  slides.push({
+    slideIndex: 0,
+    totalSlides,
+    title: `${categoryLabel} facts you need to know`,
+    content: 'Swipe for 3 facts most people get wrong',
+    category,
+    variant: 'cover',
+  });
+
+  // Fact slides
+  selected.forEach((entry, i) => {
+    slides.push({
+      slideIndex: i + 1,
+      totalSlides,
+      title: `Did you know?`,
+      content: entry.fact,
+      subtitle: `Fact ${i + 1} of ${selected.length}`,
+      category,
+      variant: 'body',
+    });
+  });
+
+  // CTA slide
+  slides.push({
+    slideIndex: totalSlides - 1,
+    totalSlides,
+    title: `More ${categoryLabel.toLowerCase()} in the grimoire`,
+    content: 'lunary.app/grimoire',
+    category,
+    variant: 'cta',
+  });
+
+  return { slides, category };
+}
+
+/**
  * Generate multiple "Did You Know" facts for preview purposes.
  */
 export function generateDidYouKnowBatch(

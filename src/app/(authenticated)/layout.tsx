@@ -45,16 +45,13 @@ export default function AuthenticatedLayout({
   useEffect(() => {
     if (!authStatus.loading && !authStatus.isAuthenticated) {
       const returnTo = encodeURIComponent(pathname);
-      if (typeof window !== 'undefined') {
-        if (Capacitor.isNativePlatform()) {
-          // On native, use Next.js router to avoid WKWebView opening Safari
-          router.replace(`/auth?returnTo=${returnTo}`);
-        } else {
-          // On web, use hard navigation for reliability before cookies are set
-          window.location.replace(`/auth?returnTo=${returnTo}`);
-        }
-      } else {
+      if (Capacitor.isNativePlatform()) {
+        // Native: replace so WKWebView back-button doesn't expose auth content.
         router.replace(`/auth?returnTo=${returnTo}`);
+      } else {
+        // Web / PWA: push so the browser back-button returns to /app instead of
+        // skipping over it to the marketing page.
+        router.push(`/auth?returnTo=${returnTo}`);
       }
     }
   }, [authStatus.isAuthenticated, authStatus.loading, pathname, router]);

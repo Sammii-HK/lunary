@@ -233,6 +233,7 @@ function canonicaliseEventType(raw: unknown): {
     value === 'astral_chat_used' ||
     value === 'tarot_drawn' ||
     value === 'ritual_started' ||
+    value === 'ritual_completed' ||
     value === 'signup_completed' ||
     value === 'subscription_started' ||
     value === 'subscription_cancelled' ||

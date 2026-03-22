@@ -8,6 +8,7 @@ import { PDFDocument, PDFFont, PDFImage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import { StandardFonts } from 'pdf-lib';
 import { PdfRetrogradePack, PdfRetrogradeSurvival } from '../schema';
+import { watermarkTemplate } from '@/utils/steganography';
 import { generateRetrogradePackPdf } from '../templates/RetrogradePackTemplate';
 
 const LOGO_URL =
@@ -193,8 +194,10 @@ function buildMercuryRetrogradePack(): PdfRetrogradePack {
       'How can I slow down and become more present during this retrograde?',
       'What communication patterns in my life need attention?',
     ],
-    closingText:
+    closingText: watermarkTemplate(
       'Thank you for navigating Mercury retrograde with Lunary. Remember: this transit is not about punishment—it is about pause. Every retrograde offers a chance to catch what you may have missed and return to what truly matters.',
+      'mercury-retrograde',
+    ),
     optionalAffirmation:
       'I flow with Mercury retrograde rather than fighting against it. Slowdowns reveal what speed so often hides.',
   };

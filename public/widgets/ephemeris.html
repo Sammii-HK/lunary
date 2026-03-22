@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Today's Sky — Lunary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto Mono', monospace;
+      background: #0a0a0a;
+      color: #ffffff;
+      margin: 0;
+      padding: 16px 20px;
+      max-width: 520px;
+    }
+
+    /* ── Header ── */
+    .header {
+      margin-bottom: 20px;
+    }
+
+    .header-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #8e8eeb;
+      margin-bottom: 6px;
+    }
+
+    .header-date {
+      font-size: 13px;
+      font-weight: 400;
+      color: #a1a1aa;
+      margin-bottom: 4px;
+    }
+
+    .header-tagline {
+      font-size: 10px;
+      color: #a1a1aa;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid #0f0f57;
+      margin: 0;
+    }
+
+    /* ── Planet list ── */
+    .planet-list {
+      list-style: none;
+    }
+
+    .planet-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(15, 15, 87, 0.5);
+    }
+
+    .planet-row:last-child {
+      border-bottom: none;
+    }
+
+    .planet-symbol {
+      font-size: 28px;
+      color: #8458d8;
+      width: 32px;
+      text-align: center;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .planet-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .planet-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+    }
+
+    .planet-sign {
+      font-size: 13px;
+      font-weight: 400;
+      color: #8e8eeb;
+      white-space: nowrap;
+    }
+
+    .rx-badge {
+      font-size: 10px;
+      font-weight: 500;
+      color: #ee789e;
+      background: rgba(53, 7, 20, 0.5);
+      border: 1px solid rgba(136, 17, 55, 0.4);
+      padding: 1px 5px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .planet-degree {
+      font-size: 12px;
+      font-weight: 400;
+      color: #a1a1aa;
+      margin-left: auto;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Summary bar ── */
+    .summary-bar {
+      padding: 14px 0 2px;
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .summary-bar.all-direct {
+      color: #6b9b7a;
+    }
+
+    .summary-bar.has-retrograde {
+      color: #ee789e;
+    }
+
+    /* ── CTA ── */
+    .cta {
+      padding-top: 16px;
+      text-align: center;
+    }
+
+    .cta-link {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      font-weight: 400;
+      color: #8458d8;
+      text-decoration: none;
+    }
+
+    .cta-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-label">Today's Sky</div>
+    <div class="header-date" id="header-date"></div>
+  </div>
+
+  <hr class="divider" />
+
+  <ul class="planet-list" id="planet-list"></ul>
+
+  <hr class="divider" />
+
+  <div class="summary-bar" id="summary-bar"></div>
+
+  <div class="cta">
+    <a class="cta-link" href="https://lunary.app" target="_blank" rel="noopener">
+      See how these planets affect you personally &rarr;
+    </a>
+  </div>
+
+<script src="./lib/astronomy.min.js"></script>
+<script>
+  var PLANETS = [
+    { name: 'Sun',     symbol: '\u2609', body: 'Sun',     canRx: false },
+    { name: 'Moon',    symbol: '\u263d', body: 'Moon',    canRx: false },
+    { name: 'Mercury', symbol: '\u263f', body: 'Mercury', canRx: true  },
+    { name: 'Venus',   symbol: '\u2640', body: 'Venus',   canRx: true  },
+    { name: 'Mars',    symbol: '\u2642', body: 'Mars',    canRx: true  },
+    { name: 'Jupiter', symbol: '\u2643', body: 'Jupiter', canRx: true  },
+    { name: 'Saturn',  symbol: '\u2644', body: 'Saturn',  canRx: true  },
+    { name: 'Uranus',  symbol: '\u26e2', body: 'Uranus',  canRx: true  },
+    { name: 'Neptune', symbol: '\u2646', body: 'Neptune', canRx: true  },
+    { name: 'Pluto',   symbol: '\u2647', body: 'Pluto',   canRx: true  },
+  ];
+
+  var SIGNS = [
+    'Aries \u2648',       'Taurus \u2649',   'Gemini \u264a',     'Cancer \u264b',
+    'Leo \u264c',         'Virgo \u264d',    'Libra \u264e',      'Scorpio \u264f',
+    'Sagittarius \u2650', 'Capricorn \u2651','Aquarius \u2652',   'Pisces \u2653',
+  ];
+
+  function getLon(bodyName, date) {
+    if (bodyName === 'Sun') return Astronomy.SunPosition(date).elon;
+    return Astronomy.EclipticLongitude(Astronomy.Body[bodyName], date);
+  }
+
+  function isRetrograde(bodyName, date) {
+    var lon1 = getLon(bodyName, date);
+    var tomorrow = new Date(date.getTime() + 86400000);
+    var lon2 = getLon(bodyName, tomorrow);
+    var delta = lon2 - lon1;
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+    return delta < -0.001;
+  }
+
+  function padTwo(n) {
+    return n < 10 ? '0' + n : '' + n;
+  }
+
+  function el(tag, cls) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    return e;
+  }
+
+  function formatDate(date) {
+    return date.toLocaleDateString('en-GB', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    });
+  }
+
+  function buildRow(planet, lon, rx) {
+    var signIndex = Math.floor(lon / 30) % 12;
+    var degInSign = lon % 30;
+    var degrees = Math.floor(degInSign);
+    var minutes = Math.floor((degInSign - degrees) * 60);
+
+    var li = el('li', 'planet-row');
+
+    var sym = el('span', 'planet-symbol');
+    sym.textContent = planet.symbol;
+    li.appendChild(sym);
+
+    var body = el('div', 'planet-body');
+
+    var nameEl = el('span', 'planet-name');
+    nameEl.textContent = planet.name;
+    body.appendChild(nameEl);
+
+    var signEl = el('span', 'planet-sign');
+    signEl.textContent = SIGNS[signIndex];
+    body.appendChild(signEl);
+
+    if (rx) {
+      var rxEl = el('span', 'rx-badge');
+      rxEl.textContent = 'Rx';
+      body.appendChild(rxEl);
+    }
+
+    var degEl = el('span', 'planet-degree');
+    degEl.textContent = degrees + '\u00b0 ' + padTwo(minutes) + '\u2032';
+    body.appendChild(degEl);
+
+    li.appendChild(body);
+    return li;
+  }
+
+  window.addEventListener('load', function () {
+    var now = new Date();
+    var list = document.getElementById('planet-list');
+    var rxNames = [];
+
+    PLANETS.forEach(function (planet) {
+      var lon, rx;
+      try {
+        lon = getLon(planet.body, now);
+        rx = planet.canRx ? isRetrograde(planet.body, now) : false;
+      } catch (e) {
+        console.error('Astronomy error for ' + planet.name + ':', e);
+        return;
+      }
+      if (rx) rxNames.push(planet.name);
+      list.appendChild(buildRow(planet, lon, rx));
+    });
+
+    // Header date
+    document.getElementById('header-date').textContent = formatDate(now);
+
+    // Summary bar
+    var bar = document.getElementById('summary-bar');
+    if (rxNames.length === 0) {
+      bar.className = 'summary-bar all-direct';
+      bar.textContent = 'All planets direct';
+    } else {
+      bar.className = 'summary-bar has-retrograde';
+      bar.textContent = rxNames.join(' \u00b7 ') + ' in retrograde';
+    }
+  });
+</script>
+</body>
+</html>

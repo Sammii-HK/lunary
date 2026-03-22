@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import crypto from 'crypto';
 
@@ -46,81 +45,13 @@ interface PackItem {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const body: GeneratePackRequest = await request.json();
-
-    if (!body.category || !body.name || !body.description || !body.price) {
-      return NextResponse.json(
-        {
-          error: 'Missing required fields: category, name, description, price',
-        },
-        { status: 400 },
-      );
-    }
-
-    console.log(`🎯 Generating pack: ${body.name} (${body.category})`);
-
-    // Generate pack content based on category
-    const packContent = await generatePackContent(body);
-
-    // Generate OG image for the pack
-    const packImageUrl = await generatePackImage(body, packContent);
-
-    // Generate PDF content
-    const pdfBuffer = await generatePackPDF(packContent);
-
-    // Upload PDF to Vercel Blob
-    const packId = generateRandomId();
-    const fileName = `${body.category}_${body.subcategory || 'general'}_${packId}.pdf`;
-    const blobKey = `shop/packs/${body.category}/${fileName}`;
-
-    const { url: downloadUrl } = await put(blobKey, Buffer.from(pdfBuffer), {
-      access: 'public', // Will implement secure access via our download API
-      addRandomSuffix: false,
-    });
-
-    // Calculate file size
-    const fileSize = pdfBuffer.byteLength;
-
-    const packData = {
-      id: packId,
-      name: body.name,
-      description: body.description,
-      category: body.category,
-      subcategory: body.subcategory,
-      price: body.price,
-      imageUrl: packImageUrl,
-      downloadUrl,
-      fileSize,
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      metadata: {
-        dateRange: body.dateRange,
-        format: 'PDF',
-        itemCount: packContent.items.length,
-      },
-    };
-
-    console.log(`✅ Pack generated successfully: ${packData.name}`);
-    console.log(`📦 File size: ${Math.round(fileSize / 1024)}KB`);
-    console.log(`📊 Items: ${packContent.items.length}`);
-
-    return NextResponse.json({
-      success: true,
-      pack: packData,
-      preview: {
-        itemCount: packContent.items.length,
-        sampleItems: packContent.items.slice(0, 3),
-      },
-    });
-  } catch (error: any) {
-    console.error('❌ Pack generation failed:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to generate pack' },
-      { status: 500 },
-    );
-  }
+  return NextResponse.json(
+    {
+      error:
+        'This endpoint has been retired. Use individual pack routes instead.',
+    },
+    { status: 410 },
+  );
 }
 
 async function generatePackContent(
