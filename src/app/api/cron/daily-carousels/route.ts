@@ -159,9 +159,11 @@ export async function GET(request: NextRequest) {
             console.log(
               `[daily-carousels] Uploaded ${post.type} slide ${i} (${(buf.byteLength / 1024).toFixed(0)}KB)`,
             );
-          } catch {
+          } catch (slideErr) {
             console.warn(
-              `[daily-carousels] Slide ${i} pre-render failed, using OG URL`,
+              `[daily-carousels] Slide ${i} pre-render failed, using OG URL:`,
+              slideErr instanceof Error ? slideErr.message : slideErr,
+              `URL: ${post.imageUrls[i]?.slice(0, 120)}`,
             );
             blobUrls.push(post.imageUrls[i]);
           }

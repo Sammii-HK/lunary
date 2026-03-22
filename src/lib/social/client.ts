@@ -182,9 +182,11 @@ async function postToSucculent(
 export async function postToSocial(
   params: SocialPostParams,
 ): Promise<SocialPostResult> {
-  // Guard: reject empty/whitespace content (prevents ghost posts)
+  // Guard: reject truly blank posts (no content AND no media).
+  // Stories are image-only -- allow posts with media even if content is empty.
   const trimmedContent = String(params.content || '').trim();
-  if (!trimmedContent) {
+  const hasMedia = params.media && params.media.length > 0;
+  if (!trimmedContent && !hasMedia) {
     return {
       success: false,
       error: 'Empty content — refusing to publish a blank post',
@@ -333,9 +335,11 @@ export async function postToSocial(
 export async function postToSocialMultiPlatform(
   params: MultiPlatformPostParams,
 ): Promise<{ results: Record<string, SocialPostResult> }> {
-  // Guard: reject empty/whitespace content (prevents ghost posts)
+  // Guard: reject truly blank posts (no content AND no media).
+  // Stories are image-only -- allow posts with media even if content is empty.
   const trimmedContent = String(params.content || '').trim();
-  if (!trimmedContent) {
+  const hasMedia = params.media && params.media.length > 0;
+  if (!trimmedContent && !hasMedia) {
     const emptyResult: SocialPostResult = {
       success: false,
       error: 'Empty content — refusing to publish a blank post',
