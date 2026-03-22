@@ -166,7 +166,8 @@ async function validateAndRetry(
   const topic = script.topic || script.facetTitle || '';
   const searchPhrase = topic;
 
-  const hookIssues = validateVideoHook(hookText, topic, searchPhrase);
+  const hookOpts = { contentType };
+  const hookIssues = validateVideoHook(hookText, topic, searchPhrase, hookOpts);
   const bodyIssues = validateScriptBody(bodyLines, topic, searchPhrase);
   const criticalHook = getCriticalIssues(hookIssues);
   const criticalBody = getCriticalIssues(bodyIssues);
@@ -189,7 +190,7 @@ async function validateAndRetry(
     .slice(1);
   const retryTopic = retry.topic || retry.facetTitle || '';
   const retryHookIssues = getCriticalIssues(
-    validateVideoHook(retryHook, retryTopic, retryTopic),
+    validateVideoHook(retryHook, retryTopic, retryTopic, hookOpts),
   );
   const retryBodyIssues = getCriticalIssues(
     validateScriptBody(retryBody, retryTopic, retryTopic),

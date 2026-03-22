@@ -463,7 +463,7 @@ const ANGEL_NUMBER_STORIES: Array<{
     number: '1111',
     meaning: 'Spiritual Gateway',
     message:
-      'A portal is open. Set your intentions now — the universe is listening.',
+      'A portal is open. Set your intentions now. The universe is listening.',
     keywords: 'Portal, Awakening, Alignment',
   },
   {
@@ -563,7 +563,7 @@ const LIFE_PATH_STORIES: Array<{
     name: 'The Intuitive',
     trait: 'Vision & illumination',
     message:
-      'You feel everything deeply. Your sensitivity is not a weakness — it is your gift.',
+      'You feel everything deeply. Your sensitivity is not a weakness. It is your gift.',
   },
   {
     number: 22,
@@ -597,7 +597,7 @@ const MIRROR_HOUR_STORIES: Array<{
     time: '12:12',
     meaning: 'Cosmic Harmony',
     message:
-      'You are in flow with the universe. Keep going — you are on the right track.',
+      'You are in flow with the universe. Keep going. You are on the right track.',
   },
   {
     time: '13:13',
@@ -644,7 +644,7 @@ const MIRROR_HOUR_STORIES: Array<{
     time: '23:23',
     meaning: 'Creative Potential',
     message:
-      'Your creative energy is charged. Express yourself — the universe is amplifying your voice.',
+      'Your creative energy is charged. Express yourself. The universe is amplifying your voice.',
   },
   {
     time: '00:00',

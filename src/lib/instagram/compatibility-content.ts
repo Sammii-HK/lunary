@@ -104,20 +104,20 @@ const PAIR_DETAILS: Record<
       'Natural chemistry and passion',
     ],
     challenges: [
-      'Both want to lead—who follows?',
+      'Both want to lead. Who follows?',
       'Impulsive decisions without grounding',
       'Competitive energy can turn combative',
     ],
   },
   'Fire-Earth': {
-    vibe: 'Fire wants to soar, Earth wants to build. One dreams in motion, the other in foundations. The friction can forge something solid—or smother the spark.',
+    vibe: 'Fire wants to soar, Earth wants to build. One dreams in motion, the other in foundations. The friction can forge something solid, or smother the spark.',
     strengths: [
       "Fire's enthusiasm inspires Earth's ambitions",
       "Earth's stability grounds Fire's chaos",
       'Complementary energy when aligned on goals',
     ],
     challenges: [
-      'Different paces—Fire rushes, Earth deliberates',
+      'Different paces: Fire rushes, Earth deliberates',
       'Fire feels restrained, Earth feels overwhelmed',
       'Conflicting priorities: freedom vs. security',
     ],
@@ -157,7 +157,7 @@ const PAIR_DETAILS: Record<
     ],
     challenges: [
       'Risk of stagnation and routine',
-      'Both stubborn—no one budges first',
+      'Both stubborn. No one budges first',
       'Lack of spontaneity can breed boredom',
     ],
   },
@@ -184,7 +184,7 @@ const PAIR_DETAILS: Record<
     challenges: [
       "Water's moods can overwhelm Earth's logic",
       "Earth's practicality can seem cold to Water",
-      'Both hold grudges—resentment lingers',
+      'Both hold grudges. Resentment lingers',
     ],
   },
   'Air-Air': {
@@ -197,7 +197,7 @@ const PAIR_DETAILS: Record<
     challenges: [
       'Avoidance of emotional vulnerability',
       'Commitment feels like a trap',
-      'No grounding force—decisions drift',
+      'No grounding force. Decisions drift',
     ],
   },
   'Air-Water': {
@@ -214,14 +214,14 @@ const PAIR_DETAILS: Record<
     ],
   },
   'Water-Water': {
-    vibe: 'Deeply intuitive, profoundly emotional, and almost psychic. Two Water signs understand each other without words—but can also drown in shared intensity.',
+    vibe: 'Deeply intuitive, profoundly emotional, and almost psychic. Two Water signs understand each other without words, but can also drown in shared intensity.',
     strengths: [
       'Unspoken understanding and empathy',
       'Deeply intimate emotional connection',
       'Shared intuition and spiritual bond',
     ],
     challenges: [
-      'Emotions amplify—no one provides grounding',
+      'Emotions amplify. No one provides grounding',
       'Codependency and boundary issues',
       'Shared moods spiral without external perspective',
     ],
