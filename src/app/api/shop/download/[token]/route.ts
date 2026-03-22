@@ -60,10 +60,13 @@ export async function GET(
       );
     }
 
-    // 4. Generate signed blob URL
-    const signedUrl = generateSignedDownloadUrl(purchase.pack.downloadUrl);
+    // 4. Resolve delivery URL
+    const rawUrl = purchase.pack.downloadUrl;
+    const deliveryUrl = rawUrl.includes('.notion.site/')
+      ? rawUrl // Notion templates: public URL, no signing needed
+      : generateSignedDownloadUrl(rawUrl);
 
-    if (!signedUrl) {
+    if (!deliveryUrl) {
       return NextResponse.json(
         { error: 'Unable to generate download link' },
         { status: 500 },
@@ -75,7 +78,7 @@ export async function GET(
 
     console.log(`✅ Download authorised for ${purchase.pack.name}`);
 
-    return NextResponse.redirect(signedUrl);
+    return NextResponse.redirect(deliveryUrl);
   } catch (err) {
     console.error('❌ Download failed:', err);
     return NextResponse.json({ error: 'Download failed' }, { status: 500 });
