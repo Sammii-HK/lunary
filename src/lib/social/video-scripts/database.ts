@@ -350,6 +350,8 @@ export async function ensureVideoPerformanceTable(): Promise<void> {
     await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS slot VARCHAR(20)`;
     // Ayrshare post ID for deduplication
     await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS ayrshare_id TEXT`;
+    // Account set ID for per-persona filtering
+    await sql`ALTER TABLE video_performance ADD COLUMN IF NOT EXISTS account_set_id TEXT`;
   } catch {
     // Columns may already exist
   }
@@ -371,6 +373,9 @@ export async function ensureVideoPerformanceTable(): Promise<void> {
   `;
   await sql`
     CREATE INDEX IF NOT EXISTS idx_video_perf_angle ON video_performance(angle)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_video_perf_account_set ON video_performance(account_set_id)
   `;
 }
 
@@ -501,7 +506,10 @@ export async function getTopPerformingStructures(
  *
  * Returns rolling metrics over `days` window (default 30).
  */
-export async function getContentCategoryScores(days: number = 30): Promise<
+export async function getContentCategoryScores(
+  days: number = 30,
+  accountSetId?: string | null,
+): Promise<
   Array<{
     category: string;
     score: number;
@@ -515,6 +523,7 @@ export async function getContentCategoryScores(days: number = 30): Promise<
 > {
   try {
     const { sql } = await import('@vercel/postgres');
+    const acctFilter = accountSetId ?? null;
 
     // Weighted composite score: views*0.3 + likes*1.0 + comments*3.0 + shares*2.0
     // Comments weighted highest — primary TikTok algorithm signal
@@ -530,6 +539,7 @@ export async function getContentCategoryScores(days: number = 30): Promise<
       FROM video_performance
       WHERE content_type IS NOT NULL
         AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+        AND (${acctFilter}::text IS NULL OR account_set_id = ${acctFilter})
       GROUP BY content_type
       HAVING COUNT(*) >= 2
       ORDER BY score DESC
@@ -545,6 +555,7 @@ export async function getContentCategoryScores(days: number = 30): Promise<
       FROM video_performance
       WHERE content_type IS NOT NULL
         AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+        AND (${acctFilter}::text IS NULL OR account_set_id = ${acctFilter})
       GROUP BY content_type
     `;
 
@@ -593,6 +604,7 @@ export async function bulkInsertPerformance(
     ayrshareId?: string;
     scheduledHour?: number;
     dayOfWeek?: number;
+    accountSetId?: string;
   }>,
 ): Promise<number> {
   const { sql } = await import('@vercel/postgres');
@@ -606,7 +618,7 @@ export async function bulkInsertPerformance(
           INSERT INTO video_performance (
             platform, views, likes, comments, shares, saves,
             content_type, recorded_at, slot, ayrshare_id,
-            scheduled_hour, day_of_week
+            scheduled_hour, day_of_week, account_set_id
           ) VALUES (
             ${record.platform || 'tiktok'},
             ${record.views},
@@ -619,7 +631,8 @@ export async function bulkInsertPerformance(
             ${record.slot ?? null},
             ${record.ayrshareId},
             ${record.scheduledHour ?? null},
-            ${record.dayOfWeek ?? null}
+            ${record.dayOfWeek ?? null},
+            ${record.accountSetId ?? null}
           )
           ON CONFLICT (ayrshare_id) WHERE ayrshare_id IS NOT NULL
           DO UPDATE SET
@@ -631,6 +644,7 @@ export async function bulkInsertPerformance(
             slot = COALESCE(EXCLUDED.slot, video_performance.slot),
             scheduled_hour = COALESCE(EXCLUDED.scheduled_hour, video_performance.scheduled_hour),
             day_of_week = COALESCE(EXCLUDED.day_of_week, video_performance.day_of_week),
+            account_set_id = COALESCE(EXCLUDED.account_set_id, video_performance.account_set_id),
             recorded_at = EXCLUDED.recorded_at
         `;
       } else {
@@ -639,7 +653,7 @@ export async function bulkInsertPerformance(
           INSERT INTO video_performance (
             platform, views, likes, comments, shares, saves,
             content_type, recorded_at, slot,
-            scheduled_hour, day_of_week
+            scheduled_hour, day_of_week, account_set_id
           ) VALUES (
             ${record.platform || 'tiktok'},
             ${record.views},
@@ -651,7 +665,8 @@ export async function bulkInsertPerformance(
             ${record.postedAt},
             ${record.slot ?? null},
             ${record.scheduledHour ?? null},
-            ${record.dayOfWeek ?? null}
+            ${record.dayOfWeek ?? null},
+            ${record.accountSetId ?? null}
           )
         `;
       }
@@ -764,8 +779,10 @@ export interface ContentEDASignals {
  */
 export async function getContentEDASignals(
   days: number = 30,
+  accountSetId?: string | null,
 ): Promise<ContentEDASignals> {
   const { sql } = await import('@vercel/postgres');
+  const acctFilter = accountSetId ?? null;
 
   // 1. Per-category aggregates with saves
   const catResult = await sql`
@@ -782,6 +799,7 @@ export async function getContentEDASignals(
     FROM video_performance
     WHERE content_type IS NOT NULL
       AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+      AND (${acctFilter}::text IS NULL OR account_set_id = ${acctFilter})
     GROUP BY content_type
     HAVING COUNT(*) >= 2
     ORDER BY count DESC
@@ -839,6 +857,7 @@ export async function getContentEDASignals(
     WHERE content_type IS NOT NULL
       AND slot IS NOT NULL
       AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+      AND (${acctFilter}::text IS NULL OR account_set_id = ${acctFilter})
     GROUP BY content_type, slot
     HAVING COUNT(*) >= 2
     ORDER BY median_engagement DESC
@@ -862,6 +881,7 @@ export async function getContentEDASignals(
     WHERE content_type IS NOT NULL
       AND day_of_week IS NOT NULL
       AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+      AND (${acctFilter}::text IS NULL OR account_set_id = ${acctFilter})
     GROUP BY content_type, day_of_week
     HAVING COUNT(*) >= 2
     ORDER BY median_engagement DESC
@@ -885,6 +905,7 @@ export async function getContentEDASignals(
     WHERE content_type IS NOT NULL
       AND scheduled_hour IS NOT NULL
       AND recorded_at >= NOW() - INTERVAL '1 day' * ${days}
+      AND (${acctFilter}::text IS NULL OR account_set_id = ${acctFilter})
     GROUP BY content_type, scheduled_hour
     HAVING COUNT(*) >= 2
     ORDER BY median_engagement DESC

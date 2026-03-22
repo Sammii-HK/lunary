@@ -19,6 +19,7 @@ import { categorisePost } from './categorise';
 import { getPlatformPerformance } from './content-scores';
 
 import { ayrshareFetch } from '../ayrshare-fetch';
+import { spellcastFetch, isSpellcastConfigured } from '../spellcast';
 
 const AYRSHARE_API_URL = 'https://api.ayrshare.com/api';
 
@@ -476,6 +477,268 @@ export async function backfillAllPerformance(): Promise<{
   );
 
   return { total: allPosts.length, inserted, skipped, errors };
+}
+
+// ── Spellcast backfill ─────────────────────────────────────────────────────
+
+/**
+ * Build a Map<postId, accountSetId> by listing published posts per account set.
+ * Uses Spellcast's list_posts endpoint with slim=true for efficiency.
+ */
+async function buildPostAccountSetMap(): Promise<Map<string, string>> {
+  const postMap = new Map<string, string>();
+
+  try {
+    // Fetch all account sets
+    const setsRes = await spellcastFetch('/api/account-sets', {
+      timeoutMs: 15000,
+    });
+    if (!setsRes.ok) return postMap;
+
+    const accountSets: Array<{ id: string; name: string }> =
+      await setsRes.json();
+
+    // For each account set, list published posts
+    for (const accountSet of accountSets) {
+      try {
+        const postsRes = await spellcastFetch(
+          `/api/posts?status=published&accountSetId=${accountSet.id}&limit=500&slim=true`,
+          { timeoutMs: 30000 },
+        );
+        if (!postsRes.ok) continue;
+
+        const data = await postsRes.json();
+        const posts: Array<{ id: string }> = data.posts ?? data ?? [];
+
+        for (const post of posts) {
+          if (post.id) {
+            postMap.set(post.id, accountSet.id);
+          }
+        }
+
+        console.log(
+          `[Spellcast Backfill] ${accountSet.name}: ${posts.length} posts mapped`,
+        );
+      } catch {
+        // Skip failed account sets
+      }
+    }
+  } catch {
+    console.warn('[Spellcast Backfill] Failed to build post→account map');
+  }
+
+  return postMap;
+}
+
+interface SpellcastAnalyticsPost {
+  postId: string;
+  content: string;
+  platform: string;
+  publishedAt: string;
+  metrics: {
+    reach: number;
+    impressions: number;
+    likes: number;
+    comments: number;
+    shares: number;
+    engagementRate: number;
+  };
+}
+
+/**
+ * Backfill video_performance from Spellcast analytics.
+ *
+ * Spellcast stores per-platform metrics for every published post.
+ * This pulls the full history and upserts into video_performance,
+ * giving the EDA engine immediate data to work with.
+ *
+ * Deduplication: uses `spellcast-{postId}-{platform}` as ayrshare_id.
+ * Safe to re-run — ON CONFLICT updates metrics.
+ */
+export async function backfillFromSpellcast(options?: {
+  startDate?: string;
+  endDate?: string;
+}): Promise<{
+  total: number;
+  inserted: number;
+  skipped: number;
+  errors: number;
+  platforms: Record<string, number>;
+  accountSets: Record<string, number>;
+}> {
+  if (!isSpellcastConfigured()) {
+    throw new Error('Spellcast not configured');
+  }
+
+  await ensureVideoPerformanceTable();
+
+  const end = options?.endDate ?? new Date().toISOString().split('T')[0];
+  const start = options?.startDate ?? '2025-01-01';
+
+  // Build postId → accountSetId lookup from all account sets
+  const postAccountMap = await buildPostAccountSetMap();
+  console.log(
+    `[Spellcast Backfill] Built post→account map: ${postAccountMap.size} posts across account sets`,
+  );
+
+  // Chunk by quarter to avoid massive responses
+  const chunks = getQuarterChunks(start, end);
+  let allPosts: SpellcastAnalyticsPost[] = [];
+
+  for (const chunk of chunks) {
+    try {
+      const res = await spellcastFetch(
+        `/api/analytics?startDate=${chunk.start}&endDate=${chunk.end}`,
+        { timeoutMs: 60000 },
+      );
+
+      if (!res.ok) {
+        console.warn(
+          `[Spellcast Backfill] Analytics ${chunk.start}→${chunk.end} failed: ${res.status}`,
+        );
+        continue;
+      }
+
+      const data = await res.json();
+      const posts: SpellcastAnalyticsPost[] = data.posts ?? data ?? [];
+      allPosts = allPosts.concat(posts);
+      console.log(
+        `[Spellcast Backfill] ${chunk.start}→${chunk.end}: ${posts.length} entries`,
+      );
+    } catch (error) {
+      console.warn(
+        `[Spellcast Backfill] Chunk ${chunk.start}→${chunk.end} error:`,
+        error,
+      );
+    }
+  }
+
+  console.log(`[Spellcast Backfill] Total entries fetched: ${allPosts.length}`);
+
+  // Filter: skip entries with zero metrics (no engagement data yet)
+  const withMetrics = allPosts.filter(
+    (p) =>
+      p.metrics &&
+      (p.metrics.impressions > 0 ||
+        p.metrics.likes > 0 ||
+        p.metrics.comments > 0),
+  );
+
+  const records: Array<{
+    platform: string;
+    views: number;
+    likes: number;
+    comments: number;
+    shares: number;
+    saves: number;
+    contentCategory: string;
+    postedAt: string;
+    slot?: string;
+    ayrshareId?: string;
+    scheduledHour?: number;
+    dayOfWeek?: number;
+    accountSetId?: string;
+  }> = [];
+
+  let skipped = 0;
+  let errors = 0;
+  const platformCounts: Record<string, number> = {};
+  const accountSetCounts: Record<string, number> = {};
+
+  for (const post of withMetrics) {
+    try {
+      if (!post.content?.trim() || !post.publishedAt) {
+        skipped++;
+        continue;
+      }
+
+      const publishedDate = new Date(post.publishedAt);
+      const scheduledHour = publishedDate.getUTCHours();
+      const dayOfWeek = publishedDate.getUTCDay();
+      const slot = inferSlotFromHour(scheduledHour) ?? undefined;
+      const platform = post.platform.toLowerCase();
+
+      // Dedup key: postId + platform (each post has one entry per platform)
+      const dedupKey = `spellcast-${post.postId}-${platform}`;
+      const accountSetId = postAccountMap.get(post.postId);
+
+      records.push({
+        platform,
+        views: post.metrics.impressions,
+        likes: post.metrics.likes,
+        comments: post.metrics.comments,
+        shares: post.metrics.shares,
+        saves: 0, // Spellcast doesn't track saves
+        contentCategory: categorisePost(post.content),
+        postedAt: post.publishedAt,
+        slot,
+        ayrshareId: dedupKey,
+        scheduledHour,
+        dayOfWeek,
+        accountSetId,
+      });
+
+      platformCounts[platform] = (platformCounts[platform] ?? 0) + 1;
+      if (accountSetId) {
+        accountSetCounts[accountSetId] =
+          (accountSetCounts[accountSetId] ?? 0) + 1;
+      }
+    } catch {
+      errors++;
+    }
+  }
+
+  let inserted = 0;
+  if (records.length > 0) {
+    inserted = await bulkInsertPerformance(records);
+  }
+
+  console.log(
+    `[Spellcast Backfill] Total: ${allPosts.length}, With metrics: ${withMetrics.length}, Inserted: ${inserted}, Skipped: ${skipped}, Errors: ${errors}`,
+  );
+  console.log(
+    `[Spellcast Backfill] Platform breakdown:`,
+    JSON.stringify(platformCounts),
+  );
+  console.log(
+    `[Spellcast Backfill] Account set breakdown:`,
+    JSON.stringify(accountSetCounts),
+  );
+
+  return {
+    total: allPosts.length,
+    inserted,
+    skipped,
+    errors,
+    platforms: platformCounts,
+    accountSets: accountSetCounts,
+  };
+}
+
+/** Split a date range into quarterly chunks */
+function getQuarterChunks(
+  start: string,
+  end: string,
+): Array<{ start: string; end: string }> {
+  const chunks: Array<{ start: string; end: string }> = [];
+  let current = new Date(start);
+  const endDate = new Date(end);
+
+  while (current < endDate) {
+    const chunkEnd = new Date(current);
+    chunkEnd.setMonth(chunkEnd.getMonth() + 3);
+    if (chunkEnd > endDate) chunkEnd.setTime(endDate.getTime());
+
+    chunks.push({
+      start: current.toISOString().split('T')[0],
+      end: chunkEnd.toISOString().split('T')[0],
+    });
+
+    current = new Date(chunkEnd);
+    current.setDate(current.getDate() + 1);
+  }
+
+  return chunks;
 }
 
 /**

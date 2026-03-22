@@ -30,26 +30,35 @@ export interface CategoryScore {
   viralScore?: number; // z-score composite (reach + engagement quality)
 }
 
-// ── EDA Signal Cache ──────────────────────────────────────────────────────
+// ── EDA Signal Cache (per account set) ───────────────────────────────────
 
-/** Cached EDA signals (refreshed every 30 minutes) */
-let edaCache: { signals: ContentEDASignals; fetchedAt: number } | null = null;
+/** Cached EDA signals keyed by account set ID (refreshed every 30 minutes) */
+const edaCacheMap = new Map<
+  string,
+  { signals: ContentEDASignals; fetchedAt: number }
+>();
 const EDA_CACHE_TTL = 30 * 60 * 1000;
+const ALL_ACCOUNTS_KEY = '__all__';
 
 /**
- * Get EDA signals with caching (30-min TTL).
+ * Get EDA signals with caching (30-min TTL), scoped to an account set.
+ * Pass null/undefined for cross-account signals.
  * Never throws — returns null on failure.
  */
-export async function getCachedEDASignals(): Promise<ContentEDASignals | null> {
-  if (edaCache && Date.now() - edaCache.fetchedAt < EDA_CACHE_TTL) {
-    return edaCache.signals;
+export async function getCachedEDASignals(
+  accountSetId?: string | null,
+): Promise<ContentEDASignals | null> {
+  const cacheKey = accountSetId ?? ALL_ACCOUNTS_KEY;
+  const cached = edaCacheMap.get(cacheKey);
+  if (cached && Date.now() - cached.fetchedAt < EDA_CACHE_TTL) {
+    return cached.signals;
   }
   try {
-    const signals = await getContentEDASignals(30);
-    edaCache = { signals, fetchedAt: Date.now() };
+    const signals = await getContentEDASignals(30, accountSetId);
+    edaCacheMap.set(cacheKey, { signals, fetchedAt: Date.now() });
     return signals;
   } catch {
-    return edaCache?.signals ?? null;
+    return cached?.signals ?? null;
   }
 }
 
@@ -66,12 +75,13 @@ export async function getCachedEDASignals(): Promise<ContentEDASignals | null> {
  */
 export async function getContentTypeWeights(
   days: number = 30,
+  accountSetId?: string | null,
 ): Promise<Map<string, CategoryScore>> {
-  const liveScores = await getContentCategoryScores(days);
+  const liveScores = await getContentCategoryScores(days, accountSetId);
   const liveMap = new Map(liveScores.map((s) => [s.category, s]));
 
-  // Load EDA viral scores (non-blocking, cached)
-  const eda = await getCachedEDASignals();
+  // Load EDA viral scores (non-blocking, cached, per-account)
+  const eda = await getCachedEDASignals(accountSetId);
   const viralMap = new Map(
     eda?.categoryViralScores.map((v) => [v.category, v]) ?? [],
   );
@@ -341,8 +351,9 @@ export async function selectSmartCategory(
   seed: number,
   dayOfWeek: number,
   slot?: string,
+  accountSetId?: string | null,
 ): Promise<SmartSelection> {
-  const eda = await getCachedEDASignals();
+  const eda = await getCachedEDASignals(accountSetId);
 
   // No EDA data — fall back to basic weighted selection
   if (!eda || eda.confidence === 'low') {
@@ -362,9 +373,13 @@ export async function selectSmartCategory(
 
   if (!shouldExplore) {
     // EXPLOIT: pick the best category for this day + slot combo
-    const dayBest = await getBestCategoriesForDay(dayOfWeek, exclude);
+    const dayBest = await getBestCategoriesForDay(
+      dayOfWeek,
+      exclude,
+      accountSetId,
+    );
     const slotBest = slot
-      ? await getBestCategoriesForSlot(slot, exclude)
+      ? await getBestCategoriesForSlot(slot, exclude, accountSetId)
       : null;
 
     // Intersect day-best and slot-best if both available
@@ -484,6 +499,7 @@ export async function getOptimalHourBySlot(
   slot: string,
   minDataPoints: number = 10,
   category?: string,
+  accountSetId?: string | null,
 ): Promise<number> {
   const { VIDEO_POSTING_HOURS } = await import('@/utils/posting-times');
   const defaultHour =
@@ -494,7 +510,7 @@ export async function getOptimalHourBySlot(
 
   // Level 4: check category-specific hour profile from EDA
   if (category) {
-    const eda = await getCachedEDASignals();
+    const eda = await getCachedEDASignals(accountSetId);
     if (eda && eda.confidence !== 'low') {
       const catHours = eda.categoryHourProfile
         .filter(
@@ -600,8 +616,9 @@ export async function getOptimalHourBySlot(
 export async function getBestCategoriesForSlot(
   slot: string,
   exclude: Set<string>,
+  accountSetId?: string | null,
 ): Promise<string[] | null> {
-  const eda = await getCachedEDASignals();
+  const eda = await getCachedEDASignals(accountSetId);
   if (!eda || eda.confidence === 'low') return null;
 
   const slotData = eda.categorySlotProfile
@@ -618,8 +635,9 @@ export async function getBestCategoriesForSlot(
 export async function getBestCategoriesForDay(
   dayOfWeek: number,
   exclude: Set<string>,
+  accountSetId?: string | null,
 ): Promise<string[] | null> {
-  const eda = await getCachedEDASignals();
+  const eda = await getCachedEDASignals(accountSetId);
   if (!eda || eda.confidence === 'low') return null;
 
   const dayData = eda.categoryDayProfile
@@ -636,12 +654,14 @@ export async function getBestCategoriesForDay(
  * Check if the content calendar is over-concentrated on one category.
  * Returns true if HHI > 0.25 (one category dominates ~50%+ of posts).
  */
-export async function isOverConcentrated(): Promise<{
+export async function isOverConcentrated(
+  accountSetId?: string | null,
+): Promise<{
   concentrated: boolean;
   hhi: number;
   dominantCategory?: string;
 }> {
-  const eda = await getCachedEDASignals();
+  const eda = await getCachedEDASignals(accountSetId);
   if (!eda) return { concentrated: false, hhi: 0 };
 
   const dominant = eda.categoryShares.sort((a, b) => b.share - a.share)[0];
