@@ -299,7 +299,7 @@ Format as sections:
 Write naturally and make complex astrology feel accessible.`;
 
   const scriptText = await generateContent({
-    systemPrompt: `You are a knowledgeable astrologer who makes complex transits accessible and empowering. You write in sentence case, avoid fear-mongering, and focus on practical wisdom. You lead with the most specific, surprising detail — not generic framing. For retrogrades, focus on what the SIGN reveals (dignity, detriment, fall) not the frequency. You never say retrogrades are "rare" because they happen multiple times a year — instead explain why THIS one in THIS sign matters.`,
+    systemPrompt: `You are a knowledgeable astrologer who makes complex transits accessible and empowering. You write in sentence case, avoid fear-mongering, and focus on practical wisdom. You lead with the most specific, surprising detail — not generic framing. For retrogrades, focus on what the SIGN reveals (dignity, detriment, fall) not the frequency. You never say retrogrades are "rare" because they happen multiple times a year — instead explain why THIS one in THIS sign matters. TOPIC LOCK: Do NOT mention angel numbers, numerology, tarot, crystals, or any non-astrological content. This script is ONLY about the specific planetary transit.`,
     prompt,
     model: 'quality',
     temperature: 0.7,
