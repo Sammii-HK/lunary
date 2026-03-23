@@ -115,7 +115,7 @@ Return strict JSON only:
       schema: VideoScriptSchema,
       schemaName: 'video_script',
       systemPrompt:
-        'You write grounded, pattern-focused TikTok scripts about angel numbers. You speak like a friend who noticed something interesting, not a spiritual guru. Every line is specific and actionable.',
+        'You write grounded, pattern-focused TikTok scripts about angel numbers. You speak like a friend who noticed something interesting, not a spiritual guru. Every line is specific and actionable. TOPIC LOCK: Do NOT mention astrology, zodiac signs, planets, transits, conjunctions, retrogrades, eclipses, moon phases, or any astrological concept. This script is ONLY about the angel number pattern.',
       model: 'quality',
       temperature: 0.75,
       maxTokens: 400,

@@ -92,7 +92,7 @@ Format as sections:
 Write naturally and make complex astrology feel accessible.`;
 
   const scriptText = await generateContent({
-    systemPrompt: `You are an astrologer who makes complex transits accessible and empowering. You write in sentence case, avoid fear-mongering, and focus on practical wisdom. You explain WHY transits matter in ways regular people can understand and use.`,
+    systemPrompt: `You are an astrologer who makes complex transits accessible and empowering. You write in sentence case, avoid fear-mongering, and focus on practical wisdom. You explain WHY transits matter in ways regular people can understand and use. TOPIC LOCK: Do NOT mention angel numbers, numerology, tarot, crystals, or any non-astrological content. This script is ONLY about the specific planetary transit.`,
     prompt,
     model: 'quality',
     temperature: 0.7,
@@ -102,7 +102,12 @@ Write naturally and make complex astrology feel accessible.`;
   // Parse sections
   const sections = parseTransitSections(scriptText);
 
-  const wordCount = scriptText.split(/\s+/).length;
+  // Build clean fullScript from parsed section content (strips [HOOK], [MEANING] etc. headers)
+  const fullScript = sections
+    .map((s) => s.content)
+    .filter(Boolean)
+    .join('\n');
+  const wordCount = fullScript.split(/\s+/).length;
 
   return {
     themeId: 'transit-alert',
@@ -114,7 +119,7 @@ Write naturally and make complex astrology feel accessible.`;
     contentType: 'transit-alert',
     platform: 'tiktok',
     sections,
-    fullScript: scriptText,
+    fullScript,
     wordCount,
     estimatedDuration: '30s',
     scheduledDate,
