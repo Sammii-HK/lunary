@@ -20,16 +20,12 @@
       "schedule": "30 7 * * *"
     },
     {
-      "path": "/api/cron/weekly-content",
-      "schedule": "0 7 * * 0"
-    },
-    {
       "path": "/api/cron/daily-stories",
-      "schedule": "30 8 * * *"
+      "schedule": "0 12 * * *"
     },
     {
       "path": "/api/cron/daily-carousels",
-      "schedule": "0 9 * * *"
+      "schedule": "30 12 * * *"
     },
     {
       "path": "/api/cron/daily-cosmic-pulse",
@@ -62,10 +58,6 @@
     {
       "path": "/api/cron/generate-weekly-challenge",
       "schedule": "0 7 * * 1"
-    },
-    {
-      "path": "/api/cron/sammii-og",
-      "schedule": "30 9 * * *"
     },
     {
       "path": "/api/cron/bip-weekly",
@@ -120,12 +112,12 @@
       "schedule": "0 22 * * *"
     },
     {
-      "path": "/api/cron/cosmic-forecast",
-      "schedule": "0 7 * * 1"
-    },
-    {
       "path": "/api/cron/weekly-wrapup",
       "schedule": "0 7 * * 0"
+    },
+    {
+      "path": "/api/cron/transit-blog-generate",
+      "schedule": "0 10 * * 3"
     }
   ]
 }

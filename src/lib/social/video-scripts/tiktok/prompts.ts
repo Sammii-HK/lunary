@@ -237,6 +237,8 @@ Keyword phrase: ${searchPhrase}
 Focus: ${facet.focus}
 ${buildScopeGuard(facet.title)}
 
+TOPIC ISOLATION (non-negotiable): Every line must be about "${facet.title}". Do NOT mention other content types. If writing about angel numbers, no conjunctions or transits. If writing about a transit, no angel numbers or numerology. Grimoire data and orbit trends are context only — never introduce off-topic subjects.
+
 TONE: ${voiceConfig.tone}
 
 WORD BUDGET (NON-NEGOTIABLE):

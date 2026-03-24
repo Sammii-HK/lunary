@@ -24,6 +24,7 @@ export async function GET() {
     'sitemap-cusps.xml',
     'sitemap-yearly-transits.xml',
     'sitemap-images.xml',
+    'sitemap-transit-blog.xml',
   ];
 
   const sitemapEntries = sitemaps

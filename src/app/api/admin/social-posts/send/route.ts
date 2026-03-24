@@ -518,6 +518,39 @@ export async function POST(request: NextRequest) {
 
     // Use content from request if provided, otherwise use from DB (which may have been edited)
     const primaryPost = postDataFromDb.rows[0] as DbPostRow;
+
+    // Sanitise postId for safe logging (user-provided value)
+    const safePostId = String(postId).replace(/[\r\n\x00-\x1F\x7F]/g, '');
+
+    // Guard against double-send: if already sent, return early without re-posting
+    if (primaryPost.status === 'sent') {
+      console.warn(
+        `[send] Post ${safePostId} already sent — skipping duplicate send`,
+      );
+      return NextResponse.json(
+        { success: false, error: 'Post already sent' },
+        { status: 409 },
+      );
+    }
+
+    // Atomically claim the post by marking it sent before we do any external calls.
+    // This prevents a second concurrent cron run from picking up the same post.
+    const claimResult = await sql`
+      UPDATE social_posts
+      SET status = 'sent', updated_at = NOW()
+      WHERE id = ${postId} AND status != 'sent'
+      RETURNING id
+    `;
+    if ((claimResult.rowCount ?? 0) === 0) {
+      console.warn(
+        `[send] Post ${safePostId} was claimed by another process — skipping`,
+      );
+      return NextResponse.json(
+        { success: false, error: 'Post already claimed' },
+        { status: 409 },
+      );
+    }
+
     const actualContent = content || primaryPost.content;
     const actualScheduledDate = scheduledDate || primaryPost.scheduled_date;
 

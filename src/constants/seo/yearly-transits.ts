@@ -791,6 +791,414 @@ const RAW_TRANSITS: YearlyTransit[] = [
     ],
     tone: 'Strong but sensible. Step back from proving yourself and lean into generous leadership that steadies others.',
   },
+
+  // ---------------------------------------------------------------------------
+  // Major conjunctions
+  // ---------------------------------------------------------------------------
+  {
+    id: 'saturn-neptune-conjunction-aries-2025',
+    year: 2025,
+    planet: 'Saturn',
+    transitType: 'Saturn-Neptune Conjunction',
+    title: 'Saturn-Neptune Conjunction in Aries 2025',
+    dates: 'First pass: July 16, 2025. Exact conjunction: February 21, 2026',
+    signs: ['Aries'],
+    description:
+      'Saturn and Neptune meet in Aries for the first time since 1989. This once-in-a-generation conjunction merges structure with dreams, discipline with imagination. The first pass on July 16 2025 sets the tone; the exact conjunction on February 21 2026 crystallises it. Both planets entering Aries together signals a collective reset in how we pursue ideals.',
+    themes: [
+      'merging dreams with discipline',
+      'spiritual maturity',
+      'idealistic action',
+      'dissolving old structures',
+    ],
+    doList: [
+      'get serious about a creative or spiritual vision',
+      'build practical foundations for idealistic goals',
+      'face illusions honestly',
+      'commit to causes that matter',
+    ],
+    avoidList: [
+      'escapism disguised as spirituality',
+      'rigid thinking that blocks imagination',
+      'expecting overnight transformation',
+      'cynicism about dreams',
+    ],
+    tone: 'Rare and deeply meaningful. When the taskmaster meets the dreamer in the warrior sign, it is time to build something visionary with real bones.',
+    startDate: new Date('2025-07-16T00:00:00Z'),
+    endDate: new Date('2026-02-21T00:00:00Z'),
+  },
+  {
+    id: 'saturn-uranus-conjunction-gemini-2032',
+    year: 2032,
+    planet: 'Saturn',
+    transitType: 'Saturn-Uranus Conjunction',
+    title: 'Saturn-Uranus Conjunction in Gemini 2032',
+    dates: 'June 28, 2032',
+    signs: ['Gemini'],
+    description:
+      'Saturn and Uranus meet in Gemini, fusing stability with revolution in the sign of communication. The last Saturn-Uranus conjunction was in 1988 in Sagittarius. This one rewrites how we structure information, education, and media. Expect breakthroughs in AI governance, communication infrastructure, and how truth is verified.',
+    themes: [
+      'revolutionary structure',
+      'communication overhaul',
+      'information integrity',
+      'technological accountability',
+    ],
+    doList: [
+      'embrace new communication systems',
+      'question information structures',
+      'balance innovation with reliability',
+      'invest in education and literacy',
+    ],
+    avoidList: [
+      'clinging to outdated media',
+      'resisting technological change',
+      'spreading unverified information',
+      'fear of disruption',
+    ],
+    tone: 'Electric and structural. The old guard of communication meets its radical upgrade. Think less about what is said and more about how truth travels.',
+    startDate: new Date('2032-06-28T00:00:00Z'),
+    endDate: new Date('2032-06-28T00:00:00Z'),
+  },
+  {
+    id: 'jupiter-neptune-conjunction-aries-2035',
+    year: 2035,
+    planet: 'Jupiter',
+    transitType: 'Jupiter-Neptune Conjunction',
+    title: 'Jupiter-Neptune Conjunction in Aries 2035',
+    dates: 'March 25, 2035',
+    signs: ['Aries'],
+    description:
+      'Jupiter and Neptune unite in Aries, expanding spiritual vision and idealistic ambition to extraordinary levels. The last Jupiter-Neptune conjunction was in Pisces in 2022. In Aries, this energy becomes active, pioneering, and personally charged. Expect a wave of visionary leadership, spiritual entrepreneurship, and collective inspiration.',
+    themes: [
+      'visionary expansion',
+      'spiritual leadership',
+      'inspired action',
+      'cosmic optimism',
+    ],
+    doList: [
+      'dream bigger than you think is reasonable',
+      'launch spiritual or creative projects',
+      'trust your intuition and act on it',
+      'connect with communities that share your vision',
+    ],
+    avoidList: [
+      'grandiose delusions',
+      'overlooking practical details',
+      'following false prophets',
+      'escapism through excess',
+    ],
+    tone: 'Expansive and transcendent. When the planet of abundance meets the planet of dreams in the sign of new beginnings, the cosmos is giving you permission to aim impossibly high.',
+    startDate: new Date('2035-03-25T00:00:00Z'),
+    endDate: new Date('2035-03-25T00:00:00Z'),
+  },
+  {
+    id: 'jupiter-pluto-conjunction-aquarius-2033',
+    year: 2033,
+    planet: 'Jupiter',
+    transitType: 'Jupiter-Pluto Conjunction',
+    title: 'Jupiter-Pluto Conjunction in Aquarius 2033',
+    dates: 'February 5, 2033',
+    signs: ['Aquarius'],
+    description:
+      'Jupiter and Pluto meet in Aquarius, amplifying collective transformation and the power of movements. The last Jupiter-Pluto conjunction was in Capricorn in 2020, coinciding with the pandemic. In Aquarius, this conjunction empowers grassroots movements, technological revolution, and radical reimagining of social structures.',
+    themes: [
+      'collective empowerment',
+      'technological transformation',
+      'social revolution',
+      'power to the people',
+    ],
+    doList: [
+      'join or lead movements aligned with your values',
+      'use technology as a force for good',
+      'challenge power structures that no longer serve',
+      'think in terms of community, not just individual gain',
+    ],
+    avoidList: [
+      'manipulative group dynamics',
+      'technology addiction',
+      'extremism in any direction',
+      'losing individuality in the crowd',
+    ],
+    tone: 'Powerful and collective. When the amplifier meets the transformer in the sign of the people, small actions can reshape civilisation.',
+    startDate: new Date('2033-02-05T00:00:00Z'),
+    endDate: new Date('2033-02-05T00:00:00Z'),
+  },
+
+  // ---------------------------------------------------------------------------
+  // Pluto in Aquarius (generational shift)
+  // ---------------------------------------------------------------------------
+  {
+    id: 'pluto-aquarius-2024',
+    year: 2024,
+    planet: 'Pluto',
+    transitType: 'Pluto Transit',
+    title: 'Pluto in Aquarius 2024-2044',
+    dates: 'November 19, 2024 - January 19, 2044',
+    signs: ['Aquarius'],
+    description:
+      'Pluto enters Aquarius for the first time since the French and American Revolutions. This 20-year transit transforms technology, governance, collective power, and what it means to be an individual within society. The last time Pluto was in Aquarius (1778-1798), two revolutions rewrote civilisation.',
+    themes: [
+      'collective transformation',
+      'technological revolution',
+      'decentralisation',
+      'social restructuring',
+    ],
+    doList: [
+      'engage with technology consciously',
+      'participate in community-building',
+      'question power structures',
+      'balance individual freedom with collective responsibility',
+    ],
+    avoidList: [
+      'blind tech adoption',
+      'surrendering privacy without thought',
+      'isolation from community',
+      'extremist tribalism',
+    ],
+    tone: 'Generational and tectonic. This is not a transit you feel in a month -- it is a transit that reshapes the world you live in over 20 years.',
+    startDate: new Date('2024-11-19T00:00:00Z'),
+    endDate: new Date('2044-01-19T00:00:00Z'),
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mercury retrogrades 2025
+  // ---------------------------------------------------------------------------
+  {
+    id: 'mercury-retrograde-aries-2025',
+    year: 2025,
+    planet: 'Mercury',
+    transitType: 'Mercury Retrograde',
+    title: 'Mercury Retrograde in Aries March 2025',
+    dates: 'March 16 - April 8, 2025',
+    signs: ['Aries'],
+    description:
+      'Mercury stations retrograde in Aries, slowing down impulsive communication and forcing a review of how you assert yourself. In the sign of the warrior, expect misunderstandings around identity, leadership, and hasty decisions.',
+    themes: [
+      'communication review',
+      'identity reflection',
+      'impulsive errors',
+      'rethinking plans',
+    ],
+    doList: [
+      'pause before reacting',
+      'revisit old conversations',
+      'back up devices',
+      'reflect on how you present yourself',
+    ],
+    avoidList: [
+      'starting arguments',
+      'signing contracts impulsively',
+      'launching new projects',
+      'assuming people understand your tone',
+    ],
+    tone: 'Frustrating but useful. Mercury retrograde in Aries asks you to slow down the warrior and let the thinker catch up.',
+    startDate: new Date('2025-03-16T00:00:00Z'),
+    endDate: new Date('2025-04-08T00:00:00Z'),
+  },
+  {
+    id: 'mercury-retrograde-leo-2025',
+    year: 2025,
+    planet: 'Mercury',
+    transitType: 'Mercury Retrograde',
+    title: 'Mercury Retrograde in Leo July 2025',
+    dates: 'July 18 - August 11, 2025',
+    signs: ['Leo'],
+    description:
+      'Mercury retrogrades in Leo, revisiting themes of self-expression, creativity, and how you seek recognition. Drama in communication is likely -- old creative projects may resurface, and ego-driven misunderstandings need careful handling.',
+    themes: [
+      'creative review',
+      'ego in communication',
+      'self-expression',
+      'past recognition',
+    ],
+    doList: [
+      'revisit creative projects',
+      'edit rather than publish',
+      'reconnect with your authentic voice',
+      'let go of needing validation',
+    ],
+    avoidList: [
+      'attention-seeking behaviour',
+      'dramatic public statements',
+      'ignoring your creative impulses',
+      'taking criticism personally',
+    ],
+    tone: 'Theatrical and reflective. The spotlight turns inward -- use it to refine your creative voice rather than perform.',
+    startDate: new Date('2025-07-18T00:00:00Z'),
+    endDate: new Date('2025-08-11T00:00:00Z'),
+  },
+  {
+    id: 'mercury-retrograde-sagittarius-2025',
+    year: 2025,
+    planet: 'Mercury',
+    transitType: 'Mercury Retrograde',
+    title: 'Mercury Retrograde in Sagittarius November 2025',
+    dates: 'November 11 - December 1, 2025',
+    signs: ['Sagittarius'],
+    description:
+      'Mercury retrogrades in Sagittarius during the holiday season, disrupting travel plans, philosophical debates, and big-picture thinking. Beliefs you took for granted may need revisiting. International communication and publishing are especially affected.',
+    themes: [
+      'belief systems',
+      'travel disruptions',
+      'philosophical review',
+      'international miscommunication',
+    ],
+    doList: [
+      'double-check travel bookings',
+      'revisit your beliefs and assumptions',
+      'finish writing projects',
+      'have open-minded conversations',
+    ],
+    avoidList: [
+      'booking last-minute travel',
+      'preaching your worldview',
+      'publishing without editing',
+      'dismissing other perspectives',
+    ],
+    tone: 'Expansive and clumsy. Sagittarius wants to run free but Mercury retrograde keeps tripping over the details.',
+    startDate: new Date('2025-11-11T00:00:00Z'),
+    endDate: new Date('2025-12-01T00:00:00Z'),
+  },
+
+  // ---------------------------------------------------------------------------
+  // Venus retrograde 2025
+  // ---------------------------------------------------------------------------
+  {
+    id: 'venus-retrograde-aries-2025',
+    year: 2025,
+    planet: 'Venus',
+    transitType: 'Venus Retrograde',
+    title: 'Venus Retrograde in Aries 2025',
+    dates: 'March 3 - April 13, 2025',
+    signs: ['Aries'],
+    description:
+      'Venus retrograde in Aries forces a deep reassessment of relationships, self-worth, and desire. In the sign of independence, expect past lovers to resurface, financial decisions to need review, and a fundamental questioning of what you truly value versus what you chase impulsively.',
+    themes: [
+      'relationship review',
+      'self-worth',
+      'desire vs need',
+      'financial reassessment',
+    ],
+    doList: [
+      'reflect on relationship patterns',
+      'reassess your finances',
+      'reconnect with what you genuinely value',
+      'practice self-love',
+    ],
+    avoidList: [
+      'starting new relationships',
+      'major purchases',
+      'cosmetic procedures',
+      'ignoring red flags from the past',
+    ],
+    tone: 'Intense and revealing. Venus retrograde in Aries strips away the performance of love and asks what is real underneath.',
+    startDate: new Date('2025-03-03T00:00:00Z'),
+    endDate: new Date('2025-04-13T00:00:00Z'),
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mars retrograde 2024-2025
+  // ---------------------------------------------------------------------------
+  {
+    id: 'mars-retrograde-leo-2025',
+    year: 2025,
+    planet: 'Mars',
+    transitType: 'Mars Retrograde',
+    title: 'Mars Retrograde in Leo 2024-2025',
+    dates: 'December 8, 2024 - February 25, 2025',
+    signs: ['Leo'],
+    description:
+      'Mars retrogrades in Leo, cooling the fire of ambition, anger, and drive. In the sign of creative courage, this retrograde forces a review of how you assert yourself, compete, and channel your energy. Physical energy may dip, and old frustrations can resurface for resolution.',
+    themes: [
+      'anger review',
+      'ambition recalibration',
+      'creative blocks',
+      'energy management',
+    ],
+    doList: [
+      'reflect on how you handle conflict',
+      'revisit stalled projects',
+      'rest and recover',
+      'channel frustration into creative work',
+    ],
+    avoidList: [
+      'picking fights',
+      'overexertion',
+      'starting competitive ventures',
+      'suppressing anger',
+    ],
+    tone: 'Slow-burning and confrontational. Mars retrograde in Leo is the universe asking you to fight smarter, not louder.',
+    startDate: new Date('2024-12-08T00:00:00Z'),
+    endDate: new Date('2025-02-25T00:00:00Z'),
+  },
+
+  // ---------------------------------------------------------------------------
+  // Eclipse seasons 2025
+  // ---------------------------------------------------------------------------
+  {
+    id: 'eclipse-season-spring-2025',
+    year: 2025,
+    planet: 'Moon',
+    transitType: 'Eclipse Season',
+    title: 'Eclipse Season Spring 2025: Virgo-Aries',
+    dates: 'March 14 - March 29, 2025',
+    signs: ['Virgo', 'Aries'],
+    description:
+      'The spring 2025 eclipse season opens with a total lunar eclipse in Virgo on March 14 and closes with a partial solar eclipse in Aries on March 29. Lunar eclipses illuminate what needs releasing; solar eclipses open new portals. This axis highlights the tension between service and self, perfection and impulse.',
+    themes: [
+      'endings and beginnings',
+      'service vs self',
+      'letting go of perfectionism',
+      'bold new starts',
+    ],
+    doList: [
+      'journal through the eclipse window',
+      'release habits that no longer serve you',
+      'set intentions on the solar eclipse',
+      'pay attention to what the universe removes',
+    ],
+    avoidList: [
+      'forcing outcomes',
+      'manifesting during lunar eclipses',
+      'ignoring emotional signals',
+      'making permanent decisions impulsively',
+    ],
+    tone: 'Intense and fated. Eclipse seasons accelerate change -- what needs to end, ends. What needs to begin, begins. Your job is to let it.',
+    startDate: new Date('2025-03-14T00:00:00Z'),
+    endDate: new Date('2025-03-29T00:00:00Z'),
+  },
+  {
+    id: 'eclipse-season-autumn-2025',
+    year: 2025,
+    planet: 'Moon',
+    transitType: 'Eclipse Season',
+    title: 'Eclipse Season Autumn 2025: Pisces-Virgo',
+    dates: 'September 7 - September 21, 2025',
+    signs: ['Pisces', 'Virgo'],
+    description:
+      'The autumn 2025 eclipse season features a total lunar eclipse in Pisces on September 7 and a partial solar eclipse in Virgo on September 21. This season dissolves illusions while demanding practical clarity. Spiritual growth meets grounded action.',
+    themes: [
+      'spiritual clarity',
+      'dissolving illusions',
+      'practical spirituality',
+      'health and healing',
+    ],
+    doList: [
+      'release spiritual bypassing',
+      'ground your intuition in action',
+      'review health routines',
+      'trust what is ending',
+    ],
+    avoidList: [
+      'escapism',
+      'obsessing over details',
+      'resisting emotional release',
+      'clinging to what the eclipse removes',
+    ],
+    tone: 'Mystical and cleansing. The Pisces-Virgo axis washes away what is false and asks you to build something real from what remains.',
+    startDate: new Date('2025-09-07T00:00:00Z'),
+    endDate: new Date('2025-09-21T00:00:00Z'),
+  },
 ];
 
 /**

@@ -215,7 +215,7 @@ export async function getVideoScripts(filters?: {
   const scripts: VideoScript[] = [];
   for (const row of result.rows) {
     const scheduledDate = new Date(row.scheduled_date);
-    const topic = row.topic || row.facet_title || row.theme_name;
+    const topic = row.topic || row.theme_name;
     const category = THEME_CATEGORY_BY_NAME.get(row.theme_name);
 
     const ensuredHook = ensureVideoHook(row.full_script, {

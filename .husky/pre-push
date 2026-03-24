@@ -10,10 +10,60 @@ while read local_ref local_oid remote_ref remote_oid; do
   fi
 done
 
-# Require a green build before pushing.
-# The build takes ~8min which kills SSH, so we check a stamp file instead.
-# Run: pnpm build (or npx next build) before pushing. The pre-commit hook
-# or a manual run creates .build-ok with the HEAD commit hash.
+# ──────────────────────────────────────────────────
+# Gate 1: Lint
+# ──────────────────────────────────────────────────
+echo "🔍 Running lint..."
+if ! pnpm lint --quiet 2>/dev/null; then
+  echo "❌ Lint failed. Fix lint errors before pushing."
+  exit 1
+fi
+echo "✅ Lint passed."
+
+# ──────────────────────────────────────────────────
+# Gate 2: Type check (changed files only)
+# Only block on type errors in files touched by this branch.
+# Pre-existing errors in unchanged files are tech debt, not blockers.
+# ──────────────────────────────────────────────────
+echo "🔍 Running type check..."
+TSC_ERRORS=$(pnpm tsc --noEmit 2>&1 || true)
+CHANGED_FILES=$(git diff origin/main --name-only -- '*.ts' '*.tsx' | sed 's|^|^|' | paste -sd'|' -)
+if [ -n "$CHANGED_FILES" ]; then
+  OUR_ERRORS=$(echo "$TSC_ERRORS" | grep "error TS" | grep -E "$CHANGED_FILES" || true)
+  if [ -n "$OUR_ERRORS" ]; then
+    echo "❌ Type errors in changed files:"
+    echo "$OUR_ERRORS"
+    exit 1
+  fi
+fi
+echo "✅ Type check passed."
+
+# ──────────────────────────────────────────────────
+# Gate 3: Unit tests
+# ──────────────────────────────────────────────────
+echo "🧪 Running tests..."
+if ! pnpm test 2>/dev/null; then
+  echo "❌ Tests failed. Fix failing tests before pushing."
+  exit 1
+fi
+echo "✅ Tests passed."
+
+# ──────────────────────────────────────────────────
+# Gate 4: Security audit (block on critical only)
+# ──────────────────────────────────────────────────
+echo "🔒 Running security audit..."
+AUDIT_OUTPUT=$(pnpm audit --prod 2>&1 || true)
+if echo "$AUDIT_OUTPUT" | grep -qi "critical"; then
+  echo "⚠️  Security audit found critical vulnerabilities:"
+  echo "$AUDIT_OUTPUT" | tail -20
+  echo "   Run 'pnpm audit' for details. Blocking push."
+  exit 1
+fi
+echo "✅ Security audit passed."
+
+# ──────────────────────────────────────────────────
+# Gate 5: Build stamp (build takes ~8min, use stamp)
+# ──────────────────────────────────────────────────
 BUILD_STAMP=".build-ok"
 HEAD_SHA=$(git rev-parse HEAD)
 
@@ -29,7 +79,7 @@ if [ ! -f "$BUILD_STAMP" ] || [ "$(cat "$BUILD_STAMP")" != "$HEAD_SHA" ]; then
   exit 1
 fi
 
-echo "✅ Build stamp matches HEAD. Push allowed."
+echo "✅ All gates passed. Push allowed."
 
 # Check if cloudflare-worker has changes and deploy if needed
 git diff --stat HEAD@{1}..HEAD 2>/dev/null | grep -q cloudflare-worker && ./scripts/check-and-deploy-worker.sh "$@" || true

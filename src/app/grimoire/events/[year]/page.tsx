@@ -588,7 +588,7 @@ While these events affect everyone, their impact on your personal chart is uniqu
     >
       {/* Custom content: Events Calendar */}
       <div className='mt-8 space-y-8'>
-        {nextYear <= maxYear && (
+        {nextYear <= END_YEAR && (
           <section className='rounded-2xl border border-zinc-800 bg-zinc-900/50 px-6 py-5'>
             <Heading as='h2' variant='h3' className='text-zinc-100 mb-3'>
               Upcoming events
