@@ -459,73 +459,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 8. Generate cosmic forecast videos (medium + long form)
-    console.log('🎬 Generating cosmic forecast videos...');
-    let cosmicForecastResult: {
-      medium?: Record<string, unknown>;
-      long?: Record<string, unknown>;
-    } = {};
-    try {
-      // Medium-form (1-3 min) for TikTok/IG Reels/YouTube Shorts
-      const mediumResponse = await fetch(`${BASE_URL}/api/video/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'Lunary-Weekly-Content-Cron/1.0',
-        },
-        body: JSON.stringify({ type: 'medium', week: 1 }),
-      });
-
-      if (mediumResponse.ok) {
-        cosmicForecastResult.medium = await mediumResponse.json();
-        console.log('✅ Medium-form cosmic forecast generated');
-      } else {
-        console.error('❌ Medium-form forecast failed:', mediumResponse.status);
-      }
-
-      // Long-form (5-10 min) for YouTube main channel
-      const longResponse = await fetch(`${BASE_URL}/api/video/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'Lunary-Weekly-Content-Cron/1.0',
-        },
-        body: JSON.stringify({ type: 'long', week: 1 }),
-      });
-
-      if (longResponse.ok) {
-        cosmicForecastResult.long = await longResponse.json();
-        console.log('✅ Long-form cosmic forecast generated');
-      } else {
-        console.error('❌ Long-form forecast failed:', longResponse.status);
-      }
-
-      await logActivity({
-        activityType: 'content_creation',
-        activityCategory: 'content',
-        status:
-          cosmicForecastResult.medium || cosmicForecastResult.long
-            ? 'success'
-            : 'failed',
-        message: `Cosmic forecast videos: medium ${cosmicForecastResult.medium ? '✓' : '✗'}, long ${cosmicForecastResult.long ? '✓' : '✗'}`,
-        metadata: {
-          mediumGenerated: !!cosmicForecastResult.medium,
-          longGenerated: !!cosmicForecastResult.long,
-        },
-      });
-    } catch (forecastError) {
-      console.error('❌ Cosmic forecast generation error:', forecastError);
-      await logActivity({
-        activityType: 'content_creation',
-        activityCategory: 'content',
-        status: 'failed',
-        message: 'Cosmic forecast generation error',
-        errorMessage:
-          forecastError instanceof Error
-            ? forecastError.message
-            : 'Unknown error',
-      });
-    }
+    // Cosmic forecast videos are handled by the Monday cosmic-forecast cron
+    // and rendered on Hetzner via render-schedule-v3.sh — not duplicated here.
 
     // Generate blog preview image URL (use first day of the week)
     const blogWeekStartDate = blogData.data?.weekStart
@@ -574,11 +509,6 @@ export async function GET(request: NextRequest) {
             : youtubeResult?.skipped
               ? 'Already uploaded'
               : 'Skipped',
-          inline: true,
-        },
-        {
-          name: 'Cosmic Forecast',
-          value: `Medium: ${cosmicForecastResult.medium ? '✓' : '✗'}, Long: ${cosmicForecastResult.long ? '✓' : '✗'}`,
           inline: true,
         },
         {
@@ -637,8 +567,6 @@ export async function GET(request: NextRequest) {
           substackResult?.results?.free?.success ||
           substackResult?.results?.paid?.success ||
           false,
-        cosmicForecastMedium: !!cosmicForecastResult.medium,
-        cosmicForecastLong: !!cosmicForecastResult.long,
       },
       executionTimeMs: executionTime,
     });
@@ -688,10 +616,6 @@ export async function GET(request: NextRequest) {
             skipped: youtubeResult.skipped || false,
           }
         : null,
-      cosmicForecast: {
-        medium: cosmicForecastResult.medium ? true : false,
-        long: cosmicForecastResult.long ? true : false,
-      },
     });
   } catch (error) {
     const executionTime = Date.now() - startTime;
