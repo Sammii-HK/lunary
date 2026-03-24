@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { Sparkles, ArrowRight } from 'lucide-react';
+import { trackCtaImpression, trackCtaClick } from '@/lib/analytics';
 
 interface MidArticleEmailCaptureProps {
   topic?: string;
@@ -20,6 +22,8 @@ export function MidArticleEmailCapture({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const formRef = useRef<HTMLDivElement>(null);
+  const impressionTracked = useRef(false);
+  const pathname = usePathname() || '';
 
   useEffect(() => {
     // Don't show if already signed up or dismissed this session
@@ -39,6 +43,19 @@ export function MidArticleEmailCapture({
       const percent = window.scrollY / scrollable;
       if (percent > 0.5 && !visible) {
         setVisible(true);
+        if (!impressionTracked.current) {
+          impressionTracked.current = true;
+          trackCtaImpression({
+            hub: hub || 'unknown',
+            ctaId: 'mid_article_email_capture',
+            location: 'seo_mid_article_email',
+            label:
+              hub === 'horoscopes'
+                ? 'Send me my horoscope'
+                : 'Show me my chart',
+            pagePath: pathname,
+          });
+        }
       }
     };
 
@@ -49,6 +66,14 @@ export function MidArticleEmailCapture({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || loading) return;
+
+    trackCtaClick({
+      hub: hub || 'unknown',
+      ctaId: 'mid_article_email_capture',
+      location: 'seo_mid_article_email',
+      label: hub === 'horoscopes' ? 'Send me my horoscope' : 'Show me my chart',
+      pagePath: pathname,
+    });
 
     setLoading(true);
     setError('');

@@ -421,10 +421,16 @@ function getOriginMetadata(): Record<string, string> {
   }
 
   const attribution = getStoredAttribution();
+  const ctaAttribution = getCtaAttribution();
   const pathname = window.location.pathname || '/';
-  const originPage = attribution?.landingPage || pathname;
-  const originHub = getContextualHub(pathname, 'universal');
   const referrer = attribution?.referrer || document.referrer || '';
+
+  // Use the CTA's original page as origin, not the current page (which is /signup/chart)
+  const originPage =
+    ctaAttribution?.cta_page || attribution?.landingPage || pathname;
+  // Use the CTA's hub if available, otherwise derive from the origin page
+  const originHub =
+    ctaAttribution?.cta_hub || getContextualHub(originPage, 'universal');
 
   let originType: 'seo' | 'internal' | 'direct' = 'direct';
 
@@ -445,6 +451,8 @@ function getOriginMetadata(): Record<string, string> {
     origin_hub: originHub,
     origin_page: originPage,
     origin_type: originType,
+    // Include CTA attribution so we know which CTA converted
+    ...(ctaAttribution || {}),
   };
 }
 
@@ -658,7 +666,64 @@ export async function trackCtaImpression(
   }
 }
 
+const CTA_ATTRIBUTION_KEY = 'lunary_last_cta_click';
+
+/**
+ * Store the last CTA click context in sessionStorage so we can attribute
+ * signups back to the specific CTA that converted the user.
+ */
+function storeCtaAttribution(payload: CtaClickPayload): void {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(
+      CTA_ATTRIBUTION_KEY,
+      JSON.stringify({
+        hub: payload.hub,
+        ctaId: payload.ctaId,
+        location: payload.location,
+        label: payload.label,
+        pagePath: payload.pagePath,
+        ctaVariant: payload.ctaVariant,
+        abTest: payload.abTest,
+        abVariant: payload.abVariant,
+        timestamp: Date.now(),
+      }),
+    );
+  } catch {
+    // sessionStorage may be unavailable
+  }
+}
+
+/**
+ * Retrieve the last CTA click attribution from sessionStorage.
+ * Returns null if no CTA click was stored or if it's older than 30 minutes.
+ */
+export function getCtaAttribution(): Record<string, string> | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(CTA_ATTRIBUTION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    // Expire after 30 minutes
+    if (Date.now() - data.timestamp > 30 * 60 * 1000) return null;
+    const result: Record<string, string> = {};
+    if (data.hub) result.cta_hub = data.hub;
+    if (data.ctaId) result.cta_id = data.ctaId;
+    if (data.location) result.cta_location = data.location;
+    if (data.label) result.cta_label = data.label;
+    if (data.pagePath) result.cta_page = data.pagePath;
+    if (data.ctaVariant) result.cta_variant = data.ctaVariant;
+    if (data.abTest) result.cta_ab_test = data.abTest;
+    if (data.abVariant) result.cta_ab_variant = data.abVariant;
+    return result;
+  } catch {
+    return null;
+  }
+}
+
 export async function trackCtaClick(payload: CtaClickPayload): Promise<void> {
+  storeCtaAttribution(payload);
+
   try {
     const sanitized = sanitizeEventPayload({
       event: 'cta_clicked',

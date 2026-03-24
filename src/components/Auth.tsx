@@ -427,6 +427,9 @@ export function AuthComponent({
 
       invalidateAuthCache();
 
+      // Track Apple sign-in as a signup conversion
+      conversionTracking.signup();
+
       if (onSuccess) {
         onSuccess();
       } else {

@@ -61,6 +61,10 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [dismissed, isAuthenticated]);
 
+  // A/B test is scoped per hub so we can compare copy variants within each hub
+  const abTestName = `seo_sticky_cta_${nudge.hub}`;
+  const abVariantIndex = nudge.ctaVariant?.split('_').pop() || '0';
+
   // Track impression when it becomes visible
   useEffect(() => {
     if (visible && !impressionTracked.current) {
@@ -75,11 +79,11 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
         ctaVariant: nudge.ctaVariant,
         ctaHeadline: nudge.ctaHeadline,
         ctaSubline: nudge.ctaSubline,
-        abTest: 'seo_sticky_cta_copy',
-        abVariant: nudge.ctaVariant,
+        abTest: abTestName,
+        abVariant: abVariantIndex,
       });
     }
-  }, [visible, nudge, pathname]);
+  }, [visible, nudge, pathname, abTestName, abVariantIndex]);
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -106,8 +110,8 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
       ctaVariant: nudge.ctaVariant,
       ctaHeadline: nudge.ctaHeadline,
       ctaSubline: nudge.ctaSubline,
-      abTest: 'seo_sticky_cta_copy',
-      abVariant: nudge.ctaVariant,
+      abTest: abTestName,
+      abVariant: abVariantIndex,
     });
 
     if (nudge.action === 'link') {
