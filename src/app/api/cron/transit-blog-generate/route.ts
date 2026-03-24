@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
           ${JSON.stringify(content.signBreakdowns)}, ${content.closingSection},
           ${ctx.planet}, ${ctx.sign}, ${ctx.transitType},
           ${ctx.startDate}, ${ctx.endDate}, ${ctx.rarity},
-          'published', 'cron-scheduled', 'gpt-4o-mini', ${wordCount},
+          'published', 'cron-scheduled', 'claude-haiku', ${wordCount},
           ${nowStr}, ${nowStr}, ${nowStr}
         )
       `;

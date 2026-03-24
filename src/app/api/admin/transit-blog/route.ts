@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       ${JSON.stringify(content.signBreakdowns)}, ${content.closingSection},
       ${ctx.planet}, ${ctx.sign}, ${ctx.transitType},
       ${ctx.startDate}, ${ctx.endDate}, ${ctx.rarity},
-      'published', 'manual', 'gpt-4o-mini', ${wordCount},
+      'published', 'manual', 'claude-haiku', ${wordCount},
       ${now}, ${now}, ${now}
     )
   `;

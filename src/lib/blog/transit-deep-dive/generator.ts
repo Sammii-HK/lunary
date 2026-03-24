@@ -1,12 +1,12 @@
 /**
  * AI content generator for transit deep-dive blog posts.
  *
- * Uses the existing content-generator pattern with gpt-4o-mini
- * and structured JSON output via Zod schema.
+ * Uses claude CLI (--print mode) with Haiku for fast, cost-effective
+ * generation. The rich context from the context-builder means the model
+ * mostly organises and expands existing data.
  */
 
-import { generateStructuredContent } from '@/lib/ai/content-generator';
-import { z } from 'zod';
+import { execFileSync } from 'child_process';
 import type { TransitGenerationContext, TransitBlogContent } from './types';
 
 const ZODIAC_SIGNS = [
@@ -24,21 +24,10 @@ const ZODIAC_SIGNS = [
   'pisces',
 ] as const;
 
-const TransitBlogSchema = z.object({
-  title: z.string(),
-  subtitle: z.string(),
-  metaDescription: z.string(),
-  keywords: z.array(z.string()),
-  introduction: z.string(),
-  historicalDeepDive: z.string(),
-  astronomicalContext: z.string(),
-  practicalGuidance: z.string(),
-  signBreakdowns: z.record(z.string(), z.string()),
-  closingSection: z.string(),
-});
+function buildPrompt(ctx: TransitGenerationContext): string {
+  const parts: string[] = [];
 
-function buildSystemPrompt(): string {
-  return `You are the editorial voice of Lunary, a cosmic knowledge platform. Your writing is witty, historically rich, and grounded in real astrology. You write deep-dive transit guides that help people understand what is coming and how to prepare.
+  parts.push(`You are the editorial voice of Lunary, a cosmic knowledge platform. Your writing is witty, historically rich, and grounded in real astrology. You write deep-dive transit guides that help people understand what is coming and how to prepare.
 
 Style rules:
 - UK English spelling (colour, honour, realise)
@@ -50,15 +39,7 @@ Style rules:
 - Every section should feel like it earns its word count. No filler
 - Sign breakdowns should feel personal and specific, not generic horoscope waffle
 
-Return valid JSON matching the schema exactly. No markdown code fences.`;
-}
-
-function buildUserPrompt(ctx: TransitGenerationContext): string {
-  const parts: string[] = [];
-
-  parts.push(
-    `Write a deep-dive transit blog post about: ${ctx.planet} ${ctx.transitType} in ${ctx.sign} ${ctx.year}`,
-  );
+Write a deep-dive transit blog post about: ${ctx.planet} ${ctx.transitType} in ${ctx.sign} ${ctx.year}`);
   parts.push('');
 
   // Core transit data
@@ -145,54 +126,78 @@ function buildUserPrompt(ctx: TransitGenerationContext): string {
   // Output instructions
   parts.push('');
   parts.push('## Output requirements');
-  parts.push('Generate a JSON object with these sections:');
   parts.push(
-    '- title: SEO-optimised, under 70 chars. Target search queries like "saturn in aries 2025 meaning"',
-  );
-  parts.push('- subtitle: a supporting line, 10-20 words');
-  parts.push('- metaDescription: 150-160 chars for Google snippet');
-  parts.push('- keywords: 8-12 search terms people would type');
-  parts.push(
-    '- introduction: witty opening hook, why this transit matters NOW, 200-300 words',
+    'Return ONLY a valid JSON object (no markdown fences, no explanation) with these fields:',
   );
   parts.push(
-    '- historicalDeepDive: what happened during previous transits, patterns across centuries, 400-600 words',
+    '- "title": SEO-optimised, under 70 chars. Target search queries like "saturn in aries 2025 meaning"',
+  );
+  parts.push('- "subtitle": a supporting line, 10-20 words');
+  parts.push('- "metaDescription": 150-160 chars for Google snippet');
+  parts.push('- "keywords": array of 8-12 search terms people would type');
+  parts.push(
+    '- "introduction": witty opening hook, why this transit matters NOW, 200-300 words',
   );
   parts.push(
-    '- astronomicalContext: exact dates, mechanics, retrograde windows explained simply, 200-300 words',
+    '- "historicalDeepDive": what happened during previous transits, patterns across centuries, 400-600 words',
   );
   parts.push(
-    '- practicalGuidance: nuanced do/avoid with real examples, 300-400 words',
+    '- "astronomicalContext": exact dates, mechanics, retrograde windows explained simply, 200-300 words',
   );
   parts.push(
-    '- signBreakdowns: object with ALL 12 zodiac signs as lowercase keys, 80-120 words each. Make each feel personal',
+    '- "practicalGuidance": nuanced do/avoid with real examples, 300-400 words',
   );
-  parts.push('- closingSection: forward-looking, empowering, 100-200 words');
+  parts.push(
+    '- "signBreakdowns": object with ALL 12 zodiac signs as lowercase keys (aries, taurus, gemini, cancer, leo, virgo, libra, scorpio, sagittarius, capricorn, aquarius, pisces), 80-120 words each. Make each feel personal and specific',
+  );
+  parts.push('- "closingSection": forward-looking, empowering, 100-200 words');
 
   return parts.join('\n');
 }
 
 /**
- * Generate a transit deep-dive blog post using AI.
+ * Extract JSON from a response that may be wrapped in markdown code fences.
+ */
+function extractJSON(text: string): string {
+  const fenced = text.match(/```(?:json)?\s*\n?([\s\S]*?)```/);
+  if (fenced) return fenced[1].trim();
+  const jsonMatch = text.match(/(\{[\s\S]*\})/);
+  if (jsonMatch) return jsonMatch[1].trim();
+  return text.trim();
+}
+
+/**
+ * Generate a transit deep-dive blog post using claude CLI --print.
+ *
+ * Uses Haiku for speed/cost since the context is rich enough that
+ * the model mostly organises and expands existing data.
  */
 export async function generateTransitBlogPost(
   ctx: TransitGenerationContext,
 ): Promise<TransitBlogContent> {
-  const content = await generateStructuredContent({
-    prompt: buildUserPrompt(ctx),
-    systemPrompt: buildSystemPrompt(),
-    schema: TransitBlogSchema,
-    schemaName: 'TransitBlogPost',
-    temperature: 0.7,
-    maxTokens: 8000,
-  });
+  const prompt = buildPrompt(ctx);
+
+  // Call claude CLI in --print mode with Haiku
+  // execFileSync avoids shell injection -- prompt passed via stdin
+  const rawOutput = execFileSync(
+    'claude',
+    ['--print', '--model', 'haiku', '--output-format', 'text'],
+    {
+      input: prompt,
+      encoding: 'utf-8',
+      maxBuffer: 1024 * 1024, // 1MB
+      timeout: 120_000, // 2 minutes
+    },
+  );
+
+  const jsonStr = extractJSON(rawOutput);
+  const content = JSON.parse(jsonStr) as TransitBlogContent;
 
   // Validate all 12 signs are present
   const missingSigns = ZODIAC_SIGNS.filter(
     (sign) => !content.signBreakdowns[sign],
   );
   if (missingSigns.length > 0) {
-    // Fill missing signs with a generic entry rather than failing
     for (const sign of missingSigns) {
       const capitalSign = sign.charAt(0).toUpperCase() + sign.slice(1);
       content.signBreakdowns[sign] =

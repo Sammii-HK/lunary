@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
           ${JSON.stringify(content.signBreakdowns)}, ${content.closingSection},
           ${ctx.planet}, ${ctx.sign}, ${ctx.transitType},
           ${ctx.startDate}, ${ctx.endDate}, ${ctx.rarity},
-          'published', 'cron-catchup', 'gpt-4o-mini', ${wordCount},
+          'published', 'cron-catchup', 'claude-haiku', ${wordCount},
           ${now}, ${now}, ${now}
         )
       `;
