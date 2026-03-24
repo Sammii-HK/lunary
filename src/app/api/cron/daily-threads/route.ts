@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { postToSocial } from '@/lib/social/client';
+import { generateThreadsFirstComment } from '@/lib/social/first-comment-generator';
 import { sendDiscordNotification } from '@/lib/discord';
 
 export const dynamic = 'force-dynamic';
@@ -122,10 +123,17 @@ export async function GET(request: NextRequest) {
           .filter(Boolean)
           .join('\n\n');
 
+        const firstComment = generateThreadsFirstComment({
+          content,
+          pillar: post.pillar,
+          topicTag: post.topicTag,
+        });
+
         const result = await postToSocial({
           platform: 'threads',
           content,
           scheduledDate: post.scheduledTime,
+          firstComment,
           media:
             post.hasImage && post.imageUrl
               ? [

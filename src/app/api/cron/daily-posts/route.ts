@@ -75,6 +75,10 @@ import {
 } from '../../../../../utils/blog/aspectInterpretations';
 import { getSlowPlanetSignTotalDays } from '../../../../../utils/astrology/transit-duration';
 import { postToSocial, postToSocialMultiPlatform } from '@/lib/social/client';
+import {
+  generateInstagramFirstComment,
+  generateThreadsFirstComment,
+} from '@/lib/social/first-comment-generator';
 import { preUploadImage } from '@/lib/social/pre-upload-image';
 import {
   getEventCalendarForDate,
@@ -1198,6 +1202,22 @@ async function runDailyPosts(dateStr: string) {
         }
       }
 
+      // Generate per-platform first comments
+      const firstComments: Record<string, string> = {};
+      if (post.platforms.includes('instagram')) {
+        firstComments.instagram = generateInstagramFirstComment({
+          content: post.content,
+          postType: post.postType,
+          topic: post.name,
+        });
+      }
+      if (post.platforms.includes('threads')) {
+        firstComments.threads = generateThreadsFirstComment({
+          content: post.content,
+          topicTag: post.name,
+        });
+      }
+
       const multiResult = await postToSocialMultiPlatform({
         platforms: post.platforms,
         content: post.content,
@@ -1205,6 +1225,8 @@ async function runDailyPosts(dateStr: string) {
         media,
         variants,
         name: post.name,
+        firstComments:
+          Object.keys(firstComments).length > 0 ? firstComments : undefined,
         pinterestOptions: pinterestOptions as any,
         pinterestLink: post.platforms.includes('pinterest')
           ? buildUtmUrl('/grimoire', 'pinterest', 'social', 'daily_quote')
