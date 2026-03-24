@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { TransitSignAccordion } from '@/components/blog/TransitSignAccordion';
 
-export const dynamic = 'force-static';
+export const dynamic = 'force-dynamic';
 export const revalidate = 86400; // 1 day
 
 interface TransitPost {
