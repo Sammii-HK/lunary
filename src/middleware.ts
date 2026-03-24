@@ -384,6 +384,37 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
 
   const response = NextResponse.next();
 
+  // Set canonical Link header to strip UI-only query params (nav, from, ref, etc.)
+  // This tells Google the clean URL is canonical, resolving duplicate indexing
+  const UI_ONLY_PARAMS = new Set([
+    'nav',
+    'from',
+    'ref',
+    'source',
+    'utm_source',
+    'utm_medium',
+    'utm_campaign',
+    'utm_content',
+    'utm_term',
+  ]);
+  if (searchParams.size > 0) {
+    const hasUiOnlyParams = Array.from(searchParams.keys()).some((k) =>
+      UI_ONLY_PARAMS.has(k),
+    );
+    if (hasUiOnlyParams) {
+      const canonicalUrl = new URL(request.url);
+      for (const param of UI_ONLY_PARAMS) {
+        canonicalUrl.searchParams.delete(param);
+      }
+      // If no params left, strip the ? entirely
+      const canonical =
+        canonicalUrl.searchParams.size === 0
+          ? `${canonicalUrl.origin}${canonicalUrl.pathname}`
+          : canonicalUrl.toString();
+      response.headers.set('Link', `<${canonical}>; rel="canonical"`);
+    }
+  }
+
   if (!shouldSkipTracking(request, hostname) && isProd) {
     let anonId = request.cookies.get(ANON_ID_COOKIE)?.value;
 
