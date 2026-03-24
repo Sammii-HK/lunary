@@ -3,9 +3,20 @@ import {
   generateTransitYears,
 } from '@/constants/seo/yearly-transits';
 
+// Must match the range in grimoire/transits/year/[year]/page.tsx
+const START_YEAR = 2025;
+const CURRENT_YEAR = new Date().getFullYear();
+const END_YEAR = Math.max(CURRENT_YEAR + 10, START_YEAR + 10);
+
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
   const transits = generateAllTransitParams();
+
+  // Filter years to only include those the page actually renders
+  // (avoids sitemap entries that return 404/soft-404)
+  const validYears = generateTransitYears().filter(
+    (year) => year >= START_YEAR && year <= END_YEAR,
+  );
 
   const urls = [
     {
@@ -20,7 +31,7 @@ export async function GET(): Promise<Response> {
       changefreq: 'yearly',
       priority: '0.7',
     })),
-    ...generateTransitYears().map((year) => ({
+    ...validYears.map((year) => ({
       loc: `${baseUrl}/grimoire/transits/year/${year}`,
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'yearly',
