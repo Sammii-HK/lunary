@@ -5,11 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { AuthComponent } from '@/components/Auth';
 import { Heading } from '@/components/ui/Heading';
-import {
-  trackCtaImpression,
-  trackCtaClick,
-  conversionTracking,
-} from '@/lib/analytics';
+import { trackCtaImpression, conversionTracking } from '@/lib/analytics';
 import { captureEvent } from '@/lib/posthog-client';
 import { getABTestVariantClient } from '@/lib/ab-tests-client';
 
@@ -76,8 +72,9 @@ export default function SignupChartClient() {
       sessionStorage.setItem(SIGNUP_SOURCE_KEY, 'grimoire');
     } catch {}
 
-    // Track completion via ether pipeline
-    trackCtaClick({
+    // Track signup completion — use trackCtaImpression instead of trackCtaClick
+    // so we don't overwrite the original CTA attribution in sessionStorage
+    trackCtaImpression({
       ctaId: 'grimoire_signup_page_auth_complete',
       hub,
       location,

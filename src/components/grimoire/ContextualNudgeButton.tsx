@@ -22,6 +22,10 @@ export function ContextualNudgeButton({
   const impressionTracked = useRef(false);
 
   // Track impression when component mounts
+  // A/B test is scoped per hub so we can compare copy variants within each hub
+  const abTestName = `seo_cta_${nudge.hub}`;
+  const abVariantIndex = nudge.ctaVariant?.split('_').pop() || '0';
+
   useEffect(() => {
     if (!impressionTracked.current) {
       impressionTracked.current = true;
@@ -37,11 +41,11 @@ export function ContextualNudgeButton({
         ctaVariant: nudge.ctaVariant,
         ctaHeadline: nudge.ctaHeadline,
         ctaSubline: nudge.ctaSubline,
-        abTest: 'seo_cta_copy',
-        abVariant: nudge.ctaVariant,
+        abTest: abTestName,
+        abVariant: abVariantIndex,
       });
     }
-  }, [nudge, location, pathname]);
+  }, [nudge, location, pathname, abTestName, abVariantIndex]);
 
   const navigateToHref = () => {
     if (nudge.href) {
@@ -62,8 +66,8 @@ export function ContextualNudgeButton({
       ctaVariant: nudge.ctaVariant,
       ctaHeadline: nudge.ctaHeadline,
       ctaSubline: nudge.ctaSubline,
-      abTest: 'seo_cta_copy',
-      abVariant: nudge.ctaVariant,
+      abTest: abTestName,
+      abVariant: abVariantIndex,
     });
 
     if (nudge.action === 'link') {

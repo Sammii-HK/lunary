@@ -33,8 +33,16 @@ interface ABTestResult {
   totalConversions: number;
 }
 
+interface HubMetrics {
+  hub: string;
+  impressions: number;
+  conversions: number;
+  conversionRate: number;
+}
+
 export default function ABTestingPage() {
   const [tests, setTests] = useState<ABTestResult[]>([]);
+  const [hubSummary, setHubSummary] = useState<HubMetrics[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('30d');
   const [selectedTest, setSelectedTest] = useState<string | null>(null);
@@ -70,6 +78,7 @@ export default function ABTestingPage() {
       if (response.ok) {
         const data = await response.json();
         setTests(data.tests || []);
+        setHubSummary(data.hubSummary || []);
       }
     } catch (error) {
       console.error('Failed to load A/B tests:', error);
@@ -145,8 +154,6 @@ export default function ABTestingPage() {
   const getTestDisplayName = (testName: string): string => {
     const names: Record<string, string> = {
       cta_copy: 'CTA Copy (In-App, PostHog)',
-      seo_cta_copy: 'SEO CTA Copy (Contextual Nudge)',
-      seo_sticky_cta_copy: 'SEO Sticky CTA Copy',
       paywall_preview: 'Paywall Preview Style',
       homepage_features: 'Homepage Features',
       feature_preview: 'Feature Preview Blur',
@@ -155,11 +162,57 @@ export default function ABTestingPage() {
       tarot_truncation: 'Tarot Truncation Length',
       transit_limit: 'Free User Transit Limit',
       inline_cta: 'Inline CTA Visibility',
+      grimoire_signup_page: 'Grimoire Signup Page',
     };
-    return names[testName] || testName;
+    if (names[testName]) return names[testName];
+
+    // Per-hub CTA tests: seo_cta_{hub} or seo_sticky_cta_{hub}
+    const stickyMatch = testName.match(/^seo_sticky_cta_(.+)$/);
+    if (stickyMatch) {
+      return `Sticky CTA · ${formatHubName(stickyMatch[1])}`;
+    }
+    const ctaMatch = testName.match(/^seo_cta_(.+)$/);
+    if (ctaMatch) {
+      return `SEO CTA · ${formatHubName(ctaMatch[1])}`;
+    }
+
+    return testName;
+  };
+
+  const formatHubName = (hub: string): string => {
+    const hubNames: Record<string, string> = {
+      horoscopes: 'Horoscopes',
+      astrology: 'Astrology',
+      transits: 'Transits',
+      numerology: 'Numerology',
+      tarot: 'Tarot',
+      moon: 'Moon',
+      houses: 'Houses',
+      planets: 'Planets',
+      aspects: 'Aspects',
+      crystals: 'Crystals',
+      spells: 'Spells & Rituals',
+      angelNumbers: 'Angel Numbers',
+      clockNumbers: 'Clock Numbers',
+      cosmicTiming: 'Cosmic Timing',
+      symbolicSystems: 'Symbolic Systems',
+      grimoireReference: 'Grimoire (General)',
+      modernWitchcraft: 'Modern Witchcraft',
+      personalContext: 'Personal Context',
+      weeklyForecast: 'Weekly Forecast',
+      universal: 'Universal',
+      tarotSpreadsIndex: 'Tarot Spreads Index',
+      tarotSpreadsDetail: 'Tarot Spread Detail',
+    };
+    return hubNames[hub] || hub;
   };
 
   const formatVariantName = (name: string): string => {
+    // Numeric variants from per-hub CTA tests → "Copy A", "Copy B", etc.
+    if (/^\d+$/.test(name)) {
+      const letter = String.fromCharCode(65 + parseInt(name)); // 0→A, 1→B, etc.
+      return `Copy ${letter}`;
+    }
     // Convert kebab-case or snake_case to Title Case
     return name
       .replace(/[-_]/g, ' ')
@@ -210,6 +263,63 @@ export default function ABTestingPage() {
           </Card>
         ) : (
           <div className='grid gap-6'>
+            {/* Hub Conversion Summary */}
+            {hubSummary.length > 0 && (
+              <Card className='bg-zinc-900 border-zinc-800'>
+                <CardHeader>
+                  <div className='flex items-center gap-2'>
+                    <BarChart3 className='w-5 h-5 text-lunary-primary-400' />
+                    <CardTitle className='text-xl'>
+                      Hub Conversion Summary
+                    </CardTitle>
+                  </div>
+                  <p className='text-sm text-zinc-500'>
+                    Which grimoire sections convert SEO visitors best
+                    (contextual nudge + sticky CTA combined)
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className='grid gap-2'>
+                    {hubSummary.map((hub) => {
+                      const maxRate = Math.max(
+                        ...hubSummary
+                          .filter((h) => h.impressions >= 20)
+                          .map((h) => h.conversionRate),
+                        1,
+                      );
+                      const barWidth =
+                        hub.impressions >= 20
+                          ? (hub.conversionRate / maxRate) * 100
+                          : 0;
+
+                      return (
+                        <div
+                          key={hub.hub}
+                          className='flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-zinc-800/50'
+                        >
+                          <span className='text-sm text-zinc-300 w-40 shrink-0'>
+                            {formatHubName(hub.hub)}
+                          </span>
+                          <div className='flex-1 h-6 bg-zinc-800 rounded-full overflow-hidden relative'>
+                            <div
+                              className='h-full bg-lunary-primary-600 rounded-full transition-all'
+                              style={{ width: `${Math.max(barWidth, 1)}%` }}
+                            />
+                          </div>
+                          <span className='text-sm font-mono text-lunary-primary-300 w-16 text-right'>
+                            {hub.conversionRate.toFixed(1)}%
+                          </span>
+                          <span className='text-xs text-zinc-500 w-24 text-right'>
+                            {hub.conversions}/{hub.impressions.toLocaleString()}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Auto-Apply Suggestions */}
             {autoSuggestions.length > 0 && (
               <Card className='bg-gradient-to-r from-lunary-primary-900/40 to-pink-900/40 border-lunary-primary-700'>

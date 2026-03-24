@@ -7,6 +7,9 @@ export const dynamic = 'force-dynamic';
 // Tests that have been concluded and hardcoded — exclude from dashboard
 const CONCLUDED_TESTS = new Set([
   'inline_cta', // sparkles won (0.79% CTR, 90% confidence). Hardcoded in components.
+  // Legacy flat CTA tests — replaced by per-hub tests (seo_cta_{hub}, seo_sticky_cta_{hub})
+  'seo_cta_copy',
+  'seo_sticky_cta_copy',
 ]);
 
 export interface VariantMetrics {
@@ -194,7 +197,11 @@ export async function GET(request: NextRequest) {
     // Sort by total impressions descending (most active tests first)
     results.sort((a, b) => b.totalImpressions - a.totalImpressions);
 
-    return NextResponse.json({ tests: results });
+    // Build hub summary — aggregate across both old flat tests and new per-hub tests
+    // This answers "which grimoire hub converts best?" regardless of copy variant
+    const hubSummary = await buildHubSummary(dateCutoff);
+
+    return NextResponse.json({ tests: results, hubSummary });
   } catch (error) {
     console.error('Failed to fetch A/B test results:', error);
     return NextResponse.json(
@@ -205,6 +212,81 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+// Hub-level summary: aggregate impressions + conversions by grimoire hub
+// Works with both old flat test data (variant = "horoscopes_4") and new per-hub data
+interface HubMetrics {
+  hub: string;
+  impressions: number;
+  conversions: number;
+  conversionRate: number;
+}
+
+async function buildHubSummary(dateCutoff: Date): Promise<HubMetrics[]> {
+  // Query all CTA events and extract hub from either:
+  // 1. New format: test name = seo_cta_{hub} or seo_sticky_cta_{hub}
+  // 2. Old format: test name = seo_cta_copy, variant = {hub}_{index}
+  // 3. metadata->>'hub' field (tracked on all CTA events)
+  const hubData = await sql`
+    SELECT
+      COALESCE(
+        metadata->>'hub',
+        CASE
+          WHEN metadata->>'abTest' LIKE 'seo_cta_%' AND metadata->>'abTest' != 'seo_cta_copy'
+            THEN REPLACE(metadata->>'abTest', 'seo_cta_', '')
+          WHEN metadata->>'abTest' LIKE 'seo_sticky_cta_%' AND metadata->>'abTest' != 'seo_sticky_cta_copy'
+            THEN REPLACE(metadata->>'abTest', 'seo_sticky_cta_', '')
+          WHEN metadata->>'abVariant' LIKE '%_%'
+            THEN REGEXP_REPLACE(metadata->>'abVariant', '_[0-9]+$', '')
+          ELSE 'unknown'
+        END
+      ) as hub,
+      event_type,
+      COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as unique_users
+    FROM conversion_events
+    WHERE (
+      metadata->>'abTest' IN ('seo_cta_copy', 'seo_sticky_cta_copy')
+      OR metadata->>'abTest' LIKE 'seo_cta_%'
+      OR metadata->>'abTest' LIKE 'seo_sticky_cta_%'
+    )
+      AND event_type IN ('cta_impression', 'cta_clicked')
+      AND created_at >= ${dateCutoff.toISOString()}
+    GROUP BY hub, event_type
+    ORDER BY hub
+  `;
+
+  // Aggregate into hub metrics
+  const hubMap = new Map<
+    string,
+    { impressions: number; conversions: number }
+  >();
+  for (const row of hubData.rows) {
+    const hub = row.hub as string;
+    if (hub === 'unknown') continue;
+    const current = hubMap.get(hub) || { impressions: 0, conversions: 0 };
+    if (row.event_type === 'cta_impression') {
+      current.impressions = parseInt(row.unique_users as string);
+    } else if (row.event_type === 'cta_clicked') {
+      current.conversions = parseInt(row.unique_users as string);
+    }
+    hubMap.set(hub, current);
+  }
+
+  const summary: HubMetrics[] = [];
+  for (const [hub, data] of hubMap.entries()) {
+    summary.push({
+      hub,
+      impressions: data.impressions,
+      conversions: data.conversions,
+      conversionRate:
+        data.impressions > 0 ? (data.conversions / data.impressions) * 100 : 0,
+    });
+  }
+
+  // Sort by impressions descending
+  summary.sort((a, b) => b.impressions - a.impressions);
+  return summary;
 }
 
 // Simplified confidence calculation (z-test for two proportions)
