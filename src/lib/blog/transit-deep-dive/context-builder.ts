@@ -252,6 +252,105 @@ const HISTORICAL_CONTEXT: Record<
     theme:
       'Expansion through creative self-expression, performance, and visibility',
   },
+  // Conjunction-specific historical context
+  'saturn-neptune-conjunction': {
+    previousPeriods: ['1989', '1953', '1917', '1882'],
+    events: {
+      '1989': [
+        'Berlin Wall falls',
+        'Tiananmen Square protests',
+        'End of Cold War begins',
+        'World Wide Web invented',
+      ],
+      '1953': [
+        'Korean War ends',
+        'DNA structure discovered',
+        'Stalin dies',
+        'Television enters mass culture',
+      ],
+      '1917': [
+        'Russian Revolution',
+        'US enters World War I',
+        'Balfour Declaration',
+      ],
+      '1882': [
+        'Edison opens first power station',
+        'Triple Alliance formed',
+        'Immigration wave reshapes America',
+      ],
+    },
+    theme:
+      'Old orders dissolve, new visions crystallise -- the dreamer and the builder reset civilisation together',
+  },
+  'saturn-uranus-conjunction': {
+    previousPeriods: ['1988', '1942', '1897'],
+    events: {
+      '1988': [
+        'Soviet glasnost peaks',
+        'Pan Am Flight 103',
+        'First internet worm',
+      ],
+      '1942': [
+        'Manhattan Project begins',
+        'Battle of Stalingrad',
+        'Radar technology transforms warfare',
+      ],
+      '1897': ['Klondike Gold Rush', 'Electron discovered', 'Zionism founded'],
+    },
+    theme:
+      'Radical innovation forced into practical structure -- technology reshapes institutions',
+  },
+  'jupiter-neptune-conjunction': {
+    previousPeriods: ['2022', '2009', '1997', '1984'],
+    events: {
+      '2022': [
+        'ChatGPT launches',
+        'Post-pandemic spiritual renaissance',
+        'Psychedelic therapy legalisation wave',
+      ],
+      '2009': [
+        'Bitcoin whitepaper circulates',
+        'Obama inaugurated',
+        'Global financial crisis recovery',
+      ],
+      '1997': [
+        'Hong Kong handover',
+        'Princess Diana dies',
+        'Dolly the sheep cloned',
+      ],
+      '1984': [
+        'Apple Macintosh launched',
+        'Band Aid and Live Aid',
+        'Bhopal disaster',
+      ],
+    },
+    theme:
+      'Collective imagination expands -- spiritual movements, artistic revolutions, and utopian visions gain momentum',
+  },
+  'jupiter-pluto-conjunction': {
+    previousPeriods: ['2020', '2007', '1994', '1981'],
+    events: {
+      '2020': [
+        'COVID-19 pandemic',
+        'Global lockdowns',
+        'Black Lives Matter movement peaks',
+        'US election upheaval',
+      ],
+      '2007': [
+        'iPhone launched',
+        'Financial crisis begins',
+        'Social media goes mainstream',
+      ],
+      '1994': [
+        'Rwandan genocide',
+        'Mandela elected president',
+        'Amazon founded',
+      ],
+      '1981': ['AIDS epidemic identified', 'IBM PC launched', 'MTV debuts'],
+    },
+    theme:
+      'Power amplified to extremes -- pandemics, wealth concentration, mass movements, and technological power shifts',
+  },
 };
 
 /**
@@ -371,8 +470,22 @@ export function buildGenerationContext(
   transit: YearlyTransit,
 ): TransitGenerationContext {
   const sign = transit.signs[0];
-  const contextKey = `${transit.planet.toLowerCase()}-${sign.toLowerCase()}`;
-  const historicalCtx = HISTORICAL_CONTEXT[contextKey];
+  const isConjunction = transit.transitType
+    .toLowerCase()
+    .includes('conjunction');
+
+  // For conjunctions, try conjunction-specific key first (e.g. 'saturn-neptune-conjunction')
+  // then fall back to planet-sign key
+  const conjunctionKey = isConjunction
+    ? transit.transitType
+        .replace(' Conjunction', '')
+        .toLowerCase()
+        .replace(/\s+/g, '-') + '-conjunction'
+    : null;
+  const planetSignKey = `${transit.planet.toLowerCase()}-${sign.toLowerCase()}`;
+  const historicalCtx =
+    (conjunctionKey && HISTORICAL_CONTEXT[conjunctionKey]) ||
+    HISTORICAL_CONTEXT[planetSignKey];
   const ephemeris = getEphemeris(transit.planet, sign);
   const previousTransit = getPreviousTransitDates(transit.planet, sign);
   const orbitalPeriod = ORBITAL_PERIOD_YEARS[transit.planet] || null;

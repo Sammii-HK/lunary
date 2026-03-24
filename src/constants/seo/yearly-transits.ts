@@ -791,6 +791,138 @@ const RAW_TRANSITS: YearlyTransit[] = [
     ],
     tone: 'Strong but sensible. Step back from proving yourself and lean into generous leadership that steadies others.',
   },
+
+  // ---------------------------------------------------------------------------
+  // Major conjunctions
+  // ---------------------------------------------------------------------------
+  {
+    id: 'saturn-neptune-conjunction-aries-2025',
+    year: 2025,
+    planet: 'Saturn',
+    transitType: 'Saturn-Neptune Conjunction',
+    title: 'Saturn-Neptune Conjunction in Aries 2025',
+    dates: 'First pass: July 16, 2025. Exact conjunction: February 21, 2026',
+    signs: ['Aries'],
+    description:
+      'Saturn and Neptune meet in Aries for the first time since 1989. This once-in-a-generation conjunction merges structure with dreams, discipline with imagination. The first pass on July 16 2025 sets the tone; the exact conjunction on February 21 2026 crystallises it. Both planets entering Aries together signals a collective reset in how we pursue ideals.',
+    themes: [
+      'merging dreams with discipline',
+      'spiritual maturity',
+      'idealistic action',
+      'dissolving old structures',
+    ],
+    doList: [
+      'get serious about a creative or spiritual vision',
+      'build practical foundations for idealistic goals',
+      'face illusions honestly',
+      'commit to causes that matter',
+    ],
+    avoidList: [
+      'escapism disguised as spirituality',
+      'rigid thinking that blocks imagination',
+      'expecting overnight transformation',
+      'cynicism about dreams',
+    ],
+    tone: 'Rare and deeply meaningful. When the taskmaster meets the dreamer in the warrior sign, it is time to build something visionary with real bones.',
+    startDate: new Date('2025-07-16T00:00:00Z'),
+    endDate: new Date('2026-02-21T00:00:00Z'),
+  },
+  {
+    id: 'saturn-uranus-conjunction-gemini-2032',
+    year: 2032,
+    planet: 'Saturn',
+    transitType: 'Saturn-Uranus Conjunction',
+    title: 'Saturn-Uranus Conjunction in Gemini 2032',
+    dates: 'June 28, 2032',
+    signs: ['Gemini'],
+    description:
+      'Saturn and Uranus meet in Gemini, fusing stability with revolution in the sign of communication. The last Saturn-Uranus conjunction was in 1988 in Sagittarius. This one rewrites how we structure information, education, and media. Expect breakthroughs in AI governance, communication infrastructure, and how truth is verified.',
+    themes: [
+      'revolutionary structure',
+      'communication overhaul',
+      'information integrity',
+      'technological accountability',
+    ],
+    doList: [
+      'embrace new communication systems',
+      'question information structures',
+      'balance innovation with reliability',
+      'invest in education and literacy',
+    ],
+    avoidList: [
+      'clinging to outdated media',
+      'resisting technological change',
+      'spreading unverified information',
+      'fear of disruption',
+    ],
+    tone: 'Electric and structural. The old guard of communication meets its radical upgrade. Think less about what is said and more about how truth travels.',
+    startDate: new Date('2032-06-28T00:00:00Z'),
+    endDate: new Date('2032-06-28T00:00:00Z'),
+  },
+  {
+    id: 'jupiter-neptune-conjunction-aries-2035',
+    year: 2035,
+    planet: 'Jupiter',
+    transitType: 'Jupiter-Neptune Conjunction',
+    title: 'Jupiter-Neptune Conjunction in Aries 2035',
+    dates: 'March 25, 2035',
+    signs: ['Aries'],
+    description:
+      'Jupiter and Neptune unite in Aries, expanding spiritual vision and idealistic ambition to extraordinary levels. The last Jupiter-Neptune conjunction was in Pisces in 2022. In Aries, this energy becomes active, pioneering, and personally charged. Expect a wave of visionary leadership, spiritual entrepreneurship, and collective inspiration.',
+    themes: [
+      'visionary expansion',
+      'spiritual leadership',
+      'inspired action',
+      'cosmic optimism',
+    ],
+    doList: [
+      'dream bigger than you think is reasonable',
+      'launch spiritual or creative projects',
+      'trust your intuition and act on it',
+      'connect with communities that share your vision',
+    ],
+    avoidList: [
+      'grandiose delusions',
+      'overlooking practical details',
+      'following false prophets',
+      'escapism through excess',
+    ],
+    tone: 'Expansive and transcendent. When the planet of abundance meets the planet of dreams in the sign of new beginnings, the cosmos is giving you permission to aim impossibly high.',
+    startDate: new Date('2035-03-25T00:00:00Z'),
+    endDate: new Date('2035-03-25T00:00:00Z'),
+  },
+  {
+    id: 'jupiter-pluto-conjunction-aquarius-2033',
+    year: 2033,
+    planet: 'Jupiter',
+    transitType: 'Jupiter-Pluto Conjunction',
+    title: 'Jupiter-Pluto Conjunction in Aquarius 2033',
+    dates: 'February 5, 2033',
+    signs: ['Aquarius'],
+    description:
+      'Jupiter and Pluto meet in Aquarius, amplifying collective transformation and the power of movements. The last Jupiter-Pluto conjunction was in Capricorn in 2020, coinciding with the pandemic. In Aquarius, this conjunction empowers grassroots movements, technological revolution, and radical reimagining of social structures.',
+    themes: [
+      'collective empowerment',
+      'technological transformation',
+      'social revolution',
+      'power to the people',
+    ],
+    doList: [
+      'join or lead movements aligned with your values',
+      'use technology as a force for good',
+      'challenge power structures that no longer serve',
+      'think in terms of community, not just individual gain',
+    ],
+    avoidList: [
+      'manipulative group dynamics',
+      'technology addiction',
+      'extremism in any direction',
+      'losing individuality in the crowd',
+    ],
+    tone: 'Powerful and collective. When the amplifier meets the transformer in the sign of the people, small actions can reshape civilisation.',
+    startDate: new Date('2033-02-05T00:00:00Z'),
+    endDate: new Date('2033-02-05T00:00:00Z'),
+  },
 ];
 
 /**
