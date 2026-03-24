@@ -23,6 +23,8 @@ jest.mock('@/hooks/useHaptic', () => ({
 
 jest.mock('@/lib/analytics', () => ({
   conversionTracking: { upgradeClicked: jest.fn() },
+  trackCtaImpression: jest.fn(),
+  trackCtaClick: jest.fn(),
 }));
 
 jest.mock('@/lib/auth-client', () => ({
