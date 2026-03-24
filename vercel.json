@@ -20,10 +20,6 @@
       "schedule": "30 7 * * *"
     },
     {
-      "path": "/api/cron/weekly-content",
-      "schedule": "0 7 * * 0"
-    },
-    {
       "path": "/api/cron/daily-stories",
       "schedule": "30 8 * * *"
     },
@@ -114,10 +110,6 @@
     {
       "path": "/api/cron/pipeline-health",
       "schedule": "0 22 * * *"
-    },
-    {
-      "path": "/api/cron/cosmic-forecast",
-      "schedule": "0 7 * * 1"
     },
     {
       "path": "/api/cron/weekly-wrapup",
