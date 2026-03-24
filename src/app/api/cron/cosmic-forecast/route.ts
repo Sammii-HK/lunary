@@ -28,7 +28,8 @@ function getWeekStart(weekOffset: number): Date {
  * Monday cron — generates medium-form + long-form cosmic forecast scripts
  * for the upcoming week (7 days ahead by default).
  *
- * Creates video_scripts + social_posts + video_jobs entries.
+ * Creates video_scripts + video_jobs entries. Render-schedule-v3 on Hetzner
+ * handles rendering and scheduling to Spellcast.
  * Rendering happens on the server via process-video-jobs.
  *
  * Manual trigger: GET /api/cron/cosmic-forecast?week=0 (this week)
@@ -110,27 +111,8 @@ export async function GET(request: NextRequest) {
         `;
         const scriptId = scriptResult.rows[0].id;
 
-        // Create social posts for medium-form platforms
-        for (const platform of ['tiktok', 'instagram', 'youtube']) {
-          await sql`
-            INSERT INTO social_posts (
-              content, platform, post_type, topic, status,
-              video_url, scheduled_date, week_theme,
-              source_type, source_id, source_title, created_at
-            )
-            SELECT ${postContent}, ${platform}, 'video',
-                   ${'Cosmic Forecast: ' + dateKey}, 'pending',
-                   ${null},
-                   ${weekStart.toISOString()}, 'Cosmic Forecast',
-                   'video_script', ${String(scriptId)}, ${'Cosmic Forecast: ' + dateKey}, NOW()
-            WHERE NOT EXISTS (
-              SELECT 1 FROM social_posts
-              WHERE platform = ${platform} AND post_type = 'video'
-                AND topic = ${'Cosmic Forecast: ' + dateKey}
-                AND scheduled_date::date = ${dateKey}
-            )
-          `;
-        }
+        // Social posts are handled by content-creator pipeline + render-schedule-v3.
+        // This cron only creates video_scripts + video_jobs.
 
         // Create video job
         await sql`
@@ -190,25 +172,7 @@ export async function GET(request: NextRequest) {
         `;
         const scriptId = scriptResult.rows[0].id;
 
-        // Create YouTube social post
-        await sql`
-          INSERT INTO social_posts (
-            content, platform, post_type, topic, status,
-            video_url, scheduled_date, week_theme,
-            source_type, source_id, source_title, created_at
-          )
-          SELECT ${postContent}, 'youtube', 'video',
-                 ${'Cosmic Forecast Long: ' + dateKey}, 'pending',
-                 ${null},
-                 ${weekStart.toISOString()}, 'Cosmic Forecast',
-                 'video_script', ${String(scriptId)}, ${'Cosmic Forecast Long: ' + dateKey}, NOW()
-          WHERE NOT EXISTS (
-            SELECT 1 FROM social_posts
-            WHERE platform = 'youtube' AND post_type = 'video'
-              AND topic = ${'Cosmic Forecast Long: ' + dateKey}
-              AND scheduled_date::date = ${dateKey}
-          )
-        `;
+        // Social posts are handled by render-schedule-v3 after rendering.
 
         // Create video job
         await sql`

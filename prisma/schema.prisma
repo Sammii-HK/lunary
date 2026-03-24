@@ -1964,6 +1964,54 @@ model activation_recommendations {
   @@index([generated_at(sort: Desc)], map: "idx_activation_rec_generated_at")
 }
 
+model TransitBlogPost {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  transitId       String    @map("transit_id")
+  title           String
+  subtitle        String?
+  metaDescription String    @map("meta_description")
+  keywords        String[]
+
+  // Content sections
+  introduction       String @db.Text
+  historicalDeepDive String @map("historical_deep_dive") @db.Text
+  astronomicalContext String @map("astronomical_context") @db.Text
+  practicalGuidance  String @map("practical_guidance") @db.Text
+  signBreakdowns     Json   @map("sign_breakdowns")
+  closingSection     String @map("closing_section") @db.Text
+
+  // Transit metadata
+  planet      String
+  sign        String?
+  transitType String  @map("transit_type")
+  startDate   DateTime? @map("start_date") @db.Timestamptz(6)
+  endDate     DateTime? @map("end_date") @db.Timestamptz(6)
+  rarity      String?
+
+  // Pipeline state
+  status      String  @default("draft")
+  generatedBy String? @map("generated_by")
+  modelUsed   String? @map("model_used")
+  wordCount   Int?    @map("word_count")
+
+  // Review
+  reviewedAt  DateTime? @map("reviewed_at") @db.Timestamptz(6)
+  reviewNotes String?   @map("review_notes")
+
+  // Publishing
+  publishedAt DateTime? @map("published_at") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status], map: "idx_transit_blog_status")
+  @@index([transitId], map: "idx_transit_blog_transit_id")
+  @@index([publishedAt(sort: Desc)], map: "idx_transit_blog_published_at")
+  @@index([startDate], map: "idx_transit_blog_start_date")
+  @@map("transit_blog_posts")
+}
+
 enum tour_status {
   ACTIVE
   COMPLETED
