@@ -327,6 +327,80 @@ const HISTORICAL_CONTEXT: Record<
     theme:
       'Collective imagination expands -- spiritual movements, artistic revolutions, and utopian visions gain momentum',
   },
+  'mercury-retrograde': {
+    previousPeriods: ['3-4 times per year, every year'],
+    events: {
+      recurring: [
+        'Communication breakdowns',
+        'Technology failures',
+        'Travel delays',
+        'Reunions with ex-partners',
+        'Contract renegotiations',
+      ],
+    },
+    theme:
+      'The cosmos presses pause on forward motion -- review, reflect, revise before charging ahead',
+  },
+  'venus-retrograde': {
+    previousPeriods: ['every 18 months'],
+    events: {
+      recurring: [
+        'Relationship reassessments',
+        'Ex-partners resurfacing',
+        'Financial reviews',
+        'Shifting values and aesthetics',
+        'Self-worth recalibrations',
+      ],
+    },
+    theme:
+      'Love, money, and beauty go under review -- what you thought you wanted may not be what you actually need',
+  },
+  'mars-retrograde': {
+    previousPeriods: ['every 26 months'],
+    events: {
+      recurring: [
+        'Energy dips and frustration',
+        'Stalled ambitions',
+        'Old conflicts resurfacing',
+        'Physical health reviews',
+        'Redirected anger and drive',
+      ],
+    },
+    theme:
+      'The warrior turns inward -- aggression cools, old battles demand resolution, and true motivation reveals itself',
+  },
+  'eclipse-season': {
+    previousPeriods: ['twice per year, every year'],
+    events: {
+      recurring: [
+        'Fated events and sudden changes',
+        'Relationships ending or beginning',
+        'Career pivots',
+        'Revelations and hidden truths surfacing',
+        'Ancestral and karmic themes activating',
+      ],
+    },
+    theme:
+      'Cosmic wildcards that accelerate destiny -- what needs to end, ends; what needs to begin, begins',
+  },
+  'pluto-aquarius': {
+    previousPeriods: ['1778-1798', '1532-1553'],
+    events: {
+      '1778-1798': [
+        'American Revolution',
+        'French Revolution',
+        'Industrial Revolution begins',
+        'Declaration of the Rights of Man',
+      ],
+      '1532-1553': [
+        'Protestant Reformation spreads across Europe',
+        'Scientific method emerges',
+        'Copernicus publishes heliocentric model',
+      ],
+    },
+    theme:
+      'Power returns to the collective -- revolutions in governance, technology, and what it means to be free',
+  },
   'jupiter-pluto-conjunction': {
     previousPeriods: ['2020', '2007', '1994', '1981'],
     events: {
@@ -470,21 +544,28 @@ export function buildGenerationContext(
   transit: YearlyTransit,
 ): TransitGenerationContext {
   const sign = transit.signs[0];
-  const isConjunction = transit.transitType
-    .toLowerCase()
-    .includes('conjunction');
+  const transitTypeLower = transit.transitType.toLowerCase();
+  const isConjunction = transitTypeLower.includes('conjunction');
+  const isRetrograde = transitTypeLower.includes('retrograde');
+  const isEclipse = transitTypeLower.includes('eclipse');
 
-  // For conjunctions, try conjunction-specific key first (e.g. 'saturn-neptune-conjunction')
-  // then fall back to planet-sign key
-  const conjunctionKey = isConjunction
-    ? transit.transitType
+  // Try specific keys in order: conjunction > retrograde/eclipse type > planet-sign
+  let specialKey: string | null = null;
+  if (isConjunction) {
+    specialKey =
+      transit.transitType
         .replace(' Conjunction', '')
         .toLowerCase()
-        .replace(/\s+/g, '-') + '-conjunction'
-    : null;
+        .replace(/\s+/g, '-') + '-conjunction';
+  } else if (isRetrograde) {
+    specialKey = `${transit.planet.toLowerCase()}-retrograde`;
+  } else if (isEclipse) {
+    specialKey = 'eclipse-season';
+  }
+
   const planetSignKey = `${transit.planet.toLowerCase()}-${sign.toLowerCase()}`;
   const historicalCtx =
-    (conjunctionKey && HISTORICAL_CONTEXT[conjunctionKey]) ||
+    (specialKey && HISTORICAL_CONTEXT[specialKey]) ||
     HISTORICAL_CONTEXT[planetSignKey];
   const ephemeris = getEphemeris(transit.planet, sign);
   const previousTransit = getPreviousTransitDates(transit.planet, sign);
