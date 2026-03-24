@@ -21,11 +21,11 @@
     },
     {
       "path": "/api/cron/daily-stories",
-      "schedule": "30 8 * * *"
+      "schedule": "0 12 * * *"
     },
     {
       "path": "/api/cron/daily-carousels",
-      "schedule": "0 9 * * *"
+      "schedule": "30 12 * * *"
     },
     {
       "path": "/api/cron/daily-cosmic-pulse",
