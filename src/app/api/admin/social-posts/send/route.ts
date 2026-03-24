@@ -519,10 +519,13 @@ export async function POST(request: NextRequest) {
     // Use content from request if provided, otherwise use from DB (which may have been edited)
     const primaryPost = postDataFromDb.rows[0] as DbPostRow;
 
+    // Sanitise postId for safe logging (user-provided value)
+    const safePostId = String(postId).replace(/[\r\n\x00-\x1F\x7F]/g, '');
+
     // Guard against double-send: if already sent, return early without re-posting
     if (primaryPost.status === 'sent') {
       console.warn(
-        `[send] Post ${postId} already sent — skipping duplicate send`,
+        `[send] Post ${safePostId} already sent — skipping duplicate send`,
       );
       return NextResponse.json(
         { success: false, error: 'Post already sent' },
@@ -540,7 +543,7 @@ export async function POST(request: NextRequest) {
     `;
     if ((claimResult.rowCount ?? 0) === 0) {
       console.warn(
-        `[send] Post ${postId} was claimed by another process — skipping`,
+        `[send] Post ${safePostId} was claimed by another process — skipping`,
       );
       return NextResponse.json(
         { success: false, error: 'Post already claimed' },
