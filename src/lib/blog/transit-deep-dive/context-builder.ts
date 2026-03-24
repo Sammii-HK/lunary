@@ -67,22 +67,6 @@ const HISTORICAL_CONTEXT: Record<
     },
     theme: 'Idealism meets materialism -- redefining what has lasting value',
   },
-  'pluto-aquarius': {
-    previousPeriods: ['1778-1798', '1532-1553'],
-    events: {
-      '1778-1798': [
-        'American Revolution',
-        'French Revolution',
-        'Industrial Revolution begins',
-      ],
-      '1532-1553': [
-        'Protestant Reformation spreads',
-        'Scientific method emerges',
-      ],
-    },
-    theme:
-      'Power returns to the collective -- revolutions in governance and technology',
-  },
   'pluto-capricorn': {
     previousPeriods: ['1762-1778', '1516-1532'],
     events: {
