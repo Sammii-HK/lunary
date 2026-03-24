@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useId, useRef, FormEvent } from 'react';
+import { usePathname } from 'next/navigation';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Heading } from './ui/Heading';
+import { trackCtaImpression, trackCtaClick } from '@/lib/analytics';
 
 // Lazy load auth client to avoid webpack issues
 let betterAuthClient: any = null;
@@ -57,6 +59,22 @@ export function NewsletterSignupForm({
   );
   const turnstileTokenRef = useRef<string | null>(null);
   const honeypotRef = useRef<HTMLInputElement>(null);
+  const impressionTracked = useRef(false);
+  const pathname = usePathname() || '';
+
+  // Track impression on mount
+  useEffect(() => {
+    if (!impressionTracked.current) {
+      impressionTracked.current = true;
+      trackCtaImpression({
+        hub: source.replace('grimoire_', '') || 'unknown',
+        ctaId: 'newsletter_signup',
+        location: 'seo_newsletter_signup',
+        label: ctaLabel,
+        pagePath: pathname,
+      });
+    }
+  }, [source, ctaLabel, pathname]);
 
   useEffect(() => {
     let isMounted = true;
@@ -101,6 +119,14 @@ export function NewsletterSignupForm({
       setMessage('Please enter a valid email address.');
       return;
     }
+
+    trackCtaClick({
+      hub: source.replace('grimoire_', '') || 'unknown',
+      ctaId: 'newsletter_signup',
+      location: 'seo_newsletter_signup',
+      label: ctaLabel,
+      pagePath: pathname,
+    });
 
     // Honeypot check: if the hidden field has a value, silently reject
     if (honeypotRef.current?.value) {

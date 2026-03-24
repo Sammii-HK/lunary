@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Sparkles, Lock, ChevronRight, Zap } from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -8,7 +8,7 @@ import { AuthComponent } from '@/components/Auth';
 import { useModal } from '@/hooks/useModal';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
-import { trackCtaClick } from '@/lib/analytics';
+import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
 import { getABTestVariantClient } from '@/lib/ab-tests-client';
 import { zodiacUnicode, planetUnicode } from '../../../utils/zodiac/zodiac';
 
@@ -58,6 +58,7 @@ export function TransitBirthdayInput() {
   const router = useRouter();
   const pathname = usePathname() || '';
   const signupPageVariant = getABTestVariantClient('grimoire-signup-page');
+  const impressionTracked = useRef(false);
 
   const [birthDate, setBirthDate] = useState('');
   const [placements, setPlacements] = useState<Placement[] | null>(null);
@@ -67,6 +68,20 @@ export function TransitBirthdayInput() {
   const [error, setError] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  // Track impression on mount (for anonymous users only)
+  useEffect(() => {
+    if (!impressionTracked.current && !authState.isAuthenticated) {
+      impressionTracked.current = true;
+      trackCtaImpression({
+        hub: 'horoscope',
+        ctaId: 'transit_teaser_input',
+        location: 'seo_transit_teaser',
+        label: 'Show my transits',
+        pagePath: pathname,
+      });
+    }
+  }, [authState.isAuthenticated, pathname]);
+
   useModal({
     isOpen: showAuthModal,
     onClose: () => setShowAuthModal(false),
@@ -75,6 +90,15 @@ export function TransitBirthdayInput() {
 
   const handleSubmit = async () => {
     if (!birthDate) return;
+
+    trackCtaClick({
+      hub: 'horoscope',
+      ctaId: 'transit_teaser_input',
+      location: 'seo_transit_teaser',
+      label: 'Show my transits',
+      pagePath: pathname,
+    });
+
     setError('');
     setLoading(true);
 

@@ -1,8 +1,9 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { NavParamLink } from '@/components/NavParamLink';
-import { trackCtaClick } from '@/lib/analytics';
+import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
 
 type SEOCTAButtonProps = {
   href: string;
@@ -18,11 +19,26 @@ export function SEOCTAButton({
   location = 'seo_cta',
 }: SEOCTAButtonProps) {
   const pathname = usePathname() || '';
+  const impressionTracked = useRef(false);
+
+  useEffect(() => {
+    if (!impressionTracked.current) {
+      impressionTracked.current = true;
+      trackCtaImpression({
+        hub,
+        ctaId: 'seo_cta_button',
+        location,
+        label,
+        href,
+        pagePath: pathname,
+      });
+    }
+  }, [hub, location, label, href, pathname]);
 
   const handleClick = () => {
     trackCtaClick({
       hub,
-      ctaId: 'seo_cta',
+      ctaId: 'seo_cta_button',
       location,
       label,
       href,
