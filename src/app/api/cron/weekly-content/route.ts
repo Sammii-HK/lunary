@@ -204,144 +204,10 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 4. Generate social media posts for the week ahead (7 days in advance)
-    console.log(
-      '📱 Generating social media posts for the week ahead (7 days in advance)...',
-    );
-    let socialPostsResult = null;
-    try {
-      // Calculate the Monday of the week that starts 7 days from now
-      // This ensures posts are always generated exactly 7 days in advance
-      const today = new Date();
-      const weekAheadDate = new Date(today);
-      weekAheadDate.setDate(today.getDate() + 7);
+    // Social text posts and Instagram content are handled by content-creator
+    // pipeline on Hetzner — not duplicated here.
 
-      // Find the Monday of that week (same calculation as blog)
-      const dayOfWeek = weekAheadDate.getDay();
-      const daysToMonday =
-        dayOfWeek === 0 ? 1 : dayOfWeek === 1 ? 0 : 8 - dayOfWeek;
-      const weekStartMonday = new Date(weekAheadDate);
-      weekStartMonday.setDate(weekAheadDate.getDate() + daysToMonday);
-      weekStartMonday.setHours(0, 0, 0, 0);
-
-      console.log(
-        `📅 Generating posts for week starting: ${weekStartMonday.toISOString()} (Monday of week 7 days ahead)`,
-      );
-
-      const socialPostsResponse = await fetch(
-        `${BASE_URL}/api/admin/social-posts/generate-weekly`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Lunary-Weekly-Content-Cron/1.0',
-            ...(process.env.CRON_SECRET
-              ? { Authorization: `Bearer ${process.env.CRON_SECRET}` }
-              : {}),
-          },
-          body: JSON.stringify({
-            weekStart: weekStartMonday.toISOString(),
-          }),
-        },
-      );
-
-      if (socialPostsResponse.ok) {
-        socialPostsResult = await socialPostsResponse.json();
-        console.log(
-          `✅ Generated ${socialPostsResult.savedIds?.length || 0} social media posts for next week`,
-        );
-        await logActivity({
-          activityType: 'content_creation',
-          activityCategory: 'content',
-          status: 'success',
-          message: `Generated ${socialPostsResult.savedIds?.length || 0} social media posts`,
-          metadata: {
-            postsGenerated: socialPostsResult.savedIds?.length || 0,
-            weekRange: socialPostsResult.weekRange,
-          },
-        });
-      } else {
-        console.error(
-          '❌ Social posts generation failed:',
-          socialPostsResponse.status,
-        );
-        await logActivity({
-          activityType: 'content_creation',
-          activityCategory: 'content',
-          status: 'failed',
-          message: 'Social posts generation failed',
-          errorMessage: `HTTP ${socialPostsResponse.status}`,
-        });
-      }
-    } catch (socialPostsError) {
-      console.error('❌ Social posts generation error:', socialPostsError);
-      await logActivity({
-        activityType: 'content_creation',
-        activityCategory: 'content',
-        status: 'failed',
-        message: 'Social posts generation error',
-        errorMessage:
-          socialPostsError instanceof Error
-            ? socialPostsError.message
-            : 'Unknown error',
-      });
-    }
-
-    // 5. Generate Instagram content for the week ahead (7 days in advance)
-    //    Called directly (not via HTTP self-fetch) to avoid auth issues
-    //    when CRON_SECRET bearer gets stripped by CDN/edge.
-    console.log(
-      '📸 Generating Instagram content for the week ahead (7 days in advance)...',
-    );
-    let instagramResult = null;
-    try {
-      const { generateWeeklyInstagramContent } =
-        await import('@/lib/instagram/generate-weekly');
-      const igStartDate = new Date(
-        new Date().getTime() + 7 * 24 * 60 * 60 * 1000,
-      ).toISOString();
-
-      instagramResult = await generateWeeklyInstagramContent(igStartDate);
-
-      if (instagramResult.success) {
-        console.log(
-          `✅ Generated ${instagramResult.totalPosts || 0} Instagram posts for next week`,
-        );
-        await logActivity({
-          activityType: 'content_creation',
-          activityCategory: 'content',
-          status: 'success',
-          message: `Generated ${instagramResult.totalPosts || 0} Instagram posts`,
-          metadata: {
-            postsGenerated: instagramResult.totalPosts || 0,
-            daysGenerated: instagramResult.daysGenerated || 0,
-          },
-        });
-      } else {
-        console.error('❌ Instagram generation failed:', instagramResult.error);
-        await logActivity({
-          activityType: 'content_creation',
-          activityCategory: 'content',
-          status: 'failed',
-          message: 'Instagram generation failed',
-          errorMessage: instagramResult.error || 'Unknown error',
-        });
-      }
-    } catch (instagramError) {
-      console.error('❌ Instagram generation error:', instagramError);
-      await logActivity({
-        activityType: 'content_creation',
-        activityCategory: 'content',
-        status: 'failed',
-        message: 'Instagram generation error',
-        errorMessage:
-          instagramError instanceof Error
-            ? instagramError.message
-            : 'Unknown error',
-      });
-    }
-
-    // 6. Generate weekly podcast episode
+    // 4. Generate weekly podcast episode
     console.log('🎙️ Generating weekly podcast episode...');
     let podcastResult = null;
     try {
@@ -475,7 +341,7 @@ export async function GET(request: NextRequest) {
         blogData.data?.weekNumber || 0,
         blogData.data?.planetaryHighlights || [],
         blogPreviewUrl,
-        socialPostsResult?.savedIds?.length || 0,
+        0,
       );
 
       const highlights = (blogData.data?.planetaryHighlights || []).slice(0, 3);
@@ -483,16 +349,6 @@ export async function GET(request: NextRequest) {
         {
           name: 'Week',
           value: `Week ${blogData.data?.weekNumber || 0}`,
-          inline: true,
-        },
-        {
-          name: 'Social Posts',
-          value: `${socialPostsResult?.savedIds?.length || 0} posts ready`,
-          inline: true,
-        },
-        {
-          name: 'Instagram',
-          value: `${instagramResult?.totalPosts || 0} posts ready`,
           inline: true,
         },
         {
@@ -540,9 +396,7 @@ export async function GET(request: NextRequest) {
         category: 'todo',
         dedupeKey: `weekly-digest-${new Date().toISOString().split('T')[0]}`,
       });
-      console.log(
-        `✅ Weekly notification sent: ${socialPostsResult?.posts?.length || socialPostsResult?.savedIds?.length || 0} social posts + ${instagramResult?.totalPosts || 0} Instagram posts ready for approval`,
-      );
+      console.log('✅ Weekly notification sent');
     } catch (notificationError) {
       console.warn('📱 Weekly notification failed:', notificationError);
     }
@@ -556,11 +410,6 @@ export async function GET(request: NextRequest) {
       metadata: {
         blogTitle: blogData.data?.title,
         newsletterSent: newsletterData.success,
-        socialPostsGenerated:
-          socialPostsResult?.posts?.length ||
-          socialPostsResult?.savedIds?.length ||
-          0,
-        instagramPostsGenerated: instagramResult?.totalPosts || 0,
         podcastEpisode: podcastResult?.episode?.episodeNumber || null,
         youtubeVideoId: youtubeResult?.videoId || null,
         substackPublished:
@@ -582,18 +431,6 @@ export async function GET(request: NextRequest) {
         sent: newsletterData.success,
         recipients: newsletterData.data?.recipients || 0,
       },
-      socialPosts: socialPostsResult
-        ? {
-            generated: socialPostsResult.savedIds?.length || 0,
-            weekRange: socialPostsResult.weekRange,
-          }
-        : null,
-      instagram: instagramResult
-        ? {
-            generated: instagramResult.totalPosts || 0,
-            daysGenerated: instagramResult.daysGenerated || 0,
-          }
-        : null,
       substack: substackResult
         ? {
             free: substackResult.results?.free?.success || false,
