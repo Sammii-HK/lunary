@@ -1,3 +1,6 @@
+// DEPRECATED: Video pipeline moved to Hetzner (content-creator/hetzner-pipeline/).
+// This route is no longer called by Vercel crons. Kept for admin/debug use only.
+
 import { NextRequest, NextResponse, after } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { sendDiscordNotification } from '@/lib/discord';

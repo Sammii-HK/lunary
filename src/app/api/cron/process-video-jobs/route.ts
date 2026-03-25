@@ -1,3 +1,6 @@
+// DEPRECATED: Video pipeline moved to Hetzner (content-creator/hetzner-pipeline/).
+// This route is no longer called by Vercel crons. Kept for admin/debug use only.
+
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { head, put } from '@vercel/blob';
