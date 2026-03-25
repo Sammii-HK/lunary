@@ -49,16 +49,27 @@ export async function GET(request: NextRequest) {
     dates.push(d.toISOString().split('T')[0]);
   }
 
-  const preRendered = await sql`
-    SELECT date_str, slot_index, variant, blob_url, rendered_at
-    FROM pre_rendered_stories
-    WHERE date_str = ANY(${dates})
-    ORDER BY date_str, slot_index
-  `;
+  // Fetch pre-rendered images for each date individually (safe parameterised queries)
+  const preRenderedRows: Array<{
+    date_str: string;
+    slot_index: number;
+    variant: string;
+    blob_url: string;
+    rendered_at: string;
+  }> = [];
+  for (const d of dates) {
+    const result = await sql`
+      SELECT date_str, slot_index, variant, blob_url, rendered_at
+      FROM pre_rendered_stories
+      WHERE date_str = ${d}
+      ORDER BY slot_index
+    `;
+    preRenderedRows.push(...(result.rows as typeof preRenderedRows));
+  }
 
   // Build lookup: dateStr → slotIndex → blobUrl
   const blobLookup = new Map<string, Map<number, string>>();
-  for (const row of preRendered.rows) {
+  for (const row of preRenderedRows) {
     if (!blobLookup.has(row.date_str)) {
       blobLookup.set(row.date_str, new Map());
     }
