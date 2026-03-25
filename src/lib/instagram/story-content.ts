@@ -193,6 +193,7 @@ function buildCalendarEventStory(event: CalendarEvent): IGStoryData {
  */
 export async function generateDailyStoryData(
   dateStr: string,
+  options?: { fillQuotes?: boolean },
 ): Promise<IGStoryData[]> {
   // Use noon UTC for moon phase calculation — midnight can straddle phase
   // boundaries and show the previous phase for most of the day
@@ -351,6 +352,61 @@ export async function generateDailyStoryData(
         params: { text: '', format: 'story', v: '4' },
         endpoint: '/api/og/social-quote',
       });
+    }
+  }
+
+  // Fill quote placeholders from DB when requested (server-side only)
+  if (options?.fillQuotes) {
+    const hasQuoteSlot = stories.some((s) => s.variant === 'quote' && !s.title);
+    if (hasQuoteSlot) {
+      let quoteText = 'The cosmos is within us. We are made of star-stuff.';
+      let quoteAuthor = 'Carl Sagan';
+      try {
+        const { sql } = await import('@vercel/postgres');
+        const quoteResult = await sql`
+          SELECT id, quote_text, author
+          FROM social_quotes
+          WHERE status = 'available'
+          ORDER BY use_count ASC, created_at ASC
+          LIMIT 50
+        `;
+        if (quoteResult.rows.length > 0) {
+          const quoteRng = seededRandom(`story-quote-${dateStr}`);
+          const quoteIndex = Math.floor(quoteRng() * quoteResult.rows.length);
+          const quote = quoteResult.rows[quoteIndex];
+          quoteText = quote.quote_text;
+          quoteAuthor = quote.author || 'Lunary';
+          await sql`
+            UPDATE social_quotes
+            SET use_count = use_count + 1, used_at = NOW(), updated_at = NOW()
+            WHERE id = ${quote.id}
+          `;
+        }
+      } catch (quoteError) {
+        console.warn(
+          '[Stories] Failed to fetch quote, using fallback:',
+          quoteError,
+        );
+      }
+
+      for (let idx = 0; idx < stories.length; idx++) {
+        if (stories[idx].variant === 'quote' && !stories[idx].title) {
+          stories[idx] = {
+            variant: 'quote',
+            title: quoteText,
+            subtitle: quoteAuthor,
+            params: {
+              text:
+                quoteAuthor !== 'Lunary'
+                  ? `${quoteText} - ${quoteAuthor}`
+                  : quoteText,
+              format: 'story',
+              v: '4',
+            },
+            endpoint: '/api/og/social-quote',
+          };
+        }
+      }
     }
   }
 

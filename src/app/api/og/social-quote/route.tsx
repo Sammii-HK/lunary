@@ -60,7 +60,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const text =
-      searchParams.get('text') || 'Your personalized cosmic guidance';
+      searchParams.get('text') ||
+      'The cosmos is within us. We are made of star-stuff.';
     const interpretation = searchParams.get('interpretation') || null;
     const rawFormat = (
       searchParams.get('format') || DEFAULT_FORMAT

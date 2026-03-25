@@ -64,7 +64,7 @@ const EMPTY_STATE_CONTENT: Record<
   horoscope: {
     icon: <Stars className='w-6 h-6 text-lunary-primary-400' />,
     heading: 'Personalize your horoscope',
-    message: 'Add your birth details to receive personalized cosmic guidance.',
+    message: 'Add your birth details to unlock your cosmic story.',
     action: { label: 'Add birthday', href: '/profile' },
   },
   general: {

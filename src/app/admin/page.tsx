@@ -19,7 +19,6 @@ import { Button } from '@/components/ui/button';
 import {
   Settings,
   BookOpen,
-  Package,
   Clock,
   Store,
   Calendar,
@@ -36,7 +35,6 @@ import {
   Send,
   Eye,
   Play,
-  Video,
   ChevronDown,
   ChevronUp,
   RefreshCw,
@@ -642,14 +640,6 @@ export default function AdminDashboard() {
       status: 'new',
     },
     {
-      title: 'Cron Monitor',
-      description: 'Monitor and trigger automated jobs',
-      href: '/admin/cron-monitor',
-      icon: <Clock className='h-5 w-5' />,
-      category: 'monitoring',
-      status: 'active',
-    },
-    {
       title: 'GPT Bridge',
       description: 'Review Grimoire bridge performance and zero-result rate',
       href: '/admin/gpt-bridge',
@@ -662,53 +652,12 @@ export default function AdminDashboard() {
   // Section 2: Content
   const contentTools: AdminTool[] = [
     {
-      title: 'Creator Brief',
-      description:
-        'Morning dashboard with transits, script options, and hot topics',
-      href: '/admin/creator-brief',
-      icon: <Sparkles className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Content Preview Hub',
-      description: 'Preview all OG images, daily posts, and weekly reports',
-      href: '/admin/daily-posts-preview',
-      icon: <Eye className='h-5 w-5' />,
-      category: 'content',
-      status: 'active',
-    },
-    {
       title: 'Social Media Manager',
       description: 'Generate and approve social media posts',
       href: '/admin/social-posts',
       icon: <Send className='h-5 w-5' />,
       category: 'content',
       status: 'new',
-    },
-    {
-      title: 'Seer Sammii',
-      description: 'First-person video scripts with talking points',
-      href: '/admin/seer-sammii',
-      icon: <Video className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Video Scripts',
-      description: 'TikTok & YouTube scripts with cover images',
-      href: '/admin/video-scripts',
-      icon: <Video className='h-5 w-5' />,
-      category: 'content',
-      status: 'new',
-    },
-    {
-      title: 'Content Videos',
-      description: 'Generate weekly long-form videos and manage outputs',
-      href: '/admin/content/videos',
-      icon: <Play className='h-5 w-5' />,
-      category: 'content',
-      status: 'active',
     },
     {
       title: 'Blog & Newsletter',
@@ -739,14 +688,6 @@ export default function AdminDashboard() {
       icon: <Smartphone className='h-5 w-5' />,
       category: 'content',
       status: 'new',
-    },
-    {
-      title: 'Social Preview',
-      description: 'Preview social media images and videos (7-day retention)',
-      href: '/admin/social-preview',
-      icon: <Play className='h-5 w-5' />,
-      category: 'content',
-      status: 'active',
     },
   ];
 
@@ -832,13 +773,6 @@ export default function AdminDashboard() {
       icon: <RefreshCw className='h-5 w-5' />,
       category: 'tools',
       status: 'new',
-    },
-    {
-      title: 'Social Preview',
-      description: 'Preview social media image formats',
-      href: '/admin/social-preview',
-      icon: <Smartphone className='h-5 w-5' />,
-      category: 'tools',
     },
     {
       title: 'Birth Chart Tool',
@@ -1466,262 +1400,6 @@ export default function AdminDashboard() {
                     <div className='text-xs text-zinc-400'>Generate year</div>
                   </div>
                 </div>
-              </Button>
-
-              {/* Monthly Pack Trigger */}
-              <Button
-                onClick={async () => {
-                  const currentYear = new Date().getFullYear();
-                  const currentMonth = new Date().getMonth() + 1;
-                  const monthName = new Date(
-                    currentYear,
-                    currentMonth - 1,
-                  ).toLocaleString('default', { month: 'long' });
-
-                  if (
-                    !confirm(
-                      `Generate monthly moon pack for ${monthName} ${currentYear}?`,
-                    )
-                  )
-                    return;
-
-                  try {
-                    const response = await fetch(
-                      '/api/admin/trigger/moon-packs',
-                      {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'monthly' }),
-                      },
-                    );
-                    const result = await response.json();
-                    if (result.success) {
-                      alert(
-                        `✅ Monthly packs generated: ${result.packsCreated || 0} packs`,
-                      );
-                    } else {
-                      alert(`❌ Failed: ${result.error || 'Unknown error'}`);
-                    }
-                  } catch (error: any) {
-                    alert(`❌ Error: ${error.message || 'Unknown error'}`);
-                  }
-                }}
-                variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-success-700 text-white transition-all'
-              >
-                <div className='flex flex-col items-center gap-3 w-full'>
-                  <Package className='h-8 w-8 text-lunary-success' />
-                  <div className='text-center'>
-                    <div className='font-semibold text-base mb-1'>
-                      Monthly Packs
-                    </div>
-                    <div className='text-xs text-zinc-400'>
-                      Generate next 3 months
-                    </div>
-                  </div>
-                </div>
-              </Button>
-
-              {/* Yearly Pack Trigger */}
-              <Button
-                onClick={async () => {
-                  const currentYear = new Date().getFullYear();
-                  if (!confirm(`Generate yearly moon pack for ${currentYear}?`))
-                    return;
-
-                  try {
-                    const response = await fetch(
-                      '/api/admin/trigger/moon-packs',
-                      {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'yearly' }),
-                      },
-                    );
-                    const result = await response.json();
-                    if (result.success) {
-                      alert(
-                        `✅ Yearly pack generated: ${result.packsCreated || 0} packs`,
-                      );
-                    } else {
-                      alert(`❌ Failed: ${result.error || 'Unknown error'}`);
-                    }
-                  } catch (error: any) {
-                    alert(`❌ Error: ${error.message || 'Unknown error'}`);
-                  }
-                }}
-                variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-accent-700 text-white transition-all'
-              >
-                <div className='flex flex-col items-center gap-3 w-full'>
-                  <Package className='h-8 w-8 text-lunary-accent' />
-                  <div className='text-center'>
-                    <div className='font-semibold text-base mb-1'>
-                      Yearly Pack
-                    </div>
-                    <div className='text-xs text-zinc-400'>
-                      Generate this year
-                    </div>
-                  </div>
-                </div>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Moon Pack Quick Generator */}
-        <Card className='mb-8 md:mb-10 lg:mb-12 bg-zinc-900 border-zinc-800'>
-          <CardHeader className='pb-4 md:pb-6'>
-            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
-              <Sparkles className='h-5 w-5 md:h-6 md:w-6' />
-              Quick Moon Pack Generator
-            </CardTitle>
-            <CardDescription className='text-sm md:text-base text-zinc-400'>
-              Generate moon phase packs quickly with one click
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6'>
-              <Button
-                onClick={async () => {
-                  const currentYear = new Date().getFullYear();
-                  const currentMonth = new Date().getMonth() + 1;
-                  const monthName = new Date(
-                    currentYear,
-                    currentMonth - 1,
-                  ).toLocaleString('default', { month: 'long' });
-
-                  if (
-                    !confirm(
-                      `Generate moon pack for ${monthName} ${currentYear}?`,
-                    )
-                  )
-                    return;
-
-                  try {
-                    const response = await fetch(
-                      '/api/shop/packs/generate-and-sync',
-                      {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          category: 'moon_phases',
-                          includeRituals: false,
-                          autoPublish: false,
-                          year: currentYear,
-                          month: currentMonth,
-                          customNaming: {},
-                        }),
-                      },
-                    );
-
-                    const result = await response.json();
-                    if (result.success) {
-                      alert(
-                        `✅ Moon pack generated: ${result.pack.fullName || result.pack.name}\n\nStripe Product: ${result.stripe?.productId}\nCheck shop to see it!`,
-                      );
-                    } else {
-                      alert(`❌ Failed: ${result.error || result.details}`);
-                    }
-                  } catch (error: any) {
-                    console.error('Generation error:', error);
-                    alert(
-                      `❌ Error generating pack: ${error.message || 'Unknown error'}`,
-                    );
-                  }
-                }}
-                variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-primary-600 text-white transition-all'
-              >
-                <div className='flex flex-col items-center gap-3 w-full'>
-                  <Calendar className='h-8 w-8 text-lunary-primary-400' />
-                  <div className='text-center'>
-                    <div className='font-semibold text-base mb-1'>
-                      This Month
-                    </div>
-                    <div className='text-xs text-zinc-400'>
-                      {new Date().toLocaleString('default', {
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </Button>
-
-              <Button
-                onClick={async () => {
-                  const currentYear = new Date().getFullYear();
-
-                  if (!confirm(`Generate yearly moon pack for ${currentYear}?`))
-                    return;
-
-                  try {
-                    const response = await fetch(
-                      '/api/shop/packs/generate-and-sync',
-                      {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          category: 'moon_phases',
-                          includeRituals: false,
-                          autoPublish: false,
-                          year: currentYear,
-                          customNaming: {},
-                        }),
-                      },
-                    );
-
-                    const result = await response.json();
-                    if (result.success) {
-                      alert(
-                        `✅ Yearly moon pack generated: ${result.pack.fullName || result.pack.name}\n\nStripe Product: ${result.stripe?.productId}\nCheck shop to see it!`,
-                      );
-                    } else {
-                      alert(`❌ Failed: ${result.error || result.details}`);
-                    }
-                  } catch (error: any) {
-                    console.error('Generation error:', error);
-                    alert(
-                      `❌ Error generating pack: ${error.message || 'Unknown error'}`,
-                    );
-                  }
-                }}
-                variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-secondary-700 text-white transition-all'
-              >
-                <div className='flex flex-col items-center gap-3 w-full'>
-                  <Calendar className='h-8 w-8 text-lunary-secondary' />
-                  <div className='text-center'>
-                    <div className='font-semibold text-base mb-1'>
-                      This Year
-                    </div>
-                    <div className='text-xs text-zinc-400'>
-                      {new Date().getFullYear()} Complete Guide
-                    </div>
-                  </div>
-                </div>
-              </Button>
-
-              <Button
-                asChild
-                variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-success-700 text-white transition-all'
-              >
-                <Link
-                  href='/admin/shop-manager'
-                  className='flex flex-col items-center gap-3 w-full'
-                >
-                  <Store className='h-8 w-8 text-lunary-success' />
-                  <div className='text-center'>
-                    <div className='font-semibold text-base mb-1'>
-                      Custom Pack
-                    </div>
-                    <div className='text-xs text-zinc-400'>
-                      Advanced options
-                    </div>
-                  </div>
-                </Link>
               </Button>
             </div>
           </CardContent>

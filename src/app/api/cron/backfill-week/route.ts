@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
   const crons = [
     '/api/cron/daily-posts',
     '/api/cron/daily-threads',
-    '/api/cron/daily-stories',
+    '/api/cron/weekly-stories',
   ];
 
   const results: Record<

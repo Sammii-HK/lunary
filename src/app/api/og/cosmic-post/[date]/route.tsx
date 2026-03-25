@@ -258,7 +258,7 @@ async function generateResponse(
       keywords: getGeneralTarotReading().daily.keywords,
       guidance: getGeneralTarotReading().guidance.dailyMessage,
     },
-    callToAction: 'Discover your personalized cosmic guidance at lunary',
+    callToAction: 'Explore your cosmic story at lunary.app',
     astronomicalData: {
       planets: Object.fromEntries(
         Object.entries(positions).map(([name, data]: [string, any]) => [
