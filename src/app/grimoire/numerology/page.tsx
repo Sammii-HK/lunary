@@ -6,8 +6,7 @@ import {
   getYearRange,
 } from '@/constants/seo/numerology';
 
-// Force dynamic rendering so Universal Year updates automatically
-export const dynamic = 'force-dynamic';
+// ISR — Universal Year only changes once per year, daily revalidation is plenty
 import {
   angelNumbers,
   lifePathNumbers,
@@ -27,8 +26,8 @@ import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 const faqs = [
   {
     question: 'What is numerology?',

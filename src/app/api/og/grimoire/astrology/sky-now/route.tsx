@@ -10,7 +10,7 @@ import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
-export const revalidate = 60;
+export const revalidate = 3600; // 1 hour — sky positions change slowly
 
 const WIDTH = 1200;
 const HEIGHT = 630;

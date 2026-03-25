@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { getImageBaseUrl } from '@/lib/urls';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // 1 hour — transit data changes daily, hourly cache is fine
 
 type TransitOfDayData = {
   date?: string;

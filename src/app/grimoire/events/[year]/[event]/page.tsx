@@ -7,8 +7,8 @@ import { generateYearlyForecast } from '@/lib/forecast/yearly';
 import yearlyEventContent from '@/data/grimoire/yearly-event-content.json';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 
 // Keep historical years indexed (starting from 2025) and extend 10 years into the future
 const START_YEAR = 2025;

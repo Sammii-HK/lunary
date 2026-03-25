@@ -10,8 +10,8 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 import { Heading } from '@/components/ui/Heading';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 
 // Dynamic year range: current year to 10 years in advance
 // Keep historical years indexed (starting from 2025) and extend 10 years into the future
@@ -23,8 +23,11 @@ const AVAILABLE_YEARS = Array.from(
   (_, i) => START_YEAR + i,
 );
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+// Pre-build current + adjacent years to avoid cold renders
+export function generateStaticParams() {
+  const y = new Date().getFullYear();
+  return [y - 1, y, y + 1].map((year) => ({ year: year.toString() }));
+}
 
 export async function generateMetadata({
   params,

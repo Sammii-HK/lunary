@@ -8,8 +8,8 @@ import { signDescriptions } from '@/constants/seo/planet-sign-content';
 import { generateCompatibilityContent } from '@/constants/seo/compatibility-content';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 
 const ZODIAC_SYMBOLS: Record<string, string> = {
   aries: '♈',

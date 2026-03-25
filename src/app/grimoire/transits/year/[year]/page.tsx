@@ -14,8 +14,8 @@ import yearlyTransitsContent from '@/data/grimoire/yearly-transits-content.json'
 import { generateYearlyForecast } from '@/lib/forecast/yearly';
 import { format } from 'date-fns';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 
 // Keep historical years indexed (starting from 2025) and extend 10 years into the future
 const START_YEAR = 2025;
@@ -132,9 +132,12 @@ const getTransitsYearContent = (year: number): TransitsYearContent => {
  * Static data provides rich content (themes, do/avoid lists)
  * Dynamic data provides accurate dates from astronomy-engine
  */
-async function getEnhancedTransits(year: number): Promise<YearlyTransit[]> {
+async function getEnhancedTransits(
+  year: number,
+  forecast?: Awaited<ReturnType<typeof generateYearlyForecast>>,
+): Promise<YearlyTransit[]> {
   const staticTransits = getTransitsForYear(year);
-  const forecast = await generateYearlyForecast(year);
+  if (!forecast) forecast = await generateYearlyForecast(year);
 
   // Create a map of static transits by planet+sign for easy lookup
   const staticByKey = new Map<string, YearlyTransit>();
@@ -203,8 +206,13 @@ async function getEnhancedTransits(year: number): Promise<YearlyTransit[]> {
   return enhancedTransits;
 }
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+// Pre-build popular years at deploy time to avoid cold renders
+export function generateStaticParams() {
+  const currentYear = new Date().getFullYear();
+  return [currentYear - 1, currentYear, currentYear + 1].map((y) => ({
+    year: y.toString(),
+  }));
+}
 
 export async function generateMetadata({
   params,
@@ -294,10 +302,9 @@ export default async function TransitsYearPage({
   }
 
   const content = getTransitsYearContent(yearNum);
-  // Use enhanced transits that merge static content with dynamic astronomical data
-  const transits = await getEnhancedTransits(yearNum);
-  // Get major planetary conjunctions for the year
+  // Single forecast call — shared between transits and conjunctions
   const forecast = await generateYearlyForecast(yearNum);
+  const transits = await getEnhancedTransits(yearNum, forecast);
   const conjunctions = forecast.conjunctions;
   const itemListSchema = createItemListSchema({
     name: `${year} Astrology Transits`,

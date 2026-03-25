@@ -9,8 +9,8 @@ import {
   createBreadcrumbSchema,
 } from '@/lib/schema';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 const lunarNodes = [
   {
     slug: 'north-node',

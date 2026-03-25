@@ -460,88 +460,76 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
       });
     }
 
-    const trackingUrl = new URL('/api/ether/visit', request.url);
-    const headers = new Headers();
-    headers.set('content-type', 'application/json');
-    headers.set('x-lunary-anon-id', anonId);
+    // Cost optimisation: only fire the tracking function call once per user per day.
+    // page_viewed, app_opened, product_opened are all daily-deduped in the DB anyway,
+    // so subsequent calls in the same day are wasted invocations.
+    // This cuts ~80-90% of function invocations from middleware.
+    const TRACKED_COOKIE = 'lunary_td';
+    const today = new Date().toISOString().split('T')[0];
+    const lastTrackedDate = request.cookies.get(TRACKED_COOKIE)?.value;
 
-    const cookieHeader = request.headers.get('cookie');
-    if (cookieHeader) headers.set('cookie', cookieHeader);
+    if (lastTrackedDate !== today) {
+      // First visit today — fire the batch tracking call
+      response.cookies.set(TRACKED_COOKIE, today, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: isProd,
+        path: '/',
+        maxAge: 60 * 60 * 24, // 24h
+      });
 
-    const userAgent = request.headers.get('user-agent');
-    if (userAgent) headers.set('user-agent', userAgent);
+      const batchUrl = new URL('/api/ether/batch', request.url);
+      const batchHeaders = new Headers();
+      batchHeaders.set('content-type', 'application/json');
+      batchHeaders.set('x-lunary-anon-id', anonId);
 
-    const referer = request.headers.get('referer');
-    if (referer) headers.set('referer', referer);
+      const cookieHeader = request.headers.get('cookie');
+      if (cookieHeader) batchHeaders.set('cookie', cookieHeader);
 
-    const acceptLanguage = request.headers.get('accept-language');
-    if (acceptLanguage) headers.set('accept-language', acceptLanguage);
+      const userAgent = request.headers.get('user-agent');
+      if (userAgent) batchHeaders.set('user-agent', userAgent);
 
-    const forwardedFor = request.headers.get('x-forwarded-for');
-    if (forwardedFor) headers.set('x-forwarded-for', forwardedFor);
+      const referer = request.headers.get('referer');
+      if (referer) batchHeaders.set('referer', referer);
 
-    const realIp = request.headers.get('x-real-ip');
-    if (realIp) headers.set('x-real-ip', realIp);
+      const acceptLanguage = request.headers.get('accept-language');
+      if (acceptLanguage) batchHeaders.set('accept-language', acceptLanguage);
 
-    // Detect platform from user-agent for server-side tracking
-    // Native Capacitor apps include platform markers in the UA string
-    const ua = userAgent || '';
-    let serverPlatform: string = 'web';
-    if (/Capacitor/i.test(ua)) {
-      if (/iPhone|iPad|iPod/i.test(ua)) {
-        serverPlatform = 'ios';
-      } else {
-        serverPlatform = 'android';
+      const forwardedFor = request.headers.get('x-forwarded-for');
+      if (forwardedFor) batchHeaders.set('x-forwarded-for', forwardedFor);
+
+      const realIp = request.headers.get('x-real-ip');
+      if (realIp) batchHeaders.set('x-real-ip', realIp);
+
+      // Detect platform from user-agent for server-side tracking
+      const ua = userAgent || '';
+      let serverPlatform: string = 'web';
+      if (/Capacitor/i.test(ua)) {
+        if (/iPhone|iPad|iPod/i.test(ua)) {
+          serverPlatform = 'ios';
+        } else {
+          serverPlatform = 'android';
+        }
       }
+
+      event.waitUntil(
+        fetch(batchUrl, {
+          method: 'POST',
+          headers: batchHeaders,
+          body: JSON.stringify({ path: finalPath, platform: serverPlatform }),
+        })
+          .then((res) => {
+            if (!res.ok) {
+              console.error('[middleware] batch fetch failed:', res.status);
+            }
+            return res.json();
+          })
+          .catch((err) => {
+            console.error('[middleware] batch fetch error:', err.message);
+          }),
+      );
     }
-
-    // Track page_viewed (one per page per user per day)
-    event.waitUntil(
-      fetch(trackingUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ path: finalPath, platform: serverPlatform }),
-      })
-        .then((res) => {
-          if (!res.ok) {
-            console.error('[middleware] page_viewed fetch failed:', res.status);
-          }
-          return res.json();
-        })
-        .catch((err) => {
-          console.error('[middleware] page_viewed fetch error:', err.message);
-        }),
-    );
-
-    // Track app_opened (one per user per UTC day) - server-side for reliability
-    const appOpenedUrl = new URL('/api/ether/open', request.url);
-    event.waitUntil(
-      fetch(appOpenedUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ path: finalPath, platform: serverPlatform }),
-      })
-        .then((res) => {
-          if (!res.ok) {
-            console.error('[middleware] app_opened fetch failed:', res.status);
-          }
-          return res.json();
-        })
-        .catch((err) => {
-          console.error('[middleware] app_opened fetch error:', err.message);
-        }),
-    );
-
-    // Track product_opened (one per authenticated user per UTC day)
-    // Endpoint checks auth and skips if user not logged in
-    const productOpenedUrl = new URL('/api/ether/product', request.url);
-    event.waitUntil(
-      fetch(productOpenedUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ path: finalPath, platform: serverPlatform }),
-      }),
-    );
+    // Returning visitor same day — skip function call entirely, save CPU + invocations
   }
 
   return response;

@@ -6,8 +6,8 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 import { SpellsClient } from './SpellsClient';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 export const metadata: Metadata = {
   title: 'Spells & Rituals: Complete Witchcraft Spell Library - Lunary',
   description:

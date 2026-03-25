@@ -6,8 +6,8 @@
 import {
   CONTENT_TYPE_CONFIGS,
   POSTING_TIME_WINDOWS,
-} from '@/lib/social/video-scripts/content-types';
-import type { ContentType } from '@/lib/social/video-scripts/content-types';
+} from '@/lib/social/content-types';
+import type { ContentType } from '@/lib/social/content-types';
 
 export interface RecommendedTime {
   hour: number;

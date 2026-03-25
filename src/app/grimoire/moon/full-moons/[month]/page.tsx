@@ -4,8 +4,8 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 const monthKeys = Object.keys(annualFullMoons);
 
 // Removed generateStaticParams - using pure ISR for faster builds

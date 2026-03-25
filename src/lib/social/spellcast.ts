@@ -216,7 +216,9 @@ const ALLOWED_PLATFORMS = new Set([
   'threads',
   'facebook',
   'bluesky',
-  'tiktok',
+  // TikTok removed — TikTok content goes through render-schedule-v3.sh on Hetzner
+  // which posts via Spellcast with post_type "video"/"reel" (routes to Ayrshare).
+  // Text posts should never go to TikTok.
   'linkedin',
   'youtube',
   'pinterest',

@@ -4,8 +4,8 @@ import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Flame } from 'lucide-react';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 const candleColors = [
   {
     slug: 'white',

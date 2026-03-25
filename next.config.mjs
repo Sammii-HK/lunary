@@ -25,15 +25,7 @@ const nextConfig = {
         playwright: 'commonjs playwright',
         'playwright-core': 'commonjs playwright-core',
         chromium: 'commonjs chromium',
-        'ffmpeg-static': 'commonjs ffmpeg-static',
-        'fluent-ffmpeg': 'commonjs fluent-ffmpeg',
-        // Sharp - native image processing, must be external
         sharp: 'commonjs sharp',
-        // Remotion packages - must be external to avoid parsing esbuild binary
-        '@remotion/bundler': 'commonjs @remotion/bundler',
-        '@remotion/renderer': 'commonjs @remotion/renderer',
-        '@remotion/cli': 'commonjs @remotion/cli',
-        esbuild: 'commonjs esbuild',
       };
 
       // Handle both array and function externals
@@ -46,14 +38,7 @@ const nextConfig = {
             request === 'playwright' ||
             request === 'playwright-core' ||
             request === 'chromium' ||
-            request === 'ffmpeg-static' ||
-            request === 'fluent-ffmpeg' ||
-            request === 'sharp' ||
-            request === '@remotion/bundler' ||
-            request === '@remotion/renderer' ||
-            request === '@remotion/cli' ||
-            request === 'esbuild' ||
-            request?.startsWith('@esbuild/')
+            request === 'sharp'
           ) {
             return callback(null, `commonjs ${request}`);
           }
@@ -122,22 +107,6 @@ const nextConfig = {
       type: 'webassembly/async',
       resourceQuery: { not: [/module/] },
     });
-
-    // Ignore binary files from ffmpeg-static (prevent Next.js/Turbopack from trying to parse them)
-    if (isServer) {
-      // Add as noParse to prevent webpack from parsing the binary
-      if (!config.module.noParse) {
-        config.module.noParse = [];
-      }
-      if (Array.isArray(config.module.noParse)) {
-        config.module.noParse.push(/ffmpeg-static.*\/ffmpeg$/);
-      } else {
-        config.module.noParse = [
-          config.module.noParse,
-          /ffmpeg-static.*\/ffmpeg$/,
-        ];
-      }
-    }
 
     // Stub out Capacitor plugin packages that are iOS-only.
     // @capacitor/core is kept — it's small and needed for platform detection.
@@ -288,15 +257,9 @@ const nextConfig = {
   // Server external packages - these are not bundled and loaded from node_modules at runtime
   // Required for packages with native binaries or platform-specific code
   serverExternalPackages: [
-    '@remotion/bundler',
-    '@remotion/renderer',
-    '@remotion/cli',
-    'esbuild',
     'playwright',
     'playwright-core',
     'chromium',
-    'ffmpeg-static',
-    'fluent-ffmpeg',
   ],
 
   // Experimental optimizations for faster builds
@@ -327,7 +290,7 @@ const nextConfig = {
   // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 2592000, // 30 days — images rarely change, saves Image Optimization costs
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },

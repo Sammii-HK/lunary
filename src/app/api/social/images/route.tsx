@@ -1,6 +1,12 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import { BRAND_COLORS } from '@/lib/video/theme-palette';
+import { thematicPaletteConfig } from '@/constants/seo/thematic-palette-config';
+
+const BRAND_COLORS = {
+  cosmicBlack: thematicPaletteConfig.meta.brandColors.eventHorizon,
+  textPrimary: thematicPaletteConfig.meta.brandColors.stardust,
+  accentDefault: thematicPaletteConfig.meta.brandColors.supernova,
+} as const;
 
 export const runtime = 'nodejs';
 

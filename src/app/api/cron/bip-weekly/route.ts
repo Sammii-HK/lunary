@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import {
   renderMetricsCard,
   renderMilestoneCard,
-} from '@/lib/video/bip-card-renderer';
+} from '@/lib/bip/card-renderer';
 import {
   uploadCardImage,
   schedulePost,

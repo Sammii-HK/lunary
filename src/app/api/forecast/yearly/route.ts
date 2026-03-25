@@ -106,9 +106,8 @@ async function cacheYearlyForecast(
   }
 }
 
-// Cache for 5 minutes - subscription checks are cached at Stripe route level
-// Forecast generation is expensive, longer cache significantly reduces CPU
-export const revalidate = 300;
+// Cache for 1 hour — forecast data is DB-cached and rarely changes
+export const revalidate = 3600;
 
 export async function GET(request: NextRequest) {
   try {

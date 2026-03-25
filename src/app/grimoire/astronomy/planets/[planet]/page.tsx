@@ -13,8 +13,8 @@ import {
   getWikipediaUrl,
 } from '@/constants/entity-relationships';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 const planetKeys = Object.keys(planetaryBodies);
 
 // Removed generateStaticParams - using pure ISR for faster builds

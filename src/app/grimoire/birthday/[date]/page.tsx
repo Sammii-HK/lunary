@@ -9,8 +9,8 @@ import {
   getNumerologyNumber,
 } from '@/constants/seo/birthday-zodiac';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 interface BirthdayData {
   month: number;
   day: number;

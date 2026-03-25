@@ -6,7 +6,7 @@ import {
   generateFreeSubstackPost,
   generatePaidSubstackPost,
 } from '../../../../../utils/substack/contentFormatter';
-import { generateReelHashtags } from '@/lib/video/narrative-generator';
+// Video pipeline removed — reel hashtags no longer generated server-side
 
 export const dynamic = 'force-dynamic';
 
@@ -357,14 +357,7 @@ export async function GET(request: NextRequest) {
         },
       ];
 
-      let reelHashtags: string[] | null = null;
-      if (weeklyData) {
-        try {
-          reelHashtags = await generateReelHashtags(weeklyData);
-        } catch (error) {
-          console.warn('Failed to generate reel hashtags:', error);
-        }
-      }
+      const reelHashtags: string[] | null = null;
 
       // Add video posts if short-form video was generated
       if (shortFormVideoUrl) {

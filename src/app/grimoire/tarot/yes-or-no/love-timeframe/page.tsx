@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 export const metadata: Metadata = {
   title: 'Yes or No Tarot for Love + Time Frame | Lunary',
   description:

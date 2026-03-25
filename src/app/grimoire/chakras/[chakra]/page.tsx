@@ -6,8 +6,8 @@ import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 const chakraKeys = Object.keys(chakras);
 
 // Removed generateStaticParams - using pure ISR for faster builds

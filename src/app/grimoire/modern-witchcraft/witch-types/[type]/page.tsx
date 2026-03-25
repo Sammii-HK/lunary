@@ -6,8 +6,8 @@ import type { FAQItem } from '@/components/grimoire/SEOContentTemplate';
 import witchTypesData from '@/constants/witch-types.json';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 const witchTypes = witchTypesData.witchTypes || {};
 const typeKeys = Object.keys(witchTypes);
 

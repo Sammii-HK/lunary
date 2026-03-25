@@ -5,8 +5,8 @@ import { Flame, Droplets, Wind, Mountain } from 'lucide-react';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../utils/string';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 export const metadata: Metadata = {
   title: 'Four Elements: Fire, Water, Air, Earth Correspondences | Lunary',
   description:

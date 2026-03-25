@@ -17,8 +17,8 @@ import {
   ZodiacSign,
 } from '@/constants/seo/monthly-horoscope';
 
-// 30-day revalidation for yearly horoscopes
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
 

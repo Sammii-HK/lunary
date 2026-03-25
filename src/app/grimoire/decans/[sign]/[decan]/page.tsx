@@ -10,8 +10,8 @@ import {
 } from '@/constants/seo/decans';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
-// 30-day ISR revalidation
-export const revalidate = 2592000;
+// 1-year ISR — evergreen content
+export const revalidate = 31536000;
 interface PageParams {
   sign: string;
   decan: string;

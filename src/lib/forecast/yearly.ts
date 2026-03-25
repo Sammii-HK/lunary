@@ -1052,7 +1052,88 @@ export function calculateEclipses(
   return eclipses;
 }
 
+// In-memory cache for forecasts (survives within a single serverless invocation)
+const forecastMemCache = new Map<number, YearlyForecast>();
+
+/**
+ * Get a yearly forecast, checking DB cache first then computing.
+ * Generic forecasts (no userBirthday) are cached in yearly_forecasts table
+ * and in-memory for the duration of the serverless instance.
+ */
 export async function generateYearlyForecast(
+  year: number,
+  userBirthday?: string,
+  observer: Observer = DEFAULT_OBSERVER,
+): Promise<YearlyForecast> {
+  // Only cache generic forecasts (no user-specific birthday)
+  if (!userBirthday) {
+    // 1. Check in-memory cache (instant, same invocation)
+    const memCached = forecastMemCache.get(year);
+    if (memCached) return memCached;
+
+    // 2. Check DB cache (yearly_forecasts table)
+    try {
+      const { sql } = await import('@vercel/postgres');
+      const result = await sql`
+        SELECT forecast FROM yearly_forecasts
+        WHERE year = ${year}
+        LIMIT 1
+      `;
+      const row = result.rows[0];
+      if (row?.forecast) {
+        const cached = row.forecast as YearlyForecast;
+        forecastMemCache.set(year, cached);
+        console.log(`[generateYearlyForecast] DB cache hit for ${year}`);
+        return cached;
+      }
+    } catch (e) {
+      // Table might not exist — fall through to computation
+      console.warn(
+        `[generateYearlyForecast] DB cache miss/error for ${year}:`,
+        (e as Error).message,
+      );
+    }
+  }
+
+  const forecast = await _computeYearlyForecast(year, userBirthday, observer);
+
+  // Cache generic forecasts
+  if (!userBirthday) {
+    forecastMemCache.set(year, forecast);
+    // Write-through to DB (fire and forget)
+    try {
+      const { sql } = await import('@vercel/postgres');
+      const stats = {
+        majorTransits: forecast.majorTransits.length,
+        retrogrades: forecast.retrogrades.length,
+        eclipses: forecast.eclipses.length,
+        keyAspects: forecast.keyAspects.length,
+      };
+      sql`
+        INSERT INTO yearly_forecasts (year, summary, forecast, stats, source, generated_at, expires_at, created_at, updated_at)
+        VALUES (${year}, ${forecast.summary}, ${JSON.stringify(forecast)}::jsonb, ${JSON.stringify(stats)}::jsonb, 'auto', NOW(), NULL, NOW(), NOW())
+        ON CONFLICT (year) DO UPDATE SET
+          forecast = EXCLUDED.forecast,
+          summary = EXCLUDED.summary,
+          stats = EXCLUDED.stats,
+          source = 'auto',
+          generated_at = NOW(),
+          updated_at = NOW()
+      `.catch((e) =>
+        console.warn(
+          `[generateYearlyForecast] DB write error:`,
+          (e as Error).message,
+        ),
+      );
+    } catch {
+      // Ignore DB write failures
+    }
+  }
+
+  return forecast;
+}
+
+async function _computeYearlyForecast(
   year: number,
   userBirthday?: string,
   observer: Observer = DEFAULT_OBSERVER,
