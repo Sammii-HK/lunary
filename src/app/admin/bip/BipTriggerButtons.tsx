@@ -59,10 +59,6 @@ export function BipTriggerButtons() {
   return (
     <div className='flex flex-col gap-4'>
       <TriggerButton
-        label='Run daily BIP post now'
-        endpoint='/api/cron/bip-daily'
-      />
-      <TriggerButton
         label='Run weekly BIP card now'
         endpoint='/api/cron/bip-weekly'
       />

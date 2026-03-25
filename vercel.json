@@ -20,12 +20,12 @@
       "schedule": "30 7 * * *"
     },
     {
-      "path": "/api/cron/daily-stories",
-      "schedule": "0 12 * * *"
+      "path": "/api/cron/weekly-stories",
+      "schedule": "0 4 * * 0"
     },
     {
-      "path": "/api/cron/daily-carousels",
-      "schedule": "30 12 * * *"
+      "path": "/api/cron/weekly-carousels",
+      "schedule": "30 3 * * 0"
     },
     {
       "path": "/api/cron/daily-cosmic-pulse",

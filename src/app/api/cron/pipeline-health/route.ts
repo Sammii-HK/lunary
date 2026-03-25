@@ -40,7 +40,6 @@ export async function GET(request: NextRequest) {
     // Check 1: notification_sent_events for tomorrow's crons
     const cronTypes = [
       { key: `daily-posts-${tomorrowStr}`, label: 'Daily Posts' },
-      { key: `daily-threads-${tomorrowStr}`, label: 'Daily Threads' },
     ];
 
     for (const cron of cronTypes) {

@@ -940,6 +940,18 @@ model social_quotes {
   @@index([use_count], map: "idx_social_quotes_use_count")
 }
 
+model pre_rendered_stories {
+  id          Int      @id @default(autoincrement())
+  date_str    String
+  slot_index  Int
+  variant     String
+  blob_url    String
+  rendered_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([date_str, slot_index], map: "idx_pre_rendered_stories_date_slot")
+  @@index([date_str], map: "idx_pre_rendered_stories_date")
+}
+
 model pinterest_quote_queue {
   id             Int       @id @default(autoincrement())
   quote_id       Int?
