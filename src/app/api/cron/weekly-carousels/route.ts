@@ -179,7 +179,10 @@ export async function GET(request: NextRequest) {
                 console.warn(
                   `[weekly-carousels] Slide ${i} pre-render failed, using OG URL`,
                 );
-                return imageUrl;
+                // Append .png before query params so Postiz accepts the URL
+                return imageUrl.includes('/api/og/')
+                  ? imageUrl.replace(/(\?.*)$/, '.png$1')
+                  : imageUrl;
               }
             },
           );
