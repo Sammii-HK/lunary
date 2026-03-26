@@ -1,6 +1,6 @@
 import { sql } from '@vercel/postgres';
 
-export const revalidate = 43200; // 12 hours — new transit posts are weekly at most
+export const dynamic = 'force-dynamic'; // Must be dynamic — queries DB, no DB available at build time
 
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
