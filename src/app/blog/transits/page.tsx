@@ -5,6 +5,7 @@ import { Heading } from '@/components/ui/Heading';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 43200; // 12 hours — transit blog index changes weekly at most
 
 export const metadata: Metadata = {

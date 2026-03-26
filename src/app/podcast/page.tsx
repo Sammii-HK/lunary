@@ -10,6 +10,7 @@ import {
 import { format } from 'date-fns';
 import { Clock, Headphones } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 43200; // 12 hours — new episodes are weekly
 
 export const metadata: Metadata = {
