@@ -448,7 +448,7 @@ function buildMetricsElement(opts: MetricsCardOptions): React.ReactElement {
 // ---------------------------------------------------------------------------
 
 export interface MilestoneCardOptions {
-  metric: 'mau' | 'mrr' | 'impressionsPerDay';
+  metric: 'mau' | 'mrr' | 'impressionsPerDay' | 'clicksPerDay';
   value: number;
   threshold: number;
   context?: string;
@@ -460,6 +460,7 @@ function buildMilestoneElement(opts: MilestoneCardOptions): React.ReactElement {
     mau: 'monthly active users',
     mrr: 'monthly recurring revenue',
     impressionsPerDay: 'impressions per day',
+    clicksPerDay: 'clicks per day',
   };
 
   const valueStr =

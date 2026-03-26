@@ -176,23 +176,8 @@ export async function GET(request: NextRequest) {
     const priorMrr = Number(priorMrrResult.rows[0]?.mrr || 0);
     const newSignups = Number(signupsResult.rows[0]?.count || 0);
 
-    // Pre-mark all MAU milestones that are already crossed as posted so they
-    // never fire. The MAU here is total grimoire/app users (not product-only),
-    // so 500/1000/2500/5000 thresholds are meaningless and fired incorrectly.
-    // Real product milestones will be posted manually when meaningful.
-    for (const milestone of MILESTONES) {
-      if (milestone.metric !== 'mau') continue;
-      const currentValue = currentMau;
-      for (const threshold of milestone.values) {
-        if (currentValue >= threshold) {
-          const stateKey = `bip_milestone_${milestone.metric}_${threshold}`;
-          const alreadySet = await getBipState(stateKey);
-          if (!alreadySet) {
-            await setBipState(stateKey, 'posted');
-          }
-        }
-      }
-    }
+    // MAU milestones removed — everyone on coupons, not meaningful yet.
+    // Real milestone checks happen later in the function with the snapshot object.
 
     // Fetch most recent DAU from daily_metrics — non-critical
     let currentDau = 0;
