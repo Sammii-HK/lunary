@@ -305,7 +305,7 @@ export function AuthComponent({
             );
           const destination = isAllowedPath ? decoded : '/app';
           setTimeout(() => {
-            router.push(destination);
+            window.location.href = destination;
           }, 500);
           return;
         }
