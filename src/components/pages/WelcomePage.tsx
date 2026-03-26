@@ -32,6 +32,7 @@ import {
   useABTestConversion,
 } from '@/hooks/useABTestTracking';
 import { Heading } from '../ui/Heading';
+import { Testimonials } from '@/components/marketing/Testimonials';
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -557,6 +558,9 @@ export default function WelcomePage() {
         <section className='py-12 md:py-20 px-4 md:px-6'>
           <HomepageFeaturesTest />
         </section>
+
+        {/* Testimonials */}
+        <Testimonials />
 
         {/* Section 8: Learn & Explore */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
