@@ -104,7 +104,7 @@ describe('useABTestTracking', () => {
       });
     });
 
-    it('should track all 8 PostHog tests when user is in all of them', async () => {
+    it('should track all 9 PostHog tests when user is in all of them', async () => {
       const allVariants: Record<string, string> = {
         'cta-copy-test': 'no-verb',
         paywall_preview_style_v1: 'blur',
@@ -114,6 +114,7 @@ describe('useABTestTracking', () => {
         'weekly-lock-style': 'heavy-blur',
         'tarot-truncation-length': 'short',
         'transit-limit-test': 'one-transit',
+        'hero-subhead-test': 'condensed',
       };
 
       mockGetABTestVariantClient.mockImplementation(
@@ -123,7 +124,7 @@ describe('useABTestTracking', () => {
       renderHook(() => useABTestTracking('horoscope', 'page_viewed'));
 
       await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(8);
+        expect(mockTrackEvent).toHaveBeenCalledTimes(9);
 
         const trackedTests = mockTrackEvent.mock.calls.map(
           (call: any[]) => call[1]?.metadata?.abTest,
@@ -136,6 +137,7 @@ describe('useABTestTracking', () => {
         expect(trackedTests).toContain('weekly_lock');
         expect(trackedTests).toContain('tarot_truncation');
         expect(trackedTests).toContain('transit_limit');
+        expect(trackedTests).toContain('hero_subhead');
       });
     });
 
