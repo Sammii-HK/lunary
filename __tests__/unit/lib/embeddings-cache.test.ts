@@ -5,7 +5,7 @@
 
 // Mock OpenAI before importing the module
 const mockCreate = jest.fn().mockResolvedValue({
-  data: [{ embedding: Array(1536).fill(0.1) }],
+  data: [{ embedding: Array(1024).fill(0.1) }],
 });
 
 jest.mock('openai', () => {
@@ -19,7 +19,7 @@ jest.mock('@vercel/postgres', () => ({
 }));
 
 // Must set env vars before importing the module
-process.env.OPENAI_API_KEY = 'test-key';
+process.env.DEEPINFRA_API_KEY = 'test-key';
 process.env.POSTGRES_URL = 'postgres://test';
 // Ensure we're not in test mode for these tests
 const originalNodeEnv = process.env.NODE_ENV;
@@ -29,6 +29,7 @@ describe('generateEmbedding caching', () => {
 
   beforeAll(async () => {
     // Override NODE_ENV so isTestMode() returns false
+    // @ts-expect-error — NODE_ENV override needed for test
     process.env.NODE_ENV = 'development';
     process.env.CI = '';
     process.env.SKIP_AUTH = '';
@@ -39,6 +40,7 @@ describe('generateEmbedding caching', () => {
   });
 
   afterAll(() => {
+    // @ts-expect-error — NODE_ENV restore needed for test
     process.env.NODE_ENV = originalNodeEnv;
   });
 
@@ -48,7 +50,7 @@ describe('generateEmbedding caching', () => {
 
   it('calls OpenAI API on first request', async () => {
     const result = await generateEmbedding('test query unique 1');
-    expect(result).toHaveLength(1536);
+    expect(result).toHaveLength(1024);
     expect(mockCreate).toHaveBeenCalledTimes(1);
   });
 
