@@ -134,10 +134,6 @@
       "schedule": "0 22 * * *"
     },
     {
-      "path": "/api/cron/weekly-wrapup",
-      "schedule": "0 7 * * 0"
-    },
-    {
       "path": "/api/cron/transit-blog-generate",
       "schedule": "0 10 * * 3"
     }
