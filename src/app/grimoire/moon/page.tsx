@@ -107,8 +107,8 @@ export default async function MoonPage() {
 
   // Combine and filter for special moons (supermoon, blue moon, etc.)
   const allMoonEvents = [
-    ...currentYearForecast.moonEvents,
-    ...nextYearForecast.moonEvents,
+    ...(currentYearForecast.moonEvents ?? []),
+    ...(nextYearForecast.moonEvents ?? []),
   ];
 
   const specialMoons = allMoonEvents.filter(

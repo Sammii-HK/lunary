@@ -1082,9 +1082,15 @@ export async function generateYearlyForecast(
       const row = result.rows[0];
       if (row?.forecast) {
         const cached = row.forecast as YearlyForecast;
-        forecastMemCache.set(year, cached);
-        console.log(`[generateYearlyForecast] DB cache hit for ${year}`);
-        return cached;
+        // Validate cached data has required fields — old entries may be incomplete
+        if (cached.ingresses && cached.moonEvents && cached.conjunctions) {
+          forecastMemCache.set(year, cached);
+          console.log(`[generateYearlyForecast] DB cache hit for ${year}`);
+          return cached;
+        }
+        console.log(
+          `[generateYearlyForecast] DB cache stale for ${year}, recomputing`,
+        );
       }
     } catch (e) {
       // Table might not exist — fall through to computation
