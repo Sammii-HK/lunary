@@ -112,17 +112,7 @@ export async function postToSpellcast(
     const isStory = instagramOpts?.isStory === true;
     // TikTok requires postType 'video' when media contains video
     const hasVideoMedia = params.media?.some((m) => m.type === 'video');
-    // Multiple images → carousel (Instagram rejects >1 image as regular 'post')
-    const imageCount =
-      params.media?.filter((m) => m.type === 'image').length ?? 0;
-    const isCarousel = imageCount > 1;
-    const postType = isStory
-      ? 'story'
-      : hasVideoMedia
-        ? 'video'
-        : isCarousel
-          ? 'carousel'
-          : 'post';
+    const postType = isStory ? 'story' : hasVideoMedia ? 'video' : 'post'; // Instagram carousels are posted as 'post' type; Postiz handles carousel creation
 
     // Stories are image-only so a placeholder is acceptable.
     // For all other post types, reject truly empty content.
@@ -216,7 +206,9 @@ const ALLOWED_PLATFORMS = new Set([
   'threads',
   'facebook',
   'bluesky',
-  'tiktok',
+  // TikTok removed — TikTok content goes through render-schedule-v3.sh on Hetzner
+  // which posts via Spellcast with post_type "video"/"reel" (routes to Ayrshare).
+  // Text posts should never go to TikTok.
   'linkedin',
   'youtube',
   'pinterest',
@@ -296,14 +288,8 @@ export async function postToSpellcastMultiPlatform(params: {
     }
 
     // Auto-detect post type from media
-    const imageCount =
-      params.media?.filter((m) => m.type === 'image').length ?? 0;
     const hasVideoMedia = params.media?.some((m) => m.type === 'video');
-    const postType = hasVideoMedia
-      ? 'video'
-      : imageCount > 1
-        ? 'carousel'
-        : 'post';
+    const postType = hasVideoMedia ? 'video' : 'post'; // Multi-image posts are 'post' type; Postiz/Instagram handles carousel creation
 
     // 1. Create draft
     const createRes = await spellcastFetch('/api/posts', {

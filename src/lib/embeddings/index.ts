@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
 import { sql } from '@vercel/postgres';
 
-const EMBEDDING_MODEL = 'text-embedding-3-small';
-const EMBEDDING_DIMENSIONS = 1536;
+const EMBEDDING_MODEL = 'BAAI/bge-large-en-v1.5';
+const EMBEDDING_DIMENSIONS = 1024;
 
 let openaiClient: OpenAI | null = null;
 
@@ -48,11 +48,12 @@ function isTestMode(): boolean {
 
 function getOpenAI(): OpenAI {
   if (!openaiClient) {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY environment variable is not set');
+    if (!process.env.DEEPINFRA_API_KEY) {
+      throw new Error('DEEPINFRA_API_KEY environment variable is not set');
     }
     openaiClient = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.DEEPINFRA_API_KEY,
+      baseURL: 'https://api.deepinfra.com/v1/openai',
     });
   }
   return openaiClient;
@@ -79,9 +80,9 @@ export interface EmbeddingResult {
 
 export async function generateEmbedding(text: string): Promise<number[]> {
   // Return empty embedding in test mode
-  if (isTestMode() && !process.env.OPENAI_API_KEY) {
+  if (isTestMode() && !process.env.DEEPINFRA_API_KEY) {
     console.warn(
-      '⚠️ generateEmbedding: Running in test mode without OpenAI API key',
+      '⚠️ generateEmbedding: Running in test mode without DeepInfra API key',
     );
     return new Array(EMBEDDING_DIMENSIONS).fill(0);
   }
@@ -94,7 +95,6 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   const response = await openai.embeddings.create({
     model: EMBEDDING_MODEL,
     input: text,
-    dimensions: EMBEDDING_DIMENSIONS,
   });
 
   const embedding = response.data[0].embedding;

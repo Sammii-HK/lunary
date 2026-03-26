@@ -4,7 +4,7 @@ import { getPrimaryHandle } from '@/constants/socialHandles';
 import { ShareFooter } from '@/lib/share/og-share-utils';
 
 export const runtime = 'edge';
-export const revalidate = 60; // Cache for 1 minute – dynamic data but not ultra volatile
+export const revalidate = 86400; // Cache 24h — readings don't change once generated
 
 const WIDTH = 1200;
 const HEIGHT = 630;

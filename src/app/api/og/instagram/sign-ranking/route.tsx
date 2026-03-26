@@ -253,7 +253,10 @@ export async function GET(request: NextRequest) {
       height,
       fonts,
       headers: {
-        'Cache-Control': 'no-store, max-age=0',
+        'Cache-Control':
+          'public, s-maxage=604800, stale-while-revalidate=86400',
+        'CDN-Cache-Control': 'public, s-maxage=604800',
+        'Vercel-CDN-Cache-Control': 'public, s-maxage=604800',
         'Access-Control-Allow-Origin': '*',
       },
     });

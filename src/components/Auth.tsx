@@ -287,25 +287,32 @@ export function AuthComponent({
         ) {
           setSuccess('Signed in successfully! Redirecting...');
           invalidateAuthCache();
+          // URLSearchParams.get already decodes; treat as raw path and validate.
           const rawReturnTo = new URLSearchParams(window.location.search).get(
             'returnTo',
           );
-          const decoded = rawReturnTo ? decodeURIComponent(rawReturnTo) : null;
+          const requestedPath =
+            typeof rawReturnTo === 'string' && rawReturnTo.length > 0
+              ? rawReturnTo
+              : null;
           // Only allow same-site relative paths — reject anything with a host,
           // and further restrict to a small set of allowed prefixes.
           const allowedReturnToPrefixes = ['/app'];
           const isRelativePath =
-            typeof decoded === 'string' &&
-            decoded.startsWith('/') &&
-            !decoded.startsWith('//');
+            typeof requestedPath === 'string' &&
+            requestedPath.startsWith('/') &&
+            !requestedPath.startsWith('//');
           const isAllowedPath =
             isRelativePath &&
             allowedReturnToPrefixes.some((prefix) =>
-              decoded.startsWith(prefix),
+              requestedPath.startsWith(prefix),
             );
-          const destination = isAllowedPath ? decoded : '/app';
+          const safePath = isAllowedPath ? requestedPath : '/app';
+          // Normalize against current origin to ensure we stay on the same site.
+          const destinationUrl = new URL(safePath, window.location.origin);
+          const destination = destinationUrl.pathname + destinationUrl.search;
           setTimeout(() => {
-            router.push(destination);
+            window.location.href = destination;
           }, 500);
           return;
         }

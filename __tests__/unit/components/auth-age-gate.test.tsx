@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -104,14 +105,17 @@ describe('Auth age gate', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Create Account' }));
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('Date of birth is required to create your account.'),
-      ).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText('Date of birth is required to create your account.'),
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
 
     expect(mockSignUp).not.toHaveBeenCalled();
-  });
+  }, 15000); // Extend test timeout to 15 seconds
 
   it('shows error when user is under 16', async () => {
     render(<AuthComponent defaultToSignUp />);

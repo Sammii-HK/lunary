@@ -10,7 +10,7 @@ import { getShopListingsFromStripe } from '@/lib/shop/catalogue';
 
 export const runtime = 'nodejs';
 // Optional caching so Stripe isn’t hit on every request
-export const revalidate = 3600;
+export const revalidate = 43200;
 
 const PRODUCTS_PER_PAGE = 12;
 

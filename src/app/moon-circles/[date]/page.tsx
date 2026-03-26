@@ -5,7 +5,8 @@ import { MoonCircleInsights } from '@/components/MoonCircleInsights';
 import { ShareInsightForm } from '@/components/ShareInsightForm';
 import { cn } from '@/lib/utils';
 
-export const revalidate = 120;
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // 1 hour — insights don't change frequently
 
 interface MoonCircleDetailRecord {
   id: number;

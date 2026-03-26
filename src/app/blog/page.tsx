@@ -3,7 +3,7 @@ import { BlogList } from './BlogList';
 import { getPaginatedPosts } from './blog-utils';
 import { generateWeeklyContent } from '../../../utils/blog/weeklyContentGenerator';
 
-export const revalidate = 3600;
+export const revalidate = 43200;
 
 const year = new Date().getFullYear();
 

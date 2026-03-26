@@ -3,7 +3,7 @@ import { ImageResponse } from 'next/og';
 import { generateStarfield } from '@/lib/share/og-utils';
 
 export const runtime = 'edge';
-export const revalidate = 3600;
+export const revalidate = 604800;
 
 let robotoFontP: Promise<ArrayBuffer> | null = null;
 

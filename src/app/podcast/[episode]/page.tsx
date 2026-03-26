@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { Clock, Calendar, Headphones, BookOpen } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 86400; // 1 day — episodes don't change once published
 
 interface PodcastEpisodePageProps {
   params: Promise<{ episode: string }>;

@@ -2,6 +2,32 @@
   "buildCommand": "pnpm run build:deploy",
   "framework": "nextjs",
   "ignoreCommand": "if [[ \"$VERCEL_GIT_COMMIT_AUTHOR_LOGIN\" == \"dependabot[bot]\" ]]; then exit 0; else exit 1; fi",
+  "functions": {
+    "src/app/api/og/**/*.tsx": {
+      "memory": 512
+    },
+    "src/app/api/ether/**/*.ts": {
+      "memory": 256
+    },
+    "src/app/api/telemetry/**/*.ts": {
+      "memory": 256
+    },
+    "src/app/api/cosmic/**/*.ts": {
+      "memory": 512
+    },
+    "src/app/api/cron/pipeline-health/*.ts": {
+      "memory": 256
+    },
+    "src/app/api/cron/activate-retrograde-spaces/*.ts": {
+      "memory": 256
+    },
+    "src/app/api/cron/process-deletions/*.ts": {
+      "memory": 256
+    },
+    "src/app/api/score/*.ts": {
+      "memory": 256
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/generate-daily-tarot",
@@ -72,10 +98,6 @@
       "schedule": "0 4 * * *"
     },
     {
-      "path": "/api/cron/collect-video-performance",
-      "schedule": "0 6 * * *"
-    },
-    {
       "path": "/api/cron/trial-nurture",
       "schedule": "0 6 * * *"
     },
@@ -110,10 +132,6 @@
     {
       "path": "/api/cron/pipeline-health",
       "schedule": "0 22 * * *"
-    },
-    {
-      "path": "/api/cron/weekly-wrapup",
-      "schedule": "0 7 * * 0"
     },
     {
       "path": "/api/cron/transit-blog-generate",

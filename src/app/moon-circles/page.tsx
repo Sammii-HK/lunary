@@ -6,6 +6,7 @@ import { CircleInviteCTA } from '@/components/CircleInviteCTA';
 import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // 1 hour — moon circles list doesn't change rapidly
 
 type MoonPhaseFilter = 'New Moon' | 'Full Moon' | null;
 

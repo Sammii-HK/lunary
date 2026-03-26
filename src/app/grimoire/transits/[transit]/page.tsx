@@ -9,7 +9,6 @@ import {
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import transitData from '@/data/slow-planet-sign-changes.json';
-import { sql } from '@vercel/postgres';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
@@ -371,19 +370,6 @@ export default async function TransitPage({
   const ephemeris = getTransitEphemeris(transit.planet, transit.signs[0]);
   const previousTransit = getPreviousTransit(transit.planet, transit.signs[0]);
 
-  // Check for a published deep-dive blog post
-  let deepDiveSlug: string | null = null;
-  try {
-    const deepDiveResult = await sql`
-      SELECT slug FROM transit_blog_posts
-      WHERE transit_id = ${transitId} AND status = 'published'
-      LIMIT 1
-    `;
-    deepDiveSlug = deepDiveResult.rows[0]?.slug ?? null;
-  } catch {
-    // DB not available or table doesn't exist yet -- silently skip
-  }
-
   // Build richer table with computed dates
   const tableRows: [string, string][] = [
     ['Transit', transit.transitType],
@@ -548,24 +534,6 @@ export default async function TransitPage({
       ]}
       faqs={faqs}
     >
-      {deepDiveSlug && (
-        <div className='mt-8 p-4 rounded-xl border border-lunary-accent-500/30 bg-lunary-accent-500/5'>
-          <h3 className='text-lg font-medium mb-2'>
-            Deep-dive guide available
-          </h3>
-          <p className='text-sm text-lunary-primary-300/80 mb-3'>
-            Read the full deep-dive with historical context, detailed dates, and
-            sign-by-sign breakdown.
-          </p>
-          <Link
-            href={`/blog/transits/${deepDiveSlug}`}
-            className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-lunary-accent-500/20 text-lunary-accent-300 hover:bg-lunary-accent-500/30 transition-colors text-sm font-medium'
-          >
-            Read the full deep dive
-          </Link>
-        </div>
-      )}
-
       {sameYearTransits.length > 0 && (
         <div className='mt-8'>
           <h3 className='text-lg font-medium mb-4'>

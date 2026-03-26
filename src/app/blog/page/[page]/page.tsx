@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { BlogList } from '../../BlogList';
 import { getPaginatedPosts, POSTS_PER_PAGE } from '../../blog-utils';
 
-export const revalidate = 3600;
+export const revalidate = 43200;
 export const dynamicParams = true;
 
 interface PageProps {

@@ -23,6 +23,7 @@ const TEST_NAME_MAPPING: Record<string, string> = {
   'tarot-truncation-length': 'tarot_truncation',
   'transit-limit-test': 'transit_limit',
   'inline-cta-style': 'inline_cta',
+  'hero-subhead-test': 'hero_subhead',
 };
 
 /** All trackable test names (read from middleware cookie) */
@@ -160,5 +161,6 @@ export function useABTestVariants() {
     weeklyLock: getABTestVariantClient('weekly-lock-style'),
     tarotTruncation: getABTestVariantClient('tarot-truncation-length'),
     transitLimit: getABTestVariantClient('transit-limit-test'),
+    heroSubhead: getABTestVariantClient('hero-subhead-test'),
   };
 }

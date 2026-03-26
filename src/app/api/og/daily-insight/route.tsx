@@ -1729,7 +1729,12 @@ export async function GET(request: NextRequest): Promise<Response> {
     });
 
     const headers = new Headers(response.headers);
-    headers.set('Cache-Control', 'no-store, max-age=0');
+    headers.set(
+      'Cache-Control',
+      'public, s-maxage=604800, stale-while-revalidate=86400',
+    );
+    headers.set('CDN-Cache-Control', 'public, s-maxage=604800');
+    headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=604800');
 
     return new Response(response.body, {
       status: response.status,

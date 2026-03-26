@@ -22,7 +22,7 @@ import {
 import type { BirthChartData } from '../../../../../../utils/astrology/birthChart';
 
 export const runtime = 'edge';
-export const revalidate = 60;
+export const revalidate = 604800; // 7 days — birth chart data is immutable per user
 
 let robotoMonoPromise: Promise<ArrayBuffer> | null = null;
 let astronomiconFontPromise: Promise<ArrayBuffer> | null = null;
