@@ -5,8 +5,8 @@ import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const lifePathKeys = Object.keys(lifePathNumbers);
 
 // Removed generateStaticParams - using pure ISR for faster builds

@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Number Correspondences: Magical Number Meanings 1-9 | Lunary',
   description:

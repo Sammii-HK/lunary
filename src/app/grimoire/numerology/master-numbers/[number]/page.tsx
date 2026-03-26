@@ -4,8 +4,8 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
 import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const masterNumberKeys = ['11', '22', '33'];
 
 // Removed generateStaticParams - using pure ISR for faster builds

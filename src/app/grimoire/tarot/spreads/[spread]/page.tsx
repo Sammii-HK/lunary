@@ -3,8 +3,8 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { TAROT_SPREAD_MAP, type TarotPlan } from '@/constants/tarotSpreads';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const difficultyLabel: Record<TarotPlan, string> = {
   free: 'Beginner',
   monthly: 'Intermediate',

@@ -7,8 +7,8 @@ import {
 } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Lunary Grimoire A–Z: Complete Topic Index | Lunary',
   description:

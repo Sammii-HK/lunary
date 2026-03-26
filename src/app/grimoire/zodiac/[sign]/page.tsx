@@ -15,8 +15,8 @@ import {
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createZodiacSignSchema, renderJsonLd } from '@/lib/schema';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const signSlugs = Object.keys(zodiacSigns);
 
 // Removed generateStaticParams - using pure ISR for faster builds

@@ -10,8 +10,8 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 import { Heading } from '@/components/ui/Heading';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 
 // Dynamic year range: current year to 10 years in advance
 // Keep historical years indexed (starting from 2025) and extend 10 years into the future
@@ -23,11 +23,8 @@ const AVAILABLE_YEARS = Array.from(
   (_, i) => START_YEAR + i,
 );
 
-// Pre-build current + adjacent years to avoid cold renders
-export function generateStaticParams() {
-  const y = new Date().getFullYear();
-  return [y - 1, y, y + 1].map((year) => ({ year: year.toString() }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,
@@ -591,7 +588,7 @@ While these events affect everyone, their impact on your personal chart is uniqu
     >
       {/* Custom content: Events Calendar */}
       <div className='mt-8 space-y-8'>
-        {nextYear <= END_YEAR && (
+        {nextYear <= maxYear && (
           <section className='rounded-2xl border border-zinc-800 bg-zinc-900/50 px-6 py-5'>
             <Heading as='h2' variant='h3' className='text-zinc-100 mb-3'>
               Upcoming events

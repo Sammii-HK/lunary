@@ -3,7 +3,7 @@ import { NavParamLink } from '@/components/NavParamLink';
 import { Heading } from '@/components/ui/Heading';
 import { getAllRisingSigns } from '@/lib/rising-signs/getRisingSign';
 
-export const revalidate = 31536000; // 30 days
+export const revalidate = 2592000; // 30 days
 
 export const metadata: Metadata = {
   title:

@@ -8,23 +8,11 @@ import { retrogradeInfo } from '@/constants/grimoire/seo-data';
 import { createEventSchema, renderJsonLd } from '@/lib/schema';
 import { generateYearlyForecast } from '@/lib/forecast/yearly';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 
-// Pre-build all planet retrograde pages (only ~10 planets)
-const RETROGRADE_PLANETS = [
-  'mercury',
-  'venus',
-  'mars',
-  'jupiter',
-  'saturn',
-  'uranus',
-  'neptune',
-  'pluto',
-];
-export function generateStaticParams() {
-  return RETROGRADE_PLANETS.map((planet) => ({ planet }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 /**
  * Fetch retrograde periods for a specific planet across current + next year.

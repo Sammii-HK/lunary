@@ -5,8 +5,8 @@ import { Layers } from 'lucide-react';
 import { tarotSuits } from '@/constants/tarot';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Tarot Suits: Wands, Cups, Swords & Pentacles Meanings | Lunary',
   description:

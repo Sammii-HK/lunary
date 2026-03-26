@@ -5,8 +5,8 @@ import { Calendar } from 'lucide-react';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const personalYears = [
   {
     number: '1',

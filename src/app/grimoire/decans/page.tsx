@@ -14,8 +14,8 @@ import {
   createBreadcrumbSchema,
 } from '@/lib/schema';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: "Zodiac Decans: Your Sign's Hidden Layer Revealed | Lunary",
   description:

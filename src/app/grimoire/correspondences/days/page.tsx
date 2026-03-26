@@ -5,8 +5,8 @@ import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../utils/string';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title:
     'Magical Days of the Week: Planetary Correspondences & Best Spells for Each Day',

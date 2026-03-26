@@ -11,8 +11,8 @@ import {
 } from '@/constants/seo/aspects';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const ASPECTS = ['conjunction', 'opposition', 'trine', 'square', 'sextile'];
 const aspectSymbols: Record<string, string> = {
   conjunction: '☌',

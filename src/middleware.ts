@@ -43,6 +43,9 @@ const AB_TESTS: Record<string, { variants: string[]; weights?: number[] }> = {
   'tarot-truncation-length': {
     variants: ['short', 'medium', 'long'],
   },
+  'hero-subhead-test': {
+    variants: ['control', 'condensed'],
+  },
   'transit-limit-test': {
     variants: ['one-transit', 'two-transit'],
   },

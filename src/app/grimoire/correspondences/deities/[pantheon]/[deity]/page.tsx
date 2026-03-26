@@ -4,8 +4,8 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../../../utils/string';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const pantheonKeys = Object.keys(correspondencesData.deities);
 
 // Removed generateStaticParams - using pure ISR for faster builds

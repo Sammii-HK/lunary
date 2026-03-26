@@ -5,8 +5,8 @@ import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createEventSchema, renderJsonLd } from '@/lib/schema';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
 

@@ -18,8 +18,8 @@ import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmi
 import { monthMeta, articleSchema } from '@/lib/horoscope-meta';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day revalidation for monthly horoscopes
+export const revalidate = 2592000;
 
 function resolveOgImageUrl(value: unknown): string | undefined {
   if (!value) return undefined;
@@ -59,26 +59,8 @@ function validateParams(params: PageParams): {
   return { sign, year, month, monthNumber };
 }
 
-// Pre-build current + next month for all signs to avoid cold renders
-export function generateStaticParams() {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth(); // 0-indexed
-  const params: { sign: string; year: string; month: string }[] = [];
-
-  for (const sign of ZODIAC_SIGNS) {
-    // Current month and next month
-    for (let offset = 0; offset <= 1; offset++) {
-      const d = new Date(currentYear, currentMonth + offset, 1);
-      params.push({
-        sign,
-        year: d.getFullYear().toString(),
-        month: MONTHS[d.getMonth()],
-      });
-    }
-  }
-  return params;
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

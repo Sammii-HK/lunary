@@ -16,7 +16,7 @@ import {
 import { Heading } from '@/components/ui/Heading';
 import { NavParamLink } from '@/components/NavParamLink';
 
-export const revalidate = 31536000;
+export const revalidate = 86400;
 export const dynamicParams = true;
 
 interface PageProps {

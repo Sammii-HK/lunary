@@ -9,9 +9,8 @@ import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 import { Heading } from '@/components/ui/Heading';
 import { ASPECT_DATA, Aspect } from '@/constants/seo/aspects';
 
-// ISR — planet positions update slowly enough that 1-hour cache is fine
-// Saves significant CPU vs force-dynamic (astronomy-engine runs on every request otherwise)
-export const revalidate = 3600;
+// Force dynamic — page fetches live DB data, cannot be pre-rendered at build time
+export const dynamic = 'force-dynamic';
 const CANONICAL_PATH = '/grimoire/astrology/sky-now';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lunary.app';
 

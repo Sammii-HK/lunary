@@ -6,8 +6,8 @@ import { tarotSuits } from '@/constants/tarot';
 import { tarotCards } from '../../../../../../utils/tarot/tarot-cards';
 import { stringToKebabCase } from '../../../../../../utils/string';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const suitKeys = Object.keys(tarotSuits);
 
 // Removed generateStaticParams - using pure ISR for faster builds

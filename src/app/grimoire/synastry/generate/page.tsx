@@ -5,8 +5,8 @@ import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 import SynastryGenerator from '@/components/grimoire/SynastryGenerator';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {

@@ -16,8 +16,8 @@ import { Heading } from '@/components/ui/Heading';
 import { astrologicalHouses } from '@/constants/grimoire/seo-data';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 
 // Map URL slugs (1st-house, 2nd-house, etc.) to house keys
 const houseSlugMap: Record<string, keyof typeof astrologicalHouses> = {

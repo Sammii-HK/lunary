@@ -30,6 +30,7 @@ import { OptimizedDemoIframe } from '@/components/marketing/OptimizedDemoIframe'
 import {
   useABTestTracking,
   useABTestConversion,
+  useABTestVariants,
 } from '@/hooks/useABTestTracking';
 import { Heading } from '../ui/Heading';
 import { Testimonials } from '@/components/marketing/Testimonials';
@@ -61,14 +62,18 @@ export default function WelcomePage() {
   const [openFAQId, setOpenFAQId] = useState<string | null>(null);
   const homepageFAQs = getHomepageFAQs();
 
-  // Track page view with A/B test data (homepage-features-test, cta-copy-test)
+  // Track page view with A/B test data (homepage-features-test, cta-copy-test, hero-subhead-test)
   useABTestTracking('welcome', 'page_viewed', [
     'homepage-features-test',
     'cta-copy-test',
+    'hero-subhead-test',
   ]);
 
   // Get conversion tracker with A/B test metadata
   const { trackConversion } = useABTestConversion();
+
+  const { heroSubhead } = useABTestVariants();
+  const isCondensedHero = heroSubhead === 'condensed';
 
   // CTA click handler with A/B tracking
   const handleCtaClick = (location: string, label: string, href: string) => {
@@ -168,11 +173,13 @@ export default function WelcomePage() {
             This demo uses real cosmic data. Everything updates daily based on
             current transits and moon phases.
           </p>
-          <p className='text-zinc-400 leading-relaxed max-w-3xl mx-auto'>
-            Lunary is designed for reflection rather than prediction. Instead of
-            offering fixed meanings or one-size-fits-all readings, it helps you
-            understand patterns, timing, and cycles as they unfold.
-          </p>
+          {!isCondensedHero && (
+            <p className='text-zinc-400 leading-relaxed max-w-3xl mx-auto'>
+              Lunary is designed for reflection rather than prediction. Instead
+              of offering fixed meanings or one-size-fits-all readings, it helps
+              you understand patterns, timing, and cycles as they unfold.
+            </p>
+          )}
           <Link
             href='/features'
             className='text-sm text-lunary-primary-400 hover:text-lunary-primary-200 transition-colors inline-block mt-4'

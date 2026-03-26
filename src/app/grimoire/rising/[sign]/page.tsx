@@ -10,7 +10,7 @@ import {
   getAllRisingSigns,
 } from '@/lib/rising-signs/getRisingSign';
 
-export const revalidate = 31536000; // 30 days
+export const revalidate = 2592000; // 30 days
 export const dynamicParams = true;
 
 interface PageProps {

@@ -6,7 +6,7 @@ import { Heart, Sparkles } from 'lucide-react';
 import { Heading } from '@/components/ui/Heading';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
-export const revalidate = 31536000;
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'Synastry Aspects: Relationship Compatibility in Astrology - Lunary',

@@ -7,8 +7,8 @@ import {
   soulUrgeKeys,
 } from '@/constants/grimoire/numerology-extended-data';
 
-// 1-year ISR — evergreen content
-export const revalidate = 31536000;
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Soul Urge Number Calculator & Meanings | Lunary',
   description:
