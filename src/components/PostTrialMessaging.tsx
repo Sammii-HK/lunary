@@ -53,12 +53,12 @@ export function PostTrialMessaging() {
             insights have been waiting. Pick up where you left off.
           </p>
           <p className='text-lunary-primary-300 text-sm font-medium mb-4'>
-            Come back with 20% off — use code COSMICSEASON at checkout
+            Come back with 3 months free — use code COSMICSEASON at checkout
           </p>
           <div className='flex flex-col sm:flex-row gap-3'>
             <Button variant='lunary-soft' size='default' asChild>
               <Link href='/pricing?nav=app&promo=COSMICSEASON'>
-                Get 20% off
+                Get 3 months free
               </Link>
             </Button>
             <SmartTrialButton size='default' />
