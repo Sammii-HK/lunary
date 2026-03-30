@@ -64,8 +64,8 @@ export const Navbar = () => {
   }
 
   return (
-    <nav className='fixed bottom-0 z-[100] flex w-full flex-col items-center border-t border-zinc-800/80 bg-zinc-950/90 backdrop-blur-xl'>
-      <div className='flex w-full h-12 items-center justify-around px-2 text-white max-w-lg'>
+    <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
+      <div className='flex w-full h-12 md:h-14 items-center justify-around px-2 py-2 text-white max-w-lg'>
         <NavLink
           href='/app'
           icon={Home}
@@ -103,7 +103,6 @@ export const Navbar = () => {
           dataNav='explore'
         />
       </div>
-      <div className='w-full h-[env(safe-area-inset-bottom,0px)]' />
     </nav>
   );
 };
@@ -165,8 +164,8 @@ const NavLink = ({
       href={href}
       data-nav={dataNav}
       onClick={handleClick}
-      className={`relative flex flex-col items-center gap-0.5 px-4 py-1 text-xs transition-colors ${
-        active ? 'text-lunary-secondary' : 'text-zinc-500'
+      className={`relative flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition ${
+        active ? 'text-lunary-secondary' : 'text-zinc-400 hover:text-zinc-300'
       }`}
     >
       <div className='relative'>
