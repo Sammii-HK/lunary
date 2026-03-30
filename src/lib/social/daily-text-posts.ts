@@ -336,8 +336,8 @@ function linkedinTransit(
     p.push(...snippet.keyPoints.slice(0, 3), '');
   }
   if (event.hookSuggestions[0]) p.push(event.hookSuggestions[0]);
-  if (event.sabbatData?.ritualSuggestions?.[0]) {
-    p.push('', `Try this: ${event.sabbatData.ritualSuggestions[0]}.`);
+  if (event.sabbatData?.rituals?.[0]) {
+    p.push('', `Try this: ${event.sabbatData.rituals[0]}.`);
   }
   const url = eventGrimoireUrl(event, snippet);
   if (url) p.push('', url);
@@ -473,7 +473,7 @@ function transitImageUrl(
 ): string {
   const baseUrl = getImageBaseUrl();
   // If we have a real article snippet, use its category/slug for the image
-  if (isArticleSnippet(snippet)) {
+  if (snippet && isArticleSnippet(snippet)) {
     return getEducationalImageUrl(snippet, baseUrl, platform);
   }
   // Build from event data
@@ -507,16 +507,6 @@ function transitPostForPlatform(
 ): DailyTextPost {
   const image = transitImageUrl(event, snippet, platform);
   switch (platform) {
-    case 'linkedin':
-      return makePost(
-        platform,
-        linkedinTransit(event, snippet),
-        dateStr,
-        'transit',
-        undefined,
-        event.score,
-        image,
-      );
     case 'pinterest': {
       const pin = pinterestTransit(event, snippet);
       return makePost(
@@ -552,21 +542,6 @@ function hybridPostForPlatform(
 ): DailyTextPost {
   const image = categoryImageUrl(catSnippet, category, platform);
   switch (platform) {
-    case 'linkedin': {
-      const base = linkedinCategory(catSnippet, category, variety);
-      const note = event.rarityFrame
-        ? `\n\nCosmic context: ${event.rarityFrame}`
-        : '';
-      return makePost(
-        platform,
-        normalise(base + note),
-        dateStr,
-        'transit',
-        undefined,
-        event.score,
-        image,
-      );
-    }
     case 'pinterest': {
       const pin = pinterestCategory(catSnippet, category);
       return makePost(
@@ -607,16 +582,6 @@ function categoryPostForPlatform(
     variety?.type === 'persona' ? 'persona' : 'category-rotation';
   const image = categoryImageUrl(snippet, category, platform);
   switch (platform) {
-    case 'linkedin':
-      return makePost(
-        platform,
-        linkedinCategory(snippet, category, variety),
-        dateStr,
-        source,
-        undefined,
-        undefined,
-        image,
-      );
     case 'pinterest': {
       const pin = pinterestCategory(snippet, category);
       return makePost(
