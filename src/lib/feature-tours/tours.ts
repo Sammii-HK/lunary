@@ -4,6 +4,7 @@ import {
   FREE_PLAN_MONTHLY_READING_LIMIT,
   MONTHLY_PLAN_MONTHLY_READING_LIMIT,
 } from '@/constants/tarotSpreads';
+import { getAccurateMoonPhase } from '../../../utils/astrology/astronomical-data';
 
 function getTarotLimit(tier: string): string {
   if (tier === 'lunary_plus_ai_annual') return 'unlimited';
@@ -11,22 +12,13 @@ function getTarotLimit(tier: string): string {
   return `${MONTHLY_PLAN_MONTHLY_READING_LIMIT}/month`;
 }
 
-// Helper to check if near new or full moon (within 2 days)
+// Check if within 2 days of a new moon (0°) or full moon (180°) using real ephemeris
 function isNearMoonPhase(): boolean {
-  const now = new Date();
-  const lunarMonth = 29.53059; // days
-  const knownNewMoon = new Date('2000-01-06'); // Reference new moon
-
-  const daysSinceReference =
-    (now.getTime() - knownNewMoon.getTime()) / (1000 * 60 * 60 * 24);
-  const currentLunarDay = daysSinceReference % lunarMonth;
-
-  // Check if within 2 days of new moon (0) or full moon (14.76)
-  return (
-    currentLunarDay < 2 ||
-    currentLunarDay > lunarMonth - 2 ||
-    Math.abs(currentLunarDay - 14.76) < 2
-  );
+  const { phaseAngle } = getAccurateMoonPhase(new Date());
+  // Within ~24° of new moon (0°/360°) or full moon (180°) ≈ ~2 days either side
+  const nearNew = phaseAngle < 24 || phaseAngle > 336;
+  const nearFull = phaseAngle > 156 && phaseAngle < 204;
+  return nearNew || nearFull;
 }
 
 export const FEATURE_TOURS: FeatureTour[] = [

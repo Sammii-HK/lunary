@@ -64,8 +64,8 @@ export const Navbar = () => {
   }
 
   return (
-    <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-zinc-800/80 bg-zinc-950/90 backdrop-blur-xl'>
-      <div className='flex w-full items-center justify-around px-2 pt-1.5 pb-[env(safe-area-inset-bottom,4px)] text-white max-w-lg'>
+    <nav className='fixed bottom-0 z-[100] flex w-full flex-col items-center border-t border-zinc-800/80 bg-zinc-950/90 backdrop-blur-xl'>
+      <div className='flex w-full h-12 items-center justify-around px-2 text-white max-w-lg'>
         <NavLink
           href='/app'
           icon={Home}
@@ -103,6 +103,7 @@ export const Navbar = () => {
           dataNav='explore'
         />
       </div>
+      <div className='w-full h-[env(safe-area-inset-bottom,0px)]' />
     </nav>
   );
 };

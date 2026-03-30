@@ -1,5 +1,8 @@
 import dayjs from 'dayjs';
-import { getRealPlanetaryPositions } from './astronomical-data';
+import {
+  getRealPlanetaryPositions,
+  getAccurateMoonPhase,
+} from './astronomical-data';
 import { parseIsoDateOnly } from '@/lib/date-only';
 
 export type TransitEvent = {
@@ -127,6 +130,9 @@ export const getUpcomingTransits = (
   const previousDay = getRealPlanetaryPositions(
     startDate.subtract(1, 'day').toDate(),
   );
+  const previousMoonPhaseAngle = getAccurateMoonPhase(
+    startDate.subtract(1, 'day').toDate(),
+  ).phaseAngle;
 
   // Process sign changes from cached data
   for (let i = 0; i < dailyPositions.length; i++) {
@@ -134,16 +140,21 @@ export const getUpcomingTransits = (
     const previousPositions =
       i === 0 ? previousDay : dailyPositions[i - 1].positions;
 
+    const prevMoonAngle =
+      i === 0
+        ? previousMoonPhaseAngle
+        : getAccurateMoonPhase(startDate.add(i - 1, 'day').toDate()).phaseAngle;
+    const currMoonAngle = getAccurateMoonPhase(date.toDate()).phaseAngle;
+
     // Add lunar phase events
-    const lunarEvents = getLunarPhaseEvents(date);
+    const lunarEvents = getLunarPhaseEvents(prevMoonAngle, currMoonAngle, date);
     events.push(...lunarEvents);
 
     // Add planetary sign changes
     events.push(...getSignChangeEvents(positions, previousPositions, date));
 
-    // Add retrograde events (simplified)
-    const retrogradeEvents = getRetrogradeEvents(date);
-    events.push(...retrogradeEvents);
+    // Add retrograde/direct station events from real astronomy-engine positions
+    events.push(...getRetrogradeEvents(positions, previousPositions, date));
   }
 
   // Remove duplicates and sort by date
@@ -161,17 +172,27 @@ export const getUpcomingTransits = (
   return uniqueEvents.sort((a, b) => a.date.valueOf() - b.date.valueOf());
 };
 
-const getLunarPhaseEvents = (date: dayjs.Dayjs): TransitEvent[] => {
+/**
+ * Detect lunar phase crossings between two consecutive days using astronomy-engine.
+ * Phase angle: 0° = New Moon, 90° = First Quarter, 180° = Full Moon, 270° = Last Quarter.
+ * We detect a crossing when prevAngle < threshold <= currAngle (or wraparound at 0°).
+ */
+const getLunarPhaseEvents = (
+  prevAngle: number,
+  currAngle: number,
+  date: dayjs.Dayjs,
+): TransitEvent[] => {
   const events: TransitEvent[] = [];
 
-  // Simplified lunar phase calculation
-  const lunarMonth = 29.53;
-  const knownNewMoon = dayjs('2024-01-11');
-  const daysSinceNew = date.diff(knownNewMoon, 'day');
-  const phase = (daysSinceNew % lunarMonth) / lunarMonth;
+  const crossed = (threshold: number): boolean => {
+    if (threshold === 0) {
+      // Wraparound: prev near 360, curr near 0
+      return prevAngle > 270 && currAngle < 90;
+    }
+    return prevAngle < threshold && currAngle >= threshold;
+  };
 
-  // Check if this is a significant lunar phase day
-  if (Math.abs(phase - 0) < 0.02 || Math.abs(phase - 1) < 0.02) {
+  if (crossed(0)) {
     events.push({
       date,
       planet: 'Moon',
@@ -181,7 +202,7 @@ const getLunarPhaseEvents = (date: dayjs.Dayjs): TransitEvent[] => {
       significance: 'high',
       type: 'lunar_phase',
     });
-  } else if (Math.abs(phase - 0.25) < 0.02) {
+  } else if (crossed(90)) {
     events.push({
       date,
       planet: 'Moon',
@@ -191,7 +212,7 @@ const getLunarPhaseEvents = (date: dayjs.Dayjs): TransitEvent[] => {
       significance: 'medium',
       type: 'lunar_phase',
     });
-  } else if (Math.abs(phase - 0.5) < 0.02) {
+  } else if (crossed(180)) {
     events.push({
       date,
       planet: 'Moon',
@@ -201,7 +222,7 @@ const getLunarPhaseEvents = (date: dayjs.Dayjs): TransitEvent[] => {
       significance: 'high',
       type: 'lunar_phase',
     });
-  } else if (Math.abs(phase - 0.75) < 0.02) {
+  } else if (crossed(270)) {
     events.push({
       date,
       planet: 'Moon',
@@ -216,47 +237,52 @@ const getLunarPhaseEvents = (date: dayjs.Dayjs): TransitEvent[] => {
   return events;
 };
 
-const getRetrogradeEvents = (date: dayjs.Dayjs): TransitEvent[] => {
+const RETROGRADE_PLANET_ENERGY: Record<string, string> = {
+  Mercury: 'communication, technology, and travel plans',
+  Venus: 'relationships, values, and financial matters',
+  Mars: 'action, energy, and ambition',
+  Jupiter: 'growth, expansion, and optimism',
+  Saturn: 'structure, discipline, and responsibility',
+  Uranus: 'change, liberation, and innovation',
+  Neptune: 'dreams, intuition, and spirituality',
+  Pluto: 'transformation, power, and regeneration',
+};
+
+const getRetrogradeEvents = (
+  current: Record<string, any>,
+  previous: Record<string, any>,
+  date: dayjs.Dayjs,
+): TransitEvent[] => {
   const events: TransitEvent[] = [];
 
-  // Simplified retrograde calculation - mock implementation
-  const dayOfYear = date.diff(date.startOf('year'), 'day') + 1;
+  PLANETS_OF_INTEREST.forEach((planet) => {
+    if (planet === 'Sun' || planet === 'Moon') return;
+    if (!current[planet] || !previous[planet]) return;
 
-  // Mercury retrograde roughly 3-4 times per year
-  if (dayOfYear % 88 === 0) {
-    events.push({
-      date,
-      planet: 'Mercury',
-      event: 'Goes Retrograde',
-      description:
-        'Review communication, technology, and travel plans. Perfect time for reflection and revision.',
-      significance: 'high',
-      type: 'retrograde',
-    });
-  } else if (dayOfYear % 88 === 21) {
-    events.push({
-      date,
-      planet: 'Mercury',
-      event: 'Goes Direct',
-      description:
-        'Communication and technology issues clear up. Time to move forward with plans.',
-      significance: 'medium',
-      type: 'direct',
-    });
-  }
+    const wasRetrograde = previous[planet].retrograde;
+    const isRetrograde = current[planet].retrograde;
+    const energy = RETROGRADE_PLANET_ENERGY[planet] ?? 'personal themes';
 
-  // Venus retrograde roughly every 18 months
-  if (dayOfYear % 584 === 0) {
-    events.push({
-      date,
-      planet: 'Venus',
-      event: 'Goes Retrograde',
-      description:
-        'Review relationships, values, and financial matters. Time for inner reflection on love.',
-      significance: 'high',
-      type: 'retrograde',
-    });
-  }
+    if (!wasRetrograde && isRetrograde) {
+      events.push({
+        date,
+        planet,
+        event: 'Goes Retrograde',
+        description: `Review ${energy}. Perfect time for reflection and revision.`,
+        significance: planet === 'Mercury' ? 'high' : 'medium',
+        type: 'retrograde',
+      });
+    } else if (wasRetrograde && !isRetrograde) {
+      events.push({
+        date,
+        planet,
+        event: 'Goes Direct',
+        description: `${planet} momentum returns. Time to move forward with plans.`,
+        significance: planet === 'Mercury' ? 'medium' : 'low',
+        type: 'direct',
+      });
+    }
+  });
 
   return events;
 };
