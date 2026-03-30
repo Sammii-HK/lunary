@@ -175,6 +175,54 @@ export function getUpcomingSabbat(date: Date = new Date()): Sabbat | null {
 }
 
 /**
+ * Get the seasonally relevant sabbat and how many days away it is.
+ *
+ * Priority:
+ * 1. Active: sabbat within ±7 days (daysOffset near 0)
+ * 2. Recent: sabbat that passed within the last 21 days (daysOffset negative)
+ * 3. Upcoming: next sabbat after today (daysOffset positive)
+ *
+ * daysOffset is negative for past sabbats, positive for future.
+ */
+export function getSeasonalSabbat(
+  date: Date = new Date(),
+): { sabbat: Sabbat; daysOffset: number } | null {
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  const year = date.getFullYear();
+
+  const candidates: Array<{ sabbat: Sabbat; d: Date }> = [];
+  for (const sabbat of wheelOfTheYearSabbats) {
+    for (const y of [year - 1, year, year + 1]) {
+      const d = parseSabbatDate(sabbat.date, y);
+      if (d) candidates.push({ sabbat, d });
+    }
+  }
+  candidates.sort((a, b) => a.d.getTime() - b.d.getTime());
+
+  const daysOffsetFor = (d: Date) =>
+    Math.round((d.getTime() - date.getTime()) / MS_PER_DAY);
+
+  // 1. Active: within ±7 days
+  const active = candidates.find((c) => Math.abs(daysOffsetFor(c.d)) <= 7);
+  if (active)
+    return { sabbat: active.sabbat, daysOffset: daysOffsetFor(active.d) };
+
+  // 2. Recently passed: up to 21 days ago
+  const recent = [...candidates]
+    .reverse()
+    .find((c) => daysOffsetFor(c.d) < 0 && daysOffsetFor(c.d) >= -21);
+  if (recent)
+    return { sabbat: recent.sabbat, daysOffset: daysOffsetFor(recent.d) };
+
+  // 3. Next upcoming
+  const upcoming = candidates.find((c) => daysOffsetFor(c.d) > 0);
+  if (upcoming)
+    return { sabbat: upcoming.sabbat, daysOffset: daysOffsetFor(upcoming.d) };
+
+  return null;
+}
+
+/**
  * Get tarot card by name
  */
 export function getTarotCard(name: string): any {

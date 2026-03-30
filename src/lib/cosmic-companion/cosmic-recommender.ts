@@ -20,7 +20,7 @@ import {
 import {
   getAspectMeaning,
   getRetrogradeGuidance,
-  getUpcomingSabbat,
+  getSeasonalSabbat,
   getTarotCardsByPlanet,
   getTarotCardsByZodiac,
   getPlanetaryDayCorrespondences,
@@ -624,27 +624,27 @@ function getRetrogradeGuidanceFromGrimoire(
 }
 
 /**
- * Get sabbat recommendation using grimoire data
+ * Get sabbat recommendation using grimoire data.
+ * Returns the seasonally relevant sabbat — recently passed (within 21 days),
+ * active (within ±7 days), or upcoming — with a real daysUntil value.
+ * daysUntil is negative when the sabbat has already passed.
  * INTERNAL: Only used within getCosmicRecommendations
  */
 function getSabbatRecommendation(
   date: Date = new Date(),
 ): SabbatRecommendation | null {
-  const upcomingSabbat = getUpcomingSabbat(date);
-  if (!upcomingSabbat) return null;
-
-  // Calculate days until (simplified - you'd want real date math)
-  const daysUntil = 7; // Placeholder
+  const seasonal = getSeasonalSabbat(date);
+  if (!seasonal) return null;
 
   return {
-    sabbat: upcomingSabbat.name,
-    daysUntil,
-    description: upcomingSabbat.description,
-    colors: upcomingSabbat.colors,
-    crystals: upcomingSabbat.crystals,
-    herbs: upcomingSabbat.herbs,
-    rituals: upcomingSabbat.rituals,
-    deities: upcomingSabbat.deities,
+    sabbat: seasonal.sabbat.name,
+    daysUntil: seasonal.daysOffset,
+    description: seasonal.sabbat.description,
+    colors: seasonal.sabbat.colors,
+    crystals: seasonal.sabbat.crystals,
+    herbs: seasonal.sabbat.herbs,
+    rituals: seasonal.sabbat.rituals,
+    deities: seasonal.sabbat.deities,
   };
 }
 
@@ -1052,7 +1052,10 @@ export async function getCosmicRecommendations(
     }
 
     if (queryContext.suggestSabbat && !queryContext.needsSabbats && sabbat) {
-      suggestionMessages.sabbat = `${sabbat.sabbat} approaches - rituals could enhance this energy.`;
+      suggestionMessages.sabbat =
+        sabbat.daysUntil < 0
+          ? `We're in the ${sabbat.sabbat} season - rituals are especially potent now.`
+          : `${sabbat.sabbat} approaches - rituals could enhance this energy.`;
     }
 
     if (Object.keys(suggestionMessages).length > 0) {
@@ -1216,10 +1219,20 @@ function generateSynthesisMessage(
   }
 
   // Sabbat timing
-  if (sabbat && sabbat.daysUntil <= 14) {
-    messages.push(
-      `${sabbat.sabbat} approaches in ${sabbat.daysUntil} days, bringing ${sabbat.rituals[0]?.toLowerCase() || 'seasonal energy'}.`,
-    );
+  if (sabbat) {
+    const ritual = sabbat.rituals[0]?.toLowerCase() || 'seasonal energy';
+    let sabbatMsg: string;
+    if (sabbat.daysUntil < 0) {
+      // Recently passed — still in season
+      sabbatMsg = `We're in the ${sabbat.sabbat} season — ${ritual} carries strong energy now.`;
+    } else if (sabbat.daysUntil === 0) {
+      sabbatMsg = `${sabbat.sabbat} is today — ${ritual} is at its peak.`;
+    } else if (sabbat.daysUntil <= 14) {
+      sabbatMsg = `${sabbat.sabbat} approaches in ${sabbat.daysUntil} days, bringing ${ritual}.`;
+    } else {
+      sabbatMsg = `${sabbat.sabbat} is coming — begin ${ritual} preparations.`;
+    }
+    messages.push(sabbatMsg);
   }
 
   // Planetary day
