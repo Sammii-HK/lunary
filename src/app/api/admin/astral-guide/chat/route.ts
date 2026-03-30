@@ -20,6 +20,7 @@ import {
   buildAstralContext,
   ASTRAL_GUIDE_PROMPT,
 } from '@/lib/ai/astral-guide';
+import { formatBirthChartSummary } from '@/lib/ai/birth-chart-with-patterns';
 import { analyzeContextNeeds } from '@/lib/ai/context-optimizer';
 import { decrypt } from '@/lib/encryption';
 import { normalizePlanType } from '../../../../../../utils/pricing';
@@ -172,6 +173,16 @@ export async function POST(request: Request) {
       });
 
       context = { ...lunaryResult.context, ...astralContext };
+      // Rebuild natalSummary from fresh birth chart — the cached call inside
+      // buildAstralContext may have produced a stale/null natalSummary.
+      if (lunaryResult.context.birthChart) {
+        context = {
+          ...context,
+          natalSummary: formatBirthChartSummary(
+            lunaryResult.context.birthChart,
+          ),
+        };
+      }
     } else {
       const lunaryResult = await buildLunaryContext({
         userId: user.id,
