@@ -127,51 +127,55 @@ export async function GET(request: NextRequest) {
         fillQuotes: true,
       });
 
-      // Pre-render all 4 images in parallel
-      const imageUrls = await Promise.all(
-        storyItems.map(async (story, i) => {
-          const imageParams = new URLSearchParams(story.params);
-          const rawImageUrl = `${SHARE_BASE_URL}${story.endpoint}?${imageParams.toString()}`;
-          const staticImageUrl = rawImageUrl.includes('/api/og/')
-            ? rawImageUrl
-                .replace(/^(https?:\/\/[^/]+)\/\//, '$1/')
-                .replace(/(\?.*)$/, '.png$1')
-            : rawImageUrl;
+      // Pre-render story images sequentially (parallel overwhelms Vercel OG
+      // functions and causes timeouts — each OG render takes ~18s)
+      const imageUrls: string[] = [];
+      for (let i = 0; i < storyItems.length; i++) {
+        const story = storyItems[i];
+        const imageParams = new URLSearchParams(story.params);
+        const rawImageUrl = `${SHARE_BASE_URL}${story.endpoint}?${imageParams.toString()}`;
+        const staticImageUrl = rawImageUrl.includes('/api/og/')
+          ? rawImageUrl
+              .replace(/^(https?:\/\/[^/]+)\/\//, '$1/')
+              .replace(/(\?.*)$/, '.png$1')
+          : rawImageUrl;
 
-          try {
-            const ogRes = await fetch(staticImageUrl, {
-              signal: AbortSignal.timeout(30_000),
-            });
-            if (!ogRes.ok) return staticImageUrl;
+        try {
+          const ogRes = await fetch(staticImageUrl, {
+            signal: AbortSignal.timeout(45_000),
+          });
+          if (!ogRes.ok) {
+            imageUrls.push(staticImageUrl);
+            continue;
+          }
 
-            const imageBuffer = await ogRes.arrayBuffer();
-            const blobPath = `stories/${dateStr}/${story.variant}-${i}.png`;
-            const blob = await put(blobPath, Buffer.from(imageBuffer), {
-              access: 'public',
-              contentType: 'image/png',
-            });
+          const imageBuffer = await ogRes.arrayBuffer();
+          const blobPath = `stories/${dateStr}/${story.variant}-${i}.png`;
+          const blob = await put(blobPath, Buffer.from(imageBuffer), {
+            access: 'public',
+            contentType: 'image/png',
+          });
 
-            // Store in pre_rendered_stories (upsert)
-            await sql`
+          // Store in pre_rendered_stories (upsert)
+          await sql`
               INSERT INTO pre_rendered_stories (date_str, slot_index, variant, blob_url, rendered_at)
               VALUES (${dateStr}, ${i}, ${story.variant}, ${blob.url}, NOW())
               ON CONFLICT (date_str, slot_index)
               DO UPDATE SET blob_url = ${blob.url}, variant = ${story.variant}, rendered_at = NOW()
             `;
 
-            totalRendered++;
-            console.log(
-              `[weekly-stories] ${dateStr}/${story.variant} → ${blob.url} (${(imageBuffer.byteLength / 1024).toFixed(0)}KB)`,
-            );
-            return blob.url;
-          } catch (err) {
-            console.warn(
-              `[weekly-stories] Pre-render failed for ${dateStr}/${story.variant}, using OG URL`,
-            );
-            return staticImageUrl;
-          }
-        }),
-      );
+          totalRendered++;
+          console.log(
+            `[weekly-stories] ${dateStr}/${story.variant} → ${blob.url} (${(imageBuffer.byteLength / 1024).toFixed(0)}KB)`,
+          );
+          imageUrls.push(blob.url);
+        } catch (err) {
+          console.warn(
+            `[weekly-stories] Pre-render failed for ${dateStr}/${story.variant}, using OG URL`,
+          );
+          imageUrls.push(staticImageUrl);
+        }
+      }
 
       // Schedule all 4 stories to Spellcast
       const dayResults: Array<{
