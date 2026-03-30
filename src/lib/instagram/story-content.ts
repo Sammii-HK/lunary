@@ -1,7 +1,11 @@
 import type { IGStoryContent, IGStoryData, RotatingStoryType } from './types';
 import { seededRandom } from './ig-utils';
 import { getTarotCard } from '../../../utils/tarot/tarot';
-import { getMoonPhase } from '../../../utils/moon/moonPhases';
+import {
+  getDetailedMoonPhase,
+  stringToCamelCase,
+} from '../../../utils/moon/moonPhases';
+import { constellationsMoonPhases } from '../../../utils/moon/zodiacPhases';
 import { getDayOfYear } from 'date-fns';
 import {
   generateAffirmation,
@@ -203,8 +207,8 @@ export async function generateDailyStoryData(
 
   const stories: IGStoryData[] = [];
 
-  // 1. Moon phase story
-  const moonPhase = getMoonPhase(date);
+  // 1. Moon phase story — with zodiac sign context for full/new moons
+  const moonDetail = getDetailedMoonPhase(date);
   const moonRng = seededRandom(`story-moon-${dateStr}`);
   const MOON_ENERGY_MESSAGES: Record<string, string[]> = {
     'New Moon': [
@@ -256,15 +260,40 @@ export async function generateDailyStoryData(
       'Rest deeply before the next chapter begins.',
     ],
   };
-  const energyMessages =
-    MOON_ENERGY_MESSAGES[moonPhase] || MOON_ENERGY_MESSAGES['Full Moon'];
-  const energy = energyMessages[Math.floor(moonRng() * energyMessages.length)];
+
+  // For full and new moons, use zodiac-specific description from the grimoire data
+  const isFullOrNew =
+    moonDetail.phase === 'Full Moon' || moonDetail.phase === 'New Moon';
+  const signKey =
+    moonDetail.sign.toLowerCase() as keyof typeof constellationsMoonPhases;
+  const phaseKey = stringToCamelCase(
+    moonDetail.phase,
+  ) as keyof (typeof constellationsMoonPhases)[typeof signKey];
+  const zodiacDetails = constellationsMoonPhases[signKey]?.[phaseKey]?.details;
+
+  let energy: string;
+  if (isFullOrNew && zodiacDetails) {
+    energy = zodiacDetails;
+  } else {
+    const energyMessages =
+      MOON_ENERGY_MESSAGES[moonDetail.phase] ||
+      MOON_ENERGY_MESSAGES['Full Moon'];
+    energy = energyMessages[Math.floor(moonRng() * energyMessages.length)];
+  }
+
+  // Show sign for full/new moons; add Supermoon label when applicable
+  const phaseDisplay = isFullOrNew
+    ? `${moonDetail.phase} in ${moonDetail.sign}`
+    : moonDetail.phase;
+  const moonTitle = moonDetail.isSuperMoon
+    ? `${phaseDisplay} (Supermoon)`
+    : phaseDisplay;
 
   stories.push({
     variant: 'daily_moon',
-    title: moonPhase,
+    title: moonTitle,
     subtitle: energy,
-    params: { phase: moonPhase, energy, date: dateStr },
+    params: { phase: moonTitle, energy, date: dateStr },
     endpoint: '/api/og/instagram/story-daily',
   });
 

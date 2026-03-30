@@ -1,4 +1,11 @@
-import { MoonPhase, Illumination, Body, AstroTime } from 'astronomy-engine';
+import {
+  MoonPhase,
+  Illumination,
+  Body,
+  AstroTime,
+  GeoVector,
+  Ecliptic,
+} from 'astronomy-engine';
 import { monthlyMoonPhases } from './monthlyPhases';
 import dayjs from 'dayjs';
 
@@ -84,6 +91,56 @@ export function getMoonPhase(date: Date): MoonPhaseLabels {
 
   const moonPhaseString = getPhase(moonPhaseAngle);
   return moonPhaseString;
+}
+
+// ── Zodiac signs in ecliptic order ──────────────────────────────────────────
+
+const ZODIAC_SIGNS_ORDERED = [
+  'Aries',
+  'Taurus',
+  'Gemini',
+  'Cancer',
+  'Leo',
+  'Virgo',
+  'Libra',
+  'Scorpio',
+  'Sagittarius',
+  'Capricorn',
+  'Aquarius',
+  'Pisces',
+] as const;
+
+export type ZodiacSign = (typeof ZODIAC_SIGNS_ORDERED)[number];
+
+export interface DetailedMoonPhase {
+  phase: MoonPhaseLabels;
+  sign: ZodiacSign;
+  isSuperMoon: boolean;
+}
+
+/**
+ * Returns moon phase label, current zodiac sign, and supermoon status.
+ * Use this instead of getMoonPhase when you need sign-aware content
+ * (e.g. "Full Moon in Scorpio" messaging or zodiac-specific rituals).
+ */
+export function getDetailedMoonPhase(date: Date): DetailedMoonPhase {
+  const phase = getMoonPhase(date);
+
+  const astroTime = new AstroTime(date);
+  const geoVector = GeoVector(Body.Moon, astroTime, true);
+
+  // Zodiac sign from ecliptic longitude
+  const moonEcliptic = Ecliptic(geoVector);
+  const signIndex = Math.floor((((moonEcliptic.elon % 360) + 360) % 360) / 30);
+  const sign = ZODIAC_SIGNS_ORDERED[signIndex];
+
+  // Supermoon: perigee distance threshold (same as astrology MCP)
+  const distanceKm =
+    Math.sqrt(geoVector.x ** 2 + geoVector.y ** 2 + geoVector.z ** 2) *
+    149597870.7;
+  const isSuperMoon = distanceKm <= 361520;
+
+  return { phase, sign, isSuperMoon };
 }
 
 export const getMoonSymbol = () => {
