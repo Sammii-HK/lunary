@@ -22,6 +22,12 @@ import { getUpcomingEclipses } from '@utils/astrology/eclipseTracker';
 import { wheelOfTheYearSabbats, type Sabbat } from '@/constants/sabbats';
 import slowPlanetData from '@/data/slow-planet-sign-changes.json';
 import { Observer } from 'astronomy-engine';
+import {
+  getMoonIdentity,
+  MOON_MODIFIERS,
+  type MoonIdentity,
+  type MoonModifier,
+} from '@/lib/moon/identities';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -76,6 +82,10 @@ export interface CalendarEvent {
   planet?: string;
   /** Zodiac sign when applicable */
   sign?: string;
+  /** Rich moon identity (themes, keywords, energy, ritual focus) for moon_phase events */
+  moonIdentity?: MoonIdentity;
+  /** Special moon modifiers (supermoon, blue moon, eclipse overlay) */
+  moonModifiers?: MoonModifier[];
 }
 
 // ---------------------------------------------------------------------------
@@ -499,9 +509,9 @@ function scoreFromOrbitalPeriod(
     return { rarity: 'HIGH', score: 75 };
   }
 
-  // Moon phases
+  // Moon phases (full/new moons are high-engagement content anchors)
   if (eventType === 'moon_phase') {
-    return { rarity: 'MEDIUM', score: 40 };
+    return { rarity: 'HIGH', score: 55 };
   }
 
   // Moon sign changes
@@ -782,7 +792,7 @@ function generateHookSuggestions(
     hooks.push(`${name}. Eclipses accelerate what was already in motion.`);
     hooks.push(`${name} today. What it is activating in your chart.`);
     hooks.push(`Eclipse season is here. Pay attention to what surfaces.`);
-  } else if (rarity === 'MEDIUM' && eventType === 'moon_phase') {
+  } else if (eventType === 'moon_phase') {
     hooks.push(`${name} tonight. Here is what it is illuminating.`);
     hooks.push(`${name} energy is building. Work with it, not against it.`);
   } else if (eventType === 'ingress' && planet && sign) {
@@ -790,6 +800,32 @@ function generateHookSuggestions(
     hooks.push(`${planet} in ${sign} changes the game for the next few weeks.`);
   } else {
     hooks.push(`${name || 'Cosmic shift'} today. Here is what to know.`);
+  }
+
+  return hooks;
+}
+
+/**
+ * Generate rich hook suggestions using moon identity data.
+ * These replace the generic moon_phase hooks with themed, named moon copy.
+ */
+function generateMoonIdentityHooks(
+  displayName: string,
+  identity: MoonIdentity,
+  moonSign: string,
+  modifiers: MoonModifier[],
+): string[] {
+  const hooks: string[] = [];
+  const themesStr = identity.themes.slice(0, 2).join(' and ');
+
+  hooks.push(`${displayName} tonight. This is the moon of ${themesStr}.`);
+  hooks.push(identity.energy);
+  hooks.push(`${identity.name} in ${moonSign}. ${identity.ritualFocus}`);
+
+  if (modifiers.length > 0) {
+    for (const mod of modifiers) {
+      hooks.push(`${mod.label}: ${mod.extraEnergy}`);
+    }
   }
 
   return hooks;
@@ -1270,37 +1306,175 @@ export async function getEventCalendarForDate(
     const moonSign = positions.Moon?.sign || '';
     const { rarity, score } = scoreFromOrbitalPeriod('Moon', 'moon_phase');
 
-    // Boost full/new moon scores
     const isFullOrNew =
       moonPhase.name.includes('Full') ||
       moonPhase.name.includes('New') ||
       moonPhase.name === 'New Moon';
-    const boostedScore = isFullOrNew ? Math.min(score + 15, 60) : score;
 
-    const supermoonLabel = moonPhase.isSuperMoon ? ' (Supermoon)' : '';
+    // Look up rich identity data for this moon
+    const monthNum = date.getUTCMonth() + 1;
+    const moonType = moonPhase.name.includes('Full') ? 'full' : 'new';
+    const identity = isFullOrNew
+      ? getMoonIdentity(monthNum, moonType as 'full' | 'new')
+      : undefined;
+
+    // Build the display name using traditional moon names
+    const traditionalName = identity?.name;
+    const displayName =
+      traditionalName && moonType === 'full'
+        ? `${traditionalName} (Full Moon) in ${moonSign}`
+        : moonType === 'new' && isFullOrNew
+          ? `New Moon in ${moonSign}`
+          : `${moonPhase.name} in ${moonSign}`;
+
+    // Collect modifiers
+    const modifiers: MoonModifier[] = [];
+    if (moonPhase.isSuperMoon) modifiers.push(MOON_MODIFIERS.supermoon);
+
+    // Supermoon boost: +20, capped at 85
+    const boostedScore = moonPhase.isSuperMoon
+      ? Math.min(score + 20, 85)
+      : score;
+
+    // Build identity-aware hook suggestions
+    const hooks = identity
+      ? generateMoonIdentityHooks(displayName, identity, moonSign, modifiers)
+      : generateHookSuggestions({
+          name: displayName,
+          rarity: isFullOrNew ? 'HIGH' : rarity,
+          eventType: 'moon_phase',
+        });
+
+    const rarityFrame =
+      modifiers.length > 0
+        ? modifiers.map((m) => m.extraEnergy).join(' ')
+        : identity
+          ? identity.energy
+          : 'a key lunar phase marking a turning point in the monthly cycle';
 
     addEvent({
       id: `moon-phase-${moonPhase.name.toLowerCase().replace(/\s+/g, '-')}-${dateStr}`,
-      name: `${moonPhase.name}${supermoonLabel} in ${moonSign}`,
+      name: displayName,
       date: dateStr,
-      rarity: isFullOrNew ? 'MEDIUM' : rarity,
-      score: moonPhase.isSuperMoon
-        ? Math.min(boostedScore + 15, 75)
-        : boostedScore,
+      rarity: isFullOrNew ? 'HIGH' : rarity,
+      score: boostedScore,
       convergenceMultiplier: 1.0,
-      hookSuggestions: generateHookSuggestions({
-        name: `${moonPhase.name}${supermoonLabel} in ${moonSign}`,
-        rarity: isFullOrNew ? 'MEDIUM' : rarity,
-        eventType: 'moon_phase',
-      }),
+      hookSuggestions: hooks,
       category: 'moon',
-      rarityFrame: moonPhase.isSuperMoon
-        ? 'a Supermoon amplifies lunar energy at its closest point to Earth'
-        : 'a key lunar phase marking a turning point in the monthly cycle',
+      rarityFrame,
       eventType: 'moon_phase',
       planet: 'Moon',
       sign: moonSign,
+      moonIdentity: identity,
+      moonModifiers: modifiers.length > 0 ? modifiers : undefined,
     });
+  }
+
+  // --- 8b. Blue moon: second full moon in the same calendar month ----------
+  if (moonPhase.isSignificant && moonPhase.name.includes('Full')) {
+    const monthStart = new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1),
+    );
+    const scanEnd = new Date(date.getTime() - 2 * 86400000); // stop 2 days before today
+    let prevFullMoonFound = false;
+    if (scanEnd > monthStart) {
+      const scanDate = new Date(monthStart);
+      while (scanDate <= scanEnd) {
+        const prevPhase = getAccurateMoonPhase(scanDate);
+        if (prevPhase.illumination >= 97) {
+          prevFullMoonFound = true;
+          break;
+        }
+        scanDate.setUTCDate(scanDate.getUTCDate() + 1);
+      }
+    }
+    if (prevFullMoonFound) {
+      const moonSign = positions.Moon?.sign || '';
+      const blueMoonMod = MOON_MODIFIERS.blueMoon;
+      addEvent({
+        id: `blue-moon-${dateStr}`,
+        name: `Blue Moon in ${moonSign}`,
+        date: dateStr,
+        rarity: 'CRITICAL',
+        score: 82,
+        convergenceMultiplier: 1.5,
+        hookSuggestions: [
+          `Blue Moon in ${moonSign} tonight. The second full moon this month.`,
+          `Once in a blue moon, literally. ${moonSign} energy peaks twice this month.`,
+          blueMoonMod.extraEnergy,
+          `Blue Moon. What did you set at the last full moon? Time to check in.`,
+        ],
+        category: 'moon',
+        rarityFrame:
+          'a Blue Moon, the second full moon in a calendar month, happens roughly every 2.5 years',
+        eventType: 'moon_phase',
+        planet: 'Moon',
+        sign: moonSign,
+        moonModifiers: [blueMoonMod],
+      });
+    }
+  }
+
+  // --- 8c. Void of course: moon has no applying aspects before sign change --
+  {
+    const moonLonNorm = ((positions.Moon?.longitude ?? 0) + 360) % 360;
+    const moonSignIndex = Math.floor(moonLonNorm / 30);
+    const nextSignBoundary = (moonSignIndex + 1) * 30;
+    const ASPECT_ANGLES = [0, 60, 90, 120, 180] as const;
+    const ORB = 8;
+    const PLANET_NAMES = [
+      'Sun',
+      'Mercury',
+      'Venus',
+      'Mars',
+      'Jupiter',
+      'Saturn',
+    ] as const;
+
+    let hasApplyingAspect = false;
+    outer: for (const planet of PLANET_NAMES) {
+      const pLon = ((positions[planet]?.longitude ?? -1000) + 360) % 360;
+      if (pLon < 0) continue;
+      for (const angle of ASPECT_ANGLES) {
+        const targets =
+          angle === 0
+            ? [pLon]
+            : angle === 180
+              ? [(pLon + 180) % 360]
+              : [(pLon + angle) % 360, (pLon - angle + 360) % 360];
+        for (const t of targets) {
+          if (t > moonLonNorm - ORB && t < nextSignBoundary) {
+            hasApplyingAspect = true;
+            break outer;
+          }
+        }
+      }
+    }
+
+    if (!hasApplyingAspect) {
+      const moonSign = positions.Moon?.sign || '';
+      const remainingDeg = nextSignBoundary - moonLonNorm;
+      const hoursRemaining = Math.round(remainingDeg / 0.549); // moon ~0.549°/hr
+      addEvent({
+        id: `moon-void-of-course-${dateStr}`,
+        name: `Moon Void of Course in ${moonSign}`,
+        date: dateStr,
+        rarity: 'LOW',
+        score: 20,
+        convergenceMultiplier: 1.0,
+        hookSuggestions: [
+          `Moon void of course in ${moonSign} for ~${hoursRemaining}h. Rest, do not start new things.`,
+          `Void of course moon. Avoid signing contracts or making major decisions right now.`,
+          `Moon VOC: cosmic pause before the next sign. Rest and let things settle.`,
+        ],
+        category: 'moon',
+        rarityFrame:
+          'the Moon is between its last major aspect and the next sign — a natural pause before renewal',
+        eventType: 'moon_sign_change',
+        planet: 'Moon',
+        sign: moonSign,
+      });
+    }
   }
 
   // --- 9. Moon sign change ------------------------------------------------
@@ -1802,4 +1976,92 @@ export async function getHighestPriorityEvent(
 ): Promise<CalendarEvent | null> {
   const events = await getEventCalendarForDate(dateStr);
   return events.length > 0 ? events[0] : null;
+}
+
+// ---------------------------------------------------------------------------
+// Moon content arc detection
+// ---------------------------------------------------------------------------
+
+export type MoonArcPhase = 'teaser' | 'main' | 'reflection';
+
+export interface MoonArcEvent {
+  /** Which part of the arc this is */
+  arcPhase: MoonArcPhase;
+  /** The date of the actual full/new moon (ISO string) */
+  moonDate: string;
+  /** 'full' or 'new' */
+  moonType: 'full' | 'new';
+  /** Moon sign at the event */
+  moonSign: string;
+  /** Rich identity data */
+  identity: MoonIdentity;
+  /** Special modifiers (supermoon, blue moon, etc.) */
+  modifiers: MoonModifier[];
+  /** Display name e.g. "Wolf Moon (Full Moon) in Cancer" */
+  displayName: string;
+}
+
+/**
+ * Detect whether a given date falls within a 3-day content arc around a
+ * full or new moon: teaser (day before), main (day of), reflection (day after).
+ *
+ * Returns an array because a date could theoretically be the reflection of
+ * one moon and the teaser of another (extremely rare).
+ */
+export function detectMoonContentArc(dateStr: string): MoonArcEvent[] {
+  const date = new Date(dateStr);
+  date.setUTCHours(12, 0, 0, 0);
+
+  const results: MoonArcEvent[] = [];
+
+  // Check day before (teaser), day of (main), and day after (reflection)
+  const offsets: { days: number; arcPhase: MoonArcPhase }[] = [
+    { days: 1, arcPhase: 'teaser' }, // tomorrow is a moon = today is teaser
+    { days: 0, arcPhase: 'main' }, // today is the moon
+    { days: -1, arcPhase: 'reflection' }, // yesterday was a moon = today is reflection
+  ];
+
+  for (const { days, arcPhase } of offsets) {
+    const checkDate = new Date(date);
+    checkDate.setUTCDate(checkDate.getUTCDate() + days);
+
+    const phase = getAccurateMoonPhase(checkDate);
+    if (!phase.isSignificant) continue;
+
+    const isFullOrNew =
+      phase.name.includes('Full') || phase.name.includes('New');
+    if (!isFullOrNew) continue;
+
+    const moonType: 'full' | 'new' = phase.name.includes('Full')
+      ? 'full'
+      : 'new';
+    const monthNum = checkDate.getUTCMonth() + 1;
+    const identity = getMoonIdentity(monthNum, moonType);
+    if (!identity) continue;
+
+    const checkPositions = getRealPlanetaryPositions(checkDate);
+    const moonSign = checkPositions.Moon?.sign || '';
+
+    const modifiers: MoonModifier[] = [];
+    if (phase.isSuperMoon) modifiers.push(MOON_MODIFIERS.supermoon);
+
+    const displayName =
+      moonType === 'full'
+        ? `${identity.name} (Full Moon) in ${moonSign}`
+        : `New Moon in ${moonSign}`;
+
+    const moonDateStr = checkDate.toISOString().split('T')[0];
+
+    results.push({
+      arcPhase,
+      moonDate: moonDateStr,
+      moonType,
+      moonSign,
+      identity,
+      modifiers,
+      displayName,
+    });
+  }
+
+  return results;
 }

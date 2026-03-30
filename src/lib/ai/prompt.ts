@@ -1,6 +1,7 @@
 import { LunaryContext } from './types';
 import { constellations } from '../../../utils/constellations';
 import { getRealPlanetaryPositions } from '../../../utils/astrology/astronomical-data';
+import { getCurrentSabbat, getUpcomingSabbat } from '../grimoire/data-accessor';
 
 const ZODIAC_SIGNS = [
   'Aries',
@@ -436,6 +437,162 @@ const describeContext = (
   const grimoirePatternData = (context as any).grimoirePatternData;
   if (grimoirePatternData && typeof grimoirePatternData === 'string') {
     parts.push(grimoirePatternData);
+  }
+
+  // Phase 2: Natal aspect patterns (Grand Trines, T-Squares, Stelliums, Yods)
+  const natalAspectPatterns = (context as any).natalAspectPatterns;
+  if (Array.isArray(natalAspectPatterns) && natalAspectPatterns.length > 0) {
+    const patternSummary = natalAspectPatterns
+      .map((p: any) => {
+        const type =
+          p.type?.replace('natal_', '').replace(/_/g, ' ') ?? 'pattern';
+        const planets = Array.isArray(p.planets) ? p.planets.join(', ') : '';
+        const element = p.element ? ` (${p.element})` : '';
+        return planets ? `${type}: ${planets}${element}` : type;
+      })
+      .join('; ');
+    parts.push(`NATAL ASPECT PATTERNS: ${patternSummary}`);
+  }
+
+  // Phase 2: Planetary returns (Saturn/Jupiter/Solar)
+  const planetaryReturns = (context as any).planetaryReturns;
+  if (Array.isArray(planetaryReturns) && planetaryReturns.length > 0) {
+    const returnSummary = planetaryReturns
+      .filter((r: any) => r.isActive || r.daysUntil != null)
+      .map((r: any) => {
+        const planet = r.planet ?? 'Unknown';
+        const days = r.daysUntil != null ? ` in ${r.daysUntil}d` : ' (active)';
+        return `${planet} Return${days}`;
+      })
+      .join(', ');
+    if (returnSummary) parts.push(`PLANETARY RETURNS: ${returnSummary}`);
+  }
+
+  // Phase 2: House emphasis
+  const natalHouseEmphasis = (context as any).natalHouseEmphasis;
+  if (Array.isArray(natalHouseEmphasis) && natalHouseEmphasis.length > 0) {
+    const houseSummary = natalHouseEmphasis
+      .map(
+        (h: any) =>
+          `H${h.house} (${Array.isArray(h.planets) ? h.planets.join(', ') : ''})`,
+      )
+      .join(', ');
+    parts.push(`HOUSE EMPHASIS: ${houseSummary}`);
+  }
+
+  // Phase 2: Lunar sensitivity
+  const lunarSensitivity = (context as any).lunarSensitivity;
+  if (lunarSensitivity && typeof lunarSensitivity === 'object') {
+    const sensitivity = lunarSensitivity.level ?? lunarSensitivity.sensitivity;
+    const phases = Array.isArray(lunarSensitivity.sensitivePhases)
+      ? lunarSensitivity.sensitivePhases.join(', ')
+      : null;
+    const parts2: string[] = [];
+    if (sensitivity) parts2.push(`level: ${sensitivity}`);
+    if (phases) parts2.push(`sensitive phases: ${phases}`);
+    if (parts2.length > 0)
+      parts.push(`LUNAR SENSITIVITY: ${parts2.join('; ')}`);
+  }
+
+  // Phase 3: Progressed chart
+  const progressedChart = (context as any).progressedChart;
+  if (progressedChart && typeof progressedChart === 'object') {
+    const progLines: string[] = [];
+    if (progressedChart.sun?.sign)
+      progLines.push(`Progressed Sun: ${progressedChart.sun.sign}`);
+    if (progressedChart.moon?.sign)
+      progLines.push(`Progressed Moon: ${progressedChart.moon.sign}`);
+    if (progressedChart.ascendant?.sign)
+      progLines.push(`Progressed ASC: ${progressedChart.ascendant.sign}`);
+    if (Array.isArray(progressedChart.placements)) {
+      const others = progressedChart.placements
+        .filter(
+          (p: any) =>
+            p.planet &&
+            p.sign &&
+            !['Sun', 'Moon', 'Ascendant'].includes(p.planet),
+        )
+        .slice(0, 4)
+        .map((p: any) => `${p.planet} in ${p.sign}`);
+      progLines.push(...others);
+    }
+    if (progLines.length > 0)
+      parts.push(`PROGRESSED CHART: ${progLines.join(', ')}`);
+  }
+
+  // Phase 3: Relevant eclipses
+  const relevantEclipses = (context as any).relevantEclipses;
+  if (Array.isArray(relevantEclipses) && relevantEclipses.length > 0) {
+    const eclipseSummary = relevantEclipses
+      .slice(0, 3)
+      .map((e: any) => {
+        const type = e.type ?? 'Eclipse';
+        const date = e.date ? ` on ${e.date}` : '';
+        const aspect = e.aspect
+          ? ` (${e.aspect} natal ${e.natalPlanet ?? ''})`
+          : '';
+        return `${type}${date}${aspect}`.trim();
+      })
+      .join('; ');
+    parts.push(`RELEVANT ECLIPSES: ${eclipseSummary}`);
+  }
+
+  // Phase 4: Cosmic recommendations (crystals, spells, numerology)
+  const cosmicRecommendations = (context as any).cosmicRecommendations;
+  if (cosmicRecommendations && typeof cosmicRecommendations === 'object') {
+    const recParts: string[] = [];
+    if (
+      Array.isArray(cosmicRecommendations.crystals) &&
+      cosmicRecommendations.crystals.length > 0
+    ) {
+      const crystalNames = cosmicRecommendations.crystals
+        .slice(0, 3)
+        .map((c: any) => c.name ?? c)
+        .join(', ');
+      recParts.push(`Crystals: ${crystalNames}`);
+    }
+    if (
+      Array.isArray(cosmicRecommendations.spells) &&
+      cosmicRecommendations.spells.length > 0
+    ) {
+      const spellNames = cosmicRecommendations.spells
+        .slice(0, 2)
+        .map((s: any) => s.name ?? s)
+        .join(', ');
+      recParts.push(`Spells: ${spellNames}`);
+    }
+    if (cosmicRecommendations.numerology?.lifePathNumber) {
+      recParts.push(
+        `Life Path: ${cosmicRecommendations.numerology.lifePathNumber}`,
+      );
+    }
+    if (recParts.length > 0)
+      parts.push(`COSMIC RECOMMENDATIONS: ${recParts.join(' | ')}`);
+  }
+
+  // Sabbats: current (if within 7 days) and upcoming — static data, always cheap to compute
+  const now = new Date();
+  const currentSabbat = getCurrentSabbat(now);
+  const upcomingSabbat = getUpcomingSabbat(now);
+  if (currentSabbat) {
+    parts.push(
+      `CURRENT SABBAT: ${currentSabbat.name} — ${currentSabbat.description} (${currentSabbat.date}, ${currentSabbat.season} season, element: ${currentSabbat.element})`,
+    );
+  }
+  if (upcomingSabbat && upcomingSabbat.name !== currentSabbat?.name) {
+    parts.push(
+      `UPCOMING SABBAT: ${upcomingSabbat.name} — ${upcomingSabbat.date} (${upcomingSabbat.season} season)`,
+    );
+  }
+
+  // Journal summaries (Book of Shadows) — fetched conditionally in astral context
+  const journalSummaries = (context as any).journalSummaries;
+  if (Array.isArray(journalSummaries) && journalSummaries.length > 0) {
+    const journalLines = journalSummaries
+      .slice(0, 3)
+      .map((j: any) => `${j.date}: ${j.summary}`)
+      .join('\n');
+    parts.push(`BOOK OF SHADOWS (recent):\n${journalLines}`);
   }
 
   // Mood - include recent trend

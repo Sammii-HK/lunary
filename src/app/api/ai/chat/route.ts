@@ -34,6 +34,7 @@ import {
   calculatePersonalTransits,
   ASTRAL_GUIDE_PROMPT,
 } from '@/lib/ai/astral-guide';
+import { formatBirthChartSummary } from '@/lib/ai/birth-chart-with-patterns';
 import { analyzeContextNeeds } from '@/lib/ai/context-optimizer';
 
 export const dynamic = 'force-dynamic';
@@ -202,6 +203,17 @@ export async function POST(request: NextRequest) {
         ...context,
         ...astralContext,
       };
+      // Rebuild natalSummary from fresh birth chart — the cached call inside
+      // buildAstralContext may have produced a stale/null natalSummary if the
+      // snapshot was saved before the user set up their chart.
+      if (lunaryResult.context.birthChart) {
+        context = {
+          ...context,
+          natalSummary: formatBirthChartSummary(
+            lunaryResult.context.birthChart,
+          ),
+        };
+      }
     } else {
       // Use regular Lunary context for general queries
       const lunaryResult = await buildLunaryContext({

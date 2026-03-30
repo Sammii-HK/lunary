@@ -3,7 +3,10 @@ import { sql } from '@vercel/postgres';
 import dayjs from 'dayjs';
 import { requireUser } from '@/lib/ai/auth';
 import { hasFeatureAccess } from '../../../../../../utils/pricing';
-import { getRealPlanetaryPositions } from '../../../../../../utils/astrology/astronomical-data';
+import {
+  getRealPlanetaryPositions,
+  getAccurateMoonPhase,
+} from '../../../../../../utils/astrology/astronomical-data';
 import type { BirthChartData } from '../../../../../../utils/astrology/birthChart';
 
 export const dynamic = 'force-dynamic';
@@ -306,36 +309,35 @@ function getSharedCosmicEvents(
   const events: CosmicEvent[] = [];
   const today = dayjs();
 
-  // Simplified lunar phase calculation
-  const lunarMonth = 29.53;
-  const knownNewMoon = dayjs('2024-01-11');
+  const userAscendant = userBirthChart.find((p) => p.body === 'Ascendant');
+  const friendAscendant = friendBirthChart.find((p) => p.body === 'Ascendant');
 
   for (let i = 0; i < days; i++) {
     const date = today.add(i, 'day');
-    const daysSinceNew = date.diff(knownNewMoon, 'day');
-    const phase = (daysSinceNew % lunarMonth) / lunarMonth;
+    const prevDate = today.add(i - 1, 'day');
 
-    // Check for significant lunar phases
-    if (Math.abs(phase - 0) < 0.02 || Math.abs(phase - 1) < 0.02) {
-      // Get sign of new moon from positions
+    const currAngle = getAccurateMoonPhase(date.toDate()).phaseAngle;
+    const prevAngle = getAccurateMoonPhase(prevDate.toDate()).phaseAngle;
+
+    const crossedNewMoon =
+      (prevAngle > 315 && currAngle < 45) ||
+      (prevAngle < 45 && currAngle >= 0 && prevAngle > currAngle);
+    const crossedFullMoon = prevAngle < 180 && currAngle >= 180;
+
+    if (crossedNewMoon) {
       const positions = getRealPlanetaryPositions(date.toDate());
       const moonSign = positions['Moon']?.sign || 'a new sign';
 
-      // Find house placements for both users
-      const userAscendant = userBirthChart.find((p) => p.body === 'Ascendant');
-      const friendAscendant = friendBirthChart.find(
-        (p) => p.body === 'Ascendant',
-      );
-
       let impact = `A powerful time for setting shared intentions`;
       if (userAscendant && friendAscendant) {
+        const moonLon = positions['Moon']?.longitude ?? 0;
         const userHouse =
-          (Math.floor(positions['Moon']?.longitude / 30) -
+          (Math.floor(moonLon / 30) -
             Math.floor(userAscendant.eclipticLongitude / 30) +
             12) %
           12;
         const friendHouse =
-          (Math.floor(positions['Moon']?.longitude / 30) -
+          (Math.floor(moonLon / 30) -
             Math.floor(friendAscendant.eclipticLongitude / 30) +
             12) %
           12;
@@ -349,7 +351,7 @@ function getSharedCosmicEvents(
         impact,
         type: 'lunar_phase',
       });
-    } else if (Math.abs(phase - 0.5) < 0.02) {
+    } else if (crossedFullMoon) {
       const positions = getRealPlanetaryPositions(date.toDate());
       const moonSign = positions['Moon']?.sign || 'a sign';
 

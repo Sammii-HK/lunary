@@ -3,6 +3,7 @@ import dayOfYear from 'dayjs/plugin/dayOfYear';
 import { getAstrologicalChart, AstroChartInformation } from './astrology';
 import { Observer } from 'astronomy-engine';
 import { getBirthChartFromProfile } from './birthChart';
+import { getAccurateMoonPhase } from './astronomical-data';
 import { parseIsoDateOnly } from '@/lib/date-only';
 
 dayjs.extend(dayOfYear);
@@ -58,23 +59,17 @@ const getDailyNumerology = (date: dayjs.Dayjs) => {
   return sum;
 };
 
-// Get current moon phase with more detail
+// Get current moon phase name from real astronomy-engine data
 const getDetailedMoonPhase = (date: Date): string => {
-  // Simplified moon phase calculation - in real app would use proper ephemeris
-  const lunarMonth = 29.53;
-  const knownNewMoon = new Date('2024-01-11'); // Known new moon date
-  const daysSinceNew = Math.floor(
-    (date.getTime() - knownNewMoon.getTime()) / (1000 * 60 * 60 * 24),
-  );
-  const phase = (daysSinceNew % lunarMonth) / lunarMonth;
-
-  if (phase < 0.1 || phase > 0.9) return 'New Moon';
-  if (phase < 0.25) return 'Waxing Crescent';
-  if (phase < 0.35) return 'First Quarter';
-  if (phase < 0.65) return 'Waxing Gibbous';
-  if (phase < 0.75) return 'Full Moon';
-  if (phase < 0.9) return 'Waning Gibbous';
-  return 'Last Quarter';
+  const { phaseAngle } = getAccurateMoonPhase(date);
+  if (phaseAngle < 22.5 || phaseAngle >= 337.5) return 'New Moon';
+  if (phaseAngle < 67.5) return 'Waxing Crescent';
+  if (phaseAngle < 112.5) return 'First Quarter';
+  if (phaseAngle < 157.5) return 'Waxing Gibbous';
+  if (phaseAngle < 202.5) return 'Full Moon';
+  if (phaseAngle < 247.5) return 'Waning Gibbous';
+  if (phaseAngle < 292.5) return 'Last Quarter';
+  return 'Waning Crescent';
 };
 
 // Enhanced daily guidance that changes based on multiple factors

@@ -96,19 +96,19 @@ export function getEclipseInfo(type: 'solar' | 'lunar'): {
 }
 
 /**
- * Get current or nearest sabbat
+ * Get the sabbat currently active (within ±7 days of its date), or null.
  */
 export function getCurrentSabbat(date: Date = new Date()): Sabbat | null {
-  const month = date.getMonth();
-  const day = date.getDate();
+  const year = date.getFullYear();
+  const WINDOW_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-  // Find sabbat within 7 days
   for (const sabbat of wheelOfTheYearSabbats) {
-    // Simple check - you may want more sophisticated date logic
-    if (
-      sabbat.date.includes(date.toLocaleDateString('en-US', { month: 'long' }))
-    ) {
-      return sabbat;
+    for (const y of [year - 1, year, year + 1]) {
+      const d = parseSabbatDate(sabbat.date, y);
+      if (!d) continue;
+      if (Math.abs(d.getTime() - date.getTime()) <= WINDOW_MS) {
+        return sabbat;
+      }
     }
   }
 
@@ -127,12 +127,99 @@ export function getSabbat(name: string): Sabbat | null {
 }
 
 /**
- * Get nearest sabbat from current date
+ * Parse a sabbat date string like "October 31st" into a Date for the given year.
+ */
+function parseSabbatDate(dateStr: string, year: number): Date | null {
+  const MONTHS: Record<string, number> = {
+    January: 0,
+    February: 1,
+    March: 2,
+    April: 3,
+    May: 4,
+    June: 5,
+    July: 6,
+    August: 7,
+    September: 8,
+    October: 9,
+    November: 10,
+    December: 11,
+  };
+  const match = dateStr.match(/^(\w+)\s+(\d+)/);
+  if (!match) return null;
+  const month = MONTHS[match[1]];
+  const day = parseInt(match[2], 10);
+  if (month == null || isNaN(day)) return null;
+  return new Date(year, month, day);
+}
+
+/**
+ * Get the next upcoming sabbat after the given date.
  */
 export function getUpcomingSabbat(date: Date = new Date()): Sabbat | null {
-  // This is simplified - you'd want proper date comparison
-  // For now, return first sabbat as example
-  return wheelOfTheYearSabbats[0];
+  const year = date.getFullYear();
+
+  // Build a list of (sabbat, Date) pairs for this year and next,
+  // then find the first one strictly after `date`.
+  const candidates: Array<{ sabbat: Sabbat; d: Date }> = [];
+  for (const sabbat of wheelOfTheYearSabbats) {
+    for (const y of [year, year + 1]) {
+      const d = parseSabbatDate(sabbat.date, y);
+      if (d) candidates.push({ sabbat, d });
+    }
+  }
+
+  candidates.sort((a, b) => a.d.getTime() - b.d.getTime());
+
+  const found = candidates.find((c) => c.d > date);
+  return found?.sabbat ?? null;
+}
+
+/**
+ * Get the seasonally relevant sabbat and how many days away it is.
+ *
+ * Priority:
+ * 1. Active: sabbat within ±7 days (daysOffset near 0)
+ * 2. Recent: sabbat that passed within the last 21 days (daysOffset negative)
+ * 3. Upcoming: next sabbat after today (daysOffset positive)
+ *
+ * daysOffset is negative for past sabbats, positive for future.
+ */
+export function getSeasonalSabbat(
+  date: Date = new Date(),
+): { sabbat: Sabbat; daysOffset: number } | null {
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  const year = date.getFullYear();
+
+  const candidates: Array<{ sabbat: Sabbat; d: Date }> = [];
+  for (const sabbat of wheelOfTheYearSabbats) {
+    for (const y of [year - 1, year, year + 1]) {
+      const d = parseSabbatDate(sabbat.date, y);
+      if (d) candidates.push({ sabbat, d });
+    }
+  }
+  candidates.sort((a, b) => a.d.getTime() - b.d.getTime());
+
+  const daysOffsetFor = (d: Date) =>
+    Math.round((d.getTime() - date.getTime()) / MS_PER_DAY);
+
+  // 1. Active: within ±7 days
+  const active = candidates.find((c) => Math.abs(daysOffsetFor(c.d)) <= 7);
+  if (active)
+    return { sabbat: active.sabbat, daysOffset: daysOffsetFor(active.d) };
+
+  // 2. Recently passed: up to 21 days ago
+  const recent = [...candidates]
+    .reverse()
+    .find((c) => daysOffsetFor(c.d) < 0 && daysOffsetFor(c.d) >= -21);
+  if (recent)
+    return { sabbat: recent.sabbat, daysOffset: daysOffsetFor(recent.d) };
+
+  // 3. Next upcoming
+  const upcoming = candidates.find((c) => daysOffsetFor(c.d) > 0);
+  if (upcoming)
+    return { sabbat: upcoming.sabbat, daysOffset: daysOffsetFor(upcoming.d) };
+
+  return null;
 }
 
 /**

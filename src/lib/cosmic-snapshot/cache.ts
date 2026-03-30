@@ -48,9 +48,20 @@ export async function getCachedSnapshot(
           return null;
         }
 
+        // Check if birth chart is present - if missing, return null to force refresh
+        // Handles the case where snapshot was saved before user set up their birth chart
+        if (!snapshot.birthChart) {
+          if (process.env.NODE_ENV === 'development') {
+            console.log(
+              `[getCachedSnapshot] Snapshot has no birth chart, forcing refresh`,
+            );
+          }
+          return null;
+        }
+
         // Check if birth chart has patterns - if missing, return null to force refresh
         // This handles edge cases where cache version matches but data is incomplete
-        if (snapshot.birthChart && !snapshot.birthChart.patterns) {
+        if (!snapshot.birthChart.patterns) {
           if (process.env.NODE_ENV === 'development') {
             console.log(
               `[getCachedSnapshot] Birth chart missing patterns, forcing refresh`,

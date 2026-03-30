@@ -82,7 +82,9 @@ import {
 import { preUploadImage } from '@/lib/social/pre-upload-image';
 import {
   getEventCalendarForDate,
+  detectMoonContentArc,
   type CalendarEvent,
+  type MoonArcEvent,
 } from '@/lib/astro/event-calendar';
 
 export const dynamic = 'force-dynamic';
@@ -997,14 +999,23 @@ async function runDailyPosts(dateStr: string) {
     getSchedule: getTransitSchedule,
   });
 
-  // Build moon phase posts (New, Full, First/Last Quarter)
-  const moonPhaseTextPosts = buildMoonPhaseTextPosts({
-    dateStr,
-    moonPhase: cosmicContent.astronomicalData?.moonPhase ?? {},
-    moonSign: cosmicContent.astronomicalData?.planets?.Moon?.sign,
-    platformHashtags,
-    getSchedule: getTransitSchedule,
-  });
+  // Build moon phase posts with rich identity and 3-day content arc
+  const moonArcEvents = detectMoonContentArc(dateStr);
+  const moonPhaseTextPosts =
+    moonArcEvents.length > 0
+      ? buildMoonArcTextPosts({
+          dateStr,
+          arcEvents: moonArcEvents,
+          platformHashtags,
+          getSchedule: getTransitSchedule,
+        })
+      : buildMoonPhaseTextPosts({
+          dateStr,
+          moonPhase: cosmicContent.astronomicalData?.moonPhase ?? {},
+          moonSign: cosmicContent.astronomicalData?.planets?.Moon?.sign,
+          platformHashtags,
+          getSchedule: getTransitSchedule,
+        });
 
   // Build transit milestone posts for slow planets (halfway, 3mo, 1mo, 1wk remaining)
   const transitMilestones = await detectTransitMilestones(today);
@@ -4521,6 +4532,177 @@ function buildEclipseTextPosts({
       variants: {
         bluesky: { content: blueskyContent },
         twitter: { content: xContent },
+      },
+    });
+  }
+
+  return posts;
+}
+
+/**
+ * Build posts for the 3-day moon content arc (teaser, main event, reflection).
+ * Uses rich moon identity data for themed, named moon copy.
+ */
+function buildMoonArcTextPosts({
+  dateStr,
+  arcEvents,
+  platformHashtags,
+  getSchedule,
+}: {
+  dateStr: string;
+  arcEvents: MoonArcEvent[];
+  platformHashtags: Record<string, string>;
+  getSchedule: () => string;
+}): DailySocialPost[] {
+  const posts: DailySocialPost[] = [];
+
+  for (const arc of arcEvents) {
+    const { arcPhase, identity, moonSign, displayName, modifiers, moonType } =
+      arc;
+    const themesStr = identity.themes.slice(0, 2).join(' and ');
+
+    // Build modifier labels if present
+    const modLabel =
+      modifiers.length > 0
+        ? modifiers.map((m) => m.label).join(' + ') + ' '
+        : '';
+
+    // Determine hook type for engagement hooks
+    const hookType: HookType = moonType === 'full' ? 'fullMoon' : 'newMoon';
+    const seed = `moon-arc-${arcPhase}-${dateStr}`;
+    const engagementHook = getEngagementHook(hookType, seed);
+    const phaseCtx = { sign: moonSign, dateStr };
+
+    let threadsBody: string;
+    let xBody: string;
+    let blueskyBody: string;
+
+    if (arcPhase === 'teaser') {
+      // Day before: anticipation and preparation
+      threadsBody = [
+        `Tomorrow: the ${modLabel}${identity.name} rises in ${moonSign}.`,
+        `This is the moon of ${themesStr}.`,
+        '',
+        identity.ritualFocus,
+        '',
+        engagementHook,
+      ].join('\n');
+
+      xBody = [
+        `${modLabel}${identity.name} in ${moonSign} tomorrow.`,
+        identity.energy,
+        '',
+        'lunary.app',
+      ].join('\n');
+
+      blueskyBody = [
+        `Tomorrow's ${moonType === 'full' ? 'full moon' : 'new moon'} is the ${identity.name} in ${moonSign}.`,
+        `The moon of ${themesStr}.`,
+        '',
+        identity.ritualFocus,
+        '',
+        'Prepare at lunary.app',
+      ].join('\n');
+    } else if (arcPhase === 'main') {
+      // Day of: the full experience
+      threadsBody = [
+        `${modLabel}${displayName} tonight.`,
+        '',
+        identity.energy,
+        '',
+        identity.ritualFocus,
+        '',
+        engagementHook,
+      ].join('\n');
+
+      xBody = [
+        `${modLabel}${displayName}.`,
+        identity.energy,
+        '',
+        'lunary.app',
+      ].join('\n');
+
+      blueskyBody = [
+        `${modLabel}${displayName}.`,
+        '',
+        identity.energy,
+        '',
+        identity.ritualFocus,
+        '',
+        'Track moon phases at lunary.app',
+      ].join('\n');
+    } else {
+      // Reflection: day after, engagement-focused
+      threadsBody = [
+        `How did last night's ${identity.name} in ${moonSign} land for you?`,
+        '',
+        `This moon was about ${themesStr}. What came up?`,
+        '',
+        engagementHook,
+      ].join('\n');
+
+      xBody = [
+        `The ${identity.name} has passed.`,
+        `What did it stir in you?`,
+        '',
+        'lunary.app',
+      ].join('\n');
+
+      blueskyBody = [
+        `The ${identity.name} in ${moonSign} has passed.`,
+        `This moon was about ${themesStr}.`,
+        '',
+        'What came up for you? Share below.',
+      ].join('\n');
+    }
+
+    // Add modifier-specific lines for special moons
+    if (modifiers.length > 0 && arcPhase === 'main') {
+      for (const mod of modifiers) {
+        threadsBody += `\n\n${mod.label}: ${mod.extraEnergy}`;
+      }
+    }
+
+    const threadsContent = addEventHashtags(
+      threadsBody,
+      platformHashtags.threads,
+      'moon',
+      phaseCtx,
+      0,
+    );
+    const xContent = addEventHashtags(
+      xBody,
+      platformHashtags.twitter,
+      'moon',
+      phaseCtx,
+      2,
+    );
+    const blueskyContent = addEventHashtags(
+      blueskyBody,
+      platformHashtags.bluesky,
+      'moon',
+      phaseCtx,
+    );
+
+    const arcLabel =
+      arcPhase === 'teaser'
+        ? 'Preview'
+        : arcPhase === 'main'
+          ? 'Event'
+          : 'Reflection';
+
+    posts.push({
+      name: `Moon ${arcLabel} • ${identity.name}`,
+      content: xContent,
+      platforms: ['bluesky', 'threads'],
+      imageUrls: [],
+      alt: `${identity.name} in ${moonSign} - ${arcLabel}`,
+      scheduledDate: getSchedule(),
+      sourceId: `moon-arc-${arcPhase}-${arc.moonDate}`,
+      variants: {
+        bluesky: { content: blueskyContent },
+        twitter: { content: xContent },
+        threads: { content: threadsContent },
       },
     });
   }

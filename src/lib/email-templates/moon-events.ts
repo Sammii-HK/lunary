@@ -1,3 +1,5 @@
+import type { MoonIdentity } from '@/lib/moon/identities';
+
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
 export interface MoonEventData {
@@ -8,6 +10,10 @@ export interface MoonEventData {
   intention?: string;
   ritualSuggestion?: string;
   tarotSuggestion?: string;
+  /** Rich moon identity (name, themes, energy, ritual focus, accent colour) */
+  identity?: MoonIdentity;
+  /** Whether this is a supermoon */
+  isSuperMoon?: boolean;
 }
 
 // New Moon Email Template
@@ -23,7 +29,7 @@ export function generateNewMoonEmailHTML(
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>New Moon in ${moonData.moonSign} - Lunary</title>
+        <title>${moonData.identity?.name || 'New Moon'} in ${moonData.moonSign} - Lunary</title>
         <style>
           body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -81,7 +87,7 @@ export function generateNewMoonEmailHTML(
           }
           .intention-box {
             background: rgba(255, 255, 255, 0.1);
-            border-left: 4px solid #8b5cf6;
+            border-left: 4px solid ${moonData.identity?.colour || '#8b5cf6'};
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
@@ -123,14 +129,14 @@ export function generateNewMoonEmailHTML(
           <div class="header">
             <img src="${baseUrl}/logo.png" alt="Lunary" class="logo" />
             <div class="moon-icon">🌑</div>
-            <h1 class="title">New Moon in ${moonData.moonSign}</h1>
-            <p class="subtitle">A Time for New Beginnings</p>
+            <h1 class="title">${moonData.identity?.name || 'New Moon'} in ${moonData.moonSign}</h1>
+            <p class="subtitle">${moonData.identity ? `The moon of ${moonData.identity.themes.slice(0, 2).join(' and ')}` : 'A time for new beginnings'}</p>
             <span class="date-badge">${moonData.dateLabel}</span>
           </div>
           
           <div class="content">
             <p>Hi ${userName || 'there'},</p>
-            <p>The New Moon in <strong>${moonData.moonSign}</strong> marks a powerful moment of renewal and intention-setting. This is your cosmic blank slate—a time to plant seeds for the lunar cycle ahead.</p>
+            <p>${moonData.identity ? moonData.identity.energy : `The New Moon in <strong>${moonData.moonSign}</strong> marks a powerful moment of renewal and intention-setting. This is your cosmic blank slate -- a time to plant seeds for the lunar cycle ahead.`}</p>
             
             ${
               moonData.intention
@@ -144,13 +150,13 @@ export function generateNewMoonEmailHTML(
             }
             
             <div class="ritual-box">
-              <h3 style="margin-top: 0; color: #fff; font-size: 20px;">🌙 New Moon Ritual</h3>
-              <p style="color: #cbd5e1; margin-bottom: 12px;">Set your intentions for this lunar cycle:</p>
+              <h3 style="margin-top: 0; color: #fff; font-size: 20px;">🌙 ${moonData.identity?.name || 'New Moon'} Ritual</h3>
+              ${moonData.identity ? `<p style="color: #cbd5e1; margin-bottom: 12px;">${moonData.identity.ritualFocus}</p>` : `<p style="color: #cbd5e1; margin-bottom: 12px;">Set your intentions for this lunar cycle:</p>`}
               <ol style="color: #cbd5e1; padding-left: 20px; margin: 0;">
                 <li>Find a quiet space and light a candle</li>
                 <li>Write down 3-5 intentions for what you want to manifest</li>
                 <li>Speak them aloud or meditate on them</li>
-                <li>Visualize these intentions coming to fruition</li>
+                <li>Visualise these intentions coming to fruition</li>
                 <li>Release them to the universe</li>
               </ol>
               ${moonData.ritualSuggestion ? `<p style="color: #cbd5e1; margin-top: 12px; font-style: italic;">${moonData.ritualSuggestion}</p>` : ''}
@@ -174,7 +180,7 @@ export function generateNewMoonEmailHTML(
             </div>
             
             <p style="color: #94a3b8; font-size: 14px; margin-top: 30px;">
-              The New Moon is a time of darkness and potential. Embrace the quiet, set your intentions, and trust in the cycle of renewal.
+              ${moonData.identity ? `The ${moonData.identity.name} invites ${moonData.identity.themes[0]}. Embrace the quiet, set your intentions, and trust in the cycle of renewal.` : 'The New Moon is a time of darkness and potential. Embrace the quiet, set your intentions, and trust in the cycle of renewal.'}
             </p>
           </div>
           
@@ -194,21 +200,23 @@ export function generateNewMoonEmailText(
 ): string {
   const dateStr = moonData.date.toISOString().split('T')[0];
 
+  const moonName = moonData.identity?.name || 'New Moon';
+
   return `
-New Moon in ${moonData.moonSign} - Lunary 🌑
+${moonName} in ${moonData.moonSign} - Lunary 🌑
 
 Hi ${userName || 'there'},
 
-The New Moon in ${moonData.moonSign} marks a powerful moment of renewal and intention-setting. This is your cosmic blank slate—a time to plant seeds for the lunar cycle ahead.
+${moonData.identity ? moonData.identity.energy : `The New Moon in ${moonData.moonSign} marks a powerful moment of renewal and intention-setting. This is your cosmic blank slate -- a time to plant seeds for the lunar cycle ahead.`}
 
 ${moonData.intention ? `\n✨ This Moon's Energy:\n${moonData.intention}\n` : ''}
 
-🌙 New Moon Ritual:
-Set your intentions for this lunar cycle:
+🌙 ${moonName} Ritual:
+${moonData.identity ? moonData.identity.ritualFocus : 'Set your intentions for this lunar cycle:'}
 1. Find a quiet space and light a candle
 2. Write down 3-5 intentions for what you want to manifest
 3. Speak them aloud or meditate on them
-4. Visualize these intentions coming to fruition
+4. Visualise these intentions coming to fruition
 5. Release them to the universe
 
 ${moonData.ritualSuggestion ? `${moonData.ritualSuggestion}\n` : ''}
@@ -216,7 +224,7 @@ ${moonData.tarotSuggestion ? `\n🔮 Tarot Guidance:\n${moonData.tarotSuggestion
 
 Join the Moon Circle: ${baseUrl}/moon-circles?date=${dateStr}
 
-The New Moon is a time of darkness and potential. Embrace the quiet, set your intentions, and trust in the cycle of renewal.
+${moonData.identity ? `The ${moonData.identity.name} invites ${moonData.identity.themes[0]}. Embrace the quiet, set your intentions, and trust in the cycle of renewal.` : 'The New Moon is a time of darkness and potential. Embrace the quiet, set your intentions, and trust in the cycle of renewal.'}
 
 © ${new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for your cosmic journey.
   `.trim();
@@ -235,7 +243,7 @@ export function generateFullMoonEmailHTML(
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Full Moon in ${moonData.moonSign} - Lunary</title>
+        <title>${moonData.identity?.name || 'Full Moon'} in ${moonData.moonSign} - Lunary</title>
         <style>
           body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -293,7 +301,7 @@ export function generateFullMoonEmailHTML(
           }
           .release-box {
             background: rgba(255, 255, 255, 0.1);
-            border-left: 4px solid #ec4899;
+            border-left: 4px solid ${moonData.identity?.colour || '#ec4899'};
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
@@ -335,14 +343,14 @@ export function generateFullMoonEmailHTML(
           <div class="header">
             <img src="${baseUrl}/logo.png" alt="Lunary" class="logo" />
             <div class="moon-icon">🌕</div>
-            <h1 class="title">Full Moon in ${moonData.moonSign}</h1>
-            <p class="subtitle">A Time for Release & Manifestation</p>
+            <h1 class="title">${moonData.identity?.name || 'Full Moon'} in ${moonData.moonSign}</h1>
+            <p class="subtitle">${moonData.identity ? `The moon of ${moonData.identity.themes.slice(0, 2).join(' and ')}` : 'A time for release and manifestation'}${moonData.isSuperMoon ? ' ✨ Supermoon' : ''}</p>
             <span class="date-badge">${moonData.dateLabel}</span>
           </div>
           
           <div class="content">
             <p>Hi ${userName || 'there'},</p>
-            <p>The Full Moon in <strong>${moonData.moonSign}</strong> illuminates what needs to be seen. This is a time of culmination, release, and celebration—when the seeds you planted at the New Moon come into full bloom.</p>
+            <p>${moonData.identity ? moonData.identity.energy : `The Full Moon in <strong>${moonData.moonSign}</strong> illuminates what needs to be seen. This is a time of culmination, release, and celebration -- when the seeds you planted at the New Moon come into full bloom.`}</p>
             
             ${
               moonData.intention
@@ -356,8 +364,8 @@ export function generateFullMoonEmailHTML(
             }
             
             <div class="ritual-box">
-              <h3 style="margin-top: 0; color: #fff; font-size: 20px;">🌕 Full Moon Ritual</h3>
-              <p style="color: #cbd5e1; margin-bottom: 12px;">Release what no longer serves you:</p>
+              <h3 style="margin-top: 0; color: #fff; font-size: 20px;">🌕 ${moonData.identity?.name || 'Full Moon'} Ritual</h3>
+              <p style="color: #cbd5e1; margin-bottom: 12px;">${moonData.identity ? moonData.identity.ritualFocus : 'Release what no longer serves you:'}</p>
               <ol style="color: #cbd5e1; padding-left: 20px; margin: 0;">
                 <li>Reflect on what you've accomplished since the New Moon</li>
                 <li>Write down what you're ready to release</li>
@@ -386,7 +394,7 @@ export function generateFullMoonEmailHTML(
             </div>
             
             <p style="color: #94a3b8; font-size: 14px; margin-top: 30px;">
-              The Full Moon brings clarity and completion. Trust in the process, release with grace, and honor the journey you've taken.
+              ${moonData.identity ? `The ${moonData.identity.name} brings ${moonData.identity.themes[0]}. Trust in the process, release with grace, and honour the journey you have taken.` : 'The Full Moon brings clarity and completion. Trust in the process, release with grace, and honour the journey you have taken.'}
             </p>
           </div>
           
@@ -406,19 +414,21 @@ export function generateFullMoonEmailText(
 ): string {
   const dateStr = moonData.date.toISOString().split('T')[0];
 
+  const moonName = moonData.identity?.name || 'Full Moon';
+
   return `
-Full Moon in ${moonData.moonSign} - Lunary 🌕
+${moonName} in ${moonData.moonSign} - Lunary 🌕${moonData.isSuperMoon ? ' (Supermoon)' : ''}
 
 Hi ${userName || 'there'},
 
-The Full Moon in ${moonData.moonSign} illuminates what needs to be seen. This is a time of culmination, release, and celebration—when the seeds you planted at the New Moon come into full bloom.
+${moonData.identity ? moonData.identity.energy : `The Full Moon in ${moonData.moonSign} illuminates what needs to be seen. This is a time of culmination, release, and celebration -- when the seeds you planted at the New Moon come into full bloom.`}
 
 ${moonData.intention ? `\n✨ This Moon's Energy:\n${moonData.intention}\n` : ''}
 
-🌕 Full Moon Ritual:
-Release what no longer serves you:
-1. Reflect on what you've accomplished since the New Moon
-2. Write down what you're ready to release
+🌕 ${moonName} Ritual:
+${moonData.identity ? moonData.identity.ritualFocus : 'Release what no longer serves you:'}
+1. Reflect on what you have accomplished since the New Moon
+2. Write down what you are ready to release
 3. Burn the paper (safely) or bury it in the earth
 4. Express gratitude for the lessons learned
 5. Celebrate your growth and manifestations
@@ -428,7 +438,7 @@ ${moonData.tarotSuggestion ? `\n🔮 Tarot Guidance:\n${moonData.tarotSuggestion
 
 Join the Moon Circle: ${baseUrl}/moon-circles?date=${dateStr}
 
-The Full Moon brings clarity and completion. Trust in the process, release with grace, and honor the journey you've taken.
+${moonData.identity ? `The ${moonData.identity.name} brings ${moonData.identity.themes[0]}. Trust in the process, release with grace, and honour the journey you have taken.` : 'The Full Moon brings clarity and completion. Trust in the process, release with grace, and honour the journey you have taken.'}
 
 © ${new Date().getFullYear()} Lunar Computing, Inc. Made with 🌙 for your cosmic journey.
   `.trim();

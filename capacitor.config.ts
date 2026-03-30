@@ -11,7 +11,7 @@ const config: CapacitorConfig = {
 
   ios: {
     scheme: 'Lunary',
-    contentInset: 'automatic',
+    contentInset: 'never',
     backgroundColor: '#0a0a0f',
     preferredContentMode: 'mobile',
   },

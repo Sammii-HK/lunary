@@ -1,5 +1,6 @@
 import { SearchMoonPhase } from 'astronomy-engine';
 import { getRealPlanetaryPositions } from '../../../utils/astrology/cosmic-og';
+import { getMoonIdentity, type MoonIdentity } from './identities';
 
 export const MONTH_NAMES = [
   'January',
@@ -45,6 +46,8 @@ export interface MoonEvent {
   timestamp: string;
   dateLabel: string;
   slug: string;
+  /** Rich identity data (themes, keywords, energy, ritual focus, etc.) */
+  identity?: MoonIdentity;
 }
 
 interface YearMoonEvents {
@@ -103,14 +106,15 @@ function collectMoonEvents(year: number, type: MoonPhaseType): MoonEvent[] {
 
     const monthName = MONTH_NAMES[monthIndex];
     const monthSlug = monthName.toLowerCase();
-    const moonName =
-      type === 'full'
-        ? (MOON_NAMES[monthIndex + 1] ?? 'Full Moon')
-        : 'New Moon';
     const slug = `${type === 'full' ? 'full-moon' : 'new-moon'}-${monthSlug}`;
     const dateLabel = `${monthName} ${eventDate.getUTCDate()}`;
     const positions = getRealPlanetaryPositions(eventDate);
     const sign = positions.Moon?.sign || 'Unknown';
+    const identity = getMoonIdentity(monthIndex + 1, type);
+    const moonName =
+      type === 'full'
+        ? (MOON_NAMES[monthIndex + 1] ?? 'Full Moon')
+        : `New Moon in ${sign}`;
 
     events.push({
       type,
@@ -121,6 +125,7 @@ function collectMoonEvents(year: number, type: MoonPhaseType): MoonEvent[] {
       timestamp: eventDate.toISOString(),
       dateLabel,
       slug,
+      identity,
     });
 
     searchDate = new Date(eventDate.getTime() + MS_IN_DAY);
