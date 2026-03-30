@@ -9,6 +9,7 @@ import {
   MoonEventData,
 } from '@/lib/email-templates/moon-events';
 import { generateMoonCircle } from '@/lib/moon-circles/generator';
+import { getMoonIdentity } from '@/lib/moon/identities';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,6 +103,11 @@ export async function GET(request: NextRequest) {
       year: 'numeric',
     }).format(today);
 
+    // Look up rich identity data for this moon
+    const monthNum = today.getUTCMonth() + 1;
+    const moonType = moonCircle.moonPhase === 'Full Moon' ? 'full' : 'new';
+    const identity = getMoonIdentity(monthNum, moonType as 'full' | 'new');
+
     const moonData: MoonEventData = {
       moonPhase: moonCircle.moonPhase,
       moonSign: moonCircle.moonSign,
@@ -110,6 +116,7 @@ export async function GET(request: NextRequest) {
       intention: moonCircle.intention,
       ritualSuggestion: moonCircle.guidedRitual,
       tarotSuggestion: moonCircle.tarotSpreadSuggestion,
+      identity,
     };
 
     let emailsSent = 0;
@@ -136,10 +143,16 @@ export async function GET(request: NextRequest) {
             ? generateNewMoonEmailText(userName || 'there', moonData)
             : generateFullMoonEmailText(userName || 'there', moonData);
 
+        const moonName = identity?.name || moonCircle.moonPhase;
+        const themeLine = identity
+          ? identity.themes.slice(0, 2).join(' and ')
+          : moonCircle.moonPhase === 'New Moon'
+            ? 'new beginnings'
+            : 'release and manifestation';
         const subject =
           moonCircle.moonPhase === 'New Moon'
-            ? `🌑 New Moon in ${moonCircle.moonSign} - Time for New Beginnings`
-            : `🌕 Full Moon in ${moonCircle.moonSign} - Time for Release & Manifestation`;
+            ? `🌑 ${moonName} in ${moonCircle.moonSign} -- ${themeLine}`
+            : `🌕 ${moonName} in ${moonCircle.moonSign} -- ${themeLine}`;
 
         await sendEmail({
           to: userEmail,

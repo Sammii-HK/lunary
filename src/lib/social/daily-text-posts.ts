@@ -134,6 +134,19 @@ function maxScore(events: CalendarEvent[]): number {
 }
 
 function findSnippetForEvent(event: CalendarEvent): GrimoireSnippet | null {
+  // Moon phase events: prefer moon grimoire pages
+  if (event.eventType === 'moon_phase') {
+    const moonResults = searchGrimoireForTopic(event.name, 5);
+    const moonPage = moonResults.find(
+      (r) =>
+        r.url.includes('/moon/') ||
+        r.url.includes('/moon-phases') ||
+        r.url.includes('/full-moons/'),
+    );
+    if (moonPage) return moonPage;
+    return moonResults[0] || null;
+  }
+
   if (event.planet && event.sign) {
     // Prefer transit pages over horoscope/placement pages
     const results = searchGrimoireForTopic(`${event.planet} ${event.sign}`, 5);
