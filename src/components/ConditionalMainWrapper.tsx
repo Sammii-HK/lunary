@@ -202,8 +202,7 @@ export function ConditionalMainWrapper({
       }}
       className={cn(
         'flex flex-col w-full overflow-y-auto h-full',
-        showAppNav &&
-          'pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))] md:pb-15 h-screen',
+        showAppNav && 'pb-10 md:pb-12 h-screen',
         // !showMarketingNav && 'pb-14 md:pb-16 h-screen',
         !showMarketingNav && !showAppNav && 'h-screen',
       )}
