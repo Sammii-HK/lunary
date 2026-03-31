@@ -453,7 +453,17 @@ export function getAccurateMoonPhase(date: Date): {
     energy = 'New Beginnings';
     priority = isSignificant ? 10 : 8;
   } else if (illumination >= 97) {
-    const month = date.getMonth() + 1;
+    // Use the peak date's month for naming so full moons crossing month
+    // boundaries (e.g. Mar 31 -> Apr 1) get the correct name
+    let month = date.getMonth() + 1;
+    if (phase < 180) {
+      // Still waxing toward peak -- peak is tomorrow or later
+      const tomorrow = new Date(date);
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+      if (tomorrow.getUTCMonth() + 1 !== month) {
+        month = tomorrow.getUTCMonth() + 1;
+      }
+    }
     name = moonNames[month] || 'Full Moon';
     emoji = '🌕';
     energy = 'Peak Power';
