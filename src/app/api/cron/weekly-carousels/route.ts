@@ -154,40 +154,44 @@ export async function GET(request: NextRequest) {
             }
           }
 
-          // Pre-render all slide images to Blob (parallel)
-          const slidePromises = post.imageUrls.map(
-            async (imageUrl: string, i: number) => {
-              if (i === 0 && coverVideoUrl) return coverVideoUrl;
+          // Pre-render slide images to Blob sequentially (parallel overwhelms
+          // Vercel OG functions and causes timeouts on multi-slide carousels)
+          const resolvedUrls: string[] = [];
+          for (let i = 0; i < post.imageUrls.length; i++) {
+            const imageUrl = post.imageUrls[i];
+            if (i === 0 && coverVideoUrl) {
+              resolvedUrls.push(coverVideoUrl);
+              continue;
+            }
 
-              try {
-                const res = await fetch(imageUrl, {
-                  signal: AbortSignal.timeout(30_000),
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            try {
+              const res = await fetch(imageUrl, {
+                signal: AbortSignal.timeout(45_000),
+              });
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-                const buf = await res.arrayBuffer();
-                const blobPath = `carousels/${dateStr}/${post.type}-${i}.png`;
-                const blob = await put(blobPath, Buffer.from(buf), {
-                  access: 'public',
-                  contentType: 'image/png',
-                });
-                console.log(
-                  `[weekly-carousels] ${dateStr}/${post.type} slide ${i} (${(buf.byteLength / 1024).toFixed(0)}KB)`,
-                );
-                return blob.url;
-              } catch {
-                console.warn(
-                  `[weekly-carousels] Slide ${i} pre-render failed, using OG URL`,
-                );
-                // Append .png before query params so Postiz accepts the URL
-                return imageUrl.includes('/api/og/')
+              const buf = await res.arrayBuffer();
+              const blobPath = `carousels/${dateStr}/${post.type}-${i}.png`;
+              const blob = await put(blobPath, Buffer.from(buf), {
+                access: 'public',
+                contentType: 'image/png',
+              });
+              console.log(
+                `[weekly-carousels] ${dateStr}/${post.type} slide ${i} (${(buf.byteLength / 1024).toFixed(0)}KB)`,
+              );
+              resolvedUrls.push(blob.url);
+            } catch {
+              console.warn(
+                `[weekly-carousels] Slide ${i} pre-render failed, using OG URL`,
+              );
+              // Append .png before query params so Postiz accepts the URL
+              resolvedUrls.push(
+                imageUrl.includes('/api/og/')
                   ? imageUrl.replace(/(\?.*)$/, '.png$1')
-                  : imageUrl;
-              }
-            },
-          );
-
-          const resolvedUrls = await Promise.all(slidePromises);
+                  : imageUrl,
+              );
+            }
+          }
           blobUrls.push(...resolvedUrls);
 
           // Ensure scheduled time is in the future

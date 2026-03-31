@@ -65,7 +65,7 @@ export const Navbar = () => {
 
   return (
     <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
-      <div className='flex w-full h-12 md:h-14 items-center justify-around px-2 py-2 text-white max-w-lg'>
+      <div className='flex w-full h-10 items-center justify-around px-2 text-white max-w-lg'>
         <NavLink
           href='/app'
           icon={Home}

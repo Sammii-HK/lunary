@@ -1528,6 +1528,8 @@ export async function getEventCalendarForDate(
     let aspectScore = 35;
     let aspectRarity: EventRarity = 'MEDIUM';
 
+    const orb = aspect.separation as number;
+
     if (bothOuter && aspectName === 'conjunction') {
       aspectScore = 88;
       aspectRarity = 'CRITICAL';
@@ -1539,8 +1541,22 @@ export async function getEventCalendarForDate(
       aspectRarity = 'MEDIUM';
     }
 
-    // Tighter orbs get higher scores
-    aspectScore += Math.round((2 - (aspect.separation as number)) * 5);
+    // Dynamic scoring: exact aspects score highest, separating aspects decay.
+    // Prevents the same conjunction dominating content for 2+ weeks.
+    if (orb <= 0.5) {
+      aspectScore += 10; // Exact today -- peak relevance
+    } else if (orb <= 1) {
+      aspectScore += 5; // Near-exact
+    } else if (orb <= 2) {
+      // Active but not headline
+    } else if (orb <= 3) {
+      aspectScore -= 10; // Noticeably separating
+      if (aspectRarity === 'CRITICAL') aspectRarity = 'HIGH';
+    } else {
+      aspectScore -= 20; // Wide orb -- background energy
+      if (aspectRarity === 'CRITICAL') aspectRarity = 'HIGH';
+      if (aspectRarity === 'HIGH') aspectRarity = 'MEDIUM';
+    }
 
     // Build substantive context for aspects
     const rulesA = PLANET_RULES_SHORT[pA] || pA;
