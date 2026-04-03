@@ -269,24 +269,38 @@ export async function GET(request: Request) {
       const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
       const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
 
-      const [bridgeLogs, notifEvents, cosmicSnaps] = await Promise.all([
-        // GptBridgeLog — API call logs, no long-term value
-        prisma.gptBridgeLog.deleteMany({
-          where: { createdAt: { lt: ninetyDaysAgo } },
-        }),
-        // analytics_notification_events — per-event rows, aggregate data already in daily_metrics
-        prisma.analytics_notification_events.deleteMany({
-          where: { created_at: { lt: ninetyDaysAgo } },
-        }),
-        // cosmic_snapshots — daily per-user snapshots, keep 60 days
-        prisma.cosmic_snapshots.deleteMany({
-          where: { snapshot_date: { lt: sixtyDaysAgo } },
-        }),
-      ]);
+      const [bridgeLogs, notifEvents, cosmicSnaps, anonConversions] =
+        await Promise.all([
+          // GptBridgeLog — API call logs, no long-term value
+          prisma.gptBridgeLog.deleteMany({
+            where: { createdAt: { lt: ninetyDaysAgo } },
+          }),
+          // analytics_notification_events — per-event rows, aggregate data already in daily_metrics
+          prisma.analytics_notification_events.deleteMany({
+            where: { created_at: { lt: ninetyDaysAgo } },
+          }),
+          // cosmic_snapshots — daily per-user snapshots, keep 60 days
+          prisma.cosmic_snapshots.deleteMany({
+            where: { snapshot_date: { lt: sixtyDaysAgo } },
+          }),
+          // conversion_events — anonymous visitor events (page_viewed, cta_impression, app_opened)
+          // are aggregated into daily_metrics so individual rows have no long-term value.
+          // ~880k of 925k rows are anon; purging 90d+ rows cuts the 941 MB table to ~300 MB.
+          prisma.conversion_events.deleteMany({
+            where: {
+              created_at: { lt: ninetyDaysAgo },
+              user_id: null,
+              event_type: {
+                in: ['page_viewed', 'cta_impression', 'app_opened'],
+              },
+            },
+          }),
+        ]);
 
       purgeResults.bridge_logs = bridgeLogs.count;
       purgeResults.notification_events = notifEvents.count;
       purgeResults.cosmic_snapshots = cosmicSnaps.count;
+      purgeResults.anon_conversion_events = anonConversions.count;
 
       console.log('Purge complete:', purgeResults);
     } catch (purgeError) {
