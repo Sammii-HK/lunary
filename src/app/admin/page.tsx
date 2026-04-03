@@ -775,6 +775,15 @@ export default function AdminDashboard() {
       status: 'new',
     },
     {
+      title: 'User Lookup',
+      description:
+        'Look up users by email, manually verify addresses, or resend verification emails',
+      href: '/admin/users',
+      icon: <Mail className='h-5 w-5' />,
+      category: 'tools',
+      status: 'new',
+    },
+    {
       title: 'Birth Chart Tool',
       description: 'Look up and regenerate user birth charts',
       href: '/admin/birth-chart',

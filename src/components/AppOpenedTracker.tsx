@@ -4,16 +4,22 @@ import { useEffect, useRef } from 'react';
 import { conversionTracking } from '@/lib/analytics';
 
 export function AppOpenedTracker() {
-  // Fire only once per page load (not on every navigation)
-  // The analytics guard handles daily deduplication at the storage/DB level
   const hasFired = useRef(false);
 
   useEffect(() => {
-    // Only fire once per page load - guard function handles daily dedup
     if (hasFired.current) return;
     hasFired.current = true;
 
-    // Fire app_opened event (client-side guard + DB constraint prevent duplicates)
+    // Skip if already tracked today — avoids any API/DB call for return visits
+    const today = new Date().toISOString().split('T')[0];
+    const key = `app_opened_${today}`;
+    try {
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, '1');
+    } catch {
+      // localStorage unavailable (private mode etc.) — fall through to server dedup
+    }
+
     conversionTracking.appOpened();
   }, []);
 
