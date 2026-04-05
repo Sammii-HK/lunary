@@ -192,6 +192,15 @@ export async function GET(request: NextRequest) {
               );
             }
           }
+          // Safety cap: Instagram rejects carousels with more than 10 slides
+          const INSTAGRAM_MAX_SLIDES = 10;
+          if (resolvedUrls.length > INSTAGRAM_MAX_SLIDES) {
+            console.warn(
+              `[weekly-carousels] ${post.type} has ${resolvedUrls.length} slides, truncating to ${INSTAGRAM_MAX_SLIDES}`,
+            );
+            resolvedUrls.splice(INSTAGRAM_MAX_SLIDES);
+          }
+
           blobUrls.push(...resolvedUrls);
 
           // Ensure scheduled time is in the future
