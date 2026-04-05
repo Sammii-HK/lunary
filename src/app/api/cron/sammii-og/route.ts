@@ -65,6 +65,7 @@ async function uploadToSpellcast(
     method: 'POST',
     headers: { Authorization: `Bearer ${spellcastKey}` },
     body: formData,
+    signal: AbortSignal.timeout(30_000),
   });
   if (!res.ok)
     throw new Error(
@@ -85,6 +86,7 @@ async function generateCaption(prompt: string): Promise<string> {
         Authorization: `Bearer ${spellcastKey}`,
       },
       body: JSON.stringify({ action: 'write', prompt }),
+      signal: AbortSignal.timeout(20_000),
     });
     if (!res.ok) return '';
     const data = (await res.json()) as { content?: string; text?: string };
@@ -190,7 +192,9 @@ export async function GET(request: NextRequest) {
   };
 
   try {
-    const cosmicRes = await fetch('https://lunary.app/api/cosmic/global');
+    const cosmicRes = await fetch('https://lunary.app/api/cosmic/global', {
+      signal: AbortSignal.timeout(10_000),
+    });
     if (cosmicRes.ok) {
       const cosmic = (await cosmicRes.json()) as {
         moonPhase?: { name?: string };
@@ -305,7 +309,9 @@ export async function GET(request: NextRequest) {
       }
 
       // Fetch OG image
-      const imageRes = await fetch(`${baseUrl}${ogPath}`);
+      const imageRes = await fetch(`${baseUrl}${ogPath}`, {
+        signal: AbortSignal.timeout(45_000),
+      });
       if (!imageRes.ok)
         throw new Error(
           `OG fetch failed (${imageRes.status}): ${baseUrl}${ogPath}`,

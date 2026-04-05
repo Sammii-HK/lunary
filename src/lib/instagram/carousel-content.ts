@@ -820,6 +820,15 @@ function buildSlides(
       break;
   }
 
+  // Cap body slides so cover + body + CTA never exceeds Instagram's 10-slide limit.
+  // The weekly-carousels cron also truncates at the URL level, but doing it here
+  // keeps slide indices and totalSlides consistent and avoids dangling "NEXT:" teasers.
+  const INSTAGRAM_MAX_SLIDES = 10;
+  if (slides.length >= INSTAGRAM_MAX_SLIDES) {
+    // Keep cover (slides[0]) + first INSTAGRAM_MAX_SLIDES-2 body slides, drop the rest
+    slides.splice(INSTAGRAM_MAX_SLIDES - 1);
+  }
+
   // CTA slide (always last)
   const ctaMessages: Record<string, string> = {
     spells: 'Cast your first spell today',
