@@ -99,6 +99,29 @@ async function generateCaption(prompt: string): Promise<string> {
   }
 }
 
+async function hasPostsScheduledToday(
+  accountSetId: string,
+  dateStr: string,
+): Promise<boolean> {
+  const spellcastUrl = process.env.SPELLCAST_API_URL;
+  const spellcastKey = process.env.SPELLCAST_API_KEY;
+  if (!spellcastUrl || !spellcastKey) return false;
+  try {
+    const res = await fetch(
+      `${spellcastUrl}/api/posts?accountSetId=${accountSetId}&startDate=${dateStr}&endDate=${dateStr}&status=scheduled&limit=1`,
+      {
+        headers: { Authorization: `Bearer ${spellcastKey}` },
+        signal: AbortSignal.timeout(10_000),
+      },
+    );
+    if (!res.ok) return false;
+    const data = (await res.json()) as unknown[];
+    return Array.isArray(data) && data.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 async function createPost(params: {
   content: string;
   mediaUrl: string;
@@ -172,6 +195,21 @@ export async function GET(request: NextRequest) {
     );
   if (dayOfMonth === 1)
     typesToPost.push(MONTHLY_TYPES[monthIndex % MONTHLY_TYPES.length]);
+
+  // Idempotency guard — bail out if posts already exist for today to prevent
+  // double-posting when the route is triggered more than once in the same day.
+  const alreadyPosted = await hasPostsScheduledToday(
+    SAMMII_SPARKLE_ACCOUNT_SET_ID,
+    dateStr,
+  );
+  if (alreadyPosted) {
+    return NextResponse.json({
+      success: true,
+      skipped: true,
+      reason: 'Posts already scheduled for today',
+      date: dateStr,
+    });
+  }
 
   // Fetch cosmic data (updated at 6 AM UTC by update-global-cosmic-data cron)
   let moonPhaseName = 'Waning Crescent';
