@@ -292,8 +292,10 @@ export async function postToSpellcastMultiPlatform(params: {
     const postType = hasVideoMedia ? 'video' : 'post'; // Multi-image posts are 'post' type; Postiz/Instagram handles carousel creation
 
     // 1. Create draft
+    // Longer timeout when media is present — Spellcast/Postiz fetches and processes images during creation
     const createRes = await spellcastFetch('/api/posts', {
       method: 'POST',
+      timeoutMs: hasMediaContent ? 60000 : 15000,
       body: JSON.stringify({
         content: params.content,
         mediaUrls: params.media?.map((m) => m.url) ?? [],
@@ -325,9 +327,10 @@ export async function postToSpellcastMultiPlatform(params: {
     const draft = await createRes.json();
 
     // 2. Schedule
+    // Longer timeout — Postiz downloads + processes media during scheduling
     const scheduleRes = await spellcastFetch(
       `/api/posts/${draft.id}/schedule`,
-      { method: 'POST' },
+      { method: 'POST', timeoutMs: hasMediaContent ? 60000 : 15000 },
     );
 
     if (!scheduleRes.ok) {
