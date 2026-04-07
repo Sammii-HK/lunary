@@ -31,6 +31,7 @@ export interface EmailOptions {
   subject: string;
   html?: string;
   text?: string;
+  from?: string;
   replyTo?: string;
   tracking?: EmailTrackingOptions;
 }
@@ -55,6 +56,7 @@ export async function sendEmail({
   subject,
   html,
   text,
+  from,
   replyTo,
   tracking,
 }: EmailOptions): Promise<{ id: string } | BatchEmailResult> {
@@ -72,8 +74,8 @@ export async function sendEmail({
 
     if (recipients.length === 1) {
       const { data, error } = await resend.emails.send({
-        from: FROM_EMAIL,
-        reply_to: replyTo || REPLY_TO,
+        from: from || FROM_EMAIL,
+        replyTo: replyTo || REPLY_TO,
         to: recipients[0],
         subject,
         html: finalHtml,
@@ -155,7 +157,7 @@ async function sendBatchEmails(
       try {
         const { data, error } = await resend.emails.send({
           from: FROM_EMAIL,
-          reply_to: replyTo,
+          replyTo: replyTo,
           to: email,
           subject,
           html,

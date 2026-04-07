@@ -263,11 +263,150 @@ export async function GET(request: Request) {
       `Deletion processing complete: ${results.processed} processed, ${results.errors} errors`,
     );
 
+    // Purge old rows from high-volume tables to keep storage and query costs down
+    const purgeResults: Record<string, number> = {};
+    try {
+      const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+      const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+
+      const [bridgeLogs, notifEvents, cosmicSnaps, anonConversions] =
+        await Promise.all([
+          // GptBridgeLog — API call logs, no long-term value
+          prisma.gptBridgeLog.deleteMany({
+            where: { createdAt: { lt: ninetyDaysAgo } },
+          }),
+          // analytics_notification_events — per-event rows, aggregate data already in daily_metrics
+          prisma.analytics_notification_events.deleteMany({
+            where: { created_at: { lt: ninetyDaysAgo } },
+          }),
+          // cosmic_snapshots — daily per-user snapshots, keep 60 days
+          prisma.cosmic_snapshots.deleteMany({
+            where: { snapshot_date: { lt: sixtyDaysAgo } },
+          }),
+          // conversion_events — anonymous visitor events (page_viewed, cta_impression, app_opened)
+          // are aggregated into daily_metrics so individual rows have no long-term value.
+          // ~880k of 925k rows are anon; purging 90d+ rows cuts the 941 MB table to ~300 MB.
+          prisma.conversion_events.deleteMany({
+            where: {
+              created_at: { lt: ninetyDaysAgo },
+              user_id: null,
+              event_type: {
+                in: ['page_viewed', 'cta_impression', 'app_opened'],
+              },
+            },
+          }),
+        ]);
+
+      purgeResults.bridge_logs = bridgeLogs.count;
+      purgeResults.notification_events = notifEvents.count;
+      purgeResults.cosmic_snapshots = cosmicSnaps.count;
+      purgeResults.anon_conversion_events = anonConversions.count;
+
+      console.log('Purge complete:', purgeResults);
+    } catch (purgeError) {
+      console.error('Purge step failed (non-fatal):', purgeError);
+    }
+
+    // Verification backfill — catch users who signed up but never got an email
+    let verificationSent = 0;
+    try {
+      const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      const candidates = await prisma.user.findMany({
+        where: {
+          emailVerified: false,
+          createdAt: { gte: sevenDaysAgo, lte: thirtyMinsAgo },
+          NOT: { email: { contains: 'test.lunary.app' } },
+        },
+        select: { id: true, email: true },
+      });
+
+      if (candidates.length > 0) {
+        const existingTokens = await prisma.verification.findMany({
+          where: {
+            identifier: { in: candidates.map((u) => u.email) },
+            expiresAt: { gte: new Date() },
+          },
+          select: { identifier: true },
+        });
+        const hasToken = new Set(existingTokens.map((v) => v.identifier));
+        const needsEmail = candidates.filter((u) => !hasToken.has(u.email));
+
+        const baseURL =
+          process.env.NEXT_PUBLIC_BASE_URL ||
+          process.env.NEXT_PUBLIC_APP_URL ||
+          'https://lunary.app';
+        const emailModule = await import('@/lib/email');
+
+        for (const user of needsEmail) {
+          try {
+            const token = crypto.randomUUID();
+            const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+            await prisma.verification.deleteMany({
+              where: { identifier: user.email },
+            });
+            await prisma.verification.create({
+              data: {
+                id: crypto.randomUUID(),
+                identifier: user.email,
+                value: token,
+                expiresAt,
+              },
+            });
+            const verificationUrl = `${baseURL}/auth/verify-email?token=${token}`;
+            let html: string;
+            let text: string;
+            try {
+              html = await (emailModule as any).generateVerificationEmailHTML(
+                verificationUrl,
+                user.email,
+              );
+              text = (emailModule as any).generateVerificationEmailText(
+                verificationUrl,
+                user.email,
+              );
+            } catch {
+              html = `<p>Verify your email to access Lunary:</p><p><a href="${verificationUrl}">${verificationUrl}</a></p>`;
+              text = `Verify your email:\n${verificationUrl}`;
+            }
+            await emailModule.sendEmail({
+              to: user.email,
+              subject: 'One click to start your trial — Lunary',
+              html,
+              text,
+              tracking: {
+                userId: user.id,
+                notificationType: 'email_verification',
+                notificationId: `email-verify-cron-${token}`,
+                utm: {
+                  source: 'email',
+                  medium: 'auth',
+                  campaign: 'email_verification_cron',
+                },
+              },
+            });
+            verificationSent++;
+            console.log(`[verification-backfill] Sent to ${user.email}`);
+          } catch (e) {
+            console.error(
+              `[verification-backfill] Failed for ${user.email}:`,
+              e,
+            );
+          }
+        }
+      }
+    } catch (backfillError) {
+      console.error('Verification backfill failed (non-fatal):', backfillError);
+    }
+
     return NextResponse.json({
       success: true,
       processed: results.processed,
       errors: results.errors,
       details: results.details,
+      purged: purgeResults,
+      verificationsSent: verificationSent,
     });
   } catch (error) {
     console.error('Deletion cron error:', error);

@@ -365,12 +365,14 @@ describe('process-deletions cron', () => {
   it('returns success response with processing details', async () => {
     await GET(makeRequest(TEST_CRON_SECRET));
 
-    expect(lastJsonCall?.data).toEqual({
-      success: true,
-      processed: 1,
-      errors: 0,
-      details: [{ userId: 'user-123', success: true }],
-    });
+    expect(lastJsonCall?.data).toEqual(
+      expect.objectContaining({
+        success: true,
+        processed: 1,
+        errors: 0,
+        details: [{ userId: 'user-123', success: true }],
+      }),
+    );
   });
 
   it('sends deletion complete email after processing', async () => {
@@ -393,11 +395,13 @@ describe('process-deletions cron', () => {
     await GET(makeRequest(TEST_CRON_SECRET));
 
     expect(mockTransaction).not.toHaveBeenCalled();
-    expect(lastJsonCall?.data).toEqual({
-      success: true,
-      processed: 0,
-      errors: 0,
-      details: [],
-    });
+    expect(lastJsonCall?.data).toEqual(
+      expect.objectContaining({
+        success: true,
+        processed: 0,
+        errors: 0,
+        details: [],
+      }),
+    );
   });
 });

@@ -65,6 +65,7 @@ async function uploadToSpellcast(
     method: 'POST',
     headers: { Authorization: `Bearer ${spellcastKey}` },
     body: formData,
+    signal: AbortSignal.timeout(30_000),
   });
   if (!res.ok)
     throw new Error(
@@ -85,6 +86,7 @@ async function generateCaption(prompt: string): Promise<string> {
         Authorization: `Bearer ${spellcastKey}`,
       },
       body: JSON.stringify({ action: 'write', prompt }),
+      signal: AbortSignal.timeout(20_000),
     });
     if (!res.ok) return '';
     const data = (await res.json()) as { content?: string; text?: string };
@@ -94,6 +96,29 @@ async function generateCaption(prompt: string): Promise<string> {
       .trim();
   } catch {
     return '';
+  }
+}
+
+async function hasPostsScheduledToday(
+  accountSetId: string,
+  dateStr: string,
+): Promise<boolean> {
+  const spellcastUrl = process.env.SPELLCAST_API_URL;
+  const spellcastKey = process.env.SPELLCAST_API_KEY;
+  if (!spellcastUrl || !spellcastKey) return false;
+  try {
+    const res = await fetch(
+      `${spellcastUrl}/api/posts?accountSetId=${accountSetId}&startDate=${dateStr}&endDate=${dateStr}&status=scheduled&limit=1`,
+      {
+        headers: { Authorization: `Bearer ${spellcastKey}` },
+        signal: AbortSignal.timeout(10_000),
+      },
+    );
+    if (!res.ok) return false;
+    const data = (await res.json()) as unknown[];
+    return Array.isArray(data) && data.length > 0;
+  } catch {
+    return false;
   }
 }
 
@@ -171,6 +196,21 @@ export async function GET(request: NextRequest) {
   if (dayOfMonth === 1)
     typesToPost.push(MONTHLY_TYPES[monthIndex % MONTHLY_TYPES.length]);
 
+  // Idempotency guard — bail out if posts already exist for today to prevent
+  // double-posting when the route is triggered more than once in the same day.
+  const alreadyPosted = await hasPostsScheduledToday(
+    SAMMII_SPARKLE_ACCOUNT_SET_ID,
+    dateStr,
+  );
+  if (alreadyPosted) {
+    return NextResponse.json({
+      success: true,
+      skipped: true,
+      reason: 'Posts already scheduled for today',
+      date: dateStr,
+    });
+  }
+
   // Fetch cosmic data (updated at 6 AM UTC by update-global-cosmic-data cron)
   let moonPhaseName = 'Waning Crescent';
   let zodiacSeason = SAMMII.sun;
@@ -190,7 +230,9 @@ export async function GET(request: NextRequest) {
   };
 
   try {
-    const cosmicRes = await fetch('https://lunary.app/api/cosmic/global');
+    const cosmicRes = await fetch('https://lunary.app/api/cosmic/global', {
+      signal: AbortSignal.timeout(10_000),
+    });
     if (cosmicRes.ok) {
       const cosmic = (await cosmicRes.json()) as {
         moonPhase?: { name?: string };
@@ -305,7 +347,9 @@ export async function GET(request: NextRequest) {
       }
 
       // Fetch OG image
-      const imageRes = await fetch(`${baseUrl}${ogPath}`);
+      const imageRes = await fetch(`${baseUrl}${ogPath}`, {
+        signal: AbortSignal.timeout(45_000),
+      });
       if (!imageRes.ok)
         throw new Error(
           `OG fetch failed (${imageRes.status}): ${baseUrl}${ogPath}`,

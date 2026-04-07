@@ -29,6 +29,7 @@ import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { captureEvent } from '@/lib/posthog-client';
 import { conversionTracking } from '@/lib/analytics';
+import { getPublicPlanName } from '@/lib/ai/plans';
 import {
   dismissRitualBadge,
   useRitualBadge,
@@ -300,21 +301,13 @@ const MessageBubble = ({
       className={`flex items-end gap-1.5 ${isUser ? 'justify-end' : 'justify-start'} text-sm md:text-base group`}
     >
       <div
-        className={`max-w-[85%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm transition-colors ${
+        className={`relative max-w-[96%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm transition-colors ${
           isUser
             ? 'bg-lunary-primary-900 text-white border border-lunary-primary-700'
             : 'bg-zinc-950 text-zinc-100 border border-zinc-800'
         }`}
       >
-        {renderContent()}
-        {!isUser && content.length > 500 && !/[.!?]$/.test(content.trim()) && (
-          <div className='mt-2 text-xs text-lunary-primary-400 italic'>
-            ...Reply "continue" for more
-          </div>
-        )}
-      </div>
-      {!isUser && (
-        <div className='opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mb-1'>
+        {!isUser && (
           <SaveToCollection
             item={{
               title: extractMeaningfulTitle(content),
@@ -337,9 +330,17 @@ const MessageBubble = ({
             folders={folders}
             onSaved={onSaved}
             onFolderCreated={onFolderCreated}
+            iconOnly
+            className='absolute right-1.5 top-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity'
           />
-        </div>
-      )}
+        )}
+        {renderContent()}
+        {!isUser && content.length > 500 && !/[.!?]$/.test(content.trim()) && (
+          <div className='mt-2 text-xs text-lunary-primary-400 italic'>
+            ...Reply "continue" for more
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -402,6 +403,12 @@ function BookOfShadowsContent() {
   >([]);
   const [isJournalMode, setIsJournalMode] = useState(false);
   const [isSubmittingJournal, setIsSubmittingJournal] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [dailyExpanded, setDailyExpanded] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('daily-thread-collapsed') !== 'true';
+  });
+  const [hasDailyModules, setHasDailyModules] = useState(false);
 
   useEffect(() => {
     if (!authState.isAuthenticated || authState.loading) return;
@@ -486,6 +493,15 @@ function BookOfShadowsContent() {
       recordCheckIn();
     }
   }, [authState.isAuthenticated, authState.loading]);
+
+  // Condense progress widget when messages are scrolled
+  useEffect(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const handleScroll = () => setIsScrolled(el.scrollTop > 40);
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Inject ritual message when user visits during ritual time
   const [ritualInjected, setRitualInjected] = useState(false);
@@ -883,20 +899,60 @@ function BookOfShadowsContent() {
 
   return (
     <div
-      className='flex flex-col flex-1 min-h-0 w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'
+      className='flex min-h-0 flex-1 flex-col w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'
       data-testid='astral-guide'
     >
-      <div className='mx-auto flex flex-1 min-h-0 w-full max-w-3xl flex-col p-4'>
-        <header className='mb-2 shrink-0 md:mb-4'>
-          <SkillProgressWidget skillTree='journal' className='shrink-0 mb-2' />
+      <div className='mx-auto flex min-h-0 flex-1 w-full max-w-3xl flex-col px-3 pb-2 pt-3 md:p-4'>
+        <header className='shrink-0 md:mb-2'>
+          <SkillProgressWidget
+            skillTree='journal'
+            className='mb-1.5 shrink-0'
+            scrolled={isScrolled}
+          />
 
-          <Heading variant='h1' as='h1'>
-            Astral Guide
-          </Heading>
+          <div className='flex items-center justify-between gap-2'>
+            <Heading variant='h1' as='h1'>
+              Astral Guide
+            </Heading>
+            {hasDailyModules && (
+              <button
+                onClick={() => {
+                  const next = !dailyExpanded;
+                  setDailyExpanded(next);
+                  localStorage.setItem('daily-thread-collapsed', String(!next));
+                }}
+                className='flex shrink-0 items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors'
+              >
+                <span>Today</span>
+                {dailyExpanded ? (
+                  <ChevronUp className='w-3 h-3' />
+                ) : (
+                  <ChevronDown className='w-3 h-3' />
+                )}
+              </button>
+            )}
+          </div>
+          <div className='mt-2 flex flex-wrap items-center gap-2 text-[11px] text-zinc-400 md:hidden'>
+            {planId ? (
+              <span className='rounded-full border border-lunary-primary-600/70 px-2.5 py-1 text-lunary-primary-300/90'>
+                {getPublicPlanName(planId)}
+              </span>
+            ) : null}
+            {usage ? (
+              <span className='rounded-full border border-zinc-700/60 px-2.5 py-1'>
+                {usage.used}/{usage.limit}
+              </span>
+            ) : null}
+            {(dailyHighlight as { primaryEvent?: string })?.primaryEvent ? (
+              <span className='max-w-full truncate rounded-full border border-zinc-700/60 px-2.5 py-1'>
+                {(dailyHighlight as { primaryEvent?: string }).primaryEvent}
+              </span>
+            ) : null}
+          </div>
           <div className='hidden md:flex flex-wrap items-center gap-2 mt-2 text-xs text-zinc-400'>
             {planId ? (
               <span className='rounded-full border border-lunary-primary-600 px-3 py-1 text-lunary-primary-300/90'>
-                Plan: {planId.replace(/_/g, ' ')}
+                Plan: {getPublicPlanName(planId)}
               </span>
             ) : null}
             {usage ? (
@@ -913,19 +969,26 @@ function BookOfShadowsContent() {
           </div>
         </header>
 
-        <div className='flex min-h-0 flex-1 flex-col gap-2'>
-          <div className='pt-1 md:pt-2'>
-            <div className='mx-auto max-w-2xl w-full'>
-              <DailyThread />
+        <div className='flex min-h-0 flex-1 flex-col gap-1'>
+          <section className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] border border-zinc-800/60 bg-zinc-950/60'>
+            <div className='shrink-0 px-2 md:px-4 md:pt-2'>
+              <DailyThread
+                isExpanded={dailyExpanded}
+                onToggle={() => {
+                  const next = !dailyExpanded;
+                  setDailyExpanded(next);
+                  localStorage.setItem('daily-thread-collapsed', String(!next));
+                }}
+                hideToggle
+                onModulesLoaded={setHasDailyModules}
+              />
             </div>
-          </div>
-          <section className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-800/60 bg-zinc-950/60'>
             <div
               ref={messagesContainerRef}
-              className='min-h-0 flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6'
+              className='min-h-0 flex-1 overflow-y-auto px-2 py-3 md:px-6 md:py-6'
               data-testid='guide-messages'
             >
-              <div className='mx-auto flex max-w-2xl flex-col gap-3 md:gap-6 w-full'>
+              <div className='mx-auto flex w-full max-w-2xl flex-col gap-3 md:gap-6'>
                 {isLoadingHistory ? (
                   <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
                     Loading your conversation...
@@ -1178,7 +1241,7 @@ function BookOfShadowsContent() {
                 attemptSend();
               }
             }}
-            className='shrink-0 relative flex items-center mb-16 md:mb-20'
+            className='relative flex shrink-0 items-center'
           >
             <label htmlFor='book-of-shadows-message' className='sr-only'>
               {isJournalMode ? 'Write a journal entry' : 'Share with Lunary'}
@@ -1195,7 +1258,7 @@ function BookOfShadowsContent() {
                   ? 'Write a journal entry...'
                   : "Write your heart's question…"
               }
-              className={`w-full min-h-16 md:min-h-8 resize-none rounded-xl border bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 ${
+              className={`w-full min-h-[56px] resize-none rounded-2xl border bg-zinc-900/70 pl-4 pr-12 py-3 text-[15px] text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 md:min-h-8 md:rounded-xl md:py-2.5 md:text-sm ${
                 isJournalMode
                   ? 'border-lunary-primary-600/50 focus:border-lunary-primary focus:ring-lunary-primary-700'
                   : 'border-zinc-700/60 focus:border-lunary-primary focus:ring-lunary-primary-800'

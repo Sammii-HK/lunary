@@ -42,6 +42,7 @@ interface SaveToCollectionProps {
   onSaved?: () => void;
   onFolderCreated?: (folder: Folder) => void;
   className?: string;
+  iconOnly?: boolean;
 }
 
 export function SaveToCollection({
@@ -51,6 +52,7 @@ export function SaveToCollection({
   onSaved,
   onFolderCreated,
   className = '',
+  iconOnly = false,
 }: SaveToCollectionProps) {
   const authState = useAuthStatus();
   const haptic = useHaptic();
@@ -218,29 +220,51 @@ export function SaveToCollection({
 
   return (
     <div className={className}>
-      <Button
-        onClick={() => {
-          fetchDataOnInteraction();
-          setShowFolderDialog(true);
-        }}
-        onMouseEnter={fetchDataOnInteraction}
-        variant='outline'
-        size='sm'
-        className='flex items-center gap-2'
-        disabled={isSaving}
-      >
-        {isSaving ? (
-          <>
-            <Loader2 className='w-4 h-4 animate-spin' />
-            <span>Saving...</span>
-          </>
-        ) : (
-          <>
-            <Bookmark className='w-4 h-4' />
-            <span>Save</span>
-          </>
-        )}
-      </Button>
+      {iconOnly ? (
+        <button
+          type='button'
+          onClick={() => {
+            fetchDataOnInteraction();
+            setShowFolderDialog(true);
+          }}
+          onMouseEnter={fetchDataOnInteraction}
+          disabled={isSaving}
+          className='p-1 rounded-md transition-colors text-zinc-500 hover:text-lunary-primary-300 disabled:opacity-40'
+          aria-label='Save to collection'
+        >
+          {isSaving ? (
+            <Loader2 className='w-3.5 h-3.5 animate-spin' />
+          ) : isSaved ? (
+            <BookmarkCheck className='w-3.5 h-3.5 text-lunary-primary-400' />
+          ) : (
+            <Bookmark className='w-3.5 h-3.5' />
+          )}
+        </button>
+      ) : (
+        <Button
+          onClick={() => {
+            fetchDataOnInteraction();
+            setShowFolderDialog(true);
+          }}
+          onMouseEnter={fetchDataOnInteraction}
+          variant='outline'
+          size='sm'
+          className='flex items-center gap-2'
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className='w-4 h-4 animate-spin' />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Bookmark className='w-4 h-4' />
+              <span>Save</span>
+            </>
+          )}
+        </Button>
+      )}
 
       <Modal isOpen={showFolderDialog} onClose={closeDialog}>
         <ModalHeader>Save to Collection</ModalHeader>

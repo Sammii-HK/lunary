@@ -252,7 +252,7 @@ export function YearlyForecast() {
 
   return (
     <Paywall feature='yearly_forecast'>
-      <div className='space-y-6'>
+      <div className='space-y-4'>
         {/* Actions */}
         <div className='flex items-center gap-2'>
           <Button

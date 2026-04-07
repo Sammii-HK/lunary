@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
 import { createHash } from 'crypto';
 import {
   canonicaliseEvent,
@@ -107,20 +106,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Check if already tracked by user_id OR anonymous_id
-    const existing = await sql`
-      SELECT 1 FROM conversion_events
-      WHERE event_type = 'app_opened'
-        AND created_at >= ${today}::date
-        AND created_at < (${today}::date + INTERVAL '1 day')
-        AND (
-          (${userId}::text IS NOT NULL AND user_id = ${userId})
-          OR (${anonymousId}::text IS NOT NULL AND anonymous_id = ${anonymousId})
-        )
-      LIMIT 1
-    `;
+    // Deterministic eventId + ON CONFLICT DO NOTHING handles deduplication —
+    // no need for a SELECT first.
+    const { inserted } = await insertCanonicalEvent(canonical.row);
 
-    if (existing.rows.length > 0) {
+    if (!inserted) {
       console.log('[app_opened] SKIPPED - already tracked today');
       return NextResponse.json({
         success: true,
@@ -129,7 +119,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    await insertCanonicalEvent(canonical.row);
     console.log('[app_opened] INSERT success', {
       duration: Date.now() - startTime,
       userId: userId ? 'present' : 'none',

@@ -331,7 +331,7 @@ export function HoroscopeView({
   // Loading skeleton (paid only, while fetching personalized horoscope)
   if (hasPaidAccess && isLoading) {
     return (
-      <div className='h-full space-y-6 p-4 pb-16 md:pb-20 overflow-auto'>
+      <div className='h-full space-y-4 p-4 pb-16 md:pb-20 overflow-auto'>
         <div className='pt-6'>
           <div className='h-8 bg-zinc-800 rounded animate-pulse w-48 mb-2' />
           <div className='h-4 bg-zinc-800 rounded animate-pulse w-64' />
@@ -345,7 +345,7 @@ export function HoroscopeView({
   }
 
   return (
-    <div className='h-full space-y-6 p-4 pb-16 md:pb-20 overflow-auto'>
+    <div className='h-full space-y-4 p-4 pb-16 md:pb-20 overflow-auto'>
       {/* Header */}
       <div>
         <div className='flex flex-wrap items-start justify-between gap-3'>
@@ -374,10 +374,12 @@ export function HoroscopeView({
               <button
                 type='button'
                 disabled
-                className='inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-zinc-200 transition hover:border-lunary-primary-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50'
+                className='inline-flex items-center gap-2 rounded-full border border-zinc-700 px-3 py-2 sm:px-4 text-xs font-semibold tracking-wide uppercase text-zinc-200 transition hover:border-lunary-primary-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50'
               >
                 <Share2 className='h-4 w-4' />
-                Share {hasPaidAccess ? 'horoscope' : 'highlight'}
+                <span className='hidden sm:inline'>
+                  Share {hasPaidAccess ? 'horoscope' : 'highlight'}
+                </span>
               </button>
             )}
           </div>
@@ -385,7 +387,7 @@ export function HoroscopeView({
       </div>
 
       {/* Cosmic Highlight Card */}
-      <div className='rounded-2xl border border-zinc-800/70 bg-gradient-to-br from-zinc-900/70 via-zinc-950/70 to-lunary-primary-950 p-5 space-y-4'>
+      <div className='rounded-xl border border-zinc-800/70 bg-gradient-to-br from-zinc-900/70 via-zinc-950/70 to-lunary-primary-950 p-3 space-y-3'>
         {/* <p className='text-[11px] font-semibold tracking-[0.3em] uppercase text-zinc-400'>
           Cosmic Highlight
         </p> */}
@@ -453,13 +455,13 @@ export function HoroscopeView({
                   'Daily universal numerology energy',
                 )
               }
-              className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400 w-full'
+              className='rounded-lg border border-zinc-700 px-3 py-2 bg-zinc-900/40 text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400 w-full'
               data-testid='numerology-day'
             >
               <div className='text-xs uppercase tracking-widest text-zinc-400'>
                 Universal Day
               </div>
-              <div className='text-3xl font-semibold text-lunary-accent-300'>
+              <div className='text-xl sm:text-2xl font-semibold text-lunary-accent-300'>
                 {universalDay.number}
               </div>
               <p className='text-[11px] text-zinc-300'>
@@ -499,13 +501,13 @@ export function HoroscopeView({
                         'Your personal day numerology focus',
                       )
                     }
-                    className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center transition hover:border-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300 w-full'
+                    className='rounded-lg border border-zinc-700 px-3 py-2 bg-zinc-900/40 text-center transition hover:border-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300 w-full'
                     data-testid='numerology-month'
                   >
                     <div className='text-xs uppercase tracking-widest text-zinc-400'>
                       Personal Day
                     </div>
-                    <div className='text-3xl font-semibold text-emerald-300'>
+                    <div className='text-xl sm:text-2xl font-semibold text-emerald-300'>
                       {personalDay.number}
                     </div>
                     <p className='text-[11px] text-zinc-300'>
@@ -547,7 +549,9 @@ export function HoroscopeView({
               <div className='text-xs uppercase tracking-widest text-zinc-400'>
                 Personal Day
               </div>
-              <div className='text-3xl font-semibold text-zinc-500'>?</div>
+              <div className='text-xl sm:text-2xl font-semibold text-zinc-500'>
+                ?
+              </div>
               <p className='text-[11px] text-zinc-500'>
                 Add your birthday to reveal this daily number.
               </p>
@@ -646,7 +650,7 @@ export function HoroscopeView({
           color='indigo'
           id='transit-wisdom'
         >
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-zinc-400 mb-2'>
             What the sky is stirring up for you today
           </p>
           <TransitWisdom
@@ -727,7 +731,7 @@ export function HoroscopeView({
           color='purple'
           id='moon-phase'
         >
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-zinc-400 mb-2'>
             The moon&apos;s influence right now
           </p>
           <MoonPhaseCard
@@ -745,7 +749,7 @@ export function HoroscopeView({
           color='zinc'
           id='today-aspects'
         >
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-zinc-400 mb-2'>
             How today&apos;s sky connects to your story
           </p>
           <TodaysAspects
@@ -842,7 +846,7 @@ export function HoroscopeView({
         color='zinc'
         id='personal-transits'
       >
-        <p className='text-sm text-zinc-400 mb-4'>
+        <p className='text-sm text-zinc-400 mb-2'>
           {hasPaidAccess
             ? 'How upcoming shifts touch your life'
             : 'Planetary events in the next 30 days — unlock personal impact for each'}

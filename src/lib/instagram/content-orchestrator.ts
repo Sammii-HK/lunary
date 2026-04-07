@@ -308,8 +308,11 @@ async function generateCarouselPost(
         effectiveBias =
           orbitCategories[Math.floor(rng() * orbitCategories.length)];
       }
-    } catch {
-      // Orbit unavailable -- proceed without bias
+    } catch (err) {
+      console.warn(
+        '[IG Orchestrator] Orbit unavailable, proceeding without category bias:',
+        err instanceof Error ? err.message : err,
+      );
     }
   }
 

@@ -155,7 +155,7 @@ export default function CommunityHubClient() {
 
   return (
     <div className='min-h-screen p-4'>
-      <div className='max-w-2xl mx-auto space-y-6'>
+      <div className='max-w-2xl mx-auto space-y-4'>
         <header className='pt-4 pb-2'>
           <Link
             href='/explore'
@@ -190,7 +190,7 @@ export default function CommunityHubClient() {
 
         {/* No spaces yet */}
         {!hasSpaces && !needsBirthChart && (
-          <div className='rounded-xl border border-zinc-800/50 bg-zinc-900/50 p-6 text-center'>
+          <div className='rounded-xl border border-zinc-800/50 bg-zinc-900/50 p-4 text-center'>
             <Users className='w-6 h-6 text-zinc-500 mx-auto mb-2' />
             <p className='text-sm text-zinc-400'>No community spaces yet</p>
             <p className='text-xs text-zinc-500 mt-1'>

@@ -761,7 +761,7 @@ export function generateTikTokCarouselCaption(
       const trait = options.trait;
       if (trait) {
         const traitLabel = trait.replace(/_/g, ' ');
-        caption = `Every sign's ${traitLabel} in one word. How accurate is yours?\n\nSwipe through all 12. Comment your sign below`;
+        caption = `Every sign's ${traitLabel} in one word. How accurate is yours?\n\nSwipe to find yours. Comment your sign below`;
       } else {
         const sign = options.sign
           ? options.sign.charAt(0).toUpperCase() + options.sign.slice(1)

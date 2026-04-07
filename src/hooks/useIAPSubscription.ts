@@ -3,6 +3,7 @@ import {
   PURCHASES_ERROR_CODE,
 } from '@revenuecat/purchases-capacitor';
 import type { PurchasesPackage } from '@revenuecat/purchases-capacitor';
+import { Capacitor } from '@capacitor/core';
 
 // RevenueCat entitlement IDs — must match what's configured in the RC dashboard
 export const RC_ENTITLEMENT_PLUS = 'plus';
@@ -23,6 +24,7 @@ let rcConfigurePromise: Promise<void> | null = null;
  * Safe to call multiple times — subsequent calls are no-ops.
  */
 export async function configureIAP(userId?: string): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return;
   if (!rcConfigured) {
     if (!rcConfigurePromise) {
       rcConfigurePromise = (async () => {

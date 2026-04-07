@@ -559,14 +559,14 @@ export function TarotSpreadExperience({
   return (
     <div
       data-testid='tarot-spreads-section'
-      className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'
+      className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 space-y-4'
     >
       <div className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100'>
+          <h2 className='text-base sm:text-xl font-medium text-zinc-100'>
             Guided Tarot Spreads
           </h2>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-xs sm:text-sm text-zinc-400'>
             Choose a spread, draw cards instantly, and save your insights.
           </p>
         </div>
@@ -767,16 +767,16 @@ export function TarotSpreadExperience({
         )}
       </div>
 
-      <div className='grid gap-6 lg:grid-cols-[2fr,1fr]'>
+      <div className='grid gap-4 lg:grid-cols-[2fr,1fr]'>
         <div className='space-y-4'>
           {isLoading && (
-            <div className='flex h-48 items-center justify-center rounded-lg border border-zinc-800/40 bg-zinc-900/30'>
+            <div className='flex h-32 items-center justify-center rounded-lg border border-zinc-800/40 bg-zinc-900/30'>
               <Loader2 className='h-6 w-6 animate-spin text-zinc-400' />
             </div>
           )}
 
           {!isLoading && !currentReading && (
-            <div className='flex h-48 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-800 bg-zinc-900/20 text-center text-sm text-zinc-400'>
+            <div className='flex h-32 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-800 bg-zinc-900/20 text-center text-sm text-zinc-400'>
               <Sparkles className='mb-2 h-5 w-5 text-lunary-accent-300' />
               Pull a spread to start building your tarot archive.
             </div>
@@ -790,7 +790,7 @@ export function TarotSpreadExperience({
                     <p className='text-xs uppercase tracking-wider text-lunary-accent-300/80'>
                       {currentReading?.spreadName}
                     </p>
-                    <h3 className='text-lg font-medium text-zinc-100'>
+                    <h3 className='text-base sm:text-lg font-medium text-zinc-100'>
                       {currentReading?.summary}
                     </h3>
                   </div>
@@ -827,7 +827,7 @@ export function TarotSpreadExperience({
                 </div>
               </div>
 
-              <div className='space-y-6'>
+              <div className='space-y-3'>
                 {currentReading?.cards?.map((card, cardIndex) => {
                   const isTransitExpanded =
                     expandedTransitCardIndex === cardIndex;
@@ -856,7 +856,7 @@ export function TarotSpreadExperience({
                             {card.card.arcana === 'major' ? 'Major' : 'Minor'}
                           </span>
                         </div>
-                        <p className='text-lg font-semibold text-zinc-100'>
+                        <p className='text-base sm:text-lg font-semibold text-zinc-100'>
                           {card.card.name}
                         </p>
                         <p className='text-sm text-zinc-300 leading-relaxed'>

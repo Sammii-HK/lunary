@@ -1016,7 +1016,9 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
         );
         await sendEmail({
           to: customer.email,
-          subject: "We'll miss you — here's a gift if you change your mind",
+          subject: 'I noticed you cancelled',
+          from: 'Sammii <hello@lunary.app>',
+          replyTo: 'sammii@lunary.app',
           html,
           text,
           tracking: {

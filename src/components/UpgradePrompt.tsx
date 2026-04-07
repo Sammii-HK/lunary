@@ -248,7 +248,7 @@ export function UpgradePrompt({
     case 'card':
       return (
         <div
-          className={`bg-zinc-900 border border-zinc-800 rounded-lg p-6 text-center ${className}`}
+          className={`bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center ${className}`}
         >
           <div className='w-12 h-12 bg-gradient-to-br from-lunary-primary to-lunary-secondary rounded-full flex items-center justify-center mx-auto mb-4'>
             <Star className='w-6 h-6 text-white' />

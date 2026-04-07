@@ -175,9 +175,9 @@ function CollectionsPageContent() {
     return (
       <div className='min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
         <div className='max-w-4xl mx-auto p-4'>
-          <div className='text-center py-12'>
-            <BookOpen className='w-16 h-16 mx-auto mb-4 text-lunary-primary-400' />
-            <h1 className='text-3xl font-bold mb-4'>Your Lunary Journal</h1>
+          <div className='text-center py-8'>
+            <BookOpen className='w-12 h-12 mx-auto mb-3 text-lunary-primary-400' />
+            <h1 className='text-xl font-bold mb-3'>Your Lunary Journal</h1>
             <p className='text-zinc-400 mb-6'>
               Save your favorite insights, rituals, and cosmic guidance in one
               place.
@@ -228,9 +228,9 @@ function CollectionsPageContent() {
   return (
     <div className='min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
       <div className='max-w-6xl mx-auto p-4'>
-        <header className='mb-8'>
-          <h1 className='text-3xl font-bold mb-2 flex items-center gap-3'>
-            <BookOpen className='w-8 h-8 text-lunary-primary-400' />
+        <header className='mb-4'>
+          <h1 className='text-xl font-bold mb-1.5 flex items-center gap-2'>
+            <BookOpen className='w-5 h-5 text-lunary-primary-400' />
             Your Lunary Journal
           </h1>
           <p className='text-zinc-400'>
@@ -239,7 +239,7 @@ function CollectionsPageContent() {
         </header>
 
         {/* Filters */}
-        <div className='mb-6 space-y-4'>
+        <div className='mb-4 space-y-3'>
           <div className='flex flex-wrap gap-2'>
             <button
               onClick={() => setSelectedCategory(null)}
@@ -387,7 +387,7 @@ function CollectionsPageContent() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className='rounded-lg border border-zinc-800 bg-zinc-900/30 p-6 animate-pulse'
+                className='rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 animate-pulse'
               >
                 <div className='h-4 bg-zinc-800 rounded w-3/4 mb-2'></div>
                 <div className='h-3 bg-zinc-800 rounded w-1/2'></div>
@@ -395,8 +395,8 @@ function CollectionsPageContent() {
             ))}
           </div>
         ) : filteredCollections.length === 0 ? (
-          <div className='text-center py-12 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <BookOpen className='w-12 h-12 mx-auto mb-4 text-zinc-600' />
+          <div className='text-center py-8 rounded-lg border border-zinc-800 bg-zinc-900/30'>
+            <BookOpen className='w-10 h-10 mx-auto mb-3 text-zinc-600' />
             <p className='text-zinc-400 mb-4'>
               {searchQuery
                 ? 'No collections match your search'
@@ -418,7 +418,7 @@ function CollectionsPageContent() {
               <button
                 key={collection.id}
                 onClick={() => setSelectedCollection(collection)}
-                className='block rounded-lg border border-zinc-800 bg-zinc-900/30 p-6 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group text-left'
+                className='block rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group text-left'
               >
                 <div className='flex items-start justify-between mb-3'>
                   <span

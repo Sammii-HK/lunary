@@ -441,9 +441,9 @@ export function TarotView({
   // --- Error state: free user but generalTarot failed to load ---
   if (!hasPaidAccess && !generalTarot) {
     return (
-      <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-32'>
-        <div className='pt-6'>
-          <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+      <div className='h-full w-full space-y-4 p-4 overflow-y-auto overflow-x-hidden pb-32'>
+        <div className='pt-2'>
+          <h1 className='text-xl md:text-2xl font-light text-zinc-100 mb-1'>
             Your Tarot Readings
           </h1>
           <p className='text-xs md:text-sm text-zinc-400'>
@@ -451,7 +451,7 @@ export function TarotView({
           </p>
         </div>
 
-        <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-6'>
+        <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
           <h3 className='text-lg font-medium text-zinc-100 mb-2'>
             Unable to load tarot reading
           </h3>
@@ -463,7 +463,7 @@ export function TarotView({
           <SmartTrialButton feature='tarot_patterns' />
         </div>
 
-        <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-6'>
+        <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
           <h3 className='text-lg font-medium text-zinc-100 mb-2'>
             Unlock Personal Tarot Readings
           </h3>
@@ -521,7 +521,7 @@ export function TarotView({
               {iosLabel('calculate your cosmic signature', isNativeIOS)}.
             </p>
           </div>
-          <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-6 space-y-4'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4 space-y-4'>
             <div className='space-y-2'>
               <h3 className='text-lg font-medium text-zinc-100'>
                 Add Your Birthday
@@ -638,11 +638,11 @@ export function TarotView({
           </Button>
         </div>
       )} */}
-      <div className='space-y-6'>
+      <div className='space-y-4'>
         {/* Daily & Weekly Cards section */}
         {hasPaidAccess ? (
           <HoroscopeSection title='Daily & Weekly Cards' color='purple'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6'>
               {/* Daily Card - Paid */}
               <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
                 <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>
@@ -775,12 +775,12 @@ export function TarotView({
           </HoroscopeSection>
         ) : (
           /* Free user: Daily & Weekly Cards with locked overlays */
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'>
-            <h2 className='text-lg md:text-xl font-medium text-zinc-100'>
+          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 space-y-4'>
+            <h2 className='text-base md:text-lg font-medium text-zinc-100'>
               Today&apos;s Cosmic Reading
             </h2>
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6'>
               {/* Daily Card - Free */}
               <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
                 <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>

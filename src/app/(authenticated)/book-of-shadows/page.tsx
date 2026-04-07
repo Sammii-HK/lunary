@@ -544,7 +544,7 @@ export default function BookOfShadowsPage() {
         </div>
       </header>
 
-      <div className='px-4 py-6'>
+      <div className='px-4 py-3'>
         {activeTab === 'journal' && (
           <div className='space-y-4'>
             <LifeThemeBanner className='mb-2' />
@@ -595,7 +595,7 @@ export default function BookOfShadowsPage() {
             )}
 
             {journalEntries.length === 0 ? (
-              <div className='text-center py-12'>
+              <div className='text-center py-6'>
                 <Feather className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
                 <p className='text-zinc-400'>No journal entries yet</p>
                 <p className='text-xs text-zinc-500 mt-1'>
@@ -669,7 +669,7 @@ export default function BookOfShadowsPage() {
             </div>
 
             {dreams.length === 0 ? (
-              <div className='text-center py-12'>
+              <div className='text-center py-6'>
                 <Moon className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
                 <p className='text-zinc-400'>No dreams recorded yet</p>
                 <p className='text-xs text-zinc-500 mt-2 max-w-xs mx-auto'>
@@ -697,7 +697,7 @@ export default function BookOfShadowsPage() {
             </div>
 
             {memories.length === 0 ? (
-              <div className='text-center py-12'>
+              <div className='text-center py-6'>
                 <Brain className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
                 <p className='text-zinc-400'>No memories yet</p>
                 <p className='text-xs text-zinc-500 mt-1'>

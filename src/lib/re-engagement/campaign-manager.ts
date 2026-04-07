@@ -6,7 +6,12 @@ export type CampaignType =
   | '30days_inactive'
   | 'missed_streak'
   | 'milestone'
-  | 'insights_ready';
+  | 'insights_ready'
+  | 'free_3days_inactive'
+  | 'free_7days_inactive'
+  | 'free_14days_inactive'
+  | 'winback_30d'
+  | 'weekly_reading';
 
 export interface CampaignUser {
   userId: string;

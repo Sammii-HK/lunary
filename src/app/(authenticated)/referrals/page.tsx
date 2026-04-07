@@ -10,7 +10,7 @@ export default function ReferralsPage() {
   return (
     <div className='min-h-screen flex flex-col'>
       <div className='flex-1 p-4'>
-        <div className='max-w-lg mx-auto space-y-6'>
+        <div className='max-w-lg mx-auto space-y-4'>
           <header className='pt-4 pb-2'>
             <Heading variant='h1' as='h1'>
               Referrals

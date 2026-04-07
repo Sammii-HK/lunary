@@ -72,7 +72,8 @@ const TRIAL_BASE_QUERY = `
   WHERE s.status = 'trial'
   AND s.trial_ends_at IS NOT NULL
   AND s.user_email IS NOT NULL
-  AND (s.has_discount IS NULL OR s.has_discount = false)
+  AND s.has_discount = false
+  AND COALESCE(s.discount_percent, 0) < 100
   AND (s.promo_code IS NULL OR s.promo_code = '')
 `;
 

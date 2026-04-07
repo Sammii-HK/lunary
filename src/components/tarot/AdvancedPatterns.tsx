@@ -355,7 +355,7 @@ export function AdvancedPatterns({
     // Show loading while transforming
     if (!basicPatternAnalysis) {
       return (
-        <div className='text-center py-8 text-zinc-400 text-sm'>
+        <div className='text-center py-4 text-zinc-400 text-sm'>
           Loading patterns...
         </div>
       );
@@ -383,7 +383,7 @@ export function AdvancedPatterns({
   // Wait for subscription to load before showing paywall
   if (subscription.loading) {
     return (
-      <div className='text-center py-8 text-zinc-400 text-sm'>
+      <div className='text-center py-4 text-zinc-400 text-sm'>
         Loading subscription...
       </div>
     );
@@ -405,7 +405,7 @@ export function AdvancedPatterns({
     <div className='relative'>
       {/* Show basic patterns when not in multidimensional mode and not year-over-year */}
       {!isMultidimensionalMode && selectedView !== 'year-over-year' && (
-        <div className='space-y-6 pt-8'>
+        <div className='space-y-4 pt-4'>
           {basicPatterns ? (
             <>
               {basicPatterns.dominantThemes.length > 0 && (
@@ -563,7 +563,7 @@ export function AdvancedPatterns({
                 )}
             </>
           ) : (
-            <div className='text-center py-8 text-zinc-400 text-sm'>
+            <div className='text-center py-4 text-zinc-400 text-sm'>
               Generating your tarot patterns...
             </div>
           )}
@@ -605,7 +605,7 @@ export function AdvancedPatterns({
           )}
 
           {error && analysis && (
-            <div className='text-center py-8 text-red-400 text-sm'>{error}</div>
+            <div className='text-center py-4 text-red-400 text-sm'>{error}</div>
           )}
 
           {analysis && analysis.yearOverYear && !loading && (
@@ -852,7 +852,7 @@ export function AdvancedPatterns({
           )}
 
           {error && analysis && (
-            <div className='text-center py-8 text-red-400 text-sm'>{error}</div>
+            <div className='text-center py-4 text-red-400 text-sm'>{error}</div>
           )}
 
           {analysis && analysis.enhancedTarot && !loading && (

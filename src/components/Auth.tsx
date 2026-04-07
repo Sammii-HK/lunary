@@ -47,6 +47,11 @@ export function AuthComponent({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<
+    string | null
+  >(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<AuthFormData>(
     () =>
@@ -217,6 +222,7 @@ export function AuthComponent({
           setSuccess(
             'Check your email — we sent you a verification link. Click it to finish signing up.',
           );
+          setPendingVerificationEmail(formData.email.toLowerCase().trim());
           return;
         }
 
@@ -363,6 +369,24 @@ export function AuthComponent({
       setError(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!pendingVerificationEmail) return;
+    setResendLoading(true);
+    setResendMessage(null);
+    try {
+      await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: pendingVerificationEmail }),
+      });
+      setResendMessage('Email resent — check your inbox (and spam folder).');
+    } catch {
+      setResendMessage('Failed to resend. Try again in a moment.');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -761,8 +785,28 @@ export function AuthComponent({
         )}
 
         {success && (
-          <div className='bg-lunary-success-900/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm'>
-            {success}
+          <div className='bg-lunary-success-900/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm space-y-2'>
+            <p>{success}</p>
+            {pendingVerificationEmail && (
+              <div className='pt-1 space-y-1'>
+                {resendMessage ? (
+                  <p className='text-lunary-success-400 text-xs'>
+                    {resendMessage}
+                  </p>
+                ) : (
+                  <button
+                    type='button'
+                    onClick={handleResendVerification}
+                    disabled={resendLoading}
+                    className='text-xs text-lunary-success-400 hover:text-lunary-success-200 underline underline-offset-2 disabled:opacity-50 transition-colors'
+                  >
+                    {resendLoading
+                      ? 'Sending…'
+                      : "Didn't get it? Resend the email"}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
 

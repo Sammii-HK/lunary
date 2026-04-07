@@ -24,9 +24,9 @@ export function HoroscopeSection({
     <div
       id={id}
       data-testid={id ? `${id}-section` : undefined}
-      className={`rounded-lg border ${colorClasses[color]} p-6 scroll-mt-20`}
+      className={`rounded-lg border ${colorClasses[color]} p-4 sm:p-6 scroll-mt-14`}
     >
-      <h2 className='text-base md:text-lg font-medium text-zinc-100 mb-3'>
+      <h2 className='text-sm md:text-base font-medium text-zinc-100 mb-2'>
         {title}
       </h2>
       {children}

@@ -124,7 +124,7 @@ async function initializeAuth() {
           );
           await emailModule.sendEmail({
             to: user.email,
-            subject: '🔐 Reset Your Lunary Password',
+            subject: 'Reset your Lunary password',
             html,
             text,
             tracking: {
@@ -160,17 +160,31 @@ async function initializeAuth() {
       }) {
         try {
           const emailModule = await import('./email');
-          const html = await (emailModule as any).generateVerificationEmailHTML(
-            url,
-            user.email,
-          );
-          const text = await (emailModule as any).generateVerificationEmailText(
-            url,
-            user.email,
-          );
+
+          // Render HTML — fall back to plain HTML if React rendering fails
+          let html: string;
+          let text: string;
+          try {
+            html = await (emailModule as any).generateVerificationEmailHTML(
+              url,
+              user.email,
+            );
+            text = (emailModule as any).generateVerificationEmailText(
+              url,
+              user.email,
+            );
+          } catch (renderError) {
+            console.error(
+              '[verification-email] React render failed, using fallback HTML:',
+              renderError,
+            );
+            html = `<p>Verify your email to start your Lunary trial:</p><p><a href="${url}">${url}</a></p>`;
+            text = `Verify your email to start your Lunary trial:\n${url}`;
+          }
+
           await emailModule.sendEmail({
             to: user.email,
-            subject: 'One click to start your trial — Lunary',
+            subject: 'One click to start your trial',
             html,
             text,
             tracking: {
@@ -184,10 +198,11 @@ async function initializeAuth() {
               },
             },
           });
-          console.log(`✅ Verification email sent to ${user.email}`);
+          console.log(`[verification-email] ✅ Sent to ${user.email}`);
         } catch (error) {
-          console.error('Failed to send verification email:', error);
-          throw error;
+          // Log but do NOT re-throw — a failed email must not block signup.
+          // The user can request a resend from /auth/verify-email.
+          console.error('[verification-email] ❌ Failed to send:', error);
         }
       },
     },

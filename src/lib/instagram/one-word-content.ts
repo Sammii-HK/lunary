@@ -531,6 +531,10 @@ export const AVAILABLE_TRAITS = Object.keys(TRAIT_DATA);
 
 // --- Carousel Generation ---
 
+// Instagram hard limit is 10 slides. Reserve 2 for cover + CTA, leaving 8 for signs.
+const INSTAGRAM_MAX_SLIDES = 10;
+const MAX_SIGN_SLIDES = INSTAGRAM_MAX_SLIDES - 2;
+
 export function generateOneWordCarousel(traitKey: string): IGCarouselSlide[] {
   const trait = TRAIT_DATA[traitKey];
   if (!trait) {
@@ -540,24 +544,40 @@ export function generateOneWordCarousel(traitKey: string): IGCarouselSlide[] {
   const slides: IGCarouselSlide[] = [];
   const category: ThemeCategory = 'zodiac';
 
+  // Pick MAX_SIGN_SLIDES signs via seeded Fisher-Yates shuffle so we stay within
+  // Instagram's 10-slide limit. Using traitKey as seed means the same trait always
+  // surfaces the same 8 signs, while different traits surface different subsets.
+  const rng = seededRandom(traitKey);
+  const shuffled = [...ZODIAC_SIGNS];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  const zodiacOrder = ZODIAC_SIGNS.map((s) => s.name);
+  const selectedSigns = shuffled
+    .slice(0, MAX_SIGN_SLIDES)
+    .sort((a, b) => zodiacOrder.indexOf(a.name) - zodiacOrder.indexOf(b.name));
+
+  const totalSlides = selectedSigns.length + 2; // cover + signs + CTA
+
   // Slide 1: Cover
   slides.push({
     slideIndex: 0,
-    totalSlides: 14,
+    totalSlides,
     title: `Your sign's ${trait.label.toLowerCase()} in one word`,
     content: 'Which word is yours? Swipe →',
     category,
     variant: 'cover',
   });
 
-  // Slides 2-13: One per sign
-  ZODIAC_SIGNS.forEach((sign, index) => {
+  // Sign slides
+  selectedSigns.forEach((sign, index) => {
     const word = trait.words[sign.name];
     const explanation = trait.explanations[sign.name];
 
     slides.push({
       slideIndex: index + 1,
-      totalSlides: 14,
+      totalSlides,
       title: sign.name,
       content: word,
       subtitle: explanation,
@@ -567,10 +587,10 @@ export function generateOneWordCarousel(traitKey: string): IGCarouselSlide[] {
     });
   });
 
-  // Slide 14: CTA
+  // CTA
   slides.push({
-    slideIndex: 13,
-    totalSlides: 14,
+    slideIndex: totalSlides - 1,
+    totalSlides,
     title: 'Did yours feel right?',
     content: 'Explore your full chart → lunary.app',
     category,

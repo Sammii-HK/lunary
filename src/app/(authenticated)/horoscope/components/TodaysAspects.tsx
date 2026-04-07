@@ -379,21 +379,19 @@ export function TodaysAspects({
               </div>
 
               <div className='flex-1 min-w-0'>
-                <div className='flex items-center justify-between mb-1'>
-                  <div className='flex items-center gap-2'>
-                    <span
-                      className={`text-sm font-medium capitalize ${styles.label}`}
-                    >
-                      {aspect.aspectType}
-                    </span>
-                    <span className='text-xs text-zinc-400'>
-                      {getAspectDescription(aspect.aspectType)}
-                    </span>
-                  </div>
+                <div className='flex items-center justify-between mb-0.5'>
+                  <span
+                    className={`text-sm font-medium capitalize ${styles.label}`}
+                  >
+                    {aspect.aspectType}
+                  </span>
                   <span className={`text-xs ${getOrbColor(aspect.orb)}`}>
                     {aspect.orb}°
                   </span>
                 </div>
+                <p className='text-xs text-zinc-400 mb-1'>
+                  {getAspectDescription(aspect.aspectType)}
+                </p>
 
                 <div className='flex items-center gap-2 text-xs mb-2'>
                   <span className='text-zinc-300'>{aspect.transitPlanet}</span>
