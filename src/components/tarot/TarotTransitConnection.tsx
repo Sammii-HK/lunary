@@ -302,10 +302,6 @@ export function TarotTransitConnection({
   if (currentConnection && historicalConnection) {
     return (
       <div className='rounded-lg border border-lunary-primary-800/30 bg-lunary-primary-950/20 p-4'>
-        <h4 className='text-sm font-medium text-lunary-accent-200 mb-4'>
-          In Your Chart
-        </h4>
-
         {/* Tab navigation */}
         <div className='flex gap-2 mb-4 border-b border-zinc-800'>
           <button
@@ -372,9 +368,6 @@ export function TarotTransitConnection({
   ) {
     return (
       <div className='rounded-lg border border-lunary-primary-800/30 bg-lunary-primary-950/20 p-4'>
-        <h4 className='text-sm font-medium text-lunary-accent-200 mb-3'>
-          In Your Chart Today
-        </h4>
         {renderInsights(currentConnection.perTransitInsights)}
       </div>
     );
@@ -383,9 +376,6 @@ export function TarotTransitConnection({
   // Fallback to paragraph format if no per-transit insights
   return (
     <div className='rounded-lg border border-lunary-primary-800/30 bg-lunary-primary-950/20 p-4'>
-      <h4 className='text-sm font-medium text-lunary-accent-200 mb-3'>
-        In Your Chart Today
-      </h4>
       <p className='text-sm text-zinc-300 leading-relaxed'>
         {currentConnection?.inDepth}
       </p>

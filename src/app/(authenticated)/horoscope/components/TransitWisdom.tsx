@@ -270,18 +270,18 @@ function TransitCard({
     <div
       className={`rounded-lg border ${styles.border} bg-zinc-900/40 p-4 space-y-3`}
     >
-      <div className='flex items-start gap-3'>
-        <span
-          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${styles.bg} ${styles.text}`}
-        >
-          {detail.intensityLevel}
-        </span>
-        <div className='flex-1 min-w-0'>
-          <h4 className='text-sm font-medium text-zinc-100 leading-tight'>
-            {detail.title}
-          </h4>
-          <p className='text-xs text-zinc-500 mt-0.5'>{detail.header}</p>
+      <div className='space-y-1'>
+        <div className='flex items-center justify-between gap-2'>
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap ${styles.bg} ${styles.text}`}
+          >
+            {detail.intensityLevel}
+          </span>
+          <p className='text-xs text-zinc-500'>{detail.header}</p>
         </div>
+        <h4 className='text-sm font-medium text-zinc-100 leading-tight'>
+          {detail.title}
+        </h4>
       </div>
 
       <div className='flex flex-wrap items-center gap-1.5'>

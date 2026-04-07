@@ -440,7 +440,7 @@ export function HoroscopeView({
 
         {/* Numerology Grid */}
         <div
-          className='mt-2 grid grid-cols-2 gap-3'
+          className='mt-2 grid grid-cols-2 gap-3 items-stretch'
           data-testid='numerology-section'
         >
           {/* Universal Day — always interactive */}
@@ -455,7 +455,7 @@ export function HoroscopeView({
                   'Daily universal numerology energy',
                 )
               }
-              className='rounded-lg border border-zinc-700 px-3 py-2 bg-zinc-900/40 text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400 w-full'
+              className='rounded-lg border border-zinc-700 px-3 py-2 bg-zinc-900/40 text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400 w-full h-full'
               data-testid='numerology-day'
             >
               <div className='text-xs uppercase tracking-widest text-zinc-400'>
@@ -501,7 +501,7 @@ export function HoroscopeView({
                         'Your personal day numerology focus',
                       )
                     }
-                    className='rounded-lg border border-zinc-700 px-3 py-2 bg-zinc-900/40 text-center transition hover:border-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300 w-full'
+                    className='rounded-lg border border-zinc-700 px-3 py-2 bg-zinc-900/40 text-center transition hover:border-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300 w-full h-full'
                     data-testid='numerology-month'
                   >
                     <div className='text-xs uppercase tracking-widest text-zinc-400'>

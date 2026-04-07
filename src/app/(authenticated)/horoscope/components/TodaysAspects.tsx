@@ -369,63 +369,58 @@ export function TodaysAspects({
             key={index}
             className={`rounded-lg border ${styles.border} ${styles.bg} p-3`}
           >
-            <div className='flex items-start gap-3'>
-              <div
-                className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${styles.bg} border ${styles.border}`}
-              >
-                <span className={`text-lg ${styles.symbol}`}>
-                  {aspect.aspectSymbol}
-                </span>
-              </div>
-
-              <div className='flex-1 min-w-0'>
-                <div className='flex items-center justify-between mb-0.5'>
+            <div>
+              <div className='flex items-center justify-between mb-0.5'>
+                <div className='flex items-center gap-1.5'>
+                  <span className={`text-base leading-none ${styles.symbol}`}>
+                    {aspect.aspectSymbol}
+                  </span>
                   <span
                     className={`text-sm font-medium capitalize ${styles.label}`}
                   >
                     {aspect.aspectType}
                   </span>
-                  <span className={`text-xs ${getOrbColor(aspect.orb)}`}>
-                    {aspect.orb}°
-                  </span>
                 </div>
-                <p className='text-xs text-zinc-400 mb-1'>
-                  {getAspectDescription(aspect.aspectType)}
-                </p>
-
-                <div className='flex items-center gap-2 text-xs mb-2'>
-                  <span className='text-zinc-300'>{aspect.transitPlanet}</span>
-                  <span className='text-zinc-600'>
-                    {aspect.transitDegree.split(' ')[0]}
-                  </span>
-                  <span className={`${styles.symbol}`}>
-                    {aspect.aspectSymbol}
-                  </span>
-                  <span className='text-zinc-300'>{aspect.natalPlanet}</span>
-                  <span className='text-zinc-600'>
-                    {aspect.natalDegree.split(' ')[0]}
-                  </span>
-                </div>
-
-                <div className='flex flex-wrap items-center gap-1.5 mb-2'>
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${
-                      aspect.duration.isApplying
-                        ? 'bg-lunary-primary-950/60 text-lunary-primary-300 border-lunary-primary-700/50'
-                        : 'bg-zinc-900/60 text-zinc-400 border-zinc-700/50'
-                    }`}
-                  >
-                    {aspect.duration.isApplying ? 'Applying' : 'Separating'}
-                  </span>
-                  <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border bg-zinc-900 border-zinc-800 text-zinc-400'>
-                    {aspect.duration.displayText}
-                  </span>
-                </div>
-
-                <p className='text-xs text-zinc-400 leading-relaxed'>
-                  {aspect.interpretation}
-                </p>
+                <span className={`text-xs ${getOrbColor(aspect.orb)}`}>
+                  {aspect.orb}°
+                </span>
               </div>
+              <p className='text-xs text-zinc-400 mb-1'>
+                {getAspectDescription(aspect.aspectType)}
+              </p>
+
+              <div className='flex items-center gap-2 text-xs mb-2'>
+                <span className='text-zinc-300'>{aspect.transitPlanet}</span>
+                <span className='text-zinc-600'>
+                  {aspect.transitDegree.split(' ')[0]}
+                </span>
+                <span className={`${styles.symbol}`}>
+                  {aspect.aspectSymbol}
+                </span>
+                <span className='text-zinc-300'>{aspect.natalPlanet}</span>
+                <span className='text-zinc-600'>
+                  {aspect.natalDegree.split(' ')[0]}
+                </span>
+              </div>
+
+              <div className='flex flex-wrap items-center gap-1.5 mb-2'>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${
+                    aspect.duration.isApplying
+                      ? 'bg-lunary-primary-950/60 text-lunary-primary-300 border-lunary-primary-700/50'
+                      : 'bg-zinc-900/60 text-zinc-400 border-zinc-700/50'
+                  }`}
+                >
+                  {aspect.duration.isApplying ? 'Applying' : 'Separating'}
+                </span>
+                <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border bg-zinc-900 border-zinc-800 text-zinc-400'>
+                  {aspect.duration.displayText}
+                </span>
+              </div>
+
+              <p className='text-xs text-zinc-400 leading-relaxed'>
+                {aspect.interpretation}
+              </p>
             </div>
           </div>
         );

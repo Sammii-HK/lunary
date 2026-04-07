@@ -142,3 +142,7 @@ export type PlanUsageSnapshot = {
 
 export const AI_LIMIT_REACHED_MESSAGE =
   "You've reached your daily message limit. Your limit will reset tomorrow, or upgrade your plan for more messages.";
+
+export function getPublicPlanName(planId: string): string {
+  return AI_PLANS[planId as AiPlanId]?.name ?? planId;
+}
