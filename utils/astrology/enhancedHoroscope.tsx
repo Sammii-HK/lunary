@@ -72,6 +72,54 @@ const getDetailedMoonPhase = (date: Date): string => {
   return 'Waning Crescent';
 };
 
+// Planet transit action phrases for house-aware guidance
+const PLANET_TRANSIT_ACTION: Record<string, string> = {
+  Pluto: 'is quietly reshaping',
+  Neptune: 'is softening the edges of',
+  Uranus: 'is awakening and disrupting',
+  Saturn: 'is grounding and testing',
+  Jupiter: 'is expanding your opportunities in',
+  Mars: 'is energising',
+  Sun: 'is illuminating',
+  Venus: 'is bringing ease and beauty to',
+  Mercury: 'is sharpening your thinking around',
+  Moon: 'is emotionally activating',
+};
+
+// House guidance suffixes for daily guidance sentences
+const HOUSE_GUIDANCE_SUFFIX: Record<number, string> = {
+  1: 'how you present yourself and take up space in the world',
+  2: 'your relationship with money, worth, and what you value',
+  3: 'how you communicate, learn, and connect with those nearby',
+  4: 'your sense of home, roots, and emotional foundation',
+  5: 'creativity, joy, romance, and self-expression',
+  6: 'daily routines, health, and how you show up in your work',
+  7: 'your one-to-one relationships and partnerships',
+  8: 'shared resources, intimacy, and deep transformation',
+  9: 'beliefs, philosophy, travel, and what you seek to understand',
+  10: 'career ambitions, reputation, and your public direction',
+  11: 'your community, friendships, and hopes for the future',
+  12: 'rest, solitude, healing, and the subconscious',
+};
+
+const getMoonSignMood = (sign: string): string => {
+  const moods: Record<string, string> = {
+    Aries: 'a restless, action-oriented charge',
+    Taurus: 'a grounded, steady quality',
+    Gemini: 'curiosity and a need for mental stimulation',
+    Cancer: 'heightened sensitivity and a pull toward home',
+    Leo: 'warmth and a desire to be seen',
+    Virgo: 'a discerning, detail-focused tone',
+    Libra: 'a longing for harmony and connection',
+    Scorpio: 'depth, intensity, and emotional undercurrents',
+    Sagittarius: 'optimism and a hunger for meaning',
+    Capricorn: 'restraint, ambition, and emotional pragmatism',
+    Aquarius: 'detachment and a pull toward the collective',
+    Pisces: 'compassion, dreams, and emotional fluidity',
+  };
+  return moods[sign] || 'a shifting emotional quality';
+};
+
 // Enhanced daily guidance that changes based on multiple factors
 const generateEnhancedDailyGuidance = (
   currentChart: AstroChartInformation[],
@@ -79,24 +127,59 @@ const generateEnhancedDailyGuidance = (
   userName?: string,
   today: dayjs.Dayjs = dayjs(),
 ): string => {
-  const name = userName || 'dear soul';
+  const currentMoon = currentChart.find((p) => p.body === 'Moon');
+  const universalDay = getDailyNumerology(today);
+  const ascendant = birthChart?.find((p: any) => p.body === 'Ascendant');
+
+  // House-aware guidance when natal chart is available
+  if (ascendant) {
+    const PLANET_PRIORITY = [
+      'Pluto',
+      'Neptune',
+      'Uranus',
+      'Saturn',
+      'Jupiter',
+      'Mars',
+      'Sun',
+      'Venus',
+      'Mercury',
+    ];
+    const sentences: string[] = [];
+
+    for (const planetName of PLANET_PRIORITY) {
+      if (sentences.length >= 2) break;
+      const transit = currentChart.find((p) => p.body === planetName);
+      if (!transit) continue;
+      const house = calculateHouseWholeSig(
+        transit.eclipticLongitude,
+        ascendant.eclipticLongitude,
+      );
+      const action = PLANET_TRANSIT_ACTION[planetName] || 'is influencing';
+      const houseSuffix =
+        HOUSE_GUIDANCE_SUFFIX[house] || 'this area of your life';
+      const ordinal = getOrdinalSuffix(house);
+      sentences.push(
+        `${planetName} ${action} your ${house}${ordinal} house — ${houseSuffix}.`,
+      );
+    }
+
+    const moonNote = currentMoon
+      ? ` The Moon in ${currentMoon.sign} adds ${getMoonSignMood(currentMoon.sign)} to the emotional backdrop.`
+      : '';
+    const numerologyNote = ` Today's ${universalDay} energy invites ${getNumerologyTheme(universalDay)}.`;
+
+    return sentences.join(' ') + moonNote + numerologyNote;
+  }
+
+  // Generic fallback (no natal chart)
   const dayOfWeek = today.day();
   const dayRuler = dayRulers[dayOfWeek as keyof typeof dayRulers];
-  const universalDay = getDailyNumerology(today);
-
-  // Get current planetary positions
   const currentSun = currentChart.find((p) => p.body === 'Sun');
-  const currentMoon = currentChart.find((p) => p.body === 'Moon');
-
-  // Get birth chart planets if available
   const birthSun = birthChart?.find((p: any) => p.body === 'Sun');
-
-  // Create dynamic guidance based on multiple factors
   const dayInfluence = getDayOfWeekInfluence(dayOfWeek, dayRuler);
   const numerologyInsight = getNumerologyInsight(universalDay);
   const planetaryAspect = getPlanetaryAspect(currentSun, currentMoon, birthSun);
-
-  return `${dayInfluence} ${planetaryAspect} ${numerologyInsight} The cosmic currents favor ${getActionGuidance(dayRuler, currentMoon?.sign || 'transition')} today.`;
+  return `${dayInfluence} ${planetaryAspect} ${numerologyInsight} The cosmic currents favour ${getActionGuidance(dayRuler, currentMoon?.sign || 'transition')} today.`;
 };
 
 const getDayOfWeekInfluence = (dayOfWeek: number, ruler: string): string => {
@@ -868,18 +951,75 @@ const getVenusTheme = (venusSign: string): string => {
   return themes[venusSign as keyof typeof themes] || 'Beauty and love';
 };
 
+// Planet significance order for highlighting (slowest/most transformative first)
+const HIGHLIGHT_PLANET_PRIORITY = [
+  'Pluto',
+  'Neptune',
+  'Uranus',
+  'Saturn',
+  'Jupiter',
+  'Mars',
+  'Sun',
+  'Venus',
+  'Mercury',
+];
+
+// House short labels for the headline
+const HOUSE_SHORT_LABEL: Record<number, string> = {
+  1: 'identity and self-expression',
+  2: 'finances and self-worth',
+  3: 'communication and learning',
+  4: 'home and inner foundation',
+  5: 'creativity and romance',
+  6: 'health and daily habits',
+  7: 'partnerships and relationships',
+  8: 'transformation and shared resources',
+  9: 'beliefs, travel, and growth',
+  10: 'career and public life',
+  11: 'community and future goals',
+  12: 'healing and the subconscious',
+};
+
 // Generate cosmic highlight - a special daily insight
 const generateCosmicHighlight = (
   currentChart: AstroChartInformation[],
   today: dayjs.Dayjs = dayjs(),
+  birthChart?: any[],
 ): string => {
+  // House-personalized highlight when natal chart is available
+  if (birthChart && birthChart.length > 0) {
+    const ascendant = birthChart.find((p: any) => p.body === 'Ascendant');
+    if (ascendant) {
+      // Collect top candidates (up to 3) and rotate daily so the heading varies
+      const candidates: Array<{ planet: string; house: number }> = [];
+      for (const planetName of HIGHLIGHT_PLANET_PRIORITY) {
+        const transit = currentChart.find((p) => p.body === planetName);
+        if (transit) {
+          const house = calculateHouseWholeSig(
+            transit.eclipticLongitude,
+            ascendant.eclipticLongitude,
+          );
+          candidates.push({ planet: planetName, house });
+          if (candidates.length >= 3) break;
+        }
+      }
+      if (candidates.length > 0) {
+        const pick = candidates[today.dayOfYear() % candidates.length];
+        const houseLabel =
+          HOUSE_SHORT_LABEL[pick.house] ?? 'personal transformation';
+        const ordinal = getOrdinalSuffix(pick.house);
+        return `${pick.planet} is moving through your ${pick.house}${ordinal} house of ${houseLabel}.`;
+      }
+    }
+  }
+
+  // Generic fallback (no natal chart)
   const dayOfWeek = today.day();
   const universalDay = getDailyNumerology(today);
 
   const mercury = currentChart.find((p) => p.body === 'Mercury');
   const mars = currentChart.find((p) => p.body === 'Mars');
 
-  // Create unique daily highlight
   const highlights = [
     `Mercury in ${mercury?.sign || 'transition'} enhances communication and learning opportunities.`,
     `Mars in ${mars?.sign || 'motion'} energizes your drive and ambition.`,
@@ -887,7 +1027,6 @@ const generateCosmicHighlight = (
     `Universal Day ${universalDay} brings ${getNumerologyTheme(universalDay)} to the forefront.`,
   ];
 
-  // Rotate based on day of year for variety
   const highlightIndex = today.dayOfYear() % highlights.length;
   return highlights[highlightIndex];
 };
@@ -1494,7 +1633,11 @@ export const getEnhancedPersonalizedHoroscope = (
     today,
     birthChart,
   );
-  const cosmicHighlight = generateCosmicHighlight(currentChart, today);
+  const cosmicHighlight = generateCosmicHighlight(
+    currentChart,
+    today,
+    birthChart ?? undefined,
+  );
   const dailyAffirmation = generateDailyAffirmation(sunSign, today);
 
   // Generate new structured fields

@@ -44,39 +44,49 @@ const getAspectInterpretation = (
   natalPlanet: string,
   aspectType: string,
 ): string => {
-  const transitVerbs: Record<string, string> = {
-    Sun: 'is lighting up',
-    Moon: 'is stirring',
-    Mercury: 'is speaking to',
-    Venus: 'is gently lifting',
-    Mars: 'is pushing',
-    Jupiter: 'is opening doors around',
-    Saturn: 'is grounding',
-    Uranus: 'is shaking up',
-    Neptune: 'is softening',
-    Pluto: 'is quietly reshaping',
-  };
-
   const natalThemes: Record<string, string> = {
-    Sun: 'your sense of self',
-    Moon: 'your emotions',
-    Mercury: 'how you think and communicate',
-    Venus: 'your relationships',
-    Mars: 'your drive and ambition',
-    Jupiter: 'your path to growth',
-    Saturn: 'your sense of responsibility',
-    Uranus: 'your need for freedom',
-    Neptune: 'your inner world',
-    Pluto: 'your personal power',
-    Ascendant: 'how you show up in the world',
-    Midheaven: 'your public life and career',
+    // Planets — what each one governs
+    Sun: 'your core identity and sense of self',
+    Moon: 'your emotional nature and instincts',
+    Mercury: 'your mind, communication, and thinking style',
+    Venus: 'your relationships, values, and what you love',
+    Mars: 'your drive, energy, and how you take action',
+    Jupiter: 'your capacity for growth and good fortune',
+    Saturn: 'your sense of responsibility, limits, and long-term structure',
+    Uranus: 'your need for freedom and your urge to break patterns',
+    Neptune: 'your dreams, intuition, and spiritual sensitivity',
+    Pluto: 'your deepest transformation and personal power',
+    // Chart angles
+    Ascendant:
+      'your rising sign — how you show up in the world and first impressions',
+    Midheaven: 'your Midheaven — your public role, career, and legacy',
+    Descendant:
+      'your Descendant — the cusp of your 7th house, showing what you seek in others and relationships',
+    'Imum Coeli':
+      'your IC — the base of your chart, tied to roots, home, and your private inner world',
+    // Arabic parts (explain what they are)
+    'Part of Spirit':
+      'your Part of Spirit — a point in your chart tied to soul purpose and creative calling',
+    'Part of Fortune':
+      'your Part of Fortune — a point in your chart linked to joy, luck, and material fulfilment',
   };
 
-  const verb = transitVerbs[transitPlanet] || 'is influencing';
-  const natalTheme =
-    natalThemes[natalPlanet] || `your ${natalPlanet.toLowerCase()} energy`;
+  const natalTheme = natalThemes[natalPlanet] ?? `your natal ${natalPlanet}`;
 
-  return `${transitPlanet} ${verb} ${natalTheme}.`;
+  switch (aspectType) {
+    case 'conjunction':
+      return `${transitPlanet} is merging with ${natalTheme}, intensifying and unifying these energies — a moment of concentrated focus.`;
+    case 'trine':
+      return `${transitPlanet} flows harmoniously with ${natalTheme}, creating natural ease and open channels — lean into what comes effortlessly now.`;
+    case 'sextile':
+      return `${transitPlanet} forms a gentle opportunity with ${natalTheme} — a subtle invitation to engage this energy consciously and act on small openings.`;
+    case 'square':
+      return `${transitPlanet} creates productive tension with ${natalTheme} — this friction is the pressure that catalyses real growth and breakthrough.`;
+    case 'opposition':
+      return `${transitPlanet} pulls at ${natalTheme} from the opposite direction — awareness of both sides of this tension brings integration and balance.`;
+    default:
+      return `${transitPlanet} is influencing ${natalTheme}.`;
+  }
 };
 
 const calculateAspectsWithDegrees = (
@@ -94,7 +104,18 @@ const calculateAspectsWithDegrees = (
 
   for (const transit of currentTransits) {
     for (const natal of birthChart) {
-      if (['North Node', 'South Node', 'Chiron', 'Lilith'].includes(natal.body))
+      if (
+        [
+          'North Node',
+          'South Node',
+          'Chiron',
+          'Lilith',
+          'Vertex',
+          'Anti-Vertex',
+          'East Point',
+          'Equatorial Ascendant',
+        ].includes(natal.body)
+      )
         continue;
 
       let diff = Math.abs(transit.eclipticLongitude - natal.eclipticLongitude);
@@ -155,9 +176,9 @@ const calculateAspectsWithDegrees = (
 };
 
 const getOrbColor = (orb: number): string => {
-  if (orb <= 2) return 'text-lunary-success-400';
-  if (orb <= 5) return 'text-lunary-accent-300';
-  return 'text-zinc-400';
+  if (orb <= 2) return 'text-content-success';
+  if (orb <= 5) return 'text-content-brand-accent';
+  return 'text-content-muted';
 };
 
 const getAspectStyles = (
@@ -168,42 +189,42 @@ const getAspectStyles = (
     { border: string; bg: string; symbol: string; label: string }
   > = {
     conjunction: {
-      border: 'border-lunary-primary-400/40',
-      bg: 'bg-lunary-primary-950/40',
-      symbol: 'text-lunary-primary-300',
-      label: 'text-lunary-primary-200',
+      border: 'border-lunary-primary-700/60',
+      bg: 'bg-surface-elevated/50',
+      symbol: 'text-content-brand',
+      label: 'text-content-brand',
     },
     opposition: {
-      border: 'border-lunary-error-300/30',
-      bg: 'bg-lunary-error-950/30',
-      symbol: 'text-lunary-error-300',
-      label: 'text-lunary-error-200',
+      border: 'border-lunary-error-500/60',
+      bg: 'bg-surface-elevated/50',
+      symbol: 'text-content-error',
+      label: 'text-content-error',
     },
     trine: {
-      border: 'border-lunary-success-400/40',
-      bg: 'bg-lunary-success-950/40',
-      symbol: 'text-lunary-success-300',
-      label: 'text-lunary-success-200',
+      border: 'border-lunary-success-600/60',
+      bg: 'bg-surface-elevated/50',
+      symbol: 'text-content-success',
+      label: 'text-content-success',
     },
     square: {
-      border: 'border-lunary-rose-400/40',
-      bg: 'bg-lunary-rose-950/40',
-      symbol: 'text-lunary-rose-300',
-      label: 'text-lunary-rose-200',
+      border: 'border-lunary-rose/60',
+      bg: 'bg-surface-elevated/50',
+      symbol: 'text-lunary-rose',
+      label: 'text-lunary-rose',
     },
     sextile: {
-      border: 'border-lunary-secondary-400/40',
-      bg: 'bg-lunary-secondary-950/40',
-      symbol: 'text-lunary-secondary-300',
-      label: 'text-lunary-secondary-200',
+      border: 'border-lunary-secondary-500/60',
+      bg: 'bg-surface-elevated/50',
+      symbol: 'text-content-brand-secondary',
+      label: 'text-content-brand-secondary',
     },
   };
   return (
     styles[aspectType] || {
-      border: 'border-zinc-700',
-      bg: 'bg-zinc-800/50',
-      symbol: 'text-zinc-400',
-      label: 'text-zinc-300',
+      border: 'border-stroke-default',
+      bg: 'bg-surface-card/50',
+      symbol: 'text-content-muted',
+      label: 'text-content-secondary',
     }
   );
 };
@@ -285,7 +306,7 @@ export function MoonPhaseCard({
   }
 
   return (
-    <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-4'>
+    <div className='rounded-lg border border-lunary-secondary-800 bg-surface-card p-4'>
       <div className='flex items-start gap-3'>
         <Image
           src={cosmicContext.moonPhase.icon.src}
@@ -296,11 +317,11 @@ export function MoonPhaseCard({
         />
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-2 mb-1'>
-            <p className='text-sm font-medium text-lunary-secondary-300'>
+            <p className='text-sm font-medium text-content-brand-secondary'>
               {cosmicContext.moonPhase.name}
             </p>
             {moonHouse && (
-              <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-primary-900/50 text-lunary-primary-300 border border-lunary-primary-700/30 font-medium'>
+              <span className='text-xs px-2 py-0.5 rounded-full bg-layer-base/50 text-content-brand border border-lunary-primary-700/30 font-medium'>
                 in your {moonHouse}
                 {moonHouse === 1
                   ? 'st'
@@ -317,18 +338,18 @@ export function MoonPhaseCard({
             {cosmicContext.moonPhase.keywords.map((keyword, idx) => (
               <span
                 key={idx}
-                className='text-xs px-2 py-0.5 rounded-full bg-lunary-secondary-900/50 text-lunary-secondary-400 border border-lunary-secondary-800'
+                className='text-xs px-2 py-0.5 rounded-full bg-layer-base/50 text-lunary-secondary-400 border border-lunary-secondary-800'
               >
                 {keyword}
               </span>
             ))}
           </div>
           {moonHouseInterpretation ? (
-            <p className='text-xs text-zinc-300 leading-relaxed mb-2 font-medium'>
+            <p className='text-xs text-content-secondary leading-relaxed mb-2 font-medium'>
               {moonHouseInterpretation}
             </p>
           ) : (
-            <p className='text-xs text-zinc-400 leading-relaxed'>
+            <p className='text-xs text-content-muted leading-relaxed'>
               {cosmicContext.moonPhase.information}
             </p>
           )}
@@ -352,7 +373,7 @@ export function TodaysAspects({
   if (aspects.length === 0) {
     return (
       <div className='text-center py-4'>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           No significant aspects between today&apos;s transits and your birth
           chart.
         </p>
@@ -385,72 +406,46 @@ export function TodaysAspects({
                   {aspect.orb}°
                 </span>
               </div>
-              <p className='text-xs text-zinc-400 mb-1'>
+              <p className='text-xs text-content-muted mb-1'>
                 {getAspectDescription(aspect.aspectType)}
               </p>
 
               <div className='flex items-center gap-2 text-xs mb-2'>
-                <span className='text-zinc-300'>{aspect.transitPlanet}</span>
-                <span className='text-zinc-600'>
+                <span className='text-content-secondary'>
+                  {aspect.transitPlanet}
+                </span>
+                <span className='text-content-muted'>
                   {aspect.transitDegree.split(' ')[0]}
                 </span>
                 <span className={`${styles.symbol}`}>
                   {aspect.aspectSymbol}
                 </span>
-                <span className='text-zinc-300'>{aspect.natalPlanet}</span>
-                <span className='text-zinc-600'>
+                <span className='text-content-secondary'>
+                  {aspect.natalPlanet}
+                </span>
+                <span className='text-content-muted'>
                   {aspect.natalDegree.split(' ')[0]}
                 </span>
               </div>
 
-              <div className='flex-1 min-w-0'>
-                <div className='flex items-center justify-between mb-0.5'>
-                  <span
-                    className={`text-sm font-medium capitalize ${styles.label}`}
-                  >
-                    {aspect.aspectType}
-                  </span>
-                  <span className={`text-xs ${getOrbColor(aspect.orb)}`}>
-                    {aspect.orb}°
-                  </span>
-                </div>
-                <p className='text-xs text-zinc-400 mb-1'>
-                  {getAspectDescription(aspect.aspectType)}
-                </p>
-
-                <div className='flex items-center gap-2 text-xs mb-2'>
-                  <span className='text-zinc-300'>{aspect.transitPlanet}</span>
-                  <span className='text-zinc-600'>
-                    {aspect.transitDegree.split(' ')[0]}
-                  </span>
-                  <span className={`${styles.symbol}`}>
-                    {aspect.aspectSymbol}
-                  </span>
-                  <span className='text-zinc-300'>{aspect.natalPlanet}</span>
-                  <span className='text-zinc-600'>
-                    {aspect.natalDegree.split(' ')[0]}
-                  </span>
-                </div>
-
-                <div className='flex flex-wrap items-center gap-1.5 mb-2'>
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${
-                      aspect.duration.isApplying
-                        ? 'bg-lunary-primary-950/60 text-lunary-primary-300 border-lunary-primary-700/50'
-                        : 'bg-zinc-900/60 text-zinc-400 border-zinc-700/50'
-                    }`}
-                  >
-                    {aspect.duration.isApplying ? 'Applying' : 'Separating'}
-                  </span>
-                  <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border bg-zinc-900 border-zinc-800 text-zinc-400'>
-                    {aspect.duration.displayText}
-                  </span>
-                </div>
-
-                <p className='text-xs text-zinc-400 leading-relaxed'>
-                  {aspect.interpretation}
-                </p>
+              <div className='flex flex-wrap items-center gap-1.5 mb-2'>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${
+                    aspect.duration.isApplying
+                      ? 'bg-layer-high/30 text-content-brand border-stroke-default'
+                      : 'bg-surface-elevated border-stroke-subtle text-content-muted'
+                  }`}
+                >
+                  {aspect.duration.isApplying ? 'Applying' : 'Separating'}
+                </span>
+                <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border bg-surface-elevated border-stroke-subtle text-content-muted'>
+                  {aspect.duration.displayText}
+                </span>
               </div>
+
+              <p className='text-xs text-content-muted leading-relaxed'>
+                {aspect.interpretation}
+              </p>
             </div>
           </div>
         );
