@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 import { useSubscription } from '../../../hooks/useSubscription';
 import {
   canCollectBirthday,
@@ -430,7 +430,7 @@ export default function ProfilePage() {
         }
         birthChartConfirmationTimeoutRef.current = window.setTimeout(() => {
           setShowBirthChartConfirmation(false);
-        }, 8000);
+        }, 20000);
         conversionTracking.birthdayEntered(authState.user?.id);
       }
       if (name && birthday) {
@@ -649,12 +649,63 @@ export default function ProfilePage() {
                       Your birthday enables personalized birth chart analysis,
                       horoscopes, and cosmic insights.
                     </p>
-                    {showBirthChartConfirmation && (
-                      <p className='text-xs text-lime-300 font-medium'>
-                        Your birth chart is now set. Lunary uses it to interpret
-                        everything you explore.
-                      </p>
-                    )}
+                    {showBirthChartConfirmation &&
+                      (() => {
+                        const chart = user?.birthChart ?? [];
+                        const sun = chart.find((p) => p.body === 'Sun')?.sign;
+                        const moon = chart.find((p) => p.body === 'Moon')?.sign;
+                        const rising = chart.find(
+                          (p) => p.body === 'Ascendant',
+                        )?.sign;
+                        return (
+                          <div className='rounded-xl border border-lime-900/60 bg-lime-950/40 p-3 space-y-2.5'>
+                            <div className='flex items-center gap-2'>
+                              <CheckCircle2 className='h-4 w-4 text-lime-400 shrink-0' />
+                              <p className='text-xs font-medium text-lime-300'>
+                                Your chart is live — everything in Lunary is now
+                                personal to you.
+                              </p>
+                            </div>
+
+                            {(sun || moon || rising) && (
+                              <div className='flex flex-wrap gap-2'>
+                                {sun && (
+                                  <span className='rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-0.5 text-[0.65rem] text-zinc-300'>
+                                    ☀️ Sun · {sun}
+                                  </span>
+                                )}
+                                {moon && (
+                                  <span className='rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-0.5 text-[0.65rem] text-zinc-300'>
+                                    🌙 Moon · {moon}
+                                  </span>
+                                )}
+                                {rising && (
+                                  <span className='rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-0.5 text-[0.65rem] text-zinc-300'>
+                                    ⬆️ Rising · {rising}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            <div className='flex flex-wrap gap-3'>
+                              <Link
+                                href='/app/birth-chart'
+                                className='flex items-center gap-1 text-[0.65rem] text-lunary-accent-300 hover:text-lunary-accent-200 transition-colors'
+                              >
+                                View your birth chart{' '}
+                                <ArrowRight className='h-3 w-3' />
+                              </Link>
+                              <Link
+                                href='/horoscope'
+                                className='flex items-center gap-1 text-[0.65rem] text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+                              >
+                                Read today&apos;s horoscope{' '}
+                                <ArrowRight className='h-3 w-3' />
+                              </Link>
+                            </div>
+                          </div>
+                        );
+                      })()}
                   </div>
                 ) : (
                   <div className='flex flex-wrap items-center justify-between gap-3'>
