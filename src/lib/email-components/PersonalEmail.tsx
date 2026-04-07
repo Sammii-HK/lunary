@@ -106,10 +106,15 @@ export function PersonalEmail({
           {children}
           <Section style={styles.divider} />
           <Text style={styles.footer}>
-            Lunar Computing, Inc. &middot;{' '}
+            Any issues, contact{' '}
+            <Link href='mailto:help@lunary.app' style={styles.footerLink}>
+              help@lunary.app
+            </Link>{' '}
+            &middot;{' '}
             <Link href={unsubscribeUrl} style={styles.footerLink}>
               unsubscribe
-            </Link>
+            </Link>{' '}
+            &middot; Lunar Computing, Inc.
           </Text>
         </Container>
       </Body>
