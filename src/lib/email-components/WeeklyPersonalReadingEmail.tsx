@@ -118,9 +118,8 @@ function WeeklyPersonalReadingEmailComponent({
             <Insight key={i}>{formatHouseTeaser(p)}</Insight>
           ))}
           <P>
-            Lunary+ includes the full reading for each of these — what the
-            energy means specifically for your chart, and what to do with it
-            this week.
+            Lunary+ includes the full reading for each of these: what the energy
+            means specifically for your chart, and what to do with it this week.
           </P>
           <Cta href={upgradeUrl} label='Get your full reading' />
         </>

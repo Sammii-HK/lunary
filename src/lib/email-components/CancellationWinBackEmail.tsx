@@ -2,7 +2,7 @@
  * CancellationWinBackEmail
  *
  * Sent within seconds of a customer.subscription.deleted Stripe event.
- * Personal note from Sammii — no marketing template. Honest, warm, brief.
+ * Personal note from Sammii no marketing template. Honest, warm, brief.
  * Offers MOONRISE20 (20% off forever, requires card) rather than free time.
  */
 import { render } from '@react-email/render';
@@ -44,8 +44,8 @@ export function CancellationWinBackEmail({
       <Cta href={`${baseUrl}/pricing`} label='Re-subscribe with 20% off' />
 
       <P>
-        If it was something else — a feature that felt missing, something that
-        did not quite click, or just the wrong time — I would genuinely like to
+        If it was something else, a feature that felt missing, something that
+        did not quite click, or just the wrong time, I would genuinely like to
         know. Reply to this email. I read every one.
       </P>
 
@@ -87,7 +87,7 @@ If price was the reason, I have a permanent 20% reduction I can offer you. Use M
 
 Re-subscribe with 20% off: ${baseUrl}/pricing
 
-If it was something else — a feature that felt missing, something that did not quite click, or just the wrong time — I would genuinely like to know. Reply to this email. I read every one.
+If it was something else, a feature that felt missing, something that did not quite click, or just the wrong time, I would genuinely like to know. Reply to this email. I read every one.
 
 Your birth chart and everything else you set up is still there. If you come back, it picks up right where you left it.
 

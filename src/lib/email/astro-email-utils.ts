@@ -1,7 +1,7 @@
 /**
  * Shared astrology utilities for email generation.
  * Computes planetary positions, house placements, transit aspects,
- * moon phase, and tarot card selection — all without requiring a
+ * moon phase, and tarot card selection all without requiring a
  * user location (ecliptic longitude is observer-independent).
  */
 import {
@@ -31,7 +31,7 @@ const ZODIAC_SIGNS = [
   'Pisces',
 ];
 
-// Generic observer — ecliptic longitude is essentially observer-independent for planets
+// Generic observer ecliptic longitude is essentially observer-independent for planets
 const OBSERVER = new Observer(51.5, 0, 0);
 
 const TRANSITING_PLANETS = [
@@ -174,7 +174,7 @@ function simpleHash(str: string): number {
   return Math.abs(h);
 }
 
-/** Card of the week — same for every free user. Rotates through all 22 cards. */
+/** Card of the week same for every free user. Rotates through all 22 cards. */
 export function getWeeklyCard(weekNum: number): WeeklyCard {
   const key = MAJOR_ARCANA_KEYS[weekNum % 22];
   const card = tarotData.majorArcana[
@@ -183,7 +183,7 @@ export function getWeeklyCard(weekNum: number): WeeklyCard {
   return card;
 }
 
-/** Personalised card — different per user, consistent within a week. */
+/** Personalised card different per user, consistent within a week. */
 export function getPersonalisedCard(
   weekNum: number,
   userId: string,
@@ -264,7 +264,7 @@ const ASPECT_VERBS: Record<string, string> = {
 const ASPECT_TONE: Record<string, string> = {
   conjunction: 'This intensifies and merges the energy of both planets.',
   trine: 'This is a supportive, flowing influence.',
-  sextile: 'This opens a door — an easier-than-usual energy to work with.',
+  sextile: 'This opens a door. An easier-than-usual energy to work with.',
   square: 'This creates friction that pushes you to act.',
   opposition: 'This calls for balance between two competing pulls.',
 };
@@ -342,14 +342,14 @@ export function formatAspectSentence(aspect: SignificantAspect): string {
     aspect.transitPlanet !== 'Sun' && aspect.transitPlanet !== 'Moon' ? '' : '';
   return (
     `${aspect.transitPlanet} ${verb} your natal ${aspect.natalPlanet} ` +
-    `(house ${aspect.house} — ${aspect.houseMeaning}). ${tone}`.trim()
+    `(house ${aspect.house}, ${aspect.houseMeaning}). ${tone}`.trim()
   );
 }
 
 /** Short teaser line for a house placement (free users) */
 export function formatHouseTeaser(p: PlanetHousePlacement): string {
   const retro = p.retrograde ? ' (retrograde)' : '';
-  return `${p.body}${retro} is moving through your ${ordinal(p.house)} house — ${p.houseMeaning}`;
+  return `${p.body}${retro} is moving through your ${ordinal(p.house)} house (${p.houseMeaning})`;
 }
 
 function ordinal(n: number): string {

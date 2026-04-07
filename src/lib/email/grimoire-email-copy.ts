@@ -31,7 +31,7 @@ function getSignData(sign: string): ZodiacSign | null {
   return data ?? null;
 }
 
-/** Seeded pick — deterministic but varies with seed */
+/** Seeded pick deterministic but varies with seed */
 function seededPick<T>(arr: T[], seed: number): T {
   return arr[Math.abs(seed) % arr.length];
 }
@@ -81,10 +81,10 @@ function buildSunTemplates(d: ZodiacSign): string[] {
 
   return [
     // Angle 1: keyword + what to do this week
-    `Your ${d.name} Sun brings ${kw1} energy, and this week that quality is particularly active. Notice where your natural ${str1} instinct is pulling you — it is probably pointing at something real.`,
+    `Your ${d.name} Sun brings ${kw1} energy, and this week that quality is particularly active. Notice where your natural ${str1} instinct is pulling you. It is probably pointing at something real.`,
 
     // Angle 2: element + modality + specific invitation
-    `As a ${modality} ${element} sign, your ${d.name} Sun processes the world through action and ${kw2}. This week there is a specific invitation in that energy — what has been waiting for you to move on it?`,
+    `As a ${modality} ${element} sign, your ${d.name} Sun processes the world through action and ${kw2}. This week there is a specific invitation in that energy. What has been waiting for you to move on it?`,
 
     // Angle 3: ruling planet angle
     `${planet} rules your chart, which means your drive and direction are tied to ${planet}'s current position. This week that influence is worth paying attention to. Your ${kw1} instinct is accurate.`,
@@ -93,19 +93,19 @@ function buildSunTemplates(d: ZodiacSign): string[] {
     `Your natural ${str1} and ${str2} are your greatest assets this week. ${d.name} energy tends to ${kw3} forward, and right now the conditions are supporting that impulse rather than blocking it.`,
 
     // Angle 5: mystical properties angle
-    `${d.mysticalProperties.split(';')[0]}. This week that quality is live in your chart — you will feel it in how you approach things if you slow down enough to notice.`,
+    `${d.mysticalProperties.split(';')[0]}. This week that quality is live in your chart. You will feel it in how you approach things if you slow down enough to notice.`,
 
     // Angle 6: weakness as something to be aware of
     `Your ${d.name} Sun is powerful, and this week especially so. The one thing worth watching: your tendency toward ${weak1}. Channel the ${kw1} energy deliberately rather than reactively.`,
 
     // Angle 7: affirmation framing
-    `This week your chart is asking you to remember something: ${d.affirmation.toLowerCase()} That is not just an affirmation — it is the literal energy available to you right now.`,
+    `This week your chart is asking you to remember something: ${d.affirmation.toLowerCase()} That is not just an affirmation. It is the literal energy available to you right now.`,
 
     // Angle 8: career/ambition angle
     `${d.careerTrait.split('.')[0]}. This week that same quality is active in how you are moving through your goals. Something that felt stuck may start to shift.`,
 
     // Angle 9: description excerpt
-    `${d.name} ${d.description.split('.').slice(1, 2).join('.').trim()}. This week that comes through clearly — lean into what makes you distinctly ${d.name}.`,
+    `${d.name} ${d.description.split('.').slice(1, 2).join('.').trim()}. This week that comes through clearly. Lean into what makes you distinctly ${d.name}.`,
 
     // Angle 10: short, direct, punchy
     `${d.name} Sun. ${element} energy. ${kw1}, ${kw2}, ${str1}. This week all of that is pointed in the right direction. Trust it.`,
@@ -124,7 +124,7 @@ function buildMoonTemplates(d: ZodiacSign): string[] {
 
   return [
     // Angle 1: keyword + emotional observation
-    `With your Moon in ${d.name}, your emotional world runs through ${kw1} and ${kw2}. What you are feeling this week is data — it is telling you something specific if you sit with it.`,
+    `With your Moon in ${d.name}, your emotional world runs through ${kw1} and ${kw2}. What you are feeling this week is data. It is telling you something specific if you sit with it.`,
 
     // Angle 2: element + inner world
     `Your ${d.name} Moon processes emotion through ${element} energy: ${kw1}, ${str1}, and often more intense than you let on. This week there is an emotional current worth acknowledging rather than pushing past.`,
@@ -132,7 +132,7 @@ function buildMoonTemplates(d: ZodiacSign): string[] {
     // Angle 3: strength angle for emotional intelligence
     `Moon in ${d.name} gives you an emotional intelligence rooted in ${str1}. This week that quality is sharper than usual. Trust what you are sensing, even if you cannot fully articulate it yet.`,
 
-    // Angle 4: weakness angle — gentle heads up
+    // Angle 4: weakness angle gentle heads up
     `Your ${d.name} Moon is a gift, and it also carries a familiar challenge: the tendency toward ${weak1}. This week that pattern may surface emotionally. Noticing it is half the work.`,
 
     // Angle 5: mystical properties
@@ -142,10 +142,10 @@ function buildMoonTemplates(d: ZodiacSign): string[] {
     `${d.loveTrait.split('.')[0]}. With Moon in ${d.name}, that same quality shapes how you are feeling in your close relationships this week. Something worth acknowledging there.`,
 
     // Angle 7: what the Moon in this sign needs
-    `Moon in ${d.name} needs ${kw1} to feel settled. This week, give yourself the conditions your emotional nature actually asks for — not what you think you should need.`,
+    `Moon in ${d.name} needs ${kw1} to feel settled. This week, give yourself the conditions your emotional nature actually asks for, not what you think you should need.`,
 
     // Angle 8: affirmation as emotional anchor
-    `This week your inner world is asking you to hold onto something: ${d.affirmation.toLowerCase()} As a ${d.name} Moon, that is not abstract — it is the emotional truth available to you right now.`,
+    `This week your inner world is asking you to hold onto something: ${d.affirmation.toLowerCase()} As a ${d.name} Moon, that is not abstract. It is the emotional truth available to you right now.`,
 
     // Angle 9: modality angle
     `As a ${d.modality} Moon sign, your emotions tend to ${d.modality === 'Cardinal' ? 'initiate and move quickly' : d.modality === 'Fixed' ? 'run deep and hold steady' : 'adapt and shift'}. This week that quality is working for you. Follow it.`,
