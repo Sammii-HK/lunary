@@ -209,12 +209,14 @@ export interface WinBackProps {
   userName: string;
   userEmail?: string;
   couponCode?: string;
+  sunSign?: string;
 }
 
 function WinBackEmailComponent({
   userName,
   userEmail,
   couponCode = 'MOONRISE20',
+  sunSign,
 }: WinBackProps) {
   const firstName = userName?.split(' ')[0] || 'there';
   const pricingUrl = `${BASE_URL}/pricing?coupon=${couponCode}&utm_source=email&utm_medium=reengagement&utm_campaign=winback_30d`;
@@ -231,16 +233,30 @@ function WinBackEmailComponent({
         I wanted to reach out one more time.
       </P>
 
+      {sunSign ? (
+        <Insight>
+          A lot has moved through your {sunSign} chart in the past month.
+          Retrogrades, sign changes, aspects that are specific to your
+          placements. The kind of thing that is easy to miss when you are not
+          checking in.
+        </Insight>
+      ) : (
+        <Insight>
+          A lot has moved through your chart in the past month: retrogrades,
+          sign changes, aspects specific to your placements. The kind of thing
+          that is easy to miss when you are not checking in.
+        </Insight>
+      )}
+
       <P>
-        If you have been curious about what Pro actually unlocks: personal
-        transit readings tied to your exact chart, Astral Chat, your full
-        placements tracked in real time. I want to make it easy to try it.
+        If you have been curious about what Pro unlocks: personal transit
+        readings tied to your exact placements, Astral Chat, your full chart
+        tracked in real time. I want to make it easy to try it.
       </P>
 
       <Insight>
-        Use code {couponCode} at checkout for 20% off, forever. That is not a
-        trial. It is a permanent reduction on your subscription as long as you
-        stay.
+        Use code {couponCode} at checkout for 20% off, forever. Not a trial. A
+        permanent reduction on your subscription as long as you stay.
       </Insight>
 
       <Cta href={pricingUrl} label='Get 20% off Pro' />

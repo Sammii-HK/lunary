@@ -364,8 +364,10 @@ export async function GET(request: NextRequest) {
       SELECT DISTINCT
         s.user_id,
         s.user_email as email,
-        s.user_name as name
+        s.user_name as name,
+        up.birth_chart
       FROM subscriptions s
+      LEFT JOIN user_profiles up ON s.user_id = up.user_id
       WHERE s.user_email IS NOT NULL
         AND EXISTS (
           SELECT 1 FROM user_sessions us2
@@ -385,16 +387,21 @@ export async function GET(request: NextRequest) {
         if (await hasReceivedCampaign(user.user_id, 'winback_30d', 60))
           continue;
 
+        const { sunSign } = parsePlacements(user.birth_chart);
+
         const html = await renderWinBackEmail({
           userName: user.name || 'there',
           userEmail: user.email,
+          sunSign,
         });
 
         await sendEmail({
           to: user.email,
           from: 'Sammii <hello@lunary.app>',
           replyTo: 'sammii@lunary.app',
-          subject: 'Still here, and I have something for you',
+          subject: sunSign
+            ? `Still here, and your ${sunSign} chart has been busy`
+            : 'Still here, and I have something for you',
           html,
           tracking: {
             userId: user.user_id,
