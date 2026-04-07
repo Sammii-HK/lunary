@@ -10,12 +10,12 @@ import {
 } from '@/lib/astrology/transit-aspects';
 import {
   getTransitCopy,
-  getHousePlacementTease,
   getDigestIntro,
+  ordinal,
 } from '@/lib/copy/transit-copy';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
-import { Check, Circle, Orbit, ArrowRight, Sparkles } from 'lucide-react';
+import { Check, Circle, Orbit, ArrowRight, Sparkles, Lock } from 'lucide-react';
 import { mutate } from 'swr';
 import Link from 'next/link';
 import { recordCheckIn, type StreakRecord } from '@/lib/streak/check-in';
@@ -111,44 +111,31 @@ export const PersonalizedHoroscopePreview = () => {
       .slice(0, 2);
   }, [user?.birthChart, currentAstrologicalChart]);
 
-  // House tease for free users — picks the most meaningful transiting planet
-  const freeTease = useMemo(() => {
-    if (!user?.birthChart || !currentAstrologicalChart?.length) return null;
+  // House placement chips for free users — real chart data, interpretation locked
+  const freePlanetTeases = useMemo(() => {
+    if (!user?.birthChart || !currentAstrologicalChart?.length) return [];
     const birthChart = user.birthChart as Array<{
       body: string;
       eclipticLongitude: number;
-      sign: string;
-      retrograde: boolean;
     }>;
     const ascendant = birthChart.find((p) => p.body === 'Ascendant');
-    if (!ascendant) return null;
+    if (!ascendant) return [];
 
-    const PRIORITY = ['Jupiter', 'Saturn', 'Mars', 'Venus', 'Sun'];
-    const planet = PRIORITY.map((name) =>
-      currentAstrologicalChart.find((p: { body: string }) => p.body === name),
-    ).find(Boolean) as
-      | {
-          body: string;
-          sign: string;
-          eclipticLongitude: number;
-          retrograde?: boolean;
-        }
-      | undefined;
-
-    if (!planet) return null;
-
-    const house = calculateHouse(
-      planet.eclipticLongitude,
-      ascendant.eclipticLongitude,
-    );
-    return getHousePlacementTease({
-      transitPlanet: planet.body,
-      house,
-      transitSign: planet.sign,
-      retrograde: planet.retrograde ?? false,
-      userId: user.id,
-    });
-  }, [user?.birthChart, user?.id, currentAstrologicalChart]);
+    return ['Jupiter', 'Saturn', 'Mars', 'Venus', 'Sun']
+      .map((name) => {
+        const planet = currentAstrologicalChart.find(
+          (p: { body: string }) => p.body === name,
+        );
+        if (!planet) return null;
+        const house = calculateHouse(
+          planet.eclipticLongitude,
+          ascendant.eclipticLongitude,
+        );
+        return { planet: name, house };
+      })
+      .filter((x): x is { planet: string; house: number } => x !== null)
+      .slice(0, 3);
+  }, [user?.birthChart, currentAstrologicalChart]);
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');
   const ctaCopy = useCTACopy();
 
@@ -411,11 +398,53 @@ export const PersonalizedHoroscopePreview = () => {
             </div>
           ) : (
             <>
-              <p className='text-sm text-zinc-200 leading-snug mb-2'>
-                {freeTease ?? `${generalHoroscope.reading.split('.')[0]}.`}
-              </p>
+              {freePlanetTeases.length > 0 ? (
+                <div className='space-y-2.5'>
+                  <p className='text-[0.6rem] uppercase tracking-[0.2em] text-zinc-500'>
+                    Active in your chart right now
+                  </p>
+                  <div className='flex flex-wrap gap-1.5'>
+                    {freePlanetTeases.map(({ planet, house }) => (
+                      <span
+                        key={planet}
+                        className='inline-flex items-center gap-1 rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[0.65rem] text-zinc-400'
+                      >
+                        {planet}
+                        <span className='text-zinc-700'>·</span>
+                        <span className='text-zinc-500'>
+                          {ordinal(house)} house
+                        </span>
+                        <Lock className='ml-0.5 h-2.5 w-2.5 text-zinc-700' />
+                      </span>
+                    ))}
+                  </div>
 
-              <div className='relative'>
+                  {topTransitAspects.length > 0 && (
+                    <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/40 px-3 py-2 space-y-1'>
+                      <p className='text-xs font-medium text-zinc-200'>
+                        {
+                          getTransitCopy({
+                            transitPlanet: topTransitAspects[0].transitPlanet,
+                            natalPlanet: topTransitAspects[0].natalPlanet,
+                            aspectType: topTransitAspects[0].aspectType,
+                            userId: user?.id,
+                          }).headline
+                        }
+                      </p>
+                      <p className='text-[0.65rem] text-zinc-600 flex items-center gap-1'>
+                        <Lock className='h-2.5 w-2.5' />
+                        Interpretation available with Lunary+
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className='text-sm text-zinc-200 leading-snug mb-2'>
+                  {`${generalHoroscope.reading.split('.')[0]}.`}
+                </p>
+              )}
+
+              <div className='relative mt-1'>
                 {renderPreview()}
                 <span className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
                   <Sparkles className='w-2.5 h-2.5' />
