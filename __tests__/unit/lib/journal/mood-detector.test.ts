@@ -149,13 +149,13 @@ describe('Mood Detector', () => {
       jest.clearAllMocks();
     });
 
-    it('should use AI when ANTHROPIC_API_KEY is set', async () => {
-      process.env.ANTHROPIC_API_KEY = 'test-key';
+    it('should use AI when DEEPINFRA_API_KEY is set', async () => {
+      process.env.DEEPINFRA_API_KEY = 'test-key';
 
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
-          content: [{ text: '["joyful", "grateful"]' }],
+          choices: [{ message: { content: '["joyful", "grateful"]' } }],
         }),
       });
 
@@ -170,7 +170,7 @@ describe('Mood Detector', () => {
     });
 
     it('should fallback to keyword detection when no API key', async () => {
-      delete process.env.ANTHROPIC_API_KEY;
+      delete process.env.DEEPINFRA_API_KEY;
 
       const text = 'I feel joyful today!';
       const result = await detectMoodsByAI(text);
@@ -180,7 +180,7 @@ describe('Mood Detector', () => {
     });
 
     it('should handle AI errors gracefully', async () => {
-      process.env.ANTHROPIC_API_KEY = 'test-key';
+      process.env.DEEPINFRA_API_KEY = 'test-key';
 
       (global.fetch as jest.Mock).mockRejectedValue(new Error('API Error'));
 
@@ -192,14 +192,17 @@ describe('Mood Detector', () => {
     });
 
     it('should filter invalid moods from AI response', async () => {
-      process.env.ANTHROPIC_API_KEY = 'test-key';
+      process.env.DEEPINFRA_API_KEY = 'test-key';
 
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
-          content: [
+          choices: [
             {
-              text: '["joyful", "invalid_mood", "grateful", "another_invalid"]',
+              message: {
+                content:
+                  '["joyful", "invalid_mood", "grateful", "another_invalid"]',
+              },
             },
           ],
         }),
@@ -215,14 +218,17 @@ describe('Mood Detector', () => {
     });
 
     it('should limit AI-detected moods to 5', async () => {
-      process.env.ANTHROPIC_API_KEY = 'test-key';
+      process.env.DEEPINFRA_API_KEY = 'test-key';
 
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
-          content: [
+          choices: [
             {
-              text: '["joyful", "grateful", "hopeful", "peaceful", "content", "excited"]',
+              message: {
+                content:
+                  '["joyful", "grateful", "hopeful", "peaceful", "content", "excited"]',
+              },
             },
           ],
         }),
@@ -250,12 +256,12 @@ describe('Mood Detector', () => {
     });
 
     it('should try AI first when preferAI is true', async () => {
-      process.env.ANTHROPIC_API_KEY = 'test-key';
+      process.env.DEEPINFRA_API_KEY = 'test-key';
 
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
-          content: [{ text: '["joyful", "grateful"]' }],
+          choices: [{ message: { content: '["joyful", "grateful"]' } }],
         }),
       });
 
@@ -267,12 +273,14 @@ describe('Mood Detector', () => {
     });
 
     it('should fallback to keywords when AI returns no moods', async () => {
-      process.env.ANTHROPIC_API_KEY = 'test-key';
+      process.env.DEEPINFRA_API_KEY = 'test-key';
 
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
-          content: [{ text: '["invalid_mood1", "invalid_mood2"]' }],
+          choices: [
+            { message: { content: '["invalid_mood1", "invalid_mood2"]' } },
+          ],
         }),
       });
 
@@ -336,12 +344,12 @@ describe('Mood Detector', () => {
     });
 
     it('should track AI usage method', async () => {
-      process.env.ANTHROPIC_API_KEY = 'test-key';
+      process.env.DEEPINFRA_API_KEY = 'test-key';
 
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
-          content: [{ text: '["joyful"]' }],
+          choices: [{ message: { content: '["joyful"]' } }],
         }),
       });
 
