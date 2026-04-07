@@ -106,7 +106,7 @@ export default function GiftsPage() {
 
   return (
     <div className='min-h-screen bg-zinc-950 px-4 py-6 pb-24'>
-      <div className='max-w-lg mx-auto space-y-6'>
+      <div className='max-w-lg mx-auto space-y-4'>
         <Heading as='h1' variant='h2'>
           Cosmic Gifts
         </Heading>
@@ -183,7 +183,7 @@ export default function GiftsPage() {
             ))}
           </div>
         ) : gifts.length === 0 ? (
-          <div className='text-center py-12'>
+          <div className='text-center py-6'>
             <Gift className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
             <p className='text-zinc-400 text-sm'>
               {tab === 'received'

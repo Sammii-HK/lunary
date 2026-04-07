@@ -374,10 +374,12 @@ export function HoroscopeView({
               <button
                 type='button'
                 disabled
-                className='inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-zinc-200 transition hover:border-lunary-primary-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50'
+                className='inline-flex items-center gap-2 rounded-full border border-zinc-700 px-3 py-2 sm:px-4 text-xs font-semibold tracking-wide uppercase text-zinc-200 transition hover:border-lunary-primary-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50'
               >
                 <Share2 className='h-4 w-4' />
-                Share {hasPaidAccess ? 'horoscope' : 'highlight'}
+                <span className='hidden sm:inline'>
+                  Share {hasPaidAccess ? 'horoscope' : 'highlight'}
+                </span>
               </button>
             )}
           </div>
@@ -459,7 +461,7 @@ export function HoroscopeView({
               <div className='text-xs uppercase tracking-widest text-zinc-400'>
                 Universal Day
               </div>
-              <div className='text-2xl font-semibold text-lunary-accent-300'>
+              <div className='text-xl sm:text-2xl font-semibold text-lunary-accent-300'>
                 {universalDay.number}
               </div>
               <p className='text-[11px] text-zinc-300'>
@@ -505,7 +507,7 @@ export function HoroscopeView({
                     <div className='text-xs uppercase tracking-widest text-zinc-400'>
                       Personal Day
                     </div>
-                    <div className='text-2xl font-semibold text-emerald-300'>
+                    <div className='text-xl sm:text-2xl font-semibold text-emerald-300'>
                       {personalDay.number}
                     </div>
                     <p className='text-[11px] text-zinc-300'>
@@ -547,7 +549,9 @@ export function HoroscopeView({
               <div className='text-xs uppercase tracking-widest text-zinc-400'>
                 Personal Day
               </div>
-              <div className='text-2xl font-semibold text-zinc-500'>?</div>
+              <div className='text-xl sm:text-2xl font-semibold text-zinc-500'>
+                ?
+              </div>
               <p className='text-[11px] text-zinc-500'>
                 Add your birthday to reveal this daily number.
               </p>
