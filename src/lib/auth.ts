@@ -124,7 +124,7 @@ async function initializeAuth() {
           );
           await emailModule.sendEmail({
             to: user.email,
-            subject: '🔐 Reset Your Lunary Password',
+            subject: 'Reset your Lunary password',
             html,
             text,
             tracking: {
@@ -184,7 +184,7 @@ async function initializeAuth() {
 
           await emailModule.sendEmail({
             to: user.email,
-            subject: 'One click to start your trial — Lunary',
+            subject: 'One click to start your trial',
             html,
             text,
             tracking: {

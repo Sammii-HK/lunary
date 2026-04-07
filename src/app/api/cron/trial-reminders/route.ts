@@ -46,7 +46,8 @@ export async function GET(request: NextRequest) {
       AND s.trial_ends_at < NOW()
       AND (s.trial_expired_email_sent = false OR s.trial_expired_email_sent IS NULL)
       AND s.user_email IS NOT NULL
-      AND (s.has_discount IS NULL OR s.has_discount = false)
+      AND s.has_discount = false
+      AND COALESCE(s.discount_percent, 0) < 100
       AND (s.promo_code IS NULL OR s.promo_code = '')
       LIMIT 100
     `;
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
 
         await sendEmail({
           to: user.email,
-          subject: 'Your trial has ended — Lunary',
+          subject: 'Your Lunary trial has ended',
           html,
           text,
           tracking: {
@@ -202,7 +203,7 @@ export async function GET(request: NextRequest) {
 
         await sendEmail({
           to: user.email,
-          subject: 'Come back for 20% off — your chart is waiting',
+          subject: 'Your chart is waiting, and I have 20% off for you',
           html,
           tracking: {
             userId: user.user_id,
