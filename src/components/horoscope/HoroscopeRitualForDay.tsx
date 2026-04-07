@@ -7,6 +7,7 @@ import { hasFeatureAccess } from '../../../utils/pricing';
 import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface HoroscopeRitualForDayProps {
   sunSign: string;
@@ -229,7 +230,7 @@ export function HoroscopeRitualForDay({
         />
       </button>
 
-      {isExpanded && (
+      <Collapse isOpen={isExpanded}>
         <div className='px-4 pb-4 space-y-4'>
           <p className='text-sm text-zinc-300 leading-relaxed'>
             {ritual.oneLine}
@@ -304,7 +305,7 @@ export function HoroscopeRitualForDay({
             </p>
           )}
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

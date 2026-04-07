@@ -18,6 +18,7 @@ import { iosLabel } from '@/lib/ios-labels';
 import { useProgress } from '@/components/progress/useProgress';
 import { ProgressBar } from '@/components/progress/ProgressBar';
 import { mutate } from 'swr';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface HoroscopeReflectionPromptsProps {
   sunSign?: string | null;
@@ -278,7 +279,7 @@ export function HoroscopeReflectionPrompts({
         </div>
       </button>
 
-      {isExpanded && (
+      <Collapse isOpen={isExpanded}>
         <div className='px-4 pb-4 space-y-3'>
           {prompts.map((prompt, i) => {
             const isSaved = savedPrompts.has(prompt);
@@ -395,7 +396,7 @@ export function HoroscopeReflectionPrompts({
             </div>
           )}
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { ChevronDown, Sparkles } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
 import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface TarotSeasonReadingProps {
   trendAnalysis: TrendAnalysis | null;
@@ -221,7 +222,7 @@ export function TarotSeasonReading({
         />
       </button>
 
-      {isExpanded && (
+      <Collapse isOpen={isExpanded}>
         <div className='px-4 pb-4 space-y-4'>
           <p className='text-sm text-zinc-300 leading-relaxed'>
             {seasonData.summary}
@@ -262,7 +263,7 @@ export function TarotSeasonReading({
             </p>
           )}
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

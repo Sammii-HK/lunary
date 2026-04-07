@@ -7,6 +7,7 @@ import { hasFeatureAccess } from '../../../utils/pricing';
 import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface HoroscopeSeasonReadingProps {
   sunSign: string;
@@ -156,7 +157,7 @@ export function HoroscopeSeasonReading({
         />
       </button>
 
-      {isExpanded && (
+      <Collapse isOpen={isExpanded}>
         <div className='px-4 pb-4 space-y-4'>
           {/* Moon phase info */}
           <div className='rounded-lg border border-lunary-secondary-800/50 bg-lunary-secondary-950/30 p-3'>
@@ -231,7 +232,7 @@ export function HoroscopeSeasonReading({
             </p>
           )}
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

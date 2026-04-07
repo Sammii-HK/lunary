@@ -9,6 +9,7 @@ import { ChevronDown, ChevronUp, Clock, Calendar } from 'lucide-react';
 import type { TransitAspect } from '@/features/horoscope/transitDetails';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { Collapse } from '@/components/ui/Collapse';
 
 dayjs.extend(relativeTime);
 
@@ -282,13 +283,13 @@ export function TarotTransitConnection({
                 <ChevronDown className='w-4 h-4 text-zinc-400 flex-shrink-0' />
               )}
             </button>
-            {isOpen && (
+            <Collapse isOpen={isOpen}>
               <div className='px-3 pb-3 pt-0 border-t border-zinc-800/50'>
                 <p className='text-xs text-zinc-300 leading-relaxed mt-2'>
                   {insight.insight}
                 </p>
               </div>
-            )}
+            </Collapse>
           </div>
         );
       })}

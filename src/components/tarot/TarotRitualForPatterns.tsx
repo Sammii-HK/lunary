@@ -7,6 +7,7 @@ import { hasFeatureAccess } from '../../../utils/pricing';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
 import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface Ritual {
   title: string;
@@ -183,7 +184,7 @@ export function TarotRitualForPatterns({
         />
       </button>
 
-      {isExpanded && (
+      <Collapse isOpen={isExpanded}>
         <div className='px-4 pb-4 space-y-4'>
           <p className='text-sm text-zinc-300 leading-relaxed'>
             {ritual.oneLine}
@@ -260,7 +261,7 @@ export function TarotRitualForPatterns({
             </p>
           )}
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

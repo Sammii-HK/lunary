@@ -3,6 +3,7 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Collapse } from '@/components/ui/Collapse';
 import { hapticService } from '@/services/native/haptic-service';
 
 interface CollapsibleSectionProps {
@@ -83,13 +84,7 @@ export function CollapsibleSection({
           <ChevronUp className='w-5 h-5 text-zinc-400' />
         )}
       </button>
-      <div
-        className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-          isCollapsed ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'
-        }`}
-      >
-        <div className='overflow-hidden'>{children}</div>
-      </div>
+      <Collapse isOpen={!isCollapsed}>{children}</Collapse>
     </div>
   );
 }

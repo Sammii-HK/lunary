@@ -17,6 +17,7 @@ import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
 import { useProgress } from '@/components/progress/useProgress';
 import { ProgressBar } from '@/components/progress/ProgressBar';
 import { mutate } from 'swr';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface TarotReflectionPromptsProps {
   trendAnalysis: TrendAnalysis | null;
@@ -228,7 +229,7 @@ export function TarotReflectionPrompts({
         </div>
       </button>
 
-      {isExpanded && (
+      <Collapse isOpen={isExpanded}>
         <div className='px-4 pb-4 space-y-3'>
           {prompts.map((prompt, i) => {
             const isSaved = savedPrompts.has(prompt);
@@ -345,7 +346,7 @@ export function TarotReflectionPrompts({
             </div>
           )}
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

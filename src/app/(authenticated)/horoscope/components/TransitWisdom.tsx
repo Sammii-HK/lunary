@@ -13,6 +13,7 @@ import {
 } from '@/features/horoscope';
 import { useSubscription } from '@/hooks/useSubscription';
 import { TransitDurationBadge } from '@/components/TransitDurationBadge';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface TransitWisdomProps {
   birthChart: BirthChartData[];
@@ -320,7 +321,9 @@ function TransitCard({
                   ? 'Hide technical insight'
                   : 'More technical insight'}
               </button>
-              {isExpanded && <PremiumSection premium={detail.premium} />}
+              <Collapse isOpen={isExpanded}>
+                <PremiumSection premium={detail.premium} />
+              </Collapse>
             </>
           ) : (
             <div className='pt-2 mt-2 border-t border-zinc-800/30'>

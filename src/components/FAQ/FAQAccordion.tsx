@@ -2,6 +2,7 @@
 
 import { ParsedMarkdown } from '@/utils/markdown';
 import { Heading } from '@/components/ui/Heading';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface FAQAccordionProps {
   question: string;
@@ -46,13 +47,13 @@ export function FAQAccordion({
           />
         </svg>
       </button>
-      {isOpen && (
+      <Collapse isOpen={isOpen}>
         <div className='px-5 pb-5 text-zinc-300 text-sm leading-relaxed border-t border-zinc-800'>
           <div className='pt-4'>
             <ParsedMarkdown content={answer} />
           </div>
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }
