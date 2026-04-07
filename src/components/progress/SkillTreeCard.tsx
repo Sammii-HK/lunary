@@ -39,7 +39,7 @@ interface SkillTreeCardProps {
   nextUnlockDescription?: string | null;
   actionVerb: string;
   featureRoute?: string | null;
-  variant?: 'compact' | 'full';
+  variant?: 'compact' | 'full' | 'micro';
   className?: string;
 }
 
@@ -58,6 +58,30 @@ export function SkillTreeCard({
   className,
 }: SkillTreeCardProps) {
   const isMaxLevel = currentLevel >= 10;
+
+  if (variant === 'micro') {
+    const microContent = (
+      <div className={cn('flex items-center gap-2', className)}>
+        <SkillIcon
+          icon={icon}
+          className='w-3 h-3 shrink-0 text-lunary-primary-400'
+        />
+        <div className='flex-1 min-w-0'>
+          <ProgressBar
+            progress={progressToNext}
+            level={currentLevel}
+            size='sm'
+            showLabel={false}
+          />
+        </div>
+        <span className='text-[10px] text-zinc-500 shrink-0 tabular-nums'>
+          Lv.{currentLevel}
+        </span>
+      </div>
+    );
+    if (featureRoute) return <Link href={featureRoute}>{microContent}</Link>;
+    return microContent;
+  }
 
   if (variant === 'compact') {
     const compactContent = (
