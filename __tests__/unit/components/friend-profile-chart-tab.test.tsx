@@ -256,7 +256,7 @@ describe('FriendProfilePage - ChartTab', () => {
     const chartWheelButton = screen.getByRole('button', {
       name: /chart wheel/i,
     });
-    expect(chartWheelButton).toHaveClass('bg-layer-base/50');
+    expect(chartWheelButton).toHaveClass('bg-lunary-primary-900/50');
   });
 
   it('can toggle between Chart Wheel and Placements List views', async () => {
