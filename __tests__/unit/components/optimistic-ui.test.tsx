@@ -594,8 +594,8 @@ describe('NotificationSettings – optimistic UI', () => {
       .closest('div')!;
     const toggleBtn = tarotSection.parentElement!.querySelector('button')!;
 
-    // Toggle should currently be in "off" state (bg-zinc-600)
-    expect(toggleBtn.className).toContain('bg-zinc-600');
+    // Toggle should currently be in "off" state (bg-stroke-strong)
+    expect(toggleBtn.className).toContain('bg-stroke-strong');
 
     // Click the toggle
     await act(async () => {
@@ -658,7 +658,7 @@ describe('NotificationSettings – optimistic UI', () => {
 
     // Should revert to off
     await waitFor(() => {
-      expect(toggleBtn.className).toContain('bg-zinc-600');
+      expect(toggleBtn.className).toContain('bg-stroke-strong');
     });
 
     alertSpy.mockRestore();
@@ -693,7 +693,7 @@ describe('NotificationSettings – optimistic UI', () => {
       .closest('div')!;
     const toggleBtn = weeklySection.parentElement!.querySelector('button')!;
 
-    expect(toggleBtn.className).toContain('bg-zinc-600');
+    expect(toggleBtn.className).toContain('bg-stroke-strong');
 
     await act(async () => {
       fireEvent.click(toggleBtn);
