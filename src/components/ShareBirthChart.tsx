@@ -191,12 +191,15 @@ export function ShareBirthChart({
         currentShareId = data.shareId;
         currentShareUrl = data.shareUrl;
 
-        setShareRecord({ shareId: currentShareId, shareUrl: currentShareUrl });
+        setShareRecord({
+          shareId: currentShareId!,
+          shareUrl: currentShareUrl!,
+        });
         setLinkCopied(false);
       }
 
       const ogImageUrl = `/api/og/share/birth-chart?shareId=${encodeURIComponent(
-        currentShareId,
+        currentShareId!,
       )}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
@@ -204,7 +207,7 @@ export function ShareBirthChart({
 
       const blob = await imageResponse.blob();
       setImageBlob(blob);
-      return { shareId: currentShareId, shareUrl: currentShareUrl };
+      return { shareId: currentShareId!, shareUrl: currentShareUrl! };
     } catch (err) {
       console.error('Error generating card:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate card');
@@ -327,7 +330,7 @@ export function ShareBirthChart({
     <div className='flex flex-col items-center justify-center'>
       <button
         onClick={handleOpen}
-        className='inline-flex items-center gap-2 rounded-full border border-lunary-primary-700 bg-lunary-primary-900/10 px-4 py-2 text-xs font-medium text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-lunary-primary-900/20 transition-colors'
+        className='inline-flex items-center gap-2 rounded-full border border-lunary-primary-700 bg-layer-base/10 px-4 py-2 text-xs font-medium text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-layer-base/20 transition-colors'
       >
         <Share2 className='w-4 h-4' />
         Share Birth Chart
@@ -365,7 +368,7 @@ export function ShareBirthChart({
               socialUrls={socialUrls}
             />
 
-            <p className='mt-4 text-xs text-zinc-400 text-center'>
+            <p className='mt-4 text-xs text-content-muted text-center'>
               People who click your link can see your Big Three and chart
               highlights without needing an account
             </p>
@@ -377,7 +380,7 @@ export function ShareBirthChart({
             <p className='text-red-400 mb-4'>{error}</p>
             <button
               onClick={generateCard}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors'
             >
               Try Again
             </button>

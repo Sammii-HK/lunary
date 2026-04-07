@@ -65,7 +65,6 @@ function ExampleStandalonePage() {
         count: 8,
         percentage: 15.4,
         suit: 'Major Arcana',
-        meaning: 'Intuition, dreams, and the subconscious',
         appearances: [
           { date: '2026-01-28' },
           { date: '2026-01-25' },
@@ -82,7 +81,6 @@ function ExampleStandalonePage() {
         count: 6,
         percentage: 11.5,
         suit: 'Cups',
-        meaning: 'Partnership, unity, and mutual attraction',
         appearances: [
           { date: '2026-01-27' },
           { date: '2026-01-22' },
@@ -113,7 +111,7 @@ function ExampleStandalonePage() {
 
   return (
     <div className='container mx-auto p-6'>
-      <h1 className='text-2xl font-bold text-zinc-200 mb-6'>
+      <h1 className='text-2xl font-bold text-content-primary mb-6'>
         Your Tarot Patterns
       </h1>
       <TarotPatternsHub
