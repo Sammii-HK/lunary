@@ -27,6 +27,8 @@ export interface PatternTheme {
 export interface CardAppearance {
   date: string;
   readingId?: string;
+  keywords?: string[];
+  information?: string;
   moonPhase?: {
     phase:
       | 'new'

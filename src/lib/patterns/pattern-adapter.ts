@@ -93,6 +93,8 @@ export async function transformBasicPatternsToAnalysis(basicPatterns: {
         .filter((reading) => reading.name === card.name)
         .map((reading) => ({
           date: reading.createdAt,
+          keywords: reading.keywords,
+          information: reading.information,
           moonPhase: reading.moonPhase,
           aspects: reading.aspects,
         }))

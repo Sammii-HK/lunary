@@ -363,7 +363,7 @@ export function TarotView({
       if (variant === 'truncated') {
         return (
           <div className='locked-preview-truncated mb-2'>
-            <p className='text-xs text-zinc-400'>{content}</p>
+            <p className='text-xs text-content-muted'>{content}</p>
           </div>
         );
       }
@@ -391,7 +391,7 @@ export function TarotView({
 
         return (
           <div className='locked-preview-redacted mb-2'>
-            <p className='text-xs text-zinc-400'>{contentWithSpaces}</p>
+            <p className='text-xs text-content-muted'>{contentWithSpaces}</p>
           </div>
         );
       }
@@ -399,7 +399,9 @@ export function TarotView({
       // Variant A: Blur Effect (default)
       return (
         <div className='locked-preview mb-2'>
-          <p className='locked-preview-text text-xs text-zinc-400'>{content}</p>
+          <p className='locked-preview-text text-xs text-content-muted'>
+            {content}
+          </p>
         </div>
       );
     },
@@ -443,19 +445,19 @@ export function TarotView({
     return (
       <div className='h-full w-full space-y-4 p-4 overflow-y-auto overflow-x-hidden pb-32'>
         <div className='pt-2'>
-          <h1 className='text-xl md:text-2xl font-light text-zinc-100 mb-1'>
+          <h1 className='text-xl md:text-2xl font-light text-content-primary mb-1'>
             Your Tarot Readings
           </h1>
-          <p className='text-xs md:text-sm text-zinc-400'>
+          <p className='text-xs md:text-sm text-content-muted'>
             General cosmic guidance based on universal energies
           </p>
         </div>
 
-        <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+        <div className='rounded-lg border border-lunary-primary-700 bg-surface-elevated/50 p-4'>
+          <h3 className='text-lg font-medium text-content-primary mb-2'>
             Unable to load tarot reading
           </h3>
-          <p className='text-xs md:text-sm text-zinc-300 mb-4 leading-relaxed'>
+          <p className='text-xs md:text-sm text-content-secondary mb-4 leading-relaxed'>
             We&apos;re having trouble loading your tarot reading. Please try
             refreshing the page, or unlock personalized readings with a birth
             chart.
@@ -463,15 +465,15 @@ export function TarotView({
           <SmartTrialButton feature='tarot_patterns' />
         </div>
 
-        <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+        <div className='rounded-lg border border-lunary-primary-700 bg-surface-elevated/50 p-4'>
+          <h3 className='text-lg font-medium text-content-primary mb-2'>
             Unlock Personal Tarot Readings
           </h3>
-          <p className='text-xs md:text-sm text-zinc-300 mb-4 leading-relaxed'>
+          <p className='text-xs md:text-sm text-content-secondary mb-4 leading-relaxed'>
             Get personalized readings, plus discover your personal tarot
             patterns and card trends over time.
           </p>
-          <ul className='text-xs text-zinc-400 space-y-2 mb-4'>
+          <ul className='text-xs text-content-muted space-y-2 mb-4'>
             <li className='flex items-start gap-2'>
               <Check
                 className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
@@ -513,20 +515,20 @@ export function TarotView({
       <div className='min-h-screen flex items-center justify-center p-4 mb-10'>
         <div className='text-center max-w-md space-y-6'>
           <div className='space-y-2'>
-            <h2 className='text-2xl font-light text-zinc-100'>
+            <h2 className='text-2xl font-light text-content-primary'>
               Complete Your Profile
             </h2>
-            <p className='text-xs md:text-sm text-zinc-400 leading-relaxed'>
+            <p className='text-xs md:text-sm text-content-muted leading-relaxed'>
               To get personalized tarot readings, we need your birthday to
               {iosLabel('calculate your cosmic signature', isNativeIOS)}.
             </p>
           </div>
-          <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4 space-y-4'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-surface-elevated/50 p-4 space-y-4'>
             <div className='space-y-2'>
-              <h3 className='text-lg font-medium text-zinc-100'>
+              <h3 className='text-lg font-medium text-content-primary'>
                 Add Your Birthday
               </h3>
-              <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
+              <p className='text-xs md:text-sm text-content-secondary leading-relaxed'>
                 Your birthday helps us personalize your tarot readings and{' '}
                 {iosLabel('provide more accurate cosmic insights', isNativeIOS)}
                 .
@@ -549,8 +551,8 @@ export function TarotView({
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>
-          <div className='w-8 h-8 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-zinc-400'>Loading your tarot reading...</p>
+          <div className='w-8 h-8 border-2 border-stroke-strong border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+          <p className='text-content-muted'>Loading your tarot reading...</p>
         </div>
       </div>
     );
@@ -581,7 +583,7 @@ export function TarotView({
               ? 'Your Tarot Readings'
               : "Today's Tarot Readings"}
         </Heading>
-        <p className='text-xs md:text-sm text-zinc-400'>
+        <p className='text-xs md:text-sm text-content-muted'>
           {hasPaidAccess
             ? iosLabel(
                 'Personalized guidance based on your cosmic signature',
@@ -644,12 +646,24 @@ export function TarotView({
           <HoroscopeSection title='Daily & Weekly Cards' color='purple'>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6'>
               {/* Daily Card - Paid */}
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
-                <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>
-                  Daily Card
-                </h3>
+              <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/50 p-4'>
+                <div className='flex items-center justify-between mb-2'>
+                  <h3 className='text-xs md:text-sm font-medium text-content-muted'>
+                    Daily Card
+                  </h3>
+                  {personalizedDailyShare && (
+                    <button
+                      type='button'
+                      onClick={() => handleCardShare(personalizedDailyShare)}
+                      className='inline-flex items-center gap-1.5 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
+                    >
+                      <Share2 className='w-4 h-4' />
+                      <span className='hidden sm:inline'>Share daily card</span>
+                    </button>
+                  )}
+                </div>
                 <p
-                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
+                  className='text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
                   onClick={() => {
                     const card = getTarotCardByName(
                       personalizedReading!.daily.name,
@@ -664,25 +678,12 @@ export function TarotView({
                     {personalizedReading!.daily.keywords[2] ||
                       personalizedReading!.daily.keywords[0]}
                   </span>
-                  <span className='text-zinc-400'>
+                  <span className='text-content-muted'>
                     {personalizedReading!.daily.keywords
                       .filter((_: string, idx: number) => idx !== 2 && idx < 2)
                       .join(', ')}
                   </span>
                 </div>
-
-                {personalizedDailyShare && (
-                  <div className='mt-3 flex flex-wrap items-center gap-2'>
-                    <button
-                      type='button'
-                      onClick={() => handleCardShare(personalizedDailyShare)}
-                      className='inline-flex items-center gap-2 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
-                    >
-                      <Share2 className='w-4 h-4' />
-                      Share daily card
-                    </button>
-                  </div>
-                )}
 
                 {/* Transit connection for daily card */}
                 {subscription.hasAccess('personal_tarot') && (
@@ -698,12 +699,26 @@ export function TarotView({
               </div>
 
               {/* Weekly Card - Paid */}
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
-                <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>
-                  Weekly Card
-                </h3>
+              <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/50 p-4'>
+                <div className='flex items-center justify-between mb-2'>
+                  <h3 className='text-xs md:text-sm font-medium text-content-muted'>
+                    Weekly Card
+                  </h3>
+                  {personalizedWeeklyShare && (
+                    <button
+                      type='button'
+                      onClick={() => handleCardShare(personalizedWeeklyShare)}
+                      className='inline-flex items-center gap-1.5 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
+                    >
+                      <Share2 className='w-4 h-4' />
+                      <span className='hidden sm:inline'>
+                        Share weekly card
+                      </span>
+                    </button>
+                  )}
+                </div>
                 <p
-                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
+                  className='text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
                   onClick={() => {
                     const card = getTarotCardByName(
                       personalizedReading!.weekly.name,
@@ -718,24 +733,12 @@ export function TarotView({
                     {personalizedReading!.weekly.keywords[2] ||
                       personalizedReading!.weekly.keywords[0]}
                   </span>
-                  <span className='text-zinc-400'>
+                  <span className='text-content-muted'>
                     {personalizedReading!.weekly.keywords
                       .filter((_: string, idx: number) => idx !== 2 && idx < 2)
                       .join(', ')}
                   </span>
                 </div>
-                {personalizedWeeklyShare && (
-                  <div className='mt-3 flex flex-wrap items-center gap-2'>
-                    <button
-                      type='button'
-                      onClick={() => handleCardShare(personalizedWeeklyShare)}
-                      className='inline-flex items-center gap-2 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
-                    >
-                      <Share2 className='w-4 h-4' />
-                      Share weekly card
-                    </button>
-                  </div>
-                )}
 
                 {/* Transit connection for weekly card */}
                 {subscription.hasAccess('personal_tarot') && (
@@ -754,7 +757,7 @@ export function TarotView({
             {/* Guidance action points - paid only */}
             <div className='mt-4'>
               <div className='rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
-                <ul className='space-y-2 text-xs text-zinc-300'>
+                <ul className='space-y-2 text-xs text-content-secondary'>
                   {guidanceActionPoints.length > 0 ? (
                     guidanceActionPoints
                       .slice(-1)
@@ -764,7 +767,7 @@ export function TarotView({
                         </li>
                       ))
                   ) : (
-                    <li className='text-xs text-zinc-400'>
+                    <li className='text-xs text-content-muted'>
                       Key insight drives your next move—save a spread to capture
                       the message.
                     </li>
@@ -775,19 +778,31 @@ export function TarotView({
           </HoroscopeSection>
         ) : (
           /* Free user: Daily & Weekly Cards with locked overlays */
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 space-y-4'>
-            <h2 className='text-base md:text-lg font-medium text-zinc-100'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 space-y-4'>
+            <h2 className='text-base md:text-lg font-medium text-content-primary'>
               Today&apos;s Cosmic Reading
             </h2>
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6'>
               {/* Daily Card - Free */}
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
-                <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>
-                  Daily Card
-                </h3>
+              <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/50 p-4'>
+                <div className='flex items-center justify-between mb-2'>
+                  <h3 className='text-xs md:text-sm font-medium text-content-muted'>
+                    Daily Card
+                  </h3>
+                  {generalDailyShare && (
+                    <button
+                      type='button'
+                      onClick={() => handleCardShare(generalDailyShare)}
+                      className='inline-flex items-center gap-1.5 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
+                    >
+                      <Share2 className='w-4 h-4' />
+                      <span className='hidden sm:inline'>Share daily card</span>
+                    </button>
+                  )}
+                </div>
                 <p
-                  className='text-base md:text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
+                  className='text-base md:text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
                   onClick={() => {
                     const card = getTarotCardByName(generalTarot!.daily.name);
                     if (card) setSelectedCard(card);
@@ -800,28 +815,15 @@ export function TarotView({
                     {generalTarot!.daily.keywords[2] ||
                       generalTarot!.daily.keywords[0]}
                   </span>
-                  <span className='text-zinc-400'>
+                  <span className='text-content-muted'>
                     {generalTarot!.daily.keywords
                       .filter((_, idx) => idx !== 2 && idx < 2)
                       .join(', ')}
                   </span>
                 </div>
 
-                {generalDailyShare && (
-                  <div className='mt-3 flex flex-wrap items-center gap-2'>
-                    <button
-                      type='button'
-                      onClick={() => handleCardShare(generalDailyShare)}
-                      className='inline-flex items-center gap-2 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
-                    >
-                      <Share2 className='w-4 h-4' />
-                      Share daily card
-                    </button>
-                  </div>
-                )}
-
                 {/* Locked preview of transit insights */}
-                <div className='mt-4 pt-4 border-t border-zinc-800'>
+                <div className='mt-4 pt-4 border-t border-stroke-subtle'>
                   <div className='flex items-center gap-2 mb-2'>
                     <LockIcon className='w-3 h-3 text-lunary-primary-300' />
                     <span className='text-xs font-medium text-lunary-primary-200'>
@@ -842,12 +844,12 @@ export function TarotView({
               </div>
 
               {/* Weekly Card - Free (locked overlay) */}
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4 relative overflow-hidden'>
+              <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/50 p-4 relative overflow-hidden'>
                 <div className='blur-md opacity-30 select-none pointer-events-none'>
-                  <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>
+                  <h3 className='text-xs md:text-sm font-medium text-content-muted mb-2'>
                     Weekly Card
                   </h3>
-                  <p className='text-lg font-medium text-zinc-100 mb-1'>
+                  <p className='text-lg font-medium text-content-primary mb-1'>
                     {generalTarot!.weekly.name}
                   </p>
                   <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm mb-3'>
@@ -859,10 +861,10 @@ export function TarotView({
                 </div>
                 <div className='absolute inset-0 flex flex-col items-center justify-center gap-3 p-4'>
                   <LockIcon className='w-6 h-6 text-lunary-primary-300' />
-                  <h4 className='text-sm font-semibold text-zinc-100 text-center'>
+                  <h4 className='text-sm font-semibold text-content-primary text-center'>
                     Weekly Card
                   </h4>
-                  <p className='text-xs text-zinc-400 text-center max-w-[200px]'>
+                  <p className='text-xs text-content-muted text-center max-w-[200px]'>
                     Deeper weekly guidance, written just for you
                   </p>
                   <span
@@ -890,7 +892,7 @@ export function TarotView({
                       });
                       router.push('/pricing?nav=app');
                     }}
-                    className='mt-1 inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-700 bg-zinc-900/80 px-3 py-1.5 text-xs font-medium text-lunary-primary-300 hover:bg-zinc-900 transition-colors'
+                    className='mt-1 inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-700 bg-surface-elevated/80 px-3 py-1.5 text-xs font-medium text-lunary-primary-300 hover:bg-surface-elevated transition-colors'
                   >
                     {ctaCopy.tarotWeekly}
                   </button>
@@ -899,12 +901,12 @@ export function TarotView({
             </div>
 
             {/* Daily Message & Weekly Energy - Free */}
-            <div className='space-y-4 pt-4 border-t border-zinc-800/50'>
-              <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
+            <div className='space-y-4 pt-4 border-t border-stroke-subtle/50'>
+              <div className='rounded-lg border border-lunary-primary-700 bg-surface-elevated/50 p-4'>
                 <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300/90 mb-2'>
                   Daily Message
                 </h3>
-                <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
+                <p className='text-xs md:text-sm text-content-secondary leading-relaxed'>
                   {generalTarot!.guidance.dailyMessage.length >
                   FREE_DAILY_TAROT_TRUNCATE_LENGTH
                     ? generalTarot!.guidance.dailyMessage
@@ -931,7 +933,7 @@ export function TarotView({
                 )}
               </div>
 
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4 relative overflow-hidden'>
+              <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/50 p-4 relative overflow-hidden'>
                 <div className='flex items-center justify-between mb-2'>
                   <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300'>
                     Weekly Energy
@@ -953,7 +955,7 @@ export function TarotView({
                   </span>
                 </div>
                 <div className='blur-sm opacity-40 select-none pointer-events-none'>
-                  <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
+                  <p className='text-xs md:text-sm text-content-secondary leading-relaxed'>
                     {generalTarot!.guidance.weeklyMessage}
                   </p>
                 </div>
@@ -1004,34 +1006,34 @@ export function TarotView({
             page='tarot'
             blurredContent={
               <div className='space-y-3'>
-                <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
+                <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden'>
                   <div className='flex items-center justify-between p-4'>
                     <div className='flex items-center gap-3'>
                       <div className='p-2 rounded-lg bg-lunary-primary-900/30'>
                         <Sparkles className='w-4 h-4 text-lunary-primary-400' />
                       </div>
                       <div>
-                        <p className='text-sm font-medium text-zinc-100'>
+                        <p className='text-sm font-medium text-content-primary'>
                           Your Tarot Season: Emotional Depths
                         </p>
-                        <p className='text-xs text-zinc-400'>
+                        <p className='text-xs text-content-muted'>
                           30-day pattern reading
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
+                <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden'>
                   <div className='flex items-center justify-between p-4'>
                     <div className='flex items-center gap-3'>
                       <div className='p-2 rounded-lg bg-lunary-secondary-900/30'>
                         <Moon className='w-4 h-4 text-lunary-secondary-400' />
                       </div>
                       <div>
-                        <p className='text-sm font-medium text-zinc-100'>
+                        <p className='text-sm font-medium text-content-primary'>
                           Cups Ritual: Water Meditation
                         </p>
-                        <p className='text-xs text-zinc-400'>
+                        <p className='text-xs text-content-muted'>
                           Ritual for your patterns
                         </p>
                       </div>
@@ -1063,19 +1065,19 @@ export function TarotView({
               <div className='space-y-3'>
                 <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-4'>
                   <div className='flex items-center gap-3 mb-3'>
-                    <div className='w-10 h-10 rounded-lg bg-zinc-800/60 border border-zinc-700 flex items-center justify-center'>
+                    <div className='w-10 h-10 rounded-lg bg-surface-card/60 border border-stroke-default flex items-center justify-center'>
                       <span className='text-lg'>🌙</span>
                     </div>
                     <div>
-                      <h4 className='text-sm font-medium text-zinc-100'>
+                      <h4 className='text-sm font-medium text-content-primary'>
                         Celtic Cross
                       </h4>
-                      <p className='text-xs text-zinc-500'>
+                      <p className='text-xs text-content-muted'>
                         10-card spread · Deep insight
                       </p>
                     </div>
                   </div>
-                  <p className='text-xs text-zinc-400 leading-relaxed'>
+                  <p className='text-xs text-content-muted leading-relaxed'>
                     Draw 10 cards and explore how past influences, present
                     challenges, and future possibilities weave together into a
                     single narrative.
@@ -1083,19 +1085,19 @@ export function TarotView({
                 </div>
                 <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-4'>
                   <div className='flex items-center gap-3 mb-3'>
-                    <div className='w-10 h-10 rounded-lg bg-zinc-800/60 border border-zinc-700 flex items-center justify-center'>
+                    <div className='w-10 h-10 rounded-lg bg-surface-card/60 border border-stroke-default flex items-center justify-center'>
                       <span className='text-lg'>💫</span>
                     </div>
                     <div>
-                      <h4 className='text-sm font-medium text-zinc-100'>
+                      <h4 className='text-sm font-medium text-content-primary'>
                         Love Triangle
                       </h4>
-                      <p className='text-xs text-zinc-500'>
+                      <p className='text-xs text-content-muted'>
                         3-card spread · Relationship focus
                       </p>
                     </div>
                   </div>
-                  <p className='text-xs text-zinc-400 leading-relaxed'>
+                  <p className='text-xs text-content-muted leading-relaxed'>
                     Explore the dynamics between you and another — what you
                     bring, what they bring, and where the connection is headed.
                   </p>
@@ -1159,10 +1161,10 @@ export function TarotView({
                       className={cn(
                         'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
                         isLocked
-                          ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                          ? 'bg-surface-card/30 text-zinc-600 border border-stroke-default/30 cursor-not-allowed opacity-50'
                           : selectedView === days
                             ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
-                            : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                            : 'bg-surface-card/50 text-content-muted border border-stroke-default/50 hover:bg-surface-card/70',
                       )}
                       title={
                         isLocked
@@ -1198,10 +1200,10 @@ export function TarotView({
                   className={cn(
                     'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
                     !subscription.hasAccess('advanced_patterns')
-                      ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                      ? 'bg-surface-card/30 text-zinc-600 border border-stroke-default/30 cursor-not-allowed opacity-50'
                       : selectedView === 'year-over-year'
                         ? 'bg-lunary-primary-900 text-lunary-primary-300 border border-lunary-primary-700'
-                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                        : 'bg-surface-card/50 text-content-muted border border-stroke-default/50 hover:bg-surface-card/70',
                   )}
                   title={
                     !subscription.hasAccess('advanced_patterns')
@@ -1228,10 +1230,10 @@ export function TarotView({
                   className={cn(
                     'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative flex items-center gap-1.5',
                     !subscription.hasAccess('advanced_patterns')
-                      ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                      ? 'bg-surface-card/30 text-zinc-600 border border-stroke-default/30 cursor-not-allowed opacity-50'
                       : isMultidimensionalMode
                         ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
-                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                        : 'bg-surface-card/50 text-content-muted border border-stroke-default/50 hover:bg-surface-card/70',
                   )}
                   title={
                     !subscription.hasAccess('advanced_patterns')
@@ -1300,7 +1302,7 @@ export function TarotView({
                 onShareReading={handleShareSpread}
               />
 
-              <p className='text-xs text-zinc-400 p-2'>
+              <p className='text-xs text-content-muted p-2'>
                 Read about{' '}
                 <Link
                   href='/grimoire/tarot/spreads'
@@ -1315,8 +1317,8 @@ export function TarotView({
         )}
 
         {/* Footer */}
-        <div className='mt-6 pt-4 border-t border-zinc-800/50'>
-          <p className='text-xs text-zinc-500 text-center'>
+        <div className='mt-6 pt-4 border-t border-stroke-subtle/50'>
+          <p className='text-xs text-content-muted text-center'>
             Come back tomorrow to see how your patterns evolve.
           </p>
         </div>
@@ -1333,33 +1335,35 @@ export function TarotView({
       {/* Share Modal */}
       {shareTarget && (
         <div
-          className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm'
+          className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-base/80 backdrop-blur-sm'
           aria-modal='true'
           role='dialog'
           onClick={closeShareModal}
         >
           <div
-            className='relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-6 text-white shadow-2xl'
+            className='relative w-full max-w-md rounded-2xl border border-stroke-subtle bg-surface-elevated p-6 text-content-primary shadow-2xl'
             onClick={(event) => event.stopPropagation()}
           >
             <button
               onClick={closeShareModal}
-              className='absolute right-4 top-4 text-zinc-400 hover:text-zinc-100'
+              className='absolute right-4 top-4 text-content-muted hover:text-content-primary'
             >
               <X className='w-5 h-5' />
             </button>
 
-            <h2 className='text-lg font-medium text-white'>
+            <h2 className='text-lg font-medium text-content-primary'>
               Share {shareTarget.title}
             </h2>
             {shareTarget.description && (
-              <p className='text-xs text-zinc-400'>{shareTarget.description}</p>
+              <p className='text-xs text-content-muted'>
+                {shareTarget.description}
+              </p>
             )}
 
             {shareLoading && (
               <div className='flex flex-col items-center justify-center py-8'>
                 <Loader2 className='h-8 w-8 animate-spin text-lunary-primary-400' />
-                <p className='mt-3 text-sm text-zinc-400'>
+                <p className='mt-3 text-sm text-content-muted'>
                   Generating the share image…
                 </p>
               </div>
@@ -1370,7 +1374,7 @@ export function TarotView({
             )}
 
             {sharePreviewUrl && (
-              <div className='mt-4 overflow-hidden rounded-xl border border-zinc-800'>
+              <div className='mt-4 overflow-hidden rounded-xl border border-stroke-subtle'>
                 <Image
                   src={sharePreviewUrl}
                   alt={shareTarget.title}
@@ -1396,7 +1400,7 @@ export function TarotView({
                 type='button'
                 onClick={handleDownloadShareImage}
                 disabled={!shareImageBlob}
-                className='flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-800 px-4 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-700 disabled:cursor-not-allowed disabled:opacity-60'
+                className='flex w-full items-center justify-center gap-2 rounded-lg border border-stroke-subtle px-4 py-3 text-sm font-semibold text-content-primary transition hover:border-stroke-default disabled:cursor-not-allowed disabled:opacity-60'
               >
                 <Download className='h-4 w-4' />
                 Save image
@@ -1404,14 +1408,14 @@ export function TarotView({
               <button
                 type='button'
                 onClick={handleCopyShareLink}
-                className='flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-800 px-4 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-zinc-800/80'
+                className='flex w-full items-center justify-center gap-2 rounded-lg bg-surface-card px-4 py-3 text-sm font-semibold text-content-primary transition hover:bg-surface-card/80'
               >
                 <Copy className='h-4 w-4' />
                 Copy share link
               </button>
             </div>
 
-            <p className='mt-4 text-xs text-zinc-500'>
+            <p className='mt-4 text-xs text-content-muted'>
               Share this cosmic insight anywhere you like.
             </p>
           </div>
@@ -1420,16 +1424,16 @@ export function TarotView({
       {/* Upgrade Modal */}
       {showUpgradeModal && (
         <div
-          className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm'
+          className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-base/80 backdrop-blur-sm'
           onClick={() => setShowUpgradeModal(false)}
         >
           <div
-            className='relative w-full max-w-md bg-zinc-900 rounded-lg border border-zinc-800/50 p-6'
+            className='relative w-full max-w-md bg-surface-elevated rounded-lg border border-stroke-subtle/50 p-6'
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setShowUpgradeModal(false)}
-              className='absolute top-4 right-4 text-zinc-400 hover:text-zinc-100 transition-colors'
+              className='absolute top-4 right-4 text-content-muted hover:text-content-primary transition-colors'
             >
               <X className='w-5 h-5' />
             </button>
