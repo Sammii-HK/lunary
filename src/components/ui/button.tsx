@@ -9,22 +9,21 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-        destructive:
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+        default: 'bg-lunary-primary text-white hover:bg-lunary-primary/90',
+        destructive: 'bg-lunary-error text-white hover:bg-lunary-error/90',
         outline:
-          'border border-lunary-primary-700 bg-transparent text-lunary-primary-300 hover:bg-lunary-primary-900 hover:border-lunary-primary-600 transition-all',
+          'border border-lunary-primary-700 bg-transparent text-content-brand hover:bg-layer-base hover:border-lunary-primary-600 transition-all',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          'bg-surface-overlay text-content-secondary hover:bg-surface-overlay/80',
         ghost:
-          'text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors',
+          'text-content-secondary hover:bg-surface-overlay hover:text-content-primary transition-colors',
         link: 'text-primary underline-offset-4 hover:underline',
         lunary:
-          'bg-lunary-primary-900 text-lunary-accent border border-lunary-primary-700 hover:bg-lunary-primary-800 hover:border-lunary-primary-600 hover:shadow-[0_0_20px_#8458D866] transition-all',
+          'bg-layer-high text-lunary-accent border border-lunary-primary-700 hover:bg-layer-raised hover:border-lunary-primary-600 hover:shadow-[0_0_20px_#8458D866] transition-all',
         'lunary-solid':
           'bg-lunary-primary text-white font-semibold hover:brightness-110 hover:shadow-[0_0_20px_#7B7BE880,0_0_40px_#7B7BE840] transition-all',
         'lunary-soft':
-          'bg-lunary-accent-900 text-lunary-accent border border-lunary-accent-700 hover:bg-lunary-accent-800 hover:text-white transition-colors',
+          'bg-lunary-primary text-white font-semibold hover:bg-lunary-primary/90 transition-colors',
         'lunary-white':
           'bg-white text-black font-medium hover:bg-gray-100 transition-colors',
       },

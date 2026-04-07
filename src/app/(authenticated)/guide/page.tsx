@@ -206,7 +206,7 @@ const MessageBubble = ({
         result.push(
           <h3
             key={key++}
-            className='font-bold text-base md:text-lg mt-3 mb-1 text-lunary-primary-200'
+            className='font-bold text-base md:text-lg mt-3 mb-1 text-content-secondary'
           >
             {match[2]}
           </h3>,
@@ -279,7 +279,7 @@ const MessageBubble = ({
             <button
               key={`${partIndex}-${lineIndex}`}
               onClick={() => onEntityClick(part.entity!)}
-              className='underline decoration-dotted decoration-lunary-primary-400/60 hover:decoration-lunary-primary-400 text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors cursor-pointer'
+              className='underline decoration-dotted decoration-lunary-primary-400/60 hover:decoration-lunary-primary-400 text-content-brand hover:text-content-secondary transition-colors cursor-pointer'
             >
               {line}
             </button>,
@@ -303,8 +303,8 @@ const MessageBubble = ({
       <div
         className={`relative max-w-[96%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm transition-colors ${
           isUser
-            ? 'bg-lunary-primary-900 text-white border border-lunary-primary-700'
-            : 'bg-zinc-950 text-zinc-100 border border-zinc-800'
+            ? 'chat-user-bubble border'
+            : 'bg-surface-elevated/60 text-content-primary border border-stroke-subtle'
         }`}
       >
         {!isUser && (
@@ -806,9 +806,9 @@ function BookOfShadowsContent() {
 
   if (authState.loading) {
     return (
-      <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
+      <div className='min-h-screen w-full bg-gradient-to-b from-surface-base via-surface-elevated to-surface-base text-content-primary'>
         <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-6 md:py-10'>
-          <div className='text-zinc-400'>Loading...</div>
+          <div className='text-content-muted'>Loading...</div>
         </div>
       </div>
     );
@@ -816,24 +816,24 @@ function BookOfShadowsContent() {
 
   if (!authState.isAuthenticated) {
     return (
-      <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
+      <div className='min-h-screen w-full bg-gradient-to-b from-surface-base via-surface-elevated to-surface-base text-content-primary'>
         <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 py-6 md:py-10'>
           <header className='mb-6 space-y-2'>
             <Heading variant='h1' as='h1'>
               Astral Guide
             </Heading>
-            {/* <p className='text-sm text-zinc-400 md:text-base'>
+            {/* <p className='text-sm text-content-muted md:text-base'>
               Your calm astro–tarot companion. Share what's stirring and Lunary
               will gather the sky around you.
             </p> */}
           </header>
 
           <div className='flex flex-1 flex-col items-center justify-center gap-6'>
-            <div className='rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur p-8 md:p-12 text-center max-w-lg'>
-              <h2 className='text-2xl font-light text-zinc-50 mb-1'>
+            <div className='rounded-3xl border border-stroke-subtle/60 bg-surface-base/60 backdrop-blur p-8 md:p-12 text-center max-w-lg'>
+              <h2 className='text-2xl font-light text-content-primary mb-1'>
                 Sign in to access your Astral Guide
               </h2>
-              <p className='text-sm text-zinc-400 mb-6 md:text-base'>
+              <p className='text-sm text-content-muted mb-6 md:text-base'>
                 Your Astral Guide is a personal space for your astro–tarot
                 journey. Sign in to begin your conversation with Lunary.
               </p>
@@ -862,11 +862,11 @@ function BookOfShadowsContent() {
           </div>
 
           {showAuthModal && (
-            <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
-              <div className='relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-xl'>
+            <div className='fixed inset-0 z-50 flex items-center justify-center bg-surface-base/60 backdrop-blur-sm p-4'>
+              <div className='relative w-full max-w-md rounded-2xl border border-stroke-subtle bg-surface-base p-6 shadow-xl'>
                 <button
                   onClick={() => setShowAuthModal(false)}
-                  className='absolute right-4 top-4 text-zinc-400 hover:text-zinc-200'
+                  className='absolute right-4 top-4 text-content-muted hover:text-content-primary'
                   aria-label='Close'
                 >
                   <svg
@@ -899,7 +899,7 @@ function BookOfShadowsContent() {
 
   return (
     <div
-      className='flex min-h-0 flex-1 flex-col w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'
+      className='flex min-h-0 flex-1 flex-col w-full bg-gradient-to-b from-surface-base via-surface-elevated to-surface-base text-content-primary'
       data-testid='astral-guide'
     >
       <div className='mx-auto flex min-h-0 flex-1 w-full max-w-3xl flex-col px-3 pb-2 pt-3 md:p-4'>
@@ -921,7 +921,7 @@ function BookOfShadowsContent() {
                   setDailyExpanded(next);
                   localStorage.setItem('daily-thread-collapsed', String(!next));
                 }}
-                className='flex shrink-0 items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors'
+                className='flex shrink-0 items-center gap-1 text-xs text-content-muted hover:text-content-primary transition-colors'
               >
                 <span>Today</span>
                 {dailyExpanded ? (
@@ -932,36 +932,36 @@ function BookOfShadowsContent() {
               </button>
             )}
           </div>
-          <div className='mt-2 flex flex-wrap items-center gap-2 text-[11px] text-zinc-400 md:hidden'>
+          <div className='mt-2 flex flex-wrap items-center gap-2 text-[11px] text-content-muted md:hidden'>
             {planId ? (
-              <span className='rounded-full border border-lunary-primary-600/70 px-2.5 py-1 text-lunary-primary-300/90'>
+              <span className='rounded-full border border-lunary-primary-600/70 px-2.5 py-1 text-content-brand/90'>
                 {getPublicPlanName(planId)}
               </span>
             ) : null}
             {usage ? (
-              <span className='rounded-full border border-zinc-700/60 px-2.5 py-1'>
+              <span className='rounded-full border border-stroke-default/60 px-2.5 py-1'>
                 {usage.used}/{usage.limit}
               </span>
             ) : null}
             {(dailyHighlight as { primaryEvent?: string })?.primaryEvent ? (
-              <span className='max-w-full truncate rounded-full border border-zinc-700/60 px-2.5 py-1'>
+              <span className='max-w-full truncate rounded-full border border-stroke-default/60 px-2.5 py-1'>
                 {(dailyHighlight as { primaryEvent?: string }).primaryEvent}
               </span>
             ) : null}
           </div>
-          <div className='hidden md:flex flex-wrap items-center gap-2 mt-2 text-xs text-zinc-400'>
+          <div className='hidden md:flex flex-wrap items-center gap-2 mt-2 text-xs text-content-muted'>
             {planId ? (
-              <span className='rounded-full border border-lunary-primary-600 px-3 py-1 text-lunary-primary-300/90'>
+              <span className='rounded-full border border-lunary-primary-600 px-3 py-1 text-content-brand/90'>
                 Plan: {getPublicPlanName(planId)}
               </span>
             ) : null}
             {usage ? (
-              <span className='rounded-full border border-zinc-700/60 px-3 py-1'>
+              <span className='rounded-full border border-stroke-default/60 px-3 py-1'>
                 Usage: {usage.used}/{usage.limit}
               </span>
             ) : null}
             {(dailyHighlight as { primaryEvent?: string })?.primaryEvent ? (
-              <span className='rounded-full border border-zinc-700/60 px-3 py-1'>
+              <span className='rounded-full border border-stroke-default/60 px-3 py-1'>
                 Today:{' '}
                 {(dailyHighlight as { primaryEvent?: string }).primaryEvent}
               </span>
@@ -970,7 +970,7 @@ function BookOfShadowsContent() {
         </header>
 
         <div className='flex min-h-0 flex-1 flex-col gap-1'>
-          <section className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] border border-zinc-800/60 bg-zinc-950/60'>
+          <section className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] border border-stroke-subtle/60 bg-surface-base/60'>
             <div className='shrink-0 px-2 md:px-4 md:pt-2'>
               <DailyThread
                 isExpanded={dailyExpanded}
@@ -990,12 +990,12 @@ function BookOfShadowsContent() {
             >
               <div className='mx-auto flex w-full max-w-2xl flex-col gap-3 md:gap-6'>
                 {isLoadingHistory ? (
-                  <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
+                  <div className='rounded-2xl border border-dashed border-stroke-default/60 bg-surface-elevated/40 px-4 py-6 text-center text-sm text-content-muted md:px-8 md:py-10 md:text-base'>
                     Loading your conversation...
                   </div>
                 ) : messages.length === 0 ? (
                   <>
-                    <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
+                    <div className='rounded-2xl border border-dashed border-stroke-default/60 bg-surface-elevated/40 px-4 py-6 text-center text-sm text-content-muted md:px-8 md:py-10 md:text-base'>
                       Begin by sharing how you're feeling, what you're
                       exploring, or what guidance you're seeking. I'll answer
                       with gentle, grounded insight.
@@ -1144,11 +1144,11 @@ function BookOfShadowsContent() {
               </div>
             </div>
 
-            <div className='shrink-0 border-t border-zinc-800/70 bg-zinc-900/40'>
+            <div className='shrink-0 border-t border-stroke-subtle/70 bg-surface-elevated/40'>
               <div className='flex items-center px-3 py-2 md:px-6 md:py-3'>
                 <button
                   onClick={() => setIsAssistExpanded(!isAssistExpanded)}
-                  className='flex flex-1 items-center justify-between text-sm font-semibold text-lunary-primary-300/90 transition hover:text-lunary-primary-200'
+                  className='flex flex-1 items-center justify-between text-sm font-semibold text-content-brand/90 transition hover:text-content-secondary'
                 >
                   <span>Assist</span>
                   {isAssistExpanded ? (
@@ -1159,16 +1159,18 @@ function BookOfShadowsContent() {
                 </button>
                 <button
                   onClick={() => setIsJournalMode(!isJournalMode)}
-                  className='flex items-center gap-2 ml-3 pl-3 border-l border-zinc-700/60'
+                  className='flex items-center gap-2 ml-3 pl-3 border-l border-stroke-default/60'
                   title={
                     isJournalMode ? 'Exit journal mode' : 'Write journal entry'
                   }
                 >
-                  <NotebookPen className='w-4 h-4 text-zinc-400' />
-                  <span className='text-xs text-zinc-400'>Journal</span>
+                  <NotebookPen className='w-4 h-4 text-content-muted' />
+                  <span className='text-xs text-content-muted'>Journal</span>
                   <div
                     className={`relative w-8 h-[18px] rounded-full transition-colors ${
-                      isJournalMode ? 'bg-lunary-primary-600' : 'bg-zinc-700'
+                      isJournalMode
+                        ? 'bg-lunary-primary-600'
+                        : 'bg-surface-overlay'
                     }`}
                   >
                     <div
@@ -1182,7 +1184,7 @@ function BookOfShadowsContent() {
                 </button>
               </div>
               {isAssistExpanded && (
-                <div className='px-3 pb-2 text-sm text-zinc-300 md:px-6 md:pb-4 space-y-3'>
+                <div className='px-3 pb-2 text-sm text-content-secondary md:px-6 md:pb-4 space-y-3'>
                   <CopilotQuickActions
                     onActionClick={(prompt) => sendMessage(prompt)}
                     disabled={isStreaming}
@@ -1206,22 +1208,22 @@ function BookOfShadowsContent() {
                       }
                     }}
                   />
-                  <div className='space-y-2 border-t border-zinc-800/70 pt-3'>
-                    <p className='text-[0.65rem] uppercase tracking-widest text-zinc-500'>
+                  <div className='space-y-2 border-t border-stroke-subtle/70 pt-3'>
+                    <p className='text-[0.65rem] uppercase tracking-widest text-content-muted'>
                       Astral tools
                     </p>
                     <div className='flex flex-wrap gap-2'>
                       <button
                         type='button'
                         onClick={() => router.push('/book-of-shadows')}
-                        className='px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg border border-zinc-700 text-zinc-200 transition hover:border-lunary-primary/80 hover:text-lunary-primary-200'
+                        className='px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg border border-stroke-default text-content-primary transition hover:border-lunary-primary/80 hover:text-content-secondary'
                       >
                         {iosLabel('Book of Shadows', isNativeIOS)}
                       </button>
                       <button
                         type='button'
                         onClick={() => router.push('/collections')}
-                        className='px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg border border-zinc-700 text-zinc-200 transition hover:border-lunary-primary/80 hover:text-lunary-primary-200'
+                        className='px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg border border-stroke-default text-content-primary transition hover:border-lunary-primary/80 hover:text-content-secondary'
                       >
                         Collections
                       </button>
@@ -1258,17 +1260,17 @@ function BookOfShadowsContent() {
                   ? 'Write a journal entry...'
                   : "Write your heart's question…"
               }
-              className={`w-full min-h-[56px] resize-none rounded-2xl border bg-zinc-900/70 pl-4 pr-12 py-3 text-[15px] text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 md:min-h-8 md:rounded-xl md:py-2.5 md:text-sm ${
+              className={`w-full min-h-[56px] resize-none rounded-2xl border bg-surface-elevated/70 pl-4 pr-12 py-3 text-[15px] text-content-primary placeholder:text-content-muted focus:outline-none focus:ring-2 md:min-h-8 md:rounded-xl md:py-2.5 md:text-sm ${
                 isJournalMode
                   ? 'border-lunary-primary-600/50 focus:border-lunary-primary focus:ring-lunary-primary-700'
-                  : 'border-zinc-700/60 focus:border-lunary-primary focus:ring-lunary-primary-800'
+                  : 'border-stroke-default/60 focus:border-lunary-primary focus:ring-lunary-primary-800'
               }`}
             />
             {isStreaming ? (
               <button
                 type='button'
                 onClick={stop}
-                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-lunary-error-900 text-lunary-error-300 border border-lunary-error-700 transition hover:bg-lunary-error-800'
+                className='absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-layer-base text-lunary-error-300 border border-lunary-error-700 transition hover:bg-lunary-error-800'
               >
                 <Square className='w-4 h-4' />
               </button>
@@ -1301,9 +1303,9 @@ export default function BookOfShadowsPage() {
   return (
     <Suspense
       fallback={
-        <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
+        <div className='min-h-screen w-full bg-gradient-to-b from-surface-base via-surface-elevated to-surface-base text-content-primary'>
           <div className='mx-auto flex w-full max-w-3xl flex-col items-center justify-center px-4 py-6 md:py-10'>
-            <div className='text-zinc-400'>Loading...</div>
+            <div className='text-content-muted'>Loading...</div>
           </div>
         </div>
       }
