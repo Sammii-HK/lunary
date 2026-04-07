@@ -1,8 +1,18 @@
 'use client';
 
-import { useEffect, useState, type MouseEvent } from 'react';
+import { useEffect, useState, useMemo, type MouseEvent } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { usePlanetaryChart } from '@/context/AstronomyContext';
+import {
+  calculateTransitAspects,
+  calculateHouse,
+} from '@/lib/astrology/transit-aspects';
+import {
+  getTransitCopy,
+  getHousePlacementTease,
+  getDigestIntro,
+} from '@/lib/copy/transit-copy';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
 import { Check, Circle, Orbit, ArrowRight, Sparkles } from 'lucide-react';
@@ -40,6 +50,15 @@ interface CachedHoroscope {
 }
 
 const FOCUS_COMPLETE_KEY = 'lunary_focus_complete';
+
+const SLOW_PLANET_SCORE: Record<string, number> = {
+  Pluto: 5,
+  Neptune: 5,
+  Uranus: 4,
+  Saturn: 4,
+  Jupiter: 3,
+  Mars: 2,
+};
 const getTodayString = () => new Date().toISOString().split('T')[0];
 
 // Use sessionStorage in demo mode so each visitor gets a fresh view
@@ -64,6 +83,7 @@ export const PersonalizedHoroscopePreview = () => {
     user?.birthday &&
     user?.birthChart;
 
+  const { currentAstrologicalChart } = usePlanetaryChart();
   const router = useRouter();
   const { progress: skillProgress } = useProgress();
   const ritualSkill = skillProgress.find((p) => p.skillTree === 'ritual');
@@ -73,6 +93,62 @@ export const PersonalizedHoroscopePreview = () => {
   const [horoscope, setHoroscope] = useState<CachedHoroscope | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const todayString = getTodayString();
+
+  // Top 2-3 transit aspects ranked by significance — paid user digest
+  const topTransitAspects = useMemo(() => {
+    if (!user?.birthChart || !currentAstrologicalChart?.length) return [];
+    const aspects = calculateTransitAspects(
+      user.birthChart as Parameters<typeof calculateTransitAspects>[0],
+      currentAstrologicalChart,
+    );
+    return aspects
+      .map((a) => ({
+        ...a,
+        score:
+          (SLOW_PLANET_SCORE[a.transitPlanet] ?? 1) + (10 - a.orbDegrees) / 10,
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 2);
+  }, [user?.birthChart, currentAstrologicalChart]);
+
+  // House tease for free users — picks the most meaningful transiting planet
+  const freeTease = useMemo(() => {
+    if (!user?.birthChart || !currentAstrologicalChart?.length) return null;
+    const birthChart = user.birthChart as Array<{
+      body: string;
+      eclipticLongitude: number;
+      sign: string;
+      retrograde: boolean;
+    }>;
+    const ascendant = birthChart.find((p) => p.body === 'Ascendant');
+    if (!ascendant) return null;
+
+    const PRIORITY = ['Jupiter', 'Saturn', 'Mars', 'Venus', 'Sun'];
+    const planet = PRIORITY.map((name) =>
+      currentAstrologicalChart.find((p: { body: string }) => p.body === name),
+    ).find(Boolean) as
+      | {
+          body: string;
+          sign: string;
+          eclipticLongitude: number;
+          retrograde?: boolean;
+        }
+      | undefined;
+
+    if (!planet) return null;
+
+    const house = calculateHouse(
+      planet.eclipticLongitude,
+      ascendant.eclipticLongitude,
+    );
+    return getHousePlacementTease({
+      transitPlanet: planet.body,
+      house,
+      transitSign: planet.sign,
+      retrograde: planet.retrograde ?? false,
+      userId: user.id,
+    });
+  }, [user?.birthChart, user?.id, currentAstrologicalChart]);
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');
   const ctaCopy = useCTACopy();
 
@@ -336,7 +412,7 @@ export const PersonalizedHoroscopePreview = () => {
           ) : (
             <>
               <p className='text-sm text-zinc-200 leading-snug mb-2'>
-                {generalHoroscope.reading.split('.')[0]}.
+                {freeTease ?? `${generalHoroscope.reading.split('.')[0]}.`}
               </p>
 
               <div className='relative'>
@@ -394,9 +470,40 @@ export const PersonalizedHoroscopePreview = () => {
           </div>
         ) : (
           <>
-            <p className='text-sm text-zinc-300 leading-snug'>
-              {focusText || horoscope?.dailyGuidance}
-            </p>
+            {topTransitAspects.length > 0 && !ritualComplete ? (
+              <div className='space-y-2.5'>
+                <p className='text-[0.6rem] uppercase tracking-[0.2em] text-zinc-500'>
+                  {getDigestIntro(user?.id)}
+                </p>
+                {topTransitAspects.map((aspect, i) => {
+                  const copy = getTransitCopy({
+                    transitPlanet: aspect.transitPlanet,
+                    natalPlanet: aspect.natalPlanet,
+                    aspectType: aspect.aspectType,
+                    remainingDays: aspect.duration?.remainingDays,
+                    userId: user?.id,
+                    seed: i,
+                  });
+                  return (
+                    <div
+                      key={`${aspect.transitPlanet}-${aspect.natalPlanet}-${i}`}
+                      className='space-y-0.5'
+                    >
+                      <p className='text-xs font-medium text-zinc-200'>
+                        {copy.headline}
+                      </p>
+                      <p className='text-xs text-zinc-400 leading-relaxed'>
+                        {copy.meaning}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className='text-sm text-zinc-300 leading-snug'>
+                {focusText || horoscope?.dailyGuidance}
+              </p>
+            )}
 
             <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/60 px-3 py-2 text-[0.7rem] uppercase text-zinc-400'>
               <div className='flex items-center gap-1 justify-between tracking-[0.25em]'>
