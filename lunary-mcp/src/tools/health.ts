@@ -258,4 +258,18 @@ export function registerHealthTools(server: McpServer) {
       }
     },
   );
+
+  server.tool(
+    'get_business_health',
+    'Check critical business signals: signup rate, last signup time, verification email delivery. Returns an alert flag if no signups in 48h — use this to spot a broken signup flow fast.',
+    {},
+    async () => {
+      try {
+        const data = await lunary('/health/signups');
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
 }
