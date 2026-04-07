@@ -91,7 +91,7 @@ export function DailyThread({
   if (modules.length === 0) return null;
 
   return (
-    <div className={cn('mb-1', className)} data-daily-thread>
+    <div className={cn(className)} data-daily-thread>
       {!hideToggle && (
         <button
           onClick={handleToggle}

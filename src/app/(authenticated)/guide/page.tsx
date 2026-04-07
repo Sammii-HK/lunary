@@ -903,10 +903,10 @@ function BookOfShadowsContent() {
       data-testid='astral-guide'
     >
       <div className='mx-auto flex min-h-0 flex-1 w-full max-w-3xl flex-col px-3 pb-2 pt-3 md:p-4'>
-        <header className='mb-2 shrink-0 md:mb-4'>
+        <header className='shrink-0 md:mb-2'>
           <SkillProgressWidget
             skillTree='journal'
-            className='mb-2 shrink-0'
+            className='mb-1.5 shrink-0'
             scrolled={isScrolled}
           />
 
@@ -969,9 +969,9 @@ function BookOfShadowsContent() {
           </div>
         </header>
 
-        <div className='flex min-h-0 flex-1 flex-col gap-2'>
+        <div className='flex min-h-0 flex-1 flex-col gap-1'>
           <section className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] border border-zinc-800/60 bg-zinc-950/60'>
-            <div className='shrink-0 px-2 pt-2 md:px-4 md:pt-3'>
+            <div className='shrink-0 px-2 md:px-4 md:pt-2'>
               <DailyThread
                 isExpanded={dailyExpanded}
                 onToggle={() => {
@@ -1241,7 +1241,7 @@ function BookOfShadowsContent() {
                 attemptSend();
               }
             }}
-            className='relative mb-2 flex shrink-0 items-center md:mb-4'
+            className='relative flex shrink-0 items-center'
           >
             <label htmlFor='book-of-shadows-message' className='sr-only'>
               {isJournalMode ? 'Write a journal entry' : 'Share with Lunary'}
