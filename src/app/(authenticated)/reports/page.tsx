@@ -64,16 +64,16 @@ export default function ReportsPage() {
   return (
     <div className='min-h-screen bg-zinc-950 flex flex-col'>
       <div className='flex-1'>
-        <div className='max-w-4xl mx-auto px-4 py-8 md:py-12'>
-          <h1 className='text-3xl md:text-4xl font-bold text-white mb-2'>
+        <div className='max-w-4xl mx-auto px-4 py-4 md:py-8'>
+          <h1 className='text-xl md:text-3xl font-bold text-white mb-1.5'>
             Weekly Cosmic Reports
           </h1>
-          <p className='text-zinc-400 mb-8'>
+          <p className='text-zinc-400 mb-4'>
             Your personalized weekly cosmic insights and patterns
           </p>
 
           {reports.length === 0 ? (
-            <div className='bg-zinc-900 border border-zinc-800 rounded-lg p-8 text-center'>
+            <div className='bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center'>
               <p className='text-zinc-300 mb-4'>
                 No reports available yet. Reports are generated weekly and sent
                 to your email.
@@ -83,7 +83,7 @@ export default function ReportsPage() {
               </p>
             </div>
           ) : (
-            <div className='space-y-6'>
+            <div className='space-y-4'>
               {reports.map((report, index) => (
                 <WeeklyReportCard key={index} report={report} />
               ))}
@@ -116,7 +116,7 @@ function WeeklyReportCard({ report }: { report: WeeklyReport }) {
         </h2>
       </div>
 
-      <div className='p-6 space-y-6'>
+      <div className='p-4 space-y-4'>
         {/* Summary */}
         {report.summary && (
           <div>

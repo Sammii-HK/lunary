@@ -66,7 +66,7 @@ export function TarotPatternsHub({
   );
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-4'>
       {/* Dominant Themes - Enhanced RecurringThemesCard */}
       {patterns.dominantThemes.length > 0 && (
         <RecurringThemesCard
@@ -143,7 +143,7 @@ export function TarotPatternsHub({
 
       {/* Upgrade Prompt for Free Users */}
       {userTier === 'free' && (
-        <div className='rounded-xl border border-lunary-accent-800 bg-lunary-accent-950/40 p-6 text-center'>
+        <div className='rounded-xl border border-lunary-accent-800 bg-lunary-accent-950/40 p-4 text-center'>
           <h3 className='text-lg font-medium text-lunary-accent-300 mb-2'>
             Unlock Deeper Pattern Insights
           </h3>

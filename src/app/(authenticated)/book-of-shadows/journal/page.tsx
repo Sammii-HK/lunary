@@ -204,7 +204,7 @@ export default function JournalPage() {
         </div>
       </header>
 
-      <div className='px-4 py-6 space-y-6'>
+      <div className='px-4 py-3 space-y-4'>
         {showAddForm ? (
           <form onSubmit={handleSubmit} className='space-y-3'>
             <textarea

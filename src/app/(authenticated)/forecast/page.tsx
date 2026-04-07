@@ -11,7 +11,7 @@ export default function ForecastPage() {
   const subscription = useSubscription();
 
   return (
-    <div className='flex h-fit-content w-full flex-col gap-6 max-w-4xl mx-auto px-4 py-6'>
+    <div className='flex h-fit-content w-full flex-col gap-4 max-w-4xl mx-auto px-4 py-4'>
       <div className='space-y-2'>
         <Heading as='h1' variant='h1'>
           {currentYear} Forecast

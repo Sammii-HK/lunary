@@ -559,7 +559,7 @@ export function TarotSpreadExperience({
   return (
     <div
       data-testid='tarot-spreads-section'
-      className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'
+      className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 space-y-4'
     >
       <div className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
         <div>
@@ -767,7 +767,7 @@ export function TarotSpreadExperience({
         )}
       </div>
 
-      <div className='grid gap-6 lg:grid-cols-[2fr,1fr]'>
+      <div className='grid gap-4 lg:grid-cols-[2fr,1fr]'>
         <div className='space-y-4'>
           {isLoading && (
             <div className='flex h-48 items-center justify-center rounded-lg border border-zinc-800/40 bg-zinc-900/30'>
@@ -827,7 +827,7 @@ export function TarotSpreadExperience({
                 </div>
               </div>
 
-              <div className='space-y-6'>
+              <div className='space-y-3'>
                 {currentReading?.cards?.map((card, cardIndex) => {
                   const isTransitExpanded =
                     expandedTransitCardIndex === cardIndex;

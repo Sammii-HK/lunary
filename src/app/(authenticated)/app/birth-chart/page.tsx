@@ -65,13 +65,13 @@ const BirthChartPage = () => {
   // Check subscription access first
   if (!hasChartAccess) {
     return (
-      <div className='h-full space-y-6 p-4 overflow-auto'>
-        <div className='flex items-center justify-center min-h-[60vh]'>
+      <div className='h-full space-y-4 p-4 overflow-auto'>
+        <div className='flex items-center justify-center min-h-[50vh]'>
           <div className='text-center max-w-lg px-4'>
-            <h1 className='text-3xl font-bold text-white mb-6'>
+            <h1 className='text-xl font-bold text-white mb-4'>
               Your Birth Chart Awaits
             </h1>
-            <div className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 rounded-lg p-6 border border-lunary-primary-700 mb-6'>
+            <div className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 rounded-lg p-4 border border-lunary-primary-700 mb-4'>
               <p className='text-zinc-300 mb-4'>
                 Sign up and unlock your complete cosmic blueprint with our
                 comprehensive birth chart. We calculate 24+ celestial bodies

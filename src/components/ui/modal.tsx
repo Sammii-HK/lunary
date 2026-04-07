@@ -82,7 +82,7 @@ export function Modal({
       <div
         ref={contentRef}
         className={cn(
-          'relative w-full border border-zinc-700/50 bg-zinc-900/95 backdrop-blur-xl shadow-2xl',
+          'relative w-full border border-stroke-default/50 bg-surface-card/95 backdrop-blur-xl shadow-2xl',
           'rounded-t-2xl sm:rounded-2xl',
           'animate-in fade-in-0 slide-in-from-bottom-4 sm:zoom-in-95 duration-200',
           'max-h-[90vh] sm:max-h-[85vh] flex flex-col',
@@ -93,18 +93,20 @@ export function Modal({
       >
         {/* iOS-style drag handle on mobile */}
         <div className='flex justify-center pt-2 pb-0 sm:hidden'>
-          <div className='h-1 w-10 rounded-full bg-zinc-600' />
+          <div className='h-1 w-10 rounded-full bg-stroke-default' />
         </div>
         {showCloseButton && (
           <button
             onClick={onClose}
-            className='absolute right-3 top-3 z-10 h-9 w-9 flex items-center justify-center text-zinc-400 hover:text-white bg-black/30 hover:bg-black/50 backdrop-blur-2xl border border-zinc-700/50 rounded-full transition-all'
+            className='absolute right-3 top-3 z-10 h-9 w-9 flex items-center justify-center text-content-muted hover:text-content-primary bg-black/30 hover:bg-black/50 backdrop-blur-2xl border border-stroke-default/50 rounded-full transition-all'
             aria-label='Close'
           >
             <X className='w-4 h-4' />
           </button>
         )}
-        <div className='flex-1 min-h-0 overflow-y-auto p-6'>{children}</div>
+        <div className='flex-1 min-h-0 overflow-y-auto p-4 sm:p-6'>
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -119,7 +121,9 @@ export function ModalHeader({ children, className }: ModalHeaderProps) {
   return (
     <div className={cn('mb-4 pr-8', className)}>
       {typeof children === 'string' ? (
-        <h3 className='text-lg font-semibold text-white'>{children}</h3>
+        <h3 className='text-lg font-semibold text-content-primary'>
+          {children}
+        </h3>
       ) : (
         children
       )}
