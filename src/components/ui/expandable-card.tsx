@@ -4,7 +4,10 @@ import { ReactNode, useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface ExpandableCardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ExpandableCardProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'onToggle'
+> {
   preview: ReactNode;
   expanded: ReactNode;
   defaultExpanded?: boolean;
