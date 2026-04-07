@@ -361,62 +361,62 @@ export default function ThematicPreviewPage() {
   };
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-white p-8'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-8'>
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='mb-8'>
           <h1 className='text-3xl font-light tracking-wide mb-2'>
             Thematic Image Preview
           </h1>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Preview all OG image types across {allCategories.length} categories
           </p>
         </div>
 
         {/* Stats */}
         <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-8'>
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardContent className='pt-6'>
               <p className='text-3xl font-light'>{allCategories.length}</p>
-              <p className='text-zinc-400 text-sm'>Categories</p>
+              <p className='text-content-muted text-sm'>Categories</p>
             </CardContent>
           </Card>
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardContent className='pt-6'>
               <p className='text-3xl font-light'>
                 {allCategories.reduce((sum, cat) => sum + cat.count, 0)}
               </p>
-              <p className='text-zinc-400 text-sm'>Total Items</p>
+              <p className='text-content-muted text-sm'>Total Items</p>
             </CardContent>
           </Card>
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardContent className='pt-6'>
               <p className='text-3xl font-light'>{formats.length}</p>
-              <p className='text-zinc-400 text-sm'>Formats</p>
+              <p className='text-content-muted text-sm'>Formats</p>
             </CardContent>
           </Card>
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardContent className='pt-6'>
               <p className='text-3xl font-light'>{categoryInfo?.count || 0}</p>
-              <p className='text-zinc-400 text-sm'>In Current Category</p>
+              <p className='text-content-muted text-sm'>In Current Category</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Controls */}
-        <Card className='bg-zinc-900 border-zinc-800 mb-8'>
+        <Card className='bg-surface-elevated border-stroke-subtle mb-8'>
           <CardContent className='pt-6'>
             <div className='flex flex-wrap gap-4 items-end'>
               {/* Category Select */}
               <div className='flex-1 min-w-[250px]'>
-                <label className='block text-sm text-zinc-400 mb-2'>
+                <label className='block text-sm text-content-muted mb-2'>
                   Category ({categoryInfo?.count || 0} items)
                 </label>
                 <Select
                   value={selectedCategory}
                   onValueChange={setSelectedCategory}
                 >
-                  <SelectTrigger className='bg-zinc-800 border-zinc-700'>
+                  <SelectTrigger className='bg-surface-card border-stroke-default'>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className='max-h-[400px]'>
@@ -431,14 +431,14 @@ export default function ThematicPreviewPage() {
 
               {/* Format Select */}
               <div className='flex-1 min-w-[200px]'>
-                <label className='block text-sm text-zinc-400 mb-2'>
+                <label className='block text-sm text-content-muted mb-2'>
                   Format
                 </label>
                 <Select
                   value={selectedFormat}
                   onValueChange={setSelectedFormat}
                 >
-                  <SelectTrigger className='bg-zinc-800 border-zinc-700'>
+                  <SelectTrigger className='bg-surface-card border-stroke-default'>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -459,7 +459,7 @@ export default function ThematicPreviewPage() {
                   className={
                     viewMode === 'grid'
                       ? 'bg-lunary-primary-600'
-                      : 'border-zinc-700'
+                      : 'border-stroke-default'
                   }
                 >
                   Grid
@@ -470,7 +470,7 @@ export default function ThematicPreviewPage() {
                   className={
                     viewMode === 'single'
                       ? 'bg-lunary-primary-600'
-                      : 'border-zinc-700'
+                      : 'border-stroke-default'
                   }
                 >
                   Single
@@ -486,7 +486,7 @@ export default function ThematicPreviewPage() {
             {items.map((item) => (
               <Card
                 key={item.slug}
-                className='bg-zinc-900 border-zinc-800 overflow-hidden cursor-pointer hover:border-zinc-600 transition-colors'
+                className='bg-surface-elevated border-stroke-subtle overflow-hidden cursor-pointer hover:border-stroke-strong transition-colors'
                 onClick={() => {
                   setSelectedItem(item);
                   setViewMode('single');
@@ -507,10 +507,10 @@ export default function ThematicPreviewPage() {
                   />
                 </div>
                 <CardContent className='p-3'>
-                  <p className='text-sm text-zinc-300 font-medium'>
+                  <p className='text-sm text-content-secondary font-medium'>
                     {item.name}
                   </p>
-                  <p className='text-xs text-zinc-500'>{item.slug}</p>
+                  <p className='text-xs text-content-muted'>{item.slug}</p>
                 </CardContent>
               </Card>
             ))}
@@ -521,7 +521,7 @@ export default function ThematicPreviewPage() {
         {viewMode === 'single' && (
           <div className='space-y-6'>
             {/* Item Selector */}
-            <Card className='bg-zinc-900 border-zinc-800'>
+            <Card className='bg-surface-elevated border-stroke-subtle'>
               <CardContent className='pt-6'>
                 <div className='flex flex-wrap gap-2'>
                   {items.map((item) => (
@@ -535,7 +535,7 @@ export default function ThematicPreviewPage() {
                       className={
                         selectedItem?.slug === item.slug
                           ? 'bg-lunary-primary-600'
-                          : 'border-zinc-700 hover:border-zinc-500'
+                          : 'border-stroke-default hover:border-stroke-strong'
                       }
                     >
                       {item.name}
@@ -547,7 +547,7 @@ export default function ThematicPreviewPage() {
 
             {/* Preview */}
             {selectedItem && (
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardHeader>
                   <CardTitle className='text-lg font-light'>
                     {selectedItem.name} -{' '}
@@ -557,7 +557,7 @@ export default function ThematicPreviewPage() {
                 <CardContent>
                   <div className='flex justify-center'>
                     <div
-                      className={`relative overflow-hidden rounded-lg border border-zinc-700 ${
+                      className={`relative overflow-hidden rounded-lg border border-stroke-default ${
                         selectedFormat === 'square'
                           ? 'w-[400px] h-[400px]'
                           : selectedFormat === 'landscape'
@@ -582,9 +582,11 @@ export default function ThematicPreviewPage() {
                   </div>
 
                   {/* Direct Link */}
-                  <div className='mt-6 p-4 bg-zinc-800/50 rounded-lg'>
-                    <p className='text-xs text-zinc-400 mb-2'>Direct URL:</p>
-                    <code className='text-xs text-zinc-300 break-all'>
+                  <div className='mt-6 p-4 bg-surface-card/50 rounded-lg'>
+                    <p className='text-xs text-content-muted mb-2'>
+                      Direct URL:
+                    </p>
+                    <code className='text-xs text-content-secondary break-all'>
                       {typeof window !== 'undefined'
                         ? window.location.origin
                         : ''}
@@ -602,7 +604,7 @@ export default function ThematicPreviewPage() {
 
             {/* All Formats Preview */}
             {selectedItem && (
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardHeader>
                   <CardTitle className='text-lg font-light'>
                     All Formats
@@ -612,11 +614,11 @@ export default function ThematicPreviewPage() {
                   <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
                     {formats.map((fmt) => (
                       <div key={fmt.value} className='space-y-2'>
-                        <p className='text-sm text-zinc-400'>
+                        <p className='text-sm text-content-muted'>
                           {fmt.description}
                         </p>
                         <div
-                          className={`relative overflow-hidden rounded border border-zinc-700 ${
+                          className={`relative overflow-hidden rounded border border-stroke-default ${
                             fmt.value === 'square'
                               ? 'aspect-square'
                               : fmt.value === 'landscape'
@@ -649,7 +651,7 @@ export default function ThematicPreviewPage() {
         )}
 
         {/* Quick Links to All Categories */}
-        <Card className='bg-zinc-900 border-zinc-800 mt-8'>
+        <Card className='bg-surface-elevated border-stroke-subtle mt-8'>
           <CardHeader>
             <CardTitle className='text-lg font-light'>
               All Categories Overview
@@ -670,7 +672,7 @@ export default function ThematicPreviewPage() {
                       setViewMode('single');
                     }}
                   >
-                    <div className='aspect-square relative overflow-hidden rounded-lg border border-zinc-700 hover:border-zinc-500 transition-colors'>
+                    <div className='aspect-square relative overflow-hidden rounded-lg border border-stroke-default hover:border-stroke-strong transition-colors'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={getImageUrl(
@@ -684,10 +686,10 @@ export default function ThematicPreviewPage() {
                         loading='lazy'
                       />
                     </div>
-                    <p className='text-xs text-zinc-400 mt-2 text-center'>
+                    <p className='text-xs text-content-muted mt-2 text-center'>
                       {cat.name}
                     </p>
-                    <p className='text-xs text-zinc-600 text-center'>
+                    <p className='text-xs text-content-muted text-center'>
                       {cat.count} items
                     </p>
                   </div>

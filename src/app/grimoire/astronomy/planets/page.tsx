@@ -119,18 +119,18 @@ export default function PlanetsIndexPage() {
     <Link
       key={planet}
       href={`/grimoire/astronomy/planets/${planet}`}
-      className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+      className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
     >
       <div className='flex items-center gap-3 mb-3'>
         <span className='text-3xl'>{PLANET_SYMBOLS[planet]}</span>
-        <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+        <h3 className='text-lg font-medium text-content-primary group-hover:text-content-brand transition-colors'>
           {PLANET_DISPLAY[planet]}
         </h3>
       </div>
-      <p className='text-sm text-zinc-400 mb-2'>
+      <p className='text-sm text-content-muted mb-2'>
         {planetInfo[planet]?.description}
       </p>
-      <p className='text-xs text-zinc-400'>
+      <p className='text-xs text-content-muted'>
         Rules: {planetInfo[planet]?.rules}
       </p>
     </Link>
@@ -227,10 +227,10 @@ export default function PlanetsIndexPage() {
       >
         <div className='space-y-12'>
           <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Personal Planets
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               These fast-moving planets shape your core personality, daily
               experiences, and how you interact with the world.
             </p>
@@ -240,10 +240,10 @@ export default function PlanetsIndexPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Social Planets
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               Jupiter and Saturn influence how you grow within society and the
               lessons you learn over longer periods.
             </p>
@@ -253,10 +253,10 @@ export default function PlanetsIndexPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Transpersonal Planets
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               These slow-moving outer planets represent generational influences
               and deep transformative experiences.
             </p>
@@ -268,7 +268,7 @@ export default function PlanetsIndexPage() {
           <div className='flex flex-wrap gap-3 pt-4'>
             <Link
               href='/birth-chart'
-              className='px-4 py-2 rounded-lg bg-lunary-primary-900/30 text-lunary-primary-300 hover:bg-lunary-primary-900/50 transition-colors'
+              className='px-4 py-2 rounded-lg bg-layer-base/30 text-content-brand hover:bg-layer-base/50 transition-colors'
             >
               Calculate Your Chart
             </Link>

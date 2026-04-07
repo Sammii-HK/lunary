@@ -56,7 +56,7 @@ const SOURCE_COLORS: Record<string, string> = {
   seo: 'bg-green-500',
   social: 'bg-blue-500',
   email: 'bg-purple-500',
-  direct: 'bg-zinc-500',
+  direct: 'bg-surface-overlay',
   referral: 'bg-orange-500',
   paid: 'bg-red-500',
 };
@@ -178,9 +178,9 @@ export function AttributionMetrics({ startDate, endDate }: Props) {
                       {source.user_count} ({source.percentage}%)
                     </span>
                   </div>
-                  <div className='h-2 bg-zinc-800 rounded-full overflow-hidden'>
+                  <div className='h-2 bg-surface-card rounded-full overflow-hidden'>
                     <div
-                      className={`h-full ${SOURCE_COLORS[source.source] || 'bg-zinc-500'}`}
+                      className={`h-full ${SOURCE_COLORS[source.source] || 'bg-surface-overlay'}`}
                       style={{ width: `${source.percentage}%` }}
                     />
                   </div>
@@ -205,7 +205,7 @@ export function AttributionMetrics({ startDate, endDate }: Props) {
               {data.conversionBySource.map((source) => (
                 <div
                   key={source.source}
-                  className='flex items-center justify-between py-2 border-b border-zinc-800 last:border-0'
+                  className='flex items-center justify-between py-2 border-b border-stroke-subtle last:border-0'
                 >
                   <div>
                     <div className='font-medium'>
@@ -221,7 +221,7 @@ export function AttributionMetrics({ startDate, endDate }: Props) {
                         ? 'text-green-500'
                         : source.conversion_rate >= 2
                           ? 'text-yellow-500'
-                          : 'text-zinc-400'
+                          : 'text-content-muted'
                     }`}
                   >
                     {source.conversion_rate}%
@@ -244,11 +244,11 @@ export function AttributionMetrics({ startDate, endDate }: Props) {
               {data.topLandingPages.slice(0, 10).map((page, i) => (
                 <div
                   key={`${page.page}-${i}`}
-                  className='flex flex-col gap-1 rounded-lg border border-zinc-800/30 bg-zinc-950/30 p-3 text-sm sm:flex-row sm:items-center sm:justify-between'
+                  className='flex flex-col gap-1 rounded-lg border border-stroke-subtle/30 bg-surface-base/30 p-3 text-sm sm:flex-row sm:items-center sm:justify-between'
                 >
                   <div className='flex items-center gap-2 flex-1 min-w-0'>
                     <span
-                      className={`w-2 h-2 rounded-full ${SOURCE_COLORS[page.source] || 'bg-zinc-500'}`}
+                      className={`w-2 h-2 rounded-full ${SOURCE_COLORS[page.source] || 'bg-surface-overlay'}`}
                     />
                     <span className='truncate font-mono text-xs'>
                       {page.page}
@@ -284,7 +284,7 @@ export function AttributionMetrics({ startDate, endDate }: Props) {
                 {data.keywordBreakdown.slice(0, 10).map((kw, i) => (
                   <div
                     key={`${kw.keyword}-${i}`}
-                    className='flex flex-col gap-1 rounded-lg border border-zinc-800/30 bg-zinc-950/30 p-3 text-sm sm:flex-row sm:items-center sm:justify-between'
+                    className='flex flex-col gap-1 rounded-lg border border-stroke-subtle/30 bg-surface-base/30 p-3 text-sm sm:flex-row sm:items-center sm:justify-between'
                   >
                     <span className='truncate flex-1 text-xs font-medium'>
                       {kw.keyword}

@@ -36,19 +36,19 @@ export function SignupGate({ referralCode, inviteCode }: SignupGateProps) {
         ].map((text) => (
           <div
             key={text}
-            className='px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50 blur-sm select-none'
+            className='px-4 py-2 rounded-lg bg-surface-card/50 border border-stroke-default/50 blur-sm select-none'
           >
-            <p className='text-sm text-zinc-300'>{text}</p>
+            <p className='text-sm text-content-secondary'>{text}</p>
           </div>
         ))}
       </div>
 
       <div className='space-y-3'>
         <Lock className='w-5 h-5 text-lunary-primary-400 mx-auto' />
-        <h2 className='text-lg font-semibold text-white'>
+        <h2 className='text-lg font-semibold text-content-primary'>
           Your results are ready!
         </h2>
-        <p className='text-sm text-zinc-400 max-w-sm mx-auto'>
+        <p className='text-sm text-content-muted max-w-sm mx-auto'>
           Create an account to reveal your cosmic compatibility
         </p>
 

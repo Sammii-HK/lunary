@@ -192,28 +192,28 @@ export function NativeAppSettings() {
             <div className='flex items-center gap-3'>
               <Download className='w-5 h-5 text-lunary-primary-400' />
               <div>
-                <p className='text-sm font-medium text-white'>
+                <p className='text-sm font-medium text-content-primary'>
                   Offline Content
                 </p>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   Download grimoire for offline reading
                 </p>
               </div>
             </div>
-            <span className='text-xs text-zinc-500'>{cacheSize}</span>
+            <span className='text-xs text-content-muted'>{cacheSize}</span>
           </div>
 
           <div className='flex gap-2'>
             <button
               onClick={handlePrecache}
               disabled={isPrecaching}
-              className='flex-1 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 text-white py-2 px-3 rounded-lg text-sm transition-colors'
+              className='flex-1 bg-surface-overlay hover:bg-surface-overlay disabled:opacity-50 text-content-primary py-2 px-3 rounded-lg text-sm transition-colors'
             >
               {isPrecaching ? 'Downloading...' : 'Download'}
             </button>
             <button
               onClick={handleClearCache}
-              className='p-2 text-zinc-400 hover:text-red-400 transition-colors'
+              className='p-2 text-content-muted hover:text-red-400 transition-colors'
               title='Clear cache'
             >
               <Trash2 className='w-4 h-4' />
@@ -221,11 +221,11 @@ export function NativeAppSettings() {
           </div>
 
           {precacheResult && (
-            <p className='text-xs text-zinc-400'>{precacheResult}</p>
+            <p className='text-xs text-content-muted'>{precacheResult}</p>
           )}
         </div>
 
-        <p className='text-xs text-zinc-500 pt-2 border-t border-zinc-700'>
+        <p className='text-xs text-content-muted pt-2 border-t border-stroke-default'>
           <Smartphone className='w-3 h-3 inline mr-1' />
           More settings available in the Lunary app
         </p>
@@ -247,7 +247,7 @@ export function NativeAppSettings() {
       onClick={() => onChange(!enabled)}
       disabled={disabled}
       className={`relative w-11 h-6 rounded-full transition-colors disabled:opacity-50 ${
-        enabled ? 'bg-lunary-primary-600' : 'bg-zinc-600'
+        enabled ? 'bg-lunary-primary-600' : 'bg-surface-overlay'
       }`}
     >
       <span
@@ -266,8 +266,10 @@ export function NativeAppSettings() {
         <div className='flex items-center gap-3'>
           <Vibrate className='w-5 h-5 text-lunary-primary-400' />
           <div>
-            <p className='text-sm font-medium text-white'>Haptic Feedback</p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-sm font-medium text-content-primary'>
+              Haptic Feedback
+            </p>
+            <p className='text-xs text-content-muted'>
               Feel vibrations when interacting
             </p>
           </div>
@@ -276,19 +278,19 @@ export function NativeAppSettings() {
       </div>
 
       {/* Native Push Notifications */}
-      <div className='space-y-4 pt-4 border-t border-zinc-700'>
+      <div className='space-y-4 pt-4 border-t border-stroke-default'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-3'>
             {pushRegistered ? (
               <Bell className='w-5 h-5 text-lunary-primary-400' />
             ) : (
-              <BellOff className='w-5 h-5 text-zinc-500' />
+              <BellOff className='w-5 h-5 text-content-muted' />
             )}
             <div>
-              <p className='text-sm font-medium text-white'>
+              <p className='text-sm font-medium text-content-primary'>
                 Push Notifications
               </p>
-              <p className='text-xs text-zinc-400'>
+              <p className='text-xs text-content-muted'>
                 {pushRegistered
                   ? 'Receive cosmic alerts on this device'
                   : 'Enable to receive notifications'}
@@ -299,7 +301,7 @@ export function NativeAppSettings() {
             <button
               onClick={handleEnablePush}
               disabled={isPushLoading}
-              className='bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:opacity-50 text-white py-1.5 px-3 rounded-lg text-sm transition-colors'
+              className='bg-lunary-primary-600 hover:bg-layer-high disabled:opacity-50 text-white py-1.5 px-3 rounded-lg text-sm transition-colors'
             >
               {isPushLoading ? 'Enabling...' : 'Enable'}
             </button>
@@ -307,7 +309,7 @@ export function NativeAppSettings() {
             <button
               onClick={handleDisablePush}
               disabled={isPushLoading}
-              className='text-zinc-400 hover:text-red-400 text-sm transition-colors'
+              className='text-content-muted hover:text-red-400 text-sm transition-colors'
             >
               Disable
             </button>
@@ -319,8 +321,10 @@ export function NativeAppSettings() {
           <div className='space-y-3 pl-8'>
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-sm text-zinc-200'>Daily Tarot Card</p>
-                <p className='text-xs text-zinc-500'>Morning card of the day</p>
+                <p className='text-sm text-content-primary'>Daily Tarot Card</p>
+                <p className='text-xs text-content-muted'>
+                  Morning card of the day
+                </p>
               </div>
               <ToggleSwitch
                 enabled={pushPreferences.daily_card ?? true}
@@ -331,8 +335,10 @@ export function NativeAppSettings() {
 
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-sm text-zinc-200'>Moon Phases</p>
-                <p className='text-xs text-zinc-500'>New & full moon alerts</p>
+                <p className='text-sm text-content-primary'>Moon Phases</p>
+                <p className='text-xs text-content-muted'>
+                  New & full moon alerts
+                </p>
               </div>
               <ToggleSwitch
                 enabled={pushPreferences.moon_phase ?? true}
@@ -343,8 +349,10 @@ export function NativeAppSettings() {
 
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-sm text-zinc-200'>Transit Alerts</p>
-                <p className='text-xs text-zinc-500'>Major planetary shifts</p>
+                <p className='text-sm text-content-primary'>Transit Alerts</p>
+                <p className='text-xs text-content-muted'>
+                  Major planetary shifts
+                </p>
               </div>
               <ToggleSwitch
                 enabled={pushPreferences.transit ?? true}
@@ -355,8 +363,10 @@ export function NativeAppSettings() {
 
             <div className='flex items-center justify-between'>
               <div>
-                <p className='text-sm text-zinc-200'>Weekly Report</p>
-                <p className='text-xs text-zinc-500'>Sunday cosmic summary</p>
+                <p className='text-sm text-content-primary'>Weekly Report</p>
+                <p className='text-xs text-content-muted'>
+                  Sunday cosmic summary
+                </p>
               </div>
               <ToggleSwitch
                 enabled={pushPreferences.weekly_report ?? true}
@@ -369,31 +379,33 @@ export function NativeAppSettings() {
       </div>
 
       {/* Offline Content */}
-      <div className='space-y-3 pt-4 border-t border-zinc-700'>
+      <div className='space-y-3 pt-4 border-t border-stroke-default'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-3'>
             <Download className='w-5 h-5 text-lunary-primary-400' />
             <div>
-              <p className='text-sm font-medium text-white'>Offline Content</p>
-              <p className='text-xs text-zinc-400'>
+              <p className='text-sm font-medium text-content-primary'>
+                Offline Content
+              </p>
+              <p className='text-xs text-content-muted'>
                 Download grimoire for offline access
               </p>
             </div>
           </div>
-          <span className='text-xs text-zinc-500'>{cacheSize}</span>
+          <span className='text-xs text-content-muted'>{cacheSize}</span>
         </div>
 
         <div className='flex gap-2'>
           <button
             onClick={handlePrecache}
             disabled={isPrecaching}
-            className='flex-1 bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:opacity-50 text-white py-2 px-3 rounded-lg text-sm transition-colors'
+            className='flex-1 bg-lunary-primary-600 hover:bg-layer-high disabled:opacity-50 text-white py-2 px-3 rounded-lg text-sm transition-colors'
           >
             {isPrecaching ? 'Downloading...' : 'Download Offline Content'}
           </button>
           <button
             onClick={handleClearCache}
-            className='p-2 text-zinc-400 hover:text-red-400 transition-colors'
+            className='p-2 text-content-muted hover:text-red-400 transition-colors'
             title='Clear cache'
           >
             <Trash2 className='w-4 h-4' />
@@ -401,7 +413,7 @@ export function NativeAppSettings() {
         </div>
 
         {precacheResult && (
-          <p className='text-xs text-zinc-400'>{precacheResult}</p>
+          <p className='text-xs text-content-muted'>{precacheResult}</p>
         )}
       </div>
     </div>

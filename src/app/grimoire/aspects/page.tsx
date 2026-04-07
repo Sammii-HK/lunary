@@ -24,17 +24,17 @@ const ASPECT_COLOR: Record<
   harmonious: {
     border: 'border-lunary-success-500/70',
     bg: 'bg-gradient-to-br from-lunary-success-900/30 to-lunary-success-950/30',
-    badge: 'bg-lunary-success-900 text-lunary-success-300',
+    badge: 'bg-layer-base text-lunary-success-300',
   },
   challenging: {
     border: 'border-lunary-error-500/60',
     bg: 'bg-gradient-to-br from-lunary-error-900/30 to-lunary-error-950/30',
-    badge: 'bg-lunary-error-900 text-lunary-error-300',
+    badge: 'bg-layer-base text-lunary-error-300',
   },
   neutral: {
-    border: 'border-zinc-700/70',
-    bg: 'bg-gradient-to-br from-zinc-900/60 to-zinc-950/40',
-    badge: 'bg-zinc-900 text-zinc-300',
+    border: 'border-stroke-default/70',
+    bg: 'bg-gradient-to-br from-surface-elevated/60 to-surface-base/40',
+    badge: 'bg-surface-elevated text-content-secondary',
   },
 };
 
@@ -102,7 +102,7 @@ export default function AspectsIndexPage() {
   });
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(aspectsListSchema)}
       {renderJsonLd(
         createBreadcrumbSchema([
@@ -119,7 +119,7 @@ export default function AspectsIndexPage() {
         />
 
         <h1 className='text-4xl font-light mb-4'>Astrological Aspects</h1>
-        <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
+        <p className='text-lg text-content-muted mb-8 max-w-3xl'>
           Aspects are the angles between planets in a chart, revealing how their
           energies interact. From harmonious trines to challenging squares, each
           aspect tells a unique story.
@@ -137,7 +137,7 @@ export default function AspectsIndexPage() {
               >
                 <div className='flex items-start justify-between gap-4 mb-4'>
                   <div>
-                    <p className='text-[0.65rem] uppercase tracking-[0.4em] text-zinc-400'>
+                    <p className='text-[0.65rem] uppercase tracking-[0.4em] text-content-muted'>
                       Aspect sign
                     </p>
                     <span className='text-4xl font-medium leading-none'>
@@ -145,10 +145,10 @@ export default function AspectsIndexPage() {
                     </span>
                   </div>
                   <div className='text-right'>
-                    <p className='text-[0.65rem] uppercase tracking-[0.4em] text-zinc-400'>
+                    <p className='text-[0.65rem] uppercase tracking-[0.4em] text-content-muted'>
                       Degrees
                     </p>
-                    <span className='text-lg font-semibold text-zinc-100'>
+                    <span className='text-lg font-semibold text-content-primary'>
                       {data.degrees}°
                     </span>
                   </div>
@@ -158,12 +158,14 @@ export default function AspectsIndexPage() {
                 >
                   {data.displayName}
                 </span>
-                <p className='text-sm text-zinc-200 mb-3'>{data.description}</p>
-                <div className='flex flex-wrap gap-2 text-[0.65rem] uppercase tracking-[0.3em] text-zinc-300'>
+                <p className='text-sm text-content-primary mb-3'>
+                  {data.description}
+                </p>
+                <div className='flex flex-wrap gap-2 text-[0.65rem] uppercase tracking-[0.3em] text-content-secondary'>
                   {data.keywords.map((keyword) => (
                     <span
                       key={keyword}
-                      className='rounded-full border border-zinc-700 px-2 py-1 bg-black/20'
+                      className='rounded-full border border-stroke-default px-2 py-1 bg-surface-base/20'
                     >
                       {keyword}
                     </span>
@@ -182,30 +184,30 @@ export default function AspectsIndexPage() {
             <Link
               key={planet}
               href={`/grimoire/aspects/${planet}/conjunct/${PLANETS.find((p) => p !== planet) || 'moon'}`}
-              className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+              className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
             >
               <div className='text-3xl mb-2'>{PLANET_SYMBOLS[planet]}</div>
-              <h3 className='text-lg font-medium group-hover:text-lunary-primary-300 transition-colors'>
+              <h3 className='text-lg font-medium group-hover:text-content-brand transition-colors'>
                 {PLANET_DISPLAY[planet]} Aspects
               </h3>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 Explore all {PLANET_DISPLAY[planet]} aspect combinations
               </p>
             </Link>
           ))}
         </div>
 
-        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
+        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+          <h2 className='text-xl font-medium text-content-brand mb-2'>
             Find Aspects in Your Chart
           </h2>
-          <p className='text-zinc-300 mb-4'>
+          <p className='text-content-secondary mb-4'>
             Discover the aspects in your natal chart and understand how your
             planetary energies interact.
           </p>
           <Link
             href='/birth-chart'
-            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+            className='inline-flex px-6 py-3 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
           >
             View Your Birth Chart
           </Link>

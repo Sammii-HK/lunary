@@ -59,12 +59,12 @@ const HoroscopeView = dynamic(
 function DashboardSkeleton() {
   return (
     <div className='p-4 space-y-4 animate-pulse'>
-      <div className='h-8 bg-zinc-800/50 rounded w-48' />
-      <div className='h-4 bg-zinc-800/30 rounded w-64' />
+      <div className='h-8 bg-surface-card/50 rounded w-48' />
+      <div className='h-4 bg-surface-card/30 rounded w-64' />
       <div className='space-y-3 mt-6'>
-        <div className='h-32 bg-zinc-800/30 rounded-xl' />
-        <div className='h-32 bg-zinc-800/30 rounded-xl' />
-        <div className='h-32 bg-zinc-800/30 rounded-xl' />
+        <div className='h-32 bg-surface-card/30 rounded-xl' />
+        <div className='h-32 bg-surface-card/30 rounded-xl' />
+        <div className='h-32 bg-surface-card/30 rounded-xl' />
       </div>
     </div>
   );
@@ -261,7 +261,7 @@ export function DemoClient() {
   };
 
   return (
-    <div className='flex flex-col h-full w-full bg-zinc-950'>
+    <div className='flex flex-col h-full w-full bg-surface-base'>
       {/* Content area - Demo content area */}
       <div
         className='flex-1 overflow-y-auto demo-mobile-view'
@@ -304,7 +304,7 @@ export function DemoClient() {
                     {activeTab === 'guide' && (
                       <div className='relative h-full'>
                         <div
-                          className='absolute inset-0 z-50 flex items-center justify-center bg-zinc-950/80 backdrop-blur-sm cursor-not-allowed'
+                          className='absolute inset-0 z-50 flex items-center justify-center bg-surface-base/80 backdrop-blur-sm cursor-not-allowed'
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -314,10 +314,10 @@ export function DemoClient() {
                           <div className='text-center space-y-4 p-8'>
                             <MessageCircle className='w-12 h-12 mx-auto text-lunary-primary-400' />
                             <div>
-                              <p className='text-sm text-zinc-300 mb-2'>
+                              <p className='text-sm text-content-secondary mb-2'>
                                 Astral Guide Chat
                               </p>
-                              <p className='text-xs text-zinc-500 mb-4'>
+                              <p className='text-xs text-content-muted mb-4'>
                                 Not available in demo - sign up to chat with
                                 your personalized guide
                               </p>
@@ -344,7 +344,7 @@ export function DemoClient() {
                     {activeTab === 'explore' && (
                       <div className='relative h-full'>
                         <div
-                          className='absolute inset-0 z-50 flex items-center justify-center bg-zinc-950/80 backdrop-blur-sm cursor-not-allowed'
+                          className='absolute inset-0 z-50 flex items-center justify-center bg-surface-base/80 backdrop-blur-sm cursor-not-allowed'
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -352,12 +352,12 @@ export function DemoClient() {
                           }}
                         >
                           <div className='text-center space-y-4 p-8'>
-                            <MoreHorizontal className='w-12 h-12 mx-auto text-zinc-600' />
+                            <MoreHorizontal className='w-12 h-12 mx-auto text-content-muted' />
                             <div>
-                              <p className='text-sm text-zinc-300 mb-2'>
+                              <p className='text-sm text-content-secondary mb-2'>
                                 Profile & More
                               </p>
-                              <p className='text-xs text-zinc-500 mb-4'>
+                              <p className='text-xs text-content-muted mb-4'>
                                 Not available in demo - sign up to customize
                                 your profile
                               </p>
@@ -390,10 +390,10 @@ export function DemoClient() {
       </div>
 
       {/* Tab bar - EXACT same as MarketingMiniApp */}
-      <nav className='border-t border-stone-800 bg-zinc-950/95 backdrop-blur-sm'>
+      <nav className='border-t border-stone-800 bg-surface-base/95 backdrop-blur-sm'>
         {/* Progress bar - show when auto-cycling */}
         {!userHasInteracted && (
-          <div className='h-0.5 bg-zinc-800 relative overflow-hidden'>
+          <div className='h-0.5 bg-surface-card relative overflow-hidden'>
             <div
               className='h-full bg-lunary-primary-400 transition-all duration-75'
               style={{ width: `${cycleProgress}%` }}
@@ -401,7 +401,7 @@ export function DemoClient() {
           </div>
         )}
 
-        <div className='flex w-full h-12 items-center justify-around px-2 py-2 text-white'>
+        <div className='flex w-full h-12 items-center justify-around px-2 py-2 text-content-primary'>
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -422,7 +422,7 @@ export function DemoClient() {
                   'flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition',
                   isActive
                     ? 'text-lunary-secondary'
-                    : 'text-zinc-400 hover:text-zinc-300',
+                    : 'text-content-muted hover:text-content-secondary',
                   willBeNext && 'animate-pulse',
                 )}
               >

@@ -103,27 +103,27 @@ export function AdminInstallPrompt() {
       case 'installed':
         return {
           label: 'Installed',
-          color: 'bg-lunary-success-900 text-lunary-success-300',
+          color: 'bg-layer-base text-lunary-success-300',
         };
       case 'prompting':
         return {
           label: 'Prompting…',
-          color: 'bg-lunary-secondary-900 text-lunary-secondary-300',
+          color: 'bg-layer-base text-content-brand-secondary',
         };
       case 'error':
         return {
           label: 'Needs Attention',
-          color: 'bg-lunary-error-900 text-lunary-error-300',
+          color: 'bg-layer-base text-lunary-error-300',
         };
       default:
-        return { label: 'Ready', color: 'bg-white/10 text-white/80' };
+        return { label: 'Ready', color: 'bg-white/10 text-content-primary/80' };
     }
   }, [status]);
 
   const renderInstructions = () => (
-    <div className='mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/80'>
+    <div className='mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-content-primary/80'>
       <p className='font-medium mb-2'>Manual installation</p>
-      <ol className='list-decimal list-inside space-y-1 text-white/70'>
+      <ol className='list-decimal list-inside space-y-1 text-content-primary/70'>
         <li>
           Ensure the admin icon in the URL bar shows “Install” (Chrome/Edge).
         </li>
@@ -133,7 +133,7 @@ export function AdminInstallPrompt() {
         </li>
         <li>Confirm, then open the app from your dock/app drawer.</li>
       </ol>
-      <p className='mt-3 text-xs text-white/50'>
+      <p className='mt-3 text-xs text-content-primary/50'>
         Need Safari? Use the Share ➜ “Add to Dock” flow after opening this page
         in Safari.
       </p>
@@ -146,13 +146,13 @@ export function AdminInstallPrompt() {
     <div className='rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 via-white/2 to-transparent p-6 shadow-2xl backdrop-blur'>
       <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-white/50'>
+          <p className='text-xs uppercase tracking-[0.4em] text-content-primary/50'>
             Admin PWA
           </p>
-          <h2 className='text-2xl font-light text-white'>
+          <h2 className='text-2xl font-light text-content-primary'>
             Install Lunary Admin on desktop
           </h2>
-          <p className='text-sm text-white/70 max-w-2xl mt-2'>
+          <p className='text-sm text-content-primary/70 max-w-2xl mt-2'>
             You’ll get lightning-fast access, offline storage of drafts, and
             instant push alerts for new content. Works in Chrome, Edge, Arc, and
             Safari (manual).
@@ -166,7 +166,7 @@ export function AdminInstallPrompt() {
           </span>
           <button
             onClick={handleInstall}
-            className='rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20 disabled:opacity-60'
+            className='rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-content-primary transition hover:bg-white/20 disabled:opacity-60'
             disabled={status === 'installed' || isStandalone}
           >
             {isStandalone
@@ -180,7 +180,7 @@ export function AdminInstallPrompt() {
       {error && <p className='mt-3 text-sm text-lunary-error-300'>{error}</p>}
       {showInstructions && !isStandalone && renderInstructions()}
       {isStandalone && (
-        <p className='mt-4 text-xs text-white/50'>
+        <p className='mt-4 text-xs text-content-primary/50'>
           Running in standalone mode ({displayMode}). Notifications and
           shortcuts are enabled.
         </p>

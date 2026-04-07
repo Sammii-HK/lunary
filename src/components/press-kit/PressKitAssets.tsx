@@ -91,19 +91,21 @@ const assetGroups: PressAssetGroup[] = [
 
 export function PressKitAssets() {
   return (
-    <section className='space-y-6 rounded-3xl border border-white/10 bg-black/40 p-6'>
+    <section className='space-y-6 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
       <div className='flex flex-col gap-2'>
-        <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
+        <p className='text-xs uppercase tracking-[0.4em] text-content-secondary'>
           Downloadables
         </p>
-        <h3 className='text-3xl font-semibold text-white'>Press Kit Assets</h3>
-        <p className='text-sm text-zinc-300'>
+        <h3 className='text-3xl font-semibold text-content-primary'>
+          Press Kit Assets
+        </h3>
+        <p className='text-sm text-content-secondary'>
           Download logos, product screenshots, founder portraits, brand assets,
           and ready-to-use materials for media coverage.
         </p>
         <Link
           href='/press-kit/lunary-press-kit.zip'
-          className='inline-flex w-fit items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-lunary-primary-400'
+          className='inline-flex w-fit items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-content-primary transition hover:border-lunary-primary-400'
         >
           <Download className='h-4 w-4' />
           Download All Assets (.zip)
@@ -117,10 +119,10 @@ export function PressKitAssets() {
             className='space-y-3 rounded-2xl border border-white/10 p-4'
           >
             <div className='flex flex-col gap-1'>
-              <h4 className='text-xl font-semibold text-white'>
+              <h4 className='text-xl font-semibold text-content-primary'>
                 {group.title}
               </h4>
-              <p className='text-sm text-zinc-400'>{group.description}</p>
+              <p className='text-sm text-content-muted'>{group.description}</p>
             </div>
             <div className='grid gap-3 md:grid-cols-2'>
               {group.assets.map((asset) => (
@@ -130,22 +132,24 @@ export function PressKitAssets() {
                 >
                   <div className='flex items-center justify-between gap-2'>
                     <div>
-                      <p className='font-semibold text-white'>{asset.name}</p>
+                      <p className='font-semibold text-content-primary'>
+                        {asset.name}
+                      </p>
                       {asset.description && (
-                        <p className='text-xs text-zinc-400'>
+                        <p className='text-xs text-content-muted'>
                           {asset.description}
                         </p>
                       )}
                     </div>
-                    <span className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
+                    <span className='text-xs uppercase tracking-[0.3em] text-content-secondary'>
                       {asset.format}
                     </span>
                   </div>
-                  <p className='text-xs text-zinc-400'>{asset.size}</p>
+                  <p className='text-xs text-content-muted'>{asset.size}</p>
                   <a
                     href={asset.file}
                     download
-                    className='inline-flex items-center gap-1 text-sm text-lunary-primary-200 hover:text-lunary-primary-100'
+                    className='inline-flex items-center gap-1 text-sm text-content-secondary hover:text-content-secondary'
                   >
                     <Download className='h-4 w-4' />
                     Download
@@ -158,11 +162,11 @@ export function PressKitAssets() {
       </div>
 
       <div className='rounded-2xl border border-lunary-primary-400/20 bg-lunary-primary-500/10 p-4'>
-        <p className='text-sm text-lunary-primary-100'>
+        <p className='text-sm text-content-secondary'>
           Need something specific? Email{' '}
           <a
             href='mailto:press@lunary.app'
-            className='underline decoration-lunary-primary-200 hover:text-white'
+            className='underline decoration-lunary-primary-200 hover:text-content-primary'
           >
             press@lunary.app
           </a>{' '}
@@ -170,7 +174,7 @@ export function PressKitAssets() {
         </p>
         <Link
           href='/press-kit/press-release-template.md'
-          className='mt-2 inline-flex items-center gap-2 text-sm text-white underline decoration-white/40'
+          className='mt-2 inline-flex items-center gap-2 text-sm text-content-primary underline decoration-white/40'
         >
           <ExternalLink className='h-4 w-4' />
           Press release template

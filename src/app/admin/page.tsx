@@ -82,14 +82,14 @@ function LockedAdminBackdrop() {
       metric: '8 drafts',
       status: 'Awaiting review',
       icon: BookOpen,
-      accent: 'text-lunary-secondary-300',
+      accent: 'text-content-brand-secondary',
     },
     {
       title: 'Notifications',
       metric: '12.4k subs',
       status: 'Queued',
       icon: Bell,
-      accent: 'text-lunary-primary-300',
+      accent: 'text-content-brand',
     },
     {
       title: 'Shop Manager',

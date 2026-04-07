@@ -143,9 +143,9 @@ export default async function QuestionPage({ params }: Props) {
             <Heading variant='h1' as='h1'>
               {data.question.text}
             </Heading>
-            <div className='flex items-center gap-3 mt-2 text-xs text-zinc-500'>
+            <div className='flex items-center gap-3 mt-2 text-xs text-content-muted'>
               {data.question.topicTag && (
-                <span className='px-2 py-0.5 rounded-full border border-zinc-700 text-zinc-400'>
+                <span className='px-2 py-0.5 rounded-full border border-stroke-default text-content-muted'>
                   {data.question.topicTag}
                 </span>
               )}

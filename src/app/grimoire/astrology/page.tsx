@@ -228,10 +228,10 @@ export default function AstrologyIndexPage() {
         <div className='space-y-12'>
           {astrologyGroups.map((group) => (
             <section key={group.title}>
-              <h2 className='text-2xl font-medium text-zinc-100 mb-3'>
+              <h2 className='text-2xl font-medium text-content-primary mb-3'>
                 {group.title}
               </h2>
-              <p className='text-sm text-zinc-400 mb-6 max-w-2xl'>
+              <p className='text-sm text-content-muted mb-6 max-w-2xl'>
                 {group.description}
               </p>
               <div className='grid md:grid-cols-2 gap-4'>
@@ -248,12 +248,12 @@ export default function AstrologyIndexPage() {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all group'
+                      className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 hover:bg-surface-elevated transition-all group'
                     >
-                      <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                      <h3 className='text-lg font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                         {item.name}
                       </h3>
-                      <p className='text-sm text-zinc-400 mt-2'>
+                      <p className='text-sm text-content-muted mt-2'>
                         {item.description}
                       </p>
                     </Link>

@@ -158,15 +158,15 @@ export function MarketingFooter() {
   ].filter((link) => link.url);
 
   return (
-    <footer className='border-t border-zinc-800/50 bg-zinc-950/50'>
+    <footer className='border-t border-stroke-subtle/50 bg-surface-base/50'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10'>
         {/* Top: Brand + Social */}
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8'>
           <Link
             href='/'
-            className='flex items-center gap-2 text-xl font-medium font-mono text-zinc-100 tracking-tight hover:text-lunary-primary transition-colors'
+            className='flex items-center gap-2 text-xl font-medium font-mono text-content-primary tracking-tight hover:text-lunary-primary transition-colors'
           >
-            <Logo size={24} />
+            <Logo size={32} />
             Lunary
           </Link>
           <div className='flex items-center gap-2'>
@@ -176,7 +176,7 @@ export function MarketingFooter() {
                 href={social.url}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='inline-flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-lunary-primary transition-colors'
+                className='inline-flex items-center justify-center w-9 h-9 rounded-lg bg-surface-elevated/50 hover:bg-surface-card text-content-muted hover:text-lunary-primary transition-colors'
                 aria-label={social.label}
                 title={social.label}
               >
@@ -192,7 +192,7 @@ export function MarketingFooter() {
             <nav key={section.key} className='space-y-2'>
               <Link
                 href={section.href}
-                className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3 inline-flex hover:text-zinc-200 transition-colors'
+                className='text-xs font-medium text-content-muted uppercase tracking-wider mb-3 inline-flex hover:text-content-primary transition-colors'
               >
                 {section.label}
               </Link>
@@ -200,7 +200,7 @@ export function MarketingFooter() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+                  className='block text-sm text-content-muted hover:text-content-primary transition-colors'
                 >
                   {item.title}
                 </Link>
@@ -211,8 +211,8 @@ export function MarketingFooter() {
         </div>
 
         {/* Copyright */}
-        <div className='pt-6 border-t border-zinc-800/50'>
-          <p className='text-xs text-zinc-400 text-center'>
+        <div className='pt-6 border-t border-stroke-subtle/50'>
+          <p className='text-xs text-content-muted text-center'>
             © {new Date().getFullYear()} Lunar Computing, Inc. All rights
             reserved.
           </p>

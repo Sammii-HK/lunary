@@ -874,32 +874,32 @@ export function OnboardingFlow({
   }
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4'>
-      <div className='relative bg-zinc-900 border border-zinc-700 rounded-lg p-6 md:p-8 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto'>
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-surface-base/70 backdrop-blur-sm p-4'>
+      <div className='relative bg-surface-elevated border border-stroke-default rounded-lg p-6 md:p-8 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto'>
         <button
           onClick={handleSkip}
-          className='absolute top-4 right-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors'
+          className='absolute top-4 right-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-content-muted hover:text-content-primary transition-colors'
           aria-label='Skip onboarding'
         >
           <X className='w-5 h-5' />
         </button>
 
         {showSkipWarning && (
-          <div className='absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/70 py-4 px-6'>
-            <div className='w-full max-w-sm rounded-lg border border-zinc-800 bg-zinc-950 p-4 text-left shadow-lg'>
+          <div className='absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-surface-base/70 py-4 px-6'>
+            <div className='w-full max-w-sm rounded-lg border border-stroke-subtle bg-surface-base p-4 text-left shadow-lg'>
               <div className='flex items-start justify-between gap-4'>
                 <div>
-                  <h3 className='text-sm font-semibold text-white mb-2'>
+                  <h3 className='text-sm font-semibold text-content-primary mb-2'>
                     Skip setup?
                   </h3>
-                  <p className='text-xs text-zinc-300'>
+                  <p className='text-xs text-content-secondary'>
                     Personalised insights and your birth chart won&apos;t be
                     available until you add your birthday in your profile.
                   </p>
                 </div>
                 <button
                   onClick={cancelSkip}
-                  className='text-zinc-400 hover:text-white'
+                  className='text-content-muted hover:text-content-primary'
                   aria-label='Cancel'
                 >
                   <X className='h-4 w-4' />
@@ -934,7 +934,7 @@ export function OnboardingFlow({
         )}
 
         {previewHeader && (
-          <div className='mb-4 rounded-lg border border-zinc-800 bg-zinc-950/60 p-3'>
+          <div className='mb-4 rounded-lg border border-stroke-subtle bg-surface-base/60 p-3'>
             {previewHeader}
           </div>
         )}
@@ -947,7 +947,7 @@ export function OnboardingFlow({
             return (
               <div
                 key={step}
-                className={`flex h-6 w-6 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/60 ${isActive ? 'ring-2 ring-lunary-primary-500' : ''}`}
+                className={`flex h-6 w-6 items-center justify-center rounded-full border border-stroke-default bg-surface-elevated/60 ${isActive ? 'ring-2 ring-lunary-primary-500' : ''}`}
                 aria-label={phase.label}
                 title={phase.label}
               >
@@ -963,36 +963,36 @@ export function OnboardingFlow({
               <div className='inline-flex items-center justify-center w-16 h-16 mb-2'>
                 <FullMoonLargeIcon />
               </div>
-              <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
+              <h2 className='text-base font-semibold text-content-primary mb-2 md:text-lg'>
                 Welcome to Lunary
               </h2>
-              <p className='text-sm text-zinc-300'>
+              <p className='text-sm text-content-secondary'>
                 We&apos;ll build your birth chart and tailor your daily guidance
                 in just a moment.
               </p>
             </div>
 
             <div className='space-y-4'>
-              <div className='p-4 bg-gradient-to-br from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded-lg border border-lunary-primary-800'>
+              <div className='p-4 bg-gradient-to-br from-layer-base/20 to-lunary-highlight-900/20 rounded-lg border border-lunary-primary-800'>
                 <div className='flex items-center justify-between mb-2'>
-                  <h3 className='text-sm font-semibold text-white flex items-center gap-2'>
-                    <Sparkles className='w-4 h-4 text-lunary-accent-300' />
+                  <h3 className='text-sm font-semibold text-content-primary flex items-center gap-2'>
+                    <Sparkles className='w-4 h-4 text-content-brand-accent' />
                     {isSubscribedOrTrial
                       ? `You’ve got ${activePlan.name}`
                       : 'What’s waiting for you'}
                   </h3>
                   {isSubscribedOrTrial && (
-                    <span className='text-[10px] uppercase tracking-wide text-lunary-accent-200/80'>
+                    <span className='text-[10px] uppercase tracking-wide text-content-brand-accent/80'>
                       Premium features included
                     </span>
                   )}
                 </div>
-                <p className='text-xs text-zinc-300 mb-3'>
+                <p className='text-xs text-content-secondary mb-3'>
                   {isSubscribedOrTrial
                     ? 'Thanks for joining. Here’s everything now available in your plan.'
                     : 'Here’s what you can explore right away with a free account.'}
                 </p>
-                <div className='space-y-3 text-xs text-zinc-300'>
+                <div className='space-y-3 text-xs text-content-secondary'>
                   {planHighlights.map((section) => {
                     const isExpanded = expandedHighlights === section.title;
                     const visibleItems = isExpanded
@@ -1001,7 +1001,7 @@ export function OnboardingFlow({
 
                     return (
                       <div key={section.title} className='space-y-2'>
-                        <div className='text-[11px] font-semibold uppercase tracking-wide text-zinc-400 flex items-center justify-between'>
+                        <div className='text-[11px] font-semibold uppercase tracking-wide text-content-muted flex items-center justify-between'>
                           {section.title}
                           {section.items.length > 1 && (
                             <button
@@ -1011,7 +1011,7 @@ export function OnboardingFlow({
                                   prev === section.title ? null : section.title,
                                 )
                               }
-                              className='inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-lunary-accent-200/80 hover:text-lunary-accent-100 transition-colors'
+                              className='inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-content-brand-accent/80 hover:text-content-brand-accent transition-colors'
                             >
                               {isExpanded ? 'Show fewer' : 'View all'}
                               <ChevronDown
@@ -1028,7 +1028,7 @@ export function OnboardingFlow({
                               key={feature}
                               className='flex items-start gap-2'
                             >
-                              <span className='text-lunary-accent-300 mt-0.5'>
+                              <span className='text-content-brand-accent mt-0.5'>
                                 •
                               </span>
                               <span>{feature}</span>
@@ -1064,12 +1064,12 @@ export function OnboardingFlow({
         {currentStep === 'birthday' && (
           <div className='space-y-6'>
             <div className='text-center'>
-              <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
+              <h2 className='text-base font-semibold text-content-primary mb-2 md:text-lg'>
                 {hasBirthdayFromSignup
                   ? 'Refine Your Birth Chart'
                   : 'When Were You Born?'}
               </h2>
-              <p className='text-zinc-300 text-sm'>
+              <p className='text-content-secondary text-sm'>
                 {hasBirthdayFromSignup
                   ? 'Add your birth time and location for a more accurate chart.'
                   : 'Your birthday lets us calculate your birth chart and personalise your daily guidance.'}
@@ -1078,44 +1078,44 @@ export function OnboardingFlow({
 
             <div className='space-y-4'>
               <div className='grid gap-3'>
-                <div className='flex items-start gap-3 rounded-lg bg-zinc-800/50 p-3'>
-                  <div className='flex-shrink-0 w-9 h-9 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
-                    <Calendar className='w-4 h-4 text-lunary-accent-300' />
+                <div className='flex items-start gap-3 rounded-lg bg-surface-card/50 p-3'>
+                  <div className='flex-shrink-0 w-9 h-9 rounded-full bg-layer-base flex items-center justify-center'>
+                    <Calendar className='w-4 h-4 text-content-brand-accent' />
                   </div>
                   <div>
-                    <h3 className='text-xs font-semibold text-white mb-1'>
+                    <h3 className='text-xs font-semibold text-content-primary mb-1'>
                       Your Birth Chart
                     </h3>
-                    <p className='text-xs text-zinc-400'>
+                    <p className='text-xs text-content-muted'>
                       Discover your unique planetary positions and cosmic
                       blueprint.
                     </p>
                   </div>
                 </div>
 
-                <div className='flex items-start gap-3 rounded-lg bg-zinc-800/50 p-3'>
-                  <div className='flex-shrink-0 w-9 h-9 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
-                    <Star className='w-4 h-4 text-lunary-accent-300' />
+                <div className='flex items-start gap-3 rounded-lg bg-surface-card/50 p-3'>
+                  <div className='flex-shrink-0 w-9 h-9 rounded-full bg-layer-base flex items-center justify-center'>
+                    <Star className='w-4 h-4 text-content-brand-accent' />
                   </div>
                   <div>
-                    <h3 className='text-xs font-semibold text-white mb-1'>
+                    <h3 className='text-xs font-semibold text-content-primary mb-1'>
                       Daily Guidance
                     </h3>
-                    <p className='text-xs text-zinc-400'>
+                    <p className='text-xs text-content-muted'>
                       Insights aligned to your chart and today&apos;s sky.
                     </p>
                   </div>
                 </div>
 
-                <div className='flex items-start gap-3 rounded-lg bg-zinc-800/50 p-3'>
-                  <div className='flex-shrink-0 w-9 h-9 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
-                    <NotebookPen className='w-4 h-4 text-lunary-accent-300' />
+                <div className='flex items-start gap-3 rounded-lg bg-surface-card/50 p-3'>
+                  <div className='flex-shrink-0 w-9 h-9 rounded-full bg-layer-base flex items-center justify-center'>
+                    <NotebookPen className='w-4 h-4 text-content-brand-accent' />
                   </div>
                   <div>
-                    <h3 className='text-xs font-semibold text-white mb-1'>
+                    <h3 className='text-xs font-semibold text-content-primary mb-1'>
                       Tarot + Rituals
                     </h3>
-                    <p className='text-xs text-zinc-400'>
+                    <p className='text-xs text-content-muted'>
                       Daily tarot guidance and ritual prompts to reflect.
                     </p>
                   </div>
@@ -1123,7 +1123,7 @@ export function OnboardingFlow({
               </div>
 
               <div>
-                <label className='block text-sm font-medium text-zinc-300 mb-2'>
+                <label className='block text-sm font-medium text-content-secondary mb-2'>
                   Birthday (recommended)
                 </label>
                 <BirthdayInput value={birthday} onChange={setBirthday} />
@@ -1132,35 +1132,35 @@ export function OnboardingFlow({
               <button
                 type='button'
                 onClick={() => setShowOptionalDetails((prev) => !prev)}
-                className='flex w-full items-center justify-between rounded-lg border border-zinc-700 bg-zinc-900/40 px-4 py-3 text-xs text-zinc-300 transition hover:border-zinc-600'
+                className='flex w-full items-center justify-between rounded-lg border border-stroke-default bg-surface-elevated/40 px-4 py-3 text-xs text-content-secondary transition hover:border-stroke-strong'
               >
                 <span>
                   Optional: add birth time &amp; location for accuracy
                 </span>
                 <ChevronDown
-                  className={`h-4 w-4 text-zinc-400 transition-transform ${showOptionalDetails ? 'rotate-180' : ''}`}
+                  className={`h-4 w-4 text-content-muted transition-transform ${showOptionalDetails ? 'rotate-180' : ''}`}
                 />
               </button>
 
               {showOptionalDetails && (
-                <div className='space-y-4 rounded-lg border border-zinc-700 bg-zinc-900/40 p-4'>
+                <div className='space-y-4 rounded-lg border border-stroke-default bg-surface-elevated/40 p-4'>
                   <div>
-                    <label className='block text-sm font-medium text-zinc-300 mb-2'>
+                    <label className='block text-sm font-medium text-content-secondary mb-2'>
                       Birth Time (optional)
                     </label>
                     <input
                       type='time'
                       value={birthTime}
                       onChange={(e) => setBirthTime(e.target.value)}
-                      className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                      className='w-full px-4 py-3 bg-surface-card border border-stroke-default rounded-lg text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                     />
-                    <p className='text-xs text-zinc-400 mt-1'>
+                    <p className='text-xs text-content-muted mt-1'>
                       More precise time = more accurate chart
                     </p>
                   </div>
 
                   <div>
-                    <label className='block text-sm font-medium text-zinc-300 mb-2'>
+                    <label className='block text-sm font-medium text-content-secondary mb-2'>
                       Birth Location (optional)
                     </label>
                     <div className='relative'>
@@ -1176,25 +1176,25 @@ export function OnboardingFlow({
                         onFocus={cancelLocationSuggestionBlur}
                         onBlur={scheduleCloseLocationSuggestions}
                         placeholder='City, Country or coordinates'
-                        className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                        className='w-full px-4 py-3 bg-surface-card border border-stroke-default rounded-lg text-content-primary placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                       />
                       {showLocationSuggestions && (
-                        <div className='absolute z-20 mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 shadow-xl'>
+                        <div className='absolute z-20 mt-2 w-full rounded-lg border border-stroke-default bg-surface-elevated shadow-xl'>
                           {isLoadingLocationSuggestions ? (
-                            <div className='px-4 py-3 text-xs text-zinc-400'>
+                            <div className='px-4 py-3 text-xs text-content-muted'>
                               Loading suggestions...
                             </div>
                           ) : locationSuggestionError ? (
-                            <div className='px-4 py-3 text-xs text-zinc-400'>
+                            <div className='px-4 py-3 text-xs text-content-muted'>
                               {locationSuggestionError}
                             </div>
                           ) : locationSuggestions.length === 0 ? (
-                            <div className='px-4 py-3 text-xs text-zinc-400'>
+                            <div className='px-4 py-3 text-xs text-content-muted'>
                               No matches found. Try adding a country or use
                               coordinates.
                             </div>
                           ) : (
-                            <ul className='max-h-56 overflow-y-auto py-1 text-sm text-zinc-200'>
+                            <ul className='max-h-56 overflow-y-auto py-1 text-sm text-content-primary'>
                               {locationSuggestions.map((suggestion) => (
                                 <li key={suggestion.label}>
                                   <button
@@ -1205,7 +1205,7 @@ export function OnboardingFlow({
                                     onClick={() =>
                                       handleLocationSuggestionSelect(suggestion)
                                     }
-                                    className='w-full px-4 py-2 text-left hover:bg-zinc-800/70 transition-colors'
+                                    className='w-full px-4 py-2 text-left hover:bg-surface-card/70 transition-colors'
                                   >
                                     {suggestion.label}
                                   </button>
@@ -1220,7 +1220,7 @@ export function OnboardingFlow({
                 </div>
               )}
 
-              <p className='text-xs text-zinc-400'>
+              <p className='text-xs text-content-muted'>
                 We use this to calculate your birth chart and planetary
                 positions. Birth time and location can improve accuracy.
               </p>
@@ -1263,10 +1263,10 @@ export function OnboardingFlow({
             <div className='inline-flex items-center justify-center w-16 h-16 mb-4'>
               <FullMoonLargeIcon />
             </div>
-            <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
+            <h2 className='text-base font-semibold text-content-primary mb-2 md:text-lg'>
               Where would you like to go?
             </h2>
-            <p className='text-zinc-300 mb-6 text-sm'>
+            <p className='text-content-secondary mb-6 text-sm'>
               Jump into your daily overview or explore a specific area.
             </p>
 
@@ -1274,42 +1274,42 @@ export function OnboardingFlow({
               <Link
                 href='/app'
                 onClick={handleComplete}
-                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
+                className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
               >
                 Daily overview
               </Link>
               <Link
                 href='/tarot'
                 onClick={handleComplete}
-                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
+                className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
               >
                 Tarot
               </Link>
               <Link
                 href='/horoscope'
                 onClick={handleComplete}
-                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
+                className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
               >
                 Horoscope
               </Link>
               <Link
                 href='/profile'
                 onClick={handleComplete}
-                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
+                className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
               >
                 Profile
               </Link>
               <Link
                 href='/app/birth-chart'
                 onClick={handleComplete}
-                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
+                className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
               >
                 Birth chart
               </Link>
               <Link
                 href='/grimoire'
                 onClick={handleComplete}
-                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
+                className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-4 py-3 text-sm text-content-primary transition hover:border-lunary-primary-700'
               >
                 Grimoire
               </Link>

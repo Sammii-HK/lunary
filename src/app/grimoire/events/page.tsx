@@ -147,79 +147,79 @@ export default function EventsIndexPage() {
       <div className='space-y-8'>
         <Link
           href={`/grimoire/events/${currentYear}`}
-          className='group block p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 hover:bg-lunary-primary-900/20 transition-colors'
+          className='group block p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10 hover:bg-layer-base/20 transition-colors'
         >
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-4'>
-              <div className='p-3 rounded-lg bg-lunary-primary-900/20'>
+              <div className='p-3 rounded-lg bg-layer-base/20'>
                 <Calendar className='h-8 w-8 text-lunary-primary-400' />
               </div>
               <div>
-                <h2 className='text-xl font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                <h2 className='text-xl font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                   {currentYear} Astrology Events
                 </h2>
-                <p className='text-zinc-400'>
+                <p className='text-content-muted'>
                   Complete guide to retrogrades, eclipses, lunar events, and
                   more
                 </p>
               </div>
             </div>
-            <ArrowRight className='h-6 w-6 text-zinc-400 group-hover:text-lunary-primary-400 transition-colors' />
+            <ArrowRight className='h-6 w-6 text-content-muted group-hover:text-lunary-primary-400 transition-colors' />
           </div>
         </Link>
 
         <div className='grid md:grid-cols-2 gap-4'>
           <Link
             href={`/grimoire/events/${currentYear}/mercury-retrograde`}
-            className='group p-4 rounded-lg border border-lunary-rose-700 bg-lunary-rose-950 hover:bg-lunary-rose-900 transition-colors'
+            className='group p-4 rounded-lg border border-lunary-rose-700 bg-layer-deep hover:bg-layer-base transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 group-hover:text-lunary-rose-300 mb-1'>
+            <h3 className='font-medium text-content-primary group-hover:text-lunary-rose-300 mb-1'>
               Mercury Retrograde {currentYear}
             </h3>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Retrograde periods: dates, meanings, survival tips
             </p>
           </Link>
 
           <Link
             href={`/grimoire/events/${currentYear}/venus-retrograde`}
-            className='group p-4 rounded-lg border border-lunary-rose-700 bg-lunary-rose-950 hover:bg-lunary-rose-900 transition-colors'
+            className='group p-4 rounded-lg border border-lunary-rose-700 bg-layer-deep hover:bg-layer-base transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 group-hover:text-lunary-rose-300 mb-1'>
+            <h3 className='font-medium text-content-primary group-hover:text-lunary-rose-300 mb-1'>
               Venus Retrograde {currentYear}
             </h3>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Love, relationships, self-worth themes
             </p>
           </Link>
 
           <Link
             href={`/grimoire/events/${currentYear}/eclipses`}
-            className='group p-4 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 hover:bg-lunary-accent-900 transition-colors'
+            className='group p-4 rounded-lg border border-lunary-accent-700 bg-layer-deep hover:bg-layer-base transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 group-hover:text-lunary-accent-300 mb-1'>
+            <h3 className='font-medium text-content-primary group-hover:text-content-brand-accent mb-1'>
               {currentYear} Eclipses
             </h3>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Solar & lunar eclipses, meanings, rituals
             </p>
           </Link>
 
           <Link
             href={`/grimoire/moon/${currentYear}`}
-            className='group p-4 rounded-lg border border-lunary-secondary-700 bg-lunary-secondary-950 hover:bg-lunary-secondary-900 transition-colors'
+            className='group p-4 rounded-lg border border-lunary-secondary-700 bg-layer-deep hover:bg-layer-base transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 group-hover:text-lunary-secondary-300 mb-1'>
+            <h3 className='font-medium text-content-primary group-hover:text-content-brand-secondary mb-1'>
               Full Moons & Lunar Events
             </h3>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Full moon dates, lunar themes, and moon phase guidance
             </p>
           </Link>
         </div>
 
         <div>
-          <h2 className='text-2xl font-medium text-white mb-3 flex items-center gap-2'>
+          <h2 className='text-2xl font-medium text-content-primary mb-3 flex items-center gap-2'>
             Other Years
           </h2>
           <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
@@ -227,9 +227,9 @@ export default function EventsIndexPage() {
               <Link
                 key={year}
                 href={`/grimoire/events/${year}`}
-                className='group p-4 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 hover:bg-lunary-primary-900/20 transition-colors'
+                className='group p-4 rounded-lg border border-lunary-primary-700 bg-layer-base/10 hover:bg-layer-base/20 transition-colors'
               >
-                <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                <h3 className='font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                   {year} Astrology Events
                 </h3>
               </Link>

@@ -74,7 +74,7 @@ export function FrequentCardsSection({
               {allowDrillDown && expandedCard === card.name && (
                 <div className='pl-4 pr-2 pb-2 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200'>
                   {cardData?.keywords?.length ? (
-                    <p className='text-xs text-lunary-accent-300'>
+                    <p className='text-xs text-content-brand-accent'>
                       {cardData.keywords.slice(0, 4).join(' · ')}
                     </p>
                   ) : null}

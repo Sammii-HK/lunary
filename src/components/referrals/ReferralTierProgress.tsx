@@ -24,7 +24,7 @@ export function ReferralTierProgress({
     <div className='space-y-4'>
       {/* Progress bar */}
       <div className='relative'>
-        <div className='h-2 bg-zinc-800 rounded-full overflow-hidden'>
+        <div className='h-2 bg-surface-card rounded-full overflow-hidden'>
           <div
             className='h-full bg-gradient-to-r from-lunary-primary-600 to-lunary-accent rounded-full transition-all duration-500'
             style={{
@@ -46,8 +46,8 @@ export function ReferralTierProgress({
                 <div
                   className={`w-4 h-4 rounded-full border-2 flex items-center justify-center -mt-3 ${
                     tier.reached
-                      ? 'border-lunary-primary-400 bg-lunary-primary-900'
-                      : 'border-zinc-600 bg-zinc-800'
+                      ? 'border-lunary-primary-400 bg-layer-base'
+                      : 'border-stroke-strong bg-surface-card'
                   }`}
                 >
                   {tier.reached && (
@@ -67,15 +67,15 @@ export function ReferralTierProgress({
             key={tier.threshold}
             className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
               tier.reached
-                ? 'border-lunary-primary-700/50 bg-lunary-primary-950/30'
-                : 'border-zinc-800 bg-zinc-900/30'
+                ? 'border-lunary-primary-700/50 bg-layer-deep/30'
+                : 'border-stroke-subtle bg-surface-elevated/30'
             }`}
           >
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                 tier.reached
-                  ? 'bg-lunary-primary-900/50 text-lunary-primary-400'
-                  : 'bg-zinc-800 text-zinc-500'
+                  ? 'bg-layer-base/50 text-lunary-primary-400'
+                  : 'bg-surface-card text-content-muted'
               }`}
             >
               {tier.threshold}
@@ -83,12 +83,12 @@ export function ReferralTierProgress({
             <div className='flex-1 min-w-0'>
               <p
                 className={`text-sm font-medium ${
-                  tier.reached ? 'text-lunary-primary-300' : 'text-zinc-400'
+                  tier.reached ? 'text-content-brand' : 'text-content-muted'
                 }`}
               >
                 {tier.label}
               </p>
-              <p className='text-xs text-zinc-500'>{tier.description}</p>
+              <p className='text-xs text-content-muted'>{tier.description}</p>
             </div>
             {tier.reached && (
               <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />

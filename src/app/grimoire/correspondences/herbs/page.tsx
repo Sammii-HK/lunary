@@ -179,10 +179,10 @@ Not all magical herbs are safe for consumption or skin contact. Always research 
         faqs={faqs}
       >
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             All Magical Herbs
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Click on any herb to explore its full correspondences, magical uses,
             and practical applications.
           </p>
@@ -191,15 +191,15 @@ Not all magical herbs are safe for consumption or skin contact. Always research 
               <Link
                 key={name}
                 href={`/grimoire/correspondences/herbs/${stringToKebabCase(name)}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-emerald-700/50 transition-all'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-emerald-700/50 transition-all'
               >
-                <h3 className='text-lg font-medium text-zinc-100 group-hover:text-emerald-300 transition-colors mb-2'>
+                <h3 className='text-lg font-medium text-content-primary group-hover:text-emerald-300 transition-colors mb-2'>
                   {name}
                 </h3>
-                <p className='text-sm text-zinc-400 mb-2'>
+                <p className='text-sm text-content-muted mb-2'>
                   {data.correspondences.slice(0, 3).join(', ')}
                 </p>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   Planet: {data.planets.join(', ')}
                 </p>
               </Link>
@@ -208,31 +208,31 @@ Not all magical herbs are safe for consumption or skin contact. Always research 
         </section>
 
         <section className='mb-12 bg-emerald-950/20 border border-emerald-900/50 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Quick Reference: Herbs by Purpose
           </h2>
           <div className='grid md:grid-cols-2 gap-4 text-sm'>
             <div>
               <p className='text-emerald-400 font-medium'>Protection:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Sage, Rosemary, Basil, Bay, Black Pepper
               </p>
             </div>
             <div>
               <p className='text-emerald-400 font-medium'>Love:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Rose, Lavender, Jasmine, Hibiscus, Damiana
               </p>
             </div>
             <div>
               <p className='text-emerald-400 font-medium'>Prosperity:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Basil, Cinnamon, Mint, Bay, Chamomile
               </p>
             </div>
             <div>
               <p className='text-emerald-400 font-medium'>Divination:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Mugwort, Yarrow, Bay, Star Anise, Wormwood
               </p>
             </div>

@@ -278,7 +278,7 @@ Different breathing patterns activate different nervous system responses:
           faqs={faqs}
         >
           <section className='mb-12'>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Breathwork Techniques
             </h2>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -286,7 +286,7 @@ Different breathing patterns activate different nervous system responses:
                 <Link
                   key={technique.slug}
                   href={`/grimoire/meditation/breathwork/${technique.slug}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-cyan-700/50 transition-all'
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-cyan-700/50 transition-all'
                 >
                   <div className='flex items-center justify-between mb-2'>
                     <span
@@ -301,11 +301,13 @@ Different breathing patterns activate different nervous system responses:
                       {technique.difficulty}
                     </span>
                   </div>
-                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-cyan-300 transition-colors mb-1'>
+                  <h3 className='text-lg font-medium text-content-primary group-hover:text-cyan-300 transition-colors mb-1'>
                     {technique.name}
                   </h3>
-                  <p className='text-sm text-zinc-400 mb-2'>{technique.aka}</p>
-                  <p className='text-sm text-zinc-400'>
+                  <p className='text-sm text-content-muted mb-2'>
+                    {technique.aka}
+                  </p>
+                  <p className='text-sm text-content-muted'>
                     {technique.description}
                   </p>
                 </Link>

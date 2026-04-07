@@ -79,18 +79,18 @@ export function VOCMoonSchedule({
 
   if (variant === 'compact') {
     return (
-      <div className='rounded-lg border border-zinc-700/50 bg-zinc-900/50 p-3'>
+      <div className='rounded-lg border border-stroke-default/50 bg-surface-elevated/50 p-3'>
         <div className='flex items-center gap-2 mb-2'>
-          <Moon className='h-4 w-4 text-zinc-400' />
-          <span className='text-xs font-medium text-zinc-300'>
+          <Moon className='h-4 w-4 text-content-muted' />
+          <span className='text-xs font-medium text-content-secondary'>
             Void of Course Moon
           </span>
         </div>
-        <p className='text-xs text-zinc-400'>
+        <p className='text-xs text-content-muted'>
           {voidPeriods.length} VOC period{voidPeriods.length > 1 ? 's' : ''}{' '}
           this week
         </p>
-        <p className='text-xs text-zinc-500 mt-1'>
+        <p className='text-xs text-content-muted mt-1'>
           Pause new beginnings during these times
         </p>
       </div>
@@ -101,15 +101,15 @@ export function VOCMoonSchedule({
   return (
     <section className='space-y-4'>
       <h2 className='text-2xl font-bold flex items-center gap-2'>
-        <Moon className='h-6 w-6 text-zinc-400' />
+        <Moon className='h-6 w-6 text-content-muted' />
         Void of Course Moon Schedule
       </h2>
 
-      <div className='rounded-xl border border-zinc-700/50 bg-zinc-900/50 p-6'>
+      <div className='rounded-xl border border-stroke-default/50 bg-surface-elevated/50 p-6'>
         {/* Explanation */}
-        <div className='mb-6 p-4 rounded-lg bg-zinc-800/50 border border-zinc-700/30'>
-          <p className='text-sm text-zinc-300'>
-            <strong className='text-zinc-100'>
+        <div className='mb-6 p-4 rounded-lg bg-surface-card/50 border border-stroke-default/30'>
+          <p className='text-sm text-content-secondary'>
+            <strong className='text-content-primary'>
               What is Void of Course Moon?
             </strong>{' '}
             When the Moon makes no more major aspects before entering a new
@@ -121,7 +121,7 @@ export function VOCMoonSchedule({
 
         {/* VOC Periods */}
         <div className='space-y-3 mb-6'>
-          <h3 className='text-sm font-medium text-zinc-300'>
+          <h3 className='text-sm font-medium text-content-secondary'>
             This Week's VOC Periods
           </h3>
           {voidPeriods.map((period, index) => {
@@ -135,29 +135,29 @@ export function VOCMoonSchedule({
             return (
               <div
                 key={index}
-                className='flex items-start gap-3 p-3 rounded-lg bg-zinc-800/30 border border-zinc-700/20'
+                className='flex items-start gap-3 p-3 rounded-lg bg-surface-card/30 border border-stroke-default/20'
               >
-                <div className='w-8 h-8 rounded-full bg-zinc-700/50 flex items-center justify-center flex-shrink-0'>
-                  <Moon className='h-4 w-4 text-zinc-400' />
+                <div className='w-8 h-8 rounded-full bg-surface-overlay/50 flex items-center justify-center flex-shrink-0'>
+                  <Moon className='h-4 w-4 text-content-muted' />
                 </div>
                 <div className='flex-1'>
                   <div className='flex flex-wrap items-center gap-2 text-sm'>
-                    <span className='font-medium text-zinc-200'>
+                    <span className='font-medium text-content-primary'>
                       {startDate.toLocaleDateString('en-US', {
                         weekday: 'short',
                         month: 'short',
                         day: 'numeric',
                       })}
                     </span>
-                    <span className='text-zinc-500'>
+                    <span className='text-content-muted'>
                       {formatTime(startDate)} → {formatTime(endDate)}
                     </span>
-                    <span className='text-xs px-2 py-0.5 rounded-full bg-zinc-700/50 text-zinc-400'>
+                    <span className='text-xs px-2 py-0.5 rounded-full bg-surface-overlay/50 text-content-muted'>
                       {formatDuration(startDate, endDate)}
                     </span>
                   </div>
                   {period.guidance && (
-                    <p className='text-xs text-zinc-400 mt-1'>
+                    <p className='text-xs text-content-muted mt-1'>
                       {period.guidance}
                     </p>
                   )}
@@ -178,7 +178,7 @@ export function VOCMoonSchedule({
               {vocGuidance.embrace.map((item) => (
                 <li
                   key={item}
-                  className='text-sm text-zinc-400 flex items-start gap-2'
+                  className='text-sm text-content-muted flex items-start gap-2'
                 >
                   <span className='text-emerald-500 mt-1'>•</span>
                   {item}
@@ -196,7 +196,7 @@ export function VOCMoonSchedule({
               {vocGuidance.avoid.map((item) => (
                 <li
                   key={item}
-                  className='text-sm text-zinc-400 flex items-start gap-2'
+                  className='text-sm text-content-muted flex items-start gap-2'
                 >
                   <span className='text-rose-500 mt-1'>•</span>
                   {item}

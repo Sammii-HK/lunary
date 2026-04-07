@@ -19,7 +19,7 @@ export function ArcanaBalanceRadial({
 
   if (total === 0) {
     return (
-      <div className='flex items-center justify-center h-[200px] text-sm text-zinc-500'>
+      <div className='flex items-center justify-center h-[200px] text-sm text-content-muted'>
         No arcana data available
       </div>
     );
@@ -115,7 +115,7 @@ export function ArcanaBalanceRadial({
               className='w-3 h-3 rounded-full'
               style={{ backgroundColor: item.fill }}
             />
-            <span className='text-xs text-zinc-300'>
+            <span className='text-xs text-content-secondary'>
               {item.name}: {item.count} ({formatPercentage(item.value)})
             </span>
           </div>
@@ -123,12 +123,12 @@ export function ArcanaBalanceRadial({
       </div>
 
       {showInterpretation && (
-        <div className='text-xs space-y-1 px-2 pt-2 border-t border-zinc-800'>
-          <p className='text-zinc-300 font-medium'>
+        <div className='text-xs space-y-1 px-2 pt-2 border-t border-stroke-subtle'>
+          <p className='text-content-secondary font-medium'>
             {interpretation.interpretation}
           </p>
-          <p className='text-zinc-500'>{interpretation.focus}</p>
-          <p className='text-zinc-600 text-[10px] mt-2'>
+          <p className='text-content-muted'>{interpretation.focus}</p>
+          <p className='text-content-muted text-[10px] mt-2'>
             Expected: ~28% Major, ~72% Minor
           </p>
         </div>

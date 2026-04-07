@@ -243,12 +243,12 @@ export function ShareWeeklyPattern({ onDataFetch }: ShareWeeklyPatternProps) {
   // Show locked state if not enough readings
   if (!hasEnoughData) {
     return (
-      <div className='flex flex-col items-center gap-2 p-4 border border-zinc-700/50 rounded-lg bg-zinc-900/30'>
-        <Lock className='w-5 h-5 text-zinc-500' />
-        <p className='text-sm text-zinc-400 text-center'>
+      <div className='flex flex-col items-center gap-2 p-4 border border-stroke-default/50 rounded-lg bg-surface-elevated/30'>
+        <Lock className='w-5 h-5 text-content-muted' />
+        <p className='text-sm text-content-muted text-center'>
           Share your weekly pattern after 3+ tarot readings
         </p>
-        <p className='text-xs text-zinc-500'>
+        <p className='text-xs text-content-muted'>
           {patternData?.readingCount || 0}/3 readings this week
         </p>
       </div>
@@ -259,7 +259,7 @@ export function ShareWeeklyPattern({ onDataFetch }: ShareWeeklyPatternProps) {
     <div className='flex flex-col items-center justify-center'>
       <button
         onClick={handleOpen}
-        className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 px-4 py-2 text-sm font-medium text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-lunary-primary-900/20 transition-colors'
+        className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-layer-base/10 px-4 py-2 text-sm font-medium text-content-secondary hover:text-content-secondary hover:bg-layer-base/20 transition-colors'
       >
         <Share2 className='w-4 h-4' />
         Share This Week's Pattern
@@ -297,7 +297,7 @@ export function ShareWeeklyPattern({ onDataFetch }: ShareWeeklyPatternProps) {
               socialUrls={socialUrls}
             />
 
-            <p className='mt-4 text-xs text-zinc-400 text-center'>
+            <p className='mt-4 text-xs text-content-muted text-center'>
               Track your tarot patterns at lunary.app
             </p>
           </>
@@ -308,7 +308,7 @@ export function ShareWeeklyPattern({ onDataFetch }: ShareWeeklyPatternProps) {
             <p className='text-red-400 mb-4'>{error}</p>
             <button
               onClick={generateCard}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors'
             >
               Try Again
             </button>

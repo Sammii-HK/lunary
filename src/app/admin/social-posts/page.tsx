@@ -1215,7 +1215,7 @@ export default function SocialPostsPage() {
   const queuedPrimaryTheme = resolveQueueWeekTheme();
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 p-6'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-6'>
       {/* Toast notification */}
       {toastMessage && (
         <div
@@ -1235,7 +1235,7 @@ export default function SocialPostsPage() {
               <Sparkles className='h-8 w-8 text-lunary-primary-400' />
               Social Media Manager
             </h1>
-            <p className='text-zinc-400'>
+            <p className='text-content-muted'>
               Generate and manage social media posts
             </p>
           </div>
@@ -1251,18 +1251,18 @@ export default function SocialPostsPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className='flex gap-4 border-b border-zinc-800'>
+        <div className='flex gap-4 border-b border-stroke-subtle'>
           <button
             onClick={() => setActiveTab('approve')}
             className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
               activeTab === 'approve'
-                ? 'text-white'
-                : 'text-zinc-400 hover:text-zinc-300'
+                ? 'text-content-primary'
+                : 'text-content-muted hover:text-content-secondary'
             }`}
           >
             Approval Queue
             {pendingCount > 0 && (
-              <Badge className='ml-2 bg-lunary-accent-900 text-lunary-accent border-lunary-accent-700 text-xs'>
+              <Badge className='ml-2 bg-layer-base text-lunary-accent border-lunary-accent-700 text-xs'>
                 {pendingCount}
               </Badge>
             )}
@@ -1274,8 +1274,8 @@ export default function SocialPostsPage() {
             onClick={() => setActiveTab('generate')}
             className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
               activeTab === 'generate'
-                ? 'text-white'
-                : 'text-zinc-400 hover:text-zinc-300'
+                ? 'text-content-primary'
+                : 'text-content-muted hover:text-content-secondary'
             }`}
           >
             Generate Posts
@@ -1288,7 +1288,7 @@ export default function SocialPostsPage() {
         {/* Generate Tab */}
         {activeTab === 'generate' && (
           <div className='space-y-6'>
-            <Card className='bg-zinc-900 border-zinc-800'>
+            <Card className='bg-surface-elevated border-stroke-subtle'>
               <CardHeader>
                 <CardTitle>Post Configuration</CardTitle>
                 <CardDescription>
@@ -1306,7 +1306,7 @@ export default function SocialPostsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, platform: e.target.value })
                       }
-                      className='w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white'
+                      className='w-full px-3 py-2 bg-surface-card border border-stroke-default rounded-lg text-content-primary'
                     >
                       <option value='instagram'>Instagram</option>
                       <option value='twitter'>Twitter/X</option>
@@ -1324,7 +1324,7 @@ export default function SocialPostsPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, postType: e.target.value })
                       }
-                      className='w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white'
+                      className='w-full px-3 py-2 bg-surface-card border border-stroke-default rounded-lg text-content-primary'
                     >
                       <option value='feature'>Feature Highlight</option>
                       <option value='benefit'>User Benefits</option>
@@ -1347,7 +1347,7 @@ export default function SocialPostsPage() {
                         setFormData({ ...formData, topic: e.target.value })
                       }
                       placeholder='e.g., Birth charts, Daily horoscopes'
-                      className='w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white'
+                      className='w-full px-3 py-2 bg-surface-card border border-stroke-default rounded-lg text-content-primary'
                     />
                   </div>
 
@@ -1366,7 +1366,7 @@ export default function SocialPostsPage() {
                           count: parseInt(e.target.value) || 3,
                         })
                       }
-                      className='w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white'
+                      className='w-full px-3 py-2 bg-surface-card border border-stroke-default rounded-lg text-content-primary'
                     />
                   </div>
 
@@ -1382,7 +1382,7 @@ export default function SocialPostsPage() {
                           weekOffset: parseInt(e.target.value) || 0,
                         })
                       }
-                      className='w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white'
+                      className='w-full px-3 py-2 bg-surface-card border border-stroke-default rounded-lg text-content-primary'
                     >
                       <option value={0}>Current Week</option>
                       <option value={1}>Next Week (+1)</option>
@@ -1404,7 +1404,7 @@ export default function SocialPostsPage() {
                           includeCTA: e.target.checked,
                         })
                       }
-                      className='w-4 h-4 rounded border-zinc-700 bg-zinc-800'
+                      className='w-4 h-4 rounded border-stroke-default bg-surface-card'
                     />
                     <span className='text-sm'>Include Call-to-Action</span>
                   </label>
@@ -1414,7 +1414,7 @@ export default function SocialPostsPage() {
                   <Button
                     onClick={handleGenerate}
                     disabled={loading}
-                    className='w-full bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
+                    className='w-full bg-lunary-primary-600 hover:bg-layer-high text-white'
                   >
                     {loading ? (
                       <>
@@ -1429,55 +1429,55 @@ export default function SocialPostsPage() {
                     )}
                   </Button>
                   {/* Thematic Mode Toggle */}
-                  <div className='flex items-center gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                  <div className='flex items-center gap-2 p-3 bg-surface-card/50 rounded-lg border border-stroke-default'>
                     <input
                       type='checkbox'
                       id='thematic-mode'
                       checked={useThematicMode}
                       onChange={(e) => setUseThematicMode(e.target.checked)}
-                      className='w-4 h-4 rounded border-zinc-600 bg-zinc-700 text-lunary-primary-500 focus:ring-lunary-primary-500'
+                      className='w-4 h-4 rounded border-stroke-strong bg-surface-overlay text-lunary-primary-500 focus:ring-lunary-primary-500'
                     />
                     <label
                       htmlFor='thematic-mode'
-                      className='text-sm text-zinc-300 cursor-pointer'
+                      className='text-sm text-content-secondary cursor-pointer'
                     >
                       Use thematic content (weekly themes with daily facets)
                     </label>
                   </div>
-                  <div className='flex items-center gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                  <div className='flex items-center gap-2 p-3 bg-surface-card/50 rounded-lg border border-stroke-default'>
                     <input
                       type='checkbox'
                       id='replace-existing'
                       checked={replaceExisting}
                       onChange={(e) => setReplaceExisting(e.target.checked)}
-                      className='w-4 h-4 rounded border-zinc-600 bg-zinc-700 text-lunary-primary-500 focus:ring-lunary-primary-500'
+                      className='w-4 h-4 rounded border-stroke-strong bg-surface-overlay text-lunary-primary-500 focus:ring-lunary-primary-500'
                     />
                     <label
                       htmlFor='replace-existing'
-                      className='text-sm text-zinc-300 cursor-pointer'
+                      className='text-sm text-content-secondary cursor-pointer'
                     >
                       Replace existing pending + approved posts for that week
                     </label>
                   </div>
-                  <div className='flex items-center gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                  <div className='flex items-center gap-2 p-3 bg-surface-card/50 rounded-lg border border-stroke-default'>
                     <input
                       type='checkbox'
                       id='videos-only'
                       checked={videosOnly}
                       onChange={(e) => setVideosOnly(e.target.checked)}
-                      className='w-4 h-4 rounded border-zinc-600 bg-zinc-700 text-lunary-primary-500 focus:ring-lunary-primary-500'
+                      className='w-4 h-4 rounded border-stroke-strong bg-surface-overlay text-lunary-primary-500 focus:ring-lunary-primary-500'
                     />
                     <label
                       htmlFor='videos-only'
-                      className='text-sm text-zinc-300 cursor-pointer'
+                      className='text-sm text-content-secondary cursor-pointer'
                     >
                       Generate videos only (skip post regeneration)
                     </label>
                   </div>
-                  <div className='rounded-lg border border-zinc-700 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-400'>
+                  <div className='rounded-lg border border-stroke-default bg-surface-elevated/40 px-3 py-2 text-xs text-content-muted'>
                     <p>
                       Primary theme:
-                      <span className='ml-1 font-medium text-white'>
+                      <span className='ml-1 font-medium text-content-primary'>
                         {queuedPrimaryTheme || 'Pending'}
                       </span>
                     </p>
@@ -1488,7 +1488,7 @@ export default function SocialPostsPage() {
                       onClick={() => handleGenerateWeekly(0)}
                       disabled={loading}
                       variant='outline'
-                      className='border-lunary-success-700 text-lunary-success hover:bg-lunary-success-950'
+                      className='border-lunary-success-700 text-lunary-success hover:bg-layer-deep'
                     >
                       <Calendar className='h-4 w-4 mr-2' />
                       Current Week
@@ -1497,7 +1497,7 @@ export default function SocialPostsPage() {
                       onClick={() => handleGenerateWeekly(1)}
                       disabled={loading}
                       variant='outline'
-                      className='border-lunary-primary-600 text-lunary-primary-400 hover:bg-lunary-primary-900/10'
+                      className='border-lunary-primary-600 text-lunary-primary-400 hover:bg-layer-base/10'
                     >
                       <Calendar className='h-4 w-4 mr-2' />
                       Next Week
@@ -1506,7 +1506,7 @@ export default function SocialPostsPage() {
                       onClick={() => handleGenerateWeekly(2)}
                       disabled={loading}
                       variant='outline'
-                      className='border-lunary-secondary-600 text-lunary-secondary-400 hover:bg-lunary-secondary-900/10'
+                      className='border-lunary-secondary-600 text-lunary-secondary-400 hover:bg-layer-base/10'
                     >
                       <Calendar className='h-4 w-4 mr-2' />
                       Week After Next
@@ -1517,7 +1517,7 @@ export default function SocialPostsPage() {
             </Card>
 
             {posts.length > 0 && (
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardHeader>
                   <CardTitle className='flex items-center gap-2'>
                     {platformIcons[formData.platform]}
@@ -1532,20 +1532,20 @@ export default function SocialPostsPage() {
                     {posts.map((post, index) => (
                       <div
                         key={index}
-                        className='p-4 bg-zinc-800 rounded-lg border border-zinc-700 relative group'
+                        className='p-4 bg-surface-card rounded-lg border border-stroke-default relative group'
                       >
-                        <p className='text-zinc-200 whitespace-pre-wrap mb-3'>
+                        <p className='text-content-primary whitespace-pre-wrap mb-3'>
                           {post}
                         </p>
                         <div className='flex items-center justify-between'>
-                          <span className='text-xs text-zinc-400'>
+                          <span className='text-xs text-content-muted'>
                             {post.length} characters
                           </span>
                           <Button
                             onClick={() => copyToClipboard(post, index)}
                             variant='ghost'
                             size='sm'
-                            className='h-8 text-zinc-400 hover:text-white'
+                            className='h-8 text-content-muted hover:text-content-primary'
                           >
                             {copiedIndex === index ? (
                               <>
@@ -1574,25 +1574,25 @@ export default function SocialPostsPage() {
           <div className='space-y-6'>
             <div className='flex items-center justify-between'>
               <div className='flex gap-4 items-center'>
-                <div className='text-center px-4 py-2 bg-zinc-900 rounded-lg border border-zinc-800'>
+                <div className='text-center px-4 py-2 bg-surface-elevated rounded-lg border border-stroke-subtle'>
                   <div className='text-2xl font-bold text-lunary-accent'>
                     {pendingCount}
                   </div>
-                  <div className='text-xs text-zinc-400'>Pending</div>
+                  <div className='text-xs text-content-muted'>Pending</div>
                 </div>
-                <div className='text-center px-4 py-2 bg-zinc-900 rounded-lg border border-zinc-800'>
+                <div className='text-center px-4 py-2 bg-surface-elevated rounded-lg border border-stroke-subtle'>
                   <div className='text-2xl font-bold text-lunary-success'>
                     {approvedCount}
                   </div>
-                  <div className='text-xs text-zinc-400'>Approved</div>
+                  <div className='text-xs text-content-muted'>Approved</div>
                 </div>
                 {(queuedVideoCount > 0 ||
                   processingVideoCount > 0 ||
                   failedVideoCount > 0 ||
                   missingScriptCount > 0) && (
-                  <div className='flex gap-2 items-center text-xs text-zinc-300'>
+                  <div className='flex gap-2 items-center text-xs text-content-secondary'>
                     {queuedVideoCount > 0 && (
-                      <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600'>
+                      <Badge className='bg-surface-card text-content-primary border-stroke-strong'>
                         {queuedVideoCount} queued
                       </Badge>
                     )}
@@ -1603,7 +1603,7 @@ export default function SocialPostsPage() {
                         disabled={requeueingProcessing}
                         className='disabled:cursor-not-allowed'
                       >
-                        <Badge className='bg-lunary-primary-900/30 text-lunary-primary-300 border-lunary-primary-700'>
+                        <Badge className='bg-layer-base/30 text-content-brand border-lunary-primary-700'>
                           {requeueingProcessing
                             ? 'Requeuing...'
                             : `${processingVideoCount} processing`}
@@ -1617,7 +1617,7 @@ export default function SocialPostsPage() {
                         disabled={requeueingFailed}
                         className='disabled:cursor-not-allowed'
                       >
-                        <Badge className='bg-lunary-error-900/30 text-lunary-error border-lunary-error-700'>
+                        <Badge className='bg-layer-base/30 text-lunary-error border-lunary-error-700'>
                           {requeueingFailed
                             ? 'Requeuing...'
                             : `${failedVideoCount} failed`}
@@ -1631,7 +1631,7 @@ export default function SocialPostsPage() {
                         disabled={generatingMissingScripts}
                         className='disabled:cursor-not-allowed'
                       >
-                        <Badge className='bg-lunary-accent-900/30 text-lunary-accent-300 border-lunary-accent-700'>
+                        <Badge className='bg-layer-base/30 text-content-brand-accent border-lunary-accent-700'>
                           {generatingMissingScripts
                             ? 'Generating...'
                             : `${missingScriptCount} missing scripts`}
@@ -1645,7 +1645,7 @@ export default function SocialPostsPage() {
                 <Button
                   onClick={() => handleBulkAction('approve_all')}
                   disabled={loading || bulkActionLoading === 'approve_all'}
-                  className='bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
+                  className='bg-lunary-primary-600 hover:bg-layer-high text-white'
                 >
                   {bulkActionLoading === 'approve_all'
                     ? 'Approving...'
@@ -1655,7 +1655,7 @@ export default function SocialPostsPage() {
                   onClick={() => handleBulkAction('clear_all')}
                   disabled={loading || bulkActionLoading === 'clear_all'}
                   variant='outline'
-                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                  className='border-stroke-default text-content-secondary hover:bg-surface-card'
                 >
                   {bulkActionLoading === 'clear_all'
                     ? 'Clearing...'
@@ -1665,7 +1665,7 @@ export default function SocialPostsPage() {
                   onClick={handleSendAllApproved}
                   disabled={loading || sendingAll}
                   variant='outline'
-                  className='border-lunary-primary-600 text-lunary-primary-300 hover:bg-lunary-primary-900/30'
+                  className='border-lunary-primary-600 text-content-brand hover:bg-layer-base/30'
                 >
                   {sendingAll ? 'Scheduling...' : 'Schedule approved'}
                 </Button>
@@ -1673,7 +1673,7 @@ export default function SocialPostsPage() {
                   onClick={() => handleProcessVideoJobs()}
                   disabled={processingVideo || processingAllVideos}
                   variant='outline'
-                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                  className='border-stroke-default text-content-secondary hover:bg-surface-card'
                 >
                   {processingVideo ? (
                     <>
@@ -1688,7 +1688,7 @@ export default function SocialPostsPage() {
                   onClick={handleProcessAllVideoJobs}
                   disabled={loading || processingAllVideos}
                   variant='outline'
-                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                  className='border-stroke-default text-content-secondary hover:bg-surface-card'
                 >
                   {processingAllVideos ? 'Processing...' : 'Process all videos'}
                 </Button>
@@ -1696,7 +1696,7 @@ export default function SocialPostsPage() {
                   onClick={handleRequeueAllVideos}
                   disabled={requeueingAllVideos}
                   variant='outline'
-                  className='border-lunary-secondary-700 text-lunary-secondary hover:bg-lunary-secondary-950'
+                  className='border-lunary-secondary-700 text-lunary-secondary hover:bg-layer-deep'
                 >
                   {requeueingAllVideos ? 'Queuing...' : 'Regenerate all videos'}
                 </Button>
@@ -1704,7 +1704,7 @@ export default function SocialPostsPage() {
                   onClick={handleBumpOgImages}
                   disabled={loading}
                   variant='outline'
-                  className='border-lunary-accent-600 text-lunary-accent-300 hover:bg-lunary-accent-900/30'
+                  className='border-lunary-accent-600 text-content-brand-accent hover:bg-layer-base/30'
                 >
                   {loading ? (
                     <>
@@ -1722,15 +1722,15 @@ export default function SocialPostsPage() {
             </div>
 
             {videoJobFeedback && (
-              <Card className='bg-zinc-900 border-zinc-800'>
-                <CardContent className='py-3 text-sm text-zinc-300'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
+                <CardContent className='py-3 text-sm text-content-secondary'>
                   {videoJobFeedback}
                 </CardContent>
               </Card>
             )}
 
             {sendAllProgress && (
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardContent className='py-4'>
                   <div className='flex items-center justify-between mb-2'>
                     <div className='flex items-center gap-2'>
@@ -1739,11 +1739,11 @@ export default function SocialPostsPage() {
                         Sending posts to Succulent...
                       </span>
                     </div>
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       {sendAllProgress.current} / {sendAllProgress.total}
                     </span>
                   </div>
-                  <div className='w-full bg-zinc-800 rounded-full h-2 overflow-hidden'>
+                  <div className='w-full bg-surface-card rounded-full h-2 overflow-hidden'>
                     <div
                       className='bg-lunary-primary-600 h-full transition-all duration-300'
                       style={{
@@ -1756,11 +1756,13 @@ export default function SocialPostsPage() {
             )}
 
             {pendingPosts.length === 0 ? (
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardContent className='py-12 text-center'>
-                  <Sparkles className='h-12 w-12 mx-auto mb-4 text-zinc-600' />
-                  <p className='text-zinc-400'>No posts pending approval</p>
-                  <p className='text-sm text-zinc-400 mt-2'>
+                  <Sparkles className='h-12 w-12 mx-auto mb-4 text-content-muted' />
+                  <p className='text-content-muted'>
+                    No posts pending approval
+                  </p>
+                  <p className='text-sm text-content-muted mt-2'>
                     Generate posts from the Generate tab
                   </p>
                   <Button
@@ -1818,7 +1820,7 @@ export default function SocialPostsPage() {
                     <Card
                       key={group.key}
                       id={formatGroupId(group.key)}
-                      className={`bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors ${
+                      className={`bg-surface-elevated border-stroke-subtle hover:border-stroke-default transition-colors ${
                         hasThreadsVariant
                           ? 'border-lunary-primary-500 shadow-[0_0_20px_rgba(129,140,248,0.4)]'
                           : ''
@@ -1832,38 +1834,38 @@ export default function SocialPostsPage() {
                                 {dateLabel}
                               </CardTitle>
                               {hasThreadsVariant && (
-                                <Badge className='bg-lunary-primary-900/30 text-lunary-primary-200 border-lunary-primary-700'>
+                                <Badge className='bg-layer-base/30 text-content-secondary border-lunary-primary-700'>
                                   Threads highlighted
                                 </Badge>
                               )}
-                              <Badge className='bg-lunary-primary-900/20 text-lunary-primary-400 border-lunary-primary-700 capitalize'>
+                              <Badge className='bg-layer-base/20 text-lunary-primary-400 border-lunary-primary-700 capitalize'>
                                 {group.postType}
                               </Badge>
                               {group.topic && (
-                                <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600'>
+                                <Badge className='bg-surface-card text-content-primary border-stroke-strong'>
                                   {group.topic}
                                 </Badge>
                               )}
                               {group.weekTheme && (
-                                <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600'>
+                                <Badge className='bg-surface-card text-content-primary border-stroke-strong'>
                                   {group.weekTheme}
                                 </Badge>
                               )}
-                              <Badge className='bg-zinc-900 text-zinc-300 border-zinc-700 capitalize'>
+                              <Badge className='bg-surface-elevated text-content-secondary border-stroke-default capitalize'>
                                 Base: {basePost.platform}
                               </Badge>
                               {pendingVariants > 0 && (
-                                <Badge className='bg-lunary-accent-900 text-lunary-accent border-lunary-accent-700 text-xs'>
+                                <Badge className='bg-layer-base text-lunary-accent border-lunary-accent-700 text-xs'>
                                   {pendingVariants} pending
                                 </Badge>
                               )}
                               {approvedVariants > 0 && (
-                                <Badge className='bg-lunary-success-900/30 text-lunary-success border-lunary-success-700 text-xs'>
+                                <Badge className='bg-layer-base/30 text-lunary-success border-lunary-success-700 text-xs'>
                                   {approvedVariants} approved
                                 </Badge>
                               )}
                             </div>
-                            <CardDescription className='text-zinc-400'>
+                            <CardDescription className='text-content-muted'>
                               {group.weekStart &&
                                 `Week of ${new Date(group.weekStart).toLocaleDateString()} • `}
                               Created:{' '}
@@ -1881,14 +1883,14 @@ export default function SocialPostsPage() {
                               <video
                                 src={baseVideoUrl}
                                 controls
-                                className='w-full rounded-lg border border-zinc-700 bg-black'
+                                className='w-full rounded-lg border border-stroke-default bg-surface-base'
                               />
                               <div className='absolute top-2 right-2 flex gap-2'>
                                 <button
                                   onClick={() =>
                                     window.open(baseVideoUrl, '_blank')
                                   }
-                                  className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                                  className='bg-surface-base/70 hover:bg-surface-base/90 text-content-primary px-2 py-1 rounded text-xs flex items-center gap-1'
                                 >
                                   <ExternalLink className='h-3 w-3' />
                                   Open
@@ -1899,18 +1901,18 @@ export default function SocialPostsPage() {
                           {basePost.postType === 'video' &&
                             basePost.videoScript && (
                               <details
-                                className='bg-zinc-800/50 rounded-lg border border-zinc-700 p-3'
+                                className='bg-surface-card/50 rounded-lg border border-stroke-default p-3'
                                 // open={!baseVideoUrl}
                                 open={true}
                               >
-                                <summary className='cursor-pointer text-sm text-zinc-300 flex items-center gap-2'>
+                                <summary className='cursor-pointer text-sm text-content-secondary flex items-center gap-2'>
                                   <FileText className='h-4 w-4' />
                                   Base video script
                                   {basePost.videoPartNumber
                                     ? ` • Part ${basePost.videoPartNumber}`
                                     : ''}
                                 </summary>
-                                <p className='mt-3 text-zinc-200 whitespace-pre-wrap text-sm'>
+                                <p className='mt-3 text-content-primary whitespace-pre-wrap text-sm'>
                                   {basePost.videoScript}
                                 </p>
                               </details>
@@ -1947,7 +1949,7 @@ export default function SocialPostsPage() {
                                 // Display carousel with all slides
                                 return (
                                   <div className='space-y-2'>
-                                    <Badge className='bg-instagram-gradient text-white border-0 w-fit'>
+                                    <Badge className='bg-instagram-gradient text-content-primary border-0 w-fit'>
                                       Instagram Carousel -{' '}
                                       {carouselImages.length} slides
                                     </Badge>
@@ -1960,14 +1962,14 @@ export default function SocialPostsPage() {
                                               alt={`Slide ${idx + 1}`}
                                               width={400}
                                               height={400}
-                                              className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90'
+                                              className='w-full rounded-lg border border-stroke-default cursor-pointer hover:opacity-90'
                                               onClick={() =>
                                                 window.open(imgUrl, '_blank')
                                               }
                                               unoptimized
                                             />
                                             <div className='absolute top-2 left-2'>
-                                              <Badge className='bg-black/70 text-white text-xs'>
+                                              <Badge className='bg-surface-base/70 text-content-primary text-xs'>
                                                 {idx + 1}/
                                                 {carouselImages.length}
                                               </Badge>
@@ -1988,7 +1990,7 @@ export default function SocialPostsPage() {
                                     alt='Post image'
                                     width={800}
                                     height={800}
-                                    className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90'
+                                    className='w-full rounded-lg border border-stroke-default cursor-pointer hover:opacity-90'
                                     onClick={() =>
                                       window.open(basePost.imageUrl, '_blank')
                                     }
@@ -2001,7 +2003,7 @@ export default function SocialPostsPage() {
                                           basePost.imageUrl || '',
                                         )
                                       }
-                                      className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                                      className='bg-surface-base/70 hover:bg-surface-base/90 text-content-primary px-2 py-1 rounded text-xs flex items-center gap-1'
                                     >
                                       <Download className='h-3 w-3' />
                                       Save
@@ -2011,18 +2013,18 @@ export default function SocialPostsPage() {
                               );
                             })()}
 
-                          <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                          <div className='p-4 bg-surface-card/50 rounded-lg border border-stroke-default'>
                             <div className='flex items-center justify-between mb-3'>
                               <div className='flex items-center gap-2'>
-                                <span className='text-xs text-zinc-400 uppercase tracking-wide'>
+                                <span className='text-xs text-content-muted uppercase tracking-wide'>
                                   Base content
                                 </span>
-                                <Badge className='bg-zinc-900 text-zinc-300 border-zinc-700 capitalize'>
+                                <Badge className='bg-surface-elevated text-content-secondary border-stroke-default capitalize'>
                                   {basePost.platform}
                                 </Badge>
                               </div>
                             </div>
-                            <p className='text-zinc-200 whitespace-pre-wrap'>
+                            <p className='text-content-primary whitespace-pre-wrap'>
                               {basePost.content}
                             </p>
                           </div>
@@ -2042,8 +2044,8 @@ export default function SocialPostsPage() {
                                   }
                                   className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors capitalize ${
                                     isActive
-                                      ? 'bg-lunary-primary-900/60 text-lunary-primary-200 border-lunary-primary-500'
-                                      : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200'
+                                      ? 'bg-layer-base/60 text-content-secondary border-lunary-primary-500'
+                                      : 'bg-surface-elevated text-content-muted border-stroke-subtle hover:text-content-primary'
                                   }`}
                                 >
                                   {variant.platform}
@@ -2055,17 +2057,17 @@ export default function SocialPostsPage() {
                           {activePost && (
                             <>
                               {activeOverridesBase ? (
-                                <Badge className='bg-lunary-secondary-900/30 text-lunary-secondary border-lunary-secondary-700 w-fit'>
+                                <Badge className='bg-layer-base/30 text-lunary-secondary border-lunary-secondary-700 w-fit'>
                                   Overrides base
                                 </Badge>
                               ) : (
-                                <Badge className='bg-zinc-900 text-zinc-300 border-zinc-700 w-fit'>
+                                <Badge className='bg-surface-elevated text-content-secondary border-stroke-default w-fit'>
                                   Matches base
                                 </Badge>
                               )}
 
                               {activePost.platform === 'reddit' && (
-                                <Badge className='bg-lunary-rose-900 text-lunary-rose border-lunary-rose-700 w-fit'>
+                                <Badge className='bg-layer-base text-lunary-rose border-lunary-rose-700 w-fit'>
                                   r/lunary_insights
                                 </Badge>
                               )}
@@ -2073,7 +2075,7 @@ export default function SocialPostsPage() {
                               {activePost.postType === 'video' &&
                                 !activePost.videoUrl &&
                                 activePost.videoJobStatus && (
-                                  <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600 capitalize w-fit'>
+                                  <Badge className='bg-surface-card text-content-primary border-stroke-strong capitalize w-fit'>
                                     Video {activePost.videoJobStatus}
                                   </Badge>
                                 )}
@@ -2096,7 +2098,7 @@ export default function SocialPostsPage() {
                                       queuedVideoIds.has(activePost.id)
                                     }
                                     variant='outline'
-                                    className='border-lunary-secondary-700 text-lunary-secondary hover:bg-lunary-secondary-950'
+                                    className='border-lunary-secondary-700 text-lunary-secondary hover:bg-layer-deep'
                                   >
                                     {generatingVideoId === activePost.id ? (
                                       <Loader2 className='h-4 w-4 mr-2 animate-spin' />
@@ -2114,14 +2116,14 @@ export default function SocialPostsPage() {
                                   <video
                                     src={activeVideoUrl}
                                     controls
-                                    className='w-full rounded-lg border border-zinc-700 bg-black'
+                                    className='w-full rounded-lg border border-stroke-default bg-surface-base'
                                   />
                                   <div className='absolute top-2 right-2 flex gap-2'>
                                     <button
                                       onClick={() =>
                                         window.open(activeVideoUrl, '_blank')
                                       }
-                                      className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                                      className='bg-surface-base/70 hover:bg-surface-base/90 text-content-primary px-2 py-1 rounded text-xs flex items-center gap-1'
                                     >
                                       <ExternalLink className='h-3 w-3' />
                                       Open
@@ -2138,7 +2140,7 @@ export default function SocialPostsPage() {
                                       alt='Post image'
                                       width={800}
                                       height={800}
-                                      className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90'
+                                      className='w-full rounded-lg border border-stroke-default cursor-pointer hover:opacity-90'
                                       onClick={() =>
                                         window.open(
                                           activePost.imageUrl,
@@ -2154,7 +2156,7 @@ export default function SocialPostsPage() {
                                             activePost.imageUrl || '',
                                           )
                                         }
-                                        className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                                        className='bg-surface-base/70 hover:bg-surface-base/90 text-content-primary px-2 py-1 rounded text-xs flex items-center gap-1'
                                       >
                                         <Download className='h-3 w-3' />
                                         Save
@@ -2163,7 +2165,7 @@ export default function SocialPostsPage() {
                                   </div>
                                 )}
 
-                              <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                              <div className='p-4 bg-surface-card/50 rounded-lg border border-stroke-default'>
                                 {editingPost === activePost.id ? (
                                   <div className='space-y-3'>
                                     <textarea
@@ -2177,7 +2179,7 @@ export default function SocialPostsPage() {
                                           [activePost.id]: e.target.value,
                                         })
                                       }
-                                      className='w-full bg-zinc-900 text-zinc-200 rounded-lg p-3 border border-zinc-600 focus:border-lunary-secondary focus:outline-none resize-y min-h-[120px]'
+                                      className='w-full bg-surface-elevated text-content-primary rounded-lg p-3 border border-stroke-strong focus:border-lunary-secondary focus:outline-none resize-y min-h-[120px]'
                                     />
                                     <div className='flex gap-2'>
                                       <Button
@@ -2205,7 +2207,7 @@ export default function SocialPostsPage() {
                                     </div>
                                   </div>
                                 ) : (
-                                  <p className='text-zinc-200 whitespace-pre-wrap'>
+                                  <p className='text-content-primary whitespace-pre-wrap'>
                                     {activePost.content}
                                   </p>
                                 )}
@@ -2219,7 +2221,7 @@ export default function SocialPostsPage() {
                                     onChange={(e) =>
                                       setScheduleDate(e.target.value)
                                     }
-                                    className='px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-sm text-white'
+                                    className='px-3 py-2 bg-surface-elevated border border-stroke-default rounded-lg text-sm text-content-primary'
                                   />
                                   <input
                                     type='time'
@@ -2227,7 +2229,7 @@ export default function SocialPostsPage() {
                                     onChange={(e) =>
                                       setScheduleTime(e.target.value)
                                     }
-                                    className='px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-sm text-white'
+                                    className='px-3 py-2 bg-surface-elevated border border-stroke-default rounded-lg text-sm text-content-primary'
                                   />
                                   <Button
                                     onClick={() =>
@@ -2236,7 +2238,7 @@ export default function SocialPostsPage() {
                                     disabled={
                                       updatingSchedule === activePost.id
                                     }
-                                    className='bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
+                                    className='bg-lunary-primary-600 hover:bg-layer-high text-white'
                                   >
                                     {updatingSchedule === activePost.id ? (
                                       <Loader2 className='h-4 w-4 mr-2 animate-spin' />
@@ -2248,7 +2250,7 @@ export default function SocialPostsPage() {
                                   <Button
                                     onClick={() => setEditingSchedule(null)}
                                     variant='outline'
-                                    className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                                    className='border-stroke-default text-content-secondary hover:bg-surface-card'
                                   >
                                     Cancel
                                   </Button>
@@ -2260,7 +2262,7 @@ export default function SocialPostsPage() {
                                       handleEditSchedule(activePost)
                                     }
                                     variant='outline'
-                                    className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                                    className='border-stroke-default text-content-secondary hover:bg-surface-card'
                                   >
                                     <Calendar className='h-4 w-4 mr-2' />
                                     Edit Schedule
@@ -2281,7 +2283,7 @@ export default function SocialPostsPage() {
                                     <Button
                                       onClick={() => handleEditPost(activePost)}
                                       variant='outline'
-                                      className='border-lunary-accent-700 text-lunary-accent hover:bg-lunary-accent-950'
+                                      className='border-lunary-accent-700 text-lunary-accent hover:bg-layer-deep'
                                     >
                                       <Edit2 className='h-4 w-4 mr-2' />
                                       Edit
@@ -2291,7 +2293,7 @@ export default function SocialPostsPage() {
                                         handleOpenInApp(activePost)
                                       }
                                       variant='outline'
-                                      className='border-lunary-secondary-700 text-lunary-secondary hover:bg-lunary-secondary-950'
+                                      className='border-lunary-secondary-700 text-lunary-secondary hover:bg-layer-deep'
                                     >
                                       <ExternalLink className='h-4 w-4 mr-2' />
                                       Preview
@@ -2304,7 +2306,7 @@ export default function SocialPostsPage() {
                                         rejectingPostId === activePost.id
                                       }
                                       variant='outline'
-                                      className='flex-1 border-lunary-error-700 text-lunary-error hover:bg-lunary-error-950'
+                                      className='flex-1 border-lunary-error-700 text-lunary-error hover:bg-layer-deep'
                                     >
                                       {rejectingPostId === activePost.id ? (
                                         <Loader2 className='h-4 w-4 mr-2 animate-spin' />
@@ -2319,7 +2321,7 @@ export default function SocialPostsPage() {
                                           handleApproveGroup(group)
                                         }
                                         variant='outline'
-                                        className='border-lunary-success-600 text-lunary-success-300 hover:bg-lunary-success-900/30'
+                                        className='border-lunary-success-600 text-lunary-success-300 hover:bg-layer-base/30'
                                         disabled={
                                           groupApprovingKey === group.key
                                         }
@@ -2339,7 +2341,7 @@ export default function SocialPostsPage() {
                                       handleSendToSucculent(activePost)
                                     }
                                     disabled={sending === activePost.id}
-                                    className='flex-1 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
+                                    className='flex-1 bg-lunary-primary-600 hover:bg-layer-high text-white'
                                   >
                                     {sending === activePost.id ? (
                                       <Loader2 className='h-4 w-4 mr-2 animate-spin' />
@@ -2351,7 +2353,7 @@ export default function SocialPostsPage() {
                                   <Button
                                     onClick={() => handleOpenInApp(activePost)}
                                     variant='outline'
-                                    className='border-lunary-secondary-700 text-lunary-secondary hover:bg-lunary-secondary-950'
+                                    className='border-lunary-secondary-700 text-lunary-secondary hover:bg-layer-deep'
                                   >
                                     <ExternalLink className='h-4 w-4 mr-2' />
                                     Open in App

@@ -14,19 +14,21 @@ export default function ReferralTermsPage() {
   const lastUpdated = 'December 6, 2025';
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='mb-8'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             Referral Program Terms
           </h1>
-          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-content-muted'>
+            Last Updated: {lastUpdated}
+          </p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
           <section>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               These Referral Program Terms (&quot;Referral Terms&quot;) govern
               your participation in the Lunary referral program (the
               &quot;Program&quot;) offered by Lunar Computing, Inc.
@@ -35,7 +37,7 @@ export default function ReferralTermsPage() {
               these Referral Terms in addition to our{' '}
               <Link
                 href='/terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 Terms of Service
               </Link>
@@ -44,45 +46,45 @@ export default function ReferralTermsPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               1. Eligibility
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               To participate in the Lunary referral program, you must:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Have an active Lunary account in good standing</li>
               <li>Be at least 18 years of age</li>
               <li>Not be an employee or contractor of Lunar Computing, Inc.</li>
               <li>Comply with all applicable laws and regulations</li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               We reserve the right to determine eligibility and to disqualify
               any participant at our sole discretion.
             </p>
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               2. How the Program Works
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               2.1 Your Referral Code
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               As an eligible participant, you will receive a unique referral
               code or link that you can share with friends, family, and others.
               Your referral code can be found in your Lunary profile settings.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               2.2 Successful Referrals
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               A referral is considered successful when:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 The referred person creates a new Lunary account using your
                 referral code or link
@@ -100,19 +102,19 @@ export default function ReferralTermsPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               2.3 Reward Structure
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               Rewards for successful referrals may include:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Free months of Lunary+ subscription</li>
               <li>Account credits</li>
               <li>Exclusive features or content</li>
               <li>Other rewards as specified by Lunary from time to time</li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               The specific rewards available at any time will be displayed in
               your Lunary account. Reward values and structures are subject to
               change.
@@ -120,10 +122,10 @@ export default function ReferralTermsPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               3. Referral Limits
             </h2>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 There may be limits on the number of referrals that can earn
                 rewards within a given time period
@@ -141,14 +143,14 @@ export default function ReferralTermsPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               4. Prohibited Activities
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               The following activities are prohibited and may result in
               disqualification from the Program and forfeiture of rewards:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Self-referral:</strong> Creating multiple accounts to
                 refer yourself
@@ -185,32 +187,32 @@ export default function ReferralTermsPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               5. Reward Redemption and Expiration
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               5.1 Earning Rewards
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Rewards will be credited to your account within 7 days of a
               successful referral being confirmed. We may delay crediting
               rewards pending verification of the referral&apos;s validity.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               5.2 Using Rewards
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Referral rewards are non-transferable and cannot be exchanged for
               cash. Rewards apply to your Lunary account only and may be subject
               to additional terms.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               5.3 Expiration
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Referral rewards may expire if not used within 12 months of being
               earned, or if your account is terminated or suspended. We will
               provide notice before expiring earned rewards where possible.
@@ -218,31 +220,31 @@ export default function ReferralTermsPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               6. Fraud Prevention
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               We actively monitor for fraudulent activity in our referral
               program. If we determine that you have engaged in fraudulent or
               abusive behavior, we may:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Revoke pending or earned rewards</li>
               <li>Disqualify you from the Program permanently</li>
               <li>Suspend or terminate your Lunary account</li>
               <li>Take legal action to recover losses</li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               Our determination of fraud is final. We are not obligated to
               provide evidence or explanation for fraud determinations.
             </p>
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               7. Program Modifications
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We reserve the right to modify, suspend, or terminate the Referral
               Program at any time and for any reason. Changes may include
               adjustments to reward values, eligibility requirements, or program
@@ -253,10 +255,10 @@ export default function ReferralTermsPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               8. Tax Responsibility
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You are solely responsible for any tax obligations arising from
               your participation in the Program and receipt of rewards. Lunary
               does not provide tax advice. Depending on your jurisdiction and
@@ -267,16 +269,16 @@ export default function ReferralTermsPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               9. Privacy
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               When you share your referral link, you are responsible for
               obtaining any necessary consents from the people you refer. We
               collect and process personal information in accordance with our{' '}
               <Link
                 href='/privacy'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 Privacy Policy
               </Link>
@@ -286,10 +288,10 @@ export default function ReferralTermsPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               10. Disclaimer
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               THE REFERRAL PROGRAM IS PROVIDED &quot;AS IS&quot; WITHOUT
               WARRANTY OF ANY KIND. WE DO NOT GUARANTEE THE AVAILABILITY OF
               REWARDS, THE OPERATION OF THE PROGRAM, OR THE ACCURACY OF REFERRAL
@@ -299,18 +301,18 @@ export default function ReferralTermsPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               11. Contact
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               For questions about the referral program:
             </p>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Referral Support:</strong>{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   support@lunary.app
                 </a>
@@ -318,26 +320,26 @@ export default function ReferralTermsPage() {
             </div>
           </section>
 
-          <section className='pt-8 border-t border-zinc-800'>
-            <h2 className='text-lg font-medium text-white mb-4'>
+          <section className='pt-8 border-t border-stroke-subtle'>
+            <h2 className='text-lg font-medium text-content-primary mb-4'>
               Related Policies
             </h2>
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/privacy'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Privacy Policy
               </Link>
               <Link
                 href='/acceptable-use'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Acceptable Use Policy
               </Link>

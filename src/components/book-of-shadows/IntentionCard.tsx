@@ -29,7 +29,7 @@ const STATUS_COLORS: Record<string, string> = {
   progressing: 'border-lunary-accent',
   blocked: 'border-amber-600',
   manifested: 'border-lunary-success',
-  released: 'border-zinc-600',
+  released: 'border-stroke-strong',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -82,7 +82,7 @@ export function IntentionCard({
     <div
       className={cn(
         'border-l-2 pl-4 py-3 transition-colors',
-        STATUS_COLORS[content.status] || 'border-zinc-700',
+        STATUS_COLORS[content.status] || 'border-stroke-default',
         isResolved && 'opacity-70',
       )}
     >
@@ -96,26 +96,28 @@ export function IntentionCard({
                 content.status === 'manifested'
                   ? 'bg-lunary-success/20 text-lunary-success'
                   : content.status === 'released'
-                    ? 'bg-zinc-800 text-zinc-400'
+                    ? 'bg-surface-card text-content-muted'
                     : content.status === 'blocked'
                       ? 'bg-amber-900/30 text-amber-400'
-                      : 'bg-lunary-primary-900/50 text-lunary-primary-300',
+                      : 'bg-layer-base/50 text-content-brand',
               )}
             >
               {STATUS_LABELS[content.status] || content.status}
             </span>
             {content.intentionCategory && (
-              <span className='text-xs text-zinc-500'>
+              <span className='text-xs text-content-muted'>
                 {CATEGORY_LABELS[content.intentionCategory] ||
                   content.intentionCategory}
               </span>
             )}
           </div>
-          <p className='text-white text-sm leading-relaxed'>{content.text}</p>
+          <p className='text-content-primary text-sm leading-relaxed'>
+            {content.text}
+          </p>
           <div className='flex items-center gap-3 mt-1.5'>
-            <span className='text-xs text-zinc-500'>{formattedDate}</span>
+            <span className='text-xs text-content-muted'>{formattedDate}</span>
             {content.moonPhase && (
-              <span className='text-xs text-zinc-500 flex items-center gap-1'>
+              <span className='text-xs text-content-muted flex items-center gap-1'>
                 <Moon className='w-3 h-3' />
                 {content.moonPhase}
                 {content.moonSign && ` in ${content.moonSign}`}
@@ -125,7 +127,7 @@ export function IntentionCard({
         </div>
         <button
           onClick={() => setExpanded(!expanded)}
-          className='p-1 text-zinc-400 hover:text-zinc-200'
+          className='p-1 text-content-muted hover:text-content-primary'
         >
           {expanded ? (
             <ChevronUp className='w-4 h-4' />
@@ -173,7 +175,7 @@ export function IntentionCard({
             size='sm'
             onClick={() => handleStatusChange('released')}
             disabled={isUpdating}
-            className='text-xs text-zinc-400'
+            className='text-xs text-content-muted'
           >
             <X className='w-3 h-3 mr-1' />
             Release
@@ -192,7 +194,7 @@ export function IntentionCard({
         </p>
       )}
       {expanded && content.releasedAt && (
-        <p className='text-xs text-zinc-400 mt-2'>
+        <p className='text-xs text-content-muted mt-2'>
           Released on{' '}
           {new Date(content.releasedAt).toLocaleDateString('en-GB', {
             month: 'short',

@@ -103,25 +103,27 @@ export function MarketingBreadcrumbs({
   }
 
   return (
-    <nav className='text-sm text-zinc-400 mb-6 flex items-center flex-wrap'>
+    <nav className='text-sm text-content-muted mb-6 flex items-center flex-wrap'>
       {resolvedItems.map((item, index) => {
         const isLast = index === resolvedItems.length - 1;
         const resolvedHref = appendNavParams(item.href);
         const content = resolvedHref ? (
           <Link
             href={resolvedHref}
-            className='hover:text-zinc-200 transition-colors py-2 px-1'
+            className='hover:text-content-primary transition-colors py-2 px-1'
           >
             {item.label}
           </Link>
         ) : (
-          <span className='text-zinc-200 py-2 px-1'>{item.label}</span>
+          <span className='text-content-primary py-2 px-1'>{item.label}</span>
         );
 
         return (
           <span key={`${item.label}-${index}`}>
             {content}
-            {!isLast && <span className='mx-1 text-zinc-600 text-base'>/</span>}
+            {!isLast && (
+              <span className='mx-1 text-content-muted text-base'>/</span>
+            )}
           </span>
         );
       })}

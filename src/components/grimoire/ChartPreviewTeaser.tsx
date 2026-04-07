@@ -46,7 +46,7 @@ const SIGN_SYMBOLS: Record<string, string> = Object.fromEntries(
 );
 
 const ASPECT_COLOURS: Record<string, string> = {
-  conjunction: 'text-lunary-accent-300',
+  conjunction: 'text-content-brand-accent',
   trine: 'text-emerald-400',
   sextile: 'text-sky-400',
   square: 'text-amber-400',
@@ -168,12 +168,12 @@ export function ChartPreviewTeaser({
 
   return (
     <>
-      <div className='my-8 rounded-xl border border-lunary-primary-700/40 bg-lunary-primary-900/20 overflow-hidden'>
+      <div className='my-8 rounded-xl border border-lunary-primary-700/40 bg-layer-base/20 overflow-hidden'>
         <div className='px-5 py-4 border-b border-lunary-primary-700/30'>
-          <Heading as='h3' variant='h4' className='text-lunary-primary-200'>
+          <Heading as='h3' variant='h4' className='text-content-secondary'>
             What is happening in your chart right now?
           </Heading>
-          <p className='text-sm text-zinc-400 mt-1'>
+          <p className='text-sm text-content-muted mt-1'>
             Enter your birthday to see which transits are activating your natal
             placements today
           </p>
@@ -189,7 +189,7 @@ export function ChartPreviewTeaser({
                   onChange={(e) => setBirthDate(e.target.value)}
                   min='1900-01-01'
                   max='2030-12-31'
-                  className='flex-1 rounded-lg bg-zinc-800/80 border border-zinc-700 px-3 py-2.5 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500/50 focus:border-lunary-primary-500'
+                  className='flex-1 rounded-lg bg-surface-card/80 border border-stroke-default px-3 py-2.5 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary-500/50 focus:border-lunary-primary-500'
                   aria-label='Birth date'
                 />
                 <Button
@@ -213,7 +213,7 @@ export function ChartPreviewTeaser({
               </div>
               <button
                 onClick={handleUnlock}
-                className='text-xs text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+                className='text-xs text-lunary-primary-400 hover:text-content-brand transition-colors'
               >
                 Skip — just show me my full chart
               </button>
@@ -225,13 +225,13 @@ export function ChartPreviewTeaser({
                 {placements.map((p) => (
                   <span
                     key={p.body}
-                    className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-800/60 text-xs text-zinc-300'
+                    className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-card/60 text-xs text-content-secondary'
                   >
                     <span className='opacity-70'>
                       {BODY_SYMBOLS[p.body] || p.body[0]}
                     </span>
                     {p.body}{' '}
-                    <span className='text-lunary-primary-300'>
+                    <span className='text-content-brand'>
                       {SIGN_SYMBOLS[p.sign]} {p.sign}
                     </span>
                   </span>
@@ -248,16 +248,16 @@ export function ChartPreviewTeaser({
                   {transits.map((t, i) => (
                     <div
                       key={i}
-                      className='px-3 py-2.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50'
+                      className='px-3 py-2.5 rounded-lg bg-surface-card/50 border border-stroke-default/50'
                     >
-                      <p className='text-sm text-zinc-200'>
+                      <p className='text-sm text-content-primary'>
                         <span className='font-medium'>
                           {BODY_SYMBOLS[t.transitPlanet] || ''}{' '}
                           {t.transitPlanet} in {t.transitSign}
                         </span>{' '}
                         <span
                           className={
-                            ASPECT_COLOURS[t.aspect] || 'text-zinc-400'
+                            ASPECT_COLOURS[t.aspect] || 'text-content-muted'
                           }
                         >
                           {t.aspect}
@@ -268,7 +268,7 @@ export function ChartPreviewTeaser({
                           {t.natalSign}
                         </span>
                       </p>
-                      <p className='text-xs text-zinc-500 mt-0.5'>
+                      <p className='text-xs text-content-muted mt-0.5'>
                         Themes: {t.flavour}
                       </p>
                     </div>
@@ -279,28 +279,28 @@ export function ChartPreviewTeaser({
               {/* Blurred transit detail */}
               <div className='relative'>
                 <div className='space-y-2 blur-sm select-none pointer-events-none'>
-                  <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
+                  <p className='text-xs font-medium text-content-muted uppercase tracking-wide'>
                     What this means for you
                   </p>
-                  <p className='text-sm text-zinc-300'>
+                  <p className='text-sm text-content-secondary'>
                     This transit is activating your 7th house of partnerships,
                     bringing new energy to your relationships and how you
                     collaborate with others. Pay attention to...
                   </p>
-                  <p className='text-sm text-zinc-300'>
+                  <p className='text-sm text-content-secondary'>
                     With Saturn forming a trine to your natal Venus, this is a
                     period of stable commitment and deepening bonds that...
                   </p>
                 </div>
                 <div className='absolute inset-0 flex items-center justify-center'>
-                  <Lock className='w-5 h-5 text-zinc-500' />
+                  <Lock className='w-5 h-5 text-content-muted' />
                 </div>
               </div>
 
               {/* Unlock CTA */}
               <button
                 onClick={handleUnlock}
-                className='w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-lunary-primary-700/60 to-lunary-primary-600/40 border border-lunary-primary-600/50 text-sm font-medium text-lunary-primary-100 hover:from-lunary-primary-700/80 hover:to-lunary-primary-600/60 transition-all group'
+                className='w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-layer-high/60 to-lunary-primary-600/40 border border-lunary-primary-600/50 text-sm font-medium text-content-secondary hover:from-layer-high/80 hover:to-lunary-primary-600/60 transition-all group'
               >
                 <Sparkles className='w-4 h-4' />
                 See what {transitCount > 3
@@ -309,7 +309,7 @@ export function ChartPreviewTeaser({
                 transits mean for you
                 <ChevronRight className='w-4 h-4 transition-transform group-hover:translate-x-0.5' />
               </button>
-              <p className='text-xs text-zinc-500 text-center'>
+              <p className='text-xs text-content-muted text-center'>
                 7 days of full access — personalised transits, chart readings,
                 and more. No card needed.
               </p>
@@ -321,7 +321,7 @@ export function ChartPreviewTeaser({
               <p className='text-sm text-red-400'>{error}</p>
               <button
                 onClick={handleUnlock}
-                className='flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-lunary-accent-300 transition-colors group'
+                className='flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-content-brand-accent transition-colors group'
               >
                 <Sparkles className='w-4 h-4' />
                 <span>See your full birth chart instead</span>
@@ -333,8 +333,8 @@ export function ChartPreviewTeaser({
       </div>
 
       {showAuthModal && (
-        <div className='fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
-          <div className='bg-zinc-900 rounded-xl p-6 sm:p-8 w-full max-w-md relative mx-4 sm:mx-0 shadow-lg shadow-black/50'>
+        <div className='fixed inset-0 bg-surface-base/40 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
+          <div className='bg-surface-elevated rounded-xl p-6 sm:p-8 w-full max-w-md relative mx-4 sm:mx-0 shadow-lg shadow-black/50'>
             <Button
               variant='ghost'
               onClick={() => setShowAuthModal(false)}
@@ -346,7 +346,7 @@ export function ChartPreviewTeaser({
               <Heading variant='h3' className='mb-2'>
                 See your full transit report
               </Heading>
-              <p className='text-zinc-300 text-xs sm:text-sm'>
+              <p className='text-content-secondary text-xs sm:text-sm'>
                 Sign up to unlock 7 days of personalised daily transits, your
                 full chart, and detailed interpretations. No card needed.
               </p>

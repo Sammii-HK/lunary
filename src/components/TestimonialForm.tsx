@@ -99,7 +99,7 @@ export function TestimonialForm({
   };
 
   return (
-    <div className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-8 shadow-[0px_20px_40px_rgba(0,0,0,0.45)] backdrop-blur'>
+    <div className='rounded-3xl border border-stroke-subtle/60 bg-surface-elevated/60 p-8 shadow-[0px_20px_40px_rgba(0,0,0,0.45)] backdrop-blur'>
       <form onSubmit={handleSubmit} className='space-y-6'>
         {/* Honeypot */}
         <div
@@ -119,7 +119,7 @@ export function TestimonialForm({
         <div className='space-y-1'>
           <label
             htmlFor='testimonial-name'
-            className='text-sm font-medium text-zinc-200'
+            className='text-sm font-medium text-content-primary'
           >
             Your Name
           </label>
@@ -132,9 +132,9 @@ export function TestimonialForm({
             onChange={(event) => setName(event.target.value)}
             placeholder='Selene Moon'
             required
-            className='w-full rounded-2xl border border-zinc-800/60 bg-zinc-950/60 px-4 py-3 text-sm text-white placeholder:text-zinc-600 transition focus:border-lunary-accent focus:outline-none'
+            className='w-full rounded-2xl border border-stroke-subtle/60 bg-surface-base/60 px-4 py-3 text-sm text-content-primary placeholder:text-content-muted transition focus:border-lunary-accent focus:outline-none'
           />
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             {name.length}/{MAX_NAME_LENGTH} characters
           </p>
         </div>
@@ -142,7 +142,7 @@ export function TestimonialForm({
         <div className='space-y-1'>
           <label
             htmlFor='testimonial-message'
-            className='text-sm font-medium text-zinc-200'
+            className='text-sm font-medium text-content-primary'
           >
             Your Testimonial
           </label>
@@ -155,15 +155,15 @@ export function TestimonialForm({
             onChange={(event) => setMessage(event.target.value)}
             placeholder='Share how Lunary has supported your rituals, insights, or personal growth.'
             required
-            className='w-full rounded-2xl border border-zinc-800/60 bg-zinc-950/60 px-4 py-3 text-sm text-white placeholder:text-zinc-600 transition focus:border-lunary-accent focus:outline-none'
+            className='w-full rounded-2xl border border-stroke-subtle/60 bg-surface-base/60 px-4 py-3 text-sm text-content-primary placeholder:text-content-muted transition focus:border-lunary-accent focus:outline-none'
           />
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             {message.length}/{MAX_MESSAGE_LENGTH} characters
           </p>
         </div>
 
         <div
-          className='rounded-2xl bg-zinc-900/60 px-4 py-3 text-xs text-zinc-400'
+          className='rounded-2xl bg-surface-elevated/60 px-4 py-3 text-xs text-content-muted'
           aria-live='polite'
         >
           {status === 'success' && (

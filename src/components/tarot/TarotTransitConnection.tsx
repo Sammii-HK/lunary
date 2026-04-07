@@ -211,7 +211,7 @@ export function TarotTransitConnection({
   if (variant === 'compact') {
     return (
       <div className='mt-4 pt-4 border-t border-stroke-subtle'>
-        <p className='text-xs text-lunary-accent-300 leading-relaxed'>
+        <p className='text-xs text-content-brand-accent leading-relaxed'>
           {currentConnection?.compact}
         </p>
       </div>
@@ -262,15 +262,15 @@ export function TarotTransitConnection({
             >
               <div className='flex flex-col gap-1 flex-1'>
                 <div className='flex items-center gap-2 justify-between'>
-                  <span className='text-xs font-medium text-lunary-primary-200'>
+                  <span className='text-xs font-medium text-content-secondary'>
                     {insight.transit.transitPlanet} {insight.transit.aspectType}{' '}
                     {insight.transit.natalPlanet}
                   </span>
-                  <span className='text-xs text-lunary-accent-300 mr-2'>
+                  <span className='text-xs text-content-brand-accent mr-2'>
                     {insight.relevance}
                   </span>
                 </div>
-                <p className='text-xs text-zinc-600'>
+                <p className='text-xs text-content-muted'>
                   {renderDegreeWithSymbol(insight.transit.transitDegree)}{' '}
                   {getAspectSymbol(insight.transit.aspectType)}{' '}
                   {renderDegreeWithSymbol(insight.transit.natalDegree)} (
@@ -312,7 +312,7 @@ export function TarotTransitConnection({
             }}
             className={`px-3 py-2 text-xs font-medium transition-colors border-b-2 ${
               activeTab === 'current'
-                ? 'border-lunary-primary-400 text-lunary-primary-200'
+                ? 'border-lunary-primary-400 text-content-secondary'
                 : 'border-transparent text-content-muted hover:text-content-secondary'
             }`}
           >
@@ -328,7 +328,7 @@ export function TarotTransitConnection({
             }}
             className={`px-3 py-2 text-xs font-medium transition-colors border-b-2 ${
               activeTab === 'historical'
-                ? 'border-lunary-primary-400 text-lunary-primary-200'
+                ? 'border-lunary-primary-400 text-content-secondary'
                 : 'border-transparent text-content-muted hover:text-content-secondary'
             }`}
           >

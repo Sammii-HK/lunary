@@ -19,7 +19,7 @@ export function RelatedProducts({ products }: RelatedProductsProps) {
 
   return (
     <div>
-      <h2 className='text-xl font-medium text-white mb-6'>
+      <h2 className='text-xl font-medium text-content-primary mb-6'>
         You Might Also Like
       </h2>
 
@@ -34,23 +34,23 @@ export function RelatedProducts({ products }: RelatedProductsProps) {
               className='aspect-[3/2] p-4 flex flex-col justify-end relative'
               style={{ background: product.gradient }}
             >
-              <div className='absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent' />
+              <div className='absolute inset-0 bg-gradient-to-t from-surface-base/50 via-transparent to-transparent' />
               <div className='relative z-10'>
-                <span className='text-xs text-white/60'>
+                <span className='text-xs text-content-primary/60'>
                   {CATEGORY_LABELS[product.category]}
                 </span>
-                <h3 className='text-base font-medium text-white line-clamp-1'>
+                <h3 className='text-base font-medium text-content-primary line-clamp-1'>
                   {product.title}
                 </h3>
               </div>
             </div>
 
             <div className='p-4'>
-              <p className='text-sm text-white/50 line-clamp-2 mb-3'>
+              <p className='text-sm text-content-primary/50 line-clamp-2 mb-3'>
                 {product.tagline}
               </p>
               <div className='flex items-center justify-between'>
-                <span className='text-white font-medium'>
+                <span className='text-content-primary font-medium'>
                   {formatPrice(product.price)}
                 </span>
                 <span className='text-xs text-lunary-primary group-hover:text-lunary-accent transition-colors'>

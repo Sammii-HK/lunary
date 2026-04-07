@@ -93,10 +93,10 @@ export default function GroundingIndexPage() {
           <div className='flex justify-center mb-4'>
             <TreePine className='w-16 h-16 text-emerald-400' />
           </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-4'>
             Grounding Techniques
           </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
+          <p className='text-lg text-content-muted max-w-2xl mx-auto'>
             Grounding connects you to the earth&apos;s stabilizing energy,
             helping you feel centered, present, and calm. Essential for empaths
             and after spiritual work.
@@ -104,16 +104,16 @@ export default function GroundingIndexPage() {
         </div>
 
         {/* Introduction */}
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-10'>
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
             Why Grounding Matters
           </h2>
-          <p className='text-zinc-400 mb-4'>
+          <p className='text-content-muted mb-4'>
             Grounding is the practice of connecting your energy to the earth.
             When we&apos;re ungrounded, we may feel spacey, anxious, scattered,
             or overwhelmed. Grounding brings us back to center.
           </p>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Grounding is especially important for: empaths and highly sensitive
             people, after meditation or spiritual work, during times of stress
             or anxiety, and when doing energy healing or magic.
@@ -122,7 +122,7 @@ export default function GroundingIndexPage() {
 
         {/* Techniques Grid */}
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Grounding Techniques
           </h2>
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -130,52 +130,54 @@ export default function GroundingIndexPage() {
               <Link
                 key={technique.slug}
                 href={`/grimoire/meditation/grounding/${technique.slug}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-emerald-700/50 transition-all'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-emerald-700/50 transition-all'
               >
                 <div className='flex items-center justify-between mb-2'>
                   <span className='text-xs px-2 py-0.5 rounded bg-emerald-900/50 text-emerald-300'>
                     {technique.type}
                   </span>
-                  <span className='text-xs text-zinc-400'>
+                  <span className='text-xs text-content-muted'>
                     {technique.time}
                   </span>
                 </div>
-                <h3 className='text-lg font-medium text-zinc-100 group-hover:text-emerald-300 transition-colors mb-2'>
+                <h3 className='text-lg font-medium text-content-primary group-hover:text-emerald-300 transition-colors mb-2'>
                   {technique.name}
                 </h3>
-                <p className='text-sm text-zinc-400'>{technique.description}</p>
+                <p className='text-sm text-content-muted'>
+                  {technique.description}
+                </p>
               </Link>
             ))}
           </div>
         </section>
 
         {/* Related Links */}
-        <div className='border-t border-zinc-800 pt-8'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+        <div className='border-t border-stroke-subtle pt-8'>
+          <h3 className='text-lg font-medium text-content-primary mb-4'>
             Explore More
           </h3>
           <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/meditation'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Meditation
             </Link>
             <Link
               href='/grimoire/meditation/breathwork'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Breathwork
             </Link>
             <Link
               href='/grimoire/crystals'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Crystals
             </Link>
             <Link
               href='/grimoire/chakras'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Chakras
             </Link>

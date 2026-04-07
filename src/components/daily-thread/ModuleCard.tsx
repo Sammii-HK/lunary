@@ -86,13 +86,13 @@ export function ModuleCard({ module, onAction }: ModuleCardProps) {
   };
 
   return (
-    <div className='flex-shrink-0 w-full rounded-lg border border-lunary-primary-700 bg-zinc-950/60 p-3 sm:p-4 space-y-2 sm:space-y-3 shadow-sm'>
+    <div className='flex-shrink-0 w-full rounded-lg border border-lunary-primary-700 bg-surface-base/60 p-3 sm:p-4 space-y-2 sm:space-y-3 shadow-sm'>
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1'>
-          <h3 className='text-xs sm:text-sm font-medium text-zinc-100 mb-1'>
+          <h3 className='text-xs sm:text-sm font-medium text-content-primary mb-1'>
             {module.title}
           </h3>
-          <p className='text-xs sm:text-sm text-zinc-400 leading-relaxed'>
+          <p className='text-xs sm:text-sm text-content-muted leading-relaxed'>
             {module.body}
           </p>
         </div>
@@ -110,7 +110,7 @@ export function ModuleCard({ module, onAction }: ModuleCardProps) {
       </div>
 
       {module.meta && (
-        <div className='text-[10px] sm:text-xs text-zinc-500 space-y-1'>
+        <div className='text-[10px] sm:text-xs text-content-muted space-y-1'>
           {module.meta.relativeTime && (
             <div>On this day, {module.meta.relativeTime}</div>
           )}

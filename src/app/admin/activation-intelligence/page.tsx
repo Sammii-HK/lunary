@@ -224,7 +224,7 @@ export default function ActivationIntelligence() {
             {tests.map((rec) => (
               <div
                 key={rec.id}
-                className='p-3 bg-gray-900/50 rounded border border-gray-800'
+                className='p-3 bg-surface-elevated/50 rounded border border-gray-800'
               >
                 <div className='flex items-start justify-between mb-2'>
                   <p className='font-medium text-sm'>{rec.recommendation}</p>

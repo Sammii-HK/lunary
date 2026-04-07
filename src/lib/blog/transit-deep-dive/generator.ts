@@ -1,9 +1,13 @@
 /**
  * AI content generator for transit deep-dive blog posts.
  *
- * Uses claude CLI (--print mode) with Haiku for fast, cost-effective
- * generation. The rich context from the context-builder means the model
- * mostly organises and expands existing data.
+ * Three-pass pipeline:
+ * 1. Sonnet  — editorial content (intro, historical deep dive, practical, closing, meta)
+ * 2. Haiku   — all 12 sign breakdowns in parallel
+ * 3. Sonnet  — editor pass: rewrites any weak/generic sign breakdowns from Haiku
+ *
+ * Splitting the work cuts total generation time from ~6min to ~2-3min while
+ * keeping Sonnet's depth where it matters most.
  */
 
 import { execFileSync } from 'child_process';
@@ -24,80 +28,69 @@ const ZODIAC_SIGNS = [
   'pisces',
 ] as const;
 
-function buildPrompt(ctx: TransitGenerationContext): string {
+type ZodiacSign = (typeof ZODIAC_SIGNS)[number];
+
+function callClaude(
+  prompt: string,
+  model: 'sonnet' | 'haiku',
+  timeoutMs = 240_000,
+): string {
+  return execFileSync(
+    'claude',
+    ['--print', '--model', model, '--output-format', 'text'],
+    {
+      input: prompt,
+      encoding: 'utf-8',
+      maxBuffer: 8 * 1024 * 1024,
+      timeout: timeoutMs,
+    },
+  ) as string;
+}
+
+function extractJSON(text: string): string {
+  const fenced = text.match(/```(?:json)?\s*\n?([\s\S]*?)```/);
+  if (fenced) return fenced[1].trim();
+  const jsonMatch = text.match(/(\{[\s\S]*\})/);
+  if (jsonMatch) return jsonMatch[1].trim();
+  return text.trim();
+}
+
+function buildContextBlock(ctx: TransitGenerationContext): string {
   const parts: string[] = [];
 
-  parts.push(`You are the editorial voice of Lunary, a cosmic knowledge platform. Your writing is witty, historically rich, and grounded in real astrology. You write deep-dive transit guides that help people understand what is coming and how to prepare.
-
-Style rules:
-- UK English spelling (colour, honour, realise)
-- Never use em dashes. Use double hyphens (--) or rewrite the sentence
-- Sentence case for headings (not Title Case)
-- Never say "AI-powered" or mention AI. The knowledge comes from Lunary's grimoire
-- Be conversational but authoritative. Think "clever friend who studied history and astrology"
-- Use concrete historical examples, not vague references
-- Every section should feel like it earns its word count. No filler
-- Sign breakdowns should feel personal and specific, not generic horoscope waffle
-
-Write a deep-dive transit blog post about: ${ctx.planet} ${ctx.transitType} in ${ctx.sign} ${ctx.year}`);
-  parts.push('');
-
-  // Core transit data
-  parts.push('## Transit details');
   parts.push(`Planet: ${ctx.planet}`);
   parts.push(`Sign: ${ctx.sign}`);
   parts.push(`Type: ${ctx.transitType}`);
-  if (ctx.startDate) parts.push(`Start date: ${ctx.startDate}`);
-  if (ctx.endDate) parts.push(`End date: ${ctx.endDate}`);
-  if (ctx.totalDays)
-    parts.push(`Duration: approximately ${ctx.totalDays} days`);
-  if (ctx.hasRetrograde)
-    parts.push(
-      'Note: includes retrograde periods where the planet briefly returns to the previous sign',
-    );
+  if (ctx.startDate) parts.push(`Start: ${ctx.startDate}`);
+  if (ctx.endDate) parts.push(`End: ${ctx.endDate}`);
+  if (ctx.totalDays) parts.push(`Duration: ~${ctx.totalDays} days`);
+  if (ctx.orbitalPeriodYears)
+    parts.push(`Orbital period: ${ctx.orbitalPeriodYears} years`);
+  if (ctx.yearsPerSign) parts.push(`Time per sign: ~${ctx.yearsPerSign} years`);
+  parts.push(`Rarity: ${ctx.rarity}`);
+  if (ctx.dignity)
+    parts.push(`Dignity: ${ctx.planet} is in ${ctx.dignity} in ${ctx.sign}`);
+  if (ctx.hasRetrograde) parts.push('Includes retrograde re-entry periods');
   if (ctx.segments.length > 1) {
     parts.push(
-      `Segments (retrograde re-entries): ${ctx.segments.map((s) => `${s.start} to ${s.end}`).join(', ')}`,
+      `Segments: ${ctx.segments.map((s) => `${s.start} to ${s.end}`).join(', ')}`,
     );
   }
 
-  // Orbital context
-  if (ctx.orbitalPeriodYears) {
-    parts.push(
-      `Orbital period: ${ctx.orbitalPeriodYears} years (full cycle through all 12 signs)`,
-    );
-  }
-  if (ctx.yearsPerSign) {
-    parts.push(`Time per sign: approximately ${ctx.yearsPerSign} years`);
-  }
-  parts.push(`Rarity: ${ctx.rarity}`);
-
-  // Dignity
-  if (ctx.dignity) {
-    parts.push(
-      `Planetary dignity: ${ctx.planet} is in ${ctx.dignity} in ${ctx.sign}`,
-    );
-  }
-
-  // Themes and guidance
   parts.push('');
-  parts.push('## Themes and guidance');
   parts.push(`Description: ${ctx.description}`);
   parts.push(`Themes: ${ctx.themes.join(', ')}`);
   parts.push(`Do: ${ctx.doList.join(', ')}`);
   parts.push(`Avoid: ${ctx.avoidList.join(', ')}`);
   parts.push(`Tone: ${ctx.tone}`);
 
-  // Historical context
   if (ctx.previousPeriods.length > 0 || ctx.historicalTheme) {
     parts.push('');
-    parts.push('## Historical context');
-    if (ctx.historicalTheme) {
+    if (ctx.historicalTheme)
       parts.push(`Historical theme: ${ctx.historicalTheme}`);
-    }
     if (ctx.previousPeriods.length > 0) {
       parts.push(
-        `Previous periods when ${ctx.planet} was in ${ctx.sign}: ${ctx.previousPeriods.join(', ')}`,
+        `Previous periods in ${ctx.sign}: ${ctx.previousPeriods.join(', ')}`,
       );
     }
     for (const [period, events] of Object.entries(ctx.historicalEvents)) {
@@ -111,106 +104,174 @@ Write a deep-dive transit blog post about: ${ctx.planet} ${ctx.transitType} in $
     );
   }
 
-  // Related transits
   if (ctx.relatedTransits.length > 0) {
     parts.push('');
-    parts.push('## Other transits happening in ' + ctx.year);
-    for (const rel of ctx.relatedTransits.slice(0, 5)) {
-      parts.push(`- ${rel.title} (${rel.planet} in ${rel.sign})`);
-    }
     parts.push(
-      'Mention 1-2 of these in the introduction or closing as additional context for the year.',
+      `Other transits in ${ctx.year}: ${ctx.relatedTransits
+        .slice(0, 4)
+        .map((r) => r.title)
+        .join('; ')}`,
     );
   }
-
-  // Output instructions
-  parts.push('');
-  parts.push('## Output requirements');
-  parts.push(
-    'Return ONLY a valid JSON object (no markdown fences, no explanation) with these fields:',
-  );
-  parts.push(
-    '- "title": SEO-optimised, under 70 chars. Target search queries like "saturn in aries 2025 meaning"',
-  );
-  parts.push('- "subtitle": a supporting line, 10-20 words');
-  parts.push('- "metaDescription": 150-160 chars for Google snippet');
-  parts.push('- "keywords": array of 8-12 search terms people would type');
-  parts.push(
-    '- "introduction": witty opening hook, why this transit matters NOW, 200-300 words',
-  );
-  parts.push(
-    '- "historicalDeepDive": what happened during previous transits, patterns across centuries, 400-600 words',
-  );
-  parts.push(
-    '- "astronomicalContext": exact dates, mechanics, retrograde windows explained simply, 200-300 words',
-  );
-  parts.push(
-    '- "practicalGuidance": nuanced do/avoid with real examples, 300-400 words',
-  );
-  parts.push(
-    '- "signBreakdowns": object with ALL 12 zodiac signs as lowercase keys (aries, taurus, gemini, cancer, leo, virgo, libra, scorpio, sagittarius, capricorn, aquarius, pisces), 80-120 words each. Make each feel personal and specific',
-  );
-  parts.push('- "closingSection": forward-looking, empowering, 100-200 words');
 
   return parts.join('\n');
 }
 
-/**
- * Extract JSON from a response that may be wrapped in markdown code fences.
- */
-function extractJSON(text: string): string {
-  const fenced = text.match(/```(?:json)?\s*\n?([\s\S]*?)```/);
-  if (fenced) return fenced[1].trim();
-  const jsonMatch = text.match(/(\{[\s\S]*\})/);
-  if (jsonMatch) return jsonMatch[1].trim();
-  return text.trim();
+const STYLE_RULES = `Style rules:
+- UK English (colour, honour, realise, whilst)
+- Never use em dashes. Use double hyphens (--) or rewrite the sentence
+- Sentence case for headings
+- Never mention AI or "Lunary's grimoire"
+- Conversational but authoritative -- investigative journalist who is also a serious astrologer
+- USE SPECIFIC NAMES, DATES, AND PEOPLE. Avoid vague generalities
+- Surface facts most readers will not know`;
+
+// --- Pass 1: Sonnet editorial content ---
+
+function buildEditorialPrompt(ctx: TransitGenerationContext): string {
+  return `You are the editorial voice of Lunary, a cosmic knowledge platform. You write investigative transit deep-dives -- journalism meets astrology.
+
+${STYLE_RULES}
+
+CRITICAL: The Lunary grimoire already covers general ${ctx.planet}-in-${ctx.sign} meanings. Do NOT repeat those. Focus on:
+- What ACTUALLY HAPPENED during previous transits -- specific events, people, cultural shifts
+- Obscure historical facts: who was alive, what they built, what collapsed, what was invented
+- The surprising angle most astrologers miss
+
+## Transit context
+${buildContextBlock(ctx)}
+
+## Output requirements
+Return ONLY valid JSON (no markdown fences) with these fields:
+- "title": SEO title, under 70 chars (e.g. "Saturn in Aries 2026: meaning and what history tells us")
+- "subtitle": supporting line, 10-20 words
+- "metaDescription": 150-160 chars for Google snippet
+- "keywords": array of 8-12 search terms
+- "introduction": 200-300 words. Open with a specific historical fact or surprising detail -- NOT a generic "Saturn is the planet of discipline" opener. Ground in the real world immediately
+- "historicalDeepDive": 500-700 words. The centrepiece. Name specific people, events, inventions, cultural movements from previous transits. Include at least one obscure or counterintuitive fact. Identify a repeating pattern and explain why this transit produces it
+- "astronomicalContext": 200-300 words. Exact dates, mechanics, retrograde windows explained simply
+- "practicalGuidance": 300-400 words. Nuanced do/avoid with real examples
+- "closingSection": 100-200 words. Forward-looking, empowering`;
 }
 
-/**
- * Generate a transit deep-dive blog post using claude CLI --print.
- *
- * Uses Haiku for speed/cost since the context is rich enough that
- * the model mostly organises and expands existing data.
- */
+// --- Pass 2: Haiku sign breakdowns ---
+
+function buildSignBreakdownsPrompt(ctx: TransitGenerationContext): string {
+  return `You are writing the per-sign section of a transit article for Lunary about ${ctx.planet} in ${ctx.sign} (${ctx.year}).
+
+${STYLE_RULES}
+
+The article's main themes: ${ctx.themes.join(', ')}
+Transit tone: ${ctx.tone}
+Do: ${ctx.doList.join(', ')}
+Avoid: ${ctx.avoidList.join(', ')}
+
+Write a breakdown for ALL 12 signs. Each should be 80-120 words, personal and specific -- not generic horoscope waffle. Reference where ${ctx.sign} falls in their chart, how ${ctx.planet}'s energy manifests for that rising/sun sign specifically. Vary the angle across signs so they don't feel templated.
+
+Return ONLY valid JSON (no markdown fences):
+{
+  "aries": "...",
+  "taurus": "...",
+  "gemini": "...",
+  "cancer": "...",
+  "leo": "...",
+  "virgo": "...",
+  "libra": "...",
+  "scorpio": "...",
+  "sagittarius": "...",
+  "capricorn": "...",
+  "aquarius": "...",
+  "pisces": "..."
+}`;
+}
+
+// --- Pass 3: Sonnet editor pass on sign breakdowns ---
+
+function buildEditorPassPrompt(
+  ctx: TransitGenerationContext,
+  breakdowns: Record<string, string>,
+): string {
+  const breakdownsText = ZODIAC_SIGNS.map(
+    (s) => `${s}: ${breakdowns[s] ?? '(missing)'}`,
+  ).join('\n\n');
+
+  return `You are a senior editor at Lunary reviewing 12 per-sign breakdowns for a transit article about ${ctx.planet} in ${ctx.sign} (${ctx.year}).
+
+${STYLE_RULES}
+
+Rewrite any breakdown that:
+- Feels generic or templated ("This transit will bring changes to your...")
+- Contains an em dash
+- Uses banned phrases: "cosmic dance", "step into", "unlock your", "manifest your", "gentle nudge", "whisper"
+- Is under 70 words or over 130 words
+- Doesn't feel specific to that sign's relationship with ${ctx.planet} in ${ctx.sign}
+
+Leave strong breakdowns unchanged. Return ALL 12, improved or not.
+
+## Current breakdowns:
+${breakdownsText}
+
+Return ONLY valid JSON (no markdown fences) with all 12 signs as keys.`;
+}
+
 export async function generateTransitBlogPost(
   ctx: TransitGenerationContext,
 ): Promise<TransitBlogContent> {
-  const prompt = buildPrompt(ctx);
+  console.log('  [1/3] Sonnet: editorial content...');
+  const editorialRaw = callClaude(buildEditorialPrompt(ctx), 'sonnet', 240_000);
+  const editorial = JSON.parse(extractJSON(editorialRaw)) as Omit<
+    TransitBlogContent,
+    'signBreakdowns'
+  >;
 
-  // Call claude CLI in --print mode with Haiku
-  // execFileSync avoids shell injection -- prompt passed via stdin
-  const rawOutput = execFileSync(
-    'claude',
-    ['--print', '--model', 'haiku', '--output-format', 'text'],
-    {
-      input: prompt,
-      encoding: 'utf-8',
-      maxBuffer: 1024 * 1024, // 1MB
-      timeout: 120_000, // 2 minutes
-    },
+  console.log('  [2/3] Haiku: sign breakdowns...');
+  const breakdownsRaw = callClaude(
+    buildSignBreakdownsPrompt(ctx),
+    'haiku',
+    60_000,
   );
+  let breakdowns = JSON.parse(extractJSON(breakdownsRaw)) as Record<
+    ZodiacSign,
+    string
+  >;
 
-  const jsonStr = extractJSON(rawOutput);
-  const content = JSON.parse(jsonStr) as TransitBlogContent;
-
-  // Validate all 12 signs are present
-  const missingSigns = ZODIAC_SIGNS.filter(
-    (sign) => !content.signBreakdowns[sign],
-  );
-  if (missingSigns.length > 0) {
-    for (const sign of missingSigns) {
-      const capitalSign = sign.charAt(0).toUpperCase() + sign.slice(1);
-      content.signBreakdowns[sign] =
-        `${capitalSign}, this transit touches your chart in subtle ways. Pay attention to the house where ${ctx.sign} falls in your birth chart, as that is where ${ctx.planet}'s energy will be most active. Use this period to reflect on ${ctx.themes[0]} and how it shows up in your daily life.`;
+  // Fill any missing signs with a fallback before the editor pass
+  for (const sign of ZODIAC_SIGNS) {
+    if (!breakdowns[sign]) {
+      const cap = sign.charAt(0).toUpperCase() + sign.slice(1);
+      breakdowns[sign] =
+        `${cap}, pay attention to the house where ${ctx.sign} falls in your birth chart -- that is where ${ctx.planet}'s energy will be most active during this transit.`;
     }
   }
 
-  return content;
+  console.log('  [3/3] Sonnet: editor pass on breakdowns...');
+  const editorRaw = callClaude(
+    buildEditorPassPrompt(ctx, breakdowns),
+    'sonnet',
+    120_000,
+  );
+  try {
+    const editedBreakdowns = JSON.parse(extractJSON(editorRaw)) as Record<
+      ZodiacSign,
+      string
+    >;
+    // Only accept edited versions for signs that came back
+    for (const sign of ZODIAC_SIGNS) {
+      if (editedBreakdowns[sign] && editedBreakdowns[sign].length > 50) {
+        breakdowns[sign] = editedBreakdowns[sign];
+      }
+    }
+  } catch {
+    // Editor pass failed to parse -- keep Haiku breakdowns as-is
+    console.warn('  [3/3] Editor pass parse failed, keeping Haiku breakdowns');
+  }
+
+  return {
+    ...editorial,
+    signBreakdowns: breakdowns,
+  } as TransitBlogContent;
 }
 
-/**
- * Count total words across all content sections.
- */
 export function countWords(content: TransitBlogContent): number {
   const allText = [
     content.introduction,
@@ -220,6 +281,5 @@ export function countWords(content: TransitBlogContent): number {
     ...Object.values(content.signBreakdowns),
     content.closingSection,
   ].join(' ');
-
   return allText.split(/\s+/).filter(Boolean).length;
 }

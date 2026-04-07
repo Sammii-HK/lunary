@@ -299,39 +299,41 @@ export function CircleTab() {
       <div className='w-full max-w-3xl space-y-6'>
         <div className='flex items-center justify-between'>
           <div>
-            <h2 className='text-lg font-semibold text-white'>Your Circle</h2>
-            <p className='text-sm text-zinc-400'>
+            <h2 className='text-lg font-semibold text-content-primary'>
+              Your Circle
+            </h2>
+            <p className='text-sm text-content-muted'>
               Connect with friends and explore cosmic compatibility
             </p>
           </div>
         </div>
 
-        <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-6'>
+        <div className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-6'>
           <div className='text-center space-y-4'>
-            <div className='w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-lunary-primary-800 to-lunary-highlight-800 flex items-center justify-center'>
-              <Users className='w-8 h-8 text-lunary-accent-200' />
+            <div className='w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-layer-raised to-lunary-highlight-800 flex items-center justify-center'>
+              <Users className='w-8 h-8 text-content-brand-accent' />
             </div>
             <div>
-              <h3 className='text-xl font-semibold text-white mb-2'>
+              <h3 className='text-xl font-semibold text-content-primary mb-2'>
                 Unlock Friend Connections
               </h3>
-              <p className='text-sm text-zinc-400 max-w-md mx-auto'>
+              <p className='text-sm text-content-muted max-w-md mx-auto'>
                 Connect with friends on Lunary to see your synastry
                 compatibility, shared cosmic events, and the best times to
                 connect.
               </p>
             </div>
-            <div className='flex flex-wrap justify-center gap-3 text-xs text-zinc-400'>
+            <div className='flex flex-wrap justify-center gap-3 text-xs text-content-muted'>
               <span className='flex items-center gap-1'>
-                <Sparkles className='w-3.5 h-3.5 text-lunary-accent-300' />
+                <Sparkles className='w-3.5 h-3.5 text-content-brand-accent' />
                 Synastry Analysis
               </span>
               <span className='flex items-center gap-1'>
-                <Heart className='w-3.5 h-3.5 text-lunary-accent-300' />
+                <Heart className='w-3.5 h-3.5 text-content-brand-accent' />
                 Compatibility Score
               </span>
               <span className='flex items-center gap-1'>
-                <Link2 className='w-3.5 h-3.5 text-lunary-accent-300' />
+                <Link2 className='w-3.5 h-3.5 text-content-brand-accent' />
                 Invite Links
               </span>
             </div>
@@ -347,10 +349,10 @@ export function CircleTab() {
         {/* Still show manual entries section for free users */}
         <div className='flex items-center justify-between'>
           <div>
-            <h3 className='text-sm font-medium text-zinc-400'>
+            <h3 className='text-sm font-medium text-content-muted'>
               Manual Entries (Free)
             </h3>
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-content-muted'>
               Add birth data manually for basic synastry
             </p>
           </div>
@@ -366,31 +368,33 @@ export function CircleTab() {
         </div>
 
         {showAddForm && (
-          <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5 space-y-4'>
-            <h3 className='font-medium text-white'>Add Someone Manually</h3>
+          <div className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5 space-y-4'>
+            <h3 className='font-medium text-content-primary'>
+              Add Someone Manually
+            </h3>
 
             <div className='grid gap-4 sm:grid-cols-2'>
               <div className='space-y-2'>
-                <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                <label className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                   Name *
                 </label>
                 <input
                   type='text'
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                  className='w-full rounded-md border border-stroke-strong bg-surface-overlay px-3 py-2 text-sm text-content-primary placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                   placeholder='Their name'
                 />
               </div>
 
               <div className='space-y-2'>
-                <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                <label className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                   Relationship
                 </label>
                 <select
                   value={formType}
                   onChange={(e) => setFormType(e.target.value)}
-                  className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                  className='w-full rounded-md border border-stroke-strong bg-surface-overlay px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                 >
                   {RELATIONSHIP_TYPES.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -403,38 +407,38 @@ export function CircleTab() {
 
             <div className='grid gap-4 sm:grid-cols-2'>
               <div className='space-y-2'>
-                <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                <label className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                   Birthday *
                 </label>
                 <BirthdayInput
                   value={formBirthday}
                   onChange={setFormBirthday}
-                  className='rounded-md border-zinc-600 bg-zinc-700 px-3 py-2 text-sm'
+                  className='rounded-md border-stroke-strong bg-surface-overlay px-3 py-2 text-sm'
                 />
               </div>
 
               <div className='space-y-2'>
-                <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                <label className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                   Birth Time (optional)
                 </label>
                 <input
                   type='time'
                   value={formBirthTime}
                   onChange={(e) => setFormBirthTime(e.target.value)}
-                  className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                  className='w-full rounded-md border border-stroke-strong bg-surface-overlay px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                 />
               </div>
             </div>
 
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+              <label className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                 Birth Location (optional)
               </label>
               <input
                 type='text'
                 value={formBirthLocation}
                 onChange={(e) => setFormBirthLocation(e.target.value)}
-                className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                className='w-full rounded-md border border-stroke-strong bg-surface-overlay px-3 py-2 text-sm text-content-primary placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                 placeholder='City, Country'
               />
             </div>
@@ -473,21 +477,21 @@ export function CircleTab() {
               return (
                 <div
                   key={profile.id}
-                  className={`rounded-xl border bg-lunary-bg-deep/90 transition-all ${
+                  className={`rounded-xl border bg-surface-base/90 transition-all ${
                     isSelected
                       ? 'border-lunary-primary-600'
-                      : 'border-zinc-700/70 hover:border-zinc-600'
+                      : 'border-stroke-default/70 hover:border-stroke-strong'
                   }`}
                 >
                   <div className='p-4 flex items-center gap-4'>
-                    <div className='w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center'>
-                      <Icon className='w-5 h-5 text-lunary-accent-300' />
+                    <div className='w-10 h-10 rounded-full bg-surface-card flex items-center justify-center'>
+                      <Icon className='w-5 h-5 text-content-brand-accent' />
                     </div>
                     <div className='flex-1 min-w-0'>
-                      <h3 className='font-medium text-white truncate'>
+                      <h3 className='font-medium text-content-primary truncate'>
                         {profile.name}
                       </h3>
-                      <p className='text-xs text-zinc-400'>
+                      <p className='text-xs text-content-muted'>
                         {formatDate(profile.birthday)}
                       </p>
                     </div>
@@ -510,7 +514,7 @@ export function CircleTab() {
                       </Button>
                       <button
                         onClick={() => handleDeleteProfile(profile.id)}
-                        className='p-2 text-zinc-500 hover:text-red-400 transition-colors'
+                        className='p-2 text-content-muted hover:text-red-400 transition-colors'
                       >
                         <Trash2 className='w-4 h-4' />
                       </button>
@@ -543,7 +547,7 @@ export function CircleTab() {
       </div>
 
       <div>
-        <p className='text-sm text-zinc-400 mb-3'>
+        <p className='text-sm text-content-muted mb-3'>
           Connect with friends or add birth data manually
         </p>
         <div className='flex gap-2'>
@@ -569,14 +573,16 @@ export function CircleTab() {
       </div>
 
       {showInviteSection && (
-        <div className='rounded-xl border border-lunary-primary-700/50 bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 p-5 space-y-4'>
+        <div className='rounded-xl border border-lunary-primary-700/50 bg-gradient-to-r from-layer-base/30 to-lunary-highlight-900/30 p-5 space-y-4'>
           <div className='flex items-start gap-3'>
-            <div className='w-10 h-10 rounded-full bg-lunary-primary-800/50 flex items-center justify-center'>
-              <UserPlus className='w-5 h-5 text-lunary-accent-300' />
+            <div className='w-10 h-10 rounded-full bg-layer-raised/50 flex items-center justify-center'>
+              <UserPlus className='w-5 h-5 text-content-brand-accent' />
             </div>
             <div className='flex-1'>
-              <h3 className='font-medium text-white'>Invite Friends</h3>
-              <p className='text-sm text-zinc-400'>
+              <h3 className='font-medium text-content-primary'>
+                Invite Friends
+              </h3>
+              <p className='text-sm text-content-muted'>
                 Share a link to connect with friends on Lunary
               </p>
             </div>
@@ -601,7 +607,7 @@ export function CircleTab() {
                 type='text'
                 value={inviteUrl}
                 readOnly
-                className='flex-1 rounded-md border border-zinc-600 bg-zinc-800 px-3 py-2 text-sm text-zinc-300'
+                className='flex-1 rounded-md border border-stroke-strong bg-surface-card px-3 py-2 text-sm text-content-secondary'
               />
               <Button
                 onClick={copyInviteLink}
@@ -638,31 +644,33 @@ export function CircleTab() {
       )}
 
       {showAddForm && (
-        <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5 space-y-4'>
-          <h3 className='font-medium text-white'>Add Someone Manually</h3>
+        <div className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5 space-y-4'>
+          <h3 className='font-medium text-content-primary'>
+            Add Someone Manually
+          </h3>
 
           <div className='grid gap-4 sm:grid-cols-2'>
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+              <label className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                 Name *
               </label>
               <input
                 type='text'
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                className='w-full rounded-md border border-stroke-strong bg-surface-overlay px-3 py-2 text-sm text-content-primary placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                 placeholder='Their name'
               />
             </div>
 
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+              <label className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                 Relationship
               </label>
               <select
                 value={formType}
                 onChange={(e) => setFormType(e.target.value)}
-                className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                className='w-full rounded-md border border-stroke-strong bg-surface-overlay px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary'
               >
                 {RELATIONSHIP_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -675,38 +683,38 @@ export function CircleTab() {
 
           <div className='grid gap-4 sm:grid-cols-2'>
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+              <label className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                 Birthday *
               </label>
               <BirthdayInput
                 value={formBirthday}
                 onChange={setFormBirthday}
-                className='rounded-md border-zinc-600 bg-zinc-700 px-3 py-2 text-sm'
+                className='rounded-md border-stroke-strong bg-surface-overlay px-3 py-2 text-sm'
               />
             </div>
 
             <div className='space-y-2'>
-              <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+              <label className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                 Birth Time (optional)
               </label>
               <input
                 type='time'
                 value={formBirthTime}
                 onChange={(e) => setFormBirthTime(e.target.value)}
-                className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                className='w-full rounded-md border border-stroke-strong bg-surface-overlay px-3 py-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary'
               />
             </div>
           </div>
 
           <div className='space-y-2'>
-            <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+            <label className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
               Birth Location (optional)
             </label>
             <input
               type='text'
               value={formBirthLocation}
               onChange={(e) => setFormBirthLocation(e.target.value)}
-              className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+              className='w-full rounded-md border border-stroke-strong bg-surface-overlay px-3 py-2 text-sm text-content-primary placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
               placeholder='City, Country'
             />
           </div>
@@ -732,12 +740,12 @@ export function CircleTab() {
       )}
 
       {!hasAnyConnections && (
-        <div className='rounded-xl border-2 border-dashed border-zinc-700 p-8 text-center'>
-          <Users className='w-12 h-12 mx-auto text-zinc-600 mb-3' />
-          <h3 className='text-lg font-medium text-zinc-300 mb-1'>
+        <div className='rounded-xl border-2 border-dashed border-stroke-default p-8 text-center'>
+          <Users className='w-12 h-12 mx-auto text-content-muted mb-3' />
+          <h3 className='text-lg font-medium text-content-secondary mb-1'>
             Your circle is empty
           </h3>
-          <p className='text-sm text-zinc-500 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Invite friends or add birth data manually
           </p>
           <div className='flex justify-center gap-2'>
@@ -765,7 +773,7 @@ export function CircleTab() {
 
       {profiles.length > 0 && (
         <div className='space-y-3'>
-          <h3 className='text-sm font-medium text-zinc-400 uppercase tracking-wide'>
+          <h3 className='text-sm font-medium text-content-muted uppercase tracking-wide'>
             Manual Entries
           </h3>
           {profiles.map((profile) => {
@@ -780,21 +788,21 @@ export function CircleTab() {
             return (
               <div
                 key={profile.id}
-                className={`rounded-xl border bg-lunary-bg-deep/90 transition-all ${
+                className={`rounded-xl border bg-surface-base/90 transition-all ${
                   isSelected
                     ? 'border-lunary-primary-600'
-                    : 'border-zinc-700/70 hover:border-zinc-600'
+                    : 'border-stroke-default/70 hover:border-stroke-strong'
                 }`}
               >
                 <div className='p-4 flex items-center gap-4'>
-                  <div className='w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center'>
-                    <Icon className='w-5 h-5 text-lunary-accent-300' />
+                  <div className='w-10 h-10 rounded-full bg-surface-card flex items-center justify-center'>
+                    <Icon className='w-5 h-5 text-content-brand-accent' />
                   </div>
                   <div className='flex-1 min-w-0'>
-                    <h3 className='font-medium text-white truncate'>
+                    <h3 className='font-medium text-content-primary truncate'>
                       {profile.name}
                     </h3>
-                    <p className='text-xs text-zinc-400'>
+                    <p className='text-xs text-content-muted'>
                       {formatDate(profile.birthday)}
                     </p>
                   </div>
@@ -815,7 +823,7 @@ export function CircleTab() {
                     </Button>
                     <button
                       onClick={() => handleDeleteProfile(profile.id)}
-                      className='p-2 text-zinc-500 hover:text-red-400 transition-colors'
+                      className='p-2 text-content-muted hover:text-red-400 transition-colors'
                     >
                       <Trash2 className='w-4 h-4' />
                     </button>
@@ -837,7 +845,7 @@ export function CircleTab() {
       {/* Activity Feed at bottom */}
       <FriendActivityFeed />
 
-      <p className='text-xs text-zinc-500 text-center'>
+      <p className='text-xs text-content-muted text-center'>
         Synastry compares birth charts to reveal cosmic compatibility.
       </p>
     </div>
@@ -856,9 +864,9 @@ function SynastryPanel({
   const [showAspects, setShowAspects] = useState(false);
 
   return (
-    <div className='border-t border-zinc-700/50 p-4'>
+    <div className='border-t border-stroke-default/50 p-4'>
       {loading ? (
-        <div className='flex items-center gap-3 text-sm text-zinc-400'>
+        <div className='flex items-center gap-3 text-sm text-content-muted'>
           <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-lunary-primary' />
           Calculating cosmic compatibility...
         </div>
@@ -868,25 +876,25 @@ function SynastryPanel({
         <div className='space-y-4'>
           <div className='flex items-start gap-4'>
             <div className='text-center'>
-              <div className='text-3xl font-bold text-lunary-accent-200'>
+              <div className='text-3xl font-bold text-content-brand-accent'>
                 {result.compatibilityScore}%
               </div>
-              <div className='text-xs text-zinc-400'>Compatibility</div>
+              <div className='text-xs text-content-muted'>Compatibility</div>
             </div>
             <div className='flex-1'>
-              <div className='h-2 bg-zinc-700 rounded-full overflow-hidden mb-2'>
+              <div className='h-2 bg-surface-overlay rounded-full overflow-hidden mb-2'>
                 <div
                   className='h-full bg-gradient-to-r from-lunary-primary to-lunary-highlight'
                   style={{ width: `${result.compatibilityScore}%` }}
                 />
               </div>
-              <p className='text-sm text-zinc-300'>{result.summary}</p>
+              <p className='text-sm text-content-secondary'>{result.summary}</p>
             </div>
           </div>
 
           {result.elementBalance && (
             <div className='space-y-2'>
-              <h4 className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+              <h4 className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                 Element Balance
               </h4>
               <div className='grid grid-cols-4 gap-2'>
@@ -901,14 +909,14 @@ function SynastryPanel({
                   return (
                     <div
                       key={el}
-                      className='rounded-lg bg-zinc-800/50 p-2 text-center'
+                      className='rounded-lg bg-surface-card/50 p-2 text-center'
                     >
                       <div
                         className={`text-lg font-bold bg-gradient-to-r ${colors[el]} bg-clip-text text-transparent`}
                       >
                         {data.combined}
                       </div>
-                      <div className='text-[10px] text-zinc-400 capitalize'>
+                      <div className='text-[10px] text-content-muted capitalize'>
                         {el}
                       </div>
                     </div>
@@ -920,7 +928,7 @@ function SynastryPanel({
 
           {result.modalityBalance && (
             <div className='space-y-2'>
-              <h4 className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+              <h4 className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                 Modality Balance
               </h4>
               <div className='grid grid-cols-3 gap-2'>
@@ -929,12 +937,12 @@ function SynastryPanel({
                   return (
                     <div
                       key={mod}
-                      className='rounded-lg bg-zinc-800/50 p-2 text-center'
+                      className='rounded-lg bg-surface-card/50 p-2 text-center'
                     >
-                      <div className='text-lg font-bold text-zinc-200'>
+                      <div className='text-lg font-bold text-content-primary'>
                         {data.combined}
                       </div>
-                      <div className='text-[10px] text-zinc-400 capitalize'>
+                      <div className='text-[10px] text-content-muted capitalize'>
                         {mod}
                       </div>
                     </div>
@@ -948,7 +956,7 @@ function SynastryPanel({
             <div className='space-y-2'>
               <button
                 onClick={() => setShowAspects(!showAspects)}
-                className='flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-zinc-400 hover:text-zinc-300'
+                className='flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-content-muted hover:text-content-secondary'
               >
                 Key Aspects ({result.aspects.length})
                 {showAspects ? (
@@ -976,7 +984,7 @@ function SynastryPanel({
                         Your {aspect.person1Planet} {aspect.aspectType} their{' '}
                         {aspect.person2Planet}
                       </span>
-                      <span className='text-zinc-500 ml-auto'>
+                      <span className='text-content-muted ml-auto'>
                         {aspect.orb.toFixed(1)}°
                       </span>
                     </div>

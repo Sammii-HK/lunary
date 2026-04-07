@@ -88,7 +88,7 @@ function getPlanetColor(planet: string): string {
     Neptune: 'text-lunary-secondary',
     Pluto: 'text-lunary-highlight',
   };
-  return colors[planet] || 'text-zinc-300';
+  return colors[planet] || 'text-content-secondary';
 }
 
 function getPlanetBorderColor(planet: string): string {
@@ -104,23 +104,23 @@ function getPlanetBorderColor(planet: string): string {
     Neptune: 'border-lunary-secondary-800',
     Pluto: 'border-lunary-highlight-800',
   };
-  return colors[planet] || 'border-zinc-700';
+  return colors[planet] || 'border-stroke-default';
 }
 
 function getPlanetBgColor(planet: string): string {
   const colors: Record<string, string> = {
-    Sun: 'bg-lunary-accent-950',
-    Moon: 'bg-lunary-secondary-950',
+    Sun: 'bg-layer-deep',
+    Moon: 'bg-layer-deep',
     Mercury: 'bg-gray-400/10',
-    Venus: 'bg-lunary-rose-950',
-    Mars: 'bg-lunary-error-900/10',
+    Venus: 'bg-layer-deep',
+    Mars: 'bg-layer-base/10',
     Jupiter: 'bg-lunary-highlight-900/10',
-    Saturn: 'bg-lunary-primary-950',
-    Uranus: 'bg-lunary-secondary-950',
-    Neptune: 'bg-lunary-secondary-950',
+    Saturn: 'bg-layer-deep',
+    Uranus: 'bg-layer-deep',
+    Neptune: 'bg-layer-deep',
     Pluto: 'bg-lunary-highlight-950',
   };
-  return colors[planet] || 'bg-zinc-800/50';
+  return colors[planet] || 'bg-surface-card/50';
 }
 
 const BLOG_SECTION_LIMITS = {
@@ -884,8 +884,8 @@ export default async function BlogPostPage({
                 {displayedAspects.map((aspect: any, index: number) => {
                   const planetAColor = getPlanetColor(aspect.planetA);
                   const planetBColor = getPlanetColor(aspect.planetB);
-                  const borderColor = 'border-zinc-700';
-                  const bgColor = 'bg-zinc-800/50';
+                  const borderColor = 'border-stroke-default';
+                  const bgColor = 'bg-surface-card/50';
 
                   return (
                     <Card
@@ -898,7 +898,7 @@ export default async function BlogPostPage({
                             <span className={planetAColor}>
                               {getPlanetSymbol(aspect.planetA)} {aspect.planetA}
                             </span>{' '}
-                            <span className='text-zinc-400'>
+                            <span className='text-content-muted'>
                               {getAspectSymbol(aspect.aspect)}
                             </span>{' '}
                             <span className={planetBColor}>
@@ -1059,12 +1059,12 @@ export default async function BlogPostPage({
         })()}
 
         {/* App CTA Section */}
-        <section className='mt-8 pt-8 border-t border-zinc-800'>
+        <section className='mt-8 pt-8 border-t border-stroke-subtle'>
           <CrossPlatformCTA variant='app' source='blog_post' />
         </section>
 
         {/* Social Sharing Section */}
-        <section className='mt-8 pt-8 border-t border-zinc-800'>
+        <section className='mt-8 pt-8 border-t border-stroke-subtle'>
           <h2 className='text-xl font-semibold mb-4'>Share This Forecast</h2>
           <SocialShareButtons
             url={`https://lunary.app/blog/week/${canonicalWeekSlug}`}
@@ -1073,7 +1073,7 @@ export default async function BlogPostPage({
         </section>
 
         {/* Related Posts Section */}
-        <section className='mt-12 pt-8 border-t border-zinc-800'>
+        <section className='mt-12 pt-8 border-t border-stroke-subtle'>
           <h2 className='text-2xl font-semibold mb-6'>
             Related Weekly Forecasts
           </h2>
@@ -1105,20 +1105,20 @@ export default async function BlogPostPage({
                   <Link
                     key={weekSlug}
                     href={`/blog/week/${weekSlug}${linkSuffix}`}
-                    className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group'
+                    className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all group'
                   >
                     <div className='flex items-center gap-2 mb-2'>
                       <Badge variant='outline' className='text-xs'>
                         Week {related.week}
                       </Badge>
-                      <span className='text-xs text-zinc-400'>
+                      <span className='text-xs text-content-muted'>
                         {related.year}
                       </span>
                     </div>
-                    <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-1'>
+                    <h3 className='font-medium text-content-primary group-hover:text-content-brand transition-colors mb-1'>
                       {related.label}
                     </h3>
-                    <p className='text-sm text-zinc-400'>
+                    <p className='text-sm text-content-muted'>
                       {related.week === currentWeekNum - 1
                         ? 'Previous cosmic forecast'
                         : related.week === currentWeekNum + 1
@@ -1133,7 +1133,7 @@ export default async function BlogPostPage({
           <div className='mt-6'>
             <Link
               href={`/blog${linkSuffix}`}
-              className='inline-flex items-center gap-2 text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors text-sm font-medium'
+              className='inline-flex items-center gap-2 text-lunary-primary-400 hover:text-content-brand transition-colors text-sm font-medium'
             >
               View All Weekly Forecasts
               <ArrowRight className='h-4 w-4' />
@@ -1141,70 +1141,78 @@ export default async function BlogPostPage({
           </div>
         </section>
 
-        <section className='mt-12 pt-8 border-t border-zinc-800'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mt-12 pt-8 border-t border-stroke-subtle'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Learn More in the Grimoire
           </h2>
-          <p className='text-sm text-zinc-400 mb-6'>
+          <p className='text-sm text-content-muted mb-6'>
             Deepen your understanding of the cosmic energies mentioned in this
             forecast.
           </p>
           <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-3'>
             <Link
               href='/grimoire/astronomy/planets'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>
+              <span className='text-content-secondary font-medium'>
                 Planetary Meanings
               </span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <p className='text-xs text-content-muted mt-1'>
                 Understand planet influences
               </p>
             </Link>
             <Link
               href='/grimoire/moon/phases'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>Moon Phases</span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <span className='text-content-secondary font-medium'>
+                Moon Phases
+              </span>
+              <p className='text-xs text-content-muted mt-1'>
                 Work with lunar energy
               </p>
             </Link>
             <Link
               href='/grimoire/astronomy/retrogrades'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>
+              <span className='text-content-secondary font-medium'>
                 Retrogrades Guide
               </span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <p className='text-xs text-content-muted mt-1'>
                 Navigate retrograde periods
               </p>
             </Link>
             <Link
               href='/grimoire/zodiac'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>Zodiac Signs</span>
-              <p className='text-xs text-zinc-500 mt-1'>Explore all 12 signs</p>
+              <span className='text-content-secondary font-medium'>
+                Zodiac Signs
+              </span>
+              <p className='text-xs text-content-muted mt-1'>
+                Explore all 12 signs
+              </p>
             </Link>
             <Link
               href='/grimoire/aspects/types'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>Aspect Types</span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <span className='text-content-secondary font-medium'>
+                Aspect Types
+              </span>
+              <p className='text-xs text-content-muted mt-1'>
                 Learn about planetary aspects
               </p>
             </Link>
             <Link
               href='/birth-chart'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>
+              <span className='text-content-secondary font-medium'>
                 Your Birth Chart
               </span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <p className='text-xs text-content-muted mt-1'>
                 Personalized cosmic insights
               </p>
             </Link>
@@ -1339,7 +1347,7 @@ export default async function BlogPostPage({
           {error instanceof Error ? error.message : 'An unknown error occurred'}
         </p>
         {error instanceof Error && error.stack && (
-          <pre className='text-xs bg-zinc-900 p-4 rounded overflow-auto max-h-96'>
+          <pre className='text-xs bg-surface-elevated p-4 rounded overflow-auto max-h-96'>
             {error.stack}
           </pre>
         )}

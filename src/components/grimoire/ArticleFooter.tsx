@@ -9,20 +9,20 @@ export function ArticleFooter({
 }) {
   const lastUpdated = dateModified || datePublished || null;
   return (
-    <footer className='mt-12 pt-8 border-t border-zinc-800/50 overflow-x-hidden'>
-      <div className='space-y-4 text-sm text-zinc-400'>
+    <footer className='mt-12 pt-8 border-t border-stroke-subtle/50 overflow-x-hidden'>
+      <div className='space-y-4 text-sm text-content-muted'>
         <div className='flex flex-wrap gap-x-4 sm:gap-x-6 gap-y-2'>
           <span className='break-words'>
-            <strong className='text-zinc-400'>Written by:</strong> Sammii,
+            <strong className='text-content-muted'>Written by:</strong> Sammii,
             Founder of Lunary
           </span>
           <span className='break-words'>
-            <strong className='text-zinc-400'>Edited by:</strong> Lunary
+            <strong className='text-content-muted'>Edited by:</strong> Lunary
             Astrology Team
           </span>
           {lastUpdated && (
             <span className='break-words'>
-              <strong className='text-zinc-400'>Last updated:</strong>{' '}
+              <strong className='text-content-muted'>Last updated:</strong>{' '}
               {new Date(dateModified || datePublished || '').toLocaleDateString(
                 'en-US',
                 {
@@ -37,7 +37,7 @@ export function ArticleFooter({
 
         {sources && sources.length > 0 && (
           <div>
-            <strong className='text-zinc-400'>Sources:</strong>
+            <strong className='text-content-muted'>Sources:</strong>
             <ul className='mt-2 space-y-1'>
               {sources.map((source, index) => (
                 <li key={index}>
@@ -46,7 +46,7 @@ export function ArticleFooter({
                       href={source.url}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='text-lunary-accent hover:text-lunary-accent-300 transition-colors'
+                      className='text-lunary-accent hover:text-content-brand-accent transition-colors'
                     >
                       {source.name}
                     </a>
@@ -61,7 +61,7 @@ export function ArticleFooter({
 
         {!sources && (
           <div>
-            <strong className='text-zinc-400'>Reference Sources:</strong>
+            <strong className='text-content-muted'>Reference Sources:</strong>
             <ul className='mt-2 space-y-1'>
               <li>Astronomy Engine (astronomical calculations)</li>
               <li>Traditional astrological texts</li>

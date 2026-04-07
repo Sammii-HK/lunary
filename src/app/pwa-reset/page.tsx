@@ -190,8 +190,8 @@ export default function PWAResetPage() {
     <div className='p-4 space-y-4 max-w-2xl mx-auto'>
       <h1 className='text-2xl font-bold'>🔧 PWA Reset & Debug Tool</h1>
 
-      <div className='bg-lunary-accent-900/20 border border-lunary-accent-700 rounded p-4'>
-        <p className='text-sm text-lunary-accent-200'>
+      <div className='bg-layer-base/20 border border-lunary-accent-700 rounded p-4'>
+        <p className='text-sm text-content-brand-accent'>
           ⚠️ This will clear ALL service workers, caches, and storage for this
           site. Use this when debugging PWA issues.
         </p>
@@ -201,7 +201,7 @@ export default function PWAResetPage() {
         <button
           onClick={clearAll}
           disabled={status === 'clearing'}
-          className='px-6 py-3 bg-lunary-error-600 hover:bg-lunary-error-700 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white rounded-lg font-medium'
+          className='px-6 py-3 bg-lunary-error-600 hover:bg-lunary-error-700 disabled:bg-surface-overlay disabled:cursor-not-allowed text-white rounded-lg font-medium'
         >
           {status === 'clearing' ? 'Clearing...' : '🧹 Clear Everything'}
         </button>
@@ -215,19 +215,19 @@ export default function PWAResetPage() {
 
         <button
           onClick={hardReload}
-          className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium'
+          className='px-6 py-3 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg font-medium'
         >
           🔄 Hard Reload
         </button>
       </div>
 
       {logs.length > 0 && (
-        <div className='bg-zinc-900 border border-zinc-700 rounded p-4'>
+        <div className='bg-surface-elevated border border-stroke-default rounded p-4'>
           <div className='flex justify-between items-center mb-2'>
             <h2 className='font-bold'>Logs</h2>
             <button
               onClick={() => setLogs([])}
-              className='text-xs text-zinc-400 hover:text-white'
+              className='text-xs text-content-muted hover:text-content-primary'
             >
               Clear
             </button>
@@ -243,7 +243,7 @@ export default function PWAResetPage() {
                       ? 'text-lunary-error'
                       : log.includes('📋')
                         ? 'text-lunary-accent'
-                        : 'text-zinc-300'
+                        : 'text-content-secondary'
                 }
               >
                 {log}
@@ -253,23 +253,23 @@ export default function PWAResetPage() {
         </div>
       )}
 
-      <div className='bg-zinc-900 border border-zinc-700 rounded p-4'>
+      <div className='bg-surface-elevated border border-stroke-default rounded p-4'>
         <h2 className='font-bold mb-2'>Quick Commands</h2>
         <div className='space-y-2 text-sm font-mono'>
           <div>
-            <span className='text-zinc-400'>Check service worker:</span>
+            <span className='text-content-muted'>Check service worker:</span>
             <code className='ml-2 text-lunary-success'>
               navigator.serviceWorker.getRegistrations()
             </code>
           </div>
           <div>
-            <span className='text-zinc-400'>Check display mode:</span>
+            <span className='text-content-muted'>Check display mode:</span>
             <code className='ml-2 text-lunary-success'>
               window.matchMedia('(display-mode: minimal-ui)').matches
             </code>
           </div>
           <div>
-            <span className='text-zinc-400'>Check caches:</span>
+            <span className='text-content-muted'>Check caches:</span>
             <code className='ml-2 text-lunary-success'>caches.keys()</code>
           </div>
         </div>

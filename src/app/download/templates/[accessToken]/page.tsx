@@ -50,23 +50,25 @@ function ErrorCard({
   message: string;
 }) {
   return (
-    <div className='min-h-screen bg-zinc-950 flex items-center justify-center p-4'>
+    <div className='min-h-screen bg-surface-base flex items-center justify-center p-4'>
       <div className='w-full max-w-md'>
         <BrandHeader />
-        <Card className='bg-zinc-900 border-zinc-800'>
+        <Card className='bg-surface-elevated border-stroke-subtle'>
           <CardHeader className='text-center'>
-            <div className='flex justify-center mb-4 text-zinc-500'>{icon}</div>
-            <CardTitle className='text-zinc-100'>{title}</CardTitle>
+            <div className='flex justify-center mb-4 text-content-muted'>
+              {icon}
+            </div>
+            <CardTitle className='text-content-primary'>{title}</CardTitle>
           </CardHeader>
           <CardContent className='text-center space-y-4'>
-            <CardDescription className='text-zinc-400 text-sm leading-relaxed'>
+            <CardDescription className='text-content-muted text-sm leading-relaxed'>
               {message}
             </CardDescription>
-            <p className='text-sm text-zinc-500'>
+            <p className='text-sm text-content-muted'>
               Need help?{' '}
               <Link
                 href='mailto:hello@lunary.app'
-                className='text-lunary-primary-300 hover:text-lunary-primary underline underline-offset-2 transition-colors'
+                className='text-content-brand hover:text-lunary-primary underline underline-offset-2 transition-colors'
               >
                 Contact support
               </Link>
@@ -116,29 +118,29 @@ export default async function TemplateDownloadPage({
 
   if (!purchase.notion_share_url) {
     return (
-      <div className='min-h-screen bg-zinc-950 flex items-center justify-center p-4'>
+      <div className='min-h-screen bg-surface-base flex items-center justify-center p-4'>
         <div className='w-full max-w-md'>
           <BrandHeader />
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardHeader className='text-center'>
-              <div className='flex justify-center mb-4 text-lunary-primary-300'>
+              <div className='flex justify-center mb-4 text-content-brand'>
                 <Clock size={48} />
               </div>
-              <CardTitle className='text-zinc-100'>
+              <CardTitle className='text-content-primary'>
                 Your template is being prepared
               </CardTitle>
             </CardHeader>
             <CardContent className='text-center space-y-4'>
-              <CardDescription className='text-zinc-400 text-sm leading-relaxed'>
+              <CardDescription className='text-content-muted text-sm leading-relaxed'>
                 Your template is on its way — we are generating your personal
                 share link. Check back in a few minutes, or check your email for
                 updates.
               </CardDescription>
-              <p className='text-sm text-zinc-500'>
+              <p className='text-sm text-content-muted'>
                 Having trouble?{' '}
                 <Link
                   href='mailto:hello@lunary.app'
-                  className='text-lunary-primary-300 hover:text-lunary-primary underline underline-offset-2 transition-colors'
+                  className='text-content-brand hover:text-lunary-primary underline underline-offset-2 transition-colors'
                 >
                   Contact support
                 </Link>

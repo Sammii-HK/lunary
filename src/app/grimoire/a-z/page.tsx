@@ -207,7 +207,7 @@ export default function AZIndexPage() {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(itemListSchema)}
       {renderJsonLd(
         createBreadcrumbSchema([
@@ -227,15 +227,15 @@ export default function AZIndexPage() {
           <h1 className='text-4xl md:text-5xl font-light mb-4'>
             Lunary Grimoire A–Z
           </h1>
-          <p className='text-xl text-zinc-400 leading-relaxed mb-6'>
+          <p className='text-xl text-content-muted leading-relaxed mb-6'>
             Complete alphabetical index of astrology topics, zodiac signs,
             planets, tarot, crystals, spells, and spiritual practices.
           </p>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h2 className='text-lg font-medium text-zinc-100 mb-3'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h2 className='text-lg font-medium text-content-primary mb-3'>
               How to Use This Index
             </h2>
-            <p className='text-zinc-400 text-sm mb-4'>
+            <p className='text-content-muted text-sm mb-4'>
               Jump to any letter using the navigation bar below, or scroll
               through to browse all topics. Each entry links directly to its
               dedicated grimoire page with detailed information.
@@ -243,19 +243,19 @@ export default function AZIndexPage() {
             <div className='flex flex-wrap gap-3'>
               <Link
                 href='/grimoire/beginners'
-                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-sm text-lunary-primary-400 hover:text-content-brand'
               >
                 New here? Start with the Beginners Guide →
               </Link>
               <Link
                 href='/grimoire/guides/birth-chart-complete-guide'
-                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-sm text-lunary-primary-400 hover:text-content-brand'
               >
                 Birth Chart Guide →
               </Link>
               <Link
                 href='/grimoire/guides/moon-phases-guide'
-                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-sm text-lunary-primary-400 hover:text-content-brand'
               >
                 Moon Phases Guide →
               </Link>
@@ -270,14 +270,14 @@ export default function AZIndexPage() {
               <a
                 key={letter}
                 href={`#letter-${letter}`}
-                className='w-8 h-8 flex items-center justify-center rounded bg-zinc-800 text-zinc-300 text-sm hover:bg-lunary-primary-900/30 hover:text-lunary-primary-300 transition-colors'
+                className='w-8 h-8 flex items-center justify-center rounded bg-surface-card text-content-secondary text-sm hover:bg-layer-base/30 hover:text-content-brand transition-colors'
               >
                 {letter}
               </a>
             ) : (
               <span
                 key={letter}
-                className='w-8 h-8 flex items-center justify-center text-zinc-700 text-sm'
+                className='w-8 h-8 flex items-center justify-center text-content-muted text-sm'
               >
                 {letter}
               </span>
@@ -292,7 +292,7 @@ export default function AZIndexPage() {
               id={`letter-${section.letter}`}
               className='scroll-mt-24'
             >
-              <h2 className='text-2xl font-light text-lunary-primary-400 mb-4 pb-2 border-b border-zinc-800'>
+              <h2 className='text-2xl font-light text-lunary-primary-400 mb-4 pb-2 border-b border-stroke-subtle'>
                 {section.letter}
               </h2>
               <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-3'>
@@ -300,9 +300,9 @@ export default function AZIndexPage() {
                   <Link
                     key={item.url}
                     href={item.url}
-                    className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+                    className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
                   >
-                    <span className='text-zinc-200'>{item.name}</span>
+                    <span className='text-content-primary'>{item.name}</span>
                   </Link>
                 ))}
               </div>
@@ -310,17 +310,17 @@ export default function AZIndexPage() {
           ))}
         </div>
 
-        <section className='mt-12 p-6 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-rose-900/20'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
+        <section className='mt-12 p-6 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-layer-base/20 to-lunary-rose-900/20'>
+          <h2 className='text-xl font-medium text-content-brand mb-2'>
             New to Astrology?
           </h2>
-          <p className='text-zinc-300 mb-4'>
+          <p className='text-content-secondary mb-4'>
             Start with our beginner's guide for a structured introduction to
             astrology fundamentals.
           </p>
           <Link
             href='/grimoire/beginners'
-            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/30 hover:bg-lunary-primary-900/50 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+            className='inline-flex px-6 py-3 rounded-lg bg-layer-base/30 hover:bg-layer-base/50 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
           >
             Astrology for Beginners
           </Link>

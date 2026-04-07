@@ -104,7 +104,7 @@ const tableOfContents = [
 ];
 
 const heroContent = (
-  <p className='text-xl text-zinc-400 leading-relaxed max-w-3xl mx-auto'>
+  <p className='text-xl text-content-muted leading-relaxed max-w-3xl mx-auto'>
     Modern witchcraft is a diverse spiritual practice that honors nature, works
     with energy, and empowers practitioners to create positive change. This
     guide covers what modern witchcraft means at Lunary, the many paths you can
@@ -157,34 +157,43 @@ export default function ModernWitchcraftPage() {
     >
       <section id='what-is-witchcraft' className='mb-16'>
         <div className='prose prose-invert max-w-none'>
-          <p className='text-zinc-300 leading-relaxed mb-6'>{whatIsAnswer}</p>
-          <p className='text-zinc-300 leading-relaxed'>{whatIsFollowup}</p>
+          <p className='text-content-secondary leading-relaxed mb-6'>
+            {whatIsAnswer}
+          </p>
+          <p className='text-content-secondary leading-relaxed'>
+            {whatIsFollowup}
+          </p>
         </div>
-        <div className='mt-6 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='mt-6 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Principles at Lunary
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>
-              <strong className='text-zinc-200'>
+              <strong className='text-content-primary'>
                 Personal responsibility:
               </strong>{' '}
               You are the authority over your own practice
             </li>
             <li>
-              <strong className='text-zinc-200'>Harm reduction:</strong> We do
-              not support manipulation, curses, or controlling others
+              <strong className='text-content-primary'>Harm reduction:</strong>{' '}
+              We do not support manipulation, curses, or controlling others
             </li>
             <li>
-              <strong className='text-zinc-200'>Inclusivity:</strong> All paths
-              are welcome; no single tradition is the &quot;right&quot; one
+              <strong className='text-content-primary'>Inclusivity:</strong> All
+              paths are welcome; no single tradition is the &quot;right&quot;
+              one
             </li>
             <li>
-              <strong className='text-zinc-200'>Grounded practice:</strong>{' '}
+              <strong className='text-content-primary'>
+                Grounded practice:
+              </strong>{' '}
               Magic supports action—it does not replace practical effort
             </li>
             <li>
-              <strong className='text-zinc-200'>Continuous learning:</strong>{' '}
+              <strong className='text-content-primary'>
+                Continuous learning:
+              </strong>{' '}
               Stay curious, humble, and open to growth
             </li>
           </ul>
@@ -192,55 +201,65 @@ export default function ModernWitchcraftPage() {
       </section>
 
       <section id='paths' className='mb-16'>
-        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
           Common Witch Paths
         </h2>
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           There are many ways to practice witchcraft. These &quot;paths&quot;
           describe where practitioners focus their energy and which elements
           resonate with them most deeply. Most witches blend multiple paths.
         </p>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>🌿 Green Witch</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              🌿 Green Witch
+            </h3>
+            <p className='text-content-muted text-sm'>
               Works with plants, herbs, gardens, and nature magic. Connected to
               the earth element.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>🍳 Kitchen Witch</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              🍳 Kitchen Witch
+            </h3>
+            <p className='text-content-muted text-sm'>
               Practices magic through cooking, baking, and domestic activities.
               The home is sacred space.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>🌙 Hedge Witch</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              🌙 Hedge Witch
+            </h3>
+            <p className='text-content-muted text-sm'>
               Works between worlds, often practicing spirit communication,
               journeying, and liminal magic.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>✨ Cosmic Witch</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              ✨ Cosmic Witch
+            </h3>
+            <p className='text-content-muted text-sm'>
               Works with astrology, planetary magic, and celestial timing.
               Aligned with cosmic cycles.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>🌊 Sea Witch</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              🌊 Sea Witch
+            </h3>
+            <p className='text-content-muted text-sm'>
               Connected to ocean magic, water element, moon tides, and coastal
               practices.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               🔮 Eclectic Witch
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Draws from multiple traditions and paths, creating a personalized
               practice.
             </p>
@@ -248,71 +267,75 @@ export default function ModernWitchcraftPage() {
         </div>
         <Link
           href='/grimoire/modern-witchcraft/witch-types'
-          className='text-lunary-primary-400 hover:text-lunary-primary-300'
+          className='text-lunary-primary-400 hover:text-content-brand'
         >
           Explore all witch types →
         </Link>
       </section>
 
       <section id='core-practices' className='mb-16'>
-        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
           Core Practices
         </h2>
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Regardless of your specific path, these core practices form the
           foundation of most witchcraft traditions:
         </p>
         <div className='space-y-4'>
           <Link
             href='/grimoire/spells/fundamentals'
-            className='block p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='block p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-2'>Spellwork</h3>
-            <p className='text-zinc-400 text-sm'>
+            <h3 className='font-medium text-content-primary mb-2'>Spellwork</h3>
+            <p className='text-content-muted text-sm'>
               Focused rituals combining intention, symbolism, and action to
               create change.
             </p>
           </Link>
           <Link
             href='/grimoire/meditation'
-            className='block p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='block p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-2'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Meditation & Grounding
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Centering yourself, connecting to earth energy, and clearing your
               mind before magical work.
             </p>
           </Link>
           <Link
             href='/grimoire/divination'
-            className='block p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='block p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-2'>Divination</h3>
-            <p className='text-zinc-400 text-sm'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Divination
+            </h3>
+            <p className='text-content-muted text-sm'>
               Tarot, pendulum, runes, scrying—tools for reflection and gaining
               perspective.
             </p>
           </Link>
           <Link
             href='/grimoire/correspondences'
-            className='block p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='block p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-2'>Correspondences</h3>
-            <p className='text-zinc-400 text-sm'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Correspondences
+            </h3>
+            <p className='text-content-muted text-sm'>
               Understanding the symbolic associations of colors, herbs,
               crystals, planets, and days.
             </p>
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year'
-            className='block p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='block p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-2'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Seasonal Celebration
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Honoring the Wheel of the Year—sabbats and esbats that mark the
               turning seasons.
             </p>
@@ -321,46 +344,44 @@ export default function ModernWitchcraftPage() {
       </section>
 
       <section id='sustainable' className='mb-16'>
-        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
           Building a Sustainable Practice
         </h2>
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           A sustainable practice is one you can maintain over years—not intense
           bursts followed by burnout. Here are principles for building something
           lasting:
         </p>
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <ul className='space-y-4 text-zinc-300'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <ul className='space-y-4 text-content-secondary'>
             <li>
-              <strong className='text-lunary-primary-300'>
+              <strong className='text-content-brand'>
                 Start small and simple.
               </strong>{' '}
               A daily 5-minute practice is more powerful than an elaborate
               weekly ritual you skip half the time.
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>
+              <strong className='text-content-brand'>
                 Build habits, not just skills.
               </strong>{' '}
               Consistency matters more than complexity. Light a candle, draw a
               card, journal a sentence—small rituals compound.
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>
+              <strong className='text-content-brand'>
                 Match your practice to your life.
               </strong>{' '}
               Busy parent? Kitchen witchcraft fits. Night owl? Moon magic calls.
               Adapt to your reality.
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>
-                Track and reflect.
-              </strong>{' '}
+              <strong className='text-content-brand'>Track and reflect.</strong>{' '}
               Keep a Book of Shadows. Note what works, what doesn&apos;t, and
               how you change over time.
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>
+              <strong className='text-content-brand'>
                 Rest is part of the cycle.
               </strong>{' '}
               Fallow periods are natural. A witch who rests during the dark moon
@@ -371,28 +392,30 @@ export default function ModernWitchcraftPage() {
       </section>
 
       <section id='community' className='mb-16'>
-        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
           Community, Solitary Practice & Safety
         </h2>
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           You can practice entirely alone, with a small group, or within a
           formal coven or tradition. Each has advantages:
         </p>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Solitary Practice
             </h3>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>• Complete freedom to design your path</li>
               <li>• Practice on your own schedule</li>
               <li>• No politics or group dynamics</li>
               <li>• Can feel isolating at times</li>
             </ul>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Group Practice</h3>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Group Practice
+            </h3>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>• Community and support</li>
               <li>• Learning from experienced practitioners</li>
               <li>• Shared rituals and celebrations</li>
@@ -400,14 +423,14 @@ export default function ModernWitchcraftPage() {
             </ul>
           </div>
         </div>
-        <div className='bg-lunary-error-900/20 border border-lunary-error-700 rounded-xl p-6'>
+        <div className='bg-layer-base/20 border border-lunary-error-700 rounded-xl p-6'>
           <h3 className='text-lg font-medium text-lunary-error-300 mb-3'>
             Safety in Community
           </h3>
-          <p className='text-zinc-300 text-sm mb-3'>
+          <p className='text-content-secondary text-sm mb-3'>
             Unfortunately, not all groups are safe. Watch for red flags:
           </p>
-          <ul className='text-zinc-400 text-sm space-y-1'>
+          <ul className='text-content-muted text-sm space-y-1'>
             <li>• Leaders who demand unquestioning obedience</li>
             <li>• Pressure to share personal/financial information</li>
             <li>
@@ -418,65 +441,73 @@ export default function ModernWitchcraftPage() {
               • Claims of exclusive truth or &quot;the only real path&quot;
             </li>
           </ul>
-          <p className='text-zinc-400 text-sm mt-3'>
+          <p className='text-content-muted text-sm mt-3'>
             Trust your instincts. A good teacher welcomes questions.
           </p>
         </div>
       </section>
 
       <section id='where-next' className='mb-16'>
-        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
           Where to Go Next
         </h2>
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Ready to dive deeper? Here are recommended next steps based on your
           interests:
         </p>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <Link
             href='/grimoire/spells/fundamentals'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-1'>Learn Spellcraft</h3>
-            <p className='text-zinc-400 text-sm'>
+            <h3 className='font-medium text-content-primary mb-1'>
+              Learn Spellcraft
+            </h3>
+            <p className='text-content-muted text-sm'>
               Foundational principles of casting spells
             </p>
           </Link>
           <Link
             href='/grimoire/modern-witchcraft/witch-types'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-1'>Find Your Path</h3>
-            <p className='text-zinc-400 text-sm'>
+            <h3 className='font-medium text-content-primary mb-1'>
+              Find Your Path
+            </h3>
+            <p className='text-content-muted text-sm'>
               Explore different types of witches
             </p>
           </Link>
           <Link
             href='/book-of-shadows'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-1'>
+            <h3 className='font-medium text-content-primary mb-1'>
               Start Your Journal
             </h3>
-            <p className='text-zinc-400 text-sm'>Begin your Book of Shadows</p>
+            <p className='text-content-muted text-sm'>
+              Begin your Book of Shadows
+            </p>
           </Link>
           <Link
             href='/grimoire/modern-witchcraft/ethics'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-1'>Study Ethics</h3>
-            <p className='text-zinc-400 text-sm'>
+            <h3 className='font-medium text-content-primary mb-1'>
+              Study Ethics
+            </h3>
+            <p className='text-content-muted text-sm'>
               Understand ethical practice principles
             </p>
           </Link>
         </div>
       </section>
 
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-violet-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+      <section className='bg-gradient-to-r from-layer-base/30 to-violet-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
           Begin Your Practice
         </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+        <p className='text-content-muted mb-6 max-w-xl mx-auto'>
           Every experienced witch was once a complete beginner. Start where you
           are, use what you have, and let your practice grow naturally.
         </p>

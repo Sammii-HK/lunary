@@ -229,11 +229,11 @@ export function TarotReflectionPrompts({
 
   return (
     <div
-      className={`rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-4 ${className}`}
+      className={`rounded-xl border border-stroke-subtle/50 bg-surface-elevated/40 p-4 ${className}`}
     >
       <div className='flex items-center gap-2 mb-3'>
         <Feather className='w-4 h-4 text-lunary-primary-400' />
-        <h3 className='text-sm font-medium text-zinc-100'>
+        <h3 className='text-sm font-medium text-content-primary'>
           Reflection Prompts
         </h3>
       </div>
@@ -246,9 +246,11 @@ export function TarotReflectionPrompts({
           return (
             <div
               key={prompt.id}
-              className='p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/30'
+              className='p-3 rounded-lg bg-surface-card/50 border border-stroke-default/30'
             >
-              <p className='text-sm text-zinc-200 italic mb-2'>{prompt.text}</p>
+              <p className='text-sm text-content-primary italic mb-2'>
+                {prompt.text}
+              </p>
 
               {isSubscribed && (
                 <div className='flex items-center justify-between'>
@@ -256,7 +258,7 @@ export function TarotReflectionPrompts({
                     {prompt.tags.slice(0, 2).map((tag) => (
                       <span
                         key={tag}
-                        className='text-[10px] px-2 py-0.5 rounded-full bg-zinc-700/50 text-zinc-400'
+                        className='text-[10px] px-2 py-0.5 rounded-full bg-surface-overlay/50 text-content-muted'
                       >
                         {tag}
                       </span>
@@ -268,8 +270,8 @@ export function TarotReflectionPrompts({
                     disabled={isSaving || isSaved}
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                       isSaved
-                        ? 'bg-lunary-success-900/30 text-lunary-success-300 border border-lunary-success-700/30'
-                        : 'bg-lunary-primary-900/30 text-lunary-primary-300 border border-lunary-primary-700/30 hover:bg-lunary-primary-900/50'
+                        ? 'bg-layer-base/30 text-lunary-success-300 border border-lunary-success-700/30'
+                        : 'bg-layer-base/30 text-content-brand border border-lunary-primary-700/30 hover:bg-layer-base/50'
                     } disabled:opacity-50`}
                   >
                     {isSaved ? (
@@ -294,11 +296,11 @@ export function TarotReflectionPrompts({
       </div>
 
       {!isSubscribed && prompts.length > 1 && (
-        <div className='mt-3 pt-3 border-t border-zinc-800/50'>
-          <p className='text-xs text-zinc-400'>
+        <div className='mt-3 pt-3 border-t border-stroke-subtle/50'>
+          <p className='text-xs text-content-muted'>
             <a
               href='/pricing?nav=app'
-              className='text-lunary-primary-400 hover:text-lunary-primary-300'
+              className='text-lunary-primary-400 hover:text-content-brand'
             >
               Upgrade to Lunary+
             </a>{' '}

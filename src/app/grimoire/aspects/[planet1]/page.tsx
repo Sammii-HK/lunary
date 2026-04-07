@@ -87,20 +87,20 @@ export default async function PlanetAspectsPage({
           <div className='flex justify-center mb-4'>
             <span className='text-6xl'>{symbol}</span>
           </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-4'>
             {planetName} Aspects
           </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
+          <p className='text-lg text-content-muted max-w-2xl mx-auto'>
             Explore how {planetName} interacts with other planets through the
             five major aspects in astrology.
           </p>
         </div>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-10'>
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
             {planetName} in Aspect
           </h2>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Aspects are angular relationships between planets that describe how
             their energies interact. Select an aspect type to explore{' '}
             {planetName}&apos;s relationships with other planets.
@@ -108,7 +108,7 @@ export default async function PlanetAspectsPage({
         </div>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Aspect Types
           </h2>
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -116,15 +116,15 @@ export default async function PlanetAspectsPage({
               <Link
                 key={aspect}
                 href={`/grimoire/aspects/${planet1}/${aspect}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
               >
                 <div className='flex items-center gap-4 mb-2'>
                   <span className='text-3xl'>{aspectSymbols[aspect]}</span>
-                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors capitalize'>
+                  <h3 className='text-lg font-medium text-content-primary group-hover:text-content-brand transition-colors capitalize'>
                     {planetName} {aspect}s
                   </h3>
                 </div>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   View all {planetName} {aspect} aspects with other planets
                 </p>
               </Link>
@@ -132,26 +132,26 @@ export default async function PlanetAspectsPage({
           </div>
         </section>
 
-        <div className='border-t border-zinc-800 pt-8'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+        <div className='border-t border-stroke-subtle pt-8'>
+          <h3 className='text-lg font-medium text-content-primary mb-4'>
             Related Resources
           </h3>
           <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/aspects'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               All Aspects
             </Link>
             <Link
               href='/grimoire/aspects/types'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Aspect Types
             </Link>
             <Link
               href='/grimoire/astronomy/planets'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               All Planets
             </Link>

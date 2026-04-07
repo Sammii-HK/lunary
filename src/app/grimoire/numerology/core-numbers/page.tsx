@@ -203,10 +203,10 @@ Understanding Core Numbers is essential for interpreting any numerology reading.
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             All Core Numbers
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Each core number carries unique energy and meaning. Click on any
             number to explore its full interpretation.
           </p>
@@ -218,17 +218,17 @@ Understanding Core Numbers is essential for interpreting any numerology reading.
                 <Link
                   key={number}
                   href={`/grimoire/numerology/core-numbers/${number}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
                 >
                   <div className='flex items-center gap-3 mb-3'>
                     <span className='text-3xl font-light text-lunary-primary-400'>
                       {number}
                     </span>
                   </div>
-                  <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-2'>
+                  <h3 className='font-medium text-content-primary group-hover:text-content-brand transition-colors mb-2'>
                     {data?.meaning || 'Number ' + number}
                   </h3>
-                  <p className='text-sm text-zinc-400 line-clamp-2'>
+                  <p className='text-sm text-content-muted line-clamp-2'>
                     {data?.description
                       ? data.description.slice(0, 100) + '...'
                       : ''}
@@ -238,7 +238,7 @@ Understanding Core Numbers is essential for interpreting any numerology reading.
                       {data.keywords.slice(0, 3).map((kw) => (
                         <span
                           key={kw}
-                          className='text-xs px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded'
+                          className='text-xs px-2 py-0.5 bg-surface-card text-content-muted rounded'
                         >
                           {kw}
                         </span>
@@ -251,72 +251,72 @@ Understanding Core Numbers is essential for interpreting any numerology reading.
           </div>
         </section>
 
-        <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             The Numerical Journey
           </h2>
-          <p className='text-zinc-400 mb-4'>
+          <p className='text-content-muted mb-4'>
             The progression from 1 to 9 tells a story of soul evolution:
           </p>
-          <div className='space-y-3 text-sm text-zinc-400'>
+          <div className='space-y-3 text-sm text-content-muted'>
             <p>
-              <span className='text-lunary-primary-300 font-medium'>1-3:</span>{' '}
+              <span className='text-content-brand font-medium'>1-3:</span>{' '}
               Individual expression — discovering self, others, and creative
               voice
             </p>
             <p>
-              <span className='text-lunary-primary-300 font-medium'>4-6:</span>{' '}
+              <span className='text-content-brand font-medium'>4-6:</span>{' '}
               Building foundations — creating stability, embracing change,
               nurturing others
             </p>
             <p>
-              <span className='text-lunary-primary-300 font-medium'>7-9:</span>{' '}
+              <span className='text-content-brand font-medium'>7-9:</span>{' '}
               Spiritual mastery — seeking wisdom, achieving success, serving
               humanity
             </p>
           </div>
         </section>
 
-        <section className='mb-12 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-accent-900/20 border border-lunary-primary-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-gradient-to-r from-layer-base/20 to-lunary-accent-900/20 border border-lunary-primary-800 rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Quick Meanings
           </h2>
           <div className='grid grid-cols-3 gap-4 text-sm'>
             <div>
-              <span className='font-medium text-lunary-primary-300'>1</span>
-              <span className='text-zinc-400'> — Leadership</span>
+              <span className='font-medium text-content-brand'>1</span>
+              <span className='text-content-muted'> — Leadership</span>
             </div>
             <div>
-              <span className='font-medium text-lunary-primary-300'>2</span>
-              <span className='text-zinc-400'> — Partnership</span>
+              <span className='font-medium text-content-brand'>2</span>
+              <span className='text-content-muted'> — Partnership</span>
             </div>
             <div>
-              <span className='font-medium text-lunary-primary-300'>3</span>
-              <span className='text-zinc-400'> — Creativity</span>
+              <span className='font-medium text-content-brand'>3</span>
+              <span className='text-content-muted'> — Creativity</span>
             </div>
             <div>
-              <span className='font-medium text-lunary-primary-300'>4</span>
-              <span className='text-zinc-400'> — Stability</span>
+              <span className='font-medium text-content-brand'>4</span>
+              <span className='text-content-muted'> — Stability</span>
             </div>
             <div>
-              <span className='font-medium text-lunary-primary-300'>5</span>
-              <span className='text-zinc-400'> — Freedom</span>
+              <span className='font-medium text-content-brand'>5</span>
+              <span className='text-content-muted'> — Freedom</span>
             </div>
             <div>
-              <span className='font-medium text-lunary-primary-300'>6</span>
-              <span className='text-zinc-400'> — Nurturing</span>
+              <span className='font-medium text-content-brand'>6</span>
+              <span className='text-content-muted'> — Nurturing</span>
             </div>
             <div>
-              <span className='font-medium text-lunary-primary-300'>7</span>
-              <span className='text-zinc-400'> — Spirituality</span>
+              <span className='font-medium text-content-brand'>7</span>
+              <span className='text-content-muted'> — Spirituality</span>
             </div>
             <div>
-              <span className='font-medium text-lunary-primary-300'>8</span>
-              <span className='text-zinc-400'> — Abundance</span>
+              <span className='font-medium text-content-brand'>8</span>
+              <span className='text-content-muted'> — Abundance</span>
             </div>
             <div>
-              <span className='font-medium text-lunary-primary-300'>9</span>
-              <span className='text-zinc-400'> — Completion</span>
+              <span className='font-medium text-content-brand'>9</span>
+              <span className='text-content-muted'> — Completion</span>
             </div>
           </div>
         </section>

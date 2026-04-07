@@ -19,8 +19,12 @@ export function FeatureCard({
     <div className='flex items-start gap-3'>
       <Icon className={`h-5 w-5 ${iconColor} flex-shrink-0 mt-0.5`} />
       <div>
-        <h3 className='text-lg font-medium text-zinc-100 mb-1'>{title}</h3>
-        <p className='text-sm text-zinc-300 leading-relaxed'>{description}</p>
+        <h3 className='text-lg font-medium text-content-primary mb-1'>
+          {title}
+        </h3>
+        <p className='text-sm text-content-secondary leading-relaxed'>
+          {description}
+        </p>
       </div>
     </div>
   );
@@ -43,13 +47,15 @@ export function FeatureList({
 }: FeatureListProps) {
   const containerClasses =
     variant === 'primary'
-      ? 'rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'
-      : 'rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6';
+      ? 'rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'
+      : 'rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6';
 
   return (
     <section className='mb-12'>
       {title && (
-        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>{title}</h2>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
+          {title}
+        </h2>
       )}
       <div className={containerClasses}>
         <div className='space-y-4'>

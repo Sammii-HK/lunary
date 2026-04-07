@@ -73,7 +73,7 @@ export function ShareCosmicCard() {
   return (
     <div className='space-y-4'>
       {cardData && (
-        <div className='bg-zinc-900 rounded-lg p-4 border border-zinc-800'>
+        <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
           <Image
             src={cardData.ogImageUrl}
             alt='Cosmic State Card'
@@ -85,14 +85,14 @@ export function ShareCosmicCard() {
           <div className='flex gap-2'>
             <button
               onClick={handleShare}
-              className='flex-1 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors'
+              className='flex-1 bg-lunary-primary-600 hover:bg-layer-high text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors'
             >
               <Share2 className='w-4 h-4' />
               Share
             </button>
             <button
               onClick={handleCopy}
-              className='flex-1 bg-zinc-700 hover:bg-zinc-600 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors'
+              className='flex-1 bg-surface-overlay hover:bg-surface-overlay text-content-primary py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors'
             >
               {copied ? (
                 <>
@@ -114,7 +114,7 @@ export function ShareCosmicCard() {
         <button
           onClick={generateCard}
           disabled={loading}
-          className='w-full bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors'
+          className='w-full bg-lunary-primary-600 hover:bg-layer-high disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors'
         >
           <Share2 className='w-5 h-5' />
           {loading ? 'Generating...' : 'Generate Shareable Cosmic Card'}

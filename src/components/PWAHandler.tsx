@@ -311,13 +311,13 @@ export function PWAHandler({
   if (showNotificationsBanner) {
     return (
       <div className='fixed bottom-14 md:bottom-16 left-0 right-0 z-40'>
-        <div className='bg-gradient-to-r from-lunary-primary-950/80 via-zinc-950/80 to-lunary-rose-950/80 border-t border-lunary-primary-700/30 px-4 py-4 backdrop-blur-md'>
+        <div className='bg-gradient-to-r from-layer-deep/80 via-surface-base/80 to-lunary-rose-950/80 border-t border-lunary-primary-700/30 px-4 py-4 backdrop-blur-md'>
           <div className='max-w-4xl mx-auto flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
             <div>
-              <h3 className='text-sm font-semibold text-lunary-primary-200'>
+              <h3 className='text-sm font-semibold text-content-secondary'>
                 Stay in the loop
               </h3>
-              <p className='text-xs text-zinc-400 mt-1'>
+              <p className='text-xs text-content-muted mt-1'>
                 Enable push alerts so Lunary can share moon phases, retrogrades,
                 and fresh readings right when they happen.
               </p>
@@ -326,7 +326,7 @@ export function PWAHandler({
               <Switch
                 checked={notificationToggle}
                 onCheckedChange={handleNotificationToggle}
-                className='border border-zinc-700 bg-zinc-900'
+                className='border border-stroke-default bg-surface-elevated'
               />
               <Button
                 variant='outline'
@@ -344,49 +344,49 @@ export function PWAHandler({
 
   return (
     <div className='fixed bottom-14 md:bottom-16 left-0 right-0 z-40'>
-      <div className='bg-gradient-to-r from-lunary-primary-950/80 via-zinc-950/80 to-lunary-rose-950/80 border-t border-lunary-primary-700/30 px-4 py-4 backdrop-blur-md'>
+      <div className='bg-gradient-to-r from-layer-deep/80 via-surface-base/80 to-lunary-rose-950/80 border-t border-lunary-primary-700/30 px-4 py-4 backdrop-blur-md'>
         <div className='max-w-4xl mx-auto flex flex-col gap-3 md:flex-row md:items-start md:justify-between'>
           <div className='flex-1 space-y-2'>
-            <h3 className='text-sm font-semibold text-lunary-primary-200'>
+            <h3 className='text-sm font-semibold text-content-secondary'>
               Keep Lunary close
             </h3>
-            <p className='text-xs text-zinc-300'>
+            <p className='text-xs text-content-secondary'>
               Your daily insights, right where you need them.
             </p>
             {isAndroid && (
-              <p className='text-[11px] text-zinc-400'>
+              <p className='text-[11px] text-content-muted'>
                 Add Lunary to your Home Screen for instant access to your daily
                 astrology.
               </p>
             )}
             {isDesktop && (
-              <p className='text-[11px] text-zinc-400'>
+              <p className='text-[11px] text-content-muted'>
                 Open Lunary anytime, as an app.
               </p>
             )}
             {isIOS && (
-              <div className='space-y-1 text-[11px] text-zinc-400'>
-                <h4 className='text-[12px] font-semibold text-lunary-primary-200 uppercase tracking-wide'>
+              <div className='space-y-1 text-[11px] text-content-muted'>
+                <h4 className='text-[12px] font-semibold text-content-secondary uppercase tracking-wide'>
                   Keep Lunary close
                 </h4>
-                <p className='text-[10px] uppercase tracking-wide text-zinc-500'>
+                <p className='text-[10px] uppercase tracking-wide text-content-muted'>
                   Use Safari on iPhone or iPad
                 </p>
-                <ol className='list-decimal list-inside space-y-1 text-[11px] text-zinc-400'>
+                <ol className='list-decimal list-inside space-y-1 text-[11px] text-content-muted'>
                   {iosSteps.map((step) => {
                     const Icon = step.icon;
                     return (
                       <li
                         key={step.label}
-                        className='flex items-center gap-2 marker:text-lunary-primary-200'
+                        className='flex items-center gap-2 marker:text-content-secondary'
                       >
-                        <Icon className='h-3 w-3 text-lunary-primary-200' />
+                        <Icon className='h-3 w-3 text-content-secondary' />
                         <span>{step.label}</span>
                       </li>
                     );
                   })}
                 </ol>
-                <p className='text-[10px] text-zinc-500'>
+                <p className='text-[10px] text-content-muted'>
                   Lunary will now be right there when you need it.
                 </p>
               </div>

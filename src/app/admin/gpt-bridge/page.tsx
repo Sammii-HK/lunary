@@ -101,27 +101,27 @@ export default function AdminGptBridgePage() {
   };
 
   return (
-    <div className='min-h-screen bg-[#0b0b0f] text-white px-6 py-10'>
+    <div className='min-h-screen bg-[#0b0b0f] text-content-primary px-6 py-10'>
       <div className='max-w-6xl mx-auto space-y-8'>
         <header className='space-y-2'>
-          <p className='text-xs uppercase tracking-[0.35em] text-white/50'>
+          <p className='text-xs uppercase tracking-[0.35em] text-content-primary/50'>
             GPT Ops
           </p>
           <h1 className='text-3xl font-semibold'>Grimoire Bridge Logs</h1>
-          <p className='text-sm text-white/60'>
+          <p className='text-sm text-content-primary/60'>
             Monitor GPT bridge quality, timing, and zero-result rate.
           </p>
         </header>
 
         <section className='grid gap-4 sm:grid-cols-3'>
           <div className='rounded-2xl border border-white/10 bg-white/5 p-4'>
-            <p className='text-xs uppercase tracking-[0.3em] text-white/50'>
+            <p className='text-xs uppercase tracking-[0.3em] text-content-primary/50'>
               Total Logs
             </p>
             <p className='mt-2 text-2xl font-semibold'>{stats.total}</p>
           </div>
           <div className='rounded-2xl border border-white/10 bg-white/5 p-4'>
-            <p className='text-xs uppercase tracking-[0.3em] text-white/50'>
+            <p className='text-xs uppercase tracking-[0.3em] text-content-primary/50'>
               Warn Rate
             </p>
             <p className='mt-2 text-2xl font-semibold'>
@@ -129,7 +129,7 @@ export default function AdminGptBridgePage() {
             </p>
           </div>
           <div className='rounded-2xl border border-white/10 bg-white/5 p-4'>
-            <p className='text-xs uppercase tracking-[0.3em] text-white/50'>
+            <p className='text-xs uppercase tracking-[0.3em] text-content-primary/50'>
               Avg Timing
             </p>
             <p className='mt-2 text-2xl font-semibold'>{stats.avgTimingMs}ms</p>
@@ -138,10 +138,10 @@ export default function AdminGptBridgePage() {
 
         <section className='rounded-2xl border border-white/10 bg-white/5 p-4'>
           <div className='grid gap-4 md:grid-cols-4'>
-            <label className='text-xs uppercase tracking-[0.3em] text-white/50'>
+            <label className='text-xs uppercase tracking-[0.3em] text-content-primary/50'>
               Range
               <select
-                className='mt-2 w-full rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-sm text-white'
+                className='mt-2 w-full rounded-lg bg-surface-base/40 border border-white/10 px-3 py-2 text-sm text-content-primary'
                 value={days}
                 onChange={(event) => setDays(event.target.value)}
               >
@@ -149,10 +149,10 @@ export default function AdminGptBridgePage() {
                 <option value='30'>Last 30 days</option>
               </select>
             </label>
-            <label className='text-xs uppercase tracking-[0.3em] text-white/50'>
+            <label className='text-xs uppercase tracking-[0.3em] text-content-primary/50'>
               Level
               <select
-                className='mt-2 w-full rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-sm text-white'
+                className='mt-2 w-full rounded-lg bg-surface-base/40 border border-white/10 px-3 py-2 text-sm text-content-primary'
                 value={level}
                 onChange={(event) => setLevel(event.target.value)}
               >
@@ -162,19 +162,19 @@ export default function AdminGptBridgePage() {
                 <option value='error'>Error</option>
               </select>
             </label>
-            <label className='text-xs uppercase tracking-[0.3em] text-white/50'>
+            <label className='text-xs uppercase tracking-[0.3em] text-content-primary/50'>
               Seed Contains
               <input
-                className='mt-2 w-full rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-sm text-white'
+                className='mt-2 w-full rounded-lg bg-surface-base/40 border border-white/10 px-3 py-2 text-sm text-content-primary'
                 value={seed}
                 onChange={(event) => setSeed(event.target.value)}
                 placeholder='venus'
               />
             </label>
-            <label className='text-xs uppercase tracking-[0.3em] text-white/50'>
+            <label className='text-xs uppercase tracking-[0.3em] text-content-primary/50'>
               Types Includes
               <input
-                className='mt-2 w-full rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-sm text-white'
+                className='mt-2 w-full rounded-lg bg-surface-base/40 border border-white/10 px-3 py-2 text-sm text-content-primary'
                 value={types}
                 onChange={(event) => setTypes(event.target.value)}
                 placeholder='tarot,crystal'
@@ -183,16 +183,16 @@ export default function AdminGptBridgePage() {
           </div>
         </section>
 
-        <section className='rounded-2xl border border-white/10 bg-black/50'>
+        <section className='rounded-2xl border border-white/10 bg-surface-base/50'>
           <div className='flex items-center justify-between px-4 py-3 border-b border-white/10'>
-            <p className='text-sm text-white/70'>
+            <p className='text-sm text-content-primary/70'>
               {loading ? 'Loading logs…' : `${logs.length} entries`}
             </p>
             {error ? <p className='text-xs text-red-400'>{error}</p> : null}
           </div>
           <div className='overflow-x-auto'>
             <table className='min-w-full text-sm font-mono'>
-              <thead className='text-xs uppercase tracking-[0.2em] text-white/40'>
+              <thead className='text-xs uppercase tracking-[0.2em] text-content-primary/40'>
                 <tr className='text-left border-b border-white/10'>
                   <th className='px-4 py-3'>Created</th>
                   <th className='px-4 py-3'>Level</th>
@@ -207,7 +207,7 @@ export default function AdminGptBridgePage() {
                   <th className='px-4 py-3'>Test</th>
                 </tr>
               </thead>
-              <tbody className='text-white/80'>
+              <tbody className='text-content-primary/80'>
                 {logs.map((log) => (
                   <tr
                     key={log.id}
@@ -231,7 +231,7 @@ export default function AdminGptBridgePage() {
                     </td>
                     <td className='px-4 py-3'>
                       <button
-                        className='rounded-lg border border-white/10 px-3 py-1 text-xs text-white/80 hover:bg-white/10'
+                        className='rounded-lg border border-white/10 px-3 py-1 text-xs text-content-primary/80 hover:bg-white/10'
                         onClick={() => handleCopyCurl(log)}
                       >
                         {copiedId === log.id ? 'Copied' : 'Copy curl'}
@@ -242,7 +242,7 @@ export default function AdminGptBridgePage() {
                 {!loading && logs.length === 0 ? (
                   <tr>
                     <td
-                      className='px-4 py-6 text-center text-white/40'
+                      className='px-4 py-6 text-center text-content-primary/40'
                       colSpan={11}
                     >
                       No logs found.

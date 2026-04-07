@@ -40,13 +40,13 @@ const CATEGORY_BAR_COLORS: Record<keyof CosmicScoreCategories, string> = {
 // Tag styles per category — distinct colored outlines
 const CATEGORY_TAG_CLASSES: Record<keyof CosmicScoreCategories, string> = {
   communication:
-    'bg-lunary-accent-900/40 border-lunary-accent-700/30 text-lunary-accent-300',
+    'bg-layer-base/40 border-lunary-accent-700/30 text-content-brand-accent',
   creativity:
-    'bg-lunary-primary-900/40 border-lunary-primary-700/30 text-lunary-primary-300',
-  love: 'bg-lunary-rose-900/40 border-lunary-rose-700/30 text-lunary-rose-300',
+    'bg-layer-base/40 border-lunary-primary-700/30 text-content-brand',
+  love: 'bg-layer-base/40 border-lunary-rose-700/30 text-lunary-rose-300',
   career:
-    'bg-lunary-success-900/40 border-lunary-success-700/40 text-lunary-success-400',
-  rest: 'bg-lunary-secondary-900/40 border-lunary-secondary-700/30 text-lunary-secondary-300',
+    'bg-layer-base/40 border-lunary-success-700/40 text-lunary-success-400',
+  rest: 'bg-layer-base/40 border-lunary-secondary-700/30 text-content-brand-secondary',
 };
 
 // Fixed color positions around the wheel
@@ -181,17 +181,17 @@ export function CosmicScore() {
     return (
       <Link
         href='/profile'
-        className='block rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 hover:border-lunary-primary-700 transition-colors'
+        className='block rounded-2xl border border-stroke-subtle bg-surface-base/70 p-4 hover:border-lunary-primary-700 transition-colors'
       >
         <div className='flex items-center gap-3'>
-          <div className='flex-shrink-0 w-12 h-12 rounded-full bg-lunary-primary-900/30 border border-lunary-primary-800/40 flex items-center justify-center'>
+          <div className='flex-shrink-0 w-12 h-12 rounded-full bg-layer-base/30 border border-lunary-primary-800/40 flex items-center justify-center'>
             <Star className='w-5 h-5 text-lunary-primary-400' />
           </div>
           <div>
-            <h3 className='text-sm font-medium text-zinc-100'>
+            <h3 className='text-sm font-medium text-content-primary'>
               {iosLabel('Unlock Your Cosmic Score', isNativeIOS)}
             </h3>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               {!user?.birthday
                 ? 'Add your birthday to get your daily score'
                 : 'Generate your birth chart to see your score'}
@@ -204,12 +204,12 @@ export function CosmicScore() {
 
   if (isLoading) {
     return (
-      <div className='rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 animate-pulse'>
+      <div className='rounded-2xl border border-stroke-subtle bg-surface-base/70 p-4 animate-pulse'>
         <div className='flex items-center gap-3'>
-          <div className='h-16 w-16 rounded-full bg-zinc-800' />
+          <div className='h-16 w-16 rounded-full bg-surface-card' />
           <div className='flex-1 space-y-2'>
-            <div className='h-4 bg-zinc-800 rounded w-3/4' />
-            <div className='h-3 bg-zinc-800/60 rounded w-1/2' />
+            <div className='h-4 bg-surface-card rounded w-3/4' />
+            <div className='h-3 bg-surface-card/60 rounded w-1/2' />
           </div>
         </div>
       </div>
@@ -219,16 +219,16 @@ export function CosmicScore() {
   // API error — show with retry
   if (fetchError || !score) {
     return (
-      <div className='rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4'>
+      <div className='rounded-2xl border border-stroke-subtle bg-surface-base/70 p-4'>
         <div className='flex items-center gap-3'>
-          <div className='flex-shrink-0 w-12 h-12 rounded-full bg-zinc-800/50 flex items-center justify-center'>
-            <Star className='w-5 h-5 text-zinc-500' />
+          <div className='flex-shrink-0 w-12 h-12 rounded-full bg-surface-card/50 flex items-center justify-center'>
+            <Star className='w-5 h-5 text-content-muted' />
           </div>
           <div>
-            <h3 className='text-sm font-medium text-zinc-300'>
+            <h3 className='text-sm font-medium text-content-secondary'>
               {iosLabel("Today's Cosmic Score", isNativeIOS)}
             </h3>
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-content-muted'>
               {fetchError || 'Score unavailable right now'}
             </p>
           </div>
@@ -252,7 +252,7 @@ export function CosmicScore() {
   const hasCategories = visibleCategories.length > 0 && categories;
 
   return (
-    <div className='rounded-2xl border border-zinc-800 bg-zinc-950/70 p-3 shadow-sm'>
+    <div className='rounded-2xl border border-stroke-subtle bg-surface-base/70 p-3 shadow-sm'>
       <div className='flex items-center gap-3'>
         {/* Circular score meter (conic gradient follows the arc) */}
         <div className='relative flex-shrink-0 w-12 h-12'>
@@ -277,12 +277,12 @@ export function CosmicScore() {
         {/* Content */}
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-1.5'>
-            <h3 className='text-xs font-medium text-zinc-100 truncate'>
+            <h3 className='text-xs font-medium text-content-primary truncate'>
               {iosLabel('Cosmic Score', isNativeIOS)}
             </h3>
             <span className='ml-auto' />
             <span
-              className={`text-[10px] px-1.5 py-0.5 rounded-md border ${CATEGORY_TAG_CLASSES[score.dominantEnergy as keyof CosmicScoreCategories] ?? 'bg-lunary-primary-900/40 border-lunary-primary-700/30 text-lunary-primary-300'}`}
+              className={`text-[10px] px-1.5 py-0.5 rounded-md border ${CATEGORY_TAG_CLASSES[score.dominantEnergy as keyof CosmicScoreCategories] ?? 'bg-layer-base/40 border-lunary-primary-700/30 text-content-brand'}`}
             >
               {score.dominantEnergy}
             </span>
@@ -295,7 +295,7 @@ export function CosmicScore() {
               }
             />
           </div>
-          <p className='text-[11px] text-zinc-400 leading-snug mt-0.5 truncate'>
+          <p className='text-[11px] text-content-muted leading-snug mt-0.5 truncate'>
             {score.headline}
           </p>
         </div>
@@ -304,7 +304,7 @@ export function CosmicScore() {
         {hasCategories && (
           <button
             onClick={() => setExpanded((prev) => !prev)}
-            className='flex-shrink-0 p-1 rounded-md text-zinc-500 hover:text-zinc-300 transition-colors'
+            className='flex-shrink-0 p-1 rounded-md text-content-muted hover:text-content-secondary transition-colors'
             aria-label={expanded ? 'Hide breakdown' : 'Show breakdown'}
           >
             <ChevronDown
@@ -325,16 +325,16 @@ export function CosmicScore() {
           <div ref={contentRef} className='pt-2.5 space-y-1.5'>
             {visibleCategories.map((key) => (
               <div key={key} className='flex items-center gap-2'>
-                <span className='text-[10px] text-zinc-500 w-24 truncate'>
+                <span className='text-[10px] text-content-muted w-24 truncate'>
                   {CATEGORY_LABELS[key]}
                 </span>
-                <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
+                <div className='flex-1 h-1.5 bg-surface-card rounded-full overflow-hidden'>
                   <div
                     className={`h-full rounded-full ${CATEGORY_BAR_COLORS[key]} transition-all duration-1000 ease-out`}
                     style={{ width: `${(categories[key] / 20) * 100}%` }}
                   />
                 </div>
-                <span className='text-[10px] text-zinc-500 w-5 text-right'>
+                <span className='text-[10px] text-content-muted w-5 text-right'>
                   {categories[key]}
                 </span>
               </div>
@@ -344,7 +344,7 @@ export function CosmicScore() {
             {!isPaid && sortedCategories.length > 2 && (
               <Link
                 href='/pricing?nav=app'
-                className='flex items-center gap-1.5 mt-1 text-[10px] text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+                className='flex items-center gap-1.5 mt-1 text-[10px] text-content-brand hover:text-content-secondary transition-colors'
               >
                 <Lock className='w-3 h-3' />
                 <span>Unlock full breakdown</span>
@@ -354,7 +354,7 @@ export function CosmicScore() {
 
             {/* Best window for paid users */}
             {isPaid && score.bestWindowDescription && (
-              <p className='text-[10px] text-zinc-500'>
+              <p className='text-[10px] text-content-muted'>
                 Best time for {score.bestWindowDescription}
               </p>
             )}

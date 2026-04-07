@@ -27,7 +27,7 @@ export function KarmicDebtCalculatorExtras() {
 
   return (
     <div className='space-y-4'>
-      <p className='text-sm text-zinc-400'>
+      <p className='text-sm text-content-muted'>
         Karmic Debt Numbers (13, 14, 16, 19) appear when Life Path, Expression,
         or Soul Urge calculations pass through these energies. Enter your data
         to spot which lessons are active for you today.
@@ -40,21 +40,21 @@ export function KarmicDebtCalculatorExtras() {
             return (
               <div
                 key={`${match.label}-${match.number}`}
-                className='border border-zinc-800 rounded-2xl bg-zinc-950/50 p-4 space-y-2'
+                className='border border-stroke-subtle rounded-2xl bg-surface-base/50 p-4 space-y-2'
               >
-                <div className='text-xs font-semibold uppercase tracking-wide text-zinc-500'>
+                <div className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                   {match.label}
                 </div>
-                <p className='text-lg font-semibold text-lunary-primary-300'>
+                <p className='text-lg font-semibold text-content-brand'>
                   Karmic Debt {match.number}
                 </p>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   {detail?.meaning ??
                     detail?.description ??
                     'A karmic lesson to work through.'}
                 </p>
                 <Link
-                  className='text-xs font-semibold text-lunary-primary-300 hover:underline'
+                  className='text-xs font-semibold text-content-brand hover:underline'
                   href={`/grimoire/numerology/karmic-debt/${match.number}`}
                 >
                   Read the full meaning
@@ -64,7 +64,7 @@ export function KarmicDebtCalculatorExtras() {
           })}
         </div>
       ) : (
-        <p className='text-sm text-zinc-300'>
+        <p className='text-sm text-content-secondary'>
           {hasInputs
             ? 'None of the numbers you entered show a karmic debt right now. Keep exploring — the lessons can shift as you grow.'
             : 'Enter your name and birth date to see if any karmic debt numbers are active for you.'}

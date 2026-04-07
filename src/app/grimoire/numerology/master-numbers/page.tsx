@@ -218,10 +218,10 @@ People with Master Numbers often feel "different" from an early age. They may st
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             The Three Master Numbers
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Each Master Number represents a different form of spiritual mastery.
             Click on your number to explore its full meaning and guidance.
           </p>
@@ -245,10 +245,10 @@ People with Master Numbers often feel "different" from an early age. They may st
                       Base: {baseNumber}
                     </span>
                   </div>
-                  <h3 className='text-xl font-medium text-zinc-100 group-hover:text-amber-300 transition-colors mb-2'>
+                  <h3 className='text-xl font-medium text-content-primary group-hover:text-amber-300 transition-colors mb-2'>
                     {data?.meaning || 'Master ' + number}
                   </h3>
-                  <p className='text-sm text-zinc-400 mb-4'>
+                  <p className='text-sm text-content-muted mb-4'>
                     {data?.description
                       ? data.description.slice(0, 150) + '...'
                       : ''}
@@ -272,10 +272,10 @@ People with Master Numbers often feel "different" from an early age. They may st
         </section>
 
         <section className='mb-12 bg-amber-950/20 border border-amber-900/50 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Signs You Might Have a Master Number
           </h2>
-          <ul className='space-y-3 text-zinc-400'>
+          <ul className='space-y-3 text-content-muted'>
             <li className='flex gap-3'>
               <span className='text-amber-400'>•</span>
               <span>You've always felt "different" or out of place</span>
@@ -303,16 +303,16 @@ People with Master Numbers often feel "different" from an early age. They may st
           </ul>
         </section>
 
-        <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Working with Master Number Energy
           </h2>
           <div className='grid md:grid-cols-2 gap-6'>
             <div>
-              <h3 className='font-medium text-zinc-200 mb-3'>
+              <h3 className='font-medium text-content-primary mb-3'>
                 Essential Practices:
               </h3>
-              <ul className='space-y-2 text-zinc-400'>
+              <ul className='space-y-2 text-content-muted'>
                 <li className='flex gap-2'>
                   <span className='text-amber-400'>•</span>
                   Daily grounding and meditation
@@ -332,10 +332,10 @@ People with Master Numbers often feel "different" from an early age. They may st
               </ul>
             </div>
             <div>
-              <h3 className='font-medium text-zinc-200 mb-3'>
+              <h3 className='font-medium text-content-primary mb-3'>
                 Common Pitfalls:
               </h3>
-              <ul className='space-y-2 text-zinc-400'>
+              <ul className='space-y-2 text-content-muted'>
                 <li className='flex gap-2'>
                   <span className='text-red-400'>•</span>
                   Ignoring your spiritual calling

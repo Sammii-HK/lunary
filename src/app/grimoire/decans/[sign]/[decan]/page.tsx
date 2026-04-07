@@ -191,8 +191,8 @@ The ${data.tarotCard} is associated with this decan, reflecting its themes and e
               href={`/grimoire/decans/${sign}/${d}`}
               className={`px-4 py-2 rounded-lg text-sm transition-colors ${
                 d === decan
-                  ? 'bg-lunary-primary-900/30 text-lunary-primary-200 border border-lunary-primary-600'
-                  : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
+                  ? 'bg-layer-base/30 text-content-secondary border border-lunary-primary-600'
+                  : 'bg-surface-card/50 text-content-muted hover:bg-surface-card hover:text-content-primary'
               }`}
             >
               {d === 1 ? 'First' : d === 2 ? 'Second' : 'Third'} Decan

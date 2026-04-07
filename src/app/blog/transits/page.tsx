@@ -21,7 +21,7 @@ const RARITY_COLOURS: Record<string, string> = {
   CRITICAL: 'bg-red-500/20 text-red-300 border-red-500/30',
   HIGH: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
   MEDIUM: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  LOW: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
+  LOW: 'bg-surface-overlay/20 text-slate-300 border-slate-500/30',
 };
 
 const PLANET_GLYPHS: Record<string, string> = {
@@ -71,12 +71,12 @@ export default async function TransitBlogIndexPage() {
   const years = Array.from(byYear.keys()).sort((a, b) => a - b);
 
   return (
-    <main className='min-h-screen bg-[#050505] text-lunary-primary-200'>
+    <main className='min-h-screen bg-[#050505] text-content-secondary'>
       <div className='mx-auto max-w-4xl px-4 py-16'>
         <Heading as='h1' variant='h1'>
           Transit guides
         </Heading>
-        <p className='mt-4 text-lg text-lunary-primary-300/80 max-w-2xl'>
+        <p className='mt-4 text-lg text-content-brand/80 max-w-2xl'>
           Deep-dive articles on every major planetary transit. Historical
           context, exact dates, practical guidance, and what it means for your
           sign. Drawn from our grimoire, grounded in real astronomical data.
@@ -100,7 +100,7 @@ export default async function TransitBlogIndexPage() {
                   href={`/blog/transits/${post.slug}`}
                   className={cn(
                     'block rounded-xl border border-lunary-primary-800/40 p-5',
-                    'bg-lunary-primary-950/30 hover:bg-lunary-primary-900/30',
+                    'bg-layer-deep/30 hover:bg-layer-base/30',
                     'transition-colors group',
                   )}
                 >
@@ -110,7 +110,7 @@ export default async function TransitBlogIndexPage() {
                         {PLANET_GLYPHS[post.planet] || ''}
                       </span>
                       <div>
-                        <h3 className='font-semibold text-lunary-primary-100 group-hover:text-lunary-accent-300 transition-colors'>
+                        <h3 className='font-semibold text-content-secondary group-hover:text-content-brand-accent transition-colors'>
                           {post.title}
                         </h3>
                         {post.subtitle && (
@@ -132,7 +132,7 @@ export default async function TransitBlogIndexPage() {
                     )}
                   </div>
 
-                  <p className='mt-3 text-sm text-lunary-primary-300/70 line-clamp-2'>
+                  <p className='mt-3 text-sm text-content-brand/70 line-clamp-2'>
                     {post.meta_description}
                   </p>
 

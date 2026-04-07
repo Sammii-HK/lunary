@@ -81,7 +81,7 @@ export function ConversionCTA({
       <Link
         href={href}
         onClick={handleClick}
-        className={`inline-flex items-center gap-1.5 text-lunary-secondary hover:text-white transition-colors ${sizeClasses[size]} ${className}`}
+        className={`inline-flex items-center gap-1.5 text-lunary-secondary hover:text-content-primary transition-colors ${sizeClasses[size]} ${className}`}
       >
         <span>{getLinkText()}</span>
         {showIcon && <ArrowRight className='w-3 h-3' />}
@@ -94,7 +94,7 @@ export function ConversionCTA({
       <Link
         href={href}
         onClick={handleClick}
-        className={`inline-flex items-center gap-2 text-lunary-secondary hover:text-white transition-colors ${className}`}
+        className={`inline-flex items-center gap-2 text-lunary-secondary hover:text-content-primary transition-colors ${className}`}
       >
         {showIcon && <Sparkles className='w-4 h-4' />}
         <span>{getLinkText()}</span>

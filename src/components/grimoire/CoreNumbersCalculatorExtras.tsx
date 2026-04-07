@@ -24,7 +24,7 @@ export function CoreNumbersCalculatorExtras() {
 
   return (
     <div className='space-y-4'>
-      <p className='text-sm text-zinc-400'>
+      <p className='text-sm text-content-muted'>
         Your Life Path, Expression, and Soul Urge numbers are the three core
         values that form the foundation of your numerology profile. Use the
         inputs above to reveal which cores you're working with right now.
@@ -33,15 +33,15 @@ export function CoreNumbersCalculatorExtras() {
         {entries.map((entry) => (
           <div
             key={entry.label}
-            className='border border-zinc-800 rounded-2xl bg-zinc-900/30 p-4 flex flex-col gap-2'
+            className='border border-stroke-subtle rounded-2xl bg-surface-elevated/30 p-4 flex flex-col gap-2'
           >
-            <div className='text-xs font-semibold uppercase tracking-wide text-zinc-500'>
+            <div className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
               {entry.label}
             </div>
-            <div className='text-4xl font-light text-lunary-primary-300'>
+            <div className='text-4xl font-light text-content-brand'>
               {entry.value ?? '--'}
             </div>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               {entry.value
                 ? 'Calculated from your inputs above'
                 : entry.description}

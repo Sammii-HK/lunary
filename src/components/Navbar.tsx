@@ -65,7 +65,7 @@ export const Navbar = () => {
 
   return (
     <nav
-      className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-zinc-800 bg-zinc-950/95 backdrop-blur'
+      className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stroke-subtle bg-surface-base/95 backdrop-blur'
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className='flex w-full items-center justify-around px-2 py-1 text-content-primary max-w-lg'>
@@ -170,7 +170,7 @@ const NavLink = ({
       className={`relative flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs transition ${
         active
           ? 'text-lunary-secondary'
-          : 'text-lunary-primary-300 hover:text-lunary-primary-200'
+          : 'text-lunary-primary-400/70 hover:text-lunary-primary-400'
       }`}
     >
       <div className='relative'>

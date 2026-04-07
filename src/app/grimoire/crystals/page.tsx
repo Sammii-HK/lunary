@@ -203,18 +203,18 @@ export default async function CrystalsPage({
           1. How Crystals Work
         </Heading>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Crystals form deep within the Earth over millions of years, their
           molecular structures creating unique vibrational frequencies. From a
           metaphysical perspective, these frequencies interact with your own
           energy field, supporting specific intentions.
         </p>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Practically, crystals serve as:
         </p>
 
-        <ul className='space-y-2 text-zinc-300 mb-6'>
+        <ul className='space-y-2 text-content-secondary mb-6'>
           <li>
             • <strong>Focus tools:</strong> They anchor your attention on your
             intention
@@ -233,8 +233,8 @@ export default async function CrystalsPage({
           </li>
         </ul>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <p className='text-zinc-400 text-sm'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <p className='text-content-muted text-sm'>
             Whether you see crystals as having inherent metaphysical properties
             or as psychological tools, they can be valuable allies in your
             practice. Their beauty and earth-born nature connect you to
@@ -250,40 +250,40 @@ export default async function CrystalsPage({
         </Heading>
 
         <div className='space-y-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
             <Heading as='h3' variant='h3'>
               By Intuition
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Which crystal catches your eye? Which do you feel drawn to touch?
               Trust that pull—your subconscious often knows what you need.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
             <Heading as='h3' variant='h3'>
               By Intention
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Research which crystals correspond to your goal. Need protection?
               Consider black tourmaline. Seeking love? Try rose quartz.
               Manifesting? Look to citrine.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
             <Heading as='h3' variant='h3'>
               By Chakra
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Match crystal colors to chakras: red/root, orange/sacral,
               yellow/solar plexus, green-pink/heart, blue/throat, indigo/third
               eye, violet-white/crown.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
             <Heading as='h3' variant='h3'>
               By Feel
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               If buying in person, hold several crystals. Notice which feels
               warm, tingly, or &quot;right&quot; in your hand. Your body can
               sense resonance.
@@ -298,53 +298,54 @@ export default async function CrystalsPage({
           3. Cleansing & Charging
         </Heading>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Crystals absorb energy from their environment and previous handlers.
           Cleansing clears this accumulated energy; charging programs them with
           your intention.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-6'>
           <Heading as='h3' variant='h3'>
             Cleansing Methods
           </Heading>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>
-              <strong className='text-zinc-200'>Moonlight:</strong> Leave under
-              the Full Moon overnight (safe for all crystals)
+              <strong className='text-content-primary'>Moonlight:</strong> Leave
+              under the Full Moon overnight (safe for all crystals)
             </li>
             <li>
-              <strong className='text-zinc-200'>Running water:</strong> Hold
-              under a stream for a minute (not for soft or water-soluble stones)
+              <strong className='text-content-primary'>Running water:</strong>{' '}
+              Hold under a stream for a minute (not for soft or water-soluble
+              stones)
             </li>
             <li>
-              <strong className='text-zinc-200'>Salt:</strong> Bury in sea salt
-              for 24 hours (not for porous stones)
+              <strong className='text-content-primary'>Salt:</strong> Bury in
+              sea salt for 24 hours (not for porous stones)
             </li>
             <li>
-              <strong className='text-zinc-200'>Smoke:</strong> Pass through
-              sage, palo santo, or incense smoke
+              <strong className='text-content-primary'>Smoke:</strong> Pass
+              through sage, palo santo, or incense smoke
             </li>
             <li>
-              <strong className='text-zinc-200'>Sound:</strong> Use singing
-              bowls, bells, or tuning forks
+              <strong className='text-content-primary'>Sound:</strong> Use
+              singing bowls, bells, or tuning forks
             </li>
             <li>
-              <strong className='text-zinc-200'>Selenite:</strong> Place on a
-              selenite slab overnight (selenite self-cleanses)
+              <strong className='text-content-primary'>Selenite:</strong> Place
+              on a selenite slab overnight (selenite self-cleanses)
             </li>
           </ul>
         </div>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-6'>
           <Heading
             as='h3'
             variant='h3'
-            // className='text-lunary-primary-300 mb-3'
+            // className='text-content-brand mb-3'
           >
             Charging Your Crystal
           </Heading>
-          <ol className='space-y-2 text-zinc-300 text-sm'>
+          <ol className='space-y-2 text-content-secondary text-sm'>
             <li>1. Hold the cleansed crystal in your hands</li>
             <li>2. Close your eyes and take a few deep breaths</li>
             <li>3. Clearly state or visualize your intention</li>
@@ -361,41 +362,41 @@ export default async function CrystalsPage({
         </Heading>
 
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <Heading as='h3' variant='h3' className='text-lunary-primary-300'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <Heading as='h3' variant='h3' className='text-content-brand'>
               Crystal Grids
             </Heading>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
+            <p className='text-sm text-content-secondary leading-relaxed mb-2'>
               Crystal grids amplify energy by arranging crystals in sacred
               geometric patterns. Place a central crystal (master stone) in the
               center, then arrange supporting stones around it. Activate by
               connecting the stones with intention, visualization, or a wand.
               Common patterns include circles, triangles, and flower of life.
             </p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               Best for: Manifestation, protection, healing, abundance
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <Heading as='h3' variant='h3' className='text-lunary-primary-300'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <Heading as='h3' variant='h3' className='text-content-brand'>
               Crystal Programming
             </Heading>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
+            <p className='text-sm text-content-secondary leading-relaxed mb-2'>
               Programming sets specific intentions into your crystals. Hold the
               crystal, clear your mind, and visualize your intention flowing
               into the stone. State your intention clearly either aloud or
               silently. The crystal will hold and amplify this energy until
               reprogrammed or cleansed.
             </p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               Best for: Setting specific goals, directing crystal energy
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <Heading as='h3' variant='h3' className='text-lunary-primary-300'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <Heading as='h3' variant='h3' className='text-content-brand'>
               Crystal Cleansing Methods
             </Heading>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <div>
                 <strong>Moonlight:</strong> Place crystals under full moon
                 overnight (avoid direct sunlight for some crystals)
@@ -420,11 +421,11 @@ export default async function CrystalsPage({
               </div>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <Heading as='h3' variant='h3' className='text-lunary-primary-300'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <Heading as='h3' variant='h3' className='text-content-brand'>
               Chakra Crystals
             </Heading>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-zinc-300'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-content-secondary'>
               <div>
                 <strong>Root:</strong> Red Jasper, Hematite, Black Tourmaline
               </div>
@@ -458,56 +459,56 @@ export default async function CrystalsPage({
         </Heading>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
             <Heading as='h3' variant='h3'>
               Carry Them
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Keep a small tumbled stone in your pocket or bag. Touch it
               throughout the day to reconnect with your intention.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
             <Heading as='h3' variant='h3'>
               Wear Them
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Crystal jewelry keeps the stone in contact with your energy field
               all day. Pendants near the heart are especially powerful.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
             <Heading as='h3' variant='h3'>
               Meditate With Them
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Hold a crystal during meditation or place it on a relevant chakra.
               Focus on its energy and let impressions arise.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
             <Heading as='h3' variant='h3'>
               Place in Space
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Put protective crystals by doors, calming ones in the bedroom,
               focus stones on your desk. Let them anchor energy in your space.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
             <Heading as='h3' variant='h3'>
               Use in Rituals
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Include crystals on your altar, in candle spells, in jar spells,
               or as offerings. They amplify ritual energy.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
             <Heading as='h3' variant='h3'>
               Create Grids
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Arrange multiple crystals in sacred geometric patterns to create
               energy fields for specific purposes.
             </p>
@@ -521,7 +522,7 @@ export default async function CrystalsPage({
           6. Beginner&apos;s Starter Kit
         </Heading>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           If you&apos;re just starting, these versatile crystals cover most
           common needs:
         </p>
@@ -529,48 +530,48 @@ export default async function CrystalsPage({
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <Link
             href='/grimoire/crystals/clear-quartz'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
             <Heading as='h3' variant='h3'>
               Clear Quartz
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               The &quot;master healer.&quot; Amplifies intention, cleanses
               energy, substitutes for almost any crystal.
             </p>
           </Link>
           <Link
             href='/grimoire/crystals/amethyst'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
             <Heading as='h3' variant='h3'>
               Amethyst
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Intuition, protection, peace. Excellent for meditation and
               developing psychic abilities.
             </p>
           </Link>
           <Link
             href='/grimoire/crystals/rose-quartz'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
             <Heading as='h3' variant='h3'>
               Rose Quartz
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Love, self-compassion, heart healing. The go-to stone for
               emotional work.
             </p>
           </Link>
           <Link
             href='/grimoire/crystals/black-tourmaline'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
             <Heading as='h3' variant='h3'>
               Black Tourmaline
             </Heading>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Protection, grounding, absorbs negativity. Essential for empaths
               and sensitive people.
             </p>
@@ -584,7 +585,7 @@ export default async function CrystalsPage({
           7. All Crystals A-Z
         </Heading>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Browse our complete crystal database. Click any crystal to see its
           full properties, correspondences, and uses.
         </p>

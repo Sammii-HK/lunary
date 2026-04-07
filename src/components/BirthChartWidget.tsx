@@ -28,18 +28,18 @@ export const BirthChartWidget = () => {
             <span className='text-lg'>⭐</span>
           </div>
 
-          <div className='bg-gradient-to-r from-lunary-primary-900/30 to-pink-900/30 rounded-lg p-4 border border-lunary-primary/30'>
-            <h4 className='text-white font-medium mb-2'>
+          <div className='bg-gradient-to-r from-layer-base/30 to-pink-900/30 rounded-lg p-4 border border-lunary-primary/30'>
+            <h4 className='text-content-primary font-medium mb-2'>
               🌟 Your Cosmic Blueprint
             </h4>
-            <p className='text-lunary-primary-200 text-sm mb-2 font-medium'>
+            <p className='text-content-secondary text-sm mb-2 font-medium'>
               ✨ Your birth chart has been calculated
             </p>
-            <p className='text-zinc-300 text-sm mb-3'>
+            <p className='text-content-secondary text-sm mb-3'>
               Unlock it now to see your complete planetary positions, aspects,
               and detailed interpretations of your cosmic nature.
             </p>
-            <ul className='text-xs text-zinc-400 space-y-1 mb-3'>
+            <ul className='text-xs text-content-muted space-y-1 mb-3'>
               <li>• Sun, Moon, and Rising sign placements</li>
               <li>• Planetary positions in zodiac signs</li>
               <li>• Cosmic aspects and their meanings</li>
@@ -57,7 +57,7 @@ export const BirthChartWidget = () => {
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Birth Chart</h3>
-          <p className='text-zinc-400 text-xs mb-2'>
+          <p className='text-content-muted text-xs mb-2'>
             Add your birthday to see your natal placements
           </p>
           <Link
@@ -77,7 +77,7 @@ export const BirthChartWidget = () => {
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Birth Chart</h3>
           <span className='text-xs text-lunary-primary-400'>Personalised</span>
-          <p className='text-zinc-400 text-xs'>Generating chart...</p>
+          <p className='text-content-muted text-xs'>Generating chart...</p>
         </div>
       </div>
     );
@@ -92,7 +92,7 @@ export const BirthChartWidget = () => {
       <div className='text-center mb-3'>
         <h3 className='font-bold'>Birth Chart</h3>
         {user.name && (
-          <p className='text-zinc-400 text-xs'>
+          <p className='text-content-muted text-xs'>
             {user.name}&apos;s Natal Placements
           </p>
         )}
@@ -116,7 +116,7 @@ export const BirthChartWidget = () => {
                   ]
                 }
               </div>
-              <div className='text-zinc-400'>{planet.degree}°</div>
+              <div className='text-content-muted'>{planet.degree}°</div>
             </div>
           </div>
         ))}

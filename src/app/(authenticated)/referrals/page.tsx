@@ -15,7 +15,7 @@ export default function ReferralsPage() {
             <Heading variant='h1' as='h1'>
               Referrals
             </Heading>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Invite friends and earn cosmic rewards
             </p>
           </header>

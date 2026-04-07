@@ -102,7 +102,7 @@ export function ReferralDashboard() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className='h-16 rounded-lg bg-zinc-900/50 animate-pulse'
+            className='h-16 rounded-lg bg-surface-elevated/50 animate-pulse'
           />
         ))}
       </div>
@@ -111,30 +111,32 @@ export function ReferralDashboard() {
 
   if (!stats) {
     return (
-      <p className='text-sm text-zinc-400'>Unable to load referral data.</p>
+      <p className='text-sm text-content-muted'>
+        Unable to load referral data.
+      </p>
     );
   }
 
   return (
     <div className='space-y-6'>
       {/* Referral code card */}
-      <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/50'>
-        <p className='text-xs text-zinc-400 uppercase tracking-wide mb-2'>
+      <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/50'>
+        <p className='text-xs text-content-muted uppercase tracking-wide mb-2'>
           Your Referral Code
         </p>
         <div className='flex items-center gap-3'>
-          <code className='flex-1 px-4 py-2 rounded-lg bg-zinc-800 text-lg font-mono text-lunary-primary-300 tracking-wider'>
+          <code className='flex-1 px-4 py-2 rounded-lg bg-surface-card text-lg font-mono text-content-brand tracking-wider'>
             {stats.code || '...'}
           </code>
           <button
             onClick={handleCopyCode}
-            className='p-2 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors'
+            className='p-2 rounded-lg border border-stroke-default hover:border-stroke-strong transition-colors'
             title='Copy referral link'
           >
             {copied ? (
               <Check className='w-5 h-5 text-lunary-success' />
             ) : (
-              <Copy className='w-5 h-5 text-zinc-400' />
+              <Copy className='w-5 h-5 text-content-muted' />
             )}
           </button>
         </div>
@@ -149,36 +151,36 @@ export function ReferralDashboard() {
 
       {/* Stats */}
       <div className='grid grid-cols-3 gap-3'>
-        <div className='p-3 rounded-lg border border-zinc-800 bg-zinc-900/30 text-center'>
-          <p className='text-2xl font-bold text-white'>
+        <div className='p-3 rounded-lg border border-stroke-subtle bg-surface-elevated/30 text-center'>
+          <p className='text-2xl font-bold text-content-primary'>
             {stats.totalReferrals}
           </p>
-          <p className='text-xs text-zinc-500'>Total</p>
+          <p className='text-xs text-content-muted'>Total</p>
         </div>
-        <div className='p-3 rounded-lg border border-zinc-800 bg-zinc-900/30 text-center'>
+        <div className='p-3 rounded-lg border border-stroke-subtle bg-surface-elevated/30 text-center'>
           <p className='text-2xl font-bold text-lunary-primary-400'>
             {stats.activatedReferrals}
           </p>
-          <p className='text-xs text-zinc-500'>Activated</p>
+          <p className='text-xs text-content-muted'>Activated</p>
         </div>
-        <div className='p-3 rounded-lg border border-zinc-800 bg-zinc-900/30 text-center'>
-          <p className='text-2xl font-bold text-zinc-400'>
+        <div className='p-3 rounded-lg border border-stroke-subtle bg-surface-elevated/30 text-center'>
+          <p className='text-2xl font-bold text-content-muted'>
             {stats.remainingReferrals}
           </p>
-          <p className='text-xs text-zinc-500'>Remaining</p>
+          <p className='text-xs text-content-muted'>Remaining</p>
         </div>
       </div>
 
       {/* Current tier */}
       {stats.currentTier && (
-        <div className='p-4 rounded-lg border border-lunary-primary-700/50 bg-lunary-primary-950/30'>
+        <div className='p-4 rounded-lg border border-lunary-primary-700/50 bg-layer-deep/30'>
           <p className='text-xs text-lunary-primary-400 uppercase tracking-wide'>
             Current Tier
           </p>
-          <p className='text-lg font-semibold text-white'>
+          <p className='text-lg font-semibold text-content-primary'>
             {stats.currentTier.label}
           </p>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-sm text-content-muted'>
             {stats.currentTier.description}
           </p>
         </div>
@@ -186,12 +188,12 @@ export function ReferralDashboard() {
 
       {/* Next tier progress */}
       {stats.nextTier && (
-        <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-          <p className='text-xs text-zinc-400 mb-1'>Next tier</p>
-          <p className='text-sm font-medium text-zinc-200'>
+        <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+          <p className='text-xs text-content-muted mb-1'>Next tier</p>
+          <p className='text-sm font-medium text-content-primary'>
             {stats.nextTier.label} — {stats.nextTier.description}
           </p>
-          <p className='text-xs text-zinc-500 mt-1'>
+          <p className='text-xs text-content-muted mt-1'>
             {stats.activatedReferrals} / {stats.nextTier.threshold} referrals
           </p>
         </div>
@@ -199,7 +201,7 @@ export function ReferralDashboard() {
 
       {/* Tier progress */}
       <div>
-        <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+        <h3 className='text-xs font-medium text-content-muted uppercase tracking-wide mb-3'>
           Reward Tiers
         </h3>
         <ReferralTierProgress

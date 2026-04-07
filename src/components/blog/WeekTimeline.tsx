@@ -86,7 +86,7 @@ function EventTooltip({
       {children}
       {isVisible && (
         <div
-          className={`absolute bottom-full mb-2 px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-xs z-20 whitespace-nowrap ${getAlignment()}`}
+          className={`absolute bottom-full mb-2 px-2 py-1 bg-surface-elevated border border-stroke-default rounded text-xs z-20 whitespace-nowrap ${getAlignment()}`}
         >
           {content}
         </div>
@@ -108,7 +108,7 @@ function getEventColor(type: TimelineEvent['type']): string {
     case 'aspect':
       return 'bg-teal-500';
     default:
-      return 'bg-zinc-500';
+      return 'bg-surface-overlay';
   }
 }
 
@@ -152,13 +152,13 @@ export function WeekTimeline({
                 className={`text-center text-xs ${
                   isToday
                     ? 'text-lunary-primary-400 font-semibold'
-                    : 'text-zinc-500'
+                    : 'text-content-muted'
                 }`}
               >
                 <div>{dayNames[day.getDay()]}</div>
                 <div
                   className={`text-lg font-medium ${
-                    isToday ? 'text-lunary-primary-300' : 'text-zinc-300'
+                    isToday ? 'text-content-brand' : 'text-content-secondary'
                   }`}
                 >
                   {day.getDate()}
@@ -171,7 +171,7 @@ export function WeekTimeline({
         {/* Timeline bar */}
         <div className='relative'>
           {/* Background bar */}
-          <div className='h-2 bg-zinc-800 rounded-full' />
+          <div className='h-2 bg-surface-card rounded-full' />
 
           {/* Today marker */}
           {todayIndex >= 0 && (
@@ -229,7 +229,7 @@ export function WeekTimeline({
                     }
                     dayIndex={dayIndex}
                   >
-                    <span className='text-xs text-zinc-500 cursor-default'>
+                    <span className='text-xs text-content-muted cursor-default'>
                       +{dayEvents.length - 2}
                     </span>
                   </EventTooltip>
@@ -240,7 +240,7 @@ export function WeekTimeline({
         </div>
 
         {/* Legend */}
-        <div className='flex flex-wrap justify-center gap-4 mt-4 text-xs text-zinc-400'>
+        <div className='flex flex-wrap justify-center gap-4 mt-4 text-xs text-content-muted'>
           <div className='flex items-center gap-1'>
             <div className='w-3 h-3 rounded-full bg-purple-500' />
             <span>Sign Change</span>

@@ -49,17 +49,17 @@ const episodes = [
 
 export default function BuildingLunaryPage() {
   return (
-    <div className='w-full max-w-4xl space-y-10 px-4 py-10 text-white'>
-      <section className='space-y-4 rounded-3xl border border-white/10 bg-black/50 p-8'>
-        <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
+    <div className='w-full max-w-4xl space-y-10 px-4 py-10 text-content-primary'>
+      <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/50 p-8'>
+        <p className='text-xs uppercase tracking-[0.4em] text-content-secondary'>
           TikTok Series
         </p>
         <h1 className='text-4xl font-semibold'>Building Lunary</h1>
-        <p className='text-lg text-zinc-200'>
+        <p className='text-lg text-content-primary'>
           A weekly TikTok series documenting how we build the Product Hunt
           launch, cosmic report generator, and community rituals — in public.
         </p>
-        <div className='flex gap-4 text-sm text-lunary-primary-100'>
+        <div className='flex gap-4 text-sm text-content-secondary'>
           <Link
             href='https://www.tiktok.com/@lunary'
             target='_blank'
@@ -83,7 +83,7 @@ export default function BuildingLunaryPage() {
         </div>
       </section>
 
-      <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+      <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
         <h2 className='text-2xl font-semibold'>Episode List</h2>
         <div className='space-y-4'>
           {episodes.map((episode, index) => (
@@ -92,18 +92,20 @@ export default function BuildingLunaryPage() {
               className='rounded-2xl border border-white/10 bg-white/5 p-4 sm:flex sm:items-center sm:justify-between'
             >
               <div>
-                <p className='text-xs uppercase tracking-[0.3em] text-lunary-primary-200'>
+                <p className='text-xs uppercase tracking-[0.3em] text-content-secondary'>
                   Episode {index + 1}
                 </p>
-                <h3 className='text-xl font-semibold text-white'>
+                <h3 className='text-xl font-semibold text-content-primary'>
                   {episode.title}
                 </h3>
-                <p className='text-sm text-zinc-300'>{episode.description}</p>
+                <p className='text-sm text-content-secondary'>
+                  {episode.description}
+                </p>
               </div>
               <Link
                 href={episode.link}
                 target='_blank'
-                className='mt-3 inline-flex rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-lunary-primary-400'
+                className='mt-3 inline-flex rounded-full border border-white/10 px-4 py-2 text-sm text-content-primary transition hover:border-lunary-primary-400'
               >
                 Watch
               </Link>
@@ -114,12 +116,12 @@ export default function BuildingLunaryPage() {
 
       <section className='grid gap-6 md:grid-cols-2'>
         <LaunchSignupForm source='tiktok' />
-        <div className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
-          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
+        <div className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
+          <p className='text-xs uppercase tracking-[0.4em] text-content-secondary'>
             Behind the scenes
           </p>
           <h2 className='text-2xl font-semibold'>What we share</h2>
-          <ul className='list-disc space-y-2 pl-5 text-sm text-zinc-300'>
+          <ul className='list-disc space-y-2 pl-5 text-sm text-content-secondary'>
             <li>Weekly build logs + rituals performed before shipping</li>
             <li>Product Hunt prep, ranging from copywriting to outreach</li>
             <li>Cosmic report sneak peeks, tarot spreads, and fails</li>

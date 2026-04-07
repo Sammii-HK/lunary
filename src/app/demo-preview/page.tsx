@@ -8,8 +8,8 @@ const DemoClient = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className='h-screen w-screen bg-zinc-950 flex items-center justify-center'>
-        <div className='animate-pulse text-zinc-500 text-sm'>
+      <div className='h-screen w-screen bg-surface-base flex items-center justify-center'>
+        <div className='animate-pulse text-content-muted text-sm'>
           Loading demo...
         </div>
       </div>

@@ -154,12 +154,12 @@ export function GeneratorClient() {
 
   return (
     <Paywall feature='downloadable_reports'>
-      <div className='w-full max-w-5xl mx-auto space-y-8 px-4 py-8 text-white'>
+      <div className='w-full max-w-5xl mx-auto space-y-8 px-4 py-8 text-content-primary'>
         <div className='space-y-2'>
           <Heading as='h1' variant='h1'>
             Cosmic Report Generator
           </Heading>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Generate personalised cosmic reports from live astronomical data.
             Choose your sections, date range and export as PDF or shareable
             link.
@@ -171,7 +171,7 @@ export function GeneratorClient() {
           <div className='space-y-6'>
             {/* Report type */}
             <div className='space-y-2'>
-              <label className='text-xs uppercase tracking-wider text-zinc-500'>
+              <label className='text-xs uppercase tracking-wider text-content-muted'>
                 Report type
               </label>
               <div className='grid grid-cols-3 gap-2'>
@@ -184,11 +184,11 @@ export function GeneratorClient() {
                       'rounded-xl border p-3 text-left transition',
                       reportType === type.value
                         ? 'border-lunary-primary-500 bg-lunary-primary-500/10'
-                        : 'border-zinc-800 bg-zinc-900/30 hover:border-zinc-700',
+                        : 'border-stroke-subtle bg-surface-elevated/30 hover:border-stroke-default',
                     )}
                   >
                     <span className='text-sm font-medium'>{type.label}</span>
-                    <span className='block text-xs text-zinc-500'>
+                    <span className='block text-xs text-content-muted'>
                       {type.description}
                     </span>
                   </button>
@@ -200,7 +200,7 @@ export function GeneratorClient() {
             {reportType === 'custom' && (
               <div className='grid gap-3 sm:grid-cols-2'>
                 <div className='space-y-1'>
-                  <label className='text-xs uppercase tracking-wider text-zinc-500'>
+                  <label className='text-xs uppercase tracking-wider text-content-muted'>
                     Start
                   </label>
                   <input
@@ -212,11 +212,11 @@ export function GeneratorClient() {
                         start: e.target.value,
                       }))
                     }
-                    className='w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-white focus:border-lunary-primary-500 focus:outline-none'
+                    className='w-full rounded-xl border border-stroke-subtle bg-surface-elevated/50 px-3 py-2 text-sm text-content-primary focus:border-lunary-primary-500 focus:outline-none'
                   />
                 </div>
                 <div className='space-y-1'>
-                  <label className='text-xs uppercase tracking-wider text-zinc-500'>
+                  <label className='text-xs uppercase tracking-wider text-content-muted'>
                     End
                   </label>
                   <input
@@ -228,7 +228,7 @@ export function GeneratorClient() {
                         end: e.target.value,
                       }))
                     }
-                    className='w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-white focus:border-lunary-primary-500 focus:outline-none'
+                    className='w-full rounded-xl border border-stroke-subtle bg-surface-elevated/50 px-3 py-2 text-sm text-content-primary focus:border-lunary-primary-500 focus:outline-none'
                   />
                 </div>
               </div>
@@ -236,7 +236,7 @@ export function GeneratorClient() {
 
             {/* Sections */}
             <div className='space-y-2'>
-              <label className='text-xs uppercase tracking-wider text-zinc-500'>
+              <label className='text-xs uppercase tracking-wider text-content-muted'>
                 Sections
               </label>
               <div className='grid gap-2 sm:grid-cols-2'>
@@ -252,7 +252,7 @@ export function GeneratorClient() {
                         'flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm transition text-left',
                         isSelected
                           ? 'border-lunary-primary-500/50 bg-lunary-primary-500/10 text-white'
-                          : 'border-zinc-800 bg-zinc-900/30 text-zinc-500 hover:border-zinc-700',
+                          : 'border-stroke-subtle bg-surface-elevated/30 text-content-muted hover:border-stroke-default',
                       )}
                     >
                       <Icon
@@ -260,7 +260,7 @@ export function GeneratorClient() {
                           'h-4 w-4 flex-shrink-0',
                           isSelected
                             ? 'text-lunary-primary-400'
-                            : 'text-zinc-600',
+                            : 'text-content-muted',
                         )}
                       />
                       {option.label}
@@ -279,7 +279,7 @@ export function GeneratorClient() {
                   'flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition',
                   makePublic
                     ? 'border-lunary-primary-500/50 bg-lunary-primary-500/10'
-                    : 'border-zinc-800 bg-zinc-900/30',
+                    : 'border-stroke-subtle bg-surface-elevated/30',
                 )}
               >
                 <span>Public share link</span>
@@ -288,13 +288,13 @@ export function GeneratorClient() {
                     'h-4 w-4 rounded-full border-2 transition',
                     makePublic
                       ? 'border-lunary-primary-400 bg-lunary-primary-400'
-                      : 'border-zinc-600',
+                      : 'border-stroke-strong',
                   )}
                 />
               </button>
 
               <div className='space-y-1'>
-                <label className='text-xs uppercase tracking-wider text-zinc-500'>
+                <label className='text-xs uppercase tracking-wider text-content-muted'>
                   Email (optional)
                 </label>
                 <input
@@ -302,7 +302,7 @@ export function GeneratorClient() {
                   placeholder='Send report to email'
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className='w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-lunary-primary-500 focus:outline-none'
+                  className='w-full rounded-xl border border-stroke-subtle bg-surface-elevated/50 px-3 py-2 text-sm text-content-primary placeholder:text-content-muted focus:border-lunary-primary-500 focus:outline-none'
                 />
               </div>
             </div>

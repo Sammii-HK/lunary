@@ -18,7 +18,9 @@ export function ShareFormatSelector({
 }: ShareFormatSelectorProps) {
   return (
     <div className='flex flex-col gap-2'>
-      <p className='text-xs text-zinc-400 uppercase tracking-wider'>Format</p>
+      <p className='text-xs text-content-muted uppercase tracking-wider'>
+        Format
+      </p>
       <div className='grid grid-cols-2 gap-2'>
         {options.map((format) => (
           <button
@@ -27,7 +29,7 @@ export function ShareFormatSelector({
             className={`px-3 py-2 rounded-lg text-sm transition-colors ${
               selected === format
                 ? 'bg-lunary-primary-600 text-white'
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                : 'bg-surface-card text-content-secondary hover:bg-surface-overlay'
             }`}
           >
             {FORMAT_LABELS[format]}

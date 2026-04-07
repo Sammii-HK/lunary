@@ -61,7 +61,7 @@ export default function SeasonsIndexPage() {
   });
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(seasonsListSchema)}
       {renderJsonLd(
         createBreadcrumbSchema([
@@ -78,7 +78,7 @@ export default function SeasonsIndexPage() {
         />
 
         <h1 className='text-4xl font-light mb-4'>Zodiac Seasons</h1>
-        <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
+        <p className='text-lg text-content-muted mb-8 max-w-3xl'>
           Throughout the year, the Sun moves through each of the 12 zodiac
           signs, creating &quot;seasons&quot; of cosmic energy that affect
           everyone. Understanding these seasons helps you align with natural
@@ -89,7 +89,7 @@ export default function SeasonsIndexPage() {
           {[currentYear, currentYear + 1].map((year) => (
             <div
               key={year}
-              className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'
+              className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'
             >
               <h2 className='text-2xl font-light mb-6'>
                 {year} Zodiac Seasons
@@ -101,15 +101,15 @@ export default function SeasonsIndexPage() {
                     <Link
                       key={s.sign}
                       href={`/grimoire/seasons/${year}/${s.sign}`}
-                      className='flex items-center justify-between p-3 rounded-lg hover:bg-zinc-800/50 transition-colors group'
+                      className='flex items-center justify-between p-3 rounded-lg hover:bg-surface-card/50 transition-colors group'
                     >
                       <div className='flex items-center gap-3'>
                         <span className='text-xl'>{s.symbol}</span>
-                        <span className='font-medium group-hover:text-lunary-primary-300 transition-colors'>
+                        <span className='font-medium group-hover:text-content-brand transition-colors'>
                           {s.displayName} Season
                         </span>
                       </div>
-                      <span className='text-sm text-zinc-400'>
+                      <span className='text-sm text-content-muted'>
                         {dates.start.split(',')[0]}
                       </span>
                     </Link>
@@ -120,18 +120,18 @@ export default function SeasonsIndexPage() {
           ))}
         </div>
 
-        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
+        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+          <h2 className='text-xl font-medium text-content-brand mb-2'>
             Personalized Season Forecasts
           </h2>
-          <p className='text-zinc-300 mb-4'>
+          <p className='text-content-secondary mb-4'>
             Each zodiac season affects your personal chart differently based on
             where it falls in your houses. Get personalized insights for how
             each season impacts you.
           </p>
           <Link
             href='/grimoire/horoscopes'
-            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+            className='inline-flex px-6 py-3 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
           >
             View Your Personalized Horoscope
           </Link>

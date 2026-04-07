@@ -117,14 +117,14 @@ export function MidArticleEmailCapture({
   return (
     <div
       ref={formRef}
-      className={`my-8 overflow-hidden rounded-xl border border-lunary-primary-500/20 bg-gradient-to-br from-lunary-primary-950/60 to-lunary-primary-900/30 transition-all duration-500 ${
+      className={`my-8 overflow-hidden rounded-xl border border-lunary-primary-500/20 bg-gradient-to-br from-layer-deep/60 to-layer-base/30 transition-all duration-500 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
       }`}
     >
       {submitted ? (
         <div className='px-6 py-8 text-center'>
           <Sparkles className='mx-auto mb-3 h-6 w-6 text-lunary-primary-400' />
-          <p className='text-lg font-medium text-lunary-primary-200'>
+          <p className='text-lg font-medium text-content-secondary'>
             {isHoroscope ? 'You are in' : 'Check your inbox'}
           </p>
           <p className='mt-1 text-sm text-lunary-primary-400'>
@@ -136,12 +136,12 @@ export function MidArticleEmailCapture({
       ) : (
         <div className='px-6 py-6'>
           <div className='mb-1 flex items-center justify-between'>
-            <h3 className='text-lg font-semibold text-lunary-primary-200'>
+            <h3 className='text-lg font-semibold text-content-secondary'>
               {headline}
             </h3>
             <button
               onClick={handleDismiss}
-              className='text-lunary-primary-500 hover:text-lunary-primary-300 transition-colors'
+              className='text-lunary-primary-500 hover:text-content-brand transition-colors'
               aria-label='Dismiss'
             >
               <svg
@@ -169,20 +169,20 @@ export function MidArticleEmailCapture({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className='w-full rounded-lg border border-lunary-primary-500/30 bg-lunary-primary-950/50 px-4 py-2.5 text-sm text-white placeholder:text-lunary-primary-500 focus:border-lunary-primary-400 focus:outline-none focus:ring-1 focus:ring-lunary-primary-400'
+              className='w-full rounded-lg border border-lunary-primary-500/30 bg-layer-deep/50 px-4 py-2.5 text-sm text-white placeholder:text-lunary-primary-500 focus:border-lunary-primary-400 focus:outline-none focus:ring-1 focus:ring-lunary-primary-400'
             />
             <input
               type='date'
               placeholder='Birth date (optional)'
               value={birthday}
               onChange={(e) => setBirthday(e.target.value)}
-              className='w-full rounded-lg border border-lunary-primary-500/30 bg-lunary-primary-950/50 px-4 py-2.5 text-sm text-white placeholder:text-lunary-primary-500 focus:border-lunary-primary-400 focus:outline-none focus:ring-1 focus:ring-lunary-primary-400'
+              className='w-full rounded-lg border border-lunary-primary-500/30 bg-layer-deep/50 px-4 py-2.5 text-sm text-white placeholder:text-lunary-primary-500 focus:border-lunary-primary-400 focus:outline-none focus:ring-1 focus:ring-lunary-primary-400'
             />
             {error && <p className='text-xs text-red-400'>{error}</p>}
             <button
               type='submit'
               disabled={loading}
-              className='flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-lunary-primary-600 to-lunary-primary-500 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-lunary-primary-500 hover:to-lunary-primary-400 disabled:opacity-50'
+              className='flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-lunary-primary-600 to-lunary-primary-500 px-4 py-2.5 text-sm font-medium text-content-primary transition-all hover:from-lunary-primary-500 hover:to-lunary-primary-400 disabled:opacity-50'
             >
               {loading ? (
                 'Sending...'

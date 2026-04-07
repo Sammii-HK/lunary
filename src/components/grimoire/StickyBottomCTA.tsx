@@ -145,11 +145,11 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
         role='complementary'
         aria-label='Sign up prompt'
       >
-        <div className='bg-zinc-950/95 backdrop-blur-sm border-t border-lunary-primary-700/50'>
+        <div className='bg-surface-base/95 backdrop-blur-sm border-t border-lunary-primary-700/50'>
           <div className='max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3'>
             <button
               onClick={handleClick}
-              className='flex-1 flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-lunary-accent-300 transition-colors group min-w-0'
+              className='flex-1 flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-content-brand-accent transition-colors group min-w-0'
             >
               <Sparkles className='w-4 h-4 flex-shrink-0' />
               <span className='truncate'>{displayText}</span>
@@ -157,7 +157,7 @@ export function StickyBottomCTA({ nudge }: StickyBottomCTAProps) {
             </button>
             <button
               onClick={handleDismiss}
-              className='flex-shrink-0 p-1 text-zinc-500 hover:text-zinc-300 transition-colors'
+              className='flex-shrink-0 p-1 text-content-muted hover:text-content-secondary transition-colors'
               aria-label='Dismiss'
             >
               <X className='w-4 h-4' />

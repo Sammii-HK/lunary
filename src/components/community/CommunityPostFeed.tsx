@@ -95,7 +95,7 @@ export function CommunityPostFeed({
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className='h-20 bg-zinc-900/50 border border-zinc-800/30 rounded-lg animate-pulse'
+            className='h-20 bg-surface-elevated/50 border border-stroke-subtle/30 rounded-lg animate-pulse'
           />
         ))}
       </div>
@@ -105,7 +105,7 @@ export function CommunityPostFeed({
   if (error && posts.length === 0) {
     return (
       <div className={cn('text-center py-8', className)}>
-        <p className='text-sm text-zinc-500'>{error}</p>
+        <p className='text-sm text-content-muted'>{error}</p>
         <Button
           variant='ghost'
           size='sm'
@@ -122,7 +122,7 @@ export function CommunityPostFeed({
     <div className={cn('space-y-3', className)}>
       {/* Header with sort + count */}
       <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-1.5 text-xs text-zinc-500'>
+        <div className='flex items-center gap-1.5 text-xs text-content-muted'>
           <MessageCircle className='w-3.5 h-3.5' />
           <span>
             {total} {total === 1 ? 'post' : 'posts'}
@@ -133,7 +133,7 @@ export function CommunityPostFeed({
             setSort(sort === 'newest' ? 'oldest' : 'newest');
             setPage(0);
           }}
-          className='flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors'
+          className='flex items-center gap-1 text-xs text-content-muted hover:text-content-secondary transition-colors'
         >
           <SortAsc className='w-3 h-3' />
           {sort === 'newest' ? 'Newest' : 'Oldest'}
@@ -142,8 +142,8 @@ export function CommunityPostFeed({
 
       {/* Posts */}
       {posts.length === 0 ? (
-        <div className='text-center py-8 border border-dashed border-zinc-800 rounded-lg'>
-          <p className='text-sm text-zinc-500'>
+        <div className='text-center py-8 border border-dashed border-stroke-subtle rounded-lg'>
+          <p className='text-sm text-content-muted'>
             No posts yet. Be the first to share!
           </p>
         </div>
@@ -172,7 +172,7 @@ export function CommunityPostFeed({
           >
             <ChevronLeft className='w-4 h-4' />
           </Button>
-          <span className='text-xs text-zinc-500'>
+          <span className='text-xs text-content-muted'>
             {page + 1} / {totalPages}
           </span>
           <Button
@@ -190,7 +190,7 @@ export function CommunityPostFeed({
       {/* Loading overlay */}
       {isLoading && posts.length > 0 && (
         <div className='flex justify-center py-2'>
-          <Loader2 className='w-4 h-4 text-zinc-500 animate-spin' />
+          <Loader2 className='w-4 h-4 text-content-muted animate-spin' />
         </div>
       )}
     </div>

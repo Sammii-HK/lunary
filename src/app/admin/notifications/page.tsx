@@ -751,20 +751,20 @@ export default function NotificationAdminPage() {
   ];
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-white p-4 md:p-8'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-4 md:p-8'>
       <div className='max-w-6xl mx-auto'>
         <h1 className='text-2xl md:text-3xl font-bold mb-6 md:mb-8'>
           Notification Admin Dashboard
         </h1>
 
         {/* Tab Navigation */}
-        <div className='flex gap-4 mb-6 border-b border-zinc-800'>
+        <div className='flex gap-4 mb-6 border-b border-stroke-subtle'>
           <button
             onClick={() => setActiveTab('preview')}
             className={`pb-3 px-1 text-sm font-medium transition-colors ${
               activeTab === 'preview'
                 ? 'border-b-2 border-lunary-secondary text-lunary-secondary'
-                : 'text-zinc-400 hover:text-white'
+                : 'text-content-muted hover:text-content-primary'
             }`}
           >
             Cosmic Events
@@ -774,7 +774,7 @@ export default function NotificationAdminPage() {
             className={`pb-3 px-1 text-sm font-medium transition-colors ${
               activeTab === 'manual'
                 ? 'border-b-2 border-lunary-secondary text-lunary-secondary'
-                : 'text-zinc-400 hover:text-white'
+                : 'text-content-muted hover:text-content-primary'
             }`}
           >
             Manual Test
@@ -784,7 +784,7 @@ export default function NotificationAdminPage() {
             className={`pb-3 px-1 text-sm font-medium transition-colors ${
               activeTab === 'history'
                 ? 'border-b-2 border-lunary-secondary text-lunary-secondary'
-                : 'text-zinc-400 hover:text-white'
+                : 'text-content-muted hover:text-content-primary'
             }`}
           >
             Sent History
@@ -802,9 +802,9 @@ export default function NotificationAdminPage() {
                 type='date'
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className='bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-white'
+                className='bg-surface-card border border-stroke-default rounded px-3 py-2 text-content-primary'
               />
-              <div className='text-sm text-zinc-400 mt-2'>
+              <div className='text-sm text-content-muted mt-2'>
                 Active Subscribers: {subscribers}
               </div>
             </div>
@@ -816,7 +816,7 @@ export default function NotificationAdminPage() {
             {/* Loading */}
             {loading && (
               <div className='text-center py-8'>
-                <div className='text-zinc-400'>Loading cosmic data...</div>
+                <div className='text-content-muted'>Loading cosmic data...</div>
               </div>
             )}
 
@@ -828,7 +828,7 @@ export default function NotificationAdminPage() {
                 </h2>
 
                 {notifications.length === 0 ? (
-                  <div className='text-zinc-400 text-center py-8'>
+                  <div className='text-content-muted text-center py-8'>
                     No notifications would be sent for this date
                   </div>
                 ) : (
@@ -838,8 +838,8 @@ export default function NotificationAdminPage() {
                         key={index}
                         className={`border rounded-lg p-4 md:p-6 ${
                           notification.wouldSend
-                            ? 'border-lunary-success-600 bg-lunary-success-950/20'
-                            : 'border-zinc-700 bg-zinc-800/50'
+                            ? 'border-lunary-success-600 bg-layer-deep/20'
+                            : 'border-stroke-default bg-surface-card/50'
                         }`}
                       >
                         <div className='flex flex-col md:flex-row md:justify-between md:items-start gap-4'>
@@ -847,10 +847,10 @@ export default function NotificationAdminPage() {
                             <div className='font-semibold text-lg md:text-xl mb-2'>
                               {notification.title}
                             </div>
-                            <div className='text-zinc-300 mb-3 md:mb-4'>
+                            <div className='text-content-secondary mb-3 md:mb-4'>
                               {notification.body}
                             </div>
-                            <div className='flex flex-wrap gap-4 text-sm text-zinc-400'>
+                            <div className='flex flex-wrap gap-4 text-sm text-content-muted'>
                               <span>Priority: {notification.priority}</span>
                               <span>Type: {notification.type}</span>
                               <span
@@ -881,10 +881,10 @@ export default function NotificationAdminPage() {
                 {/* Cosmic Data Debug */}
                 {cosmicData && (
                   <details className='mt-8'>
-                    <summary className='cursor-pointer text-zinc-400 hover:text-white'>
+                    <summary className='cursor-pointer text-content-muted hover:text-content-primary'>
                       Debug: Raw Cosmic Data
                     </summary>
-                    <pre className='bg-zinc-900 p-4 rounded mt-2 text-xs overflow-auto'>
+                    <pre className='bg-surface-elevated p-4 rounded mt-2 text-xs overflow-auto'>
                       {JSON.stringify(cosmicData, null, 2)}
                     </pre>
                   </details>
@@ -902,13 +902,13 @@ export default function NotificationAdminPage() {
                 {sentSummary.map((item) => (
                   <div
                     key={item.type}
-                    className='bg-zinc-800/50 border border-zinc-700 rounded-lg p-4'
+                    className='bg-surface-card/50 border border-stroke-default rounded-lg p-4'
                   >
                     <div className='text-2xl font-bold'>{item.count}</div>
-                    <div className='text-sm text-zinc-400 capitalize'>
+                    <div className='text-sm text-content-muted capitalize'>
                       {item.type.replace(/_/g, ' ')}
                     </div>
-                    <div className='text-xs text-zinc-400 mt-1'>
+                    <div className='text-xs text-content-muted mt-1'>
                       Last: {new Date(item.lastSent).toLocaleDateString()}
                     </div>
                   </div>
@@ -922,17 +922,19 @@ export default function NotificationAdminPage() {
 
             {historyLoading ? (
               <div className='text-center py-8'>
-                <div className='text-zinc-400'>Loading sent history...</div>
+                <div className='text-content-muted'>
+                  Loading sent history...
+                </div>
               </div>
             ) : sentHistory.length === 0 ? (
-              <div className='text-zinc-400 text-center py-8'>
+              <div className='text-content-muted text-center py-8'>
                 No notifications sent in the last 7 days
               </div>
             ) : (
               <div className='overflow-x-auto'>
                 <table className='w-full text-sm'>
                   <thead>
-                    <tr className='text-left text-zinc-400 border-b border-zinc-800'>
+                    <tr className='text-left text-content-muted border-b border-stroke-subtle'>
                       <th className='pb-3 pr-4'>Date</th>
                       <th className='pb-3 pr-4'>Event</th>
                       <th className='pb-3 pr-4'>Type</th>
@@ -944,16 +946,16 @@ export default function NotificationAdminPage() {
                     {sentHistory.map((notification) => (
                       <tr
                         key={notification.id}
-                        className='border-b border-zinc-800/50 hover:bg-zinc-800/30'
+                        className='border-b border-stroke-subtle/50 hover:bg-surface-card/30'
                       >
-                        <td className='py-3 pr-4 text-zinc-300'>
+                        <td className='py-3 pr-4 text-content-secondary'>
                           {new Date(notification.sentAt).toLocaleString()}
                         </td>
                         <td className='py-3 pr-4 font-medium'>
                           {notification.eventName}
                         </td>
                         <td className='py-3 pr-4'>
-                          <span className='px-2 py-1 bg-zinc-700 rounded text-xs capitalize'>
+                          <span className='px-2 py-1 bg-surface-overlay rounded text-xs capitalize'>
                             {notification.eventType.replace(/_/g, ' ')}
                           </span>
                         </td>
@@ -964,13 +966,13 @@ export default function NotificationAdminPage() {
                                 ? 'text-lunary-error'
                                 : notification.priority >= 7
                                   ? 'text-lunary-accent'
-                                  : 'text-zinc-400'
+                                  : 'text-content-muted'
                             }`}
                           >
                             {notification.priority}
                           </span>
                         </td>
-                        <td className='py-3 text-zinc-400'>
+                        <td className='py-3 text-content-muted'>
                           {notification.sentBy}
                         </td>
                       </tr>
@@ -982,7 +984,7 @@ export default function NotificationAdminPage() {
 
             <button
               onClick={loadSentHistory}
-              className='px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-sm rounded transition-colors'
+              className='px-4 py-2 bg-surface-overlay hover:bg-surface-overlay text-content-primary text-sm rounded transition-colors'
             >
               Refresh History
             </button>
@@ -991,21 +993,21 @@ export default function NotificationAdminPage() {
 
         {activeTab === 'manual' && (
           <div className='space-y-8'>
-            <div className='bg-lunary-accent-950/30 border border-lunary-accent-800 rounded-lg p-4'>
+            <div className='bg-layer-deep/30 border border-lunary-accent-800 rounded-lg p-4'>
               <h3 className='font-semibold text-lunary-accent mb-2'>
                 📱 Manual Notification Testing
               </h3>
-              <p className='text-sm text-zinc-300'>
+              <p className='text-sm text-content-secondary'>
                 Test all notification types and their deep links. Each test will
                 send a real push notification to all active subscribers.
               </p>
-              <p className='text-xs text-zinc-400 mt-2'>
+              <p className='text-xs text-content-muted mt-2'>
                 💡 Tip: Click the notification on your device to test if it
                 navigates to the correct page and scrolls to the right section.
               </p>
             </div>
 
-            <div className='space-y-1 text-sm text-zinc-400 bg-zinc-900 p-3 rounded'>
+            <div className='space-y-1 text-sm text-content-muted bg-surface-elevated p-3 rounded'>
               <div>
                 <strong>Active Subscribers:</strong> {subscribers}
               </div>
@@ -1024,26 +1026,26 @@ export default function NotificationAdminPage() {
                   {category.tests.map((test, testIndex) => (
                     <div
                       key={testIndex}
-                      className='border border-zinc-700 bg-zinc-800/50 rounded-lg p-4 hover:border-zinc-600 transition-colors'
+                      className='border border-stroke-default bg-surface-card/50 rounded-lg p-4 hover:border-stroke-strong transition-colors'
                     >
                       <div className='flex flex-col md:flex-row md:justify-between md:items-start gap-4'>
                         <div className='flex-1'>
                           <div className='font-semibold text-base mb-1'>
                             {test.name}
                           </div>
-                          <div className='text-sm text-zinc-300 mb-2'>
+                          <div className='text-sm text-content-secondary mb-2'>
                             {test.description}
                           </div>
                           <div className='flex flex-col gap-1 text-xs'>
-                            <div className='text-zinc-400'>
-                              <span className='text-zinc-500'>Type:</span>{' '}
-                              <code className='bg-zinc-900 px-1.5 py-0.5 rounded'>
+                            <div className='text-content-muted'>
+                              <span className='text-content-muted'>Type:</span>{' '}
+                              <code className='bg-surface-elevated px-1.5 py-0.5 rounded'>
                                 {test.type}
                               </code>
                             </div>
-                            <div className='text-zinc-400'>
-                              <span className='text-zinc-500'>URL:</span>{' '}
-                              <code className='bg-zinc-900 px-1.5 py-0.5 rounded text-lunary-secondary'>
+                            <div className='text-content-muted'>
+                              <span className='text-content-muted'>URL:</span>{' '}
+                              <code className='bg-surface-elevated px-1.5 py-0.5 rounded text-lunary-secondary'>
                                 {test.url}
                               </code>
                             </div>
@@ -1054,7 +1056,7 @@ export default function NotificationAdminPage() {
                             sendManualTestNotification(test.type, test.url)
                           }
                           disabled={manualTestLoading}
-                          className='px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white text-sm rounded transition-colors whitespace-nowrap'
+                          className='px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-surface-overlay disabled:cursor-not-allowed text-white text-sm rounded transition-colors whitespace-nowrap'
                         >
                           {manualTestLoading ? 'Sending...' : 'Test Send'}
                         </button>
@@ -1065,9 +1067,9 @@ export default function NotificationAdminPage() {
               </div>
             ))}
 
-            <div className='bg-zinc-900 border border-zinc-800 rounded-lg p-4 mt-8'>
+            <div className='bg-surface-elevated border border-stroke-subtle rounded-lg p-4 mt-8'>
               <h4 className='font-semibold mb-3'>Testing Checklist</h4>
-              <ul className='space-y-2 text-sm text-zinc-300'>
+              <ul className='space-y-2 text-sm text-content-secondary'>
                 <li className='flex items-start gap-2'>
                   <span className='text-lunary-accent mt-0.5'>1.</span>
                   <span>

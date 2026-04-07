@@ -68,7 +68,7 @@ function TransitCard({
       >
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-2 mb-1'>
-            <span className='text-sm font-medium text-zinc-100'>
+            <span className='text-sm font-medium text-content-primary'>
               {transit.transitName}
             </span>
             <span
@@ -77,32 +77,34 @@ function TransitCard({
               {colors.label}
             </span>
           </div>
-          <p className='text-xs text-zinc-400 line-clamp-2'>
+          <p className='text-xs text-content-muted line-clamp-2'>
             {transit.description}
           </p>
         </div>
         <div className='shrink-0 ml-2 mt-1'>
           {expanded ? (
-            <ChevronUp className='w-4 h-4 text-zinc-500' />
+            <ChevronUp className='w-4 h-4 text-content-muted' />
           ) : (
-            <ChevronDown className='w-4 h-4 text-zinc-500' />
+            <ChevronDown className='w-4 h-4 text-content-muted' />
           )}
         </div>
       </button>
 
       {expanded && isPremium && (
-        <div className='px-3 pb-3 pt-0 border-t border-zinc-800/50 space-y-3'>
+        <div className='px-3 pb-3 pt-0 border-t border-stroke-subtle/50 space-y-3'>
           <div className='mt-3'>
-            <p className='text-xs font-medium text-zinc-400 mb-1 flex items-center gap-1'>
+            <p className='text-xs font-medium text-content-muted mb-1 flex items-center gap-1'>
               <Sparkles className='w-3 h-3' />
               Emotional Tone
             </p>
-            <p className='text-xs text-zinc-300'>{transit.emotionalTone}</p>
+            <p className='text-xs text-content-secondary'>
+              {transit.emotionalTone}
+            </p>
           </div>
 
           {transit.suggestedActions.length > 0 && (
             <div>
-              <p className='text-xs font-medium text-zinc-400 mb-1 flex items-center gap-1'>
+              <p className='text-xs font-medium text-content-muted mb-1 flex items-center gap-1'>
                 <TrendingUp className='w-3 h-3' />
                 Suggested Actions
               </p>
@@ -110,7 +112,7 @@ function TransitCard({
                 {transit.suggestedActions.map((action, i) => (
                   <li
                     key={i}
-                    className='text-xs text-zinc-400 flex items-start gap-2'
+                    className='text-xs text-content-muted flex items-start gap-2'
                   >
                     <span className='text-lunary-primary-400'>•</span>
                     {action}
@@ -122,7 +124,7 @@ function TransitCard({
 
           {transit.watchFor.length > 0 && (
             <div>
-              <p className='text-xs font-medium text-zinc-400 mb-1 flex items-center gap-1'>
+              <p className='text-xs font-medium text-content-muted mb-1 flex items-center gap-1'>
                 <AlertCircle className='w-3 h-3' />
                 Watch For
               </p>
@@ -130,7 +132,7 @@ function TransitCard({
                 {transit.watchFor.map((item, i) => (
                   <li
                     key={i}
-                    className='text-xs text-zinc-400 flex items-start gap-2'
+                    className='text-xs text-content-muted flex items-start gap-2'
                   >
                     <span className='text-amber-400'>•</span>
                     {item}
@@ -160,7 +162,7 @@ export function TransitImpact({
 
   return (
     <div className={`space-y-3 ${className}`}>
-      <h3 className='text-sm font-medium text-zinc-100 flex items-center gap-2'>
+      <h3 className='text-sm font-medium text-content-primary flex items-center gap-2'>
         <TrendingUp className='w-4 h-4 text-lunary-primary-400' />
         Transits for You
       </h3>
@@ -185,10 +187,10 @@ export function TransitImpact({
 
       {!isSubscribed && transits.length > 1 && (
         <div className='pt-2'>
-          <p className='text-xs text-zinc-400'>
+          <p className='text-xs text-content-muted'>
             <a
               href='/pricing?nav=app'
-              className='text-lunary-primary-400 hover:text-lunary-primary-300'
+              className='text-lunary-primary-400 hover:text-content-brand'
             >
               Upgrade to Lunary+
             </a>{' '}

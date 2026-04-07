@@ -130,21 +130,26 @@ function CollapsibleSpreadLibrary({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className='space-y-2' id='spreads'>
+    <div
+      id='spreads'
+      className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden'
+    >
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className='flex w-full items-center justify-between rounded-lg border border-zinc-800/50 bg-zinc-900/30 px-3 py-2 text-left transition-colors hover:bg-zinc-900/50'
+        className='flex w-full items-center justify-between px-3 py-2 text-left transition-colors hover:bg-surface-elevated/50'
       >
-        <span className='text-xs uppercase tracking-wide text-zinc-400'>
+        <span className='text-xs uppercase tracking-wide text-content-muted'>
           Spread Library
         </span>
         {isCollapsed ? (
-          <ChevronDown className='w-4 h-4 text-zinc-400' />
+          <ChevronDown className='w-4 h-4 text-content-muted' />
         ) : (
-          <ChevronUp className='w-4 h-4 text-zinc-400' />
+          <ChevronUp className='w-4 h-4 text-content-muted' />
         )}
       </button>
-      {!isCollapsed && <div>{children}</div>}
+      {!isCollapsed && (
+        <div className='border-t border-stroke-subtle/50 p-3'>{children}</div>
+      )}
     </div>
   );
 }
@@ -534,8 +539,8 @@ export function TarotSpreadExperience({
         className={clsx(
           'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
           isLocked
-            ? 'bg-zinc-800/80 text-zinc-300'
-            : 'bg-lunary-primary-950 text-lunary-accent-200',
+            ? 'bg-surface-card/80 text-content-secondary'
+            : 'bg-layer-deep text-content-brand-accent',
         )}
       >
         {isLocked && <LockIcon className='h-3 w-3' />}
@@ -557,26 +562,13 @@ export function TarotSpreadExperience({
   }, []);
 
   return (
-    <div
-      data-testid='tarot-spreads-section'
-      className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 space-y-4'
-    >
-      <div className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
-        <div>
-          <h2 className='text-base sm:text-xl font-medium text-zinc-100'>
-            Guided Tarot Spreads
-          </h2>
-          <p className='text-xs sm:text-sm text-zinc-400'>
-            Choose a spread, draw cards instantly, and save your insights.
-          </p>
+    <div data-testid='tarot-spreads-section' className='space-y-4'>
+      {usage && usage.monthlyLimit !== null && (
+        <div className='w-fit rounded-full border border-lunary-primary-800 bg-layer-deep px-3 py-1 text-xs text-content-brand-accent'>
+          {usage.monthlyLimit - usage.monthlyUsed} of {usage.monthlyLimit} saved
+          spreads this month
         </div>
-        {usage && usage.monthlyLimit !== null && (
-          <div className='rounded-full border border-lunary-primary-800 bg-lunary-primary-950 px-3 py-1 text-xs text-lunary-accent-200'>
-            {usage.monthlyLimit - usage.monthlyUsed} of {usage.monthlyLimit}{' '}
-            saved spreads this month
-          </div>
-        )}
-      </div>
+      )}
 
       {error && !error.toLowerCase().includes('authentication required') && (
         <div className='rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200'>
@@ -585,7 +577,7 @@ export function TarotSpreadExperience({
       )}
 
       {limitWarning && (
-        <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-3 text-sm text-lunary-accent-200'>
+        <div className='rounded-lg border border-lunary-accent-700 bg-layer-deep p-3 text-sm text-content-brand-accent'>
           {limitWarning}
         </div>
       )}
@@ -596,9 +588,11 @@ export function TarotSpreadExperience({
             {Object.entries(groupedSpreads).map(([category, spreads]) => (
               <div
                 key={category}
-                className='rounded-lg border border-zinc-800/40 bg-zinc-900/40 p-3 space-y-2'
+                className='rounded-lg border border-stroke-subtle/40 bg-surface-elevated/40 p-3 space-y-2'
               >
-                <p className='text-xs font-medium text-zinc-400'>{category}</p>
+                <p className='text-xs font-medium text-content-muted'>
+                  {category}
+                </p>
                 <div className='space-y-2'>
                   {spreads.map((spread) => {
                     const isLocked = !displayUnlockedSpreads.has(spread.slug);
@@ -612,11 +606,11 @@ export function TarotSpreadExperience({
                           'w-full rounded-lg border px-3 py-2 text-left transition-all relative',
                           isSelected
                             ? isLocked
-                              ? 'border-zinc-700/50 bg-zinc-900/50'
-                              : 'border-lunary-primary-600 bg-lunary-primary-950'
+                              ? 'border-stroke-default/50 bg-surface-elevated/50'
+                              : 'border-lunary-primary-600 bg-layer-deep'
                             : isLocked
-                              ? 'border-zinc-800/30 bg-zinc-900/30 hover:border-zinc-700/50 cursor-not-allowed'
-                              : 'border-zinc-800/30 bg-zinc-900/30 hover:border-lunary-primary-700',
+                              ? 'border-stroke-subtle/30 bg-surface-elevated/30 hover:border-stroke-default/50 cursor-not-allowed'
+                              : 'border-stroke-subtle/30 bg-surface-elevated/30 hover:border-lunary-primary-700',
                         )}
                         disabled={isLocked && !isSelected}
                         title={
@@ -631,19 +625,23 @@ export function TarotSpreadExperience({
                               <p
                                 className={clsx(
                                   'text-sm font-medium',
-                                  isLocked ? 'text-zinc-400' : 'text-zinc-100',
+                                  isLocked
+                                    ? 'text-content-muted'
+                                    : 'text-content-primary',
                                 )}
                               >
                                 {spread.name}
                               </p>
                               {isLocked && (
-                                <LockIcon className='h-3 w-3 text-zinc-600' />
+                                <LockIcon className='h-3 w-3 text-content-muted' />
                               )}
                             </div>
                             <p
                               className={clsx(
                                 'text-xs',
-                                isLocked ? 'text-zinc-600' : 'text-zinc-400',
+                                isLocked
+                                  ? 'text-content-muted'
+                                  : 'text-content-muted',
                               )}
                             >
                               {spread.cardCount} cards · {spread.estimatedTime}
@@ -661,29 +659,29 @@ export function TarotSpreadExperience({
         </CollapsibleSpreadLibrary>
 
         {!selectedSpread && (
-          <div className='flex flex-col items-center justify-center rounded-lg border border-dashed border-zinc-800 bg-zinc-900/20 p-12 text-center'>
-            <Sparkles className='mb-3 h-8 w-8 text-lunary-accent-300/50' />
-            <p className='text-sm text-zinc-400'>
+          <div className='flex flex-col items-center justify-center rounded-lg border border-dashed border-stroke-subtle bg-surface-elevated/20 p-12 text-center'>
+            <Sparkles className='mb-3 h-8 w-8 text-content-brand-accent/50' />
+            <p className='text-sm text-content-muted'>
               Select a spread from above to begin your reading
             </p>
           </div>
         )}
 
         {selectedSpread && (
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4 space-y-3'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/40 p-4 space-y-3'>
             {!displayUnlockedSpreads.has(selectedSpread.slug) && (
-              <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 p-4 mb-3'>
+              <div className='rounded-lg border border-lunary-primary-700 bg-layer-deep p-4 mb-3'>
                 <div className='flex items-start gap-3'>
                   <LockIcon className='h-5 w-5 text-lunary-accent mt-0.5 flex-shrink-0' />
                   <div className='flex-1'>
-                    <h4 className='text-sm font-medium text-lunary-accent-200 mb-1'>
+                    <h4 className='text-sm font-medium text-content-brand-accent mb-1'>
                       This spread requires{' '}
                       {iosLabel(
                         PLAN_LABEL[selectedSpread.minimumPlan],
                         isNativeIOS,
                       )}
                     </h4>
-                    <p className='text-xs text-lunary-accent-300/80 mb-3'>
+                    <p className='text-xs text-content-brand-accent/80 mb-3'>
                       Upgrade to unlock {selectedSpread.name} and access all
                       premium tarot spreads.
                     </p>
@@ -700,10 +698,10 @@ export function TarotSpreadExperience({
             )}
             <div className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
               <div>
-                <h3 className='text-lg font-medium text-zinc-100'>
+                <h3 className='text-lg font-medium text-content-primary'>
                   {selectedSpread.name}
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   {selectedSpread.description}
                 </p>
               </div>
@@ -717,10 +715,10 @@ export function TarotSpreadExperience({
                 className={clsx(
                   'inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors',
                   isGenerating
-                    ? 'bg-lunary-primary-950 text-lunary-accent-200'
+                    ? 'bg-layer-deep text-content-brand-accent'
                     : displayUnlockedSpreads.has(selectedSpread.slug)
                       ? 'bg-lunary-primary text-white hover:bg-lunary-primary-400'
-                      : 'bg-zinc-800/80 text-zinc-400 cursor-not-allowed',
+                      : 'bg-surface-card/80 text-content-muted cursor-not-allowed',
                 )}
               >
                 {isGenerating ? (
@@ -739,24 +737,24 @@ export function TarotSpreadExperience({
               </button>
             </div>
             <div className='grid gap-3 md:grid-cols-2'>
-              <div className='rounded-md border border-zinc-800/40 bg-zinc-950/40 p-3'>
-                <p className='text-xs font-semibold uppercase text-zinc-400'>
+              <div className='rounded-md border border-stroke-subtle/40 bg-surface-base/40 p-3'>
+                <p className='text-xs font-semibold uppercase text-content-muted'>
                   Intention
                 </p>
-                <p className='text-sm text-zinc-300'>
+                <p className='text-sm text-content-secondary'>
                   {selectedSpread.intention}
                 </p>
               </div>
-              <div className='rounded-md border border-zinc-800/40 bg-zinc-950/40 p-3'>
-                <p className='text-xs font-semibold uppercase text-zinc-400'>
+              <div className='rounded-md border border-stroke-subtle/40 bg-surface-base/40 p-3'>
+                <p className='text-xs font-semibold uppercase text-content-muted'>
                   Journaling Prompts
                 </p>
-                <ul className='mt-1 space-y-1 text-xs text-zinc-300'>
+                <ul className='mt-1 space-y-1 text-xs text-content-secondary'>
                   {selectedSpread.journalPrompts.slice(0, 2).map((prompt) => (
                     <li key={prompt}>• {prompt}</li>
                   ))}
                   {selectedSpread.journalPrompts.length > 2 && (
-                    <li className='text-zinc-400'>
+                    <li className='text-content-muted'>
                       + more in the spread guide
                     </li>
                   )}
@@ -770,27 +768,27 @@ export function TarotSpreadExperience({
       <div className='grid gap-4 lg:grid-cols-[2fr,1fr]'>
         <div className='space-y-4'>
           {isLoading && (
-            <div className='flex h-32 items-center justify-center rounded-lg border border-zinc-800/40 bg-zinc-900/30'>
-              <Loader2 className='h-6 w-6 animate-spin text-zinc-400' />
+            <div className='flex h-32 items-center justify-center rounded-lg border border-stroke-subtle/40 bg-surface-elevated/30'>
+              <Loader2 className='h-6 w-6 animate-spin text-content-muted' />
             </div>
           )}
 
           {!isLoading && !currentReading && (
-            <div className='flex h-32 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-800 bg-zinc-900/20 text-center text-sm text-zinc-400'>
-              <Sparkles className='mb-2 h-5 w-5 text-lunary-accent-300' />
+            <div className='flex h-32 flex-col items-center justify-center rounded-lg border border-dashed border-stroke-subtle bg-surface-elevated/20 text-center text-sm text-content-muted'>
+              <Sparkles className='mb-2 h-5 w-5 text-content-brand-accent' />
               Pull a spread to start building your tarot archive.
             </div>
           )}
 
           {currentReading && (
             <div className='space-y-4'>
-              <div className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'>
+              <div className='rounded-lg border border-lunary-primary-800 bg-layer-deep p-4'>
                 <div className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
                   <div>
-                    <p className='text-xs uppercase tracking-wider text-lunary-accent-300/80'>
+                    <p className='text-xs uppercase tracking-wider text-content-brand-accent/80'>
                       {currentReading?.spreadName}
                     </p>
-                    <h3 className='text-base sm:text-lg font-medium text-zinc-100'>
+                    <h3 className='text-base sm:text-lg font-medium text-content-primary'>
                       {currentReading?.summary}
                     </h3>
                   </div>
@@ -799,13 +797,13 @@ export function TarotSpreadExperience({
                       <button
                         type='button'
                         onClick={() => onShareReading(currentReading)}
-                        className='inline-flex items-center gap-2 rounded-md bg-zinc-900/60 px-3 py-1 text-xs font-medium text-lunary-primary-300 transition-colors hover:bg-zinc-900/80'
+                        className='inline-flex items-center gap-2 rounded-md bg-surface-elevated/60 px-3 py-1 text-xs font-medium text-content-brand transition-colors hover:bg-surface-elevated/80'
                       >
                         <Share2 className='h-4 w-4' />
                         Share spread
                       </button>
                     )}
-                    <p className='text-xs text-zinc-400'>
+                    <p className='text-xs text-content-muted'>
                       Saved{' '}
                       {currentReading?.createdAt
                         ? new Date(
@@ -819,7 +817,7 @@ export function TarotSpreadExperience({
                   {currentReading?.highlights?.map((highlight) => (
                     <span
                       key={highlight}
-                      className='rounded-full bg-zinc-900/60 px-3 py-1 text-xs text-zinc-300'
+                      className='rounded-full bg-surface-elevated/60 px-3 py-1 text-xs text-content-secondary'
                     >
                       {highlight}
                     </span>
@@ -835,7 +833,7 @@ export function TarotSpreadExperience({
                     <div
                       key={card.positionId}
                       data-testid={`spread-card-${cardIndex}`}
-                      className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4'
+                      className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/40 p-4'
                     >
                       {/* Card header - clickable to preview */}
                       <button
@@ -845,34 +843,34 @@ export function TarotSpreadExperience({
                       >
                         <div className='flex w-full items-center justify-between'>
                           <div>
-                            <p className='text-xs uppercase tracking-wide text-zinc-400'>
+                            <p className='text-xs uppercase tracking-wide text-content-muted'>
                               {card.positionLabel}
                             </p>
-                            <p className='text-xs text-zinc-500'>
+                            <p className='text-xs text-content-muted'>
                               {card.positionPrompt}
                             </p>
                           </div>
-                          <span className='text-[10px] uppercase tracking-[0.2em] text-zinc-500'>
+                          <span className='text-[10px] uppercase tracking-[0.2em] text-content-muted'>
                             {card.card.arcana === 'major' ? 'Major' : 'Minor'}
                           </span>
                         </div>
-                        <p className='text-base sm:text-lg font-semibold text-zinc-100'>
+                        <p className='text-base sm:text-lg font-semibold text-content-primary'>
                           {card.card.name}
                         </p>
-                        <p className='text-sm text-zinc-300 leading-relaxed'>
+                        <p className='text-sm text-content-secondary leading-relaxed'>
                           "{card.insight}"
                         </p>
                         <div className='flex flex-wrap gap-1'>
                           {card.card.keywords.slice(0, 4).map((keyword) => (
                             <span
                               key={`${card.positionId}-${keyword}`}
-                              className='text-xs px-2 py-0.5 rounded text-zinc-100 bg-zinc-900 border border-zinc-800'
+                              className='text-xs px-2 py-0.5 rounded text-content-primary bg-surface-elevated border border-stroke-subtle'
                             >
                               {keyword}
                             </span>
                           ))}
                         </div>
-                        <p className='text-xs text-lunary-primary-300'>
+                        <p className='text-xs text-content-brand'>
                           Tap to explore the full meaning
                         </p>
                       </button>
@@ -887,15 +885,15 @@ export function TarotSpreadExperience({
                               isTransitExpanded ? -1 : cardIndex,
                             )
                           }
-                          className='w-full flex items-center justify-between px-4 py-3 rounded-lg border border-lunary-primary-800/30 bg-lunary-primary-950/20 hover:bg-lunary-primary-950/30 transition-colors'
+                          className='w-full flex items-center justify-between px-4 py-3 rounded-lg border border-lunary-primary-800/30 bg-layer-deep/20 hover:bg-layer-deep/30 transition-colors'
                         >
-                          <span className='text-sm font-medium text-lunary-accent-200'>
+                          <span className='text-sm font-medium text-content-brand-accent'>
                             In Your Chart
                           </span>
                           {isTransitExpanded ? (
-                            <ChevronUp className='w-4 h-4 text-lunary-accent-300' />
+                            <ChevronUp className='w-4 h-4 text-content-brand-accent' />
                           ) : (
-                            <ChevronDown className='w-4 h-4 text-lunary-accent-300' />
+                            <ChevronDown className='w-4 h-4 text-content-brand-accent' />
                           )}
                         </button>
 
@@ -932,10 +930,10 @@ export function TarotSpreadExperience({
 
               <div className='space-y-3'>
                 <div className='flex items-center justify-between'>
-                  <p className='text-sm font-medium text-zinc-200'>
+                  <p className='text-sm font-medium text-content-primary'>
                     Reflection Notes
                   </p>
-                  <span className='text-xs text-zinc-400'>
+                  <span className='text-xs text-content-muted'>
                     {isSavingNotes ? 'Saving…' : 'Auto-saved'}
                   </span>
                 </div>
@@ -944,7 +942,7 @@ export function TarotSpreadExperience({
                   onChange={(event) => setNotesDraft(event.target.value)}
                   rows={4}
                   placeholder='Capture rituals, emotions, and how the message landed today.'
-                  className='w-full rounded-lg border border-zinc-800/60 bg-zinc-950/70 p-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-lunary-primary-600 focus:outline-none focus:ring-1 focus:ring-lunary-primary-600'
+                  className='w-full rounded-lg border border-stroke-subtle/60 bg-surface-base/70 p-3 text-sm text-content-primary placeholder:text-content-muted focus:border-lunary-primary-600 focus:outline-none focus:ring-1 focus:ring-lunary-primary-600'
                 />
               </div>
             </div>
@@ -952,18 +950,20 @@ export function TarotSpreadExperience({
         </div>
 
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/40 p-4'>
             <div className='flex items-center justify-between'>
-              <p className='text-sm font-medium text-zinc-100'>Saved Spreads</p>
+              <p className='text-sm font-medium text-content-primary'>
+                Saved Spreads
+              </p>
               {usage && usage.plan !== 'free' && (
-                <span className='text-xs text-lunary-accent-200'>
+                <span className='text-xs text-content-brand-accent'>
                   History: {usage?.historyWindowDays ?? 0} days
                 </span>
               )}
             </div>
             <div className='mt-3 space-y-2'>
               {readings.length === 0 && (
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   No saved spreads yet. Your pulls will appear here.
                 </p>
               )}
@@ -973,24 +973,24 @@ export function TarotSpreadExperience({
                   className={clsx(
                     'group flex items-start justify-between gap-3 rounded-md border px-3 py-2',
                     currentReading?.id === reading.id
-                      ? 'border-lunary-primary-600 bg-lunary-primary-950'
-                      : 'border-zinc-800/40 bg-zinc-900/40 hover:border-lunary-primary-700',
+                      ? 'border-lunary-primary-600 bg-layer-deep'
+                      : 'border-stroke-subtle/40 bg-surface-elevated/40 hover:border-lunary-primary-700',
                   )}
                 >
                   <button
                     onClick={() => setCurrentReading(reading)}
                     className='flex-1 text-left'
                   >
-                    <p className='text-sm font-medium text-zinc-100'>
+                    <p className='text-sm font-medium text-content-primary'>
                       {reading.spreadName}
                     </p>
-                    <p className='text-xs text-zinc-400'>
+                    <p className='text-xs text-content-muted'>
                       {new Date(reading.createdAt).toLocaleDateString()}
                     </p>
                   </button>
                   <button
                     onClick={() => handleArchive(reading.id)}
-                    className='text-zinc-600 hover:text-red-400'
+                    className='text-content-muted hover:text-red-400'
                     aria-label='Archive reading'
                   >
                     <Trash2 className='h-4 w-4' />
@@ -1000,9 +1000,9 @@ export function TarotSpreadExperience({
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4 text-sm text-zinc-300'>
-            <p className='text-sm font-medium text-zinc-100'>Tips</p>
-            <ul className='mt-2 space-y-1 text-xs text-zinc-400'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/40 p-4 text-sm text-content-secondary'>
+            <p className='text-sm font-medium text-content-primary'>Tips</p>
+            <ul className='mt-2 space-y-1 text-xs text-content-muted'>
               <li>• Click a card to open its full meaning.</li>
               <li>• Notes auto-save—capture rituals, actions, and shifts.</li>
               <li>

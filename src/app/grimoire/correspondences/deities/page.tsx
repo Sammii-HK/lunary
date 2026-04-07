@@ -188,24 +188,26 @@ While eclectic practice is valid, be aware that some traditions are closed or re
         faqs={faqs}
       >
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>Pantheons</h2>
-          <p className='text-zinc-400 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
+            Pantheons
+          </h2>
+          <p className='text-content-muted mb-6'>
             Explore gods and goddesses organized by their cultural tradition.
           </p>
           <div className='space-y-6'>
             {pantheons.map(([pantheon, deities]) => (
               <div
                 key={pantheon}
-                className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'
+                className='rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5'
               >
                 <Link
                   href={`/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}`}
                   className='group'
                 >
-                  <h3 className='text-xl font-medium text-zinc-100 group-hover:text-amber-300 transition-colors mb-2'>
+                  <h3 className='text-xl font-medium text-content-primary group-hover:text-amber-300 transition-colors mb-2'>
                     {pantheon} Pantheon
                   </h3>
-                  <p className='text-sm text-zinc-400 mb-4'>
+                  <p className='text-sm text-content-muted mb-4'>
                     {pantheonInfo[pantheon]}
                   </p>
                 </Link>
@@ -216,7 +218,7 @@ While eclectic practice is valid, be aware that some traditions are closed or re
                       <Link
                         key={deity}
                         href={`/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}/${stringToKebabCase(deity)}`}
-                        className='px-3 py-1 text-sm bg-zinc-800 text-zinc-400 rounded hover:bg-zinc-700 hover:text-zinc-200 transition-colors'
+                        className='px-3 py-1 text-sm bg-surface-card text-content-muted rounded hover:bg-surface-overlay hover:text-content-primary transition-colors'
                       >
                         {deity}
                       </Link>
@@ -236,25 +238,29 @@ While eclectic practice is valid, be aware that some traditions are closed or re
         </section>
 
         <section className='mb-12 bg-amber-950/20 border border-amber-900/50 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Quick Reference: Deities by Domain
           </h2>
           <div className='grid md:grid-cols-2 gap-4 text-sm'>
             <div>
               <p className='text-amber-400 font-medium'>Love & Beauty:</p>
-              <p className='text-zinc-400'>Aphrodite, Venus, Freya, Hathor</p>
+              <p className='text-content-muted'>
+                Aphrodite, Venus, Freya, Hathor
+              </p>
             </div>
             <div>
               <p className='text-amber-400 font-medium'>War & Protection:</p>
-              <p className='text-zinc-400'>Ares, Mars, Thor, Sekhmet</p>
+              <p className='text-content-muted'>Ares, Mars, Thor, Sekhmet</p>
             </div>
             <div>
               <p className='text-amber-400 font-medium'>Magic & Wisdom:</p>
-              <p className='text-zinc-400'>Hecate, Odin, Thoth, Brigid</p>
+              <p className='text-content-muted'>Hecate, Odin, Thoth, Brigid</p>
             </div>
             <div>
               <p className='text-amber-400 font-medium'>Death & Rebirth:</p>
-              <p className='text-zinc-400'>Hades, Hel, Osiris, The Morrigan</p>
+              <p className='text-content-muted'>
+                Hades, Hel, Osiris, The Morrigan
+              </p>
             </div>
           </div>
         </section>

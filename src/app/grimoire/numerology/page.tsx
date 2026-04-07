@@ -171,7 +171,7 @@ export default function NumerologyIndexPage() {
   });
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(numerologyListSchema)}
       <SEOContentTemplate
         title='Numerology Guide & Calculators: Angel Numbers, Life Path & Universal Years | Lunary'
@@ -218,40 +218,40 @@ export default function NumerologyIndexPage() {
         childrenPosition='before-faqs'
       >
         <div className='max-w-6xl mx-auto px-4 py-12'>
-          <div className='mb-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <div className='mb-12 p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
             <div className='flex items-center gap-4 mb-4'>
-              <span className='text-5xl font-light text-lunary-primary-300'>
+              <span className='text-5xl font-light text-content-brand'>
                 {currentUniversalYear}
               </span>
               <div>
-                <h2 className='text-2xl font-medium text-lunary-primary-300'>
+                <h2 className='text-2xl font-medium text-content-brand'>
                   {currentYear}: Universal Year {currentUniversalYear}
                 </h2>
-                <p className='text-zinc-400'>
+                <p className='text-content-muted'>
                   {NUMEROLOGY_MEANINGS[currentUniversalYear].theme}
                 </p>
               </div>
             </div>
-            <p className='text-zinc-300 mb-4'>
+            <p className='text-content-secondary mb-4'>
               {NUMEROLOGY_MEANINGS[currentUniversalYear].energy}
             </p>
             <Link
               href={`/grimoire/numerology/year/${currentYear}`}
-              className='inline-flex px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 text-sm transition-colors'
+              className='inline-flex px-4 py-2 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand text-sm transition-colors'
             >
               Read {currentYear} Full Forecast
             </Link>
           </div>
 
           <Link href='/grimoire/angel-numbers' className='group block'>
-            <h2 className='text-2xl font-light mb-6 flex items-center gap-2 group-hover:text-lunary-accent-300 transition-colors'>
+            <h2 className='text-2xl font-light mb-6 flex items-center gap-2 group-hover:text-content-brand-accent transition-colors'>
               Angel Numbers
-              <span className='text-zinc-600 group-hover:text-lunary-accent-400 transition-colors'>
+              <span className='text-content-muted group-hover:text-lunary-accent-400 transition-colors'>
                 →
               </span>
             </h2>
           </Link>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Angel numbers are repeating number sequences that carry divine
             guidance. When you see these numbers repeatedly, your angels are
             trying to communicate with you.
@@ -261,12 +261,12 @@ export default function NumerologyIndexPage() {
               <Link
                 key={num}
                 href={`/grimoire/angel-numbers/${num}`}
-                className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-accent-600 hover:bg-zinc-900 transition-all text-center group'
+                className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-accent-600 hover:bg-surface-elevated transition-all text-center group'
               >
-                <div className='text-2xl font-light text-lunary-accent-400 group-hover:text-lunary-accent-300 transition-colors mb-1'>
+                <div className='text-2xl font-light text-lunary-accent-400 group-hover:text-content-brand-accent transition-colors mb-1'>
                   {num}
                 </div>
-                <div className='text-xs text-zinc-400 group-hover:text-lunary-accent-400 transition-colors'>
+                <div className='text-xs text-content-muted group-hover:text-lunary-accent-400 transition-colors'>
                   {data.meaning.split(' & ')[0]}
                 </div>
               </Link>
@@ -274,14 +274,14 @@ export default function NumerologyIndexPage() {
           </div>
 
           <Link href='/grimoire/life-path' className='group block'>
-            <h2 className='text-2xl font-light mb-6 flex items-center gap-2 group-hover:text-lunary-secondary-300 transition-colors'>
+            <h2 className='text-2xl font-light mb-6 flex items-center gap-2 group-hover:text-content-brand-secondary transition-colors'>
               Life Path Numbers
-              <span className='text-zinc-600 group-hover:text-lunary-secondary-400 transition-colors'>
+              <span className='text-content-muted group-hover:text-lunary-secondary-400 transition-colors'>
                 →
               </span>
             </h2>
           </Link>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Your Life Path Number reveals your life&apos;s purpose, natural
             talents, and the lessons you&apos;re here to learn. It&apos;s
             calculated from your birth date.
@@ -291,15 +291,17 @@ export default function NumerologyIndexPage() {
               <Link
                 key={num}
                 href={`/grimoire/life-path/${num}`}
-                className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-secondary-600 hover:bg-zinc-900 transition-all group'
+                className='p-5 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-secondary-600 hover:bg-surface-elevated transition-all group'
               >
                 <div className='flex items-center gap-3 mb-2'>
-                  <span className='text-3xl font-light text-lunary-secondary-400 group-hover:text-lunary-secondary-300 transition-colors'>
+                  <span className='text-3xl font-light text-lunary-secondary-400 group-hover:text-content-brand-secondary transition-colors'>
                     {num}
                   </span>
-                  <span className='text-sm text-zinc-400'>{data.meaning}</span>
+                  <span className='text-sm text-content-muted'>
+                    {data.meaning}
+                  </span>
                 </div>
-                <p className='text-sm text-zinc-400 line-clamp-2'>
+                <p className='text-sm text-content-muted line-clamp-2'>
                   {data.description.split('.')[0]}.
                 </p>
               </Link>
@@ -310,24 +312,24 @@ export default function NumerologyIndexPage() {
             href='/grimoire/numerology/core-numbers'
             className='group block'
           >
-            <h2 className='text-2xl font-light mb-6 flex items-center gap-2 group-hover:text-lunary-primary-300 transition-colors'>
+            <h2 className='text-2xl font-light mb-6 flex items-center gap-2 group-hover:text-content-brand transition-colors'>
               Core Numbers
-              <span className='text-zinc-600 group-hover:text-lunary-primary-400 transition-colors'>
+              <span className='text-content-muted group-hover:text-lunary-primary-400 transition-colors'>
                 →
               </span>
             </h2>
           </Link>
           <div className='grid md:grid-cols-3 gap-6 mb-12'>
-            <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <div className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
               <Link href='/grimoire/numerology/expression' className='group'>
-                <h3 className='text-xl font-medium text-lunary-secondary-400 mb-3 group-hover:text-lunary-secondary-300 transition-colors flex items-center gap-2'>
+                <h3 className='text-xl font-medium text-lunary-secondary-400 mb-3 group-hover:text-content-brand-secondary transition-colors flex items-center gap-2'>
                   Expression Numbers
-                  <span className='text-zinc-600 group-hover:text-lunary-secondary-400 transition-colors text-sm'>
+                  <span className='text-content-muted group-hover:text-lunary-secondary-400 transition-colors text-sm'>
                     →
                   </span>
                 </h3>
               </Link>
-              <p className='text-zinc-400 mb-4 text-sm'>
+              <p className='text-content-muted mb-4 text-sm'>
                 Also called Destiny Number, reveals your natural talents and
                 abilities.
               </p>
@@ -338,23 +340,23 @@ export default function NumerologyIndexPage() {
                     <Link
                       key={num}
                       href={`/grimoire/numerology/expression/${num}`}
-                      className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-secondary-600 text-sm transition-colors'
+                      className='px-3 py-1 rounded border border-stroke-default hover:border-lunary-secondary-600 text-sm transition-colors'
                     >
                       {num}
                     </Link>
                   ))}
               </div>
             </div>
-            <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <div className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
               <Link href='/grimoire/numerology/soul-urge' className='group'>
-                <h3 className='text-xl font-medium text-lunary-accent-400 mb-3 group-hover:text-lunary-accent-300 transition-colors flex items-center gap-2'>
+                <h3 className='text-xl font-medium text-lunary-accent-400 mb-3 group-hover:text-content-brand-accent transition-colors flex items-center gap-2'>
                   Soul Urge Numbers
-                  <span className='text-zinc-600 group-hover:text-lunary-accent-400 transition-colors text-sm'>
+                  <span className='text-content-muted group-hover:text-lunary-accent-400 transition-colors text-sm'>
                     →
                   </span>
                 </h3>
               </Link>
-              <p className='text-zinc-400 mb-4 text-sm'>
+              <p className='text-content-muted mb-4 text-sm'>
                 Also called Heart&apos;s Desire, reveals your innermost
                 motivations.
               </p>
@@ -365,23 +367,23 @@ export default function NumerologyIndexPage() {
                     <Link
                       key={num}
                       href={`/grimoire/numerology/soul-urge/${num}`}
-                      className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-accent-600 text-sm transition-colors'
+                      className='px-3 py-1 rounded border border-stroke-default hover:border-lunary-accent-600 text-sm transition-colors'
                     >
                       {num}
                     </Link>
                   ))}
               </div>
             </div>
-            <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <div className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
               <Link href='/grimoire/numerology/karmic-debt' className='group'>
                 <h3 className='text-xl font-medium text-lunary-error-400 mb-3 group-hover:text-lunary-error-300 transition-colors flex items-center gap-2'>
                   Karmic Debt Numbers
-                  <span className='text-zinc-600 group-hover:text-lunary-error-400 transition-colors text-sm'>
+                  <span className='text-content-muted group-hover:text-lunary-error-400 transition-colors text-sm'>
                     →
                   </span>
                 </h3>
               </Link>
-              <p className='text-zinc-400 mb-4 text-sm'>
+              <p className='text-content-muted mb-4 text-sm'>
                 Reveal lessons carried over from past lives.
               </p>
               <div className='flex flex-wrap gap-2'>
@@ -389,7 +391,7 @@ export default function NumerologyIndexPage() {
                   <Link
                     key={num}
                     href={`/grimoire/numerology/karmic-debt/${num}`}
-                    className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-error-600 text-sm transition-colors'
+                    className='px-3 py-1 rounded border border-stroke-default hover:border-lunary-error-600 text-sm transition-colors'
                   >
                     {num}
                   </Link>
@@ -399,21 +401,21 @@ export default function NumerologyIndexPage() {
           </div>
 
           <h2 className='text-2xl font-light mb-6'>Clock Numbers</h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             When you repeatedly notice certain times on the clock, the universe
             may be sending you a message through mirror hours and double hours.
           </p>
           <div className='grid md:grid-cols-2 gap-6 mb-12'>
-            <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <div className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
               <Link href='/grimoire/mirror-hours' className='group'>
                 <h3 className='text-xl font-medium text-lunary-highlight-400 mb-3 group-hover:text-lunary-highlight-300 transition-colors flex items-center gap-2'>
                   Mirror Hours
-                  <span className='text-zinc-600 group-hover:text-lunary-highlight-400 transition-colors text-sm'>
+                  <span className='text-content-muted group-hover:text-lunary-highlight-400 transition-colors text-sm'>
                     →
                   </span>
                 </h3>
               </Link>
-              <p className='text-zinc-400 mb-4 text-sm'>
+              <p className='text-content-muted mb-4 text-sm'>
                 Times where digits mirror each other (01:10, 12:21, etc.)
               </p>
               <div className='flex flex-wrap gap-2'>
@@ -421,23 +423,23 @@ export default function NumerologyIndexPage() {
                   <Link
                     key={time}
                     href={`/grimoire/mirror-hours/${time.replace(':', '-')}`}
-                    className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-highlight-600 text-sm transition-colors'
+                    className='px-3 py-1 rounded border border-stroke-default hover:border-lunary-highlight-600 text-sm transition-colors'
                   >
                     {time}
                   </Link>
                 ))}
               </div>
             </div>
-            <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <div className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
               <Link href='/grimoire/double-hours' className='group'>
-                <h3 className='text-xl font-medium text-lunary-primary-400 mb-3 group-hover:text-lunary-primary-300 transition-colors flex items-center gap-2'>
+                <h3 className='text-xl font-medium text-lunary-primary-400 mb-3 group-hover:text-content-brand transition-colors flex items-center gap-2'>
                   Double Hours
-                  <span className='text-zinc-600 group-hover:text-lunary-primary-400 transition-colors text-sm'>
+                  <span className='text-content-muted group-hover:text-lunary-primary-400 transition-colors text-sm'>
                     →
                   </span>
                 </h3>
               </Link>
-              <p className='text-zinc-400 mb-4 text-sm'>
+              <p className='text-content-muted mb-4 text-sm'>
                 Times where hour and minute are the same (11:11, 22:22, etc.)
               </p>
               <div className='flex flex-wrap gap-2'>
@@ -445,7 +447,7 @@ export default function NumerologyIndexPage() {
                   <Link
                     key={time}
                     href={`/grimoire/double-hours/${time.replace(':', '-')}`}
-                    className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-primary-600 text-sm transition-colors'
+                    className='px-3 py-1 rounded border border-stroke-default hover:border-lunary-primary-600 text-sm transition-colors'
                   >
                     {time}
                   </Link>
@@ -455,7 +457,7 @@ export default function NumerologyIndexPage() {
           </div>
 
           <h2 className='text-2xl font-light mb-6'>Universal Year Meanings</h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             The Universal Year influences the collective energy of the entire
             world during that calendar year. Understanding it helps you align
             with the year&apos;s themes.
@@ -464,17 +466,17 @@ export default function NumerologyIndexPage() {
             {Object.entries(NUMEROLOGY_MEANINGS).map(([num, data]) => (
               <div
                 key={num}
-                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'
+                className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'
               >
                 <div className='flex items-center gap-3 mb-3'>
                   <span className='text-3xl font-light text-lunary-primary-400'>
                     {num}
                   </span>
                 </div>
-                <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                <h3 className='text-lg font-medium text-content-primary mb-2'>
                   {data.theme}
                 </h3>
-                <p className='text-sm text-zinc-400 mb-3'>
+                <p className='text-sm text-content-muted mb-3'>
                   {data.keywords.join(', ')}
                 </p>
               </div>
@@ -489,9 +491,9 @@ export default function NumerologyIndexPage() {
                 <Link
                   key={year}
                   href={`/grimoire/numerology/year/${year}`}
-                  className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all text-center group'
+                  className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 hover:bg-surface-elevated transition-all text-center group'
                 >
-                  <div className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                  <div className='text-lg font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                     {year}
                   </div>
                   <div className='text-2xl font-light text-lunary-primary-400'>
@@ -503,7 +505,7 @@ export default function NumerologyIndexPage() {
           </div>
 
           <h2 className='text-2xl font-light mb-6'>Calculate Your Numbers</h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Use these calculators to discover your personal numerology numbers.
           </p>
           <div className='grid md:grid-cols-2 gap-6 mb-12'>
@@ -516,16 +518,18 @@ export default function NumerologyIndexPage() {
           </div>
 
           <div className='grid md:grid-cols-2 gap-6 mb-12'>
-            <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <div className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
               <h2 className='text-xl font-medium mb-4'>
                 How to Calculate Your Life Path Number
               </h2>
-              <p className='text-zinc-400 mb-4'>
+              <p className='text-content-muted mb-4'>
                 Add all digits of your birth date until you get a single digit
                 (1-9) or a Master Number (11, 22, 33).
               </p>
-              <div className='bg-zinc-800/50 p-4 rounded-lg font-mono text-sm'>
-                <p className='text-zinc-400 mb-1'>Example: March 15, 1990</p>
+              <div className='bg-surface-card/50 p-4 rounded-lg font-mono text-sm'>
+                <p className='text-content-muted mb-1'>
+                  Example: March 15, 1990
+                </p>
                 <p>3 + 1 + 5 + 1 + 9 + 9 + 0 = 28</p>
                 <p>2 + 8 = 10</p>
                 <p>1 + 0 = 1</p>
@@ -533,15 +537,15 @@ export default function NumerologyIndexPage() {
               </div>
             </div>
 
-            <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <div className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
               <h2 className='text-xl font-medium mb-4'>
                 How to Calculate Universal Year
               </h2>
-              <p className='text-zinc-400 mb-4'>
+              <p className='text-content-muted mb-4'>
                 Add all digits of the year together until you get a single digit
                 (1-9).
               </p>
-              <div className='bg-zinc-800/50 p-4 rounded-lg font-mono text-sm'>
+              <div className='bg-surface-card/50 p-4 rounded-lg font-mono text-sm'>
                 <p>2025 = 2 + 0 + 2 + 5 = 9</p>
                 <p>2026 = 2 + 0 + 2 + 6 = 10 = 1 + 0 = 1</p>
               </div>

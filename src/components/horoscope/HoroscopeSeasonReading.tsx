@@ -130,28 +130,28 @@ export function HoroscopeSeasonReading({
 
   return (
     <div
-      className={`rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden ${className}`}
+      className={`rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden ${className}`}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className='w-full flex items-center justify-between p-4 text-left hover:bg-zinc-800/30 transition-colors'
+        className='w-full flex items-center justify-between p-4 text-left hover:bg-surface-card/30 transition-colors'
       >
         <div className='flex items-center gap-3'>
-          <div className='p-2 rounded-lg bg-lunary-primary-900/30'>
+          <div className='p-2 rounded-lg bg-layer-base/30'>
             <Sparkles className='w-4 h-4 text-lunary-primary-400' />
           </div>
           <div>
-            <p className='text-sm font-medium text-zinc-100'>
+            <p className='text-sm font-medium text-content-primary'>
               {iosLabel('Your Cosmic Season', isNativeIOS)}:{' '}
               {seasonData.seasonName}
             </p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               {iosLabel('Moon-guided energy reading', isNativeIOS)}
             </p>
           </div>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-zinc-500 transition-transform ${
+          className={`w-4 h-4 text-content-muted transition-transform ${
             isExpanded ? 'rotate-180' : ''
           }`}
         />
@@ -160,7 +160,7 @@ export function HoroscopeSeasonReading({
       <Collapse isOpen={isExpanded}>
         <div className='px-4 pb-4 space-y-4'>
           {/* Moon phase info */}
-          <div className='rounded-lg border border-lunary-secondary-800/50 bg-lunary-secondary-950/30 p-3'>
+          <div className='rounded-lg border border-lunary-secondary-800/50 bg-layer-deep/30 p-3'>
             <div className='flex items-center gap-3'>
               <img
                 src={cosmicContext.moonPhase.icon.src}
@@ -168,14 +168,14 @@ export function HoroscopeSeasonReading({
                 className='w-10 h-10 flex-shrink-0'
               />
               <div className='flex-1 min-w-0'>
-                <p className='text-sm font-medium text-lunary-secondary-300 mb-1'>
+                <p className='text-sm font-medium text-content-brand-secondary mb-1'>
                   {cosmicContext.moonPhase.name}
                 </p>
                 <div className='flex flex-wrap gap-1.5'>
                   {cosmicContext.moonPhase.keywords.map((keyword, idx) => (
                     <span
                       key={idx}
-                      className='text-xs px-2 py-0.5 rounded-full bg-lunary-secondary-900/50 text-lunary-secondary-400 border border-lunary-secondary-800'
+                      className='text-xs px-2 py-0.5 rounded-full bg-layer-base/50 text-lunary-secondary-400 border border-lunary-secondary-800'
                     >
                       {keyword}
                     </span>
@@ -186,7 +186,7 @@ export function HoroscopeSeasonReading({
           </div>
 
           {/* Summary narrative */}
-          <p className='text-sm text-zinc-300 leading-relaxed'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
             {seasonData.summary}
           </p>
 
@@ -194,7 +194,10 @@ export function HoroscopeSeasonReading({
           {hasPaidAccess && seasonData.paragraphs.length > 0 && (
             <div className='space-y-3'>
               {seasonData.paragraphs.map((paragraph, i) => (
-                <p key={i} className='text-sm text-zinc-300 leading-relaxed'>
+                <p
+                  key={i}
+                  className='text-sm text-content-secondary leading-relaxed'
+                >
                   {paragraph}
                 </p>
               ))}
@@ -202,19 +205,19 @@ export function HoroscopeSeasonReading({
           )}
 
           {hasPaidAccess && focusAreas && focusAreas.length > 0 && (
-            <div className='pt-3 border-t border-zinc-800/50'>
-              <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2'>
+            <div className='pt-3 border-t border-stroke-subtle/50'>
+              <p className='text-xs font-medium text-content-muted uppercase tracking-wide mb-2'>
                 Focus Areas
               </p>
               <ul className='space-y-1.5'>
                 {focusAreas.map((area, i) => (
                   <li
                     key={i}
-                    className='text-sm text-zinc-300 flex items-start gap-2'
+                    className='text-sm text-content-secondary flex items-start gap-2'
                   >
                     <span className='text-lunary-primary-400 mt-0.5'>•</span>
                     <span>
-                      <span className='font-medium text-zinc-200'>
+                      <span className='font-medium text-content-primary'>
                         {area.title}
                       </span>{' '}
                       — {area.guidance}
@@ -226,7 +229,7 @@ export function HoroscopeSeasonReading({
           )}
 
           {!hasPaidAccess && (
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-content-muted'>
               Upgrade for the full season narrative and personalized focus
               guidance.
             </p>

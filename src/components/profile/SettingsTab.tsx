@@ -5,10 +5,11 @@ import dynamic from 'next/dynamic';
 import { Capacitor } from '@capacitor/core';
 import { ChevronDown } from 'lucide-react';
 import { SectionTitle } from '@/components/ui/SectionTitle';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { hapticService } from '@/services/native/haptic-service';
 
 const SkeletonCard = () => (
-  <div className='h-32 bg-zinc-800 animate-pulse rounded-xl' />
+  <div className='h-32 bg-surface-card animate-pulse rounded-xl' />
 );
 
 const SubscriptionManagement = dynamic(
@@ -106,6 +107,17 @@ export function SettingsTab({
 
   const settingsSections: SettingSection[] = [
     {
+      id: 'appearance',
+      title: 'Appearance',
+      description: 'Switch between dark and light mode.',
+      content: (
+        <div className='flex items-center justify-between'>
+          <span className='text-sm text-content-secondary'>Theme</span>
+          <ThemeToggle />
+        </div>
+      ),
+    },
+    {
       id: 'location',
       title: 'Location',
       description: 'Keep your coordinates current for precise readings.',
@@ -195,32 +207,32 @@ export function SettingsTab({
       {/* Preferences */}
       <div className='w-full max-w-3xl space-y-3'>
         <SectionTitle as='h2'>Preferences</SectionTitle>
-        <div className='rounded-xl border border-zinc-700/60 bg-zinc-900/70 overflow-hidden'>
+        <div className='rounded-xl border border-stroke-default/60 bg-surface-elevated/70 overflow-hidden'>
           {settingsSections.map((section, index) => {
             const open = isSectionOpen(section.id);
             return (
               <div key={section.id}>
                 {index > 0 && (
-                  <div className='mx-4 border-t border-zinc-800/80' />
+                  <div className='mx-4 border-t border-stroke-subtle/80' />
                 )}
                 <button
                   onClick={() => toggleSection(section.id)}
-                  className='flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-sm font-medium text-white active:bg-zinc-800/60'
+                  className='flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-sm font-medium text-content-primary active:bg-surface-card/60'
                 >
                   <div>
                     <p>{section.title}</p>
                     {section.description && (
-                      <p className='text-xs font-normal text-zinc-500'>
+                      <p className='text-xs font-normal text-content-muted'>
                         {section.description}
                       </p>
                     )}
                   </div>
                   <ChevronDown
-                    className={`h-4 w-4 flex-shrink-0 text-zinc-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+                    className={`h-4 w-4 flex-shrink-0 text-content-muted transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {open && (
-                  <div className='border-t border-zinc-800/60 px-4 py-4 text-sm text-zinc-200'>
+                  <div className='border-t border-stroke-subtle/60 px-4 py-4 text-sm text-content-primary'>
                     {section.content}
                   </div>
                 )}
@@ -234,7 +246,7 @@ export function SettingsTab({
       {isNativeIOS && (
         <div className='w-full max-w-3xl space-y-3'>
           <SectionTitle as='h2'>Linked Accounts</SectionTitle>
-          <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg p-4'>
+          <div className='rounded-xl border border-stroke-default bg-surface-elevated/70 shadow-lg p-4'>
             <AppleAccountLink />
           </div>
         </div>
@@ -256,27 +268,27 @@ export function SettingsTab({
       {/* Data & Privacy */}
       <div className='w-full max-w-3xl space-y-3'>
         <SectionTitle as='h2'>Data & Privacy</SectionTitle>
-        <div className='rounded-xl border border-zinc-700/60 bg-zinc-900/70 overflow-hidden'>
+        <div className='rounded-xl border border-stroke-default/60 bg-surface-elevated/70 overflow-hidden'>
           {/* Export Data */}
           <div className='flex items-center justify-between px-4 py-3.5'>
             <div>
-              <p className='text-sm font-medium text-zinc-200'>
+              <p className='text-sm font-medium text-content-primary'>
                 Export Your Data
               </p>
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-content-muted'>
                 Download all your Lunary data as JSON
               </p>
             </div>
             <a
               href='/api/account/export'
               download
-              className='px-3 py-1.5 text-sm font-medium text-lunary-accent border border-lunary-primary-700 rounded-lg active:bg-lunary-primary-950 transition-colors'
+              className='px-3 py-1.5 text-sm font-medium text-lunary-accent border border-lunary-primary-700 rounded-lg active:bg-layer-deep transition-colors'
             >
               Download
             </a>
           </div>
 
-          <div className='mx-4 border-t border-zinc-800/80' />
+          <div className='mx-4 border-t border-stroke-subtle/80' />
 
           {/* Delete Account */}
           <div className='px-4 py-3.5'>
@@ -286,13 +298,13 @@ export function SettingsTab({
                   <p className='text-sm font-medium text-lunary-error-300'>
                     Delete Account
                   </p>
-                  <p className='text-xs text-zinc-500'>
+                  <p className='text-xs text-content-muted'>
                     Permanently remove your account (30-day grace period)
                   </p>
                 </div>
                 <button
                   onClick={handleDeleteAccount}
-                  className='px-3 py-1.5 text-sm font-medium text-lunary-error border border-lunary-error-700 rounded-lg active:bg-lunary-error-900 transition-colors'
+                  className='px-3 py-1.5 text-sm font-medium text-lunary-error border border-lunary-error-700 rounded-lg active:bg-layer-base transition-colors'
                 >
                   Delete
                 </button>
@@ -304,14 +316,14 @@ export function SettingsTab({
                 <p className='text-sm text-lunary-error-300 font-medium'>
                   Are you sure you want to delete your account?
                 </p>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   This will schedule your account for deletion in 30 days. You
                   can cancel during this period.
                 </p>
                 <div className='flex gap-2'>
                   <button
                     onClick={cancelDelete}
-                    className='flex-1 px-3 py-2 text-sm font-medium text-zinc-300 border border-zinc-600 rounded-lg active:bg-zinc-800 transition-colors'
+                    className='flex-1 px-3 py-2 text-sm font-medium text-content-secondary border border-stroke-strong rounded-lg active:bg-surface-card transition-colors'
                   >
                     Cancel
                   </button>
@@ -327,8 +339,8 @@ export function SettingsTab({
 
             {deleteState === 'deleting' && (
               <div className='flex items-center gap-2 py-1'>
-                <div className='h-4 w-4 border-2 border-zinc-500 border-t-zinc-200 rounded-full animate-spin' />
-                <p className='text-sm text-zinc-400'>
+                <div className='h-4 w-4 border-2 border-stroke-strong border-t-zinc-200 rounded-full animate-spin' />
+                <p className='text-sm text-content-muted'>
                   Processing deletion request...
                 </p>
               </div>
@@ -341,7 +353,7 @@ export function SettingsTab({
                 </p>
                 <button
                   onClick={cancelDelete}
-                  className='text-xs text-zinc-500 underline'
+                  className='text-xs text-content-muted underline'
                 >
                   Dismiss
                 </button>
@@ -354,7 +366,7 @@ export function SettingsTab({
                 <div className='flex gap-2'>
                   <button
                     onClick={cancelDelete}
-                    className='text-xs text-zinc-500 underline'
+                    className='text-xs text-content-muted underline'
                   >
                     Dismiss
                   </button>

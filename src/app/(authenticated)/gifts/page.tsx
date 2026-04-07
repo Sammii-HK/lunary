@@ -105,22 +105,22 @@ export default function GiftsPage() {
   }, [openingGiftId]);
 
   return (
-    <div className='min-h-screen bg-zinc-950 px-4 py-6 pb-24'>
+    <div className='min-h-screen bg-surface-base px-4 py-6 pb-24'>
       <div className='max-w-lg mx-auto space-y-4'>
         <Heading as='h1' variant='h2'>
           Cosmic Gifts
         </Heading>
 
         {/* Tabs */}
-        <div className='flex gap-1 bg-zinc-900/50 rounded-lg p-1'>
+        <div className='flex gap-1 bg-surface-elevated/50 rounded-lg p-1'>
           <button
             type='button'
             onClick={() => setTab('received')}
             className={cn(
               'flex-1 flex items-center justify-center gap-1.5 rounded-md py-2 text-sm font-medium transition-colors',
               tab === 'received'
-                ? 'bg-zinc-800 text-white'
-                : 'text-zinc-500 hover:text-zinc-300',
+                ? 'bg-surface-card text-content-primary'
+                : 'text-content-muted hover:text-content-secondary',
             )}
           >
             <Inbox className='w-4 h-4' />
@@ -132,8 +132,8 @@ export default function GiftsPage() {
             className={cn(
               'flex-1 flex items-center justify-center gap-1.5 rounded-md py-2 text-sm font-medium transition-colors',
               tab === 'sent'
-                ? 'bg-zinc-800 text-white'
-                : 'text-zinc-500 hover:text-zinc-300',
+                ? 'bg-surface-card text-content-primary'
+                : 'text-content-muted hover:text-content-secondary',
             )}
           >
             <Send className='w-4 h-4' />
@@ -143,14 +143,14 @@ export default function GiftsPage() {
 
         {/* Unwrap animation overlay */}
         {openingGiftId && (
-          <div className='fixed inset-0 bg-black/80 z-50 flex items-center justify-center'>
+          <div className='fixed inset-0 bg-surface-base/80 z-50 flex items-center justify-center'>
             <GiftUnwrapAnimation onComplete={handleUnwrapComplete} />
           </div>
         )}
 
         {/* Opened gift detail */}
         {openedGift && (
-          <div className='fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4'>
+          <div className='fixed inset-0 bg-surface-base/80 z-50 flex items-center justify-center p-4'>
             <div className='w-full max-w-sm'>
               <GiftCard
                 giftType={openedGift.giftType}
@@ -164,7 +164,7 @@ export default function GiftsPage() {
               <button
                 type='button'
                 onClick={() => setOpenedGift(null)}
-                className='mt-4 w-full py-2 rounded-lg bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700 transition-colors'
+                className='mt-4 w-full py-2 rounded-lg bg-surface-card text-sm text-content-secondary hover:bg-surface-overlay transition-colors'
               >
                 Close
               </button>
@@ -178,19 +178,19 @@ export default function GiftsPage() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className='h-20 bg-zinc-900/50 rounded-xl animate-pulse'
+                className='h-20 bg-surface-elevated/50 rounded-xl animate-pulse'
               />
             ))}
           </div>
         ) : gifts.length === 0 ? (
           <div className='text-center py-6'>
-            <Gift className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
-            <p className='text-zinc-400 text-sm'>
+            <Gift className='w-10 h-10 text-content-muted mx-auto mb-3' />
+            <p className='text-content-muted text-sm'>
               {tab === 'received'
                 ? 'No gifts yet'
                 : "You haven't sent any gifts yet"}
             </p>
-            <p className='text-xs text-zinc-500 mt-1'>
+            <p className='text-xs text-content-muted mt-1'>
               {tab === 'received'
                 ? 'Gifts from friends will appear here'
                 : "Send a gift from a friend's profile"}
@@ -218,8 +218,8 @@ export default function GiftsPage() {
                   className={cn(
                     'w-full rounded-xl border p-4 text-left transition-all',
                     isReceived && !isOpened
-                      ? 'border-lunary-primary-500/50 bg-lunary-primary-900/10 hover:bg-lunary-primary-900/20'
-                      : 'border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900/80',
+                      ? 'border-lunary-primary-500/50 bg-layer-base/10 hover:bg-layer-base/20'
+                      : 'border-stroke-subtle bg-surface-elevated/50 hover:bg-surface-elevated/80',
                     !isReceived && 'cursor-default',
                   )}
                 >
@@ -233,13 +233,13 @@ export default function GiftsPage() {
                         className='rounded-full'
                       />
                     ) : (
-                      <div className='w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center'>
-                        <Sparkles className='w-4 h-4 text-zinc-500' />
+                      <div className='w-10 h-10 rounded-full bg-surface-card flex items-center justify-center'>
+                        <Sparkles className='w-4 h-4 text-content-muted' />
                       </div>
                     )}
                     <div className='flex-1 min-w-0'>
                       <div className='flex items-center gap-2'>
-                        <p className='text-sm font-medium text-white truncate'>
+                        <p className='text-sm font-medium text-content-primary truncate'>
                           {isReceived
                             ? `From ${personName}`
                             : `To ${personName}`}
@@ -248,7 +248,7 @@ export default function GiftsPage() {
                           <span className='w-2 h-2 rounded-full bg-lunary-primary-400 animate-pulse shrink-0' />
                         )}
                       </div>
-                      <p className='text-xs text-zinc-500'>
+                      <p className='text-xs text-content-muted'>
                         {gift.giftType === 'tarot_pull'
                           ? 'Tarot Pull'
                           : 'Cosmic Encouragement'}{' '}

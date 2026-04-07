@@ -67,7 +67,7 @@ interface SuccessMetricsProps {
 export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
   if (loading || !data) {
     return (
-      <Card className='border-zinc-800 bg-zinc-950/40'>
+      <Card className='border-stroke-subtle bg-surface-base/40'>
         <CardHeader>
           <CardTitle>Success Metrics</CardTitle>
           <CardDescription>Loading metrics...</CardDescription>
@@ -244,7 +244,7 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
   ];
 
   return (
-    <Card className='border-zinc-800/30 bg-zinc-900/10'>
+    <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
       <CardHeader>
         <div className='flex items-center gap-2'>
           <Target className='h-4 w-4 text-lunary-primary-400/70' />
@@ -252,7 +252,7 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
             Success Metrics
           </CardTitle>
         </div>
-        <CardDescription className='text-xs text-zinc-400'>
+        <CardDescription className='text-xs text-content-muted'>
           Key performance indicators
         </CardDescription>
       </CardHeader>
@@ -296,13 +296,13 @@ function MetricCard({
   const trendColors = {
     up: 'text-lunary-success',
     down: 'text-lunary-error',
-    stable: 'text-zinc-400',
+    stable: 'text-content-muted',
   };
 
   const trendBgColors = {
-    up: 'bg-lunary-success-900/20 border-lunary-success-800',
-    down: 'bg-lunary-error-900/20 border-lunary-error-800',
-    stable: 'bg-zinc-900/40 border-zinc-800',
+    up: 'bg-layer-base/20 border-lunary-success-800',
+    down: 'bg-layer-base/20 border-lunary-error-800',
+    stable: 'bg-surface-elevated/40 border-stroke-subtle',
   };
 
   const TrendIcon =
@@ -319,12 +319,12 @@ function MetricCard({
     >
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
-          <div className='text-xs font-medium text-zinc-400'>{label}</div>
-          <div className='mt-2 text-xl font-light tracking-tight text-white'>
+          <div className='text-xs font-medium text-content-muted'>{label}</div>
+          <div className='mt-2 text-xl font-light tracking-tight text-content-primary'>
             {formattedValue}
           </div>
           {subtitle && (
-            <div className='mt-1 text-xs text-zinc-600'>{subtitle}</div>
+            <div className='mt-1 text-xs text-content-muted'>{subtitle}</div>
           )}
         </div>
         <div className='flex flex-col items-end gap-1'>
@@ -353,7 +353,7 @@ function MetricCard({
       </div>
       {target && (
         <div className='mt-3'>
-          <div className='mb-1 flex items-center justify-between text-xs text-zinc-400'>
+          <div className='mb-1 flex items-center justify-between text-xs text-content-muted'>
             <span>Target Range</span>
             <span
               className={cn(
@@ -363,7 +363,7 @@ function MetricCard({
               {isInTargetRange ? '✓ In Range' : '⚠ Outside Range'}
             </span>
           </div>
-          <div className='h-2 w-full rounded-full bg-zinc-800'>
+          <div className='h-2 w-full rounded-full bg-surface-card'>
             <div
               className={cn(
                 'h-2 rounded-full transition-all',

@@ -82,12 +82,12 @@ const typeIcons: Record<string, React.ComponentType<{ className?: string }>> = {
 
 function MoonBanner({ phase }: { phase: string }) {
   return (
-    <div className='rounded-xl border border-lunary-primary-700/40 bg-lunary-primary-900/20 p-4 text-sm'>
-      <div className='flex items-center gap-2 text-lunary-primary-200'>
+    <div className='rounded-xl border border-lunary-primary-700/40 bg-layer-base/20 p-4 text-sm'>
+      <div className='flex items-center gap-2 text-content-secondary'>
         <Moon className='h-4 w-4' />
         <span className='font-medium'>Current Moon Phase: {phase}</span>
       </div>
-      <p className='mt-1 text-zinc-300'>
+      <p className='mt-1 text-content-secondary'>
         Certain spells work best during specific moon phases. Look for moon
         phase indicators on each spell.
       </p>
@@ -274,7 +274,7 @@ export function SpellsClient({
         <button
           onClick={() => setShowFilters(!showFilters)}
           data-testid='spell-filters'
-          className='flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all'
+          className='flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg text-content-primary/70 hover:bg-white/10 hover:text-content-primary transition-all'
         >
           <Filter className='w-4 h-4' />
           <span>Filters</span>
@@ -286,7 +286,7 @@ export function SpellsClient({
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className='flex items-center gap-1 text-sm text-white/50 hover:text-white transition-all'
+            className='flex items-center gap-1 text-sm text-content-primary/50 hover:text-content-primary transition-all'
           >
             <X className='w-3 h-3' />
             Clear filters
@@ -297,14 +297,16 @@ export function SpellsClient({
       {showFilters && (
         <div className='bg-white/5 rounded-xl p-6 space-y-6 border border-white/10'>
           <div>
-            <h3 className='text-sm font-medium text-white/70 mb-3'>Category</h3>
+            <h3 className='text-sm font-medium text-content-primary/70 mb-3'>
+              Category
+            </h3>
             <div className='flex flex-wrap gap-2'>
               <button
                 onClick={() => setSelectedCategory('all')}
                 className={`px-3 py-1.5 rounded-full text-sm transition-all ${
                   selectedCategory === 'all'
                     ? 'bg-lunary-primary text-white'
-                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                    : 'bg-white/5 text-content-primary/70 hover:bg-white/10'
                 }`}
               >
                 All ({safeCategoryCounts.all ?? totalCount})
@@ -317,7 +319,7 @@ export function SpellsClient({
                   className={`px-3 py-1.5 rounded-full text-sm flex items-center gap-1.5 transition-all ${
                     selectedCategory === key
                       ? 'bg-lunary-primary text-white'
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                      : 'bg-white/5 text-content-primary/70 hover:bg-white/10'
                   }`}
                 >
                   <span>{cat.icon}</span>
@@ -331,7 +333,7 @@ export function SpellsClient({
           </div>
 
           <div>
-            <h3 className='text-sm font-medium text-white/70 mb-3'>
+            <h3 className='text-sm font-medium text-content-primary/70 mb-3'>
               Difficulty
             </h3>
             <div className='flex flex-wrap gap-2'>
@@ -343,7 +345,7 @@ export function SpellsClient({
                     className={`px-3 py-1.5 rounded-full text-sm capitalize transition-all ${
                       selectedDifficulty === diff
                         ? 'bg-lunary-primary text-white'
-                        : 'bg-white/5 text-white/70 hover:bg-white/10'
+                        : 'bg-white/5 text-content-primary/70 hover:bg-white/10'
                     }`}
                   >
                     {diff === 'all' ? 'All Levels' : diff}
@@ -366,17 +368,17 @@ export function SpellsClient({
                 href={`/grimoire/spells/${spell.id}`}
                 data-testid='spell-card'
                 data-spell-slug={spell.id}
-                className='group block rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-violet-700/50 transition-all'
+                className='group block rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-violet-700/50 transition-all'
               >
                 <div className='flex items-start justify-between gap-4 mb-3'>
                   <div className='flex-1'>
                     <div className='flex items-center gap-2 mb-1'>
-                      <TypeIcon className='h-4 w-4 text-lunary-primary-300' />
-                      <h3 className='font-medium text-zinc-100 group-hover:text-violet-300 transition-colors'>
+                      <TypeIcon className='h-4 w-4 text-content-brand' />
+                      <h3 className='font-medium text-content-primary group-hover:text-violet-300 transition-colors'>
                         {spell.title}
                       </h3>
                     </div>
-                    <p className='text-sm text-zinc-400 line-clamp-2'>
+                    <p className='text-sm text-content-muted line-clamp-2'>
                       {spell.purpose}
                     </p>
                   </div>
@@ -384,20 +386,20 @@ export function SpellsClient({
                   <span
                     className={`text-xs px-2.5 py-1 rounded-full whitespace-nowrap ${
                       difficultyColors[spell.difficulty] ||
-                      'text-zinc-300 bg-zinc-800'
+                      'text-content-secondary bg-surface-card'
                     }`}
                   >
                     {spell.difficulty}
                   </span>
                 </div>
 
-                <div className='flex flex-wrap items-center gap-3 text-xs text-zinc-500'>
+                <div className='flex flex-wrap items-center gap-3 text-xs text-content-muted'>
                   <span className='flex items-center gap-1'>
                     <Clock className='w-3 h-3' />
                     {spell.duration}
                   </span>
 
-                  <span className='px-2 py-0.5 bg-zinc-800 rounded'>
+                  <span className='px-2 py-0.5 bg-surface-card rounded'>
                     {safeCategories[spell.category]?.name ||
                       spell.category.replace(/-/g, ' ')}
                   </span>
@@ -407,13 +409,13 @@ export function SpellsClient({
                       {spell.timing.moonPhase.slice(0, 3).map((p) => (
                         <span
                           key={p}
-                          className='px-2 py-0.5 bg-zinc-800 rounded text-xs text-zinc-300'
+                          className='px-2 py-0.5 bg-surface-card rounded text-xs text-content-secondary'
                         >
                           {p}
                         </span>
                       ))}
                       {spell.timing.moonPhase.length > 3 && (
-                        <span className='px-2 py-0.5 bg-zinc-800 rounded text-xs text-zinc-400'>
+                        <span className='px-2 py-0.5 bg-surface-card rounded text-xs text-content-muted'>
                           +{spell.timing.moonPhase.length - 3}
                         </span>
                       )}
@@ -426,7 +428,7 @@ export function SpellsClient({
         </div>
       ) : (
         <div className='text-center py-16'>
-          <p className='text-white/50 text-lg mb-4'>
+          <p className='text-content-primary/50 text-lg mb-4'>
             No spells found matching your criteria.
           </p>
           <button
@@ -447,14 +449,14 @@ export function SpellsClient({
             <Link
               href={getPageHref(basePath, currentPage - 1, preservedQs)}
               rel='prev'
-              className='px-3 py-2 rounded-lg text-sm flex items-center gap-1 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-all'
+              className='px-3 py-2 rounded-lg text-sm flex items-center gap-1 bg-white/5 text-content-primary/70 hover:bg-white/10 hover:text-content-primary transition-all'
               aria-label='Go to previous page'
             >
               <ChevronLeft className='h-4 w-4' />
               Previous
             </Link>
           ) : (
-            <span className='px-3 py-2 rounded-lg text-sm flex items-center gap-1 bg-white/5 text-white/50 opacity-40 cursor-not-allowed'>
+            <span className='px-3 py-2 rounded-lg text-sm flex items-center gap-1 bg-white/5 text-content-primary/50 opacity-40 cursor-not-allowed'>
               <ChevronLeft className='h-4 w-4' />
               Previous
             </span>
@@ -465,7 +467,7 @@ export function SpellsClient({
               page === 'ellipsis' ? (
                 <span
                   key={`ellipsis-${idx}`}
-                  className='w-8 h-8 flex items-center justify-center text-zinc-500'
+                  className='w-8 h-8 flex items-center justify-center text-content-muted'
                 >
                   …
                 </span>
@@ -476,8 +478,8 @@ export function SpellsClient({
                   aria-current={page === currentPage ? 'page' : undefined}
                   className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors flex items-center justify-center ${
                     page === currentPage
-                      ? 'bg-lunary-primary-900 text-lunary-primary-300 border border-lunary-primary-700'
-                      : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
+                      ? 'bg-layer-base text-content-brand border border-lunary-primary-700'
+                      : 'text-content-muted hover:text-content-primary hover:bg-surface-card'
                   }`}
                 >
                   {page}
@@ -490,14 +492,14 @@ export function SpellsClient({
             <Link
               href={getPageHref(basePath, currentPage + 1, preservedQs)}
               rel='next'
-              className='px-3 py-2 rounded-lg text-sm flex items-center gap-1 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-all'
+              className='px-3 py-2 rounded-lg text-sm flex items-center gap-1 bg-white/5 text-content-primary/70 hover:bg-white/10 hover:text-content-primary transition-all'
               aria-label='Go to next page'
             >
               Next
               <ChevronRight className='h-4 w-4' />
             </Link>
           ) : (
-            <span className='px-3 py-2 rounded-lg text-sm flex items-center gap-1 bg-white/5 text-white/50 opacity-40 cursor-not-allowed'>
+            <span className='px-3 py-2 rounded-lg text-sm flex items-center gap-1 bg-white/5 text-content-primary/50 opacity-40 cursor-not-allowed'>
               Next
               <ChevronRight className='h-4 w-4' />
             </span>
@@ -505,7 +507,7 @@ export function SpellsClient({
         </nav>
       )}
 
-      <div className='text-center text-sm text-white/40 pt-6'>
+      <div className='text-center text-sm text-content-primary/40 pt-6'>
         Showing {startIndex}–{endIndex} of {totalCount} spells
       </div>
     </div>

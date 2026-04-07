@@ -73,13 +73,15 @@ export default function AdminUserEngagementPage() {
 
   if (!userId) {
     return (
-      <div className='p-6 text-sm text-zinc-300'>Missing userId in URL.</div>
+      <div className='p-6 text-sm text-content-secondary'>
+        Missing userId in URL.
+      </div>
     );
   }
 
   if (loading && !data) {
     return (
-      <div className='flex min-h-[60vh] items-center justify-center text-zinc-400'>
+      <div className='flex min-h-[60vh] items-center justify-center text-content-muted'>
         <div className='flex items-center gap-3'>
           <Loader2 className='h-5 w-5 animate-spin text-lunary-primary-400' />
           Loading profile…
@@ -91,102 +93,108 @@ export default function AdminUserEngagementPage() {
   return (
     <div className='space-y-6 p-6'>
       <div>
-        <h1 className='text-xl font-semibold text-zinc-100'>{title}</h1>
-        <p className='mt-1 text-sm text-zinc-400'>
+        <h1 className='text-xl font-semibold text-content-primary'>{title}</h1>
+        <p className='mt-1 text-sm text-content-muted'>
           Privacy-safe engagement profile derived from meaningful events only.
         </p>
       </div>
 
       {error && (
-        <div className='rounded-lg border border-lunary-error-800/30 bg-lunary-error-950/20 px-4 py-3 text-sm text-lunary-error-300'>
+        <div className='rounded-lg border border-lunary-error-800/30 bg-layer-deep/20 px-4 py-3 text-sm text-lunary-error-300'>
           {error}
         </div>
       )}
 
       {data && (
         <div className='grid gap-6 lg:grid-cols-2'>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>Overview</CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 First seen, last seen, and active-day signals.
               </CardDescription>
             </CardHeader>
-            <CardContent className='space-y-2 text-sm text-zinc-300'>
+            <CardContent className='space-y-2 text-sm text-content-secondary'>
               <div className='flex items-center justify-between'>
                 <span>First seen</span>
-                <span className='text-zinc-400'>
+                <span className='text-content-muted'>
                   {data.first_seen ?? 'N/A'}
                 </span>
               </div>
               <div className='flex items-center justify-between'>
                 <span>Last seen</span>
-                <span className='text-zinc-400'>{data.last_seen ?? 'N/A'}</span>
+                <span className='text-content-muted'>
+                  {data.last_seen ?? 'N/A'}
+                </span>
               </div>
               <div className='flex items-center justify-between'>
                 <span>Engagement span</span>
-                <span className='text-zinc-400'>
+                <span className='text-content-muted'>
                   {data.engagement_span_days} days
                 </span>
               </div>
               <div className='flex items-center justify-between'>
                 <span>Lifetime active days</span>
-                <span className='text-zinc-400'>
+                <span className='text-content-muted'>
                   {data.lifetime_active_days}
                 </span>
               </div>
               <div className='flex items-center justify-between'>
                 <span>Active days (7d)</span>
-                <span className='text-zinc-400'>{data.active_days_last_7}</span>
+                <span className='text-content-muted'>
+                  {data.active_days_last_7}
+                </span>
               </div>
               <div className='flex items-center justify-between'>
                 <span>Active days (30d)</span>
-                <span className='text-zinc-400'>
+                <span className='text-content-muted'>
                   {data.active_days_last_30}
                 </span>
               </div>
               <div className='flex items-center justify-between'>
                 <span>Active days (90d)</span>
-                <span className='text-zinc-400'>
+                <span className='text-content-muted'>
                   {data.active_days_last_90}
                 </span>
               </div>
               <div className='flex items-center justify-between'>
                 <span>Longest streak (90d)</span>
-                <span className='text-zinc-400'>
+                <span className='text-content-muted'>
                   {data.longest_streak_last_90} days
                 </span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
                 Top Grimoire pages
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 Most viewed Grimoire entity keys and last view time.
               </CardDescription>
             </CardHeader>
-            <CardContent className='space-y-2 text-sm text-zinc-300'>
+            <CardContent className='space-y-2 text-sm text-content-secondary'>
               {data.grimoire_top_pages.length === 0 && (
-                <div className='text-zinc-500'>No Grimoire views found.</div>
+                <div className='text-content-muted'>
+                  No Grimoire views found.
+                </div>
               )}
               {data.grimoire_top_pages.map((row) => (
                 <div
                   key={row.entity_id}
-                  className='flex items-center justify-between rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2'
+                  className='flex items-center justify-between rounded-lg border border-stroke-subtle/60 bg-surface-base/40 px-3 py-2'
                 >
                   <div className='min-w-0'>
-                    <div className='truncate text-zinc-200'>
+                    <div className='truncate text-content-primary'>
                       {row.entity_id}
                     </div>
-                    <div className='text-xs text-zinc-500'>
+                    <div className='text-xs text-content-muted'>
                       Last viewed: {row.last_viewed ?? 'N/A'}
                     </div>
                   </div>
-                  <div className='shrink-0 text-zinc-400'>
+                  <div className='shrink-0 text-content-muted'>
                     {row.views.toLocaleString()}
                   </div>
                 </div>
@@ -194,26 +202,30 @@ export default function AdminUserEngagementPage() {
             </CardContent>
           </Card>
 
-          <Card className='border-zinc-800/30 bg-zinc-900/10 lg:col-span-2'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10 lg:col-span-2'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
                 Feature usage (lifetime)
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 Counts and distinct active days per event type.
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-2'>
               {data.feature_usage.length === 0 && (
-                <div className='text-sm text-zinc-500'>No events found.</div>
+                <div className='text-sm text-content-muted'>
+                  No events found.
+                </div>
               )}
               {data.feature_usage.map((row) => (
                 <div
                   key={row.event_type}
-                  className='flex items-center justify-between rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2 text-sm'
+                  className='flex items-center justify-between rounded-lg border border-stroke-subtle/60 bg-surface-base/40 px-3 py-2 text-sm'
                 >
-                  <span className='text-zinc-300'>{row.event_type}</span>
-                  <span className='text-zinc-400'>
+                  <span className='text-content-secondary'>
+                    {row.event_type}
+                  </span>
+                  <span className='text-content-muted'>
                     {row.total_events.toLocaleString()} events ·{' '}
                     {row.feature_days.toLocaleString()} days
                   </span>
@@ -222,34 +234,36 @@ export default function AdminUserEngagementPage() {
             </CardContent>
           </Card>
 
-          <Card className='border-zinc-800/30 bg-zinc-900/10 lg:col-span-2'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10 lg:col-span-2'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
                 Recent activity
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 Last 50 events. No chat content is stored or displayed.
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-2'>
               {data.recent_events.length === 0 && (
-                <div className='text-sm text-zinc-500'>No events found.</div>
+                <div className='text-sm text-content-muted'>
+                  No events found.
+                </div>
               )}
               {data.recent_events.map((row, idx) => (
                 <div
                   key={`${row.created_at}-${idx}`}
-                  className='grid grid-cols-1 gap-1 rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2 text-sm md:grid-cols-4'
+                  className='grid grid-cols-1 gap-1 rounded-lg border border-stroke-subtle/60 bg-surface-base/40 px-3 py-2 text-sm md:grid-cols-4'
                 >
-                  <span className='text-zinc-400 md:col-span-1'>
+                  <span className='text-content-muted md:col-span-1'>
                     {row.created_at}
                   </span>
-                  <span className='text-zinc-200 md:col-span-1'>
+                  <span className='text-content-primary md:col-span-1'>
                     {row.event_type}
                   </span>
-                  <span className='truncate text-zinc-400 md:col-span-1'>
+                  <span className='truncate text-content-muted md:col-span-1'>
                     {row.entity_id || row.page_path || 'N/A'}
                   </span>
-                  <span className='truncate text-zinc-500 md:col-span-1'>
+                  <span className='truncate text-content-muted md:col-span-1'>
                     {row.page_path || 'N/A'}
                   </span>
                 </div>

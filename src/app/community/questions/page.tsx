@@ -35,7 +35,7 @@ export default async function QuestionsPage() {
             <Heading variant='h1' as='h1'>
               Ask the Circle
             </Heading>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Post questions, get cosmic wisdom from the community
             </p>
           </header>

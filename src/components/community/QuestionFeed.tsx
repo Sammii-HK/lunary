@@ -131,13 +131,13 @@ export function QuestionFeed({
       <div className='flex items-center justify-between mb-4'>
         <div className='flex gap-2'>
           {/* Sort toggle */}
-          <div className='flex rounded-lg border border-zinc-700 overflow-hidden'>
+          <div className='flex rounded-lg border border-stroke-default overflow-hidden'>
             <button
               onClick={() => setSort('top')}
               className={`px-3 py-1 text-xs transition-colors ${
                 sort === 'top'
-                  ? 'bg-lunary-primary-900/30 text-lunary-primary-300'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-layer-base/30 text-content-brand'
+                  : 'text-content-muted hover:text-content-primary'
               }`}
             >
               Top
@@ -146,8 +146,8 @@ export function QuestionFeed({
               onClick={() => setSort('new')}
               className={`px-3 py-1 text-xs transition-colors ${
                 sort === 'new'
-                  ? 'bg-lunary-primary-900/30 text-lunary-primary-300'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-layer-base/30 text-content-brand'
+                  : 'text-content-muted hover:text-content-primary'
               }`}
             >
               New
@@ -171,8 +171,8 @@ export function QuestionFeed({
             onClick={() => setTopic(t.value)}
             className={`px-3 py-1 text-xs rounded-full border transition-colors ${
               topic === t.value
-                ? 'border-lunary-primary-500 bg-lunary-primary-900/30 text-lunary-primary-300'
-                : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                ? 'border-lunary-primary-500 bg-layer-base/30 text-content-brand'
+                : 'border-stroke-default text-content-muted hover:border-stroke-strong'
             }`}
           >
             {t.label}
@@ -186,13 +186,13 @@ export function QuestionFeed({
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className='h-20 rounded-lg bg-zinc-900/50 border border-zinc-800 animate-pulse'
+              className='h-20 rounded-lg bg-surface-elevated/50 border border-stroke-subtle animate-pulse'
             />
           ))}
         </div>
       ) : questions.length === 0 ? (
         <div className='text-center py-12'>
-          <p className='text-zinc-400 text-sm'>
+          <p className='text-content-muted text-sm'>
             No questions yet. Be the first to ask!
           </p>
         </div>
@@ -210,7 +210,7 @@ export function QuestionFeed({
       )}
 
       {total > questions.length && (
-        <p className='text-center text-xs text-zinc-500 mt-4'>
+        <p className='text-center text-xs text-content-muted mt-4'>
           Showing {questions.length} of {total} questions
         </p>
       )}

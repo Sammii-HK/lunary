@@ -113,7 +113,7 @@ export function autoLinkTerms(text: string): ReactNode[] {
             <Link
               key={`link-${i}`}
               href={href}
-              className='text-lunary-primary-400 hover:text-lunary-primary-300 underline'
+              className='text-lunary-primary-400 hover:text-content-brand underline'
             >
               {words.slice(i, i + phraseWords.length).join('')}
             </Link>,
@@ -133,7 +133,7 @@ export function autoLinkTerms(text: string): ReactNode[] {
           <Link
             key={`link-${i}`}
             href={termMappings[word]}
-            className='text-lunary-primary-400 hover:text-lunary-primary-300 underline'
+            className='text-lunary-primary-400 hover:text-content-brand underline'
           >
             {words[i]}
           </Link>,

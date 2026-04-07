@@ -252,10 +252,10 @@ export function ShareSynastry({
 
   const buttonClasses = {
     default:
-      'inline-flex items-center gap-2 rounded-full border border-lunary-primary-700 bg-lunary-primary-900/10 px-4 py-2 text-xs font-medium text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-lunary-primary-900/20 transition-colors',
+      'inline-flex items-center gap-2 rounded-full border border-lunary-primary-700 bg-layer-base/10 px-4 py-2 text-xs font-medium text-content-secondary hover:text-content-secondary hover:bg-layer-base/20 transition-colors',
     small:
-      'inline-flex items-center gap-1.5 rounded-full border border-zinc-600 bg-zinc-800/50 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors',
-    icon: 'p-2 rounded-full border border-zinc-600 bg-zinc-800/50 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors',
+      'inline-flex items-center gap-1.5 rounded-full border border-stroke-strong bg-surface-card/50 px-3 py-1.5 text-xs font-medium text-content-secondary hover:text-content-primary hover:bg-surface-card transition-colors',
+    icon: 'p-2 rounded-full border border-stroke-strong bg-surface-card/50 text-content-secondary hover:text-content-primary hover:bg-surface-card transition-colors',
   };
 
   return (
@@ -297,7 +297,7 @@ export function ShareSynastry({
               socialUrls={socialUrls}
             />
 
-            <p className='mt-4 text-xs text-zinc-400 text-center'>
+            <p className='mt-4 text-xs text-content-muted text-center'>
               Discover your cosmic compatibility at lunary.app
             </p>
           </>
@@ -308,7 +308,7 @@ export function ShareSynastry({
             <p className='text-red-400 mb-4'>{error}</p>
             <button
               onClick={generateCard}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors'
             >
               Try Again
             </button>

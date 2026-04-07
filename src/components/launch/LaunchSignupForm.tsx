@@ -87,7 +87,7 @@ export function LaunchSignupForm({
     <form
       onSubmit={handleSubmit}
       className={clsx(
-        'space-y-4 rounded-3xl border border-white/10 bg-black/60 p-6 shadow-xl',
+        'space-y-4 rounded-3xl border border-white/10 bg-surface-base/60 p-6 shadow-xl',
         className,
       )}
     >
@@ -104,11 +104,13 @@ export function LaunchSignupForm({
         />
       </div>
       <div>
-        <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
+        <p className='text-xs uppercase tracking-[0.4em] text-content-secondary'>
           Launch Waitlist
         </p>
-        <h3 className='text-2xl font-semibold text-white'>Reserve your spot</h3>
-        <p className='text-sm text-zinc-300'>
+        <h3 className='text-2xl font-semibold text-content-primary'>
+          Reserve your spot
+        </h3>
+        <p className='text-sm text-content-secondary'>
           Get the Product Hunt reminder, press kit drops, and cosmic report
           template.
         </p>
@@ -119,7 +121,7 @@ export function LaunchSignupForm({
           placeholder='Preferred name (optional)'
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className='rounded-2xl border border-white/10 bg-black/70 px-4 py-3 text-sm text-white placeholder:text-zinc-400 focus:border-lunary-primary-400 focus:outline-none'
+          className='rounded-2xl border border-white/10 bg-surface-base/70 px-4 py-3 text-sm text-content-primary placeholder:text-content-muted focus:border-lunary-primary-400 focus:outline-none'
         />
         <div className='flex gap-3'>
           <label htmlFor='launch-email' className='sr-only'>
@@ -132,7 +134,7 @@ export function LaunchSignupForm({
             placeholder='Email'
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className='flex-1 rounded-2xl border border-white/10 bg-black/70 px-4 py-3 text-sm text-white placeholder:text-zinc-400 focus:border-lunary-primary-400 focus:outline-none'
+            className='flex-1 rounded-2xl border border-white/10 bg-surface-base/70 px-4 py-3 text-sm text-content-primary placeholder:text-content-muted focus:border-lunary-primary-400 focus:outline-none'
           />
           <button
             type='submit'
@@ -160,7 +162,7 @@ export function LaunchSignupForm({
           className={clsx('text-sm', {
             'text-lunary-success-300': status === 'success',
             'text-red-300': status === 'error',
-            'text-zinc-400': status === 'idle',
+            'text-content-muted': status === 'idle',
           })}
         >
           {message}

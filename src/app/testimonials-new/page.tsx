@@ -12,7 +12,7 @@ export default function TestimonialsPage() {
           <Heading as='h1' variant='h1'>
             Share the impact Lunary has had on your cosmic journey.
           </Heading>
-          <p className='text-base text-zinc-300'>
+          <p className='text-base text-content-secondary'>
             We read every testimonial and may feature the ones that inspire us.
             Provide as much detail as you like; your story helps other cosmic
             seekers discover Lunary.
@@ -22,19 +22,19 @@ export default function TestimonialsPage() {
         <section className='grid gap-8 lg:grid-cols-[1.1fr,0.9fr]'>
           <TestimonialForm allowRepeat />
 
-          <div className='rounded-3xl border border-zinc-800/60 bg-gradient-to-b from-lunary-secondary/5 to-zinc-900/40 p-8'>
-            <h2 className='text-lg font-semibold text-white'>
+          <div className='rounded-3xl border border-stroke-subtle/60 bg-gradient-to-b from-lunary-secondary/5 to-surface-elevated/40 p-8'>
+            <h2 className='text-lg font-semibold text-content-primary'>
               Need inspiration?
             </h2>
-            <p className='mt-3 text-sm text-zinc-300'>
+            <p className='mt-3 text-sm text-content-secondary'>
               Tell us about one of the following:
             </p>
-            <ul className='mt-4 space-y-3 text-sm text-zinc-300'>
+            <ul className='mt-4 space-y-3 text-sm text-content-secondary'>
               <li>• A cosmic insight that changed how you make decisions.</li>
               <li>• How Lunary helped you build a ritual you love.</li>
               <li>• Feedback on what keeps you coming back to the app.</li>
             </ul>
-            <p className='mt-6 text-xs uppercase tracking-[0.4em] text-zinc-500'>
+            <p className='mt-6 text-xs uppercase tracking-[0.4em] text-content-muted'>
               We treat every story with care.
             </p>
           </div>

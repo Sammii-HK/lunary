@@ -68,45 +68,47 @@ export function NumerologyInfoModal({
     <Modal isOpen={isOpen} onClose={onClose} size='md'>
       <ModalHeader>
         <div className='space-y-1'>
-          <p className='text-xs uppercase tracking-[0.4em] text-zinc-400'>
+          <p className='text-xs uppercase tracking-[0.4em] text-content-muted'>
             {contextLabel}
           </p>
           {contextDetail && (
-            <p className='text-[10px] uppercase tracking-[0.5em] text-zinc-500'>
+            <p className='text-[10px] uppercase tracking-[0.5em] text-content-muted'>
               {contextDetail}
             </p>
           )}
-          <div className='text-3xl font-semibold text-white'>
+          <div className='text-3xl font-semibold text-content-primary'>
             Number {number}
           </div>
         </div>
       </ModalHeader>
       <ModalBody>
         <div className='space-y-3'>
-          <p className='text-sm text-zinc-200 leading-relaxed'>{meaning}</p>
+          <p className='text-sm text-content-primary leading-relaxed'>
+            {meaning}
+          </p>
           {modalDescription && (
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               {modalDescription}
             </p>
           )}
           {energy && (
             <div>
-              <div className='text-xs uppercase tracking-[0.4em] text-zinc-500'>
+              <div className='text-xs uppercase tracking-[0.4em] text-content-muted'>
                 {energyLabel ?? 'Daily energy'}
               </div>
-              <p className='text-sm text-zinc-300'>{energy}</p>
+              <p className='text-sm text-content-secondary'>{energy}</p>
             </div>
           )}
           {keywords && keywords.length > 0 && (
             <div>
-              <div className='text-xs uppercase tracking-[0.4em] text-zinc-500 mb-2'>
+              <div className='text-xs uppercase tracking-[0.4em] text-content-muted mb-2'>
                 Keywords
               </div>
               <div className='flex flex-wrap gap-2'>
                 {keywords.map((keyword) => (
                   <span
                     key={keyword}
-                    className='px-3 py-1 rounded-full border border-zinc-700 text-[11px] text-zinc-200'
+                    className='px-3 py-1 rounded-full border border-stroke-default text-[11px] text-content-primary'
                   >
                     {keyword}
                   </span>
@@ -118,10 +120,10 @@ export function NumerologyInfoModal({
             <div className='space-y-3'>
               {sections.map((section) => (
                 <div key={section.label}>
-                  <div className='text-xs uppercase tracking-[0.4em] text-zinc-500 mb-1'>
+                  <div className='text-xs uppercase tracking-[0.4em] text-content-muted mb-1'>
                     {section.label}
                   </div>
-                  <ul className='text-sm text-zinc-300 list-disc list-inside space-y-1'>
+                  <ul className='text-sm text-content-secondary list-disc list-inside space-y-1'>
                     {section.items.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -130,7 +132,9 @@ export function NumerologyInfoModal({
               ))}
             </div>
           )}
-          {extraNote && <p className='text-sm text-zinc-400'>{extraNote}</p>}
+          {extraNote && (
+            <p className='text-sm text-content-muted'>{extraNote}</p>
+          )}
         </div>
       </ModalBody>
       <ModalFooter>
@@ -143,14 +147,14 @@ export function NumerologyInfoModal({
                 }),
               );
             }}
-            className='w-full text-center rounded-lg border border-lunary-primary-600 bg-lunary-primary-950 px-4 py-3 text-sm font-semibold text-lunary-primary-300 transition hover:border-lunary-primary-400 hover:text-white'
+            className='w-full text-center rounded-lg border border-lunary-primary-600 bg-layer-deep px-4 py-3 text-sm font-semibold text-content-brand transition hover:border-lunary-primary-400 hover:text-white'
           >
             {label}
           </button>
         ) : (
           <Link
             href={href}
-            className='w-full text-center rounded-lg border border-lunary-primary-600 bg-lunary-primary-950 px-4 py-3 text-sm font-semibold text-lunary-primary-300 transition hover:border-lunary-primary-400 hover:text-white'
+            className='w-full text-center rounded-lg border border-lunary-primary-600 bg-layer-deep px-4 py-3 text-sm font-semibold text-content-brand transition hover:border-lunary-primary-400 hover:text-white'
           >
             {label}
           </Link>

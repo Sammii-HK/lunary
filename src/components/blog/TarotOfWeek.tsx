@@ -119,7 +119,7 @@ export function TarotOfWeek({
 
   if (variant === 'teaser') {
     return (
-      <div className='rounded-xl border border-purple-700/30 bg-gradient-to-br from-purple-950/30 to-zinc-900 p-4'>
+      <div className='rounded-xl border border-purple-700/30 bg-gradient-to-br from-purple-950/30 to-surface-elevated p-4'>
         <div className='flex items-center gap-2 mb-3'>
           <Sparkles className='h-5 w-5 text-purple-400' />
           <h3 className='font-semibold text-purple-300'>Tarot of the Week</h3>
@@ -136,9 +136,11 @@ export function TarotOfWeek({
             />
           </div>
           <div className='flex-1'>
-            <h4 className='font-medium text-zinc-100 mb-1'>{card.name}</h4>
-            <p className='text-xs text-zinc-400 mb-2'>{reason}</p>
-            <p className='text-sm text-zinc-300 line-clamp-3'>
+            <h4 className='font-medium text-content-primary mb-1'>
+              {card.name}
+            </h4>
+            <p className='text-xs text-content-muted mb-2'>{reason}</p>
+            <p className='text-sm text-content-secondary line-clamp-3'>
               {card.keywords.slice(0, 3).join(' • ')}
             </p>
           </div>
@@ -159,7 +161,7 @@ export function TarotOfWeek({
         Tarot Card of the Week
       </h2>
 
-      <div className='rounded-xl border border-purple-700/30 bg-gradient-to-br from-purple-950/20 to-zinc-900 p-6'>
+      <div className='rounded-xl border border-purple-700/30 bg-gradient-to-br from-purple-950/20 to-surface-elevated p-6'>
         <div className='flex flex-col md:flex-row gap-6'>
           {/* Card Image */}
           <div className='flex justify-center md:justify-start'>
@@ -180,7 +182,7 @@ export function TarotOfWeek({
               <h3 className='text-2xl font-bold text-purple-300'>
                 {card.name}
               </h3>
-              <p className='text-sm text-zinc-400 mt-1'>{reason}</p>
+              <p className='text-sm text-content-muted mt-1'>{reason}</p>
             </div>
 
             {/* Keywords */}
@@ -197,10 +199,10 @@ export function TarotOfWeek({
 
             {/* Core Meaning */}
             <div>
-              <h4 className='text-sm font-medium text-zinc-300 mb-1'>
+              <h4 className='text-sm font-medium text-content-secondary mb-1'>
                 This Week's Message
               </h4>
-              <p className='text-sm text-zinc-400 leading-relaxed'>
+              <p className='text-sm text-content-muted leading-relaxed'>
                 {card.information}
               </p>
             </div>
@@ -215,28 +217,28 @@ export function TarotOfWeek({
         </div>
 
         {/* How to Work With This Card */}
-        <div className='mt-6 pt-6 border-t border-zinc-800'>
-          <h4 className='text-sm font-medium text-zinc-300 mb-3'>
+        <div className='mt-6 pt-6 border-t border-stroke-subtle'>
+          <h4 className='text-sm font-medium text-content-secondary mb-3'>
             How to Work With {card.name} This Week
           </h4>
           <div className='grid md:grid-cols-2 gap-4 text-sm'>
             <div>
               <span className='text-purple-400 font-medium'>In Love:</span>
-              <p className='text-zinc-400 mt-1'>{card.loveMeaning}</p>
+              <p className='text-content-muted mt-1'>{card.loveMeaning}</p>
             </div>
             <div>
               <span className='text-purple-400 font-medium'>In Career:</span>
-              <p className='text-zinc-400 mt-1'>{card.careerMeaning}</p>
+              <p className='text-content-muted mt-1'>{card.careerMeaning}</p>
             </div>
           </div>
         </div>
 
         {/* Symbolism for deeper exploration */}
         <details className='mt-4'>
-          <summary className='text-sm text-zinc-400 hover:text-zinc-300'>
+          <summary className='text-sm text-content-muted hover:text-content-secondary'>
             Explore the Symbolism
           </summary>
-          <p className='text-sm text-zinc-500 mt-2 leading-relaxed'>
+          <p className='text-sm text-content-muted mt-2 leading-relaxed'>
             {card.symbolism}
           </p>
         </details>
@@ -270,8 +272,8 @@ export function TarotCardCompact({
           Card of the Week
         </span>
       </div>
-      <p className='font-medium text-zinc-100'>{card.name}</p>
-      <p className='text-xs text-zinc-400 mt-1'>
+      <p className='font-medium text-content-primary'>{card.name}</p>
+      <p className='text-xs text-content-muted mt-1'>
         {card.keywords.slice(0, 2).join(' • ')}
       </p>
     </div>

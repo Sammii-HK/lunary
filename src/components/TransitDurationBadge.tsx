@@ -19,8 +19,6 @@ export function TransitDurationBadge({
 
   const { totalDays, remainingDays, displayText } = duration;
   const daysSinceEntered = totalDays - remainingDays;
-  const elapsed = daysSinceEntered / totalDays;
-  const remaining = remainingDays / totalDays;
 
   // Proportional thresholds capped for slow planets
   // Moon (2.3d): green first ~5h, pink last ~8h
@@ -30,18 +28,17 @@ export function TransitDurationBadge({
   const endingThreshold = Math.min(totalDays * 0.15, 14);
   const midThreshold = Math.min(totalDays * 0.5, 60);
 
-  let colorClasses = 'bg-zinc-900 border-zinc-800 text-zinc-400';
+  // Use semantic CSS classes that flip between dark/light mode
+  let colorClasses =
+    'bg-surface-elevated border-stroke-subtle text-content-muted';
 
   if (daysSinceEntered < newThreshold) {
-    // Newly entered → aurora green
-    colorClasses = 'bg-emerald-950/50 border-emerald-800/40 text-emerald-400';
+    colorClasses = 'duration-new';
   } else if (remainingDays < endingThreshold) {
-    // Ending soon → cosmic rose
-    colorClasses = 'bg-pink-950/50 border-pink-800/40 text-pink-400';
+    colorClasses = 'duration-ending';
   } else if (remainingDays < midThreshold) {
-    // Medium term → primary
     colorClasses =
-      'bg-lunary-primary-900/50 border-lunary-primary-700/30 text-lunary-primary-200';
+      'bg-layer-base/50 border-stroke-default/30 text-content-secondary';
   }
 
   return (

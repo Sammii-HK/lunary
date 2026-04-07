@@ -37,19 +37,21 @@ export function BirthDataForm({
   return (
     <form onSubmit={handleSubmit} className='space-y-4'>
       <div>
-        <label className='block text-xs text-zinc-400 mb-1'>Your Name</label>
+        <label className='block text-xs text-content-muted mb-1'>
+          Your Name
+        </label>
         <input
           type='text'
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder='Enter your name'
           required
-          className='w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-500'
+          className='w-full bg-surface-elevated border border-stroke-default rounded-lg px-3 py-2 text-sm text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-500'
         />
       </div>
 
       <div>
-        <label className='block text-xs text-zinc-400 mb-1'>
+        <label className='block text-xs text-content-muted mb-1'>
           Date of Birth
         </label>
         <input
@@ -57,33 +59,33 @@ export function BirthDataForm({
           value={birthDate}
           onChange={(e) => setBirthDate(e.target.value)}
           required
-          className='w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-lunary-primary-500'
+          className='w-full bg-surface-elevated border border-stroke-default rounded-lg px-3 py-2 text-sm text-content-primary focus:outline-none focus:border-lunary-primary-500'
         />
       </div>
 
       <div>
-        <label className='block text-xs text-zinc-400 mb-1'>
+        <label className='block text-xs text-content-muted mb-1'>
           Time of Birth{' '}
-          <span className='text-zinc-600'>(optional, for accuracy)</span>
+          <span className='text-content-muted'>(optional, for accuracy)</span>
         </label>
         <input
           type='time'
           value={birthTime}
           onChange={(e) => setBirthTime(e.target.value)}
-          className='w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-lunary-primary-500'
+          className='w-full bg-surface-elevated border border-stroke-default rounded-lg px-3 py-2 text-sm text-content-primary focus:outline-none focus:border-lunary-primary-500'
         />
       </div>
 
       <div>
-        <label className='block text-xs text-zinc-400 mb-1'>
-          Birth Location <span className='text-zinc-600'>(optional)</span>
+        <label className='block text-xs text-content-muted mb-1'>
+          Birth Location <span className='text-content-muted'>(optional)</span>
         </label>
         <input
           type='text'
           value={birthLocation}
           onChange={(e) => setBirthLocation(e.target.value)}
           placeholder='City, Country'
-          className='w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-500'
+          className='w-full bg-surface-elevated border border-stroke-default rounded-lg px-3 py-2 text-sm text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-500'
         />
       </div>
 

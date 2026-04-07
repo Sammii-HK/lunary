@@ -37,13 +37,13 @@ export function ForecastTeaser({ year }: { year: number }) {
   return (
     <div className='space-y-4'>
       {/* Upcoming events — dates and planet visible, interpretations locked */}
-      <div className='rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 space-y-3'>
+      <div className='rounded-2xl border border-stroke-subtle bg-surface-base/70 p-4 space-y-3'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
-            <Calendar className='h-4 w-4 text-lunary-accent-300' />
-            <span className='text-sm text-zinc-100'>Coming up</span>
+            <Calendar className='h-4 w-4 text-content-brand-accent' />
+            <span className='text-sm text-content-primary'>Coming up</span>
           </div>
-          <span className='inline-flex items-center gap-1 rounded border border-lunary-primary-700/50 bg-lunary-primary-900/80 px-2 py-0.5 text-[10px] text-lunary-primary-300'>
+          <span className='inline-flex items-center gap-1 rounded border border-lunary-primary-700/50 bg-layer-base/80 px-2 py-0.5 text-[10px] text-content-brand'>
             <Sparkles className='h-2.5 w-2.5' />
             Lunary+
           </span>
@@ -54,18 +54,18 @@ export function ForecastTeaser({ year }: { year: number }) {
             {upcomingEvents.map((event, i) => (
               <div
                 key={i}
-                className='flex items-start gap-3 rounded-xl border border-zinc-800/60 bg-zinc-900/40 px-3 py-2'
+                className='flex items-start gap-3 rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 px-3 py-2'
               >
                 <div className='min-w-0 flex-1 space-y-0.5'>
                   <div className='flex items-center gap-2'>
-                    <span className='text-xs font-medium text-zinc-200'>
+                    <span className='text-xs font-medium text-content-primary'>
                       {event.planet} · {TYPE_LABELS[event.type] ?? event.type}
                     </span>
-                    <span className='text-[0.6rem] text-zinc-600'>
+                    <span className='text-[0.6rem] text-content-muted'>
                       {event.date.format('D MMM')}
                     </span>
                   </div>
-                  <p className='text-[0.65rem] text-zinc-600 flex items-center gap-1'>
+                  <p className='text-[0.65rem] text-content-muted flex items-center gap-1'>
                     <Lock className='h-2.5 w-2.5 shrink-0' />
                     Interpretation locked · Lunary+
                   </p>
@@ -74,15 +74,15 @@ export function ForecastTeaser({ year }: { year: number }) {
             ))}
           </div>
         ) : (
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             No major transits in the next 30 days.
           </p>
         )}
       </div>
 
       {/* Locked full-year section */}
-      <div className='rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 space-y-3'>
-        <p className='text-[0.6rem] uppercase tracking-[0.2em] text-zinc-500'>
+      <div className='rounded-2xl border border-stroke-subtle bg-surface-base/70 p-4 space-y-3'>
+        <p className='text-[0.6rem] uppercase tracking-[0.2em] text-content-muted'>
           Full {year} forecast
         </p>
 
@@ -97,7 +97,7 @@ export function ForecastTeaser({ year }: { year: number }) {
             ].map((item, i) => (
               <div
                 key={i}
-                className='flex items-center gap-2 text-xs text-zinc-300'
+                className='flex items-center gap-2 text-xs text-content-secondary'
               >
                 <span className='h-1 w-1 rounded-full bg-lunary-accent-400 shrink-0' />
                 {item}

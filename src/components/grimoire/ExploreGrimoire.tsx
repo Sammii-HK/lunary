@@ -18,11 +18,11 @@ const GRIMOIRE_LINKS = [
 
 export function ExploreGrimoire() {
   return (
-    <section className='mt-12 pt-8 border-t border-zinc-800'>
+    <section className='mt-12 pt-8 border-t border-stroke-subtle'>
       <Heading as='h2' variant='h2'>
         Explore the Grimoire
       </Heading>
-      <p className='text-sm text-zinc-400 mb-4'>
+      <p className='text-sm text-content-muted mb-4'>
         Continue your cosmic journey through Lunary&apos;s library of
         astrological wisdom.
       </p>
@@ -31,7 +31,7 @@ export function ExploreGrimoire() {
           <NavParamLink
             key={link.href}
             href={link.href}
-            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
+            className='px-3 py-2 text-sm bg-surface-elevated/50 border border-stroke-subtle/50 rounded-lg text-content-secondary hover:bg-surface-card/50 hover:border-lunary-primary-600 transition-colors text-center'
           >
             {link.label}
           </NavParamLink>

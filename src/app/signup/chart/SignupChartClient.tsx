@@ -102,25 +102,25 @@ export default function SignupChartClient() {
   if (authState.isAuthenticated) return null;
 
   return (
-    <div className='min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-12'>
+    <div className='min-h-screen bg-surface-base flex items-center justify-center px-4 py-12'>
       <div className='w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 items-start'>
         {/* Value proposition panel */}
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-6'>
-          <Heading variant='h2' className='mb-1 text-white'>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-6'>
+          <Heading variant='h2' className='mb-1 text-content-primary'>
             {headline}
           </Heading>
-          <p className='text-zinc-400 text-sm mb-6'>{subline}</p>
+          <p className='text-content-muted text-sm mb-6'>{subline}</p>
 
-          <p className='text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3'>
+          <p className='text-xs font-semibold uppercase tracking-wider text-content-muted mb-3'>
             What you get
           </p>
           <ul className='space-y-3'>
             {FEATURES.map((feature) => (
               <li
                 key={feature}
-                className='flex items-start gap-2 text-sm text-zinc-300'
+                className='flex items-start gap-2 text-sm text-content-secondary'
               >
-                <span className='text-lunary-accent-300 mt-0.5 flex-shrink-0'>
+                <span className='text-content-brand-accent mt-0.5 flex-shrink-0'>
                   &#10022;
                 </span>
                 {feature}
@@ -128,14 +128,14 @@ export default function SignupChartClient() {
             ))}
           </ul>
 
-          <p className='text-zinc-500 text-xs mt-6'>
+          <p className='text-content-muted text-xs mt-6'>
             No credit card &middot; No spam &middot; Takes 30 seconds
           </p>
         </div>
 
         {/* Auth form panel */}
         <div>
-          <Heading variant='h2' className='mb-4 text-white'>
+          <Heading variant='h2' className='mb-4 text-content-primary'>
             Start your free trial
           </Heading>
           <AuthComponent

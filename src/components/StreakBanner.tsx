@@ -50,10 +50,10 @@ export function StreakBanner({ location, className = '' }: StreakBannerProps) {
 
   return (
     <div
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg bg-lunary-rose-950/30 border border-lunary-rose-800/30 ${className}`}
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg bg-layer-deep/30 border border-lunary-rose-800/30 ${className}`}
     >
       <Flame className='w-4 h-4 text-lunary-rose' />
-      <span className='text-sm text-zinc-300'>
+      <span className='text-sm text-content-secondary'>
         <span className='font-medium text-lunary-rose'>{streak.current}</span>{' '}
         day streak
       </span>

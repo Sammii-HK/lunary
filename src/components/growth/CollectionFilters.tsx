@@ -132,11 +132,11 @@ export function CollectionFilters({
   return (
     <div className={`space-y-2 ${className}`}>
       <div className='flex items-center justify-between'>
-        <p className='text-xs font-medium text-zinc-400'>Filter by</p>
+        <p className='text-xs font-medium text-content-muted'>Filter by</p>
         {activeFilters.length > 0 && (
           <button
             onClick={clearAll}
-            className='text-xs text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-xs text-lunary-primary-400 hover:text-content-brand'
           >
             Clear all
           </button>
@@ -152,8 +152,8 @@ export function CollectionFilters({
               onClick={() => toggleFilter(chip.id)}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs transition-colors ${
                 isActive
-                  ? 'bg-lunary-primary-900/40 text-lunary-primary-300 border border-lunary-primary-700/50'
-                  : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70'
+                  ? 'bg-layer-base/40 text-content-brand border border-lunary-primary-700/50'
+                  : 'bg-surface-card/50 text-content-muted border border-stroke-default/50 hover:bg-surface-card/70'
               }`}
             >
               {chip.icon}
@@ -166,7 +166,7 @@ export function CollectionFilters({
         {allChips.length > 6 && (
           <button
             onClick={() => setShowAll(!showAll)}
-            className='text-xs text-zinc-400 hover:text-zinc-300 px-2'
+            className='text-xs text-content-muted hover:text-content-secondary px-2'
           >
             {showAll ? 'Show less' : `+${allChips.length - 6} more`}
           </button>
@@ -227,10 +227,10 @@ export function EntryChips({
           key={i}
           className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${
             chip.type === 'theme'
-              ? 'bg-lunary-primary-900/30 text-lunary-primary-300 border border-lunary-primary-700/30'
+              ? 'bg-layer-base/30 text-content-brand border border-lunary-primary-700/30'
               : chip.type === 'suit'
                 ? 'bg-amber-900/20 text-amber-300 border border-amber-700/30'
-                : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/30'
+                : 'bg-surface-card/50 text-content-muted border border-stroke-default/30'
           }`}
         >
           {chip.icon}

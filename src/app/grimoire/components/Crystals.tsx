@@ -70,7 +70,7 @@ const Crystals = ({
         <Heading as='h3' variant='h3'>
           Complete Crystal Guide
         </Heading>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           Comprehensive crystal guide with daily selections, categories, and how
           to work with crystals for healing and magic
         </p>
@@ -80,8 +80,8 @@ const Crystals = ({
         <Heading as='h3' variant='h3'>
           Daily Selection
         </Heading>
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-          <p className='text-sm text-zinc-300'>
+        <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+          <p className='text-sm text-content-secondary'>
             Select crystals based on your daily intentions and needs. Choose
             crystals that resonate with your current energy and goals.
           </p>
@@ -111,7 +111,7 @@ const Crystals = ({
               <Link
                 key={link.id}
                 href={`${pathname}?q=${encodeURIComponent(link.label)}`}
-                className='rounded-full border border-zinc-800 bg-zinc-900/40 px-3 py-1 text-zinc-300 hover:border-lunary-primary-600 hover:text-white transition-colors'
+                className='rounded-full border border-stroke-subtle bg-surface-elevated/40 px-3 py-1 text-content-secondary hover:border-lunary-primary-600 hover:text-content-primary transition-colors'
               >
                 {link.label}
               </Link>
@@ -119,8 +119,8 @@ const Crystals = ({
           </div>
         )}
         {categories.length === 0 ? (
-          <div className='rounded-lg border border-zinc-800/60 bg-zinc-900/30 p-4'>
-            <p className='text-sm text-zinc-400'>
+          <div className='rounded-lg border border-stroke-subtle/60 bg-surface-elevated/30 p-4'>
+            <p className='text-sm text-content-muted'>
               No crystals match your search. Try a different keyword.
             </p>
           </div>
@@ -130,7 +130,11 @@ const Crystals = ({
               const categoryId = `category-${stringToKebabCase(category.name)}`;
               return (
                 <div key={category.name} id={categoryId}>
-                  <Heading as='h4' variant='h4' className='text-zinc-200 mb-3'>
+                  <Heading
+                    as='h4'
+                    variant='h4'
+                    className='text-content-primary mb-3'
+                  >
                     {category.name}
                   </Heading>
                   <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
@@ -140,16 +144,16 @@ const Crystals = ({
                         href={`/grimoire/crystals/${crystal.slug}`}
                         data-testid='crystal-card'
                         data-crystal-slug={crystal.slug}
-                        className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-secondary-400 transition-all group'
+                        className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-secondary-400 transition-all group'
                       >
                         <Heading
                           as='h4'
                           variant='h4'
-                          className='text-lunary-secondary-200 group-hover:text-lunary-secondary-300'
+                          className='text-content-brand-secondary group-hover:text-content-brand-secondary'
                         >
                           {crystal.name}
                         </Heading>
-                        <p className='text-sm text-zinc-300 leading-relaxed'>
+                        <p className='text-sm text-content-secondary leading-relaxed'>
                           {crystal.properties}
                         </p>
                       </Link>

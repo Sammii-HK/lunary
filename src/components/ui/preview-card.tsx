@@ -34,7 +34,7 @@ export const PreviewCard = ({
       {showArrow && (
         <ArrowRight
           className={cn(
-            'w-4 h-4 text-zinc-600 group-hover:text-lunary-accent group-active:text-lunary-accent transition-colors flex-shrink-0 mt-1',
+            'w-4 h-4 text-content-muted group-hover:text-lunary-accent group-active:text-lunary-accent transition-colors flex-shrink-0 mt-1',
             arrowClassName,
           )}
         />
@@ -77,17 +77,17 @@ export const PreviewCardHeader = ({
   badgeVariant = 'default',
 }: PreviewCardHeaderProps) => {
   const badgeClasses = {
-    default: 'bg-zinc-700/50 text-zinc-300',
-    highlight: 'bg-lunary-primary-900 text-lunary-accent-300',
-    warning: 'bg-lunary-accent-900 text-lunary-accent-300',
+    default: 'bg-surface-overlay/50 text-content-secondary',
+    highlight: 'bg-layer-base text-content-brand-accent',
+    warning: 'bg-layer-base text-content-brand-accent',
   };
 
   return (
     <div className='flex items-center gap-2 mb-1'>
       {icon && <span className='text-lunary-accent'>{icon}</span>}
-      <span className='text-sm font-medium text-zinc-200'>{title}</span>
+      <span className='text-sm font-medium text-content-primary'>{title}</span>
       {subtitle && (
-        <span className='text-xs text-zinc-400 uppercase tracking-wide'>
+        <span className='text-xs text-content-muted uppercase tracking-wide'>
           {subtitle}
         </span>
       )}
@@ -115,6 +115,8 @@ export const PreviewCardBody = ({
   className,
 }: PreviewCardBodyProps) => {
   return (
-    <div className={cn('text-xs text-zinc-400', className)}>{children}</div>
+    <div className={cn('text-xs text-content-muted', className)}>
+      {children}
+    </div>
   );
 };

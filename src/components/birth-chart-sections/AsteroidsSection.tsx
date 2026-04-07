@@ -49,7 +49,7 @@ export function AsteroidsSection({ birthChartData }: AsteroidsSectionProps) {
       defaultCollapsed={true}
       persistState={true}
     >
-      <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+      <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           {asteroidsData.map((asteroid) => {
             const symbol =
@@ -61,17 +61,17 @@ export function AsteroidsSection({ birthChartData }: AsteroidsSectionProps) {
                 key={asteroid.body}
                 className='border-l-2 border-[#FCD34D] pl-3'
               >
-                <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                   <span className='text-lg text-[#FCD34D]'>{symbol}</span>
                   {asteroid.body} in {asteroid.sign}
                   {asteroid.retrograde && (
                     <span className='text-lunary-error text-xs'>℞</span>
                   )}
                 </h5>
-                <p className='text-xs text-zinc-400 mt-1'>
+                <p className='text-xs text-content-muted mt-1'>
                   {asteroid.degree}°{asteroid.minute}' {asteroid.sign}
                 </p>
-                <p className='text-xs text-zinc-300 mt-1.5'>
+                <p className='text-xs text-content-secondary mt-1.5'>
                   {ASTEROID_INTERPRETATIONS[asteroid.body]}
                 </p>
               </div>

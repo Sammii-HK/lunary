@@ -211,8 +211,8 @@ export function NewsletterSignupForm({
     <div
       className={cn(
         compact
-          ? 'rounded-xl border border-lunary-primary-800/50 bg-lunary-primary-950/60 p-4 sm:p-5'
-          : 'rounded-2xl border border-lunary-primary-800 bg-lunary-primary-950 p-6 sm:p-8 shadow-lg shadow-lunary-primary-950 backdrop-blur-lg',
+          ? 'rounded-xl border border-stroke-default bg-surface-card/80 backdrop-blur-md p-4 sm:p-5'
+          : 'rounded-2xl border border-stroke-default bg-surface-card/70 p-6 sm:p-8 shadow-lg shadow-lunary-primary-900/20 backdrop-blur-lg',
         className,
       )}
     >
@@ -235,7 +235,7 @@ export function NewsletterSignupForm({
             </Heading>
             <p
               className={cn(
-                'text-lunary-accent-100/80',
+                'text-content-brand-accent/80',
                 compact ? 'text-xs sm:text-sm' : 'text-sm sm:text-base',
               )}
             >
@@ -283,7 +283,7 @@ export function NewsletterSignupForm({
                 }
               }}
               placeholder={inputPlaceholder}
-              className='border-lunary-primary-600 bg-black/40 placeholder:text-lunary-accent-200/40 focus:border-lunary-accent-300 focus:ring-lunary-accent-700'
+              className='border-lunary-primary-600 bg-surface-base/40 placeholder:text-content-brand-accent/40 focus:border-lunary-accent-300 focus:ring-lunary-accent-700'
               autoComplete='email'
               inputMode='email'
             />
@@ -324,8 +324,8 @@ export function NewsletterSignupForm({
               'flex items-start gap-2 text-sm',
               align === 'center' && 'justify-center text-center',
               status === 'error'
-                ? 'text-lunary-error-300'
-                : 'text-lunary-success-300',
+                ? 'text-content-error'
+                : 'text-content-success',
             )}
           >
             {status === 'error' ? (

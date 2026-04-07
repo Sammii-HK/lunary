@@ -212,7 +212,7 @@ export function ShareCompatibilityInvite({
       {compact ? (
         <button
           onClick={handleOpen}
-          className='inline-flex items-center justify-center rounded-lg border border-lunary-primary-600 bg-lunary-primary-900/10 p-2 text-lunary-primary-300 hover:text-lunary-primary-200 hover:bg-lunary-primary-900/20 transition-colors'
+          className='inline-flex items-center justify-center rounded-lg border border-lunary-primary-600 bg-layer-base/10 p-2 text-content-brand hover:text-content-secondary hover:bg-layer-base/20 transition-colors'
           title='Invite to check compatibility'
         >
           <Heart className='w-4 h-4' />
@@ -220,7 +220,7 @@ export function ShareCompatibilityInvite({
       ) : (
         <button
           onClick={handleOpen}
-          className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-500/50 bg-lunary-primary-900/20 px-4 py-2 text-sm font-medium text-lunary-primary-200 hover:text-white hover:bg-lunary-primary-900/30 hover:border-lunary-primary-400 transition-all'
+          className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-500/50 bg-layer-base/20 px-4 py-2 text-sm font-medium text-content-secondary hover:text-white hover:bg-layer-base/30 hover:border-lunary-primary-400 transition-all'
         >
           <Heart className='w-4 h-4' />
           <Share2 className='w-4 h-4' />
@@ -267,7 +267,7 @@ export function ShareCompatibilityInvite({
             <p className='text-red-400 mb-4'>{error}</p>
             <button
               onClick={generateCard}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors'
             >
               Try Again
             </button>

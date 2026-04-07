@@ -105,7 +105,7 @@ export default async function YearHoroscopePage({
   const heroContent = (
     <div className='text-center space-y-3'>
       <span className='text-6xl'>{symbol}</span>
-      <p className='text-sm uppercase tracking-[0.3em] text-zinc-400'>
+      <p className='text-sm uppercase tracking-[0.3em] text-content-muted'>
         {element} Sign • Ruled by {ruler}
       </p>
     </div>
@@ -253,34 +253,42 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
         )[year];
         const signSnippet = yearSnippets?.[signKey]?.snippet;
         return signSnippet ? (
-          <section className='mb-10 rounded-lg border border-zinc-800 bg-zinc-900/30 px-6 py-5'>
-            <p className='text-sm uppercase tracking-widest text-zinc-500 mb-3'>
+          <section className='mb-10 rounded-lg border border-stroke-subtle bg-surface-elevated/30 px-6 py-5'>
+            <p className='text-sm uppercase tracking-widest text-content-muted mb-3'>
               {year} at a glance
             </p>
-            <p className='text-zinc-300 leading-relaxed'>{signSnippet}</p>
+            <p className='text-content-secondary leading-relaxed'>
+              {signSnippet}
+            </p>
           </section>
         ) : null;
       })()}
 
       <section className='mb-12 grid gap-4 md:grid-cols-3'>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-2'>Love</h2>
-          <p className='text-sm text-zinc-400'>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
+          <h2 className='text-lg font-medium text-content-primary mb-2'>
+            Love
+          </h2>
+          <p className='text-sm text-content-muted'>
             {year} invites {signName} to build love through{' '}
             {element.toLowerCase()} consistency. Lead with honesty and let
             relationships deepen through shared routines.
           </p>
         </div>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-2'>Career</h2>
-          <p className='text-sm text-zinc-400'>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
+          <h2 className='text-lg font-medium text-content-primary mb-2'>
+            Career
+          </h2>
+          <p className='text-sm text-content-muted'>
             Your ruler, {ruler}, highlights long-term momentum. Focus on steady
             growth, visible wins, and a clearer public direction.
           </p>
         </div>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-2'>Year</h2>
-          <p className='text-sm text-zinc-400'>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
+          <h2 className='text-lg font-medium text-content-primary mb-2'>
+            Year
+          </h2>
+          <p className='text-sm text-content-muted'>
             This year is about aligning your monthly choices with a single
             through-line. Let {signName} set the tone for what you want to be
             known for.
@@ -289,7 +297,7 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       </section>
 
       <section className='mb-12'>
-        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
           Select a Month
         </h2>
         <div className='grid grid-cols-3 md:grid-cols-4 gap-4'>
@@ -297,9 +305,9 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
             <Link
               key={month}
               href={`/grimoire/horoscopes/${sign}/${year}/${month}`}
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all text-center group'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 hover:bg-surface-elevated transition-all text-center group'
             >
-              <div className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+              <div className='font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                 {MONTH_DISPLAY_NAMES[month]}
               </div>
             </Link>
@@ -308,13 +316,15 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       </section>
 
       <section className='mb-12'>
-        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>Other Years</h2>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
+          Other Years
+        </h2>
         <div className='flex flex-wrap gap-2'>
           {AVAILABLE_YEARS.filter((y) => y !== yearNum).map((y) => (
             <Link
               key={y}
               href={`/grimoire/horoscopes/${sign}/${y}`}
-              className='px-4 py-2 rounded-lg bg-zinc-800/50 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-sm'
+              className='px-4 py-2 rounded-lg bg-surface-card/50 text-content-secondary hover:bg-surface-card hover:text-content-primary transition-colors text-sm'
             >
               {y}
             </Link>
@@ -323,30 +333,30 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       </section>
 
       <section className='mb-12'>
-        <div className='p-5 bg-zinc-900/50 border border-zinc-800/50 rounded-xl'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='p-5 bg-surface-elevated/50 border border-stroke-subtle/50 rounded-xl'>
+          <h2 className='text-lg font-medium text-content-primary mb-3'>
             Explore {signName} placements
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Your {year} horoscope shifts depending on where {signName} sits in
             your chart. Explore each placement for deeper insight.
           </p>
           <div className='flex flex-wrap gap-3'>
             <Link
               href={`/grimoire/zodiac/${sign}`}
-              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+              className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
             >
               {signName} Sun sign &rarr;
             </Link>
             <Link
               href={`/grimoire/moon-in/${sign}`}
-              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+              className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
             >
               Moon in {signName} &rarr;
             </Link>
             <Link
               href={`/grimoire/rising/${sign}`}
-              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+              className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
             >
               {signName} rising &rarr;
             </Link>
@@ -355,7 +365,7 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
       </section>
 
       <section className='mb-12'>
-        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
           Other Signs for {year}
         </h2>
         <div className='flex flex-wrap gap-2'>
@@ -363,7 +373,7 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
             <Link
               key={s}
               href={`/grimoire/horoscopes/${s}/${year}`}
-              className='px-4 py-2 rounded-lg bg-zinc-800/50 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-sm'
+              className='px-4 py-2 rounded-lg bg-surface-card/50 text-content-secondary hover:bg-surface-card hover:text-content-primary transition-colors text-sm'
             >
               {SIGN_SYMBOLS[s]} {SIGN_DISPLAY_NAMES[s]}
             </Link>

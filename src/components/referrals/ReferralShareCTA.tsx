@@ -126,19 +126,21 @@ export function ReferralShareCTA({
   if (!referralCode) {
     return (
       <div
-        className={`rounded-xl border border-zinc-800/60 bg-zinc-900/40 ${compact ? 'p-3' : 'p-4'}`}
+        className={`rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 ${compact ? 'p-3' : 'p-4'}`}
       >
         <div className='flex items-center gap-3'>
           <Gift className='w-5 h-5 text-lunary-primary-400 flex-shrink-0' />
           <div className='flex-1 min-w-0'>
-            <p className={`text-zinc-300 ${compact ? 'text-xs' : 'text-sm'}`}>
+            <p
+              className={`text-content-secondary ${compact ? 'text-xs' : 'text-sm'}`}
+            >
               {message}
             </p>
-            <p className='text-[11px] text-zinc-500 mt-0.5'>
+            <p className='text-[11px] text-content-muted mt-0.5'>
               {tierTease} ·{' '}
               <Link
                 href='/referrals'
-                className='text-lunary-primary-400 hover:text-lunary-primary-200 transition-colors'
+                className='text-lunary-primary-400 hover:text-content-secondary transition-colors'
               >
                 See your rewards
               </Link>
@@ -146,7 +148,7 @@ export function ReferralShareCTA({
           </div>
           <button
             onClick={generateCode}
-            className='text-xs font-medium text-lunary-primary-400 hover:text-lunary-primary-200 transition-colors whitespace-nowrap'
+            className='text-xs font-medium text-lunary-primary-400 hover:text-content-secondary transition-colors whitespace-nowrap'
           >
             Get link
           </button>
@@ -157,19 +159,21 @@ export function ReferralShareCTA({
 
   return (
     <div
-      className={`rounded-xl border border-zinc-800/60 bg-zinc-900/40 ${compact ? 'p-3' : 'p-4'}`}
+      className={`rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 ${compact ? 'p-3' : 'p-4'}`}
     >
       <div className='flex items-center gap-3'>
         <Gift className='w-5 h-5 text-lunary-primary-400 flex-shrink-0' />
         <div className='flex-1 min-w-0'>
-          <p className={`text-zinc-300 ${compact ? 'text-xs' : 'text-sm'}`}>
+          <p
+            className={`text-content-secondary ${compact ? 'text-xs' : 'text-sm'}`}
+          >
             {message}
           </p>
-          <p className='text-[11px] text-zinc-500 mt-0.5'>
+          <p className='text-[11px] text-content-muted mt-0.5'>
             {tierTease} ·{' '}
             <Link
               href='/referrals'
-              className='text-lunary-primary-400 hover:text-lunary-primary-200 transition-colors'
+              className='text-lunary-primary-400 hover:text-content-secondary transition-colors'
             >
               See your rewards
             </Link>
@@ -178,22 +182,22 @@ export function ReferralShareCTA({
         <div className='flex items-center gap-2 flex-shrink-0'>
           <button
             onClick={handleCopy}
-            className='p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors'
+            className='p-1.5 rounded-lg bg-surface-card hover:bg-surface-overlay transition-colors'
             title='Copy referral link'
           >
             {copied ? (
               <Check className='w-4 h-4 text-lunary-success' />
             ) : (
-              <Copy className='w-4 h-4 text-zinc-400' />
+              <Copy className='w-4 h-4 text-content-muted' />
             )}
           </button>
           {canShare && (
             <button
               onClick={handleShare}
-              className='p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors'
+              className='p-1.5 rounded-lg bg-surface-card hover:bg-surface-overlay transition-colors'
               title='Share referral link'
             >
-              <Share2 className='w-4 h-4 text-zinc-400' />
+              <Share2 className='w-4 h-4 text-content-muted' />
             </button>
           )}
         </div>

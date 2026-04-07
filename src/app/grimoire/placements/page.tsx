@@ -95,7 +95,7 @@ export default function PlacementsIndexPage() {
   );
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(itemListSchema)}
       {renderJsonLd(
         createBreadcrumbSchema([
@@ -113,10 +113,10 @@ export default function PlacementsIndexPage() {
         />
 
         <header className='mb-12'>
-          <h1 className='text-4xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-4xl font-light text-content-primary mb-4'>
             Astrological Placements: Sun, Moon & Rising in Every Sign
           </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl'>
+          <p className='text-lg text-content-muted max-w-2xl'>
             Explore what each planet means in every zodiac sign. Click any
             combination to learn about its influence on personality, strengths,
             and challenges.
@@ -129,7 +129,7 @@ export default function PlacementsIndexPage() {
               <a
                 key={planetKey}
                 href={`#${planetKey}-placements`}
-                className='px-4 py-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 text-zinc-300 hover:text-lunary-primary-300 text-sm whitespace-nowrap transition-colors'
+                className='px-4 py-2 rounded-lg bg-surface-card/50 hover:bg-surface-card text-content-secondary hover:text-content-brand text-sm whitespace-nowrap transition-colors'
               >
                 {planet.name}
               </a>
@@ -138,23 +138,23 @@ export default function PlacementsIndexPage() {
         </nav>
 
         <div className='grid grid-cols-3 gap-4 mb-12 max-w-md'>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-3xl font-light text-lunary-primary-400'>
               {planets.length}
             </div>
-            <div className='text-sm text-zinc-400'>Planets</div>
+            <div className='text-sm text-content-muted'>Planets</div>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-3xl font-light text-lunary-primary-400'>
               {signs.length}
             </div>
-            <div className='text-sm text-zinc-400'>Signs</div>
+            <div className='text-sm text-content-muted'>Signs</div>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-3xl font-light text-lunary-primary-400'>
               {planets.length * signs.length}
             </div>
-            <div className='text-sm text-zinc-400'>Combinations</div>
+            <div className='text-sm text-content-muted'>Combinations</div>
           </div>
         </div>
 
@@ -164,13 +164,13 @@ export default function PlacementsIndexPage() {
             <section
               key={planetKey}
               id={`${planetKey}-placements`}
-              className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'
+              className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/30'
             >
               <div className='mb-6'>
-                <h2 className='text-2xl font-medium text-zinc-100 mb-2'>
+                <h2 className='text-2xl font-medium text-content-primary mb-2'>
                   {planet.name} Placements
                 </h2>
-                <p className='text-zinc-400 text-sm'>
+                <p className='text-content-muted text-sm'>
                   {planet.name} governs {planet.themes}. Rules {planet.rules}.
                 </p>
               </div>
@@ -179,7 +179,7 @@ export default function PlacementsIndexPage() {
                   <Link
                     key={signKey}
                     href={`/grimoire/placements/${planetKey}-in-${signKey}`}
-                    className='p-3 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 hover:border-lunary-primary-600 transition-colors text-center group'
+                    className='p-3 rounded-lg bg-surface-card/50 hover:bg-surface-overlay/50 border border-stroke-default/50 hover:border-lunary-primary-600 transition-colors text-center group'
                   >
                     <div className='text-lg mb-1'>
                       {sign.element === 'Fire'
@@ -190,7 +190,7 @@ export default function PlacementsIndexPage() {
                             ? '💨'
                             : '💧'}
                     </div>
-                    <div className='text-sm text-zinc-300 group-hover:text-lunary-primary-300 transition-colors'>
+                    <div className='text-sm text-content-secondary group-hover:text-content-brand transition-colors'>
                       {sign.name}
                     </div>
                   </Link>
@@ -201,8 +201,8 @@ export default function PlacementsIndexPage() {
         </div>
 
         {/* Sign Quick Links */}
-        <section className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Browse by Zodiac Sign
           </h2>
           <div className='flex flex-wrap gap-3'>
@@ -210,7 +210,7 @@ export default function PlacementsIndexPage() {
               <Link
                 key={signKey}
                 href={`/grimoire/zodiac/${signKey}`}
-                className='px-4 py-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-300 hover:text-lunary-primary-300 text-sm transition-colors'
+                className='px-4 py-2 rounded-lg bg-surface-card/50 hover:bg-surface-overlay/50 text-content-secondary hover:text-content-brand text-sm transition-colors'
               >
                 {sign.name}
               </Link>
@@ -226,12 +226,12 @@ export default function PlacementsIndexPage() {
             {faqs.map((faq, index) => (
               <div
                 key={index}
-                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'
+                className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/30'
               >
-                <h3 className='text-lg font-medium mb-2 text-zinc-100'>
+                <h3 className='text-lg font-medium mb-2 text-content-primary'>
                   {faq.question}
                 </h3>
-                <p className='text-zinc-400'>{faq.answer}</p>
+                <p className='text-content-muted'>{faq.answer}</p>
               </div>
             ))}
           </div>
@@ -240,11 +240,11 @@ export default function PlacementsIndexPage() {
         <section className='text-center'>
           <Link
             href='/birth-chart'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium text-lg transition-colors'
           >
             Discover Your Placements
           </Link>
-          <p className='mt-3 text-sm text-zinc-400'>
+          <p className='mt-3 text-sm text-content-muted'>
             Generate your complete birth chart to see all your planetary
             placements
           </p>

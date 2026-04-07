@@ -83,10 +83,10 @@ export default function GlossaryPage() {
       />
 
       <header className='mb-8'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-4'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-4'>
           Astrology Glossary
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           Complete dictionary of {ASTROLOGY_GLOSSARY.length} astrological terms.
           Reference guide for understanding birth charts, planetary aspects,
           houses, and more.
@@ -95,17 +95,17 @@ export default function GlossaryPage() {
 
       <GlossaryClient terms={ASTROLOGY_GLOSSARY} />
 
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+      <section className='bg-gradient-to-r from-layer-base/30 to-lunary-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
           See These Terms in Action
         </h2>
-        <p className='text-zinc-400 mb-6'>
+        <p className='text-content-muted mb-6'>
           Get your personalized birth chart and see how these astrological
           concepts apply to your unique cosmic blueprint.
         </p>
         <Link
           href='/birth-chart'
-          className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
+          className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg font-medium transition-colors'
         >
           Calculate Your Birth Chart Free
         </Link>

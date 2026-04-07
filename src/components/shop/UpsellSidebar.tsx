@@ -37,7 +37,9 @@ export function UpsellSidebar({
 
   return (
     <div className='space-y-6'>
-      <h2 className='text-lg font-medium text-white'>Save with Bundles</h2>
+      <h2 className='text-lg font-medium text-content-primary'>
+        Save with Bundles
+      </h2>
 
       {products.map((product) => {
         const savingPercent = getBundleSavingPercent(product);
@@ -51,27 +53,27 @@ export function UpsellSidebar({
               className='p-5 relative'
               style={{ background: product.gradient }}
             >
-              <div className='absolute inset-0 bg-black/30' />
+              <div className='absolute inset-0 bg-surface-base/30' />
               {savingPercent !== null && (
                 <span className='absolute top-3 right-3 z-20 px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-900/50 text-emerald-400 border border-emerald-800'>
                   Save {savingPercent}%
                 </span>
               )}
               <div className='relative z-10'>
-                <span className='inline-block px-2 py-0.5 text-xs font-medium text-white/80 bg-white/10 rounded-full mb-2'>
+                <span className='inline-block px-2 py-0.5 text-xs font-medium text-content-primary/80 bg-white/10 rounded-full mb-2'>
                   Bundle
                 </span>
-                <h3 className='text-lg font-medium text-white mb-1'>
+                <h3 className='text-lg font-medium text-content-primary mb-1'>
                   {product.title}
                 </h3>
-                <p className='text-sm text-white/70 line-clamp-2 mb-3'>
+                <p className='text-sm text-content-primary/70 line-clamp-2 mb-3'>
                   {product.tagline}
                 </p>
                 <div className='flex items-center justify-between'>
-                  <span className='text-xl font-semibold text-white'>
+                  <span className='text-xl font-semibold text-content-primary'>
                     {formatPrice(product.price)}
                   </span>
-                  <span className='text-sm text-white/80 group-hover:text-white transition-colors'>
+                  <span className='text-sm text-content-primary/80 group-hover:text-content-primary transition-colors'>
                     Learn More →
                   </span>
                 </div>
@@ -82,7 +84,7 @@ export function UpsellSidebar({
       })}
 
       <div className='p-4 rounded-xl bg-white/5 border border-white/5'>
-        <p className='text-sm text-white/50 text-center'>
+        <p className='text-sm text-content-primary/50 text-center'>
           Bundles include {currentProduct.title} and more at a discounted price.
         </p>
       </div>

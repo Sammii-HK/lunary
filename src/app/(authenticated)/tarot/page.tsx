@@ -52,8 +52,8 @@ export default function TarotReadings() {
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>
-          <div className='w-8 h-8 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-zinc-400'>Loading your tarot reading...</p>
+          <div className='w-8 h-8 border-2 border-stroke-strong border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+          <p className='text-content-muted'>Loading your tarot reading...</p>
         </div>
       </div>
     );
@@ -64,8 +64,8 @@ export default function TarotReadings() {
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>
-          <div className='w-8 h-8 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-zinc-400'>Loading your tarot reading...</p>
+          <div className='w-8 h-8 border-2 border-stroke-strong border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+          <p className='text-content-muted'>Loading your tarot reading...</p>
         </div>
       </div>
     );
@@ -77,7 +77,7 @@ export default function TarotReadings() {
       {authStatus.isAuthenticated && (
         <SkillProgressWidget
           skillTree='tarot'
-          className='sticky top-0 z-10 px-4 pt-3 pb-2 bg-zinc-950/90 backdrop-blur-sm'
+          className='sticky top-0 z-10 px-4 pt-3 pb-2 bg-surface-base/90 backdrop-blur-sm'
         />
       )}
       <TarotView

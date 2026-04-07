@@ -40,7 +40,7 @@ export function ChartControls({
       </div>
       {showAspects && (
         <div className='flex gap-2 items-center'>
-          <span className='text-xs text-zinc-500'>Filter:</span>
+          <span className='text-xs text-content-muted'>Filter:</span>
           <Button
             onClick={() => onAspectFilterChange('all')}
             variant={aspectFilter === 'all' ? 'lunary-soft' : 'ghost'}

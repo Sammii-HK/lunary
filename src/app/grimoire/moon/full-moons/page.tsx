@@ -219,10 +219,10 @@ Each named moon carries specific energy for your practice. Align your rituals wi
           faqs={faqs}
         >
           <section className='mb-12'>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               All 12 Full Moons
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               Click on any moon to explore its full folklore, magical
               correspondences, and ritual suggestions.
             </p>
@@ -231,16 +231,16 @@ Each named moon carries specific energy for your practice. Align your rituals wi
                 <Link
                   key={month}
                   href={`/grimoire/moon/full-moons/${stringToKebabCase(month)}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-amber-700/50 transition-all'
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-amber-700/50 transition-all'
                 >
                   <div className='flex items-center justify-between mb-2'>
-                    <span className='text-sm text-zinc-400'>{month}</span>
+                    <span className='text-sm text-content-muted'>{month}</span>
                     <span className='text-xl'>🌕</span>
                   </div>
-                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-amber-300 transition-colors mb-2'>
+                  <h3 className='text-lg font-medium text-content-primary group-hover:text-amber-300 transition-colors mb-2'>
                     {moon.name}
                   </h3>
-                  <p className='text-sm text-zinc-400 line-clamp-2'>
+                  <p className='text-sm text-content-muted line-clamp-2'>
                     {moon.description}
                   </p>
                 </Link>
@@ -249,31 +249,31 @@ Each named moon carries specific energy for your practice. Align your rituals wi
           </section>
 
           <section className='mb-12 bg-amber-950/20 border border-amber-900/50 rounded-xl p-6'>
-            <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+            <h2 className='text-xl font-medium text-content-primary mb-4'>
               Quick Reference: Full Moon by Season
             </h2>
             <div className='grid md:grid-cols-2 gap-4 text-sm'>
               <div>
                 <p className='text-blue-400 font-medium'>Winter Moons:</p>
-                <p className='text-zinc-400'>
+                <p className='text-content-muted'>
                   Wolf (Jan), Snow (Feb), Cold (Dec)
                 </p>
               </div>
               <div>
                 <p className='text-green-400 font-medium'>Spring Moons:</p>
-                <p className='text-zinc-400'>
+                <p className='text-content-muted'>
                   Worm (Mar), Pink (Apr), Flower (May)
                 </p>
               </div>
               <div>
                 <p className='text-amber-400 font-medium'>Summer Moons:</p>
-                <p className='text-zinc-400'>
+                <p className='text-content-muted'>
                   Strawberry (Jun), Buck (Jul), Sturgeon (Aug)
                 </p>
               </div>
               <div>
                 <p className='text-orange-400 font-medium'>Autumn Moons:</p>
-                <p className='text-zinc-400'>
+                <p className='text-content-muted'>
                   Harvest (Sep), Hunter (Oct), Beaver (Nov)
                 </p>
               </div>

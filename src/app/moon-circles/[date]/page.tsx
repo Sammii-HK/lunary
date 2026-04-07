@@ -208,11 +208,11 @@ export default async function MoonCircleDetailPage({
 
   return (
     <div className='space-y-12 py-8'>
-      <section className='rounded-3xl border border-lunary-primary-700 bg-black/40 p-8 shadow-xl shadow-lunary-primary-900 backdrop-blur'>
+      <section className='rounded-3xl border border-lunary-primary-700 bg-surface-base/40 p-8 shadow-xl shadow-lunary-primary-900 backdrop-blur'>
         <div className='space-y-4'>
           <Link
             href='/moon-circles'
-            className='inline-flex items-center text-sm text-lunary-primary-100/80 hover:text-white'
+            className='inline-flex items-center text-sm text-content-secondary/80 hover:text-content-primary'
           >
             ← Back to Moon Circles
           </Link>
@@ -221,40 +221,40 @@ export default async function MoonCircleDetailPage({
               className={cn(
                 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide',
                 circle.moon_phase === 'Full Moon'
-                  ? 'bg-lunary-accent-900 text-lunary-accent-100'
-                  : 'bg-lunary-primary-900 text-lunary-primary-100',
+                  ? 'bg-layer-base text-content-brand-accent'
+                  : 'bg-layer-base text-content-secondary',
               )}
             >
               {circle.moon_phase}
             </span>
-            <span className='rounded-full border border-lunary-primary-700 px-3 py-1 text-xs text-lunary-primary-100/80'>
+            <span className='rounded-full border border-lunary-primary-700 px-3 py-1 text-xs text-content-secondary/80'>
               {formatReadableDate(circle.event_date)}
             </span>
-            <span className='rounded-full border border-lunary-primary-700 px-3 py-1 text-xs text-lunary-primary-100/80'>
+            <span className='rounded-full border border-lunary-primary-700 px-3 py-1 text-xs text-content-secondary/80'>
               {circle.insight_count} insight
               {circle.insight_count === 1 ? '' : 's'}
             </span>
           </div>
           <div className='space-y-3'>
-            <h1 className='text-4xl font-semibold text-white'>
+            <h1 className='text-4xl font-semibold text-content-primary'>
               {circle.theme || circle.title || 'Moon Circle'}
             </h1>
             {circle.description && (
-              <p className='text-base text-lunary-primary-100/80'>
+              <p className='text-base text-content-secondary/80'>
                 {circle.description}
               </p>
             )}
           </div>
           {circle.focus_points.length > 0 && (
             <div className='space-y-2'>
-              <p className='text-xs uppercase tracking-[0.2em] text-lunary-primary-200/70'>
+              <p className='text-xs uppercase tracking-[0.2em] text-content-secondary/70'>
                 Focus for this circle
               </p>
               <div className='flex flex-wrap gap-2'>
                 {circle.focus_points.map((focus) => (
                   <span
                     key={focus}
-                    className='rounded-full border border-lunary-primary-700 px-3 py-1 text-xs text-lunary-primary-100/80'
+                    className='rounded-full border border-lunary-primary-700 px-3 py-1 text-xs text-content-secondary/80'
                   >
                     {focus}
                   </span>
@@ -285,11 +285,13 @@ export default async function MoonCircleDetailPage({
       {(circle.rituals.length > 0 ||
         circle.journal_prompts.length > 0 ||
         circle.astrology_highlights.length > 0) && (
-        <section className='grid gap-8 rounded-3xl border border-lunary-primary-700 bg-lunary-primary-950/30 p-6 md:grid-cols-3'>
+        <section className='grid gap-8 rounded-3xl border border-lunary-primary-700 bg-layer-deep/30 p-6 md:grid-cols-3'>
           {circle.rituals.length > 0 && (
             <div>
-              <h2 className='text-lg font-semibold text-white'>Ritual flow</h2>
-              <ul className='mt-4 space-y-2 text-sm text-lunary-primary-100/80'>
+              <h2 className='text-lg font-semibold text-content-primary'>
+                Ritual flow
+              </h2>
+              <ul className='mt-4 space-y-2 text-sm text-content-secondary/80'>
                 {circle.rituals.map((item, index) => (
                   <li key={`${item}-${index}`} className='flex gap-2'>
                     <span className='text-lunary-primary-400'>
@@ -303,14 +305,14 @@ export default async function MoonCircleDetailPage({
           )}
           {circle.journal_prompts.length > 0 && (
             <div>
-              <h2 className='text-lg font-semibold text-white'>
+              <h2 className='text-lg font-semibold text-content-primary'>
                 Journal prompts
               </h2>
-              <ul className='mt-4 space-y-2 text-sm text-lunary-primary-100/80'>
+              <ul className='mt-4 space-y-2 text-sm text-content-secondary/80'>
                 {circle.journal_prompts.map((item, index) => (
                   <li
                     key={`${item}-${index}`}
-                    className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-900/30 px-3 py-2'
+                    className='rounded-2xl border border-lunary-primary-700 bg-layer-base/30 px-3 py-2'
                   >
                     {item}
                   </li>
@@ -320,10 +322,10 @@ export default async function MoonCircleDetailPage({
           )}
           {circle.astrology_highlights.length > 0 && (
             <div>
-              <h2 className='text-lg font-semibold text-white'>
+              <h2 className='text-lg font-semibold text-content-primary'>
                 Astrology highlights
               </h2>
-              <ul className='mt-4 space-y-2 text-sm text-lunary-primary-100/80'>
+              <ul className='mt-4 space-y-2 text-sm text-content-secondary/80'>
                 {circle.astrology_highlights.map((item, index) => (
                   <li key={`${item}-${index}`} className='flex gap-2'>
                     <span className='text-lunary-primary-400'>✦</span>
@@ -337,17 +339,17 @@ export default async function MoonCircleDetailPage({
       )}
 
       {circle.resource_links.length > 0 && (
-        <section className='rounded-3xl border border-lunary-primary-700 bg-black/40 p-6'>
-          <h2 className='text-lg font-semibold text-white'>
+        <section className='rounded-3xl border border-lunary-primary-700 bg-surface-base/40 p-6'>
+          <h2 className='text-lg font-semibold text-content-primary'>
             Resources & follow-up
           </h2>
-          <ul className='mt-4 space-y-3 text-sm text-lunary-primary-100/80'>
+          <ul className='mt-4 space-y-3 text-sm text-content-secondary/80'>
             {circle.resource_links.map((resource, index) => (
               <li key={`${resource.url ?? resource.label}-${index}`}>
                 {resource.url ? (
                   <Link
                     href={resource.url}
-                    className='text-lunary-primary-200 underline decoration-lunary-primary-400/60 underline-offset-4 hover:text-white'
+                    className='text-content-secondary underline decoration-lunary-primary-400/60 underline-offset-4 hover:text-content-primary'
                     target='_blank'
                     rel='noreferrer'
                   >
@@ -365,12 +367,12 @@ export default async function MoonCircleDetailPage({
       {related.length > 0 && (
         <section className='space-y-4'>
           <div className='flex items-center justify-between'>
-            <h2 className='text-2xl font-semibold text-white'>
+            <h2 className='text-2xl font-semibold text-content-primary'>
               Related circles
             </h2>
             <Link
               href='/moon-circles'
-              className='text-sm text-lunary-primary-100/80 underline-offset-4 hover:text-white hover:underline'
+              className='text-sm text-content-secondary/80 underline-offset-4 hover:text-content-primary hover:underline'
             >
               View all circles →
             </Link>
@@ -380,16 +382,16 @@ export default async function MoonCircleDetailPage({
               <Link
                 key={item.id}
                 href={`/moon-circles/${item.date_slug || item.id}`}
-                className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-900/20 p-5 transition hover:border-lunary-primary-300 hover:bg-lunary-primary-900/40'
+                className='rounded-2xl border border-lunary-primary-700 bg-layer-base/20 p-5 transition hover:border-lunary-primary-300 hover:bg-layer-base/40'
               >
-                <div className='flex items-center justify-between text-xs text-lunary-primary-200/80'>
+                <div className='flex items-center justify-between text-xs text-content-secondary/80'>
                   <span>{item.moon_phase}</span>
                   <span>{formatReadableDate(item.event_date)}</span>
                 </div>
-                <p className='mt-2 text-lg font-semibold text-white'>
+                <p className='mt-2 text-lg font-semibold text-content-primary'>
                   {item.theme || 'Moon Circle'}
                 </p>
-                <p className='mt-2 text-xs text-lunary-primary-200/70'>
+                <p className='mt-2 text-xs text-content-secondary/70'>
                   {item.insight_count} insight
                   {item.insight_count === 1 ? '' : 's'}
                 </p>

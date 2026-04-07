@@ -31,12 +31,12 @@ export function AdminBreadcrumbs() {
 
   return (
     <nav
-      className='pt-6 mb-6 flex items-center gap-2 text-sm text-zinc-400 px-4 md:px-6 lg:px-8'
+      className='pt-6 mb-6 flex items-center gap-2 text-sm text-content-muted px-4 md:px-6 lg:px-8'
       aria-label='Breadcrumb'
     >
       <Link
         href='/admin'
-        className='flex items-center gap-1 hover:text-white transition-colors'
+        className='flex items-center gap-1 hover:text-content-primary transition-colors'
       >
         <Home className='h-4 w-4' />
         <span>Admin</span>
@@ -45,13 +45,15 @@ export function AdminBreadcrumbs() {
         .filter((crumb) => crumb.href !== '/admin')
         .map((crumb, index) => (
           <div key={crumb.href} className='flex items-center gap-2'>
-            <ChevronRight className='h-4 w-4 text-zinc-600' />
+            <ChevronRight className='h-4 w-4 text-content-muted' />
             {crumb.isLast ? (
-              <span className='text-white font-medium'>{crumb.label}</span>
+              <span className='text-content-primary font-medium'>
+                {crumb.label}
+              </span>
             ) : (
               <Link
                 href={crumb.href}
-                className='hover:text-white transition-colors'
+                className='hover:text-content-primary transition-colors'
               >
                 {crumb.label}
               </Link>

@@ -228,10 +228,10 @@ export default function SubscriptionManagement({
     return (
       <div className='border border-stone-800 rounded-md p-4 w-full'>
         <div className='text-center'>
-          <h3 className='text-base font-medium text-zinc-100 mb-2'>
+          <h3 className='text-base font-medium text-content-primary mb-2'>
             Start Your Cosmic Journey
           </h3>
-          <p className='text-zinc-400 text-sm mb-4'>
+          <p className='text-content-muted text-sm mb-4'>
             Unlock personalized horoscopes, birth charts, and mystical insights
           </p>
           <Button variant='outline' asChild>
@@ -257,28 +257,30 @@ export default function SubscriptionManagement({
   return (
     <div className='border border-stone-800 rounded-md p-4 w-full'>
       <div className='flex justify-between items-start mb-3'>
-        <h3 className='text-base font-medium text-zinc-100'>Subscription</h3>
+        <h3 className='text-base font-medium text-content-primary'>
+          Subscription
+        </h3>
         <div className='flex items-center gap-2'>
           <button
             onClick={handleRefresh}
             disabled={loading === 'refresh'}
-            className='p-1.5 rounded-md hover:bg-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+            className='p-1.5 rounded-md hover:bg-surface-overlay transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
             title='Refresh subscription status'
           >
             <RefreshCw
               size={16}
-              className={`text-zinc-400 ${loading === 'refresh' ? 'animate-spin' : ''}`}
+              className={`text-content-muted ${loading === 'refresh' ? 'animate-spin' : ''}`}
             />
           </button>
           <div
             className={`px-2 py-1 rounded-full text-xs font-medium ${
               displaySubscription.status === 'active'
-                ? 'bg-lunary-success-900 text-lunary-success-300'
+                ? 'bg-layer-base text-lunary-success-300'
                 : displaySubscription.status === 'trialing'
-                  ? 'bg-lunary-secondary-900 text-lunary-secondary-300'
+                  ? 'bg-layer-base text-content-brand-secondary'
                   : displaySubscription.status === 'canceled'
-                    ? 'bg-lunary-accent-900 text-lunary-accent-300'
-                    : 'bg-zinc-700 text-zinc-300'
+                    ? 'bg-layer-base text-content-brand-accent'
+                    : 'bg-surface-overlay text-content-secondary'
             }`}
           >
             {displaySubscription.status === 'trialing'
@@ -294,8 +296,8 @@ export default function SubscriptionManagement({
 
       <div className='space-y-2 mb-4'>
         <div className='flex justify-between'>
-          <span className='text-zinc-400 text-sm'>Plan:</span>
-          <span className='text-white text-sm font-medium'>
+          <span className='text-content-muted text-sm'>Plan:</span>
+          <span className='text-content-primary text-sm font-medium'>
             {(() => {
               const plan =
                 stripeSubscription?.plan || (displaySubscription as any)?.plan;
@@ -317,8 +319,8 @@ export default function SubscriptionManagement({
           (stripeSubscription?.trialEnd ||
             (stripeSubscription as any)?.trial_end) && (
             <div className='flex justify-between'>
-              <span className='text-zinc-400 text-sm'>Trial ends:</span>
-              <span className='text-lunary-secondary-300 text-sm'>
+              <span className='text-content-muted text-sm'>Trial ends:</span>
+              <span className='text-content-brand-secondary text-sm'>
                 {new Date(
                   ((stripeSubscription as any)?.trial_end ||
                     parseInt(stripeSubscription?.trialEnd || '0')) * 1000,
@@ -331,8 +333,8 @@ export default function SubscriptionManagement({
           (stripeSubscription?.currentPeriodEnd ||
             (stripeSubscription as any)?.current_period_end) && (
             <div className='flex justify-between'>
-              <span className='text-zinc-400 text-sm'>Next billing:</span>
-              <span className='text-white text-sm'>
+              <span className='text-content-muted text-sm'>Next billing:</span>
+              <span className='text-content-primary text-sm'>
                 {new Date(
                   ((stripeSubscription as any)?.current_period_end ||
                     parseInt(stripeSubscription?.currentPeriodEnd || '0')) *
@@ -344,8 +346,8 @@ export default function SubscriptionManagement({
 
         {stripeSubscription?.cancelAtPeriodEnd && (
           <div className='flex justify-between'>
-            <span className='text-zinc-400 text-sm'>Ends:</span>
-            <span className='text-lunary-accent-300 text-sm'>
+            <span className='text-content-muted text-sm'>Ends:</span>
+            <span className='text-content-brand-accent text-sm'>
               {new Date(
                 ((stripeSubscription as any)?.current_period_end ||
                   parseInt(stripeSubscription?.currentPeriodEnd || '0')) * 1000,
@@ -356,7 +358,7 @@ export default function SubscriptionManagement({
       </div>
 
       {error && (
-        <div className='bg-lunary-error-900/50 border border-lunary-error text-lunary-error-300 px-3 py-2 rounded text-sm mb-3'>
+        <div className='bg-layer-base/50 border border-lunary-error text-lunary-error-300 px-3 py-2 rounded text-sm mb-3'>
           {error}
         </div>
       )}
@@ -383,7 +385,7 @@ export default function SubscriptionManagement({
           <button
             onClick={handleBillingPortal}
             disabled={loading === 'portal'}
-            className='w-full flex items-center justify-center gap-2 bg-lunary-secondary hover:bg-lunary-secondary-400 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white py-2 px-3 rounded-md transition-colors text-sm'
+            className='w-full flex items-center justify-center gap-2 bg-lunary-secondary hover:bg-lunary-secondary-400 disabled:bg-surface-overlay disabled:cursor-not-allowed text-white py-2 px-3 rounded-md transition-colors text-sm'
           >
             <Settings size={14} />
             {loading === 'portal' ? 'Opening...' : 'Manage Subscription'}

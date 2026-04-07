@@ -62,8 +62,8 @@ function CustomTooltip({ active, payload }: any) {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className='bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs'>
-        <p className='text-zinc-300'>{data.displayDate}</p>
+      <div className='bg-surface-elevated border border-stroke-default rounded-lg px-3 py-2 text-xs'>
+        <p className='text-content-secondary'>{data.displayDate}</p>
         <p className='text-lunary-primary font-medium'>
           {data.count} {data.count === 1 ? 'appearance' : 'appearances'}
         </p>
@@ -83,7 +83,7 @@ export function CardFrequencyTimeline({
   if (timelineData.length === 0) {
     return (
       <div
-        className='flex items-center justify-center text-xs text-zinc-500'
+        className='flex items-center justify-center text-xs text-content-muted'
         style={{ height }}
       >
         No timeline data

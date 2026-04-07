@@ -61,18 +61,21 @@ export default function RisingSignsPage() {
   return (
     <main className='max-w-4xl mx-auto px-4 py-8'>
       <div className='mb-8'>
-        <nav className='text-sm text-zinc-500 mb-4'>
-          <NavParamLink href='/grimoire' className='hover:text-zinc-300'>
+        <nav className='text-sm text-content-muted mb-4'>
+          <NavParamLink
+            href='/grimoire'
+            className='hover:text-content-secondary'
+          >
             Grimoire
           </NavParamLink>
           <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Rising Signs</span>
+          <span className='text-content-secondary'>Rising Signs</span>
         </nav>
 
         <Heading as='h1' variant='h1'>
           Rising Signs (Ascendant) Guide
         </Heading>
-        <p className='text-lg text-zinc-400 mt-4'>
+        <p className='text-lg text-content-muted mt-4'>
           Your rising sign, or ascendant, is the zodiac sign that was rising on
           the eastern horizon at the moment of your birth. It shapes your first
           impressions, physical appearance, and how others perceive you.
@@ -80,11 +83,11 @@ export default function RisingSignsPage() {
       </div>
 
       {/* What is a Rising Sign */}
-      <section className='mb-12 p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+      <section className='mb-12 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
         <Heading as='h2' variant='h3'>
           What is a Rising Sign?
         </Heading>
-        <div className='mt-4 space-y-4 text-zinc-300'>
+        <div className='mt-4 space-y-4 text-content-secondary'>
           <p>
             While your <strong>Sun sign</strong> represents your core identity
             and <strong>Moon sign</strong> reflects your emotional nature, your{' '}
@@ -98,27 +101,27 @@ export default function RisingSignsPage() {
             the planets fall into.
           </p>
           <div className='grid md:grid-cols-3 gap-4 mt-6'>
-            <div className='p-4 rounded-lg bg-zinc-800/50'>
-              <div className='font-medium text-zinc-100 mb-2'>
+            <div className='p-4 rounded-lg bg-surface-card/50'>
+              <div className='font-medium text-content-primary mb-2'>
                 First Impressions
               </div>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 How you come across when meeting new people
               </p>
             </div>
-            <div className='p-4 rounded-lg bg-zinc-800/50'>
-              <div className='font-medium text-zinc-100 mb-2'>
+            <div className='p-4 rounded-lg bg-surface-card/50'>
+              <div className='font-medium text-content-primary mb-2'>
                 Physical Appearance
               </div>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 Influences your style, mannerisms, and physical traits
               </p>
             </div>
-            <div className='p-4 rounded-lg bg-zinc-800/50'>
-              <div className='font-medium text-zinc-100 mb-2'>
+            <div className='p-4 rounded-lg bg-surface-card/50'>
+              <div className='font-medium text-content-primary mb-2'>
                 Life Approach
               </div>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 How you instinctively navigate the world
               </p>
             </div>
@@ -133,7 +136,7 @@ export default function RisingSignsPage() {
             <span className='mr-2'>{elementEmoji[element]}</span>
             {element} Rising Signs
           </Heading>
-          <p className='text-zinc-400 mt-2 mb-4'>
+          <p className='text-content-muted mt-2 mb-4'>
             {element === 'Fire' &&
               'Bold, energetic, and action-oriented first impressions.'}
             {element === 'Earth' &&
@@ -151,21 +154,21 @@ export default function RisingSignsPage() {
                 className={`p-5 rounded-lg border ${elementColors[element]} hover:border-lunary-primary-600 transition-all`}
               >
                 <div className='flex items-center justify-between mb-2'>
-                  <span className='text-lg font-medium text-zinc-100'>
+                  <span className='text-lg font-medium text-content-primary'>
                     {rising.sign} Rising
                   </span>
-                  <span className='text-xs text-zinc-500'>
+                  <span className='text-xs text-content-muted'>
                     Ruled by {rising.ruler}
                   </span>
                 </div>
-                <p className='text-sm text-zinc-400 mb-3'>
+                <p className='text-sm text-content-muted mb-3'>
                   {rising.firstImpression.slice(0, 120)}...
                 </p>
                 <div className='flex flex-wrap gap-2'>
                   {rising.coreTraits.slice(0, 2).map((trait) => (
                     <span
                       key={trait}
-                      className='text-xs px-2 py-1 rounded bg-zinc-800 text-zinc-400'
+                      className='text-xs px-2 py-1 rounded bg-surface-card text-content-muted'
                     >
                       {trait}
                     </span>
@@ -178,11 +181,11 @@ export default function RisingSignsPage() {
       ))}
 
       {/* CTA */}
-      <section className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-950/30 text-center'>
+      <section className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-layer-deep/30 text-center'>
         <Heading as='h2' variant='h3'>
           Don&apos;t Know Your Rising Sign?
         </Heading>
-        <p className='text-zinc-400 mt-2 mb-4'>
+        <p className='text-content-muted mt-2 mb-4'>
           Calculate your complete birth chart to discover your rising sign,
           along with your Moon sign and planetary placements.
         </p>

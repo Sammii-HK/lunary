@@ -70,19 +70,19 @@ export default function FAQPage() {
       {/* FAQ Schema for SEO */}
       {renderFAQSchema(allFAQs)}
 
-      <div className='min-h-screen bg-zinc-950 text-zinc-50'>
+      <div className='min-h-screen bg-surface-base text-content-primary'>
         {/* Hero */}
         <section className='py-12 md:py-16 px-4 md:px-6'>
           <div className='max-w-4xl mx-auto text-center space-y-4'>
-            <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100'>
+            <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary'>
               Frequently Asked Questions
             </h1>
-            <p className='text-sm md:text-base text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+            <p className='text-sm md:text-base text-content-muted leading-relaxed max-w-2xl mx-auto'>
               Everything you need to know about Lunary. Can't find what you're
               looking for? Email us at{' '}
               <a
                 href='mailto:support@lunary.app'
-                className='text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+                className='text-content-brand hover:text-content-secondary transition-colors'
               >
                 support@lunary.app
               </a>
@@ -101,9 +101,9 @@ export default function FAQPage() {
         </section>
 
         {/* Quick Links */}
-        <nav className='py-6 px-4 md:px-6 border-y border-zinc-800/30 bg-zinc-900/30'>
+        <nav className='py-6 px-4 md:px-6 border-y border-stroke-subtle/30 bg-surface-elevated/30'>
           <div className='max-w-6xl mx-auto'>
-            <p className='text-xs uppercase tracking-wider text-zinc-500 mb-3'>
+            <p className='text-xs uppercase tracking-wider text-content-muted mb-3'>
               Quick Links
             </p>
             <div className='flex flex-wrap gap-3'>
@@ -111,7 +111,7 @@ export default function FAQPage() {
                 <a
                   key={category.id}
                   href={`#${category.id}`}
-                  className='inline-flex items-center gap-2 px-4 py-2 bg-zinc-900/50 border border-zinc-800 rounded-lg text-sm text-zinc-300 hover:text-lunary-primary-300 hover:border-lunary-primary-700 transition-colors'
+                  className='inline-flex items-center gap-2 px-4 py-2 bg-surface-elevated/50 border border-stroke-subtle rounded-lg text-sm text-content-secondary hover:text-content-brand hover:border-lunary-primary-700 transition-colors'
                 >
                   {getIcon(category.icon, 'w-5 h-5')}
                   <span>{category.title}</span>
@@ -125,7 +125,7 @@ export default function FAQPage() {
         <div className='max-w-4xl mx-auto px-4 md:px-6 py-12 md:py-16 space-y-16'>
           {filteredCategories.length === 0 ? (
             <div className='text-center py-20'>
-              <p className='text-zinc-400 mb-4'>
+              <p className='text-content-muted mb-4'>
                 No questions found matching &quot;{searchQuery}&quot;
               </p>
               <Button
@@ -149,12 +149,12 @@ export default function FAQPage() {
         </div>
 
         {/* Still Have Questions */}
-        <section className='py-16 md:py-20 px-4 md:px-6 bg-zinc-900/30 border-t border-zinc-800/30'>
+        <section className='py-16 md:py-20 px-4 md:px-6 bg-surface-elevated/30 border-t border-stroke-subtle/30'>
           <div className='max-w-3xl mx-auto text-center space-y-6'>
-            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+            <h2 className='text-2xl md:text-3xl font-light text-content-primary'>
               Still have questions?
             </h2>
-            <p className='text-zinc-400 leading-relaxed'>
+            <p className='text-content-muted leading-relaxed'>
               Can't find what you're looking for? Our support team is here to
               help.
             </p>
@@ -185,49 +185,49 @@ export default function FAQPage() {
                 </Link>
               </Button>
             </div>
-            <p className='text-xs text-zinc-500 pt-4'>
+            <p className='text-xs text-content-muted pt-4'>
               We typically respond within 24 hours (usually faster!)
             </p>
           </div>
         </section>
 
         {/* Related Resources */}
-        <section className='py-16 md:py-20 px-4 md:px-6 border-t border-zinc-800/30'>
+        <section className='py-16 md:py-20 px-4 md:px-6 border-t border-stroke-subtle/30'>
           <div className='max-w-4xl mx-auto'>
-            <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-8 text-center'>
+            <h2 className='text-2xl md:text-3xl font-light text-content-primary mb-8 text-center'>
               Related Resources
             </h2>
             <div className='grid md:grid-cols-3 gap-6'>
               <Link
                 href='/features'
-                className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-lunary-primary-700 transition-colors group'
+                className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:bg-surface-elevated/50 hover:border-lunary-primary-700 transition-colors group'
               >
-                <h3 className='text-lg font-medium text-zinc-200 mb-2 group-hover:text-lunary-primary-300 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-content-brand transition-colors'>
                   Features
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   Explore all Lunary features with detailed breakdowns
                 </p>
               </Link>
               <Link
                 href='/pricing'
-                className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-lunary-primary-700 transition-colors group'
+                className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:bg-surface-elevated/50 hover:border-lunary-primary-700 transition-colors group'
               >
-                <h3 className='text-lg font-medium text-zinc-200 mb-2 group-hover:text-lunary-primary-300 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-content-brand transition-colors'>
                   Pricing
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   Compare plans and see what's included at each tier
                 </p>
               </Link>
               <Link
                 href='/grimoire'
-                className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-lunary-primary-700 transition-colors group'
+                className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:bg-surface-elevated/50 hover:border-lunary-primary-700 transition-colors group'
               >
-                <h3 className='text-lg font-medium text-zinc-200 mb-2 group-hover:text-lunary-primary-300 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-content-brand transition-colors'>
                   Grimoire
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   2,000+ free articles on astrology, tarot, and symbolism
                 </p>
               </Link>

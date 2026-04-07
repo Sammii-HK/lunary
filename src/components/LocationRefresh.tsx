@@ -35,38 +35,38 @@ export default function LocationRefresh({
 
   const containerClasses =
     variant === 'card'
-      ? 'w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-800 p-4'
-      : 'space-y-3 text-sm text-zinc-200';
+      ? 'w-full max-w-md rounded-lg border border-stroke-default bg-surface-card p-4'
+      : 'space-y-3 text-sm text-content-primary';
 
   const headingClasses =
     variant === 'card'
       ? 'mb-3 flex items-center gap-2'
-      : 'flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-zinc-400';
+      : 'flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-content-muted';
 
   const titleClasses =
     variant === 'card'
-      ? 'text-lg font-semibold text-white'
-      : 'text-sm font-semibold text-white';
+      ? 'text-lg font-semibold text-content-primary'
+      : 'text-sm font-semibold text-content-primary';
 
   const labelClasses =
     variant === 'card'
-      ? 'mb-1 block text-sm font-medium text-zinc-300'
-      : 'mb-1 block text-xs font-medium uppercase tracking-wide text-zinc-400';
+      ? 'mb-1 block text-sm font-medium text-content-secondary'
+      : 'mb-1 block text-xs font-medium uppercase tracking-wide text-content-muted';
 
   const coordinatesClasses =
     variant === 'card'
-      ? 'text-sm text-white'
-      : 'text-sm font-medium text-white';
+      ? 'text-sm text-content-primary'
+      : 'text-sm font-medium text-content-primary';
 
   const descriptionClasses =
     variant === 'card'
-      ? 'mt-1 text-xs text-zinc-400'
-      : 'mt-1 text-xs text-zinc-400';
+      ? 'mt-1 text-xs text-content-muted'
+      : 'mt-1 text-xs text-content-muted';
 
   const infoTextClasses =
     variant === 'card'
-      ? 'text-center text-xs text-zinc-400'
-      : 'text-xs text-zinc-400';
+      ? 'text-center text-xs text-content-muted'
+      : 'text-xs text-content-muted';
 
   const feedbackClasses =
     variant === 'card'
@@ -75,8 +75,8 @@ export default function LocationRefresh({
 
   const successClasses =
     variant === 'card'
-      ? `${feedbackClasses} border-lunary-success bg-lunary-success-900/50 text-lunary-success-300`
-      : `${feedbackClasses} border-lunary-success-600 bg-lunary-success-950 text-lunary-success-200`;
+      ? `${feedbackClasses} border-lunary-success bg-layer-base/50 text-lunary-success-300`
+      : `${feedbackClasses} border-lunary-success-600 bg-layer-deep text-lunary-success-200`;
 
   const errorClasses =
     variant === 'card'
@@ -139,7 +139,7 @@ export default function LocationRefresh({
         <button
           onClick={handleRefreshLocation}
           disabled={loading}
-          className='flex w-full items-center justify-center gap-2 rounded-md bg-lunary-primary-600 px-4 py-2 text-sm text-white transition-colors hover:bg-lunary-primary-700 disabled:cursor-not-allowed disabled:bg-zinc-600'
+          className='flex w-full items-center justify-center gap-2 rounded-md bg-lunary-primary-600 px-4 py-2 text-sm text-white transition-colors hover:bg-layer-high disabled:cursor-not-allowed disabled:bg-surface-overlay'
         >
           <RotateCcw size={14} className={loading ? 'animate-spin' : ''} />
           {loading ? 'Updating Location...' : 'Refresh Location'}

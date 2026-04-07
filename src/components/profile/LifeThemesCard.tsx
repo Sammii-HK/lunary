@@ -93,9 +93,9 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
   if (loading) {
     return (
       <div
-        className={`rounded-xl border border-zinc-800/60 bg-zinc-950/60 p-4 ${className}`}
+        className={`rounded-xl border border-stroke-subtle/60 bg-surface-base/60 p-4 ${className}`}
       >
-        <div className='h-16 bg-zinc-900/50 rounded-lg animate-pulse' />
+        <div className='h-16 bg-surface-elevated/50 rounded-lg animate-pulse' />
       </div>
     );
   }
@@ -103,13 +103,15 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
   if (!hasEnoughData) {
     return (
       <div
-        className={`rounded-xl border border-zinc-800/60 bg-zinc-950/60 p-4 ${className}`}
+        className={`rounded-xl border border-stroke-subtle/60 bg-surface-base/60 p-4 ${className}`}
       >
         <div className='flex items-center gap-2 mb-2'>
-          <Sparkles className='w-4 h-4 text-zinc-600' />
-          <h3 className='text-sm font-medium text-zinc-400'>Life Themes</h3>
+          <Sparkles className='w-4 h-4 text-content-muted' />
+          <h3 className='text-sm font-medium text-content-muted'>
+            Life Themes
+          </h3>
         </div>
-        <p className='text-xs text-zinc-500 leading-relaxed'>
+        <p className='text-xs text-content-muted leading-relaxed'>
           Life themes appear as you write more in your journal and pull more
           tarot. Try saving a few reflections, record a dream, or do some
           spreads, then check back here.
@@ -121,13 +123,15 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
   if (themes.length === 0) {
     return (
       <div
-        className={`rounded-xl border border-zinc-800/60 bg-zinc-950/60 p-4 ${className}`}
+        className={`rounded-xl border border-stroke-subtle/60 bg-surface-base/60 p-4 ${className}`}
       >
         <div className='flex items-center gap-2 mb-2'>
-          <Sparkles className='w-4 h-4 text-zinc-600' />
-          <h3 className='text-sm font-medium text-zinc-400'>Life Themes</h3>
+          <Sparkles className='w-4 h-4 text-content-muted' />
+          <h3 className='text-sm font-medium text-content-muted'>
+            Life Themes
+          </h3>
         </div>
-        <p className='text-xs text-zinc-500 leading-relaxed'>
+        <p className='text-xs text-content-muted leading-relaxed'>
           Themes are emerging from your activity. Keep journaling, pulling
           tarot, and recording dreams to reveal stronger patterns.
         </p>
@@ -137,11 +141,11 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
 
   return (
     <div
-      className={`rounded-xl border border-zinc-800/60 bg-zinc-950/60 p-4 ${className} max-w-full`}
+      className={`rounded-xl border border-stroke-subtle/60 bg-surface-base/60 p-4 ${className} max-w-full`}
     >
       <div className='flex items-center gap-2 mb-3'>
         <Sparkles className='w-4 h-4 text-lunary-primary-400' />
-        <h3 className='text-sm font-medium text-zinc-200'>
+        <h3 className='text-sm font-medium text-content-primary'>
           Current Life Themes
         </h3>
       </div>
@@ -153,24 +157,24 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
           return (
             <div
               key={theme.id}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'
+              className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden'
             >
               <button
                 onClick={() => setExpandedTheme(isExpanded ? null : theme.id)}
-                className='w-full flex items-center justify-between p-3 text-left hover:bg-zinc-800/30 transition-colors'
+                className='w-full flex items-center justify-between p-3 text-left hover:bg-surface-card/30 transition-colors'
               >
                 <div className='flex-1 min-w-0'>
-                  <p className='text-sm font-medium text-zinc-100'>
+                  <p className='text-sm font-medium text-content-primary'>
                     {theme.name}
                   </p>
                   {!isExpanded && (
-                    <p className='text-xs text-zinc-400 truncate'>
+                    <p className='text-xs text-content-muted truncate'>
                       {theme.shortSummary}
                     </p>
                   )}
                 </div>
                 <ChevronDown
-                  className={`w-4 h-4 text-zinc-500 transition-transform ${
+                  className={`w-4 h-4 text-content-muted transition-transform ${
                     isExpanded ? 'rotate-180' : ''
                   }`}
                 />
@@ -178,7 +182,7 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
 
               {isExpanded && (
                 <div className='px-3 pb-3 space-y-3'>
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
+                  <p className='text-sm text-content-secondary leading-relaxed'>
                     {hasCosmicProfileAccess
                       ? theme.longSummary
                       : theme.shortSummary}
@@ -190,19 +194,21 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
                     if (!themeData) return null;
                     const { triggers } = themeData;
                     return (
-                      <div className='space-y-2 pt-2 border-t border-zinc-800/50'>
-                        <p className='text-xs font-medium text-zinc-500 uppercase tracking-wide'>
+                      <div className='space-y-2 pt-2 border-t border-stroke-subtle/50'>
+                        <p className='text-xs font-medium text-content-muted uppercase tracking-wide'>
                           Connected to
                         </p>
                         <div className='space-y-1.5'>
                           {triggers.tarotMajors.length > 0 && (
                             <div className='flex items-start gap-2'>
                               <Star className='w-3.5 h-3.5 text-lunary-accent mt-0.5 shrink-0' />
-                              <p className='text-xs text-zinc-400'>
-                                <span className='text-zinc-300'>Tarot:</span>{' '}
+                              <p className='text-xs text-content-muted'>
+                                <span className='text-content-secondary'>
+                                  Tarot:
+                                </span>{' '}
                                 {triggers.tarotMajors.slice(0, 3).join(', ')}
                                 {triggers.tarotSuits.length > 0 && (
-                                  <span className='text-zinc-500'>
+                                  <span className='text-content-muted'>
                                     {' '}
                                     • {triggers.tarotSuits.join(' & ')} energy
                                   </span>
@@ -214,8 +220,8 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
                             triggers.transits.length > 0 && (
                               <div className='flex items-start gap-2'>
                                 <Layers className='w-3.5 h-3.5 text-lunary-secondary mt-0.5 shrink-0' />
-                                <p className='text-xs text-zinc-400'>
-                                  <span className='text-zinc-300'>
+                                <p className='text-xs text-content-muted'>
+                                  <span className='text-content-secondary'>
                                     Transits:
                                   </span>{' '}
                                   {triggers.transits.slice(0, 2).join(', ')}
@@ -230,7 +236,7 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
                   {hasCosmicProfileAccess &&
                     theme.guidanceBullets.length > 0 && (
                       <div className='space-y-1.5'>
-                        <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
+                        <p className='text-xs font-medium text-content-muted uppercase tracking-wide'>
                           Guidance
                         </p>
                         <ul className='space-y-1'>
@@ -239,7 +245,7 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
                             .map((bullet, i) => (
                               <li
                                 key={i}
-                                className='text-xs text-zinc-400 flex items-start gap-2'
+                                className='text-xs text-content-muted flex items-start gap-2'
                               >
                                 <span className='text-lunary-primary-400 mt-0.5'>
                                   •
@@ -256,7 +262,7 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
                       {theme.relatedTags.slice(0, 4).map((tag) => (
                         <span
                           key={tag}
-                          className='text-xs px-2 py-0.5 rounded bg-lunary-primary-900/30 text-lunary-primary-300'
+                          className='text-xs px-2 py-0.5 rounded bg-layer-base/30 text-content-brand'
                         >
                           {tag}
                         </span>
@@ -271,7 +277,7 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
       </div>
 
       {!hasCosmicProfileAccess && themes.length > 0 && (
-        <p className='text-xs text-zinc-500 mt-3'>
+        <p className='text-xs text-content-muted mt-3'>
           Upgrade for deeper theme insights and guidance.
         </p>
       )}
@@ -279,7 +285,7 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
       {/* Link to patterns */}
       <Link
         href='/book-of-shadows?tab=patterns'
-        className='mt-3 flex items-center justify-between gap-2 text-xs text-lunary-accent-300 hover:text-lunary-accent-200 transition-colors group'
+        className='mt-3 flex items-center justify-between gap-2 text-xs text-content-brand-accent hover:text-content-brand-accent transition-colors group'
       >
         <span>View your pattern evolution</span>
         <ArrowRight className='w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform' />

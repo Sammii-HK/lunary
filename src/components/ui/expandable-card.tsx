@@ -85,7 +85,7 @@ export const ExpandableCard = ({
       data-component='expandable-card'
       data-version='v2'
       className={cn(
-        'bg-lunary-bg border border-stroke-subtle/50 rounded-md w-full overflow-hidden transition-all relative',
+        'bg-surface-elevated border border-stroke-subtle/50 rounded-md w-full overflow-hidden transition-all relative',
         isExpanded && 'border-lunary-primary-700/50',
         className,
       )}
@@ -155,8 +155,8 @@ export const ExpandableCardHeader = ({
 }: ExpandableCardHeaderProps) => {
   const badgeClasses = {
     default: 'bg-surface-card/50 text-content-muted',
-    highlight: 'bg-surface-card/50 text-lunary-primary-200',
-    warning: 'bg-surface-card/50 text-lunary-accent-200',
+    highlight: 'bg-surface-card/50 text-content-secondary',
+    warning: 'bg-surface-card/50 text-content-brand-accent',
     danger: 'bg-layer-deep/50 text-lunary-error-300',
   };
 

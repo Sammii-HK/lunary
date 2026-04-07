@@ -242,7 +242,7 @@ To incorporate elements into your practice, consider:
         faqs={faqs}
       >
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Explore Each Element
           </h2>
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -250,7 +250,7 @@ To incorporate elements into your practice, consider:
               <Link
                 key={name}
                 href={`/grimoire/correspondences/elements/${stringToKebabCase(name)}`}
-                className={`group rounded-xl border bg-zinc-900/30 p-6 hover:bg-zinc-900/50 transition-all ${elementColors[name]}`}
+                className={`group rounded-xl border bg-surface-elevated/30 p-6 hover:bg-surface-elevated/50 transition-all ${elementColors[name]}`}
               >
                 <div className='flex items-center gap-4 mb-4'>
                   {elementIcons[name]}
@@ -260,21 +260,21 @@ To incorporate elements into your practice, consider:
                     {name}
                   </h3>
                 </div>
-                <div className='space-y-2 text-sm text-zinc-400'>
+                <div className='space-y-2 text-sm text-content-muted'>
                   <p>
-                    <span className='text-zinc-400'>Direction:</span>{' '}
+                    <span className='text-content-muted'>Direction:</span>{' '}
                     {data.directions}
                   </p>
                   <p>
-                    <span className='text-zinc-400'>Season:</span>{' '}
+                    <span className='text-content-muted'>Season:</span>{' '}
                     {data.seasons}
                   </p>
                   <p>
-                    <span className='text-zinc-400'>Zodiac:</span>{' '}
+                    <span className='text-content-muted'>Zodiac:</span>{' '}
                     {data.zodiacSigns.join(', ')}
                   </p>
                   <p>
-                    <span className='text-zinc-400'>Colors:</span>{' '}
+                    <span className='text-content-muted'>Colors:</span>{' '}
                     {data.colors.slice(0, 3).join(', ')}
                   </p>
                 </div>
@@ -283,32 +283,32 @@ To incorporate elements into your practice, consider:
           </div>
         </section>
 
-        <section className='mb-12 bg-gradient-to-r from-orange-900/20 via-blue-900/20 to-emerald-900/20 border border-zinc-700 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-gradient-to-r from-orange-900/20 via-blue-900/20 to-emerald-900/20 border border-stroke-default rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Quick Reference: Elemental Magic
           </h2>
           <div className='grid md:grid-cols-2 gap-4 text-sm'>
             <div>
               <p className='text-orange-400 font-medium'>Fire Magic:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Candles, passion, transformation, courage, willpower
               </p>
             </div>
             <div>
               <p className='text-blue-400 font-medium'>Water Magic:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Bowls, emotions, intuition, healing, purification
               </p>
             </div>
             <div>
               <p className='text-cyan-400 font-medium'>Air Magic:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Incense, communication, intellect, travel, new beginnings
               </p>
             </div>
             <div>
               <p className='text-emerald-400 font-medium'>Earth Magic:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Crystals, abundance, stability, grounding, fertility
               </p>
             </div>

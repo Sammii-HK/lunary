@@ -28,20 +28,20 @@ export const metadata: Metadata = {
 
 export default function PersonalizedVsGenericAstrologyPage() {
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <div className='mb-8'>
-          <h1 className='text-4xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-4xl font-light text-content-primary mb-4'>
             Personalized Astrology vs Generic: Why It Matters
           </h1>
-          <p className='text-lg text-zinc-400'>
+          <p className='text-lg text-content-muted'>
             Understanding the difference between personalized birth chart
             astrology and generic zodiac horoscopes.
           </p>
         </div>
 
-        <div className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
+        <div className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
             <strong>Note:</strong> This educational content explains the
             differences between personalized and generic astrology approaches to
             help you make informed decisions about astrology apps.
@@ -50,18 +50,18 @@ export default function PersonalizedVsGenericAstrologyPage() {
 
         {/* What is Generic Astrology */}
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             What is Generic Astrology?
           </h2>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6'>
+            <p className='text-sm text-content-secondary leading-relaxed mb-4'>
               Generic astrology, also known as sun sign astrology, provides
               horoscopes and insights based solely on your zodiac sign (the
               position of the sun at your birth). This approach assumes that
               everyone born under the same sun sign will have similar
               experiences and characteristics.
             </p>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               Generic horoscopes are written for millions of people at once,
               based only on the sun's position. They don't account for your
               exact birth time, date, location, or the positions of other
@@ -72,18 +72,18 @@ export default function PersonalizedVsGenericAstrologyPage() {
 
         {/* What is Personalized Astrology */}
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             What is Personalized Astrology?
           </h2>
-          <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'>
+            <p className='text-sm text-content-secondary leading-relaxed mb-4'>
               Personalized astrology creates a unique birth chart based on your
               exact birth time, date, and location. This chart calculates the
               positions of all planets, the moon, and other celestial bodies at
               the moment you were born, creating a one-of-a-kind astrological
               profile.
             </p>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               Personalized horoscopes and insights are based on YOUR specific
               birth chart, taking into account planetary aspects, house
               placements, and transits that affect your unique astrological
@@ -95,18 +95,18 @@ export default function PersonalizedVsGenericAstrologyPage() {
 
         {/* Key Differences */}
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Key Differences
           </h2>
           <div className='space-y-4'>
-            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+            <div className='rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'>
               <div className='flex items-start gap-3 mb-3'>
                 <Star className='h-5 w-5 text-lunary-primary-400 flex-shrink-0 mt-0.5' />
                 <div>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                  <h3 className='text-lg font-medium text-content-primary mb-2'>
                     Calculation Method
                   </h3>
-                  <div className='space-y-2 text-sm text-zinc-300'>
+                  <div className='space-y-2 text-sm text-content-secondary'>
                     <div className='flex items-start gap-2'>
                       <span className='text-lunary-success'>✓</span>
                       <span>
@@ -116,7 +116,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                       </span>
                     </div>
                     <div className='flex items-start gap-2'>
-                      <span className='text-zinc-400'>✗</span>
+                      <span className='text-content-muted'>✗</span>
                       <span>
                         <strong>Generic:</strong> Based only on sun sign
                         position, doesn't require birth time or location
@@ -127,14 +127,14 @@ export default function PersonalizedVsGenericAstrologyPage() {
               </div>
             </div>
 
-            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+            <div className='rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'>
               <div className='flex items-start gap-3 mb-3'>
                 <Star className='h-5 w-5 text-lunary-primary-400 flex-shrink-0 mt-0.5' />
                 <div>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                  <h3 className='text-lg font-medium text-content-primary mb-2'>
                     Accuracy
                   </h3>
-                  <div className='space-y-2 text-sm text-zinc-300'>
+                  <div className='space-y-2 text-sm text-content-secondary'>
                     <div className='flex items-start gap-2'>
                       <span className='text-lunary-success'>✓</span>
                       <span>
@@ -143,7 +143,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                       </span>
                     </div>
                     <div className='flex items-start gap-2'>
-                      <span className='text-zinc-400'>✗</span>
+                      <span className='text-content-muted'>✗</span>
                       <span>
                         <strong>Generic:</strong> Only considers sun sign,
                         ignores other planetary influences
@@ -154,14 +154,14 @@ export default function PersonalizedVsGenericAstrologyPage() {
               </div>
             </div>
 
-            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+            <div className='rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'>
               <div className='flex items-start gap-3 mb-3'>
                 <Star className='h-5 w-5 text-lunary-primary-400 flex-shrink-0 mt-0.5' />
                 <div>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                  <h3 className='text-lg font-medium text-content-primary mb-2'>
                     Relevance
                   </h3>
-                  <div className='space-y-2 text-sm text-zinc-300'>
+                  <div className='space-y-2 text-sm text-content-secondary'>
                     <div className='flex items-start gap-2'>
                       <span className='text-lunary-success'>✓</span>
                       <span>
@@ -170,7 +170,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                       </span>
                     </div>
                     <div className='flex items-start gap-2'>
-                      <span className='text-zinc-400'>✗</span>
+                      <span className='text-content-muted'>✗</span>
                       <span>
                         <strong>Generic:</strong> Same horoscope for millions of
                         people, not specific to your situation
@@ -181,14 +181,14 @@ export default function PersonalizedVsGenericAstrologyPage() {
               </div>
             </div>
 
-            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+            <div className='rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'>
               <div className='flex items-start gap-3 mb-3'>
                 <Star className='h-5 w-5 text-lunary-primary-400 flex-shrink-0 mt-0.5' />
                 <div>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                  <h3 className='text-lg font-medium text-content-primary mb-2'>
                     Astronomical Accuracy
                   </h3>
-                  <div className='space-y-2 text-sm text-zinc-300'>
+                  <div className='space-y-2 text-sm text-content-secondary'>
                     <div className='flex items-start gap-2'>
                       <span className='text-lunary-success'>✓</span>
                       <span>
@@ -197,7 +197,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
                       </span>
                     </div>
                     <div className='flex items-start gap-2'>
-                      <span className='text-zinc-400'>✗</span>
+                      <span className='text-content-muted'>✗</span>
                       <span>
                         <strong>Generic:</strong> Often uses simplified or
                         approximate positions, not real astronomy
@@ -212,18 +212,18 @@ export default function PersonalizedVsGenericAstrologyPage() {
 
         {/* Why Personalized Matters */}
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Why Personalized Astrology Matters
           </h2>
-          <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'>
             <div className='space-y-4'>
               <div className='flex items-start gap-3'>
                 <Check className='h-5 w-5 text-lunary-success flex-shrink-0 mt-0.5' />
                 <div>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-1'>
+                  <h3 className='text-lg font-medium text-content-primary mb-1'>
                     More Accurate Insights
                   </h3>
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
+                  <p className='text-sm text-content-secondary leading-relaxed'>
                     Your birth chart is unique - even people born on the same
                     day will have different charts if they were born at
                     different times or locations. Personalized astrology
@@ -235,10 +235,10 @@ export default function PersonalizedVsGenericAstrologyPage() {
               <div className='flex items-start gap-3'>
                 <Check className='h-5 w-5 text-lunary-success flex-shrink-0 mt-0.5' />
                 <div>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-1'>
+                  <h3 className='text-lg font-medium text-content-primary mb-1'>
                     Real Astronomical Data
                   </h3>
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
+                  <p className='text-sm text-content-secondary leading-relaxed'>
                     Personalized astrology uses real astronomical calculations
                     based on actual planetary positions at your birth. This
                     provides astronomically accurate birth charts, not
@@ -249,10 +249,10 @@ export default function PersonalizedVsGenericAstrologyPage() {
               <div className='flex items-start gap-3'>
                 <Check className='h-5 w-5 text-lunary-success flex-shrink-0 mt-0.5' />
                 <div>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-1'>
+                  <h3 className='text-lg font-medium text-content-primary mb-1'>
                     Relevant Guidance
                   </h3>
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
+                  <p className='text-sm text-content-secondary leading-relaxed'>
                     Personalized horoscopes consider current planetary transits
                     and how they specifically affect YOUR chart. This provides
                     guidance that's relevant to your unique situation, not
@@ -263,10 +263,10 @@ export default function PersonalizedVsGenericAstrologyPage() {
               <div className='flex items-start gap-3'>
                 <Check className='h-5 w-5 text-lunary-success flex-shrink-0 mt-0.5' />
                 <div>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-1'>
+                  <h3 className='text-lg font-medium text-content-primary mb-1'>
                     Complete Picture
                   </h3>
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
+                  <p className='text-sm text-content-secondary leading-relaxed'>
                     Personalized astrology considers all planets, aspects,
                     houses, and transits in your chart. This provides a complete
                     picture of your astrological profile, not just your sun
@@ -280,11 +280,11 @@ export default function PersonalizedVsGenericAstrologyPage() {
 
         {/* How Lunary Provides Personalized Astrology */}
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             How Lunary Provides Personalized Astrology
           </h2>
-          <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'>
+            <p className='text-sm text-content-secondary leading-relaxed mb-4'>
               Lunary uses real astronomical calculations to create your unique
               birth chart based on your exact birth time, date, and location.
               Every horoscope, insight, and reading is personalized to YOUR
@@ -293,31 +293,31 @@ export default function PersonalizedVsGenericAstrologyPage() {
             <div className='space-y-3'>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
-                <span className='text-sm text-zinc-300'>
+                <span className='text-sm text-content-secondary'>
                   Real astronomical calculations from your exact birth data
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
-                <span className='text-sm text-zinc-300'>
+                <span className='text-sm text-content-secondary'>
                   Personalized horoscopes based on YOUR birth chart
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
-                <span className='text-sm text-zinc-300'>
+                <span className='text-sm text-content-secondary'>
                   Tarot readings personalized to your chart
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
-                <span className='text-sm text-zinc-300'>
+                <span className='text-sm text-content-secondary'>
                   Insights based on current transits affecting your chart
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
-                <span className='text-sm text-zinc-300'>
+                <span className='text-sm text-content-secondary'>
                   Complete grimoire with spells and rituals
                 </span>
               </div>
@@ -327,18 +327,18 @@ export default function PersonalizedVsGenericAstrologyPage() {
 
         {/* Conclusion */}
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Conclusion
           </h2>
-          <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'>
+            <p className='text-sm text-content-secondary leading-relaxed mb-4'>
               Personalized astrology provides more accurate, relevant, and
               meaningful insights than generic zodiac horoscopes. By using your
               exact birth chart with real astronomical calculations,
               personalized astrology accounts for your unique astrological
               profile and provides guidance tailored specifically to you.
             </p>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               If you're looking for astrology insights that are truly
               personalized to your birth chart, consider using an app like
               Lunary that uses real astronomical data and provides chart-based
@@ -351,7 +351,7 @@ export default function PersonalizedVsGenericAstrologyPage() {
         <section className='text-center mb-12'>
           <Link
             href='/pricing'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium text-lg transition-colors'
           >
             Try Personalized Astrology Free
             <ArrowRight className='h-5 w-5' />
@@ -359,8 +359,8 @@ export default function PersonalizedVsGenericAstrologyPage() {
         </section>
 
         {/* Legal Disclaimer */}
-        <section className='mt-12 pt-8 border-t border-zinc-800'>
-          <p className='text-xs text-zinc-400 leading-relaxed'>
+        <section className='mt-12 pt-8 border-t border-stroke-subtle'>
+          <p className='text-xs text-content-muted leading-relaxed'>
             <strong>Disclaimer:</strong> This educational content is for
             informational purposes only. Astrology is not a science and should
             not be used as a substitute for professional advice. This content

@@ -31,14 +31,14 @@ export function FAQCategory({
     <section id={category.id} className='scroll-mt-24'>
       {/* Category Header */}
       <div className='flex items-center gap-3 mb-6'>
-        <div className='p-2 rounded-lg bg-lunary-primary-900/20 text-lunary-primary-300'>
+        <div className='p-2 rounded-lg bg-layer-base/20 text-content-brand'>
           {getIcon(category.icon, 'w-5 h-5')}
         </div>
         <div>
-          <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+          <h2 className='text-2xl md:text-3xl font-light text-content-primary'>
             {category.title}
           </h2>
-          <p className='text-sm text-zinc-500'>
+          <p className='text-sm text-content-muted'>
             {category.questions.length} question
             {category.questions.length !== 1 ? 's' : ''}
           </p>

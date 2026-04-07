@@ -20,7 +20,7 @@ export function CosmicProgress({
         <div className='w-full max-w-3xl space-y-3'>
           <div className='flex items-center gap-2 mb-4'>
             <Sparkles className='w-5 h-5 text-lunary-accent' />
-            <h2 className='text-lg font-semibold text-white'>
+            <h2 className='text-lg font-semibold text-content-primary'>
               Your Cosmic Progress
             </h2>
           </div>
@@ -28,7 +28,7 @@ export function CosmicProgress({
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className='h-32 bg-zinc-800/50 animate-pulse rounded-xl'
+                className='h-32 bg-surface-card/50 animate-pulse rounded-xl'
               />
             ))}
           </div>
@@ -50,11 +50,11 @@ export function CosmicProgress({
         <div className='flex items-center justify-between mb-4'>
           <div className='flex items-center gap-2'>
             <Sparkles className='w-5 h-5 text-lunary-accent' />
-            <h2 className='text-lg font-semibold text-white'>
+            <h2 className='text-lg font-semibold text-content-primary'>
               Your Cosmic Progress
             </h2>
           </div>
-          <span className='text-sm text-zinc-400'>
+          <span className='text-sm text-content-muted'>
             Level {totalLevel}/{maxTotalLevel}
           </span>
         </div>

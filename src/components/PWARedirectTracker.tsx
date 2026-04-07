@@ -161,19 +161,19 @@ export function PWARedirectTracker() {
   }, []);
 
   return (
-    <div className='fixed bottom-4 left-4 right-4 bg-black/90 border border-red-500 rounded-lg p-4 text-xs font-mono max-h-64 overflow-auto z-[9999]'>
+    <div className='fixed bottom-4 left-4 right-4 bg-surface-base/90 border border-red-500 rounded-lg p-4 text-xs font-mono max-h-64 overflow-auto z-[9999]'>
       <div className='flex justify-between items-center mb-2'>
         <h3 className='text-red-400 font-bold'>🔍 PWA Redirect Tracker</h3>
         <button
           onClick={() => setLogs([])}
-          className='text-zinc-400 hover:text-white'
+          className='text-content-muted hover:text-content-primary'
         >
           Clear
         </button>
       </div>
       <div className='space-y-1'>
         {logs.length === 0 ? (
-          <div className='text-zinc-400'>No logs yet...</div>
+          <div className='text-content-muted'>No logs yet...</div>
         ) : (
           logs.map((log, i) => (
             <div

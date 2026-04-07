@@ -317,7 +317,7 @@ export default function SubstackManagerPage() {
   };
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 p-6'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-6'>
       <div className='max-w-7xl mx-auto'>
         <div className='mb-6'>
           <Link href='/admin'>
@@ -329,7 +329,7 @@ export default function SubstackManagerPage() {
           <div className='flex items-start justify-between'>
             <div>
               <h1 className='text-3xl font-bold mb-2'>Substack Manager</h1>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Generate and publish weekly Substack posts (Free: $0, Paid:
                 $3/month)
               </p>
@@ -338,7 +338,7 @@ export default function SubstackManagerPage() {
               onClick={verifyConnection}
               disabled={verificationStatus.checking}
               variant='outline'
-              className='bg-zinc-800 hover:bg-zinc-700'
+              className='bg-surface-card hover:bg-surface-overlay'
             >
               {verificationStatus.checking ? (
                 <>
@@ -357,8 +357,8 @@ export default function SubstackManagerPage() {
             <div
               className={`mt-4 p-3 rounded-lg border ${
                 verificationStatus.authenticated
-                  ? 'bg-lunary-success-950 border-lunary-success-900 text-lunary-success'
-                  : 'bg-lunary-error-950 border-lunary-error-900 text-lunary-error'
+                  ? 'bg-layer-deep border-lunary-success-900 text-lunary-success'
+                  : 'bg-layer-deep border-lunary-error-900 text-lunary-error'
               }`}
             >
               <p className='text-sm font-medium'>
@@ -374,12 +374,12 @@ export default function SubstackManagerPage() {
         </div>
 
         <Tabs defaultValue='publishing' className='space-y-6'>
-          <TabsList className='bg-zinc-900 border border-zinc-800'>
+          <TabsList className='bg-surface-elevated border border-stroke-subtle'>
             <TabsTrigger value='publishing'>Publishing</TabsTrigger>
           </TabsList>
           <TabsContent value='publishing' className='space-y-6'>
             <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardHeader>
                   <CardTitle className='flex items-center gap-2'>
                     <Calendar className='h-5 w-5' />
@@ -397,7 +397,7 @@ export default function SubstackManagerPage() {
                         onChange={(e) =>
                           setWeekOffset(parseInt(e.target.value))
                         }
-                        className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
+                        className='w-full bg-surface-card border-stroke-default rounded px-3 py-2 text-sm'
                       >
                         {weekOptions.map((opt) => (
                           <option key={opt.offset} value={opt.offset}>
@@ -432,7 +432,7 @@ export default function SubstackManagerPage() {
                 </CardContent>
               </Card>
 
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardHeader>
                   <CardTitle className='flex items-center gap-2'>
                     <Send className='h-5 w-5' />
@@ -489,7 +489,7 @@ export default function SubstackManagerPage() {
                 </CardContent>
               </Card>
 
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardHeader>
                   <CardTitle>Publishing Status</CardTitle>
                 </CardHeader>
@@ -550,7 +550,7 @@ export default function SubstackManagerPage() {
                       </div>
                     )}
                     {!publishResults.free && !publishResults.paid && (
-                      <p className='text-sm text-zinc-400'>
+                      <p className='text-sm text-content-muted'>
                         No posts published yet
                       </p>
                     )}
@@ -559,7 +559,7 @@ export default function SubstackManagerPage() {
               </Card>
             </div>
 
-            <Card className='bg-zinc-900 border-zinc-800'>
+            <Card className='bg-surface-elevated border-stroke-subtle'>
               <CardHeader>
                 <CardTitle className='flex items-center gap-2'>
                   <History className='h-5 w-5' />
@@ -568,9 +568,9 @@ export default function SubstackManagerPage() {
               </CardHeader>
               <CardContent>
                 <div className='space-y-4'>
-                  <div className='flex items-center gap-2 p-3 bg-lunary-accent-950 border border-lunary-accent-900 rounded-lg'>
+                  <div className='flex items-center gap-2 p-3 bg-layer-deep border border-lunary-accent-900 rounded-lg'>
                     <AlertCircle className='h-5 w-5 text-lunary-accent flex-shrink-0' />
-                    <p className='text-sm text-lunary-accent-200'>
+                    <p className='text-sm text-content-brand-accent'>
                       Backfill publishes multiple weeks at once. Start with a
                       small range (1-2 weeks) to test before doing a larger
                       backfill.
@@ -590,7 +590,7 @@ export default function SubstackManagerPage() {
                             end: parseInt(e.target.value),
                           })
                         }
-                        className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
+                        className='w-full bg-surface-card border-stroke-default rounded px-3 py-2 text-sm'
                       >
                         {weekOptions
                           .filter((opt) => opt.offset < 0)
@@ -613,7 +613,7 @@ export default function SubstackManagerPage() {
                             start: parseInt(e.target.value),
                           })
                         }
-                        className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
+                        className='w-full bg-surface-card border-stroke-default rounded px-3 py-2 text-sm'
                       >
                         {weekOptions
                           .filter(
@@ -630,7 +630,7 @@ export default function SubstackManagerPage() {
                   </div>
 
                   <div className='flex items-center justify-between'>
-                    <p className='text-sm text-zinc-400'>
+                    <p className='text-sm text-content-muted'>
                       {Math.abs(backfillRange.start - backfillRange.end) + 1}{' '}
                       weeks selected (
                       {(Math.abs(backfillRange.start - backfillRange.end) + 1) *
@@ -660,15 +660,15 @@ export default function SubstackManagerPage() {
 
                   {backfillResults.length > 0 && (
                     <div className='mt-4 space-y-2 max-h-64 overflow-y-auto'>
-                      <p className='text-sm font-medium text-zinc-300'>
+                      <p className='text-sm font-medium text-content-secondary'>
                         Backfill Results:
                       </p>
                       {backfillResults.map((result, idx) => (
                         <div
                           key={idx}
-                          className='flex items-center justify-between p-2 bg-zinc-800 rounded text-sm'
+                          className='flex items-center justify-between p-2 bg-surface-card rounded text-sm'
                         >
-                          <span className='text-zinc-300'>
+                          <span className='text-content-secondary'>
                             {new Date(result.weekStart).toLocaleDateString(
                               'en-US',
                               {
@@ -703,7 +703,7 @@ export default function SubstackManagerPage() {
               </CardContent>
             </Card>
 
-            <Card className='bg-zinc-900 border-zinc-800 mb-6'>
+            <Card className='bg-surface-elevated border-stroke-subtle mb-6'>
               <CardHeader>
                 <CardTitle className='flex items-center gap-2'>
                   <Share2 className='h-5 w-5' />
@@ -713,7 +713,7 @@ export default function SubstackManagerPage() {
               <CardContent>
                 <div className='space-y-4'>
                   <div className='flex items-center justify-between'>
-                    <p className='text-sm text-zinc-400'>
+                    <p className='text-sm text-content-muted'>
                       Generate images and captions for the selected week
                     </p>
                     <Button
@@ -743,7 +743,7 @@ export default function SubstackManagerPage() {
                           {Object.entries(socialContent.images).map(
                             ([format, url]) => (
                               <div key={format} className='space-y-2'>
-                                <div className='aspect-square bg-zinc-800 rounded overflow-hidden'>
+                                <div className='aspect-square bg-surface-card rounded overflow-hidden'>
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={url}
@@ -752,13 +752,13 @@ export default function SubstackManagerPage() {
                                   />
                                 </div>
                                 <div className='flex items-center justify-between'>
-                                  <span className='text-xs text-zinc-400 capitalize'>
+                                  <span className='text-xs text-content-muted capitalize'>
                                     {format}
                                   </span>
                                   <a
                                     href={url}
                                     download={`lunary-${format}.png`}
-                                    className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                                    className='text-lunary-primary-400 hover:text-content-brand'
                                   >
                                     <Download className='h-4 w-4' />
                                   </a>
@@ -776,20 +776,20 @@ export default function SubstackManagerPage() {
                             ([length, caption]) => (
                               <div
                                 key={length}
-                                className='bg-zinc-800 rounded p-3'
+                                className='bg-surface-card rounded p-3'
                               >
                                 <div className='flex items-center justify-between mb-2'>
-                                  <span className='text-xs text-zinc-400 capitalize'>
+                                  <span className='text-xs text-content-muted capitalize'>
                                     {length}
                                   </span>
                                   <button
                                     onClick={() => copyToClipboard(caption)}
-                                    className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                                    className='text-lunary-primary-400 hover:text-content-brand'
                                   >
                                     <Copy className='h-4 w-4' />
                                   </button>
                                 </div>
-                                <p className='text-sm text-zinc-300'>
+                                <p className='text-sm text-content-secondary'>
                                   {caption}
                                 </p>
                               </div>
@@ -804,7 +804,7 @@ export default function SubstackManagerPage() {
                           {socialContent.hashtags.map((tag) => (
                             <span
                               key={tag}
-                              className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-2 py-1 rounded'
+                              className='text-xs bg-layer-base/20 text-content-brand px-2 py-1 rounded'
                             >
                               {tag}
                             </span>
@@ -814,7 +814,7 @@ export default function SubstackManagerPage() {
                           onClick={() =>
                             copyToClipboard(socialContent.hashtags.join(' '))
                           }
-                          className='text-xs text-lunary-primary-400 hover:text-lunary-primary-300 mt-2'
+                          className='text-xs text-lunary-primary-400 hover:text-content-brand mt-2'
                         >
                           Copy all hashtags
                         </button>
@@ -829,7 +829,7 @@ export default function SubstackManagerPage() {
                             ([platform, content]) => (
                               <div
                                 key={platform}
-                                className='bg-zinc-800 rounded p-3'
+                                className='bg-surface-card rounded p-3'
                               >
                                 <div className='flex items-center justify-between mb-2'>
                                   <span className='text-sm font-medium capitalize'>
@@ -839,17 +839,17 @@ export default function SubstackManagerPage() {
                                 {Object.entries(content).map(([type, text]) => (
                                   <div key={type} className='mb-2'>
                                     <div className='flex items-center justify-between'>
-                                      <span className='text-xs text-zinc-400 capitalize'>
+                                      <span className='text-xs text-content-muted capitalize'>
                                         {type}
                                       </span>
                                       <button
                                         onClick={() => copyToClipboard(text)}
-                                        className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                                        className='text-lunary-primary-400 hover:text-content-brand'
                                       >
                                         <Copy className='h-3 w-3' />
                                       </button>
                                     </div>
-                                    <p className='text-xs text-zinc-400 mt-1 line-clamp-2'>
+                                    <p className='text-xs text-content-muted mt-1 line-clamp-2'>
                                       {text}
                                     </p>
                                   </div>
@@ -867,13 +867,13 @@ export default function SubstackManagerPage() {
 
             {preview && (
               <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-                <Card className='bg-zinc-900 border-zinc-800'>
+                <Card className='bg-surface-elevated border-stroke-subtle'>
                   <CardHeader>
                     <CardTitle className='flex items-center justify-between'>
                       <span>Free Post Preview</span>
                       <Badge variant='outline'>Free</Badge>
                     </CardTitle>
-                    <p className='text-sm text-zinc-400'>
+                    <p className='text-sm text-content-muted'>
                       {preview.metadata.freeWordCount} words
                     </p>
                   </CardHeader>
@@ -884,12 +884,12 @@ export default function SubstackManagerPage() {
                           {preview.free.title}
                         </h3>
                         {preview.free.subtitle && (
-                          <p className='text-sm text-zinc-400 italic'>
+                          <p className='text-sm text-content-muted italic'>
                             {preview.free.subtitle}
                           </p>
                         )}
                       </div>
-                      <div className='bg-zinc-950 rounded p-4 max-h-96 overflow-y-auto'>
+                      <div className='bg-surface-base rounded p-4 max-h-96 overflow-y-auto'>
                         <pre className='text-xs whitespace-pre-wrap font-mono'>
                           {preview.free.content.substring(0, 1000)}
                           {preview.free.content.length > 1000 && '...'}
@@ -899,13 +899,13 @@ export default function SubstackManagerPage() {
                   </CardContent>
                 </Card>
 
-                <Card className='bg-zinc-900 border-zinc-800'>
+                <Card className='bg-surface-elevated border-stroke-subtle'>
                   <CardHeader>
                     <CardTitle className='flex items-center justify-between'>
                       <span>Paid Post Preview</span>
                       <Badge variant='default'>$3/month</Badge>
                     </CardTitle>
-                    <p className='text-sm text-zinc-400'>
+                    <p className='text-sm text-content-muted'>
                       {preview.metadata.paidWordCount} words
                     </p>
                   </CardHeader>
@@ -916,12 +916,12 @@ export default function SubstackManagerPage() {
                           {preview.paid.title}
                         </h3>
                         {preview.paid.subtitle && (
-                          <p className='text-sm text-zinc-400 italic'>
+                          <p className='text-sm text-content-muted italic'>
                             {preview.paid.subtitle}
                           </p>
                         )}
                       </div>
-                      <div className='bg-zinc-950 rounded p-4 max-h-96 overflow-y-auto'>
+                      <div className='bg-surface-base rounded p-4 max-h-96 overflow-y-auto'>
                         <pre className='text-xs whitespace-pre-wrap font-mono'>
                           {preview.paid.content.substring(0, 1000)}
                           {preview.paid.content.length > 1000 && '...'}
@@ -934,14 +934,14 @@ export default function SubstackManagerPage() {
             )}
 
             {preview && (
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardHeader>
                   <CardTitle>Week Metadata</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm'>
                     <div>
-                      <p className='text-zinc-400'>Week Start</p>
+                      <p className='text-content-muted'>Week Start</p>
                       <p className='font-medium'>
                         {new Date(
                           preview.metadata.weekStart,
@@ -949,7 +949,7 @@ export default function SubstackManagerPage() {
                       </p>
                     </div>
                     <div>
-                      <p className='text-zinc-400'>Week End</p>
+                      <p className='text-content-muted'>Week End</p>
                       <p className='font-medium'>
                         {new Date(
                           preview.metadata.weekEnd,
@@ -957,13 +957,13 @@ export default function SubstackManagerPage() {
                       </p>
                     </div>
                     <div>
-                      <p className='text-zinc-400'>Week Number</p>
+                      <p className='text-content-muted'>Week Number</p>
                       <p className='font-medium'>
                         {preview.metadata.weekNumber}
                       </p>
                     </div>
                     <div>
-                      <p className='text-zinc-400'>Year</p>
+                      <p className='text-content-muted'>Year</p>
                       <p className='font-medium'>
                         {new Date(preview.metadata.weekStart).getFullYear()}
                       </p>

@@ -93,47 +93,47 @@ export function ExitIntent() {
   };
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
-      <div className='relative bg-zinc-900 border border-zinc-700 rounded-lg p-6 md:p-8 max-w-md w-full shadow-xl'>
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-surface-base/60 backdrop-blur-sm p-4'>
+      <div className='relative bg-surface-elevated border border-stroke-default rounded-lg p-6 md:p-8 max-w-md w-full shadow-xl'>
         <button
           onClick={handleClose}
-          className='absolute top-4 right-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors'
+          className='absolute top-4 right-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-content-muted hover:text-content-primary transition-colors'
           aria-label='Close'
         >
           <X className='w-5 h-5' />
         </button>
 
         <div className='text-center space-y-4'>
-          <h2 className='text-2xl font-bold text-white'>
+          <h2 className='text-2xl font-bold text-content-primary'>
             Wait! Don't Miss Out
           </h2>
-          <p className='text-zinc-300'>
+          <p className='text-content-secondary'>
             Unlock personalized horoscopes, birth charts, and cosmic insights
             tailored to you.
           </p>
 
           <div className='space-y-3 pt-4'>
             <div className='flex items-center gap-3 text-left'>
-              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
-                <span className='text-lunary-accent-300 text-sm'>✓</span>
+              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-layer-base flex items-center justify-center'>
+                <span className='text-content-brand-accent text-sm'>✓</span>
               </div>
-              <span className='text-zinc-300 text-sm'>
+              <span className='text-content-secondary text-sm'>
                 Personalized birth chart analysis
               </span>
             </div>
             <div className='flex items-center gap-3 text-left'>
-              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
-                <span className='text-lunary-accent-300 text-sm'>✓</span>
+              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-layer-base flex items-center justify-center'>
+                <span className='text-content-brand-accent text-sm'>✓</span>
               </div>
-              <span className='text-zinc-300 text-sm'>
+              <span className='text-content-secondary text-sm'>
                 Daily horoscopes based on your chart
               </span>
             </div>
             <div className='flex items-center gap-3 text-left'>
-              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
-                <span className='text-lunary-accent-300 text-sm'>✓</span>
+              <div className='flex-shrink-0 w-6 h-6 rounded-full bg-layer-base flex items-center justify-center'>
+                <span className='text-content-brand-accent text-sm'>✓</span>
               </div>
-              <span className='text-zinc-300 text-sm'>
+              <span className='text-content-secondary text-sm'>
                 Personalized tarot readings
               </span>
             </div>
@@ -145,7 +145,7 @@ export function ExitIntent() {
 
           <button
             onClick={handleClose}
-            className='text-sm text-zinc-400 hover:text-zinc-300 transition-colors'
+            className='text-sm text-content-muted hover:text-content-secondary transition-colors'
           >
             No thanks, I'll stay on the free plan
           </button>

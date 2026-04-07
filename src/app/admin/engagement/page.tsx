@@ -101,14 +101,14 @@ export default function EngagementPage() {
   };
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-white'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       <div className='container mx-auto px-4 md:px-6 py-6 md:py-8 max-w-4xl'>
         <div className='mb-6'>
           <h1 className='text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3'>
             <MessageSquare className='h-8 w-8 md:h-10 md:w-10' />
             Engagement Queue
           </h1>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Review and reply to social media comments
           </p>
         </div>
@@ -125,7 +125,7 @@ export default function EngagementPage() {
                 className={
                   filter === s
                     ? 'bg-lunary-primary-600'
-                    : 'border-zinc-700 text-zinc-400'
+                    : 'border-stroke-default text-content-muted'
                 }
               >
                 {s === 'pending_review'
@@ -139,7 +139,7 @@ export default function EngagementPage() {
             size='sm'
             onClick={loadItems}
             disabled={loading}
-            className='border-zinc-700 text-zinc-400'
+            className='border-stroke-default text-content-muted'
           >
             <RefreshCw
               className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`}
@@ -150,15 +150,15 @@ export default function EngagementPage() {
 
         {/* Items */}
         {loading ? (
-          <div className='text-center py-12 text-zinc-400'>
+          <div className='text-center py-12 text-content-muted'>
             <Loader2 className='h-8 w-8 animate-spin mx-auto mb-4' />
             <p>Loading engagement items...</p>
           </div>
         ) : items.length === 0 ? (
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardContent className='py-12 text-center'>
-              <MessageSquare className='h-10 w-10 mx-auto mb-4 text-zinc-600' />
-              <p className='text-zinc-400'>
+              <MessageSquare className='h-10 w-10 mx-auto mb-4 text-content-muted' />
+              <p className='text-content-muted'>
                 No {filter === 'pending_review' ? 'pending' : filter} items
               </p>
             </CardContent>
@@ -166,22 +166,25 @@ export default function EngagementPage() {
         ) : (
           <div className='space-y-4'>
             {items.map((item) => (
-              <Card key={item.id} className='bg-zinc-900 border-zinc-800'>
+              <Card
+                key={item.id}
+                className='bg-surface-elevated border-stroke-subtle'
+              >
                 <CardHeader className='pb-2'>
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-2'>
                       <Badge
                         variant='outline'
-                        className='border-zinc-700 text-zinc-400'
+                        className='border-stroke-default text-content-muted'
                       >
                         {item.platform}
                       </Badge>
                       {item.author_name && (
-                        <span className='text-xs text-zinc-500'>
+                        <span className='text-xs text-content-muted'>
                           @{item.author_name}
                         </span>
                       )}
-                      <span className='text-xs text-zinc-600'>
+                      <span className='text-xs text-content-muted'>
                         {timeAgo(item.created_at)}
                       </span>
                     </div>
@@ -189,9 +192,9 @@ export default function EngagementPage() {
                 </CardHeader>
                 <CardContent className='space-y-3'>
                   {/* Original comment */}
-                  <div className='bg-zinc-800/50 p-3 rounded-lg'>
-                    <p className='text-xs text-zinc-500 mb-1'>Comment:</p>
-                    <p className='text-sm text-zinc-300 whitespace-pre-wrap'>
+                  <div className='bg-surface-card/50 p-3 rounded-lg'>
+                    <p className='text-xs text-content-muted mb-1'>Comment:</p>
+                    <p className='text-sm text-content-secondary whitespace-pre-wrap'>
                       {item.comment_text}
                     </p>
                   </div>
@@ -199,12 +202,14 @@ export default function EngagementPage() {
                   {/* Suggested reply */}
                   {editingId === item.id ? (
                     <div>
-                      <p className='text-xs text-zinc-500 mb-1'>Edit reply:</p>
+                      <p className='text-xs text-content-muted mb-1'>
+                        Edit reply:
+                      </p>
                       <textarea
                         value={editedReply}
                         onChange={(e) => setEditedReply(e.target.value)}
                         rows={4}
-                        className='w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm resize-none'
+                        className='w-full px-3 py-2 bg-surface-card border border-stroke-default rounded-lg text-content-primary text-sm resize-none'
                       />
                       <div className='flex gap-2 mt-2'>
                         <Button
@@ -228,7 +233,7 @@ export default function EngagementPage() {
                           size='sm'
                           variant='outline'
                           onClick={() => setEditingId(null)}
-                          className='border-zinc-700 text-zinc-400'
+                          className='border-stroke-default text-content-muted'
                         >
                           Cancel
                         </Button>
@@ -236,15 +241,15 @@ export default function EngagementPage() {
                     </div>
                   ) : item.suggested_reply ? (
                     <div className='bg-lunary-primary-600/10 border border-lunary-primary-600/20 p-3 rounded-lg'>
-                      <p className='text-xs text-lunary-primary-300 mb-1'>
+                      <p className='text-xs text-content-brand mb-1'>
                         Suggested reply:
                       </p>
-                      <p className='text-sm text-zinc-300 whitespace-pre-wrap'>
+                      <p className='text-sm text-content-secondary whitespace-pre-wrap'>
                         {item.suggested_reply}
                       </p>
                     </div>
                   ) : (
-                    <p className='text-xs text-zinc-500 italic'>
+                    <p className='text-xs text-content-muted italic'>
                       No AI suggestion available
                     </p>
                   )}
@@ -271,7 +276,7 @@ export default function EngagementPage() {
                         size='sm'
                         variant='outline'
                         onClick={() => startEditing(item)}
-                        className='border-zinc-700 text-zinc-400'
+                        className='border-stroke-default text-content-muted'
                       >
                         Edit
                       </Button>
@@ -280,7 +285,7 @@ export default function EngagementPage() {
                         variant='outline'
                         onClick={() => handleAction(item.id, 'dismiss')}
                         disabled={processingId === item.id}
-                        className='border-zinc-700 text-zinc-400'
+                        className='border-stroke-default text-content-muted'
                       >
                         <X className='h-3 w-3 mr-1' />
                         Dismiss

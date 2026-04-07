@@ -45,7 +45,7 @@ export default function DemoPreviewLayout({
       </Script>
 
       <div
-        className='h-screen w-screen overflow-hidden bg-zinc-950'
+        className='h-screen w-screen overflow-hidden bg-surface-base'
         style={{
           position: 'fixed',
           overscrollBehavior: 'none',

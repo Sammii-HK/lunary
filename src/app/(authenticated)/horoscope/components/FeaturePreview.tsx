@@ -92,13 +92,13 @@ export function FeaturePreview({
 
   return (
     <div>
-      <h2 className='text-base md:text-lg font-medium text-zinc-100 mb-4'>
+      <h2 className='text-base md:text-lg font-medium text-content-primary mb-4'>
         {title}
       </h2>
       <div className='relative'>
         {renderBlurredContent()}
-        <div className='absolute inset-0 rounded-lg bg-gradient-to-b from-transparent via-zinc-950/60 to-zinc-950 flex flex-col items-center justify-center gap-3'>
-          <span className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
+        <div className='absolute inset-0 rounded-lg bg-gradient-to-b from-surface-base/0 via-surface-base/60 to-surface-base flex flex-col items-center justify-center gap-3'>
+          <span className='inline-flex items-center gap-1 text-[10px] bg-layer-base/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-content-brand'>
             <Sparkles className='w-2.5 h-2.5' />
             Lunary+
           </span>
@@ -106,7 +106,7 @@ export function FeaturePreview({
             <button
               type='button'
               onClick={handleUpgradeClick}
-              className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-zinc-900/80 px-4 py-2 text-xs font-medium text-lunary-primary-300 hover:bg-zinc-900 transition-colors'
+              className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-surface-elevated/80 px-4 py-2 text-xs font-medium text-content-brand hover:bg-surface-elevated transition-colors'
             >
               <Sparkles className='w-3 h-3' />
               {ctaButtonText}

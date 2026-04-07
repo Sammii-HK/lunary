@@ -127,20 +127,20 @@ export default function ZodiacIndexPage() {
                 <Link
                   key={key}
                   href={`/grimoire/zodiac/${stringToKebabCase(key)}`}
-                  className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all group'
+                  className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 hover:bg-surface-elevated transition-all group'
                 >
                   <div className='flex items-center gap-4'>
                     <span className='text-4xl font-astro'>{symbol}</span>
                     <div>
-                      <h2 className='text-xl font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                      <h2 className='text-xl font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                         {sign.name}
                       </h2>
-                      <p className='text-sm text-zinc-400'>
+                      <p className='text-sm text-content-muted'>
                         {sign.dates} • {sign.element}
                       </p>
                     </div>
                   </div>
-                  <p className='mt-3 text-sm text-zinc-400 line-clamp-2'>
+                  <p className='mt-3 text-sm text-content-muted line-clamp-2'>
                     {sign.mysticalProperties}
                   </p>
                 </Link>
@@ -148,11 +148,11 @@ export default function ZodiacIndexPage() {
             })}
           </div>
 
-          <section className='p-6 rounded-lg border border-lunary-primary-800/50 bg-lunary-primary-900/10'>
-            <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <section className='p-6 rounded-lg border border-lunary-primary-800/50 bg-layer-base/10'>
+            <h2 className='text-xl font-medium text-content-primary mb-2'>
               2026 Horoscope Overview
             </h2>
-            <p className='text-sm text-zinc-400 mb-4'>
+            <p className='text-sm text-content-muted mb-4'>
               Discover what the cosmos has in store for each sign this year.
             </p>
             <div className='grid md:grid-cols-3 lg:grid-cols-4 gap-3'>
@@ -162,15 +162,15 @@ export default function ZodiacIndexPage() {
                   <Link
                     key={`horoscope-${key}`}
                     href={`/grimoire/horoscopes/${stringToKebabCase(key)}/2026`}
-                    className='p-3 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all group'
+                    className='p-3 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 hover:bg-surface-elevated transition-all group'
                   >
                     <div className='flex items-center gap-2 mb-1'>
                       <span className='text-lg font-astro'>{symbol}</span>
-                      <span className='text-sm font-medium text-zinc-200 group-hover:text-lunary-primary-300 transition-colors'>
+                      <span className='text-sm font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                         {sign.name} 2026
                       </span>
                     </div>
-                    <p className='text-xs text-zinc-500'>
+                    <p className='text-xs text-content-muted'>
                       View yearly forecast →
                     </p>
                   </Link>
@@ -179,13 +179,15 @@ export default function ZodiacIndexPage() {
             </div>
           </section>
 
-          <section className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          <section className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+            <h2 className='text-xl font-medium text-content-primary mb-4'>
               Understanding the Zodiac
             </h2>
-            <div className='grid md:grid-cols-2 gap-6 text-sm text-zinc-400'>
+            <div className='grid md:grid-cols-2 gap-6 text-sm text-content-muted'>
               <div>
-                <h3 className='font-medium text-zinc-300 mb-2'>Elements</h3>
+                <h3 className='font-medium text-content-secondary mb-2'>
+                  Elements
+                </h3>
                 <ul className='space-y-1'>
                   <li>
                     <strong>Fire:</strong> Aries, Leo, Sagittarius
@@ -202,7 +204,9 @@ export default function ZodiacIndexPage() {
                 </ul>
               </div>
               <div>
-                <h3 className='font-medium text-zinc-300 mb-2'>Modalities</h3>
+                <h3 className='font-medium text-content-secondary mb-2'>
+                  Modalities
+                </h3>
                 <ul className='space-y-1'>
                   <li>
                     <strong>Cardinal:</strong> Aries, Cancer, Libra, Capricorn
@@ -221,11 +225,11 @@ export default function ZodiacIndexPage() {
           <section className='text-center'>
             <Link
               href='/birth-chart'
-              className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+              className='inline-flex px-6 py-3 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
             >
               View Your Birth Chart
             </Link>
-            <p className='mt-2 text-sm text-zinc-400'>
+            <p className='mt-2 text-sm text-content-muted'>
               Discover which signs are in your planets and houses
             </p>
           </section>

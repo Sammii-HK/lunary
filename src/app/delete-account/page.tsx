@@ -16,27 +16,27 @@ export const metadata: Metadata = {
 
 export default function DeleteAccountPage() {
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='mb-8'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             Account Deletion
           </h1>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-sm text-content-muted'>
             How to delete your Lunary account and what happens to your data
           </p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               1. How to Request Deletion
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               To delete your Lunary account:
             </p>
-            <ol className='list-decimal pl-6 text-zinc-300 space-y-2'>
+            <ol className='list-decimal pl-6 text-content-secondary space-y-2'>
               <li>Open the Lunary app</li>
               <li>
                 Go to <strong>Profile</strong> (bottom navigation)
@@ -49,7 +49,7 @@ export default function DeleteAccountPage() {
               </li>
               <li>Confirm your decision when prompted</li>
             </ol>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               If you cannot access the app, use the form below to request
               deletion. We&apos;ll send a verification link to your email.
             </p>
@@ -60,10 +60,10 @@ export default function DeleteAccountPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               2. What Happens Next
             </h2>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Your deletion request enters a{' '}
                 <strong>30-day grace period</strong>. During this time, your
@@ -88,13 +88,13 @@ export default function DeleteAccountPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               3. Data That Gets Deleted
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               After the grace period, the following data is permanently deleted:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Profile information:</strong> Name, birthday, birth
                 time, birth location, and birth chart data
@@ -162,15 +162,15 @@ export default function DeleteAccountPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               4. Data That Gets Anonymized
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               To maintain the integrity of aggregate analytics (e.g., total
               active users, feature usage trends), certain analytics records are
               anonymized rather than deleted:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Usage activity:</strong> Your user ID is replaced with
                 &quot;deleted&quot; so that activity counts remain accurate but
@@ -188,14 +188,14 @@ export default function DeleteAccountPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               5. Data Retained for Legal Compliance
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               A small number of records are retained for legal and audit
               purposes:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Consent records:</strong> Proof that you provided
                 consent for data processing (required under GDPR and other
@@ -207,17 +207,17 @@ export default function DeleteAccountPage() {
                 compliance
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               These records do not contain personal content — only timestamps,
               consent types, and processing status.
             </p>
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               6. Timeframe
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Account deletion is processed within <strong>30 days</strong> of
               the request. Once the grace period expires, data deletion is
               irreversible and typically completes within 24 hours of the
@@ -226,22 +226,22 @@ export default function DeleteAccountPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               7. Contact
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               If you have questions about account deletion or need to request
               manual deletion (for example, if you can no longer access the
               app), please contact us:
             </p>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Lunar Computing, Inc.</strong>
                 <br />
                 Email:{' '}
                 <a
                   href='mailto:privacy@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   privacy@lunary.app
                 </a>
@@ -249,7 +249,7 @@ export default function DeleteAccountPage() {
                 General Support:{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   support@lunary.app
                 </a>

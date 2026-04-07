@@ -143,7 +143,7 @@ export default function ShopSuccessPage() {
       <div className='min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center'>
         <div className='text-center max-w-md mx-auto px-4'>
           <div className='text-lunary-error text-6xl mb-6'>⚠️</div>
-          <h1 className='text-2xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl font-semibold text-content-primary mb-4'>
             Something went wrong
           </h1>
           <p className='text-slate-300 mb-6'>{error}</p>
@@ -154,7 +154,7 @@ export default function ShopSuccessPage() {
             </Button>
             <Link
               href='/shop'
-              className='inline-block px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors'
+              className='inline-block px-6 py-3 bg-surface-overlay hover:bg-surface-overlay text-white font-medium rounded-lg transition-colors'
             >
               Return to shop
             </Link>
@@ -172,7 +172,7 @@ export default function ShopSuccessPage() {
             <Logo size={181} />
           </div>
 
-          <h1 className='text-4xl font-light text-white mb-4'>
+          <h1 className='text-4xl font-light text-content-primary mb-4'>
             Purchase successful
           </h1>
 
@@ -181,22 +181,22 @@ export default function ShopSuccessPage() {
           </p>
 
           {purchaseDetails && (
-            <div className='bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6 mb-8'>
-              <h2 className='text-lg font-medium text-white mb-4'>
+            <div className='bg-surface-card/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6 mb-8'>
+              <h2 className='text-lg font-medium text-content-primary mb-4'>
                 Purchase details
               </h2>
 
               <div className='space-y-3 text-sm'>
                 <div className='flex justify-between'>
                   <span className='text-slate-400'>Purchase ID:</span>
-                  <span className='text-white font-mono'>
+                  <span className='text-content-primary font-mono'>
                     {purchaseDetails.purchase.id}
                   </span>
                 </div>
 
                 <div className='flex justify-between'>
                   <span className='text-slate-400'>Amount:</span>
-                  <span className='text-white'>
+                  <span className='text-content-primary'>
                     {(purchaseDetails.purchase.currency || 'usd').toUpperCase()}{' '}
                     {(purchaseDetails.purchase.amount / 100).toFixed(2)}
                   </span>
@@ -205,8 +205,8 @@ export default function ShopSuccessPage() {
             </div>
           )}
 
-          <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6 mb-8'>
-            <h2 className='text-lg font-medium text-white mb-3'>
+          <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-6 mb-8'>
+            <h2 className='text-lg font-medium text-content-primary mb-3'>
               Download your pack
             </h2>
 
@@ -224,14 +224,14 @@ export default function ShopSuccessPage() {
           <div className='flex flex-col sm:flex-row gap-4 justify-center mt-8'>
             <Link
               href='/shop'
-              className='px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors'
+              className='px-6 py-3 bg-surface-overlay hover:bg-surface-overlay text-white font-medium rounded-lg transition-colors'
             >
               Browse more products
             </Link>
 
             <Link
               href='/'
-              className='px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors'
+              className='px-6 py-3 bg-surface-overlay hover:bg-surface-overlay text-white font-medium rounded-lg transition-colors'
             >
               Return home
             </Link>

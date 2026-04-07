@@ -13,12 +13,9 @@ interface BreadcrumbsProps {
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
     <nav aria-label='Breadcrumb' className='mb-6'>
-      <ol className='flex items-center gap-2 text-sm text-zinc-400'>
+      <ol className='flex items-center gap-2 text-sm text-content-muted'>
         <li>
-          <Link
-            href='/'
-            className='hover:text-lunary-primary-300 transition-colors'
-          >
+          <Link href='/' className='hover:text-content-brand transition-colors'>
             Home
           </Link>
         </li>
@@ -26,13 +23,13 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
           <li key={item.href} className='flex items-center gap-2'>
             <ChevronRight className='h-4 w-4' />
             {index === items.length - 1 ? (
-              <span className='text-zinc-300' aria-current='page'>
+              <span className='text-content-secondary' aria-current='page'>
                 {item.label}
               </span>
             ) : (
               <Link
                 href={item.href}
-                className='hover:text-lunary-primary-300 transition-colors'
+                className='hover:text-content-brand transition-colors'
               >
                 {item.label}
               </Link>

@@ -29,16 +29,16 @@ export function MoonPhaseHero({
     `Align rituals with the ${phaseName.toLowerCase()} energy by focusing on ${highlightKeywords}.`;
 
   return (
-    <div className='mb-10 flex flex-wrap items-center gap-4 border-b border-zinc-800/60 pb-6'>
-      <div className='rounded-3xl border border-zinc-800/50 bg-zinc-900/60 p-3'>
+    <div className='mb-10 flex flex-wrap items-center gap-4 border-b border-stroke-subtle/60 pb-6'>
+      <div className='rounded-3xl border border-stroke-subtle/50 bg-surface-elevated/60 p-3'>
         <MoonPhaseIcon phase={phaseKey} size={64} priority />
       </div>
       <div className='flex-1 min-w-0 space-y-1'>
         <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-400'>
           {displayName}
         </p>
-        <p className='text-sm text-zinc-400'>{keywords.join(' • ')}</p>
-        <p className='text-base text-zinc-200 max-w-2xl'>{heroText}</p>
+        <p className='text-sm text-content-muted'>{keywords.join(' • ')}</p>
+        <p className='text-base text-content-primary max-w-2xl'>{heroText}</p>
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ export default function TrademarkPage() {
   const lastUpdated = 'December 6, 2025';
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs
           items={[
@@ -24,15 +24,17 @@ export default function TrademarkPage() {
           ]}
         />
         <div className='mb-8'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             Trademark Guidelines
           </h1>
-          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-content-muted'>
+            Last Updated: {lastUpdated}
+          </p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
           <section>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               These Trademark Guidelines govern the use of the Lunary name,
               logos, and other brand assets (collectively, the &quot;Lunary
               Marks&quot;) owned by Lunar Computing, Inc. (&quot;Lunary,&quot;
@@ -44,13 +46,13 @@ export default function TrademarkPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               1. Our Brand Assets
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               The Lunary Marks include, but are not limited to:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>The Lunary Name:</strong> &quot;Lunary&quot; and
                 &quot;Lunary+&quot;
@@ -71,11 +73,11 @@ export default function TrademarkPage() {
                 typography, and design elements
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               For official brand assets, please visit our{' '}
               <Link
                 href='/press-kit'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 Press Kit
               </Link>
@@ -84,18 +86,18 @@ export default function TrademarkPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               2. Permitted Uses
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               You may use the Lunary Marks without prior permission in the
               following cases:
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               2.1 Editorial and Informational Use
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Writing about Lunary in news articles, blog posts, reviews, or
                 educational content
@@ -106,31 +108,31 @@ export default function TrademarkPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               2.2 API Attribution
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               If you use the Lunary API, you may (and should) display
               &quot;Powered by Lunary&quot; in your application as required by
               our{' '}
               <Link
                 href='/api-terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 API Terms of Service
               </Link>
               .
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               2.3 Referral and Affiliate Use
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               If you are participating in our referral program, you may use the
               Lunary name to promote your referral link, subject to our{' '}
               <Link
                 href='/referral-terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 Referral Program Terms
               </Link>
@@ -139,14 +141,14 @@ export default function TrademarkPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               3. Prohibited Uses
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               The following uses of the Lunary Marks are prohibited without
               prior written permission:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Domain Names:</strong> Registering domain names
                 containing &quot;Lunary&quot; or confusingly similar variations
@@ -184,15 +186,17 @@ export default function TrademarkPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               4. Logo Usage Guidelines
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               When using the Lunary logo with permission:
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3'>4.1 Do</h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
+              4.1 Do
+            </h3>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Use the logo files provided in our press kit</li>
               <li>
                 Maintain the minimum clear space around the logo (equal to the
@@ -206,10 +210,10 @@ export default function TrademarkPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               4.2 Do Not
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Change the logo colors outside of approved variations</li>
               <li>Add effects such as shadows, gradients, or outlines</li>
               <li>Combine the logo with other logos, symbols, or graphics</li>
@@ -222,13 +226,13 @@ export default function TrademarkPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               5. Naming Conventions
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               When referring to Lunary in text:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Correct:</strong> &quot;Lunary&quot; (capitalized, no
                 article)
@@ -253,15 +257,15 @@ export default function TrademarkPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               6. Press Kit
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Official Lunary brand assets, including logos in various formats
               and approved screenshots, are available in our{' '}
               <Link
                 href='/press-kit'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 Press Kit
               </Link>
@@ -271,20 +275,20 @@ export default function TrademarkPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               7. Requesting Permission
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               If you would like to use the Lunary Marks in a way not covered by
               these guidelines, or if you are unsure whether your intended use
               is permitted, please contact us for permission:
             </p>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Brand Inquiries:</strong>{' '}
                 <a
                   href='mailto:brand@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   brand@lunary.app
                 </a>
@@ -292,23 +296,23 @@ export default function TrademarkPage() {
                 <strong>Partnership Inquiries:</strong>{' '}
                 <a
                   href='mailto:partnerships@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   partnerships@lunary.app
                 </a>
               </p>
             </div>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               Please include details about your intended use, your company or
               organization, and any relevant mockups or examples.
             </p>
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               8. Enforcement
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We actively protect our trademarks and will take appropriate
               action against unauthorized use, including but not limited to
               sending cease and desist notices, filing DMCA takedowns, and
@@ -316,7 +320,7 @@ export default function TrademarkPage() {
               use of the Lunary Marks, please report it to{' '}
               <a
                 href='mailto:legal@lunary.app'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 legal@lunary.app
               </a>
@@ -325,10 +329,10 @@ export default function TrademarkPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               9. Changes to Guidelines
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We may update these Trademark Guidelines from time to time.
               Changes are effective upon posting to this page. We encourage you
               to review these guidelines periodically, especially before using
@@ -336,32 +340,32 @@ export default function TrademarkPage() {
             </p>
           </section>
 
-          <section className='pt-8 border-t border-zinc-800'>
-            <h2 className='text-lg font-medium text-white mb-4'>
+          <section className='pt-8 border-t border-stroke-subtle'>
+            <h2 className='text-lg font-medium text-content-primary mb-4'>
               Related Resources
             </h2>
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/press-kit'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Press Kit
               </Link>
               <Link
                 href='/api-terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 API Terms
               </Link>
               <Link
                 href='/terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/dmca'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 DMCA Policy
               </Link>

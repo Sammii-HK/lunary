@@ -60,12 +60,10 @@ export function PremiumPathway({
     return (
       <Link
         href='/pricing?nav=app'
-        className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-lunary-primary-700/30 bg-lunary-primary-950/20 hover:bg-lunary-primary-950/40 transition-colors ${className}`}
+        className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-lunary-primary-700/30 bg-layer-deep/20 hover:bg-layer-deep/40 transition-colors ${className}`}
       >
         <LockIcon className='w-3 h-3 text-lunary-primary-400' />
-        <span className='text-xs text-lunary-primary-300'>
-          Unlock with Lunary+
-        </span>
+        <span className='text-xs text-content-brand'>Unlock with Lunary+</span>
         <ChevronRight className='w-3 h-3 text-lunary-primary-400 group-hover:translate-x-0.5 transition-transform' />
       </Link>
     );
@@ -73,20 +71,20 @@ export function PremiumPathway({
 
   return (
     <div
-      className={`rounded-xl border border-lunary-primary-700/30 bg-gradient-to-br from-lunary-primary-950/30 to-zinc-900/60 p-4 ${className}`}
+      className={`rounded-xl border border-lunary-primary-700/30 bg-gradient-to-br from-layer-deep/30 to-surface-elevated/60 p-4 ${className}`}
     >
       <div className='flex items-start gap-3'>
         <div className='shrink-0 text-2xl'>{content.icon}</div>
         <div className='flex-1'>
-          <h3 className='text-sm font-medium text-zinc-100 mb-1'>
+          <h3 className='text-sm font-medium text-content-primary mb-1'>
             {content.heading}
           </h3>
-          <p className='text-xs text-zinc-400 leading-relaxed mb-3'>
+          <p className='text-xs text-content-muted leading-relaxed mb-3'>
             {content.text}
           </p>
           <Link
             href='/pricing?nav=app'
-            className='group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-lunary-primary-600/20 border border-lunary-primary-600/40 text-xs font-medium text-lunary-primary-300 hover:bg-lunary-primary-600/30 transition-colors'
+            className='group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-lunary-primary-600/20 border border-lunary-primary-600/40 text-xs font-medium text-content-brand hover:bg-lunary-primary-600/30 transition-colors'
           >
             <Sparkles className='w-3 h-3' />
             Upgrade to Lunary+
@@ -111,10 +109,10 @@ export function InlineUpgrade({ feature, className = '' }: InlineUpgradeProps) {
   }
 
   return (
-    <span className={`text-xs text-zinc-400 ${className}`}>
+    <span className={`text-xs text-content-muted ${className}`}>
       <Link
         href='/pricing?nav=app'
-        className='text-lunary-primary-400 hover:text-lunary-primary-300'
+        className='text-lunary-primary-400 hover:text-content-brand'
       >
         Upgrade to Lunary+
       </Link>{' '}
@@ -132,7 +130,7 @@ export function LockedFeatureBadge({ className = '' }: { className?: string }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800/50 border border-zinc-700/50 text-[10px] text-zinc-500 ${className}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-card/50 border border-stroke-default/50 text-[10px] text-content-muted ${className}`}
     >
       <LockIcon className='w-2.5 h-2.5' />
       Premium

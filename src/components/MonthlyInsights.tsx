@@ -75,21 +75,21 @@ export function MonthlyInsights() {
   ).toLocaleDateString('en-US', { month: 'long' });
 
   return (
-    <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-4 md:p-6'>
+    <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-base/60 p-4 md:p-6'>
       <div className='flex items-center gap-3 mb-4'>
         <Calendar className='w-5 h-5 text-lunary-accent' />
-        <h2 className='text-lg font-semibold text-zinc-100'>
+        <h2 className='text-lg font-semibold text-content-primary'>
           {monthName} Insights
         </h2>
       </div>
 
       <div className='space-y-4'>
         {insight.summary && (
-          <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950/20 p-3'>
-            <h3 className='text-sm font-semibold text-lunary-accent-300 mb-1'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-layer-deep/20 p-3'>
+            <h3 className='text-sm font-semibold text-content-brand-accent mb-1'>
               Your Cosmic Month in Review
             </h3>
-            <p className='text-xs text-zinc-300 leading-relaxed'>
+            <p className='text-xs text-content-secondary leading-relaxed'>
               {insight.summary}
             </p>
           </div>
@@ -99,7 +99,7 @@ export function MonthlyInsights() {
           <div>
             <div className='flex items-center gap-2 mb-2'>
               <TrendingUp className='w-4 h-4 text-lunary-accent' />
-              <h3 className='text-sm font-medium text-zinc-300'>
+              <h3 className='text-sm font-medium text-content-secondary'>
                 Frequent Cards
               </h3>
             </div>
@@ -110,12 +110,12 @@ export function MonthlyInsights() {
                 return (
                   <div key={idx} className='space-y-1'>
                     <div className='flex items-center justify-between text-xs'>
-                      <span className='text-zinc-300 font-medium'>
+                      <span className='text-content-secondary font-medium'>
                         {card.name}
                       </span>
-                      <span className='text-zinc-400'>{card.count}x</span>
+                      <span className='text-content-muted'>{card.count}x</span>
                     </div>
-                    <div className='h-2 bg-zinc-800/60 rounded-full overflow-hidden'>
+                    <div className='h-2 bg-surface-card/60 rounded-full overflow-hidden'>
                       <div
                         className='h-full bg-gradient-to-r from-lunary-primary to-lunary-primary-400/40 rounded-full transition-all'
                         style={{ width: `${percentage}%` }}
@@ -130,11 +130,11 @@ export function MonthlyInsights() {
           <div>
             <div className='flex items-center gap-2 mb-2'>
               <TrendingUp className='w-4 h-4 text-lunary-accent' />
-              <h3 className='text-sm font-medium text-zinc-300'>
+              <h3 className='text-sm font-medium text-content-secondary'>
                 Frequent Cards
               </h3>
             </div>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               No frequent cards yet this month. Start pulling cards to see your
               patterns!
             </p>
@@ -145,7 +145,7 @@ export function MonthlyInsights() {
           <div>
             <div className='flex items-center gap-2 mb-2'>
               <Sparkles className='w-4 h-4 text-lunary-accent' />
-              <h3 className='text-sm font-medium text-zinc-300'>
+              <h3 className='text-sm font-medium text-content-secondary'>
                 Transit Impacts
               </h3>
             </div>
@@ -153,7 +153,7 @@ export function MonthlyInsights() {
               {insight.transitImpacts.map((transit, idx) => (
                 <span
                   key={idx}
-                  className='text-xs px-2 py-1 rounded-lg border border-zinc-700/60 bg-zinc-900/40 text-zinc-300'
+                  className='text-xs px-2 py-1 rounded-lg border border-stroke-default/60 bg-surface-elevated/40 text-content-secondary'
                 >
                   {transit.aspect} ({transit.count}x)
                 </span>
@@ -166,11 +166,11 @@ export function MonthlyInsights() {
           <div>
             <div className='flex items-center gap-2 mb-2'>
               <Sparkles className='w-4 h-4 text-lunary-accent' />
-              <h3 className='text-sm font-medium text-zinc-300'>
+              <h3 className='text-sm font-medium text-content-secondary'>
                 Journal Entries
               </h3>
             </div>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               {insight.journalCount} entry
               {insight.journalCount !== 1 ? 'ies' : 'y'} this month
               {insight.journalThemes && insight.journalThemes.length > 0 && (
@@ -184,18 +184,22 @@ export function MonthlyInsights() {
           <div>
             <div className='flex items-center gap-2 mb-2'>
               <Sparkles className='w-4 h-4 text-lunary-accent' />
-              <h3 className='text-sm font-medium text-zinc-300'>
+              <h3 className='text-sm font-medium text-content-secondary'>
                 Tarot Themes
               </h3>
             </div>
-            <p className='text-xs text-zinc-400'>{insight.themes.join(', ')}</p>
+            <p className='text-xs text-content-muted'>
+              {insight.themes.join(', ')}
+            </p>
           </div>
         )}
 
         {insight.moodTrend && (
           <div>
-            <p className='text-xs text-zinc-400'>
-              <span className='text-zinc-300 font-medium'>Mood trend:</span>{' '}
+            <p className='text-xs text-content-muted'>
+              <span className='text-content-secondary font-medium'>
+                Mood trend:
+              </span>{' '}
               {insight.moodTrend}
             </p>
           </div>
@@ -205,7 +209,7 @@ export function MonthlyInsights() {
           <div>
             <div className='flex items-center gap-2 mb-3'>
               <BarChart3 className='w-4 h-4 text-lunary-accent' />
-              <h3 className='text-sm font-medium text-zinc-300'>
+              <h3 className='text-sm font-medium text-content-secondary'>
                 This Month vs Last Month
               </h3>
             </div>
@@ -214,8 +218,10 @@ export function MonthlyInsights() {
               insight.trends.tarot.lastMonth > 0 ? (
                 <div className='text-xs'>
                   <div className='flex items-center justify-between mb-1'>
-                    <span className='text-zinc-300'>Tarot Readings</span>
-                    <span className='text-zinc-400'>
+                    <span className='text-content-secondary'>
+                      Tarot Readings
+                    </span>
+                    <span className='text-content-muted'>
                       {insight.trends.tarot.thisMonth} vs{' '}
                       {insight.trends.tarot.lastMonth}
                       {insight.trends.tarot.changePercent !== 0 && (
@@ -238,8 +244,10 @@ export function MonthlyInsights() {
               insight.trends.journal.lastMonth > 0 ? (
                 <div className='text-xs'>
                   <div className='flex items-center justify-between mb-1'>
-                    <span className='text-zinc-300'>Journal Entries</span>
-                    <span className='text-zinc-400'>
+                    <span className='text-content-secondary'>
+                      Journal Entries
+                    </span>
+                    <span className='text-content-muted'>
                       {insight.trends.journal.thisMonth} vs{' '}
                       {insight.trends.journal.lastMonth}
                       {insight.trends.journal.changePercent !== 0 && (
@@ -262,8 +270,8 @@ export function MonthlyInsights() {
               insight.trends.rituals.lastMonth > 0 ? (
                 <div className='text-xs'>
                   <div className='flex items-center justify-between mb-1'>
-                    <span className='text-zinc-300'>Rituals</span>
-                    <span className='text-zinc-400'>
+                    <span className='text-content-secondary'>Rituals</span>
+                    <span className='text-content-muted'>
                       {insight.trends.rituals.thisMonth} vs{' '}
                       {insight.trends.rituals.lastMonth}
                       {insight.trends.rituals.changePercent !== 0 && (
@@ -290,14 +298,14 @@ export function MonthlyInsights() {
           <div>
             <div className='flex items-center gap-2 mb-3'>
               <BarChart3 className='w-4 h-4 text-lunary-accent' />
-              <h3 className='text-sm font-medium text-zinc-300'>
+              <h3 className='text-sm font-medium text-content-secondary'>
                 Daily Activity
               </h3>
             </div>
             <Suspense
               fallback={
                 <div className='h-48 flex items-center justify-center'>
-                  <div className='animate-pulse text-zinc-500 text-sm'>
+                  <div className='animate-pulse text-content-muted text-sm'>
                     Loading chart...
                   </div>
                 </div>
@@ -309,14 +317,16 @@ export function MonthlyInsights() {
         )}
 
         {insight.mostActiveDay && (
-          <div className='text-xs text-zinc-400'>
-            <span className='text-zinc-300 font-medium'>Most active day:</span>{' '}
+          <div className='text-xs text-content-muted'>
+            <span className='text-content-secondary font-medium'>
+              Most active day:
+            </span>{' '}
             {insight.mostActiveDay}
           </div>
         )}
 
         {insight.frequentCards.length > 0 && (
-          <div className='pt-3 border-t border-zinc-800/60'>
+          <div className='pt-3 border-t border-stroke-subtle/60'>
             <SharePersonalized
               type='monthly-insights'
               data={{

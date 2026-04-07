@@ -113,7 +113,7 @@ export default async function SkyNowPage() {
   const cosmicData = await getGlobalCosmicData(now);
   if (!cosmicData) {
     return (
-      <div className='min-h-[400px] rounded-3xl border border-zinc-800/40 bg-zinc-900/40 p-8 text-sm text-zinc-400'>
+      <div className='min-h-[400px] rounded-3xl border border-stroke-subtle/40 bg-surface-elevated/40 p-8 text-sm text-content-muted'>
         Unable to load the sky data right now. Please refresh the page in a
         moment.
       </div>
@@ -178,11 +178,11 @@ export default async function SkyNowPage() {
   const shareDateParam = now.toISOString();
   const heroContent = (
     <div className='mx-auto flex max-w-4xl flex-col items-center gap-4'>
-      <div className='rounded-[40px] border border-white/10 bg-gradient-to-b from-zinc-950/60 to-zinc-900/60 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.6)]'>
+      <div className='rounded-[40px] border border-white/10 bg-gradient-to-b from-surface-base/60 to-surface-elevated/60 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.6)]'>
         <ChartWheelSvg birthChart={chartData} size={380} />
       </div>
       <SkyNowSharePanel dateParam={shareDateParam} />
-      <p className='max-w-2xl text-center text-sm text-zinc-300'>
+      <p className='max-w-2xl text-center text-sm text-content-secondary'>
         The chart above reflects the planetary positions for the current sky now
         moment. Refresh the page periodically for updated transit geometry and
         bookmark this page to keep track of how the sky is shifting around you.
@@ -255,51 +255,51 @@ export default async function SkyNowPage() {
                   {visibleEntries.map((highlight) => (
                     <article
                       key={`${highlight.name}-${highlight.aspect}`}
-                      className='rounded-2xl border border-white/10 bg-zinc-950/60 p-4 text-sm text-zinc-200'
+                      className='rounded-2xl border border-white/10 bg-surface-base/60 p-4 text-sm text-content-primary'
                     >
                       <div className='flex items-center gap-3'>
-                        <span className='font-astro text-2xl text-white'>
+                        <span className='font-astro text-2xl text-content-primary'>
                           {highlight.glyph}
                         </span>
-                        <p className='text-base font-semibold text-white'>
+                        <p className='text-base font-semibold text-content-primary'>
                           {highlight.name}
                         </p>
                       </div>
-                      <p className='mt-2 text-xs text-zinc-400 uppercase tracking-[0.35em]'>
+                      <p className='mt-2 text-xs text-content-muted uppercase tracking-[0.35em]'>
                         {highlight.aspect || 'Aspect'}
                       </p>
-                      <p className='mt-1 text-sm text-zinc-300'>
+                      <p className='mt-1 text-sm text-content-secondary'>
                         {highlight.energy}
                       </p>
                     </article>
                   ))}
                 </div>
                 {hiddenEntries.length > 0 && (
-                  <details className='rounded-2xl border border-white/10 bg-zinc-900/60 p-4 text-sm text-zinc-200'>
-                    <summary className='cursor-pointer text-xs font-semibold uppercase tracking-[0.35em] text-zinc-400'>
+                  <details className='rounded-2xl border border-white/10 bg-surface-elevated/60 p-4 text-sm text-content-primary'>
+                    <summary className='cursor-pointer text-xs font-semibold uppercase tracking-[0.35em] text-content-muted'>
                       {hiddenEntries.length} more {section.title.toLowerCase()}
                     </summary>
                     <div className='mt-4 space-y-3'>
                       {hiddenEntries.map((highlight) => (
                         <article
                           key={`hidden-${highlight.name}-${highlight.aspect}`}
-                          className='rounded-xl border border-zinc-800/40 bg-zinc-950/40 p-3'
+                          className='rounded-xl border border-stroke-subtle/40 bg-surface-base/40 p-3'
                         >
                           <div className='flex items-center gap-2'>
                             <span
-                              className='font-astro text-lg text-white'
+                              className='font-astro text-lg text-content-primary'
                               aria-hidden='true'
                             >
                               {highlight.glyph}
                             </span>
-                            <p className='text-sm font-semibold text-white'>
+                            <p className='text-sm font-semibold text-content-primary'>
                               {highlight.name}
                             </p>
                           </div>
-                          <p className='mt-1 text-[0.65rem] uppercase tracking-[0.4em] text-zinc-400'>
+                          <p className='mt-1 text-[0.65rem] uppercase tracking-[0.4em] text-content-muted'>
                             {highlight.aspect || 'Aspect'}
                           </p>
-                          <p className='text-sm text-zinc-300'>
+                          <p className='text-sm text-content-secondary'>
                             {highlight.energy}
                           </p>
                         </article>
@@ -321,7 +321,7 @@ export default async function SkyNowPage() {
               return (
                 <div
                   key={summary.slug}
-                  className='flex flex-col gap-3 rounded-2xl border border-white/10 bg-zinc-950/60 p-4 text-sm text-zinc-200'
+                  className='flex flex-col gap-3 rounded-2xl border border-white/10 bg-surface-base/60 p-4 text-sm text-content-primary'
                 >
                   <div className='flex items-center justify-between'>
                     <span
@@ -330,7 +330,7 @@ export default async function SkyNowPage() {
                     >
                       {data.symbol}
                     </span>
-                    <span className='text-xs uppercase tracking-[0.35em] text-zinc-500'>
+                    <span className='text-xs uppercase tracking-[0.35em] text-content-muted'>
                       {data.degrees}°
                     </span>
                   </div>
@@ -338,18 +338,22 @@ export default async function SkyNowPage() {
                     <Heading as='h3' variant='h3'>
                       {summary.name}
                     </Heading>
-                    <p className='text-xs uppercase tracking-[0.35em] text-zinc-500'>
+                    <p className='text-xs uppercase tracking-[0.35em] text-content-muted'>
                       {summary.type}
                     </p>
                   </div>
-                  <p className='text-sm text-zinc-300'>{summary.description}</p>
-                  <p className='text-sm text-zinc-300'>{summary.tip}</p>
+                  <p className='text-sm text-content-secondary'>
+                    {summary.description}
+                  </p>
+                  <p className='text-sm text-content-secondary'>
+                    {summary.tip}
+                  </p>
                 </div>
               );
             })}
           </div>
         </div>
-        <p className='text-xs capitalize tracking-[0.35em] text-zinc-500'>
+        <p className='text-xs capitalize tracking-[0.35em] text-content-muted'>
           The chart updates whenever the sky shifts, while this explanation
           keeps the context evergreen. Refresh to catch new aspects and bookmark
           the page as your live transit reference.

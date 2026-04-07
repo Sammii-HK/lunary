@@ -34,7 +34,7 @@ export function QuickStats({
   aspectCount,
 }: QuickStatsProps) {
   return (
-    <div className='rounded-xl border border-zinc-800 bg-gradient-to-r from-zinc-900/80 to-zinc-900/40 p-4 mb-8'>
+    <div className='rounded-xl border border-stroke-subtle bg-gradient-to-r from-surface-elevated/80 to-surface-elevated/40 p-4 mb-8'>
       <div className='flex flex-wrap items-center justify-center gap-4 md:gap-6'>
         {/* Retrograde Alert */}
         {retrogradeCount > 0 && (
@@ -44,7 +44,7 @@ export function QuickStats({
               {retrogradeCount} Retrograde{retrogradeCount > 1 ? 's' : ''}
             </span>
             {retrogradePlanets.length > 0 && (
-              <span className='text-xs text-zinc-400'>
+              <span className='text-xs text-content-muted'>
                 ({retrogradePlanets.map((p) => getPlanetSymbol(p)).join(' ')})
               </span>
             )}
@@ -53,7 +53,7 @@ export function QuickStats({
 
         {/* Moon Phase */}
         {majorMoonPhase && (
-          <div className='flex items-center gap-2 text-zinc-200'>
+          <div className='flex items-center gap-2 text-content-primary'>
             <Image
               src={getMoonPhaseIcon(majorMoonPhase.phase)}
               alt={majorMoonPhase.phase}
@@ -93,7 +93,7 @@ export function QuickStats({
         {bestDay && (
           <div className='flex items-center gap-2'>
             <Calendar className='h-4 w-4 text-emerald-400' />
-            <span className='text-sm text-zinc-300'>
+            <span className='text-sm text-content-secondary'>
               Best day:{' '}
               <Badge
                 variant='outline'
@@ -117,7 +117,7 @@ interface EnergyIndicatorProps {
 
 export function EnergyIndicator({ level, label }: EnergyIndicatorProps) {
   const colors = {
-    1: 'bg-zinc-600',
+    1: 'bg-surface-overlay',
     2: 'bg-emerald-600',
     3: 'bg-yellow-500',
     4: 'bg-orange-500',
@@ -139,12 +139,14 @@ export function EnergyIndicator({ level, label }: EnergyIndicatorProps) {
           <div
             key={i}
             className={`h-2 w-1.5 rounded-sm ${
-              i <= level ? colors[level] : 'bg-zinc-800'
+              i <= level ? colors[level] : 'bg-surface-card'
             }`}
           />
         ))}
       </div>
-      <span className='text-xs text-zinc-400'>{label || labels[level]}</span>
+      <span className='text-xs text-content-muted'>
+        {label || labels[level]}
+      </span>
     </div>
   );
 }
@@ -183,7 +185,8 @@ export function AspectNatureBadge({
   };
 
   const nature = aspectNature[aspect.toLowerCase()] || {
-    color: 'bg-zinc-600/20 text-zinc-300 border-zinc-600/40',
+    color:
+      'bg-surface-overlay/20 text-content-secondary border-stroke-strong/40',
     label: aspect,
   };
 

@@ -190,29 +190,29 @@ export default function GuidesIndexPage() {
               <Link
                 key={guide.slug}
                 href={`/grimoire/guides/${guide.slug}`}
-                className='group block p-6 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 hover:border-lunary-primary-600 transition-all duration-300'
+                className='group block p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/50 hover:bg-surface-elevated hover:border-lunary-primary-600 transition-all duration-300'
               >
                 <div className='flex items-start gap-4'>
                   <span className='text-4xl'>{guide.icon}</span>
                   <div className='flex-1'>
-                    <h2 className='text-xl font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-2'>
+                    <h2 className='text-xl font-medium text-content-primary group-hover:text-content-brand transition-colors mb-2'>
                       {guide.title}
                     </h2>
-                    <p className='text-zinc-400 text-sm mb-4'>
+                    <p className='text-content-muted text-sm mb-4'>
                       {guide.description}
                     </p>
                     <div className='flex flex-wrap gap-2 mb-4'>
                       {guide.topics.map((topic) => (
                         <span
                           key={topic}
-                          className='text-xs px-2 py-1 rounded bg-zinc-800 text-zinc-400'
+                          className='text-xs px-2 py-1 rounded bg-surface-card text-content-muted'
                         >
                           {topic}
                         </span>
                       ))}
                     </div>
                     <div className='flex items-center justify-between'>
-                      <span className='text-xs text-zinc-400'>
+                      <span className='text-xs text-content-muted'>
                         {guide.wordCount} words
                       </span>
                       <span className='text-lunary-primary-400 text-sm group-hover:translate-x-1 transition-transform'>
@@ -225,34 +225,34 @@ export default function GuidesIndexPage() {
             ))}
           </div>
 
-          <section className='p-8 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h2 className='text-2xl font-light text-zinc-100 mb-6'>
+          <section className='p-8 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h2 className='text-2xl font-light text-content-primary mb-6'>
               What Makes These Guides Complete?
             </h2>
             <div className='grid md:grid-cols-3 gap-6'>
               <div>
-                <h3 className='font-medium text-zinc-100 mb-2'>
+                <h3 className='font-medium text-content-primary mb-2'>
                   Comprehensive Coverage
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   Each guide covers the topic from foundations to advanced
                   concepts, so you never need to look elsewhere.
                 </p>
               </div>
               <div>
-                <h3 className='font-medium text-zinc-100 mb-2'>
+                <h3 className='font-medium text-content-primary mb-2'>
                   Practical Application
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   Beyond theory, each guide includes actionable techniques,
                   rituals, and exercises you can use immediately.
                 </p>
               </div>
               <div>
-                <h3 className='font-medium text-zinc-100 mb-2'>
+                <h3 className='font-medium text-content-primary mb-2'>
                   Cross-Referenced
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   Guides link to related grimoire entries, giving you a complete
                   web of interconnected knowledge.
                 </p>
@@ -261,7 +261,7 @@ export default function GuidesIndexPage() {
           </section>
 
           <section className='text-center'>
-            <p className='text-zinc-400 mb-4'>
+            <p className='text-content-muted mb-4'>
               Want personalized insights based on your birth chart?
             </p>
             <Button asChild variant='lunary-solid' size='lg'>

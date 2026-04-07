@@ -121,7 +121,7 @@ The same Moon + transit data that powers the authenticated app feeds this Grimoi
       heroContent={
         <div className='text-center space-y-1'>
           <p className='text-sm text-lunary-primary-400'>{today}</p>
-          <p className='text-xs text-zinc-500 uppercase tracking-[0.3em]'>
+          <p className='text-xs text-content-muted uppercase tracking-[0.3em]'>
             Updated every dawn with real planetary context
           </p>
         </div>
@@ -140,21 +140,21 @@ The same Moon + transit data that powers the authenticated app feeds this Grimoi
       components={<CosmicHighlight />}
     >
       {/* <section className='mb-12 grid gap-6 md:grid-cols-2'>
-        <div className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
-          <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+        <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/50 p-6'>
+          <h3 className='text-lg font-semibold text-content-primary mb-2'>
             Daily Signals
           </h3>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
             These signals are the same pulse that powers the Lunary app,
             rewritten for this public hub so you can scan the essentials before
             picking your sign.
           </p>
         </div>
-        <div className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
-          <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+        <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/50 p-6'>
+          <h3 className='text-lg font-semibold text-content-primary mb-2'>
             Why this page matters
           </h3>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
             The Grimoire aggregates our daily horoscopes so you can share the
             energy with friends, reference it throughout the day, and still head
             into the app when you want chart-precise guidance.
@@ -168,14 +168,14 @@ The same Moon + transit data that powers the authenticated app feeds this Grimoi
             <Link
               key={sign.name}
               href={`/grimoire/horoscopes/today/${sign.name.toLowerCase()}`}
-              className='group p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-all'
+              className='group p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-all'
             >
               <div className='text-3xl mb-2'>{sign.symbol}</div>
-              <h2 className='text-lg font-medium group-hover:text-lunary-primary-300 transition-colors'>
+              <h2 className='text-lg font-medium group-hover:text-content-brand transition-colors'>
                 {sign.name}
               </h2>
-              <p className='text-xs text-zinc-500'>{sign.dates}</p>
-              <div className='flex items-center gap-1 mt-3 text-xs text-zinc-400'>
+              <p className='text-xs text-content-muted'>{sign.dates}</p>
+              <div className='flex items-center gap-1 mt-3 text-xs text-content-muted'>
                 <span>{sign.element}</span>
                 <ArrowRight className='w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity' />
               </div>

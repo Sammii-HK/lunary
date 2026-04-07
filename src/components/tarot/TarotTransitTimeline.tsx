@@ -42,13 +42,13 @@ const formatAspectName = (aspectType: string): string => {
 
 const getAspectColor = (aspectType: string): string => {
   const colors: Record<string, string> = {
-    conjunction: 'text-lunary-primary-300',
-    trine: 'text-emerald-400',
-    sextile: 'text-lunary-accent-300',
-    square: 'text-amber-400',
-    opposition: 'text-rose-400',
+    conjunction: 'text-content-brand',
+    trine: 'text-content-success',
+    sextile: 'text-content-brand-accent',
+    square: 'text-lunary-rose',
+    opposition: 'text-content-error',
   };
-  return colors[aspectType.toLowerCase()] || 'text-zinc-400';
+  return colors[aspectType.toLowerCase()] || 'text-content-muted';
 };
 
 // Aspect symbols mapping
@@ -99,10 +99,12 @@ function TransitList({
   return (
     <div className='space-y-3'>
       <div className='flex items-center gap-2'>
-        {Icon && <Icon className='w-4 h-4 text-lunary-accent-300' />}
-        <h4 className='text-sm font-medium text-lunary-accent-200'>{title}</h4>
+        {Icon && <Icon className='w-4 h-4 text-content-brand-accent' />}
+        <h4 className='text-sm font-medium text-content-brand-accent'>
+          {title}
+        </h4>
         {timestamp && (
-          <span className='text-xs text-zinc-500'>
+          <span className='text-xs text-content-muted'>
             {dayjs(timestamp).fromNow()}
           </span>
         )}
@@ -116,25 +118,25 @@ function TransitList({
           return (
             <div
               key={idx}
-              className='rounded-md border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'
+              className='rounded-md border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden'
             >
               <button
                 onClick={() => setOpenAccordion(isOpen ? -1 : idx)}
-                className='w-full flex items-center justify-between p-3 text-left hover:bg-zinc-900/50 transition-colors'
+                className='w-full flex items-center justify-between p-3 text-left hover:bg-surface-elevated/50 transition-colors'
               >
                 <div className='flex-1'>
                   <div className='flex items-baseline gap-1.5'>
-                    <span className='text-lunary-primary-200 font-medium'>
+                    <span className='text-content-secondary font-medium'>
                       {transit.transitPlanet}
                     </span>
                     <span className={getAspectColor(transit.aspectType)}>
                       {formatAspectName(transit.aspectType)}
                     </span>
-                    <span className='text-zinc-400'>
+                    <span className='text-content-muted'>
                       your {transit.natalPlanet}
                     </span>
                   </div>
-                  <div className='text-xs text-zinc-600 mt-1'>
+                  <div className='text-xs text-content-muted mt-1'>
                     {renderDegreeWithSymbol(transit.transitDegree)}{' '}
                     {getAspectSymbol(transit.aspectType)}{' '}
                     {renderDegreeWithSymbol(transit.natalDegree)} ({orbRounded}°
@@ -143,14 +145,14 @@ function TransitList({
                 </div>
                 {insight &&
                   (isOpen ? (
-                    <ChevronUp className='w-4 h-4 text-zinc-400 flex-shrink-0 ml-2' />
+                    <ChevronUp className='w-4 h-4 text-content-muted flex-shrink-0 ml-2' />
                   ) : (
-                    <ChevronDown className='w-4 h-4 text-zinc-400 flex-shrink-0 ml-2' />
+                    <ChevronDown className='w-4 h-4 text-content-muted flex-shrink-0 ml-2' />
                   ))}
               </button>
               {insight && isOpen && (
-                <div className='px-3 pb-3 pt-0 border-t border-zinc-800/50'>
-                  <p className='text-xs text-zinc-300 leading-relaxed mt-2'>
+                <div className='px-3 pb-3 pt-0 border-t border-stroke-subtle/50'>
+                  <p className='text-xs text-content-secondary leading-relaxed mt-2'>
                     {insight.insight}
                   </p>
                 </div>
@@ -266,11 +268,11 @@ export function TarotTransitTimeline({
   // Weekly mode - show day-by-day evolution
   if (weeklyMode && cardName && historicalTransits) {
     return (
-      <div className='mt-6 rounded-lg border border-lunary-primary-800/30 bg-lunary-primary-950/20 p-4'>
-        <h3 className='text-sm font-medium text-lunary-accent-200 mb-4'>
+      <div className='mt-6 rounded-lg border border-lunary-primary-800/30 bg-layer-deep/20 p-4'>
+        <h3 className='text-sm font-medium text-content-brand-accent mb-4'>
           How {cardName} Evolves This Week
         </h3>
-        <p className='text-xs text-zinc-400 mb-4'>
+        <p className='text-xs text-content-muted mb-4'>
           The transits shift daily, creating different flavors of this card's
           message throughout the week.
         </p>
@@ -299,7 +301,7 @@ export function TarotTransitTimeline({
         </div>
 
         {historicalTransits && currentTransits && (
-          <p className='text-xs text-zinc-500 mt-4 pt-4 border-t border-zinc-800'>
+          <p className='text-xs text-content-muted mt-4 pt-4 border-t border-stroke-subtle'>
             Notice how the aspects have shifted since you drew this card. The
             core message remains, but the cosmic weather colors how you
             experience it today.
@@ -313,13 +315,13 @@ export function TarotTransitTimeline({
   return (
     <div className='mt-6'>
       {/* Tab navigation */}
-      <div className='flex gap-2 mb-4 border-b border-zinc-800'>
+      <div className='flex gap-2 mb-4 border-b border-stroke-subtle'>
         <button
           onClick={() => setActiveTab('current')}
           className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
             activeTab === 'current'
-              ? 'border-lunary-primary-400 text-lunary-primary-200'
-              : 'border-transparent text-zinc-400 hover:text-zinc-300'
+              ? 'border-lunary-primary-400 text-content-secondary'
+              : 'border-transparent text-content-muted hover:text-content-secondary'
           }`}
         >
           <div className='flex items-center gap-2'>
@@ -332,8 +334,8 @@ export function TarotTransitTimeline({
             onClick={() => setActiveTab('historical')}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
               activeTab === 'historical'
-                ? 'border-lunary-primary-400 text-lunary-primary-200'
-                : 'border-transparent text-zinc-400 hover:text-zinc-300'
+                ? 'border-lunary-primary-400 text-content-secondary'
+                : 'border-transparent text-content-muted hover:text-content-secondary'
             }`}
           >
             <div className='flex items-center gap-2'>
@@ -353,14 +355,14 @@ export function TarotTransitTimeline({
       {activeTab === 'current' && (
         <>
           {loading ? (
-            <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/30 p-4'>
-              <div className='flex items-center gap-2 text-xs text-zinc-500'>
+            <div className='rounded-lg border border-stroke-subtle/30 bg-surface-elevated/30 p-4'>
+              <div className='flex items-center gap-2 text-xs text-content-muted'>
                 <div className='w-3 h-3 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin' />
                 <span>Calculating current transits...</span>
               </div>
             </div>
           ) : currentTransits ? (
-            <div className='rounded-lg border border-lunary-primary-800/30 bg-lunary-primary-950/20 p-4'>
+            <div className='rounded-lg border border-lunary-primary-800/30 bg-layer-deep/20 p-4'>
               <TransitList
                 transits={currentTransits}
                 title='Right Now'
@@ -369,8 +371,8 @@ export function TarotTransitTimeline({
               />
             </div>
           ) : (
-            <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/30 p-4'>
-              <p className='text-sm text-zinc-400'>
+            <div className='rounded-lg border border-stroke-subtle/30 bg-surface-elevated/30 p-4'>
+              <p className='text-sm text-content-muted'>
                 No current transit data available.
               </p>
             </div>
@@ -379,7 +381,7 @@ export function TarotTransitTimeline({
       )}
 
       {activeTab === 'historical' && historicalTransits && (
-        <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/30 p-4'>
+        <div className='rounded-lg border border-stroke-subtle/30 bg-surface-elevated/30 p-4'>
           <TransitList
             transits={historicalTransits}
             title='When Drawn'
@@ -392,7 +394,7 @@ export function TarotTransitTimeline({
 
       {/* Comparison note */}
       {historicalTransits && currentTransits && (
-        <p className='text-xs text-zinc-500 mt-4'>
+        <p className='text-xs text-content-muted mt-4'>
           Switch between tabs to compare how the cosmic weather has shifted
           since you pulled this spread.
         </p>

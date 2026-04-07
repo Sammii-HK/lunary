@@ -42,7 +42,7 @@ export default function ClearCachePage() {
   return (
     <div className='p-6 space-y-4'>
       <h1 className='text-2xl font-bold'>Clear Cache</h1>
-      <p className='text-zinc-300'>{status}</p>
+      <p className='text-content-secondary'>{status}</p>
       <Link
         href='/'
         className='block mt-4 px-4 py-2 bg-lunary-primary-600 text-white rounded-lg text-center'

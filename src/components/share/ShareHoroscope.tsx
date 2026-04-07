@@ -221,8 +221,8 @@ export function ShareHoroscope({
         onClick={handleOpen}
         className={
           compact
-            ? 'inline-flex items-center justify-center rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-2 text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-lunary-primary-900/20 transition-colors'
-            : 'inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-zinc-200 transition hover:border-lunary-primary-500 hover:text-white'
+            ? 'inline-flex items-center justify-center rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-2 text-content-secondary hover:text-content-secondary hover:bg-layer-base/20 transition-colors'
+            : 'inline-flex items-center gap-2 rounded-full border border-stroke-default px-4 py-2 text-xs font-semibold tracking-wide uppercase text-content-primary transition hover:border-lunary-primary-500 hover:text-content-primary'
         }
         title={compact ? 'Share Transits' : undefined}
       >
@@ -258,7 +258,7 @@ export function ShareHoroscope({
               socialUrls={socialUrls}
             />
 
-            <p className='mt-4 text-xs text-zinc-400 text-center'>
+            <p className='mt-4 text-xs text-content-muted text-center'>
               Check your transits at lunary.app
             </p>
           </>
@@ -269,7 +269,7 @@ export function ShareHoroscope({
             <p className='text-red-400 mb-4'>{error}</p>
             <button
               onClick={generateCard}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors'
             >
               Try Again
             </button>

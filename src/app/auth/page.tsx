@@ -57,10 +57,10 @@ export default function AuthPage() {
     // Show spinner while auth check runs OR while redirecting to /app.
     // Returning null causes a blank screen in Capacitor WKWebView.
     return (
-      <div className='min-h-screen bg-black text-white flex items-center justify-center p-4'>
+      <div className='min-h-screen bg-surface-base text-content-primary flex items-center justify-center p-4'>
         <div className='text-center'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-lunary-primary mx-auto mb-4'></div>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             {authState.isAuthenticated
               ? 'Taking you to the app…'
               : 'Checking authentication...'}
@@ -71,7 +71,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className='min-h-screen bg-black text-white flex flex-col'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col'>
       <div className='flex-1 flex items-center justify-center p-4'>
         <div className='w-full max-w-md'>
           <div className='text-center mb-8'>
@@ -81,7 +81,7 @@ export default function AuthPage() {
                 Lunary
               </h1>
             </div>
-            <p className='text-zinc-400'>
+            <p className='text-content-muted'>
               Your birth chart, daily transits, and personalised tarot — free
               for 7 days
             </p>

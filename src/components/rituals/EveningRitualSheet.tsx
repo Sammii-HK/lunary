@@ -41,11 +41,11 @@ const INTENTION_OUTCOMES = [
   {
     value: 'progressing',
     label: 'Progressing',
-    color: 'text-lunary-primary-300',
+    color: 'text-content-brand',
   },
   { value: 'blocked', label: 'Blocked', color: 'text-amber-400' },
   { value: 'manifested', label: 'Manifested!', color: 'text-lunary-success' },
-  { value: 'released', label: 'Releasing', color: 'text-zinc-400' },
+  { value: 'released', label: 'Releasing', color: 'text-content-muted' },
 ] as const;
 
 interface ActiveIntention {
@@ -163,7 +163,7 @@ export function EveningRitualSheet({
       <ModalBody>
         {step === 'mood' && (
           <div className='space-y-4'>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               How are you feeling this evening?
             </p>
             <div className='grid grid-cols-5 gap-2'>
@@ -174,8 +174,8 @@ export function EveningRitualSheet({
                   className={cn(
                     'flex flex-col items-center gap-1 p-2 rounded-lg border transition-colors',
                     selectedMood === id
-                      ? 'bg-lunary-primary-900/50 border-lunary-primary-600 text-lunary-primary-300'
-                      : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300',
+                      ? 'bg-layer-base/50 border-lunary-primary-600 text-content-brand'
+                      : 'border-stroke-subtle text-content-muted hover:border-stroke-default hover:text-content-secondary',
                   )}
                 >
                   <Icon className='w-5 h-5' />
@@ -188,14 +188,14 @@ export function EveningRitualSheet({
 
         {step === 'gratitude' && (
           <div className='space-y-4'>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               What are you grateful for today?
             </p>
             <textarea
               value={gratitude}
               onChange={(e) => setGratitude(e.target.value)}
               placeholder='One thing you appreciated today...'
-              className='w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none text-sm'
+              className='w-full bg-surface-elevated border border-stroke-default rounded-lg p-3 text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none text-sm'
               rows={3}
               maxLength={500}
               autoFocus
@@ -205,13 +205,15 @@ export function EveningRitualSheet({
 
         {step === 'intention' && activeIntention && (
           <div className='space-y-4'>
-            <div className='bg-lunary-primary-900/20 border border-lunary-primary-800/30 rounded-lg p-3'>
+            <div className='bg-layer-base/20 border border-lunary-primary-800/30 rounded-lg p-3'>
               <p className='text-[0.65rem] uppercase tracking-widest text-lunary-primary-400 mb-1'>
                 Today's intention
               </p>
-              <p className='text-sm text-white'>{activeIntention.text}</p>
+              <p className='text-sm text-content-primary'>
+                {activeIntention.text}
+              </p>
             </div>
-            <p className='text-sm text-zinc-400'>How did it go?</p>
+            <p className='text-sm text-content-muted'>How did it go?</p>
             <div className='grid grid-cols-2 gap-2'>
               {INTENTION_OUTCOMES.map(({ value, label, color }) => (
                 <button
@@ -220,8 +222,8 @@ export function EveningRitualSheet({
                   className={cn(
                     'p-3 rounded-lg border text-sm transition-colors text-left',
                     intentionOutcome === value
-                      ? 'bg-lunary-primary-900/50 border-lunary-primary-600'
-                      : 'border-zinc-800 hover:border-zinc-700',
+                      ? 'bg-layer-base/50 border-lunary-primary-600'
+                      : 'border-stroke-subtle hover:border-stroke-default',
                     color,
                   )}
                 >
@@ -234,13 +236,13 @@ export function EveningRitualSheet({
 
         {step === 'done' && (
           <div className='text-center py-6'>
-            <div className='w-12 h-12 bg-lunary-primary-900/50 rounded-full flex items-center justify-center mx-auto mb-3'>
+            <div className='w-12 h-12 bg-layer-base/50 rounded-full flex items-center justify-center mx-auto mb-3'>
               <Sparkles className='w-6 h-6 text-lunary-primary-400' />
             </div>
-            <p className='text-white font-medium mb-1'>
+            <p className='text-content-primary font-medium mb-1'>
               Evening ritual complete
             </p>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Rest well. Tomorrow holds new cosmic potential.
             </p>
           </div>

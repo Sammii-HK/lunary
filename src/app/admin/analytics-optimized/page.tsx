@@ -29,32 +29,32 @@ export default function AnalyticsOptimizedPage() {
       {/* Header */}
       <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
         <div>
-          <h1 className='text-3xl font-bold tracking-tight text-white'>
+          <h1 className='text-3xl font-bold tracking-tight text-content-primary'>
             Analytics Dashboard (Optimized)
             <span className='ml-3 rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-400'>
               99% Cost Reduction
             </span>
           </h1>
-          <p className='mt-1 text-sm text-zinc-400'>
+          <p className='mt-1 text-sm text-content-muted'>
             Pre-computed historical metrics + real-time today
           </p>
         </div>
 
         {/* Date Range Picker */}
-        <div className='flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2'>
-          <CalendarRange className='h-4 w-4 text-zinc-400' />
+        <div className='flex items-center gap-2 rounded-lg border border-stroke-subtle bg-surface-elevated/40 px-3 py-2'>
+          <CalendarRange className='h-4 w-4 text-content-muted' />
           <input
             type='date'
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className='bg-transparent text-sm text-zinc-200 outline-none'
+            className='bg-transparent text-sm text-content-primary outline-none'
           />
-          <span className='text-zinc-500'>to</span>
+          <span className='text-content-muted'>to</span>
           <input
             type='date'
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className='bg-transparent text-sm text-zinc-200 outline-none'
+            className='bg-transparent text-sm text-content-primary outline-none'
           />
         </div>
       </div>
@@ -89,39 +89,43 @@ export default function AnalyticsOptimizedPage() {
       {/* Loading State */}
       {loading && (
         <div className='flex h-64 items-center justify-center'>
-          <div className='text-zinc-400'>Loading dashboard...</div>
+          <div className='text-content-muted'>Loading dashboard...</div>
         </div>
       )}
 
       {/* Summary Cards */}
       {summary && !loading && (
         <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
-          <div className='rounded-xl border border-zinc-800 bg-zinc-900/40 p-6'>
-            <div className='text-sm text-zinc-400'>Monthly Active Users</div>
-            <div className='mt-2 text-3xl font-bold text-white'>
+          <div className='rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-6'>
+            <div className='text-sm text-content-muted'>
+              Monthly Active Users
+            </div>
+            <div className='mt-2 text-3xl font-bold text-content-primary'>
               {summary.mau.toLocaleString()}
             </div>
           </div>
 
-          <div className='rounded-xl border border-zinc-800 bg-zinc-900/40 p-6'>
-            <div className='text-sm text-zinc-400'>
+          <div className='rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-6'>
+            <div className='text-sm text-content-muted'>
               Monthly Recurring Revenue
             </div>
-            <div className='mt-2 text-3xl font-bold text-white'>
+            <div className='mt-2 text-3xl font-bold text-content-primary'>
               ${summary.mrr.toFixed(0)}
             </div>
           </div>
 
-          <div className='rounded-xl border border-zinc-800 bg-zinc-900/40 p-6'>
-            <div className='text-sm text-zinc-400'>Total Signups</div>
-            <div className='mt-2 text-3xl font-bold text-white'>
+          <div className='rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-6'>
+            <div className='text-sm text-content-muted'>Total Signups</div>
+            <div className='mt-2 text-3xl font-bold text-content-primary'>
               {summary.totalSignups.toLocaleString()}
             </div>
           </div>
 
-          <div className='rounded-xl border border-zinc-800 bg-zinc-900/40 p-6'>
-            <div className='text-sm text-zinc-400'>Stickiness (DAU/MAU)</div>
-            <div className='mt-2 text-3xl font-bold text-white'>
+          <div className='rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-6'>
+            <div className='text-sm text-content-muted'>
+              Stickiness (DAU/MAU)
+            </div>
+            <div className='mt-2 text-3xl font-bold text-content-primary'>
               {summary.stickiness.toFixed(1)}%
             </div>
           </div>
@@ -130,11 +134,13 @@ export default function AnalyticsOptimizedPage() {
 
       {/* Timeseries Data Table */}
       {timeseries.length > 0 && !loading && (
-        <div className='rounded-xl border border-zinc-800 bg-zinc-900/40 p-6'>
-          <h2 className='mb-4 text-xl font-bold text-white'>Daily Metrics</h2>
+        <div className='rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-6'>
+          <h2 className='mb-4 text-xl font-bold text-content-primary'>
+            Daily Metrics
+          </h2>
           <div className='overflow-x-auto'>
             <table className='w-full text-sm'>
-              <thead className='border-b border-zinc-700 text-left text-zinc-400'>
+              <thead className='border-b border-stroke-default text-left text-content-muted'>
                 <tr>
                   <th className='pb-3'>Date</th>
                   <th className='pb-3'>DAU</th>
@@ -146,9 +152,12 @@ export default function AnalyticsOptimizedPage() {
                   <th className='pb-3'>Source</th>
                 </tr>
               </thead>
-              <tbody className='text-zinc-200'>
+              <tbody className='text-content-primary'>
                 {timeseries.slice(-14).map((metric) => (
-                  <tr key={metric.date} className='border-b border-zinc-800/50'>
+                  <tr
+                    key={metric.date}
+                    className='border-b border-stroke-subtle/50'
+                  >
                     <td className='py-3 font-medium'>{metric.date}</td>
                     <td className='py-3'>{metric.dau.toLocaleString()}</td>
                     <td className='py-3'>{metric.wau.toLocaleString()}</td>
@@ -172,7 +181,7 @@ export default function AnalyticsOptimizedPage() {
               </tbody>
             </table>
           </div>
-          <div className='mt-4 text-xs text-zinc-500'>
+          <div className='mt-4 text-xs text-content-muted'>
             Showing last 14 days • Total: {timeseries.length} days
           </div>
         </div>

@@ -85,9 +85,9 @@ export function ArchetypeEvolutionChart({
   if (snapshots.length === 0) {
     return (
       <div
-        className={`rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 ${className}`}
+        className={`rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6 ${className}`}
       >
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           No archetype history yet. Check back after patterns are detected!
         </p>
       </div>
@@ -96,9 +96,9 @@ export function ArchetypeEvolutionChart({
 
   return (
     <div
-      className={`rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 ${className}`}
+      className={`rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6 ${className}`}
     >
-      <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+      <h3 className='text-lg font-medium text-content-primary mb-4'>
         Archetype Evolution
       </h3>
       <ResponsiveContainer width='100%' height={300}>

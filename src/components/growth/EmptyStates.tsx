@@ -84,29 +84,31 @@ export function EmptyState({
   if (compact) {
     return (
       <div
-        className={`flex items-center gap-3 p-3 rounded-lg bg-zinc-900/30 border border-zinc-800/50 ${className}`}
+        className={`flex items-center gap-3 p-3 rounded-lg bg-surface-elevated/30 border border-stroke-subtle/50 ${className}`}
       >
         <div className='shrink-0 opacity-50'>{content.icon}</div>
-        <p className='text-xs text-zinc-400'>{content.message}</p>
+        <p className='text-xs text-content-muted'>{content.message}</p>
       </div>
     );
   }
 
   return (
     <div
-      className={`flex flex-col items-center justify-center text-center p-6 rounded-xl bg-zinc-900/30 border border-zinc-800/50 ${className}`}
+      className={`flex flex-col items-center justify-center text-center p-6 rounded-xl bg-surface-elevated/30 border border-stroke-subtle/50 ${className}`}
     >
-      <div className='w-12 h-12 rounded-full bg-lunary-primary-950/50 border border-lunary-primary-800/30 flex items-center justify-center mb-4'>
+      <div className='w-12 h-12 rounded-full bg-layer-deep/50 border border-lunary-primary-800/30 flex items-center justify-center mb-4'>
         {content.icon}
       </div>
-      <h3 className='text-sm font-medium text-zinc-100 mb-2'>
+      <h3 className='text-sm font-medium text-content-primary mb-2'>
         {content.heading}
       </h3>
-      <p className='text-xs text-zinc-400 max-w-xs mb-4'>{content.message}</p>
+      <p className='text-xs text-content-muted max-w-xs mb-4'>
+        {content.message}
+      </p>
       {content.action && (
         <Link
           href={content.action.href}
-          className='group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-lunary-primary-900/30 border border-lunary-primary-700/30 text-xs font-medium text-lunary-primary-300 hover:bg-lunary-primary-900/50 transition-colors'
+          className='group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-layer-base/30 border border-lunary-primary-700/30 text-xs font-medium text-content-brand hover:bg-layer-base/50 transition-colors'
         >
           {content.action.label}
           <ChevronRight className='w-3 h-3 group-hover:translate-x-0.5 transition-transform' />
@@ -127,7 +129,7 @@ export function LoadingState({ className = '', lines = 3 }: LoadingStateProps) {
       {Array.from({ length: lines }).map((_, i) => (
         <div
           key={i}
-          className='h-4 bg-zinc-800 rounded animate-pulse'
+          className='h-4 bg-surface-card rounded animate-pulse'
           style={{ width: `${100 - i * 15}%` }}
         />
       ))}

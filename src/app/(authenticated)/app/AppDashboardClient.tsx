@@ -29,7 +29,7 @@ const DateWidget = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-6 w-48 bg-zinc-800/50 rounded animate-pulse mx-auto' />
+      <div className='h-6 w-48 bg-surface-card/50 rounded animate-pulse mx-auto' />
     ),
     ssr: false,
   },
@@ -44,7 +44,7 @@ const MoonPreview = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-20 bg-zinc-900/50 rounded-md animate-pulse' />
+      <div className='h-20 bg-surface-elevated/50 rounded-md animate-pulse' />
     ),
     ssr: false,
   },
@@ -57,7 +57,7 @@ const TransitOfTheDay = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-16 bg-zinc-900/50 rounded-md animate-pulse' />
+      <div className='h-16 bg-surface-elevated/50 rounded-md animate-pulse' />
     ),
     ssr: false,
   },
@@ -70,7 +70,7 @@ const DailyInsightCard = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-20 bg-zinc-900/50 rounded-md animate-pulse' />
+      <div className='h-20 bg-surface-elevated/50 rounded-md animate-pulse' />
     ),
     ssr: false,
   },
@@ -83,7 +83,7 @@ const DailyCardPreview = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-20 bg-zinc-900/50 rounded-md animate-pulse' />
+      <div className='h-20 bg-surface-elevated/50 rounded-md animate-pulse' />
     ),
     ssr: false,
   },
@@ -96,10 +96,10 @@ const PersonalizedHoroscopePreview = dynamic(
     })),
   {
     loading: () => (
-      <div className='bg-gradient-to-br from-lunary-primary-900/30 to-lunary-accent-900/20 rounded-xl p-4 border border-lunary-primary-800/30 animate-pulse'>
-        <div className='h-4 bg-lunary-primary-800/30 rounded w-3/4 mb-3' />
-        <div className='h-3 bg-lunary-primary-800/20 rounded w-full mb-2' />
-        <div className='h-3 bg-lunary-primary-800/20 rounded w-5/6' />
+      <div className='bg-gradient-to-br from-layer-base/30 to-lunary-accent-900/20 rounded-xl p-4 border border-lunary-primary-800/30 animate-pulse'>
+        <div className='h-4 bg-layer-raised/30 rounded w-3/4 mb-3' />
+        <div className='h-3 bg-layer-raised/20 rounded w-full mb-2' />
+        <div className='h-3 bg-layer-raised/20 rounded w-5/6' />
       </div>
     ),
     ssr: false,
@@ -113,7 +113,7 @@ const CrystalPreview = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-16 bg-zinc-900/50 rounded-md animate-pulse' />
+      <div className='h-16 bg-surface-elevated/50 rounded-md animate-pulse' />
     ),
     ssr: false,
   },
@@ -126,7 +126,7 @@ const DailyRunePreview = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-16 bg-zinc-900/50 rounded-md animate-pulse' />
+      <div className='h-16 bg-surface-elevated/50 rounded-md animate-pulse' />
     ),
     ssr: false,
   },
@@ -139,7 +139,7 @@ const SkyNowCard = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-24 bg-zinc-900/50 rounded-md animate-pulse' />
+      <div className='h-24 bg-surface-elevated/50 rounded-md animate-pulse' />
     ),
     ssr: false,
   },
@@ -163,7 +163,7 @@ const CosmicScore = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-24 bg-zinc-900/50 rounded-2xl animate-pulse' />
+      <div className='h-24 bg-surface-elevated/50 rounded-2xl animate-pulse' />
     ),
     ssr: false,
   },
@@ -206,7 +206,7 @@ const WeeklyChallengeCard = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-24 bg-zinc-900/50 rounded-xl animate-pulse' />
+      <div className='h-24 bg-surface-elevated/50 rounded-xl animate-pulse' />
     ),
     ssr: false,
   },
@@ -391,7 +391,7 @@ export default function AppDashboardClient() {
         style={{ height: pullDistance > 0 || isRefreshing ? pullDistance : 0 }}
       >
         <div
-          className='text-zinc-400'
+          className='text-content-muted'
           style={{
             opacity: progress,
             transform: `rotate(${progress * 360}deg)`,
@@ -421,14 +421,14 @@ export default function AppDashboardClient() {
         <header>
           <div className='flex items-center justify-between mb-2'>
             <div className='w-16' />
-            <p className='text-lg text-zinc-300 text-center flex-1'>
+            <p className='text-lg text-content-secondary text-center flex-1'>
               {greeting()}
               {firstName && (
                 <>
                   ,{' '}
                   <Link
                     href='/profile'
-                    className='text-lunary-accent hover:text-lunary-accent-300 transition-colors'
+                    className='text-lunary-accent hover:text-content-brand-accent transition-colors'
                   >
                     {firstName}
                   </Link>
@@ -459,12 +459,14 @@ export default function AppDashboardClient() {
         {authState.isAuthenticated && isEvening && (
           <button
             onClick={() => setShowEveningRitual(true)}
-            className='w-full bg-gradient-to-r from-lunary-primary-900/40 to-indigo-900/30 border border-lunary-primary-800/30 rounded-xl p-3 flex items-center gap-3 hover:border-lunary-primary-700/50 transition-colors'
+            className='w-full ritual-card-gradient border border-stroke-subtle rounded-xl p-3 flex items-center gap-3 hover:border-stroke-default transition-colors'
           >
             <span className='text-lg'>🌙</span>
             <div className='text-left flex-1'>
-              <p className='text-sm text-white font-medium'>Evening Ritual</p>
-              <p className='text-xs text-zinc-400'>
+              <p className='text-sm text-content-primary font-medium'>
+                Evening Ritual
+              </p>
+              <p className='text-xs text-content-muted'>
                 Reflect on your day with a quick mood check-in
               </p>
             </div>
@@ -513,14 +515,14 @@ export default function AppDashboardClient() {
         {authState.isAuthenticated && <ReferralShareCTA compact />}
 
         {authState.isAuthenticated && (
-          <p className='text-xs text-zinc-500 text-center mt-4'>
+          <p className='text-xs text-content-muted text-center mt-4'>
             {focusHonoured
               ? "You've honoured today's focus."
               : "You've checked in with today's sky."}
           </p>
         )}
         {authState.isAuthenticated && focusHonoured && (
-          <p className='text-[0.65rem] text-zinc-400 text-center'>
+          <p className='text-[0.65rem] text-content-muted text-center'>
             Tomorrow feels calm, steady light.
           </p>
         )}

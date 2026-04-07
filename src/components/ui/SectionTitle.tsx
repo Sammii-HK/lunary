@@ -15,7 +15,7 @@ export const SectionTitle = React.forwardRef<HTMLElement, SectionTitleProps>(
       <Comp
         ref={ref as any}
         className={cn(
-          'text-xs font-semibold uppercase tracking-wide text-zinc-400',
+          'text-xs font-semibold uppercase tracking-wide text-content-muted',
           className,
         )}
         {...props}

@@ -243,9 +243,9 @@ export default function BlogManagerPage() {
 
             {/* Inline Preview */}
             {showPreview && (
-              <div className='mb-6 prose prose-invert max-w-none bg-zinc-950 p-6 rounded-lg border border-zinc-800 overflow-auto max-h-[60vh]'>
+              <div className='mb-6 prose prose-invert max-w-none bg-surface-base p-6 rounded-lg border border-stroke-subtle overflow-auto max-h-[60vh]'>
                 <article className='space-y-8'>
-                  <header className='space-y-4 border-b border-zinc-800 pb-6'>
+                  <header className='space-y-4 border-b border-stroke-subtle pb-6'>
                     <div className='flex items-center gap-2 text-sm text-muted-foreground'>
                       <Badge variant='outline'>
                         Week {currentWeek.weekNumber}
@@ -296,7 +296,7 @@ export default function BlogManagerPage() {
                             (highlight: any, index: number) => (
                               <div
                                 key={index}
-                                className='border border-zinc-800 rounded-lg p-4'
+                                className='border border-stroke-subtle rounded-lg p-4'
                               >
                                 <div className='flex items-start justify-between mb-2'>
                                   <h3 className='text-xl font-semibold'>
@@ -333,7 +333,7 @@ export default function BlogManagerPage() {
                             (phase: any, index: number) => (
                               <div
                                 key={index}
-                                className='border border-zinc-800 rounded-lg p-4'
+                                className='border border-stroke-subtle rounded-lg p-4'
                               >
                                 <div className='flex items-start justify-between mb-2'>
                                   <h3 className='text-xl font-semibold'>
@@ -394,7 +394,7 @@ export default function BlogManagerPage() {
                               return (
                                 <div
                                   key={index}
-                                  className='border border-zinc-800 rounded-lg p-4'
+                                  className='border border-stroke-subtle rounded-lg p-4'
                                 >
                                   <h3 className='text-xl font-semibold mb-2'>
                                     {forecast.date
@@ -417,7 +417,7 @@ export default function BlogManagerPage() {
                                   )}
 
                                   {dayCrystal && (
-                                    <div className='mt-3 p-3 bg-lunary-rose-950/20 border border-lunary-rose-800/30 rounded-lg'>
+                                    <div className='mt-3 p-3 bg-layer-deep/20 border border-lunary-rose-800/30 rounded-lg'>
                                       <div className='flex items-center gap-2 mb-2'>
                                         <Gem className='h-4 w-4 text-lunary-rose-300' />
                                         <p className='text-sm font-semibold text-lunary-rose-300'>
@@ -627,9 +627,9 @@ export default function BlogManagerPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className='prose prose-invert max-w-none bg-zinc-950 p-6 rounded-lg border border-zinc-800 overflow-auto max-h-[80vh]'>
+                <div className='prose prose-invert max-w-none bg-surface-base p-6 rounded-lg border border-stroke-subtle overflow-auto max-h-[80vh]'>
                   <article className='space-y-8'>
-                    <header className='space-y-4 border-b border-zinc-800 pb-6'>
+                    <header className='space-y-4 border-b border-stroke-subtle pb-6'>
                       <div className='flex items-center gap-2 text-sm text-muted-foreground'>
                         <Badge variant='outline'>
                           Week {currentWeek.weekNumber}
@@ -682,7 +682,7 @@ export default function BlogManagerPage() {
                               (highlight: any, index: number) => (
                                 <div
                                   key={index}
-                                  className='border border-zinc-800 rounded-lg p-4'
+                                  className='border border-stroke-subtle rounded-lg p-4'
                                 >
                                   <div className='flex items-start justify-between mb-2'>
                                     <h3 className='text-xl font-semibold'>
@@ -719,7 +719,7 @@ export default function BlogManagerPage() {
                               (phase: any, index: number) => (
                                 <div
                                   key={index}
-                                  className='border border-zinc-800 rounded-lg p-4'
+                                  className='border border-stroke-subtle rounded-lg p-4'
                                 >
                                   <div className='flex items-start justify-between mb-2'>
                                     <h3 className='text-xl font-semibold'>
@@ -781,7 +781,7 @@ export default function BlogManagerPage() {
                                 return (
                                   <div
                                     key={index}
-                                    className='border border-zinc-800 rounded-lg p-4'
+                                    className='border border-stroke-subtle rounded-lg p-4'
                                   >
                                     <h3 className='text-xl font-semibold mb-2'>
                                       {forecast.date
@@ -806,7 +806,7 @@ export default function BlogManagerPage() {
                                     )}
 
                                     {dayCrystal && (
-                                      <div className='mt-3 p-3 bg-lunary-rose-950/20 border border-lunary-rose-800/30 rounded-lg'>
+                                      <div className='mt-3 p-3 bg-layer-deep/20 border border-lunary-rose-800/30 rounded-lg'>
                                         <div className='flex items-center gap-2 mb-2'>
                                           <Gem className='h-4 w-4 text-lunary-rose-300' />
                                           <p className='text-sm font-semibold text-lunary-rose-300'>

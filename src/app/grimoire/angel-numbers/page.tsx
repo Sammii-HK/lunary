@@ -250,10 +250,10 @@ export default function AngelNumbersIndexPage() {
         faqs={faqs}
       >
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Triple Number Sequences
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Triple numbers (111, 222, 333, etc.) are the most commonly
             recognized angel numbers. Click a number to see its full meaning.
           </p>
@@ -262,12 +262,12 @@ export default function AngelNumbersIndexPage() {
               <Link
                 key={data.number}
                 href={`/grimoire/angel-numbers/${data.number}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all text-center'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all text-center'
               >
-                <span className='text-2xl font-light text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
+                <span className='text-2xl font-light text-lunary-primary-400 group-hover:text-content-brand transition-colors'>
                   {data.number}
                 </span>
-                <p className='text-xs text-zinc-400 mt-2 line-clamp-2'>
+                <p className='text-xs text-content-muted mt-2 line-clamp-2'>
                   {numberTeasers[data.number] || data.coreMeaning}
                 </p>
               </Link>
@@ -277,10 +277,10 @@ export default function AngelNumbersIndexPage() {
 
         {quadrupleNumbers.length > 0 && (
           <section className='mb-12'>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Quadruple Number Sequences
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               Quadruple numbers (1111, 2222, etc.) amplify the energy of their
               single digit to master levels.
             </p>
@@ -289,12 +289,12 @@ export default function AngelNumbersIndexPage() {
                 <Link
                   key={data.number}
                   href={`/grimoire/angel-numbers/${data.number}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-secondary-600 transition-all text-center'
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-secondary-600 transition-all text-center'
                 >
-                  <span className='text-2xl font-light text-lunary-secondary-400 group-hover:text-lunary-secondary-300 transition-colors'>
+                  <span className='text-2xl font-light text-lunary-secondary-400 group-hover:text-content-brand-secondary transition-colors'>
                     {data.number}
                   </span>
-                  <p className='text-xs text-zinc-400 mt-2 line-clamp-2'>
+                  <p className='text-xs text-content-muted mt-2 line-clamp-2'>
                     {numberTeasers[data.number] || data.coreMeaning}
                   </p>
                 </Link>
@@ -305,10 +305,10 @@ export default function AngelNumbersIndexPage() {
 
         {sequentialNumbers.length > 0 && (
           <section className='mb-12'>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Sequential Patterns
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               Sequential numbers (123, 234, 345, etc.) represent step-by-step
               progress and natural growth patterns.
             </p>
@@ -317,12 +317,12 @@ export default function AngelNumbersIndexPage() {
                 <Link
                   key={data.number}
                   href={`/grimoire/angel-numbers/${data.number}`}
-                  className='group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-success-600 transition-all text-center'
+                  className='group rounded-lg border border-stroke-subtle bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-success-600 transition-all text-center'
                 >
                   <span className='text-xl font-light text-lunary-success-400 group-hover:text-lunary-success-300 transition-colors'>
                     {data.number}
                   </span>
-                  <p className='text-[11px] text-zinc-400 mt-2 line-clamp-2'>
+                  <p className='text-[11px] text-content-muted mt-2 line-clamp-2'>
                     {numberTeasers[data.number] || data.coreMeaning}
                   </p>
                 </Link>
@@ -333,10 +333,10 @@ export default function AngelNumbersIndexPage() {
 
         {x0x0Numbers.length > 0 && (
           <section className='mb-12'>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Divine Amplification Patterns
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               X0X0 patterns (1010, 2020, 3030, etc.) combine number energy with
               zeros that amplify divine connection and infinite potential.
             </p>
@@ -345,12 +345,12 @@ export default function AngelNumbersIndexPage() {
                 <Link
                   key={data.number}
                   href={`/grimoire/angel-numbers/${data.number}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-accent-600 transition-all text-center'
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-accent-600 transition-all text-center'
                 >
-                  <span className='text-2xl font-light text-lunary-accent-400 group-hover:text-lunary-accent-300 transition-colors'>
+                  <span className='text-2xl font-light text-lunary-accent-400 group-hover:text-content-brand-accent transition-colors'>
                     {data.number}
                   </span>
-                  <p className='text-xs text-zinc-400 mt-2 line-clamp-2'>
+                  <p className='text-xs text-content-muted mt-2 line-clamp-2'>
                     {numberTeasers[data.number] || data.coreMeaning}
                   </p>
                 </Link>
@@ -361,10 +361,10 @@ export default function AngelNumbersIndexPage() {
 
         {mirrorNumbers.length > 0 && (
           <section className='mb-12'>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Mirror & Alternating Patterns
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               Mirror patterns (1212, 1313, 1414, etc.) combine the energies of
               two numbers in a balanced, repeating rhythm.
             </p>
@@ -373,12 +373,12 @@ export default function AngelNumbersIndexPage() {
                 <Link
                   key={data.number}
                   href={`/grimoire/angel-numbers/${data.number}`}
-                  className='group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-rose-600 transition-all text-center'
+                  className='group rounded-lg border border-stroke-subtle bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-rose-600 transition-all text-center'
                 >
                   <span className='text-xl font-light text-lunary-rose-400 group-hover:text-lunary-rose-300 transition-colors'>
                     {data.number}
                   </span>
-                  <p className='text-[11px] text-zinc-400 mt-2 line-clamp-2'>
+                  <p className='text-[11px] text-content-muted mt-2 line-clamp-2'>
                     {numberTeasers[data.number] || data.coreMeaning}
                   </p>
                 </Link>
@@ -389,10 +389,10 @@ export default function AngelNumbersIndexPage() {
 
         {otherNumbers.length > 0 && (
           <section className='mb-12'>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Other Special Patterns
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               Unique number patterns with special spiritual significance.
             </p>
             <div className='grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3'>
@@ -400,12 +400,12 @@ export default function AngelNumbersIndexPage() {
                 <Link
                   key={data.number}
                   href={`/grimoire/angel-numbers/${data.number}`}
-                  className='group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-zinc-600 transition-all text-center'
+                  className='group rounded-lg border border-stroke-subtle bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-stroke-strong transition-all text-center'
                 >
-                  <span className='text-xl font-light text-zinc-100 group-hover:text-zinc-300 transition-colors'>
+                  <span className='text-xl font-light text-content-primary group-hover:text-content-secondary transition-colors'>
                     {data.number}
                   </span>
-                  <p className='text-[11px] text-zinc-400 mt-2 line-clamp-2'>
+                  <p className='text-[11px] text-content-muted mt-2 line-clamp-2'>
                     {numberTeasers[data.number] || data.coreMeaning}
                   </p>
                 </Link>
@@ -414,11 +414,11 @@ export default function AngelNumbersIndexPage() {
           </section>
         )}
 
-        <section className='mb-8 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-8 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Why you're seeing this number
           </h2>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li className='flex items-center gap-2'>
               <span className='text-lunary-primary-400'>•</span>
               Repetition - the number keeps showing up to get your attention.
@@ -434,12 +434,12 @@ export default function AngelNumbersIndexPage() {
           </ul>
         </section>
 
-        <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Where to look for angel numbers
           </h2>
           <div className='grid md:grid-cols-2 gap-4'>
-            <ul className='space-y-2 text-zinc-400'>
+            <ul className='space-y-2 text-content-muted'>
               <li className='flex items-center gap-2'>
                 <span className='text-lunary-primary-400'>•</span>
                 Digital clocks and watches
@@ -453,7 +453,7 @@ export default function AngelNumbersIndexPage() {
                 Phone numbers and addresses
               </li>
             </ul>
-            <ul className='space-y-2 text-zinc-400'>
+            <ul className='space-y-2 text-content-muted'>
               <li className='flex items-center gap-2'>
                 <span className='text-lunary-primary-400'>•</span>
                 Page numbers and social metrics
@@ -471,14 +471,14 @@ export default function AngelNumbersIndexPage() {
         </section>
 
         <section className='mb-8'>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-sm text-content-muted'>
             Looking for a deeper meaning? Each angel number has its own page
             exploring love, work, and spiritual themes:{' '}
             {numbers.map((num, index) => (
               <span key={num}>
                 <Link
                   href={`/grimoire/angel-numbers/${num}`}
-                  className='text-lunary-primary-300 hover:text-lunary-primary-200'
+                  className='text-content-brand hover:text-content-secondary'
                 >
                   {num}
                 </Link>

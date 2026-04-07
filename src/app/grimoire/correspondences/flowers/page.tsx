@@ -179,10 +179,10 @@ Flowers represent the peak expression of a plant's energy — they are designed 
         faqs={faqs}
       >
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             All Magical Flowers
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Click on any flower to explore its full correspondences, magical
             uses, and practical applications.
           </p>
@@ -191,15 +191,15 @@ Flowers represent the peak expression of a plant's energy — they are designed 
               <Link
                 key={name}
                 href={`/grimoire/correspondences/flowers/${stringToKebabCase(name)}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-pink-700/50 transition-all'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-pink-700/50 transition-all'
               >
-                <h3 className='text-lg font-medium text-zinc-100 group-hover:text-pink-300 transition-colors mb-2'>
+                <h3 className='text-lg font-medium text-content-primary group-hover:text-pink-300 transition-colors mb-2'>
                   {name}
                 </h3>
-                <p className='text-sm text-zinc-400 mb-2'>
+                <p className='text-sm text-content-muted mb-2'>
                   {data.correspondences.slice(0, 3).join(', ')}
                 </p>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   Planet: {data.planets.join(', ')}
                 </p>
               </Link>
@@ -208,25 +208,33 @@ Flowers represent the peak expression of a plant's energy — they are designed 
         </section>
 
         <section className='mb-12 bg-pink-950/20 border border-pink-900/50 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Quick Reference: Flowers by Purpose
           </h2>
           <div className='grid md:grid-cols-2 gap-4 text-sm'>
             <div>
               <p className='text-pink-400 font-medium'>Love & Romance:</p>
-              <p className='text-zinc-400'>Rose, Jasmine, Hibiscus, Orchid</p>
+              <p className='text-content-muted'>
+                Rose, Jasmine, Hibiscus, Orchid
+              </p>
             </div>
             <div>
               <p className='text-pink-400 font-medium'>Peace & Healing:</p>
-              <p className='text-zinc-400'>Lavender, Chamomile, Lily, Violet</p>
+              <p className='text-content-muted'>
+                Lavender, Chamomile, Lily, Violet
+              </p>
             </div>
             <div>
               <p className='text-pink-400 font-medium'>Protection:</p>
-              <p className='text-zinc-400'>Marigold, Snapdragon, Carnation</p>
+              <p className='text-content-muted'>
+                Marigold, Snapdragon, Carnation
+              </p>
             </div>
             <div>
               <p className='text-pink-400 font-medium'>Success & Prosperity:</p>
-              <p className='text-zinc-400'>Sunflower, Daffodil, Honeysuckle</p>
+              <p className='text-content-muted'>
+                Sunflower, Daffodil, Honeysuckle
+              </p>
             </div>
           </div>
         </section>

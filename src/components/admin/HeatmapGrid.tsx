@@ -15,7 +15,7 @@ interface HeatmapGridProps {
 export function HeatmapGrid({ data }: HeatmapGridProps) {
   if (!data.length) {
     return (
-      <div className='text-sm text-zinc-400'>
+      <div className='text-sm text-content-muted'>
         No feature usage data available.
       </div>
     );
@@ -29,7 +29,7 @@ export function HeatmapGrid({ data }: HeatmapGridProps) {
 
   return (
     <div className='overflow-x-auto'>
-      <table className='w-full text-left text-xs text-zinc-400'>
+      <table className='w-full text-left text-xs text-content-muted'>
         <thead>
           <tr>
             <th className='pb-2'>Date</th>
@@ -51,13 +51,13 @@ export function HeatmapGrid({ data }: HeatmapGridProps) {
         <tbody>
           {data.map((row) => (
             <tr key={row.date}>
-              <td className='py-2 text-zinc-400'>{row.date.slice(5)}</td>
+              <td className='py-2 text-content-muted'>{row.date.slice(5)}</td>
               {row.entries.map((entry) => {
                 const intensity = entry.value / max;
                 return (
                   <td key={entry.feature} className='py-1'>
                     <div
-                      className='h-6 rounded-md text-center text-xs font-semibold text-white'
+                      className='h-6 rounded-md text-center text-xs font-semibold text-content-primary'
                       style={{
                         backgroundColor: `rgba(147,51,234,${Math.max(
                           0.1,

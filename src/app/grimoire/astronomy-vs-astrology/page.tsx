@@ -103,7 +103,7 @@ export default function AstronomyVsAstrologyPage() {
   );
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(faqSchema)}
       {renderJsonLd(
         createBreadcrumbSchema([
@@ -126,7 +126,7 @@ export default function AstronomyVsAstrologyPage() {
           <h1 className='text-4xl md:text-5xl font-light mb-4'>
             Astronomy vs Astrology
           </h1>
-          <p className='text-xl text-zinc-400 leading-relaxed max-w-3xl'>
+          <p className='text-xl text-content-muted leading-relaxed max-w-3xl'>
             These two disciplines share ancient roots and look at the same sky,
             but approach it in fundamentally different ways. Here is how they
             differ—and where they connect.
@@ -138,14 +138,14 @@ export default function AstronomyVsAstrologyPage() {
           <div className='overflow-x-auto'>
             <table className='w-full'>
               <thead>
-                <tr className='border-b border-zinc-800'>
-                  <th className='text-left py-3 px-4 text-zinc-400 font-medium'>
+                <tr className='border-b border-stroke-subtle'>
+                  <th className='text-left py-3 px-4 text-content-muted font-medium'>
                     Aspect
                   </th>
-                  <th className='text-left py-3 px-4 text-zinc-400 font-medium'>
+                  <th className='text-left py-3 px-4 text-content-muted font-medium'>
                     Astronomy
                   </th>
-                  <th className='text-left py-3 px-4 text-zinc-400 font-medium'>
+                  <th className='text-left py-3 px-4 text-content-muted font-medium'>
                     Astrology
                   </th>
                 </tr>
@@ -154,15 +154,15 @@ export default function AstronomyVsAstrologyPage() {
                 {comparisons.map((row, index) => (
                   <tr
                     key={index}
-                    className='border-b border-zinc-800/50 hover:bg-zinc-900/30'
+                    className='border-b border-stroke-subtle/50 hover:bg-surface-elevated/30'
                   >
-                    <td className='py-4 px-4 font-medium text-lunary-primary-300'>
+                    <td className='py-4 px-4 font-medium text-content-brand'>
                       {row.aspect}
                     </td>
-                    <td className='py-4 px-4 text-zinc-300 text-sm'>
+                    <td className='py-4 px-4 text-content-secondary text-sm'>
                       {row.astronomy}
                     </td>
-                    <td className='py-4 px-4 text-zinc-300 text-sm'>
+                    <td className='py-4 px-4 text-content-secondary text-sm'>
                       {row.astrology}
                     </td>
                   </tr>
@@ -172,21 +172,21 @@ export default function AstronomyVsAstrologyPage() {
           </div>
         </section>
 
-        <section className='mb-12 p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+        <section className='mb-12 p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
           <h2 className='text-2xl font-light mb-4'>Historical Connection</h2>
-          <p className='text-zinc-300 leading-relaxed mb-4'>
+          <p className='text-content-secondary leading-relaxed mb-4'>
             For most of human history, astronomy and astrology were unified.
             Ancient Babylonians, Greeks, and Arabs studied the stars both to
             understand physical reality and to find meaning in celestial
             patterns.
           </p>
-          <p className='text-zinc-300 leading-relaxed mb-4'>
+          <p className='text-content-secondary leading-relaxed mb-4'>
             The separation began during the Scientific Revolution (16th-17th
             centuries) as the scientific method became the standard for
             validating knowledge claims. Astronomy evolved into a pure science,
             while astrology continued as a symbolic practice.
           </p>
-          <p className='text-zinc-400 leading-relaxed'>
+          <p className='text-content-muted leading-relaxed'>
             Notable figures who practiced both include Ptolemy, Johannes Kepler,
             and Tycho Brahe. Today, they are distinct disciplines—but both still
             look at the same magnificent sky.
@@ -197,37 +197,37 @@ export default function AstronomyVsAstrologyPage() {
           <h2 className='text-2xl font-light mb-6'>
             How Lunary Uses Astronomical Accuracy
           </h2>
-          <p className='text-zinc-300 leading-relaxed mb-6'>
+          <p className='text-content-secondary leading-relaxed mb-6'>
             Lunary sits at the intersection of scientific precision and symbolic
             meaning. We believe that accurate data makes for better reflection.
           </p>
           <div className='grid md:grid-cols-2 gap-6 mb-6'>
-            <div className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-              <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+            <div className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+              <h3 className='text-lg font-medium text-content-brand mb-3'>
                 Astronomical Precision
               </h3>
-              <p className='text-zinc-400 text-sm mb-3'>
+              <p className='text-content-muted text-sm mb-3'>
                 We use the Astronomy Engine library to calculate planetary
                 positions to arcsecond precision—the same accuracy as scientific
                 applications. Our data matches NASA ephemeris.
               </p>
-              <ul className='text-zinc-500 text-xs space-y-1'>
+              <ul className='text-content-muted text-xs space-y-1'>
                 <li>• Real-time planetary positions</li>
                 <li>• Accurate moon phase calculations</li>
                 <li>• Precise eclipse and retrograde timing</li>
                 <li>• Location-specific house calculations</li>
               </ul>
             </div>
-            <div className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-              <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+            <div className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+              <h3 className='text-lg font-medium text-content-brand mb-3'>
                 Symbolic Interpretation
               </h3>
-              <p className='text-zinc-400 text-sm mb-3'>
+              <p className='text-content-muted text-sm mb-3'>
                 We apply this precise astronomical data through the lens of
                 Western astrological tradition, offering interpretations for
                 self-reflection and personal insight.
               </p>
-              <ul className='text-zinc-500 text-xs space-y-1'>
+              <ul className='text-content-muted text-xs space-y-1'>
                 <li>• Zodiac sign meanings and traits</li>
                 <li>• Planetary symbolism and archetypes</li>
                 <li>• House-based life area interpretations</li>
@@ -235,11 +235,11 @@ export default function AstronomyVsAstrologyPage() {
               </ul>
             </div>
           </div>
-          <div className='p-5 rounded-xl border border-lunary-primary-700/50 bg-lunary-primary-900/10'>
-            <p className='text-zinc-300 text-sm'>
-              <strong className='text-lunary-primary-300'>Our position:</strong>{' '}
-              We do not claim astrology is science. We offer it as a framework
-              for self-reflection, using the most accurate astronomical data
+          <div className='p-5 rounded-xl border border-lunary-primary-700/50 bg-layer-base/10'>
+            <p className='text-content-secondary text-sm'>
+              <strong className='text-content-brand'>Our position:</strong> We
+              do not claim astrology is science. We offer it as a framework for
+              self-reflection, using the most accurate astronomical data
               available. You are always free to take what resonates and leave
               what doesn&apos;t.
             </p>
@@ -254,12 +254,12 @@ export default function AstronomyVsAstrologyPage() {
             {faqs.map((faq, index) => (
               <div
                 key={index}
-                className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'
+                className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30'
               >
-                <h3 className='text-lg font-medium mb-2 text-zinc-100'>
+                <h3 className='text-lg font-medium mb-2 text-content-primary'>
                   {faq.question}
                 </h3>
-                <p className='text-zinc-400'>{faq.answer}</p>
+                <p className='text-content-muted'>{faq.answer}</p>
               </div>
             ))}
           </div>
@@ -270,58 +270,62 @@ export default function AstronomyVsAstrologyPage() {
           <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-4'>
             <Link
               href='/grimoire/astronomy/planets'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-200 font-medium'>The Planets</span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <span className='text-content-primary font-medium'>
+                The Planets
+              </span>
+              <p className='text-xs text-content-muted mt-1'>
                 Astronomical data + astrological meaning
               </p>
             </Link>
             <Link
               href='/grimoire/zodiac'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-200 font-medium'>Zodiac Signs</span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <span className='text-content-primary font-medium'>
+                Zodiac Signs
+              </span>
+              <p className='text-xs text-content-muted mt-1'>
                 The 12 signs of the zodiac
               </p>
             </Link>
             <Link
               href='/grimoire/guides/birth-chart-complete-guide'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-200 font-medium'>
+              <span className='text-content-primary font-medium'>
                 Birth Chart Guide
               </span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <p className='text-xs text-content-muted mt-1'>
                 Learn to read your chart
               </p>
             </Link>
             <Link
               href='/grimoire/glossary'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-200 font-medium'>
+              <span className='text-content-primary font-medium'>
                 Astrology Glossary
               </span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <p className='text-xs text-content-muted mt-1'>
                 Terms and definitions
               </p>
             </Link>
           </div>
         </section>
 
-        <section className='p-6 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-rose-900/20'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
+        <section className='p-6 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-layer-base/20 to-lunary-rose-900/20'>
+          <h2 className='text-xl font-medium text-content-brand mb-2'>
             Experience Both Perspectives
           </h2>
-          <p className='text-zinc-300 mb-4'>
+          <p className='text-content-secondary mb-4'>
             See your birth chart calculated with astronomical precision,
             interpreted through astrological tradition.
           </p>
           <Link
             href='/birth-chart'
-            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/30 hover:bg-lunary-primary-900/50 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+            className='inline-flex px-6 py-3 rounded-lg bg-layer-base/30 hover:bg-layer-base/50 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
           >
             Calculate Your Birth Chart
           </Link>

@@ -203,12 +203,12 @@ export function UpgradePrompt({
     case 'banner':
       return (
         <div
-          className={`bg-gradient-to-r from-lunary-primary-900 to-lunary-secondary-900 border border-lunary-primary-700 rounded-lg p-4 relative ${className}`}
+          className={`bg-gradient-to-r from-layer-base to-lunary-secondary-900 border border-lunary-primary-700 rounded-lg p-4 relative ${className}`}
         >
           {shouldShowTrialCountdown && (
             <button
               onClick={handleDismiss}
-              className='absolute top-2 right-2 text-zinc-400 hover:text-zinc-100 transition-colors p-1'
+              className='absolute top-2 right-2 text-content-muted hover:text-content-primary transition-colors p-1'
               aria-label='Dismiss'
             >
               <X className='w-4 h-4' />
@@ -218,7 +218,7 @@ export function UpgradePrompt({
             <div className='flex items-center gap-3'>
               <Zap className='w-5 h-5 text-lunary-primary' />
               <div>
-                <h3 className='text-sm font-medium text-white'>
+                <h3 className='text-sm font-medium text-content-primary'>
                   {promptTitle}
                 </h3>
                 <p className='text-xs text-gray-400'>{promptDescription}</p>
@@ -248,12 +248,14 @@ export function UpgradePrompt({
     case 'card':
       return (
         <div
-          className={`bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center ${className}`}
+          className={`bg-surface-elevated border border-stroke-subtle rounded-lg p-4 text-center ${className}`}
         >
           <div className='w-12 h-12 bg-gradient-to-br from-lunary-primary to-lunary-secondary rounded-full flex items-center justify-center mx-auto mb-4'>
-            <Star className='w-6 h-6 text-white' />
+            <Star className='w-6 h-6 text-content-primary' />
           </div>
-          <h3 className='text-xl font-medium text-white mb-2'>{promptTitle}</h3>
+          <h3 className='text-xl font-medium text-content-primary mb-2'>
+            {promptTitle}
+          </h3>
           <p className='text-sm text-gray-400 mb-6'>{promptDescription}</p>
           <SmartTrialButton fullWidth />
         </div>
@@ -270,12 +272,12 @@ export function UpgradePrompt({
     case 'floating':
       return (
         <div
-          className={`fixed bottom-4 right-4 bg-zinc-900 border border-zinc-700 rounded-lg p-4 max-w-sm z-50 shadow-lg ${className}`}
+          className={`fixed bottom-4 right-4 bg-surface-elevated border border-stroke-default rounded-lg p-4 max-w-sm z-50 shadow-lg ${className}`}
         >
           {shouldShowTrialCountdown && (
             <button
               onClick={handleDismiss}
-              className='absolute top-2 right-2 text-zinc-400 hover:text-zinc-100 transition-colors p-1'
+              className='absolute top-2 right-2 text-content-muted hover:text-content-primary transition-colors p-1'
               aria-label='Dismiss'
             >
               <X className='w-4 h-4' />
@@ -284,7 +286,7 @@ export function UpgradePrompt({
           <div className='flex items-start gap-3'>
             <Sparkles className='w-5 h-5 text-lunary-primary mt-0.5 flex-shrink-0' />
             <div className='flex-1'>
-              <h3 className='text-sm font-medium text-white mb-1'>
+              <h3 className='text-sm font-medium text-content-primary mb-1'>
                 {promptTitle}
               </h3>
               <p className='text-xs text-gray-400 mb-3'>{promptDescription}</p>
@@ -314,8 +316,10 @@ export function UpgradePrompt({
 
     default:
       return (
-        <div className={`bg-zinc-900 rounded-lg p-6 ${className}`}>
-          <h3 className='text-lg font-medium text-white mb-2'>{promptTitle}</h3>
+        <div className={`bg-surface-elevated rounded-lg p-6 ${className}`}>
+          <h3 className='text-lg font-medium text-content-primary mb-2'>
+            {promptTitle}
+          </h3>
           <p className='text-sm text-gray-400 mb-4'>{promptDescription}</p>
           <SmartTrialButton />
         </div>

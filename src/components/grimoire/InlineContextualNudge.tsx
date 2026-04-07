@@ -148,7 +148,7 @@ export function InlineContextualNudge({
         {variant === 'minimal' && (
           <button
             onClick={handleClick}
-            className='text-sm text-lunary-accent-400 hover:text-lunary-accent-300 underline underline-offset-2 decoration-lunary-accent-400/50 hover:decoration-lunary-accent-300 transition-colors'
+            className='text-sm text-lunary-accent-400 hover:text-content-brand-accent underline underline-offset-2 decoration-lunary-accent-400/50 hover:decoration-lunary-accent-300 transition-colors'
           >
             {displayText}
           </button>
@@ -157,7 +157,7 @@ export function InlineContextualNudge({
         {variant === 'sparkles' && (
           <button
             onClick={handleClick}
-            className='inline-flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-lunary-accent-300 transition-colors group'
+            className='inline-flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-content-brand-accent transition-colors group'
           >
             <Sparkles className='w-4 h-4 flex-shrink-0' />
             <span>{displayText}</span>
@@ -168,10 +168,10 @@ export function InlineContextualNudge({
         {variant === 'card' && (
           <button
             onClick={handleClick}
-            className='flex items-center gap-3 px-4 py-3 rounded-lg bg-lunary-primary-900/30 border border-lunary-primary-700/50 hover:bg-lunary-primary-900/50 hover:border-lunary-primary-600 transition-all group'
+            className='flex items-center gap-3 px-4 py-3 rounded-lg bg-layer-base/30 border border-lunary-primary-700/50 hover:bg-layer-base/50 hover:border-lunary-primary-600 transition-all group'
           >
             <Star className='w-5 h-5 text-lunary-accent-400 flex-shrink-0' />
-            <span className='text-sm text-zinc-200 group-hover:text-white'>
+            <span className='text-sm text-content-primary group-hover:text-content-primary'>
               {displayText}
             </span>
             <ArrowRight className='w-4 h-4 text-lunary-accent-400 flex-shrink-0 transition-transform group-hover:translate-x-0.5 ml-auto' />

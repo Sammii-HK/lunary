@@ -49,7 +49,7 @@ export default function WitchTypesIndexPage() {
       <div className='flex justify-center mb-4'>
         <Wand2 className='w-16 h-16 text-violet-400' />
       </div>
-      <p className='text-zinc-400 text-lg max-w-2xl mx-auto'>
+      <p className='text-content-muted text-lg max-w-2xl mx-auto'>
         Modern witchcraft contains countless paths. These categories highlight
         affinities and rituals so you can find a place to begin or grow without
         feeling boxed in.
@@ -110,12 +110,12 @@ A "Green Witch" feels called to work with plants and herbs. A "Cosmic Witch" is 
     >
       <section
         id='important-context'
-        className='mb-10 bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6'
+        className='mb-10 bg-surface-elevated/50 border border-stroke-subtle rounded-2xl p-6'
       >
-        <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
+        <h2 className='text-2xl font-medium text-content-primary mb-4'>
           Important Context
         </h2>
-        <ul className='space-y-3 text-sm text-zinc-300'>
+        <ul className='space-y-3 text-sm text-content-secondary'>
           {contextList.map((item) => (
             <li key={item} className='flex items-start gap-2'>
               <span className='text-lunary-accent mt-1'>•</span>
@@ -125,7 +125,7 @@ A "Green Witch" feels called to work with plants and herbs. A "Cosmic Witch" is 
         </ul>
       </section>
       <section id='witch-types' className='mb-12'>
-        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
           Explore Witch Types
         </h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -133,33 +133,33 @@ A "Green Witch" feels called to work with plants and herbs. A "Cosmic Witch" is 
             <Link
               key={witch.slug}
               href={`/grimoire/modern-witchcraft/witch-types/${witch.slug}`}
-              className='group rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/60 hover:border-violet-500 transition-all'
+              className='group rounded-2xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/60 hover:border-violet-500 transition-all'
             >
               <div className='flex items-center gap-4 mb-2'>
                 <span className='text-3xl'>{witch.emoji}</span>
-                <h3 className='text-lg font-medium text-zinc-100 group-hover:text-violet-300 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary group-hover:text-violet-300 transition-colors'>
                   {witch.name}
                 </h3>
               </div>
-              <p className='text-sm text-zinc-400'>{witch.description}</p>
+              <p className='text-sm text-content-muted'>{witch.description}</p>
             </Link>
           ))}
         </div>
       </section>
       <section
         id='choose-your-path'
-        className='mb-10 bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-2xl p-6'
+        className='mb-10 bg-layer-base/20 border border-lunary-primary-700 rounded-2xl p-6'
       >
-        <h2 className='text-xl font-medium text-lunary-primary-300 mb-3'>
+        <h2 className='text-xl font-medium text-content-brand mb-3'>
           You Don&apos;t Have to Pick Just One Path
         </h2>
-        <p className='text-zinc-300 leading-relaxed mb-4'>
+        <p className='text-content-secondary leading-relaxed mb-4'>
           Many practitioners identify with multiple types, and most blend
           techniques from various paths. You might be a &quot;Cosmic Kitchen
           Witch&quot; who uses planetary timing while baking, or a &quot;Green
           Hedge Witch&quot; who works with herbs and spirit communication.
         </p>
-        <p className='text-zinc-400 text-sm'>
+        <p className='text-content-muted text-sm'>
           The most important thing is not the label—it&apos;s developing a
           practice that feels authentic to you. Let your curiosity guide you,
           respect the traditions you draw from, and remember that every

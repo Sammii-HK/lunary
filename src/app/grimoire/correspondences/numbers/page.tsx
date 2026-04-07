@@ -198,10 +198,10 @@ Numbers above 9 carry the energy of their reduced digit. 13 (1+3=4) has 4 energy
         faqs={faqs}
       >
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             All Magical Numbers
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Click on any number to explore its full correspondences, magical
             uses, and practical applications.
           </p>
@@ -210,15 +210,15 @@ Numbers above 9 carry the energy of their reduced digit. 13 (1+3=4) has 4 energy
               <Link
                 key={num}
                 href={`/grimoire/correspondences/numbers/${num}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all text-center'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all text-center'
               >
                 <div className='text-4xl font-light text-lunary-primary-400 mb-3'>
                   {num}
                 </div>
-                <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-2'>
+                <h3 className='font-medium text-content-primary group-hover:text-content-brand transition-colors mb-2'>
                   {data.correspondences[0]}
                 </h3>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   {data.planets.join(', ')}
                 </p>
               </Link>

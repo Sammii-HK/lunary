@@ -11,7 +11,7 @@ const AuthComponent = dynamic(
   () => import('@/components/Auth').then((m) => ({ default: m.AuthComponent })),
   {
     loading: () => (
-      <div className='h-48 bg-zinc-800 animate-pulse rounded-lg' />
+      <div className='h-48 bg-surface-card animate-pulse rounded-lg' />
     ),
   },
 );
@@ -91,7 +91,7 @@ export default function InvitePage() {
 
   if (status === 'loading') {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-lunary-bg'>
+      <div className='min-h-screen flex items-center justify-center bg-surface-elevated'>
         <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary' />
       </div>
     );
@@ -99,13 +99,15 @@ export default function InvitePage() {
 
   if (status === 'accepted') {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-lunary-bg p-4'>
+      <div className='min-h-screen flex items-center justify-center bg-surface-elevated p-4'>
         <div className='max-w-md w-full text-center space-y-6'>
           <div className='w-20 h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center'>
             <Check className='w-10 h-10 text-green-400' />
           </div>
-          <h1 className='text-2xl font-bold text-white'>Connected!</h1>
-          <p className='text-zinc-400'>
+          <h1 className='text-2xl font-bold text-content-primary'>
+            Connected!
+          </h1>
+          <p className='text-content-muted'>
             You and {inviterName} are now cosmic friends. Redirecting to your
             Circle...
           </p>
@@ -116,15 +118,15 @@ export default function InvitePage() {
 
   if (status === 'expired' || status === 'error') {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-lunary-bg p-4'>
+      <div className='min-h-screen flex items-center justify-center bg-surface-elevated p-4'>
         <div className='max-w-md w-full text-center space-y-6'>
           <div className='w-20 h-20 mx-auto rounded-full bg-red-500/20 flex items-center justify-center'>
             <X className='w-10 h-10 text-red-400' />
           </div>
-          <h1 className='text-2xl font-bold text-white'>
+          <h1 className='text-2xl font-bold text-content-primary'>
             {status === 'expired' ? 'Invite Expired' : 'Something Went Wrong'}
           </h1>
-          <p className='text-zinc-400'>{errorMessage}</p>
+          <p className='text-content-muted'>{errorMessage}</p>
           <Button onClick={() => router.push('/')} variant='outline'>
             Go to Lunary
           </Button>
@@ -134,25 +136,25 @@ export default function InvitePage() {
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-lunary-bg p-4'>
+    <div className='min-h-screen flex items-center justify-center bg-surface-elevated p-4'>
       <div className='max-w-md w-full space-y-8'>
         {/* Invite Card */}
-        <div className='rounded-2xl border border-zinc-700 bg-lunary-bg-deep p-8 text-center space-y-6'>
+        <div className='rounded-2xl border border-stroke-default bg-surface-base p-8 text-center space-y-6'>
           <div className='w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-lunary-primary to-lunary-highlight flex items-center justify-center'>
-            <Users className='w-10 h-10 text-white' />
+            <Users className='w-10 h-10 text-content-primary' />
           </div>
 
           <div className='space-y-2'>
-            <h1 className='text-2xl font-bold text-white'>
+            <h1 className='text-2xl font-bold text-content-primary'>
               {inviterName} wants to connect
             </h1>
-            <p className='text-zinc-400'>
+            <p className='text-content-muted'>
               Join their cosmic circle on Lunary to discover your compatibility
               and explore the stars together.
             </p>
           </div>
 
-          <div className='flex items-center justify-center gap-2 text-sm text-lunary-accent-300'>
+          <div className='flex items-center justify-center gap-2 text-sm text-content-brand-accent'>
             <Sparkles className='w-4 h-4' />
             <span>Compare birth charts & see synastry</span>
           </div>
@@ -186,7 +188,7 @@ export default function InvitePage() {
           )}
 
           {authState.isAuthenticated && !showAuth && (
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-content-muted'>
               Signed in as {authState.user?.email}
             </p>
           )}
@@ -202,12 +204,12 @@ export default function InvitePage() {
           ].map((feature) => (
             <div
               key={feature.title}
-              className='rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 text-center'
+              className='rounded-lg border border-stroke-subtle bg-surface-elevated/50 p-3 text-center'
             >
-              <div className='text-sm font-medium text-white'>
+              <div className='text-sm font-medium text-content-primary'>
                 {feature.title}
               </div>
-              <div className='text-xs text-zinc-500'>{feature.desc}</div>
+              <div className='text-xs text-content-muted'>{feature.desc}</div>
             </div>
           ))}
         </div>

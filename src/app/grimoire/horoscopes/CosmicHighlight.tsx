@@ -60,38 +60,42 @@ export async function CosmicHighlight({
 
   return (
     <section className='mb-10 grid gap-4 md:grid-cols-3'>
-      <div className='col-span-2 rounded-2xl border border-zinc-800/60 bg-gradient-to-br from-zinc-900/80 via-zinc-900/80 to-lunary-primary-950 p-6'>
-        <div className='flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-zinc-400'>
+      <div className='col-span-2 rounded-2xl border border-stroke-subtle/60 bg-gradient-to-br from-surface-elevated/80 via-surface-elevated/80 to-layer-deep p-6'>
+        <div className='flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-content-muted'>
           <span>Cosmic Highlight</span>
-          <span className='text-zinc-500'>•</span>
+          <span className='text-content-muted'>•</span>
           <span>{dateLabel}</span>
         </div>
-        <h2 className='text-2xl font-semibold text-white mt-3'>{headline}</h2>
-        <p className='mt-4 text-sm text-zinc-300 leading-relaxed'>{summary}</p>
-        <div className='mt-5 flex flex-wrap gap-2 text-[11px] text-zinc-300'>
+        <h2 className='text-2xl font-semibold text-content-primary mt-3'>
+          {headline}
+        </h2>
+        <p className='mt-4 text-sm text-content-secondary leading-relaxed'>
+          {summary}
+        </p>
+        <div className='mt-5 flex flex-wrap gap-2 text-[11px] text-content-secondary'>
           {moonPhaseName && moonSign && (
-            <span className='rounded-md border border-zinc-700/70 bg-zinc-900/60 px-3 py-1'>
+            <span className='rounded-md border border-stroke-default/70 bg-surface-elevated/60 px-3 py-1'>
               {moonPhaseName} in {moonSign}
             </span>
           )}
           {sunSign && (
-            <span className='rounded-md border border-zinc-700/70 bg-zinc-900/60 px-3 py-1'>
+            <span className='rounded-md border border-stroke-default/70 bg-surface-elevated/60 px-3 py-1'>
               Sun in {sunSign}
             </span>
           )}
         </div>
       </div>
-      <div className='space-y-4 rounded-2xl border border-zinc-800/60 bg-zinc-900/60 p-5 col-span-3 md:col-span-1'>
+      <div className='space-y-4 rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/60 p-5 col-span-3 md:col-span-1'>
         <div>
-          <h3 className='text-sm font-semibold tracking-wide text-zinc-300'>
+          <h3 className='text-sm font-semibold tracking-wide text-content-secondary'>
             {variant === 'daily' ? 'Daily Signals' : 'Weekly Signals'}
           </h3>
-          <p className='text-xs text-zinc-500 mt-1'>
+          <p className='text-xs text-content-muted mt-1'>
             Updated {variant === 'daily' ? 'every morning' : 'every Monday'}{' '}
             with real sky timing.
           </p>
         </div>
-        <ul className='space-y-2 text-xs text-zinc-200 leading-relaxed'>
+        <ul className='space-y-2 text-xs text-content-primary leading-relaxed'>
           <li>
             <strong>
               {variant === 'daily' ? 'Daily Vibe' : 'Weekly Vibe'}:

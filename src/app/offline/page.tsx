@@ -5,7 +5,7 @@ export default function OfflinePage() {
     <div className='flex flex-col items-center justify-center h-full p-6 text-center'>
       <div className='mb-8'>
         <svg
-          className='w-24 h-24 text-zinc-600 mx-auto'
+          className='w-24 h-24 text-content-muted mx-auto'
           fill='none'
           viewBox='0 0 24 24'
           stroke='currentColor'
@@ -19,11 +19,11 @@ export default function OfflinePage() {
         </svg>
       </div>
 
-      <h1 className='text-2xl font-light text-zinc-100 mb-3'>
+      <h1 className='text-2xl font-light text-content-primary mb-3'>
         You&apos;re Offline
       </h1>
 
-      <p className='text-zinc-400 mb-8 max-w-sm'>
+      <p className='text-content-muted mb-8 max-w-sm'>
         The cosmic connection has been temporarily disrupted. Check your
         internet connection and try again.
       </p>
@@ -36,7 +36,7 @@ export default function OfflinePage() {
           Try Again
         </button>
 
-        <p className='text-xs text-zinc-400'>
+        <p className='text-xs text-content-muted'>
           Some content may still be available from cache
         </p>
       </div>

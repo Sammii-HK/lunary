@@ -42,7 +42,7 @@ function TriggerButton({
       <button
         onClick={run}
         disabled={loading}
-        className='bg-[#8458d8] text-white font-semibold px-4 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#7448c8] transition-colors'
+        className='bg-[#8458d8] text-content-primary font-semibold px-4 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#7448c8] transition-colors'
       >
         {loading ? 'Running...' : label}
       </button>

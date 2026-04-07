@@ -37,13 +37,13 @@ const RARITY_COLOURS: Record<string, string> = {
   CRITICAL: 'bg-red-500/20 text-red-300',
   HIGH: 'bg-amber-500/20 text-amber-300',
   MEDIUM: 'bg-blue-500/20 text-blue-300',
-  LOW: 'bg-slate-500/20 text-slate-300',
+  LOW: 'bg-surface-overlay/20 text-slate-300',
 };
 
 const STATUS_COLOURS: Record<string, string> = {
   published: 'bg-green-500/20 text-green-300',
   draft: 'bg-yellow-500/20 text-yellow-300',
-  archived: 'bg-slate-500/20 text-slate-300',
+  archived: 'bg-surface-overlay/20 text-slate-300',
 };
 
 export default function TransitBlogAdminPage() {
@@ -123,7 +123,7 @@ export default function TransitBlogAdminPage() {
   const draftCount = posts.filter((p) => p.status === 'draft').length;
 
   return (
-    <div className='min-h-screen bg-[#050505] p-6 text-lunary-primary-200'>
+    <div className='min-h-screen bg-[#050505] p-6 text-content-secondary'>
       <div className='mx-auto max-w-6xl'>
         <div className='flex items-center justify-between mb-8'>
           <div>
@@ -156,7 +156,7 @@ export default function TransitBlogAdminPage() {
         </div>
 
         {/* Published + Draft posts */}
-        <Card className='bg-lunary-primary-950/50 border-lunary-primary-800/40 mb-8'>
+        <Card className='bg-layer-deep/50 border-lunary-primary-800/40 mb-8'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
               <BookOpen className='w-5 h-5' />
@@ -176,7 +176,7 @@ export default function TransitBlogAdminPage() {
                 {posts.map((post) => (
                   <div
                     key={post.id}
-                    className='flex items-center justify-between p-3 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-800/30'
+                    className='flex items-center justify-between p-3 rounded-lg bg-layer-base/20 border border-lunary-primary-800/30'
                   >
                     <div className='flex-1 min-w-0'>
                       <div className='flex items-center gap-2'>
@@ -217,7 +217,7 @@ export default function TransitBlogAdminPage() {
                             href={`/blog/transits/${post.slug}`}
                             target='_blank'
                             rel='noopener'
-                            className='text-lunary-primary-400 hover:text-lunary-primary-200'
+                            className='text-lunary-primary-400 hover:text-content-secondary'
                           >
                             <Eye className='w-4 h-4' />
                           </a>
@@ -263,7 +263,7 @@ export default function TransitBlogAdminPage() {
         </Card>
 
         {/* Generation queue */}
-        <Card className='bg-lunary-primary-950/50 border-lunary-primary-800/40'>
+        <Card className='bg-layer-deep/50 border-lunary-primary-800/40'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
               <Wand2 className='w-5 h-5' />
@@ -280,7 +280,7 @@ export default function TransitBlogAdminPage() {
                 {queue.slice(0, 15).map((item) => (
                   <div
                     key={item.transitId}
-                    className='flex items-center justify-between p-3 rounded-lg bg-lunary-primary-900/10 border border-lunary-primary-800/20'
+                    className='flex items-center justify-between p-3 rounded-lg bg-layer-base/10 border border-lunary-primary-800/20'
                   >
                     <div>
                       <span className='font-medium'>{item.title}</span>

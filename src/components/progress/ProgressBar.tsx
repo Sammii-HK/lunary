@@ -34,13 +34,13 @@ export function ProgressBar({
     <div className={cn('w-full', className)}>
       {showLabel && (
         <div className='flex justify-between items-center mb-1.5'>
-          <span className={cn('font-medium text-zinc-400', config.label)}>
+          <span className={cn('font-medium text-content-muted', config.label)}>
             Level {level}
             {isMaxLevel && (
               <span className='ml-1 text-lunary-accent'>(Max)</span>
             )}
           </span>
-          <span className={cn('text-zinc-500', config.label)}>
+          <span className={cn('text-content-muted', config.label)}>
             {displayProgress}%
           </span>
         </div>
@@ -54,7 +54,7 @@ export function ProgressBar({
             ? 'border-lunary-accent/60 shadow-[0_0_8px_rgba(199,125,255,0.3)]'
             : displayProgress > 0
               ? 'border-lunary-primary-600/50 shadow-[0_0_6px_rgba(132,88,216,0.2)]'
-              : 'border-zinc-700/60',
+              : 'border-stroke-default/60',
         )}
       >
         <div

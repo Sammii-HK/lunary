@@ -136,7 +136,7 @@ export function OptimizedDemoIframe({
     >
       {/* iPhone frame */}
       <div
-        className='relative w-full h-full bg-zinc-950 rounded-[2.5rem] border border-zinc-800 overflow-hidden'
+        className='relative w-full h-full bg-surface-base rounded-[2.5rem] border border-stroke-subtle overflow-hidden'
         style={{
           boxShadow:
             '0 18px 28px rgba(0, 0, 0, 0.28), 0 0 22px rgba(178, 126, 255, 0.18)',
@@ -168,8 +168,8 @@ export function OptimizedDemoIframe({
           />
         ) : (
           // Placeholder while lazy loading
-          <div className='flex items-center justify-center h-full bg-zinc-950'>
-            <div className='animate-pulse text-zinc-500 text-sm'>
+          <div className='flex items-center justify-center h-full bg-surface-base'>
+            <div className='animate-pulse text-content-muted text-sm'>
               Loading demo...
             </div>
           </div>
@@ -178,7 +178,7 @@ export function OptimizedDemoIframe({
 
       {/* Caption */}
       <div className='mt-4 text-center space-y-1'>
-        <p className='text-xs text-zinc-400'>
+        <p className='text-xs text-content-muted'>
           Live preview using real cosmic data for today
         </p>
       </div>

@@ -97,27 +97,29 @@ export default function SEODashboard() {
   return (
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='mb-8'>
-        <h1 className='text-3xl font-light text-white mb-2 flex items-center gap-3'>
+        <h1 className='text-3xl font-light text-content-primary mb-2 flex items-center gap-3'>
           <Search className='h-8 w-8 text-lunary-primary-400' />
           SEO Indexing Audit
         </h1>
-        <p className='text-zinc-400'>
+        <p className='text-content-muted'>
           Check which pages are indexed by Google using the Search Console API
         </p>
       </div>
 
-      <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 mb-6'>
-        <h2 className='text-lg font-medium text-white mb-4'>Run Audit</h2>
+      <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6 mb-6'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
+          Run Audit
+        </h2>
 
         <div className='space-y-4'>
           <div>
-            <label className='block text-sm text-zinc-400 mb-2'>
+            <label className='block text-sm text-content-muted mb-2'>
               Number of URLs to check (from predefined list)
             </label>
             <select
               value={limit}
               onChange={(e) => setLimit(Number(e.target.value))}
-              className='bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-white'
+              className='bg-surface-card border border-stroke-default rounded px-3 py-2 text-content-primary'
             >
               <option value={10}>10 URLs</option>
               <option value={20}>20 URLs</option>
@@ -127,21 +129,21 @@ export default function SEODashboard() {
           </div>
 
           <div>
-            <label className='block text-sm text-zinc-400 mb-2'>
+            <label className='block text-sm text-content-muted mb-2'>
               Or enter custom URLs (comma-separated)
             </label>
             <textarea
               value={customUrls}
               onChange={(e) => setCustomUrls(e.target.value)}
               placeholder='https://lunary.app/grimoire/zodiac/aries, https://lunary.app/grimoire/tarot/the-fool'
-              className='w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-white h-24'
+              className='w-full bg-surface-card border border-stroke-default rounded px-3 py-2 text-content-primary h-24'
             />
           </div>
 
           <button
             onClick={runAudit}
             disabled={loading}
-            className='flex items-center gap-2 px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-zinc-700 text-white rounded-lg transition-colors'
+            className='flex items-center gap-2 px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high disabled:bg-surface-overlay text-white rounded-lg transition-colors'
           >
             {loading ? (
               <>
@@ -166,7 +168,7 @@ export default function SEODashboard() {
           {error.includes('invalid_grant') && (
             <p className='text-red-300 text-sm mt-2'>
               The OAuth refresh token has expired. Run{' '}
-              <code className='bg-zinc-800 px-1 rounded'>
+              <code className='bg-surface-card px-1 rounded'>
                 npx tsx scripts/regenerate-google-token.ts
               </code>{' '}
               to regenerate it.
@@ -178,11 +180,11 @@ export default function SEODashboard() {
       {result && (
         <>
           <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
-            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-              <div className='text-3xl font-light text-white'>
+            <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+              <div className='text-3xl font-light text-content-primary'>
                 {result.summary.totalUrls}
               </div>
-              <div className='text-sm text-zinc-400'>Total Checked</div>
+              <div className='text-sm text-content-muted'>Total Checked</div>
             </div>
             <div className='bg-green-900/20 border border-green-700 rounded-lg p-4'>
               <div className='text-3xl font-light text-green-400'>
@@ -196,25 +198,25 @@ export default function SEODashboard() {
               </div>
               <div className='text-sm text-red-300'>Not Indexed</div>
             </div>
-            <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-4'>
+            <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-lg p-4'>
               <div className='text-3xl font-light text-lunary-primary-400'>
                 {result.summary.indexRate}
               </div>
-              <div className='text-sm text-lunary-primary-300'>Index Rate</div>
+              <div className='text-sm text-content-brand'>Index Rate</div>
             </div>
           </div>
 
           {Object.keys(result.notIndexedReasons).length > 0 && (
-            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 mb-6'>
-              <h3 className='text-lg font-medium text-white mb-3'>
+            <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4 mb-6'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 Not Indexed Reasons
               </h3>
               <div className='space-y-2'>
                 {Object.entries(result.notIndexedReasons).map(
                   ([reason, count]) => (
                     <div key={reason} className='flex justify-between text-sm'>
-                      <span className='text-zinc-300'>{reason}</span>
-                      <span className='text-zinc-400'>{count} pages</span>
+                      <span className='text-content-secondary'>{reason}</span>
+                      <span className='text-content-muted'>{count} pages</span>
                     </div>
                   ),
                 )}
@@ -222,8 +224,10 @@ export default function SEODashboard() {
             </div>
           )}
 
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h3 className='text-lg font-medium text-white mb-4'>All Pages</h3>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h3 className='text-lg font-medium text-content-primary mb-4'>
+              All Pages
+            </h3>
             <div className='space-y-2'>
               {result.allPages.map((page) => (
                 <div
@@ -241,9 +245,9 @@ export default function SEODashboard() {
                       >
                         {page.url.replace('https://lunary.app', '')}
                       </a>
-                      <ExternalLink className='h-3 w-3 text-zinc-400 flex-shrink-0' />
+                      <ExternalLink className='h-3 w-3 text-content-muted flex-shrink-0' />
                     </div>
-                    <div className='text-xs text-zinc-400 mt-1'>
+                    <div className='text-xs text-content-muted mt-1'>
                       {page.coverageState}
                       {page.lastCrawlTime && (
                         <span className='ml-2'>
@@ -265,11 +269,11 @@ export default function SEODashboard() {
         </>
       )}
 
-      <div className='mt-8 p-4 bg-zinc-900/30 border border-zinc-800 rounded-lg'>
-        <h3 className='text-sm font-medium text-zinc-300 mb-2'>
+      <div className='mt-8 p-4 bg-surface-elevated/30 border border-stroke-subtle rounded-lg'>
+        <h3 className='text-sm font-medium text-content-secondary mb-2'>
           How to Improve Indexing
         </h3>
-        <ul className='text-xs text-zinc-400 space-y-1'>
+        <ul className='text-xs text-content-muted space-y-1'>
           <li>
             • <strong>Crawled - not indexed:</strong> Improve content quality,
             add internal links

@@ -62,7 +62,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   return (
     <button
       onClick={handleCopy}
-      className='px-3 py-1.5 text-xs bg-zinc-800 hover:bg-zinc-700 rounded-md text-zinc-300 transition-colors border border-zinc-600'
+      className='px-3 py-1.5 text-xs bg-surface-card hover:bg-surface-overlay rounded-md text-content-secondary transition-colors border border-stroke-strong'
     >
       {copied ? 'Copied!' : label}
     </button>
@@ -612,12 +612,12 @@ export default function InstagramPreviewPage() {
   }, [storyPreviews, selectedDate, cacheBuster]);
 
   return (
-    <div className='min-h-screen bg-black text-white p-8'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-8'>
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='mb-8'>
           <h1 className='text-3xl font-bold mb-2'>Instagram Content Preview</h1>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Preview all content types: memes, carousels, cards, quotes, facts,
             rankings, compatibility, and stories
           </p>
@@ -630,7 +630,7 @@ export default function InstagramPreviewPage() {
                 type='date'
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className='px-3 py-2 bg-zinc-800 border border-zinc-600 rounded-md text-white'
+                className='px-3 py-2 bg-surface-card border border-stroke-strong rounded-md text-content-primary'
               />
             </div>
             <div className='flex items-center gap-2'>
@@ -638,7 +638,7 @@ export default function InstagramPreviewPage() {
               <select
                 value={selectedSign}
                 onChange={(e) => setSelectedSign(e.target.value)}
-                className='px-3 py-2 bg-zinc-800 border border-zinc-600 rounded-md text-white'
+                className='px-3 py-2 bg-surface-card border border-stroke-strong rounded-md text-content-primary'
               >
                 {SIGNS.map((sign) => (
                   <option key={sign} value={sign}>
@@ -649,22 +649,22 @@ export default function InstagramPreviewPage() {
             </div>
             <button
               onClick={() => setCacheBuster(Date.now())}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high rounded-md text-white font-medium transition-colors'
             >
               Refresh All
             </button>
           </div>
 
           {/* Tabs */}
-          <div className='flex flex-wrap gap-2 border-b border-zinc-700 pb-0'>
+          <div className='flex flex-wrap gap-2 border-b border-stroke-default pb-0'>
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
                 className={`px-4 py-2 rounded-t-md font-medium transition-colors text-sm ${
                   activeTab === tab.key
-                    ? 'bg-zinc-800 text-white border-b-2 border-lunary-primary-500'
-                    : 'text-zinc-400 hover:text-zinc-200'
+                    ? 'bg-surface-card text-content-primary border-b-2 border-lunary-primary-500'
+                    : 'text-content-muted hover:text-content-primary'
                 }`}
               >
                 {tab.label}
@@ -690,15 +690,15 @@ export default function InstagramPreviewPage() {
                 return (
                   <div
                     key={template}
-                    className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                    className='bg-surface-elevated rounded-lg border border-stroke-default overflow-hidden'
                   >
-                    <div className='p-4 border-b border-zinc-700'>
+                    <div className='p-4 border-b border-stroke-default'>
                       <h3 className='font-bold capitalize'>
                         {template.replace('_', ' ')}
                       </h3>
                     </div>
                     <div className='p-4'>
-                      <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600'>
+                      <div className='aspect-[4/5] rounded-lg overflow-hidden border border-stroke-strong'>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         {/* lgtm[js/xss-through-dom] — admin-only page, URL validated by sanitizeImageUrl, sign from <select> allow-list */}
                         <img
@@ -728,7 +728,7 @@ export default function InstagramPreviewPage() {
               Grimoire Carousel Previews
             </h2>
             {carouselsLoading ? (
-              <div className='text-zinc-400 py-8 text-center'>
+              <div className='text-content-muted py-8 text-center'>
                 Loading carousel data from grimoire...
               </div>
             ) : (
@@ -736,14 +736,14 @@ export default function InstagramPreviewPage() {
                 {carouselPreviews.map(({ carousel, imageUrls }) => (
                   <div
                     key={carousel.slug}
-                    className='bg-zinc-900 rounded-lg border border-zinc-700 p-6'
+                    className='bg-surface-elevated rounded-lg border border-stroke-default p-6'
                   >
                     <div className='flex items-center gap-3 mb-4'>
                       <h3 className='font-bold text-lg'>{carousel.title}</h3>
-                      <span className='text-xs px-2 py-1 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                      <span className='text-xs px-2 py-1 rounded-full bg-surface-card text-lunary-primary-400'>
                         {carousel.category}
                       </span>
-                      <span className='text-xs text-zinc-500'>
+                      <span className='text-xs text-content-muted'>
                         {carousel.slides.length} slides
                       </span>
                       <CopyButton
@@ -782,7 +782,7 @@ export default function InstagramPreviewPage() {
                     <div className='grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3'>
                       {carousel.slides.map((slide, i) => (
                         <div key={i}>
-                          <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
+                          <div className='aspect-[4/5] rounded-lg overflow-hidden border border-stroke-strong bg-surface-card'>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={sanitizeImageUrl(imageUrls[i])}
@@ -790,7 +790,7 @@ export default function InstagramPreviewPage() {
                               className='w-full h-full object-cover'
                             />
                           </div>
-                          <p className='text-xs text-zinc-400 mt-1 text-center truncate'>
+                          <p className='text-xs text-content-muted mt-1 text-center truncate'>
                             {slide.variant === 'cover'
                               ? 'Cover'
                               : slide.variant === 'cta'
@@ -814,15 +814,15 @@ export default function InstagramPreviewPage() {
               {quoteUrls.map(({ quote, url }) => (
                 <div
                   key={quote}
-                  className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                  className='bg-surface-elevated rounded-lg border border-stroke-default overflow-hidden'
                 >
-                  <div className='p-4 border-b border-zinc-700'>
-                    <p className='text-sm text-zinc-300 line-clamp-2'>
+                  <div className='p-4 border-b border-stroke-default'>
+                    <p className='text-sm text-content-secondary line-clamp-2'>
                       {quote}
                     </p>
                   </div>
                   <div className='p-4'>
-                    <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
+                    <div className='aspect-square rounded-lg overflow-hidden border border-stroke-strong'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={sanitizeImageUrl(url)}
@@ -846,18 +846,18 @@ export default function InstagramPreviewPage() {
               {didYouKnowPreviews.map((item, i) => (
                 <div
                   key={i}
-                  className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                  className='bg-surface-elevated rounded-lg border border-stroke-default overflow-hidden'
                 >
-                  <div className='p-4 border-b border-zinc-700'>
-                    <span className='text-xs px-2 py-1 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                  <div className='p-4 border-b border-stroke-default'>
+                    <span className='text-xs px-2 py-1 rounded-full bg-surface-card text-lunary-primary-400'>
                       {item.category}
                     </span>
-                    <p className='text-sm text-zinc-300 mt-2 line-clamp-2'>
+                    <p className='text-sm text-content-secondary mt-2 line-clamp-2'>
                       {item.fact}
                     </p>
                   </div>
                   <div className='p-4'>
-                    <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
+                    <div className='aspect-square rounded-lg overflow-hidden border border-stroke-strong'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={sanitizeImageUrl(item.url)}
@@ -879,15 +879,15 @@ export default function InstagramPreviewPage() {
             </h2>
 
             {/* Ranking Carousel Variant (Fix 7) */}
-            <div className='bg-zinc-900 rounded-lg border border-zinc-700 p-6 mb-8'>
+            <div className='bg-surface-elevated rounded-lg border border-stroke-default p-6 mb-8'>
               <div className='flex items-center gap-3 mb-4'>
                 <h3 className='font-bold text-lg'>
                   Carousel: Ranked by {rankingCarouselPreviews.trait}
                 </h3>
-                <span className='text-xs px-2 py-1 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                <span className='text-xs px-2 py-1 rounded-full bg-surface-card text-lunary-primary-400'>
                   carousel
                 </span>
-                <span className='text-xs text-zinc-500'>
+                <span className='text-xs text-content-muted'>
                   {rankingCarouselPreviews.slides.length} slides
                 </span>
                 <CopyButton
@@ -908,7 +908,7 @@ export default function InstagramPreviewPage() {
               <div className='grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3'>
                 {rankingCarouselPreviews.slides.map((slide, i) => (
                   <div key={i}>
-                    <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
+                    <div className='aspect-[4/5] rounded-lg overflow-hidden border border-stroke-strong bg-surface-card'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={sanitizeImageUrl(
@@ -918,7 +918,7 @@ export default function InstagramPreviewPage() {
                         className='w-full h-full object-cover'
                       />
                     </div>
-                    <p className='text-xs text-zinc-400 mt-1 text-center truncate'>
+                    <p className='text-xs text-content-muted mt-1 text-center truncate'>
                       {slide.variant === 'cover'
                         ? 'Cover'
                         : slide.variant === 'cta'
@@ -943,13 +943,13 @@ export default function InstagramPreviewPage() {
                 return (
                   <div
                     key={i}
-                    className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                    className='bg-surface-elevated rounded-lg border border-stroke-default overflow-hidden'
                   >
-                    <div className='p-4 border-b border-zinc-700'>
+                    <div className='p-4 border-b border-stroke-default'>
                       <h3 className='font-bold capitalize'>
                         Ranked by: {item.trait}
                       </h3>
-                      <p className='text-xs text-zinc-400 mt-1'>
+                      <p className='text-xs text-content-muted mt-1'>
                         Top 3:{' '}
                         {item.rankings
                           .slice(0, 3)
@@ -958,7 +958,7 @@ export default function InstagramPreviewPage() {
                       </p>
                     </div>
                     <div className='p-4'>
-                      <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600'>
+                      <div className='aspect-[4/5] rounded-lg overflow-hidden border border-stroke-strong'>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={sanitizeImageUrl(item.url)}
@@ -988,14 +988,14 @@ export default function InstagramPreviewPage() {
             </h2>
 
             {/* Compatibility Carousel Variant (Fix 8) */}
-            <div className='bg-zinc-900 rounded-lg border border-zinc-700 p-6 mb-8'>
+            <div className='bg-surface-elevated rounded-lg border border-stroke-default p-6 mb-8'>
               <div className='flex items-center gap-3 mb-4'>
                 <h3 className='font-bold text-lg capitalize'>
                   Carousel: {compatCarouselPreviews.sign1} +{' '}
                   {compatCarouselPreviews.sign2} ({compatCarouselPreviews.score}
                   %)
                 </h3>
-                <span className='text-xs px-2 py-1 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                <span className='text-xs px-2 py-1 rounded-full bg-surface-card text-lunary-primary-400'>
                   carousel
                 </span>
                 <CopyButton
@@ -1021,7 +1021,7 @@ export default function InstagramPreviewPage() {
               <div className='grid grid-cols-3 md:grid-cols-5 gap-3'>
                 {compatCarouselPreviews.slides.map((slide, i) => (
                   <div key={i}>
-                    <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
+                    <div className='aspect-[4/5] rounded-lg overflow-hidden border border-stroke-strong bg-surface-card'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={sanitizeImageUrl(
@@ -1031,7 +1031,7 @@ export default function InstagramPreviewPage() {
                         className='w-full h-full object-cover'
                       />
                     </div>
-                    <p className='text-xs text-zinc-400 mt-1 text-center truncate'>
+                    <p className='text-xs text-content-muted mt-1 text-center truncate'>
                       {slide.variant === 'cover'
                         ? 'Cover'
                         : slide.variant === 'cta'
@@ -1061,9 +1061,9 @@ export default function InstagramPreviewPage() {
                 return (
                   <div
                     key={i}
-                    className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                    className='bg-surface-elevated rounded-lg border border-stroke-default overflow-hidden'
                   >
-                    <div className='p-4 border-b border-zinc-700'>
+                    <div className='p-4 border-b border-stroke-default'>
                       <h3 className='font-bold capitalize'>
                         {item.sign1.charAt(0).toUpperCase() +
                           item.sign1.slice(1)}{' '}
@@ -1071,12 +1071,12 @@ export default function InstagramPreviewPage() {
                         {item.sign2.charAt(0).toUpperCase() +
                           item.sign2.slice(1)}
                       </h3>
-                      <p className='text-xs text-zinc-400 mt-1'>
+                      <p className='text-xs text-content-muted mt-1'>
                         Score: {item.score}% &middot; {item.headline}
                       </p>
                     </div>
                     <div className='p-4'>
-                      <div className='aspect-square rounded-lg overflow-hidden border border-zinc-600'>
+                      <div className='aspect-square rounded-lg overflow-hidden border border-stroke-strong'>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={sanitizeImageUrl(item.url)}
@@ -1104,7 +1104,7 @@ export default function InstagramPreviewPage() {
             <h2 className='text-xl font-bold mb-4'>
               Today&apos;s Stories &mdash; {selectedDate}
             </h2>
-            <p className='text-sm text-zinc-400 mb-4'>
+            <p className='text-sm text-content-muted mb-4'>
               These 4 stories will be posted today based on the rotation
               schedule.
             </p>
@@ -1112,19 +1112,19 @@ export default function InstagramPreviewPage() {
               {storyPreviews.map((item, i) => (
                 <div
                   key={i}
-                  className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                  className='bg-surface-elevated rounded-lg border border-stroke-default overflow-hidden'
                 >
-                  <div className='p-4 border-b border-zinc-700'>
-                    <span className='text-xs px-2 py-1 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                  <div className='p-4 border-b border-stroke-default'>
+                    <span className='text-xs px-2 py-1 rounded-full bg-surface-card text-lunary-primary-400'>
                       {item.variant.replace('_', ' ')}
                     </span>
                     <h3 className='font-bold mt-2'>{item.title}</h3>
-                    <p className='text-xs text-zinc-400 mt-1'>
+                    <p className='text-xs text-content-muted mt-1'>
                       {item.subtitle}
                     </p>
                   </div>
                   <div className='p-4'>
-                    <div className='aspect-[9/16] max-h-[600px] rounded-lg overflow-hidden border border-zinc-600 mx-auto'>
+                    <div className='aspect-[9/16] max-h-[600px] rounded-lg overflow-hidden border border-stroke-strong mx-auto'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={sanitizeImageUrl(item.url)}
@@ -1146,7 +1146,7 @@ export default function InstagramPreviewPage() {
             <h2 className='text-xl font-bold mb-4'>
               All Story Types &mdash; {selectedDate}
             </h2>
-            <p className='text-sm text-zinc-400 mb-4'>
+            <p className='text-sm text-content-muted mb-4'>
               Preview of every story type. Only 4 are posted each day via the
               weekly rotation.
             </p>
@@ -1154,10 +1154,10 @@ export default function InstagramPreviewPage() {
               {allStoryTypePreviews.map((item, i) => (
                 <div
                   key={i}
-                  className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                  className='bg-surface-elevated rounded-lg border border-stroke-default overflow-hidden'
                 >
-                  <div className='p-3 border-b border-zinc-700'>
-                    <span className='text-xs px-2 py-0.5 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                  <div className='p-3 border-b border-stroke-default'>
+                    <span className='text-xs px-2 py-0.5 rounded-full bg-surface-card text-lunary-primary-400'>
                       {item.variant.replace(/_/g, ' ')}
                     </span>
                     <h3 className='font-bold text-sm mt-1 truncate'>
@@ -1165,7 +1165,7 @@ export default function InstagramPreviewPage() {
                     </h3>
                   </div>
                   <div className='p-3'>
-                    <div className='aspect-[9/16] rounded-lg overflow-hidden border border-zinc-600'>
+                    <div className='aspect-[9/16] rounded-lg overflow-hidden border border-stroke-strong'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={sanitizeImageUrl(item.url)}
@@ -1196,16 +1196,16 @@ export default function InstagramPreviewPage() {
                 return (
                   <div
                     key={item.number}
-                    className='bg-zinc-900 rounded-lg border border-zinc-700 p-6'
+                    className='bg-surface-elevated rounded-lg border border-stroke-default p-6'
                   >
                     <div className='flex items-center gap-3 mb-4'>
                       <h3 className='font-bold text-lg'>
                         Angel Number {item.number}
                       </h3>
-                      <span className='text-xs px-2 py-1 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                      <span className='text-xs px-2 py-1 rounded-full bg-surface-card text-lunary-primary-400'>
                         numerology
                       </span>
-                      <span className='text-xs text-zinc-500'>
+                      <span className='text-xs text-content-muted'>
                         {item.slides.length} slides
                       </span>
                       <CopyButton
@@ -1217,7 +1217,7 @@ export default function InstagramPreviewPage() {
                     <div className='grid grid-cols-3 md:grid-cols-5 gap-3'>
                       {item.slides.map((slide, i) => (
                         <div key={i}>
-                          <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
+                          <div className='aspect-[4/5] rounded-lg overflow-hidden border border-stroke-strong bg-surface-card'>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={sanitizeImageUrl(item.imageUrls[i])}
@@ -1225,7 +1225,7 @@ export default function InstagramPreviewPage() {
                               className='w-full h-full object-cover'
                             />
                           </div>
-                          <p className='text-xs text-zinc-400 mt-1 text-center truncate'>
+                          <p className='text-xs text-content-muted mt-1 text-center truncate'>
                             {slide.variant === 'cover'
                               ? 'Cover'
                               : slide.variant === 'cta'
@@ -1259,16 +1259,16 @@ export default function InstagramPreviewPage() {
                 return (
                   <div
                     key={item.traitKey}
-                    className='bg-zinc-900 rounded-lg border border-zinc-700 p-6'
+                    className='bg-surface-elevated rounded-lg border border-stroke-default p-6'
                   >
                     <div className='flex items-center gap-3 mb-4'>
                       <h3 className='font-bold text-lg'>
                         Your Sign&apos;s {item.traitLabel} in One Word
                       </h3>
-                      <span className='text-xs px-2 py-1 rounded-full bg-zinc-800 text-lunary-primary-400'>
+                      <span className='text-xs px-2 py-1 rounded-full bg-surface-card text-lunary-primary-400'>
                         zodiac
                       </span>
-                      <span className='text-xs text-zinc-500'>
+                      <span className='text-xs text-content-muted'>
                         {item.slides.length} slides
                       </span>
                       <CopyButton
@@ -1279,7 +1279,7 @@ export default function InstagramPreviewPage() {
                     <div className='grid grid-cols-4 md:grid-cols-7 gap-2'>
                       {item.slides.map((slide, i) => (
                         <div key={i}>
-                          <div className='aspect-[4/5] rounded-lg overflow-hidden border border-zinc-600 bg-zinc-800'>
+                          <div className='aspect-[4/5] rounded-lg overflow-hidden border border-stroke-strong bg-surface-card'>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={sanitizeImageUrl(item.imageUrls[i])}
@@ -1287,7 +1287,7 @@ export default function InstagramPreviewPage() {
                               className='w-full h-full object-cover'
                             />
                           </div>
-                          <p className='text-xs text-zinc-400 mt-1 text-center truncate'>
+                          <p className='text-xs text-content-muted mt-1 text-center truncate'>
                             {slide.variant === 'cover'
                               ? 'Cover'
                               : slide.variant === 'cta'
@@ -1305,24 +1305,24 @@ export default function InstagramPreviewPage() {
         )}
 
         {/* Actions */}
-        <div className='mt-8 bg-zinc-900 rounded-lg p-6 border border-zinc-700'>
+        <div className='mt-8 bg-surface-elevated rounded-lg p-6 border border-stroke-default'>
           <h3 className='text-xl font-bold mb-4'>Quick Links</h3>
           <div className='flex flex-wrap gap-4'>
             <a
               href='/admin/daily-posts-preview'
-              className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-surface-card hover:bg-surface-overlay rounded-md text-content-primary font-medium transition-colors'
             >
               Daily Posts Preview
             </a>
             <a
               href='/admin/scheduler'
-              className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-surface-card hover:bg-surface-overlay rounded-md text-content-primary font-medium transition-colors'
             >
               Scheduler
             </a>
             <button
               onClick={() => setCacheBuster(Date.now())}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high rounded-md text-white font-medium transition-colors'
             >
               Refresh Images
             </button>

@@ -48,14 +48,14 @@ export default function FeaturesPage() {
   };
 
   return (
-    <div className='min-h-fit bg-zinc-950 text-zinc-50'>
+    <div className='min-h-fit bg-surface-base text-content-primary'>
       {/* Hero */}
       <section className='py-12 md:py-16 px-4 md:px-6'>
         <div className='max-w-4xl mx-auto text-center space-y-4'>
           <Heading as='h1' variant='h1'>
             Your Complete Cosmic Toolkit
           </Heading>
-          <p className='text-sm md:text-base text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+          <p className='text-sm md:text-base text-content-muted leading-relaxed max-w-2xl mx-auto'>
             From your daily morning briefing to deep pattern recognition,
             everything you need to understand yourself through the cosmos
           </p>
@@ -63,42 +63,42 @@ export default function FeaturesPage() {
       </section>
 
       {/* Quick Navigation */}
-      <nav className='py-6 px-4 md:px-6 border-y border-zinc-800/30 sticky top-0 bg-zinc-950/95 backdrop-blur-sm z-10'>
+      <nav className='py-6 px-4 md:px-6 border-y border-stroke-subtle/30 sticky top-0 bg-surface-base/95 backdrop-blur-sm z-10'>
         <div className='max-w-6xl mx-auto'>
           <div className='flex overflow-x-auto gap-4 pb-2 md:pb-0 md:justify-center scrollbar-hide'>
             <a
               href='#getting-started'
-              className='text-xs md:text-sm text-zinc-400 hover:text-lunary-primary-300 transition-colors whitespace-nowrap'
+              className='text-xs md:text-sm text-content-muted hover:text-content-brand transition-colors whitespace-nowrap'
             >
               Getting Started
             </a>
             <a
               href='#daily-practice'
-              className='text-xs md:text-sm text-zinc-400 hover:text-lunary-primary-300 transition-colors whitespace-nowrap'
+              className='text-xs md:text-sm text-content-muted hover:text-content-brand transition-colors whitespace-nowrap'
             >
               Daily Practice
             </a>
             <a
               href='#weekly-guidance'
-              className='text-xs md:text-sm text-zinc-400 hover:text-lunary-primary-300 transition-colors whitespace-nowrap'
+              className='text-xs md:text-sm text-content-muted hover:text-content-brand transition-colors whitespace-nowrap'
             >
               Weekly Guidance
             </a>
             <a
               href='#deep-exploration'
-              className='text-xs md:text-sm text-zinc-400 hover:text-lunary-primary-300 transition-colors whitespace-nowrap'
+              className='text-xs md:text-sm text-content-muted hover:text-content-brand transition-colors whitespace-nowrap'
             >
               Deep Exploration
             </a>
             <a
               href='#connect'
-              className='text-xs md:text-sm text-zinc-400 hover:text-lunary-primary-300 transition-colors whitespace-nowrap'
+              className='text-xs md:text-sm text-content-muted hover:text-content-brand transition-colors whitespace-nowrap'
             >
               Connect
             </a>
             <a
               href='#learning'
-              className='text-xs md:text-sm text-zinc-400 hover:text-lunary-primary-300 transition-colors whitespace-nowrap'
+              className='text-xs md:text-sm text-content-muted hover:text-content-brand transition-colors whitespace-nowrap'
             >
               Learning
             </a>
@@ -117,7 +117,7 @@ export default function FeaturesPage() {
             <Heading as='h2' variant='h2'>
               Getting Started
             </Heading>
-            <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
+            <p className='text-sm md:text-base text-content-muted max-w-2xl mx-auto'>
               Everything begins with your birth chart
             </p>
           </div>
@@ -189,7 +189,7 @@ export default function FeaturesPage() {
             <Heading as='h2' variant='h2'>
               Daily Practice
             </Heading>
-            <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
+            <p className='text-sm md:text-base text-content-muted max-w-2xl mx-auto'>
               Your morning cosmic weather report
             </p>
           </div>
@@ -297,7 +297,7 @@ export default function FeaturesPage() {
             <Heading as='h2' variant='h2'>
               Weekly Guidance
             </Heading>
-            <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
+            <p className='text-sm md:text-base text-content-muted max-w-2xl mx-auto'>
               Deeper themes and upcoming shifts
             </p>
           </div>
@@ -368,7 +368,7 @@ export default function FeaturesPage() {
             <Heading as='h2' variant='h2'>
               Deep Exploration
             </Heading>
-            <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
+            <p className='text-sm md:text-base text-content-muted max-w-2xl mx-auto'>
               When you need more than daily guidance
             </p>
           </div>
@@ -482,7 +482,7 @@ export default function FeaturesPage() {
             <Heading as='h2' variant='h2'>
               Connect & Compare
             </Heading>
-            <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
+            <p className='text-sm md:text-base text-content-muted max-w-2xl mx-auto'>
               Friends, community spaces, and cosmic gifts
             </p>
           </div>
@@ -589,7 +589,7 @@ export default function FeaturesPage() {
             <Heading as='h2' variant='h2'>
               Learning & Discovery
             </Heading>
-            <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
+            <p className='text-sm md:text-base text-content-muted max-w-2xl mx-auto'>
               Free education, always
             </p>
           </div>
@@ -634,12 +634,12 @@ export default function FeaturesPage() {
         </section>
 
         {/* Comparison Table */}
-        <section className='py-12 md:py-20 border-t border-zinc-800/30'>
+        <section className='py-12 md:py-20 border-t border-stroke-subtle/30'>
           <div className='text-center space-y-3 mb-12'>
             <Heading as='h2' variant='h2'>
               Compare Plans
             </Heading>
-            <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
+            <p className='text-sm md:text-base text-content-muted max-w-2xl mx-auto'>
               See what's included at each tier
             </p>
           </div>
@@ -647,24 +647,24 @@ export default function FeaturesPage() {
         </section>
 
         {/* How Lunary Compares */}
-        <section className='py-12 md:py-20 border-t border-zinc-800/30'>
+        <section className='py-12 md:py-20 border-t border-stroke-subtle/30'>
           <div className='max-w-4xl mx-auto space-y-8'>
             <div className='text-center space-y-3'>
               <Heading as='h2' variant='h2'>
                 Which astrology app is right for you?
               </Heading>
-              <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
+              <p className='text-sm md:text-base text-content-muted max-w-2xl mx-auto'>
                 Different tools for different needs
               </p>
             </div>
 
             <div className='grid md:grid-cols-2 gap-6'>
               {/* Lunary */}
-              <div className='rounded-xl border border-lunary-primary-700/30 bg-lunary-primary-900/10 p-6 space-y-4'>
+              <div className='rounded-xl border border-lunary-primary-700/30 bg-layer-base/10 p-6 space-y-4'>
                 <Heading as='h3' variant='h3'>
                   Choose Lunary if you want to:
                 </Heading>
-                <ul className='space-y-2 text-sm text-zinc-300'>
+                <ul className='space-y-2 text-sm text-content-secondary'>
                   <li className='flex items-start gap-2'>
                     <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                     <span>
@@ -699,23 +699,29 @@ export default function FeaturesPage() {
               </div>
 
               {/* What Makes Lunary Different */}
-              <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-6 space-y-4'>
-                <Heading as='h3' variant='h3' className='text-zinc-300'>
+              <div className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-6 space-y-4'>
+                <Heading
+                  as='h3'
+                  variant='h3'
+                  className='text-content-secondary'
+                >
                   What makes Lunary different:
                 </Heading>
-                <ul className='space-y-2 text-sm text-zinc-400'>
+                <ul className='space-y-2 text-sm text-content-muted'>
                   <li className='flex items-start gap-2'>
                     <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                     <span>
-                      <span className='text-zinc-300'>Full synastry:</span> Most
-                      apps show a basic % - we show every aspect between your
-                      charts
+                      <span className='text-content-secondary'>
+                        Full synastry:
+                      </span>{' '}
+                      Most apps show a basic % - we show every aspect between
+                      your charts
                     </span>
                   </li>
                   <li className='flex items-start gap-2'>
                     <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                     <span>
-                      <span className='text-zinc-300'>
+                      <span className='text-content-secondary'>
                         Real astronomical data:
                       </span>{' '}
                       24+ celestial bodies with precise calculations, not
@@ -725,7 +731,7 @@ export default function FeaturesPage() {
                   <li className='flex items-start gap-2'>
                     <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                     <span>
-                      <span className='text-zinc-300'>
+                      <span className='text-content-secondary'>
                         Pattern recognition:
                       </span>{' '}
                       Your data becomes your astrology textbook over time
@@ -734,12 +740,14 @@ export default function FeaturesPage() {
                   <li className='flex items-start gap-2'>
                     <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
                     <span>
-                      <span className='text-zinc-300'>Tarot + astrology:</span>{' '}
+                      <span className='text-content-secondary'>
+                        Tarot + astrology:
+                      </span>{' '}
                       See cosmic context for every card you pull
                     </span>
                   </li>
                 </ul>
-                <p className='text-xs text-zinc-500 pt-2'>
+                <p className='text-xs text-content-muted pt-2'>
                   Lunary teaches you to read your own chart - not just entertain
                   you
                 </p>
@@ -747,31 +755,21 @@ export default function FeaturesPage() {
             </div>
 
             <div className='text-center pt-4'>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 Lunary stands out for{' '}
-                <span className='text-lunary-primary-300'>
-                  pattern recognition
-                </span>
-                ,{' '}
-                <span className='text-lunary-primary-300'>
-                  relationship timing
-                </span>
-                ,{' '}
-                <span className='text-lunary-primary-300'>
-                  educational depth
-                </span>
-                , and{' '}
-                <span className='text-lunary-primary-300'>
-                  tarot integration
-                </span>
-                . No other app combines all four.
+                <span className='text-content-brand'>pattern recognition</span>,{' '}
+                <span className='text-content-brand'>relationship timing</span>,{' '}
+                <span className='text-content-brand'>educational depth</span>,
+                and{' '}
+                <span className='text-content-brand'>tarot integration</span>.
+                No other app combines all four.
               </p>
             </div>
           </div>
         </section>
 
         {/* Final CTA */}
-        <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/20 border-t border-zinc-800/30'>
+        <section className='py-12 md:py-20 px-4 md:px-6 bg-surface-elevated/20 border-t border-stroke-subtle/30'>
           <div className='max-w-2xl mx-auto text-center space-y-6'>
             <Heading as='h2' variant='h2'>
               Ready to start your practice?
@@ -780,31 +778,31 @@ export default function FeaturesPage() {
             <div className='max-w-md mx-auto text-left space-y-2'>
               <div className='flex items-center gap-2'>
                 <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
-                <span className='text-sm text-zinc-400'>
+                <span className='text-sm text-content-muted'>
                   Complete birth chart in 60 seconds
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
-                <span className='text-sm text-zinc-400'>
+                <span className='text-sm text-content-muted'>
                   Daily guidance based on YOUR chart
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
-                <span className='text-sm text-zinc-400'>
+                <span className='text-sm text-content-muted'>
                   2,000+ free grimoire articles
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
-                <span className='text-sm text-zinc-400'>
+                <span className='text-sm text-content-muted'>
                   Pattern tracking over time
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
-                <span className='text-sm text-zinc-400'>
+                <span className='text-sm text-content-muted'>
                   No credit card required
                 </span>
               </div>
@@ -825,11 +823,11 @@ export default function FeaturesPage() {
                   {CTA_COPY.auth.createChart}
                 </Link>
               </Button>
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-content-muted'>
                 Want to see pricing first?{' '}
                 <Link
                   href='/pricing'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-200'
+                  className='text-lunary-primary-400 hover:text-content-secondary'
                   onClick={() =>
                     handleCtaClick(
                       'final-cta-secondary',
@@ -874,17 +872,17 @@ function FeatureCard({
   ctaHref: string;
 }) {
   return (
-    <div className='rounded-xl md:rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6'>
+    <div className='rounded-xl md:rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6'>
       {/* Header */}
       <div className='flex items-start gap-3 md:gap-4'>
-        <div className='p-2 rounded-lg bg-lunary-primary-900/20 text-lunary-primary-300 flex-shrink-0'>
+        <div className='p-2 rounded-lg bg-layer-base/20 text-content-brand flex-shrink-0'>
           {icon}
         </div>
         <div className='flex-1 min-w-0'>
-          <Heading as='h3' variant='h3' className='text-zinc-100'>
+          <Heading as='h3' variant='h3' className='text-content-primary'>
             {title}
           </Heading>
-          <p className='text-xs md:text-sm lg:text-base text-zinc-300 leading-relaxed'>
+          <p className='text-xs md:text-sm lg:text-base text-content-secondary leading-relaxed'>
             {description}
           </p>
         </div>
@@ -895,7 +893,7 @@ function FeatureCard({
         {features.map((feature, index) => (
           <li
             key={index}
-            className='flex items-start gap-2 text-xs md:text-sm text-zinc-400'
+            className='flex items-start gap-2 text-xs md:text-sm text-content-muted'
           >
             <span className='text-lunary-primary-400 mt-0.5 flex-shrink-0'>
               ✓
@@ -906,21 +904,21 @@ function FeatureCard({
       </ul>
 
       {/* Pricing Tiers */}
-      <div className='pt-3 md:pt-4 border-t border-zinc-800/30 space-y-1.5 md:space-y-2'>
+      <div className='pt-3 md:pt-4 border-t border-stroke-subtle/30 space-y-1.5 md:space-y-2'>
         <div className='text-xs md:text-sm'>
-          <span className='text-zinc-500'>Free:</span>{' '}
-          <span className='text-zinc-300'>{freeTier}</span>
+          <span className='text-content-muted'>Free:</span>{' '}
+          <span className='text-content-secondary'>{freeTier}</span>
         </div>
         {paidTier && (
           <div className='text-xs md:text-sm'>
-            <span className='text-zinc-500'>Lunary+:</span>{' '}
-            <span className='text-zinc-300'>{paidTier}</span>
+            <span className='text-content-muted'>Lunary+:</span>{' '}
+            <span className='text-content-secondary'>{paidTier}</span>
           </div>
         )}
         {proTier && (
           <div className='text-xs md:text-sm'>
-            <span className='text-zinc-500'>Lunary+ Pro:</span>{' '}
-            <span className='text-zinc-300'>{proTier}</span>
+            <span className='text-content-muted'>Lunary+ Pro:</span>{' '}
+            <span className='text-content-secondary'>{proTier}</span>
           </div>
         )}
       </div>

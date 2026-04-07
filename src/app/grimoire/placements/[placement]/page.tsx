@@ -342,7 +342,7 @@ export default async function PlacementPage({ params }: PageProps) {
       {/* Quick Stats */}
       <section className='mb-8'>
         <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-2xl mb-1'>
               {signInfo.element === 'Fire'
                 ? '🔥'
@@ -352,30 +352,40 @@ export default async function PlacementPage({ params }: PageProps) {
                     ? '💨'
                     : '💧'}
             </div>
-            <div className='text-xs text-zinc-400'>Element</div>
-            <div className='text-sm text-zinc-300'>{signInfo.element}</div>
+            <div className='text-xs text-content-muted'>Element</div>
+            <div className='text-sm text-content-secondary'>
+              {signInfo.element}
+            </div>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-2xl mb-1'>⚡</div>
-            <div className='text-xs text-zinc-400'>Modality</div>
-            <div className='text-sm text-zinc-300'>{signInfo.modality}</div>
+            <div className='text-xs text-content-muted'>Modality</div>
+            <div className='text-sm text-content-secondary'>
+              {signInfo.modality}
+            </div>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-2xl mb-1'>🌟</div>
-            <div className='text-xs text-zinc-400'>Planet Rules</div>
-            <div className='text-sm text-zinc-300'>{planetInfo.rules}</div>
+            <div className='text-xs text-content-muted'>Planet Rules</div>
+            <div className='text-sm text-content-secondary'>
+              {planetInfo.rules}
+            </div>
           </div>
           {curated?.dignity ? (
-            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+            <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
               <div className='text-2xl mb-1'>✨</div>
-              <div className='text-xs text-zinc-400'>Dignity</div>
-              <div className='text-sm text-zinc-300'>{curated.dignity}</div>
+              <div className='text-xs text-content-muted'>Dignity</div>
+              <div className='text-sm text-content-secondary'>
+                {curated.dignity}
+              </div>
             </div>
           ) : (
-            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+            <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
               <div className='text-2xl mb-1'>♈</div>
-              <div className='text-xs text-zinc-400'>Sign Ruler</div>
-              <div className='text-sm text-zinc-300'>{signInfo.ruler}</div>
+              <div className='text-xs text-content-muted'>Sign Ruler</div>
+              <div className='text-sm text-content-secondary'>
+                {signInfo.ruler}
+              </div>
             </div>
           )}
         </div>
@@ -391,10 +401,10 @@ export default async function PlacementPage({ params }: PageProps) {
               {content.planet} Sign Compatibility
             </Heading>
             <div className='grid md:grid-cols-2 gap-4 mt-4'>
-              <div className='p-5 rounded-lg border border-lunary-success-700 bg-lunary-success-950'>
+              <div className='p-5 rounded-lg border border-lunary-success-700 bg-layer-deep'>
                 <div className='flex items-center gap-2 mb-3'>
                   <Sparkles className='h-4 w-4 text-lunary-success' />
-                  <span className='font-medium text-zinc-100'>
+                  <span className='font-medium text-content-primary'>
                     Best Matches
                   </span>
                 </div>
@@ -403,7 +413,7 @@ export default async function PlacementPage({ params }: PageProps) {
                     <NavParamLink
                       key={match}
                       href={`/grimoire/placements/${parsed.planet}-in-${match.replace(`${content.planet} in `, '').toLowerCase()}`}
-                      className='px-3 py-1.5 rounded-lg bg-lunary-success-900/30 text-lunary-success-300 text-sm hover:bg-lunary-success-900/50 transition-colors'
+                      className='px-3 py-1.5 rounded-lg bg-layer-base/30 text-lunary-success-300 text-sm hover:bg-layer-base/50 transition-colors'
                     >
                       {match}
                     </NavParamLink>
@@ -412,10 +422,10 @@ export default async function PlacementPage({ params }: PageProps) {
               </div>
               {'difficultMatches' in curated &&
                 Array.isArray(curated.difficultMatches) && (
-                  <div className='p-5 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950'>
+                  <div className='p-5 rounded-lg border border-lunary-accent-700 bg-layer-deep'>
                     <div className='flex items-center gap-2 mb-3'>
                       <AlertTriangle className='h-4 w-4 text-lunary-accent' />
-                      <span className='font-medium text-zinc-100'>
+                      <span className='font-medium text-content-primary'>
                         Challenging Matches
                       </span>
                     </div>
@@ -424,7 +434,7 @@ export default async function PlacementPage({ params }: PageProps) {
                         <NavParamLink
                           key={match}
                           href={`/grimoire/placements/${parsed.planet}-in-${match.replace(`${content.planet} in `, '').toLowerCase()}`}
-                          className='px-3 py-1.5 rounded-lg bg-lunary-accent-900/30 text-lunary-accent-300 text-sm hover:bg-lunary-accent-900/50 transition-colors'
+                          className='px-3 py-1.5 rounded-lg bg-layer-base/30 text-content-brand-accent text-sm hover:bg-layer-base/50 transition-colors'
                         >
                           {match}
                         </NavParamLink>
@@ -434,14 +444,14 @@ export default async function PlacementPage({ params }: PageProps) {
                 )}
             </div>
             {curated.famousExamples && (
-              <div className='mt-4 p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
+              <div className='mt-4 p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
                 <div className='flex items-center gap-2 mb-2'>
                   <Users className='h-4 w-4 text-lunary-primary-400' />
-                  <span className='text-sm font-medium text-zinc-300'>
+                  <span className='text-sm font-medium text-content-secondary'>
                     Famous Examples
                   </span>
                 </div>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   {curated.famousExamples}
                 </p>
               </div>
@@ -452,14 +462,16 @@ export default async function PlacementPage({ params }: PageProps) {
       {/* Famous Examples (for planets without match data) */}
       {curated && curated.famousExamples && !('bestMatches' in curated) && (
         <section className='mb-8'>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
             <div className='flex items-center gap-2 mb-2'>
               <Users className='h-4 w-4 text-lunary-primary-400' />
-              <span className='text-sm font-medium text-zinc-300'>
+              <span className='text-sm font-medium text-content-secondary'>
                 Famous Examples
               </span>
             </div>
-            <p className='text-sm text-zinc-400'>{curated.famousExamples}</p>
+            <p className='text-sm text-content-muted'>
+              {curated.famousExamples}
+            </p>
           </div>
         </section>
       )}
@@ -470,10 +482,13 @@ export default async function PlacementPage({ params }: PageProps) {
           <Star className='h-5 w-5 inline mr-2 text-lunary-success' />
           {curated?.coreTraits ? 'Core Traits' : 'Strengths'}
         </Heading>
-        <div className='p-5 rounded-lg border border-lunary-success-700 bg-lunary-success-950 mt-4'>
+        <div className='p-5 rounded-lg border border-lunary-success-700 bg-layer-deep mt-4'>
           <ul className='space-y-3'>
             {strengths.map((item, i) => (
-              <li key={i} className='flex items-start gap-3 text-zinc-300'>
+              <li
+                key={i}
+                className='flex items-start gap-3 text-content-secondary'
+              >
                 <span className='text-lunary-success mt-1'>✓</span>
                 {item}
               </li>
@@ -488,10 +503,13 @@ export default async function PlacementPage({ params }: PageProps) {
           <AlertTriangle className='h-5 w-5 inline mr-2 text-lunary-accent' />
           Potential Challenges
         </Heading>
-        <div className='p-5 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 mt-4'>
+        <div className='p-5 rounded-lg border border-lunary-accent-700 bg-layer-deep mt-4'>
           <ul className='space-y-3'>
             {challenges.map((item, i) => (
-              <li key={i} className='flex items-start gap-3 text-zinc-300'>
+              <li
+                key={i}
+                className='flex items-start gap-3 text-content-secondary'
+              >
                 <span className='text-lunary-accent mt-1'>!</span>
                 {item}
               </li>
@@ -507,7 +525,7 @@ export default async function PlacementPage({ params }: PageProps) {
         </Heading>
         <div className='grid md:grid-cols-2 gap-4 mt-4'>
           <div>
-            <h3 className='text-sm text-zinc-400 mb-3'>
+            <h3 className='text-sm text-content-muted mb-3'>
               {content.planet} in Other Signs
             </h3>
             <div className='flex flex-wrap gap-2'>
@@ -515,7 +533,7 @@ export default async function PlacementPage({ params }: PageProps) {
                 <NavParamLink
                   key={p.slug}
                   href={`/grimoire/placements/${p.slug}`}
-                  className='px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors'
+                  className='px-3 py-1.5 rounded-lg bg-surface-card hover:bg-surface-overlay text-content-secondary text-sm transition-colors'
                 >
                   {p.label}
                 </NavParamLink>
@@ -523,7 +541,7 @@ export default async function PlacementPage({ params }: PageProps) {
             </div>
           </div>
           <div>
-            <h3 className='text-sm text-zinc-400 mb-3'>
+            <h3 className='text-sm text-content-muted mb-3'>
               Other Planets in {content.sign}
             </h3>
             <div className='flex flex-wrap gap-2'>
@@ -531,7 +549,7 @@ export default async function PlacementPage({ params }: PageProps) {
                 <NavParamLink
                   key={p.slug}
                   href={`/grimoire/placements/${p.slug}`}
-                  className='px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors'
+                  className='px-3 py-1.5 rounded-lg bg-surface-card hover:bg-surface-overlay text-content-secondary text-sm transition-colors'
                 >
                   {p.label}
                 </NavParamLink>

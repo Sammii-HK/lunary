@@ -61,30 +61,38 @@ export function CollapsibleSection({
   };
 
   return (
-    <div className={cn('space-y-4', className)} data-collapsible={titleString}>
+    <div
+      className={cn(
+        'rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden',
+        className,
+      )}
+      data-collapsible={titleString}
+    >
       <button
         onClick={handleToggle}
-        className='flex w-full items-center justify-between rounded-lg border border-zinc-800/50 bg-zinc-900/30 px-4 py-3 text-left transition-colors hover:bg-zinc-900/50'
+        className='flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-surface-elevated/50'
       >
         <div className='flex items-center gap-3'>
           {icon && <span className='text-xl'>{icon}</span>}
           {typeof title === 'string' ? (
-            <h2 className='text-base md:text-lg font-medium text-zinc-100'>
+            <h2 className='text-base md:text-lg font-medium text-content-primary'>
               {title}
             </h2>
           ) : (
-            <div className='text-base md:text-lg font-medium text-zinc-100'>
+            <div className='text-base md:text-lg font-medium text-content-primary'>
               {title}
             </div>
           )}
         </div>
         {isCollapsed ? (
-          <ChevronDown className='w-5 h-5 text-zinc-400' />
+          <ChevronDown className='w-5 h-5 text-content-muted' />
         ) : (
-          <ChevronUp className='w-5 h-5 text-zinc-400' />
+          <ChevronUp className='w-5 h-5 text-content-muted' />
         )}
       </button>
-      <Collapse isOpen={!isCollapsed}>{children}</Collapse>
+      <Collapse isOpen={!isCollapsed}>
+        <div className='border-t border-stroke-subtle/50 p-4'>{children}</div>
+      </Collapse>
     </div>
   );
 }

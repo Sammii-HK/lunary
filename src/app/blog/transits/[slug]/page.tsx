@@ -164,10 +164,10 @@ export default async function TransitBlogPostPage({
       transitSignDisplay={post.sign || undefined}
     >
       <section id='dates-and-mechanics' className='space-y-4'>
-        <h2 className='text-xl font-semibold text-lunary-primary-200'>
+        <h2 className='text-xl font-semibold text-content-secondary'>
           Dates and mechanics
         </h2>
-        <div className='prose prose-invert max-w-none text-lunary-primary-300/90 leading-relaxed'>
+        <div className='prose prose-invert max-w-none text-content-brand/90 leading-relaxed'>
           {post.astronomical_context.split('\n\n').map((p, i) => (
             <p key={i}>{p}</p>
           ))}
@@ -175,10 +175,10 @@ export default async function TransitBlogPostPage({
       </section>
 
       <section id='practical-guidance' className='space-y-4'>
-        <h2 className='text-xl font-semibold text-lunary-primary-200'>
+        <h2 className='text-xl font-semibold text-content-secondary'>
           Practical guidance
         </h2>
-        <div className='prose prose-invert max-w-none text-lunary-primary-300/90 leading-relaxed'>
+        <div className='prose prose-invert max-w-none text-content-brand/90 leading-relaxed'>
           {post.practical_guidance.split('\n\n').map((p, i) => (
             <p key={i}>{p}</p>
           ))}
@@ -186,17 +186,17 @@ export default async function TransitBlogPostPage({
       </section>
 
       <section id='sign-breakdowns' className='space-y-4'>
-        <h2 className='text-xl font-semibold text-lunary-primary-200'>
+        <h2 className='text-xl font-semibold text-content-secondary'>
           How it affects your sign
         </h2>
         <TransitSignAccordion breakdowns={signBreakdowns} />
       </section>
 
       <section id='looking-ahead' className='space-y-4'>
-        <h2 className='text-xl font-semibold text-lunary-primary-200'>
+        <h2 className='text-xl font-semibold text-content-secondary'>
           Looking ahead
         </h2>
-        <div className='prose prose-invert max-w-none text-lunary-primary-300/90 leading-relaxed'>
+        <div className='prose prose-invert max-w-none text-content-brand/90 leading-relaxed'>
           {post.closing_section.split('\n\n').map((p, i) => (
             <p key={i}>{p}</p>
           ))}

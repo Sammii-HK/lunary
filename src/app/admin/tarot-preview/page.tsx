@@ -32,12 +32,12 @@ const PREVIEW_CARDS = [
 
 export default function TarotPreviewPage() {
   return (
-    <div className='min-h-screen bg-lunary-bg p-8'>
+    <div className='min-h-screen bg-surface-elevated p-8'>
       <div className='max-w-6xl mx-auto'>
-        <h1 className='text-3xl font-bold text-white mb-2'>
+        <h1 className='text-3xl font-bold text-content-primary mb-2'>
           Programmatic Tarot Cards
         </h1>
-        <p className='text-zinc-400 mb-8'>
+        <p className='text-content-muted mb-8'>
           Proof of concept: SVG-based tarot cards with procedural star fields
           and sacred geometry patterns. Each card uses seeded randomness for
           consistent rendering.
@@ -55,16 +55,16 @@ export default function TarotPreviewPage() {
                 height={267}
                 className='drop-shadow-lg hover:drop-shadow-2xl transition-all hover:scale-105'
               />
-              <span className='text-xs text-zinc-500'>{card.element}</span>
+              <span className='text-xs text-content-muted'>{card.element}</span>
             </div>
           ))}
         </div>
 
-        <div className='mt-12 border-t border-zinc-800 pt-8'>
-          <h2 className='text-xl font-semibold text-white mb-4'>
+        <div className='mt-12 border-t border-stroke-subtle pt-8'>
+          <h2 className='text-xl font-semibold text-content-primary mb-4'>
             Implementation Details
           </h2>
-          <ul className='text-sm text-zinc-400 space-y-2'>
+          <ul className='text-sm text-content-muted space-y-2'>
             <li>
               <span className='text-lunary-primary'>Star Field:</span> Reuses
               seeded random generator from video starfield-generator.ts
@@ -90,9 +90,11 @@ export default function TarotPreviewPage() {
           </ul>
         </div>
 
-        <div className='mt-8 p-4 bg-zinc-900/50 rounded-lg border border-zinc-800'>
-          <h3 className='text-sm font-medium text-white mb-2'>Next Steps</h3>
-          <ul className='text-sm text-zinc-400 space-y-1'>
+        <div className='mt-8 p-4 bg-surface-elevated/50 rounded-lg border border-stroke-subtle'>
+          <h3 className='text-sm font-medium text-content-primary mb-2'>
+            Next Steps
+          </h3>
+          <ul className='text-sm text-content-muted space-y-1'>
             <li>
               1. Add more symbol types (lantern, tower, sun, wheel, chalice)
             </li>

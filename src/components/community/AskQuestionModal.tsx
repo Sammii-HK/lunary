@@ -61,7 +61,7 @@ export function AskQuestionModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size='md'>
       <ModalBody>
-        <h2 className='text-lg font-semibold text-white mb-4'>
+        <h2 className='text-lg font-semibold text-content-primary mb-4'>
           Ask the Circle
         </h2>
 
@@ -73,8 +73,8 @@ export function AskQuestionModal({
               onClick={() => setTopic(t.value)}
               className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                 topic === t.value
-                  ? 'border-lunary-primary-500 bg-lunary-primary-900/30 text-lunary-primary-300'
-                  : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                  ? 'border-lunary-primary-500 bg-layer-base/30 text-content-brand'
+                  : 'border-stroke-default text-content-muted hover:border-stroke-strong'
               }`}
             >
               {t.label}
@@ -89,21 +89,21 @@ export function AskQuestionModal({
           placeholder='What cosmic question is on your mind?'
           rows={4}
           maxLength={1000}
-          className='w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-500 resize-none'
+          className='w-full bg-surface-elevated border border-stroke-default rounded-lg px-3 py-2 text-sm text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-500 resize-none'
         />
 
         <div className='flex items-center justify-between mt-3'>
-          <label className='flex items-center gap-2 text-xs text-zinc-400'>
+          <label className='flex items-center gap-2 text-xs text-content-muted'>
             <input
               type='checkbox'
               checked={isAnonymous}
               onChange={(e) => setIsAnonymous(e.target.checked)}
-              className='rounded border-zinc-600'
+              className='rounded border-stroke-strong'
             />
             Post anonymously
           </label>
 
-          <span className='text-xs text-zinc-600'>{text.length}/1000</span>
+          <span className='text-xs text-content-muted'>{text.length}/1000</span>
         </div>
 
         {error && <p className='text-xs text-red-400 mt-2'>{error}</p>}

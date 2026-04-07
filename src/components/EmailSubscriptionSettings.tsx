@@ -227,7 +227,7 @@ export function EmailSubscriptionSettings() {
 
   if (loading) {
     return (
-      <div className='w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
+      <div className='w-full max-w-md rounded-lg border border-stroke-default bg-surface-card p-4'>
         <div className='flex items-center justify-center py-4'>
           <div className='h-6 w-6 animate-spin rounded-full border-b-2 border-lunary-primary-400'></div>
         </div>
@@ -237,12 +237,12 @@ export function EmailSubscriptionSettings() {
 
   if (!userEmail) {
     return (
-      <div className='w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-800 p-4'>
-        <h3 className='mb-3 flex items-center gap-2 text-lg font-semibold text-white'>
+      <div className='w-full max-w-md rounded-lg border border-stroke-default bg-surface-card p-4'>
+        <h3 className='mb-3 flex items-center gap-2 text-lg font-semibold text-content-primary'>
           <Mail className='h-5 w-5' />
           Email Newsletter
         </h3>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           {authState.isAuthenticated
             ? 'Add an email address to your profile to manage subscriptions.'
             : 'Sign in to manage your email subscriptions.'}
@@ -258,8 +258,8 @@ export function EmailSubscriptionSettings() {
         <div
           className={`p-4 rounded-lg border ${
             emailVerified
-              ? 'bg-lunary-success-900/20 border-lunary-success-700'
-              : 'bg-lunary-error-900/20 border-lunary-error-700'
+              ? 'bg-layer-base/20 border-lunary-success-700'
+              : 'bg-layer-base/20 border-lunary-error-700'
           }`}
         >
           <div className='flex items-start gap-3'>
@@ -271,10 +271,10 @@ export function EmailSubscriptionSettings() {
               )}
             </div>
             <div className='flex-1'>
-              <p className='text-sm font-medium text-white'>
+              <p className='text-sm font-medium text-content-primary'>
                 {emailVerified ? 'Email Verified' : 'Email Not Verified'}
               </p>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {emailVerified
                   ? `Your email ${userEmail} is verified.`
                   : `We need to verify your email ${userEmail} to enable all features.`}
@@ -305,12 +305,12 @@ export function EmailSubscriptionSettings() {
       )}
 
       {/* Newsletter Subscription Section */}
-      <div className='p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
-        <h3 className='text-lg font-semibold text-white mb-3 flex items-center gap-2'>
+      <div className='p-4 bg-surface-card rounded-lg border border-stroke-default'>
+        <h3 className='text-lg font-semibold text-content-primary mb-3 flex items-center gap-2'>
           <Mail className='h-5 w-5' />
           Email Newsletter
         </h3>
-        <p className='text-xs text-zinc-400 mb-4'>
+        <p className='text-xs text-content-muted mb-4'>
           Receive weekly cosmic insights, blog updates, and special offers
         </p>
 
@@ -327,7 +327,7 @@ export function EmailSubscriptionSettings() {
             <span>{statusMessage.text}</span>
             <button
               onClick={() => setStatusMessage(null)}
-              className='flex-shrink-0 text-zinc-500 hover:text-zinc-300'
+              className='flex-shrink-0 text-content-muted hover:text-content-secondary'
             >
               &times;
             </button>
@@ -337,20 +337,20 @@ export function EmailSubscriptionSettings() {
         <div className='space-y-4'>
           <div className='flex items-center justify-between'>
             <div>
-              <p className='text-sm text-white font-medium'>
+              <p className='text-sm text-content-primary font-medium'>
                 {isSubscribed ? (
                   <span className='flex items-center gap-2 text-lunary-success'>
                     <CheckCircle className='h-4 w-4' />
                     Subscribed
                   </span>
                 ) : (
-                  <span className='flex items-center gap-2 text-zinc-400'>
+                  <span className='flex items-center gap-2 text-content-muted'>
                     <XCircle className='h-4 w-4' />
                     Not Subscribed
                   </span>
                 )}
               </p>
-              <p className='text-xs text-zinc-400 mt-1'>
+              <p className='text-xs text-content-muted mt-1'>
                 {isSubscribed
                   ? `Receiving emails at ${userEmail}`
                   : 'You will not receive email newsletters'}
@@ -360,7 +360,7 @@ export function EmailSubscriptionSettings() {
               onClick={toggleSubscription}
               disabled={updating}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isSubscribed ? 'bg-lunary-primary-600' : 'bg-zinc-600'
+                isSubscribed ? 'bg-lunary-primary-600' : 'bg-surface-overlay'
               } disabled:opacity-50`}
             >
               <span
@@ -372,8 +372,8 @@ export function EmailSubscriptionSettings() {
           </div>
 
           {isSubscribed && (
-            <div className='pt-3 border-t border-zinc-700'>
-              <p className='text-xs text-zinc-400'>
+            <div className='pt-3 border-t border-stroke-default'>
+              <p className='text-xs text-content-muted'>
                 You can unsubscribe at any time by clicking the link in any
                 email or disabling this toggle.
               </p>

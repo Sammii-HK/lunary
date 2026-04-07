@@ -74,7 +74,7 @@ export function SkillTreeCard({
             showLabel={false}
           />
         </div>
-        <span className='text-[10px] text-zinc-500 shrink-0 tabular-nums'>
+        <span className='text-[10px] text-content-muted shrink-0 tabular-nums'>
           Lv.{currentLevel}
         </span>
       </div>
@@ -87,18 +87,20 @@ export function SkillTreeCard({
     const compactContent = (
       <div
         className={cn(
-          'flex items-center gap-3 p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50',
-          featureRoute && 'hover:border-zinc-700/50 transition-colors',
+          'flex items-center gap-3 p-3 rounded-lg bg-surface-elevated/50 border border-stroke-subtle/50',
+          featureRoute && 'hover:border-stroke-default/50 transition-colors',
           className,
         )}
       >
         <SkillIcon icon={icon} className='w-6 h-6' />
         <div className='flex-1 min-w-0'>
           <div className='flex items-center justify-between mb-1'>
-            <span className='text-sm font-medium text-white truncate'>
+            <span className='text-sm font-medium text-content-primary truncate'>
               {name}
             </span>
-            <span className='text-xs text-zinc-400'>Lv. {currentLevel}</span>
+            <span className='text-xs text-content-muted'>
+              Lv. {currentLevel}
+            </span>
           </div>
           <ProgressBar
             progress={progressToNext}
@@ -123,7 +125,7 @@ export function SkillTreeCard({
   const content = (
     <div
       className={cn(
-        'p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50 hover:border-zinc-700/50 transition-colors',
+        'p-4 rounded-xl bg-surface-elevated/50 border border-stroke-subtle/50 hover:border-stroke-default/50 transition-colors',
         className,
       )}
     >
@@ -132,13 +134,15 @@ export function SkillTreeCard({
         <div className='flex items-center gap-3'>
           <SkillIcon icon={icon} className='w-8 h-8' />
           <div>
-            <h3 className='font-semibold text-white'>{name}</h3>
-            <p className='text-xs text-zinc-400'>
+            <h3 className='font-semibold text-content-primary'>{name}</h3>
+            <p className='text-xs text-content-muted'>
               {totalActions} {actionVerb}
             </p>
           </div>
         </div>
-        {featureRoute && <ChevronRight className='w-5 h-5 text-zinc-500' />}
+        {featureRoute && (
+          <ChevronRight className='w-5 h-5 text-content-muted' />
+        )}
       </div>
 
       {/* Progress Bar */}
@@ -150,22 +154,23 @@ export function SkillTreeCard({
 
       {/* Next Unlock */}
       {!isMaxLevel && actionsToNext !== null && (
-        <div className='flex items-center gap-2 p-2 rounded-lg bg-zinc-800/30 border border-zinc-700/30'>
+        <div className='flex items-center gap-2 p-2 rounded-lg bg-surface-card/30 border border-stroke-default/30'>
           {unlockText ? (
             <>
               <Sparkles className='w-4 h-4 text-lunary-accent shrink-0' />
-              <span className='text-xs text-zinc-300'>
+              <span className='text-xs text-content-secondary'>
                 <span className='text-lunary-accent font-medium'>
                   {actionsToNext}
                 </span>{' '}
-                more to unlock: <span className='text-white'>{unlockText}</span>
+                more to unlock:{' '}
+                <span className='text-content-primary'>{unlockText}</span>
               </span>
             </>
           ) : (
             <>
-              <Sparkles className='w-4 h-4 text-zinc-400 shrink-0' />
-              <span className='text-xs text-zinc-400'>
-                <span className='text-zinc-300 font-medium'>
+              <Sparkles className='w-4 h-4 text-content-muted shrink-0' />
+              <span className='text-xs text-content-muted'>
+                <span className='text-content-secondary font-medium'>
                   {actionsToNext}
                 </span>{' '}
                 more to reach level {currentLevel + 1}

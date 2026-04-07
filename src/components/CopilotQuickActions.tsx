@@ -142,20 +142,20 @@ export function CopilotQuickActions({
             key={action.id}
             onClick={() => onActionClick(action.prompt)}
             disabled={disabled}
-            className='inline-flex items-center gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary/40 disabled:opacity-50 disabled:cursor-not-allowed'
+            className='inline-flex items-center gap-2 rounded-lg border border-stroke-default/60 bg-surface-elevated/40 px-3 py-2 text-xs text-content-secondary transition hover:bg-surface-card/60 hover:border-lunary-primary/40 disabled:opacity-50 disabled:cursor-not-allowed'
           >
             {action.icon}
             <span>{iosLabel(action.label, isNativeIOS)}</span>
           </button>
         ))}
       </div>
-      <div className='flex flex-wrap gap-2 pt-2 border-t border-zinc-800/50'>
+      <div className='flex flex-wrap gap-2 pt-2 border-t border-stroke-subtle/50'>
         {dailyThreadActions.map((action) => (
           <button
             key={action.id}
             onClick={action.onClick}
             disabled={disabled}
-            className='inline-flex items-center gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary/40 disabled:opacity-50 disabled:cursor-not-allowed'
+            className='inline-flex items-center gap-2 rounded-lg border border-stroke-default/60 bg-surface-elevated/40 px-3 py-2 text-xs text-content-secondary transition hover:bg-surface-card/60 hover:border-lunary-primary/40 disabled:opacity-50 disabled:cursor-not-allowed'
           >
             {action.icon}
             <span>{action.label}</span>

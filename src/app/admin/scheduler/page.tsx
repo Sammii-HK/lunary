@@ -182,14 +182,14 @@ export default function SchedulerAdminPage() {
   };
 
   return (
-    <div className='min-h-screen bg-black text-white p-8'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-8'>
       <div className='max-w-4xl mx-auto'>
         <h1 className='text-3xl font-bold mb-8 text-lunary-primary-400'>
           🌟 Cosmic Social Media Scheduler
         </h1>
 
-        <div className='bg-zinc-900 rounded-lg p-6 mb-8'>
-          <h2 className='text-xl font-semibold mb-4 text-white'>
+        <div className='bg-surface-elevated rounded-lg p-6 mb-8'>
+          <h2 className='text-xl font-semibold mb-4 text-content-primary'>
             Schedule Posts
           </h2>
 
@@ -197,7 +197,7 @@ export default function SchedulerAdminPage() {
             <div>
               <label
                 htmlFor='month'
-                className='block text-sm font-medium text-zinc-300 mb-2'
+                className='block text-sm font-medium text-content-secondary mb-2'
               >
                 Target Month (leave empty for next month)
               </label>
@@ -207,9 +207,9 @@ export default function SchedulerAdminPage() {
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
                 placeholder={getNextMonth()}
-                className='bg-zinc-800 border border-zinc-700 rounded px-3 py-2 w-48 text-white'
+                className='bg-surface-card border border-stroke-default rounded px-3 py-2 w-48 text-content-primary'
               />
-              <p className='text-xs text-zinc-400 mt-1'>
+              <p className='text-xs text-content-muted mt-1'>
                 Default:{' '}
                 {new Date(getNextMonth() + '-01').toLocaleDateString('en-US', {
                   month: 'long',
@@ -226,7 +226,10 @@ export default function SchedulerAdminPage() {
                 onChange={(e) => setTestMode(e.target.checked)}
                 className='mr-2'
               />
-              <label htmlFor='testMode' className='text-sm text-zinc-300'>
+              <label
+                htmlFor='testMode'
+                className='text-sm text-content-secondary'
+              >
                 Test Mode (localhost:3001)
               </label>
             </div>
@@ -235,16 +238,16 @@ export default function SchedulerAdminPage() {
           <button
             onClick={scheduleMonth}
             disabled={loading}
-            className='bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-lunary-primary-800 disabled:opacity-50 px-6 py-3 rounded font-medium text-white transition-colors'
+            className='bg-lunary-primary-600 hover:bg-layer-high disabled:bg-layer-raised disabled:opacity-50 px-6 py-3 rounded font-medium text-white transition-colors'
           >
             {loading ? '⏳ Scheduling Posts...' : '🚀 Schedule Month'}
           </button>
 
-          <div className='mt-4 pt-4 border-t border-zinc-700'>
-            <h3 className='text-lg font-semibold mb-3 text-zinc-200'>
+          <div className='mt-4 pt-4 border-t border-stroke-default'>
+            <h3 className='text-lg font-semibold mb-3 text-content-primary'>
               🧪 Quick Test
             </h3>
-            <p className='text-sm text-zinc-400 mb-3'>
+            <p className='text-sm text-content-muted mb-3'>
               Test with just today's cosmic post (scheduled 1 minute from now)
             </p>
             <div className='flex gap-2'>
@@ -303,8 +306,8 @@ export default function SchedulerAdminPage() {
           <div
             className={`rounded-lg p-6 mb-8 ${
               result.success
-                ? 'bg-lunary-success-900/30 border border-lunary-success-700'
-                : 'bg-lunary-error-900/30 border border-lunary-error-700'
+                ? 'bg-layer-base/30 border border-lunary-success-700'
+                : 'bg-layer-base/30 border border-lunary-error-700'
             }`}
           >
             <h3 className='text-lg font-semibold mb-4 flex items-center'>
@@ -319,11 +322,11 @@ export default function SchedulerAdminPage() {
 
               {/* Show detailed error information if available */}
               {(result as any)?.details && (
-                <div className='mt-3 p-3 bg-black/30 rounded border border-zinc-700'>
-                  <h5 className='text-sm font-semibold mb-2 text-zinc-300'>
+                <div className='mt-3 p-3 bg-surface-base/30 rounded border border-stroke-default'>
+                  <h5 className='text-sm font-semibold mb-2 text-content-secondary'>
                     🔍 Error Details:
                   </h5>
-                  <div className='text-xs text-zinc-400 space-y-1'>
+                  <div className='text-xs text-content-muted space-y-1'>
                     {(result as any).details.type && (
                       <div>
                         <span className='font-medium'>Type:</span>{' '}
@@ -346,23 +349,23 @@ export default function SchedulerAdminPage() {
                     {(result as any).details.responseText && (
                       <div>
                         <span className='font-medium'>Response:</span>
-                        <pre className='mt-1 text-xs bg-black/50 p-2 rounded overflow-x-auto'>
+                        <pre className='mt-1 text-xs bg-surface-base/50 p-2 rounded overflow-x-auto'>
                           {(result as any).details.responseText}
                         </pre>
                       </div>
                     )}
                     {(result as any).details.stack && (
                       <details className='mt-2'>
-                        <summary className='cursor-pointer text-zinc-300 hover:text-zinc-200'>
+                        <summary className='cursor-pointer text-content-secondary hover:text-content-primary'>
                           Stack Trace
                         </summary>
-                        <pre className='mt-1 text-xs bg-black/50 p-2 rounded overflow-x-auto whitespace-pre-wrap'>
+                        <pre className='mt-1 text-xs bg-surface-base/50 p-2 rounded overflow-x-auto whitespace-pre-wrap'>
                           {(result as any).details.stack}
                         </pre>
                       </details>
                     )}
                     {(result as any).timestamp && (
-                      <div className='text-xs text-zinc-400 mt-2'>
+                      <div className='text-xs text-content-muted mt-2'>
                         Time:{' '}
                         {new Date((result as any).timestamp).toLocaleString()}
                       </div>
@@ -373,11 +376,11 @@ export default function SchedulerAdminPage() {
 
               {/* Show Succulent API response if available */}
               {(result as any)?.succulentResponse && (
-                <div className='mt-3 p-3 bg-black/30 rounded border border-zinc-700'>
-                  <h5 className='text-sm font-semibold mb-2 text-zinc-300'>
+                <div className='mt-3 p-3 bg-surface-base/30 rounded border border-stroke-default'>
+                  <h5 className='text-sm font-semibold mb-2 text-content-secondary'>
                     🔗 Succulent API Response:
                   </h5>
-                  <pre className='text-xs text-zinc-400 overflow-x-auto whitespace-pre-wrap'>
+                  <pre className='text-xs text-content-muted overflow-x-auto whitespace-pre-wrap'>
                     {JSON.stringify((result as any).succulentResponse, null, 2)}
                   </pre>
                 </div>
@@ -386,36 +389,36 @@ export default function SchedulerAdminPage() {
 
             {result.summary && (
               <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
-                <div className='bg-zinc-800 rounded p-3'>
+                <div className='bg-surface-card rounded p-3'>
                   <div className='text-2xl font-bold text-lunary-primary-400'>
                     {result.summary.totalPosts}
                   </div>
-                  <div className='text-sm text-zinc-400'>Total Posts</div>
+                  <div className='text-sm text-content-muted'>Total Posts</div>
                 </div>
-                <div className='bg-zinc-800 rounded p-3'>
+                <div className='bg-surface-card rounded p-3'>
                   <div className='text-2xl font-bold text-lunary-success'>
                     {result.summary.successful}
                   </div>
-                  <div className='text-sm text-zinc-400'>Successful</div>
+                  <div className='text-sm text-content-muted'>Successful</div>
                 </div>
-                <div className='bg-zinc-800 rounded p-3'>
+                <div className='bg-surface-card rounded p-3'>
                   <div className='text-2xl font-bold text-lunary-error'>
                     {result.summary.failed}
                   </div>
-                  <div className='text-sm text-zinc-400'>Failed</div>
+                  <div className='text-sm text-content-muted'>Failed</div>
                 </div>
-                <div className='bg-zinc-800 rounded p-3'>
+                <div className='bg-surface-card rounded p-3'>
                   <div className='text-lg font-bold text-lunary-secondary'>
                     {result.summary.month}
                   </div>
-                  <div className='text-sm text-zinc-400'>Target Month</div>
+                  <div className='text-sm text-content-muted'>Target Month</div>
                 </div>
               </div>
             )}
 
             {result.results && result.results.length > 0 && (
               <div>
-                <h4 className='font-medium mb-3 text-zinc-200'>
+                <h4 className='font-medium mb-3 text-content-primary'>
                   Post Results:
                 </h4>
                 <div className='max-h-64 overflow-y-auto space-y-2'>
@@ -424,15 +427,15 @@ export default function SchedulerAdminPage() {
                       key={index}
                       className={`flex justify-between items-center p-2 rounded text-sm ${
                         item.status === 'success'
-                          ? 'bg-lunary-success-900/30 text-lunary-success-300'
-                          : 'bg-lunary-error-900/30 text-lunary-error-300'
+                          ? 'bg-layer-base/30 text-lunary-success-300'
+                          : 'bg-layer-base/30 text-lunary-error-300'
                       }`}
                     >
                       <span>{item.date}</span>
                       <span className='flex items-center'>
                         {item.status === 'success' ? '✅' : '❌'}
                         {item.postId && (
-                          <code className='ml-2 text-xs bg-black/30 px-1 rounded'>
+                          <code className='ml-2 text-xs bg-surface-base/30 px-1 rounded'>
                             {item.postId}
                           </code>
                         )}
@@ -449,11 +452,11 @@ export default function SchedulerAdminPage() {
             {/* Show post content preview for single post tests */}
             {(result as any)?.postContent && (
               <div className='mt-6'>
-                <h4 className='font-medium mb-3 text-zinc-200'>
+                <h4 className='font-medium mb-3 text-content-primary'>
                   📱 Post Content Preview:
                 </h4>
-                <div className='bg-black/30 p-4 rounded border border-zinc-700'>
-                  <pre className='whitespace-pre-wrap text-sm text-zinc-300 leading-relaxed'>
+                <div className='bg-surface-base/30 p-4 rounded border border-stroke-default'>
+                  <pre className='whitespace-pre-wrap text-sm text-content-secondary leading-relaxed'>
                     {(result as any).postContent}
                   </pre>
                 </div>
@@ -463,18 +466,18 @@ export default function SchedulerAdminPage() {
             {/* Show prefill buttons for successful posts */}
             {result.success && currentPostData && (
               <div className='mt-6'>
-                <h4 className='font-medium mb-3 text-zinc-200'>
+                <h4 className='font-medium mb-3 text-content-primary'>
                   🚀 Open in Applications:
                 </h4>
-                <div className='bg-black/30 p-4 rounded border border-zinc-700'>
-                  <p className='text-sm text-zinc-400 mb-4'>
+                <div className='bg-surface-base/30 p-4 rounded border border-stroke-default'>
+                  <p className='text-sm text-content-muted mb-4'>
                     Click any button to open the corresponding app with your
                     content prefilled:
                   </p>
 
                   {/* Social Media Platforms */}
                   <div className='mb-6'>
-                    <h5 className='text-sm font-semibold text-zinc-300 mb-3'>
+                    <h5 className='text-sm font-semibold text-content-secondary mb-3'>
                       Social Media
                     </h5>
                     <div className='grid grid-cols-2 md:grid-cols-4 gap-2'>
@@ -496,7 +499,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-lunary-secondary-800 hover:bg-lunary-secondary-900 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-secondary-800 hover:bg-layer-base px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📘 Facebook
                       </button>
@@ -515,7 +518,7 @@ export default function SchedulerAdminPage() {
                         onClick={() =>
                           socialPrefillUrls.instagram(currentPostData)
                         }
-                        className='bg-gradient-to-r from-lunary-primary-600 to-lunary-rose-600 hover:from-lunary-primary-700 hover:to-lunary-rose-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-gradient-to-r from-lunary-primary-600 to-lunary-rose-600 hover:from-layer-high hover:to-lunary-rose-700 px-3 py-2 rounded text-sm font-medium text-content-primary transition-colors flex items-center justify-center'
                       >
                         📸 Instagram
                       </button>
@@ -548,7 +551,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-lunary-primary hover:bg-lunary-primary-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-primary hover:bg-layer-high px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         🌀 Tumblr
                       </button>
@@ -557,7 +560,7 @@ export default function SchedulerAdminPage() {
 
                   {/* Messaging Apps */}
                   <div className='mb-6'>
-                    <h5 className='text-sm font-semibold text-zinc-300 mb-3'>
+                    <h5 className='text-sm font-semibold text-content-secondary mb-3'>
                       Messaging
                     </h5>
                     <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
@@ -590,7 +593,7 @@ export default function SchedulerAdminPage() {
                             '_blank',
                           )
                         }
-                        className='bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-gray-600 hover:bg-surface-overlay px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         ✉️ Email
                       </button>
@@ -599,7 +602,7 @@ export default function SchedulerAdminPage() {
 
                   {/* Utility Actions */}
                   <div>
-                    <h5 className='text-sm font-semibold text-zinc-300 mb-3'>
+                    <h5 className='text-sm font-semibold text-content-secondary mb-3'>
                       Utilities
                     </h5>
                     <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
@@ -616,7 +619,7 @@ export default function SchedulerAdminPage() {
                             );
                           }
                         }}
-                        className='bg-lunary-primary-600 hover:bg-lunary-primary-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-primary-600 hover:bg-layer-high px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📋 Copy Text
                       </button>
@@ -634,7 +637,7 @@ export default function SchedulerAdminPage() {
                             );
                           }
                         }}
-                        className='bg-lunary-primary-600 hover:bg-lunary-primary-700 px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
+                        className='bg-lunary-primary-600 hover:bg-layer-high px-3 py-2 rounded text-sm font-medium text-white transition-colors flex items-center justify-center'
                       >
                         📋 Copy All
                       </button>
@@ -653,8 +656,8 @@ export default function SchedulerAdminPage() {
                     </div>
                   </div>
 
-                  <div className='mt-4 pt-4 border-t border-zinc-600'>
-                    <p className='text-xs text-zinc-400'>
+                  <div className='mt-4 pt-4 border-t border-stroke-strong'>
+                    <p className='text-xs text-content-muted'>
                       💡 <strong>Tip:</strong> Instagram doesn't support URL
                       prefilling, so the content will be copied to your
                       clipboard instead. For best results with images, save or
@@ -667,21 +670,21 @@ export default function SchedulerAdminPage() {
           </div>
         )}
 
-        <div className='bg-zinc-900 rounded-lg p-6'>
-          <h3 className='text-lg font-semibold mb-3 text-zinc-200'>
+        <div className='bg-surface-elevated rounded-lg p-6'>
+          <h3 className='text-lg font-semibold mb-3 text-content-primary'>
             ⚙️ Setup Instructions
           </h3>
 
-          <div className='space-y-3 text-sm text-zinc-400'>
+          <div className='space-y-3 text-sm text-content-muted'>
             <div>
-              <strong className='text-zinc-300'>
+              <strong className='text-content-secondary'>
                 1. Environment Variables:
               </strong>
-              <pre className='bg-black/50 p-2 rounded mt-1 text-xs overflow-x-auto'>
+              <pre className='bg-surface-base/50 p-2 rounded mt-1 text-xs overflow-x-auto'>
                 {`SUCCULENT_SECRET_KEY=sk_live_your_api_key_here
 SUCCULENT_ACCOUNT_GROUP_ID=group_your_group_id_here`}
               </pre>
-              <p className='text-xs text-zinc-400 mt-2'>
+              <p className='text-xs text-content-muted mt-2'>
                 💡 <strong>Debugging tip:</strong> The enhanced error logging
                 will now show if these variables are missing or malformed. Check
                 the server logs or use the "Test Today's Post" button to see
@@ -690,20 +693,22 @@ SUCCULENT_ACCOUNT_GROUP_ID=group_your_group_id_here`}
             </div>
 
             <div>
-              <strong className='text-zinc-300'>
+              <strong className='text-content-secondary'>
                 2. Automated Scheduling (Cron):
               </strong>
               <p className='mt-1'>
                 Run this command weekly to schedule the next month:
               </p>
-              <pre className='bg-black/50 p-2 rounded mt-1 text-xs overflow-x-auto'>
+              <pre className='bg-surface-base/50 p-2 rounded mt-1 text-xs overflow-x-auto'>
                 {`# Run every Sunday at 10 AM to schedule next month's posts
 0 10 * * 0 curl -X POST https://lunary.app/api/schedule-posts`}
               </pre>
             </div>
 
             <div>
-              <strong className='text-zinc-300'>3. Post Format:</strong>
+              <strong className='text-content-secondary'>
+                3. Post Format:
+              </strong>
               <ul className='list-disc list-inside mt-1 space-y-1'>
                 <li>Posts to Instagram, X (Twitter), Facebook, LinkedIn</li>
                 <li>Includes cosmic image generated from your OG system</li>

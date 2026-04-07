@@ -45,13 +45,13 @@ export function MetricTable({
   };
 
   return (
-    <table className='w-full text-left text-sm text-zinc-400'>
+    <table className='w-full text-left text-sm text-content-muted'>
       <thead>
-        <tr className='border-b border-zinc-800'>
+        <tr className='border-b border-stroke-subtle'>
           {columns.map((col) => (
             <th
               key={col.key}
-              className={`pb-3 text-xs font-medium text-zinc-400 ${
+              className={`pb-3 text-xs font-medium text-content-muted ${
                 col.align === 'right' ? 'text-right' : ''
               }`}
             >
@@ -65,12 +65,12 @@ export function MetricTable({
           data.map((row, idx) => (
             <tr
               key={idx}
-              className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
+              className='border-b border-stroke-subtle/50 hover:bg-surface-elevated/20'
             >
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={`py-3 text-zinc-300 ${
+                  className={`py-3 text-content-secondary ${
                     col.align === 'right' ? 'text-right' : ''
                   } ${col.align !== 'right' ? 'font-medium' : ''}`}
                 >
@@ -85,7 +85,7 @@ export function MetricTable({
           <tr>
             <td
               colSpan={columns.length}
-              className='py-4 text-center text-xs text-zinc-500'
+              className='py-4 text-center text-xs text-content-muted'
             >
               {emptyMessage}
             </td>

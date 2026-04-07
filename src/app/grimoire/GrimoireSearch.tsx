@@ -997,7 +997,7 @@ export function GrimoireSearch({
       className={`relative ${compact ? 'w-48 md:w-64' : 'max-w-xl mx-auto'}`}
     >
       <Search
-        className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 ${compact ? 'w-4 h-4' : 'w-4 h-4 md:w-5 md:h-5'}`}
+        className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-content-muted ${compact ? 'w-4 h-4' : 'w-4 h-4 md:w-5 md:h-5'}`}
         aria-hidden='true'
       />
       <input
@@ -1016,7 +1016,7 @@ export function GrimoireSearch({
         data-testid='grimoire-search'
         aria-label='Search grimoire'
         className={cn(
-          'w-full bg-zinc-800/80 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent',
+          'w-full bg-surface-card/80 border border-stroke-default rounded-md text-content-primary placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent',
           compact
             ? 'pl-9 pr-9 py-1 text-xs'
             : 'pl-10 md:pl-12 pr-10 md:pr-12 py-2 md:py-2.5 text-sm md:text-base',
@@ -1033,7 +1033,7 @@ export function GrimoireSearch({
           'absolute right-3 top-1/2 -translate-y-1/2 transition-colors',
           isPersonalized
             ? 'text-lunary-accent'
-            : 'text-zinc-500 hover:text-zinc-300',
+            : 'text-content-muted hover:text-content-secondary',
         )}
         aria-label={
           isPersonalized
@@ -1055,8 +1055,8 @@ export function GrimoireSearch({
 
       {/* Search Results Dropdown */}
       {showSearchResults && searchDataLoading && searchQuery.trim() && (
-        <div className='absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg p-3 z-50'>
-          <div className='flex items-center gap-2 text-zinc-400'>
+        <div className='absolute top-full left-0 right-0 mt-1 bg-surface-elevated border border-stroke-default rounded-md shadow-lg p-3 z-50'>
+          <div className='flex items-center gap-2 text-content-muted'>
             <div className='w-4 h-4 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin' />
             <span className='text-sm'>Loading...</span>
           </div>
@@ -1068,9 +1068,9 @@ export function GrimoireSearch({
         isPersonalized &&
         !searchQuery.trim() &&
         (personalizationAvailable ? (
-          <div className='absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg z-50 p-3 space-y-3'>
+          <div className='absolute top-full left-0 right-0 mt-1 bg-surface-elevated border border-stroke-default rounded-md shadow-lg z-50 p-3 space-y-3'>
             <div>
-              <p className='text-[10px] font-medium uppercase tracking-wider text-zinc-500 mb-1.5'>
+              <p className='text-[10px] font-medium uppercase tracking-wider text-content-muted mb-1.5'>
                 Based on your chart
               </p>
               <div className='space-y-0.5'>
@@ -1081,7 +1081,7 @@ export function GrimoireSearch({
                       setShowSearchResults(false);
                       onResultClick?.();
                     }}
-                    className='block px-2 py-1.5 rounded text-sm text-zinc-200 hover:bg-zinc-800 transition-colors'
+                    className='block px-2 py-1.5 rounded text-sm text-content-primary hover:bg-surface-card transition-colors'
                   >
                     Sun in {userSigns.sun}
                   </NavParamLink>
@@ -1093,7 +1093,7 @@ export function GrimoireSearch({
                       setShowSearchResults(false);
                       onResultClick?.();
                     }}
-                    className='block px-2 py-1.5 rounded text-sm text-zinc-200 hover:bg-zinc-800 transition-colors'
+                    className='block px-2 py-1.5 rounded text-sm text-content-primary hover:bg-surface-card transition-colors'
                   >
                     Moon in {userSigns.moon}
                   </NavParamLink>
@@ -1105,7 +1105,7 @@ export function GrimoireSearch({
                       setShowSearchResults(false);
                       onResultClick?.();
                     }}
-                    className='block px-2 py-1.5 rounded text-sm text-zinc-200 hover:bg-zinc-800 transition-colors'
+                    className='block px-2 py-1.5 rounded text-sm text-content-primary hover:bg-surface-card transition-colors'
                   >
                     Rising in {userSigns.rising}
                   </NavParamLink>
@@ -1114,7 +1114,7 @@ export function GrimoireSearch({
             </div>
             {(currentMoonSign || activeRetrogrades.length > 0) && (
               <div>
-                <p className='text-[10px] font-medium uppercase tracking-wider text-zinc-500 mb-1.5'>
+                <p className='text-[10px] font-medium uppercase tracking-wider text-content-muted mb-1.5'>
                   Current sky
                 </p>
                 <div className='space-y-0.5'>
@@ -1125,7 +1125,7 @@ export function GrimoireSearch({
                         setShowSearchResults(false);
                         onResultClick?.();
                       }}
-                      className='block px-2 py-1.5 rounded text-sm text-zinc-200 hover:bg-zinc-800 transition-colors'
+                      className='block px-2 py-1.5 rounded text-sm text-content-primary hover:bg-surface-card transition-colors'
                     >
                       Moon in {currentMoonSign} — explore {currentMoonSign}{' '}
                       magic
@@ -1139,7 +1139,7 @@ export function GrimoireSearch({
                         setShowSearchResults(false);
                         onResultClick?.();
                       }}
-                      className='block px-2 py-1.5 rounded text-sm text-zinc-200 hover:bg-zinc-800 transition-colors'
+                      className='block px-2 py-1.5 rounded text-sm text-content-primary hover:bg-surface-card transition-colors'
                     >
                       {planet} is retrograde — survival guide
                     </NavParamLink>
@@ -1147,14 +1147,14 @@ export function GrimoireSearch({
                 </div>
               </div>
             )}
-            <div className='border-t border-zinc-800 pt-2'>
+            <div className='border-t border-stroke-subtle pt-2'>
               <NavParamLink
                 href='/guide'
                 onClick={() => {
                   setShowSearchResults(false);
                   onResultClick?.();
                 }}
-                className='inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-lunary-primary-300 transition-colors'
+                className='inline-flex items-center gap-1.5 text-xs text-content-muted hover:text-content-brand transition-colors'
               >
                 <Sparkles className='w-3 h-3' />
                 For full chart guidance, ask the Astral Guide
@@ -1162,8 +1162,8 @@ export function GrimoireSearch({
             </div>
           </div>
         ) : (
-          <div className='absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg z-50 p-3'>
-            <p className='text-sm text-zinc-400'>
+          <div className='absolute top-full left-0 right-0 mt-1 bg-surface-elevated border border-stroke-default rounded-md shadow-lg z-50 p-3'>
+            <p className='text-sm text-content-muted'>
               {user
                 ? 'Add your birth details in settings to personalize your Grimoire search'
                 : 'Sign in to personalize your Grimoire search'}
@@ -1175,7 +1175,7 @@ export function GrimoireSearch({
         !searchDataLoading &&
         searchQuery.trim() &&
         searchResults.length > 0 && (
-          <div className='absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg max-h-80 overflow-y-auto z-50'>
+          <div className='absolute top-full left-0 right-0 mt-1 bg-surface-elevated border border-stroke-default rounded-md shadow-lg max-h-80 overflow-y-auto z-50'>
             <div className='p-2 space-y-0.5'>
               {searchResults.map((result, index) => (
                 <NavParamLink
@@ -1186,10 +1186,10 @@ export function GrimoireSearch({
                     setSearchQuery('');
                     onResultClick?.();
                   }}
-                  className='block px-3 py-2 rounded hover:bg-zinc-800 transition-colors'
+                  className='block px-3 py-2 rounded hover:bg-surface-card transition-colors'
                 >
                   <div className='flex items-center gap-1.5'>
-                    <span className='text-sm font-medium text-zinc-100 truncate'>
+                    <span className='text-sm font-medium text-content-primary truncate'>
                       {result.title}
                     </span>
                     {result.badges?.map((badge) => (
@@ -1202,17 +1202,17 @@ export function GrimoireSearch({
                     ))}
                   </div>
                   {result.match && (
-                    <div className='text-xs text-zinc-400 mt-0.5 truncate'>
+                    <div className='text-xs text-content-muted mt-0.5 truncate'>
                       {result.match}
                     </div>
                   )}
-                  <div className='text-xs text-zinc-500 mt-0.5 capitalize'>
+                  <div className='text-xs text-content-muted mt-0.5 capitalize'>
                     {result.type}
                   </div>
                 </NavParamLink>
               ))}
             </div>
-            <div className='border-t border-zinc-800 px-3 py-2'>
+            <div className='border-t border-stroke-subtle px-3 py-2'>
               <NavParamLink
                 href='/guide'
                 onClick={() => {
@@ -1220,7 +1220,7 @@ export function GrimoireSearch({
                   setSearchQuery('');
                   onResultClick?.();
                 }}
-                className='inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-lunary-primary-300 transition-colors'
+                className='inline-flex items-center gap-1.5 text-xs text-content-muted hover:text-content-brand transition-colors'
               >
                 <Sparkles className='w-3 h-3' />
                 For personalized guidance, ask the Astral Guide
@@ -1234,11 +1234,11 @@ export function GrimoireSearch({
         !searchDataLoading &&
         searchQuery.trim() &&
         searchResults.length === 0 && (
-          <div className='absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg p-3 z-50'>
-            <p className='text-zinc-400 text-sm mb-1'>
+          <div className='absolute top-full left-0 right-0 mt-1 bg-surface-elevated border border-stroke-default rounded-md shadow-lg p-3 z-50'>
+            <p className='text-content-muted text-sm mb-1'>
               No results for &ldquo;{searchQuery}&rdquo;
             </p>
-            <p className='text-zinc-500 text-xs mb-2'>
+            <p className='text-content-muted text-xs mb-2'>
               The Astral Guide knows the entire Grimoire and has your birth
               chart, transits, and moon phase. Ask it anything.
             </p>
@@ -1249,7 +1249,7 @@ export function GrimoireSearch({
                 setSearchQuery('');
                 onResultClick?.();
               }}
-              className='inline-flex items-center gap-1.5 text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+              className='inline-flex items-center gap-1.5 text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
             >
               <Sparkles className='w-4 h-4' />
               Ask the Astral Guide

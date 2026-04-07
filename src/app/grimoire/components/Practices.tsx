@@ -129,10 +129,10 @@ const Practices = () => {
   return (
     <div className='space-y-8'>
       <section>
-        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-4'>
+        <h2 className='text-2xl md:text-3xl font-light text-content-primary mb-4'>
           Explore Witchcraft Practices
         </h2>
-        <p className='text-zinc-400 leading-relaxed mb-6'>
+        <p className='text-content-muted leading-relaxed mb-6'>
           Each practice type serves a unique purpose in your magical journey.
           Click on any practice to learn more and get started.
         </p>
@@ -142,31 +142,31 @@ const Practices = () => {
             <Link
               key={practice.href}
               href={practice.href}
-              className='group rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+              className='group rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
             >
               <div className='space-y-4'>
                 <div className='flex items-center gap-3'>
-                  <div className='text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
+                  <div className='text-lunary-primary-400 group-hover:text-content-brand transition-colors'>
                     {practice.icon}
                   </div>
-                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                  <h3 className='text-lg font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                     {practice.name}
                   </h3>
                 </div>
 
-                <p className='text-sm text-zinc-400 leading-relaxed'>
+                <p className='text-sm text-content-muted leading-relaxed'>
                   {practice.description}
                 </p>
 
-                <div className='flex items-center gap-4 text-xs text-zinc-500 pt-2 border-t border-zinc-800/50'>
-                  <span className='px-2 py-1 rounded bg-zinc-800/50'>
+                <div className='flex items-center gap-4 text-xs text-content-muted pt-2 border-t border-stroke-subtle/50'>
+                  <span className='px-2 py-1 rounded bg-surface-card/50'>
                     {practice.difficulty}
                   </span>
                   <span>{practice.timeRequired}</span>
                 </div>
 
                 <div className='pt-2'>
-                  <span className='text-sm text-lunary-primary-400 group-hover:text-lunary-primary-300 font-medium'>
+                  <span className='text-sm text-lunary-primary-400 group-hover:text-content-brand font-medium'>
                     Learn More →
                   </span>
                 </div>
@@ -176,15 +176,15 @@ const Practices = () => {
         </div>
       </section>
 
-      <section className='mt-12 pt-8 border-t border-zinc-800/50'>
-        <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+      <section className='mt-12 pt-8 border-t border-stroke-subtle/50'>
+        <h2 className='text-xl font-medium text-content-primary mb-4'>
           Getting Started
         </h2>
-        <div className='bg-zinc-900/50 border border-zinc-800/50 rounded-lg p-6'>
-          <p className='text-zinc-300 leading-relaxed mb-4'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle/50 rounded-lg p-6'>
+          <p className='text-content-secondary leading-relaxed mb-4'>
             New to witchcraft practices? Start with foundational skills:
           </p>
-          <ul className='space-y-2 text-zinc-300'>
+          <ul className='space-y-2 text-content-secondary'>
             <li className='flex items-start gap-2'>
               <span className='text-lunary-primary-400 mt-1'>•</span>
               <span>
@@ -218,43 +218,43 @@ const Practices = () => {
       </section>
 
       <section className='mt-8'>
-        <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <h2 className='text-xl font-medium text-content-primary mb-4'>
           Related Topics
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           <Link
             href='/grimoire/modern-witchcraft'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Modern Witchcraft
           </Link>
           <Link
             href='/grimoire/correspondences'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Magical Correspondences
           </Link>
           <Link
             href='/grimoire/modern-witchcraft/ethics'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Witchcraft Ethics
           </Link>
           <Link
             href='/grimoire/book-of-shadows'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Book of Shadows
           </Link>
           <Link
             href='/grimoire/modern-witchcraft/witch-types'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Types of Witches
           </Link>
           <Link
             href='/grimoire/modern-witchcraft/tools'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Witchcraft Tools
           </Link>

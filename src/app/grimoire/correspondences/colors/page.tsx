@@ -94,7 +94,7 @@ const colorDisplay: Record<string, string> = {
   Blue: 'bg-blue-500',
   Purple: 'bg-purple-500',
   White: 'bg-white',
-  Black: 'bg-zinc-900 border border-zinc-600',
+  Black: 'bg-surface-elevated border border-stroke-strong',
   Pink: 'bg-pink-400',
   Silver: 'bg-zinc-400',
   Gold: 'bg-amber-400',
@@ -204,10 +204,10 @@ Colors affect us psychologically and energetically. In magic, we harness these e
         faqs={faqs}
       >
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             All Magical Colors
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Click on any color to explore its full correspondences, magical
             uses, and practical applications.
           </p>
@@ -216,17 +216,17 @@ Colors affect us psychologically and energetically. In magic, we harness these e
               <Link
                 key={name}
                 href={`/grimoire/correspondences/colors/${stringToKebabCase(name)}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-zinc-600 transition-all'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-stroke-strong transition-all'
               >
                 <div className='flex items-center gap-3 mb-3'>
                   <div
-                    className={`w-8 h-8 rounded-full ${colorDisplay[name] || 'bg-zinc-600'}`}
+                    className={`w-8 h-8 rounded-full ${colorDisplay[name] || 'bg-surface-overlay'}`}
                   />
-                  <h3 className='font-medium text-zinc-100 group-hover:text-zinc-200 transition-colors'>
+                  <h3 className='font-medium text-content-primary group-hover:text-content-primary transition-colors'>
                     {name}
                   </h3>
                 </div>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   {data.correspondences.slice(0, 3).join(', ')}
                 </p>
               </Link>
@@ -234,40 +234,40 @@ Colors affect us psychologically and energetically. In magic, we harness these e
           </div>
         </section>
 
-        <section className='mb-12 bg-gradient-to-r from-red-900/20 via-green-900/20 to-blue-900/20 border border-zinc-700 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-gradient-to-r from-red-900/20 via-green-900/20 to-blue-900/20 border border-stroke-default rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Quick Reference: Colors by Intention
           </h2>
           <div className='grid md:grid-cols-2 gap-4 text-sm'>
             <div>
               <p className='text-red-400 font-medium'>Love & Passion:</p>
-              <p className='text-zinc-400'>Red, Pink, Rose Gold</p>
+              <p className='text-content-muted'>Red, Pink, Rose Gold</p>
             </div>
             <div>
               <p className='text-green-400 font-medium'>Money & Abundance:</p>
-              <p className='text-zinc-400'>Green, Gold, Silver</p>
+              <p className='text-content-muted'>Green, Gold, Silver</p>
             </div>
             <div>
               <p className='text-blue-400 font-medium'>Healing & Peace:</p>
-              <p className='text-zinc-400'>Blue, White, Light Green</p>
+              <p className='text-content-muted'>Blue, White, Light Green</p>
             </div>
             <div>
               <p className='text-purple-400 font-medium'>
                 Spirituality & Power:
               </p>
-              <p className='text-zinc-400'>Purple, Indigo, Violet</p>
+              <p className='text-content-muted'>Purple, Indigo, Violet</p>
             </div>
             <div>
               <p className='text-orange-400 font-medium'>
                 Success & Creativity:
               </p>
-              <p className='text-zinc-400'>Orange, Gold, Yellow</p>
+              <p className='text-content-muted'>Orange, Gold, Yellow</p>
             </div>
             <div>
-              <p className='text-zinc-400 font-medium'>
+              <p className='text-content-muted font-medium'>
                 Protection & Banishing:
               </p>
-              <p className='text-zinc-400'>Black, White, Red</p>
+              <p className='text-content-muted'>Black, White, Red</p>
             </div>
           </div>
         </section>

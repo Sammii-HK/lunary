@@ -60,15 +60,15 @@ const screenshots = [
 
 export default function ProductHuntPage() {
   return (
-    <div className='w-full max-w-5xl space-y-12 px-4 py-10 text-white'>
-      <section className='space-y-6 rounded-3xl border border-white/10 bg-black/50 p-8 shadow-2xl'>
+    <div className='w-full max-w-5xl space-y-12 px-4 py-10 text-content-primary'>
+      <section className='space-y-6 rounded-3xl border border-white/10 bg-surface-base/50 p-8 shadow-2xl'>
         <p className='text-xs uppercase tracking-[0.4em] text-lunary-rose-200'>
           Product Hunt · Coming Soon
         </p>
         <h1 className='text-4xl font-semibold'>
           Lunary — Personalized Astrology Powered by Real Astronomical Data
         </h1>
-        <p className='text-lg text-zinc-200'>
+        <p className='text-lg text-content-primary'>
           Astronomy-based astrology with optional Astral Guide chat for deeper
           guidance. We combine Astronomy Engine precision with tarot archetypes
           and mood intelligence so you can plan launches, rituals, and creative
@@ -88,20 +88,22 @@ export default function ProductHuntPage() {
       </section>
 
       <section className='grid gap-6 md:grid-cols-2'>
-        <div className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+        <div className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
           <h2 className='text-2xl font-semibold'>Maker Comment</h2>
-          <p className='text-sm text-zinc-300'>
+          <p className='text-sm text-content-secondary'>
             &ldquo;I built Lunary because astrology apps felt either too fluffy
             or too gatekept. We pair real astronomy with human language so
             modern mystics, founders, and ritual keepers can make confident
             decisions. Launching on Product Hunt lets us show that spirituality
             and data can co-exist beautifully.&rdquo;
           </p>
-          <p className='text-xs uppercase tracking-[0.3em] text-zinc-400'>
+          <p className='text-xs uppercase tracking-[0.3em] text-content-muted'>
             — [Founder Name], Builder of Lunary
           </p>
-          <div className='rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-zinc-200'>
-            <p className='font-semibold text-white'>Launch Schedule</p>
+          <div className='rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-content-primary'>
+            <p className='font-semibold text-content-primary'>
+              Launch Schedule
+            </p>
             <ul className='mt-2 space-y-1'>
               <li>9:00 AM PT · Product Hunt post goes live</li>
               <li>9:15 AM PT · TikTok live build session</li>
@@ -112,9 +114,9 @@ export default function ProductHuntPage() {
         <LaunchSignupForm source='product_hunt' />
       </section>
 
-      <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+      <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
         <div>
-          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
+          <p className='text-xs uppercase tracking-[0.4em] text-content-secondary'>
             Screenshots
           </p>
           <h2 className='text-3xl font-semibold'>Peek inside Lunary</h2>
@@ -123,9 +125,9 @@ export default function ProductHuntPage() {
           {screenshots.map((shot) => (
             <div
               key={shot.src}
-              className='rounded-2xl border border-white/10 bg-white/5 p-3 text-center text-sm text-zinc-300'
+              className='rounded-2xl border border-white/10 bg-white/5 p-3 text-center text-sm text-content-secondary'
             >
-              <div className='relative mb-3 h-48 w-full overflow-hidden rounded-xl bg-black/40'>
+              <div className='relative mb-3 h-48 w-full overflow-hidden rounded-xl bg-surface-base/40'>
                 <Image
                   src={shot.src}
                   alt={shot.alt}
@@ -140,9 +142,9 @@ export default function ProductHuntPage() {
         </div>
       </section>
 
-      <section className='space-y-3 rounded-3xl border border-white/10 bg-black/40 p-6'>
+      <section className='space-y-3 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
         <h2 className='text-2xl font-semibold'>Spread the word</h2>
-        <p className='text-sm text-zinc-300'>
+        <p className='text-sm text-content-secondary'>
           Tweets, LinkedIn posts, TikToks, and Product Hunt comments help us
           reach the Top 5 goal.
         </p>

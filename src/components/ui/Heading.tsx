@@ -3,15 +3,15 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 
-const headingVariants = cva('text-zinc-100', {
+const headingVariants = cva('text-content-primary', {
   variants: {
     variant: {
-      // text-xl md:text-2xl font-light lg:text-4xl text-lunary-primary-100 break-words
-      h1: 'text-xl md:text-2xl font-light tracking-tight lg:text-4xl text-lunary-primary-100 break-words',
+      // text-xl md:text-2xl font-light lg:text-4xl text-content-secondary break-words
+      h1: 'text-xl md:text-2xl font-light tracking-tight lg:text-4xl text-content-secondary break-words',
       // h1: 'text-2xl md:text-4xl lg:text-5xl font-light tracking-tight',
-      h2: 'text-lg md:text-xl font-light tracking-tight text-zinc-300 mb-3',
-      h3: 'text-sm md:text-md font-normal text-lunary-primary-300 mb-2',
-      h4: 'text-sm font-medium text-zinc-400 mb-3',
+      h2: 'text-lg md:text-xl font-light tracking-tight text-content-secondary mb-3',
+      h3: 'text-sm md:text-md font-normal text-content-brand mb-2',
+      h4: 'text-sm font-medium text-content-muted mb-3',
     },
   },
   defaultVariants: {

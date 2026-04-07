@@ -138,7 +138,7 @@ export default function BookOfShadowsPage() {
             Your Personal Grimoire
           </span>
         </Heading>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           A Book of Shadows is your personal record of magical practice—a place
           to document spells, rituals, dreams, reflections, and discoveries. It
           grows with you, becoming both a reference guide and a mirror of your
@@ -146,11 +146,11 @@ export default function BookOfShadowsPage() {
         </p>
       </header>
 
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a href='#what-is-bos' className='hover:text-lunary-primary-400'>
               1. What Is a Book of Shadows?
@@ -200,30 +200,30 @@ export default function BookOfShadowsPage() {
 
       {/* Section 1 */}
       <section id='what-is-bos' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           1. What Is a Book of Shadows?
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           A Book of Shadows (often abbreviated BOS) is a personal journal for
           your magical and spiritual practice. The term originated in Wicca, but
           the concept of keeping a magical diary exists across many traditions
           and practices.
         </p>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Think of it as a combination of:
         </p>
 
-        <ul className='space-y-2 text-zinc-300 mb-6'>
+        <ul className='space-y-2 text-content-secondary mb-6'>
           <li>• A spell book—recording what you&apos;ve cast and created</li>
           <li>• A reference guide—correspondences, symbols, and techniques</li>
           <li>• A journal—reflections, dreams, and insights</li>
           <li>• A lab notebook—what worked, what didn&apos;t, and why</li>
         </ul>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <p className='text-zinc-400 text-sm'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <p className='text-content-muted text-sm'>
             Your Book of Shadows is uniquely yours. There is no
             &quot;correct&quot; format—it reflects your practice, your voice,
             and your journey.
@@ -233,44 +233,48 @@ export default function BookOfShadowsPage() {
 
       {/* Section 2 */}
       <section id='why-keep-one' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           2. Why Keep One?
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Recording your practice accelerates learning and deepens your
           connection to the work. Here&apos;s why it matters:
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Track What Works</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Track What Works
+            </h3>
+            <p className='text-content-muted text-sm'>
               When you record spells and rituals with outcomes, you learn what
               techniques are most effective for you personally.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Notice Patterns</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Notice Patterns
+            </h3>
+            <p className='text-content-muted text-sm'>
               Over time, you&apos;ll see recurring themes—in your dreams, your
               readings, your life. Patterns reveal deeper truths.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Build Your Reference
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Collect correspondences, symbols, and techniques that resonate
               with you. Your BOS becomes your personal magical encyclopedia.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Witness Your Growth
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Looking back at old entries shows how far you&apos;ve come.
               It&apos;s evidence of your evolution as a practitioner.
             </p>
@@ -280,20 +284,20 @@ export default function BookOfShadowsPage() {
 
       {/* Section 3 */}
       <section id='what-to-include' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           3. What to Include
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Include whatever is meaningful to your practice. Common entries
           include:
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Spells & Rituals
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>• Date, moon phase, and astrological context</li>
             <li>• The spell or ritual performed</li>
             <li>• Ingredients and tools used</li>
@@ -302,11 +306,11 @@ export default function BookOfShadowsPage() {
           </ul>
         </div>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Divination Readings
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>• Tarot spreads with card positions and your interpretation</li>
             <li>• Questions asked and answers received</li>
             <li>• Rune castings, pendulum answers, or other divination</li>
@@ -314,22 +318,22 @@ export default function BookOfShadowsPage() {
           </ul>
         </div>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Dreams & Symbols
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>• Dream journals (write immediately upon waking)</li>
             <li>• Recurring symbols and their meanings for you</li>
             <li>• Synchronicities and omens noticed</li>
           </ul>
         </div>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Correspondences & Reference
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>• Herbs, crystals, and their properties</li>
             <li>• Color and candle correspondences</li>
             <li>• Moon phase and planetary day associations</li>
@@ -340,41 +344,47 @@ export default function BookOfShadowsPage() {
 
       {/* Section 4 */}
       <section id='organization' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           4. How to Organize
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           There&apos;s no single correct way. Choose what makes retrieval easy:
         </p>
 
         <div className='space-y-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Chronological</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Chronological
+            </h3>
+            <p className='text-content-muted text-sm'>
               Simply write entries in date order. Easy to maintain; shows your
               journey over time. Add an index if it grows large.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>By Category</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              By Category
+            </h3>
+            <p className='text-content-muted text-sm'>
               Separate sections for spells, divination, correspondences, dreams,
               etc. Good for reference; requires a bit more planning.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>By Intention</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              By Intention
+            </h3>
+            <p className='text-content-muted text-sm'>
               Group by purpose—protection, love, abundance, healing. Useful for
               quickly finding relevant material for specific needs.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Hybrid / Flexible
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Use whatever system makes sense in the moment. Digital BOS tools
               with search functions make this approach practical.
             </p>
@@ -384,14 +394,16 @@ export default function BookOfShadowsPage() {
 
       {/* Section 5 */}
       <section id='digital-vs-physical' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           5. Digital vs. Physical
         </h2>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-3'>Physical Journal</h3>
-            <ul className='space-y-2 text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-3'>
+              Physical Journal
+            </h3>
+            <ul className='space-y-2 text-content-muted text-sm'>
               <li>✦ Tactile, ritualistic feel</li>
               <li>✦ No technology required</li>
               <li>✦ Can include pressed flowers, drawings</li>
@@ -399,9 +411,11 @@ export default function BookOfShadowsPage() {
               <li>✦ Can be lost or damaged</li>
             </ul>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-3'>Digital BOS</h3>
-            <ul className='space-y-2 text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-3'>
+              Digital BOS
+            </h3>
+            <ul className='space-y-2 text-content-muted text-sm'>
               <li>✦ Searchable and organized</li>
               <li>✦ Always backed up</li>
               <li>✦ Accessible from anywhere</li>
@@ -411,7 +425,7 @@ export default function BookOfShadowsPage() {
           </div>
         </div>
 
-        <p className='text-zinc-400 text-sm mt-4'>
+        <p className='text-content-muted text-sm mt-4'>
           Many practitioners use both: a physical journal for special rituals
           and a digital one for everyday reference and quick notes.
         </p>
@@ -419,15 +433,15 @@ export default function BookOfShadowsPage() {
 
       {/* Section 6 */}
       <section id='getting-started' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           6. Getting Started
         </h2>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-brand mb-3'>
             Your First Entry
           </h3>
-          <ol className='space-y-2 text-zinc-300 text-sm'>
+          <ol className='space-y-2 text-content-secondary text-sm'>
             <li>1. Write today&apos;s date and current moon phase</li>
             <li>
               2. State your intention: &quot;I am beginning this Book of Shadows
@@ -439,7 +453,7 @@ export default function BookOfShadowsPage() {
           </ol>
         </div>
 
-        <p className='text-zinc-400 text-sm mt-4'>
+        <p className='text-content-muted text-sm mt-4'>
           Don&apos;t overthink it. The best Book of Shadows is one you actually
           use. Start imperfectly and let it evolve.
         </p>
@@ -447,7 +461,7 @@ export default function BookOfShadowsPage() {
 
       {/* FAQ */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           7. Frequently Asked Questions
         </h2>
 
@@ -455,23 +469,25 @@ export default function BookOfShadowsPage() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 {faq.question}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-content-secondary leading-relaxed'>
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-violet-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+      <section className='bg-gradient-to-r from-layer-base/30 to-violet-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
           Start Your Digital Book of Shadows
         </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+        <p className='text-content-muted mb-6 max-w-xl mx-auto'>
           Lunary&apos;s Book of Shadows is always with you—searchable, backed
           up, and integrated with moon phases and astrological data.
         </p>

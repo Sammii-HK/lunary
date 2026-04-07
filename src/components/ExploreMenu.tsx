@@ -97,7 +97,9 @@ export const ExploreMenu = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs transition w-full md:flex-1 ${
-          isActive ? 'text-zinc-200' : 'text-zinc-400 hover:text-zinc-200'
+          isActive
+            ? 'text-content-primary'
+            : 'text-content-muted hover:text-content-primary'
         }`}
         aria-label='Explore menu'
         aria-expanded={isOpen}
@@ -105,7 +107,7 @@ export const ExploreMenu = () => {
         <div className='relative'>
           <Globe className='h-5 w-5' />
           {isOpen && (
-            <ChevronDown className='absolute -bottom-1 -right-1 h-3 w-3 text-zinc-400' />
+            <ChevronDown className='absolute -bottom-1 -right-1 h-3 w-3 text-content-muted' />
           )}
         </div>
         <span className='hidden text-[10px] uppercase tracking-wide md:block md:text-center md:leading-tight md:w-full md:break-words'>
@@ -114,7 +116,7 @@ export const ExploreMenu = () => {
       </button>
 
       {isOpen && (
-        <div className='absolute bottom-full mb-2 z-50 rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl left-2 right-2 w-auto sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-56'>
+        <div className='absolute bottom-full mb-2 z-50 rounded-lg border border-stroke-subtle bg-surface-base shadow-xl left-2 right-2 w-auto sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-56'>
           <div className='p-2 space-y-1'>
             {visibleItems.map((item) => {
               const ItemIcon = item.icon;
@@ -132,8 +134,8 @@ export const ExploreMenu = () => {
                   }}
                   className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition ${
                     itemActive
-                      ? 'bg-zinc-800 text-zinc-100'
-                      : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'
+                      ? 'bg-surface-card text-content-primary'
+                      : 'text-content-muted hover:bg-surface-elevated hover:text-content-primary'
                   }`}
                 >
                   <ItemIcon className='h-4 w-4 flex-shrink-0' />

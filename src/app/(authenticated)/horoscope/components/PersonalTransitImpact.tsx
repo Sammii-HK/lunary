@@ -16,14 +16,14 @@ export function PersonalTransitImpactCard({
 
   return (
     <div
-      className={`rounded-lg border-l-2 border-opacity-50 ${impactBorderColor} bg-lunary-bg p-4`}
+      className={`rounded-lg border-l-2 border-opacity-50 ${impactBorderColor} bg-surface-elevated p-4`}
     >
       <div className='flex justify-between items-start mb-2'>
         <div>
-          <h4 className='font-medium text-zinc-100 text-sm mb-1'>
+          <h4 className='font-medium text-content-primary text-sm mb-1'>
             {impact.planet} {impact.event}
           </h4>
-          <p className='text-xs text-zinc-400'>
+          <p className='text-xs text-content-muted'>
             {impact.date.format('MMM DD')} • {impact.type.replace('_', ' ')}
             {impact.house &&
               ` • ${impact.house}${getOrdinalSuffix(impact.house)} house`}
@@ -32,35 +32,39 @@ export function PersonalTransitImpactCard({
         <span
           className={`px-2 py-1 rounded text-xs font-medium ${
             impact.significance === 'high'
-              ? 'bg-lunary-error-950 text-lunary-error-400 border border-lunary-error-800'
+              ? 'bg-surface-card text-content-error border border-stroke-default'
               : impact.significance === 'medium'
-                ? 'bg-lunary-secondary-950 text-lunary-secondary-300 border border-lunary-secondary-800'
-                : 'bg-zinc-900 text-zinc-400 border border-zinc-700'
+                ? 'bg-surface-card text-content-brand-secondary border border-stroke-default'
+                : 'bg-surface-elevated text-content-muted border border-stroke-default'
           }`}
         >
           {impact.significance}
         </span>
       </div>
-      <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
+      <p className='text-sm text-content-secondary leading-relaxed mb-2'>
         {impact.description}
       </p>
-      <div className='mt-2 pt-2 border-t border-zinc-700/50 space-y-2'>
-        <p className='text-xs text-zinc-400 leading-relaxed'>
-          <span className='font-medium text-zinc-300'>Personal Impact:</span>{' '}
+      <div className='mt-2 pt-2 border-t border-stroke-default/50 space-y-2'>
+        <p className='text-xs text-content-muted leading-relaxed'>
+          <span className='font-medium text-content-secondary'>
+            Personal Impact:
+          </span>{' '}
           {impact.personalImpact}
         </p>
         {impact.actionableGuidance && (
-          <div className='bg-zinc-800/50 border border-zinc-700/50 rounded p-2'>
-            <p className='text-xs text-zinc-300 leading-relaxed'>
-              <span className='font-medium text-zinc-200'>What to do:</span>{' '}
+          <div className='bg-surface-card/50 border border-stroke-default/50 rounded p-2'>
+            <p className='text-xs text-content-secondary leading-relaxed'>
+              <span className='font-medium text-content-primary'>
+                What to do:
+              </span>{' '}
               {impact.actionableGuidance}
             </p>
           </div>
         )}
         {impact.aspectToNatal && (
-          <p className='text-xs text-zinc-400'>
-            <span className='font-medium text-zinc-300'>Aspect:</span> Transit
-            at{' '}
+          <p className='text-xs text-content-muted'>
+            <span className='font-medium text-content-secondary'>Aspect:</span>{' '}
+            Transit at{' '}
             {impact.aspectToNatal.transitDegree ||
               impact.aspectToNatal.transitSign}{' '}
             {impact.aspectToNatal.aspectType} your natal{' '}

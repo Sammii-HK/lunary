@@ -40,16 +40,16 @@ const breadcrumbItems = [
 
 export default function SynastryGeneratorPage() {
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <GrimoireBreadcrumbs items={breadcrumbItems} />
 
         <header className='mb-8 text-center'>
           <Heart className='w-12 h-12 text-lunary-rose mx-auto mb-4' />
-          <h1 className='text-3xl md:text-4xl font-light text-zinc-100 mb-2'>
+          <h1 className='text-3xl md:text-4xl font-light text-content-primary mb-2'>
             Synastry Chart Generator
           </h1>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Compare two birth charts to discover relationship compatibility
           </p>
         </header>
@@ -59,7 +59,7 @@ export default function SynastryGeneratorPage() {
         <div className='mt-12 text-center'>
           <Link
             href='/grimoire/synastry'
-            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-sm text-lunary-primary-400 hover:text-content-brand'
           >
             Learn more about synastry and relationship astrology →
           </Link>

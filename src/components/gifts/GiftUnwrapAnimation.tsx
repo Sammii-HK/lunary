@@ -59,7 +59,7 @@ export function GiftUnwrapAnimation({ onComplete }: GiftUnwrapAnimationProps) {
       >
         <Sparkles
           className={cn(
-            'w-10 h-10 text-white transition-all duration-500',
+            'w-10 h-10 text-content-primary transition-all duration-500',
             phase === 'glow' && 'animate-spin',
           )}
         />

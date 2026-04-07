@@ -90,7 +90,7 @@ export const CrystalWidget = () => {
           <div className='text-center'>
             <h3 className='font-bold mb-2'>Personal Crystal</h3>
             <span className='text-xs text-lunary-accent'>Personalised</span>
-            <p className='text-zinc-400 text-xs mt-2'>
+            <p className='text-content-muted text-xs mt-2'>
               Access to historical and future dates requires a subscription.
             </p>
           </div>
@@ -105,7 +105,7 @@ export const CrystalWidget = () => {
       return (
         <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
           <div className='flex-1 flex items-center justify-center'>
-            <div className='h-4 w-32 bg-zinc-800 rounded animate-pulse' />
+            <div className='h-4 w-32 bg-surface-card rounded animate-pulse' />
           </div>
         </div>
       );
@@ -116,22 +116,22 @@ export const CrystalWidget = () => {
         <div className='space-y-2'>
           <div className='flex items-center justify-between mb-1'>
             <h3 className='font-bold text-sm'>Personal Crystal</h3>
-            <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+            <span className='flex items-center gap-1 text-[10px] text-content-brand uppercase tracking-wide'>
               Personal <Lock className='w-3 h-3' />
             </span>
           </div>
 
           <div className='space-y-2'>
             <div className='text-center'>
-              <h4 className='font-semibold text-lunary-accent-300'>
+              <h4 className='font-semibold text-content-brand-accent'>
                 {generalCrystal.name}
               </h4>
-              <p className='text-xs text-zinc-400'>
+              <p className='text-xs text-content-muted'>
                 {generalCrystal.properties.slice(0, 3).join(' • ')}
               </p>
             </div>
 
-            <p className='text-xs text-zinc-300 mb-2'>
+            <p className='text-xs text-content-secondary mb-2'>
               {generalCrystal.reason}
             </p>
 
@@ -146,8 +146,8 @@ export const CrystalWidget = () => {
             )}
           </div>
 
-          <div className='bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded p-2 border border-lunary-primary-800'>
-            <p className='text-xs text-zinc-400 mb-2'>
+          <div className='bg-gradient-to-r from-layer-base/20 to-lunary-highlight-900/20 rounded p-2 border border-lunary-primary-800'>
+            <p className='text-xs text-content-muted mb-2'>
               Get crystals chosen specifically for YOUR birth chart with
               personalized guidance.
             </p>
@@ -165,7 +165,7 @@ export const CrystalWidget = () => {
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
           <span className='text-xs text-lunary-accent'>Personalised</span>
           <div className='text-4xl mb-2'>💎</div>
-          <p className='text-zinc-400 text-xs mb-2'>
+          <p className='text-content-muted text-xs mb-2'>
             Add your birthday for personalized crystal guidance
           </p>
           <Link
@@ -186,7 +186,7 @@ export const CrystalWidget = () => {
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
           <span className='text-xs text-lunary-accent'>Personalised</span>
           <div className='text-4xl mb-2'>🔮</div>
-          <p className='text-zinc-400 text-xs'>
+          <p className='text-content-muted text-xs'>
             Calculating your crystal alignment...
           </p>
         </div>
@@ -201,7 +201,7 @@ export const CrystalWidget = () => {
           <h3 className='font-bold mb-2'>Personal Crystal</h3>
           <span className='text-xs text-lunary-accent'>Personalised</span>
           <div className='text-4xl mb-2'>🔮</div>
-          <p className='text-zinc-400 text-xs'>
+          <p className='text-content-muted text-xs'>
             Calculating your crystal alignment...
           </p>
         </div>
@@ -217,25 +217,25 @@ export const CrystalWidget = () => {
       {/* Info Icon with Popover */}
       <button
         onClick={() => setShowInfo(!showInfo)}
-        className='absolute top-2 right-2 p-1 text-zinc-400 hover:text-zinc-300 transition-colors'
+        className='absolute top-2 right-2 p-1 text-content-muted hover:text-content-secondary transition-colors'
       >
         <Info size={14} />
       </button>
       {showInfo && (
-        <div className='absolute top-8 right-2 bg-zinc-800 border border-zinc-700 rounded-lg p-4 max-w-sm text-xs text-zinc-300 shadow-lg z-50'>
+        <div className='absolute top-8 right-2 bg-surface-card border border-stroke-default rounded-lg p-4 max-w-sm text-xs text-content-secondary shadow-lg z-50'>
           <button
             onClick={() => setShowInfo(false)}
-            className='absolute top-2 right-2 text-zinc-400 hover:text-zinc-300'
+            className='absolute top-2 right-2 text-content-muted hover:text-content-secondary'
           >
             <X size={12} />
           </button>
           <div className='space-y-3'>
             <div>
-              <h4 className='font-semibold text-white mb-2'>
+              <h4 className='font-semibold text-content-primary mb-2'>
                 Crystal Selection Process
               </h4>
               <p className='mb-2'>Your daily crystal is calculated using:</p>
-              <ul className='list-disc list-inside space-y-1 text-zinc-400'>
+              <ul className='list-disc list-inside space-y-1 text-content-muted'>
                 <li>Your birth chart placements (Sun, Moon, planets)</li>
                 <li>Current planetary positions and transits</li>
                 <li>Selected date&apos;s numerological vibration</li>
@@ -244,7 +244,7 @@ export const CrystalWidget = () => {
               </ul>
             </div>
             <div>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Each crystal&apos;s properties are matched against these cosmic
                 factors to find your most beneficial stone for the selected
                 date.
@@ -261,21 +261,21 @@ export const CrystalWidget = () => {
         </div>
 
         <div className='text-center mb-3'>
-          <div className='text-base font-semibold text-white'>
+          <div className='text-base font-semibold text-content-primary'>
             {recommendedCrystal.name}
           </div>
-          <div className='text-xs text-zinc-400 mb-2'>
+          <div className='text-xs text-content-muted mb-2'>
             {recommendedCrystal.chakra} Chakra
           </div>
         </div>
 
-        <div className='text-center text-sm text-zinc-300 leading-relaxed mb-3'>
+        <div className='text-center text-sm text-content-secondary leading-relaxed mb-3'>
           <p className='mb-2'>{recommendedCrystal.description}</p>
-          <p className='text-xs text-zinc-400'>{guidance}</p>
+          <p className='text-xs text-content-muted'>{guidance}</p>
         </div>
 
         <div className='text-center mb-3'>
-          <div className='text-xs text-zinc-400 italic'>
+          <div className='text-xs text-content-muted italic'>
             &quot;{recommendedCrystal.intention}&quot;
           </div>
         </div>

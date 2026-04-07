@@ -108,11 +108,11 @@ export function AppleAccountLink() {
 
   return (
     <div className='space-y-3'>
-      <div className='flex items-center justify-between p-4 rounded-lg bg-zinc-800/50'>
+      <div className='flex items-center justify-between p-4 rounded-lg bg-surface-card/50'>
         <div className='flex items-center gap-3'>
           <div className='flex h-9 w-9 items-center justify-center rounded-full bg-white/10'>
             <svg
-              className='w-5 h-5 text-white'
+              className='w-5 h-5 text-content-primary'
               viewBox='0 0 24 24'
               fill='currentColor'
             >
@@ -120,10 +120,10 @@ export function AppleAccountLink() {
             </svg>
           </div>
           <div>
-            <h4 className='text-sm font-medium text-zinc-200'>
+            <h4 className='text-sm font-medium text-content-primary'>
               {isLinked ? 'Apple ID Linked' : 'Link Apple ID'}
             </h4>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               {isLinked
                 ? 'You can sign in with Apple on any device'
                 : 'Sign in with Apple on iOS, even with a different email'}
@@ -137,7 +137,7 @@ export function AppleAccountLink() {
           <button
             onClick={handleLinkApple}
             disabled={status === 'linking'}
-            className='flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-white/10 hover:bg-white/15 border border-zinc-600 rounded-lg transition-colors disabled:opacity-50'
+            className='flex items-center gap-2 px-4 py-2 text-sm font-medium text-content-primary bg-white/10 hover:bg-white/15 border border-stroke-strong rounded-lg transition-colors disabled:opacity-50'
           >
             {status === 'linking' ? (
               <Loader2 className='w-4 h-4 animate-spin' />

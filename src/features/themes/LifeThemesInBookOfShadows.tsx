@@ -72,21 +72,21 @@ export function LifeThemesInBookOfShadows({
 
   return (
     <div
-      className={`rounded-xl border border-lunary-primary-700/30 bg-gradient-to-r from-lunary-primary-950/30 to-zinc-900/50 p-4 ${className}`}
+      className={`rounded-xl border border-lunary-primary-700/30 bg-gradient-to-r from-layer-deep/30 to-surface-elevated/50 p-4 ${className}`}
     >
       <div className='flex items-start gap-3'>
-        <div className='shrink-0 w-8 h-8 rounded-full bg-lunary-primary-900/40 border border-lunary-primary-700/50 flex items-center justify-center'>
+        <div className='shrink-0 w-8 h-8 rounded-full bg-layer-base/40 border border-lunary-primary-700/50 flex items-center justify-center'>
           <Sparkles className='w-4 h-4 text-lunary-primary-400' />
         </div>
 
         <div className='flex-1 min-w-0'>
-          <p className='text-xs text-lunary-primary-300/80 mb-1'>
+          <p className='text-xs text-content-brand/80 mb-1'>
             You are currently moving through...
           </p>
-          <h3 className='text-sm font-medium text-zinc-100 mb-1'>
+          <h3 className='text-sm font-medium text-content-primary mb-1'>
             {primaryTheme.name}
           </h3>
-          <p className='text-xs text-zinc-400 line-clamp-2'>
+          <p className='text-xs text-content-muted line-clamp-2'>
             {isSubscribed
               ? primaryTheme.longSummary.slice(0, 150) + '...'
               : primaryTheme.shortSummary}
@@ -95,7 +95,7 @@ export function LifeThemesInBookOfShadows({
           {isSubscribed && (
             <Link
               href='/profile#life-themes'
-              className='inline-flex items-center gap-1 mt-2 text-xs text-lunary-primary-400 hover:text-lunary-primary-300'
+              className='inline-flex items-center gap-1 mt-2 text-xs text-lunary-primary-400 hover:text-content-brand'
             >
               View all themes
               <ChevronRight className='w-3 h-3' />

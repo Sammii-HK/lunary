@@ -19,10 +19,10 @@ const Divination = () => {
   return (
     <div className='space-y-8'>
       <div className='mb-6'>
-        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+        <h2 className='text-2xl md:text-3xl font-light text-content-primary mb-2'>
           Complete Divination Guide
         </h2>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           Explore various divination methods beyond tarot: pendulum, scrying,
           dream interpretation, and reading omens. Each method offers unique
           insights.
@@ -34,26 +34,26 @@ const Divination = () => {
         <div>
           <Link
             href='/grimoire/divination/pendulum'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
+            className='block text-xl font-medium text-content-primary mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Pendulum Divination
           </Link>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Pendulums are simple yet powerful divination tools. They answer
             yes/no questions and can help locate objects or energy.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               How Pendulums Work
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+            <p className='text-sm text-content-secondary leading-relaxed mb-3'>
               Pendulums amplify subtle energy movements from your subconscious
               or spiritual guidance. The movement reflects answers through
               direction and pattern.
             </p>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Yes:</strong> Usually clockwise circle or forward/back
                 swing
@@ -67,11 +67,11 @@ const Divination = () => {
               </p>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Calibrating Your Pendulum
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>1. Hold the pendulum steady, allowing it to hang freely</p>
               <p>2. Ask "Show me yes" and observe the movement</p>
               <p>3. Ask "Show me no" and observe the movement</p>
@@ -83,11 +83,11 @@ const Divination = () => {
               </p>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Asking Questions
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Good questions:</strong>
               </p>
@@ -107,11 +107,11 @@ const Divination = () => {
               </ul>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Pendulum Care
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>• Cleanse your pendulum regularly (moonlight, sage, salt)</p>
               <p>• Store in a protective pouch or box</p>
               <p>• Don't let others handle your pendulum</p>
@@ -126,21 +126,21 @@ const Divination = () => {
         <div>
           <Link
             href='/grimoire/divination/scrying'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
+            className='block text-xl font-medium text-content-primary mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Scrying
           </Link>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Scrying is the art of seeing visions in reflective surfaces. Common
             tools include crystal balls, black mirrors, water, and fire.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Scrying Methods
             </h3>
-            <div className='space-y-3 text-sm text-zinc-300'>
+            <div className='space-y-3 text-sm text-content-secondary'>
               <div>
                 <strong>Crystal Ball:</strong> Most traditional method. Use
                 clear quartz or obsidian. Requires practice to see images.
@@ -159,11 +159,11 @@ const Divination = () => {
               </div>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               How to Scry
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>1. Create a quiet, dimly lit space</p>
               <p>2. Cleanse your scrying tool</p>
               <p>3. Set your intention or ask a question</p>
@@ -173,11 +173,11 @@ const Divination = () => {
               <p>7. Journal what you see immediately after</p>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Interpreting Visions
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 Scrying visions can be literal, symbolic, or emotional. Trust
                 your intuition and consider:
@@ -199,21 +199,21 @@ const Divination = () => {
         <div>
           <Link
             href='/grimoire/divination/dream-interpretation'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
+            className='block text-xl font-medium text-content-primary mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Dream Interpretation
           </Link>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Dreams are messages from your subconscious and the spiritual realm.
             Learning to interpret dreams opens a powerful channel of guidance.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Keeping a Dream Journal
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Why journal:</strong>
               </p>
@@ -235,11 +235,11 @@ const Divination = () => {
               </ul>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Common Dream Symbols
             </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-300'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-content-secondary'>
               <div>
                 <strong>Water:</strong> Emotions, subconscious, cleansing
               </div>
@@ -267,16 +267,16 @@ const Divination = () => {
                 <strong>Chase:</strong> Running from problems or fears
               </div>
             </div>
-            <p className='text-xs text-zinc-400 mt-3'>
+            <p className='text-xs text-content-muted mt-3'>
               Remember: Symbol meanings are personal. What matters is your
               association with the symbol.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Types of Dreams
             </h3>
-            <div className='space-y-3 text-sm text-zinc-300'>
+            <div className='space-y-3 text-sm text-content-secondary'>
               <div>
                 <strong>Prophetic Dreams:</strong> Show future events or
                 possibilities. Often feel vivid and memorable.
@@ -307,21 +307,21 @@ const Divination = () => {
         <div>
           <Link
             href='/grimoire/divination/omen-reading'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
+            className='block text-xl font-medium text-content-primary mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Reading Omens
           </Link>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Omens are signs from nature and the universe. Learning to recognize
             and interpret omens connects you with cosmic guidance.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Animal Omens
             </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-zinc-300'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-content-secondary'>
               <div>
                 <strong>Crows/Ravens:</strong> Messages, transformation, magic
               </div>
@@ -348,11 +348,11 @@ const Divination = () => {
               </div>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Natural Omens
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Feathers:</strong> Messages from spirit, protection
               </p>
@@ -373,11 +373,11 @@ const Divination = () => {
               </p>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               How to Read Omens
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>1. Pay attention to what catches your eye</p>
               <p>2. Notice patterns and repetition</p>
               <p>3. Consider timing (what were you thinking about?)</p>

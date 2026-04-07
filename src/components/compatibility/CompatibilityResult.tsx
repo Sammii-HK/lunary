@@ -27,7 +27,7 @@ export function CompatibilityResult({
         ? 'text-lunary-primary-400'
         : score >= 40
           ? 'text-amber-400'
-          : 'text-zinc-400';
+          : 'text-content-muted';
 
   const scoreLabel =
     score >= 80
@@ -51,7 +51,7 @@ export function CompatibilityResult({
               fill='none'
               stroke='currentColor'
               strokeWidth='6'
-              className='text-zinc-800'
+              className='text-content-muted'
             />
             <circle
               cx='50'
@@ -67,41 +67,45 @@ export function CompatibilityResult({
           </svg>
           <div className='absolute inset-0 flex flex-col items-center justify-center'>
             <span className={`text-3xl font-bold ${scoreColor}`}>{score}</span>
-            <span className='text-[10px] text-zinc-400 uppercase tracking-wide'>
+            <span className='text-[10px] text-content-muted uppercase tracking-wide'>
               score
             </span>
           </div>
         </div>
 
-        <h2 className='text-lg font-semibold text-white'>{scoreLabel}</h2>
-        <p className='text-sm text-zinc-400'>with {inviterName}</p>
+        <h2 className='text-lg font-semibold text-content-primary'>
+          {scoreLabel}
+        </h2>
+        <p className='text-sm text-content-muted'>with {inviterName}</p>
       </div>
 
       {/* Summary */}
       {summary && (
-        <div className='p-4 rounded-lg bg-zinc-900/50 border border-zinc-800'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>{summary}</p>
+        <div className='p-4 rounded-lg bg-surface-elevated/50 border border-stroke-subtle'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
+            {summary}
+          </p>
         </div>
       )}
 
       {/* Top aspects */}
       {aspects.length > 0 && (
         <div>
-          <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+          <h3 className='text-xs font-medium text-content-muted uppercase tracking-wide mb-3'>
             Key Aspects
           </h3>
           <div className='space-y-2'>
             {aspects.slice(0, 5).map((aspect, i) => (
               <div
                 key={i}
-                className='flex items-center gap-3 p-3 rounded-lg bg-zinc-900/30 border border-zinc-800/50'
+                className='flex items-center gap-3 p-3 rounded-lg bg-surface-elevated/30 border border-stroke-subtle/50'
               >
                 <div
                   className={`w-2 h-2 rounded-full ${
                     aspect.isHarmonious ? 'bg-lunary-success' : 'bg-amber-400'
                   }`}
                 />
-                <span className='text-sm text-zinc-300'>
+                <span className='text-sm text-content-secondary'>
                   {aspect.planet1} {aspect.aspectType} {aspect.planet2}
                 </span>
                 <span
@@ -122,19 +126,19 @@ export function CompatibilityResult({
       {/* Element balance */}
       {elementBalance && Object.keys(elementBalance).length > 0 && (
         <div>
-          <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+          <h3 className='text-xs font-medium text-content-muted uppercase tracking-wide mb-3'>
             Element Balance
           </h3>
           <div className='grid grid-cols-2 gap-2'>
             {Object.entries(elementBalance).map(([element, value]) => (
               <div
                 key={element}
-                className='flex items-center gap-2 p-2 rounded-lg bg-zinc-900/30 border border-zinc-800/50'
+                className='flex items-center gap-2 p-2 rounded-lg bg-surface-elevated/30 border border-stroke-subtle/50'
               >
-                <span className='text-xs text-zinc-400 capitalize w-12'>
+                <span className='text-xs text-content-muted capitalize w-12'>
                   {element}
                 </span>
-                <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
+                <div className='flex-1 h-1.5 bg-surface-card rounded-full overflow-hidden'>
                   <div
                     className='h-full bg-lunary-primary-500 rounded-full transition-all'
                     style={{ width: `${Math.min(value * 10, 100)}%` }}

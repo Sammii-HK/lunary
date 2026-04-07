@@ -95,23 +95,23 @@ export const TarotWidget = () => {
         <div className='space-y-3 flex-1 min-w-0 overflow-y-auto overflow-x-hidden'>
           <div className='flex items-center justify-between'>
             <h3 className='text-sm font-bold'>Personal Tarot Card</h3>
-            <span className='inline-flex items-center gap-1 rounded border border-lunary-primary-700/50 bg-lunary-primary-900/80 px-2 py-0.5 text-[10px] text-lunary-primary-300'>
+            <span className='inline-flex items-center gap-1 rounded border border-lunary-primary-700/50 bg-layer-base/80 px-2 py-0.5 text-[10px] text-content-brand'>
               <Sparkles className='h-2.5 w-2.5' />
               Lunary+
             </span>
           </div>
 
           <div className='text-center'>
-            <h4 className='mb-2 font-semibold text-lunary-accent-300'>
+            <h4 className='mb-2 font-semibold text-content-brand-accent'>
               {currentTarotCard?.name ?? '—'}
             </h4>
-            <p className='mb-3 break-words text-xs text-zinc-400'>
+            <p className='mb-3 break-words text-xs text-content-muted'>
               {currentTarotCard?.keywords?.slice(0, 3).join(' • ')}
             </p>
           </div>
 
           <div className='locked-preview'>
-            <p className='locked-preview-text break-words text-sm leading-relaxed text-zinc-300'>
+            <p className='locked-preview-text break-words text-sm leading-relaxed text-content-secondary'>
               {currentTarotCard?.information}
             </p>
           </div>
@@ -132,21 +132,21 @@ export const TarotWidget = () => {
         </div>
 
         <div className='text-center'>
-          <h4 className='mb-3 font-semibold text-white'>
+          <h4 className='mb-3 font-semibold text-content-primary'>
             {currentTarotCard.name}
           </h4>
-          <p className='mb-3 break-words text-xs text-zinc-400'>
+          <p className='mb-3 break-words text-xs text-content-muted'>
             {currentTarotCard.keywords.join(' • ')}
           </p>
         </div>
 
-        <p className='break-words text-sm leading-relaxed text-zinc-300'>
+        <p className='break-words text-sm leading-relaxed text-content-secondary'>
           {currentTarotCard.information}
         </p>
 
         {transitConnection && (
-          <div className='mt-2 border-t border-zinc-800 pt-2'>
-            <p className='text-xs leading-relaxed text-lunary-accent-300'>
+          <div className='mt-2 border-t border-stroke-subtle pt-2'>
+            <p className='text-xs leading-relaxed text-content-brand-accent'>
               {transitConnection.compact}
             </p>
           </div>

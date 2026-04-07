@@ -80,18 +80,20 @@ export function PremiumPathway({
 
   return (
     <div
-      className={`rounded-lg border border-lunary-primary-800/30 bg-gradient-to-r from-lunary-primary-950/30 to-transparent p-4 ${className}`}
+      className={`rounded-lg border border-lunary-primary-800/30 bg-gradient-to-r from-layer-deep/30 to-transparent p-4 ${className}`}
     >
       <div className='flex items-start gap-3'>
-        <div className='p-2 rounded-lg bg-lunary-primary-900/30 flex-shrink-0'>
+        <div className='p-2 rounded-lg bg-layer-base/30 flex-shrink-0'>
           <Sparkles className='w-4 h-4 text-lunary-primary-400' />
         </div>
         <div className='flex-1 min-w-0'>
-          <p className='text-sm font-medium text-zinc-200 mb-1'>{copy.title}</p>
-          <p className='text-xs text-zinc-400 mb-3'>{copy.description}</p>
+          <p className='text-sm font-medium text-content-primary mb-1'>
+            {copy.title}
+          </p>
+          <p className='text-xs text-content-muted mb-3'>{copy.description}</p>
           <Link
             href='/pricing?nav=app'
-            className='inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white transition-colors'
+            className='inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-lunary-primary-600 hover:bg-layer-high text-white transition-colors'
           >
             {ctaLabel}
           </Link>

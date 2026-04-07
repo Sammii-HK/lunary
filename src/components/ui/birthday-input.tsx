@@ -212,8 +212,8 @@ export function BirthdayInput({
         autoComplete='bday'
         maxLength={10}
         className={cn(
-          'w-full px-4 py-3 bg-zinc-800 border rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent transition-colors',
-          error ? 'border-red-500' : 'border-zinc-700',
+          'w-full px-4 py-3 bg-surface-card border rounded-lg text-content-primary placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent transition-colors',
+          error ? 'border-red-500' : 'border-stroke-default',
           disabled && 'opacity-50 cursor-not-allowed',
           className,
         )}
@@ -222,7 +222,7 @@ export function BirthdayInput({
       {!error && warning && (
         <p className='mt-1 text-xs text-amber-300'>{warning}</p>
       )}
-      <p className='mt-1 text-xs text-zinc-400'>Format: {placeholder}</p>
+      <p className='mt-1 text-xs text-content-muted'>Format: {placeholder}</p>
     </div>
   );
 }

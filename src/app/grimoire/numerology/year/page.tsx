@@ -96,25 +96,25 @@ export default function PersonalYearIndexPage() {
           <div className='flex justify-center mb-4'>
             <Calendar className='w-16 h-16 text-lunary-primary-400' />
           </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-4'>
             Personal Year Numbers
           </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
+          <p className='text-lg text-content-muted max-w-2xl mx-auto'>
             Your Personal Year reveals the themes, opportunities, and lessons
             you&apos;ll encounter during a calendar year. It cycles from 1 to 9.
           </p>
         </div>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-10'>
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
             Calculating Your Personal Year
           </h2>
-          <p className='text-zinc-400 mb-4'>
+          <p className='text-content-muted mb-4'>
             Add your birth month + birth day + current year, then reduce to a
             single digit. For example: March 15 in 2025 = 3 + 1 + 5 + 2 + 0 + 2
             + 5 = 18 → 1 + 8 = 9 (Personal Year 9).
           </p>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Each year has a distinct energy that influences your experiences.
             Working with your Personal Year helps you align with natural cycles
             and make the most of each period.
@@ -126,7 +126,7 @@ export default function PersonalYearIndexPage() {
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             The 9-Year Cycle
           </h2>
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
@@ -134,48 +134,48 @@ export default function PersonalYearIndexPage() {
               <Link
                 key={year.number}
                 href={`/grimoire/numerology/year/${year.number}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
               >
                 <div className='flex items-center gap-3 mb-2'>
                   <span className='text-2xl font-light text-lunary-primary-400'>
                     {year.number}
                   </span>
-                  <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                  <h3 className='font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                     {year.theme}
                   </h3>
                 </div>
-                <p className='text-sm text-zinc-400'>{year.description}</p>
+                <p className='text-sm text-content-muted'>{year.description}</p>
               </Link>
             ))}
           </div>
         </section>
 
-        <div className='border-t border-zinc-800 pt-8'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+        <div className='border-t border-stroke-subtle pt-8'>
+          <h3 className='text-lg font-medium text-content-primary mb-4'>
             Related Resources
           </h3>
           <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/numerology'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Numerology Overview
             </Link>
             <Link
               href='/grimoire/life-path'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Life Path Numbers
             </Link>
             <Link
               href='/grimoire/numerology/core-numbers'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Core Numbers
             </Link>
             <Link
               href='/grimoire/numerology/master-numbers'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Master Numbers
             </Link>

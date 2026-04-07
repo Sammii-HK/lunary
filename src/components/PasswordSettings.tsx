@@ -74,7 +74,7 @@ export function PasswordSettings() {
   if (mode === 'view') {
     return (
       <div className='space-y-4'>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           Manage your password for signing in with email and password.
         </p>
 
@@ -85,7 +85,7 @@ export function PasswordSettings() {
           >
             Set a Password
           </button>
-          <p className='text-xs text-zinc-400 text-center'>
+          <p className='text-xs text-content-muted text-center'>
             If you signed in with magic link and want to use a password instead
           </p>
         </div>
@@ -93,11 +93,11 @@ export function PasswordSettings() {
         <div className='flex flex-col gap-2'>
           <button
             onClick={() => setMode('change')}
-            className='w-full bg-zinc-700 hover:bg-zinc-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm'
+            className='w-full bg-surface-overlay hover:bg-surface-overlay text-content-primary font-medium py-2 px-4 rounded-lg transition-colors text-sm'
           >
             Change Password
           </button>
-          <p className='text-xs text-zinc-400 text-center'>
+          <p className='text-xs text-content-muted text-center'>
             If you already have a password and want to change it
           </p>
         </div>
@@ -107,7 +107,7 @@ export function PasswordSettings() {
 
   return (
     <form onSubmit={handleSetPassword} className='space-y-4'>
-      <p className='text-sm text-zinc-400'>
+      <p className='text-sm text-content-muted'>
         {mode === 'set'
           ? 'Set a password to sign in without magic link.'
           : 'Enter your current password and choose a new one.'}
@@ -115,28 +115,28 @@ export function PasswordSettings() {
 
       {mode === 'change' && (
         <div>
-          <label className='block text-sm font-medium text-zinc-300 mb-1'>
+          <label className='block text-sm font-medium text-content-secondary mb-1'>
             Current Password
           </label>
           <input
             type='password'
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
-            className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+            className='w-full bg-surface-card border border-stroke-default text-content-primary rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lunary-primary'
             required
           />
         </div>
       )}
 
       <div>
-        <label className='block text-sm font-medium text-zinc-300 mb-1'>
+        <label className='block text-sm font-medium text-content-secondary mb-1'>
           {mode === 'set' ? 'Password' : 'New Password'}
         </label>
         <input
           type='password'
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+          className='w-full bg-surface-card border border-stroke-default text-content-primary rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lunary-primary'
           placeholder='At least 8 characters'
           minLength={8}
           required
@@ -144,14 +144,14 @@ export function PasswordSettings() {
       </div>
 
       <div>
-        <label className='block text-sm font-medium text-zinc-300 mb-1'>
+        <label className='block text-sm font-medium text-content-secondary mb-1'>
           Confirm Password
         </label>
         <input
           type='password'
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+          className='w-full bg-surface-card border border-stroke-default text-content-primary rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lunary-primary'
           placeholder='Type password again'
           minLength={8}
           required
@@ -165,7 +165,7 @@ export function PasswordSettings() {
       )}
 
       {success && (
-        <div className='bg-lunary-success-900/30 border border-lunary-success-700 text-lunary-success-300 px-3 py-2 rounded-lg text-sm'>
+        <div className='bg-layer-base/30 border border-lunary-success-700 text-lunary-success-300 px-3 py-2 rounded-lg text-sm'>
           {success}
         </div>
       )}
@@ -181,7 +181,7 @@ export function PasswordSettings() {
             setNewPassword('');
             setConfirmPassword('');
           }}
-          className='flex-1 bg-zinc-700 hover:bg-zinc-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm'
+          className='flex-1 bg-surface-overlay hover:bg-surface-overlay text-content-primary font-medium py-2 px-4 rounded-lg transition-colors text-sm'
         >
           Cancel
         </button>

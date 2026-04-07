@@ -95,17 +95,17 @@ export function WeeklyUsageCounter() {
 
   if (weeklyCount === null) {
     return (
-      <div className='flex items-center gap-2 px-4 py-2 rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 backdrop-blur-sm min-h-[40px]'>
-        <div className='w-4 h-4 bg-lunary-primary-800 rounded animate-pulse' />
-        <div className='h-4 w-48 bg-lunary-primary-800 rounded animate-pulse' />
+      <div className='flex items-center gap-2 px-4 py-2 rounded-lg border border-lunary-primary-700 bg-layer-deep backdrop-blur-sm min-h-[40px]'>
+        <div className='w-4 h-4 bg-layer-raised rounded animate-pulse' />
+        <div className='h-4 w-48 bg-layer-raised rounded animate-pulse' />
       </div>
     );
   }
 
   return (
-    <div className='flex items-center gap-2 px-4 py-2 rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 backdrop-blur-sm min-h-[40px]'>
-      <Sparkles className='w-4 h-4 text-lunary-accent-300' strokeWidth={2} />
-      <span className='text-sm font-medium text-lunary-accent-300'>
+    <div className='flex items-center gap-2 px-4 py-2 rounded-lg border border-lunary-primary-700 bg-layer-deep backdrop-blur-sm min-h-[40px]'>
+      <Sparkles className='w-4 h-4 text-content-brand-accent' strokeWidth={2} />
+      <span className='text-sm font-medium text-content-brand-accent'>
         This week you accessed {weeklyCount} cosmic insight
         {weeklyCount !== 1 ? 's' : ''}
       </span>

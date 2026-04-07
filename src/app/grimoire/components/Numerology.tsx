@@ -80,10 +80,10 @@ const Numerology = () => {
   return (
     <div className='space-y-8'>
       <div className='mb-6'>
-        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+        <h2 className='text-2xl md:text-3xl font-light text-content-primary mb-2'>
           Numerology
         </h2>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           Explore the mystical meaning of numbers and their influence on your
           life
         </p>
@@ -95,22 +95,22 @@ const Numerology = () => {
           <Link
             key={section.title}
             href={section.href}
-            className='block p-5 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+            className='block p-5 rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
           >
             <div className='flex items-start gap-4'>
-              <span className='text-zinc-400 group-hover:text-lunary-primary-400 transition-colors mt-1'>
+              <span className='text-content-muted group-hover:text-lunary-primary-400 transition-colors mt-1'>
                 {section.icon}
               </span>
               <div className='flex-1'>
-                <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-1'>
+                <h3 className='text-lg font-medium text-content-primary group-hover:text-content-brand transition-colors mb-1'>
                   {section.title}
                 </h3>
-                <p className='text-sm text-zinc-400 mb-2'>
+                <p className='text-sm text-content-muted mb-2'>
                   {section.description}
                 </p>
-                <p className='text-xs text-zinc-400'>{section.examples}</p>
+                <p className='text-xs text-content-muted'>{section.examples}</p>
               </div>
-              <span className='text-zinc-600 group-hover:text-lunary-primary-400 transition-colors'>
+              <span className='text-content-muted group-hover:text-lunary-primary-400 transition-colors'>
                 →
               </span>
             </div>
@@ -119,21 +119,25 @@ const Numerology = () => {
       </div>
 
       {/* Quick Reference */}
-      <section className='mt-8 p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-        <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+      <section className='mt-8 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+        <h3 className='text-lg font-medium text-content-primary mb-4'>
           How to Calculate Your Numbers
         </h3>
         <div className='space-y-4 text-sm'>
           <div>
-            <p className='text-zinc-300 font-medium'>Life Path Number</p>
-            <p className='text-zinc-400'>
+            <p className='text-content-secondary font-medium'>
+              Life Path Number
+            </p>
+            <p className='text-content-muted'>
               Add all digits of your birth date until you get a single digit (or
               11, 22, 33)
             </p>
           </div>
           <div>
-            <p className='text-zinc-300 font-medium'>Personal Day Number</p>
-            <p className='text-zinc-400'>
+            <p className='text-content-secondary font-medium'>
+              Personal Day Number
+            </p>
+            <p className='text-content-muted'>
               Add your life path number to the current day's universal number
             </p>
           </div>

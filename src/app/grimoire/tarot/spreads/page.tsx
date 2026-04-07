@@ -206,7 +206,7 @@ export default function TarotSpreadsIndexPage() {
         >
           {categories.map((category) => (
             <section key={category} className='mb-12'>
-              <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+              <h2 className='text-2xl font-medium text-content-primary mb-6'>
                 {category}
               </h2>
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -215,17 +215,17 @@ export default function TarotSpreadsIndexPage() {
                     <Link
                       key={spread.slug}
                       href={`/grimoire/tarot/spreads/${stringToKebabCase(spread.slug)}`}
-                      className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-violet-700/50 transition-all'
+                      className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-violet-700/50 transition-all'
                     >
                       <div className='flex items-center justify-between mb-3'>
-                        <h3 className='font-medium text-zinc-100 group-hover:text-violet-300 transition-colors'>
+                        <h3 className='font-medium text-content-primary group-hover:text-violet-300 transition-colors'>
                           {spread.name}
                         </h3>
                       </div>
-                      <p className='text-sm text-zinc-400 mb-3 line-clamp-2'>
+                      <p className='text-sm text-content-muted mb-3 line-clamp-2'>
                         {spread.description}
                       </p>
-                      <div className='flex items-center gap-4 text-xs text-zinc-400'>
+                      <div className='flex items-center gap-4 text-xs text-content-muted'>
                         <span className='flex items-center gap-1'>
                           <Star className='w-3 h-3' />
                           {spread.cardCount} cards

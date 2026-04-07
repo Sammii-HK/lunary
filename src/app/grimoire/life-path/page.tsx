@@ -196,10 +196,10 @@ Plus three Master Numbers (11, 22, 33) with amplified spiritual potential.`}
         <NumerologyCalculator type='life-path' />
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Core Life Path Numbers (1-9)
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Each Life Path Number represents a unique journey with its own
             purpose, lessons, and gifts. Click on your number to explore its
             full meaning.
@@ -211,12 +211,12 @@ Plus three Master Numbers (11, 22, 33) with amplified spiritual potential.`}
                 <Link
                   key={num}
                   href={`/grimoire/life-path/${num}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all text-center'
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all text-center'
                 >
-                  <span className='text-3xl font-light text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
+                  <span className='text-3xl font-light text-lunary-primary-400 group-hover:text-content-brand transition-colors'>
                     {num}
                   </span>
-                  <p className='text-xs text-zinc-400 mt-2 line-clamp-1'>
+                  <p className='text-xs text-content-muted mt-2 line-clamp-1'>
                     {data?.meaning || 'The ' + num}
                   </p>
                 </Link>
@@ -226,10 +226,10 @@ Plus three Master Numbers (11, 22, 33) with amplified spiritual potential.`}
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Master Life Path Numbers
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Master Numbers carry intensified energy and greater spiritual
             potential. They're rare and indicate souls with special missions.
           </p>
@@ -248,7 +248,7 @@ Plus three Master Numbers (11, 22, 33) with amplified spiritual potential.`}
                   <span className='block px-2 py-0.5 text-xs bg-amber-900/50 text-amber-300 rounded mt-2 mx-auto w-fit'>
                     Master Number
                   </span>
-                  <p className='text-sm text-zinc-400 mt-3'>
+                  <p className='text-sm text-content-muted mt-3'>
                     {data?.meaning || 'Master ' + num}
                   </p>
                 </Link>
@@ -257,43 +257,43 @@ Plus three Master Numbers (11, 22, 33) with amplified spiritual potential.`}
           </div>
         </section>
 
-        <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Example Calculation
           </h2>
-          <div className='space-y-4 text-zinc-300'>
+          <div className='space-y-4 text-content-secondary'>
             <p>
               <strong>Birth Date:</strong> March 15, 1990
             </p>
-            <div className='bg-zinc-800/50 p-4 rounded-lg font-mono text-sm'>
-              <p className='text-zinc-400 mb-2'>Add all digits:</p>
+            <div className='bg-surface-card/50 p-4 rounded-lg font-mono text-sm'>
+              <p className='text-content-muted mb-2'>Add all digits:</p>
               <p>Month: 3</p>
               <p>Day: 1 + 5 = 6</p>
               <p>Year: 1 + 9 + 9 + 0 = 19 → 1 + 9 = 10 → 1 + 0 = 1</p>
-              <p className='mt-2 text-zinc-400'>Total: 3 + 6 + 1 = 10</p>
-              <p className='text-zinc-400'>Reduce: 1 + 0 = 1</p>
-              <p className='mt-2 text-lunary-primary-300'>
+              <p className='mt-2 text-content-muted'>Total: 3 + 6 + 1 = 10</p>
+              <p className='text-content-muted'>Reduce: 1 + 0 = 1</p>
+              <p className='mt-2 text-content-brand'>
                 Life Path Number: 1 (The Leader)
               </p>
             </div>
           </div>
         </section>
 
-        <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Master Number Example
           </h2>
-          <div className='space-y-4 text-zinc-300'>
+          <div className='space-y-4 text-content-secondary'>
             <p>
               <strong>Birth Date:</strong> November 29, 1993
             </p>
-            <div className='bg-zinc-800/50 p-4 rounded-lg font-mono text-sm'>
-              <p className='text-zinc-400 mb-2'>Add all digits:</p>
+            <div className='bg-surface-card/50 p-4 rounded-lg font-mono text-sm'>
+              <p className='text-content-muted mb-2'>Add all digits:</p>
               <p>Month: 1 + 1 = 2</p>
               <p>Day: 2 + 9 = 11 → Keep as Master Number</p>
               <p>Year: 1 + 9 + 9 + 3 = 22 → Keep as Master Number</p>
-              <p className='mt-2 text-zinc-400'>Total: 2 + 11 + 22 = 35</p>
-              <p className='text-zinc-400'>Reduce: 3 + 5 = 8</p>
+              <p className='mt-2 text-content-muted'>Total: 2 + 11 + 22 = 35</p>
+              <p className='text-content-muted'>Reduce: 3 + 5 = 8</p>
               <p className='mt-2 text-amber-300'>
                 Note: When reducing, 11 and 22 first become 2 and 4. Final Life
                 Path: 8

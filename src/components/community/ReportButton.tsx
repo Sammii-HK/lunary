@@ -92,7 +92,7 @@ export function ReportButton({
 
   if (submitted || blocked) {
     return (
-      <span className='text-[10px] text-zinc-500'>
+      <span className='text-[10px] text-content-muted'>
         {blocked ? 'Blocked' : 'Reported'}
       </span>
     );
@@ -103,7 +103,7 @@ export function ReportButton({
       <button
         type='button'
         onClick={() => setIsOpen(!isOpen)}
-        className='p-1 text-zinc-600 hover:text-zinc-400 transition-colors'
+        className='p-1 text-content-muted hover:text-content-muted transition-colors'
         aria-label='Report content'
         title='Report'
       >
@@ -116,8 +116,8 @@ export function ReportButton({
             className='fixed inset-0 z-40'
             onClick={() => setIsOpen(false)}
           />
-          <div className='absolute right-0 bottom-full mb-1 z-50 w-44 rounded-lg border border-zinc-800 bg-zinc-900 shadow-lg py-1'>
-            <p className='px-3 py-1.5 text-[10px] font-medium text-zinc-500 uppercase tracking-wide'>
+          <div className='absolute right-0 bottom-full mb-1 z-50 w-44 rounded-lg border border-stroke-subtle bg-surface-elevated shadow-lg py-1'>
+            <p className='px-3 py-1.5 text-[10px] font-medium text-content-muted uppercase tracking-wide'>
               Report as
             </p>
             {REASONS.map((r) => (
@@ -126,7 +126,7 @@ export function ReportButton({
                 type='button'
                 disabled={isSubmitting}
                 onClick={() => handleReport(r.value)}
-                className='w-full px-3 py-1.5 text-left text-xs text-zinc-300 hover:bg-zinc-800 transition-colors disabled:opacity-50'
+                className='w-full px-3 py-1.5 text-left text-xs text-content-secondary hover:bg-surface-card transition-colors disabled:opacity-50'
               >
                 {r.label}
               </button>
@@ -134,12 +134,12 @@ export function ReportButton({
 
             {authorId && (
               <>
-                <div className='border-t border-zinc-800 my-1' />
+                <div className='border-t border-stroke-subtle my-1' />
                 <button
                   type='button'
                   disabled={isSubmitting}
                   onClick={handleBlock}
-                  className='w-full px-3 py-1.5 text-left text-xs text-red-400 hover:bg-zinc-800 transition-colors disabled:opacity-50'
+                  className='w-full px-3 py-1.5 text-left text-xs text-red-400 hover:bg-surface-card transition-colors disabled:opacity-50'
                 >
                   Block this user
                 </button>

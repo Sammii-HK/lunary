@@ -3,16 +3,16 @@ import { Users } from 'lucide-react';
 
 export function SignupCTA() {
   return (
-    <div className='rounded-lg border border-lunary-primary-700/50 bg-gradient-to-r from-lunary-primary-950/60 to-zinc-900 p-4'>
+    <div className='rounded-lg border border-lunary-primary-700/50 bg-gradient-to-r from-layer-deep/60 to-surface-elevated p-4'>
       <div className='flex items-center gap-3'>
-        <div className='p-2 rounded-lg bg-lunary-primary-900/30 text-lunary-primary-400'>
+        <div className='p-2 rounded-lg bg-layer-base/30 text-lunary-primary-400'>
           <Users className='w-5 h-5' />
         </div>
         <div className='flex-1'>
-          <p className='text-sm font-medium text-zinc-200'>
+          <p className='text-sm font-medium text-content-primary'>
             Join the Circle to ask questions
           </p>
-          <p className='text-xs text-zinc-400'>
+          <p className='text-xs text-content-muted'>
             Create an account to participate in the cosmic community
           </p>
         </div>

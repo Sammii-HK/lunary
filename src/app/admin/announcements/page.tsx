@@ -188,10 +188,10 @@ export default function AdminAnnouncementsPage() {
           <p className='text-xs tracking-[0.4em] uppercase text-lunary-accent'>
             Feature Announcements
           </p>
-          <h1 className='text-3xl font-semibold text-white'>
+          <h1 className='text-3xl font-semibold text-content-primary'>
             Manage Announcements
           </h1>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-sm text-content-muted'>
             Create and manage feature announcements shown to users on login.
             Users see one announcement per session, in release date order.
           </p>
@@ -213,7 +213,7 @@ export default function AdminAnnouncementsPage() {
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className='flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 transition'
+            className='flex items-center gap-2 rounded-xl border border-stroke-default bg-surface-card px-4 py-2.5 text-sm font-medium text-content-primary hover:bg-surface-overlay transition'
           >
             <Plus className='w-4 h-4' />
             New Announcement
@@ -224,15 +224,15 @@ export default function AdminAnnouncementsPage() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-6 space-y-5'
+            className='rounded-3xl border border-stroke-subtle/60 bg-surface-elevated/60 p-6 space-y-5'
           >
-            <h2 className='text-lg font-medium text-white'>
+            <h2 className='text-lg font-medium text-content-primary'>
               {editingId ? 'Edit Announcement' : 'New Announcement'}
             </h2>
 
             <div className='space-y-4'>
               <div>
-                <label className='block text-xs uppercase tracking-wider text-zinc-500 mb-1.5'>
+                <label className='block text-xs uppercase tracking-wider text-content-muted mb-1.5'>
                   Title
                 </label>
                 <input
@@ -241,14 +241,14 @@ export default function AdminAnnouncementsPage() {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, title: e.target.value }))
                   }
-                  className='w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-indigo-500 focus:outline-none'
+                  className='w-full rounded-lg border border-stroke-default bg-surface-card px-3 py-2 text-sm text-content-primary placeholder-zinc-500 focus:border-indigo-500 focus:outline-none'
                   placeholder='Friend Connections & Synastry'
                   required
                 />
               </div>
 
               <div>
-                <label className='block text-xs uppercase tracking-wider text-zinc-500 mb-1.5'>
+                <label className='block text-xs uppercase tracking-wider text-content-muted mb-1.5'>
                   Description
                 </label>
                 <textarea
@@ -259,7 +259,7 @@ export default function AdminAnnouncementsPage() {
                       description: e.target.value,
                     }))
                   }
-                  className='w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-indigo-500 focus:outline-none min-h-[80px]'
+                  className='w-full rounded-lg border border-stroke-default bg-surface-card px-3 py-2 text-sm text-content-primary placeholder-zinc-500 focus:border-indigo-500 focus:outline-none min-h-[80px]'
                   placeholder='Describe the feature and why users should care...'
                   required
                 />
@@ -267,7 +267,7 @@ export default function AdminAnnouncementsPage() {
 
               <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  <label className='block text-xs uppercase tracking-wider text-zinc-500 mb-1.5'>
+                  <label className='block text-xs uppercase tracking-wider text-content-muted mb-1.5'>
                     Icon
                   </label>
                   <select
@@ -275,7 +275,7 @@ export default function AdminAnnouncementsPage() {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, icon: e.target.value }))
                     }
-                    className='w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none'
+                    className='w-full rounded-lg border border-stroke-default bg-surface-card px-3 py-2 text-sm text-content-primary focus:border-indigo-500 focus:outline-none'
                   >
                     {AVAILABLE_ICONS.map((icon) => (
                       <option key={icon} value={icon}>
@@ -286,7 +286,7 @@ export default function AdminAnnouncementsPage() {
                 </div>
 
                 <div>
-                  <label className='block text-xs uppercase tracking-wider text-zinc-500 mb-1.5'>
+                  <label className='block text-xs uppercase tracking-wider text-content-muted mb-1.5'>
                     Release Date
                   </label>
                   <input
@@ -298,14 +298,14 @@ export default function AdminAnnouncementsPage() {
                         releasedAt: e.target.value,
                       }))
                     }
-                    className='w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none'
+                    className='w-full rounded-lg border border-stroke-default bg-surface-card px-3 py-2 text-sm text-content-primary focus:border-indigo-500 focus:outline-none'
                   />
                 </div>
               </div>
 
               <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  <label className='block text-xs uppercase tracking-wider text-zinc-500 mb-1.5'>
+                  <label className='block text-xs uppercase tracking-wider text-content-muted mb-1.5'>
                     CTA Button Label (optional)
                   </label>
                   <input
@@ -317,13 +317,13 @@ export default function AdminAnnouncementsPage() {
                         ctaLabel: e.target.value,
                       }))
                     }
-                    className='w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-indigo-500 focus:outline-none'
+                    className='w-full rounded-lg border border-stroke-default bg-surface-card px-3 py-2 text-sm text-content-primary placeholder-zinc-500 focus:border-indigo-500 focus:outline-none'
                     placeholder='Try It Now'
                   />
                 </div>
 
                 <div>
-                  <label className='block text-xs uppercase tracking-wider text-zinc-500 mb-1.5'>
+                  <label className='block text-xs uppercase tracking-wider text-content-muted mb-1.5'>
                     CTA Link (optional)
                   </label>
                   <input
@@ -335,14 +335,14 @@ export default function AdminAnnouncementsPage() {
                         ctaHref: e.target.value,
                       }))
                     }
-                    className='w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-indigo-500 focus:outline-none'
+                    className='w-full rounded-lg border border-stroke-default bg-surface-card px-3 py-2 text-sm text-content-primary placeholder-zinc-500 focus:border-indigo-500 focus:outline-none'
                     placeholder='/profile?tab=circle'
                   />
                 </div>
               </div>
 
               <div>
-                <label className='block text-xs uppercase tracking-wider text-zinc-500 mb-1.5'>
+                <label className='block text-xs uppercase tracking-wider text-content-muted mb-1.5'>
                   Required Tier (leave empty for all users)
                 </label>
                 <div className='flex flex-wrap gap-2'>
@@ -354,7 +354,7 @@ export default function AdminAnnouncementsPage() {
                       className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                         formData.requiredTier.includes(tier.value)
                           ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
-                          : 'border-zinc-600 text-zinc-400 hover:border-zinc-500'
+                          : 'border-stroke-strong text-content-muted hover:border-stroke-strong'
                       }`}
                     >
                       {tier.label}
@@ -374,7 +374,7 @@ export default function AdminAnnouncementsPage() {
               <button
                 type='button'
                 onClick={resetForm}
-                className='rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-800 transition'
+                className='rounded-lg border border-stroke-default px-4 py-2 text-sm font-medium text-content-secondary hover:bg-surface-card transition'
               >
                 Cancel
               </button>
@@ -384,11 +384,11 @@ export default function AdminAnnouncementsPage() {
 
         {/* List */}
         {loading ? (
-          <div className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-10 text-center text-sm text-zinc-400'>
+          <div className='rounded-3xl border border-stroke-subtle/60 bg-surface-elevated/60 p-10 text-center text-sm text-content-muted'>
             Loading announcements...
           </div>
         ) : announcements.length === 0 ? (
-          <div className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-10 text-center text-sm text-zinc-400'>
+          <div className='rounded-3xl border border-stroke-subtle/60 bg-surface-elevated/60 p-10 text-center text-sm text-content-muted'>
             No announcements yet. Create one to get started.
           </div>
         ) : (
@@ -396,28 +396,28 @@ export default function AdminAnnouncementsPage() {
             {announcements.map((announcement) => (
               <div
                 key={announcement.id}
-                className={`rounded-3xl border bg-zinc-900/60 p-6 shadow-[0px_10px_25px_rgba(0,0,0,0.45)] ${
+                className={`rounded-3xl border bg-surface-elevated/60 p-6 shadow-[0px_10px_25px_rgba(0,0,0,0.45)] ${
                   announcement.isActive
-                    ? 'border-zinc-800/60'
-                    : 'border-zinc-800/30 opacity-60'
+                    ? 'border-stroke-subtle/60'
+                    : 'border-stroke-subtle/30 opacity-60'
                 }`}
               >
                 <div className='flex items-start justify-between gap-4'>
                   <div className='flex-1 min-w-0'>
                     <div className='flex items-center gap-2 mb-2'>
-                      <h3 className='text-base font-medium text-white truncate'>
+                      <h3 className='text-base font-medium text-content-primary truncate'>
                         {announcement.title}
                       </h3>
                       {!announcement.isActive && (
-                        <span className='text-xs text-zinc-500 uppercase'>
+                        <span className='text-xs text-content-muted uppercase'>
                           (inactive)
                         </span>
                       )}
                     </div>
-                    <p className='text-sm text-zinc-400 line-clamp-2 mb-3'>
+                    <p className='text-sm text-content-muted line-clamp-2 mb-3'>
                       {announcement.description}
                     </p>
-                    <div className='flex flex-wrap items-center gap-3 text-xs text-zinc-500'>
+                    <div className='flex flex-wrap items-center gap-3 text-xs text-content-muted'>
                       <span>Icon: {announcement.icon}</span>
                       <span>
                         Released: {formatDate(announcement.releasedAt)}
@@ -450,7 +450,7 @@ export default function AdminAnnouncementsPage() {
                       onClick={() =>
                         toggleActive(announcement.id, !announcement.isActive)
                       }
-                      className='p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition'
+                      className='p-2 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-card transition'
                       title={announcement.isActive ? 'Deactivate' : 'Activate'}
                     >
                       {announcement.isActive ? (
@@ -461,14 +461,14 @@ export default function AdminAnnouncementsPage() {
                     </button>
                     <button
                       onClick={() => handleEdit(announcement)}
-                      className='p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition'
+                      className='p-2 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-card transition'
                       title='Edit'
                     >
                       <Pencil className='w-4 h-4' />
                     </button>
                     <button
                       onClick={() => handleDelete(announcement.id)}
-                      className='p-2 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-zinc-800 transition'
+                      className='p-2 rounded-lg text-content-muted hover:text-red-400 hover:bg-surface-card transition'
                       title='Delete'
                     >
                       <Trash2 className='w-4 h-4' />

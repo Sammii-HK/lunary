@@ -166,7 +166,7 @@ ${rising.compatibility}`;
       {/* Quick Stats */}
       <section className='mb-8'>
         <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-2xl mb-1'>
               {rising.element === 'Fire'
                 ? '🔥'
@@ -176,23 +176,29 @@ ${rising.compatibility}`;
                     ? '💨'
                     : '💧'}
             </div>
-            <div className='text-xs text-zinc-400'>Element</div>
-            <div className='text-sm text-zinc-300'>{rising.element}</div>
+            <div className='text-xs text-content-muted'>Element</div>
+            <div className='text-sm text-content-secondary'>
+              {rising.element}
+            </div>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-2xl mb-1'>⚡</div>
-            <div className='text-xs text-zinc-400'>Modality</div>
-            <div className='text-sm text-zinc-300'>{rising.modality}</div>
+            <div className='text-xs text-content-muted'>Modality</div>
+            <div className='text-sm text-content-secondary'>
+              {rising.modality}
+            </div>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-2xl mb-1'>🌟</div>
-            <div className='text-xs text-zinc-400'>Ruler</div>
-            <div className='text-sm text-zinc-300'>{rising.ruler}</div>
+            <div className='text-xs text-content-muted'>Ruler</div>
+            <div className='text-sm text-content-secondary'>{rising.ruler}</div>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-2xl mb-1'>👁️</div>
-            <div className='text-xs text-zinc-400'>Governs</div>
-            <div className='text-sm text-zinc-300'>First Impressions</div>
+            <div className='text-xs text-content-muted'>Governs</div>
+            <div className='text-sm text-content-secondary'>
+              First Impressions
+            </div>
           </div>
         </div>
       </section>
@@ -207,7 +213,7 @@ ${rising.compatibility}`;
           {rising.coreTraits.map((trait) => (
             <span
               key={trait}
-              className='px-3 py-1.5 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 text-sm'
+              className='px-3 py-1.5 rounded-lg bg-layer-base/20 border border-lunary-primary-700 text-content-brand text-sm'
             >
               {trait}
             </span>
@@ -221,10 +227,13 @@ ${rising.compatibility}`;
           <Star className='h-5 w-5 inline mr-2 text-lunary-success' />
           Rising Sign Strengths
         </Heading>
-        <div className='p-5 rounded-lg border border-lunary-success-700 bg-lunary-success-950 mt-4'>
+        <div className='p-5 rounded-lg border border-lunary-success-700 bg-layer-deep mt-4'>
           <ul className='space-y-3'>
             {rising.strengths.map((strength, i) => (
-              <li key={i} className='flex items-start gap-3 text-zinc-300'>
+              <li
+                key={i}
+                className='flex items-start gap-3 text-content-secondary'
+              >
                 <span className='text-lunary-success mt-1'>✓</span>
                 {strength}
               </li>
@@ -239,10 +248,13 @@ ${rising.compatibility}`;
           <AlertTriangle className='h-5 w-5 inline mr-2 text-lunary-accent' />
           Potential Challenges
         </Heading>
-        <div className='p-5 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 mt-4'>
+        <div className='p-5 rounded-lg border border-lunary-accent-700 bg-layer-deep mt-4'>
           <ul className='space-y-3'>
             {rising.challenges.map((challenge, i) => (
-              <li key={i} className='flex items-start gap-3 text-zinc-300'>
+              <li
+                key={i}
+                className='flex items-start gap-3 text-content-secondary'
+              >
                 <span className='text-lunary-accent mt-1'>!</span>
                 {challenge}
               </li>
@@ -254,14 +266,16 @@ ${rising.compatibility}`;
       {/* Famous Examples */}
       {rising.famousExamples && (
         <section className='mb-8'>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
             <div className='flex items-center gap-2 mb-2'>
               <Users className='h-4 w-4 text-lunary-primary-400' />
-              <span className='text-sm font-medium text-zinc-300'>
+              <span className='text-sm font-medium text-content-secondary'>
                 Famous {rising.sign} Risings
               </span>
             </div>
-            <p className='text-sm text-zinc-400'>{rising.famousExamples}</p>
+            <p className='text-sm text-content-muted'>
+              {rising.famousExamples}
+            </p>
           </div>
         </section>
       )}
@@ -276,13 +290,17 @@ ${rising.compatibility}`;
             <NavParamLink
               key={related.slug}
               href={`/grimoire/rising/${related.slug}`}
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
             >
               <div className='flex items-center justify-between'>
-                <span className='text-zinc-200'>{related.sign} Rising</span>
-                <span className='text-xs text-zinc-500'>{related.element}</span>
+                <span className='text-content-primary'>
+                  {related.sign} Rising
+                </span>
+                <span className='text-xs text-content-muted'>
+                  {related.element}
+                </span>
               </div>
-              <div className='text-xs text-zinc-500 mt-1'>
+              <div className='text-xs text-content-muted mt-1'>
                 {related.coreTraits[0]}
               </div>
             </NavParamLink>

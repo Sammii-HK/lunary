@@ -17,19 +17,21 @@ export default function MercuryRetrogadePrivacyPage() {
   const lastUpdated = 'March 14, 2026';
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='mb-8'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             Privacy Policy: Is Mercury Retrograde?
           </h1>
-          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-content-muted'>
+            Last Updated: {lastUpdated}
+          </p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
           <section>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Lunar Computing, Inc. (&quot;we,&quot; &quot;us,&quot; or
               &quot;our&quot;) develops the Is Mercury Retrograde? iOS app. This
               Privacy Policy explains how we handle your information when you
@@ -38,14 +40,14 @@ export default function MercuryRetrogadePrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               1. Information We Collect
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               1.1 Information You Provide
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Sign in with Apple Account (Optional):</strong> If you
                 choose to sign in using Apple ID, we receive an Apple user
@@ -59,10 +61,10 @@ export default function MercuryRetrogadePrivacyPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               1.2 Information Collected Automatically
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Device Information:</strong> iOS version, device model,
                 device identifier (for crash reporting only)
@@ -79,10 +81,10 @@ export default function MercuryRetrogadePrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               2. How We Use Your Information
             </h2>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Authenticate your account (if you choose to sign in) and sync
                 your notification preferences
@@ -103,10 +105,10 @@ export default function MercuryRetrogadePrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               3. Data Collection and Local Processing
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               No data is collected by us. The app only reads astronomical
               calculations performed locally on your device using the
               astronomy-engine library (MIT-licensed). No user data, readings,
@@ -117,10 +119,10 @@ export default function MercuryRetrogadePrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               4. Notification Preferences and CloudKit
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               If you create an account and enable push notifications, your
               notification preferences are synced to your iCloud account via
               CloudKit for safekeeping across your Apple devices. We do not have
@@ -131,10 +133,10 @@ export default function MercuryRetrogadePrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               5. Third-Party Services
             </h2>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Apple CloudKit:</strong> Secure syncing of your
                 notification preferences across your Apple devices (if you sign
@@ -151,10 +153,10 @@ export default function MercuryRetrogadePrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               6. Do We Sell Your Data?
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               No. We do not sell, share, or monetize your personal data. Your
               notification preferences are private to you and synced only to
               your own Apple devices via CloudKit.
@@ -162,10 +164,10 @@ export default function MercuryRetrogadePrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               7. Your Rights
             </h2>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Access:</strong> Request information about what data we
                 hold
@@ -179,11 +181,11 @@ export default function MercuryRetrogadePrivacyPage() {
                 preferences
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               To exercise these rights or contact us about your data, email{' '}
               <a
                 href='mailto:privacy@lunary.app'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 privacy@lunary.app
               </a>
@@ -192,11 +194,11 @@ export default function MercuryRetrogadePrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               8. Contact Us
             </h2>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Lunar Computing, Inc.</strong>
                 <br />
                 131 Continental Dr, Suite 305
@@ -207,7 +209,7 @@ export default function MercuryRetrogadePrivacyPage() {
                 Email:{' '}
                 <a
                   href='mailto:privacy@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   privacy@lunary.app
                 </a>
@@ -215,20 +217,20 @@ export default function MercuryRetrogadePrivacyPage() {
             </div>
           </section>
 
-          <section className='pt-8 border-t border-zinc-800'>
-            <h2 className='text-lg font-medium text-white mb-4'>
+          <section className='pt-8 border-t border-stroke-subtle'>
+            <h2 className='text-lg font-medium text-content-primary mb-4'>
               Related Policies
             </h2>
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/apps/terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 App Terms of Service
               </Link>
               <Link
                 href='/privacy'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Lunary Web Privacy
               </Link>

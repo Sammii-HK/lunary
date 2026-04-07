@@ -368,8 +368,8 @@ ${retrogradeData.whatToAvoid.map((a) => `- ${a}`).join('\n')}`}
         }
       >
         {/* Cross-link to events pages for year-specific deep dives */}
-        <nav className='mt-6 rounded-xl border border-zinc-800 bg-zinc-900/50 p-5'>
-          <h3 className='text-sm font-medium text-zinc-300 mb-3'>
+        <nav className='mt-6 rounded-xl border border-stroke-subtle bg-surface-elevated/50 p-5'>
+          <h3 className='text-sm font-medium text-content-secondary mb-3'>
             {planetName} Retrograde by Year
           </h3>
           <div className='flex flex-wrap gap-2'>
@@ -377,7 +377,7 @@ ${retrogradeData.whatToAvoid.map((a) => `- ${a}`).join('\n')}`}
               <Link
                 key={yr}
                 href={`/grimoire/events/${yr}`}
-                className='px-3 py-1.5 rounded-lg text-sm bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors'
+                className='px-3 py-1.5 rounded-lg text-sm bg-surface-card/50 text-content-muted hover:bg-surface-card hover:text-content-primary transition-colors'
               >
                 {yr} Events
               </Link>

@@ -62,7 +62,7 @@ export function TrialReminder({
       <Link
         href='/pricing?nav=app'
         onClick={handleUpgradeClick}
-        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lunary-rose-900 border border-lunary-rose-700 text-lunary-rose text-xs font-medium hover:bg-lunary-rose-800 transition-colors ${className}`}
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-layer-base border border-lunary-rose-700 text-lunary-rose text-xs font-medium hover:bg-lunary-rose-800 transition-colors ${className}`}
       >
         <Zap className='w-3 h-3' />
         <span>{trialDaysRemaining} days left</span>
@@ -78,7 +78,9 @@ export function TrialReminder({
         <div className='flex items-center gap-3'>
           <Clock className='w-5 h-5 text-lunary-accent' />
           <div>
-            <h3 className='text-sm font-medium text-white'>{getMessage()}</h3>
+            <h3 className='text-sm font-medium text-content-primary'>
+              {getMessage()}
+            </h3>
             <p className='text-xs text-gray-400'>
               Continue enjoying personalized cosmic insights
             </p>

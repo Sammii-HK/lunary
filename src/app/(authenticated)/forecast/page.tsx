@@ -16,7 +16,7 @@ export default function ForecastPage() {
         <Heading as='h1' variant='h1'>
           {currentYear} Forecast
         </Heading>
-        <p className='text-zinc-400'>
+        <p className='text-content-muted'>
           Major transits, retrogrades, eclipses and key aspects for the year
           ahead. Download as a calendar to track cosmic events.
         </p>

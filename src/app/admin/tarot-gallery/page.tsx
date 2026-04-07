@@ -114,12 +114,12 @@ export default function TarotGalleryPage() {
   };
 
   return (
-    <div className='min-h-screen bg-black text-white p-8'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-8'>
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='mb-8'>
           <h1 className='text-3xl font-bold mb-4'>Tarot Card Gallery</h1>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Preview all tarot cards with their suit-based color variations. Each
             suit has its own color theme and 5 daily background variations.
           </p>
@@ -137,7 +137,7 @@ export default function TarotGalleryPage() {
                   style={{ backgroundColor: suitColor }}
                 ></div>
                 <h2 className='text-2xl font-bold'>{suitName}</h2>
-                <div className='text-sm text-zinc-400'>
+                <div className='text-sm text-content-muted'>
                   ({cards.length} cards)
                 </div>
               </div>
@@ -156,21 +156,21 @@ export default function TarotGalleryPage() {
                   return (
                     <div
                       key={card.name}
-                      className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden hover:border-lunary-primary transition-colors'
+                      className='bg-surface-elevated rounded-lg border border-stroke-default overflow-hidden hover:border-lunary-primary transition-colors'
                     >
                       {/* Card Header */}
-                      <div className='p-4 border-b border-zinc-700'>
-                        <h3 className='text-lg font-bold text-white mb-1'>
+                      <div className='p-4 border-b border-stroke-default'>
+                        <h3 className='text-lg font-bold text-content-primary mb-1'>
                           {card.name}
                         </h3>
-                        <p className='text-zinc-400 text-sm mb-2'>
+                        <p className='text-content-muted text-sm mb-2'>
                           {card.archetype}
                         </p>
                         <div className='flex flex-wrap gap-1'>
                           {card.keywords.map((keyword) => (
                             <span
                               key={keyword}
-                              className='px-2 py-1 bg-zinc-800 rounded text-xs text-zinc-300'
+                              className='px-2 py-1 bg-surface-card rounded text-xs text-content-secondary'
                             >
                               {keyword}
                             </span>
@@ -180,7 +180,7 @@ export default function TarotGalleryPage() {
 
                       {/* Image Preview */}
                       <div className='p-4'>
-                        <div className='relative aspect-square rounded-lg overflow-hidden border border-zinc-600'>
+                        <div className='relative aspect-square rounded-lg overflow-hidden border border-stroke-strong'>
                           <Image
                             src={imageUrl}
                             alt={card.name}
@@ -191,7 +191,7 @@ export default function TarotGalleryPage() {
                         </div>
 
                         {/* Note about daily rotation */}
-                        <div className='mt-2 text-xs text-zinc-400'>
+                        <div className='mt-2 text-xs text-content-muted'>
                           Daily rotation: Card {globalIndex + 1} of{' '}
                           {allCards.length}
                         </div>
@@ -208,7 +208,7 @@ export default function TarotGalleryPage() {
         <div className='mt-8 flex gap-4 justify-center'>
           <a
             href='/admin/daily-posts-preview'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-layer-high rounded-md text-white font-medium transition-colors'
           >
             ← Daily Posts Preview
           </a>

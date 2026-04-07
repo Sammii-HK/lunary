@@ -37,49 +37,53 @@ export default function HelpPage() {
   ];
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='text-center mb-12'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             Help & Support
           </h1>
-          <p className='text-base md:text-lg text-zinc-400'>
+          <p className='text-base md:text-lg text-content-muted'>
             Find answers to common questions or get in touch with our support
             team
           </p>
         </div>
 
         <div className='grid gap-8 md:grid-cols-2 mb-12'>
-          <div className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
+          <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/50 p-6'>
             <div className='flex items-center gap-3 mb-4'>
               <Search className='w-6 h-6 text-lunary-primary-400' />
-              <h2 className='text-xl font-semibold text-white'>FAQ</h2>
+              <h2 className='text-xl font-semibold text-content-primary'>
+                FAQ
+              </h2>
             </div>
-            <p className='text-sm text-zinc-400 mb-4'>
+            <p className='text-sm text-content-muted mb-4'>
               Browse frequently asked questions about Lunary features,
               subscriptions, and account management.
             </p>
             <a
               href='#faq'
-              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+              className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
             >
               View FAQs →
             </a>
           </div>
 
-          <div className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
+          <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/50 p-6'>
             <div className='flex items-center gap-3 mb-4'>
               <Mail className='w-6 h-6 text-lunary-primary-400' />
-              <h2 className='text-xl font-semibold text-white'>Contact Us</h2>
+              <h2 className='text-xl font-semibold text-content-primary'>
+                Contact Us
+              </h2>
             </div>
-            <p className='text-sm text-zinc-400 mb-4'>
+            <p className='text-sm text-content-muted mb-4'>
               Need personalized assistance? Send us an email and we'll get back
               to you as soon as possible.
             </p>
             <a
               href='mailto:support@lunary.app'
-              className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+              className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
             >
               support@lunary.app →
             </a>
@@ -87,7 +91,7 @@ export default function HelpPage() {
         </div>
 
         <section id='faq' className='space-y-6 mb-12'>
-          <h2 className='text-2xl font-semibold text-white flex items-center gap-2'>
+          <h2 className='text-2xl font-semibold text-content-primary flex items-center gap-2'>
             <HelpCircle className='w-6 h-6 text-lunary-primary-400' />
             Frequently Asked Questions
           </h2>
@@ -95,23 +99,23 @@ export default function HelpPage() {
             {faqs.map((faq, index) => (
               <div
                 key={index}
-                className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-6'
+                className='rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-6'
               >
-                <h3 className='text-lg font-medium text-white mb-2'>
+                <h3 className='text-lg font-medium text-content-primary mb-2'>
                   {faq.question}
                 </h3>
-                <p className='text-sm text-zinc-400'>{faq.answer}</p>
+                <p className='text-sm text-content-muted'>{faq.answer}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-950/20 p-8 text-center'>
+        <section className='rounded-2xl border border-lunary-primary-700 bg-layer-deep/20 p-8 text-center'>
           <MessageCircle className='w-12 h-12 text-lunary-primary-400 mx-auto mb-4' />
-          <h2 className='text-2xl font-semibold text-white mb-3'>
+          <h2 className='text-2xl font-semibold text-content-primary mb-3'>
             Still need help?
           </h2>
-          <p className='text-sm text-zinc-400 mb-6 max-w-md mx-auto'>
+          <p className='text-sm text-content-muted mb-6 max-w-md mx-auto'>
             Our support team is here to help. Reach out via email and we'll
             respond within 24-48 hours.
           </p>

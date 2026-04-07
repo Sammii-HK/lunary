@@ -77,11 +77,11 @@ export default function InstagramPerformancePage() {
     n != null ? n.toLocaleString() : '-';
 
   return (
-    <div className='min-h-screen bg-black text-white p-8'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-8'>
       <div className='max-w-6xl mx-auto'>
         <div className='mb-8'>
           <h1 className='text-3xl font-bold mb-2'>Instagram Performance</h1>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Track engagement, saves, and reach across all content types
           </p>
 
@@ -90,7 +90,7 @@ export default function InstagramPerformancePage() {
             <select
               value={days}
               onChange={(e) => setDays(Number(e.target.value))}
-              className='px-3 py-2 bg-zinc-800 border border-zinc-600 rounded-md text-white'
+              className='px-3 py-2 bg-surface-card border border-stroke-strong rounded-md text-content-primary'
             >
               <option value={7}>Last 7 days</option>
               <option value={14}>Last 14 days</option>
@@ -102,7 +102,7 @@ export default function InstagramPerformancePage() {
         </div>
 
         {loading ? (
-          <div className='text-zinc-400 py-12 text-center'>
+          <div className='text-content-muted py-12 text-center'>
             Loading performance data...
           </div>
         ) : (
@@ -113,34 +113,34 @@ export default function InstagramPerformancePage() {
                 Performance by Post Type
               </h2>
               {byType.length === 0 ? (
-                <div className='bg-zinc-900 rounded-lg border border-zinc-700 p-8 text-center text-zinc-400'>
+                <div className='bg-surface-elevated rounded-lg border border-stroke-default p-8 text-center text-content-muted'>
                   No data yet. Record performance metrics via POST
                   /api/admin/instagram-performance.
                 </div>
               ) : (
-                <div className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'>
+                <div className='bg-surface-elevated rounded-lg border border-stroke-default overflow-hidden'>
                   <table className='w-full text-sm'>
                     <thead>
-                      <tr className='border-b border-zinc-700'>
-                        <th className='p-4 text-left font-medium text-zinc-400'>
+                      <tr className='border-b border-stroke-default'>
+                        <th className='p-4 text-left font-medium text-content-muted'>
                           Post Type
                         </th>
-                        <th className='p-4 text-right font-medium text-zinc-400'>
+                        <th className='p-4 text-right font-medium text-content-muted'>
                           Posts
                         </th>
-                        <th className='p-4 text-right font-medium text-zinc-400'>
+                        <th className='p-4 text-right font-medium text-content-muted'>
                           Avg Engagement
                         </th>
-                        <th className='p-4 text-right font-medium text-zinc-400'>
+                        <th className='p-4 text-right font-medium text-content-muted'>
                           Avg Save Rate
                         </th>
-                        <th className='p-4 text-right font-medium text-zinc-400'>
+                        <th className='p-4 text-right font-medium text-content-muted'>
                           Total Likes
                         </th>
-                        <th className='p-4 text-right font-medium text-zinc-400'>
+                        <th className='p-4 text-right font-medium text-content-muted'>
                           Total Saves
                         </th>
-                        <th className='p-4 text-right font-medium text-zinc-400'>
+                        <th className='p-4 text-right font-medium text-content-muted'>
                           Total Comments
                         </th>
                       </tr>
@@ -149,7 +149,7 @@ export default function InstagramPerformancePage() {
                       {byType.map((row) => (
                         <tr
                           key={row.post_type}
-                          className='border-b border-zinc-800 hover:bg-zinc-800/50'
+                          className='border-b border-stroke-subtle hover:bg-surface-card/50'
                         >
                           <td className='p-4 font-medium capitalize'>
                             {row.post_type.replace(/_/g, ' ')}
@@ -184,7 +184,7 @@ export default function InstagramPerformancePage() {
                 Performance by Category (Save Rate)
               </h2>
               {byCategory.length === 0 ? (
-                <div className='bg-zinc-900 rounded-lg border border-zinc-700 p-8 text-center text-zinc-400'>
+                <div className='bg-surface-elevated rounded-lg border border-stroke-default p-8 text-center text-content-muted'>
                   No category data yet.
                 </div>
               ) : (
@@ -192,15 +192,15 @@ export default function InstagramPerformancePage() {
                   {byCategory.map((row) => (
                     <div
                       key={row.post_type}
-                      className='bg-zinc-900 rounded-lg border border-zinc-700 p-4'
+                      className='bg-surface-elevated rounded-lg border border-stroke-default p-4'
                     >
-                      <div className='text-sm text-zinc-400 capitalize mb-1'>
+                      <div className='text-sm text-content-muted capitalize mb-1'>
                         {(row as any).content_category || 'Unknown'}
                       </div>
                       <div className='text-2xl font-bold text-lunary-primary-400'>
                         {formatRate(row._avg.save_rate)}
                       </div>
-                      <div className='text-xs text-zinc-500 mt-1'>
+                      <div className='text-xs text-content-muted mt-1'>
                         {row._count} posts &middot; {formatNum(row._sum.saves)}{' '}
                         saves
                       </div>
@@ -214,36 +214,36 @@ export default function InstagramPerformancePage() {
             <div className='mb-8'>
               <h2 className='text-xl font-bold mb-4'>Top 10 Posts</h2>
               {topPosts.length === 0 ? (
-                <div className='bg-zinc-900 rounded-lg border border-zinc-700 p-8 text-center text-zinc-400'>
+                <div className='bg-surface-elevated rounded-lg border border-stroke-default p-8 text-center text-content-muted'>
                   No posts recorded yet.
                 </div>
               ) : (
-                <div className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'>
+                <div className='bg-surface-elevated rounded-lg border border-stroke-default overflow-hidden'>
                   <table className='w-full text-sm'>
                     <thead>
-                      <tr className='border-b border-zinc-700'>
-                        <th className='p-4 text-left font-medium text-zinc-400'>
+                      <tr className='border-b border-stroke-default'>
+                        <th className='p-4 text-left font-medium text-content-muted'>
                           #
                         </th>
-                        <th className='p-4 text-left font-medium text-zinc-400'>
+                        <th className='p-4 text-left font-medium text-content-muted'>
                           Type
                         </th>
-                        <th className='p-4 text-left font-medium text-zinc-400'>
+                        <th className='p-4 text-left font-medium text-content-muted'>
                           Category
                         </th>
-                        <th className='p-4 text-right font-medium text-zinc-400'>
+                        <th className='p-4 text-right font-medium text-content-muted'>
                           Engagement
                         </th>
-                        <th className='p-4 text-right font-medium text-zinc-400'>
+                        <th className='p-4 text-right font-medium text-content-muted'>
                           Likes
                         </th>
-                        <th className='p-4 text-right font-medium text-zinc-400'>
+                        <th className='p-4 text-right font-medium text-content-muted'>
                           Saves
                         </th>
-                        <th className='p-4 text-right font-medium text-zinc-400'>
+                        <th className='p-4 text-right font-medium text-content-muted'>
                           Comments
                         </th>
-                        <th className='p-4 text-right font-medium text-zinc-400'>
+                        <th className='p-4 text-right font-medium text-content-muted'>
                           Posted
                         </th>
                       </tr>
@@ -252,7 +252,7 @@ export default function InstagramPerformancePage() {
                       {topPosts.map((post, i) => (
                         <tr
                           key={post.id}
-                          className='border-b border-zinc-800 hover:bg-zinc-800/50'
+                          className='border-b border-stroke-subtle hover:bg-surface-card/50'
                         >
                           <td className='p-4'>{i + 1}</td>
                           <td className='p-4 capitalize'>
@@ -273,7 +273,7 @@ export default function InstagramPerformancePage() {
                           <td className='p-4 text-right'>
                             {formatNum(post.comments)}
                           </td>
-                          <td className='p-4 text-right text-zinc-400'>
+                          <td className='p-4 text-right text-content-muted'>
                             {post.posted_at
                               ? new Date(post.posted_at).toLocaleDateString()
                               : '-'}
@@ -289,18 +289,18 @@ export default function InstagramPerformancePage() {
         )}
 
         {/* Actions */}
-        <div className='mt-8 bg-zinc-900 rounded-lg p-6 border border-zinc-700'>
+        <div className='mt-8 bg-surface-elevated rounded-lg p-6 border border-stroke-default'>
           <h3 className='text-xl font-bold mb-4'>Quick Links</h3>
           <div className='flex flex-wrap gap-4'>
             <a
               href='/admin/instagram-preview'
-              className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-surface-card hover:bg-surface-overlay rounded-md text-content-primary font-medium transition-colors'
             >
               Content Preview
             </a>
             <a
               href='/admin/scheduler'
-              className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-md text-white font-medium transition-colors'
+              className='px-4 py-2 bg-surface-card hover:bg-surface-overlay rounded-md text-content-primary font-medium transition-colors'
             >
               Scheduler
             </a>

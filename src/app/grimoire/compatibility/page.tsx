@@ -75,7 +75,7 @@ export default function CompatibilityIndexPage() {
   });
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(compatibilityListSchema)}
       {renderJsonLd(
         createBreadcrumbSchema([
@@ -91,10 +91,10 @@ export default function CompatibilityIndexPage() {
           ]}
         />
         <div className='mb-12'>
-          <h1 className='text-4xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-4xl font-light text-content-primary mb-4'>
             Zodiac Compatibility: Best & Worst Matches for Every Sign
           </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl'>
+          <p className='text-lg text-content-muted max-w-2xl'>
             Explore how zodiac signs interact in love, friendship, and work.
             Select two signs to see their compatibility analysis.
           </p>
@@ -102,26 +102,26 @@ export default function CompatibilityIndexPage() {
 
         {/* Stats */}
         <div className='grid grid-cols-3 gap-4 mb-12 max-w-md'>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-3xl font-light text-lunary-rose'>12</div>
-            <div className='text-sm text-zinc-400'>Signs</div>
+            <div className='text-sm text-content-muted'>Signs</div>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-3xl font-light text-lunary-rose'>78</div>
-            <div className='text-sm text-zinc-400'>Unique Pairs</div>
+            <div className='text-sm text-content-muted'>Unique Pairs</div>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
             <div className='text-3xl font-light text-lunary-rose'>3</div>
-            <div className='text-sm text-zinc-400'>Categories</div>
+            <div className='text-sm text-content-muted'>Categories</div>
           </div>
         </div>
 
         {/* Compatibility Matrix */}
         <div className='mb-12 overflow-x-auto'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Compatibility Matrix
           </h2>
-          <p className='text-zinc-400 text-sm mb-6'>
+          <p className='text-content-muted text-sm mb-6'>
             Hover to highlight row and column. Click any cell to see the full
             compatibility analysis.
           </p>
@@ -130,19 +130,21 @@ export default function CompatibilityIndexPage() {
 
         {/* Browse by Sign */}
         <div className='space-y-8'>
-          <h2 className='text-2xl font-medium text-zinc-100'>Browse by Sign</h2>
+          <h2 className='text-2xl font-medium text-content-primary'>
+            Browse by Sign
+          </h2>
           {signs.map(([key1, sign1]) => (
             <section
               key={key1}
-              className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'
+              className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/30'
             >
               <div className='flex items-center gap-3 mb-4'>
                 <span className='text-2xl'>{ZODIAC_SYMBOLS[key1] || '⭐'}</span>
                 <div>
-                  <h3 className='text-xl font-medium text-zinc-100'>
+                  <h3 className='text-xl font-medium text-content-primary'>
                     {sign1.name} Compatibility
                   </h3>
-                  <p className='text-sm text-zinc-400'>
+                  <p className='text-sm text-content-muted'>
                     {sign1.element} • {sign1.modality}
                   </p>
                 </div>
@@ -157,7 +159,7 @@ export default function CompatibilityIndexPage() {
                     <Link
                       key={key2}
                       href={`/grimoire/compatibility/${slug}`}
-                      className='px-3 py-1.5 rounded-lg bg-zinc-800/50 hover:bg-lunary-rose-900 border border-zinc-700/50 hover:border-lunary-rose-600 text-zinc-300 hover:text-lunary-rose-300 text-sm transition-colors'
+                      className='px-3 py-1.5 rounded-lg bg-surface-card/50 hover:bg-layer-base border border-stroke-default/50 hover:border-lunary-rose-600 text-content-secondary hover:text-lunary-rose-300 text-sm transition-colors'
                     >
                       {sign1.name} & {sign2.name}
                     </Link>
@@ -172,7 +174,7 @@ export default function CompatibilityIndexPage() {
         <section className='mt-12'>
           <Link
             href='/grimoire/synastry/generate'
-            className='block p-6 rounded-lg bg-gradient-to-r from-lunary-rose-900/30 to-lunary-primary-900/30 border border-lunary-rose-700 hover:border-lunary-rose-500 transition-colors group'
+            className='block p-6 rounded-lg bg-gradient-to-r from-lunary-rose-900/30 to-layer-base/30 border border-lunary-rose-700 hover:border-lunary-rose-500 transition-colors group'
           >
             <div className='flex items-center justify-between'>
               <div>
@@ -180,7 +182,7 @@ export default function CompatibilityIndexPage() {
                   <Heart className='h-5 w-5' />
                   Generate Synastry Chart
                 </h3>
-                <p className='text-zinc-400 mt-1'>
+                <p className='text-content-muted mt-1'>
                   Compare two birth charts to discover deep compatibility,
                   strengths, and growth areas
                 </p>
@@ -196,11 +198,11 @@ export default function CompatibilityIndexPage() {
         <section className='mt-6 text-center'>
           <Link
             href='/birth-chart'
-            className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-zinc-100 transition-colors'
+            className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-surface-card/50 hover:bg-surface-card border border-stroke-default text-content-secondary hover:text-content-primary transition-colors'
           >
             View Your Birth Chart
           </Link>
-          <p className='mt-3 text-sm text-zinc-400'>
+          <p className='mt-3 text-sm text-content-muted'>
             Understand your complete astrological profile
           </p>
         </section>

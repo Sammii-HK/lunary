@@ -72,11 +72,8 @@ export function SocialProof() {
       {/* Trust Counter */}
       <div className='text-center'>
         <div className='inline-flex items-center gap-2 px-6 py-3 rounded-full border border-lunary-primary/30 bg-lunary-primary-500/10 backdrop-blur-sm'>
-          <Star
-            className='w-5 h-5 text-lunary-primary-300'
-            fill='currentColor'
-          />
-          <span className='text-lg font-medium text-white'>
+          <Star className='w-5 h-5 text-content-brand' fill='currentColor' />
+          <span className='text-lg font-medium text-content-primary'>
             Trusted by {userCount.toLocaleString()}+ cosmic seekers
           </span>
         </div>
@@ -88,7 +85,7 @@ export function SocialProof() {
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
-              className='p-6 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors'
+              className='p-6 rounded-xl border border-stroke-subtle/50 bg-surface-elevated/30 hover:bg-surface-elevated/40 transition-colors'
             >
               <div className='flex items-center gap-1 mb-3'>
                 {Array.from({ length: testimonial.rating }).map((_, i) => (
@@ -100,10 +97,10 @@ export function SocialProof() {
                 ))}
               </div>
               <Quote className='w-6 h-6 text-lunary-primary-400/50 mb-3' />
-              <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+              <p className='text-sm text-content-secondary leading-relaxed mb-4'>
                 &ldquo;{testimonial.text}&rdquo;
               </p>
-              <p className='text-xs text-zinc-400 font-medium'>
+              <p className='text-xs text-content-muted font-medium'>
                 — {testimonial.name}
               </p>
             </div>

@@ -65,7 +65,7 @@ const highlightInlineTime = (text: string): React.ReactNode => {
   if (parts.length === 1) return text;
   return parts.map((part, i) =>
     i % 2 === 1 ? (
-      <span key={i} className='text-lunary-primary-200'>
+      <span key={i} className='text-content-secondary'>
         {part}
       </span>
     ) : (
@@ -439,7 +439,7 @@ export const DailyInsightCard = () => {
 
       return (
         <div className='locked-preview-redacted mb-2'>
-          <p className='text-xs text-zinc-400'>{contentWithSpaces}</p>
+          <p className='text-xs text-content-muted'>{contentWithSpaces}</p>
         </div>
       );
     }
@@ -456,18 +456,18 @@ export const DailyInsightCard = () => {
     return (
       <Link
         href='/horoscope'
-        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full min-h-20'
+        className='block py-3 px-4 bg-surface-elevated border border-stroke-subtle/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full min-h-20'
         data-testid='journal-prompt'
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
             <div className='flex items-center gap-2 mb-1'>
-              <Sparkles className='w-4 h-4 text-lunary-primary-300' />
-              <span className='text-sm text-zinc-200'>
+              <Sparkles className='w-4 h-4 text-content-brand' />
+              <span className='text-sm text-content-primary'>
                 Today&apos;s Influence
               </span>
             </div>
-            <p className='text-sm text-zinc-200 leading-relaxed mb-2'>
+            <p className='text-sm text-content-primary leading-relaxed mb-2'>
               {highlightInlineTime(generalTransitText ?? insight.text)}
             </p>
 
@@ -496,7 +496,7 @@ export const DailyInsightCard = () => {
                     );
                   }
                 }}
-                className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300 hover:bg-lunary-primary-800/80 transition-colors'
+                className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-layer-base/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-content-brand hover:bg-layer-raised/80 transition-colors'
               >
                 <Sparkles className='w-2.5 h-2.5' />
                 Lunary+
@@ -532,12 +532,12 @@ export const DailyInsightCard = () => {
                   }
                 }
               }}
-              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0'
+              className='flex items-center gap-1.5 text-xs text-content-secondary hover:text-content-secondary transition-colors bg-none border-none p-0'
             >
               {ctaCopy.horoscope}
             </span>
           </div>
-          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-300 transition-colors flex-shrink-0 mt-1' />
+          <ArrowRight className='w-4 h-4 text-content-muted group-hover:text-content-brand transition-colors flex-shrink-0 mt-1' />
         </div>
       </Link>
     );
@@ -546,34 +546,36 @@ export const DailyInsightCard = () => {
   return (
     <Link
       href='/horoscope'
-      className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full min-h-20'
+      className='block py-3 px-4 bg-surface-elevated border border-stroke-subtle/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full min-h-20'
       data-testid='journal-prompt'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-2 mb-1'>
-            <Sparkles className='w-4 h-4 text-lunary-primary-300' />
-            <span className='text-sm text-zinc-200'>Today's Influence</span>
+            <Sparkles className='w-4 h-4 text-content-brand' />
+            <span className='text-sm text-content-primary'>
+              Today's Influence
+            </span>
           </div>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
             {highlightInlineTime(displayText)}
           </p>
           {transitDetails.length > 0 && (
             <div className='mt-2 space-y-1'>
               {transitDetails.map((detail) => (
-                <p key={detail.id} className='text-xs text-zinc-500'>
+                <p key={detail.id} className='text-xs text-content-muted'>
                   {detail.title} · {detail.header}
                 </p>
               ))}
             </div>
           )}
           {lifeThemeName && (
-            <p className='text-xs text-lunary-secondary-200 mt-2'>
+            <p className='text-xs text-content-brand-secondary mt-2'>
               Connects to your theme: {lifeThemeName}
             </p>
           )}
         </div>
-        <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-300 transition-colors flex-shrink-0 mt-1' />
+        <ArrowRight className='w-4 h-4 text-content-muted group-hover:text-content-brand transition-colors flex-shrink-0 mt-1' />
       </div>
     </Link>
   );

@@ -1,0 +1,1298 @@
+import transitData from '../../data/slow-planet-sign-changes.json';
+import { format } from 'date-fns';
+
+export interface YearlyTransit {
+  id: string;
+  year: number;
+  planet: string;
+  transitType: string;
+  title: string;
+  dates: string;
+  signs: string[];
+  description: string;
+  themes: string[];
+  doList: string[];
+  avoidList: string[];
+  tone: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+
+const RAW_TRANSITS: YearlyTransit[] = [
+  // 2025
+  {
+    id: 'saturn-return-2025',
+    year: 2025,
+    planet: 'Saturn',
+    transitType: 'Saturn Return',
+    title: 'Saturn Return 2025',
+    dates: 'All year (for those born ~1995-1996)',
+    signs: ['Pisces'],
+    description:
+      'Saturn Return occurs when Saturn returns to its natal position, happening around ages 29-30. In 2025, Saturn continues through Pisces, bringing karmic lessons about boundaries, spirituality, and dissolving old structures.',
+    themes: ['maturity', 'responsibility', 'life assessment', 'karmic lessons'],
+    doList: [
+      'take stock of your life',
+      'set long-term goals',
+      'accept responsibility',
+      'build sustainable structures',
+    ],
+    avoidList: [
+      'avoiding hard truths',
+      'resisting change',
+      'shortcuts',
+      'blaming others',
+    ],
+    tone: 'Sobering but empowering. A season of boundaries, truth-telling, and building a life you can actually sustain.',
+  },
+  {
+    id: 'jupiter-gemini-2025',
+    year: 2025,
+    planet: 'Jupiter',
+    transitType: 'Jupiter Transit',
+    title: 'Jupiter in Gemini 2025',
+    dates: 'Until June 9, 2025',
+    signs: ['Gemini'],
+    description:
+      'Jupiter in Gemini expands communication, learning, and networking. This transit favors writers, teachers, and those in media. Ideas flow freely and connections multiply.',
+    themes: ['communication', 'learning', 'networking', 'curiosity'],
+    doList: [
+      'learn new skills',
+      'write and publish',
+      'network actively',
+      'explore ideas',
+    ],
+    avoidList: [
+      'scattered focus',
+      'superficial knowledge',
+      'gossip',
+      'overcommitting',
+    ],
+    tone: 'Bright, busy, and curious. Momentum comes through learning, writing, networking, and saying yes strategically.',
+  },
+  {
+    id: 'jupiter-cancer-2025',
+    year: 2025,
+    planet: 'Jupiter',
+    transitType: 'Jupiter Transit',
+    title: 'Jupiter in Cancer 2025',
+    dates: 'June 9, 2025 - June 30, 2026',
+    signs: ['Cancer'],
+    description:
+      "Jupiter enters Cancer mid-2025, expanding themes of home, family, and emotional security. This is Jupiter's exaltation sign, making it especially powerful for nurturing, real estate, and family growth.",
+    themes: ['home', 'family', 'emotional growth', 'nurturing'],
+    doList: [
+      'invest in home',
+      'strengthen family bonds',
+      'heal emotional wounds',
+      'create safety',
+    ],
+    avoidList: [
+      'overprotectiveness',
+      'clinging to the past',
+      'emotional manipulation',
+      'over-eating',
+    ],
+    tone: 'Soft, healing, and protective. Growth comes through home, family, emotional safety, and nurturing what matters.',
+  },
+  // 2026
+  {
+    id: 'saturn-return-2026',
+    year: 2026,
+    planet: 'Saturn',
+    transitType: 'Saturn Return',
+    title: 'Saturn Return 2026',
+    dates: 'All year (for those born ~1996-1997)',
+    signs: ['Pisces', 'Aries'],
+    description:
+      'In 2026, Saturn transitions from Pisces to Aries. Those born in late 1996-1997 experience their Saturn Return, a major life transition around age 29-30.',
+    themes: ['new beginnings', 'identity', 'independence', 'taking charge'],
+    doList: [
+      'define your identity',
+      'take leadership',
+      'start new ventures',
+      'be courageous',
+    ],
+    avoidList: ['recklessness', 'impatience', 'selfishness', 'burning bridges'],
+    tone: ' Brave and clarifying. This transit pushes you to define yourself, lead your life, and commit to a new chapter.',
+  },
+  {
+    id: 'jupiter-cancer-2026',
+    year: 2026,
+    planet: 'Jupiter',
+    transitType: 'Jupiter Transit',
+    title: 'Jupiter in Cancer 2026',
+    dates: 'Until June 30, 2026',
+    signs: ['Cancer'],
+    description:
+      'Jupiter continues its exalted position in Cancer through the first half of 2026, blessing family matters, home investments, and emotional healing.',
+    themes: [
+      'family expansion',
+      'home blessings',
+      'emotional abundance',
+      'nurturing',
+    ],
+    doList: [
+      'buy property',
+      'expand family',
+      'heal generational patterns',
+      'create sanctuary',
+    ],
+    avoidList: [
+      'smothering',
+      'living in the past',
+      'emotional eating',
+      'dependency',
+    ],
+    tone: 'Supportive and restorative. Emotional confidence grows when you prioritise home, care, and steady inner security.',
+  },
+  {
+    id: 'jupiter-leo-2026',
+    year: 2026,
+    planet: 'Jupiter',
+    transitType: 'Jupiter Transit',
+    title: 'Jupiter in Leo 2026',
+    dates: 'June 30, 2026 - July 2027',
+    signs: ['Leo'],
+    description:
+      'Jupiter enters Leo in mid-2026, bringing expansion to creativity, self-expression, and romance. This transit favors artists, performers, and those embracing their authentic selves.',
+    themes: ['creativity', 'romance', 'self-expression', 'joy'],
+    doList: ['create boldly', 'romance', 'perform', 'celebrate yourself'],
+    avoidList: ['arrogance', 'drama', 'overspending', 'vanity'],
+    tone: 'Joyful and bold. Confidence expands when you create, perform, love loudly, and stop shrinking your light.',
+  },
+  {
+    id: 'saturn-second-cycle-2026',
+    year: 2026,
+    planet: 'Saturn',
+    transitType: 'Saturn Square',
+    title: 'Saturn Second Square 2026',
+    dates: 'March 2026 - August 2026 (for those born ~1985-1989)',
+    signs: ['Aries', 'Capricorn'],
+    description:
+      'Saturn’s second check-in hits the natal square line for people born in the mid-80s. This is about confronting ambition, discipline, and how you prove your reliability after the first return.',
+    themes: ['discipline', 'maturity', 'authority', 'integration'],
+    doList: [
+      'review what you named as progress after your first return',
+      'set clearer boundaries around work and leadership',
+      'build sustainable systems rather than hustle harder',
+      'lean into accountability partnerships',
+    ],
+    avoidList: [
+      'acting out of aggression or impatience',
+      'defensive perfectionism',
+      'burning out while proving yourself',
+      'letting fear of failure freeze movement',
+    ],
+    tone: 'Demanding but honest. Saturn squares ask for more maturity and steadiness, not just motion.',
+  },
+  // 2027
+  {
+    id: 'saturn-aries-2027',
+    year: 2027,
+    planet: 'Saturn',
+    transitType: 'Saturn Return',
+    title: 'Saturn in Aries 2027',
+    dates: 'All year',
+    signs: ['Aries'],
+    description:
+      'Saturn fully commits to Aries in 2027, teaching lessons about independence, leadership, and taking mature action. This is about learning to be a responsible pioneer.',
+    themes: ['leadership', 'independence', 'courage', 'discipline'],
+    doList: [
+      'lead responsibly',
+      'take calculated risks',
+      'build independence',
+      'develop self-discipline',
+    ],
+    avoidList: ['impulsive action', 'aggression', 'selfishness', 'impatience'],
+    tone: 'Disciplined fire. You are asked to act with maturity, lead with integrity, and build courage through consistency.',
+  },
+  {
+    id: 'saturn-return-2027',
+    year: 2027,
+    planet: 'Saturn',
+    transitType: 'Saturn Return',
+    title: 'Saturn Return 2027',
+    dates: 'All year (for those born ~1998-1999)',
+    signs: ['Aries'],
+    description:
+      'Saturn returns to its natal degree for people born in 1998-1999, making 2027 a pivotal year to confront where you have led, what you have shouldered, and who you are becoming.',
+    themes: ['accountability', 'identity', 'commitment', 'leadership'],
+    doList: [
+      'assess long-term commitments',
+      'refine your leadership style',
+      'own responsibility for outcomes',
+      'build structures that support growth',
+    ],
+    avoidList: [
+      'giving up when things feel heavy',
+      'acting impulsively for quick wins',
+      'neglecting self-care',
+      'blaming others for stalled progress',
+    ],
+    tone: 'Intense but steady. It asks you to see where you have fallen short, then rebuild with discipline and clarity.',
+  },
+  {
+    id: 'saturn-opposition-2027',
+    year: 2027,
+    planet: 'Saturn',
+    transitType: 'Saturn Opposition',
+    title: 'Saturn Opposition 2027',
+    dates: 'June 2027 - January 2028 (for those born ~1978-1982)',
+    signs: ['Cancer', 'Capricorn'],
+    description:
+      'The midway opposition amplifies partnership lessons for the mid-70s cohort and those who are integrating Saturn’s second square. It mirrors how you share power, resources, and responsibility.',
+    themes: ['relationships', 'balance', 'power sharing', 'accountability'],
+    doList: [
+      're-evaluate how you balance work and relationships',
+      'say yes to mutual responsibility',
+      'practice assertive but compassionate boundaries',
+      'keep agreements and revise where needed',
+    ],
+    avoidList: [
+      'standing rigid in old patterns of control',
+      'ghosting or withdrawing from partnership friction',
+      'sacrificing needs to keep the peace',
+      'resisting honest conversations about fairness',
+    ],
+    tone: 'Reflective and relational. Opposition energy works best when it invites dialogue instead of blame.',
+  },
+  {
+    id: 'uranus-taurus-2019',
+    year: 2019,
+    planet: 'Uranus',
+    transitType: 'Uranus Transit',
+    title: 'Uranus in Taurus 2019-2025',
+    dates: 'March 6, 2019 - July 7, 2025',
+    signs: ['Taurus'],
+    description:
+      'Uranus in Taurus revolutionizes finances, values, and material security. This 7-year transit brings sudden changes to how we earn, spend, and define worth. Expect disruptions in banking, agriculture, and personal resources.',
+    themes: [
+      'financial revolution',
+      'values shift',
+      'material innovation',
+      'earth changes',
+    ],
+    doList: [
+      'diversify income streams',
+      'embrace financial technology',
+      'reassess what you truly value',
+      'stay flexible with resources',
+    ],
+    avoidList: [
+      'rigid attachment to possessions',
+      'resistance to financial change',
+      'stubbornness about values',
+      'ignoring new economic realities',
+    ],
+    tone: 'Groundbreaking and unsettling. Uranus asks you to revolutionize your relationship with money, security, and what you hold dear.',
+  },
+  {
+    id: 'uranus-gemini-2025',
+    year: 2025,
+    planet: 'Uranus',
+    transitType: 'Uranus Transit',
+    title: 'Uranus Enters Gemini 2025',
+    dates: 'July 7 - November 7, 2025 (preview)',
+    signs: ['Gemini'],
+    description:
+      'Uranus enters Gemini for the first time on July 7, 2025, giving us a preview of its revolutionary energy in communication, technology, and information before retrograding back to Taurus in November.',
+    themes: [
+      'communication revolution',
+      'technology',
+      'information',
+      'innovation',
+    ],
+    doList: [
+      'embrace new tech',
+      'learn cutting-edge skills',
+      'be adaptable',
+      'think differently',
+    ],
+    avoidList: [
+      'resistance to change',
+      'information overload',
+      'nervous energy',
+      'scattered thinking',
+    ],
+    tone: 'Electric and disruptive in the best way. This preview period hints at the major shifts coming when Uranus settles into Gemini permanently in 2026.',
+  },
+  {
+    id: 'uranus-taurus-2026-retrograde',
+    year: 2026,
+    planet: 'Uranus',
+    transitType: 'Uranus Transit',
+    title: 'Uranus Returns to Taurus 2025-2026',
+    dates: 'November 7, 2025 - April 26, 2026',
+    signs: ['Taurus'],
+    description:
+      'Uranus retrogrades back into Taurus for a final review of the financial and material revolutions that began in 2019. This is the last chance to integrate lessons about values, security, and resources before Uranus moves into Gemini permanently.',
+    themes: [
+      'final integration',
+      'financial review',
+      'values completion',
+      'material closure',
+    ],
+    doList: [
+      'complete unfinished financial changes',
+      'solidify new value systems',
+      'release old material attachments',
+      'prepare for the communication era ahead',
+    ],
+    avoidList: [
+      'reverting to old money habits',
+      'ignoring final lessons',
+      'rushing closure',
+      'clinging to outdated security',
+    ],
+    tone: 'Reflective and completing. Use this final passage to close out seven years of material revolution with intention.',
+  },
+  {
+    id: 'uranus-gemini-2026',
+    year: 2026,
+    planet: 'Uranus',
+    transitType: 'Uranus Transit',
+    title: 'Uranus in Gemini 2026',
+    dates: 'April 26, 2026 - July 2032',
+    signs: ['Gemini'],
+    description:
+      'Uranus re-enters Gemini on April 26, 2026, beginning its long-term transit through the sign of the twins that lasts until 2032. Expect major breakthroughs in AI, media, and how we share information.',
+    themes: [
+      'communication revolution',
+      'technology',
+      'information',
+      'innovation',
+    ],
+    doList: [
+      'embrace new tech',
+      'learn cutting-edge skills',
+      'be adaptable',
+      'think differently',
+    ],
+    avoidList: [
+      'resistance to change',
+      'information overload',
+      'nervous energy',
+      'scattered thinking',
+    ],
+    tone: 'Electric and disruptive in the best way. Expect fast change, breakthroughs, and a total upgrade in how you think and communicate.',
+  },
+  {
+    id: 'neptune-pisces-2012',
+    year: 2012,
+    planet: 'Neptune',
+    transitType: 'Neptune Transit',
+    title: 'Neptune in Pisces 2012-2026',
+    dates: 'February 3, 2012 - March 30, 2025',
+    signs: ['Pisces'],
+    description:
+      'Neptune in its home sign of Pisces dissolves boundaries between reality and imagination. This 14-year transit has heightened collective spirituality, artistic expression, and compassion, while also bringing confusion, escapism, and idealism.',
+    themes: ['spirituality', 'imagination', 'dissolution', 'compassion'],
+    doList: [
+      'develop spiritual practices',
+      'embrace creativity',
+      'practice compassion',
+      'trust intuition',
+    ],
+    avoidList: [
+      'escapism',
+      'addiction',
+      'denial of reality',
+      'victim mentality',
+    ],
+    tone: 'Dreamy and transcendent. Neptune asks you to dissolve ego boundaries and connect with something greater than yourself.',
+  },
+  {
+    id: 'neptune-aries-2025-preview',
+    year: 2025,
+    planet: 'Neptune',
+    transitType: 'Neptune Transit',
+    title: 'Neptune Enters Aries 2025',
+    dates: 'March 30 - October 22, 2025 (preview)',
+    signs: ['Aries'],
+    description:
+      'Neptune enters Aries for the first time since 1875, bringing a preview of spiritual pioneering and idealistic action before retrograding back to Pisces in October.',
+    themes: [
+      'spiritual courage',
+      'idealistic action',
+      'identity dissolution',
+      'new dreams',
+    ],
+    doList: [
+      'dream boldly',
+      'pioneer spiritual paths',
+      'act on inspiration',
+      'embrace new ideals',
+    ],
+    avoidList: [
+      'impulsive escapism',
+      'identity confusion',
+      'aggressive idealism',
+      'spiritual bypassing',
+    ],
+    tone: 'Pioneering and visionary. This preview hints at the collective spiritual awakening and identity shifts coming in the years ahead.',
+  },
+  {
+    id: 'neptune-aries-2026',
+    year: 2026,
+    planet: 'Neptune',
+    transitType: 'Neptune Transit',
+    title: 'Neptune Enters Aries 2026',
+    dates: 'January 26, 2026 - March 2039',
+    signs: ['Aries'],
+    description:
+      'Neptune settles into Aries for a 13-year transit that will redefine collective spirituality, identity, and idealism. Expect new spiritual movements, visionary leaders, and a generation inspired to act on their dreams.',
+    themes: [
+      'spiritual pioneering',
+      'visionary action',
+      'identity transcendence',
+      'new ideals',
+    ],
+    doList: [
+      'act on spiritual inspiration',
+      'pioneer new paths',
+      'embrace visionary leadership',
+      'dissolve limiting self-concepts',
+    ],
+    avoidList: [
+      'spiritual ego',
+      'impulsive idealism',
+      'identity confusion',
+      'aggression masked as enlightenment',
+    ],
+    tone: 'Bold and transcendent. Neptune in Aries asks you to dream courageously and act on your highest vision.',
+  },
+  {
+    id: 'saturn-return-2028',
+    year: 2028,
+    planet: 'Saturn',
+    transitType: 'Saturn Return',
+    title: 'Saturn Return 2028',
+    dates: 'All year (for those born ~1999-2000)',
+    signs: ['Aries'],
+    description:
+      'Saturn continues its return for the late 1990s cohort as it finishes its journey through Aries, urging a final pass on identity, discipline, and the responsibilities you are ready to own.',
+    themes: ['responsibility', 'maturity', 'integration', 'discipline'],
+    doList: [
+      'clarify long-term goals',
+      'reaffirm commitments to yourself',
+      'integrate lessons from the past few years',
+      'lean into steady structures instead of quick fixes',
+    ],
+    avoidList: [
+      'overworking without rest',
+      'ignoring lessons from authority figures',
+      'impulsive shifts in direction',
+      'defensive reactions to feedback',
+    ],
+    tone: 'Steady and clarifying. This year rewards those who take a disciplined, patient approach to the life they are building.',
+  },
+  {
+    id: 'saturn-second-square-2028',
+    year: 2028,
+    planet: 'Saturn',
+    transitType: 'Saturn Square',
+    title: 'Saturn Second Square 2028',
+    dates: 'February 2028 - August 2028 (for those born ~1971-1975)',
+    signs: ['Capricorn', 'Scorpio'],
+    description:
+      'The square returns one last time before the next Saturn return, nudging the late-60s and early-70s cohort to integrate leadership lessons, soften rigidity, and lean into more grounded, patient authority.',
+    themes: ['integration', 'wisdom', 'boundaries', 'service'],
+    doList: [
+      'slow down to listen before reacting',
+      'support the next generation with steadiness',
+      'hold space for rest without guilt',
+      'rewrite hard rules that no longer serve others',
+    ],
+    avoidList: [
+      'cling to outdated power plays',
+      'burn out proving relevance',
+      'isolating to avoid pressure',
+      'minimizing vulnerability for the sake of control',
+    ],
+    tone: 'Calmer than the first square but still firm. Use this time to finish what Saturn asked for and leave space for renewal.',
+  },
+  // 2028
+  {
+    id: 'jupiter-virgo-2028',
+    year: 2028,
+    planet: 'Jupiter',
+    transitType: 'Jupiter Transit',
+    title: 'Jupiter in Virgo 2028',
+    dates: 'July 2027 - August 2028',
+    signs: ['Virgo'],
+    description:
+      'Jupiter in Virgo brings expansion through service, health, and practical improvement. This transit favors those in healthcare, wellness, and service industries.',
+    themes: ['health', 'service', 'improvement', 'practical growth'],
+    doList: [
+      'optimize health',
+      'serve others',
+      'improve skills',
+      'organize life',
+    ],
+    avoidList: ['perfectionism', 'over-analysis', 'criticism', 'workaholism'],
+    tone: 'Practical and improving. Progress comes through routines, skill-building, health, and small changes that compound.',
+  },
+  // 2028
+  {
+    id: 'saturn-taurus-2028',
+    year: 2028,
+    planet: 'Saturn',
+    transitType: 'Saturn Transit',
+    title: 'Saturn Enters Taurus 2028',
+    dates: 'April 12-14, 2028 onwards',
+    signs: ['Taurus'],
+    description:
+      'Saturn enters Taurus in April 2028, bringing lessons about finances, values, and material security. This transit teaches sustainable wealth-building and lasts until May 2030.',
+    themes: ['finances', 'values', 'security', 'sustainability'],
+    doList: [
+      'build savings',
+      'define values',
+      'create stability',
+      'invest wisely',
+    ],
+    avoidList: [
+      'overspending',
+      'stubbornness',
+      'materialism',
+      'resistance to change',
+    ],
+    tone: 'Grounding and reality-based. It is time to stabilise money, values, and long-term security through patience and structure.',
+  },
+  {
+    id: 'jupiter-libra-2028',
+    year: 2028,
+    planet: 'Jupiter',
+    transitType: 'Jupiter Transit',
+    title: 'Jupiter Enters Libra 2028',
+    dates: 'August 24, 2028 - September 24, 2029',
+    signs: ['Libra'],
+    description:
+      'Jupiter enters Libra on August 24, 2028, expanding relationships, partnerships, and the pursuit of justice and harmony. This transit favors marriage, legal matters, diplomacy, and collaborative ventures.',
+    themes: ['relationships', 'partnership', 'justice', 'harmony'],
+    doList: [
+      'invest in partnerships',
+      'seek balance and fairness',
+      'pursue legal matters',
+      'beautify your environment',
+    ],
+    avoidList: [
+      'codependency',
+      'indecision',
+      'people-pleasing',
+      'superficiality',
+    ],
+    tone: 'Harmonising and partnership-focused. Expansion comes through collaboration, commitment, and choosing relationships that feel balanced.',
+  },
+  // 2029
+  {
+    id: 'saturn-taurus-2029',
+    year: 2029,
+    planet: 'Saturn',
+    transitType: 'Saturn Transit',
+    title: 'Saturn in Taurus 2029',
+    dates: 'All year (continuing from April 2028)',
+    signs: ['Taurus'],
+    description:
+      'Saturn continues its journey through Taurus in 2029, deepening lessons about finances, values, and material security that began in April 2028.',
+    themes: ['finances', 'values', 'security', 'sustainability'],
+    doList: [
+      'build savings',
+      'define values',
+      'create stability',
+      'invest wisely',
+    ],
+    avoidList: [
+      'overspending',
+      'stubbornness',
+      'materialism',
+      'resistance to change',
+    ],
+    tone: 'Grounding and reality-based. It is time to stabilise money, values, and long-term security through patience and structure.',
+  },
+  {
+    id: 'saturn-return-2029',
+    year: 2029,
+    planet: 'Saturn',
+    transitType: 'Saturn Return',
+    title: 'Saturn Return 2029',
+    dates: 'All year (for those born ~1999-2000)',
+    signs: ['Taurus'],
+    description:
+      'The 1999/2000 birth cohort hits Saturn Return as Saturn moves through Taurus, demanding a sober review of finances, values, and how secure your routines really are.',
+    themes: ['responsibility', 'stability', 'values', 'financial maturity'],
+    doList: [
+      'audit your spending and savings plans',
+      'commit to long-term structures',
+      'choose people and work that reinforce your values',
+      'make decisions from patience rather than fear',
+    ],
+    avoidList: [
+      'rushing financial fixes',
+      'overcommitting before feeling secure',
+      'neglecting self-worth for safety nets',
+      'letting others set your worth',
+    ],
+    tone: 'Sober and grounding. Saturn asks for slow, steady steps that keep your resources and self-respect intact.',
+  },
+  // 2030
+  {
+    id: 'saturn-return-2030',
+    year: 2030,
+    planet: 'Saturn',
+    transitType: 'Saturn Return',
+    title: 'Saturn Return 2030',
+    dates: 'Until May 2030 (for those born ~2000-2001)',
+    signs: ['Taurus'],
+    description:
+      'Saturn finishes its journey through Taurus in May 2030, completing the return for people born in 2000-2001 and wrapping up lessons about values, security, and personal worth.',
+    themes: ['integration', 'boundaries', 'security', 'personal worth'],
+    doList: [
+      'complete any commitments you promised yourself',
+      'set boundaries that protect your time and resources',
+      'lean into slow growth instead of quick wins',
+      'track how you define success and reshape it if needed',
+    ],
+    avoidList: [
+      'defaulting to old patterns that no longer serve you',
+      'confusing busyness for progress',
+      'allowing others to erode your boundaries',
+      'underpricing the value you bring',
+    ],
+    tone: 'Clarifying and wrapping up. This year ties loose ends so you can enter the next Saturn cycle with confidence.',
+  },
+  {
+    id: 'saturn-gemini-2030',
+    year: 2030,
+    planet: 'Saturn',
+    transitType: 'Saturn Transit',
+    title: 'Saturn Enters Gemini 2030',
+    dates: 'May 31, 2030 onwards',
+    signs: ['Gemini'],
+    description:
+      'Saturn enters Gemini on May 31, 2030, shifting lessons to communication, learning, and mental discipline. This transit teaches structured thinking and responsible information sharing.',
+    themes: ['communication', 'learning', 'mental discipline', 'teaching'],
+    doList: [
+      'develop communication skills',
+      'commit to learning',
+      'write and teach',
+      'think before speaking',
+    ],
+    avoidList: [
+      'scattered thinking',
+      'gossip',
+      'superficial knowledge',
+      'nervous anxiety',
+    ],
+    tone: 'Focused and intellectually grounding. Saturn asks you to deepen your knowledge and communicate with integrity.',
+  },
+  {
+    id: 'jupiter-libra-2030',
+    year: 2030,
+    planet: 'Jupiter',
+    transitType: 'Jupiter Transit',
+    title: 'Jupiter in Libra 2030',
+    dates: 'Late 2029 - Late 2030',
+    signs: ['Libra'],
+    description:
+      'Jupiter in Libra expands relationships, partnerships, and justice. This transit favors marriage, legal matters, and collaborative ventures.',
+    themes: ['relationships', 'partnership', 'justice', 'balance'],
+    doList: ['partner up', 'seek balance', 'legal matters', 'beautify'],
+    avoidList: [
+      'codependency',
+      'indecision',
+      'people-pleasing',
+      'superficiality',
+    ],
+    tone: 'Harmonising and partnership-focused. Expansion comes through collaboration, commitment, and choosing relationships that feel balanced.',
+  },
+  {
+    id: 'saturn-square-2033',
+    year: 2033,
+    planet: 'Saturn',
+    transitType: 'Saturn Square',
+    title: 'Saturn First Square 2033',
+    dates: 'April 2033 - September 2033 (for those born ~1984-1987)',
+    signs: ['Capricorn', 'Libra'],
+    description:
+      'Saturn hits the first square to its natal position, stirring tension between what you built in your thirties and the new standards you are being asked to meet. Regardless of your chart, this is about recalibrating authority, responsibility, and integrity.',
+    themes: [
+      'responsibility',
+      'boundary testing',
+      'recalibration',
+      'authority',
+    ],
+    doList: [
+      'review your structures',
+      'set clearer boundaries',
+      'honour authority while staying authentic',
+      'lean into disciplined creativity',
+    ],
+    avoidList: [
+      'defensive overreaction',
+      'sacrifice of integrity for approval',
+      'burning out trying to control everything',
+      'reactive leadership',
+    ],
+    tone: 'Demanding yet clarifying. This square forces you to confront what you have outgrown and gently nudges you toward more mature authority.',
+  },
+  {
+    id: 'saturn-opposition-2040',
+    year: 2040,
+    planet: 'Saturn',
+    transitType: 'Saturn Opposition',
+    title: 'Saturn Opposition 2040',
+    dates: 'May 2040 - December 2040 (for those born ~1975-1977)',
+    signs: ['Cancer', 'Capricorn'],
+    description:
+      'Saturn opposes its natal position, spotlighting relationships, partnerships, and how you share responsibility. This is a mirror moment; you are asked to balance your needs with the needs of others without compromising your maturity.',
+    themes: ['relationships', 'power balance', 'commitment', 'integration'],
+    doList: [
+      're-evaluate how you share power',
+      'strengthen communication in partnerships',
+      'stay accountable to agreements',
+      'practice compassionate detachment',
+    ],
+    avoidList: [
+      'co-dependent patterns',
+      'letting fear of change block commitment',
+      'overcorrecting or withdrawing completely',
+      'shaming yourself for needing support',
+    ],
+    tone: 'Reflective and relational. Balance is the key; ask what you are ready to build together and where you still need to stand alone.',
+  },
+  {
+    id: 'saturn-square-2048',
+    year: 2048,
+    planet: 'Saturn',
+    transitType: 'Saturn Square',
+    title: 'Saturn Second Square 2048',
+    dates: 'January 2048 - July 2048 (for those born ~1967-1969)',
+    signs: ['Scorpio', 'Aquarius'],
+    description:
+      'The second square arrives as Saturn approaches its return, asking for integration of the lessons that unfolded earlier in this cycle. Authority, transformation, and collective responsibility are themes to honour before the next cycle begins.',
+    themes: [
+      'integration',
+      'transformation',
+      'collective responsibility',
+      'inner authority',
+    ],
+    doList: [
+      'ease up on perfectionism',
+      'mentor the next generation',
+      'rebuild structures with wisdom',
+      'prioritize rest alongside discipline',
+    ],
+    avoidList: [
+      'resisting evolution',
+      'clinging to the burnout-era hustle',
+      'isolation out of fear',
+      'ignoring the system-level shifts already underway',
+    ],
+    tone: 'Strong but sensible. Step back from proving yourself and lean into generous leadership that steadies others.',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Major conjunctions
+  // ---------------------------------------------------------------------------
+  {
+    id: 'saturn-neptune-conjunction-aries-2025',
+    year: 2025,
+    planet: 'Saturn',
+    transitType: 'Saturn-Neptune Conjunction',
+    title: 'Saturn-Neptune Conjunction in Aries 2025',
+    dates: 'First pass: July 16, 2025. Exact conjunction: February 21, 2026',
+    signs: ['Aries'],
+    description:
+      'Saturn and Neptune meet in Aries for the first time since 1989. This once-in-a-generation conjunction merges structure with dreams, discipline with imagination. The first pass on July 16 2025 sets the tone; the exact conjunction on February 21 2026 crystallises it. Both planets entering Aries together signals a collective reset in how we pursue ideals.',
+    themes: [
+      'merging dreams with discipline',
+      'spiritual maturity',
+      'idealistic action',
+      'dissolving old structures',
+    ],
+    doList: [
+      'get serious about a creative or spiritual vision',
+      'build practical foundations for idealistic goals',
+      'face illusions honestly',
+      'commit to causes that matter',
+    ],
+    avoidList: [
+      'escapism disguised as spirituality',
+      'rigid thinking that blocks imagination',
+      'expecting overnight transformation',
+      'cynicism about dreams',
+    ],
+    tone: 'Rare and deeply meaningful. When the taskmaster meets the dreamer in the warrior sign, it is time to build something visionary with real bones.',
+    startDate: new Date('2025-07-16T00:00:00Z'),
+    endDate: new Date('2026-02-21T00:00:00Z'),
+  },
+  {
+    id: 'saturn-uranus-conjunction-gemini-2032',
+    year: 2032,
+    planet: 'Saturn',
+    transitType: 'Saturn-Uranus Conjunction',
+    title: 'Saturn-Uranus Conjunction in Gemini 2032',
+    dates: 'June 28, 2032',
+    signs: ['Gemini'],
+    description:
+      'Saturn and Uranus meet in Gemini, fusing stability with revolution in the sign of communication. The last Saturn-Uranus conjunction was in 1988 in Sagittarius. This one rewrites how we structure information, education, and media. Expect breakthroughs in AI governance, communication infrastructure, and how truth is verified.',
+    themes: [
+      'revolutionary structure',
+      'communication overhaul',
+      'information integrity',
+      'technological accountability',
+    ],
+    doList: [
+      'embrace new communication systems',
+      'question information structures',
+      'balance innovation with reliability',
+      'invest in education and literacy',
+    ],
+    avoidList: [
+      'clinging to outdated media',
+      'resisting technological change',
+      'spreading unverified information',
+      'fear of disruption',
+    ],
+    tone: 'Electric and structural. The old guard of communication meets its radical upgrade. Think less about what is said and more about how truth travels.',
+    startDate: new Date('2032-06-28T00:00:00Z'),
+    endDate: new Date('2032-06-28T00:00:00Z'),
+  },
+  {
+    id: 'jupiter-neptune-conjunction-aries-2035',
+    year: 2035,
+    planet: 'Jupiter',
+    transitType: 'Jupiter-Neptune Conjunction',
+    title: 'Jupiter-Neptune Conjunction in Aries 2035',
+    dates: 'March 25, 2035',
+    signs: ['Aries'],
+    description:
+      'Jupiter and Neptune unite in Aries, expanding spiritual vision and idealistic ambition to extraordinary levels. The last Jupiter-Neptune conjunction was in Pisces in 2022. In Aries, this energy becomes active, pioneering, and personally charged. Expect a wave of visionary leadership, spiritual entrepreneurship, and collective inspiration.',
+    themes: [
+      'visionary expansion',
+      'spiritual leadership',
+      'inspired action',
+      'cosmic optimism',
+    ],
+    doList: [
+      'dream bigger than you think is reasonable',
+      'launch spiritual or creative projects',
+      'trust your intuition and act on it',
+      'connect with communities that share your vision',
+    ],
+    avoidList: [
+      'grandiose delusions',
+      'overlooking practical details',
+      'following false prophets',
+      'escapism through excess',
+    ],
+    tone: 'Expansive and transcendent. When the planet of abundance meets the planet of dreams in the sign of new beginnings, the cosmos is giving you permission to aim impossibly high.',
+    startDate: new Date('2035-03-25T00:00:00Z'),
+    endDate: new Date('2035-03-25T00:00:00Z'),
+  },
+  {
+    id: 'jupiter-pluto-conjunction-aquarius-2033',
+    year: 2033,
+    planet: 'Jupiter',
+    transitType: 'Jupiter-Pluto Conjunction',
+    title: 'Jupiter-Pluto Conjunction in Aquarius 2033',
+    dates: 'February 5, 2033',
+    signs: ['Aquarius'],
+    description:
+      'Jupiter and Pluto meet in Aquarius, amplifying collective transformation and the power of movements. The last Jupiter-Pluto conjunction was in Capricorn in 2020, coinciding with the pandemic. In Aquarius, this conjunction empowers grassroots movements, technological revolution, and radical reimagining of social structures.',
+    themes: [
+      'collective empowerment',
+      'technological transformation',
+      'social revolution',
+      'power to the people',
+    ],
+    doList: [
+      'join or lead movements aligned with your values',
+      'use technology as a force for good',
+      'challenge power structures that no longer serve',
+      'think in terms of community, not just individual gain',
+    ],
+    avoidList: [
+      'manipulative group dynamics',
+      'technology addiction',
+      'extremism in any direction',
+      'losing individuality in the crowd',
+    ],
+    tone: 'Powerful and collective. When the amplifier meets the transformer in the sign of the people, small actions can reshape civilisation.',
+    startDate: new Date('2033-02-05T00:00:00Z'),
+    endDate: new Date('2033-02-05T00:00:00Z'),
+  },
+
+  // ---------------------------------------------------------------------------
+  // Pluto in Aquarius (generational shift)
+  // ---------------------------------------------------------------------------
+  {
+    id: 'pluto-aquarius-2024',
+    year: 2024,
+    planet: 'Pluto',
+    transitType: 'Pluto Transit',
+    title: 'Pluto in Aquarius 2024-2044',
+    dates: 'November 19, 2024 - January 19, 2044',
+    signs: ['Aquarius'],
+    description:
+      'Pluto enters Aquarius for the first time since the French and American Revolutions. This 20-year transit transforms technology, governance, collective power, and what it means to be an individual within society. The last time Pluto was in Aquarius (1778-1798), two revolutions rewrote civilisation.',
+    themes: [
+      'collective transformation',
+      'technological revolution',
+      'decentralisation',
+      'social restructuring',
+    ],
+    doList: [
+      'engage with technology consciously',
+      'participate in community-building',
+      'question power structures',
+      'balance individual freedom with collective responsibility',
+    ],
+    avoidList: [
+      'blind tech adoption',
+      'surrendering privacy without thought',
+      'isolation from community',
+      'extremist tribalism',
+    ],
+    tone: 'Generational and tectonic. This is not a transit you feel in a month -- it is a transit that reshapes the world you live in over 20 years.',
+    startDate: new Date('2024-11-19T00:00:00Z'),
+    endDate: new Date('2044-01-19T00:00:00Z'),
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mercury retrogrades 2025
+  // ---------------------------------------------------------------------------
+  {
+    id: 'mercury-retrograde-aries-2025',
+    year: 2025,
+    planet: 'Mercury',
+    transitType: 'Mercury Retrograde',
+    title: 'Mercury Retrograde in Aries March 2025',
+    dates: 'March 16 - April 8, 2025',
+    signs: ['Aries'],
+    description:
+      'Mercury stations retrograde in Aries, slowing down impulsive communication and forcing a review of how you assert yourself. In the sign of the warrior, expect misunderstandings around identity, leadership, and hasty decisions.',
+    themes: [
+      'communication review',
+      'identity reflection',
+      'impulsive errors',
+      'rethinking plans',
+    ],
+    doList: [
+      'pause before reacting',
+      'revisit old conversations',
+      'back up devices',
+      'reflect on how you present yourself',
+    ],
+    avoidList: [
+      'starting arguments',
+      'signing contracts impulsively',
+      'launching new projects',
+      'assuming people understand your tone',
+    ],
+    tone: 'Frustrating but useful. Mercury retrograde in Aries asks you to slow down the warrior and let the thinker catch up.',
+    startDate: new Date('2025-03-16T00:00:00Z'),
+    endDate: new Date('2025-04-08T00:00:00Z'),
+  },
+  {
+    id: 'mercury-retrograde-leo-2025',
+    year: 2025,
+    planet: 'Mercury',
+    transitType: 'Mercury Retrograde',
+    title: 'Mercury Retrograde in Leo July 2025',
+    dates: 'July 18 - August 11, 2025',
+    signs: ['Leo'],
+    description:
+      'Mercury retrogrades in Leo, revisiting themes of self-expression, creativity, and how you seek recognition. Drama in communication is likely -- old creative projects may resurface, and ego-driven misunderstandings need careful handling.',
+    themes: [
+      'creative review',
+      'ego in communication',
+      'self-expression',
+      'past recognition',
+    ],
+    doList: [
+      'revisit creative projects',
+      'edit rather than publish',
+      'reconnect with your authentic voice',
+      'let go of needing validation',
+    ],
+    avoidList: [
+      'attention-seeking behaviour',
+      'dramatic public statements',
+      'ignoring your creative impulses',
+      'taking criticism personally',
+    ],
+    tone: 'Theatrical and reflective. The spotlight turns inward -- use it to refine your creative voice rather than perform.',
+    startDate: new Date('2025-07-18T00:00:00Z'),
+    endDate: new Date('2025-08-11T00:00:00Z'),
+  },
+  {
+    id: 'mercury-retrograde-sagittarius-2025',
+    year: 2025,
+    planet: 'Mercury',
+    transitType: 'Mercury Retrograde',
+    title: 'Mercury Retrograde in Sagittarius November 2025',
+    dates: 'November 11 - December 1, 2025',
+    signs: ['Sagittarius'],
+    description:
+      'Mercury retrogrades in Sagittarius during the holiday season, disrupting travel plans, philosophical debates, and big-picture thinking. Beliefs you took for granted may need revisiting. International communication and publishing are especially affected.',
+    themes: [
+      'belief systems',
+      'travel disruptions',
+      'philosophical review',
+      'international miscommunication',
+    ],
+    doList: [
+      'double-check travel bookings',
+      'revisit your beliefs and assumptions',
+      'finish writing projects',
+      'have open-minded conversations',
+    ],
+    avoidList: [
+      'booking last-minute travel',
+      'preaching your worldview',
+      'publishing without editing',
+      'dismissing other perspectives',
+    ],
+    tone: 'Expansive and clumsy. Sagittarius wants to run free but Mercury retrograde keeps tripping over the details.',
+    startDate: new Date('2025-11-11T00:00:00Z'),
+    endDate: new Date('2025-12-01T00:00:00Z'),
+  },
+
+  // ---------------------------------------------------------------------------
+  // Venus retrograde 2025
+  // ---------------------------------------------------------------------------
+  {
+    id: 'venus-retrograde-aries-2025',
+    year: 2025,
+    planet: 'Venus',
+    transitType: 'Venus Retrograde',
+    title: 'Venus Retrograde in Aries 2025',
+    dates: 'March 3 - April 13, 2025',
+    signs: ['Aries'],
+    description:
+      'Venus retrograde in Aries forces a deep reassessment of relationships, self-worth, and desire. In the sign of independence, expect past lovers to resurface, financial decisions to need review, and a fundamental questioning of what you truly value versus what you chase impulsively.',
+    themes: [
+      'relationship review',
+      'self-worth',
+      'desire vs need',
+      'financial reassessment',
+    ],
+    doList: [
+      'reflect on relationship patterns',
+      'reassess your finances',
+      'reconnect with what you genuinely value',
+      'practice self-love',
+    ],
+    avoidList: [
+      'starting new relationships',
+      'major purchases',
+      'cosmetic procedures',
+      'ignoring red flags from the past',
+    ],
+    tone: 'Intense and revealing. Venus retrograde in Aries strips away the performance of love and asks what is real underneath.',
+    startDate: new Date('2025-03-03T00:00:00Z'),
+    endDate: new Date('2025-04-13T00:00:00Z'),
+  },
+
+  // ---------------------------------------------------------------------------
+  // Mars retrograde 2024-2025
+  // ---------------------------------------------------------------------------
+  {
+    id: 'mars-retrograde-leo-2025',
+    year: 2025,
+    planet: 'Mars',
+    transitType: 'Mars Retrograde',
+    title: 'Mars Retrograde in Leo 2024-2025',
+    dates: 'December 8, 2024 - February 25, 2025',
+    signs: ['Leo'],
+    description:
+      'Mars retrogrades in Leo, cooling the fire of ambition, anger, and drive. In the sign of creative courage, this retrograde forces a review of how you assert yourself, compete, and channel your energy. Physical energy may dip, and old frustrations can resurface for resolution.',
+    themes: [
+      'anger review',
+      'ambition recalibration',
+      'creative blocks',
+      'energy management',
+    ],
+    doList: [
+      'reflect on how you handle conflict',
+      'revisit stalled projects',
+      'rest and recover',
+      'channel frustration into creative work',
+    ],
+    avoidList: [
+      'picking fights',
+      'overexertion',
+      'starting competitive ventures',
+      'suppressing anger',
+    ],
+    tone: 'Slow-burning and confrontational. Mars retrograde in Leo is the universe asking you to fight smarter, not louder.',
+    startDate: new Date('2024-12-08T00:00:00Z'),
+    endDate: new Date('2025-02-25T00:00:00Z'),
+  },
+
+  // ---------------------------------------------------------------------------
+  // Eclipse seasons 2025
+  // ---------------------------------------------------------------------------
+  {
+    id: 'eclipse-season-spring-2025',
+    year: 2025,
+    planet: 'Moon',
+    transitType: 'Eclipse Season',
+    title: 'Eclipse Season Spring 2025: Virgo-Aries',
+    dates: 'March 14 - March 29, 2025',
+    signs: ['Virgo', 'Aries'],
+    description:
+      'The spring 2025 eclipse season opens with a total lunar eclipse in Virgo on March 14 and closes with a partial solar eclipse in Aries on March 29. Lunar eclipses illuminate what needs releasing; solar eclipses open new portals. This axis highlights the tension between service and self, perfection and impulse.',
+    themes: [
+      'endings and beginnings',
+      'service vs self',
+      'letting go of perfectionism',
+      'bold new starts',
+    ],
+    doList: [
+      'journal through the eclipse window',
+      'release habits that no longer serve you',
+      'set intentions on the solar eclipse',
+      'pay attention to what the universe removes',
+    ],
+    avoidList: [
+      'forcing outcomes',
+      'manifesting during lunar eclipses',
+      'ignoring emotional signals',
+      'making permanent decisions impulsively',
+    ],
+    tone: 'Intense and fated. Eclipse seasons accelerate change -- what needs to end, ends. What needs to begin, begins. Your job is to let it.',
+    startDate: new Date('2025-03-14T00:00:00Z'),
+    endDate: new Date('2025-03-29T00:00:00Z'),
+  },
+  {
+    id: 'eclipse-season-autumn-2025',
+    year: 2025,
+    planet: 'Moon',
+    transitType: 'Eclipse Season',
+    title: 'Eclipse Season Autumn 2025: Pisces-Virgo',
+    dates: 'September 7 - September 21, 2025',
+    signs: ['Pisces', 'Virgo'],
+    description:
+      'The autumn 2025 eclipse season features a total lunar eclipse in Pisces on September 7 and a partial solar eclipse in Virgo on September 21. This season dissolves illusions while demanding practical clarity. Spiritual growth meets grounded action.',
+    themes: [
+      'spiritual clarity',
+      'dissolving illusions',
+      'practical spirituality',
+      'health and healing',
+    ],
+    doList: [
+      'release spiritual bypassing',
+      'ground your intuition in action',
+      'review health routines',
+      'trust what is ending',
+    ],
+    avoidList: [
+      'escapism',
+      'obsessing over details',
+      'resisting emotional release',
+      'clinging to what the eclipse removes',
+    ],
+    tone: 'Mystical and cleansing. The Pisces-Virgo axis washes away what is false and asks you to build something real from what remains.',
+    startDate: new Date('2025-09-07T00:00:00Z'),
+    endDate: new Date('2025-09-21T00:00:00Z'),
+  },
+];
+
+/**
+ * Enrich transit entries with computed start/end dates from pre-computed JSON.
+ * For each transit, finds matching segments (planet + sign within year) and
+ * sets startDate/endDate. Overwrites `dates` string with formatted range
+ * while preserving parenthetical notes like "(for those born ~1996-1997)".
+ */
+function enrichTransitDates(transits: YearlyTransit[]): YearlyTransit[] {
+  const segments = transitData.segments as Record<
+    string,
+    Record<string, { start: string; end: string }[]>
+  >;
+
+  return transits.map((transit) => {
+    const planetSegments = segments[transit.planet];
+    if (!planetSegments) return transit;
+
+    // Find all segments matching any of the transit's signs within the transit's year
+    const yearStart = new Date(`${transit.year}-01-01T00:00:00.000Z`);
+    const yearEnd = new Date(`${transit.year + 1}-01-01T00:00:00.000Z`);
+
+    let earliestStart: Date | null = null;
+    let latestEnd: Date | null = null;
+
+    for (const sign of transit.signs) {
+      const signSegs = planetSegments[sign];
+      if (!signSegs) continue;
+
+      for (const seg of signSegs) {
+        const segStart = new Date(seg.start);
+        const segEnd = new Date(seg.end);
+
+        // Segment overlaps with the transit's year
+        if (segEnd > yearStart && segStart < yearEnd) {
+          if (!earliestStart || segStart < earliestStart) {
+            earliestStart = segStart;
+          }
+          if (!latestEnd || segEnd > latestEnd) {
+            latestEnd = segEnd;
+          }
+        }
+      }
+    }
+
+    if (!earliestStart || !latestEnd) return transit;
+
+    // Extract parenthetical notes from existing dates string
+    const parenMatch = transit.dates.match(/\(.*\)/);
+    const parenNote = parenMatch ? ` ${parenMatch[0]}` : '';
+
+    // Format the date range
+    const startInYear = earliestStart >= yearStart;
+    const endInYear = latestEnd <= yearEnd;
+
+    let formattedDates: string;
+
+    if (!startInYear && !endInYear) {
+      // Spans the entire year
+      formattedDates = `All year${parenNote}`;
+    } else if (!startInYear && endInYear) {
+      // Started before this year, ends during it
+      formattedDates = `Until ${format(latestEnd, 'MMMM d, yyyy')}${parenNote}`;
+    } else if (startInYear && !endInYear) {
+      // Starts during this year, continues past it
+      formattedDates = `${format(earliestStart, 'MMMM d, yyyy')} onwards${parenNote}`;
+    } else {
+      // Both start and end within the year
+      formattedDates = `${format(earliestStart, 'MMMM d, yyyy')} - ${format(latestEnd, 'MMMM d, yyyy')}${parenNote}`;
+    }
+
+    return {
+      ...transit,
+      dates: formattedDates,
+      startDate: earliestStart,
+      endDate: latestEnd,
+    };
+  });
+}
+
+// Enrich with computed dates from pre-computed JSON
+export const YEARLY_TRANSITS: YearlyTransit[] =
+  enrichTransitDates(RAW_TRANSITS);
+
+export function getTransitsForYear(year: number): YearlyTransit[] {
+  return YEARLY_TRANSITS.filter((t) => t.year === year);
+}
+
+export function generateAllTransitParams(): { transit: string }[] {
+  return YEARLY_TRANSITS.map((t) => ({ transit: t.id }));
+}
+
+export function generateTransitYears(): number[] {
+  return Array.from(new Set(YEARLY_TRANSITS.map((t) => t.year))).sort(
+    (a, b) => a - b,
+  );
+}

@@ -74,7 +74,7 @@ export function Modal({
 
   return (
     <div
-      className='fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:p-4'
+      className='fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-surface-base/60 backdrop-blur-sm sm:p-4'
       onClick={handleBackdropClick}
       role='dialog'
       aria-modal='true'
@@ -98,7 +98,7 @@ export function Modal({
         {showCloseButton && (
           <button
             onClick={onClose}
-            className='absolute right-3 top-3 z-10 h-9 w-9 flex items-center justify-center text-content-muted hover:text-content-primary bg-black/30 hover:bg-black/50 backdrop-blur-2xl border border-stroke-default/50 rounded-full transition-all'
+            className='absolute right-3 top-3 z-10 h-9 w-9 flex items-center justify-center text-content-muted hover:text-content-primary bg-surface-base/30 hover:bg-surface-base/50 backdrop-blur-2xl border border-stroke-default/50 rounded-full transition-all'
             aria-label='Close'
           >
             <X className='w-4 h-4' />

@@ -445,36 +445,36 @@ export default async function ShareTarotPage({
   );
 
   return (
-    <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-indigo-950 to-lunary-primary-900 py-12 text-white sm:py-16'>
+    <div className='min-h-screen w-full bg-gradient-to-br from-surface-base via-indigo-950 to-layer-base py-12 text-content-primary sm:py-16'>
       <div className='mx-auto flex w-full max-w-4xl flex-col items-center px-4 text-center sm:px-6 lg:px-8'>
-        <div className='w-full rounded-3xl border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur'>
-          <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
+        <div className='w-full rounded-3xl border border-white/10 bg-surface-base/40 p-8 shadow-2xl backdrop-blur'>
+          <p className='text-xs uppercase tracking-[0.35em] text-content-secondary/80'>
             Shared from Lunary
           </p>
-          <h1 className='mt-6 text-2xl font-light text-white sm:text-3xl'>
+          <h1 className='mt-6 text-2xl font-light text-content-primary sm:text-3xl'>
             {shareTitle}
           </h1>
-          <p className='mt-2 text-sm text-lunary-primary-200/80'>
+          <p className='mt-2 text-sm text-content-secondary/80'>
             {variantLabel
               ? `${variantLabel} guidance`
               : 'Personal cosmic insight'}
             {shareDate ? ` · ${shareDate}` : null}
           </p>
 
-          <div className='mt-10 rounded-2xl border border-lunary-primary-700 bg-lunary-primary-900/10 p-8'>
-            <p className='text-sm uppercase tracking-[0.3em] text-lunary-primary-200/70'>
+          <div className='mt-10 rounded-2xl border border-lunary-primary-700 bg-layer-base/10 p-8'>
+            <p className='text-sm uppercase tracking-[0.3em] text-content-secondary/70'>
               Featured Card
             </p>
-            <p className='mt-4 text-3xl font-light text-white sm:text-4xl'>
+            <p className='mt-4 text-3xl font-light text-content-primary sm:text-4xl'>
               {card}
             </p>
             {keywords.length > 0 && (
-              <p className='mt-4 text-sm text-lunary-primary-100/80'>
+              <p className='mt-4 text-sm text-content-secondary/80'>
                 {keywords.join(' • ')}
               </p>
             )}
             {text && (
-              <p className='mt-6 text-base leading-relaxed text-zinc-100/90'>
+              <p className='mt-6 text-base leading-relaxed text-content-primary/90'>
                 {text}
               </p>
             )}
@@ -483,14 +483,14 @@ export default async function ShareTarotPage({
           {isPattern && (
             <div className='mt-10 space-y-8 text-left'>
               {orderedSignalHighlights.length > 0 && (
-                <div className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-950 p-6'>
-                  <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200'>
+                <div className='rounded-2xl border border-lunary-primary-700 bg-layer-deep p-6'>
+                  <p className='text-xs uppercase tracking-[0.35em] text-content-secondary'>
                     Signal Highlights
                   </p>
-                  <ul className='mt-4 space-y-2 text-base leading-relaxed text-zinc-100/90'>
+                  <ul className='mt-4 space-y-2 text-base leading-relaxed text-content-primary/90'>
                     {orderedSignalHighlights.map((highlight, index) => (
                       <li key={`${highlight}-${index}`} className='flex gap-2'>
-                        <span className='text-lunary-primary-200'>•</span>
+                        <span className='text-content-secondary'>•</span>
                         <span>{highlight}</span>
                       </li>
                     ))}
@@ -502,31 +502,31 @@ export default async function ShareTarotPage({
                 <div className='rounded-2xl border border-white/10 bg-white/5 p-6 space-y-6'>
                   {suitBlocks.length > 0 && (
                     <div>
-                      <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
+                      <p className='text-xs uppercase tracking-[0.35em] text-content-secondary/80'>
                         Suit Patterns
                       </p>
                       <div className='mt-4 space-y-4'>
                         {suitBlocks.map((pattern) => (
                           <div
                             key={pattern.suit}
-                            className='rounded-xl border border-white/10 bg-black/30 p-4'
+                            className='rounded-xl border border-white/10 bg-surface-base/30 p-4'
                           >
-                            <p className='text-sm font-semibold text-white'>
+                            <p className='text-sm font-semibold text-content-primary'>
                               {pattern.suit}
                               {timeframeDays ? (
-                                <span className='text-xs text-lunary-primary-200/80'>
+                                <span className='text-xs text-content-secondary/80'>
                                   {' '}
                                   ({pattern.count}/{timeframeDays} days)
                                 </span>
                               ) : (
-                                <span className='text-xs text-lunary-primary-200/80'>
+                                <span className='text-xs text-content-secondary/80'>
                                   {' '}
                                   · {pattern.count} pulls
                                 </span>
                               )}
                             </p>
                             {pattern.reading && (
-                              <p className='mt-2 text-sm leading-relaxed text-zinc-300'>
+                              <p className='mt-2 text-sm leading-relaxed text-content-secondary'>
                                 {pattern.reading}
                               </p>
                             )}
@@ -538,26 +538,26 @@ export default async function ShareTarotPage({
 
                   {numberBlocks.length > 0 && (
                     <div>
-                      <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
+                      <p className='text-xs uppercase tracking-[0.35em] text-content-secondary/80'>
                         Number Patterns
                       </p>
                       <div className='mt-4 space-y-4'>
                         {numberBlocks.map((pattern) => (
                           <div
                             key={pattern.number}
-                            className='rounded-xl border border-white/10 bg-black/30 p-4'
+                            className='rounded-xl border border-white/10 bg-surface-base/30 p-4'
                           >
-                            <p className='text-sm font-semibold text-white'>
+                            <p className='text-sm font-semibold text-content-primary'>
                               {pattern.number}s ({pattern.count}{' '}
                               {pattern.count === 1 ? 'time' : 'times'})
                             </p>
                             {pattern.reading && (
-                              <p className='mt-2 text-sm leading-relaxed text-zinc-300'>
+                              <p className='mt-2 text-sm leading-relaxed text-content-secondary'>
                                 {pattern.reading}
                               </p>
                             )}
                             {pattern.cards?.length ? (
-                              <p className='mt-2 text-xs text-zinc-400'>
+                              <p className='mt-2 text-xs text-content-muted'>
                                 Cards: {pattern.cards.join(', ')}
                               </p>
                             ) : null}
@@ -571,21 +571,21 @@ export default async function ShareTarotPage({
 
               {cardBlocks.length > 0 && (
                 <div className='rounded-2xl border border-white/10 bg-white/5 p-6'>
-                  <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
+                  <p className='text-xs uppercase tracking-[0.35em] text-content-secondary/80'>
                     Card Patterns
                   </p>
                   <div className='mt-4 space-y-4'>
                     {cardBlocks.map((pattern) => (
                       <div
                         key={pattern.name}
-                        className='rounded-xl border border-white/10 bg-black/30 p-4'
+                        className='rounded-xl border border-white/10 bg-surface-base/30 p-4'
                       >
-                        <p className='text-sm font-semibold text-white'>
+                        <p className='text-sm font-semibold text-content-primary'>
                           {pattern.name} ({pattern.count}{' '}
                           {pattern.count === 1 ? 'time' : 'times'})
                         </p>
                         {pattern.reading && (
-                          <p className='mt-2 text-sm leading-relaxed text-zinc-300'>
+                          <p className='mt-2 text-sm leading-relaxed text-content-secondary'>
                             {pattern.reading}
                           </p>
                         )}
@@ -598,26 +598,26 @@ export default async function ShareTarotPage({
               {(sharedMoonPhase || sharedMoonTip || sharedTransitImpact) && (
                 <div className='grid gap-4 md:grid-cols-2'>
                   {(sharedMoonPhase || sharedMoonTip) && (
-                    <div className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
-                      <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
+                    <div className='rounded-2xl border border-lunary-primary-700 bg-layer-base/10 p-6'>
+                      <p className='text-xs uppercase tracking-[0.35em] text-content-secondary/80'>
                         Moon Widget
                       </p>
-                      <p className='mt-3 text-2xl font-light text-white'>
+                      <p className='mt-3 text-2xl font-light text-content-primary'>
                         {sharedMoonPhase ?? 'Current lunar flow'}
                       </p>
                       {sharedMoonTip && (
-                        <p className='mt-2 text-sm leading-relaxed text-lunary-primary-100/80'>
+                        <p className='mt-2 text-sm leading-relaxed text-content-secondary/80'>
                           {sharedMoonTip}
                         </p>
                       )}
                     </div>
                   )}
                   {sharedTransitImpact && (
-                    <div className='rounded-2xl border border-lunary-accent-700 bg-lunary-accent-950 p-6'>
-                      <p className='text-xs uppercase tracking-[0.35em] text-lunary-accent-200'>
+                    <div className='rounded-2xl border border-lunary-accent-700 bg-layer-deep p-6'>
+                      <p className='text-xs uppercase tracking-[0.35em] text-content-brand-accent'>
                         Personal Transit Impact
                       </p>
-                      <p className='mt-3 text-sm leading-relaxed text-lunary-accent-100'>
+                      <p className='mt-3 text-sm leading-relaxed text-content-brand-accent'>
                         {sharedTransitImpact}
                       </p>
                     </div>
@@ -626,7 +626,7 @@ export default async function ShareTarotPage({
               )}
 
               {sharedActionPrompt && (
-                <div className='rounded-2xl border border-lunary-success-700 bg-lunary-success-950 p-6'>
+                <div className='rounded-2xl border border-lunary-success-700 bg-layer-deep p-6'>
                   <p className='text-xs uppercase tracking-[0.35em] text-lunary-success-200'>
                     Action Prompt
                   </p>
@@ -638,7 +638,7 @@ export default async function ShareTarotPage({
             </div>
           )}
 
-          <div className='mt-12 space-y-4 text-sm text-zinc-200/80'>
+          <div className='mt-12 space-y-4 text-sm text-content-primary/80'>
             <p>
               Ready to explore your own tarot journey? Lunary creates
               personalized readings using real astronomical data and your unique
@@ -653,11 +653,11 @@ export default async function ShareTarotPage({
 
           <div className='mt-12 rounded-2xl border border-white/10 bg-white/5 p-6 text-left'>
             <div className='flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between'>
-              <p className='text-xs uppercase tracking-[0.35em] text-lunary-primary-200/80'>
+              <p className='text-xs uppercase tracking-[0.35em] text-content-secondary/80'>
                 Tag us when you post
               </p>
               {highlightedHandle && (
-                <p className='text-xs text-lunary-primary-100/80'>
+                <p className='text-xs text-content-secondary/80'>
                   {highlightedPlatformLabel
                     ? `Posting to ${highlightedPlatformLabel}? Use ${highlightedHandle} so we can reshare.`
                     : `Use ${highlightedHandle} so we can reshare your spread.`}
@@ -668,12 +668,12 @@ export default async function ShareTarotPage({
               {SOCIAL_TAGS.map((tag) => (
                 <div
                   key={tag.platform}
-                  className='rounded-2xl border border-white/10 bg-black/30 p-4 text-left'
+                  className='rounded-2xl border border-white/10 bg-surface-base/30 p-4 text-left'
                 >
-                  <p className='text-xs uppercase tracking-[0.3em] text-zinc-400'>
+                  <p className='text-xs uppercase tracking-[0.3em] text-content-muted'>
                     {tag.label}
                   </p>
-                  <p className='mt-1 text-lg font-semibold text-white'>
+                  <p className='mt-1 text-lg font-semibold text-content-primary'>
                     {tag.handle}
                   </p>
                 </div>
@@ -690,7 +690,7 @@ export default async function ShareTarotPage({
             </Link>
             <Link
               href='/'
-              className='text-sm font-medium text-lunary-primary-200/80 transition hover:text-lunary-primary-100'
+              className='text-sm font-medium text-content-secondary/80 transition hover:text-content-secondary'
             >
               Explore Lunary →
             </Link>

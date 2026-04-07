@@ -165,7 +165,10 @@ export function ShareBirthChartLayout({
     : 'Personalized cosmic profile';
 
   return (
-    <div className='w-full text-white' style={{ background: theme.background }}>
+    <div
+      className='w-full text-content-primary'
+      style={{ background: theme.background }}
+    >
       <div className='relative min-h-full'>
         <div
           className='absolute inset-0 pointer-events-none opacity-50'
@@ -189,38 +192,40 @@ export function ShareBirthChartLayout({
             />
             <div className='relative z-10 flex flex-col gap-8'>
               <div className='space-y-2'>
-                <p className='text-xs uppercase tracking-[0.35em] text-white/70'>
+                <p className='text-xs uppercase tracking-[0.35em] text-content-primary/70'>
                   Shared from Lunary
                 </p>
-                <h1 className='text-3xl font-light text-white sm:text-4xl'>
+                <h1 className='text-3xl font-light text-content-primary sm:text-4xl'>
                   {shareTitle}
                 </h1>
-                <p className='text-sm text-white/70'>{shareSubtitle}</p>
+                <p className='text-sm text-content-primary/70'>
+                  {shareSubtitle}
+                </p>
               </div>
 
               <div className='grid gap-4 sm:grid-cols-2'>
-                <div className='rounded-2xl border border-white/15 bg-black/50 p-5 text-left shadow-inner shadow-black/40'>
-                  <p className='text-[0.6rem] uppercase tracking-[0.35em] text-white/70'>
+                <div className='rounded-2xl border border-white/15 bg-surface-base/50 p-5 text-left shadow-inner shadow-black/40'>
+                  <p className='text-[0.6rem] uppercase tracking-[0.35em] text-content-primary/70'>
                     Element
                   </p>
-                  <p className='mt-2 text-lg font-semibold uppercase text-white'>
+                  <p className='mt-2 text-lg font-semibold uppercase text-content-primary'>
                     {element ?? 'Balanced'}
                   </p>
                   {element && elementDescriptions[element] && (
-                    <p className='mt-1 text-xs text-white/60'>
+                    <p className='mt-1 text-xs text-content-primary/60'>
                       {elementDescriptions[element].meaning}
                     </p>
                   )}
                 </div>
-                <div className='rounded-2xl border border-white/15 bg-black/50 p-5 text-left shadow-inner shadow-black/40'>
-                  <p className='text-[0.6rem] uppercase tracking-[0.35em] text-white/70'>
+                <div className='rounded-2xl border border-white/15 bg-surface-base/50 p-5 text-left shadow-inner shadow-black/40'>
+                  <p className='text-[0.6rem] uppercase tracking-[0.35em] text-content-primary/70'>
                     Modality
                   </p>
-                  <p className='mt-2 text-lg font-semibold uppercase text-white'>
+                  <p className='mt-2 text-lg font-semibold uppercase text-content-primary'>
                     {modality ?? 'Dynamic'}
                   </p>
                   {modality && modalityDescriptions[modality] && (
-                    <p className='mt-1 text-xs text-white/60'>
+                    <p className='mt-1 text-xs text-content-primary/60'>
                       {modalityDescriptions[modality]}
                     </p>
                   )}
@@ -253,7 +258,7 @@ export function ShareBirthChartLayout({
                     className='rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/0 p-5 text-left'
                   >
                     <div className='flex items-center justify-between'>
-                      <p className='text-[0.7rem] uppercase tracking-[0.35em] text-white/60'>
+                      <p className='text-[0.7rem] uppercase tracking-[0.35em] text-content-primary/60'>
                         {item.label}
                       </p>
                       {item.glyph && (
@@ -265,18 +270,20 @@ export function ShareBirthChartLayout({
                         </span>
                       )}
                     </div>
-                    <p className='mt-2 text-2xl font-light text-white'>
+                    <p className='mt-2 text-2xl font-light text-content-primary'>
                       {item.value ?? '—'}
                     </p>
                     {item.note && (
-                      <p className='mt-1 text-xs text-white/60'>{item.note}</p>
+                      <p className='mt-1 text-xs text-content-primary/60'>
+                        {item.note}
+                      </p>
                     )}
                   </div>
                 ))}
               </div>
 
               {keywords.length > 0 && (
-                <div className='flex flex-wrap justify-center gap-2 text-[0.65rem] uppercase tracking-[0.35em] text-white/70'>
+                <div className='flex flex-wrap justify-center gap-2 text-[0.65rem] uppercase tracking-[0.35em] text-content-primary/70'>
                   {keywords.map((keyword) => (
                     <span
                       key={keyword}
@@ -290,10 +297,10 @@ export function ShareBirthChartLayout({
 
               {insight && (
                 <div className='rounded-2xl border border-white/10 bg-white/5 p-6 text-left'>
-                  <p className='text-[0.6rem] uppercase tracking-[0.35em] text-white/60'>
+                  <p className='text-[0.6rem] uppercase tracking-[0.35em] text-content-primary/60'>
                     Signature Insight
                   </p>
-                  <p className='mt-2 text-sm leading-relaxed text-white/80'>
+                  <p className='mt-2 text-sm leading-relaxed text-content-primary/80'>
                     {insight}
                   </p>
                 </div>
@@ -302,11 +309,11 @@ export function ShareBirthChartLayout({
               {hasChart && (
                 <div className='space-y-6 text-left'>
                   <div className='flex justify-center'>
-                    <div className='relative rounded-[32px] border border-white/10 bg-gradient-to-br from-black/60 to-black/10 p-6 shadow-[0_20px_80px_rgba(0,0,0,0.6)]'>
+                    <div className='relative rounded-[32px] border border-white/10 bg-gradient-to-br from-surface-base/60 to-surface-base/10 p-6 shadow-[0_20px_80px_rgba(0,0,0,0.6)]'>
                       <ChartWheelOg birthChart={birthChart} size={360} />
                     </div>
                   </div>
-                  <div className='text-[0.65rem] uppercase tracking-[0.35em] text-white/70'>
+                  <div className='text-[0.65rem] uppercase tracking-[0.35em] text-content-primary/70'>
                     Full Chart Placements
                   </div>
                   <div className='grid gap-3 md:grid-cols-2'>
@@ -340,11 +347,11 @@ export function ShareBirthChartLayout({
                             >
                               {glyph}
                             </span>
-                            <span className='text-sm font-semibold text-white'>
+                            <span className='text-sm font-semibold text-content-primary'>
                               {placement.body}
                             </span>
                           </div>
-                          <p className='mt-1 text-xs text-white/70'>
+                          <p className='mt-1 text-xs text-content-primary/70'>
                             {signGlyph ? (
                               <span
                                 className='mr-1'
@@ -364,14 +371,14 @@ export function ShareBirthChartLayout({
                 </div>
               )}
 
-              <div className='mt-4 rounded-2xl border border-white/15 bg-gradient-to-br from-lunary-primary-950/50 to-lunary-secondary-950/40 p-6'>
-                <div className='flex items-center justify-center gap-2 text-white'>
+              <div className='mt-4 rounded-2xl border border-white/15 bg-gradient-to-br from-layer-deep/50 to-lunary-secondary-950/40 p-6'>
+                <div className='flex items-center justify-center gap-2 text-content-primary'>
                   <Sparkles className='w-5 h-5 text-lunary-primary-400' />
                   <h3 className='text-lg font-medium'>
                     Discover Your Complete Cosmic Blueprint
                   </h3>
                 </div>
-                <p className='mt-3 text-sm text-white/70'>
+                <p className='mt-3 text-sm text-content-primary/70'>
                   Create your free birth chart on Lunary and explore the
                   planetary positions, aspects, patterns, and personalized
                   cosmic guidance all mapped to your unique moment.
@@ -387,7 +394,7 @@ export function ShareBirthChartLayout({
                     <Link href='/'>Explore Lunary</Link>
                   </Button>
                 </div>
-                <p className='mt-3 text-xs text-white/50'>
+                <p className='mt-3 text-xs text-content-primary/50'>
                   Free account includes birth chart, daily insights, and more.
                 </p>
               </div>

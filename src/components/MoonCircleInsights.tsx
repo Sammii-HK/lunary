@@ -243,32 +243,32 @@ export function MoonCircleInsights({
   return (
     <section
       className={cn(
-        'rounded-3xl border border-lunary-primary-700 bg-black/40 p-6 shadow-lg shadow-lunary-primary-800 backdrop-blur',
+        'rounded-3xl border border-lunary-primary-700 bg-surface-base/40 p-6 shadow-lg shadow-lunary-primary-800 backdrop-blur',
         className,
       )}
     >
       <header className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
         <div>
-          <p className='text-xs uppercase tracking-[0.2em] text-lunary-accent-200/70'>
+          <p className='text-xs uppercase tracking-[0.2em] text-content-brand-accent/70'>
             Community reflections
           </p>
-          <h3 className='text-2xl font-semibold text-white'>
+          <h3 className='text-2xl font-semibold text-content-primary'>
             {moonPhase} insights
           </h3>
           {displayDate && (
-            <p className='text-sm text-lunary-accent-100/70'>
+            <p className='text-sm text-content-brand-accent/70'>
               Shared for {displayDate}
             </p>
           )}
         </div>
         <div className='flex flex-wrap items-center gap-2'>
-          <span className='rounded-full border border-lunary-primary-700 px-3 py-1 text-sm text-lunary-accent-100'>
+          <span className='rounded-full border border-lunary-primary-700 px-3 py-1 text-sm text-content-brand-accent'>
             {displayTotal} insight{displayTotal === 1 ? '' : 's'}
           </span>
           <Button
             type='button'
             variant='ghost'
-            className='text-sm text-lunary-accent-100 hover:bg-lunary-primary-950'
+            className='text-sm text-content-brand-accent hover:bg-layer-deep'
             onClick={handleToggleCollapse}
           >
             {isCollapsed ? (
@@ -289,8 +289,8 @@ export function MoonCircleInsights({
       {!isCollapsed && (
         <div className='mt-6 space-y-6'>
           <div className='flex flex-wrap items-center justify-between gap-3'>
-            <div className='flex items-center gap-2 text-sm text-lunary-accent-100/80'>
-              <MessageCircle className='h-4 w-4 text-lunary-accent-300' />
+            <div className='flex items-center gap-2 text-sm text-content-brand-accent/80'>
+              <MessageCircle className='h-4 w-4 text-content-brand-accent' />
               Voices from the circle
             </div>
             <div className='flex flex-wrap items-center gap-2'>
@@ -302,8 +302,8 @@ export function MoonCircleInsights({
                 className={cn(
                   'gap-1 text-xs',
                   sort === 'newest'
-                    ? 'bg-lunary-primary-950 text-white'
-                    : 'text-lunary-accent-100',
+                    ? 'bg-layer-deep text-white'
+                    : 'text-content-brand-accent',
                 )}
               >
                 <SortAsc className='h-4 w-4' />
@@ -317,8 +317,8 @@ export function MoonCircleInsights({
                 className={cn(
                   'gap-1 text-xs',
                   sort === 'oldest'
-                    ? 'bg-lunary-primary-950 text-white'
-                    : 'text-lunary-accent-100',
+                    ? 'bg-layer-deep text-white'
+                    : 'text-content-brand-accent',
                 )}
               >
                 <SortAsc className='h-4 w-4 rotate-180' />
@@ -329,7 +329,7 @@ export function MoonCircleInsights({
                 variant='ghost'
                 size='sm'
                 onClick={handleManualRefresh}
-                className='gap-1 text-xs text-lunary-accent-100 hover:text-white'
+                className='gap-1 text-xs text-content-brand-accent hover:text-content-primary'
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -351,7 +351,7 @@ export function MoonCircleInsights({
           )}
 
           {error && (
-            <div className='rounded-2xl border border-lunary-error-600 bg-lunary-error-950 px-4 py-3 text-sm text-lunary-error-100'>
+            <div className='rounded-2xl border border-lunary-error-600 bg-layer-deep px-4 py-3 text-sm text-lunary-error-100'>
               {error}
             </div>
           )}
@@ -361,14 +361,14 @@ export function MoonCircleInsights({
               {[0, 1].map((key) => (
                 <div
                   key={key}
-                  className='h-24 animate-pulse rounded-2xl bg-lunary-primary-950'
+                  className='h-24 animate-pulse rounded-2xl bg-layer-deep'
                 />
               ))}
             </div>
           )}
 
           {!isLoading && insights.length === 0 && (
-            <div className='rounded-2xl border border-dashed border-lunary-primary-600 bg-lunary-primary-950 p-6 text-center text-sm text-lunary-accent-100/80'>
+            <div className='rounded-2xl border border-dashed border-lunary-primary-600 bg-layer-deep p-6 text-center text-sm text-content-brand-accent/80'>
               No insights yet. Be the first to share how this{' '}
               {moonPhase.toLowerCase()} is showing up for you.
             </div>
@@ -391,14 +391,14 @@ export function MoonCircleInsights({
           )}
 
           {totalPages > 1 && (
-            <div className='flex items-center justify-between rounded-2xl border border-lunary-primary-700 px-4 py-3 text-sm text-lunary-accent-100/80'>
+            <div className='flex items-center justify-between rounded-2xl border border-lunary-primary-700 px-4 py-3 text-sm text-content-brand-accent/80'>
               <Button
                 type='button'
                 variant='ghost'
                 size='sm'
                 onClick={() => handlePageChange('prev')}
                 disabled={page === 0 || isLoading}
-                className='gap-1 text-lunary-accent-100 disabled:opacity-40'
+                className='gap-1 text-content-brand-accent disabled:opacity-40'
               >
                 <ChevronLeft className='h-4 w-4' />
                 Newer
@@ -412,7 +412,7 @@ export function MoonCircleInsights({
                 size='sm'
                 onClick={() => handlePageChange('next')}
                 disabled={page >= totalPages - 1 || isLoading}
-                className='gap-1 text-lunary-accent-100 disabled:opacity-40'
+                className='gap-1 text-content-brand-accent disabled:opacity-40'
               >
                 Older
                 <ChevronRight className='h-4 w-4' />
@@ -423,7 +423,7 @@ export function MoonCircleInsights({
       )}
 
       {isCollapsed && (
-        <div className='mt-4 rounded-2xl border border-dashed border-lunary-primary-600 bg-lunary-primary-950 p-4 text-sm text-lunary-accent-100/80'>
+        <div className='mt-4 rounded-2xl border border-dashed border-lunary-primary-600 bg-layer-deep p-4 text-sm text-content-brand-accent/80'>
           <p>
             Tap expand to read what others experienced during this{' '}
             {moonPhase.toLowerCase()} circle.

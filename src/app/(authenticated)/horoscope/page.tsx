@@ -64,7 +64,7 @@ export default function HoroscopePage() {
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>
           <div className='w-8 h-8 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             {iosLabel('Loading your horoscope...', isNativeIOS)}
           </p>
         </div>
@@ -78,7 +78,7 @@ export default function HoroscopePage() {
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>
           <div className='w-8 h-8 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             {iosLabel('Loading your horoscope...', isNativeIOS)}
           </p>
         </div>
@@ -93,7 +93,7 @@ export default function HoroscopePage() {
       {authStatus.isAuthenticated && (
         <SkillProgressWidget
           skillTree='explorer'
-          className='sticky top-0 z-10 px-4 pt-3 pb-2 bg-zinc-950/90 backdrop-blur-sm'
+          className='sticky top-0 z-10 px-4 pt-3 pb-2 bg-surface-base/90 backdrop-blur-sm'
         />
       )}
       <div className='flex-1'>

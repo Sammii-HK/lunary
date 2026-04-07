@@ -88,15 +88,15 @@ export function LifeThemesOverview({
   if (isLoading) {
     return (
       <div
-        className={`rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-4 ${className}`}
+        className={`rounded-xl border border-stroke-subtle/50 bg-surface-elevated/30 p-4 ${className}`}
       >
         <div className='flex items-center gap-3 mb-3'>
-          <div className='w-6 h-6 rounded-full bg-zinc-800 animate-pulse' />
-          <div className='h-5 w-32 bg-zinc-800 rounded animate-pulse' />
+          <div className='w-6 h-6 rounded-full bg-surface-card animate-pulse' />
+          <div className='h-5 w-32 bg-surface-card rounded animate-pulse' />
         </div>
         <div className='space-y-2'>
-          <div className='h-4 bg-zinc-800 rounded w-3/4 animate-pulse' />
-          <div className='h-4 bg-zinc-800 rounded w-1/2 animate-pulse' />
+          <div className='h-4 bg-surface-card rounded w-3/4 animate-pulse' />
+          <div className='h-4 bg-surface-card rounded w-1/2 animate-pulse' />
         </div>
       </div>
     );
@@ -105,13 +105,15 @@ export function LifeThemesOverview({
   if (themes.length === 0) {
     return (
       <div
-        className={`rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-4 ${className}`}
+        className={`rounded-xl border border-stroke-subtle/50 bg-surface-elevated/30 p-4 ${className}`}
       >
         <div className='flex items-center gap-2 mb-2'>
           <Sparkles className='w-4 h-4 text-lunary-primary-400' />
-          <h3 className='text-sm font-medium text-zinc-100'>Life Themes</h3>
+          <h3 className='text-sm font-medium text-content-primary'>
+            Life Themes
+          </h3>
         </div>
-        <p className='text-xs text-zinc-400'>
+        <p className='text-xs text-content-muted'>
           Once you have used Lunary for a while, we will reveal the themes
           emerging in your journey.
         </p>
@@ -125,19 +127,19 @@ export function LifeThemesOverview({
 
   return (
     <div
-      className={`rounded-xl border border-zinc-800/50 bg-gradient-to-br from-zinc-900/60 to-lunary-primary-950/10 p-4 ${className}`}
+      className={`rounded-xl border border-stroke-subtle/50 bg-gradient-to-br from-surface-elevated/60 to-layer-deep/10 p-4 ${className}`}
     >
       <div className='flex items-center justify-between mb-3'>
         <div className='flex items-center gap-2'>
           <Sparkles className='w-4 h-4 text-lunary-primary-400' />
-          <h3 className='text-sm font-medium text-zinc-100'>
+          <h3 className='text-sm font-medium text-content-primary'>
             Your Life Themes
           </h3>
         </div>
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className='p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 transition-colors disabled:opacity-50'
+          className='p-1.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-card/50 transition-colors disabled:opacity-50'
           title='Refresh themes'
         >
           <RefreshCw
@@ -150,7 +152,7 @@ export function LifeThemesOverview({
         {displayThemes.map((theme) => (
           <div
             key={theme.id}
-            className='border border-zinc-800/50 rounded-lg bg-zinc-900/40 overflow-hidden'
+            className='border border-stroke-subtle/50 rounded-lg bg-surface-elevated/40 overflow-hidden'
           >
             <button
               onClick={() =>
@@ -160,11 +162,11 @@ export function LifeThemesOverview({
             >
               <div className='flex-1 min-w-0'>
                 <div className='flex items-center gap-2 mb-1'>
-                  <span className='text-sm font-medium text-zinc-100'>
+                  <span className='text-sm font-medium text-content-primary'>
                     {theme.name}
                   </span>
                   <div
-                    className='h-1.5 w-12 rounded-full bg-zinc-800'
+                    className='h-1.5 w-12 rounded-full bg-surface-card'
                     title={`Confidence: ${Math.round(theme.confidence * 100)}%`}
                   >
                     <div
@@ -173,34 +175,34 @@ export function LifeThemesOverview({
                     />
                   </div>
                 </div>
-                <p className='text-xs text-zinc-400 line-clamp-2'>
+                <p className='text-xs text-content-muted line-clamp-2'>
                   {theme.shortSummary}
                 </p>
               </div>
               <div className='shrink-0 ml-2 mt-1'>
                 {expandedTheme === theme.id ? (
-                  <ChevronUp className='w-4 h-4 text-zinc-500' />
+                  <ChevronUp className='w-4 h-4 text-content-muted' />
                 ) : (
-                  <ChevronDown className='w-4 h-4 text-zinc-500' />
+                  <ChevronDown className='w-4 h-4 text-content-muted' />
                 )}
               </div>
             </button>
 
             {expandedTheme === theme.id && isSubscribed && (
-              <div className='px-3 pb-3 pt-0 border-t border-zinc-800/50'>
-                <p className='text-xs text-zinc-300 leading-relaxed mt-3 mb-3'>
+              <div className='px-3 pb-3 pt-0 border-t border-stroke-subtle/50'>
+                <p className='text-xs text-content-secondary leading-relaxed mt-3 mb-3'>
                   {theme.longSummary}
                 </p>
                 {theme.guidanceBullets && theme.guidanceBullets.length > 0 && (
                   <div className='mt-2'>
-                    <p className='text-xs font-medium text-zinc-400 mb-2'>
+                    <p className='text-xs font-medium text-content-muted mb-2'>
                       Guidance:
                     </p>
                     <ul className='space-y-1'>
                       {theme.guidanceBullets.slice(0, 3).map((bullet, i) => (
                         <li
                           key={i}
-                          className='text-xs text-zinc-400 flex items-start gap-2'
+                          className='text-xs text-content-muted flex items-start gap-2'
                         >
                           <span className='text-lunary-primary-400 mt-0.5'>
                             •
@@ -216,7 +218,7 @@ export function LifeThemesOverview({
                     {theme.relatedTags.map((tag) => (
                       <span
                         key={tag}
-                        className='text-[10px] px-2 py-0.5 rounded-full bg-lunary-primary-900/30 text-lunary-primary-300 border border-lunary-primary-700/30'
+                        className='text-[10px] px-2 py-0.5 rounded-full bg-layer-base/30 text-content-brand border border-lunary-primary-700/30'
                       >
                         {tag}
                       </span>
@@ -230,11 +232,11 @@ export function LifeThemesOverview({
       </div>
 
       {!isSubscribed && themes.length > 1 && (
-        <div className='mt-3 pt-3 border-t border-zinc-800/50'>
-          <p className='text-xs text-zinc-400'>
+        <div className='mt-3 pt-3 border-t border-stroke-subtle/50'>
+          <p className='text-xs text-content-muted'>
             <a
               href='/pricing?nav=app'
-              className='text-lunary-primary-400 hover:text-lunary-primary-300'
+              className='text-lunary-primary-400 hover:text-content-brand'
             >
               Upgrade to Lunary+
             </a>{' '}

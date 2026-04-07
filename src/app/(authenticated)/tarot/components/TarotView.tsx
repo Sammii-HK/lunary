@@ -536,7 +536,7 @@ export function TarotView({
             </div>
             <Link
               href='/profile'
-              className='inline-flex items-center justify-center w-full py-3 px-4 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 font-medium hover:bg-lunary-primary-900/30 transition-colors'
+              className='inline-flex items-center justify-center w-full py-3 px-4 rounded-lg bg-layer-base/20 border border-lunary-primary-700 text-content-brand font-medium hover:bg-layer-base/30 transition-colors'
             >
               Add details to your profile
             </Link>
@@ -596,7 +596,7 @@ export function TarotView({
         </p>
       </div>
       {/* Moon Phase
-      <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-3'>
+      <div className='rounded-lg border border-lunary-secondary-800 bg-layer-deep/40 p-3'>
         <div className='flex items-center gap-3'>
           <img
             src={cosmicContext.moonPhase.icon.src}
@@ -604,14 +604,14 @@ export function TarotView({
             className='w-10 h-10 flex-shrink-0'
           />
           <div className='flex-1 min-w-0'>
-            <p className='text-sm font-medium text-lunary-secondary-300 mb-1'>
+            <p className='text-sm font-medium text-content-brand-secondary mb-1'>
               {cosmicContext.moonPhase.name}
             </p>
             <div className='flex flex-wrap gap-1.5'>
               {cosmicContext.moonPhase.keywords.map((keyword, idx) => (
                 <span
                   key={idx}
-                  className='text-xs px-2 py-0.5 rounded-full bg-lunary-secondary-900/50 text-lunary-secondary-400 border border-lunary-secondary-800'
+                  className='text-xs px-2 py-0.5 rounded-full bg-layer-base/50 text-lunary-secondary-400 border border-lunary-secondary-800'
                 >
                   {keyword}
                 </span>
@@ -655,7 +655,7 @@ export function TarotView({
                     <button
                       type='button'
                       onClick={() => handleCardShare(personalizedDailyShare)}
-                      className='inline-flex items-center gap-1.5 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
+                      className='inline-flex items-center gap-1.5 text-xs font-medium text-content-brand hover:text-content-secondary transition-colors'
                     >
                       <Share2 className='w-4 h-4' />
                       <span className='hidden sm:inline'>Share daily card</span>
@@ -663,7 +663,7 @@ export function TarotView({
                   )}
                 </div>
                 <p
-                  className='text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
+                  className='text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-content-brand transition-colors'
                   onClick={() => {
                     const card = getTarotCardByName(
                       personalizedReading!.daily.name,
@@ -674,7 +674,7 @@ export function TarotView({
                   {personalizedReading!.daily.name}
                 </p>
                 <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm'>
-                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
+                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-layer-base/50 border border-lunary-primary-700/30 text-content-secondary font-medium'>
                     {personalizedReading!.daily.keywords[2] ||
                       personalizedReading!.daily.keywords[0]}
                   </span>
@@ -708,7 +708,7 @@ export function TarotView({
                     <button
                       type='button'
                       onClick={() => handleCardShare(personalizedWeeklyShare)}
-                      className='inline-flex items-center gap-1.5 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
+                      className='inline-flex items-center gap-1.5 text-xs font-medium text-content-brand hover:text-content-secondary transition-colors'
                     >
                       <Share2 className='w-4 h-4' />
                       <span className='hidden sm:inline'>
@@ -718,7 +718,7 @@ export function TarotView({
                   )}
                 </div>
                 <p
-                  className='text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
+                  className='text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-content-brand transition-colors'
                   onClick={() => {
                     const card = getTarotCardByName(
                       personalizedReading!.weekly.name,
@@ -729,7 +729,7 @@ export function TarotView({
                   {personalizedReading!.weekly.name}
                 </p>
                 <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm'>
-                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
+                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-layer-base/50 border border-lunary-primary-700/30 text-content-secondary font-medium'>
                     {personalizedReading!.weekly.keywords[2] ||
                       personalizedReading!.weekly.keywords[0]}
                   </span>
@@ -756,7 +756,7 @@ export function TarotView({
 
             {/* Guidance action points - paid only */}
             <div className='mt-4'>
-              <div className='rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
+              <div className='rounded-lg border border-lunary-success-800 bg-layer-deep p-4'>
                 <ul className='space-y-2 text-xs text-content-secondary'>
                   {guidanceActionPoints.length > 0 ? (
                     guidanceActionPoints
@@ -794,7 +794,7 @@ export function TarotView({
                     <button
                       type='button'
                       onClick={() => handleCardShare(generalDailyShare)}
-                      className='inline-flex items-center gap-1.5 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
+                      className='inline-flex items-center gap-1.5 text-xs font-medium text-content-brand hover:text-content-secondary transition-colors'
                     >
                       <Share2 className='w-4 h-4' />
                       <span className='hidden sm:inline'>Share daily card</span>
@@ -802,7 +802,7 @@ export function TarotView({
                   )}
                 </div>
                 <p
-                  className='text-base md:text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
+                  className='text-base md:text-lg font-medium text-content-primary mb-1 cursor-pointer hover:text-content-brand transition-colors'
                   onClick={() => {
                     const card = getTarotCardByName(generalTarot!.daily.name);
                     if (card) setSelectedCard(card);
@@ -811,7 +811,7 @@ export function TarotView({
                   {generalTarot!.daily.name}
                 </p>
                 <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm mb-3'>
-                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
+                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-layer-base/50 border border-lunary-primary-700/30 text-content-secondary font-medium'>
                     {generalTarot!.daily.keywords[2] ||
                       generalTarot!.daily.keywords[0]}
                   </span>
@@ -825,8 +825,8 @@ export function TarotView({
                 {/* Locked preview of transit insights */}
                 <div className='mt-4 pt-4 border-t border-stroke-subtle'>
                   <div className='flex items-center gap-2 mb-2'>
-                    <LockIcon className='w-3 h-3 text-lunary-primary-300' />
-                    <span className='text-xs font-medium text-lunary-primary-200'>
+                    <LockIcon className='w-3 h-3 text-content-brand' />
+                    <span className='text-xs font-medium text-content-secondary'>
                       In Your Chart Today
                     </span>
                   </div>
@@ -836,7 +836,7 @@ export function TarotView({
                   <button
                     type='button'
                     onClick={() => router.push('/pricing?nav=app')}
-                    className='mt-2 text-xs text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors font-medium'
+                    className='mt-2 text-xs text-content-brand hover:text-content-secondary transition-colors font-medium'
                   >
                     Unlock personalized insights
                   </button>
@@ -853,14 +853,14 @@ export function TarotView({
                     {generalTarot!.weekly.name}
                   </p>
                   <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm mb-3'>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
+                    <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-layer-base/50 border border-lunary-primary-700/30 text-content-secondary font-medium'>
                       {generalTarot!.weekly.keywords[2] ||
                         generalTarot!.weekly.keywords[0]}
                     </span>
                   </div>
                 </div>
                 <div className='absolute inset-0 flex flex-col items-center justify-center gap-3 p-4'>
-                  <LockIcon className='w-6 h-6 text-lunary-primary-300' />
+                  <LockIcon className='w-6 h-6 text-content-brand' />
                   <h4 className='text-sm font-semibold text-content-primary text-center'>
                     Weekly Card
                   </h4>
@@ -877,7 +877,7 @@ export function TarotView({
                         router.push('/pricing?nav=app');
                       }
                     }}
-                    className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300 cursor-pointer hover:bg-lunary-primary-800/50 transition-colors'
+                    className='inline-flex items-center gap-1 text-[10px] bg-layer-base/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-content-brand cursor-pointer hover:bg-layer-raised/50 transition-colors'
                   >
                     <Sparkles className='w-2.5 h-2.5' />
                     Lunary+ Feature
@@ -892,7 +892,7 @@ export function TarotView({
                       });
                       router.push('/pricing?nav=app');
                     }}
-                    className='mt-1 inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-700 bg-surface-elevated/80 px-3 py-1.5 text-xs font-medium text-lunary-primary-300 hover:bg-surface-elevated transition-colors'
+                    className='mt-1 inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-700 bg-surface-elevated/80 px-3 py-1.5 text-xs font-medium text-content-brand hover:bg-surface-elevated transition-colors'
                   >
                     {ctaCopy.tarotWeekly}
                   </button>
@@ -903,7 +903,7 @@ export function TarotView({
             {/* Daily Message & Weekly Energy - Free */}
             <div className='space-y-4 pt-4 border-t border-stroke-subtle/50'>
               <div className='rounded-lg border border-lunary-primary-700 bg-surface-elevated/50 p-4'>
-                <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300/90 mb-2'>
+                <h3 className='text-xs md:text-sm font-medium text-content-brand/90 mb-2'>
                   Daily Message
                 </h3>
                 <p className='text-xs md:text-sm text-content-secondary leading-relaxed'>
@@ -926,7 +926,7 @@ export function TarotView({
                       });
                       router.push('/pricing?nav=app');
                     }}
-                    className='mt-2 text-xs text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors font-medium'
+                    className='mt-2 text-xs text-content-brand hover:text-content-secondary transition-colors font-medium'
                   >
                     {ctaCopy.tarotDaily}
                   </button>
@@ -935,7 +935,7 @@ export function TarotView({
 
               <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/50 p-4 relative overflow-hidden'>
                 <div className='flex items-center justify-between mb-2'>
-                  <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300'>
+                  <h3 className='text-xs md:text-sm font-medium text-content-brand'>
                     Weekly Energy
                   </h3>
                   <span
@@ -948,7 +948,7 @@ export function TarotView({
                         router.push('/pricing?nav=app');
                       }
                     }}
-                    className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded text-lunary-primary-300 cursor-pointer hover:bg-lunary-primary-800/50 transition-colors'
+                    className='inline-flex items-center gap-1 text-[10px] bg-layer-base/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded text-content-brand cursor-pointer hover:bg-layer-raised/50 transition-colors'
                   >
                     <Sparkles className='w-2.5 h-2.5' />
                     Lunary+
@@ -969,7 +969,7 @@ export function TarotView({
                     });
                     router.push('/pricing?nav=app');
                   }}
-                  className='mt-3 text-xs text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors font-medium'
+                  className='mt-3 text-xs text-content-brand hover:text-content-secondary transition-colors font-medium'
                 >
                   {ctaCopy.tarotWeekly}
                 </button>
@@ -1009,7 +1009,7 @@ export function TarotView({
                 <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden'>
                   <div className='flex items-center justify-between p-4'>
                     <div className='flex items-center gap-3'>
-                      <div className='p-2 rounded-lg bg-lunary-primary-900/30'>
+                      <div className='p-2 rounded-lg bg-layer-base/30'>
                         <Sparkles className='w-4 h-4 text-lunary-primary-400' />
                       </div>
                       <div>
@@ -1026,7 +1026,7 @@ export function TarotView({
                 <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden'>
                   <div className='flex items-center justify-between p-4'>
                     <div className='flex items-center gap-3'>
-                      <div className='p-2 rounded-lg bg-lunary-secondary-900/30'>
+                      <div className='p-2 rounded-lg bg-layer-base/30'>
                         <Moon className='w-4 h-4 text-lunary-secondary-400' />
                       </div>
                       <div>
@@ -1063,7 +1063,7 @@ export function TarotView({
             page='tarot'
             blurredContent={
               <div className='space-y-3'>
-                <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-4'>
+                <div className='rounded-lg border border-lunary-accent-700 bg-layer-deep p-4'>
                   <div className='flex items-center gap-3 mb-3'>
                     <div className='w-10 h-10 rounded-lg bg-surface-card/60 border border-stroke-default flex items-center justify-center'>
                       <span className='text-lg'>🌙</span>
@@ -1083,7 +1083,7 @@ export function TarotView({
                     single narrative.
                   </p>
                 </div>
-                <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-4'>
+                <div className='rounded-lg border border-lunary-accent-700 bg-layer-deep p-4'>
                   <div className='flex items-center gap-3 mb-3'>
                     <div className='w-10 h-10 rounded-lg bg-surface-card/60 border border-stroke-default flex items-center justify-center'>
                       <span className='text-lg'>💫</span>
@@ -1110,173 +1110,152 @@ export function TarotView({
         {/* Tarot Patterns section - always shown */}
         <div data-testid='pattern-analysis-section'>
           <CollapsibleSection title='Tarot Patterns' defaultCollapsed={false}>
-            <HoroscopeSection
-              title={
-                selectedView === 'year-over-year'
-                  ? 'Year-over-Year Patterns'
-                  : timeFrame === 365
-                    ? '12-Month Patterns'
-                    : timeFrame === 180
-                      ? '6-Month Patterns'
-                      : timeFrame === 90
-                        ? '90-Day Patterns'
-                        : timeFrame === 30
-                          ? '30-Day Patterns'
-                          : timeFrame === 14
-                            ? '14-Day Patterns'
-                            : '7-Day Patterns'
-              }
-              color='zinc'
+            <div
+              className='mb-4 flex flex-wrap gap-2'
+              data-testid='pattern-timeframe-selector'
             >
-              <div
-                className='mb-4 flex flex-wrap gap-2'
-                data-testid='pattern-timeframe-selector'
-              >
-                {[7, 14, 30, 90, 180, 365].map((days) => {
-                  const needsAdvancedAccess = days === 365;
-                  const needsPatternsAccess = days >= 14;
-                  const hasAccess = needsAdvancedAccess
-                    ? subscription.hasAccess('advanced_patterns')
-                    : needsPatternsAccess
-                      ? subscription.hasAccess('tarot_patterns')
-                      : true; // 7-day is free
-                  const isLocked = !hasAccess;
+              {[7, 14, 30, 90, 180, 365].map((days) => {
+                const needsAdvancedAccess = days === 365;
+                const needsPatternsAccess = days >= 14;
+                const hasAccess = needsAdvancedAccess
+                  ? subscription.hasAccess('advanced_patterns')
+                  : needsPatternsAccess
+                    ? subscription.hasAccess('tarot_patterns')
+                    : true; // 7-day is free
+                const isLocked = !hasAccess;
 
-                  return (
-                    <button
-                      key={days}
-                      data-testid={`pattern-${days}days`}
-                      onClick={() => {
-                        if (isLocked) {
-                          setUpgradeFeature(
-                            needsAdvancedAccess
-                              ? 'advanced_patterns'
-                              : 'tarot_patterns',
-                          );
-                          setShowUpgradeModal(true);
-                          return;
-                        }
-                        setSelectedView(days);
-                      }}
-                      className={cn(
-                        'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
-                        isLocked
-                          ? 'bg-surface-card/30 text-zinc-600 border border-stroke-default/30 cursor-not-allowed opacity-50'
-                          : selectedView === days
-                            ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
-                            : 'bg-surface-card/50 text-content-muted border border-stroke-default/50 hover:bg-surface-card/70',
-                      )}
-                      title={
-                        isLocked
-                          ? needsAdvancedAccess
-                            ? 'Upgrade to Lunary+ Pro to unlock'
-                            : 'Upgrade to Lunary+ to unlock'
-                          : undefined
+                return (
+                  <button
+                    key={days}
+                    data-testid={`pattern-${days}days`}
+                    onClick={() => {
+                      if (isLocked) {
+                        setUpgradeFeature(
+                          needsAdvancedAccess
+                            ? 'advanced_patterns'
+                            : 'tarot_patterns',
+                        );
+                        setShowUpgradeModal(true);
+                        return;
                       }
-                    >
-                      {days === 180
-                        ? '6 months'
-                        : days === 365
-                          ? '12 months'
-                          : `${days} days`}
-                      {isLocked && (
-                        <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
-                      )}
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => {
-                    const hasAccess =
-                      subscription.hasAccess('advanced_patterns');
-                    if (!hasAccess) {
-                      setUpgradeFeature('advanced_patterns');
-                      setShowUpgradeModal(true);
-                      return;
+                      setSelectedView(days);
+                    }}
+                    className={cn(
+                      'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
+                      isLocked
+                        ? 'bg-surface-card/30 text-content-muted border border-stroke-default/30 cursor-not-allowed opacity-50'
+                        : selectedView === days
+                          ? 'bg-layer-base/20 text-content-brand border border-lunary-primary-700'
+                          : 'bg-surface-card/50 text-content-muted border border-stroke-default/50 hover:bg-surface-card/70',
+                    )}
+                    title={
+                      isLocked
+                        ? needsAdvancedAccess
+                          ? 'Upgrade to Lunary+ Pro to unlock'
+                          : 'Upgrade to Lunary+ to unlock'
+                        : undefined
                     }
-                    setSelectedView('year-over-year');
-                    setIsMultidimensionalMode(true);
-                  }}
-                  className={cn(
-                    'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
-                    !subscription.hasAccess('advanced_patterns')
-                      ? 'bg-surface-card/30 text-zinc-600 border border-stroke-default/30 cursor-not-allowed opacity-50'
-                      : selectedView === 'year-over-year'
-                        ? 'bg-lunary-primary-900 text-lunary-primary-300 border border-lunary-primary-700'
-                        : 'bg-surface-card/50 text-content-muted border border-stroke-default/50 hover:bg-surface-card/70',
-                  )}
-                  title={
-                    !subscription.hasAccess('advanced_patterns')
-                      ? 'Upgrade to Lunary+ Pro Annual to unlock'
-                      : undefined
+                  >
+                    {days === 180
+                      ? '6 months'
+                      : days === 365
+                        ? '12 months'
+                        : `${days} days`}
+                    {isLocked && (
+                      <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-content-muted' />
+                    )}
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => {
+                  const hasAccess = subscription.hasAccess('advanced_patterns');
+                  if (!hasAccess) {
+                    setUpgradeFeature('advanced_patterns');
+                    setShowUpgradeModal(true);
+                    return;
                   }
-                >
-                  Year-over-Year
-                  {!subscription.hasAccess('advanced_patterns') && (
-                    <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
-                  )}
-                </button>
-                <button
-                  onClick={() => {
-                    const hasAccess =
-                      subscription.hasAccess('advanced_patterns');
-                    if (!hasAccess) {
-                      setUpgradeFeature('advanced_patterns');
-                      setShowUpgradeModal(true);
-                      return;
-                    }
-                    setIsMultidimensionalMode(!isMultidimensionalMode);
-                  }}
-                  className={cn(
-                    'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative flex items-center gap-1.5',
-                    !subscription.hasAccess('advanced_patterns')
-                      ? 'bg-surface-card/30 text-zinc-600 border border-stroke-default/30 cursor-not-allowed opacity-50'
-                      : isMultidimensionalMode
-                        ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
-                        : 'bg-surface-card/50 text-content-muted border border-stroke-default/50 hover:bg-surface-card/70',
-                  )}
-                  title={
-                    !subscription.hasAccess('advanced_patterns')
-                      ? 'Upgrade to Lunary+ Pro Annual to unlock advanced patterns'
-                      : isMultidimensionalMode
-                        ? 'Turn off multidimensional analysis'
-                        : 'Turn on multidimensional analysis'
-                  }
-                >
-                  <Sparkles className='w-3 h-3' />
-                  Advanced
-                  {!subscription.hasAccess('advanced_patterns') && (
-                    <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
-                  )}
-                </button>
-              </div>
-              <AdvancedPatterns
-                key={`patterns-${selectedView}-${isMultidimensionalMode}`}
-                basicPatterns={
-                  hasPaidAccess
-                    ? personalizedReading?.trendAnalysis
-                    : freeBasicPatterns
-                }
-                selectedView={selectedView}
-                isMultidimensionalMode={isMultidimensionalMode}
-                onMultidimensionalModeChange={setIsMultidimensionalMode}
-                recentReadings={
-                  typeof selectedView === 'number' && selectedView === 7
-                    ? hasPaidAccess
-                      ? personalizedPreviousReadings
-                      : previousReadings
+                  setSelectedView('year-over-year');
+                  setIsMultidimensionalMode(true);
+                }}
+                className={cn(
+                  'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'bg-surface-card/30 text-content-muted border border-stroke-default/30 cursor-not-allowed opacity-50'
+                    : selectedView === 'year-over-year'
+                      ? 'bg-layer-base text-content-brand border border-lunary-primary-700'
+                      : 'bg-surface-card/50 text-content-muted border border-stroke-default/50 hover:bg-surface-card/70',
+                )}
+                title={
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'Upgrade to Lunary+ Pro Annual to unlock'
                     : undefined
                 }
-                onCardClick={(card: { name: string }) => {
-                  const tarotCard = getTarotCardByName(card.name);
-                  if (tarotCard) setSelectedCard(tarotCard);
+              >
+                Year-over-Year
+                {!subscription.hasAccess('advanced_patterns') && (
+                  <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-content-muted' />
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  const hasAccess = subscription.hasAccess('advanced_patterns');
+                  if (!hasAccess) {
+                    setUpgradeFeature('advanced_patterns');
+                    setShowUpgradeModal(true);
+                    return;
+                  }
+                  setIsMultidimensionalMode(!isMultidimensionalMode);
                 }}
-                birthChart={user?.birthChart}
-                userBirthday={userBirthday}
-                currentTransits={currentAstrologicalChart}
-                userBirthLocation={user?.birthLocation}
-              />
-            </HoroscopeSection>
+                className={cn(
+                  'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative flex items-center gap-1.5',
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'bg-surface-card/30 text-content-muted border border-stroke-default/30 cursor-not-allowed opacity-50'
+                    : isMultidimensionalMode
+                      ? 'bg-layer-base/20 text-content-brand border border-lunary-primary-700'
+                      : 'bg-surface-card/50 text-content-muted border border-stroke-default/50 hover:bg-surface-card/70',
+                )}
+                title={
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'Upgrade to Lunary+ Pro Annual to unlock advanced patterns'
+                    : isMultidimensionalMode
+                      ? 'Turn off multidimensional analysis'
+                      : 'Turn on multidimensional analysis'
+                }
+              >
+                <Sparkles className='w-3 h-3' />
+                Advanced
+                {!subscription.hasAccess('advanced_patterns') && (
+                  <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-content-muted' />
+                )}
+              </button>
+            </div>
+            <AdvancedPatterns
+              key={`patterns-${selectedView}-${isMultidimensionalMode}`}
+              basicPatterns={
+                hasPaidAccess
+                  ? personalizedReading?.trendAnalysis
+                  : freeBasicPatterns
+              }
+              selectedView={selectedView}
+              isMultidimensionalMode={isMultidimensionalMode}
+              onMultidimensionalModeChange={setIsMultidimensionalMode}
+              recentReadings={
+                typeof selectedView === 'number' && selectedView === 7
+                  ? hasPaidAccess
+                    ? personalizedPreviousReadings
+                    : previousReadings
+                  : undefined
+              }
+              onCardClick={(card: { name: string }) => {
+                const tarotCard = getTarotCardByName(card.name);
+                if (tarotCard) setSelectedCard(tarotCard);
+              }}
+              birthChart={user?.birthChart}
+              userBirthday={userBirthday}
+              currentTransits={currentAstrologicalChart}
+              userBirthLocation={user?.birthLocation}
+            />
           </CollapsibleSection>
         </div>
 
@@ -1306,7 +1285,7 @@ export function TarotView({
                 Read about{' '}
                 <Link
                   href='/grimoire/tarot/spreads'
-                  className='text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+                  className='text-content-brand hover:text-content-secondary transition-colors'
                 >
                   each spread
                 </Link>{' '}

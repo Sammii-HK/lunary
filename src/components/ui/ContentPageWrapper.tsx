@@ -39,10 +39,12 @@ export function ContentPageWrapper({
   showFooter = true,
   className = '',
   padding = 'px-4 py-8 md:py-12',
-  background = 'bg-zinc-950',
+  background = 'bg-surface-base',
 }: ContentPageWrapperProps) {
   return (
-    <div className={`min-h-screen ${background} text-zinc-100 flex flex-col`}>
+    <div
+      className={`min-h-screen ${background} text-content-primary flex flex-col`}
+    >
       <div
         className={`${maxWidthClasses[maxWidth]} mx-auto ${padding} ${className}`}
       >

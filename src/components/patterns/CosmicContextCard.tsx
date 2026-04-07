@@ -43,14 +43,14 @@ export function CosmicContextCard({
   const card = cardName ? getTarotCardByName(cardName) : null;
 
   return (
-    <div className='bg-zinc-900/50 rounded-lg p-3 space-y-2 border border-zinc-800/50'>
+    <div className='bg-surface-elevated/50 rounded-lg p-3 space-y-2 border border-stroke-subtle/50'>
       {/* Header with Date and Moon Phase */}
       <div className='flex items-center justify-between'>
         <div>
-          <p className='text-xs font-medium text-zinc-400 mb-0.5'>
+          <p className='text-xs font-medium text-content-muted mb-0.5'>
             When pulled
           </p>
-          <p className='text-sm font-medium text-zinc-200'>
+          <p className='text-sm font-medium text-content-primary'>
             {dayjs(date).format('MMM D, YYYY')}
           </p>
         </div>
@@ -64,7 +64,7 @@ export function CosmicContextCard({
               className='flex-shrink-0'
             />
             <div className='text-right'>
-              <p className='text-xs font-medium text-lunary-secondary-300'>
+              <p className='text-xs font-medium text-content-brand-secondary'>
                 {moonPhase.name}
               </p>
             </div>
@@ -74,21 +74,23 @@ export function CosmicContextCard({
 
       {/* Card Meaning - shown first for context */}
       {showCardMeaning && card && (
-        <div className='pt-2 border-t border-zinc-800/50'>
-          <p className='text-xs font-medium text-zinc-300 mb-1'>Card Meaning</p>
+        <div className='pt-2 border-t border-stroke-subtle/50'>
+          <p className='text-xs font-medium text-content-secondary mb-1'>
+            Card Meaning
+          </p>
           {card?.keywords && card.keywords.length > 0 && (
             <div className='flex flex-wrap gap-1.5 mb-2'>
               {card.keywords.slice(0, 3).map((keyword: string, idx: number) => (
                 <span
                   key={idx}
-                  className='text-xs px-2 py-0.5 rounded-full bg-lunary-primary-900/50 text-lunary-primary-300 border border-lunary-primary-800'
+                  className='text-xs px-2 py-0.5 rounded-full bg-layer-base/50 text-content-brand border border-lunary-primary-800'
                 >
                   {keyword}
                 </span>
               ))}
             </div>
           )}
-          <p className='text-xs text-zinc-400 leading-relaxed'>
+          <p className='text-xs text-content-muted leading-relaxed'>
             {card?.information}
           </p>
         </div>
@@ -96,14 +98,14 @@ export function CosmicContextCard({
 
       {/* Aspects */}
       {aspects && aspects.length > 0 && (
-        <div className='pt-2 border-t border-zinc-800/50'>
-          <p className='text-xs text-zinc-500 mb-2'>Active aspects</p>
+        <div className='pt-2 border-t border-stroke-subtle/50'>
+          <p className='text-xs text-content-muted mb-2'>Active aspects</p>
           <div className='flex flex-wrap gap-1.5'>
             {aspects.map((aspect, idx) => (
               <Badge
                 key={idx}
                 variant='outline'
-                className='text-xs bg-zinc-800/40 border-zinc-700'
+                className='text-xs bg-surface-card/40 border-stroke-default'
               >
                 {aspect.planet1} {aspect.aspectSymbol} {aspect.planet2}
               </Badge>

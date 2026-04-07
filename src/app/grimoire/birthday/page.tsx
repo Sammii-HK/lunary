@@ -66,7 +66,7 @@ export default function BirthdayIndexPage() {
           { name: 'Birthday', url: '/grimoire/birthday' },
         ]),
       )}
-      <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      <div className='min-h-screen bg-surface-base text-content-primary'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
           <Breadcrumbs
             items={[
@@ -76,20 +76,20 @@ export default function BirthdayIndexPage() {
           />
 
           <h1 className='text-4xl font-light mb-4'>Birthday Zodiac Calendar</h1>
-          <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
+          <p className='text-lg text-content-muted mb-8 max-w-3xl'>
             Find your zodiac sign based on your birthday. Select your birth
             month and day below to discover your sun sign, personality traits,
             compatibility, and cosmic insights.
           </p>
 
-          <div className='mb-12 p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+          <div className='mb-12 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
             <h2 className='text-xl font-medium mb-4'>Zodiac Sign Dates</h2>
             <div className='grid md:grid-cols-3 gap-4'>
               {ZODIAC_DATE_RANGES.map((zodiac) => (
                 <Link
                   key={zodiac.sign}
                   href={`/grimoire/zodiac/${zodiac.sign.toLowerCase()}`}
-                  className='flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-800/50 transition-colors'
+                  className='flex items-center gap-3 p-3 rounded-lg hover:bg-surface-card/50 transition-colors'
                 >
                   <span className='text-2xl'>
                     {zodiac.sign === 'Aries'
@@ -118,7 +118,7 @@ export default function BirthdayIndexPage() {
                   </span>
                   <div>
                     <div className='font-medium'>{zodiac.sign}</div>
-                    <div className='text-sm text-zinc-400'>
+                    <div className='text-sm text-content-muted'>
                       {MONTH_NAMES[zodiac.startMonth - 1].slice(0, 3)}{' '}
                       {zodiac.startDay} -{' '}
                       {MONTH_NAMES[zodiac.endMonth - 1].slice(0, 3)}{' '}
@@ -142,7 +142,7 @@ export default function BirthdayIndexPage() {
                     <Link
                       key={`${name}-${day}`}
                       href={`/grimoire/birthday/${name.toLowerCase()}-${day}`}
-                      className='w-10 h-10 flex items-center justify-center rounded-lg border border-zinc-800 hover:border-lunary-primary-600 hover:bg-zinc-800/50 text-sm transition-colors'
+                      className='w-10 h-10 flex items-center justify-center rounded-lg border border-stroke-subtle hover:border-lunary-primary-600 hover:bg-surface-card/50 text-sm transition-colors'
                     >
                       {day}
                     </Link>
@@ -152,18 +152,18 @@ export default function BirthdayIndexPage() {
             ))}
           </div>
 
-          <div className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-            <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
+          <div className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+            <h2 className='text-xl font-medium text-content-brand mb-2'>
               Get Your Full Birth Chart
             </h2>
-            <p className='text-zinc-300 mb-4'>
+            <p className='text-content-secondary mb-4'>
               Your birthday reveals your Sun sign, but your complete natal chart
               includes Moon, Rising, and all planetary placements for deeper
               cosmic insight.
             </p>
             <Link
               href='/birth-chart'
-              className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+              className='inline-flex px-6 py-3 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
             >
               View Your Birth Chart
             </Link>

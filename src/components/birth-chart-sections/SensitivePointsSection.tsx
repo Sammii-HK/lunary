@@ -65,16 +65,16 @@ export function SensitivePointsSection({
       defaultCollapsed={true}
       persistState={true}
     >
-      <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+      <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           {midheaven && (
             <div className='border-l-2 border-lunary-highlight pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-lunary-highlight'>
                   {astroPointSymbols.midheaven}
                 </span>
                 Midheaven in {midheaven.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       midheaven.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -82,19 +82,19 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.midheaven.mysticalProperties}
               </p>
             </div>
           )}
           {imumCoeli && (
             <div className='border-l-2 border-lunary-highlight pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-lunary-highlight'>
                   {astroPointSymbols.imumcoeli}
                 </span>
                 Imum Coeli in {imumCoeli.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       imumCoeli.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -102,19 +102,19 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.imumcoeli.mysticalProperties}
               </p>
             </div>
           )}
           {descendant && (
             <div className='border-l-2 border-lunary-primary-400 pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-lunary-primary-400'>
                   {astroPointSymbols.descendant}
                 </span>
                 Descendant in {descendant.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       descendant.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -122,19 +122,19 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.descendant.mysticalProperties}
               </p>
             </div>
           )}
           {northNode && (
             <div className='border-l-2 border-emerald-500 pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-emerald-400'>
                   {astroPointSymbols.northnode}
                 </span>
                 North Node in {northNode.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       northNode.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -142,19 +142,19 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.northnode.mysticalProperties}
               </p>
             </div>
           )}
           {southNode && (
             <div className='border-l-2 border-violet-500 pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-violet-400'>
                   {astroPointSymbols.southnode}
                 </span>
                 South Node in {southNode.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       southNode.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -162,19 +162,19 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.southnode.mysticalProperties}
               </p>
             </div>
           )}
           {chiron && (
             <div className='border-l-2 border-amber-500 pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-amber-400'>
                   {astroPointSymbols.chiron}
                 </span>
                 Chiron in {chiron.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       chiron.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -182,19 +182,19 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.chiron.mysticalProperties}
               </p>
             </div>
           )}
           {lilith && (
             <div className='border-l-2 border-fuchsia-500 pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-fuchsia-400'>
                   {astroPointSymbols.lilith}
                 </span>
                 Lilith in {lilith.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       lilith.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -202,19 +202,19 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.lilith.mysticalProperties}
               </p>
             </div>
           )}
           {partOfFortune && (
             <div className='border-l-2 border-lunary-accent pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-lunary-accent'>
                   {astroPointSymbols.partoffortune}
                 </span>
                 Part of Fortune in {partOfFortune.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       partOfFortune.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -222,19 +222,19 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.partoffortune.mysticalProperties}
               </p>
             </div>
           )}
           {partOfSpirit && (
             <div className='border-l-2 border-lunary-accent pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-lunary-accent'>
                   {astroPointSymbols.partofspirit}
                 </span>
                 Part of Spirit in {partOfSpirit.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       partOfSpirit.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -242,19 +242,19 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.partofspirit.mysticalProperties}
               </p>
             </div>
           )}
           {vertex && (
             <div className='border-l-2 border-cyan-500 pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-cyan-400'>
                   {astroPointSymbols.vertex}
                 </span>
                 Vertex in {vertex.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       vertex.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -262,19 +262,19 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.vertex.mysticalProperties}
               </p>
             </div>
           )}
           {antiVertex && (
             <div className='border-l-2 border-cyan-500 pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-cyan-400'>
                   {astroPointSymbols.antivertex}
                 </span>
                 Anti-Vertex in {antiVertex.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       antiVertex.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -282,19 +282,19 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.antivertex.mysticalProperties}
               </p>
             </div>
           )}
           {eastPoint && (
             <div className='border-l-2 border-cyan-500 pl-3'>
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+              <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <span className='font-astro text-lg text-cyan-400'>
                   {astroPointSymbols.eastpoint}
                 </span>
                 East Point in {eastPoint.sign}
-                <span className='font-astro text-zinc-400'>
+                <span className='font-astro text-content-muted'>
                   {
                     zodiacSymbol[
                       eastPoint.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -302,7 +302,7 @@ export function SensitivePointsSection({
                   }
                 </span>
               </h5>
-              <p className='text-xs text-zinc-300 mt-1'>
+              <p className='text-xs text-content-secondary mt-1'>
                 {astrologicalPoints.eastpoint.mysticalProperties}
               </p>
             </div>
@@ -316,7 +316,7 @@ export function SensitivePointsSection({
                 key={asteroid.body}
                 className='border-l-2 border-[#FCD34D] pl-3'
               >
-                <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                <h5 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                   <span className='font-astro text-lg text-[#FCD34D]'>
                     {
                       astroPointSymbols[
@@ -325,7 +325,7 @@ export function SensitivePointsSection({
                     }
                   </span>
                   {asteroid.body} in {asteroid.sign}
-                  <span className='font-astro text-zinc-400'>
+                  <span className='font-astro text-content-muted'>
                     {
                       zodiacSymbol[
                         asteroid.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -336,11 +336,11 @@ export function SensitivePointsSection({
                     <span className='text-lunary-error text-xs'>℞</span>
                   )}
                 </h5>
-                <p className='text-xs text-zinc-400 mt-1'>
+                <p className='text-xs text-content-muted mt-1'>
                   {asteroid.degree}°{asteroid.minute}' {asteroid.sign}
                 </p>
                 {asteroidInfo?.mysticalProperties && (
-                  <p className='text-xs text-zinc-300 mt-1'>
+                  <p className='text-xs text-content-secondary mt-1'>
                     {asteroidInfo.mysticalProperties}
                   </p>
                 )}

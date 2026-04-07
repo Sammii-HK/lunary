@@ -87,23 +87,25 @@ export function ArchetypeBar({ className = '' }: ArchetypeBarProps) {
 
   return (
     <div
-      className={`rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden ${className}`}
+      className={`rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden ${className}`}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className='w-full flex items-center justify-between p-3 text-left hover:bg-zinc-800/30 transition-colors'
+        className='w-full flex items-center justify-between p-3 text-left hover:bg-surface-card/30 transition-colors'
       >
         <div className='flex items-center gap-2'>
           <Sparkles className='w-4 h-4 text-lunary-secondary-400' />
           <div>
-            <span className='text-sm text-zinc-300'>Pattern detected: </span>
-            <span className='text-sm font-medium text-lunary-secondary-300'>
+            <span className='text-sm text-content-secondary'>
+              Pattern detected:{' '}
+            </span>
+            <span className='text-sm font-medium text-content-brand-secondary'>
               {archetype.name}
             </span>
           </div>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-zinc-500 transition-transform ${
+          className={`w-4 h-4 text-content-muted transition-transform ${
             isExpanded ? 'rotate-180' : ''
           }`}
         />
@@ -111,7 +113,7 @@ export function ArchetypeBar({ className = '' }: ArchetypeBarProps) {
 
       {isExpanded && (
         <div className='px-3 pb-3 space-y-3'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
             {hasCosmicProfileAccess
               ? archetype.premiumNarrative.split('\n\n')[0]
               : archetype.freeSummary}
@@ -119,14 +121,14 @@ export function ArchetypeBar({ className = '' }: ArchetypeBarProps) {
 
           {hasCosmicProfileAccess && archetype.suggestedWork.length > 0 && (
             <div className='space-y-1.5'>
-              <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
+              <p className='text-xs font-medium text-content-muted uppercase tracking-wide'>
                 Suggested practices
               </p>
               <ul className='space-y-1'>
                 {archetype.suggestedWork.slice(0, 3).map((work, i) => (
                   <li
                     key={i}
-                    className='text-xs text-zinc-400 flex items-start gap-2'
+                    className='text-xs text-content-muted flex items-start gap-2'
                   >
                     <span className='text-lunary-secondary-400 mt-0.5'>•</span>
                     {work}
@@ -137,7 +139,7 @@ export function ArchetypeBar({ className = '' }: ArchetypeBarProps) {
           )}
 
           {!hasCosmicProfileAccess && (
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-content-muted'>
               Upgrade for deeper archetype insights and practices.
             </p>
           )}

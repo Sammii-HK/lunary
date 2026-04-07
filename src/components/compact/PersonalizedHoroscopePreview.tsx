@@ -352,7 +352,7 @@ export const PersonalizedHoroscopePreview = () => {
 
       return (
         <div className='locked-preview-redacted mb-2'>
-          <p className='text-xs text-zinc-400'>{contentWithSpaces}</p>
+          <p className='text-xs text-content-muted'>{contentWithSpaces}</p>
         </div>
       );
     }
@@ -373,7 +373,7 @@ export const PersonalizedHoroscopePreview = () => {
     return (
       <Link
         href='/pricing?nav=app'
-        className='group block border border-zinc-800 rounded-2xl bg-zinc-950/70 p-4 shadow-sm transition-colors hover:border-lunary-primary-500 hover:bg-zinc-900'
+        className='group block border border-stroke-subtle rounded-2xl bg-surface-base/70 p-4 shadow-sm transition-colors hover:border-lunary-primary-500 hover:bg-surface-elevated'
         onClick={(e) => {
           // If click target is a button, let button handle it
           const target = e.target as HTMLElement;
@@ -384,44 +384,44 @@ export const PersonalizedHoroscopePreview = () => {
       >
         <div className='space-y-3'>
           <div>
-            <h3 className='text-sm leading-snug text-zinc-100 flex items-center'>
-              <Orbit className='mr-2 w-4 h-4 text-lunary-accent-300' />
+            <h3 className='text-sm leading-snug text-content-primary flex items-center'>
+              <Orbit className='mr-2 w-4 h-4 text-content-brand-accent' />
               Today's Cosmic Energy
             </h3>
           </div>
 
           {isLoading ? (
-            <div className='space-y-2 text-xs text-zinc-500'>
-              <div className='h-3 bg-zinc-800 rounded animate-pulse' />
-              <div className='h-3 bg-zinc-800 rounded animate-pulse w-5/6' />
-              <div className='h-3 bg-zinc-800 rounded animate-pulse w-4/6' />
+            <div className='space-y-2 text-xs text-content-muted'>
+              <div className='h-3 bg-surface-card rounded animate-pulse' />
+              <div className='h-3 bg-surface-card rounded animate-pulse w-5/6' />
+              <div className='h-3 bg-surface-card rounded animate-pulse w-4/6' />
             </div>
           ) : (
             <>
               {freePlanetTeases.length > 0 ? (
                 <div className='space-y-2.5'>
-                  <p className='text-[0.6rem] uppercase tracking-[0.2em] text-zinc-500'>
+                  <p className='text-[0.6rem] uppercase tracking-[0.2em] text-content-muted'>
                     Active in your chart right now
                   </p>
                   <div className='flex flex-wrap gap-1.5'>
                     {freePlanetTeases.map(({ planet, house }) => (
                       <span
                         key={planet}
-                        className='inline-flex items-center gap-1 rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[0.65rem] text-zinc-400'
+                        className='inline-flex items-center gap-1 rounded-full border border-stroke-subtle bg-surface-elevated px-2 py-0.5 text-[0.65rem] text-content-muted'
                       >
                         {planet}
-                        <span className='text-zinc-700'>·</span>
-                        <span className='text-zinc-500'>
+                        <span className='text-content-muted'>·</span>
+                        <span className='text-content-muted'>
                           {ordinal(house)} house
                         </span>
-                        <Lock className='ml-0.5 h-2.5 w-2.5 text-zinc-700' />
+                        <Lock className='ml-0.5 h-2.5 w-2.5 text-content-muted' />
                       </span>
                     ))}
                   </div>
 
                   {topTransitAspects.length > 0 && (
-                    <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/40 px-3 py-2 space-y-1'>
-                      <p className='text-xs font-medium text-zinc-200'>
+                    <div className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 px-3 py-2 space-y-1'>
+                      <p className='text-xs font-medium text-content-primary'>
                         {
                           getTransitCopy({
                             transitPlanet: topTransitAspects[0].transitPlanet,
@@ -431,7 +431,7 @@ export const PersonalizedHoroscopePreview = () => {
                           }).headline
                         }
                       </p>
-                      <p className='text-[0.65rem] text-zinc-600 flex items-center gap-1'>
+                      <p className='text-[0.65rem] text-content-muted flex items-center gap-1'>
                         <Lock className='h-2.5 w-2.5' />
                         Interpretation available with Lunary+
                       </p>
@@ -439,20 +439,20 @@ export const PersonalizedHoroscopePreview = () => {
                   )}
                 </div>
               ) : (
-                <p className='text-sm text-zinc-200 leading-snug mb-2'>
+                <p className='text-sm text-content-primary leading-snug mb-2'>
                   {`${generalHoroscope.reading.split('.')[0]}.`}
                 </p>
               )}
 
               <div className='relative mt-1'>
                 {renderPreview()}
-                <span className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
+                <span className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-layer-base/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-content-brand'>
                   <Sparkles className='w-2.5 h-2.5' />
                   Lunary+
                 </span>
               </div>
 
-              <span className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'>
+              <span className='flex items-center gap-1.5 text-xs text-content-secondary hover:text-content-secondary transition-colors'>
                 <span>{ctaCopy.horoscope}</span>
                 <ArrowRight className='w-4 h-4' />
               </span>
@@ -467,7 +467,7 @@ export const PersonalizedHoroscopePreview = () => {
   return (
     <Link
       href='/horoscope'
-      className='group block border border-zinc-800 rounded-2xl bg-zinc-950/70 p-4 shadow-sm transition-colors hover:border-lunary-primary-500 hover:bg-zinc-900'
+      className='group block border border-stroke-subtle rounded-2xl bg-surface-base/70 p-4 shadow-sm transition-colors hover:border-lunary-primary-500 hover:bg-surface-elevated'
       onClick={(e) => {
         // Prevent navigation when clicking interactive elements inside the card
         const target = e.target as HTMLElement;
@@ -484,24 +484,24 @@ export const PersonalizedHoroscopePreview = () => {
       <div className='space-y-3'>
         <div className='flex items-center justify-between gap-3'>
           <div>
-            <h3 className='text-sm leading-snug text-zinc-100 flex'>
-              <Orbit className='mr-2 w-4 h-4 text-lunary-accent-300' />
+            <h3 className='text-sm leading-snug text-content-primary flex'>
+              <Orbit className='mr-2 w-4 h-4 text-content-brand-accent' />
               {horoscope?.headline || 'Personalized review'}
             </h3>
           </div>
         </div>
 
         {isLoading ? (
-          <div className='space-y-2 text-xs text-zinc-500'>
-            <div className='h-3 bg-zinc-800 rounded animate-pulse' />
-            <div className='h-3 bg-zinc-800 rounded animate-pulse w-5/6' />
-            <div className='h-3 bg-zinc-800 rounded animate-pulse w-4/6' />
+          <div className='space-y-2 text-xs text-content-muted'>
+            <div className='h-3 bg-surface-card rounded animate-pulse' />
+            <div className='h-3 bg-surface-card rounded animate-pulse w-5/6' />
+            <div className='h-3 bg-surface-card rounded animate-pulse w-4/6' />
           </div>
         ) : (
           <>
             {topTransitAspects.length > 0 && !ritualComplete ? (
               <div className='space-y-2.5'>
-                <p className='text-[0.6rem] uppercase tracking-[0.2em] text-zinc-500'>
+                <p className='text-[0.6rem] uppercase tracking-[0.2em] text-content-muted'>
                   {getDigestIntro(user?.id)}
                 </p>
                 {topTransitAspects.map((aspect, i) => {
@@ -518,10 +518,10 @@ export const PersonalizedHoroscopePreview = () => {
                       key={`${aspect.transitPlanet}-${aspect.natalPlanet}-${i}`}
                       className='space-y-0.5'
                     >
-                      <p className='text-xs font-medium text-zinc-200'>
+                      <p className='text-xs font-medium text-content-primary'>
                         {copy.headline}
                       </p>
-                      <p className='text-xs text-zinc-400 leading-relaxed'>
+                      <p className='text-xs text-content-muted leading-relaxed'>
                         {copy.meaning}
                       </p>
                     </div>
@@ -529,15 +529,15 @@ export const PersonalizedHoroscopePreview = () => {
                 })}
               </div>
             ) : (
-              <p className='text-sm text-zinc-300 leading-snug'>
+              <p className='text-sm text-content-secondary leading-snug'>
                 {focusText || horoscope?.dailyGuidance}
               </p>
             )}
 
-            <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/60 px-3 py-2 text-[0.7rem] uppercase text-zinc-400'>
+            <div className='rounded-xl border border-stroke-subtle/60 bg-surface-elevated/60 px-3 py-2 text-[0.7rem] uppercase text-content-muted'>
               <div className='flex items-center gap-1 justify-between tracking-[0.25em]'>
                 {iosLabel("Today's ritual", isNativeIOS)}
-                <div className='flex items-center gap-1 text-[0.55rem] uppercase tracking-[0.3em] text-zinc-500'>
+                <div className='flex items-center gap-1 text-[0.55rem] uppercase tracking-[0.3em] text-content-muted'>
                   <button
                     type='button'
                     aria-pressed={ritualComplete}
@@ -550,7 +550,7 @@ export const PersonalizedHoroscopePreview = () => {
                     className={`flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${
                       ritualComplete
                         ? 'border-lunary-accent text-lunary-accent'
-                        : 'border-zinc-700 text-zinc-500'
+                        : 'border-stroke-default text-content-muted'
                     }`}
                   >
                     {ritualComplete ? (
@@ -562,7 +562,7 @@ export const PersonalizedHoroscopePreview = () => {
                   <span className='ml-1'>Complete</span>
                 </div>
               </div>
-              <p className='mt-1 text-xs text-lunary-primary-200 normal-case'>
+              <p className='mt-1 text-xs text-content-secondary normal-case'>
                 {anchorCopy}
               </p>
             </div>
@@ -573,7 +573,7 @@ export const PersonalizedHoroscopePreview = () => {
 
             {ritualComplete && (
               <>
-                <p className='text-[0.65rem] text-zinc-400 flex flex-wrap items-center gap-2'>
+                <p className='text-[0.65rem] text-content-muted flex flex-wrap items-center gap-2'>
                   <span className='whitespace-nowrap'>
                     Capture this ritual inside your Book of Shadows.
                   </span>
@@ -584,7 +584,7 @@ export const PersonalizedHoroscopePreview = () => {
                       event.stopPropagation();
                       handleJournalClick(event);
                     }}
-                    className='text-[0.65rem] text-lunary-accent hover:text-lunary-accent-100 transition-colors'
+                    className='text-[0.65rem] text-lunary-accent hover:text-content-brand-accent transition-colors'
                   >
                     Journal about it
                   </button>
@@ -596,11 +596,11 @@ export const PersonalizedHoroscopePreview = () => {
             {ritualComplete && ritualSkill ? (
               <div className='mt-1'>
                 <div className='flex items-center justify-between mb-0.5'>
-                  <span className='text-[0.6rem] text-zinc-400'>
+                  <span className='text-[0.6rem] text-content-muted'>
                     Ritual Keeper · Lv. {ritualSkill.currentLevel}
                   </span>
                   {streakCopy && (
-                    <span className='text-[0.6rem] text-lunary-accent-200'>
+                    <span className='text-[0.6rem] text-content-brand-accent'>
                       {streakCopy}
                     </span>
                   )}
@@ -614,13 +614,13 @@ export const PersonalizedHoroscopePreview = () => {
               </div>
             ) : (
               streakCopy && (
-                <p className='text-[0.65rem] text-lunary-accent-200'>
+                <p className='text-[0.65rem] text-content-brand-accent'>
                   {streakCopy}
                 </p>
               )
             )}
 
-            {/* <div className='flex flex-wrap items-center gap-2 text-[0.65rem] text-zinc-500'>
+            {/* <div className='flex flex-wrap items-center gap-2 text-[0.65rem] text-content-muted'>
               <ReflectionBox />
             </div> */}
           </>

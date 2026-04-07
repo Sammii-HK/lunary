@@ -32,14 +32,16 @@ export function RecurringThemesCard({
 
   return (
     <div
-      className={`rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-4 ${className}`}
+      className={`rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-4 ${className}`}
     >
       <div className='flex items-start gap-2 mb-3'>
         <Sparkles className='w-4 h-4 text-lunary-primary-400 mt-0.5' />
         <div>
-          <h3 className='text-sm font-medium text-zinc-200'>{title}</h3>
+          <h3 className='text-sm font-medium text-content-primary'>{title}</h3>
           {subtitle && (
-            <p className='text-xs text-zinc-500 leading-relaxed'>{subtitle}</p>
+            <p className='text-xs text-content-muted leading-relaxed'>
+              {subtitle}
+            </p>
           )}
         </div>
       </div>
@@ -55,7 +57,7 @@ export function RecurringThemesCard({
           return (
             <li key={`${item.label}-${index}`} className='space-y-1'>
               <div className='flex items-center gap-3'>
-                <span className='text-sm text-zinc-200 flex items-center gap-1.5'>
+                <span className='text-sm text-content-primary flex items-center gap-1.5'>
                   {item.label}
                   {showTrendIndicators && item.trend && (
                     <span className={`text-xs ${getTrendColor(item.trend)}`}>
@@ -63,7 +65,7 @@ export function RecurringThemesCard({
                     </span>
                   )}
                 </span>
-                <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
+                <div className='flex-1 h-1.5 bg-surface-card rounded-full overflow-hidden'>
                   <div
                     className={`h-full bg-lunary-primary-500/60 rounded-full transition-all ${!barStyle ? widthClass : ''}`}
                     style={barStyle}
@@ -71,7 +73,7 @@ export function RecurringThemesCard({
                 </div>
               </div>
               {item.detail && (
-                <p className='text-xs text-zinc-500'>{item.detail}</p>
+                <p className='text-xs text-content-muted'>{item.detail}</p>
               )}
             </li>
           );

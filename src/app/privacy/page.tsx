@@ -17,19 +17,21 @@ export default function PrivacyPolicyPage() {
   const lastUpdated = 'February 12, 2026';
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='mb-8'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             Privacy Policy
           </h1>
-          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-content-muted'>
+            Last Updated: {lastUpdated}
+          </p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
           <section>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Lunar Computing, Inc. (&quot;Lunary,&quot; &quot;we,&quot;
               &quot;us,&quot; or &quot;our&quot;) is committed to protecting
               your privacy. This Privacy Policy explains how we collect, use,
@@ -37,7 +39,7 @@ export default function PrivacyPolicyPage() {
               mobile application, and services (collectively, the
               &quot;Service&quot;).
             </p>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               By using the Service, you agree to the collection and use of
               information in accordance with this policy. If you do not agree
               with our policies and practices, please do not use our Service.
@@ -45,18 +47,18 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               1. Information We Collect
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               1.1 Information You Provide
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               We collect information you voluntarily provide when using our
               Service:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Account Information:</strong> Email address, name, and
                 password when you create an account
@@ -82,13 +84,13 @@ export default function PrivacyPolicyPage() {
                 through our payment provider (see Section 4)
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               Journals, reflections, dreams, and other written entries are
               user-generated content stored privately within your account. This
               content is not reviewed manually and is not shared publicly unless
               you explicitly choose to do so.
             </p>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               <strong>Community spaces and Q&amp;A:</strong> Posts you submit to
               community spaces are visible to other authenticated users of that
               space. Questions and answers posted in Q&amp;A are publicly
@@ -98,7 +100,7 @@ export default function PrivacyPolicyPage() {
               and safety purposes. Community content is subject to automated
               content filtering and may be removed if it violates our policies.
             </p>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               <strong>Social features:</strong> When you use Lunary&apos;s
               social features (gifting, compatibility invites, friend
               connections), certain information is shared with other users. Gift
@@ -109,7 +111,7 @@ export default function PrivacyPolicyPage() {
               milestone celebrations. Referral codes are anonymous identifiers
               and do not reveal your identity to referred users.
             </p>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               <strong>Rituals and intentions:</strong> Mood entries, gratitude
               reflections, dream intentions, and manifestation goals are private
               to your account and are not shared with other users. This content
@@ -118,13 +120,13 @@ export default function PrivacyPolicyPage() {
               to improve the service.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               1.2 Information Collected Automatically
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               When you access the Service, we automatically collect:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Device Information:</strong> Browser type, operating
                 system, device identifiers
@@ -143,26 +145,26 @@ export default function PrivacyPolicyPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               1.3 Cookies and Similar Technologies
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We use cookies and similar tracking technologies to collect and
               track information. For detailed information about our use of
               cookies, please see our{' '}
               <Link
                 href='/cookies'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 Cookie Policy
               </Link>
               .
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               1.4 Product Analytics & In-App Activity
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We collect limited in-app usage data to understand how features
               are used, improve reliability, and develop new functionality. This
               can include interactions with app features, navigation flows, and
@@ -174,13 +176,13 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               2. How We Use Your Information
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               We use the information we collect to:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Provide, maintain, and improve the Service</li>
               <li>
                 Generate personalized astrological content, horoscopes, and
@@ -221,7 +223,7 @@ export default function PrivacyPolicyPage() {
                 required)
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               Lunary may generate derived insights (such as themes, patterns, or
               summaries) based on your activity and content. These insights are
               for personal reflection and are not medical, psychological, or
@@ -230,15 +232,15 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               3. Legal Basis for Processing (GDPR)
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               If you are located in the European Economic Area (EEA), United
               Kingdom, or Switzerland, we process your personal data based on
               the following legal grounds:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Contract Performance:</strong> Processing necessary to
                 provide you with the Service you requested
@@ -260,14 +262,14 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               4. Payment Processing (Stripe)
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               We use Stripe, Inc. as our payment processor. When you make a
               purchase:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>
                   Lunary does NOT store your credit card numbers or full payment
@@ -288,14 +290,14 @@ export default function PrivacyPolicyPage() {
                 status) for accounting and support purposes.
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               For information on how Stripe handles your payment data, please
               review{' '}
               <a
                 href='https://stripe.com/privacy'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 Stripe&apos;s Privacy Policy
               </a>
@@ -304,18 +306,18 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               5. Lunary GPT and AI Features
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               Lunary offers AI-assisted features including Lunary GPT, an
               optional AI assistant. When you interact with our AI features:
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               5.1 What Lunary GPT Receives
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 User-provided text (questions, reflections, tarot prompts)
               </li>
@@ -325,15 +327,15 @@ export default function PrivacyPolicyPage() {
               </li>
               <li>Optional emotional or symbolic themes you choose to share</li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-2'>
+            <p className='text-content-secondary leading-relaxed mt-2'>
               Lunary GPT does not automatically access your Lunary account
               unless you explicitly provide information during the conversation.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               5.2 What Lunary GPT Does NOT Store
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Chat history on Lunary servers (conversations are ephemeral)
               </li>
@@ -342,14 +344,14 @@ export default function PrivacyPolicyPage() {
               <li>Any sensitive personal information</li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               5.3 How Lunary APIs Are Used
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-2'>
+            <p className='text-content-secondary leading-relaxed mb-2'>
               When Lunary GPT calls our APIs (for birth charts, tarot, rituals,
               crystals, or cosmic data):
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Only the specific data required to fulfill the request is sent
               </li>
@@ -361,10 +363,10 @@ export default function PrivacyPolicyPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               5.4 Third-Party AI Processing
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Our AI features are powered by OpenAI. Chat content is processed
               by OpenAI&apos;s API to generate responses. We do not share
               personal identifiers, birth details, journaling content, or other
@@ -374,7 +376,7 @@ export default function PrivacyPolicyPage() {
                 href='https://openai.com/privacy'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 OpenAI&apos;s Privacy Policy
               </a>
@@ -383,14 +385,14 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               6. Information Sharing and Disclosure
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               We do not sell your personal information. We may share your
               information in the following circumstances:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Service Providers:</strong> With third-party vendors who
                 perform services on our behalf (hosting, analytics, payment
@@ -414,10 +416,10 @@ export default function PrivacyPolicyPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               6.1 Third-Party Services We Use
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Stripe:</strong> Payment processing
               </li>
@@ -437,18 +439,18 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               7. Data Retention
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               We retain your personal information for as long as necessary to:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Provide the Service to you</li>
               <li>Comply with legal obligations</li>
               <li>Resolve disputes and enforce our agreements</li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               Compatibility invite data is stored temporarily and automatically
               expires after 30 days. When you delete your account, we will
               delete or anonymize your personal information within 30 days,
@@ -458,14 +460,14 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               8. Your Rights and Choices
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               8.1 All Users
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Access:</strong> Request access to the personal
                 information we hold about you
@@ -488,14 +490,14 @@ export default function PrivacyPolicyPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               8.2 European Users (GDPR)
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               If you are in the EEA, UK, or Switzerland, you have additional
               rights:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Right to restrict processing of your personal information</li>
               <li>
                 Right to object to processing based on legitimate interests
@@ -507,15 +509,18 @@ export default function PrivacyPolicyPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6' id='ccpa'>
+            <h3
+              className='text-xl font-medium text-content-primary mb-3 mt-6'
+              id='ccpa'
+            >
               8.3 California Residents (CCPA/CPRA)
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               If you are a California resident, you have the following rights
               under the California Consumer Privacy Act (CCPA) and California
               Privacy Rights Act (CPRA):
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Right to Know:</strong> Request disclosure of the
                 categories and specific pieces of personal information we have
@@ -539,11 +544,11 @@ export default function PrivacyPolicyPage() {
               </li>
             </ul>
 
-            <div className='mt-6 p-4 border border-lunary-primary-700 bg-lunary-primary-950/20 rounded-xl'>
-              <h4 className='text-lg font-medium text-white mb-2'>
+            <div className='mt-6 p-4 border border-lunary-primary-700 bg-layer-deep/20 rounded-xl'>
+              <h4 className='text-lg font-medium text-content-primary mb-2'>
                 Do Not Sell or Share My Personal Information
               </h4>
-              <p className='text-zinc-300 text-sm'>
+              <p className='text-content-secondary text-sm'>
                 Lunary does not sell your personal information in the
                 traditional sense. However, some data sharing for analytics or
                 advertising purposes may constitute a &quot;sale&quot; or
@@ -551,7 +556,7 @@ export default function PrivacyPolicyPage() {
                 please email{' '}
                 <a
                   href='mailto:privacy@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   privacy@lunary.app
                 </a>{' '}
@@ -562,19 +567,19 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               9. Data Subject Access Requests (DSAR)
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               To exercise any of your rights described above, please submit a
               request by:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Emailing{' '}
                 <a
                   href='mailto:privacy@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   privacy@lunary.app
                 </a>
@@ -587,10 +592,10 @@ export default function PrivacyPolicyPage() {
                 locate your data
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               We will respond to your request within:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>GDPR requests:</strong> 30 days (extendable by 60 days
                 for complex requests)
@@ -603,10 +608,10 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               10. Data Security
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We implement appropriate technical and organizational security
               measures to protect your personal information against unauthorized
               access, alteration, disclosure, or destruction. These measures
@@ -618,10 +623,10 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               11. International Data Transfers
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Lunary is based in the United States. If you are accessing the
               Service from outside the United States, please be aware that your
               information may be transferred to, stored, and processed in the
@@ -632,17 +637,17 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               12. Children&apos;s Privacy
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               The Service is not intended for individuals under the age of 16.
               We do not knowingly collect personal information from individuals
               under 16. If you are a parent or guardian and believe your child
               has provided us with personal information, please contact us at{' '}
               <a
                 href='mailto:privacy@lunary.app'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 privacy@lunary.app
               </a>
@@ -651,10 +656,10 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               13. Changes to This Privacy Policy
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We may update this Privacy Policy from time to time. We will
               notify you of any material changes by posting the new Privacy
               Policy on this page and updating the &quot;Last Updated&quot; date
@@ -665,15 +670,15 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               14. Contact Us
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               If you have any questions about this Privacy Policy or our privacy
               practices, please contact us:
             </p>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Lunar Computing, Inc.</strong>
                 <br />
                 131 Continental Dr, Suite 305
@@ -684,7 +689,7 @@ export default function PrivacyPolicyPage() {
                 Email:{' '}
                 <a
                   href='mailto:privacy@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   privacy@lunary.app
                 </a>
@@ -692,7 +697,7 @@ export default function PrivacyPolicyPage() {
                 General Support:{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   support@lunary.app
                 </a>
@@ -700,32 +705,32 @@ export default function PrivacyPolicyPage() {
             </div>
           </section>
 
-          <section className='pt-8 border-t border-zinc-800'>
-            <h2 className='text-lg font-medium text-white mb-4'>
+          <section className='pt-8 border-t border-stroke-subtle'>
+            <h2 className='text-lg font-medium text-content-primary mb-4'>
               Related Policies
             </h2>
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/cookies'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Cookie Policy
               </Link>
               <Link
                 href='/acceptable-use'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Acceptable Use Policy
               </Link>
               <Link
                 href='/refund'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Refund Policy
               </Link>

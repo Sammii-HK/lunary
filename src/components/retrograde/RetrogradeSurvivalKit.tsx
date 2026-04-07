@@ -31,7 +31,7 @@ export function RetrogradeSurvivalKit({
   return (
     <div
       className={cn(
-        'rounded-xl border border-amber-800/40 bg-gradient-to-br from-amber-950/40 to-zinc-900',
+        'rounded-xl border border-amber-800/40 bg-gradient-to-br from-amber-950/40 to-surface-elevated',
         className,
       )}
     >
@@ -63,7 +63,7 @@ export function RetrogradeSurvivalKit({
               {content.dos.map((item, i) => (
                 <li
                   key={i}
-                  className='flex items-start gap-2 text-xs text-zinc-300'
+                  className='flex items-start gap-2 text-xs text-content-secondary'
                 >
                   <CheckCircle2 className='w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0' />
                   <span>{item}</span>
@@ -81,7 +81,7 @@ export function RetrogradeSurvivalKit({
               {content.donts.map((item, i) => (
                 <li
                   key={i}
-                  className='flex items-start gap-2 text-xs text-zinc-300'
+                  className='flex items-start gap-2 text-xs text-content-secondary'
                 >
                   <XCircle className='w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0' />
                   <span>{item}</span>
@@ -91,14 +91,14 @@ export function RetrogradeSurvivalKit({
           </div>
 
           {/* Journal Prompt */}
-          <div className='rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-800/30 p-3'>
+          <div className='rounded-lg bg-layer-base/20 border border-lunary-primary-800/30 p-3'>
             <div className='flex items-center gap-1.5 mb-1.5'>
               <BookOpen className='w-3.5 h-3.5 text-lunary-primary-400' />
-              <span className='text-[10px] font-medium text-lunary-primary-300 uppercase tracking-wide'>
+              <span className='text-[10px] font-medium text-content-brand uppercase tracking-wide'>
                 Journal Prompt
               </span>
             </div>
-            <p className='text-xs text-zinc-300 italic'>
+            <p className='text-xs text-content-secondary italic'>
               {content.journalPrompt}
             </p>
           </div>
@@ -111,7 +111,7 @@ export function RetrogradeSurvivalKit({
                 Tip
               </span>
             </div>
-            <p className='text-xs text-zinc-300'>{content.tip}</p>
+            <p className='text-xs text-content-secondary'>{content.tip}</p>
           </div>
         </div>
       )}

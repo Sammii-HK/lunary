@@ -87,7 +87,7 @@ export default async function SignHoroscopePage({
   const heroContent = (
     <div className='text-center space-y-3'>
       <span className='text-6xl'>{symbol}</span>
-      <p className='text-sm uppercase tracking-[0.3em] text-zinc-400'>
+      <p className='text-sm uppercase tracking-[0.3em] text-content-muted'>
         {element} Sign • Ruled by {ruler}
       </p>
     </div>
@@ -158,7 +158,7 @@ export default async function SignHoroscopePage({
       childrenPosition='after-description'
     >
       <section className='mb-12'>
-        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+        <h2 className='text-2xl font-medium text-content-primary mb-6'>
           Select a Year
         </h2>
         <div className='grid grid-cols-2 md:grid-cols-3 gap-4'>
@@ -166,12 +166,12 @@ export default async function SignHoroscopePage({
             <Link
               key={year}
               href={`/grimoire/horoscopes/${sign}/${year}`}
-              className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all text-center group'
+              className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 hover:bg-surface-elevated transition-all text-center group'
             >
-              <div className='text-2xl font-light text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+              <div className='text-2xl font-light text-content-primary group-hover:text-content-brand transition-colors'>
                 {year}
               </div>
-              <div className='text-sm text-zinc-400 mt-1'>
+              <div className='text-sm text-content-muted mt-1'>
                 {signName} Horoscopes
               </div>
             </Link>

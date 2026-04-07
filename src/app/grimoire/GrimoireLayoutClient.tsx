@@ -32,42 +32,42 @@ const currentYear = new Date().getFullYear();
 // Dynamic imports for grimoire components (lazy load to improve build speed)
 const Moon = dynamic(() => import('./components/Moon'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const WheelOfTheYear = dynamic(() => import('./components/WheelOfTheYear'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const Astronomy = dynamic(() => import('./components/Astronomy'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const Correspondences = dynamic(() => import('./components/Correspondences'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const Practices = dynamic(() => import('./components/Practices'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const Tarot = dynamic(() => import('./components/Tarot'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const Runes = dynamic(() => import('./components/Runes'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const Chakras = dynamic(() => import('./components/Chakras'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const Numerology = dynamic(
@@ -77,13 +77,13 @@ const Numerology = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+      <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
     ),
   },
 );
 const Crystals = dynamic(() => import('./components/Crystals'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 type CrystalsComponentProps = ComponentProps<typeof Crystals>;
@@ -91,37 +91,37 @@ const EMPTY_CRYSTAL_CATEGORIES: CrystalsComponentProps['categories'] = [];
 const EMPTY_CRYSTAL_TOTAL_COUNT: CrystalsComponentProps['totalCount'] = 0;
 const BirthChart = dynamic(() => import('./components/BirthChart'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const CandleMagic = dynamic(() => import('./components/CandleMagic'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const Divination = dynamic(() => import('./components/Divination'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const ModernWitchcraft = dynamic(
   () => import('./components/ModernWitchcraft'),
   {
     loading: () => (
-      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+      <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
     ),
   },
 );
 const Meditation = dynamic(() => import('./components/Meditation'), {
   loading: () => (
-    <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+    <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
   ),
 });
 const CompatibilityChart = dynamic(
   () => import('./components/CompatibilityChart'),
   {
     loading: () => (
-      <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
+      <div className='h-64 bg-surface-elevated/50 rounded-lg animate-pulse' />
     ),
   },
 );
@@ -695,10 +695,10 @@ function GrimoireIndexPage({
         {/* Header with Search */}
         <div className='text-center mb-12 md:mb-16'>
           <Notebook className='w-16 h-16 md:w-20 md:h-20 text-lunary-primary-400 mx-auto mb-6' />
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-4'>
             Welcome to the Grimoire
           </h1>
-          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto mb-8'>
+          <p className='text-base md:text-lg text-content-muted leading-relaxed max-w-2xl mx-auto mb-8'>
             Explore mystical knowledge, cosmic wisdom, and ancient practices to
             deepen your spiritual journey.
           </p>
@@ -719,10 +719,10 @@ function GrimoireIndexPage({
               {/* Category Header */}
               <div className='flex items-center gap-3 mb-6'>
                 <span className='text-lunary-primary-400'>{category.icon}</span>
-                <h2 className='text-xl md:text-2xl font-medium text-zinc-100'>
+                <h2 className='text-xl md:text-2xl font-medium text-content-primary'>
                   {category.name}
                 </h2>
-                <div className='flex-1 h-px bg-zinc-800' />
+                <div className='flex-1 h-px bg-surface-card' />
               </div>
 
               {/* All Items as Links */}
@@ -732,12 +732,14 @@ function GrimoireIndexPage({
                     key={`${category.name}-${item.title}`}
                     href={withNavParams(item.href)}
                     prefetch={true}
-                    className='group rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                    className='group rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
                   >
-                    <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-1'>
+                    <h3 className='font-medium text-content-primary group-hover:text-content-brand transition-colors mb-1'>
                       {item.title}
                     </h3>
-                    <p className='text-xs text-zinc-400'>{item.description}</p>
+                    <p className='text-xs text-content-muted'>
+                      {item.description}
+                    </p>
                   </Link>
                 ))}
               </div>
@@ -860,7 +862,7 @@ export default function GrimoireLayout({
         <div className='p-4 md:p-6 lg:p-8'>
           <div className='max-w-4xl mx-auto'>
             {GrimoireContent[currentSection as keyof typeof GrimoireContent]}
-            <GrimoireStats className='mt-8 pt-6 border-t border-zinc-800/50' />
+            <GrimoireStats className='mt-8 pt-6 border-t border-stroke-subtle/50' />
             <ExploreGrimoire />
             <MarketingFooterGate />
           </div>
