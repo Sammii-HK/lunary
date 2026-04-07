@@ -75,7 +75,7 @@ export async function sendEmail({
     if (recipients.length === 1) {
       const { data, error } = await resend.emails.send({
         from: from || FROM_EMAIL,
-        reply_to: replyTo || REPLY_TO,
+        replyTo: replyTo || REPLY_TO,
         to: recipients[0],
         subject,
         html: finalHtml,
@@ -157,7 +157,7 @@ async function sendBatchEmails(
       try {
         const { data, error } = await resend.emails.send({
           from: FROM_EMAIL,
-          reply_to: replyTo,
+          replyTo: replyTo,
           to: email,
           subject,
           html,
