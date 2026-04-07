@@ -2,8 +2,8 @@
  * /api/cron/weekly-reading
  *
  * Runs every Sunday at 9am UTC.
- * Sends a personal weekly chart reading from Sammii to every activated user
- * who has a birth chart on file.
+ * Pro users  → personalised card + full transit aspects + Sun/Moon grimoire copy
+ * Free users → card of the week + Sun grimoire copy + transit house teasers (upsell)
  *
  * "Activated" = has at least one real session (filters out bot signups).
  * Deduplicates per ISO week so it never sends twice in the same week.
@@ -19,26 +19,37 @@ import {
   renderWeeklyPersonalReading,
   weeklyReadingSubject,
 } from '@/lib/email-components/WeeklyPersonalReadingEmail';
-import { getCurrentWeekLabel } from '@/lib/email/grimoire-email-copy';
+import {
+  getCurrentWeekLabel,
+  getWeekSeed,
+} from '@/lib/email/grimoire-email-copy';
+import {
+  getCurrentPlanetPositions,
+  getCurrentMoonPhase,
+  getWeeklyCard,
+  getPersonalisedCard,
+  getPlanetHousePlacements,
+  getSignificantTransitAspects,
+} from '@/lib/email/astro-email-utils';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-function parsePlacements(birthChart: unknown): {
+function parseBirthChart(birthChart: unknown): {
   sunSign?: string;
   moonSign?: string;
+  raw: unknown[];
 } {
-  if (!Array.isArray(birthChart)) return {};
+  if (!Array.isArray(birthChart)) return { raw: [] };
   let sunSign: string | undefined;
   let moonSign: string | undefined;
   for (const p of birthChart as Record<string, unknown>[]) {
     if (p?.body === 'Sun') sunSign = p.sign as string;
     if (p?.body === 'Moon') moonSign = p.sign as string;
   }
-  return { sunSign, moonSign };
+  return { sunSign, moonSign, raw: birthChart };
 }
 
-/** ISO week key used for deduplication, e.g. "weekly_reading_2026-W15" */
 function weekCampaignKey(): string {
   const now = new Date();
   const startOfYear = new Date(now.getFullYear(), 0, 1);
@@ -67,14 +78,22 @@ export async function GET(request: NextRequest) {
 
     const weekLabel = getCurrentWeekLabel();
     const campaignKey = weekCampaignKey();
+    const weekNum = getWeekSeed();
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app';
 
-    // All activated users (at least one session) with a birth chart
+    // Compute shared values once — same for all users this week
+    const now = new Date();
+    const currentPositions = getCurrentPlanetPositions(now);
+    const moonPhase = getCurrentMoonPhase(now);
+    const collectiveCard = getWeeklyCard(weekNum);
+
+    // All activated users with a birth chart
     const users = await sql`
       SELECT DISTINCT
         s.user_id,
         s.user_email as email,
         s.user_name as name,
+        s.is_paying,
         up.birth_chart
       FROM subscriptions s
       INNER JOIN user_profiles up ON s.user_id = up.user_id
@@ -84,7 +103,7 @@ export async function GET(request: NextRequest) {
           SELECT 1 FROM user_sessions us
           WHERE us.user_id = s.user_id
         )
-      LIMIT 200
+      LIMIT 500
     `;
 
     if (users.rows.length === 0) {
@@ -101,23 +120,42 @@ export async function GET(request: NextRequest) {
 
     for (const user of users.rows) {
       try {
-        // One reading per user per week — keyed to the ISO week
         if (await hasReceivedCampaign(user.user_id, 'weekly_reading', 6)) {
           skipped++;
           continue;
         }
 
-        const { sunSign, moonSign } = parsePlacements(user.birth_chart);
+        const isPro = user.is_paying === true;
+        const { sunSign, moonSign, raw } = parseBirthChart(user.birth_chart);
         const firstName = user.name?.split(' ')[0] || undefined;
+
+        const weeklyCard = isPro
+          ? getPersonalisedCard(weekNum, user.user_id)
+          : collectiveCard;
+
+        const transitAspects =
+          isPro && raw.length > 0
+            ? getSignificantTransitAspects(raw, currentPositions, 2)
+            : [];
+
+        const planetHouses =
+          !isPro && raw.length > 0
+            ? getPlanetHousePlacements(raw, currentPositions)
+            : [];
 
         const html = await renderWeeklyPersonalReading({
           userId: user.user_id,
           userName: user.name || 'there',
+          isPro,
           sunSign,
           moonSign,
           userEmail: user.email,
           weekLabel,
           baseUrl,
+          moonPhase,
+          weeklyCard,
+          transitAspects,
+          planetHouses,
         });
 
         await sendEmail({
@@ -133,7 +171,7 @@ export async function GET(request: NextRequest) {
             utm: {
               source: 'email',
               medium: 'weekly',
-              campaign: 'weekly_reading',
+              campaign: isPro ? 'weekly_reading' : 'weekly_reading_free',
             },
           },
         });
