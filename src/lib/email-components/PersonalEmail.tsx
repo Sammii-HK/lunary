@@ -106,7 +106,10 @@ export function PersonalEmail({
           {children}
           <Section style={styles.divider} />
           <Text style={styles.footer}>
-            Any issues, contact{' '}
+            <Link href={BASE_URL} style={styles.footerLink}>
+              lunary.app
+            </Link>{' '}
+            &middot; Any issues, contact{' '}
             <Link href='mailto:help@lunary.app' style={styles.footerLink}>
               help@lunary.app
             </Link>{' '}
