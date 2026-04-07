@@ -129,7 +129,8 @@ export async function POST(request: NextRequest) {
 
       await sendEmail({
         to: user.email,
-        from: 'Sammii <sammii@lunary.app>',
+        from: 'Sammii <hello@lunary.app>',
+        replyTo: 'sammii@lunary.app',
         subject,
         html,
         tracking: {

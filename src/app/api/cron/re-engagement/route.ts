@@ -183,7 +183,8 @@ export async function GET(request: NextRequest) {
 
         await sendEmail({
           to: user.email,
-          from: 'Sammii <sammii@lunary.app>',
+          from: 'Sammii <hello@lunary.app>',
+          replyTo: 'sammii@lunary.app',
           subject: 'Came to check in on your chart',
           html,
           tracking: {
@@ -252,7 +253,8 @@ export async function GET(request: NextRequest) {
 
         await sendEmail({
           to: user.email,
-          from: 'Sammii <sammii@lunary.app>',
+          from: 'Sammii <hello@lunary.app>',
+          replyTo: 'sammii@lunary.app',
           subject: sunSign
             ? `Your ${sunSign} chart: here is what moved this week`
             : 'Here is what moved in your chart this week',
@@ -325,7 +327,8 @@ export async function GET(request: NextRequest) {
 
         await sendEmail({
           to: user.email,
-          from: 'Sammii <sammii@lunary.app>',
+          from: 'Sammii <hello@lunary.app>',
+          replyTo: 'sammii@lunary.app',
           subject: 'Something I want to make sure you saw',
           html,
           tracking: {
@@ -389,7 +392,8 @@ export async function GET(request: NextRequest) {
 
         await sendEmail({
           to: user.email,
-          from: 'Sammii <sammii@lunary.app>',
+          from: 'Sammii <hello@lunary.app>',
+          replyTo: 'sammii@lunary.app',
           subject: 'Still here, and I have something for you',
           html,
           tracking: {
