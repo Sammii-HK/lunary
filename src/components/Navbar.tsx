@@ -7,6 +7,7 @@ import {
   Orbit,
   MessageCircle,
   MoreHorizontal,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -68,7 +69,7 @@ export const Navbar = () => {
       className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stroke-subtle bg-surface-base/95 backdrop-blur'
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className='flex w-full items-center justify-around px-2 py-1 text-content-primary max-w-lg'>
+      <div className='flex w-full items-center justify-around px-2 py-1 text-content-primary max-w-2xl'>
         <NavLink
           href='/app'
           icon={Home}
@@ -89,6 +90,13 @@ export const Navbar = () => {
           label='Transits'
           activePath={pathname}
           dataNav='horoscope'
+        />
+        <NavLink
+          href='/app/birth-chart'
+          icon={Sparkles}
+          label='Your Chart'
+          activePath={pathname}
+          dataNav='birth-chart'
         />
         <NavLink
           href='/guide'
@@ -119,7 +127,6 @@ const isActive = (pathname: string | null, href: string) => {
       '/explore',
       '/grimoire',
       '/profile',
-      '/birth-chart',
       '/book-of-shadows/journal',
       '/blog',
       '/pricing',
@@ -169,7 +176,7 @@ const NavLink = ({
       onClick={handleClick}
       className={`relative flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs transition ${
         active
-          ? 'text-lunary-secondary'
+          ? 'bg-lunary-primary/10 text-lunary-primary'
           : 'text-content-brand hover:text-content-secondary'
       }`}
     >
