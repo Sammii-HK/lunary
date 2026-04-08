@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { useCosmicDate } from '@/context/AstronomyContext';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { conversionTracking } from '@/lib/analytics';
 import { useTour } from '@/context/TourContext';
@@ -216,8 +217,14 @@ export default function AppDashboardClient() {
   const { user } = useUser();
   const authState = useAuthStatus();
   const { startTour, hasSeenOnboarding } = useTour();
+  const { currentDate } = useCosmicDate();
   const [focusHonoured, setFocusHonoured] = useState(false);
   const router = useRouter();
+
+  const isViewingDifferentDate = useMemo(() => {
+    const today = dayjs().format('YYYY-MM-DD');
+    return currentDate && currentDate !== today;
+  }, [currentDate]);
 
   const handleRefresh = useCallback(async () => {
     router.refresh();
@@ -412,7 +419,11 @@ export default function AppDashboardClient() {
 
       <div
         id='dashboard-container'
-        className='dashboard-container flex w-full flex-col gap-4 max-w-2xl md:max-w-4xl mx-auto p-4 mb-10'
+        className={`dashboard-container flex w-full flex-col gap-4 max-w-2xl md:max-w-4xl mx-auto p-4 mb-10 rounded-2xl transition-all duration-300 ${
+          isViewingDifferentDate
+            ? 'border-2 border-lunary-accent shadow-lg shadow-lunary-accent/30 animate-pulse'
+            : ''
+        }`}
       >
         <h1 className='sr-only'>Lunary - Your Daily Cosmic Guide</h1>
 

@@ -234,6 +234,25 @@ export default function FeaturesPage() {
             ctaHref='/auth?signup=true'
           />
 
+          {/* Time Travel / Date Explorer */}
+          <FeatureCard
+            icon={<Calendar className='w-5 h-5 md:w-6 md:h-6' />}
+            title='Time Travel Through the Cosmos'
+            description='Tap any date to see how the entire dashboard shifts—perfect for planning ahead or understanding the past.'
+            features={[
+              'See moon phases for any date in history or future',
+              'View planetary positions for a specific moment',
+              'Pull tarot cards as they would manifest on a different date',
+              'Check cosmic energy and transits for future dates',
+              'Plan big decisions by exploring different time windows',
+              'Understand the astrology of important past dates',
+            ]}
+            freeTier='Today only'
+            paidTier='Explore any date in history or future'
+            cta='Try time travel'
+            ctaHref='/auth?signup=true'
+          />
+
           {/* Daily Tarot */}
           <FeatureCard
             icon={<Layers className='w-5 h-5 md:w-6 md:h-6' />}
