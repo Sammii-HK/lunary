@@ -1,6 +1,11 @@
 #!/usr/bin/env tsx
 /**
- * Build in Public — Post Generator
+ * @deprecated Weekly + milestone posts are now handled by server-side crons:
+ *   - bip-weekly/route.ts (Monday 02:00 UTC)
+ *   - bip-milestone-check/route.ts (daily 04:30 UTC)
+ * This CLI is kept for manual one-offs: `pnpm post:bip:launch "Feature Name"`
+ *
+ * Build in Public — Post Generator (Legacy CLI)
  *
  * Fetches Lunary metrics, renders a card image, generates a caption via
  * OpenAI GPT-4o-mini, and schedules the post in Spellcast.
