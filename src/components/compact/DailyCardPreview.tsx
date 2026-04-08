@@ -198,7 +198,7 @@ export const DailyCardPreview = () => {
 
       return (
         <div className='locked-preview-redacted mb-2'>
-          <p className='text-xs text-zinc-400'>{contentWithSpaces}</p>
+          <p className='text-xs text-content-muted'>{contentWithSpaces}</p>
         </div>
       );
     }
@@ -215,15 +215,17 @@ export const DailyCardPreview = () => {
     return (
       <Link
         href='/tarot'
-        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full'
+        className='block py-3 px-4 bg-surface-elevated border border-stroke-subtle/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full'
         data-testid='tarot-daily-card'
       >
         <div className='flex items-start justify-between gap-3 h-full'>
           <div className='flex-1 min-w-0 h-full justify-between flex flex-col'>
             <div className='flex items-center justify-between mb-1'>
               <div className='flex items-center gap-2'>
-                <Layers className='w-4 h-4 text-lunary-accent-300' />
-                <span className='text-sm text-zinc-200'>Tarot for Today</span>
+                <Layers className='w-4 h-4 text-content-brand-accent' />
+                <span className='text-sm text-content-primary'>
+                  Tarot for Today
+                </span>
               </div>
               <ShareDailyTarotCard
                 cardName={dailyCard.name}
@@ -233,11 +235,11 @@ export const DailyCardPreview = () => {
               />
             </div>
             <p className='text-sm text-lunary-primary-2'>{dailyCard.name}</p>
-            <p className='text-xs text-zinc-400 mb-2'>
+            <p className='text-xs text-content-muted mb-2'>
               {dailyCard.keywords.join(' • ')}
             </p>
             {dailyCard.information && (
-              <p className='hidden md:block text-xs text-zinc-300 mb-2'>
+              <p className='hidden md:block text-xs text-content-secondary mb-2'>
                 {dailyCard.information.split('.')[0]}.
               </p>
             )}
@@ -267,7 +269,7 @@ export const DailyCardPreview = () => {
                     );
                   }
                 }}
-                className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300 hover:bg-lunary-primary-800/80 transition-colors'
+                className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-layer-base/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-content-brand hover:bg-layer-raised/80 transition-colors'
               >
                 <Sparkles className='w-2.5 h-2.5' />
                 Lunary+
@@ -303,12 +305,12 @@ export const DailyCardPreview = () => {
                   }
                 }
               }}
-              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0'
+              className='flex items-center gap-1.5 text-xs text-content-secondary hover:text-content-secondary transition-colors bg-none border-none p-0'
             >
               {ctaCopy.tarotDaily}
             </span>
           </div>
-          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-300 transition-colors flex-shrink-0 mt-1' />
+          <ArrowRight className='w-4 h-4 text-content-muted group-hover:text-content-brand-accent transition-colors flex-shrink-0 mt-1' />
         </div>
       </Link>
     );
@@ -317,15 +319,17 @@ export const DailyCardPreview = () => {
   return (
     <Link
       href='/tarot'
-      className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full'
+      className='block py-3 px-4 bg-surface-elevated border border-stroke-subtle/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full'
       data-testid='tarot-daily-card'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>
           <div className='flex items-center justify-between mb-1'>
             <div className='flex items-center gap-2'>
-              <Layers className='w-4 h-4 text-lunary-accent-300' />
-              <span className='text-sm text-zinc-200'>Tarot for Today</span>
+              <Layers className='w-4 h-4 text-content-brand-accent' />
+              <span className='text-sm text-content-primary'>
+                Tarot for Today
+              </span>
             </div>
             <div className='flex items-center gap-2'>
               <ShareDailyTarotCard
@@ -334,23 +338,23 @@ export const DailyCardPreview = () => {
                 isPersonalized={true}
                 compact
               />
-              <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
+              <span className='text-xs bg-surface-card/50 text-content-secondary px-1.5 py-0.5 rounded'>
                 Personal
               </span>
             </div>
           </div>
-          <p className='text-sm text-lunary-primary-200'>{dailyCard.name}</p>
-          <p className='text-xs text-zinc-400 mt-2'>
+          <p className='text-sm text-content-secondary'>{dailyCard.name}</p>
+          <p className='text-xs text-content-muted mt-2'>
             {dailyCard.keywords.join(' • ')}
           </p>
           {dailyCard.information && (
-            <p className='hidden md:block text-xs text-zinc-400 mt-2 line-clamp-2'>
+            <p className='hidden md:block text-xs text-content-muted mt-2 line-clamp-2'>
               {dailyCard.information}
             </p>
           )}
           {firstTransitInsight && (
-            <div className='mt-2 pt-2 border-t border-zinc-800/50'>
-              <p className='text-xs text-lunary-accent-300'>
+            <div className='mt-2 pt-2 border-t border-stroke-subtle/50'>
+              <p className='text-xs text-content-brand-accent'>
                 {firstTransitInsight.transit.transitPlanet}{' '}
                 {firstTransitInsight.transit.aspectType}{' '}
                 {firstTransitInsight.transit.natalPlanet}{' '}
@@ -373,7 +377,7 @@ export const DailyCardPreview = () => {
             </div>
           )}
         </div>
-        <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-300 transition-colors flex-shrink-0 mt-1' />
+        <ArrowRight className='w-4 h-4 text-content-muted group-hover:text-content-brand-accent transition-colors flex-shrink-0 mt-1' />
       </div>
     </Link>
   );

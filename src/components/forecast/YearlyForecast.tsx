@@ -19,14 +19,12 @@ import { Button } from '@/components/ui/button';
 
 const ASPECT_STYLES: Record<string, string> = {
   conjunction:
-    'text-lunary-secondary-300 bg-lunary-secondary-900/20 border-lunary-secondary-800/40',
+    'text-content-brand-secondary bg-layer-base/20 border-lunary-secondary-800/40',
   trine:
-    'text-lunary-success-300 bg-lunary-success-900/20 border-lunary-success-800/40',
+    'text-lunary-success-300 bg-layer-base/20 border-lunary-success-800/40',
   opposition: 'text-red-300 bg-red-900/20 border-red-800/40',
-  square:
-    'text-lunary-rose-300 bg-lunary-rose-900/20 border-lunary-rose-800/40',
-  sextile:
-    'text-lunary-primary-300 bg-lunary-primary-900/20 border-lunary-primary-800/40',
+  square: 'text-lunary-rose-300 bg-layer-base/20 border-lunary-rose-800/40',
+  sextile: 'text-content-brand bg-layer-base/20 border-lunary-primary-800/40',
 };
 
 function getAspectStyle(aspect: string): string {
@@ -35,14 +33,14 @@ function getAspectStyle(aspect: string): string {
   );
   return key
     ? ASPECT_STYLES[key]
-    : 'text-zinc-100 bg-zinc-900/40 border-zinc-800/50';
+    : 'text-content-primary bg-surface-elevated/40 border-stroke-subtle/50';
 }
 
 function getAspectTextColor(aspect: string): string {
   const key = Object.keys(ASPECT_STYLES).find((k) =>
     aspect.toLowerCase().includes(k),
   );
-  if (!key) return 'text-zinc-100';
+  if (!key) return 'text-content-primary';
   return ASPECT_STYLES[key].split(' ')[0];
 }
 
@@ -204,7 +202,9 @@ export function YearlyForecast() {
       <div className='flex items-center justify-center py-20'>
         <div className='text-center space-y-3'>
           <Loader2 className='h-6 w-6 animate-spin text-lunary-primary-400 mx-auto' />
-          <p className='text-sm text-zinc-400'>Calculating cosmic events...</p>
+          <p className='text-sm text-content-muted'>
+            Calculating cosmic events...
+          </p>
         </div>
       </div>
     );
@@ -228,13 +228,13 @@ export function YearlyForecast() {
       label: 'Transits',
       value: forecast.majorTransits.length,
       icon: Orbit,
-      colour: 'text-lunary-secondary-300',
+      colour: 'text-content-brand-secondary',
     },
     {
       label: 'Retrogrades',
       value: forecast.retrogrades.length,
       icon: RotateCcw,
-      colour: 'text-lunary-accent-300',
+      colour: 'text-content-brand-accent',
     },
     {
       label: 'Eclipses',
@@ -246,7 +246,7 @@ export function YearlyForecast() {
       label: 'Key aspects',
       value: forecast.keyAspects.length,
       icon: Sparkles,
-      colour: 'text-lunary-primary-300',
+      colour: 'text-content-brand',
     },
   ];
 
@@ -290,8 +290,8 @@ export function YearlyForecast() {
 
         {/* Summary */}
         {forecast.summary && (
-          <div className='rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-5'>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+          <div className='rounded-xl border border-stroke-subtle/50 bg-surface-elevated/30 p-5'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               {forecast.summary}
             </p>
           </div>
@@ -302,15 +302,15 @@ export function YearlyForecast() {
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className='rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-4 space-y-1'
+              className='rounded-xl border border-stroke-subtle/50 bg-surface-elevated/30 p-4 space-y-1'
             >
               <div className='flex items-center gap-2'>
                 <stat.icon className={cn('h-4 w-4', stat.colour)} />
-                <span className='text-2xl font-semibold text-white'>
+                <span className='text-2xl font-semibold text-content-primary'>
                   {stat.value}
                 </span>
               </div>
-              <p className='text-xs text-zinc-500 uppercase tracking-wide'>
+              <p className='text-xs text-content-muted uppercase tracking-wide'>
                 {stat.label}
               </p>
             </div>
@@ -331,22 +331,22 @@ export function YearlyForecast() {
               {forecast.eclipses.map((eclipse, i) => (
                 <div
                   key={i}
-                  className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+                  className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'
                 >
                   <div className='flex items-start justify-between gap-4 mb-1'>
                     <div className='flex items-center gap-2'>
                       <span className='text-xs font-medium uppercase tracking-wide text-lunary-highlight-300'>
                         {eclipse.type}
                       </span>
-                      <span className='text-sm font-medium text-zinc-100'>
+                      <span className='text-sm font-medium text-content-primary'>
                         {eclipse.sign}
                       </span>
                     </div>
-                    <span className='text-xs text-zinc-500 whitespace-nowrap'>
+                    <span className='text-xs text-content-muted whitespace-nowrap'>
                       {formatDateRange(eclipse.startDate, eclipse.endDate)}
                     </span>
                   </div>
-                  <p className='text-sm text-zinc-400 leading-relaxed'>
+                  <p className='text-sm text-content-muted leading-relaxed'>
                     {eclipse.description}
                   </p>
                 </div>
@@ -360,7 +360,7 @@ export function YearlyForecast() {
           <CollapsibleSection
             title={
               <span className='flex items-center gap-2'>
-                <RotateCcw className='h-5 w-5 text-lunary-accent-300' />
+                <RotateCcw className='h-5 w-5 text-content-brand-accent' />
                 Retrograde periods
               </span>
             }
@@ -369,17 +369,17 @@ export function YearlyForecast() {
               {forecast.retrogrades.map((retro, i) => (
                 <div
                   key={i}
-                  className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+                  className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'
                 >
                   <div className='flex items-start justify-between gap-4 mb-1'>
-                    <span className='text-sm font-medium text-zinc-100'>
+                    <span className='text-sm font-medium text-content-primary'>
                       {retro.planet} Retrograde
                     </span>
-                    <span className='text-xs text-zinc-500 whitespace-nowrap'>
+                    <span className='text-xs text-content-muted whitespace-nowrap'>
                       {formatDateRange(retro.startDate, retro.endDate)}
                     </span>
                   </div>
-                  <p className='text-sm text-zinc-400 leading-relaxed'>
+                  <p className='text-sm text-content-muted leading-relaxed'>
                     {retro.description}
                   </p>
                 </div>
@@ -393,7 +393,7 @@ export function YearlyForecast() {
           <CollapsibleSection
             title={
               <span className='flex items-center gap-2'>
-                <Orbit className='h-5 w-5 text-lunary-secondary-300' />
+                <Orbit className='h-5 w-5 text-content-brand-secondary' />
                 Major transits
               </span>
             }
@@ -416,15 +416,15 @@ export function YearlyForecast() {
                     >
                       {transit.event}
                     </span>
-                    <span className='text-xs text-zinc-500 whitespace-nowrap'>
+                    <span className='text-xs text-content-muted whitespace-nowrap'>
                       {formatDateRange(transit.startDate, transit.endDate)}
                     </span>
                   </div>
-                  <p className='text-sm text-zinc-400 leading-relaxed'>
+                  <p className='text-sm text-content-muted leading-relaxed'>
                     {transit.description}
                   </p>
                   {transit.significance && (
-                    <p className='text-xs text-zinc-500 mt-2 italic'>
+                    <p className='text-xs text-content-muted mt-2 italic'>
                       {transit.significance}
                     </p>
                   )}
@@ -439,7 +439,7 @@ export function YearlyForecast() {
           <CollapsibleSection
             title={
               <span className='flex items-center gap-2'>
-                <Sparkles className='h-5 w-5 text-lunary-primary-300' />
+                <Sparkles className='h-5 w-5 text-content-brand' />
                 Key aspects
               </span>
             }
@@ -465,16 +465,16 @@ export function YearlyForecast() {
                         {aspect.aspect}
                       </span>
                       {aspect.planets.filter(Boolean).length > 0 && (
-                        <span className='text-xs text-zinc-500 ml-2'>
+                        <span className='text-xs text-content-muted ml-2'>
                           {aspect.planets.filter(Boolean).join(' / ')}
                         </span>
                       )}
                     </div>
-                    <span className='text-xs text-zinc-500 whitespace-nowrap'>
+                    <span className='text-xs text-content-muted whitespace-nowrap'>
                       {formatDateRange(aspect.startDate, aspect.endDate)}
                     </span>
                   </div>
-                  <p className='text-sm text-zinc-400 leading-relaxed'>
+                  <p className='text-sm text-content-muted leading-relaxed'>
                     {aspect.description || 'Energetic emphasis peaks here.'}
                   </p>
                 </div>
@@ -488,7 +488,7 @@ export function YearlyForecast() {
           <CollapsibleSection
             title={
               <span className='flex items-center gap-2'>
-                <CalendarRange className='h-5 w-5 text-zinc-300' />
+                <CalendarRange className='h-5 w-5 text-content-secondary' />
                 Month by month
               </span>
             }
@@ -508,7 +508,7 @@ export function YearlyForecast() {
                     defaultCollapsed={true}
                   >
                     {!hasEvents ? (
-                      <p className='text-sm text-zinc-500 px-1'>
+                      <p className='text-sm text-content-muted px-1'>
                         No major events this month.
                       </p>
                     ) : (
@@ -516,21 +516,21 @@ export function YearlyForecast() {
                         {month.eclipses.map((eclipse, i) => (
                           <div
                             key={`e-${i}`}
-                            className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3'
+                            className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3'
                           >
                             <div className='flex items-center justify-between mb-1'>
                               <span className='text-xs font-medium text-lunary-highlight-300'>
                                 {eclipse.type === 'solar' ? 'Solar' : 'Lunar'}{' '}
                                 Eclipse in {eclipse.sign}
                               </span>
-                              <span className='text-xs text-zinc-500'>
+                              <span className='text-xs text-content-muted'>
                                 {formatDateRange(
                                   eclipse.startDate,
                                   eclipse.endDate,
                                 )}
                               </span>
                             </div>
-                            <p className='text-xs text-zinc-400'>
+                            <p className='text-xs text-content-muted'>
                               {eclipse.description}
                             </p>
                           </div>
@@ -553,14 +553,14 @@ export function YearlyForecast() {
                               >
                                 {transit.event}
                               </span>
-                              <span className='text-xs text-zinc-500'>
+                              <span className='text-xs text-content-muted'>
                                 {formatDateRange(
                                   transit.startDate,
                                   transit.endDate,
                                 )}
                               </span>
                             </div>
-                            <p className='text-xs text-zinc-400'>
+                            <p className='text-xs text-content-muted'>
                               {transit.description}
                             </p>
                           </div>
@@ -584,14 +584,14 @@ export function YearlyForecast() {
                                 {aspect.planets.filter(Boolean).join(' ')}{' '}
                                 {aspect.aspect}
                               </span>
-                              <span className='text-xs text-zinc-500'>
+                              <span className='text-xs text-content-muted'>
                                 {formatDateRange(
                                   aspect.startDate,
                                   aspect.endDate,
                                 )}
                               </span>
                             </div>
-                            <p className='text-xs text-zinc-400'>
+                            <p className='text-xs text-content-muted'>
                               {aspect.description}
                             </p>
                           </div>

@@ -133,15 +133,15 @@ const SOCIAL_LINKS = [
 
 export default function LinksPage() {
   return (
-    <div className='min-h-screen bg-lunary-bg flex items-start justify-center px-4 py-12'>
+    <div className='min-h-screen bg-surface-elevated flex items-start justify-center px-4 py-12'>
       <div className='w-full max-w-md space-y-8'>
         {/* Profile header */}
         <div className='flex flex-col items-center gap-3'>
           <Logo size={56} />
-          <h1 className='text-xl font-bold text-zinc-100 font-mono tracking-tight'>
+          <h1 className='text-xl font-bold text-content-primary font-mono tracking-tight'>
             Lunary
           </h1>
-          <p className='text-sm text-zinc-400 text-center max-w-xs'>
+          <p className='text-sm text-content-muted text-center max-w-xs'>
             Astrology, tarot & cosmic wisdom — in your pocket.
           </p>
         </div>
@@ -152,19 +152,19 @@ export default function LinksPage() {
             const Icon = link.icon;
             const inner = (
               <span className='flex items-center gap-3 w-full'>
-                <span className='flex-shrink-0 w-10 h-10 rounded-lg bg-zinc-800/80 flex items-center justify-center text-lunary-primary-400'>
+                <span className='flex-shrink-0 w-10 h-10 rounded-lg bg-surface-card/80 flex items-center justify-center text-lunary-primary-400'>
                   <Icon className='w-5 h-5' />
                 </span>
                 <span className='flex-1 min-w-0'>
-                  <span className='block text-sm font-medium text-zinc-100'>
+                  <span className='block text-sm font-medium text-content-primary'>
                     {link.label}
                   </span>
-                  <span className='block text-xs text-zinc-500'>
+                  <span className='block text-xs text-content-muted'>
                     {link.description}
                   </span>
                 </span>
                 {link.external && (
-                  <ExternalLink className='w-4 h-4 text-zinc-600 flex-shrink-0' />
+                  <ExternalLink className='w-4 h-4 text-content-muted flex-shrink-0' />
                 )}
               </span>
             );
@@ -173,7 +173,7 @@ export default function LinksPage() {
               return (
                 <div
                   key={link.label}
-                  className='block w-full rounded-xl border border-zinc-800/40 bg-zinc-900/30 p-3 opacity-50 cursor-not-allowed'
+                  className='block w-full rounded-xl border border-stroke-subtle/40 bg-surface-elevated/30 p-3 opacity-50 cursor-not-allowed'
                 >
                   {inner}
                 </div>
@@ -187,7 +187,7 @@ export default function LinksPage() {
                   href={link.href!}
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='block w-full rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-3 hover:bg-zinc-800/60 hover:border-lunary-primary-700/50 transition-colors'
+                  className='block w-full rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-3 hover:bg-surface-card/60 hover:border-lunary-primary-700/50 transition-colors'
                 >
                   {inner}
                 </a>
@@ -198,7 +198,7 @@ export default function LinksPage() {
               <Link
                 key={link.label}
                 href={link.href!}
-                className='block w-full rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-3 hover:bg-zinc-800/60 hover:border-lunary-primary-700/50 transition-colors'
+                className='block w-full rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40 p-3 hover:bg-surface-card/60 hover:border-lunary-primary-700/50 transition-colors'
               >
                 {inner}
               </Link>
@@ -208,7 +208,7 @@ export default function LinksPage() {
 
         {/* Social links */}
         <div className='space-y-3'>
-          <p className='text-xs text-zinc-500 uppercase tracking-wider text-center'>
+          <p className='text-xs text-content-muted uppercase tracking-wider text-center'>
             Follow us
           </p>
           <div className='flex items-center justify-center gap-2 flex-wrap'>
@@ -218,7 +218,7 @@ export default function LinksPage() {
                 href={social.href}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='inline-flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-900/60 border border-zinc-800/60 text-zinc-400 hover:text-lunary-primary-400 hover:bg-zinc-800/60 hover:border-lunary-primary-700/50 transition-colors'
+                className='inline-flex items-center justify-center w-10 h-10 rounded-xl bg-surface-elevated/60 border border-stroke-subtle/60 text-content-muted hover:text-lunary-primary-400 hover:bg-surface-card/60 hover:border-lunary-primary-700/50 transition-colors'
                 aria-label={social.label}
                 title={social.label}
               >
@@ -232,7 +232,7 @@ export default function LinksPage() {
         <div className='text-center pt-4'>
           <Link
             href='/'
-            className='text-xs text-zinc-600 hover:text-zinc-400 transition-colors'
+            className='text-xs text-content-muted hover:text-content-muted transition-colors'
           >
             lunary.app
           </Link>

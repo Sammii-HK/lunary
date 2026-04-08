@@ -110,50 +110,50 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
             defaultCollapsed={false}
             persistState={true}
           >
-            <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+            <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
               <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
                 {sun && (
-                  <div className='bg-zinc-900 rounded p-3'>
+                  <div className='bg-surface-elevated rounded p-3'>
                     <div className='flex items-center gap-2 mb-1'>
                       <span className='font-astro text-lg'>
                         {bodiesSymbols.sun}
                       </span>
-                      <span className='text-sm font-medium text-white'>
+                      <span className='text-sm font-medium text-content-primary'>
                         Sun in {sun.sign}
                       </span>
                     </div>
-                    <p className='text-xs text-zinc-300'>
+                    <p className='text-xs text-content-secondary'>
                       Your core identity and life purpose. This is who you are
                       at your essence.
                     </p>
                   </div>
                 )}
                 {moon && (
-                  <div className='bg-zinc-900 rounded p-3'>
+                  <div className='bg-surface-elevated rounded p-3'>
                     <div className='flex items-center gap-2 mb-1'>
                       <span className='font-astro text-lg'>
                         {bodiesSymbols.moon}
                       </span>
-                      <span className='text-sm font-medium text-white'>
+                      <span className='text-sm font-medium text-content-primary'>
                         Moon in {moon.sign}
                       </span>
                     </div>
-                    <p className='text-xs text-zinc-300'>
+                    <p className='text-xs text-content-secondary'>
                       Your emotional nature and inner needs. This is how you
                       feel and what you need to feel secure.
                     </p>
                   </div>
                 )}
                 {rising && (
-                  <div className='bg-zinc-900 rounded p-3'>
+                  <div className='bg-surface-elevated rounded p-3'>
                     <div className='flex items-center gap-2 mb-1'>
                       <span className='text-lg font-astro text-lunary-accent'>
                         {astroPointSymbols.ascendant}
                       </span>
-                      <span className='text-sm font-medium text-white'>
+                      <span className='text-sm font-medium text-content-primary'>
                         {rising.sign} Rising
                       </span>
-                      <span className='text-sm font-astro text-zinc-400'>
+                      <span className='text-sm font-astro text-content-muted'>
                         {
                           zodiacSymbol[
                             rising.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -161,7 +161,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                         }
                       </span>
                     </div>
-                    <p className='text-xs text-zinc-300'>
+                    <p className='text-xs text-content-secondary'>
                       Your outer personality and how others see you. This is
                       your mask and first impression.
                     </p>
@@ -180,19 +180,19 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
           defaultCollapsed={false}
           persistState={true}
         >
-          <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+          <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
               {/* Dominant Element */}
-              <div className='bg-zinc-900 rounded-lg p-3'>
+              <div className='bg-surface-elevated rounded-lg p-3'>
                 <div className='flex items-center gap-2 mb-2'>
                   <span className='font-astro text-lg'>
                     {dominantElement.symbol}
                   </span>
-                  <span className='text-sm font-medium text-white'>
+                  <span className='text-sm font-medium text-content-primary'>
                     {dominantElement.name} Dominant
                   </span>
                 </div>
-                <p className='text-xs text-zinc-300'>
+                <p className='text-xs text-content-secondary'>
                   {dominantElement.count} planet
                   {dominantElement.count !== 1 ? 's' : ''} in{' '}
                   {dominantElement.name} signs. You express yourself through{' '}
@@ -201,16 +201,16 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
               </div>
 
               {/* Dominant Modality */}
-              <div className='bg-zinc-900 rounded-lg p-3'>
+              <div className='bg-surface-elevated rounded-lg p-3'>
                 <div className='flex items-center gap-2 mb-2'>
                   <span className='font-astro text-lg'>
                     {getModalitySymbol(dominantModality.name)}
                   </span>
-                  <span className='text-sm font-medium text-white'>
+                  <span className='text-sm font-medium text-content-primary'>
                     {dominantModality.name} Mode
                   </span>
                 </div>
-                <p className='text-xs text-zinc-300'>
+                <p className='text-xs text-content-secondary'>
                   {dominantModality.count} planet
                   {dominantModality.count !== 1 ? 's' : ''} in{' '}
                   {dominantModality.name} signs. You approach life through{' '}
@@ -224,7 +224,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
               </div>
 
               {/* Most Aspected Planet */}
-              <div className='bg-zinc-900 rounded-lg p-3'>
+              <div className='bg-surface-elevated rounded-lg p-3'>
                 <div className='flex items-center gap-2 mb-2'>
                   <span className='font-astro text-lg'>
                     {
@@ -233,11 +233,11 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                       ]
                     }
                   </span>
-                  <span className='text-sm font-medium text-white'>
+                  <span className='text-sm font-medium text-content-primary'>
                     {mostAspectedPlanet} Focal Point
                   </span>
                 </div>
-                <p className='text-xs text-zinc-300'>
+                <p className='text-xs text-content-secondary'>
                   Your most aspected planet. This is a major driving force in
                   your chart, connecting multiple energies and themes.
                 </p>
@@ -255,7 +255,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
             defaultCollapsed={false}
             persistState={true}
           >
-            <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+            <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
               <div className='mb-3'>
                 <div className='flex items-center gap-2 mb-2'>
                   <span className='font-astro text-xl'>
@@ -265,11 +265,11 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                       ]
                     }
                   </span>
-                  <span className='text-base font-medium text-white'>
+                  <span className='text-base font-medium text-content-primary'>
                     {chartRulerData.chartRulerName} rules your chart
                   </span>
                 </div>
-                <p className='text-sm text-zinc-300 mb-3'>
+                <p className='text-sm text-content-secondary mb-3'>
                   As the ruler of your {rising.sign} Ascendant,{' '}
                   {chartRulerData.chartRulerName} is the most important planet
                   in your chart. Its placement shows how you express your
@@ -277,16 +277,16 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                 </p>
               </div>
 
-              <div className='bg-zinc-900 rounded-lg p-3 mb-3'>
-                <div className='text-sm font-medium text-white mb-3'>
+              <div className='bg-surface-elevated rounded-lg p-3 mb-3'>
+                <div className='text-sm font-medium text-content-primary mb-3'>
                   Chart Ruler Placement
                 </div>
                 <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
                   <div className='text-center'>
-                    <div className='text-xs text-zinc-400 mb-1'>Sign</div>
-                    <div className='text-sm text-white flex items-center justify-center gap-1.5'>
+                    <div className='text-xs text-content-muted mb-1'>Sign</div>
+                    <div className='text-sm text-content-primary flex items-center justify-center gap-1.5'>
                       {chartRulerData.chartRuler.sign}
-                      <span className='font-astro text-base text-zinc-500'>
+                      <span className='font-astro text-base text-content-muted'>
                         {
                           zodiacSymbol[
                             chartRulerData.chartRuler.sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -296,8 +296,10 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                     </div>
                   </div>
                   <div className='text-center'>
-                    <div className='text-xs text-zinc-400 mb-1'>Position</div>
-                    <div className='text-sm text-white flex items-center justify-center gap-1.5'>
+                    <div className='text-xs text-content-muted mb-1'>
+                      Position
+                    </div>
+                    <div className='text-sm text-content-primary flex items-center justify-center gap-1.5'>
                       {chartRulerData.chartRuler.degree}°
                       {chartRulerData.chartRuler.minute}'
                       {chartRulerData.chartRuler.retrograde && (
@@ -307,8 +309,10 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                   </div>
                   {chartRulerData.housePlacement && (
                     <div className='text-center'>
-                      <div className='text-xs text-zinc-400 mb-1'>House</div>
-                      <div className='text-sm text-white'>
+                      <div className='text-xs text-content-muted mb-1'>
+                        House
+                      </div>
+                      <div className='text-sm text-content-primary'>
                         {chartRulerData.housePlacement}
                       </div>
                     </div>
@@ -317,8 +321,8 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
               </div>
 
               {chartRulerData.rulerAspects.length > 0 && (
-                <div className='bg-zinc-900 rounded-lg p-3'>
-                  <div className='text-sm font-medium text-white mb-2'>
+                <div className='bg-surface-elevated rounded-lg p-3'>
+                  <div className='text-sm font-medium text-content-primary mb-2'>
                     Key Aspects to Chart Ruler
                   </div>
                   <div className='space-y-1.5'>
@@ -330,12 +334,12 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                         <span className='font-astro text-sm text-lunary-accent'>
                           {aspect.aspectSymbol}
                         </span>
-                        <span className='text-zinc-300'>
+                        <span className='text-content-secondary'>
                           {aspect.planet1 === chartRulerData.chartRulerName
                             ? aspect.planet2
                             : aspect.planet1}
                         </span>
-                        <span className='text-zinc-500'>
+                        <span className='text-content-muted'>
                           ({aspect.orb}° orb)
                         </span>
                       </div>
@@ -358,8 +362,8 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                 defaultCollapsed={true}
                 persistState={true}
               >
-                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
-                  <p className='text-xs text-zinc-400'>
+                <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
+                  <p className='text-xs text-content-muted'>
                     Add your birth time to see accurate house placements.
                   </p>
                 </div>
@@ -375,7 +379,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
               defaultCollapsed={true}
               persistState={true}
             >
-              <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+              <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
                 <div className='grid grid-cols-2 gap-2'>
                   {houses.map(({ house, sign, planets }) => {
                     const houseInfo = houseThemes[house];
@@ -385,11 +389,11 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                         className={`rounded p-2 ${
                           planets.length > 0
                             ? 'bg-lunary-highlight-950 border border-lunary-highlight-700/30'
-                            : 'bg-zinc-900'
+                            : 'bg-surface-elevated'
                         }`}
                       >
                         <div className='flex items-center justify-between mb-1'>
-                          <span className='text-xs font-medium text-zinc-300'>
+                          <span className='text-xs font-medium text-content-secondary'>
                             {house}
                             {house === 1
                               ? 'st'
@@ -407,9 +411,9 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                             }
                           </span>
                         </div>
-                        <div className='text-xs text-zinc-400 mb-1 flex items-center gap-1.5'>
+                        <div className='text-xs text-content-muted mb-1 flex items-center gap-1.5'>
                           <span>{sign}</span>
-                          <span className='font-astro text-base text-zinc-500'>
+                          <span className='font-astro text-base text-content-muted'>
                             {
                               zodiacSymbol[
                                 sign.toLowerCase() as keyof typeof zodiacSymbol
@@ -447,7 +451,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                             })}
                           </div>
                         )}
-                        <div className='text-[10px] text-zinc-400 mt-1'>
+                        <div className='text-[10px] text-content-muted mt-1'>
                           {houseInfo?.theme}
                         </div>
                       </div>
@@ -495,14 +499,16 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
             defaultCollapsed={true}
             persistState={true}
           >
-            <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+            <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
               <div className='space-y-3'>
                 {chartAnalysis.map((analysis, index) => (
-                  <div key={index} className='bg-zinc-900 rounded p-3'>
-                    <h5 className='text-xs font-medium text-lunary-secondary-300 mb-1'>
+                  <div key={index} className='bg-surface-elevated rounded p-3'>
+                    <h5 className='text-xs font-medium text-content-brand-secondary mb-1'>
                       {analysis.category}
                     </h5>
-                    <p className='text-xs text-zinc-300'>{analysis.insight}</p>
+                    <p className='text-xs text-content-secondary'>
+                      {analysis.insight}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -518,7 +524,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
           defaultCollapsed={true}
           persistState={true}
         >
-          <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+          <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
             <div className='grid grid-cols-2 gap-3'>
               {/* Elements */}
               <div>
@@ -527,13 +533,16 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                 </h5>
                 <div className='space-y-1'>
                   {elementModality.elements.map((element) => (
-                    <div key={element.name} className='bg-zinc-900 rounded p-2'>
+                    <div
+                      key={element.name}
+                      className='bg-surface-elevated rounded p-2'
+                    >
                       <div className='flex items-center justify-between mb-1'>
                         <div className='flex items-center gap-2'>
                           <span className='text-sm font-astro'>
                             {element.symbol}
                           </span>
-                          <span className='text-xs text-zinc-300'>
+                          <span className='text-xs text-content-secondary'>
                             {element.name}
                           </span>
                         </div>
@@ -563,7 +572,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                               return (
                                 <span
                                   key={planet.body}
-                                  className={`text-xs bg-zinc-800 px-1 rounded ${isAstronomiconChar ? 'font-astro' : ''}`}
+                                  className={`text-xs bg-surface-card px-1 rounded ${isAstronomiconChar ? 'font-astro' : ''}`}
                                   title={`${planet.body}: ${planet.degree}\u00B0${planet.minute}' ${planet.sign}`}
                                 >
                                   {symbol}
@@ -587,14 +596,14 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                   {elementModality.modalities.map((modality) => (
                     <div
                       key={modality.name}
-                      className='bg-zinc-900 rounded p-2'
+                      className='bg-surface-elevated rounded p-2'
                     >
                       <div className='flex items-center justify-between mb-1'>
                         <div className='flex items-center gap-2'>
                           <span className='text-sm font-astro'>
                             {getModalitySymbol(modality.name)}
                           </span>
-                          <span className='text-xs text-zinc-300'>
+                          <span className='text-xs text-content-secondary'>
                             {modality.name}
                           </span>
                         </div>
@@ -625,7 +634,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                                 return (
                                   <span
                                     key={planet.body}
-                                    className={`text-xs bg-zinc-800 px-1 rounded ${isAstronomiconChar ? 'font-astro' : ''}`}
+                                    className={`text-xs bg-surface-card px-1 rounded ${isAstronomiconChar ? 'font-astro' : ''}`}
                                     title={`${planet.body}: ${planet.degree}\u00B0${planet.minute}' ${planet.sign}`}
                                   >
                                     {symbol}
@@ -634,7 +643,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                               },
                             )}
                           </div>
-                          <p className='text-xs text-zinc-400 mt-1'>
+                          <p className='text-xs text-content-muted mt-1'>
                             {getModalityMeaning(
                               modality.name,
                               (modality as any).planets || [],
@@ -659,17 +668,19 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
             defaultCollapsed={true}
             persistState={true}
           >
-            <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+            <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
               <div className='space-y-2'>
                 {aspects.map((aspect, index) => (
                   <div
                     key={index}
                     className='border-l-2 border-lunary-primary pl-3'
                   >
-                    <h5 className='text-xs font-medium text-lunary-primary-300'>
+                    <h5 className='text-xs font-medium text-content-brand'>
                       {aspect.planet1} {aspect.aspectSymbol} {aspect.planet2}
                     </h5>
-                    <p className='text-xs text-zinc-300'>{aspect.meaning}</p>
+                    <p className='text-xs text-content-secondary'>
+                      {aspect.meaning}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -686,14 +697,14 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
             defaultCollapsed={true}
             persistState={true}
           >
-            <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+            <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
               <div className='space-y-2'>
                 {patterns.map((pattern, index) => (
-                  <div key={index} className='bg-zinc-900 rounded p-3'>
+                  <div key={index} className='bg-surface-elevated rounded p-3'>
                     <h5 className='text-xs font-medium text-lunary-success-300 mb-1'>
                       {pattern.name}
                     </h5>
-                    <p className='text-xs text-zinc-300'>
+                    <p className='text-xs text-content-secondary'>
                       {pattern.description}
                     </p>
                     <p className='text-xs text-lunary-success-200 mt-1'>
@@ -715,7 +726,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
             defaultCollapsed={true}
             persistState={true}
           >
-            <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+            <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
               <div className='space-y-2'>
                 {stelliums.map((stellium, index) => (
                   <div
@@ -726,12 +737,14 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                       {stellium.sign} Stellium ({stellium.planets.length}{' '}
                       planets)
                     </h5>
-                    <p className='text-xs text-zinc-400 mb-1'>
+                    <p className='text-xs text-content-muted mb-1'>
                       {stellium.planets
                         .map((p) => `${p.body} (${p.degree}\u00B0)`)
                         .join(', ')}
                     </p>
-                    <p className='text-xs text-zinc-300'>{stellium.meaning}</p>
+                    <p className='text-xs text-content-secondary'>
+                      {stellium.meaning}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -748,7 +761,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
             defaultCollapsed={true}
             persistState={true}
           >
-            <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+            <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
               <div className='space-y-3'>
                 {dignities.map((dignity, index) => {
                   const dignityStyles = {
@@ -790,7 +803,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                   return (
                     <div
                       key={index}
-                      className={`border-l-2 ${borderColor} pl-3 bg-zinc-900/30 rounded-r p-2`}
+                      className={`border-l-2 ${borderColor} pl-3 bg-surface-elevated/30 rounded-r p-2`}
                     >
                       <div className='flex items-center gap-2 mb-1.5'>
                         <span className='font-astro text-sm'>
@@ -800,7 +813,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                             ]
                           }
                         </span>
-                        <h5 className='text-sm font-medium text-white'>
+                        <h5 className='text-sm font-medium text-content-primary'>
                           {dignity.planet}
                         </h5>
                         <span
@@ -810,7 +823,7 @@ export function BirthChartShowcase({ birthChart }: BirthChartShowcaseProps) {
                           {dignity.type}
                         </span>
                       </div>
-                      <p className='text-xs text-zinc-300 leading-relaxed'>
+                      <p className='text-xs text-content-secondary leading-relaxed'>
                         {dignity.meaning}
                       </p>
                     </div>

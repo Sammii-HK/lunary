@@ -78,7 +78,7 @@ export function SendGiftModal({
                 <p className='text-[0.65rem] uppercase tracking-widest text-lunary-primary-400 mb-1'>
                   Send a Cosmic Gift
                 </p>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   Choose a gift for {recipientName}
                 </p>
               </div>
@@ -113,7 +113,7 @@ export function SendGiftModal({
               <button
                 type='button'
                 onClick={() => setStep('choose')}
-                className='flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors'
+                className='flex items-center gap-1 text-xs text-content-muted hover:text-content-primary transition-colors'
               >
                 <ArrowLeft className='w-3 h-3' />
                 Back
@@ -123,7 +123,7 @@ export function SendGiftModal({
                 <p className='text-[0.65rem] uppercase tracking-widest text-lunary-primary-400 mb-1'>
                   {selectedGift?.name}
                 </p>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   Add a personal message (optional)
                 </p>
               </div>
@@ -133,9 +133,9 @@ export function SendGiftModal({
                 onChange={(e) => setMessage(e.target.value.slice(0, 500))}
                 placeholder='Write something meaningful...'
                 rows={3}
-                className='w-full rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-lunary-primary-500 focus:outline-none focus:ring-1 focus:ring-lunary-primary-500/50 resize-none'
+                className='w-full rounded-lg border border-stroke-subtle bg-surface-elevated/50 px-3 py-2 text-sm text-content-primary placeholder:text-content-muted focus:border-lunary-primary-500 focus:outline-none focus:ring-1 focus:ring-lunary-primary-500/50 resize-none'
               />
-              <p className='text-xs text-zinc-600 text-right'>
+              <p className='text-xs text-content-muted text-right'>
                 {message.length}/500
               </p>
 
@@ -164,11 +164,13 @@ export function SendGiftModal({
           {step === 'sent' && (
             <div className='text-center space-y-4 py-4'>
               <div className='w-16 h-16 bg-gradient-to-br from-lunary-primary-500 to-lunary-accent rounded-full flex items-center justify-center mx-auto shadow-lg shadow-lunary-primary-500/30'>
-                <Send className='w-7 h-7 text-white' />
+                <Send className='w-7 h-7 text-content-primary' />
               </div>
               <div>
-                <p className='text-lg font-bold text-white'>Gift Sent!</p>
-                <p className='text-sm text-zinc-400 mt-1'>
+                <p className='text-lg font-bold text-content-primary'>
+                  Gift Sent!
+                </p>
+                <p className='text-sm text-content-muted mt-1'>
                   {recipientName} will receive a notification
                 </p>
               </div>

@@ -14,19 +14,21 @@ export default function AccessibilityPage() {
   const lastUpdated = 'December 6, 2025';
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='mb-8'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             Accessibility Statement
           </h1>
-          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-content-muted'>
+            Last Updated: {lastUpdated}
+          </p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
           <section>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Lunar Computing, Inc. (&quot;Lunary&quot;) is committed to
               ensuring digital accessibility for people with disabilities. We
               are continually improving the user experience for everyone and
@@ -36,10 +38,10 @@ export default function AccessibilityPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               Our Commitment
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We strive to conform to the Web Content Accessibility Guidelines
               (WCAG) 2.1 Level AA standards. These guidelines explain how to
               make web content more accessible for people with disabilities and
@@ -50,14 +52,14 @@ export default function AccessibilityPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               Accessibility Features
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               We have implemented the following accessibility features on our
               platform:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Keyboard Navigation:</strong> Our website can be
                 navigated using a keyboard for users who cannot use a mouse
@@ -90,14 +92,14 @@ export default function AccessibilityPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               Known Limitations
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               While we strive for comprehensive accessibility, some areas of our
               platform may have limitations:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Dynamic Content:</strong> Some dynamically generated
                 content (such as AI-generated horoscopes and chat responses) may
@@ -118,21 +120,21 @@ export default function AccessibilityPage() {
                 conveyed
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               We are actively working to address these limitations and improve
               accessibility across our platform.
             </p>
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               Assistive Technologies
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               Our platform is designed to be compatible with the following
               assistive technologies:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Screen readers (NVDA, JAWS, VoiceOver, TalkBack)</li>
               <li>Screen magnification software</li>
               <li>Speech recognition software</li>
@@ -142,10 +144,10 @@ export default function AccessibilityPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               Browser Support
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               For the best accessibility experience, we recommend using the
               latest versions of modern browsers including Chrome, Firefox,
               Safari, or Edge. Our platform is designed to work with browsers
@@ -154,20 +156,20 @@ export default function AccessibilityPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               Feedback and Contact
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               We welcome your feedback on the accessibility of Lunary. If you
               encounter any accessibility barriers or have suggestions for
               improvement, please let us know:
             </p>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Accessibility Feedback:</strong>{' '}
                 <a
                   href='mailto:accessibility@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   accessibility@lunary.app
                 </a>
@@ -175,32 +177,32 @@ export default function AccessibilityPage() {
                 <strong>General Support:</strong>{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   support@lunary.app
                 </a>
               </p>
             </div>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               When contacting us about accessibility issues, please include:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>A description of the accessibility issue</li>
               <li>The page URL where you encountered the issue</li>
               <li>The assistive technology you were using (if applicable)</li>
               <li>Your browser and operating system</li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               We aim to respond to accessibility feedback within 5 business
               days.
             </p>
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               Continuous Improvement
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We are committed to continuously improving the accessibility of
               our platform. We regularly review our content and features for
               accessibility issues and work to address them. We also train our
@@ -209,26 +211,26 @@ export default function AccessibilityPage() {
             </p>
           </section>
 
-          <section className='pt-8 border-t border-zinc-800'>
-            <h2 className='text-lg font-medium text-white mb-4'>
+          <section className='pt-8 border-t border-stroke-subtle'>
+            <h2 className='text-lg font-medium text-content-primary mb-4'>
               Related Policies
             </h2>
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/privacy'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Privacy Policy
               </Link>
               <Link
                 href='/help'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Help & Support
               </Link>

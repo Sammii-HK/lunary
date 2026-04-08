@@ -239,43 +239,43 @@ export function TarotSeasonReading({
 
   return (
     <div
-      className={`rounded-xl border border-lunary-primary-700/30 bg-gradient-to-br from-lunary-primary-950/20 to-zinc-900/60 p-4 ${className}`}
+      className={`rounded-xl border border-lunary-primary-700/30 bg-gradient-to-br from-layer-deep/20 to-surface-elevated/60 p-4 ${className}`}
     >
       <div className='flex items-center gap-2 mb-3'>
         <Sparkles className='w-4 h-4 text-lunary-primary-400' />
-        <span className='text-xs font-medium text-lunary-primary-300/80 uppercase tracking-wide'>
+        <span className='text-xs font-medium text-content-brand/80 uppercase tracking-wide'>
           {periodLabel} Season
         </span>
       </div>
 
       {isSubscribed && seasonData && (
-        <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+        <h3 className='text-lg font-medium text-content-primary mb-2'>
           {seasonData.seasonName}
         </h3>
       )}
 
-      <p className='text-sm text-zinc-300 leading-relaxed'>
+      <p className='text-sm text-content-secondary leading-relaxed'>
         {seasonData?.short}
       </p>
 
       {isSubscribed && seasonData && seasonData.long.length > 0 && (
         <div className='mt-4 space-y-3'>
           {seasonData.long.map((paragraph, i) => (
-            <p key={i} className='text-sm text-zinc-400 leading-relaxed'>
+            <p key={i} className='text-sm text-content-muted leading-relaxed'>
               {paragraph}
             </p>
           ))}
 
           {seasonData.focusBullets.length > 0 && (
-            <div className='mt-4 pt-3 border-t border-zinc-800/50'>
-              <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2'>
+            <div className='mt-4 pt-3 border-t border-stroke-subtle/50'>
+              <p className='text-xs font-medium text-content-muted uppercase tracking-wide mb-2'>
                 Focus for this period
               </p>
               <ul className='space-y-1.5'>
                 {seasonData.focusBullets.map((bullet, i) => (
                   <li
                     key={i}
-                    className='text-xs text-zinc-300 flex items-start gap-2'
+                    className='text-xs text-content-secondary flex items-start gap-2'
                   >
                     <span className='text-lunary-primary-400 mt-0.5'>•</span>
                     {bullet}

@@ -28,6 +28,7 @@ export function AnswerCard({
   voteCount,
   isBestAnswer,
   createdAt,
+  userId,
   isAstralGuide = false,
   onVote,
   onMarkBest,
@@ -39,7 +40,7 @@ export function AnswerCard({
       className={`flex gap-3 p-4 rounded-lg border transition-colors ${
         isBestAnswer
           ? 'border-lunary-success/50 bg-lunary-success/5'
-          : 'border-zinc-800 bg-zinc-900/30'
+          : 'border-stroke-subtle bg-surface-elevated/30'
       }`}
     >
       {/* Vote column */}
@@ -49,12 +50,14 @@ export function AnswerCard({
           className={`p-1 rounded transition-colors ${
             hasVoted
               ? 'text-lunary-primary-400'
-              : 'text-zinc-500 hover:text-zinc-300'
+              : 'text-content-muted hover:text-content-secondary'
           }`}
         >
           <ChevronUp className='w-5 h-5' />
         </button>
-        <span className='text-sm font-medium text-zinc-300'>{voteCount}</span>
+        <span className='text-sm font-medium text-content-secondary'>
+          {voteCount}
+        </span>
       </div>
 
       {/* Content */}
@@ -68,14 +71,16 @@ export function AnswerCard({
           </div>
         )}
 
-        <div className='text-sm text-zinc-300 whitespace-pre-wrap'>{text}</div>
+        <div className='text-sm text-content-secondary whitespace-pre-wrap'>
+          {text}
+        </div>
 
         <div className='flex items-center gap-3 mt-3 flex-wrap'>
           <span
             className={`text-xs ${
               isAstralGuide
                 ? 'text-lunary-primary-400 font-medium'
-                : 'text-zinc-500'
+                : 'text-content-muted'
             }`}
           >
             {isAstralGuide
@@ -86,7 +91,7 @@ export function AnswerCard({
           </span>
 
           {createdAt && (
-            <span className='text-xs text-zinc-600'>
+            <span className='text-xs text-content-muted'>
               {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
             </span>
           )}
@@ -94,7 +99,7 @@ export function AnswerCard({
           {canMarkBest && !isBestAnswer && (
             <button
               onClick={() => onMarkBest?.(id)}
-              className='text-xs text-zinc-500 hover:text-lunary-success transition-colors'
+              className='text-xs text-content-muted hover:text-lunary-success transition-colors'
             >
               Mark as best
             </button>

@@ -272,7 +272,7 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
           {prevMonth && (
             <Link
               href={`/grimoire/horoscopes/${sign}/${year}/${prevMonth}`}
-              className='text-lunary-primary-400 hover:text-lunary-primary-300 flex items-center gap-2'
+              className='text-lunary-primary-400 hover:text-content-brand flex items-center gap-2'
             >
               <ArrowLeft className='w-4 h-4' />
               {MONTH_DISPLAY_NAMES[prevMonth]}
@@ -283,7 +283,7 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
           {nextMonth && (
             <Link
               href={`/grimoire/horoscopes/${sign}/${year}/${nextMonth}`}
-              className='text-lunary-primary-400 hover:text-lunary-primary-300 flex items-center gap-2'
+              className='text-lunary-primary-400 hover:text-content-brand flex items-center gap-2'
             >
               {MONTH_DISPLAY_NAMES[nextMonth]}
               <ArrowRight className='w-4 h-4' />
@@ -299,8 +299,8 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
             href={`/grimoire/horoscopes/${s}/${year}/${month}`}
             className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
               s === sign
-                ? 'bg-lunary-primary-900/30 text-lunary-primary-200 border border-lunary-primary-600'
-                : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
+                ? 'bg-layer-base/30 text-content-secondary border border-lunary-primary-600'
+                : 'bg-surface-card/50 text-content-muted hover:bg-surface-card hover:text-content-primary'
             }`}
           >
             {SIGN_SYMBOLS[s]} {SIGN_DISPLAY_NAMES[s]}
@@ -308,30 +308,30 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
         ))}
       </div>
 
-      <div className='mt-8 p-5 bg-zinc-900/50 border border-zinc-800/50 rounded-xl'>
-        <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+      <div className='mt-8 p-5 bg-surface-elevated/50 border border-stroke-subtle/50 rounded-xl'>
+        <h3 className='text-lg font-medium text-content-primary mb-3'>
           Explore {signName} placements
         </h3>
-        <p className='text-sm text-zinc-400 mb-4'>
+        <p className='text-sm text-content-muted mb-4'>
           Your horoscope depends on where {signName} falls in your chart.
           Explore each placement for deeper insight.
         </p>
         <div className='flex flex-wrap gap-3'>
           <Link
             href={`/grimoire/zodiac/${sign}`}
-            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+            className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
           >
             {signName} Sun sign &rarr;
           </Link>
           <Link
             href={`/grimoire/moon-in/${sign}`}
-            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+            className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
           >
             Moon in {signName} &rarr;
           </Link>
           <Link
             href={`/grimoire/rising/${sign}`}
-            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+            className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
           >
             {signName} rising &rarr;
           </Link>

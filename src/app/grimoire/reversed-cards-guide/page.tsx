@@ -38,14 +38,14 @@ export default function ReversedCardsGuidePage() {
       canonicalUrl='https://lunary.app/grimoire/reversed-cards-guide'
     >
       <div className='space-y-6'>
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Understanding Reversed Cards
           </h2>
-          <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+          <p className='text-sm text-content-secondary leading-relaxed mb-4'>
             Reversed cards can mean several things depending on context:
           </p>
-          <ul className='list-disc list-inside text-sm text-zinc-300 space-y-2 mb-4'>
+          <ul className='list-disc list-inside text-sm text-content-secondary space-y-2 mb-4'>
             <li>
               <strong>Blocked energy:</strong> The card's energy is present but
               not flowing freely
@@ -67,17 +67,17 @@ export default function ReversedCardsGuidePage() {
               of the card's energy
             </li>
           </ul>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
             Always consider the card's position in the spread, surrounding
             cards, and your intuition when interpreting reversals.
           </p>
         </div>
 
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             How to Read Reversed Cards
           </h2>
-          <div className='space-y-3 text-sm text-zinc-300'>
+          <div className='space-y-3 text-sm text-content-secondary'>
             <div>
               <strong>1. Check the context:</strong> What question are you
               asking? What position is the card in?
@@ -97,11 +97,11 @@ export default function ReversedCardsGuidePage() {
           </div>
         </div>
 
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Common Reversed Patterns
           </h2>
-          <div className='space-y-3 text-sm text-zinc-300'>
+          <div className='space-y-3 text-sm text-content-secondary'>
             <div>
               <strong>Major Arcana reversed:</strong> Often indicates internal
               spiritual work or shadow aspects of major life themes
@@ -117,11 +117,11 @@ export default function ReversedCardsGuidePage() {
           </div>
         </div>
 
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Element-Specific Reversed Meanings
           </h2>
-          <div className='space-y-4 text-sm text-zinc-300'>
+          <div className='space-y-4 text-sm text-content-secondary'>
             <div>
               <strong>Reversed Wands (Fire):</strong> Blocked creativity, lack
               of motivation, delayed action, or internalized passion
@@ -141,11 +141,11 @@ export default function ReversedCardsGuidePage() {
           </div>
         </div>
 
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Tips for Reading Reversed Cards
           </h2>
-          <ul className='list-disc list-inside space-y-2 text-sm text-zinc-300'>
+          <ul className='list-disc list-inside space-y-2 text-sm text-content-secondary'>
             <li>
               Don't automatically assume reversed means "bad" or "negative"
             </li>
@@ -166,26 +166,26 @@ export default function ReversedCardsGuidePage() {
           </ul>
         </div>
 
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Related Topics
           </h2>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
             <Link
               href='/grimoire/tarot'
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+              className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
             >
               Tarot Cards Guide
             </Link>
             <Link
               href='/grimoire/card-combinations'
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+              className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
             >
               Reading Card Combinations
             </Link>
             <Link
               href='/grimoire/tarot/spreads'
-              className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+              className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
             >
               Tarot Spreads
             </Link>

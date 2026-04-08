@@ -492,7 +492,7 @@ export default async function EventsYearEventPage({
       }
     >
       <div className='mt-8 space-y-6'>
-        <section className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
+        <section className='rounded-2xl border border-stroke-subtle bg-surface-elevated/50 p-6'>
           <Heading as='h2' variant='h3'>
             {config.title} Calendar
           </Heading>
@@ -500,10 +500,12 @@ export default async function EventsYearEventPage({
             {entries.map((entry) => (
               <div
                 key={`${entry.date}-${entry.description}`}
-                className='flex flex-col gap-1 border-b border-zinc-800/60 pb-3 last:border-0 last:pb-0 md:flex-row md:items-center md:justify-between'
+                className='flex flex-col gap-1 border-b border-stroke-subtle/60 pb-3 last:border-0 last:pb-0 md:flex-row md:items-center md:justify-between'
               >
-                <span className='text-zinc-100 font-medium'>{entry.date}</span>
-                <span className='text-zinc-400 text-sm'>
+                <span className='text-content-primary font-medium'>
+                  {entry.date}
+                </span>
+                <span className='text-content-muted text-sm'>
                   {entry.description}
                 </span>
               </div>

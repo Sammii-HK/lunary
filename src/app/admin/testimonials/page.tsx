@@ -115,10 +115,10 @@ export default function AdminTestimonialsPage() {
           <p className='text-xs tracking-[0.4em] uppercase text-lunary-accent'>
             Testimonial Admin
           </p>
-          <h1 className='text-3xl font-semibold text-white'>
+          <h1 className='text-3xl font-semibold text-content-primary'>
             Select featured testimonials
           </h1>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-sm text-content-muted'>
             Toggle the star button to publish testimonials across the featured
             page. Only the ones marked as featured will appear on the
             `/testimonials` widget.
@@ -138,11 +138,11 @@ export default function AdminTestimonialsPage() {
         )}
 
         {loading ? (
-          <div className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-10 text-center text-sm text-zinc-400'>
+          <div className='rounded-3xl border border-stroke-subtle/60 bg-surface-elevated/60 p-10 text-center text-sm text-content-muted'>
             Loading testimonials…
           </div>
         ) : sortedTestimonials.length === 0 ? (
-          <div className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-10 text-center text-sm text-zinc-400'>
+          <div className='rounded-3xl border border-stroke-subtle/60 bg-surface-elevated/60 p-10 text-center text-sm text-content-muted'>
             No testimonials have been submitted yet.
           </div>
         ) : (
@@ -150,10 +150,10 @@ export default function AdminTestimonialsPage() {
             {sortedTestimonials.map((testimonial) => (
               <div
                 key={testimonial.id}
-                className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-6 shadow-[0px_10px_25px_rgba(0,0,0,0.45)]'
+                className='rounded-3xl border border-stroke-subtle/60 bg-surface-elevated/60 p-6 shadow-[0px_10px_25px_rgba(0,0,0,0.45)]'
               >
                 <div className='flex items-center justify-between gap-4'>
-                  <div className='text-xs uppercase tracking-[0.4em] text-zinc-500'>
+                  <div className='text-xs uppercase tracking-[0.4em] text-content-muted'>
                     #{testimonial.id} · {formatDate(testimonial.createdAt)}
                   </div>
                   <button
@@ -165,16 +165,16 @@ export default function AdminTestimonialsPage() {
                     className={`rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.4em] transition ${
                       testimonial.isPublished
                         ? 'border-lunary-success text-lunary-success'
-                        : 'border-zinc-600 text-zinc-400'
-                    } ${busyId === testimonial.id ? 'opacity-60' : 'hover:border-white hover:text-white'}`}
+                        : 'border-stroke-strong text-content-muted'
+                    } ${busyId === testimonial.id ? 'opacity-60' : 'hover:border-white hover:text-content-primary'}`}
                   >
                     {testimonial.isPublished ? 'Featured' : 'Feature'}
                   </button>
                 </div>
-                <p className='mt-4 text-sm text-zinc-300 leading-relaxed'>
+                <p className='mt-4 text-sm text-content-secondary leading-relaxed'>
                   {testimonial.message}
                 </p>
-                <p className='mt-4 text-xs text-zinc-500 uppercase tracking-[0.4em]'>
+                <p className='mt-4 text-xs text-content-muted uppercase tracking-[0.4em]'>
                   — {testimonial.name}
                 </p>
               </div>

@@ -86,13 +86,13 @@ export default function AboutLunaryPage() {
   const sectionNodes = sections.map((section, sectionIndex) => (
     <Fragment key={section.id}>
       <section id={section.id} className='space-y-4'>
-        <h2 className='text-2xl font-medium text-zinc-100'>
+        <h2 className='text-2xl font-medium text-content-primary'>
           {section.heading}
         </h2>
         {section.paragraphs.map((paragraph, index) => (
           <p
             key={`${section.id}-p-${index}`}
-            className='text-zinc-300 leading-relaxed'
+            className='text-content-secondary leading-relaxed'
           >
             {paragraph}
           </p>
@@ -102,7 +102,7 @@ export default function AboutLunaryPage() {
             {section.bullets.map((bullet, bulletIndex) => (
               <li
                 key={`${section.id}-bullet-${bulletIndex}`}
-                className='flex items-start gap-3 text-zinc-300'
+                className='flex items-start gap-3 text-content-secondary'
               >
                 <span className='text-lunary-accent mt-1'>•</span>
                 <span className='break-words'>{bullet}</span>
@@ -112,7 +112,7 @@ export default function AboutLunaryPage() {
         )}
       </section>
       {sectionIndex < sections.length - 1 && (
-        <div className='flex justify-center text-sm text-zinc-500'>⸻</div>
+        <div className='flex justify-center text-sm text-content-muted'>⸻</div>
       )}
     </Fragment>
   ));
@@ -133,7 +133,7 @@ export default function AboutLunaryPage() {
     >
       <div className='space-y-8'>
         {sectionNodes}
-        <p className='text-center text-sm text-zinc-500'>{summaryLine}</p>
+        <p className='text-center text-sm text-content-muted'>{summaryLine}</p>
       </div>
     </SEOContentTemplate>
   );

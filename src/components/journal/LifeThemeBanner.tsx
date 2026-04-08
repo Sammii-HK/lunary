@@ -97,13 +97,13 @@ export function LifeThemeBanner({ className = '' }: LifeThemeBannerProps) {
     <>
       <button
         onClick={() => setShowModal(true)}
-        className={`w-full text-left rounded-lg border border-lunary-primary-800/50 bg-gradient-to-r from-lunary-primary-950/40 to-transparent p-3 hover:border-lunary-primary-700/50 transition-colors ${className}`}
+        className={`w-full text-left rounded-lg border border-lunary-primary-800/50 bg-gradient-to-r from-layer-deep/40 to-transparent p-3 hover:border-lunary-primary-700/50 transition-colors ${className}`}
       >
         <div className='flex items-center gap-2'>
           <Sparkles className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
-          <p className='text-sm text-zinc-300'>
+          <p className='text-sm text-content-secondary'>
             You're currently moving through:{' '}
-            <span className='text-lunary-primary-300 font-medium'>
+            <span className='text-content-brand font-medium'>
               {primaryTheme.name}
             </span>
           </p>
@@ -119,7 +119,7 @@ export function LifeThemeBanner({ className = '' }: LifeThemeBannerProps) {
         </ModalHeader>
         <ModalBody>
           <div className='space-y-4'>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               {hasCosmicProfileAccess
                 ? primaryTheme.longSummary
                 : primaryTheme.shortSummary}
@@ -128,14 +128,14 @@ export function LifeThemeBanner({ className = '' }: LifeThemeBannerProps) {
             {hasCosmicProfileAccess &&
               primaryTheme.guidanceBullets.length > 0 && (
                 <div className='space-y-2'>
-                  <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
+                  <p className='text-xs font-medium text-content-muted uppercase tracking-wide'>
                     Guidance for this theme
                   </p>
                   <ul className='space-y-2'>
                     {primaryTheme.guidanceBullets.map((bullet, i) => (
                       <li
                         key={i}
-                        className='text-sm text-zinc-300 flex items-start gap-2'
+                        className='text-sm text-content-secondary flex items-start gap-2'
                       >
                         <span className='text-lunary-primary-400 mt-0.5'>
                           •
@@ -152,7 +152,7 @@ export function LifeThemeBanner({ className = '' }: LifeThemeBannerProps) {
                 {primaryTheme.relatedTags.map((tag) => (
                   <span
                     key={tag}
-                    className='text-xs px-2 py-1 rounded bg-lunary-primary-900/30 text-lunary-primary-300'
+                    className='text-xs px-2 py-1 rounded bg-layer-base/30 text-content-brand'
                   >
                     {tag}
                   </span>
@@ -161,7 +161,7 @@ export function LifeThemeBanner({ className = '' }: LifeThemeBannerProps) {
             )}
 
             {!hasCosmicProfileAccess && (
-              <p className='text-xs text-zinc-500 pt-2 border-t border-zinc-800'>
+              <p className='text-xs text-content-muted pt-2 border-t border-stroke-subtle'>
                 Upgrade to unlock deeper insights and personalized guidance for
                 your themes.
               </p>

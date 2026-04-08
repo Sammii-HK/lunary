@@ -354,25 +354,25 @@ export default function PWADiagnosePage() {
     <div className='p-4 space-y-4 max-w-2xl mx-auto'>
       <h1 className='text-2xl font-bold'>🔍 PWA Diagnostic Tool</h1>
 
-      <div className='bg-zinc-900 border border-zinc-700 rounded p-4'>
+      <div className='bg-surface-elevated border border-stroke-default rounded p-4'>
         <div className='grid grid-cols-3 gap-4 mb-4'>
           <div className='text-center'>
             <div className='text-2xl font-bold text-lunary-success'>
               {passCount}
             </div>
-            <div className='text-xs text-zinc-400'>Passed</div>
+            <div className='text-xs text-content-muted'>Passed</div>
           </div>
           <div className='text-center'>
             <div className='text-2xl font-bold text-lunary-error'>
               {failCount}
             </div>
-            <div className='text-xs text-zinc-400'>Failed</div>
+            <div className='text-xs text-content-muted'>Failed</div>
           </div>
           <div className='text-center'>
             <div className='text-2xl font-bold text-lunary-accent'>
               {warnCount}
             </div>
-            <div className='text-xs text-zinc-400'>Warnings</div>
+            <div className='text-xs text-content-muted'>Warnings</div>
           </div>
         </div>
       </div>
@@ -383,10 +383,10 @@ export default function PWADiagnosePage() {
             key={i}
             className={`p-3 rounded border ${
               result.status === 'pass'
-                ? 'bg-lunary-success-900/20 border-lunary-success-700'
+                ? 'bg-layer-base/20 border-lunary-success-700'
                 : result.status === 'fail'
-                  ? 'bg-lunary-error-900/20 border-lunary-error-700'
-                  : 'bg-lunary-accent-900/20 border-lunary-accent-700'
+                  ? 'bg-layer-base/20 border-lunary-error-700'
+                  : 'bg-layer-base/20 border-lunary-accent-700'
             }`}
           >
             <div className='flex items-start justify-between'>
@@ -405,7 +405,7 @@ export default function PWADiagnosePage() {
                   ? 'text-lunary-success-300'
                   : result.status === 'fail'
                     ? 'text-lunary-error-300'
-                    : 'text-lunary-accent-300'
+                    : 'text-content-brand-accent'
               }`}
             >
               {result.message}
@@ -415,7 +415,7 @@ export default function PWADiagnosePage() {
       </div>
 
       {failCount > 0 && (
-        <div className='bg-lunary-error-900/20 border border-lunary-error-700 rounded p-4'>
+        <div className='bg-layer-base/20 border border-lunary-error-700 rounded p-4'>
           <h2 className='font-bold text-lunary-error mb-2'>
             ❌ Critical Issues Found
           </h2>
@@ -427,7 +427,7 @@ export default function PWADiagnosePage() {
       )}
 
       {failCount === 0 && warnCount === 0 && results.length > 0 && (
-        <div className='bg-lunary-success-900/20 border border-lunary-success-700 rounded p-4'>
+        <div className='bg-layer-base/20 border border-lunary-success-700 rounded p-4'>
           <h2 className='font-bold text-lunary-success mb-2'>
             ✅ All Checks Passed!
           </h2>

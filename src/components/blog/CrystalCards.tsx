@@ -33,42 +33,42 @@ function getCrystalColors(
   > = {
     root: {
       border: 'border-red-700/40',
-      bg: 'bg-gradient-to-br from-red-950/30 to-zinc-900',
+      bg: 'bg-gradient-to-br from-red-950/30 to-surface-elevated',
       accent: 'text-red-400',
     },
     sacral: {
       border: 'border-orange-700/40',
-      bg: 'bg-gradient-to-br from-orange-950/30 to-zinc-900',
+      bg: 'bg-gradient-to-br from-orange-950/30 to-surface-elevated',
       accent: 'text-orange-400',
     },
     'solar plexus': {
       border: 'border-yellow-700/40',
-      bg: 'bg-gradient-to-br from-yellow-950/30 to-zinc-900',
+      bg: 'bg-gradient-to-br from-yellow-950/30 to-surface-elevated',
       accent: 'text-yellow-400',
     },
     heart: {
       border: 'border-emerald-700/40',
-      bg: 'bg-gradient-to-br from-emerald-950/30 to-zinc-900',
+      bg: 'bg-gradient-to-br from-emerald-950/30 to-surface-elevated',
       accent: 'text-emerald-400',
     },
     throat: {
       border: 'border-sky-700/40',
-      bg: 'bg-gradient-to-br from-sky-950/30 to-zinc-900',
+      bg: 'bg-gradient-to-br from-sky-950/30 to-surface-elevated',
       accent: 'text-sky-400',
     },
     'third eye': {
       border: 'border-indigo-700/40',
-      bg: 'bg-gradient-to-br from-indigo-950/30 to-zinc-900',
+      bg: 'bg-gradient-to-br from-indigo-950/30 to-surface-elevated',
       accent: 'text-indigo-400',
     },
     crown: {
       border: 'border-purple-700/40',
-      bg: 'bg-gradient-to-br from-purple-950/30 to-zinc-900',
+      bg: 'bg-gradient-to-br from-purple-950/30 to-surface-elevated',
       accent: 'text-purple-400',
     },
     all: {
       border: 'border-lunary-primary-700/40',
-      bg: 'bg-gradient-to-br from-lunary-primary-950/30 to-zinc-900',
+      bg: 'bg-gradient-to-br from-layer-deep/30 to-surface-elevated',
       accent: 'text-lunary-primary-400',
     },
   };
@@ -150,7 +150,7 @@ export function CrystalCards({ crystals }: CrystalCardsProps) {
               {crystals.map((_, index) => (
                 <div
                   key={index}
-                  className='w-1.5 h-1.5 rounded-full bg-zinc-700'
+                  className='w-1.5 h-1.5 rounded-full bg-surface-overlay'
                 />
               ))}
             </div>
@@ -185,7 +185,9 @@ export function CrystalCard({ crystal, className = '' }: CrystalCardProps) {
       {/* Header */}
       <div className='flex items-start justify-between mb-3'>
         <div className='flex items-center gap-2'>
-          <div className={`p-1.5 rounded-lg bg-zinc-800/50 ${colors.accent}`}>
+          <div
+            className={`p-1.5 rounded-lg bg-surface-card/50 ${colors.accent}`}
+          >
             <Sparkles className='h-4 w-4' />
           </div>
           <h3 className={`font-semibold ${colors.accent}`}>
@@ -195,7 +197,7 @@ export function CrystalCard({ crystal, className = '' }: CrystalCardProps) {
       </div>
 
       {/* Date */}
-      <p className='text-xs text-zinc-500 mb-3'>
+      <p className='text-xs text-content-muted mb-3'>
         {crystalDate.toLocaleDateString('en-US', {
           weekday: 'long',
           month: 'short',
@@ -204,22 +206,24 @@ export function CrystalCard({ crystal, className = '' }: CrystalCardProps) {
       </p>
 
       {/* Reason */}
-      <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+      <p className='text-sm text-content-secondary leading-relaxed mb-3'>
         {crystal.reason}
       </p>
 
       {/* Usage tip */}
       {crystal.usage && (
-        <p className='text-xs text-zinc-400 italic mb-3 border-l-2 border-zinc-700 pl-2'>
+        <p className='text-xs text-content-muted italic mb-3 border-l-2 border-stroke-default pl-2'>
           {crystal.usage}
         </p>
       )}
 
       {/* Affirmation */}
       {crystal.affirmation && (
-        <p className='text-xs text-zinc-400 mb-3'>
-          <span className='font-medium text-zinc-300'>Affirmation:</span> "
-          {crystal.affirmation}"
+        <p className='text-xs text-content-muted mb-3'>
+          <span className='font-medium text-content-secondary'>
+            Affirmation:
+          </span>{' '}
+          "{crystal.affirmation}"
         </p>
       )}
 
@@ -228,7 +232,7 @@ export function CrystalCard({ crystal, className = '' }: CrystalCardProps) {
         {crystal.chakra && (
           <Badge
             variant='outline'
-            className='text-xs border-zinc-700 text-zinc-400'
+            className='text-xs border-stroke-default text-content-muted'
           >
             {formatChakra(crystal.chakra)}
           </Badge>
@@ -236,7 +240,7 @@ export function CrystalCard({ crystal, className = '' }: CrystalCardProps) {
         {crystal.intention && (
           <Badge
             variant='secondary'
-            className='text-xs bg-zinc-800 text-zinc-300'
+            className='text-xs bg-surface-card text-content-secondary'
           >
             {crystal.intention}
           </Badge>

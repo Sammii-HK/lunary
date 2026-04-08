@@ -383,7 +383,7 @@ export default function NewsletterManagerPage() {
             </CardHeader>
             <CardContent className='space-y-4'>
               {sendResult && (
-                <div className='p-4 bg-slate-800 rounded-lg'>
+                <div className='p-4 bg-surface-card rounded-lg'>
                   <h3 className='font-semibold mb-2'>Send Results:</h3>
                   <div className='space-y-1 text-sm'>
                     <div>Recipients: {sendResult.recipients}</div>

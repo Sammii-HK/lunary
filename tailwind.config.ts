@@ -132,6 +132,38 @@ const config: Config = {
           // Text
           text: '#FFFFFF',
         },
+
+        // Brand surface layers — dark purple in dark mode, light lavender in light mode
+        layer: {
+          deep: 'rgb(var(--layer-deep)   / <alpha-value>)',
+          base: 'rgb(var(--layer-base)   / <alpha-value>)',
+          raised: 'rgb(var(--layer-raised) / <alpha-value>)',
+          high: 'rgb(var(--layer-high)   / <alpha-value>)',
+        },
+
+        // Semantic tokens — switch with data-theme attribute
+        surface: {
+          base: 'rgb(var(--surface-base) / <alpha-value>)',
+          elevated: 'rgb(var(--surface-elevated) / <alpha-value>)',
+          card: 'rgb(var(--surface-card) / <alpha-value>)',
+          overlay: 'rgb(var(--surface-overlay) / <alpha-value>)',
+        },
+        content: {
+          primary: 'rgb(var(--content-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--content-secondary) / <alpha-value>)',
+          muted: 'rgb(var(--content-muted) / <alpha-value>)',
+          brand: 'rgb(var(--content-brand) / <alpha-value>)',
+          'brand-accent': 'rgb(var(--content-brand-accent) / <alpha-value>)',
+          'brand-secondary':
+            'rgb(var(--content-brand-secondary) / <alpha-value>)',
+          error: 'rgb(var(--content-error) / <alpha-value>)',
+          success: 'rgb(var(--content-success) / <alpha-value>)',
+        },
+        stroke: {
+          subtle: 'rgb(var(--stroke-subtle) / <alpha-value>)',
+          default: 'rgb(var(--stroke-default) / <alpha-value>)',
+          strong: 'rgb(var(--stroke-strong) / <alpha-value>)',
+        },
       },
       fontFamily: {
         astro: ['var(--font-astro)'],

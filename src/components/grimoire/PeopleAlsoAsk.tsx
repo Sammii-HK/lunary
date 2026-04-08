@@ -33,28 +33,28 @@ export function PeopleAlsoAsk({
         {questions.map((item, index) => (
           <div
             key={index}
-            className='border border-zinc-800 rounded-lg overflow-hidden bg-zinc-900/50'
+            className='border border-stroke-subtle rounded-lg overflow-hidden bg-surface-elevated/50'
           >
             <button
               onClick={() => toggleQuestion(index)}
-              className='w-full flex items-center justify-between text-left hover:bg-zinc-800/50 transition-colors px-4 py-1'
+              className='w-full flex items-center justify-between text-left hover:bg-surface-card/50 transition-colors px-4 py-1'
               aria-expanded={openIndex === index}
             >
               <Heading
                 as='h3'
                 variant='h4'
-                className='text-lunary-secondary-200 font-normal pt-3'
+                className='text-content-brand-secondary font-normal pt-3'
               >
                 {item.question}
               </Heading>
               {openIndex === index ? (
-                <ChevronUp className='h-5 w-5 text-zinc-400 flex-shrink-0' />
+                <ChevronUp className='h-5 w-5 text-content-muted flex-shrink-0' />
               ) : (
-                <ChevronDown className='h-5 w-5 text-zinc-400 flex-shrink-0' />
+                <ChevronDown className='h-5 w-5 text-content-muted flex-shrink-0' />
               )}
             </button>
             {openIndex === index && (
-              <div className='px-4 pb-4 text-zinc-300 text-sm leading-relaxed border-t border-zinc-800'>
+              <div className='px-4 pb-4 text-content-secondary text-sm leading-relaxed border-t border-stroke-subtle'>
                 <p className='pt-4'>{item.answer}</p>
               </div>
             )}

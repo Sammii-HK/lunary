@@ -119,34 +119,36 @@ function LifeThemeCard({ snapshot }: { snapshot: LifeThemeSnapshot }) {
   const dominantTheme = snapshot.data.themes[0];
 
   return (
-    <div className='bg-zinc-900 border border-lunary-primary-700/30 rounded-lg p-4'>
+    <div className='bg-surface-elevated border border-lunary-primary-700/30 rounded-lg p-4'>
       <div className='flex items-center justify-between mb-3'>
         <div className='flex items-center gap-2'>
           <TrendingUp className='w-4 h-4 text-lunary-primary-400' />
-          <span className='text-xs text-zinc-500'>{formattedDate}</span>
+          <span className='text-xs text-content-muted'>{formattedDate}</span>
         </div>
-        <span className='text-xs bg-lunary-primary-900/30 text-lunary-primary-300 px-2 py-0.5 rounded'>
+        <span className='text-xs bg-layer-base/30 text-content-brand px-2 py-0.5 rounded'>
           Score: {dominantTheme.score}
         </span>
       </div>
 
-      <h3 className='text-base font-semibold text-white mb-1'>
+      <h3 className='text-base font-semibold text-content-primary mb-1'>
         {dominantTheme.name}
       </h3>
-      <p className='text-sm text-zinc-400 mb-3'>{dominantTheme.shortSummary}</p>
+      <p className='text-sm text-content-muted mb-3'>
+        {dominantTheme.shortSummary}
+      </p>
 
       <div className='flex flex-wrap gap-2 mb-3'>
         {snapshot.data.themes.slice(1, 3).map((theme) => (
           <span
             key={theme.id}
-            className='text-xs bg-zinc-800 text-zinc-400 px-2 py-1 rounded'
+            className='text-xs bg-surface-card text-content-muted px-2 py-1 rounded'
           >
             {theme.name} ({theme.score})
           </span>
         ))}
       </div>
 
-      <div className='text-xs text-zinc-500'>
+      <div className='text-xs text-content-muted'>
         <div>📖 {dominantTheme.sources.journalEntries} journal entries</div>
         {dominantTheme.sources.tarotCards.length > 0 && (
           <div>
@@ -169,26 +171,28 @@ function TarotSeasonCard({ snapshot }: { snapshot: TarotSeasonSnapshot }) {
   const topSuit = snapshot.data.suitDistribution[0];
 
   return (
-    <div className='bg-zinc-900 border border-indigo-700/30 rounded-lg p-4'>
+    <div className='bg-surface-elevated border border-indigo-700/30 rounded-lg p-4'>
       <div className='flex items-center justify-between mb-3'>
         <div className='flex items-center gap-2'>
           <Sparkles className='w-4 h-4 text-indigo-400' />
-          <span className='text-xs text-zinc-500'>{formattedDate}</span>
+          <span className='text-xs text-content-muted'>{formattedDate}</span>
         </div>
         <span className='text-xs bg-indigo-900/30 text-indigo-300 px-2 py-0.5 rounded'>
           {snapshot.data.period} days
         </span>
       </div>
 
-      <h3 className='text-base font-semibold text-white mb-1'>
+      <h3 className='text-base font-semibold text-content-primary mb-1'>
         {snapshot.data.season.name}
       </h3>
-      <p className='text-sm text-zinc-400 mb-3'>
+      <p className='text-sm text-content-muted mb-3'>
         {snapshot.data.season.description}
       </p>
 
       <div className='mb-3'>
-        <div className='text-xs text-zinc-500 mb-1'>Suit Distribution:</div>
+        <div className='text-xs text-content-muted mb-1'>
+          Suit Distribution:
+        </div>
         <div className='flex gap-1 h-2 rounded overflow-hidden'>
           {snapshot.data.suitDistribution.map((suit) => (
             <div
@@ -199,12 +203,12 @@ function TarotSeasonCard({ snapshot }: { snapshot: TarotSeasonSnapshot }) {
             />
           ))}
         </div>
-        <div className='text-xs text-zinc-500 mt-1'>
+        <div className='text-xs text-content-muted mt-1'>
           {topSuit.suit}: {topSuit.percentage.toFixed(0)}%
         </div>
       </div>
 
-      <div className='text-xs text-zinc-500'>
+      <div className='text-xs text-content-muted'>
         <div>
           🃏 Top cards:{' '}
           {snapshot.data.frequentCards
@@ -226,23 +230,25 @@ function MoonPhasePatternCard({ snapshot }: { snapshot: MoonPhasePattern }) {
   });
 
   return (
-    <div className='bg-zinc-900 border border-zinc-700 rounded-lg p-4'>
+    <div className='bg-surface-elevated border border-stroke-default rounded-lg p-4'>
       <div className='flex items-center justify-between mb-3'>
         <div className='flex items-center gap-2'>
-          <Moon className='w-4 h-4 text-zinc-400' />
-          <span className='text-xs text-zinc-500'>{formattedDate}</span>
+          <Moon className='w-4 h-4 text-content-muted' />
+          <span className='text-xs text-content-muted'>{formattedDate}</span>
         </div>
-        <span className='text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded'>
+        <span className='text-xs bg-surface-card text-content-muted px-2 py-0.5 rounded'>
           {(snapshot.data.confidence * 100).toFixed(0)}% confidence
         </span>
       </div>
 
-      <h3 className='text-base font-semibold text-white mb-1'>
+      <h3 className='text-base font-semibold text-content-primary mb-1'>
         {snapshot.data.title}
       </h3>
-      <p className='text-sm text-zinc-400 mb-3'>{snapshot.data.description}</p>
+      <p className='text-sm text-content-muted mb-3'>
+        {snapshot.data.description}
+      </p>
 
-      <div className='text-xs text-zinc-500'>
+      <div className='text-xs text-content-muted'>
         <div>
           🃏 {snapshot.data.data.pullCount} pulls /{' '}
           {snapshot.data.data.totalPulls} total
@@ -264,21 +270,21 @@ function ArchetypeCard({ snapshot }: { snapshot: ArchetypeSnapshot }) {
   const dominantArchetype = snapshot.data.archetypes[0];
 
   return (
-    <div className='bg-zinc-900 border border-lunary-secondary-700/30 rounded-lg p-4'>
+    <div className='bg-surface-elevated border border-lunary-secondary-700/30 rounded-lg p-4'>
       <div className='flex items-center justify-between mb-3'>
         <div className='flex items-center gap-2'>
           <Sparkles className='w-4 h-4 text-lunary-secondary-400' />
-          <span className='text-xs text-zinc-500'>{formattedDate}</span>
+          <span className='text-xs text-content-muted'>{formattedDate}</span>
         </div>
-        <span className='text-xs bg-lunary-secondary-900/30 text-lunary-secondary-300 px-2 py-0.5 rounded'>
+        <span className='text-xs bg-layer-base/30 text-content-brand-secondary px-2 py-0.5 rounded'>
           Strength: {dominantArchetype.strength}
         </span>
       </div>
 
-      <h3 className='text-base font-semibold text-white mb-1'>
+      <h3 className='text-base font-semibold text-content-primary mb-1'>
         {dominantArchetype.name}
       </h3>
-      <p className='text-sm text-zinc-400 mb-3'>
+      <p className='text-sm text-content-muted mb-3'>
         Your dominant archetype pattern for this period
       </p>
 
@@ -286,7 +292,7 @@ function ArchetypeCard({ snapshot }: { snapshot: ArchetypeSnapshot }) {
         {snapshot.data.archetypes.slice(1, 3).map((archetype, idx) => (
           <span
             key={idx}
-            className='text-xs bg-zinc-800 text-zinc-400 px-2 py-1 rounded'
+            className='text-xs bg-surface-card text-content-muted px-2 py-1 rounded'
           >
             {archetype.name} ({archetype.strength})
           </span>
@@ -294,7 +300,7 @@ function ArchetypeCard({ snapshot }: { snapshot: ArchetypeSnapshot }) {
       </div>
 
       {dominantArchetype.basedOn && dominantArchetype.basedOn.length > 0 && (
-        <div className='text-xs text-zinc-500'>
+        <div className='text-xs text-content-muted'>
           <div>
             Based on: {dominantArchetype.basedOn.slice(0, 3).join(', ')}
             {dominantArchetype.basedOn.length > 3 && '...'}
@@ -316,7 +322,9 @@ export function PatternSnapshotsSection() {
   if (isLoading) {
     return (
       <div className='text-center py-8'>
-        <div className='animate-pulse text-zinc-400'>Loading patterns...</div>
+        <div className='animate-pulse text-content-muted'>
+          Loading patterns...
+        </div>
       </div>
     );
   }
@@ -324,9 +332,9 @@ export function PatternSnapshotsSection() {
   if (!patterns || patterns.totalSnapshots === 0) {
     return (
       <div className='text-center py-12'>
-        <Zap className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
-        <p className='text-zinc-400'>No patterns detected yet</p>
-        <p className='text-xs text-zinc-500 mt-1'>
+        <Zap className='w-10 h-10 text-content-muted mx-auto mb-3' />
+        <p className='text-content-muted'>No patterns detected yet</p>
+        <p className='text-xs text-content-muted mt-1'>
           Keep journaling and pulling tarot to discover your patterns
         </p>
       </div>
@@ -379,7 +387,7 @@ export function PatternSnapshotsSection() {
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           {isFromCache && (
-            <span className='text-xs text-zinc-500 bg-zinc-800/50 px-2 py-1 rounded'>
+            <span className='text-xs text-content-muted bg-surface-card/50 px-2 py-1 rounded'>
               📦 Cached
             </span>
           )}
@@ -387,7 +395,7 @@ export function PatternSnapshotsSection() {
         <button
           onClick={() => refresh()}
           disabled={isLoading}
-          className='flex items-center gap-1.5 px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+          className='flex items-center gap-1.5 px-3 py-1.5 text-xs text-content-muted hover:text-content-primary hover:bg-surface-card/50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
           title='Refresh patterns'
         >
           <RefreshCw
@@ -402,10 +410,12 @@ export function PatternSnapshotsSection() {
         {patterns.byType.map((type) => (
           <div
             key={type.type}
-            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 text-center'
+            className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-3 text-center'
           >
-            <div className='text-2xl font-bold text-white'>{type.count}</div>
-            <div className='text-xs text-zinc-500 capitalize'>
+            <div className='text-2xl font-bold text-content-primary'>
+              {type.count}
+            </div>
+            <div className='text-xs text-content-muted capitalize'>
               {type.type.replace('_', ' ')}
             </div>
           </div>
@@ -420,13 +430,13 @@ export function PatternSnapshotsSection() {
             onClick={() => setSelectedType(filter.id)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
               selectedType === filter.id
-                ? 'bg-lunary-primary-600/20 text-lunary-primary-300 border border-lunary-primary-700'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 border border-transparent'
+                ? 'bg-lunary-primary-600/20 text-content-brand border border-lunary-primary-700'
+                : 'text-content-muted hover:text-content-primary hover:bg-surface-card/50 border border-transparent'
             }`}
           >
             {filter.label}
             {filter.count > 0 && (
-              <span className='text-xs bg-zinc-800 px-1.5 py-0.5 rounded'>
+              <span className='text-xs bg-surface-card px-1.5 py-0.5 rounded'>
                 {filter.count}
               </span>
             )}
@@ -448,7 +458,7 @@ export function PatternSnapshotsSection() {
       <div className='space-y-3'>
         {filteredSnapshots.length === 0 ? (
           <div className='text-center py-8'>
-            <p className='text-zinc-400'>No patterns of this type yet</p>
+            <p className='text-content-muted'>No patterns of this type yet</p>
           </div>
         ) : (
           filteredSnapshots.map((snapshot, idx) => {

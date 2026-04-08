@@ -132,23 +132,23 @@ export default async function PodcastEpisodePage({
 
       <div className='mx-auto max-w-3xl px-4 py-12'>
         {/* Breadcrumbs */}
-        <nav className='mb-6 text-sm text-lunary-primary-300/60'>
-          <Link href='/' className='hover:text-lunary-primary-300'>
+        <nav className='mb-6 text-sm text-content-brand/60'>
+          <Link href='/' className='hover:text-content-brand'>
             Home
           </Link>
           <span className='mx-2'>/</span>
-          <Link href='/podcast' className='hover:text-lunary-primary-300'>
+          <Link href='/podcast' className='hover:text-content-brand'>
             Podcast
           </Link>
           <span className='mx-2'>/</span>
-          <span className='text-lunary-primary-300/80'>
+          <span className='text-content-brand/80'>
             Episode {episode.episodeNumber}
           </span>
         </nav>
 
         {/* Header */}
         <header className='mb-8'>
-          <div className='mb-3 flex items-center gap-3 text-sm text-lunary-primary-300/60'>
+          <div className='mb-3 flex items-center gap-3 text-sm text-content-brand/60'>
             <span className='flex items-center gap-1'>
               <Calendar className='h-4 w-4' />
               {publishedDate}
@@ -167,7 +167,7 @@ export default async function PodcastEpisodePage({
             {episode.title}
           </Heading>
 
-          <p className='mt-4 text-lg text-lunary-primary-300/70'>
+          <p className='mt-4 text-lg text-content-brand/70'>
             {episode.description}
           </p>
         </header>
@@ -214,7 +214,7 @@ export default async function PodcastEpisodePage({
                   <Heading as='h3' variant='h3'>
                     {section.title}
                   </Heading>
-                  <p className='mt-2 text-lunary-primary-300/70'>
+                  <p className='mt-2 text-content-brand/70'>
                     {section.content}
                   </p>
                 </div>
@@ -233,7 +233,7 @@ export default async function PodcastEpisodePage({
               {showNotes.keyPoints.map((point, i) => (
                 <li
                   key={i}
-                  className='flex items-start gap-2 text-lunary-primary-300/70'
+                  className='flex items-start gap-2 text-content-brand/70'
                 >
                   <span className='mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-lunary-accent-300' />
                   {point}
@@ -256,8 +256,8 @@ export default async function PodcastEpisodePage({
                   href={`/grimoire/${grimoireSlug}`}
                   className='flex items-center gap-3 rounded-lg border border-lunary-primary-300/20 p-4 transition-colors hover:border-lunary-primary-300/40 hover:bg-lunary-primary-300/5'
                 >
-                  <BookOpen className='h-5 w-5 flex-shrink-0 text-lunary-accent-300' />
-                  <span className='text-lunary-primary-300/80'>
+                  <BookOpen className='h-5 w-5 flex-shrink-0 text-content-brand-accent' />
+                  <span className='text-content-brand/80'>
                     {formatSlugTitle(grimoireSlug)}
                   </span>
                 </a>
@@ -274,17 +274,17 @@ export default async function PodcastEpisodePage({
                 <Heading as='h2' variant='h2' className='inline'>
                   Transcript
                 </Heading>
-                <span className='ml-2 text-sm text-lunary-primary-300/50'>
+                <span className='ml-2 text-sm text-content-brand/50'>
                   (click to expand)
                 </span>
               </summary>
               <div className='mt-4 space-y-4'>
                 {transcript.map((line, i) => (
                   <div key={i} className='flex gap-3'>
-                    <span className='flex-shrink-0 text-sm font-medium text-lunary-accent-300'>
+                    <span className='flex-shrink-0 text-sm font-medium text-content-brand-accent'>
                       {line.speaker === 'HOST_A' ? 'Luna' : 'Sol'}:
                     </span>
-                    <p className='text-lunary-primary-300/70'>{line.text}</p>
+                    <p className='text-content-brand/70'>{line.text}</p>
                   </div>
                 ))}
               </div>
@@ -296,7 +296,7 @@ export default async function PodcastEpisodePage({
         <div className='border-t border-lunary-primary-300/10 pt-8'>
           <Link
             href='/podcast'
-            className='text-lunary-accent-300 transition-colors hover:text-lunary-accent-300/80'
+            className='text-content-brand-accent transition-colors hover:text-content-brand-accent/80'
           >
             &larr; All episodes
           </Link>

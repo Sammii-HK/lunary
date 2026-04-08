@@ -53,18 +53,18 @@ export default function AIConversionPage() {
   };
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 p-6'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-6'>
       <div className='max-w-7xl mx-auto space-y-6'>
         <div>
           <h1 className='text-3xl font-bold mb-2'>AI Conversion Optimizer</h1>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Use AI to optimize conversions across your app
           </p>
         </div>
 
         <div className='grid md:grid-cols-2 gap-6'>
           {/* Generate Personalized CTAs */}
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardHeader>
               <div className='flex items-center gap-2'>
                 <Zap className='w-5 h-5 text-lunary-primary-400' />
@@ -72,7 +72,7 @@ export default function AIConversionPage() {
               </div>
             </CardHeader>
             <CardContent className='space-y-4'>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 Generate personalized, conversion-optimized call-to-actions
               </p>
               <button
@@ -83,7 +83,7 @@ export default function AIConversionPage() {
                   })
                 }
                 disabled={loading === 'generate-cta'}
-                className='w-full px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
+                className='w-full px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
               >
                 {loading === 'generate-cta' ? (
                   <>
@@ -98,12 +98,17 @@ export default function AIConversionPage() {
                 )}
               </button>
               {results['generate-cta']?.ctas && (
-                <div className='mt-4 p-3 bg-zinc-800/50 rounded border border-zinc-700'>
-                  <p className='text-xs text-zinc-400 mb-2'>Generated CTAs:</p>
+                <div className='mt-4 p-3 bg-surface-card/50 rounded border border-stroke-default'>
+                  <p className='text-xs text-content-muted mb-2'>
+                    Generated CTAs:
+                  </p>
                   <ul className='space-y-1'>
                     {results['generate-cta'].ctas.map(
                       (cta: string, idx: number) => (
-                        <li key={idx} className='text-sm text-zinc-300'>
+                        <li
+                          key={idx}
+                          className='text-sm text-content-secondary'
+                        >
                           • {cta}
                         </li>
                       ),
@@ -115,7 +120,7 @@ export default function AIConversionPage() {
           </Card>
 
           {/* Analyze Conversion Funnel */}
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardHeader>
               <div className='flex items-center gap-2'>
                 <TrendingUp className='w-5 h-5 text-lunary-secondary' />
@@ -123,7 +128,7 @@ export default function AIConversionPage() {
               </div>
             </CardHeader>
             <CardContent className='space-y-4'>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 AI-assisted analysis of your conversion funnel
               </p>
               <button
@@ -146,15 +151,17 @@ export default function AIConversionPage() {
                 )}
               </button>
               {results['analyze-funnel']?.analysis && (
-                <div className='mt-4 p-3 bg-zinc-800/50 rounded border border-zinc-700'>
+                <div className='mt-4 p-3 bg-surface-card/50 rounded border border-stroke-default'>
                   {!results['analyze-funnel']?.dataAvailable && (
-                    <div className='mb-3 p-2 bg-lunary-accent-950 border border-lunary-accent-900 rounded text-xs text-lunary-accent'>
+                    <div className='mb-3 p-2 bg-layer-deep border border-lunary-accent-900 rounded text-xs text-lunary-accent'>
                       ⚠️ No data available - analysis is based on general
                       recommendations only
                     </div>
                   )}
-                  <p className='text-xs text-zinc-400 mb-2'>AI Analysis:</p>
-                  <div className='text-sm text-zinc-300 whitespace-pre-wrap'>
+                  <p className='text-xs text-content-muted mb-2'>
+                    AI Analysis:
+                  </p>
+                  <div className='text-sm text-content-secondary whitespace-pre-wrap'>
                     {results['analyze-funnel'].analysis}
                   </div>
                 </div>
@@ -163,7 +170,7 @@ export default function AIConversionPage() {
           </Card>
 
           {/* Suggest A/B Tests */}
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardHeader>
               <div className='flex items-center gap-2'>
                 <Target className='w-5 h-5 text-lunary-success' />
@@ -171,7 +178,7 @@ export default function AIConversionPage() {
               </div>
             </CardHeader>
             <CardContent className='space-y-4'>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 Get AI suggestions for new conversion tests
               </p>
               <button
@@ -198,11 +205,11 @@ export default function AIConversionPage() {
               {results['suggest-tests']?.suggestions && (
                 <div className='mt-4 space-y-3'>
                   {results['suggest-tests']?.actualStats && (
-                    <div className='p-2 bg-zinc-800/70 rounded border border-zinc-700 text-xs'>
-                      <p className='text-zinc-400 mb-1'>
+                    <div className='p-2 bg-surface-card/70 rounded border border-stroke-default text-xs'>
+                      <p className='text-content-muted mb-1'>
                         📊 Actual Stats (30d):
                       </p>
-                      <div className='text-zinc-300 space-y-0.5'>
+                      <div className='text-content-secondary space-y-0.5'>
                         <p>
                           Signups:{' '}
                           {results['suggest-tests'].actualStats.signups}
@@ -217,8 +224,8 @@ export default function AIConversionPage() {
                       </div>
                     </div>
                   )}
-                  <div className='p-3 bg-zinc-800/50 rounded border border-zinc-700 max-h-60 overflow-y-auto'>
-                    <p className='text-xs text-zinc-400 mb-2'>
+                  <div className='p-3 bg-surface-card/50 rounded border border-stroke-default max-h-60 overflow-y-auto'>
+                    <p className='text-xs text-content-muted mb-2'>
                       Suggested Tests:
                     </p>
                     <div className='space-y-3'>
@@ -228,11 +235,14 @@ export default function AIConversionPage() {
                       )
                         .slice(0, 5)
                         .map((test: any, idx: number) => (
-                          <div key={idx} className='text-xs text-zinc-300'>
-                            <p className='font-semibold text-white mb-1'>
+                          <div
+                            key={idx}
+                            className='text-xs text-content-secondary'
+                          >
+                            <p className='font-semibold text-content-primary mb-1'>
                               {test.name || test.testName || `Test ${idx + 1}`}
                             </p>
-                            <p className='text-zinc-400'>
+                            <p className='text-content-muted'>
                               {test.hypothesis || test.description}
                             </p>
                             {test.expectedImpact && (
@@ -251,7 +261,7 @@ export default function AIConversionPage() {
           </Card>
 
           {/* Optimize Email Copy */}
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardHeader>
               <div className='flex items-center gap-2'>
                 <Mail className='w-5 h-5 text-lunary-accent' />
@@ -259,7 +269,7 @@ export default function AIConversionPage() {
               </div>
             </CardHeader>
             <CardContent className='space-y-4'>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 Optimize email copy for better conversions
               </p>
               <button
@@ -287,9 +297,11 @@ export default function AIConversionPage() {
                 )}
               </button>
               {results['optimize-email']?.optimized && (
-                <div className='mt-4 p-3 bg-zinc-800/50 rounded border border-zinc-700'>
-                  <p className='text-xs text-zinc-400 mb-2'>Optimized Copy:</p>
-                  <div className='text-sm text-zinc-300 space-y-2'>
+                <div className='mt-4 p-3 bg-surface-card/50 rounded border border-stroke-default'>
+                  <p className='text-xs text-content-muted mb-2'>
+                    Optimized Copy:
+                  </p>
+                  <div className='text-sm text-content-secondary space-y-2'>
                     {results['optimize-email'].optimized.subject && (
                       <div>
                         <span className='text-lunary-primary-400'>
@@ -302,7 +314,7 @@ export default function AIConversionPage() {
                       <div>
                         <span className='text-lunary-primary-400'>Body:</span>
                         <div
-                          className='mt-1 text-zinc-400'
+                          className='mt-1 text-content-muted'
                           dangerouslySetInnerHTML={{
                             __html: results['optimize-email'].optimized.body,
                           }}
@@ -316,7 +328,7 @@ export default function AIConversionPage() {
           </Card>
 
           {/* Predict Churn */}
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardHeader>
               <div className='flex items-center gap-2'>
                 <Users className='w-5 h-5 text-lunary-error' />
@@ -324,7 +336,7 @@ export default function AIConversionPage() {
               </div>
             </CardHeader>
             <CardContent className='space-y-4'>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 Identify users at risk of churning
               </p>
               <button
@@ -345,11 +357,11 @@ export default function AIConversionPage() {
                 )}
               </button>
               {results['predict-churn']?.predictions && (
-                <div className='mt-4 p-3 bg-zinc-800/50 rounded border border-zinc-700 max-h-60 overflow-y-auto'>
-                  <p className='text-xs text-zinc-400 mb-2'>
+                <div className='mt-4 p-3 bg-surface-card/50 rounded border border-stroke-default max-h-60 overflow-y-auto'>
+                  <p className='text-xs text-content-muted mb-2'>
                     Churn Predictions:
                   </p>
-                  <div className='text-sm text-zinc-300 whitespace-pre-wrap'>
+                  <div className='text-sm text-content-secondary whitespace-pre-wrap'>
                     {typeof results['predict-churn'].predictions === 'string'
                       ? results['predict-churn'].predictions
                       : JSON.stringify(
@@ -364,7 +376,7 @@ export default function AIConversionPage() {
           </Card>
 
           {/* Personalize Experience */}
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardHeader>
               <div className='flex items-center gap-2'>
                 <Wand2 className='w-5 h-5 text-lunary-rose' />
@@ -372,13 +384,13 @@ export default function AIConversionPage() {
               </div>
             </CardHeader>
             <CardContent className='space-y-4'>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 Get personalized experience recommendations
               </p>
               <input
                 type='text'
                 placeholder='User ID (optional)'
-                className='w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm'
+                className='w-full px-3 py-2 bg-surface-card border border-stroke-default rounded-lg text-content-primary text-sm'
                 id='personalize-user-id'
               />
               <button
@@ -409,11 +421,11 @@ export default function AIConversionPage() {
                 )}
               </button>
               {results['personalize-experience']?.personalization && (
-                <div className='mt-4 p-3 bg-zinc-800/50 rounded border border-zinc-700'>
-                  <p className='text-xs text-zinc-400 mb-2'>
+                <div className='mt-4 p-3 bg-surface-card/50 rounded border border-stroke-default'>
+                  <p className='text-xs text-content-muted mb-2'>
                     Personalization Strategy:
                   </p>
-                  <div className='text-sm text-zinc-300 whitespace-pre-wrap'>
+                  <div className='text-sm text-content-secondary whitespace-pre-wrap'>
                     {typeof results['personalize-experience']
                       .personalization === 'string'
                       ? results['personalize-experience'].personalization

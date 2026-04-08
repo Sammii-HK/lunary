@@ -23,12 +23,14 @@ export function TarotKeywords({
 }: TarotKeywordsProps) {
   return (
     <section className={cn('mb-8', className)}>
-      <h2 className='text-lg font-medium text-zinc-100 mb-4'>Quick Keywords</h2>
+      <h2 className='text-lg font-medium text-content-primary mb-4'>
+        Quick Keywords
+      </h2>
 
       <div className='space-y-4'>
         {/* Upright Keywords */}
         <div>
-          <div className='text-xs uppercase tracking-[0.4em] text-zinc-500 mb-2'>
+          <div className='text-xs uppercase tracking-[0.4em] text-content-muted mb-2'>
             Upright
           </div>
           <div className='flex flex-wrap gap-2'>
@@ -45,7 +47,7 @@ export function TarotKeywords({
 
         {/* Reversed Keywords */}
         <div>
-          <div className='text-xs uppercase tracking-[0.4em] text-zinc-500 mb-2'>
+          <div className='text-xs uppercase tracking-[0.4em] text-content-muted mb-2'>
             Reversed
           </div>
           <div className='flex flex-wrap gap-2'>

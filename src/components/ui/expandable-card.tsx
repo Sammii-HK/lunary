@@ -4,13 +4,15 @@ import { ReactNode, useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface ExpandableCardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ExpandableCardProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'onToggle'
+> {
   preview: ReactNode;
   expanded: ReactNode;
   defaultExpanded?: boolean;
   autoExpandOnDesktop?: boolean;
   isExpanded?: boolean; // Controlled state from parent
-  className?: string;
   previewClassName?: string;
   expandedClassName?: string;
   onToggle?: (isExpanded: boolean) => void;
@@ -83,7 +85,7 @@ export const ExpandableCard = ({
       data-component='expandable-card'
       data-version='v2'
       className={cn(
-        'bg-lunary-bg border border-zinc-800/50 rounded-md w-full overflow-hidden transition-all relative',
+        'bg-surface-elevated border border-stroke-subtle/50 rounded-md w-full overflow-hidden transition-all relative',
         isExpanded && 'border-lunary-primary-700/50',
         className,
       )}
@@ -101,16 +103,16 @@ export const ExpandableCard = ({
           }
         }}
         className={cn(
-          'w-full py-3 px-4 text-left hover:bg-zinc-900/50 active:bg-zinc-900/50 transition-colors group',
+          'w-full py-3 px-4 text-left hover:bg-surface-elevated/50 active:bg-surface-elevated/50 transition-colors group',
           previewClassName,
         )}
       >
         <div className='w-full'>{preview}</div>
         <div className='absolute top-1 right-2'>
           {isExpanded ? (
-            <ChevronUp className='w-4 h-4 text-zinc-500' />
+            <ChevronUp className='w-4 h-4 text-content-muted' />
           ) : (
-            <ChevronDown className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent group-active:text-lunary-accent transition-colors' />
+            <ChevronDown className='w-4 h-4 text-content-muted group-hover:text-lunary-accent group-active:text-lunary-accent transition-colors' />
           )}
         </div>
       </div>
@@ -123,7 +125,7 @@ export const ExpandableCard = ({
       >
         <div
           className={cn(
-            'px-4 pb-4 border-t border-zinc-800/30 max-h-[400px] overflow-y-auto',
+            'px-4 pb-4 border-t border-stroke-subtle/30 max-h-[400px] overflow-y-auto',
             expandedClassName,
           )}
         >
@@ -152,18 +154,20 @@ export const ExpandableCardHeader = ({
   action,
 }: ExpandableCardHeaderProps) => {
   const badgeClasses = {
-    default: 'bg-zinc-800/50 text-zinc-400',
-    highlight: 'bg-zinc-800/50 text-lunary-primary-200',
-    warning: 'bg-zinc-800/50 text-lunary-accent-200',
-    danger: 'bg-lunary-error-950/50 text-lunary-error-300',
+    default: 'bg-surface-card/50 text-content-muted',
+    highlight: 'bg-surface-card/50 text-content-secondary',
+    warning: 'bg-surface-card/50 text-content-brand-accent',
+    danger: 'bg-layer-deep/50 text-lunary-error-300',
   };
 
   return (
     <div className='flex items-center justify-between w-full pr-2'>
       <div className='flex items-center gap-2'>
         {icon && <span>{icon}</span>}
-        <span className='text-sm text-zinc-200'>{title}</span>
-        {subtitle && <span className='text-xs text-zinc-400'>{subtitle}</span>}
+        <span className='text-sm text-content-primary'>{title}</span>
+        {subtitle && (
+          <span className='text-xs text-content-muted'>{subtitle}</span>
+        )}
       </div>
       <div className='flex items-center gap-2'>
         {action}

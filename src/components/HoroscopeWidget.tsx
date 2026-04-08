@@ -707,7 +707,7 @@ export const HoroscopeWidget = () => {
           <div className='text-center'>
             <h3 className='font-bold mb-2'>Personal Horoscope</h3>
             <span className='text-xs text-lunary-accent'>Personalised</span>
-            <p className='text-zinc-400 text-xs mt-2'>
+            <p className='text-content-muted text-xs mt-2'>
               Access to historical and future dates requires a subscription.
             </p>
           </div>
@@ -724,22 +724,22 @@ export const HoroscopeWidget = () => {
         <div className='space-y-2'>
           <div className='flex items-center justify-between'>
             {/* <h3 className='font-bold'>Daily Cosmic Energy</h3> */}
-            {/* <span className='text-xs text-zinc-400'>
+            {/* <span className='text-xs text-content-muted'>
               {generalHoroscope.moonPhase}
             </span> */}
           </div>
 
           <div className='space-y-2 text-xs'>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               {generalHoroscope.reading}
             </p>
           </div>
 
-          <div className='bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded p-2 border border-lunary-primary-800'>
-            <p className='text-xs text-lunary-accent-200 mb-1 font-medium'>
+          <div className='bg-gradient-to-r from-layer-base/20 to-lunary-highlight-900/20 rounded p-2 border border-lunary-primary-800'>
+            <p className='text-xs text-content-brand-accent mb-1 font-medium'>
               ✨ Your personalized horoscope is ready
             </p>
-            <p className='text-xs text-zinc-400 mb-2'>
+            <p className='text-xs text-content-muted mb-2'>
               Unlock it now to see how the selected date&apos;s cosmic energy
               affects YOUR birth chart. Experience the difference personalized
               astrology makes!
@@ -758,7 +758,7 @@ export const HoroscopeWidget = () => {
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Horoscope</h3>
           <span className='text-xs text-lunary-accent'>Personalised</span>
-          <p className='text-zinc-400 text-xs mb-2'>
+          <p className='text-content-muted text-xs mb-2'>
             Add your birthday for personalized cosmic insights
           </p>
           <Link
@@ -778,7 +778,7 @@ export const HoroscopeWidget = () => {
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Horoscope</h3>
           <span className='text-xs text-lunary-accent'>Personalised</span>
-          <p className='text-zinc-400 text-xs'>
+          <p className='text-content-muted text-xs'>
             Calculating your cosmic influences...
           </p>
         </div>
@@ -793,7 +793,7 @@ export const HoroscopeWidget = () => {
         <div className='text-center'>
           <h3 className='font-bold mb-2'>Personal Horoscope</h3>
           <span className='text-xs text-lunary-accent'>Personalised</span>
-          <p className='text-zinc-400 text-xs'>
+          <p className='text-content-muted text-xs'>
             Loading cosmic calculations...
           </p>
         </div>
@@ -822,12 +822,12 @@ export const HoroscopeWidget = () => {
           ref={scrollRef}
           className='h-full overflow-y-auto max-h-48 md:max-h-96 lg:max-h-48'
         >
-          <div className='text-sm text-zinc-300 leading-relaxed'>
+          <div className='text-sm text-content-secondary leading-relaxed'>
             {horoscope}
           </div>
         </div>
         {showBottomBlur && (
-          <div className='absolute bottom-0 left-0 right-0 h-12 pointer-events-none bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent' />
+          <div className='absolute bottom-0 left-0 right-0 h-12 pointer-events-none bg-gradient-to-t from-surface-base via-surface-base/80 to-transparent' />
         )}
       </div>
     </div>

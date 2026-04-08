@@ -67,7 +67,7 @@ export function GrimoireStats({ pagePath, className }: GrimoireStatsProps) {
 
   return (
     <div
-      className={`flex items-center gap-4 text-xs text-zinc-500 ${className}`}
+      className={`flex items-center gap-4 text-xs text-content-muted ${className}`}
     >
       <div className='flex items-center gap-1.5'>
         <Users className='w-3.5 h-3.5' />

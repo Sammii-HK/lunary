@@ -95,15 +95,15 @@ export function DailyThread({
       {!hideToggle && (
         <button
           onClick={handleToggle}
-          className='flex w-full items-center justify-between rounded-lg border border-zinc-800/50 bg-zinc-900/30 px-3 sm:px-4 py-2 sm:py-2.5 text-left transition-colors hover:bg-zinc-900/50 mb-1.5'
+          className='flex w-full items-center justify-between rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 px-3 sm:px-4 py-2 sm:py-2.5 text-left transition-colors hover:bg-surface-elevated/50 mb-1.5'
         >
-          <span className='text-xs sm:text-sm font-medium text-zinc-100'>
+          <span className='text-xs sm:text-sm font-medium text-content-primary'>
             Today's thread
           </span>
           {isExpanded ? (
-            <ChevronUp className='w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400' />
+            <ChevronUp className='w-3.5 h-3.5 sm:w-4 sm:h-4 text-content-muted' />
           ) : (
-            <ChevronDown className='w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400' />
+            <ChevronDown className='w-3.5 h-3.5 sm:w-4 sm:h-4 text-content-muted' />
           )}
         </button>
       )}

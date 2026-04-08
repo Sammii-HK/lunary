@@ -101,18 +101,18 @@ function WeeklyReportPreviewContent() {
   };
 
   return (
-    <div className='min-h-screen bg-black text-white p-8'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-8'>
       <div className='max-w-7xl mx-auto'>
         <div className='mb-8'>
           <h1 className='text-3xl font-bold mb-4'>
             Weekly Cosmic Report Preview
           </h1>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Preview weekly cosmic reports for any user before they're sent
           </p>
         </div>
 
-        <div className='bg-zinc-900 rounded-lg border border-zinc-700 p-6 mb-8'>
+        <div className='bg-surface-elevated rounded-lg border border-stroke-default p-6 mb-8'>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-4'>
             <div>
               <label className='block text-sm font-medium mb-2'>
@@ -124,7 +124,7 @@ function WeeklyReportPreviewContent() {
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
                 placeholder='Optional - user ID'
-                className='w-full px-3 py-2 bg-zinc-800 border border-zinc-600 rounded-md text-white'
+                className='w-full px-3 py-2 bg-surface-card border border-stroke-strong rounded-md text-content-primary'
               />
             </div>
             <div>
@@ -137,7 +137,7 @@ function WeeklyReportPreviewContent() {
                 value={userEmail}
                 onChange={(e) => setUserEmail(e.target.value)}
                 placeholder='Optional - user email'
-                className='w-full px-3 py-2 bg-zinc-800 border border-zinc-600 rounded-md text-white'
+                className='w-full px-3 py-2 bg-surface-card border border-stroke-strong rounded-md text-content-primary'
               />
             </div>
             <div>
@@ -149,14 +149,14 @@ function WeeklyReportPreviewContent() {
                 type='date'
                 value={weekStart}
                 onChange={(e) => setWeekStart(e.target.value)}
-                className='w-full px-3 py-2 bg-zinc-800 border border-zinc-600 rounded-md text-white'
+                className='w-full px-3 py-2 bg-surface-card border border-stroke-strong rounded-md text-content-primary'
               />
             </div>
           </div>
           <button
             onClick={generatePreview}
             disabled={loading}
-            className='px-6 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-zinc-700 disabled:cursor-not-allowed rounded-md text-white font-medium transition-colors flex items-center gap-2'
+            className='px-6 py-2 bg-lunary-primary-600 hover:bg-layer-high disabled:bg-surface-overlay disabled:cursor-not-allowed rounded-md text-white font-medium transition-colors flex items-center gap-2'
           >
             {loading ? (
               <>
@@ -173,22 +173,22 @@ function WeeklyReportPreviewContent() {
         </div>
 
         {error && (
-          <div className='bg-lunary-error-900/50 border border-lunary-error-700 rounded-lg p-4 mb-8'>
+          <div className='bg-layer-base/50 border border-lunary-error-700 rounded-lg p-4 mb-8'>
             <p className='text-lunary-error-300'>{error}</p>
           </div>
         )}
 
         {previewData && (
           <div className='space-y-6'>
-            <div className='bg-zinc-900 rounded-lg border border-zinc-700 p-6'>
+            <div className='bg-surface-elevated rounded-lg border border-stroke-default p-6'>
               <div className='flex items-center justify-between mb-4'>
                 <div>
                   <h2 className='text-2xl font-bold mb-2'>Preview</h2>
-                  <p className='text-zinc-400 text-sm'>
+                  <p className='text-content-muted text-sm'>
                     User: {previewData.user.name || previewData.user.email} (
                     {previewData.user.id})
                   </p>
-                  <p className='text-zinc-400 text-sm'>
+                  <p className='text-content-muted text-sm'>
                     Week: {formatDate(previewData.weekStart)} -{' '}
                     {formatDate(previewData.weekEnd)}
                   </p>
@@ -199,7 +199,7 @@ function WeeklyReportPreviewContent() {
                     className={`px-4 py-2 rounded-md transition-colors ${
                       viewMode === 'report'
                         ? 'bg-lunary-primary-600 text-white'
-                        : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                        : 'bg-surface-card text-content-secondary hover:bg-surface-overlay'
                     }`}
                   >
                     Report Data
@@ -209,7 +209,7 @@ function WeeklyReportPreviewContent() {
                     className={`px-4 py-2 rounded-md transition-colors ${
                       viewMode === 'email'
                         ? 'bg-lunary-primary-600 text-white'
-                        : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                        : 'bg-surface-card text-content-secondary hover:bg-surface-overlay'
                     }`}
                   >
                     Email Preview
@@ -219,9 +219,9 @@ function WeeklyReportPreviewContent() {
             </div>
 
             {viewMode === 'report' && (
-              <div className='bg-zinc-900 rounded-lg border border-zinc-700 p-6'>
+              <div className='bg-surface-elevated rounded-lg border border-stroke-default p-6'>
                 <h3 className='text-xl font-bold mb-4'>Report Summary</h3>
-                <p className='text-zinc-300 mb-6'>
+                <p className='text-content-secondary mb-6'>
                   {previewData.report.summary}
                 </p>
 
@@ -232,12 +232,12 @@ function WeeklyReportPreviewContent() {
                       {previewData.report.moonPhases.map((phase, idx) => (
                         <div
                           key={idx}
-                          className='bg-zinc-800 rounded p-3 flex items-center gap-3'
+                          className='bg-surface-card rounded p-3 flex items-center gap-3'
                         >
                           <span className='text-2xl'>{phase.emoji}</span>
                           <div>
                             <div className='font-medium'>{phase.phase}</div>
-                            <div className='text-sm text-zinc-400'>
+                            <div className='text-sm text-content-muted'>
                               {formatDate(phase.date)}
                             </div>
                           </div>
@@ -250,9 +250,9 @@ function WeeklyReportPreviewContent() {
                     <h4 className='text-lg font-semibold mb-3'>Key Transits</h4>
                     <div className='space-y-2'>
                       {previewData.report.keyTransits.map((transit, idx) => (
-                        <div key={idx} className='bg-zinc-800 rounded p-3'>
+                        <div key={idx} className='bg-surface-card rounded p-3'>
                           <div className='font-medium'>{transit.transit}</div>
-                          <div className='text-sm text-zinc-400'>
+                          <div className='text-sm text-content-muted'>
                             {transit.description} - {formatDate(transit.date)}
                           </div>
                         </div>
@@ -266,8 +266,8 @@ function WeeklyReportPreviewContent() {
                     <h4 className='text-lg font-semibold mb-3'>
                       Tarot Patterns
                     </h4>
-                    <div className='bg-zinc-800 rounded p-4'>
-                      <p className='text-zinc-300 mb-2'>
+                    <div className='bg-surface-card rounded p-4'>
+                      <p className='text-content-secondary mb-2'>
                         <strong>Dominant Themes:</strong>{' '}
                         {previewData.report.tarotPatterns.dominantThemes.join(
                           ', ',
@@ -276,10 +276,10 @@ function WeeklyReportPreviewContent() {
                       {previewData.report.tarotPatterns.frequentCards.length >
                         0 && (
                         <div>
-                          <strong className='text-zinc-300'>
+                          <strong className='text-content-secondary'>
                             Frequent Cards:
                           </strong>
-                          <ul className='list-disc list-inside mt-2 text-zinc-400'>
+                          <ul className='list-disc list-inside mt-2 text-content-muted'>
                             {previewData.report.tarotPatterns.frequentCards.map(
                               (card, idx) => (
                                 <li key={idx}>
@@ -297,11 +297,11 @@ function WeeklyReportPreviewContent() {
             )}
 
             {viewMode === 'email' && (
-              <div className='bg-zinc-900 rounded-lg border border-zinc-700 p-6'>
+              <div className='bg-surface-elevated rounded-lg border border-stroke-default p-6'>
                 <div className='mb-4 flex items-center justify-between'>
                   <div>
                     <h3 className='text-xl font-bold mb-1'>Email Preview</h3>
-                    <p className='text-sm text-zinc-400'>
+                    <p className='text-sm text-content-muted'>
                       To: {previewData.email.to} | Subject:{' '}
                       {previewData.email.subject}
                     </p>
@@ -319,7 +319,7 @@ function WeeklyReportPreviewContent() {
                     Open in New Tab
                   </button>
                 </div>
-                <div className='border border-zinc-700 rounded-lg overflow-hidden'>
+                <div className='border border-stroke-default rounded-lg overflow-hidden'>
                   <iframe
                     srcDoc={previewData.email.html}
                     className='w-full h-[800px] bg-white'
@@ -327,18 +327,18 @@ function WeeklyReportPreviewContent() {
                   />
                 </div>
                 <details className='mt-4'>
-                  <summary className='cursor-pointer text-sm text-zinc-400 hover:text-zinc-300'>
+                  <summary className='cursor-pointer text-sm text-content-muted hover:text-content-secondary'>
                     View HTML Source
                   </summary>
-                  <pre className='mt-2 p-4 bg-zinc-800 rounded text-xs overflow-auto max-h-96'>
+                  <pre className='mt-2 p-4 bg-surface-card rounded text-xs overflow-auto max-h-96'>
                     {previewData.email.html}
                   </pre>
                 </details>
                 <details className='mt-4'>
-                  <summary className='cursor-pointer text-sm text-zinc-400 hover:text-zinc-300'>
+                  <summary className='cursor-pointer text-sm text-content-muted hover:text-content-secondary'>
                     View Text Version
                   </summary>
-                  <pre className='mt-2 p-4 bg-zinc-800 rounded text-xs overflow-auto max-h-96 whitespace-pre-wrap'>
+                  <pre className='mt-2 p-4 bg-surface-card rounded text-xs overflow-auto max-h-96 whitespace-pre-wrap'>
                     {previewData.email.text}
                   </pre>
                 </details>
@@ -355,8 +355,8 @@ export default function WeeklyReportPreviewPage() {
   return (
     <Suspense
       fallback={
-        <div className='min-h-screen bg-zinc-950 text-white flex items-center justify-center'>
-          <div className='text-zinc-400'>Loading...</div>
+        <div className='min-h-screen bg-surface-base text-content-primary flex items-center justify-center'>
+          <div className='text-content-muted'>Loading...</div>
         </div>
       }
     >

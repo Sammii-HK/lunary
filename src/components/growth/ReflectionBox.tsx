@@ -88,11 +88,13 @@ export function ReflectionBox({
 
   return (
     <div
-      className={`rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-4 ${className}`}
+      className={`rounded-xl border border-stroke-subtle/50 bg-surface-elevated/40 p-4 ${className}`}
     >
       <div className='flex items-center gap-2 mb-3'>
         <Feather className='w-4 h-4 text-lunary-primary-400' />
-        <h3 className='text-sm font-medium text-zinc-100'>Quick Reflection</h3>
+        <h3 className='text-sm font-medium text-content-primary'>
+          Quick Reflection
+        </h3>
       </div>
 
       <div className='relative'>
@@ -102,7 +104,7 @@ export function ReflectionBox({
           placeholder={placeholder}
           disabled={isSubmitting || isSaved}
           rows={3}
-          className='w-full bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3 pr-12 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-700 resize-none disabled:opacity-50'
+          className='w-full bg-surface-card/50 border border-stroke-default/50 rounded-lg p-3 pr-12 text-sm text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-700 resize-none disabled:opacity-50'
         />
 
         <button
@@ -110,8 +112,8 @@ export function ReflectionBox({
           disabled={!reflection.trim() || isSubmitting || isSaved}
           className={`absolute right-2 bottom-2 p-2 rounded-lg transition-all ${
             isSaved
-              ? 'bg-lunary-success-900/30 text-lunary-success-300'
-              : 'bg-lunary-primary-900/30 text-lunary-primary-300 hover:bg-lunary-primary-900/50'
+              ? 'bg-layer-base/30 text-lunary-success-300'
+              : 'bg-layer-base/30 text-content-brand hover:bg-layer-base/50'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isSaved ? (
@@ -130,7 +132,7 @@ export function ReflectionBox({
         </p>
       )}
 
-      <p className='text-[10px] text-zinc-500 mt-2'>
+      <p className='text-[10px] text-content-muted mt-2'>
         Your reflection will be saved to your Book of Shadows with today's
         cosmic context.
       </p>
@@ -147,27 +149,29 @@ export function HoroscopeCrossLinks({
     <div className={`grid grid-cols-2 gap-3 ${className}`}>
       <a
         href='/tarot'
-        className='group flex items-center gap-2 p-3 rounded-xl border border-zinc-800/50 bg-zinc-900/40 hover:border-lunary-primary-700/50 transition-colors'
+        className='group flex items-center gap-2 p-3 rounded-xl border border-stroke-subtle/50 bg-surface-elevated/40 hover:border-lunary-primary-700/50 transition-colors'
       >
         <span className='text-xl'>🃏</span>
         <div>
-          <p className='text-sm font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+          <p className='text-sm font-medium text-content-primary group-hover:text-content-brand transition-colors'>
             Pull a Card
           </p>
-          <p className='text-xs text-zinc-500'>Get tarot guidance for today</p>
+          <p className='text-xs text-content-muted'>
+            Get tarot guidance for today
+          </p>
         </div>
       </a>
 
       <a
         href='/book-of-shadows'
-        className='group flex items-center gap-2 p-3 rounded-xl border border-zinc-800/50 bg-zinc-900/40 hover:border-lunary-primary-700/50 transition-colors'
+        className='group flex items-center gap-2 p-3 rounded-xl border border-stroke-subtle/50 bg-surface-elevated/40 hover:border-lunary-primary-700/50 transition-colors'
       >
         <span className='text-xl'>📔</span>
         <div>
-          <p className='text-sm font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+          <p className='text-sm font-medium text-content-primary group-hover:text-content-brand transition-colors'>
             Book of Shadows
           </p>
-          <p className='text-xs text-zinc-500'>Record your reflections</p>
+          <p className='text-xs text-content-muted'>Record your reflections</p>
         </div>
       </a>
     </div>
@@ -183,13 +187,13 @@ export function HoroscopeNavigationLinks({
     <div className={`flex flex-wrap gap-2 ${className}`}>
       <Link
         href='/grimoire/horoscopes/weekly'
-        className='inline-flex items-center px-3 py-1.5 rounded-full border border-zinc-700/50 bg-zinc-800/30 text-xs text-zinc-300 hover:border-lunary-primary-700/50 hover:text-lunary-primary-300 transition-colors'
+        className='inline-flex items-center px-3 py-1.5 rounded-full border border-stroke-default/50 bg-surface-card/30 text-xs text-content-secondary hover:border-lunary-primary-700/50 hover:text-content-brand transition-colors'
       >
         Your Weekly Horoscope
       </Link>
       <Link
         href='/grimoire/horoscopes/monthly'
-        className='inline-flex items-center px-3 py-1.5 rounded-full border border-zinc-700/50 bg-zinc-800/30 text-xs text-zinc-300 hover:border-lunary-primary-700/50 hover:text-lunary-primary-300 transition-colors'
+        className='inline-flex items-center px-3 py-1.5 rounded-full border border-stroke-default/50 bg-surface-card/30 text-xs text-content-secondary hover:border-lunary-primary-700/50 hover:text-content-brand transition-colors'
       >
         Your Monthly Horoscope
       </Link>

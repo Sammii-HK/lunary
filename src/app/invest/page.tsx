@@ -23,24 +23,24 @@ export const metadata: Metadata = {
 
 export default function InvestPage() {
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20 flex-1'>
         {/* Hero Section */}
         <section className='text-center mb-16 md:mb-20 lg:mb-24 space-y-6'>
-          <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-zinc-100 leading-tight tracking-tight'>
+          <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-content-primary leading-tight tracking-tight'>
             Lunary — Pre-Seed Raise
           </h1>
-          <p className='text-lg md:text-xl lg:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed'>
+          <p className='text-lg md:text-xl lg:text-2xl text-content-muted max-w-3xl mx-auto leading-relaxed'>
             The astronomy-based spiritual intelligence platform with optional AI
             chat
           </p>
-          <p className='text-base md:text-lg text-zinc-300 max-w-4xl mx-auto leading-relaxed'>
+          <p className='text-base md:text-lg text-content-secondary max-w-4xl mx-auto leading-relaxed'>
             Lunary is raising a{' '}
-            <span className='font-medium text-lunary-primary-300'>
+            <span className='font-medium text-content-brand'>
               £2M pre-seed round
             </span>{' '}
             to scale the world's first unified{' '}
-            <span className='font-medium text-lunary-primary-300'>
+            <span className='font-medium text-content-brand'>
               symbolic intelligence OS
             </span>{' '}
             — combining astrology, tarot, rituals, crystals, emotional insight,
@@ -49,22 +49,24 @@ export default function InvestPage() {
         </section>
 
         {/* What is Lunary */}
-        <section className='py-12 md:py-16 lg:py-20 border-b border-zinc-800/50 space-y-6'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-6'>
+        <section className='py-12 md:py-16 lg:py-20 border-b border-stroke-subtle/50 space-y-6'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-6'>
             What is Lunary?
           </h2>
-          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-4xl'>
+          <p className='text-base md:text-lg text-content-muted leading-relaxed max-w-4xl'>
             Lunary is a personalised spiritual platform built for the{' '}
-            <span className='font-medium text-zinc-300'>1.2B+ people</span> who
-            use astrology, tarot, rituals, moon cycles, crystals, journaling, or
-            symbolic systems to understand their inner world.
+            <span className='font-medium text-content-secondary'>
+              1.2B+ people
+            </span>{' '}
+            who use astrology, tarot, rituals, moon cycles, crystals,
+            journaling, or symbolic systems to understand their inner world.
           </p>
-          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-4xl font-medium text-lunary-primary-300'>
+          <p className='text-base md:text-lg text-content-muted leading-relaxed max-w-4xl font-medium text-content-brand'>
             Where the market is fragmented, Lunary is unified.
           </p>
           <div className='grid md:grid-cols-2 gap-4 mt-8'>
             <div className='space-y-3'>
-              <ul className='space-y-2 text-zinc-300'>
+              <ul className='space-y-2 text-content-secondary'>
                 <li className='flex items-start'>
                   <span className='mr-3 text-lunary-primary-400'>•</span>
                   <span>Astrology engine</span>
@@ -92,7 +94,7 @@ export default function InvestPage() {
               </ul>
             </div>
             <div className='space-y-3'>
-              <ul className='space-y-2 text-zinc-300'>
+              <ul className='space-y-2 text-content-secondary'>
                 <li className='flex items-start'>
                   <span className='mr-3 text-lunary-primary-400'>•</span>
                   <span>Book of Shadows (journaling)</span>
@@ -116,24 +118,24 @@ export default function InvestPage() {
               </ul>
             </div>
           </div>
-          <p className='text-base md:text-lg text-zinc-300 leading-relaxed max-w-4xl mt-6 font-medium'>
+          <p className='text-base md:text-lg text-content-secondary leading-relaxed max-w-4xl mt-6 font-medium'>
             It is the first{' '}
-            <span className='text-lunary-primary-300'>symbolic OS</span> built
-            on real astronomy with optional AI guidance.
+            <span className='text-content-brand'>symbolic OS</span> built on
+            real astronomy with optional AI guidance.
           </p>
         </section>
 
         {/* Why Now */}
-        <section className='py-12 md:py-16 lg:py-20 border-b border-zinc-800/50 space-y-6'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-6'>
+        <section className='py-12 md:py-16 lg:py-20 border-b border-stroke-subtle/50 space-y-6'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-6'>
             Why Now?
           </h2>
-          <ul className='space-y-4 text-zinc-300 max-w-4xl'>
+          <ul className='space-y-4 text-content-secondary max-w-4xl'>
             <li className='flex items-start'>
               <span className='mr-3 text-lunary-primary-400'>•</span>
               <span>
                 Spiritual wellness is a{' '}
-                <span className='font-medium text-lunary-primary-300'>
+                <span className='font-medium text-content-brand'>
                   $4.2B industry
                 </span>{' '}
                 growing rapidly
@@ -167,9 +169,9 @@ export default function InvestPage() {
               </span>
             </li>
           </ul>
-          <p className='text-base md:text-lg text-zinc-300 leading-relaxed max-w-4xl mt-6 font-medium'>
+          <p className='text-base md:text-lg text-content-secondary leading-relaxed max-w-4xl mt-6 font-medium'>
             We are building{' '}
-            <span className='text-lunary-primary-300'>
+            <span className='text-content-brand'>
               the category-defining platform
             </span>{' '}
             for symbolic intelligence.
@@ -177,11 +179,11 @@ export default function InvestPage() {
         </section>
 
         {/* Traction */}
-        <section className='py-12 md:py-16 lg:py-20 border-b border-zinc-800/50 space-y-6'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-6'>
+        <section className='py-12 md:py-16 lg:py-20 border-b border-stroke-subtle/50 space-y-6'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-6'>
             Traction
           </h2>
-          <ul className='space-y-4 text-zinc-300 max-w-4xl'>
+          <ul className='space-y-4 text-content-secondary max-w-4xl'>
             <li className='flex items-start'>
               <span className='mr-3 text-lunary-primary-400'>•</span>
               <span>Fully functional product</span>
@@ -225,17 +227,17 @@ export default function InvestPage() {
               <span>Crystal Index acquisition</span>
             </li>
           </ul>
-          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-4xl mt-6'>
+          <p className='text-base md:text-lg text-content-muted leading-relaxed max-w-4xl mt-6'>
             This is more product delivered than most pre-seed companies.
           </p>
         </section>
 
         {/* Market */}
-        <section className='py-12 md:py-16 lg:py-20 border-b border-zinc-800/50 space-y-6'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-6'>
+        <section className='py-12 md:py-16 lg:py-20 border-b border-stroke-subtle/50 space-y-6'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-6'>
             Market
           </h2>
-          <ul className='space-y-4 text-zinc-300 max-w-4xl'>
+          <ul className='space-y-4 text-content-secondary max-w-4xl'>
             <li className='flex items-start'>
               <span className='mr-3 text-lunary-primary-400'>•</span>
               <span>$4.2B spiritual wellness</span>
@@ -259,9 +261,9 @@ export default function InvestPage() {
               </span>
             </li>
           </ul>
-          <p className='text-base md:text-lg text-zinc-300 leading-relaxed max-w-4xl mt-6 font-medium'>
+          <p className='text-base md:text-lg text-content-secondary leading-relaxed max-w-4xl mt-6 font-medium'>
             Lunary sits at the intersection of{' '}
-            <span className='text-lunary-primary-300'>
+            <span className='text-content-brand'>
               AI × spirituality × self-reflection × symbolic systems
             </span>
             .
@@ -269,20 +271,20 @@ export default function InvestPage() {
         </section>
 
         {/* Competitive Advantage */}
-        <section className='py-12 md:py-16 lg:py-20 border-b border-zinc-800/50 space-y-6'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-6'>
+        <section className='py-12 md:py-16 lg:py-20 border-b border-stroke-subtle/50 space-y-6'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-6'>
             Competitive Advantage
           </h2>
-          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-4xl'>
+          <p className='text-base md:text-lg text-content-muted leading-relaxed max-w-4xl'>
             Lunary is{' '}
-            <span className='font-medium text-lunary-primary-300'>
+            <span className='font-medium text-content-brand'>
               the only platform
             </span>{' '}
             that unifies:
           </p>
           <div className='grid md:grid-cols-2 gap-4 mt-6'>
             <div className='space-y-3'>
-              <ul className='space-y-2 text-zinc-300'>
+              <ul className='space-y-2 text-content-secondary'>
                 <li className='flex items-start'>
                   <span className='mr-3 text-lunary-primary-400'>•</span>
                   <span>Astrology</span>
@@ -306,7 +308,7 @@ export default function InvestPage() {
               </ul>
             </div>
             <div className='space-y-3'>
-              <ul className='space-y-2 text-zinc-300'>
+              <ul className='space-y-2 text-content-secondary'>
                 <li className='flex items-start'>
                   <span className='mr-3 text-lunary-primary-400'>•</span>
                   <span>AI symbolic analysis</span>
@@ -330,34 +332,34 @@ export default function InvestPage() {
               </ul>
             </div>
           </div>
-          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-4xl mt-6'>
+          <p className='text-base md:text-lg text-content-muted leading-relaxed max-w-4xl mt-6'>
             No competitor does all of these.
           </p>
-          <p className='text-base md:text-lg text-zinc-300 leading-relaxed max-w-4xl mt-4 font-medium'>
+          <p className='text-base md:text-lg text-content-secondary leading-relaxed max-w-4xl mt-4 font-medium'>
             This creates an{' '}
-            <span className='text-lunary-primary-300'>unbeatable moat</span>:
+            <span className='text-content-brand'>unbeatable moat</span>:
           </p>
-          <ol className='space-y-4 text-zinc-300 max-w-4xl mt-6 list-decimal list-inside'>
+          <ol className='space-y-4 text-content-secondary max-w-4xl mt-6 list-decimal list-inside'>
             <li>
-              <span className='font-medium text-lunary-primary-300'>Depth</span>{' '}
-              — Most complete library of symbolic systems
+              <span className='font-medium text-content-brand'>Depth</span> —
+              Most complete library of symbolic systems
             </li>
             <li>
-              <span className='font-medium text-lunary-primary-300'>AI</span> —
-              Only platform with an astral guide that knows you
+              <span className='font-medium text-content-brand'>AI</span> — Only
+              platform with an astral guide that knows you
             </li>
             <li>
-              <span className='font-medium text-lunary-primary-300'>SEO</span> —
+              <span className='font-medium text-content-brand'>SEO</span> —
               Massive evergreen content engine
             </li>
             <li>
-              <span className='font-medium text-lunary-primary-300'>
+              <span className='font-medium text-content-brand'>
                 Shareability
               </span>{' '}
               — OG images drive organic growth
             </li>
             <li>
-              <span className='font-medium text-lunary-primary-300'>
+              <span className='font-medium text-content-brand'>
                 Personalisation
               </span>{' '}
               — Birth chart, emotions, tarot patterns
@@ -366,14 +368,14 @@ export default function InvestPage() {
         </section>
 
         {/* Business Model */}
-        <section className='py-12 md:py-16 lg:py-20 border-b border-zinc-800/50 space-y-6'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-6'>
+        <section className='py-12 md:py-16 lg:py-20 border-b border-stroke-subtle/50 space-y-6'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-6'>
             Business Model
           </h2>
-          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-4xl font-medium'>
+          <p className='text-base md:text-lg text-content-muted leading-relaxed max-w-4xl font-medium'>
             Current revenue streams:
           </p>
-          <ul className='space-y-3 text-zinc-300 max-w-4xl'>
+          <ul className='space-y-3 text-content-secondary max-w-4xl'>
             <li className='flex items-start'>
               <span className='mr-3 text-lunary-primary-400'>•</span>
               <span>Monthly subscriptions</span>
@@ -403,10 +405,10 @@ export default function InvestPage() {
               <span>Premium identity (colour themes, profile grades)</span>
             </li>
           </ul>
-          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-4xl mt-6 font-medium'>
+          <p className='text-base md:text-lg text-content-muted leading-relaxed max-w-4xl mt-6 font-medium'>
             Future revenue streams:
           </p>
-          <ul className='space-y-3 text-zinc-300 max-w-4xl'>
+          <ul className='space-y-3 text-content-secondary max-w-4xl'>
             <li className='flex items-start'>
               <span className='mr-3 text-lunary-primary-400'>•</span>
               <span>Live readings</span>
@@ -436,19 +438,19 @@ export default function InvestPage() {
               <span>Brand partnerships</span>
             </li>
           </ul>
-          <p className='text-base md:text-lg text-zinc-300 leading-relaxed max-w-4xl mt-6 font-medium'>
-            Margins are <span className='text-lunary-primary-300'>99%+</span>.
+          <p className='text-base md:text-lg text-content-secondary leading-relaxed max-w-4xl mt-6 font-medium'>
+            Margins are <span className='text-content-brand'>99%+</span>.
           </p>
         </section>
 
         {/* Vision */}
-        <section className='py-12 md:py-16 lg:py-20 border-b border-zinc-800/50 space-y-6'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-6'>
+        <section className='py-12 md:py-16 lg:py-20 border-b border-stroke-subtle/50 space-y-6'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-6'>
             Vision
           </h2>
-          <p className='text-base md:text-lg text-zinc-300 leading-relaxed max-w-4xl'>
+          <p className='text-base md:text-lg text-content-secondary leading-relaxed max-w-4xl'>
             To become the{' '}
-            <span className='font-medium text-lunary-primary-300'>
+            <span className='font-medium text-content-brand'>
               global spiritual operating system
             </span>
             , powered by symbolic AI — guiding millions through cosmic cycles,
@@ -457,38 +459,40 @@ export default function InvestPage() {
         </section>
 
         {/* Raise Details */}
-        <section className='py-12 md:py-16 lg:py-20 border-b border-zinc-800/50 space-y-6'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-6'>
+        <section className='py-12 md:py-16 lg:py-20 border-b border-stroke-subtle/50 space-y-6'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-6'>
             Raise Details
           </h2>
           <div className='grid md:grid-cols-2 gap-8 max-w-4xl'>
             <div className='space-y-4'>
               <div>
-                <p className='text-sm text-zinc-400 mb-1'>Target</p>
-                <p className='text-xl font-medium text-zinc-100'>
+                <p className='text-sm text-content-muted mb-1'>Target</p>
+                <p className='text-xl font-medium text-content-primary'>
                   £2M pre-seed
                 </p>
               </div>
               <div>
-                <p className='text-sm text-zinc-400 mb-1'>Valuation</p>
-                <p className='text-xl font-medium text-zinc-100'>
+                <p className='text-sm text-content-muted mb-1'>Valuation</p>
+                <p className='text-xl font-medium text-content-primary'>
                   £12–15M post-money
                 </p>
               </div>
               <div>
-                <p className='text-sm text-zinc-400 mb-1'>Vehicle</p>
-                <p className='text-xl font-medium text-zinc-100'>SAFE</p>
+                <p className='text-sm text-content-muted mb-1'>Vehicle</p>
+                <p className='text-xl font-medium text-content-primary'>SAFE</p>
               </div>
               <div>
-                <p className='text-sm text-zinc-400 mb-1'>Runway</p>
-                <p className='text-xl font-medium text-zinc-100'>24 months</p>
+                <p className='text-sm text-content-muted mb-1'>Runway</p>
+                <p className='text-xl font-medium text-content-primary'>
+                  24 months
+                </p>
               </div>
             </div>
             <div className='space-y-4'>
-              <p className='text-base text-zinc-400 mb-3 font-medium'>
+              <p className='text-base text-content-muted mb-3 font-medium'>
                 Use of funds:
               </p>
-              <ul className='space-y-2 text-zinc-300'>
+              <ul className='space-y-2 text-content-secondary'>
                 <li className='flex items-start'>
                   <span className='mr-3 text-lunary-primary-400'>•</span>
                   <span>AI engine expansion</span>
@@ -527,23 +531,25 @@ export default function InvestPage() {
         </section>
 
         {/* Founder */}
-        <section className='py-12 md:py-16 lg:py-20 border-b border-zinc-800/50 space-y-6'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-6'>
+        <section className='py-12 md:py-16 lg:py-20 border-b border-stroke-subtle/50 space-y-6'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-6'>
             Founder
           </h2>
           <div className='max-w-4xl space-y-4'>
-            <p className='text-xl font-medium text-zinc-100'>Sammii H-K</p>
-            <p className='text-base text-zinc-400 leading-relaxed'>
+            <p className='text-xl font-medium text-content-primary'>
+              Sammii H-K
+            </p>
+            <p className='text-base text-content-muted leading-relaxed'>
               Designer + engineer + founder.
             </p>
-            <p className='text-base text-zinc-400 leading-relaxed'>
+            <p className='text-base text-content-muted leading-relaxed'>
               Solo technical founder with full product, AI, design, branding,
               and UX execution.
             </p>
             <div className='space-y-2 mt-6'>
-              <p className='text-base text-zinc-300'>Zero burn.</p>
-              <p className='text-base text-zinc-300'>High leverage.</p>
-              <p className='text-base text-zinc-300'>
+              <p className='text-base text-content-secondary'>Zero burn.</p>
+              <p className='text-base text-content-secondary'>High leverage.</p>
+              <p className='text-base text-content-secondary'>
                 Extreme shipping velocity.
               </p>
             </div>
@@ -552,31 +558,31 @@ export default function InvestPage() {
 
         {/* Contact */}
         <section className='py-12 md:py-16 lg:py-20 space-y-6'>
-          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-6'>
+          <h2 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-6'>
             Contact
           </h2>
           <div className='max-w-4xl space-y-4'>
             <div>
-              <p className='text-sm text-zinc-400 mb-1'>Email</p>
+              <p className='text-sm text-content-muted mb-1'>Email</p>
               <a
                 href='mailto:sammi@lunary.app'
-                className='text-lg font-medium text-lunary-primary-300 hover:text-lunary-primary-400 transition-colors'
+                className='text-lg font-medium text-content-brand hover:text-lunary-primary-400 transition-colors'
               >
                 sammi@lunary.app
               </a>
             </div>
             <div>
-              <p className='text-sm text-zinc-400 mb-1'>Website</p>
+              <p className='text-sm text-content-muted mb-1'>Website</p>
               <a
                 href='https://www.lunary.app'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-lg font-medium text-lunary-primary-300 hover:text-lunary-primary-400 transition-colors'
+                className='text-lg font-medium text-content-brand hover:text-lunary-primary-400 transition-colors'
               >
                 https://www.lunary.app
               </a>
             </div>
-            <p className='text-base text-zinc-400 mt-6'>
+            <p className='text-base text-content-muted mt-6'>
               Pitch deck available on request.
             </p>
           </div>

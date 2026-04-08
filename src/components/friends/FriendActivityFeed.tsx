@@ -58,9 +58,9 @@ interface ActivityData {
 function getMatchColor(score: number): string {
   if (score >= 80) return 'text-green-400 bg-green-900/30 border-green-800/40';
   if (score >= 60)
-    return 'text-lunary-accent-300 bg-lunary-accent-900/30 border-lunary-accent-800/40';
+    return 'text-content-brand-accent bg-layer-base/30 border-lunary-accent-800/40';
   if (score >= 40) return 'text-amber-400 bg-amber-900/30 border-amber-800/40';
-  return 'text-zinc-400 bg-zinc-800/50 border-zinc-700/40';
+  return 'text-content-muted bg-surface-card/50 border-stroke-default/40';
 }
 
 function FriendRow({
@@ -103,7 +103,7 @@ function FriendRow({
     >
       <Link
         href={`/profile/friends/${friend.connectionId}`}
-        className='flex items-center justify-between p-2.5 rounded-lg hover:bg-zinc-800/50 transition-colors'
+        className='flex items-center justify-between p-2.5 rounded-lg hover:bg-surface-card/50 transition-colors'
         data-testid='friend-activity-link'
       >
         <div className='flex items-center gap-2.5 min-w-0'>
@@ -116,17 +116,17 @@ function FriendRow({
               className='w-8 h-8 rounded-full'
             />
           ) : (
-            <div className='w-8 h-8 rounded-full bg-lunary-primary-800 flex items-center justify-center text-xs text-zinc-400'>
+            <div className='w-8 h-8 rounded-full bg-layer-raised flex items-center justify-center text-xs text-content-muted'>
               {friend.name.charAt(0)}
             </div>
           )}
           <div className='min-w-0'>
             <div className='flex items-center gap-1.5'>
-              <span className='text-sm text-zinc-200 truncate'>
+              <span className='text-sm text-content-primary truncate'>
                 {friend.name}
               </span>
               {friend.sunSign && (
-                <span className='text-[10px] text-zinc-500'>
+                <span className='text-[10px] text-content-muted'>
                   {friend.sunSign}
                 </span>
               )}
@@ -141,7 +141,7 @@ function FriendRow({
                 />
               )}
             </div>
-            <div className='flex items-center gap-2 text-[11px] text-zinc-500'>
+            <div className='flex items-center gap-2 text-[11px] text-content-muted'>
               {friend.lastCheckIn && (
                 <span>
                   {formatDistanceToNow(new Date(friend.lastCheckIn), {
@@ -167,7 +167,7 @@ function FriendRow({
             <Flame className='w-3.5 h-3.5 text-orange-400' />
           )}
           {friend.currentStreak > 0 && (
-            <span className='text-xs text-zinc-400'>
+            <span className='text-xs text-content-muted'>
               {friend.currentStreak}d
             </span>
           )}
@@ -183,7 +183,7 @@ function FriendRow({
             setSwiped(false);
             onRemove(friend.connectionId);
           }}
-          className='absolute right-1 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-zinc-800 hover:bg-red-900/60 text-zinc-500 hover:text-red-400 transition-colors'
+          className='absolute right-1 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-surface-card hover:bg-red-900/60 text-content-muted hover:text-red-400 transition-colors'
           data-testid='remove-friend'
         >
           <Trash2 className='w-3.5 h-3.5' />
@@ -298,11 +298,11 @@ export function FriendActivityFeed() {
 
   if (isLoading) {
     return (
-      <div className='bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4 animate-pulse'>
-        <div className='h-4 bg-zinc-800 rounded w-1/3 mb-3' />
+      <div className='bg-surface-elevated/50 border border-stroke-subtle/50 rounded-xl p-4 animate-pulse'>
+        <div className='h-4 bg-surface-card rounded w-1/3 mb-3' />
         <div className='space-y-3'>
-          <div className='h-12 bg-zinc-800/50 rounded' />
-          <div className='h-12 bg-zinc-800/50 rounded' />
+          <div className='h-12 bg-surface-card/50 rounded' />
+          <div className='h-12 bg-surface-card/50 rounded' />
         </div>
       </div>
     );
@@ -317,14 +317,14 @@ export function FriendActivityFeed() {
       data.celebrationsReceived.length === 0)
   ) {
     return (
-      <div className='bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4'>
+      <div className='bg-surface-elevated/50 border border-stroke-subtle/50 rounded-xl p-4'>
         <div className='flex items-center gap-2 mb-2'>
           <Users className='w-4 h-4 text-lunary-primary-400' />
-          <h3 className='text-sm font-medium text-zinc-300'>
+          <h3 className='text-sm font-medium text-content-secondary'>
             Your Circle Today
           </h3>
         </div>
-        <p className='text-xs text-zinc-500'>
+        <p className='text-xs text-content-muted'>
           Add friends to see their activity.{' '}
           <Link
             href='/profile/friends'
@@ -350,10 +350,10 @@ export function FriendActivityFeed() {
 
       {/* Cosmic Support Received */}
       {data.celebrationsReceived.length > 0 && (
-        <div className='bg-gradient-to-r from-lunary-accent-900/20 to-lunary-primary-900/20 border border-lunary-accent-800/30 rounded-xl p-4'>
+        <div className='bg-gradient-to-r from-lunary-accent-900/20 to-layer-base/20 border border-lunary-accent-800/30 rounded-xl p-4'>
           <div className='flex items-center gap-2 mb-3'>
             <Heart className='w-4 h-4 text-lunary-accent-400' />
-            <h3 className='text-sm font-medium text-zinc-300'>
+            <h3 className='text-sm font-medium text-content-secondary'>
               Cosmic Support Received
             </h3>
           </div>
@@ -373,15 +373,15 @@ export function FriendActivityFeed() {
                       className='w-5 h-5 rounded-full'
                     />
                   ) : (
-                    <div className='w-5 h-5 rounded-full bg-lunary-primary-800 flex items-center justify-center text-[10px] text-zinc-400'>
+                    <div className='w-5 h-5 rounded-full bg-layer-raised flex items-center justify-center text-[10px] text-content-muted'>
                       {c.senderName.charAt(0)}
                     </div>
                   )}
-                  <span className='text-zinc-300 truncate'>
+                  <span className='text-content-secondary truncate'>
                     {c.senderName} celebrated your {c.milestone}-day streak
                   </span>
                 </div>
-                <span className='text-zinc-500 flex-shrink-0 ml-2'>
+                <span className='text-content-muted flex-shrink-0 ml-2'>
                   {formatDistanceToNow(new Date(c.createdAt), {
                     addSuffix: true,
                   })}
@@ -396,17 +396,17 @@ export function FriendActivityFeed() {
       {unopenedGiftCount > 0 && (
         <Link
           href='/gifts?nav=app'
-          className='flex items-center gap-3 p-4 rounded-xl border border-lunary-primary-500/30 bg-lunary-primary-900/10 hover:bg-lunary-primary-900/20 transition-colors'
+          className='flex items-center gap-3 p-4 rounded-xl border border-lunary-primary-500/30 bg-layer-base/10 hover:bg-layer-base/20 transition-colors'
         >
           <div className='w-8 h-8 rounded-full bg-lunary-primary-500/20 flex items-center justify-center'>
             <Gift className='w-4 h-4 text-lunary-primary-400' />
           </div>
           <div className='flex-1'>
-            <p className='text-sm font-medium text-white'>
+            <p className='text-sm font-medium text-content-primary'>
               {unopenedGiftCount} unopened{' '}
               {unopenedGiftCount === 1 ? 'gift' : 'gifts'}
             </p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               Tap to open your cosmic gifts
             </p>
           </div>
@@ -416,10 +416,10 @@ export function FriendActivityFeed() {
 
       {/* Your Circle Today */}
       {data.friends.length > 0 && (
-        <div className='bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle/50 rounded-xl p-4'>
           <div className='flex items-center gap-2 mb-3'>
             <Users className='w-4 h-4 text-lunary-primary-400' />
-            <h3 className='text-sm font-medium text-zinc-300'>
+            <h3 className='text-sm font-medium text-content-secondary'>
               Your Circle Today
             </h3>
           </div>
@@ -438,10 +438,10 @@ export function FriendActivityFeed() {
 
       {/* Recent Milestones */}
       {data.milestones.length > 0 && (
-        <div className='bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle/50 rounded-xl p-4'>
           <div className='flex items-center gap-2 mb-3'>
             <Sparkles className='w-4 h-4 text-lunary-accent-400' />
-            <h3 className='text-sm font-medium text-zinc-300'>
+            <h3 className='text-sm font-medium text-content-secondary'>
               Recent Milestones
             </h3>
           </div>
@@ -454,10 +454,10 @@ export function FriendActivityFeed() {
                   className='flex items-center justify-between text-xs'
                 >
                   <div className='min-w-0'>
-                    <span className='text-zinc-300'>
+                    <span className='text-content-secondary'>
                       {m.name} hit {m.milestone} days
                     </span>
-                    <span className='text-zinc-500 ml-1.5'>
+                    <span className='text-content-muted ml-1.5'>
                       {formatDistanceToNow(new Date(m.achievedAt), {
                         addSuffix: true,
                       })}
@@ -469,8 +469,8 @@ export function FriendActivityFeed() {
                     className={cn(
                       'flex-shrink-0 ml-2 px-2.5 py-1 rounded-full text-[11px] transition-colors',
                       alreadySent
-                        ? 'bg-zinc-800 text-zinc-500 cursor-default'
-                        : 'bg-lunary-primary-900/50 text-lunary-primary-300 hover:bg-lunary-primary-800/50',
+                        ? 'bg-surface-card text-content-muted cursor-default'
+                        : 'bg-layer-base/50 text-content-brand hover:bg-layer-raised/50',
                     )}
                   >
                     {alreadySent ? 'Sent!' : 'Send cosmic energy'}

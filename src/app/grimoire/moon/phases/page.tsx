@@ -204,10 +204,10 @@ As the moon waxes, lean into building, attracting, and grateful manifestation wo
           faqs={faqs}
         >
           <section className='mb-12'>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               All 8 Moon Phases
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               Click on any phase to explore its energy, rituals, and magical
               applications in depth.
             </p>
@@ -216,16 +216,16 @@ As the moon waxes, lean into building, attracting, and grateful manifestation wo
                 <Link
                   key={key}
                   href={`/grimoire/moon/phases/${stringToKebabCase(key)}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-zinc-600 transition-all'
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-stroke-strong transition-all'
                 >
                   <div className='flex items-center gap-4 mb-3'>
-                    <div className='w-16 h-16 rounded-2xl bg-zinc-950/60 flex items-center justify-center'>
+                    <div className='w-16 h-16 rounded-2xl bg-surface-base/60 flex items-center justify-center'>
                       <MoonPhaseIcon
                         phase={key as MonthlyMoonPhaseKey}
                         size={44}
                       />
                     </div>
-                    <h3 className='text-lg font-medium text-zinc-100 group-hover:text-zinc-200 transition-colors'>
+                    <h3 className='text-lg font-medium text-content-primary group-hover:text-content-primary transition-colors'>
                       {phaseDisplayNames[key]}
                     </h3>
                   </div>
@@ -233,13 +233,13 @@ As the moon waxes, lean into building, attracting, and grateful manifestation wo
                     {phase.keywords.map((keyword) => (
                       <span
                         key={keyword}
-                        className='text-xs px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded'
+                        className='text-xs px-2 py-0.5 bg-surface-card text-content-muted rounded'
                       >
                         {keyword}
                       </span>
                     ))}
                   </div>
-                  <p className='text-sm text-zinc-400 line-clamp-2'>
+                  <p className='text-sm text-content-muted line-clamp-2'>
                     {phase.information}
                   </p>
                 </Link>
@@ -247,16 +247,16 @@ As the moon waxes, lean into building, attracting, and grateful manifestation wo
             </div>
           </section>
 
-          <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-            <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          <section className='mb-12 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+            <h2 className='text-xl font-medium text-content-primary mb-4'>
               Quick Reference: Lunar Timing
             </h2>
             <div className='grid md:grid-cols-2 gap-6'>
               <div>
-                <h3 className='font-medium text-zinc-200 mb-2'>
+                <h3 className='font-medium text-content-primary mb-2'>
                   Waxing Moon Magic:
                 </h3>
-                <ul className='space-y-1 text-sm text-zinc-400'>
+                <ul className='space-y-1 text-sm text-content-muted'>
                   <li>• Attraction and drawing spells</li>
                   <li>• Abundance and prosperity work</li>
                   <li>• Love and relationship magic</li>
@@ -265,10 +265,10 @@ As the moon waxes, lean into building, attracting, and grateful manifestation wo
                 </ul>
               </div>
               <div>
-                <h3 className='font-medium text-zinc-200 mb-2'>
+                <h3 className='font-medium text-content-primary mb-2'>
                   Waning Moon Magic:
                 </h3>
-                <ul className='space-y-1 text-sm text-zinc-400'>
+                <ul className='space-y-1 text-sm text-content-muted'>
                   <li>• Banishing and protection</li>
                   <li>• Breaking bad habits</li>
                   <li>• Releasing negative energy</li>

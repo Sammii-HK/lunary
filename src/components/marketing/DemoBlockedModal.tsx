@@ -34,7 +34,7 @@ export function DemoBlockedModal({
       {/* Backdrop */}
       <div
         className={cn(
-          'fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 z-50',
+          'fixed inset-0 bg-surface-base/60 backdrop-blur-sm transition-opacity duration-300 z-50',
           isOpen ? 'opacity-100' : 'opacity-0',
         )}
         onClick={onClose}
@@ -47,11 +47,11 @@ export function DemoBlockedModal({
           isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
         )}
       >
-        <div className='relative w-[320px] bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800 rounded-2xl border border-zinc-700/50 shadow-2xl p-6'>
+        <div className='relative w-[320px] bg-gradient-to-br from-surface-elevated via-surface-elevated to-surface-card rounded-2xl border border-stroke-default/50 shadow-2xl p-6'>
           {/* Close button */}
           <button
             onClick={onClose}
-            className='absolute top-4 right-4 text-zinc-400 hover:text-zinc-200 transition-colors'
+            className='absolute top-4 right-4 text-content-muted hover:text-content-primary transition-colors'
           >
             <X className='w-5 h-5' />
           </button>
@@ -61,17 +61,17 @@ export function DemoBlockedModal({
             <div className='relative'>
               <div className='absolute inset-0 bg-lunary-primary-500/20 blur-xl rounded-full' />
               <div className='relative bg-gradient-to-br from-lunary-primary-600 to-lunary-accent-600 p-3 rounded-full'>
-                <Lock className='w-6 h-6 text-white' />
+                <Lock className='w-6 h-6 text-content-primary' />
               </div>
             </div>
           </div>
 
           {/* Content */}
           <div className='text-center space-y-3'>
-            <h3 className='text-lg font-semibold text-zinc-100'>
+            <h3 className='text-lg font-semibold text-content-primary'>
               Unavailable in Demo
             </h3>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               {action} is not available in the demo preview. Create an account
               to unlock all features.
             </p>
@@ -92,7 +92,7 @@ export function DemoBlockedModal({
                 window.location.href = '/auth?signup=true';
               }
             }}
-            className='w-full mt-6 bg-gradient-to-r from-lunary-primary-600 to-lunary-accent-600 hover:from-lunary-primary-500 hover:to-lunary-accent-500 text-white font-medium px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-lunary-primary-600/20'
+            className='w-full mt-6 bg-gradient-to-r from-lunary-primary-600 to-lunary-accent-600 hover:from-lunary-primary-500 hover:to-lunary-accent-500 text-content-primary font-medium px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-lunary-primary-600/20'
           >
             <Sparkles className='w-4 h-4' />
             Create Account
@@ -101,7 +101,7 @@ export function DemoBlockedModal({
           {/* Dismiss button */}
           <button
             onClick={onClose}
-            className='w-full mt-2 text-sm text-zinc-400 hover:text-zinc-200 py-2 transition-colors'
+            className='w-full mt-2 text-sm text-content-muted hover:text-content-primary py-2 transition-colors'
           >
             Continue exploring demo
           </button>

@@ -79,44 +79,44 @@ export function RisingSignCalculator() {
     <>
       <form
         onSubmit={handleSubmit}
-        className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 md:p-8'
+        className='rounded-2xl border border-stroke-subtle bg-surface-elevated/50 p-6 md:p-8'
       >
-        <h2 className='text-lg font-medium text-zinc-100 mb-2'>
+        <h2 className='text-lg font-medium text-content-primary mb-2'>
           Calculate Your Rising Sign
         </h2>
-        <p className='text-sm text-zinc-400 mb-4'>
+        <p className='text-sm text-content-muted mb-4'>
           Enter your birth date, exact time, and location to calculate your
           Ascendant accurately.
         </p>
         <div className='grid gap-4 md:grid-cols-3'>
-          <label className='text-sm text-zinc-300'>
+          <label className='text-sm text-content-secondary'>
             Birth date
             <input
               type='date'
               value={formState.birthDate}
               onChange={updateField('birthDate')}
-              className='mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-100'
+              className='mt-2 w-full rounded-lg border border-stroke-default bg-surface-base/60 px-3 py-2 text-sm text-content-primary'
               required
             />
           </label>
-          <label className='text-sm text-zinc-300'>
+          <label className='text-sm text-content-secondary'>
             Exact time
             <input
               type='time'
               value={formState.birthTime}
               onChange={updateField('birthTime')}
-              className='mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-100'
+              className='mt-2 w-full rounded-lg border border-stroke-default bg-surface-base/60 px-3 py-2 text-sm text-content-primary'
               required
             />
           </label>
-          <label className='text-sm text-zinc-300'>
+          <label className='text-sm text-content-secondary'>
             Birth location
             <input
               type='text'
               value={formState.birthLocation}
               onChange={updateField('birthLocation')}
               placeholder='City, Country'
-              className='mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-100'
+              className='mt-2 w-full rounded-lg border border-stroke-default bg-surface-base/60 px-3 py-2 text-sm text-content-primary'
               required
             />
           </label>
@@ -124,7 +124,7 @@ export function RisingSignCalculator() {
         {error ? (
           <p className='mt-3 text-xs text-rose-300'>{error}</p>
         ) : (
-          <p className='mt-3 text-xs text-zinc-500'>
+          <p className='mt-3 text-xs text-content-muted'>
             We&apos;ll use this to prefill your chart after you sign up.
           </p>
         )}
@@ -140,21 +140,21 @@ export function RisingSignCalculator() {
       </form>
 
       {showAuthModal && (
-        <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
-          <div className='bg-zinc-900 rounded-lg p-4 sm:p-6 w-full max-w-md relative mx-4 sm:mx-0'>
+        <div className='fixed inset-0 bg-surface-base/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
+          <div className='bg-surface-elevated rounded-lg p-4 sm:p-6 w-full max-w-md relative mx-4 sm:mx-0'>
             <button
               onClick={() => setShowAuthModal(false)}
-              className='absolute top-2 right-2 sm:top-4 sm:right-4 text-zinc-400 hover:text-white text-xl'
+              className='absolute top-2 right-2 sm:top-4 sm:right-4 text-content-muted hover:text-content-primary text-xl'
               aria-label='Close sign up modal'
             >
               ×
             </button>
 
             <div className='text-center mb-4 sm:mb-6'>
-              <h3 className='text-lg sm:text-xl font-bold text-white mb-2'>
+              <h3 className='text-lg sm:text-xl font-bold text-content-primary mb-2'>
                 Sign up to see your rising sign
               </h3>
-              <p className='text-zinc-300 text-xs sm:text-sm'>
+              <p className='text-content-secondary text-xs sm:text-sm'>
                 Create your account and we&apos;ll calculate it instantly.
               </p>
             </div>

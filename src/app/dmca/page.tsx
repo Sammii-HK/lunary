@@ -14,19 +14,21 @@ export default function DMCAPage() {
   const lastUpdated = 'December 6, 2025';
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='mb-8'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             DMCA Policy
           </h1>
-          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-content-muted'>
+            Last Updated: {lastUpdated}
+          </p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
           <section>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Lunar Computing, Inc. (&quot;Lunary,&quot; &quot;we,&quot;
               &quot;us,&quot; or &quot;our&quot;) respects the intellectual
               property rights of others and expects our users to do the same. In
@@ -37,10 +39,10 @@ export default function DMCAPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               1. DMCA Compliance
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               If you believe that content available on or through our Service
               infringes your copyright, you may submit a notification pursuant
               to the DMCA by providing our designated Copyright Agent with the
@@ -52,14 +54,14 @@ export default function DMCAPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               2. Filing a DMCA Notice
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               To file a valid DMCA notice, you must provide a written
               communication that includes the following:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Identification of the copyrighted work:</strong> A
                 description of the copyrighted work you claim has been
@@ -97,14 +99,14 @@ export default function DMCAPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               3. Designated Copyright Agent
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               Send your DMCA notice to our designated Copyright Agent:
             </p>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Lunar Computing, Inc.</strong>
                 <br />
                 Attn: DMCA Agent
@@ -112,13 +114,13 @@ export default function DMCAPage() {
                 Email:{' '}
                 <a
                   href='mailto:dmca@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   dmca@lunary.app
                 </a>
               </p>
             </div>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               Please note that the DMCA requires that you swear to the facts in
               your notice under penalty of perjury. It is a federal crime to
               intentionally lie in a sworn declaration. We may forward your
@@ -127,15 +129,15 @@ export default function DMCAPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               4. Counter-Notification
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               If you believe that content you posted was removed or disabled by
               mistake or misidentification, you may file a counter-notification
               with us. A valid counter-notification must include:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Your physical or electronic signature</li>
               <li>
                 Identification of the material that was removed or disabled and
@@ -159,7 +161,7 @@ export default function DMCAPage() {
                 such person
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               Send counter-notifications to the same Copyright Agent address
               listed above with &quot;DMCA Counter-Notification&quot; in the
               subject line.
@@ -167,10 +169,10 @@ export default function DMCAPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               5. Process After Counter-Notification
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Upon receipt of a valid counter-notification, we will forward it
               to the original complainant. If the original complainant does not
               notify us within 10 business days that they have filed a court
@@ -181,10 +183,10 @@ export default function DMCAPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               6. Repeat Infringers
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               In accordance with the DMCA and other applicable law, we have
               adopted a policy of terminating, in appropriate circumstances, the
               accounts of users who are deemed to be repeat infringers. We may
@@ -196,10 +198,10 @@ export default function DMCAPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               7. Modifications to Policy
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We reserve the right to modify this DMCA Policy at any time.
               Changes will be effective immediately upon posting to this page.
               Your continued use of the Service after any changes indicates your
@@ -208,18 +210,18 @@ export default function DMCAPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               8. Contact
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               For questions about this DMCA Policy:
             </p>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>DMCA Inquiries:</strong>{' '}
                 <a
                   href='mailto:dmca@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   dmca@lunary.app
                 </a>
@@ -227,7 +229,7 @@ export default function DMCAPage() {
                 <strong>Legal Inquiries:</strong>{' '}
                 <a
                   href='mailto:legal@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   legal@lunary.app
                 </a>
@@ -235,26 +237,26 @@ export default function DMCAPage() {
             </div>
           </section>
 
-          <section className='pt-8 border-t border-zinc-800'>
-            <h2 className='text-lg font-medium text-white mb-4'>
+          <section className='pt-8 border-t border-stroke-subtle'>
+            <h2 className='text-lg font-medium text-content-primary mb-4'>
               Related Policies
             </h2>
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/acceptable-use'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Acceptable Use Policy
               </Link>
               <Link
                 href='/trademark'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Trademark Guidelines
               </Link>

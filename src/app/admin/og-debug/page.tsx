@@ -69,12 +69,12 @@ export default function OGDebugPage() {
   ];
 
   return (
-    <div className='min-h-screen bg-black text-white p-8'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-8'>
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='mb-8'>
           <h1 className='text-3xl font-bold mb-4'>OG Image Debug Page</h1>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Debug OG images with cache-busting and real-time updates
           </p>
 
@@ -85,7 +85,7 @@ export default function OGDebugPage() {
               type='date'
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className='px-3 py-2 bg-zinc-800 border border-zinc-600 rounded-md text-white'
+              className='px-3 py-2 bg-surface-card border border-stroke-strong rounded-md text-content-primary'
             />
             <button
               onClick={refreshCache}
@@ -93,13 +93,15 @@ export default function OGDebugPage() {
             >
               🔄 Force Refresh (Bypass Cache)
             </button>
-            <div className='text-sm text-zinc-400'>Cache key: {cacheKey}</div>
+            <div className='text-sm text-content-muted'>
+              Cache key: {cacheKey}
+            </div>
           </div>
 
           {/* Cache Busting Info */}
-          <div className='bg-zinc-900 rounded-lg p-4 border border-zinc-700 mb-6'>
+          <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-default mb-6'>
             <h3 className='text-lg font-bold mb-2'>Cache Busting Methods:</h3>
-            <ul className='text-sm text-zinc-400 space-y-1'>
+            <ul className='text-sm text-content-muted space-y-1'>
               <li>
                 • <strong>URL timestamp</strong>: Adds ?t={cacheKey} to force
                 new requests
@@ -125,30 +127,36 @@ export default function OGDebugPage() {
           {ogTypes.map((og: any) => (
             <div
               key={og.name}
-              className={`bg-zinc-900 rounded-lg border overflow-hidden ${
-                loadErrors[og.name] ? 'border-lunary-error' : 'border-zinc-700'
+              className={`bg-surface-elevated rounded-lg border overflow-hidden ${
+                loadErrors[og.name]
+                  ? 'border-lunary-error'
+                  : 'border-stroke-default'
               }`}
             >
-              <div className='p-4 border-b border-zinc-700'>
+              <div className='p-4 border-b border-stroke-default'>
                 <div className='flex items-center justify-between'>
-                  <h3 className='text-lg font-bold text-white'>{og.name}</h3>
+                  <h3 className='text-lg font-bold text-content-primary'>
+                    {og.name}
+                  </h3>
                   {loadErrors[og.name] && (
-                    <span className='px-2 py-1 text-xs bg-lunary-error-900 text-lunary-error rounded'>
+                    <span className='px-2 py-1 text-xs bg-layer-base text-lunary-error rounded'>
                       ERROR
                     </span>
                   )}
                   {og.isJson && (
-                    <span className='px-2 py-1 text-xs bg-lunary-secondary-900 text-lunary-secondary rounded'>
+                    <span className='px-2 py-1 text-xs bg-layer-base text-lunary-secondary rounded'>
                       JSON
                     </span>
                   )}
                 </div>
-                <p className='text-zinc-400 text-sm mt-1'>{og.description}</p>
+                <p className='text-content-muted text-sm mt-1'>
+                  {og.description}
+                </p>
               </div>
 
               <div className='p-4'>
                 {og.isJson ? (
-                  <div className='bg-zinc-800 rounded p-4 text-xs text-zinc-400 h-48 overflow-auto'>
+                  <div className='bg-surface-card rounded p-4 text-xs text-content-muted h-48 overflow-auto'>
                     <a
                       href={og.url}
                       target='_blank'
@@ -158,9 +166,9 @@ export default function OGDebugPage() {
                     </a>
                   </div>
                 ) : (
-                  <div className='relative aspect-square rounded-lg overflow-hidden border border-zinc-600 mb-3'>
+                  <div className='relative aspect-square rounded-lg overflow-hidden border border-stroke-strong mb-3'>
                     {loadErrors[og.name] ? (
-                      <div className='absolute inset-0 flex items-center justify-center bg-lunary-error-900/20 text-lunary-error text-sm'>
+                      <div className='absolute inset-0 flex items-center justify-center bg-layer-base/20 text-lunary-error text-sm'>
                         Failed to load image
                       </div>
                     ) : (
@@ -178,13 +186,13 @@ export default function OGDebugPage() {
                   </div>
                 )}
 
-                <div className='text-xs text-zinc-400 break-all mb-2 font-mono bg-zinc-800 p-2 rounded'>
+                <div className='text-xs text-content-muted break-all mb-2 font-mono bg-surface-card p-2 rounded'>
                   {og.url}
                 </div>
 
                 <button
                   onClick={() => window.open(og.url, '_blank')}
-                  className='w-full px-3 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded text-sm text-white transition-colors'
+                  className='w-full px-3 py-2 bg-lunary-primary-600 hover:bg-layer-high rounded text-sm text-white transition-colors'
                 >
                   Open in New Tab
                 </button>
@@ -194,7 +202,7 @@ export default function OGDebugPage() {
         </div>
 
         {/* Debug Info */}
-        <div className='mt-8 bg-zinc-900 rounded-lg p-6 border border-zinc-700'>
+        <div className='mt-8 bg-surface-elevated rounded-lg p-6 border border-stroke-default'>
           <h3 className='text-xl font-bold mb-4'>Debug Info</h3>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm'>
             <div>
@@ -219,7 +227,7 @@ export default function OGDebugPage() {
         <div className='mt-8 text-center'>
           <a
             href='/admin/daily-posts-preview'
-            className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
+            className='inline-block px-6 py-3 bg-lunary-primary-600 hover:bg-layer-high rounded-md text-white font-medium transition-colors'
           >
             ← Back to Daily Posts Preview
           </a>

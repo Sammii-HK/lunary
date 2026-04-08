@@ -6,14 +6,9 @@ import { sendDiscordNotification } from '@/lib/discord';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-const ALLOWED_BASE_URLS = new Set(
-  [
-    'https://lunary.app',
-    'https://www.lunary.app',
-    process.env.NEXT_PUBLIC_BASE_URL,
-    process.env.NEXT_PUBLIC_APP_URL,
-  ].filter(Boolean),
-);
+// Only canonical non-www URL is allowed — www.lunary.app returns 308
+// which Postiz/Spellcast does not follow when fetching carousel images.
+const ALLOWED_BASE_URLS = new Set(['https://lunary.app'].filter(Boolean));
 
 const TARGET_PLATFORMS = ['instagram', 'bluesky'];
 

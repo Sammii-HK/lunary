@@ -212,7 +212,7 @@ export function ShareCosmicScore({
     <div className='flex items-center'>
       <button
         onClick={handleOpen}
-        className='p-1 rounded-md text-zinc-500 hover:text-zinc-300 transition-colors'
+        className='p-1 rounded-md text-content-muted hover:text-content-secondary transition-colors'
         title='Share your cosmic score'
       >
         <Share2 className='w-3.5 h-3.5' />
@@ -250,7 +250,7 @@ export function ShareCosmicScore({
               socialUrls={socialUrls}
             />
 
-            <p className='mt-4 text-xs text-zinc-400 text-center'>
+            <p className='mt-4 text-xs text-content-muted text-center'>
               Track your cosmic energy at lunary.app
             </p>
           </>
@@ -261,7 +261,7 @@ export function ShareCosmicScore({
             <p className='text-red-400 mb-4'>{error}</p>
             <button
               onClick={generateCard}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors'
             >
               Try Again
             </button>

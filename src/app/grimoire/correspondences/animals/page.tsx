@@ -231,10 +231,10 @@ Animals connected to **Earth**: Grounding, abundance, stability`}
         faqs={faqs}
       >
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             All Spirit Animals
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Click on any animal to explore its full symbolism, magical uses, and
             spiritual messages.
           </p>
@@ -243,12 +243,12 @@ Animals connected to **Earth**: Grounding, abundance, stability`}
               <Link
                 key={animal.slug}
                 href={`/grimoire/correspondences/animals/${animal.slug}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-orange-700/50 transition-all'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-orange-700/50 transition-all'
               >
-                <h3 className='text-lg font-medium text-zinc-100 group-hover:text-orange-300 transition-colors mb-2'>
+                <h3 className='text-lg font-medium text-content-primary group-hover:text-orange-300 transition-colors mb-2'>
                   {animal.name}
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   {animal.correspondences.join(', ')}
                 </p>
               </Link>
@@ -257,27 +257,33 @@ Animals connected to **Earth**: Grounding, abundance, stability`}
         </section>
 
         <section className='mb-12 bg-orange-950/20 border border-orange-900/50 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Quick Reference: Animals by Element
           </h2>
           <div className='grid md:grid-cols-2 gap-4 text-sm'>
             <div>
               <p className='text-orange-400 font-medium'>Air Animals:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Owl, Raven, Crow, Butterfly, Eagle, Hawk
               </p>
             </div>
             <div>
               <p className='text-red-400 font-medium'>Fire Animals:</p>
-              <p className='text-zinc-400'>Fox, Lion, Phoenix, Salamander</p>
+              <p className='text-content-muted'>
+                Fox, Lion, Phoenix, Salamander
+              </p>
             </div>
             <div>
               <p className='text-blue-400 font-medium'>Water Animals:</p>
-              <p className='text-zinc-400'>Snake, Fish, Dolphin, Frog, Otter</p>
+              <p className='text-content-muted'>
+                Snake, Fish, Dolphin, Frog, Otter
+              </p>
             </div>
             <div>
               <p className='text-emerald-400 font-medium'>Earth Animals:</p>
-              <p className='text-zinc-400'>Bear, Wolf, Deer, Cat, Rabbit</p>
+              <p className='text-content-muted'>
+                Bear, Wolf, Deer, Cat, Rabbit
+              </p>
             </div>
           </div>
         </section>

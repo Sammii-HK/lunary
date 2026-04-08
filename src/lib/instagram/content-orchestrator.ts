@@ -28,24 +28,26 @@ import type { IGScheduledPost, IGPostBatch, IGPostType } from './types';
 import { validateSocialCopy } from '@/lib/social/social-copy/validation';
 import { getWeightedGrimoireCategories } from '@/lib/threads/orbit-insights';
 
-const SHARE_BASE_URL = (
-  process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
-).replace(/\/+$/, '');
+// Always use canonical non-www URL — www.lunary.app returns 308 which
+// Postiz/Spellcast does not follow when pre-fetching carousel images.
+const SHARE_BASE_URL = 'https://lunary.app';
 
-// Daily posting schedule (UTC hours)
+// Daily posting schedule (UTC hours) — targeting US/UK crossover
+// 13:00 UTC = 9am EDT / 2pm BST | 16:00 = noon EDT / 5pm BST
+// 17:00 UTC = 1pm EDT / 6pm BST | 20:00 = 4pm EDT / 9pm BST
 const POSTING_TIMES: Record<IGPostType, number> = {
-  carousel: 10, // 10am UTC (primary content slot)
-  angel_number_carousel: 10, // 10am UTC (primary content slot)
-  one_word: 12, // noon UTC (engagement slot)
-  meme: 12, // noon UTC (lunch scroll)
-  did_you_know: 14, // 2pm UTC (afternoon education)
-  sign_ranking: 12, // noon UTC (engagement slot)
-  compatibility: 12, // noon UTC (engagement slot)
-  transit_spotlight: 10, // 10am UTC (timely, saves)
-  myth_vs_reality: 12, // noon UTC (contrarian, saves)
-  quote: 19, // 7pm UTC (evening reflection -- stories/bonus)
-  app_feature: 14, // 2pm UTC (when scheduled)
-  story: 9, // 9am UTC (morning stories)
+  carousel: 13, // 9am EDT / 2pm BST (primary content slot)
+  angel_number_carousel: 13, // 9am EDT / 2pm BST
+  one_word: 16, // noon EDT / 5pm BST (engagement slot)
+  meme: 16, // noon EDT / 5pm BST (lunch scroll US)
+  did_you_know: 17, // 1pm EDT / 6pm BST (afternoon education)
+  sign_ranking: 16, // noon EDT / 5pm BST (engagement slot)
+  compatibility: 16, // noon EDT / 5pm BST (engagement slot)
+  transit_spotlight: 13, // 9am EDT / 2pm BST (timely, saves)
+  myth_vs_reality: 16, // noon EDT / 5pm BST (contrarian, saves)
+  quote: 20, // 4pm EDT / 9pm BST (evening reflection)
+  app_feature: 17, // 1pm EDT / 6pm BST (when scheduled)
+  story: 12, // 8am EDT / 1pm BST (morning stories, not 5am EDT)
 };
 
 // ---------------------------------------------------------------------------

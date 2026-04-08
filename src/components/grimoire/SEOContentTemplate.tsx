@@ -307,8 +307,8 @@ export async function SEOContentTemplate({
   const contextualCopySentence = contextualCopy ?? automaticCopy.sentence;
   const contextualCopyClasses =
     contextualCopyVariant === 'callout'
-      ? 'bg-gradient-to-r from-lunary-primary-900 to-lunary-highlight-900 border border-transparent text-white'
-      : 'bg-zinc-900/40 border border-zinc-800 text-zinc-200';
+      ? 'bg-gradient-to-r from-layer-base to-lunary-highlight-900 border border-transparent text-content-primary'
+      : 'bg-surface-elevated/40 border border-stroke-subtle text-content-primary';
   const shouldShowContextualNudge = !disableContextualNudge;
   const contextualNudge = shouldShowContextualNudge
     ? getContextualNudge(canonicalPathname, anonId)
@@ -341,7 +341,7 @@ export async function SEOContentTemplate({
           position: 'sticky',
           top: 0,
         }}
-        className='z-40 bg-zinc-950 border-b border-zinc-800/50 -mx-4 px-4 py-2 mb-6'
+        className='z-40 bg-surface-base border-b border-stroke-subtle/50 -mx-4 px-4 py-2 mb-6'
       >
         <div className='flex items-center justify-between gap-4 [&>nav]:mb-0'>
           {autoBreadcrumbs.length > 0 && (
@@ -362,7 +362,7 @@ export async function SEOContentTemplate({
           </span>
         )}
         {description && (
-          <p className='text-zinc-400 leading-relaxed break-words mt-4'>
+          <p className='text-content-muted leading-relaxed break-words mt-4'>
             {description}
           </p>
         )}
@@ -373,11 +373,11 @@ export async function SEOContentTemplate({
 
         {/* Table of Contents */}
         {tableOfContents && tableOfContents.length > 0 && (
-          <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 sm:p-6 mb-12'>
+          <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-4 sm:p-6 mb-12'>
             <Heading as='h2' variant='h2'>
               Table of Contents
             </Heading>
-            <ol className='space-y-2 text-zinc-400'>
+            <ol className='space-y-2 text-content-muted'>
               {tableOfContents.map((item, index) => (
                 <li key={index}>
                   <a
@@ -402,15 +402,17 @@ export async function SEOContentTemplate({
 
         {/* TL;DR Quick Meaning Block */}
         {tldr && (
-          <div className='tldr bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-4 sm:p-6 my-6 mb-8 w-full overflow-x-hidden'>
+          <div className='tldr bg-layer-base/20 border border-lunary-primary-700 rounded-lg p-4 sm:p-6 my-6 mb-8 w-full overflow-x-hidden'>
             <Heading
               as='h2'
               variant='h2'
-              className='text-lunary-accent-300 mb-3'
+              className='text-content-brand-accent mb-3'
             >
               Quick Meaning
             </Heading>
-            <p className='text-zinc-200 leading-relaxed break-words'>{tldr}</p>
+            <p className='text-content-primary leading-relaxed break-words'>
+              {tldr}
+            </p>
           </div>
         )}
 
@@ -420,7 +422,7 @@ export async function SEOContentTemplate({
             <Heading as='h2' variant='h2'>
               {whatIs.question}
             </Heading>
-            <p className='what-is-answer text-zinc-300 leading-relaxed break-words'>
+            <p className='what-is-answer text-content-secondary leading-relaxed break-words'>
               {whatIs.answer}
             </p>
           </section>
@@ -429,7 +431,9 @@ export async function SEOContentTemplate({
         {/* Intro */}
         {intro && (
           <section className='prose prose-invert max-w-none overflow-x-hidden'>
-            <p className='text-zinc-300 leading-relaxed break-words'>{intro}</p>
+            <p className='text-content-secondary leading-relaxed break-words'>
+              {intro}
+            </p>
           </section>
         )}
 
@@ -483,7 +487,7 @@ export async function SEOContentTemplate({
               {emotionalThemes.map((theme, index) => (
                 <li
                   key={index}
-                  className='flex items-start gap-3 text-zinc-300 break-words'
+                  className='flex items-start gap-3 text-content-secondary break-words'
                 >
                   <span className='text-lunary-accent mt-1 flex-shrink-0'>
                     •
@@ -505,9 +509,9 @@ export async function SEOContentTemplate({
               {howToWorkWith.map((item, index) => (
                 <div
                   key={index}
-                  className='bg-zinc-900/50 border border-zinc-800/50 rounded-lg p-4 w-full overflow-x-hidden'
+                  className='bg-surface-elevated/50 border border-stroke-subtle/50 rounded-lg p-4 w-full overflow-x-hidden'
                 >
-                  <p className='text-zinc-300 leading-relaxed break-words'>
+                  <p className='text-content-secondary leading-relaxed break-words'>
                     {item}
                   </p>
                 </div>
@@ -527,7 +531,7 @@ export async function SEOContentTemplate({
                 <NavParamLink
                   key={index}
                   href={`/grimoire/zodiac/${sign.toLowerCase()}`}
-                  className='px-3 sm:px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-lunary-accent-300 transition-colors whitespace-nowrap'
+                  className='px-3 sm:px-4 py-2 bg-surface-card/50 border border-stroke-default rounded-lg text-content-secondary hover:bg-surface-overlay hover:text-content-brand-accent transition-colors whitespace-nowrap'
                 >
                   {sign}
                 </NavParamLink>
@@ -544,7 +548,7 @@ export async function SEOContentTemplate({
             </Heading>
             <div className='flex flex-wrap gap-4 text-3xl sm:text-4xl'>
               {glyphs.map((glyph, index) => (
-                <span key={index} className='text-zinc-300 font-astro'>
+                <span key={index} className='text-content-secondary font-astro'>
                   {glyph}
                 </span>
               ))}
@@ -559,7 +563,7 @@ export async function SEOContentTemplate({
               Symbolism Breakdown
             </Heading>
             <div className='prose prose-invert max-w-none break-words'>
-              <p className='text-zinc-300 leading-relaxed whitespace-pre-line break-words'>
+              <p className='text-content-secondary leading-relaxed whitespace-pre-line break-words'>
                 {symbolism}
               </p>
             </div>
@@ -573,7 +577,7 @@ export async function SEOContentTemplate({
               Numerology & Astrology Correspondences
             </Heading>
             <div className='prose prose-invert max-w-none break-words'>
-              <p className='text-zinc-300 leading-relaxed whitespace-pre-line break-words'>
+              <p className='text-content-secondary leading-relaxed whitespace-pre-line break-words'>
                 {numerology}
               </p>
             </div>
@@ -587,7 +591,7 @@ export async function SEOContentTemplate({
               Astrological Correspondences
             </Heading>
             <div className='prose prose-invert max-w-none break-words'>
-              <p className='text-zinc-300 leading-relaxed whitespace-pre-line break-words'>
+              <p className='text-content-secondary leading-relaxed whitespace-pre-line break-words'>
                 {astrologyCorrespondences}
               </p>
             </div>
@@ -606,13 +610,13 @@ export async function SEOContentTemplate({
                 {table.title}
               </Heading>
               <div className='max-w-full overflow-x-auto'>
-                <table className='w-full border-collapse border border-zinc-700'>
+                <table className='w-full border-collapse border border-stroke-default'>
                   <thead>
-                    <tr className='bg-zinc-800/50'>
+                    <tr className='bg-surface-card/50'>
                       {table.headers.map((header, headerIndex) => (
                         <th
                           key={headerIndex}
-                          className='border border-zinc-700 px-2 sm:px-4 py-2 sm:py-3 text-left text-zinc-200 font-medium  break-words whitespace-nowrap'
+                          className='border border-stroke-default px-2 sm:px-4 py-2 sm:py-3 text-left text-content-primary font-medium  break-words whitespace-nowrap'
                         >
                           {header}
                         </th>
@@ -623,12 +627,12 @@ export async function SEOContentTemplate({
                     {table.rows.map((row, rowIndex) => (
                       <tr
                         key={rowIndex}
-                        className='border-b border-zinc-700 hover:bg-zinc-800/30'
+                        className='border-b border-stroke-default hover:bg-surface-card/30'
                       >
                         {row.map((cell, cellIndex) => (
                           <td
                             key={cellIndex}
-                            className='border border-zinc-700 px-2 sm:px-4 py-2 sm:py-3 text-zinc-300  break-words'
+                            className='border border-stroke-default px-2 sm:px-4 py-2 sm:py-3 text-content-secondary  break-words'
                           >
                             {cell}
                           </td>
@@ -651,9 +655,9 @@ export async function SEOContentTemplate({
               {examplePlacements.map((placement, index) => (
                 <div
                   key={index}
-                  className='bg-zinc-900/50 border border-zinc-800/50 rounded-lg p-4 w-full overflow-x-hidden'
+                  className='bg-surface-elevated/50 border border-stroke-subtle/50 rounded-lg p-4 w-full overflow-x-hidden'
                 >
-                  <p className='text-zinc-300 leading-relaxed break-words'>
+                  <p className='text-content-secondary leading-relaxed break-words'>
                     {placement}
                   </p>
                 </div>
@@ -672,10 +676,10 @@ export async function SEOContentTemplate({
               {rituals.map((ritual, index) => (
                 <div
                   key={index}
-                  className='bg-zinc-900/50 border border-zinc-800/50 rounded-lg p-4 sm:p-6 w-full overflow-x-hidden'
+                  className='bg-surface-elevated/50 border border-stroke-subtle/50 rounded-lg p-4 sm:p-6 w-full overflow-x-hidden'
                 >
                   <div className='prose prose-invert max-w-none break-words'>
-                    <p className='text-zinc-300 leading-relaxed whitespace-pre-line break-words'>
+                    <p className='text-content-secondary leading-relaxed whitespace-pre-line break-words'>
                       {ritual}
                     </p>
                   </div>
@@ -695,9 +699,9 @@ export async function SEOContentTemplate({
               {journalPrompts.map((prompt, index) => (
                 <div
                   key={index}
-                  className='bg-lunary-primary-950 border border-lunary-primary-800 rounded-lg p-4 w-full overflow-x-hidden'
+                  className='bg-layer-deep border border-lunary-primary-800 rounded-lg p-4 w-full overflow-x-hidden'
                 >
-                  <p className='text-zinc-300 leading-relaxed italic break-words'>
+                  <p className='text-content-secondary leading-relaxed italic break-words'>
                     "{prompt}"
                   </p>
                 </div>
@@ -745,7 +749,7 @@ export async function SEOContentTemplate({
                 <NavParamLink
                   key={index}
                   href={item.href}
-                  className='px-3 sm:px-4 py-2 bg-zinc-800/80 border border-lunary-primary-400 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-lunary-accent-300 transition-colors  break-words'
+                  className='px-3 sm:px-4 py-2 bg-surface-card/80 border border-lunary-primary-400 rounded-lg text-content-secondary hover:bg-surface-overlay hover:text-content-brand-accent transition-colors  break-words'
                 >
                   {item.name}
                 </NavParamLink>
@@ -790,7 +794,7 @@ export async function SEOContentTemplate({
             location='seo_contextual_nudge'
           />
         ) : ctaText && ctaHref ? (
-          <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 text-center overflow-x-hidden'>
+          <section className='bg-gradient-to-r from-layer-base/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 text-center overflow-x-hidden'>
             <Heading as='h2' variant='h3'>
               {ctaText}
             </Heading>

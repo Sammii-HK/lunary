@@ -124,7 +124,7 @@ export function HappeningNowSection() {
 
   return (
     <section>
-      <h2 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+      <h2 className='text-xs font-medium text-content-muted uppercase tracking-wide mb-3'>
         Happening Now
       </h2>
       <div className='space-y-2'>
@@ -132,21 +132,21 @@ export function HappeningNowSection() {
           <Link
             key={card.id}
             href={card.href}
-            className='flex items-center gap-4 p-4 rounded-lg border border-lunary-primary-700/50 bg-gradient-to-r from-lunary-primary-950/40 to-zinc-900/80 hover:border-lunary-primary-500 hover:from-lunary-primary-900/40 transition-all group'
+            className='flex items-center gap-4 p-4 rounded-lg border border-stroke-default bg-gradient-to-r from-layer-deep/40 to-surface-elevated/80 hover:border-stroke-strong hover:from-layer-base/40 transition-all group'
           >
-            <div className='p-2.5 rounded-lg bg-lunary-primary-900/40 text-lunary-primary-300'>
+            <div className='p-2.5 rounded-lg bg-layer-base/40 text-content-brand'>
               {card.icon}
             </div>
             <div className='flex-1 min-w-0'>
-              <h3 className='text-sm font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+              <h3 className='text-sm font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                 {card.title}
               </h3>
-              <p className='text-xs text-zinc-400'>{card.subtitle}</p>
+              <p className='text-xs text-content-muted'>{card.subtitle}</p>
             </div>
-            <span className='text-xs font-medium text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors whitespace-nowrap'>
+            <span className='text-xs font-medium text-content-muted group-hover:text-content-brand transition-colors whitespace-nowrap'>
               {card.cta}
             </span>
-            <ChevronRight className='w-4 h-4 text-lunary-primary-500 group-hover:text-lunary-primary-300 transition-colors' />
+            <ChevronRight className='w-4 h-4 text-content-muted group-hover:text-content-brand transition-colors' />
           </Link>
         ))}
       </div>

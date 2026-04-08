@@ -60,14 +60,14 @@ export function AnnouncementModal({
 
   return (
     <div
-      className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50'
+      className='fixed inset-0 bg-surface-base/80 backdrop-blur-sm flex items-center justify-center p-4 z-50'
       onClick={(e) => {
         if (e.target === e.currentTarget) onDismiss();
       }}
     >
       <div
         ref={modalRef}
-        className='bg-zinc-900 border border-zinc-700 rounded-xl max-w-md w-full relative overflow-hidden'
+        className='bg-surface-elevated border border-stroke-default rounded-xl max-w-md w-full relative overflow-hidden'
       >
         {/* Decorative background */}
         <div className='absolute inset-0 overflow-hidden pointer-events-none'>
@@ -78,7 +78,7 @@ export function AnnouncementModal({
         {/* Close button */}
         <button
           onClick={onDismiss}
-          className='absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors z-10'
+          className='absolute top-4 right-4 text-content-muted hover:text-content-primary transition-colors z-10'
           aria-label='Close modal'
         >
           <X className='w-5 h-5' />
@@ -109,12 +109,12 @@ export function AnnouncementModal({
           </div>
 
           {/* Title */}
-          <h2 className='text-xl font-semibold text-white text-center mb-3'>
+          <h2 className='text-xl font-semibold text-content-primary text-center mb-3'>
             {announcement.title}
           </h2>
 
           {/* Description */}
-          <p className='text-zinc-400 text-center text-sm leading-relaxed mb-6'>
+          <p className='text-content-muted text-center text-sm leading-relaxed mb-6'>
             {announcement.description}
           </p>
 
@@ -131,7 +131,7 @@ export function AnnouncementModal({
             )}
             <button
               onClick={onDismiss}
-              className={`py-2.5 px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium rounded-lg transition-colors border border-zinc-700 ${
+              className={`py-2.5 px-4 bg-surface-card hover:bg-surface-overlay text-content-secondary text-sm font-medium rounded-lg transition-colors border border-stroke-default ${
                 announcement.ctaLabel && announcement.ctaHref ? '' : 'flex-1'
               }`}
             >

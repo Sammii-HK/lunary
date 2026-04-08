@@ -33,11 +33,11 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
 
   if (!posthogKey) {
     return (
-      <div className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 text-center'>
-        <div className='text-sm text-zinc-400'>
+      <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-6 text-center'>
+        <div className='text-sm text-content-muted'>
           PostHog is not configured. To enable page-level heatmaps:
         </div>
-        <ol className='mt-4 space-y-2 text-left text-xs text-zinc-400'>
+        <ol className='mt-4 space-y-2 text-left text-xs text-content-muted'>
           <li>
             1. Sign up at{' '}
             <a
@@ -80,7 +80,7 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
 
   if (error) {
     return (
-      <div className='rounded-2xl border border-lunary-error-800 bg-lunary-error-950 p-4 text-sm text-lunary-error-200'>
+      <div className='rounded-2xl border border-lunary-error-800 bg-layer-deep p-4 text-sm text-lunary-error-200'>
         {error}
       </div>
     );
@@ -108,13 +108,13 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
 
   return (
     <div className='space-y-4'>
-      <div className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6'>
+      <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-6'>
         <div className='mb-4 flex items-center justify-between'>
           <div>
-            <h3 className='text-sm font-medium text-zinc-200'>
+            <h3 className='text-sm font-medium text-content-primary'>
               Page-Level Heatmaps
             </h3>
-            <p className='mt-1 text-xs text-zinc-400'>
+            <p className='mt-1 text-xs text-content-muted'>
               View heatmaps and session recordings in PostHog
             </p>
           </div>
@@ -125,8 +125,8 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
             </a>
           </Button>
         </div>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-950/60 p-4'>
-          <div className='space-y-2 text-xs text-zinc-400'>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-base/60 p-4'>
+          <div className='space-y-2 text-xs text-content-muted'>
             <div className='flex items-center justify-between'>
               <span>Heatmap Tracking:</span>
               <span className='text-lunary-success'>Active</span>
@@ -143,7 +143,7 @@ export function PostHogHeatmap({ pagePath }: PostHogHeatmapProps) {
             )}
           </div>
         </div>
-        <div className='mt-4 text-xs text-zinc-400'>
+        <div className='mt-4 text-xs text-content-muted'>
           💡 Tip: PostHog heatmaps show where users click, scroll, and interact
           on your pages. Access the full dashboard for detailed insights and
           session recordings.

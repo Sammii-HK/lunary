@@ -18,19 +18,18 @@ import {
 } from 'lucide-react';
 
 const VARIANT_COLORS: Record<string, string> = {
-  daily_moon:
-    'bg-lunary-primary-900 text-lunary-primary-300 border-lunary-primary-700',
+  daily_moon: 'bg-layer-base text-content-brand border-lunary-primary-700',
   tarot_pull:
-    'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
+    'bg-layer-base text-content-brand-secondary border-lunary-secondary-700',
   affirmation:
-    'bg-lunary-success-900 text-lunary-success-300 border-lunary-success-700',
-  ritual_tip: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
+    'bg-layer-base text-lunary-success-300 border-lunary-success-700',
+  ritual_tip: 'bg-layer-base text-lunary-rose-300 border-lunary-rose-700',
   sign_of_the_day:
-    'bg-lunary-accent-900 text-lunary-accent-300 border-lunary-accent-700',
+    'bg-layer-base text-content-brand-accent border-lunary-accent-700',
   transit_alert: 'bg-orange-900 text-orange-300 border-orange-700',
   did_you_know: 'bg-cyan-900 text-cyan-300 border-cyan-700',
   numerology: 'bg-violet-900 text-violet-300 border-violet-700',
-  quote: 'bg-zinc-800 text-zinc-300 border-zinc-600',
+  quote: 'bg-surface-card text-content-secondary border-stroke-strong',
   calendar_event: 'bg-amber-900 text-amber-300 border-amber-700',
 };
 
@@ -181,7 +180,7 @@ export default function WeeklyStoriesPage() {
   );
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-white'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       <div className='container mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 max-w-[1600px]'>
         {/* Header */}
         <div className='mb-6 md:mb-8'>
@@ -191,7 +190,7 @@ export default function WeeklyStoriesPage() {
                 <Calendar className='h-7 w-7' />
                 Weekly Stories
               </h1>
-              <p className='text-sm text-zinc-400 mt-1'>
+              <p className='text-sm text-content-muted mt-1'>
                 {preRenderedCount}/28 pre-rendered to Blob
               </p>
             </div>
@@ -217,7 +216,7 @@ export default function WeeklyStoriesPage() {
                     });
                 }}
                 variant='outline'
-                className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                className='border-stroke-default text-content-secondary hover:bg-surface-card'
               >
                 <RotateCw className='h-4 w-4 mr-2' />
                 Refresh
@@ -225,19 +224,19 @@ export default function WeeklyStoriesPage() {
             </div>
           </div>
           {preRenderResult && (
-            <div className='mt-3 p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-sm text-zinc-300'>
+            <div className='mt-3 p-3 rounded-lg bg-surface-elevated border border-stroke-default text-sm text-content-secondary'>
               {preRenderResult}
             </div>
           )}
         </div>
 
         {/* Week Navigation */}
-        <div className='flex items-center justify-center gap-4 mb-8 p-4 rounded-xl bg-zinc-900 border border-zinc-800'>
+        <div className='flex items-center justify-center gap-4 mb-8 p-4 rounded-xl bg-surface-elevated border border-stroke-subtle'>
           <Button
             onClick={() => setWeekOffset((w) => w - 1)}
             variant='ghost'
             size='sm'
-            className='text-zinc-300 hover:text-white hover:bg-zinc-800'
+            className='text-content-secondary hover:text-content-primary hover:bg-surface-card'
           >
             <ChevronLeft className='h-4 w-4 mr-1' />
             Prev
@@ -246,18 +245,18 @@ export default function WeeklyStoriesPage() {
             onClick={() => setWeekOffset(0)}
             variant='outline'
             size='sm'
-            className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+            className='border-stroke-default text-content-secondary hover:bg-surface-card'
           >
             This Week
           </Button>
-          <span className='text-sm font-medium text-zinc-300 min-w-[180px] text-center'>
+          <span className='text-sm font-medium text-content-secondary min-w-[180px] text-center'>
             {weekLabel}
           </span>
           <Button
             onClick={() => setWeekOffset((w) => w + 1)}
             variant='ghost'
             size='sm'
-            className='text-zinc-300 hover:text-white hover:bg-zinc-800'
+            className='text-content-secondary hover:text-content-primary hover:bg-surface-card'
           >
             Next
             <ChevronRight className='h-4 w-4 ml-1' />
@@ -265,7 +264,7 @@ export default function WeeklyStoriesPage() {
         </div>
 
         {loading ? (
-          <div className='text-center py-20 text-zinc-400'>
+          <div className='text-center py-20 text-content-muted'>
             Loading story previews...
           </div>
         ) : (
@@ -285,15 +284,15 @@ export default function WeeklyStoriesPage() {
                   key={dateStr}
                   className={`rounded-xl border p-3 ${
                     isToday
-                      ? 'border-lunary-primary-600 bg-lunary-primary-950/30'
-                      : 'border-zinc-800 bg-zinc-900/50'
+                      ? 'border-lunary-primary-600 bg-layer-deep/30'
+                      : 'border-stroke-subtle bg-surface-elevated/50'
                   }`}
                 >
                   {/* Day Header */}
                   <div className='flex items-center justify-between mb-3'>
                     <div className='flex items-center gap-2'>
                       <span className='text-lg font-bold'>{dayNum}</span>
-                      <span className='text-xs text-zinc-400 uppercase'>
+                      <span className='text-xs text-content-muted uppercase'>
                         {dayName}
                       </span>
                     </div>
@@ -303,10 +302,10 @@ export default function WeeklyStoriesPage() {
                       ) : somePreRendered ? (
                         <Circle className='h-3.5 w-3.5 text-yellow-500' />
                       ) : (
-                        <Circle className='h-3.5 w-3.5 text-zinc-600' />
+                        <Circle className='h-3.5 w-3.5 text-content-muted' />
                       )}
                       {isToday && (
-                        <Badge className='bg-lunary-primary-900 text-lunary-primary-300 border-lunary-primary-700 text-[10px]'>
+                        <Badge className='bg-layer-base text-content-brand border-lunary-primary-700 text-[10px]'>
                           Today
                         </Badge>
                       )}
@@ -320,7 +319,7 @@ export default function WeeklyStoriesPage() {
                       return (
                         <div
                           key={i}
-                          className='rounded-lg border border-zinc-700/50 bg-zinc-800/50 overflow-hidden'
+                          className='rounded-lg border border-stroke-default/50 bg-surface-card/50 overflow-hidden'
                         >
                           {/* Image Preview */}
                           <div className='aspect-[9/16] relative group'>
@@ -342,9 +341,9 @@ export default function WeeklyStoriesPage() {
                                   `story_${dateStr}_${story.variant}.png`,
                                 )
                               }
-                              className='absolute inset-0 bg-black/0 group-hover:bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer'
+                              className='absolute inset-0 bg-surface-base/0 group-hover:bg-surface-base/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer'
                             >
-                              <Download className='h-6 w-6 text-white' />
+                              <Download className='h-6 w-6 text-content-primary' />
                             </button>
                             {/* Pre-rendered indicator */}
                             {story.preRendered && (
@@ -357,11 +356,11 @@ export default function WeeklyStoriesPage() {
                           {/* Info */}
                           <div className='p-2'>
                             <Badge
-                              className={`text-[10px] mb-1 ${VARIANT_COLORS[story.variant] ?? 'bg-zinc-800 text-zinc-300'}`}
+                              className={`text-[10px] mb-1 ${VARIANT_COLORS[story.variant] ?? 'bg-surface-card text-content-secondary'}`}
                             >
                               {story.variant.replace(/_/g, ' ')}
                             </Badge>
-                            <p className='text-[11px] text-zinc-400 line-clamp-2 leading-tight'>
+                            <p className='text-[11px] text-content-muted line-clamp-2 leading-tight'>
                               {story.title}
                             </p>
                           </div>
@@ -376,7 +375,7 @@ export default function WeeklyStoriesPage() {
                     disabled={downloading === dateStr || stories.length === 0}
                     variant='outline'
                     size='sm'
-                    className='w-full mt-3 border-zinc-700 text-zinc-300 hover:bg-zinc-800 text-xs'
+                    className='w-full mt-3 border-stroke-default text-content-secondary hover:bg-surface-card text-xs'
                   >
                     <Download className='h-3 w-3 mr-1' />
                     {downloading === dateStr

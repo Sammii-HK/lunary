@@ -18,6 +18,7 @@ import { iosLabel } from '@/lib/ios-labels';
 import { useProgress } from '@/components/progress/useProgress';
 import { ProgressBar } from '@/components/progress/ProgressBar';
 import { mutate } from 'swr';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface HoroscopeReflectionPromptsProps {
   sunSign?: string | null;
@@ -243,21 +244,21 @@ export function HoroscopeReflectionPrompts({
 
   return (
     <div
-      className={`rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden ${className}`}
+      className={`rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden ${className}`}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className='w-full flex items-center justify-between p-4 text-left hover:bg-zinc-800/30 transition-colors'
+        className='w-full flex items-center justify-between p-4 text-left hover:bg-surface-card/30 transition-colors'
       >
         <div className='flex items-center gap-3'>
-          <div className='p-2 rounded-lg bg-lunary-primary-900/30'>
+          <div className='p-2 rounded-lg bg-layer-base/30'>
             <BookOpen className='w-4 h-4 text-lunary-primary-400' />
           </div>
           <div>
-            <p className='text-sm font-medium text-zinc-100'>
+            <p className='text-sm font-medium text-content-primary'>
               {iosLabel('Cosmic Reflection Prompts', isNativeIOS)}
             </p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               {prompts.length} {prompts.length === 1 ? 'prompt' : 'prompts'} for
               your journal
             </p>
@@ -265,20 +266,20 @@ export function HoroscopeReflectionPrompts({
         </div>
         <div className='flex items-center gap-3'>
           {journalSkill && (
-            <div className='flex items-center gap-1.5 text-[10px] text-zinc-500'>
+            <div className='flex items-center gap-1.5 text-[10px] text-content-muted'>
               <PenTool className='w-3 h-3 text-lunary-accent' />
               <span>Lv. {journalSkill.currentLevel}</span>
             </div>
           )}
           <ChevronDown
-            className={`w-4 h-4 text-zinc-500 transition-transform ${
+            className={`w-4 h-4 text-content-muted transition-transform ${
               isExpanded ? 'rotate-180' : ''
             }`}
           />
         </div>
       </button>
 
-      {isExpanded && (
+      <Collapse isOpen={isExpanded}>
         <div className='px-4 pb-4 space-y-3'>
           {prompts.map((prompt, i) => {
             const isSaved = savedPrompts.has(prompt);
@@ -287,9 +288,9 @@ export function HoroscopeReflectionPrompts({
             return (
               <div
                 key={i}
-                className='p-3 rounded-lg border border-zinc-800/50 bg-zinc-800/20'
+                className='p-3 rounded-lg border border-stroke-subtle/50 bg-surface-card/20'
               >
-                <p className='text-sm text-zinc-300 mb-2'>{prompt}</p>
+                <p className='text-sm text-content-secondary mb-2'>{prompt}</p>
                 <div className='space-y-2'>
                   {activePromptIndex === i && !isSaved ? (
                     <>
@@ -303,7 +304,7 @@ export function HoroscopeReflectionPrompts({
                         }
                         rows={3}
                         placeholder='Write your reflection...'
-                        className='w-full bg-zinc-900/60 border border-zinc-700/60 rounded-md p-2 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-700 resize-none'
+                        className='w-full bg-surface-elevated/60 border border-stroke-default/60 rounded-md p-2 text-xs text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-700 resize-none'
                         disabled={isSaving}
                       />
                       <div className='flex items-center gap-2'>
@@ -312,7 +313,7 @@ export function HoroscopeReflectionPrompts({
                             handleSaveToJournal(prompt, drafts[prompt] ?? '')
                           }
                           disabled={!drafts[prompt]?.trim() || isSaving}
-                          className='inline-flex items-center gap-1.5 text-xs font-medium text-lunary-accent-300 hover:text-lunary-accent-200 transition-colors disabled:opacity-50'
+                          className='inline-flex items-center gap-1.5 text-xs font-medium text-content-brand-accent hover:text-content-brand-accent transition-colors disabled:opacity-50'
                         >
                           {isSaving ? (
                             <Loader2 className='w-3 h-3 animate-spin' />
@@ -324,7 +325,7 @@ export function HoroscopeReflectionPrompts({
                         <button
                           onClick={() => setActivePromptIndex(null)}
                           disabled={isSaving}
-                          className='text-xs text-zinc-500 hover:text-zinc-300 transition-colors'
+                          className='text-xs text-content-muted hover:text-content-secondary transition-colors'
                         >
                           Cancel
                         </button>
@@ -337,7 +338,7 @@ export function HoroscopeReflectionPrompts({
                       className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors ${
                         isSaved
                           ? 'text-lunary-success-400'
-                          : 'text-lunary-accent-400 hover:text-lunary-accent-300'
+                          : 'text-lunary-accent-400 hover:text-content-brand-accent'
                       }`}
                     >
                       {isSaving ? (
@@ -358,12 +359,12 @@ export function HoroscopeReflectionPrompts({
           {!hasAccess && (
             <Link
               href='/pricing?nav=app'
-              className='flex items-center gap-2 rounded-lg border border-lunary-primary-800/40 bg-lunary-primary-950/30 px-3 py-2.5 hover:bg-lunary-primary-950/50 transition-colors group'
+              className='flex items-center gap-2 rounded-lg border border-lunary-primary-800/40 bg-layer-deep/30 px-3 py-2.5 hover:bg-layer-deep/50 transition-colors group'
             >
               <Sparkles className='w-3.5 h-3.5 text-lunary-primary-400 flex-shrink-0' />
-              <p className='text-xs text-zinc-400'>
+              <p className='text-xs text-content-muted'>
                 Get{' '}
-                <span className='text-lunary-primary-300 font-medium group-hover:text-lunary-primary-200'>
+                <span className='text-content-brand font-medium group-hover:text-content-secondary'>
                   {JOURNAL_PROMPT_LIMITS.lunary_plus -
                     JOURNAL_PROMPT_LIMITS.free}{' '}
                   more prompts
@@ -374,13 +375,13 @@ export function HoroscopeReflectionPrompts({
           )}
 
           {journalSkill && (
-            <div className='pt-2 border-t border-zinc-800/40'>
+            <div className='pt-2 border-t border-stroke-subtle/40'>
               <div className='flex items-center justify-between mb-1'>
-                <span className='text-[10px] text-zinc-500 flex items-center gap-1'>
+                <span className='text-[10px] text-content-muted flex items-center gap-1'>
                   <PenTool className='w-3 h-3' />
                   Journal Keeper
                 </span>
-                <span className='text-[10px] text-zinc-500'>
+                <span className='text-[10px] text-content-muted'>
                   {journalSkill.actionsToNext !== null
                     ? `${journalSkill.actionsToNext} more to level ${journalSkill.currentLevel + 1}`
                     : 'Max level'}
@@ -395,7 +396,7 @@ export function HoroscopeReflectionPrompts({
             </div>
           )}
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

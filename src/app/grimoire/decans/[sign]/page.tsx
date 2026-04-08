@@ -87,20 +87,20 @@ export default async function SignDecansPage({
           <div className='flex justify-center mb-4'>
             <span className='text-6xl'>{symbol}</span>
           </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-4'>
             {signName} Decans
           </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
+          <p className='text-lg text-content-muted max-w-2xl mx-auto'>
             Each zodiac sign is divided into three decans of 10 degrees each.
             Your decan reveals more nuanced traits based on your birth date.
           </p>
         </div>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-10'>
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
             What Are Decans?
           </h2>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Decans divide each 30-degree zodiac sign into three 10-degree
             sections. Each decan has a co-ruler that modifies the sign&apos;s
             expression, adding depth to your astrological profile.
@@ -113,27 +113,27 @@ export default async function SignDecansPage({
               <Link
                 key={decan.number}
                 href={`/grimoire/decans/${sign}/${decan.number}`}
-                className='group block rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                className='group block rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
               >
                 <div className='flex items-center justify-between mb-3'>
                   <div className='flex items-center gap-3'>
                     <Star className='w-5 h-5 text-lunary-primary-400' />
-                    <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                    <h3 className='text-lg font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                       {decan.name} Decan
                     </h3>
                   </div>
-                  <span className='text-sm text-zinc-400'>
+                  <span className='text-sm text-content-muted'>
                     {decan.dateRange}
                   </span>
                 </div>
-                <p className='text-sm text-zinc-400 mb-2'>
+                <p className='text-sm text-content-muted mb-2'>
                   Subruler: {decan.subruler}
                 </p>
                 <div className='flex flex-wrap gap-2'>
                   {decan.traits.slice(0, 3).map((trait) => (
                     <span
                       key={trait}
-                      className='text-xs px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded'
+                      className='text-xs px-2 py-0.5 bg-surface-card text-content-muted rounded'
                     >
                       {trait}
                     </span>
@@ -144,26 +144,26 @@ export default async function SignDecansPage({
           </div>
         </section>
 
-        <div className='border-t border-zinc-800 pt-8'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+        <div className='border-t border-stroke-subtle pt-8'>
+          <h3 className='text-lg font-medium text-content-primary mb-4'>
             Related Resources
           </h3>
           <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/decans'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               All Decans
             </Link>
             <Link
               href={`/grimoire/zodiac/${sign}`}
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               {signName} Overview
             </Link>
             <Link
               href='/grimoire/zodiac'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               All Signs
             </Link>

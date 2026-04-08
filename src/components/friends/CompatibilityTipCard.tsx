@@ -11,10 +11,10 @@ interface CompatibilityTipCardProps {
 }
 
 const PAIR_STYLES: Record<string, string> = {
-  same: 'border-lunary-primary-800/40 from-lunary-primary-950/30',
+  same: 'border-lunary-primary-800/40 from-layer-deep/30',
   complementary: 'border-green-800/40 from-green-950/30',
   challenging: 'border-amber-800/40 from-amber-950/30',
-  neutral: 'border-zinc-800/40 from-zinc-900/50',
+  neutral: 'border-stroke-subtle/40 from-surface-elevated/50',
 };
 
 const PAIR_LABELS: Record<string, string> = {
@@ -36,21 +36,21 @@ export function CompatibilityTipCard({
   return (
     <div
       className={cn(
-        'rounded-xl border bg-gradient-to-br to-zinc-900 p-4',
+        'rounded-xl border bg-gradient-to-br to-surface-elevated p-4',
         style,
         className,
       )}
     >
       <div className='flex items-center gap-2 mb-2'>
         <Sparkles className='w-3.5 h-3.5 text-lunary-accent-400' />
-        <span className='text-[10px] font-medium text-zinc-400 uppercase tracking-wide'>
+        <span className='text-[10px] font-medium text-content-muted uppercase tracking-wide'>
           Daily tip with {friendName}
         </span>
-        <span className='px-1.5 py-0.5 text-[9px] font-medium rounded-full bg-zinc-800/50 text-zinc-500'>
+        <span className='px-1.5 py-0.5 text-[9px] font-medium rounded-full bg-surface-card/50 text-content-muted'>
           {label}
         </span>
       </div>
-      <p className='text-xs text-zinc-300'>{tip}</p>
+      <p className='text-xs text-content-secondary'>{tip}</p>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { hasFeatureAccess } from '../../../utils/pricing';
 import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 import { useIsNativeIOS } from '@/hooks/useNativePlatform';
 import { iosLabel } from '@/lib/ios-labels';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface HoroscopeRitualForDayProps {
   sunSign: string;
@@ -205,61 +206,67 @@ export function HoroscopeRitualForDay({
 
   return (
     <div
-      className={`rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden ${className}`}
+      className={`rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden ${className}`}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className='w-full flex items-center justify-between p-4 text-left hover:bg-zinc-800/30 transition-colors'
+        className='w-full flex items-center justify-between p-4 text-left hover:bg-surface-card/30 transition-colors'
       >
         <div className='flex items-center gap-3'>
-          <div className='p-2 rounded-lg bg-lunary-secondary-900/30'>
+          <div className='p-2 rounded-lg bg-layer-base/30'>
             <Moon className='w-4 h-4 text-lunary-secondary-400' />
           </div>
           <div>
-            <p className='text-sm font-medium text-zinc-100'>{ritual.title}</p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-sm font-medium text-content-primary'>
+              {ritual.title}
+            </p>
+            <p className='text-xs text-content-muted'>
               {iosLabel("Today's moon-timed ritual", isNativeIOS)}
             </p>
           </div>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-zinc-500 transition-transform ${
+          className={`w-4 h-4 text-content-muted transition-transform ${
             isExpanded ? 'rotate-180' : ''
           }`}
         />
       </button>
 
-      {isExpanded && (
+      <Collapse isOpen={isExpanded}>
         <div className='px-4 pb-4 space-y-4'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
             {ritual.oneLine}
           </p>
 
           {hasPaidAccess ? (
             <div className='space-y-3'>
               <div>
-                <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1'>
+                <p className='text-xs font-medium text-content-muted uppercase tracking-wide mb-1'>
                   Intention
                 </p>
-                <p className='text-sm text-zinc-300'>{ritual.intention}</p>
+                <p className='text-sm text-content-secondary'>
+                  {ritual.intention}
+                </p>
               </div>
 
               <div>
-                <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1'>
+                <p className='text-xs font-medium text-content-muted uppercase tracking-wide mb-1'>
                   Best Timing
                 </p>
-                <p className='text-sm text-zinc-300'>{ritual.timing}</p>
+                <p className='text-sm text-content-secondary'>
+                  {ritual.timing}
+                </p>
               </div>
 
               <div>
-                <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1'>
+                <p className='text-xs font-medium text-content-muted uppercase tracking-wide mb-1'>
                   Tools
                 </p>
                 <ul className='space-y-1'>
                   {ritual.tools.map((tool, i) => (
                     <li
                       key={i}
-                      className='text-sm text-zinc-300 flex items-start gap-2'
+                      className='text-sm text-content-secondary flex items-start gap-2'
                     >
                       <span className='text-lunary-secondary-400 mt-0.5'>
                         •
@@ -271,14 +278,14 @@ export function HoroscopeRitualForDay({
               </div>
 
               <div>
-                <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1'>
+                <p className='text-xs font-medium text-content-muted uppercase tracking-wide mb-1'>
                   Steps
                 </p>
                 <ol className='space-y-2'>
                   {ritual.steps.map((step, i) => (
                     <li
                       key={i}
-                      className='text-sm text-zinc-300 flex items-start gap-2'
+                      className='text-sm text-content-secondary flex items-start gap-2'
                     >
                       <span className='text-lunary-secondary-400 font-medium min-w-[1.5rem]'>
                         {i + 1}.
@@ -289,22 +296,22 @@ export function HoroscopeRitualForDay({
                 </ol>
               </div>
 
-              <div className='pt-3 border-t border-zinc-800/50'>
-                <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1'>
+              <div className='pt-3 border-t border-stroke-subtle/50'>
+                <p className='text-xs font-medium text-content-muted uppercase tracking-wide mb-1'>
                   Affirmation
                 </p>
-                <p className='text-sm text-lunary-secondary-300 italic'>
+                <p className='text-sm text-content-brand-secondary italic'>
                   &ldquo;{ritual.affirmation}&rdquo;
                 </p>
               </div>
             </div>
           ) : (
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-content-muted'>
               Upgrade for full ritual steps, tools, timing, and affirmation.
             </p>
           )}
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

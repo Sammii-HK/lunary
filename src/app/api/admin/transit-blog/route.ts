@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       ${JSON.stringify(content.signBreakdowns)}, ${content.closingSection},
       ${ctx.planet}, ${ctx.sign}, ${ctx.transitType},
       ${ctx.startDate}, ${ctx.endDate}, ${ctx.rarity},
-      'published', 'manual', 'claude-haiku', ${wordCount},
+      'published', 'manual', 'claude-sonnet', ${wordCount},
       ${now}, ${now}, ${now}
     )
   `;

@@ -74,7 +74,7 @@ export default function CuspsIndexPage() {
   });
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(cuspsListSchema)}
       {renderJsonLd(
         createBreadcrumbSchema([
@@ -88,7 +88,7 @@ export default function CuspsIndexPage() {
         />
 
         <h1 className='text-4xl font-light mb-4'>Zodiac Cusps</h1>
-        <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
+        <p className='text-lg text-content-muted mb-8 max-w-3xl'>
           Born on the border between two zodiac signs? You may be a cusp baby,
           blending the energies of both signs into a unique personality.
           Discover your cusp type.
@@ -101,16 +101,18 @@ export default function CuspsIndexPage() {
               <Link
                 key={cusp.id}
                 href={`/grimoire/cusps/${cusp.id}`}
-                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <div className='text-sm text-lunary-primary-400 mb-1'>
                   {data.dates}
                 </div>
-                <h3 className='text-lg font-medium mb-1 group-hover:text-lunary-primary-300 transition-colors'>
+                <h3 className='text-lg font-medium mb-1 group-hover:text-content-brand transition-colors'>
                   {data.sign1}-{data.sign2} Cusp
                 </h3>
-                <div className='text-zinc-300 mb-2'>The {data.name}</div>
-                <div className='text-sm text-zinc-400'>
+                <div className='text-content-secondary mb-2'>
+                  The {data.name}
+                </div>
+                <div className='text-sm text-content-muted'>
                   {data.element1} + {data.element2}
                 </div>
               </Link>
@@ -118,17 +120,17 @@ export default function CuspsIndexPage() {
           })}
         </div>
 
-        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
+        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+          <h2 className='text-xl font-medium text-content-brand mb-2'>
             Are You a Cusp Baby?
           </h2>
-          <p className='text-zinc-300 mb-4'>
+          <p className='text-content-secondary mb-4'>
             Enter your birth details to see if you were born on a cusp and which
             one.
           </p>
           <Link
             href='/birth-chart'
-            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+            className='inline-flex px-6 py-3 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
           >
             Check Your Birth Chart
           </Link>

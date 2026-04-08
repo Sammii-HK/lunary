@@ -95,11 +95,11 @@ export function GrimoireExitIntent({
   if (!show) return null;
 
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
-      <div className='relative bg-zinc-900 border border-lunary-primary-700/50 rounded-xl p-6 sm:p-8 max-w-md w-full shadow-xl shadow-black/50'>
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-surface-base/60 backdrop-blur-sm p-4'>
+      <div className='relative bg-surface-elevated border border-lunary-primary-700/50 rounded-xl p-6 sm:p-8 max-w-md w-full shadow-xl shadow-black/50'>
         <button
           onClick={handleClose}
-          className='absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors'
+          className='absolute top-4 right-4 text-content-muted hover:text-content-primary transition-colors'
           aria-label='Close'
         >
           <X className='w-5 h-5' />
@@ -108,10 +108,12 @@ export function GrimoireExitIntent({
         <div className='space-y-4'>
           <div className='flex items-center gap-2'>
             <Sparkles className='w-5 h-5 text-lunary-accent-400' />
-            <h2 className='text-lg font-semibold text-white'>Before you go</h2>
+            <h2 className='text-lg font-semibold text-content-primary'>
+              Before you go
+            </h2>
           </div>
 
-          <p className='text-zinc-300 text-sm leading-relaxed'>
+          <p className='text-content-secondary text-sm leading-relaxed'>
             Everything you just read applies differently to your chart. See your
             personalised placements, transits, and daily readings — free for 7
             days.
@@ -125,7 +127,7 @@ export function GrimoireExitIntent({
             ].map((item) => (
               <li
                 key={item}
-                className='flex items-start gap-2 text-sm text-zinc-400'
+                className='flex items-start gap-2 text-sm text-content-muted'
               >
                 <span className='text-lunary-accent-400 mt-0.5 flex-shrink-0'>
                   &#10022;
@@ -137,13 +139,13 @@ export function GrimoireExitIntent({
 
           <button
             onClick={handleSignup}
-            className='w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-lunary-primary-600 to-lunary-primary-500 text-sm font-medium text-white hover:from-lunary-primary-500 hover:to-lunary-primary-400 transition-all group'
+            className='w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-lunary-primary-600 to-lunary-primary-500 text-sm font-medium text-content-primary hover:from-lunary-primary-500 hover:to-lunary-primary-400 transition-all group'
           >
             See your chart
             <ChevronRight className='w-4 h-4 transition-transform group-hover:translate-x-0.5' />
           </button>
 
-          <p className='text-center text-xs text-zinc-600'>
+          <p className='text-center text-xs text-content-muted'>
             No card needed. Takes 30 seconds.
           </p>
         </div>

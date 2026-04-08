@@ -30,6 +30,7 @@ import { AppOpenedTracker } from '@/components/AppOpenedTracker';
 import { AttributionCapture } from '@/components/AttributionCapture';
 import { AstronomyProviderWrapper } from '@/components/AstronomyProviderWrapper';
 import { PostHogProvider } from '@/components/PostHogProvider';
+import { ThemeProvider } from '@/providers/ThemeProvider';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -134,6 +135,12 @@ export default function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <head>
+        {/* Theme: read stored preference before first paint to avoid flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('lunary-theme');var r;if(t==='light')r='light';else if(t==='system')r=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';else r='dark';document.documentElement.setAttribute('data-theme',r);}catch(e){}})();`,
+          }}
+        />
         {/* Polyfill crypto.randomUUID for older Android WebViews */}
         <script
           dangerouslySetInnerHTML={{
@@ -165,7 +172,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${roboto.className} ${astronomicon.variable} flex flex-col w-full h-dvh bg-zinc-950 text-white overflow-hidden`}
+        className={`${roboto.className} ${astronomicon.variable} flex flex-col w-full h-dvh bg-surface-base text-content-primary overflow-hidden`}
         suppressHydrationWarning
       >
         {/* Auto-recover from stale chunk errors after deploys */}
@@ -197,37 +204,41 @@ export default function RootLayout({
           }}
         />
         <StructuredData />
-        <Suspense fallback={null}>
-          <AttributionCapture />
-          <AuthStatusProvider>
-            <PostHogProvider>
-              <ErrorBoundaryWrapper>
-                <UserProvider>
-                  <AstronomyProviderWrapper>
-                    <AppOpenedTracker />
-                    <Suspense
-                      fallback={
-                        <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
-                          {children}
-                        </main>
-                      }
-                    >
-                      <ConditionalMainWrapper>
-                        <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
-                        <Analytics />
-                        <SpeedInsights />
-                      </ConditionalMainWrapper>
-                    </Suspense>
-                    <Suspense fallback={null}>
-                      <AppChrome />
-                    </Suspense>
-                    <CookieConsent />
-                  </AstronomyProviderWrapper>
-                </UserProvider>
-              </ErrorBoundaryWrapper>
-            </PostHogProvider>
-          </AuthStatusProvider>
-        </Suspense>
+        <ThemeProvider>
+          <Suspense fallback={null}>
+            <AttributionCapture />
+            <AuthStatusProvider>
+              <PostHogProvider>
+                <ErrorBoundaryWrapper>
+                  <UserProvider>
+                    <AstronomyProviderWrapper>
+                      <AppOpenedTracker />
+                      <Suspense
+                        fallback={
+                          <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
+                            {children}
+                          </main>
+                        }
+                      >
+                        <ConditionalMainWrapper>
+                          <ErrorBoundaryWrapper>
+                            {children}
+                          </ErrorBoundaryWrapper>
+                          <Analytics />
+                          <SpeedInsights />
+                        </ConditionalMainWrapper>
+                      </Suspense>
+                      <Suspense fallback={null}>
+                        <AppChrome />
+                      </Suspense>
+                      <CookieConsent />
+                    </AstronomyProviderWrapper>
+                  </UserProvider>
+                </ErrorBoundaryWrapper>
+              </PostHogProvider>
+            </AuthStatusProvider>
+          </Suspense>
+        </ThemeProvider>
       </body>
     </html>
   );

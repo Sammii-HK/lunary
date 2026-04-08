@@ -88,8 +88,8 @@ export default function CommunitySpaceClient() {
     return (
       <div className='min-h-screen p-4'>
         <div className='max-w-2xl mx-auto flex items-center gap-2 py-8'>
-          <Loader2 className='w-5 h-5 text-zinc-500 animate-spin' />
-          <span className='text-sm text-zinc-500'>Loading space...</span>
+          <Loader2 className='w-5 h-5 text-content-muted animate-spin' />
+          <span className='text-sm text-content-muted'>Loading space...</span>
         </div>
       </div>
     );
@@ -99,7 +99,9 @@ export default function CommunitySpaceClient() {
     return (
       <div className='min-h-screen p-4'>
         <div className='max-w-2xl mx-auto py-8 text-center'>
-          <p className='text-sm text-zinc-400'>{error ?? 'Space not found'}</p>
+          <p className='text-sm text-content-muted'>
+            {error ?? 'Space not found'}
+          </p>
           <Link
             href='/community'
             className='text-xs text-lunary-primary-400 hover:underline mt-2 inline-block'
@@ -119,7 +121,7 @@ export default function CommunitySpaceClient() {
       <div className='max-w-2xl mx-auto space-y-4 mb-20'>
         <Link
           href='/community'
-          className='inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors'
+          className='inline-flex items-center gap-1 text-xs text-content-muted hover:text-content-secondary transition-colors'
         >
           <ArrowLeft className='w-3.5 h-3.5' />
           Community
@@ -155,9 +157,9 @@ export default function CommunitySpaceClient() {
 
         {/* Upgrade prompt for free users who are members */}
         {space.isMember && !isSubscribed && (
-          <div className='rounded-xl border border-zinc-800/50 bg-zinc-900/50 p-4 text-center'>
-            <Lock className='w-5 h-5 text-zinc-500 mx-auto mb-2' />
-            <p className='text-sm text-zinc-400'>
+          <div className='rounded-xl border border-stroke-subtle/50 bg-surface-elevated/50 p-4 text-center'>
+            <Lock className='w-5 h-5 text-content-muted mx-auto mb-2' />
+            <p className='text-sm text-content-muted'>
               Upgrade to Lunary+ to post in community spaces
             </p>
             <Link

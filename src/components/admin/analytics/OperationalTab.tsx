@@ -131,15 +131,15 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
   return (
     <div className='space-y-10'>
       {/* MAU Type Explainer */}
-      <Card className='border-lunary-primary-700/40 bg-lunary-primary-950/20'>
+      <Card className='border-lunary-primary-700/40 bg-layer-deep/20'>
         <CardContent className='pt-6'>
           <div className='flex items-start gap-3'>
-            <Users className='mt-0.5 h-5 w-5 flex-shrink-0 text-lunary-primary-300' />
+            <Users className='mt-0.5 h-5 w-5 flex-shrink-0 text-content-brand' />
             <div className='space-y-3'>
-              <h3 className='font-medium text-lunary-primary-200'>
+              <h3 className='font-medium text-content-secondary'>
                 Understanding MAU Types
               </h3>
-              <div className='space-y-2 text-sm text-zinc-300'>
+              <div className='space-y-2 text-sm text-content-secondary'>
                 <div className='flex items-start gap-2'>
                   <CheckCircle className='mt-0.5 h-4 w-4 flex-shrink-0 text-lunary-success-300' />
                   <div>
@@ -152,9 +152,9 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                   </div>
                 </div>
                 <div className='flex items-start gap-2'>
-                  <Activity className='mt-0.5 h-4 w-4 flex-shrink-0 text-lunary-secondary-300' />
+                  <Activity className='mt-0.5 h-4 w-4 flex-shrink-0 text-content-brand-secondary' />
                   <div>
-                    <strong className='text-lunary-secondary-200'>
+                    <strong className='text-content-brand-secondary'>
                       App MAU:
                     </strong>{' '}
                     All users who opened the app, including logged-out users
@@ -162,9 +162,9 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                   </div>
                 </div>
                 <div className='flex items-start gap-2'>
-                  <Info className='mt-0.5 h-4 w-4 flex-shrink-0 text-lunary-accent-300' />
+                  <Info className='mt-0.5 h-4 w-4 flex-shrink-0 text-content-brand-accent' />
                   <div>
-                    <strong className='text-lunary-accent-200'>
+                    <strong className='text-content-brand-accent'>
                       Grimoire MAU:
                     </strong>{' '}
                     Users who only viewed grimoire educational content without
@@ -179,11 +179,11 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
 
       {/* Integrity Warnings */}
       {integrityWarnings.length > 0 && (
-        <div className='rounded-xl border border-lunary-warning-600/40 bg-zinc-900/40 px-4 py-3 text-sm text-zinc-200'>
-          <p className='text-xs text-zinc-400 font-medium'>
+        <div className='rounded-xl border border-lunary-warning-600/40 bg-surface-elevated/40 px-4 py-3 text-sm text-content-primary'>
+          <p className='text-xs text-content-muted font-medium'>
             Integrity warnings
           </p>
-          <ul className='mt-2 space-y-1 text-xs text-zinc-300'>
+          <ul className='mt-2 space-y-1 text-xs text-content-secondary'>
             {integrityWarnings.map((warning) => (
               <li key={warning}>- {warning}</li>
             ))}
@@ -202,7 +202,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
             <MiniStat
               label='Total accounts (all-time)'
               value={totalAccountsEver.toLocaleString()}
-              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+              icon={<Activity className='h-5 w-5 text-content-brand' />}
             />
             <MiniStat
               label='Product users (signed-in, range)'
@@ -212,7 +212,9 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
             <MiniStat
               label='Total returning users (all-time)'
               value={allTimeReturningUsers}
-              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
+              icon={
+                <Activity className='h-5 w-5 text-content-brand-secondary' />
+              }
             />
             <MiniStat
               label='Avg active days per product user (range)'
@@ -221,7 +223,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                   ? allTimeMedianActiveDays.toFixed(2)
                   : '—'
               }
-              icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+              icon={<Target className='h-5 w-5 text-content-brand-accent' />}
             />
           </div>
         </StatSection>
@@ -235,13 +237,13 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
             title='Platform breakdown'
             description='Sessions and unique users by platform (web, Android, iOS, PWA).'
           >
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+            <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
               <CardHeader>
                 <CardTitle className='flex items-center gap-2 text-base font-medium'>
-                  <Smartphone className='h-4 w-4 text-lunary-primary-300' />
+                  <Smartphone className='h-4 w-4 text-content-brand' />
                   Platform sessions
                 </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
+                <CardDescription className='text-xs text-content-muted'>
                   Based on app_opened and product_opened events in the selected
                   range.
                 </CardDescription>
@@ -267,15 +269,15 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                         return (
                           <div key={p.platform} className='space-y-1'>
                             <div className='flex items-center justify-between text-sm'>
-                              <span className='font-medium capitalize text-zinc-200'>
+                              <span className='font-medium capitalize text-content-primary'>
                                 {p.platform}
                               </span>
-                              <span className='text-zinc-400'>
+                              <span className='text-content-muted'>
                                 {p.sessions.toLocaleString()} sessions /{' '}
                                 {p.unique_users.toLocaleString()} users
                               </span>
                             </div>
-                            <div className='h-2 w-full rounded-full bg-zinc-800'>
+                            <div className='h-2 w-full rounded-full bg-surface-card'>
                               <div
                                 className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
                                 style={{ width: `${pct.toFixed(1)}%` }}
@@ -287,7 +289,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                     )}
                   </div>
                 ) : (
-                  <p className='text-sm text-zinc-500'>
+                  <p className='text-sm text-content-muted'>
                     No platform data recorded yet. Platform tracking starts
                     collecting once the client-side detection is deployed.
                   </p>
@@ -301,19 +303,19 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
       {/* SEO & Attribution */}
       <section className='space-y-3'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>
+          <h2 className='text-sm font-medium text-content-primary'>
             SEO & Attribution
           </h2>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             First-touch attribution tracking for organic and marketing channels.
           </p>
         </div>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               First-touch attribution
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Total attributed users (first-touch source logged at signup).
             </CardDescription>
           </CardHeader>
@@ -322,7 +324,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               <MiniStat
                 label='Total Attributed Users'
                 value={totalAttributedUsers}
-                icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+                icon={<Activity className='h-5 w-5 text-content-brand' />}
               />
               <MiniStat
                 label='Organic (SEO) Users'
@@ -333,19 +335,19 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                 label='Organic % of attributed signups'
                 value={organicAttributionPercentage}
                 icon={
-                  <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
+                  <Sparkles className='h-5 w-5 text-content-brand-secondary' />
                 }
               />
             </div>
           </CardContent>
         </Card>
         <div className='grid gap-4 lg:grid-cols-2'>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
                 Traffic Source Breakdown
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 Where your users are coming from.
               </CardDescription>
             </CardHeader>
@@ -372,12 +374,12 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               />
             </CardContent>
           </Card>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
                 Conversion by Source
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 Which sources convert to paid users.
               </CardDescription>
             </CardHeader>
@@ -412,44 +414,46 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
       {/* Signup → Subscription (30d) */}
       <section className='space-y-3'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>
+          <h2 className='text-sm font-medium text-content-primary'>
             Signup -&gt; Subscription (30d)
           </h2>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             Tracks new free accounts that converted to paid within 30 days of
             signup.
           </p>
         </div>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               Subscription funnel
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Window is scoped to signup date (30-day lookback).
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className='grid gap-4 md:grid-cols-3'>
-              <div className='rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-3 py-3 text-sm'>
-                <p className='text-xs font-medium text-zinc-400'>Signups</p>
-                <p className='text-2xl font-light text-white'>
+              <div className='rounded-xl border border-stroke-subtle/40 bg-surface-base/60 px-3 py-3 text-sm'>
+                <p className='text-xs font-medium text-content-muted'>
+                  Signups
+                </p>
+                <p className='text-2xl font-light text-content-primary'>
                   {signup30dSignups.toLocaleString()}
                 </p>
               </div>
-              <div className='rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-3 py-3 text-sm'>
-                <p className='text-xs font-medium text-zinc-400'>
+              <div className='rounded-xl border border-stroke-subtle/40 bg-surface-base/60 px-3 py-3 text-sm'>
+                <p className='text-xs font-medium text-content-muted'>
                   Subscriptions
                 </p>
-                <p className='text-2xl font-light text-white'>
+                <p className='text-2xl font-light text-content-primary'>
                   {signup30dSubscriptions.toLocaleString()}
                 </p>
               </div>
-              <div className='rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-3 py-3 text-sm'>
-                <p className='text-xs font-medium text-zinc-400'>
+              <div className='rounded-xl border border-stroke-subtle/40 bg-surface-base/60 px-3 py-3 text-sm'>
+                <p className='text-xs font-medium text-content-muted'>
                   Conversion rate
                 </p>
-                <p className='text-2xl font-light text-white'>
+                <p className='text-2xl font-light text-content-primary'>
                   {signup30dRate}
                 </p>
               </div>
@@ -461,19 +465,19 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
       {/* CTA Conversions */}
       <section className='space-y-3'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>
+          <h2 className='text-sm font-medium text-content-primary'>
             CTA Conversions by Hub
           </h2>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             Clickers, signups in range, and conversion % per hub.
           </p>
         </div>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               CTA conversion performance
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Signups attributed to CTA clicks within the selected date range.
             </CardDescription>
           </CardHeader>
@@ -511,20 +515,20 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
       {/* CTA Location Breakdown - Inline vs Full nudge */}
       <section className='space-y-3'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>
+          <h2 className='text-sm font-medium text-content-primary'>
             CTA Performance by Location
           </h2>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             Compare inline (after TL;DR) vs full CTA (bottom of page)
             performance.
           </p>
         </div>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               Inline vs Full CTA comparison
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Track which CTA position converts better. CTR = clicks /
               impressions. Conversion = signups / clickers (in range).
             </CardDescription>
@@ -576,17 +580,19 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
       {/* Activation Rate */}
       <section className='space-y-3'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>Activation Rate</h2>
-          <p className='text-xs text-zinc-500'>
+          <h2 className='text-sm font-medium text-content-primary'>
+            Activation Rate
+          </h2>
+          <p className='text-xs text-content-muted'>
             Users who completed 1+ key action within 7 days of signup.
           </p>
         </div>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               Activation health
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Activated users cannot exceed total signups.
             </CardDescription>
           </CardHeader>
@@ -595,7 +601,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               <MiniStat
                 label='Activation Rate %'
                 value={activationRateDisplay}
-                icon={<Sparkles className='h-5 w-5 text-lunary-primary-300' />}
+                icon={<Sparkles className='h-5 w-5 text-content-brand' />}
               />
               <MiniStat
                 label='Activated Users'
@@ -605,7 +611,9 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               <MiniStat
                 label='Total Signups'
                 value={activationTotalSignups}
-                icon={<Target className='h-5 w-5 text-lunary-secondary-300' />}
+                icon={
+                  <Target className='h-5 w-5 text-content-brand-secondary' />
+                }
               />
             </div>
           </CardContent>
@@ -615,19 +623,19 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
       {/* Activation by Feature */}
       <section className='space-y-3'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>
+          <h2 className='text-sm font-medium text-content-primary'>
             Activation by Feature
           </h2>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             Free / Paid / Unknown splits based on tier at activation time.
           </p>
         </div>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               Feature-driven tiers
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Tier is resolved at the time of the activation event.
             </CardDescription>
           </CardHeader>
@@ -682,21 +690,21 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
       {/* Event Volume & Quality */}
       <section className='space-y-6'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>
+          <h2 className='text-sm font-medium text-content-primary'>
             Event Volume & Quality
           </h2>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             Understand raw `app_opened` volume, session depth, and AI costs
             before digging into usage trends.
           </p>
         </div>
         <div className='grid gap-6 lg:grid-cols-3'>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
                 Raw Event Audit
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 Canonical `app_opened` counts are surfaced when the audit mode
                 is enabled.
               </CardDescription>
@@ -705,7 +713,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               <MiniStat
                 label='Raw app_opened events'
                 value={engagementOverview?.audit?.raw_events_count ?? '—'}
-                icon={<Loader2 className='h-5 w-5 text-lunary-accent-300' />}
+                icon={<Loader2 className='h-5 w-5 text-content-brand-accent' />}
               />
               <MiniStat
                 label='Canonical identities'
@@ -713,12 +721,14 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                   engagementOverview?.audit?.distinct_canonical_identities ??
                   '—'
                 }
-                icon={<Sparkles className='h-5 w-5 text-lunary-primary-300' />}
+                icon={<Sparkles className='h-5 w-5 text-content-brand' />}
               />
               <MiniStat
                 label='Missing identity rows'
                 value={engagementOverview?.audit?.missing_identity_rows ?? '—'}
-                icon={<Target className='h-5 w-5 text-lunary-secondary-300' />}
+                icon={
+                  <Target className='h-5 w-5 text-content-brand-secondary' />
+                }
               />
               <MiniStat
                 label='Identity links applied'
@@ -730,16 +740,16 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
             </CardContent>
           </Card>
 
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
                 Average sessions
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 Depth of signed-in product engagement per user.
               </CardDescription>
             </CardHeader>
-            <CardContent className='space-y-3 text-sm text-zinc-200'>
+            <CardContent className='space-y-3 text-sm text-content-primary'>
               <div className='flex items-center justify-between'>
                 <span>Signed-in product sessions</span>
                 <span>
@@ -762,16 +772,16 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
             </CardContent>
           </Card>
 
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
                 AI usage & costs
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 Track generation volume versus spend.
               </CardDescription>
             </CardHeader>
-            <CardContent className='space-y-2 text-sm text-zinc-300'>
+            <CardContent className='space-y-2 text-sm text-content-secondary'>
               <div className='flex items-center justify-between'>
                 <span>Total API cost</span>
                 <span>
@@ -808,12 +818,12 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
           </Card>
         </div>
 
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               Feature usage heatmap
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Past seven days of key feature events.
             </CardDescription>
           </CardHeader>
@@ -822,17 +832,17 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
           </CardContent>
         </Card>
 
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               Audience Segments
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Compare the deduped counts across the four canonical families.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               Pageview Reach = `page_viewed` deduped - Engaged Users = key
               action events - Signed-in Product Usage = authenticated product
               event users - Grimoire Viewers = `grimoire_viewed` users
@@ -841,7 +851,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               <MiniStat
                 label='Pageview Reach MAU'
                 value={reachMau}
-                icon={<Bell className='h-5 w-5 text-lunary-primary-300' />}
+                icon={<Bell className='h-5 w-5 text-content-brand' />}
               />
               <MiniStat
                 label='Engaged Users MAU'
@@ -852,16 +862,16 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                 label='Signed-in Product MAU'
                 value={activity?.signed_in_product_mau ?? 0}
                 icon={
-                  <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
+                  <Sparkles className='h-5 w-5 text-content-brand-secondary' />
                 }
               />
               <MiniStat
                 label='Grimoire Viewers MAU'
                 value={grimoireMau}
-                icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+                icon={<Target className='h-5 w-5 text-content-brand-accent' />}
               />
             </div>
-            <p className='mt-2 text-xs text-zinc-500'>
+            <p className='mt-2 text-xs text-content-muted'>
               These families let you compare reach, engagement, product, and
               Grimoire-only cohorts without mixing denominators.
             </p>
@@ -872,20 +882,20 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
       {/* Grimoire Deep Dive */}
       <section className='space-y-6'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>
+          <h2 className='text-sm font-medium text-content-primary'>
             Grimoire Deep Dive
           </h2>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             Grimoire viewers are scoped to `grimoire_viewed` events and feed the
             conversion flywheel.
           </p>
         </div>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               Grimoire health
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Entry rate, penetration, and return behavior inside the Grimoire
               experience.
             </CardDescription>
@@ -904,7 +914,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                     ? `${grimoireHealth.grimoire_to_app_users} of ${grimoireHealth.grimoire_visitors}`
                     : undefined
                 }
-                icon={<Sparkles className='h-5 w-5 text-lunary-primary-300' />}
+                icon={<Sparkles className='h-5 w-5 text-content-brand' />}
               />
               <MiniStat
                 label='Grimoire MAU'
@@ -915,7 +925,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                 label='Grimoire-only MAU'
                 value={grimoireOnlyMau}
                 icon={
-                  <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                  <Activity className='h-5 w-5 text-content-brand-secondary' />
                 }
               />
               <MiniStat
@@ -926,7 +936,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                     ? grimoireHealth.grimoire_views_per_active_user.toFixed(2)
                     : '—'
                 }
-                icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+                icon={<Activity className='h-5 w-5 text-content-brand' />}
               />
             </div>
             <div className='grid gap-4 md:grid-cols-2'>
@@ -937,7 +947,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                     ? `${grimoireHealth.return_to_grimoire_rate.toFixed(2)}%`
                     : '—'
                 }
-                icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+                icon={<Target className='h-5 w-5 text-content-brand-accent' />}
               />
               <MiniStat
                 label='Grimoire conversions'
@@ -948,8 +958,8 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                 icon={<Sparkles className='h-5 w-5 text-lunary-success-300' />}
               />
             </div>
-            <div className='rounded-xl border border-zinc-800/30 bg-zinc-950/50 p-4 text-sm text-zinc-300'>
-              <p className='text-xs uppercase tracking-wider text-zinc-400'>
+            <div className='rounded-xl border border-stroke-subtle/30 bg-surface-base/50 p-4 text-sm text-content-secondary'>
+              <p className='text-xs uppercase tracking-wider text-content-muted'>
                 Conversion influence
               </p>
               <div className='mt-2 space-y-1'>
@@ -990,12 +1000,12 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
             </div>
           </CardContent>
         </Card>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               Top Grimoire Pages
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Best performing grimoire pages by unique views (deduplicated, 1
               per user per page per day).
             </CardDescription>
@@ -1028,12 +1038,12 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
           </CardContent>
         </Card>
         {searchConsoleData && (
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
                 SEO & referral entry rate
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 Organic reach that feeds the Grimoire experience.
               </CardDescription>
             </CardHeader>
@@ -1050,21 +1060,21 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
       {/* Conversion & Lifecycle */}
       <section className='space-y-6'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>
+          <h2 className='text-sm font-medium text-content-primary'>
             Conversion & Lifecycle
           </h2>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             Signup to trial to paid movement, lifecycle stages, and churn
             diagnostics.
           </p>
         </div>
         <div className='grid gap-6 xl:grid-cols-2'>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
                 Conversion funnel (cohort)
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 Tracks users who signed up in the selected range through free
                 &rarr; trial &rarr; paid. Only this cohort, not all subscribers.
               </CardDescription>
@@ -1087,21 +1097,21 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
       {/* Notifications & External Channels */}
       <section className='space-y-6'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>
+          <h2 className='text-sm font-medium text-content-primary'>
             Notifications & External Channels
           </h2>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             Track deliverability and command usage across push, email, and
             Discord.
           </p>
         </div>
         <div className='grid gap-6 lg:grid-cols-2'>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
             <CardHeader>
               <CardTitle className='text-base font-medium'>
                 Notification health
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
+              <CardDescription className='text-xs text-content-muted'>
                 Open rates by channel.
               </CardDescription>
             </CardHeader>
@@ -1110,24 +1120,24 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                 {notificationTypes.map((type) => (
                   <div
                     key={type.key}
-                    className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4'
+                    className='rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-4'
                   >
-                    <div className='flex items-center gap-2 text-sm font-medium text-zinc-300'>
-                      <Bell className='h-4 w-4 text-lunary-primary-300' />
+                    <div className='flex items-center gap-2 text-sm font-medium text-content-secondary'>
+                      <Bell className='h-4 w-4 text-content-brand' />
                       {type.label}
                     </div>
                     <div className='mt-3 grid gap-2 text-sm'>
-                      <div className='flex items-center justify-between text-zinc-400'>
+                      <div className='flex items-center justify-between text-content-muted'>
                         <span>Sent</span>
                         <span>{type.data.sent.toLocaleString()}</span>
                       </div>
-                      <div className='flex items-center justify-between text-zinc-400'>
+                      <div className='flex items-center justify-between text-content-muted'>
                         <span>Open rate</span>
                         <span>
                           {Number(type.data.open_rate ?? 0).toFixed(1)}%
                         </span>
                       </div>
-                      <div className='flex items-center justify-between text-zinc-400'>
+                      <div className='flex items-center justify-between text-content-muted'>
                         <span>CTR</span>
                         <span>
                           {Number(type.data.click_through_rate ?? 0).toFixed(1)}
@@ -1149,25 +1159,25 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
       {/* Cohorts & Retention */}
       <section className='space-y-6'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>
+          <h2 className='text-sm font-medium text-content-primary'>
             Cohorts & Retention
           </h2>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-xs text-content-muted'>
             View retention by signup cohort. Cohorts younger than 30 days are
             still maturing.
           </p>
         </div>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               Cohort retention analysis
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Retention by signup week/month (first `app_opened`).
             </CardDescription>
           </CardHeader>
           <CardContent className='overflow-x-auto'>
-            <div className='mb-4 text-xs text-zinc-400'>
+            <div className='mb-4 text-xs text-content-muted'>
               Keeps cohort size, Day 1/7/30 retention, and maturity notes in
               view.
             </div>
@@ -1217,7 +1227,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               data={cohorts?.cohorts ?? []}
               emptyMessage='No cohort data for this range.'
             />
-            <p className='mt-3 text-xs text-zinc-500'>
+            <p className='mt-3 text-xs text-content-muted'>
               Immature cohorts (less than or equal to 30 days old) are still
               filling out, so treat their Day 30 rows as provisional.
             </p>
@@ -1242,27 +1252,27 @@ function SubscriptionLifecycleCard({
   planBreakdown: any;
 }) {
   return (
-    <Card className='border-zinc-800/30 bg-zinc-900/10'>
+    <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
       <CardHeader>
         <CardTitle className='text-base font-medium'>
           Subscription lifecycle & plans
         </CardTitle>
-        <CardDescription className='text-xs text-zinc-400'>
+        <CardDescription className='text-xs text-content-muted'>
           Track plan states, duration, and churn.
         </CardDescription>
       </CardHeader>
-      <CardContent className='space-y-3 text-sm text-zinc-200'>
+      <CardContent className='space-y-3 text-sm text-content-primary'>
         <div className='grid gap-2 md:grid-cols-2'>
           {lifecycleStateEntries.map(([status, count]) => (
             <div key={status} className='flex items-center justify-between'>
-              <span className='capitalize tracking-wide text-xs text-zinc-500'>
+              <span className='capitalize tracking-wide text-xs text-content-muted'>
                 {status.replace(/_/g, ' ')}
               </span>
               <span>{count.toLocaleString()}</span>
             </div>
           ))}
         </div>
-        <div className='flex items-center justify-between text-xs text-zinc-400'>
+        <div className='flex items-center justify-between text-xs text-content-muted'>
           <span>Avg subscription duration</span>
           <span>
             {subscriptionLifecycle?.avgDurationDays
@@ -1270,7 +1280,7 @@ function SubscriptionLifecycleCard({
               : 'N/A'}
           </span>
         </div>
-        <div className='flex items-center justify-between text-xs text-zinc-400'>
+        <div className='flex items-center justify-between text-xs text-content-muted'>
           <span>Churn rate</span>
           <span>
             {subscriptionLifecycle?.churnRate !== undefined
@@ -1278,13 +1288,13 @@ function SubscriptionLifecycleCard({
               : 'N/A'}
           </span>
         </div>
-        <div className='space-y-2 pt-2 text-xs text-zinc-300'>
+        <div className='space-y-2 pt-2 text-xs text-content-secondary'>
           {planBreakdown?.planBreakdown?.map((plan: any) => (
             <div
               key={plan.plan}
-              className='flex flex-col gap-1 rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2'
+              className='flex flex-col gap-1 rounded-lg border border-stroke-subtle/60 bg-surface-base/40 px-3 py-2'
             >
-              <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
+              <span className='text-[11px] uppercase tracking-wide text-content-muted'>
                 {plan.plan}
               </span>
               <span>Subscriptions: {plan.count}</span>
@@ -1292,14 +1302,14 @@ function SubscriptionLifecycleCard({
               <span>MRR: ${Number(plan.mrr ?? 0).toFixed(2)}</span>
               <span>Share: {Number(plan.percentage ?? 0).toFixed(1)}%</span>
               {(plan.withDiscount > 0 || plan.fullPrice > 0) && (
-                <span className='text-zinc-500'>
+                <span className='text-content-muted'>
                   Coupon: {plan.withDiscount} | Full: {plan.fullPrice}
                 </span>
               )}
             </div>
           ))}
           {!planBreakdown?.planBreakdown?.length && (
-            <div className='text-xs text-zinc-500'>
+            <div className='text-xs text-content-muted'>
               No plan breakdown data for this range.
             </div>
           )}
@@ -1312,15 +1322,15 @@ function SubscriptionLifecycleCard({
               Coupon Analysis
             </div>
             <div className='space-y-1 text-xs'>
-              <div className='flex justify-between text-zinc-300'>
+              <div className='flex justify-between text-content-secondary'>
                 <span>With coupon</span>
                 <span>{planBreakdown.couponSummary.totalWithDiscount}</span>
               </div>
-              <div className='flex justify-between text-zinc-300'>
+              <div className='flex justify-between text-content-secondary'>
                 <span>Full price</span>
                 <span>{planBreakdown.couponSummary.totalFullPrice}</span>
               </div>
-              <div className='flex justify-between text-zinc-400'>
+              <div className='flex justify-between text-content-muted'>
                 <span>Coupon %</span>
                 <span>
                   {Number(
@@ -1329,7 +1339,7 @@ function SubscriptionLifecycleCard({
                   %
                 </span>
               </div>
-              <div className='flex justify-between text-emerald-400 pt-1 border-t border-zinc-800/50'>
+              <div className='flex justify-between text-emerald-400 pt-1 border-t border-stroke-subtle/50'>
                 <span>Potential MRR</span>
                 <span>
                   $
@@ -1354,24 +1364,24 @@ function SubscriptionLifecycleCard({
         {/* Coupon Breakdown by Code */}
         {planBreakdown?.couponBreakdown?.length > 0 && (
           <div className='mt-3 space-y-2'>
-            <div className='text-[11px] uppercase tracking-wide text-zinc-500'>
+            <div className='text-[11px] uppercase tracking-wide text-content-muted'>
               Active Coupons
             </div>
             {planBreakdown.couponBreakdown.map((coupon: any) => (
               <div
                 key={coupon.couponCode}
-                className='flex items-center justify-between rounded border border-zinc-800/40 bg-zinc-950/30 px-2 py-1.5 text-xs'
+                className='flex items-center justify-between rounded border border-stroke-subtle/40 bg-surface-base/30 px-2 py-1.5 text-xs'
               >
                 <div className='flex flex-col'>
-                  <span className='text-zinc-300 font-medium'>
+                  <span className='text-content-secondary font-medium'>
                     {coupon.couponCode}
                   </span>
-                  <span className='text-zinc-500 text-[10px]'>
+                  <span className='text-content-muted text-[10px]'>
                     {coupon.discountPercent}% off - {coupon.activeCount} active
                   </span>
                 </div>
                 {coupon.latestExpiry && (
-                  <span className='text-zinc-500 text-[10px]'>
+                  <span className='text-content-muted text-[10px]'>
                     Expires:{' '}
                     {new Date(coupon.latestExpiry).toLocaleDateString()}
                   </span>
@@ -1389,7 +1399,7 @@ function SubscriptionLifecycleCard({
             </div>
             <div className='space-y-1 text-xs'>
               {planBreakdown.legacyMonthlySubscribers.map((sub: any) => (
-                <div key={sub.subscriptionId} className='text-zinc-400'>
+                <div key={sub.subscriptionId} className='text-content-muted'>
                   {sub.email || sub.name || 'Unknown'} - {sub.status}
                 </div>
               ))}
@@ -1408,12 +1418,12 @@ function DiscordAnalyticsCards({
 }) {
   return (
     <div className='space-y-6'>
-      <Card className='border-zinc-800/30 bg-zinc-900/10'>
+      <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
         <CardHeader>
           <CardTitle className='text-base font-medium'>
             Discord bot engagement
           </CardTitle>
-          <CardDescription className='text-xs text-zinc-400'>
+          <CardDescription className='text-xs text-content-muted'>
             Command usage (last 7 days).
           </CardDescription>
         </CardHeader>
@@ -1421,7 +1431,7 @@ function DiscordAnalyticsCards({
           <MiniStat
             label='Total commands'
             value={discordAnalytics.stats?.funnel?.totalCommands ?? 0}
-            icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+            icon={<Activity className='h-5 w-5 text-content-brand' />}
           />
           <MiniStat
             label='Button clicks'
@@ -1435,21 +1445,21 @@ function DiscordAnalyticsCards({
                 ? `${discordAnalytics.stats.funnel.clickThroughRate}%`
                 : 'N/A'
             }
-            icon={<Sparkles className='h-5 w-5 text-lunary-secondary-300' />}
+            icon={<Sparkles className='h-5 w-5 text-content-brand-secondary' />}
           />
           <MiniStat
             label='Accounts linked'
             value={discordAnalytics.stats?.funnel?.accountsLinked ?? 0}
-            icon={<Bell className='h-5 w-5 text-lunary-accent-300' />}
+            icon={<Bell className='h-5 w-5 text-content-brand-accent' />}
           />
         </CardContent>
       </Card>
-      <Card className='border-zinc-800/30 bg-zinc-900/10'>
+      <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
         <CardHeader>
           <CardTitle className='text-base font-medium'>
             Top Discord commands
           </CardTitle>
-          <CardDescription className='text-xs text-zinc-400'>
+          <CardDescription className='text-xs text-content-muted'>
             Most popular bot interactions
           </CardDescription>
         </CardHeader>
@@ -1458,13 +1468,13 @@ function DiscordAnalyticsCards({
             .slice(0, 5)
             .map((cmd: any) => (
               <div key={cmd.command_name} className='space-y-2'>
-                <div className='flex items-center justify-between text-sm text-zinc-400'>
+                <div className='flex items-center justify-between text-sm text-content-muted'>
                   <span className='capitalize'>
                     {cmd.command_name || 'Unknown'}
                   </span>
                   <span>{cmd.total_uses.toLocaleString()}</span>
                 </div>
-                <div className='h-2 w-full rounded-full bg-zinc-800'>
+                <div className='h-2 w-full rounded-full bg-surface-card'>
                   <div
                     className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
                     style={{
@@ -1480,7 +1490,7 @@ function DiscordAnalyticsCards({
                     }}
                   />
                 </div>
-                <div className='flex items-center justify-between text-xs text-zinc-400'>
+                <div className='flex items-center justify-between text-xs text-content-muted'>
                   <span>{cmd.unique_users} users</span>
                   <span>{cmd.linked_users} linked</span>
                 </div>

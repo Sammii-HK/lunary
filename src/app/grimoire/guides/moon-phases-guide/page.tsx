@@ -323,7 +323,7 @@ export default function MoonPhasesGuidePage() {
       {renderJsonLd(faqSchema)}
 
       {/* Breadcrumbs */}
-      <nav className='text-sm text-zinc-400 mb-8'>
+      <nav className='text-sm text-content-muted mb-8'>
         <Link href='/grimoire' className='hover:text-lunary-primary-400'>
           Grimoire
         </Link>
@@ -332,18 +332,18 @@ export default function MoonPhasesGuidePage() {
           Moon
         </Link>
         <span className='mx-2'>→</span>
-        <span className='text-zinc-300'>Complete Guide</span>
+        <span className='text-content-secondary'>Complete Guide</span>
       </nav>
 
       {/* Hero Section */}
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-6'>
           Moon Phases: The Complete Guide
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             Master the Lunar Cycle
           </span>
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed mb-6'>
+        <p className='text-xl text-content-muted leading-relaxed mb-6'>
           The Moon has guided humanity for millennia—governing tides, seasons,
           and our inner emotional landscape. This comprehensive guide will teach
           you the meaning of each lunar phase, how to work with moon energy, and
@@ -360,11 +360,11 @@ export default function MoonPhasesGuidePage() {
       </header>
 
       {/* Table of Contents */}
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a
               href='#understanding-moon'
@@ -427,43 +427,43 @@ export default function MoonPhasesGuidePage() {
 
       {/* Section 1: Understanding the Lunar Cycle */}
       <section id='understanding-moon' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           1. Understanding the Lunar Cycle
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           The lunar cycle is the Moon&apos;s journey from invisible (New Moon)
           to fully illuminated (Full Moon) and back again. This 29.5-day cycle
           has been tracked by humans since ancient times and forms the basis of
           many calendars and spiritual practices.
         </p>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           As the Moon orbits Earth, the Sun illuminates different portions of
           its surface from our perspective. When the Moon is between Earth and
           the Sun, we see the dark New Moon. When Earth is between the Sun and
           Moon, we see the fully lit Full Moon.
         </p>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-lg p-6'>
+          <h3 className='text-lg font-medium text-content-brand mb-3'>
             The Two Halves of the Lunar Cycle
           </h3>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <h4 className='text-zinc-100 font-medium mb-2'>
+              <h4 className='text-content-primary font-medium mb-2'>
                 Waxing (Growing) 🌒🌓🌔🌕
               </h4>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 New Moon → Full Moon. The light increases. Energy for: building,
                 growing, attracting, creating, starting new things.
               </p>
             </div>
             <div>
-              <h4 className='text-zinc-100 font-medium mb-2'>
+              <h4 className='text-content-primary font-medium mb-2'>
                 Waning (Releasing) 🌕🌖🌗🌘
               </h4>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Full Moon → New Moon. The light decreases. Energy for:
                 releasing, completing, letting go, banishing, rest.
               </p>
@@ -474,11 +474,11 @@ export default function MoonPhasesGuidePage() {
 
       {/* Section 2: The 8 Moon Phases */}
       <section id='eight-phases' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           2. The 8 Moon Phases Explained
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Each phase of the Moon carries unique energy. Understanding these
           phases helps you align your activities and intentions with natural
           rhythms.
@@ -488,28 +488,28 @@ export default function MoonPhasesGuidePage() {
           {MOON_PHASES.map((phase) => (
             <div
               key={phase.name}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
               <div className='flex items-center gap-3 mb-3'>
                 <span className='text-3xl'>{phase.emoji}</span>
                 <div>
-                  <h3 className='text-xl font-medium text-zinc-100'>
+                  <h3 className='text-xl font-medium text-content-primary'>
                     {phase.name}
                   </h3>
-                  <p className='text-sm text-zinc-400'>
+                  <p className='text-sm text-content-muted'>
                     {phase.illumination} illuminated • ~{phase.duration}
                   </p>
                 </div>
               </div>
 
-              <p className='text-lunary-primary-300 mb-4'>{phase.energy}</p>
+              <p className='text-content-brand mb-4'>{phase.energy}</p>
 
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div>
                   <h4 className='text-sm font-medium text-lunary-success mb-2'>
                     ✓ Best Activities
                   </h4>
-                  <ul className='text-sm text-zinc-400 space-y-1'>
+                  <ul className='text-sm text-content-muted space-y-1'>
                     {phase.activities.map((activity) => (
                       <li key={activity}>• {activity}</li>
                     ))}
@@ -519,7 +519,7 @@ export default function MoonPhasesGuidePage() {
                   <h4 className='text-sm font-medium text-lunary-error mb-2'>
                     ✗ Avoid
                   </h4>
-                  <ul className='text-sm text-zinc-400 space-y-1'>
+                  <ul className='text-sm text-content-muted space-y-1'>
                     {phase.avoid.map((item) => (
                       <li key={item}>• {item}</li>
                     ))}
@@ -533,11 +533,11 @@ export default function MoonPhasesGuidePage() {
 
       {/* Section 3: Full Moon Names */}
       <section id='full-moon-names' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           3. Full Moon Names by Month
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Each month&apos;s Full Moon has traditional names, many originating
           from Native American, Colonial American, or European traditions. These
           names reflect the natural world and seasonal activities.
@@ -548,11 +548,11 @@ export default function MoonPhasesGuidePage() {
             <Link
               key={moon.month}
               href={`/grimoire/moon/full-moon-names#${moon.month.toLowerCase()}`}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 hover:border-lunary-primary transition-colors'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4 hover:border-lunary-primary transition-colors'
             >
-              <h4 className='text-zinc-100 font-medium'>{moon.name}</h4>
+              <h4 className='text-content-primary font-medium'>{moon.name}</h4>
               <p className='text-sm text-lunary-primary-400'>{moon.month}</p>
-              <p className='text-xs text-zinc-400 mt-1'>{moon.meaning}</p>
+              <p className='text-xs text-content-muted mt-1'>{moon.meaning}</p>
             </Link>
           ))}
         </div>
@@ -560,18 +560,18 @@ export default function MoonPhasesGuidePage() {
 
       {/* Section 4: New Moon Ritual */}
       <section id='new-moon-ritual' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           4. New Moon Ritual Guide
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           The New Moon is the perfect time to set intentions for the coming
           lunar cycle. This is when the slate is clean and new energy is ready
           to be directed.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-4'>
             Simple New Moon Ritual
           </h3>
           <ol className='space-y-4'>
@@ -580,10 +580,10 @@ export default function MoonPhasesGuidePage() {
                 1
               </span>
               <div>
-                <h4 className='text-zinc-100 font-medium'>
+                <h4 className='text-content-primary font-medium'>
                   Create Sacred Space
                 </h4>
-                <p className='text-zinc-400 text-sm'>
+                <p className='text-content-muted text-sm'>
                   Light a candle, cleanse your space with sage or incense, and
                   sit in a quiet, comfortable place.
                 </p>
@@ -594,8 +594,10 @@ export default function MoonPhasesGuidePage() {
                 2
               </span>
               <div>
-                <h4 className='text-zinc-100 font-medium'>Ground Yourself</h4>
-                <p className='text-zinc-400 text-sm'>
+                <h4 className='text-content-primary font-medium'>
+                  Ground Yourself
+                </h4>
+                <p className='text-content-muted text-sm'>
                   Take several deep breaths. Close your eyes and feel your
                   connection to the earth beneath you.
                 </p>
@@ -606,8 +608,8 @@ export default function MoonPhasesGuidePage() {
                 3
               </span>
               <div>
-                <h4 className='text-zinc-100 font-medium'>Reflect</h4>
-                <p className='text-zinc-400 text-sm'>
+                <h4 className='text-content-primary font-medium'>Reflect</h4>
+                <p className='text-content-muted text-sm'>
                   Consider what you want to call into your life. What seeds do
                   you want to plant this cycle?
                 </p>
@@ -618,8 +620,10 @@ export default function MoonPhasesGuidePage() {
                 4
               </span>
               <div>
-                <h4 className='text-zinc-100 font-medium'>Write Intentions</h4>
-                <p className='text-zinc-400 text-sm'>
+                <h4 className='text-content-primary font-medium'>
+                  Write Intentions
+                </h4>
+                <p className='text-content-muted text-sm'>
                   Write 3-10 intentions in present tense, as if they&apos;re
                   already happening: &quot;I am...&quot; &quot;I have...&quot;
                   &quot;I attract...&quot;
@@ -631,10 +635,10 @@ export default function MoonPhasesGuidePage() {
                 5
               </span>
               <div>
-                <h4 className='text-zinc-100 font-medium'>
+                <h4 className='text-content-primary font-medium'>
                   Seal with Gratitude
                 </h4>
-                <p className='text-zinc-400 text-sm'>
+                <p className='text-content-muted text-sm'>
                   Express thanks for what&apos;s coming. Keep your intentions
                   somewhere safe to revisit at the Full Moon.
                 </p>
@@ -646,50 +650,50 @@ export default function MoonPhasesGuidePage() {
 
       {/* Section 5: Full Moon Ritual */}
       <section id='full-moon-ritual' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           5. Full Moon Ritual Guide
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           The Full Moon is a time of culmination and release. It&apos;s ideal
           for letting go of what no longer serves you and celebrating how far
           you&apos;ve come.
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               🌕 Release Ritual
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Write down what you want to release (fears, limiting beliefs,
               toxic patterns). Safely burn the paper or tear it up and dispose
               of it.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               💎 Crystal Charging
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Place your crystals outside or on a windowsill to absorb the Full
               Moon&apos;s energy overnight. Set an intention for each crystal.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               🌊 Moon Water
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Place a jar of water under the Full Moon to charge it. Use for
               rituals, plants, baths, or drinking (if using clean water).
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               🙏 Gratitude Practice
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Review your New Moon intentions. Express gratitude for progress
               and lessons learned. Celebrate your wins, big and small.
             </p>
@@ -699,67 +703,67 @@ export default function MoonPhasesGuidePage() {
 
       {/* Section 8: Special Moons */}
       <section id='special-moons' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           8. Special Moons: Supermoons, Eclipses & Blue Moons
         </h2>
 
         <div className='space-y-4'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-zinc-100 mb-3'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               🌕 Supermoon
             </h3>
-            <p className='text-zinc-300 mb-2'>
+            <p className='text-content-secondary mb-2'>
               A Supermoon occurs when the Full Moon coincides with the
               Moon&apos;s closest approach to Earth (perigee). The Moon appears
               up to 14% larger and 30% brighter.
             </p>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Energy is amplified—emotions run higher, manifestation is more
               powerful, and rituals have extra potency.
             </p>
           </div>
 
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-zinc-100 mb-3'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               🌑 Solar Eclipse (New Moon)
             </h3>
-            <p className='text-zinc-300 mb-2'>
+            <p className='text-content-secondary mb-2'>
               A Solar Eclipse occurs when the Moon passes between Earth and the
               Sun, temporarily blocking sunlight. These are powerful New Moons
               that can mark major new beginnings.
             </p>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Eclipse energy lasts 6 months and can trigger significant life
               changes. Many practitioners avoid rituals during eclipses and
               instead observe and receive.
             </p>
           </div>
 
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-zinc-100 mb-3'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               🌕 Lunar Eclipse (Full Moon)
             </h3>
-            <p className='text-zinc-300 mb-2'>
+            <p className='text-content-secondary mb-2'>
               A Lunar Eclipse occurs when Earth passes between the Sun and Moon,
               casting a shadow on the Moon. These are intense Full Moons that
               often bring revelations and endings.
             </p>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Lunar Eclipses illuminate what&apos;s been hidden. They&apos;re
               powerful for releasing and completing cycles.
             </p>
           </div>
 
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-zinc-100 mb-3'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               🔵 Blue Moon
             </h3>
-            <p className='text-zinc-300 mb-2'>
+            <p className='text-content-secondary mb-2'>
               A Blue Moon is the second Full Moon in a calendar month, occurring
               roughly every 2.5 years. Despite the name, the Moon doesn&apos;t
               actually appear blue.
             </p>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Blue Moons are considered especially magical and powerful for
               manifestation. &quot;Once in a blue moon&quot; refers to their
               rarity.
@@ -770,49 +774,49 @@ export default function MoonPhasesGuidePage() {
 
       {/* Section 7: Manifestation by Moon Phase */}
       <section id='manifestation' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           7. Manifestation by Moon Phase
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Each lunar phase offers unique energy for different types of
           manifestation work. Aligning your intentions with the Moon&apos;s
           cycle amplifies your manifesting power.
         </p>
 
         <div className='space-y-4'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               🌑 New Moon - Plant Seeds
             </h4>
-            <p className='text-zinc-400'>
+            <p className='text-content-muted'>
               Set new intentions. Write down goals. Start fresh projects. The
               energy is perfect for new beginnings and clarifying what you want.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               🌒 Waxing Phase - Take Action
             </h4>
-            <p className='text-zinc-400'>
+            <p className='text-content-muted'>
               Build momentum. Take concrete steps toward your goals. This is the
               time for active manifestation—doing, creating, and attracting.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               🌕 Full Moon - Celebrate & Receive
             </h4>
-            <p className='text-zinc-400'>
+            <p className='text-content-muted'>
               Gratitude and release. Celebrate what has manifested. Let go of
               what no longer serves you. The Full Moon illuminates results.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               🌘 Waning Phase - Release & Rest
             </h4>
-            <p className='text-zinc-400'>
+            <p className='text-content-muted'>
               Let go of obstacles. Break bad habits. Clear space for the next
               cycle. This is a time for banishing and inner work.
             </p>
@@ -822,88 +826,110 @@ export default function MoonPhasesGuidePage() {
 
       {/* Section 8: Moon Signs */}
       <section id='moon-signs' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           8. Moon Signs & Their Energy
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           As the Moon moves through each zodiac sign (about 2.5 days per sign),
           it takes on that sign&apos;s qualities. Knowing the current Moon sign
           helps you choose the best times for different activities.
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>♈ Aries Moon</h4>
-            <p className='text-xs text-zinc-400'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
+              ♈ Aries Moon
+            </h4>
+            <p className='text-xs text-content-muted'>
               Action, starting new things, courage
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>♉ Taurus Moon</h4>
-            <p className='text-xs text-zinc-400'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
+              ♉ Taurus Moon
+            </h4>
+            <p className='text-xs text-content-muted'>
               Stability, self-care, financial matters
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>♊ Gemini Moon</h4>
-            <p className='text-xs text-zinc-400'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
+              ♊ Gemini Moon
+            </h4>
+            <p className='text-xs text-content-muted'>
               Communication, learning, socializing
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>♋ Cancer Moon</h4>
-            <p className='text-xs text-zinc-400'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
+              ♋ Cancer Moon
+            </h4>
+            <p className='text-xs text-content-muted'>
               Home, family, emotional healing
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>♌ Leo Moon</h4>
-            <p className='text-xs text-zinc-400'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
+              ♌ Leo Moon
+            </h4>
+            <p className='text-xs text-content-muted'>
               Creativity, self-expression, romance
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>♍ Virgo Moon</h4>
-            <p className='text-xs text-zinc-400'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
+              ♍ Virgo Moon
+            </h4>
+            <p className='text-xs text-content-muted'>
               Organization, health routines, analysis
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>♎ Libra Moon</h4>
-            <p className='text-xs text-zinc-400'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
+              ♎ Libra Moon
+            </h4>
+            <p className='text-xs text-content-muted'>
               Relationships, beauty, balance
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>♏ Scorpio Moon</h4>
-            <p className='text-xs text-zinc-400'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
+              ♏ Scorpio Moon
+            </h4>
+            <p className='text-xs text-content-muted'>
               Deep transformation, shadow work
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
               ♐ Sagittarius Moon
             </h4>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               Adventure, expansion, optimism
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
               ♑ Capricorn Moon
             </h4>
-            <p className='text-xs text-zinc-400'>Career, goals, discipline</p>
+            <p className='text-xs text-content-muted'>
+              Career, goals, discipline
+            </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>♒ Aquarius Moon</h4>
-            <p className='text-xs text-zinc-400'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
+              ♒ Aquarius Moon
+            </h4>
+            <p className='text-xs text-content-muted'>
               Innovation, community, breaking patterns
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <h4 className='font-medium text-zinc-100 mb-1'>♓ Pisces Moon</h4>
-            <p className='text-xs text-zinc-400'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4'>
+            <h4 className='font-medium text-content-primary mb-1'>
+              ♓ Pisces Moon
+            </h4>
+            <p className='text-xs text-content-muted'>
               Intuition, dreams, spiritual work
             </p>
           </div>
@@ -912,7 +938,7 @@ export default function MoonPhasesGuidePage() {
 
       {/* FAQ Section */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           9. Frequently Asked Questions
         </h2>
 
@@ -920,12 +946,14 @@ export default function MoonPhasesGuidePage() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 {faq.question}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-content-secondary leading-relaxed'>
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>
@@ -933,73 +961,73 @@ export default function MoonPhasesGuidePage() {
 
       {/* Where to Go Next */}
       <section className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           Continue Your Lunar Journey
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
           <Link
             href='/grimoire/moon/rituals'
-            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+            className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5 hover:border-lunary-primary transition-colors'
           >
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Moon Rituals
             </h4>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Detailed rituals for each lunar phase
             </p>
           </Link>
           <Link
             href='/grimoire/spells/fundamentals'
-            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+            className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5 hover:border-lunary-primary transition-colors'
           >
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Spellcraft Fundamentals
             </h4>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Learn how to time spells with the Moon
             </p>
           </Link>
           <Link
             href='/grimoire/events/2026'
-            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+            className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5 hover:border-lunary-primary transition-colors'
           >
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               2026 Cosmic Events
             </h4>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Upcoming eclipses, supermoons, and retrogrades
             </p>
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year'
-            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+            className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5 hover:border-lunary-primary transition-colors'
           >
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Wheel of the Year
             </h4>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Seasonal sabbats and their lunar connections
             </p>
           </Link>
           <Link
             href='/grimoire/moon-in'
-            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+            className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5 hover:border-lunary-primary transition-colors'
           >
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Moon in Signs
             </h4>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               How each zodiac sign colors lunar energy
             </p>
           </Link>
           <Link
             href='/grimoire/crystals'
-            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+            className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5 hover:border-lunary-primary transition-colors'
           >
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Crystals for Moon Work
             </h4>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Moonstone, selenite, and lunar allies
             </p>
           </Link>
@@ -1007,24 +1035,24 @@ export default function MoonPhasesGuidePage() {
       </section>
 
       {/* CTA Section */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-blue-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+      <section className='bg-gradient-to-r from-layer-base/30 to-blue-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
           Ready to Work with the Moon?
         </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+        <p className='text-content-muted mb-6 max-w-xl mx-auto'>
           Track the lunar cycle, get personalized moon insights, and receive
           notifications for important lunar events with Lunary.
         </p>
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Link
             href='/grimoire/moon'
-            className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
+            className='px-8 py-3 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg font-medium transition-colors'
           >
             Today&apos;s Moon Phase
           </Link>
           <Link
             href='/grimoire/moon'
-            className='px-8 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
+            className='px-8 py-3 border border-lunary-primary text-content-brand hover:bg-layer-base/10 rounded-lg font-medium transition-colors'
           >
             Explore Moon Content
           </Link>

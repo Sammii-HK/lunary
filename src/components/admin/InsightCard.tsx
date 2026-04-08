@@ -22,7 +22,7 @@ export function InsightCard({ insight }: InsightCardProps) {
   const colorClasses = {
     positive: {
       icon: 'text-lunary-success-300',
-      bg: 'bg-lunary-success-950/20',
+      bg: 'bg-layer-deep/20',
       border: 'border-lunary-success-800/30',
       badge: 'success' as const,
     },
@@ -34,13 +34,13 @@ export function InsightCard({ insight }: InsightCardProps) {
     },
     critical: {
       icon: 'text-lunary-error-300',
-      bg: 'bg-lunary-error-950/20',
+      bg: 'bg-layer-deep/20',
       border: 'border-lunary-error-800/30',
       badge: 'destructive' as const,
     },
     info: {
-      icon: 'text-lunary-primary-300',
-      bg: 'bg-lunary-primary-950/20',
+      icon: 'text-content-brand',
+      bg: 'bg-layer-deep/20',
       border: 'border-lunary-primary-800/30',
       badge: 'default' as const,
     },
@@ -64,7 +64,7 @@ export function InsightCard({ insight }: InsightCardProps) {
           </div>
           <div className='flex-1 min-w-0'>
             <div className='flex items-start justify-between gap-2 mb-2'>
-              <div className='text-sm font-medium text-white'>
+              <div className='text-sm font-medium text-content-primary'>
                 {insight.message}
               </div>
               <Badge variant={colors.badge} className='flex-shrink-0 text-xs'>
@@ -73,17 +73,20 @@ export function InsightCard({ insight }: InsightCardProps) {
             </div>
 
             {insight.metric && (
-              <div className='mt-2 text-xs text-zinc-400'>
-                <span className='text-zinc-500'>{insight.metric.label}:</span>{' '}
-                <span className='text-white font-medium'>
+              <div className='mt-2 text-xs text-content-muted'>
+                <span className='text-content-muted'>
+                  {insight.metric.label}:
+                </span>{' '}
+                <span className='text-content-primary font-medium'>
                   {insight.metric.value}
                 </span>
               </div>
             )}
 
             {insight.action && (
-              <div className='mt-3 text-xs text-zinc-300'>
-                <span className='text-zinc-500'>Action:</span> {insight.action}
+              <div className='mt-3 text-xs text-content-secondary'>
+                <span className='text-content-muted'>Action:</span>{' '}
+                {insight.action}
               </div>
             )}
           </div>

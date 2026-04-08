@@ -46,8 +46,8 @@ export function FeatureGate({
     return (
       <div className={className}>
         {/* Teaser Text */}
-        <div className='mb-4 p-4 bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 rounded-lg border border-lunary-primary-700'>
-          <p className='text-lunary-accent-200 text-sm font-medium italic'>
+        <div className='mb-4 p-4 bg-gradient-to-r from-layer-base/30 to-lunary-highlight-900/30 rounded-lg border border-lunary-primary-700'>
+          <p className='text-content-brand-accent text-sm font-medium italic'>
             &ldquo;This is the personalised interpretation for YOUR
             chart.&rdquo;
           </p>
@@ -67,17 +67,17 @@ export function FeatureGate({
       <div className={className}>
         <div className='relative'>
           {/* Teaser Text */}
-          <div className='mb-4 p-4 bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 rounded-lg border border-lunary-primary-700'>
-            <p className='text-lunary-accent-200 text-sm font-medium italic'>
+          <div className='mb-4 p-4 bg-gradient-to-r from-layer-base/30 to-lunary-highlight-900/30 rounded-lg border border-lunary-primary-700'>
+            <p className='text-content-brand-accent text-sm font-medium italic'>
               &ldquo;This is the personalised interpretation for YOUR
               chart.&rdquo;
             </p>
           </div>
           <div className='opacity-50 pointer-events-none'>{previewContent}</div>
-          <div className='absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-lg'>
+          <div className='absolute inset-0 flex items-center justify-center bg-surface-base/60 backdrop-blur-sm rounded-lg'>
             <div className='text-center p-6 max-w-md'>
               <LockIcon className='w-12 h-12 text-lunary-accent mx-auto mb-4' />
-              <h3 className='text-lg font-medium text-white mb-2'>
+              <h3 className='text-lg font-medium text-content-primary mb-2'>
                 Unlock Full Access
               </h3>
               <p className='text-sm text-gray-400 mb-4'>
@@ -93,9 +93,11 @@ export function FeatureGate({
 
   return (
     <div className={className}>
-      <div className='bg-zinc-900 border border-zinc-800 rounded-lg p-6 text-center'>
+      <div className='bg-surface-elevated border border-stroke-subtle rounded-lg p-6 text-center'>
         <LockIcon className='w-10 h-10 text-lunary-accent mx-auto mb-4' />
-        <h3 className='text-lg font-medium text-white mb-2'>Premium Feature</h3>
+        <h3 className='text-lg font-medium text-content-primary mb-2'>
+          Premium Feature
+        </h3>
         <p className='text-sm text-gray-400 mb-4'>
           This feature requires a subscription
         </p>

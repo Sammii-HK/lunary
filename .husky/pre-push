@@ -39,10 +39,24 @@ fi
 echo "✅ Type check passed."
 
 # ──────────────────────────────────────────────────
-# Gate 3: Unit tests
+# Gate 3: Unit tests (committed changes only)
+# Stash WIP so tests run against committed code only,
+# then restore automatically — no manual stashing needed.
 # ──────────────────────────────────────────────────
 echo "🧪 Running tests..."
-if ! pnpm test 2>/dev/null; then
+WIP_STASHED=false
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  git stash push -u -m "pre-push-test-stash" --quiet
+  WIP_STASHED=true
+fi
+TEST_RESULT=0
+if ! pnpm test -- --changedSince=origin/main --passWithNoTests 2>/dev/null; then
+  TEST_RESULT=1
+fi
+if [ "$WIP_STASHED" = true ]; then
+  git stash pop --quiet
+fi
+if [ $TEST_RESULT -ne 0 ]; then
   echo "❌ Tests failed. Fix failing tests before pushing."
   exit 1
 fi

@@ -18,7 +18,7 @@ const AREA_CONFIG = {
     icon: Briefcase,
     borderColor: 'border-l-lunary-accent',
     iconBg: 'bg-lunary-accent/10',
-    iconColor: 'text-lunary-accent-300',
+    iconColor: 'text-content-brand-accent',
   },
   inner: {
     icon: Sparkles,
@@ -56,7 +56,7 @@ export function MoreForToday({ focusAreas }: { focusAreas: FocusArea[] }) {
       <button
         type='button'
         onClick={toggleOpen}
-        className='flex items-center gap-2 text-sm text-zinc-300 hover:text-zinc-100 transition-colors w-full'
+        className='flex items-center gap-2 text-sm text-content-secondary hover:text-content-primary transition-colors w-full'
       >
         <div className='flex items-center gap-1.5'>
           {focusAreas.map((focus) => {
@@ -72,9 +72,11 @@ export function MoreForToday({ focusAreas }: { focusAreas: FocusArea[] }) {
             );
           })}
         </div>
-        <span className='text-sm text-zinc-300 truncate'>{areaLabels}</span>
+        <span className='text-sm text-content-secondary truncate'>
+          {areaLabels}
+        </span>
         <ChevronDown
-          className={`w-4 h-4 ml-auto flex-shrink-0 text-zinc-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 ml-auto flex-shrink-0 text-content-muted transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -90,17 +92,17 @@ export function MoreForToday({ focusAreas }: { focusAreas: FocusArea[] }) {
             return (
               <div
                 key={focus.area}
-                className={`p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50 border-l-2 ${config.borderColor}`}
+                className={`p-3 rounded-lg bg-surface-elevated/50 border border-stroke-subtle/50 border-l-2 ${config.borderColor}`}
               >
                 <div className='flex items-center gap-2 mb-1.5'>
                   <span className={`rounded-full ${config.iconBg} p-1.5`}>
                     <Icon className={`w-4 h-4 ${config.iconColor}`} />
                   </span>
-                  <span className='text-sm font-medium text-zinc-200'>
+                  <span className='text-sm font-medium text-content-primary'>
                     {focus.title}
                   </span>
                 </div>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
+                <p className='text-sm text-content-muted leading-relaxed'>
                   {focus.guidance}
                 </p>
               </div>

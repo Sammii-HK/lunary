@@ -23,7 +23,7 @@ export function FriendTransitBadge({
         'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-medium',
         variant === 'retrograde'
           ? 'bg-amber-900/30 text-amber-300 border border-amber-800/40'
-          : 'bg-lunary-primary-900/30 text-lunary-primary-300 border border-lunary-primary-800/40',
+          : 'bg-layer-base/30 text-content-brand border border-lunary-primary-800/40',
         className,
       )}
     >

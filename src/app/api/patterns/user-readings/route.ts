@@ -131,12 +131,11 @@ export async function GET(request: NextRequest) {
     startDate.setDate(startDate.getDate() - timeFrameDays);
     const startDateStr = startDate.toISOString().split('T')[0];
 
-    // Query multi-card spread readings only (exclude daily single-card pulls)
+    // Query all readings including single-card daily pulls
     const result = await sql`
       SELECT cards, created_at, spread_slug
       FROM tarot_readings
       WHERE user_id = ${userId}
-        AND jsonb_array_length(cards) > 1
         AND created_at >= ${startDateStr}::date
         AND archived_at IS NULL
       ORDER BY created_at DESC
@@ -164,12 +163,14 @@ export async function GET(request: NextRequest) {
             const aspects = calculateDailyAspects(readingDate);
 
             // Flatten: emit one item per card, each carrying the spread's context
+            // Cards can be stored as { card: { name, ... } } or directly as { name, ... }
             return cardsData
-              .filter((cd: any) => cd.card)
-              .map((cd: any) => ({
-                name: cd.card.name,
-                keywords: cd.card.keywords || [],
-                information: cd.card.information || '',
+              .map((cd: any) => cd.card ?? cd)
+              .filter((c: any) => c?.name)
+              .map((c: any) => ({
+                name: c.name,
+                keywords: (c.keywords || []).slice(0, 4),
+                information: c.information || c.description || '',
                 createdAt: row.created_at,
                 moonPhase: {
                   phase: moonPhaseKey,

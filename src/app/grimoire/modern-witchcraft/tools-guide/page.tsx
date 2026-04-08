@@ -116,13 +116,13 @@ export default function WitchcraftToolsPage() {
       />
 
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-6'>
           Tools of the Craft
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             Working With Magical Tools
           </span>
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           Tools are extensions of your will and intention. They help focus
           energy, create sacred space, and add symbolic weight to your
           practice—but they are never required. Your intention is always the
@@ -130,11 +130,11 @@ export default function WitchcraftToolsPage() {
         </p>
       </header>
 
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a
               href='#intuitive-vs-dogmatic'
@@ -183,45 +183,45 @@ export default function WitchcraftToolsPage() {
 
       {/* Section 1 */}
       <section id='intuitive-vs-dogmatic' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           1. Working With Tools Intuitively vs. Dogmatically
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           There are two approaches to magical tools: following tradition exactly
           as taught, or developing your own intuitive relationships with tools.
           Most practitioners find a balance between both.
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Traditional Approach
             </h3>
-            <p className='text-zinc-400 text-sm mb-3'>
+            <p className='text-content-muted text-sm mb-3'>
               Follow established correspondences and uses. Athame for air, wand
               for fire (or vice versa in some traditions). Specific tools for
               specific purposes.
             </p>
-            <p className='text-zinc-500 text-xs'>
+            <p className='text-content-muted text-xs'>
               Benefit: Taps into centuries of collective practice and energy.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Intuitive Approach
             </h3>
-            <p className='text-zinc-400 text-sm mb-3'>
+            <p className='text-content-muted text-sm mb-3'>
               Use what feels right to you. If a stone calls to you for a
               specific purpose, use it—even if tradition says otherwise.
             </p>
-            <p className='text-zinc-500 text-xs'>
+            <p className='text-content-muted text-xs'>
               Benefit: Develops deep personal connection and authentic practice.
             </p>
           </div>
         </div>
 
-        <p className='text-zinc-400 text-sm mt-4'>
+        <p className='text-content-muted text-sm mt-4'>
           Neither approach is wrong. Learn the traditions, then let your
           practice evolve naturally.
         </p>
@@ -229,50 +229,50 @@ export default function WitchcraftToolsPage() {
 
       {/* Section 2: Altars */}
       <section id='altars' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           2. Altars & Sacred Space
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           An altar is a dedicated space for magical and spiritual practice. It
           can be elaborate or simple—a shelf, a windowsill, or a corner of your
           desk.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Common Altar Elements
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>
-              <strong className='text-zinc-200'>
+              <strong className='text-content-primary'>
                 Representation of elements:
               </strong>{' '}
               Candle (fire), water bowl, feather or incense (air), salt or
               crystal (earth)
             </li>
             <li>
-              <strong className='text-zinc-200'>Personal items:</strong> Photos,
-              mementos, symbols that hold meaning for you
+              <strong className='text-content-primary'>Personal items:</strong>{' '}
+              Photos, mementos, symbols that hold meaning for you
             </li>
             <li>
-              <strong className='text-zinc-200'>Working tools:</strong> Candles,
-              crystals, herbs, tarot deck
+              <strong className='text-content-primary'>Working tools:</strong>{' '}
+              Candles, crystals, herbs, tarot deck
             </li>
             <li>
-              <strong className='text-zinc-200'>
+              <strong className='text-content-primary'>
                 Deity or spirit representation:
               </strong>{' '}
               If you work with specific beings (optional)
             </li>
             <li>
-              <strong className='text-zinc-200'>Seasonal items:</strong> Change
-              with the Wheel of the Year
+              <strong className='text-content-primary'>Seasonal items:</strong>{' '}
+              Change with the Wheel of the Year
             </li>
           </ul>
         </div>
 
-        <p className='text-zinc-400 text-sm mt-4'>
+        <p className='text-content-muted text-sm mt-4'>
           Cleanse your altar regularly. Arrange items intuitively—there is no
           single &quot;correct&quot; layout.
         </p>
@@ -280,11 +280,11 @@ export default function WitchcraftToolsPage() {
 
       {/* Section 3: Fire Tools */}
       <section id='fire-tools' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           3. Candles & Fire Tools
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Fire is transformation. Candles are the most common fire tool—easy to
           use, readily available, and endlessly versatile.
         </p>
@@ -292,33 +292,33 @@ export default function WitchcraftToolsPage() {
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <Link
             href='/grimoire/candle-magic'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-orange-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-orange-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-2'>Candles</h3>
-            <p className='text-zinc-400 text-sm'>
+            <h3 className='font-medium text-content-primary mb-2'>Candles</h3>
+            <p className='text-content-muted text-sm'>
               Color correspondences, carving, anointing, and spell candles. Full
               guide available.
             </p>
           </Link>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Cauldron</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>Cauldron</h3>
+            <p className='text-content-muted text-sm'>
               Fire-safe container for burning papers, mixing potions, or holding
               ritual fire. Represents transformation.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Incense</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>Incense</h3>
+            <p className='text-content-muted text-sm'>
               Combines fire and air. Use for cleansing space, setting mood, and
               adding scent correspondences.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Matches / Lighter
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Some prefer matches for the ritual of striking fire. Choose what
               feels right.
             </p>
@@ -328,42 +328,44 @@ export default function WitchcraftToolsPage() {
 
       {/* Section 4: Herbs */}
       <section id='herbs' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           4. Herbs & Kitchen Witchery
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Herbs are accessible, affordable, and powerful. Many are already in
           your kitchen. Kitchen witchery weaves magic into everyday cooking and
           home activities.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Common Kitchen Herbs
           </h3>
           <div className='grid grid-cols-2 gap-3 text-sm'>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Rosemary:</strong> Protection,
-              memory
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Rosemary:</strong>{' '}
+              Protection, memory
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Basil:</strong> Prosperity, love
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Basil:</strong>{' '}
+              Prosperity, love
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Cinnamon:</strong> Success,
-              passion
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Cinnamon:</strong>{' '}
+              Success, passion
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Salt:</strong> Purification,
-              protection
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Salt:</strong>{' '}
+              Purification, protection
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Bay leaves:</strong> Wishes,
-              divination
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Bay leaves:</strong>{' '}
+              Wishes, divination
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Lavender:</strong> Peace, sleep
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Lavender:</strong> Peace,
+              sleep
             </div>
           </div>
         </div>
@@ -371,7 +373,7 @@ export default function WitchcraftToolsPage() {
         <div className='mt-4'>
           <Link
             href='/grimoire/correspondences/herbs'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-lunary-primary-400 hover:text-content-brand'
           >
             Full herb correspondence guide →
           </Link>
@@ -380,35 +382,37 @@ export default function WitchcraftToolsPage() {
 
       {/* Section 5: Crystals */}
       <section id='crystals' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           5. Crystals & Mineral Allies
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Crystals are used to amplify, store, and direct energy. Different
           crystals carry different properties and can support various
           intentions.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Starter Crystals
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>
-              <strong className='text-zinc-200'>Clear Quartz:</strong> Master
-              healer, amplifies all intentions
+              <strong className='text-content-primary'>Clear Quartz:</strong>{' '}
+              Master healer, amplifies all intentions
             </li>
             <li>
-              <strong className='text-zinc-200'>Amethyst:</strong> Intuition,
-              protection, peace
+              <strong className='text-content-primary'>Amethyst:</strong>{' '}
+              Intuition, protection, peace
             </li>
             <li>
-              <strong className='text-zinc-200'>Rose Quartz:</strong> Love,
-              heart healing, self-compassion
+              <strong className='text-content-primary'>Rose Quartz:</strong>{' '}
+              Love, heart healing, self-compassion
             </li>
             <li>
-              <strong className='text-zinc-200'>Black Tourmaline:</strong>{' '}
+              <strong className='text-content-primary'>
+                Black Tourmaline:
+              </strong>{' '}
               Protection, grounding, absorbs negativity
             </li>
           </ul>
@@ -417,7 +421,7 @@ export default function WitchcraftToolsPage() {
         <div className='mt-4'>
           <Link
             href='/grimoire/crystals'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-lunary-primary-400 hover:text-content-brand'
           >
             Full crystal guide →
           </Link>
@@ -426,21 +430,21 @@ export default function WitchcraftToolsPage() {
 
       {/* Section 6: Journals */}
       <section id='journals' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           6. Journals & Book of Shadows
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           A Book of Shadows is a personal record of your magical practice:
           spells, rituals, dreams, observations, and insights. It is perhaps the
           most important tool you can have.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             What to Record
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>• Spells you cast and their results</li>
             <li>• Tarot readings and interpretations</li>
             <li>• Moon phase observations</li>
@@ -453,7 +457,7 @@ export default function WitchcraftToolsPage() {
         <div className='mt-4'>
           <Link
             href='/book-of-shadows'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-lunary-primary-400 hover:text-content-brand'
           >
             Start your digital Book of Shadows →
           </Link>
@@ -462,44 +466,48 @@ export default function WitchcraftToolsPage() {
 
       {/* Section 7: Digital */}
       <section id='digital' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           7. Digital Tools (Lunary)
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Digital tools can enhance and support your practice without replacing
           traditional methods. Lunary offers several features that function as
           modern magical tools:
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Birth Chart Calculator
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Astronomical precision for your natal chart—no manual calculations
               required.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Moon Phase Tracker
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Real-time moon data so you always know the current phase and sign.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Digital Tarot</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Digital Tarot
+            </h3>
+            <p className='text-content-muted text-sm'>
               Draw cards for reflection when physical cards aren&apos;t
               available.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Book of Shadows</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Book of Shadows
+            </h3>
+            <p className='text-content-muted text-sm'>
               Digital journal that&apos;s always with you—searchable, backed up,
               and private.
             </p>
@@ -509,7 +517,7 @@ export default function WitchcraftToolsPage() {
 
       {/* FAQ */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           8. Frequently Asked Questions
         </h2>
 
@@ -517,12 +525,14 @@ export default function WitchcraftToolsPage() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 {faq.question}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-content-secondary leading-relaxed'>
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>

@@ -61,9 +61,9 @@ export function Testimonials() {
   const items = [...testimonials, ...testimonials];
 
   return (
-    <section className='pt-4 pb-12 md:pt-6 md:pb-20 border-t border-zinc-800/30'>
+    <section className='pt-4 pb-12 md:pt-6 md:pb-20 border-t border-stroke-subtle/30'>
       <div className='max-w-5xl mx-auto px-4 md:px-6 mb-8'>
-        <p className='text-center text-xs tracking-[0.3em] uppercase text-zinc-500'>
+        <p className='text-center text-xs tracking-[0.3em] uppercase text-content-muted'>
           From the community
         </p>
       </div>
@@ -77,12 +77,14 @@ export function Testimonials() {
           {items.map((t, i) => (
             <div
               key={`${t.id}-${i}`}
-              className='shrink-0 w-[300px] md:w-[360px] rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5'
+              className='shrink-0 w-[300px] md:w-[360px] rounded-2xl border border-stroke-subtle/60 bg-surface-elevated/40 p-5'
             >
-              <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+              <p className='text-sm text-content-secondary leading-relaxed mb-3'>
                 &ldquo;{t.message}&rdquo;
               </p>
-              <p className='text-xs text-zinc-500 tracking-wide'>— {t.name}</p>
+              <p className='text-xs text-content-muted tracking-wide'>
+                — {t.name}
+              </p>
             </div>
           ))}
         </div>

@@ -156,7 +156,7 @@ export function CompatibilityClient({ inviteCode }: CompatibilityClientProps) {
   if (step === 'loading') {
     return (
       <div className='min-h-screen flex items-center justify-center'>
-        <div className='animate-pulse text-zinc-400'>
+        <div className='animate-pulse text-content-muted'>
           Loading compatibility invite...
         </div>
       </div>
@@ -167,10 +167,10 @@ export function CompatibilityClient({ inviteCode }: CompatibilityClientProps) {
     return (
       <div className='min-h-screen flex flex-col items-center justify-center p-4'>
         <div className='max-w-sm text-center space-y-4'>
-          <h1 className='text-lg font-semibold text-white'>
+          <h1 className='text-lg font-semibold text-content-primary'>
             Something went wrong
           </h1>
-          <p className='text-sm text-zinc-400'>{error}</p>
+          <p className='text-sm text-content-muted'>{error}</p>
         </div>
       </div>
     );
@@ -189,7 +189,7 @@ export function CompatibilityClient({ inviteCode }: CompatibilityClientProps) {
               <Heading variant='h2' as='h1'>
                 {inviteInfo.inviterName}
               </Heading>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 wants to check your cosmic compatibility
               </p>
             </div>
@@ -197,8 +197,8 @@ export function CompatibilityClient({ inviteCode }: CompatibilityClientProps) {
 
           {/* Step: enter birth data */}
           {step === 'enter-data' && (
-            <div className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/50'>
-              <h2 className='text-sm font-medium text-zinc-300 mb-4'>
+            <div className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/50'>
+              <h2 className='text-sm font-medium text-content-secondary mb-4'>
                 Enter your birth details
               </h2>
               <BirthDataForm

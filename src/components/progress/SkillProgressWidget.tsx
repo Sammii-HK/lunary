@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useProgress } from './useProgress';
 import { SkillTreeCard } from './SkillTreeCard';
+import { Collapse } from '@/components/ui/Collapse';
 import {
   SKILL_TREES,
   calculateLevel,
@@ -40,7 +41,7 @@ export function SkillProgressWidget({
   if (isLoading) {
     return (
       <div className={className}>
-        <div className='h-12 bg-zinc-800/50 animate-pulse rounded-lg' />
+        <div className='h-12 bg-surface-card/50 animate-pulse rounded-lg' />
       </div>
     );
   }
@@ -76,21 +77,27 @@ export function SkillProgressWidget({
 
   const isMicro = condensed || scrolled;
 
+  const cardProps = {
+    name: skill.name,
+    icon: skill.icon,
+    currentLevel: skill.currentLevel,
+    totalActions: skill.totalActions,
+    progressToNext: skill.progressToNext,
+    actionsToNext: skill.actionsToNext,
+    nextUnlock: skill.nextUnlock,
+    nextUnlockDescription: skill.nextUnlockDescription,
+    actionVerb: skill.actionVerb,
+    featureRoute: skill.featureRoute,
+  };
+
   return (
     <div className={className}>
-      <SkillTreeCard
-        name={skill.name}
-        icon={skill.icon}
-        currentLevel={skill.currentLevel}
-        totalActions={skill.totalActions}
-        progressToNext={skill.progressToNext}
-        actionsToNext={skill.actionsToNext}
-        nextUnlock={skill.nextUnlock}
-        nextUnlockDescription={skill.nextUnlockDescription}
-        actionVerb={skill.actionVerb}
-        featureRoute={skill.featureRoute}
-        variant={isMicro ? 'micro' : 'compact'}
-      />
+      <Collapse isOpen={!isMicro}>
+        <SkillTreeCard {...cardProps} variant='compact' />
+      </Collapse>
+      <Collapse isOpen={isMicro}>
+        <SkillTreeCard {...cardProps} variant='micro' />
+      </Collapse>
     </div>
   );
 }

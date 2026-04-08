@@ -203,10 +203,10 @@ Each sign has optimal magical uses. Check the current Moon sign before important
         faqs={faqs}
       >
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Moon in All 12 Signs
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Click on any sign to explore how the Moon expresses through that
             zodiac energy.
           </p>
@@ -215,48 +215,50 @@ Each sign has optimal magical uses. Check the current Moon sign before important
               <Link
                 key={key}
                 href={`/grimoire/moon-in/${stringToKebabCase(key)}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-zinc-600 transition-all'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-stroke-strong transition-all'
               >
                 <div className='flex items-center gap-3 mb-3'>
                   <span className='text-2xl'>
                     {zodiacUnicode[key as keyof typeof zodiacUnicode]}
                   </span>
-                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-zinc-200 transition-colors'>
+                  <h3 className='text-lg font-medium text-content-primary group-hover:text-content-primary transition-colors'>
                     Moon in {sign.name}
                   </h3>
                 </div>
-                <p className='text-sm text-zinc-400'>{sign.element} sign</p>
+                <p className='text-sm text-content-muted'>
+                  {sign.element} sign
+                </p>
               </Link>
             ))}
           </div>
         </section>
 
-        <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Quick Reference: Moon Sign Magic
           </h2>
           <div className='grid md:grid-cols-2 gap-4 text-sm'>
             <div>
               <p className='text-red-400 font-medium'>Fire Moon Magic:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Courage, new beginnings, passion, protection, success
               </p>
             </div>
             <div>
               <p className='text-emerald-400 font-medium'>Earth Moon Magic:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Money, abundance, health, grounding, stability
               </p>
             </div>
             <div>
               <p className='text-cyan-400 font-medium'>Air Moon Magic:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Communication, travel, learning, legal matters, clarity
               </p>
             </div>
             <div>
               <p className='text-blue-400 font-medium'>Water Moon Magic:</p>
-              <p className='text-zinc-400'>
+              <p className='text-content-muted'>
                 Emotions, psychic work, healing, love, divination
               </p>
             </div>

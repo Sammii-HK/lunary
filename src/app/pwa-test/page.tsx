@@ -79,7 +79,7 @@ export default function PWATestPage() {
   return (
     <div className='p-4 max-w-2xl mx-auto'>
       <h1 className='text-2xl font-bold mb-4'>PWA Test</h1>
-      <pre className='bg-zinc-900 p-4 rounded font-mono text-xs whitespace-pre-wrap overflow-auto'>
+      <pre className='bg-surface-elevated p-4 rounded font-mono text-xs whitespace-pre-wrap overflow-auto'>
         {result}
       </pre>
     </div>

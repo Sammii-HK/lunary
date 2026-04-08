@@ -109,20 +109,20 @@ export default async function PlanetAspectTypePage({
         <div className='text-center mb-12'>
           <div className='flex justify-center items-center gap-4 mb-4'>
             <span className='text-5xl'>{symbol}</span>
-            <span className='text-3xl text-zinc-400'>{aspectSymbol}</span>
+            <span className='text-3xl text-content-muted'>{aspectSymbol}</span>
           </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-4'>
             {planetName} {aspect.charAt(0).toUpperCase() + aspect.slice(1)}{' '}
             Aspects
           </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
+          <p className='text-lg text-content-muted max-w-2xl mx-auto'>
             Explore how {planetName} forms {aspect} aspects with other planets,
             creating {aspectDescriptions[aspect as Aspect]} energy.
           </p>
         </div>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             {planetName} {aspect.charAt(0).toUpperCase() + aspect.slice(1)}{' '}
             Combinations
           </h2>
@@ -131,16 +131,18 @@ export default async function PlanetAspectTypePage({
               <Link
                 key={planet2}
                 href={`/grimoire/aspects/${planet1}/${aspect}/${planet2}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all text-center'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all text-center'
               >
                 <div className='flex items-center justify-center gap-2 mb-2'>
                   <span className='text-2xl'>{symbol}</span>
-                  <span className='text-lg text-zinc-400'>{aspectSymbol}</span>
+                  <span className='text-lg text-content-muted'>
+                    {aspectSymbol}
+                  </span>
                   <span className='text-2xl'>
                     {PLANET_SYMBOLS[planet2 as Planet]}
                   </span>
                 </div>
-                <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors text-sm'>
+                <h3 className='font-medium text-content-primary group-hover:text-content-brand transition-colors text-sm'>
                   {planetName}{' '}
                   {aspect.charAt(0).toUpperCase() + aspect.slice(1)}{' '}
                   {PLANET_DISPLAY[planet2 as Planet]}
@@ -150,26 +152,26 @@ export default async function PlanetAspectTypePage({
           </div>
         </section>
 
-        <div className='border-t border-zinc-800 pt-8'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+        <div className='border-t border-stroke-subtle pt-8'>
+          <h3 className='text-lg font-medium text-content-primary mb-4'>
             Related Resources
           </h3>
           <div className='flex flex-wrap gap-3'>
             <Link
               href={`/grimoire/aspects/${planet1}`}
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               All {planetName} Aspects
             </Link>
             <Link
               href={`/grimoire/aspects/types/${aspect}`}
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               About {aspect.charAt(0).toUpperCase() + aspect.slice(1)}s
             </Link>
             <Link
               href='/grimoire/aspects'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               All Aspects
             </Link>

@@ -19,7 +19,7 @@ const TAG_COLORS: Record<string, string> = {
   falling: 'bg-red-900/30 text-red-300',
   animals: 'bg-emerald-900/30 text-emerald-300',
   nature: 'bg-green-900/30 text-green-300',
-  darkness: 'bg-zinc-800/50 text-zinc-300',
+  darkness: 'bg-surface-card/50 text-content-secondary',
   light: 'bg-yellow-900/30 text-yellow-300',
   anxious: 'bg-rose-900/30 text-rose-300',
   peaceful: 'bg-teal-900/30 text-teal-300',
@@ -50,7 +50,7 @@ export function DreamTagChips({ entry, className = '' }: DreamTagChipsProps) {
         <span
           key={tag}
           className={`text-xs px-1.5 py-0.5 rounded ${
-            TAG_COLORS[tag] || 'bg-zinc-800/50 text-zinc-400'
+            TAG_COLORS[tag] || 'bg-surface-card/50 text-content-muted'
           }`}
         >
           {tag}

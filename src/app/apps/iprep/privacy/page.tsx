@@ -17,19 +17,21 @@ export default function IPrepPrivacyPage() {
   const lastUpdated = 'March 22, 2026';
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='mb-8'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             Privacy Policy: iPrep
           </h1>
-          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-content-muted'>
+            Last Updated: {lastUpdated}
+          </p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
           <section>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Lunar Computing, Inc. (&quot;we,&quot; &quot;us,&quot; or
               &quot;our&quot;) develops the iPrep iOS app. This Privacy Policy
               explains how we handle your information when you use iPrep for
@@ -38,14 +40,14 @@ export default function IPrepPrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               1. Information We Collect
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               1.1 Information You Provide
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Practice sessions:</strong> Your spoken answers are
                 transcribed locally using Apple&apos;s Speech Recognition
@@ -64,10 +66,10 @@ export default function IPrepPrivacyPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               1.2 Information Collected Automatically
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Device information:</strong> iOS version, device model,
                 and identifier (used only for crash reporting).
@@ -84,15 +86,15 @@ export default function IPrepPrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               2. Microphone and Speech Recognition
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               iPrep requests access to your microphone and speech recognition to
               transcribe your spoken answers. Here is what happens with that
               data:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>On-device transcription:</strong> Speech is transcribed
                 using Apple&apos;s Speech Recognition framework. When using
@@ -117,14 +119,14 @@ export default function IPrepPrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               3. AI Scoring and Feedback
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               iPrep uses AI to score your answers. Depending on your setup, one
               of the following is used:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>On-device (heuristics):</strong> Rule-based scoring that
                 runs entirely on your device. No data leaves your device.
@@ -153,10 +155,10 @@ export default function IPrepPrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               4. Practice Session Data and CloudKit
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Your practice sessions, scores, question history, and streaks are
               stored locally on your device and synced to your iCloud account
               via Apple CloudKit for backup and cross-device access. We do not
@@ -165,10 +167,10 @@ export default function IPrepPrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               5. API Keys
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               DeepInfra and Claude API keys you enter in Settings are stored
               exclusively in your device&apos;s iOS Keychain. They are never
               transmitted to our servers, included in analytics, or stored in
@@ -177,10 +179,10 @@ export default function IPrepPrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               6. Third-Party Services
             </h2>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Apple CloudKit:</strong> Syncs your practice data across
                 your Apple devices.
@@ -203,20 +205,20 @@ export default function IPrepPrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               7. Do We Sell Your Data?
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               No. We do not sell, share, or monetize your personal data, your
               practice transcripts, or your profile information.
             </p>
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               8. Your Rights
             </h2>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Access:</strong> Request information about what data we
                 hold about you.
@@ -230,11 +232,11 @@ export default function IPrepPrivacyPage() {
                 time in iOS Settings.
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               To exercise these rights, email{' '}
               <a
                 href='mailto:privacy@lunary.app'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 privacy@lunary.app
               </a>
@@ -243,11 +245,11 @@ export default function IPrepPrivacyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               9. Contact Us
             </h2>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Lunar Computing, Inc.</strong>
                 <br />
                 131 Continental Dr, Suite 305
@@ -258,7 +260,7 @@ export default function IPrepPrivacyPage() {
                 Email:{' '}
                 <a
                   href='mailto:privacy@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   privacy@lunary.app
                 </a>
@@ -266,20 +268,20 @@ export default function IPrepPrivacyPage() {
             </div>
           </section>
 
-          <section className='pt-8 border-t border-zinc-800'>
-            <h2 className='text-lg font-medium text-white mb-4'>
+          <section className='pt-8 border-t border-stroke-subtle'>
+            <h2 className='text-lg font-medium text-content-primary mb-4'>
               Related Policies
             </h2>
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/apps/terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 App Terms of Service
               </Link>
               <Link
                 href='/privacy'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Lunary Web Privacy
               </Link>

@@ -160,13 +160,13 @@ export default function MoonRitualsPage() {
       <GrimoireBreadcrumbs items={breadcrumbItems} />
 
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-6'>
           Moon Rituals
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             Complete Guide to Lunar Magic
           </span>
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           The Moon has guided magical practice for millennia. Each phase offers
           distinct energy for different types of work: setting intentions,
           building momentum, manifesting desires, and releasing what no longer
@@ -175,11 +175,11 @@ export default function MoonRitualsPage() {
         </p>
       </header>
 
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a
               href='#what-is-moon-ritual'
@@ -233,29 +233,29 @@ export default function MoonRitualsPage() {
 
       {/* Section 1 */}
       <section id='what-is-moon-ritual' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           1. What Is a Moon Ritual?
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           A moon ritual is any intentional practice aligned with the lunar
           cycle. It can be as simple as lighting a candle and speaking an
           intention, or as elaborate as a multi-hour ceremony with tools,
           invocations, and symbolic actions.
         </p>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           The power of moon rituals comes from aligning your energy with natural
           cosmic rhythms. Rather than working against the current, you flow with
           the Moon&apos;s energy—using New Moon for planting seeds, Full Moon
           for harvest and release.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Why Moon Rituals Work
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>
               • The lunar cycle creates a natural rhythm for intention-setting
               and release
@@ -275,48 +275,48 @@ export default function MoonRitualsPage() {
 
       {/* Section 2 */}
       <section id='preparing' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           2. Preparing for Any Moon Ritual
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Regardless of the phase, certain preparation steps enhance any moon
           ritual:
         </p>
 
         <ol className='space-y-4'>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               1. Cleanse your space
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Use smoke (sage, palo santo), sound (bells, singing bowls), or
               visualization to clear stagnant energy.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               2. Ground and center yourself
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Take deep breaths. Visualize roots growing from your feet into the
               earth. Feel stable and present.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               3. Gather your materials
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Candles, paper, pen, crystals, herbs—whatever you plan to use.
               Having everything ready prevents breaking focus mid-ritual.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               4. Set your intention
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Know what you want from this ritual before you begin. Vague
               intentions produce vague results.
             </p>
@@ -326,28 +326,28 @@ export default function MoonRitualsPage() {
 
       {/* Section 3: New Moon */}
       <section id='new-moon' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           3. New Moon Rituals
         </h2>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-6'>
           <div className='flex items-center gap-4 mb-4'>
-            <div className='w-12 h-12 rounded-2xl bg-zinc-950/60 flex items-center justify-center'>
+            <div className='w-12 h-12 rounded-2xl bg-surface-base/60 flex items-center justify-center'>
               <MoonPhaseIcon
                 phase={'newMoon' as MonthlyMoonPhaseKey}
                 size={40}
               />
             </div>
             <div>
-              <h3 className='text-xl font-medium text-zinc-100'>
+              <h3 className='text-xl font-medium text-content-primary'>
                 New Moon Energy
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Beginnings • Intention • Planting seeds
               </p>
             </div>
           </div>
-          <p className='text-zinc-300 mb-4'>
+          <p className='text-content-secondary mb-4'>
             The New Moon is the start of the lunar cycle—a blank slate. This is
             the ideal time to set intentions for what you want to manifest,
             start new projects, and plant metaphorical seeds for the cycle
@@ -355,38 +355,38 @@ export default function MoonRitualsPage() {
           </p>
         </div>
 
-        <h3 className='text-xl font-medium text-zinc-100 mb-4'>
+        <h3 className='text-xl font-medium text-content-primary mb-4'>
           Simple New Moon Intention Ritual
         </h3>
         <ol className='space-y-3 mb-6'>
           <li className='flex gap-3'>
             <span className='text-lunary-primary-400'>1.</span>
-            <span className='text-zinc-300'>
+            <span className='text-content-secondary'>
               Light a white or silver candle
             </span>
           </li>
           <li className='flex gap-3'>
             <span className='text-lunary-primary-400'>2.</span>
-            <span className='text-zinc-300'>
+            <span className='text-content-secondary'>
               Take three deep breaths to center
             </span>
           </li>
           <li className='flex gap-3'>
             <span className='text-lunary-primary-400'>3.</span>
-            <span className='text-zinc-300'>
+            <span className='text-content-secondary'>
               Write 3–10 intentions in present tense (&quot;I am...&quot;,
               &quot;I have...&quot;)
             </span>
           </li>
           <li className='flex gap-3'>
             <span className='text-lunary-primary-400'>4.</span>
-            <span className='text-zinc-300'>
+            <span className='text-content-secondary'>
               Read each intention aloud with conviction
             </span>
           </li>
           <li className='flex gap-3'>
             <span className='text-lunary-primary-400'>5.</span>
-            <span className='text-zinc-300'>
+            <span className='text-content-secondary'>
               Keep the paper on your altar until the Full Moon, then review
             </span>
           </li>
@@ -395,23 +395,23 @@ export default function MoonRitualsPage() {
 
       {/* Section 4: Waxing */}
       <section id='waxing' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           4. Waxing Moon Rituals
         </h2>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-6'>
           <div className='flex items-center gap-3 mb-4'>
             <span className='text-3xl'>🌒</span>
             <div>
-              <h3 className='text-xl font-medium text-zinc-100'>
+              <h3 className='text-xl font-medium text-content-primary'>
                 Waxing Moon Energy
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Growth • Attraction • Building momentum
               </p>
             </div>
           </div>
-          <p className='text-zinc-300'>
+          <p className='text-content-secondary'>
             As the Moon grows from New to Full, its energy supports growth,
             attraction, and building. Use this phase to take action on your
             intentions, attract what you desire, and nurture what you&apos;ve
@@ -419,10 +419,10 @@ export default function MoonRitualsPage() {
           </p>
         </div>
 
-        <h3 className='text-xl font-medium text-zinc-100 mb-4'>
+        <h3 className='text-xl font-medium text-content-primary mb-4'>
           Waxing Moon Ritual Ideas
         </h3>
-        <ul className='space-y-2 text-zinc-300'>
+        <ul className='space-y-2 text-content-secondary'>
           <li>• Perform attraction spells for love, money, or opportunities</li>
           <li>• Take concrete action steps toward your New Moon intentions</li>
           <li>• Charge crystals and magical tools in the growing light</li>
@@ -433,23 +433,23 @@ export default function MoonRitualsPage() {
 
       {/* Section 5: Full Moon */}
       <section id='full-moon' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           5. Full Moon Rituals
         </h2>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-6'>
           <div className='flex items-center gap-3 mb-4'>
             <span className='text-3xl'>🌕</span>
             <div>
-              <h3 className='text-xl font-medium text-zinc-100'>
+              <h3 className='text-xl font-medium text-content-primary'>
                 Full Moon Energy
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Illumination • Manifestation • Release
               </p>
             </div>
           </div>
-          <p className='text-zinc-300'>
+          <p className='text-content-secondary'>
             The Full Moon is the peak of lunar energy. It brings things to
             light—literally and metaphorically. This is the time to celebrate
             what has manifested, charge your tools, and release what no longer
@@ -457,47 +457,45 @@ export default function MoonRitualsPage() {
           </p>
         </div>
 
-        <h3 className='text-xl font-medium text-zinc-100 mb-4'>
+        <h3 className='text-xl font-medium text-content-primary mb-4'>
           Full Moon Release Ritual
         </h3>
         <ol className='space-y-3 mb-6'>
           <li className='flex gap-3'>
             <span className='text-lunary-primary-400'>1.</span>
-            <span className='text-zinc-300'>
+            <span className='text-content-secondary'>
               Create sacred space and ground yourself
             </span>
           </li>
           <li className='flex gap-3'>
             <span className='text-lunary-primary-400'>2.</span>
-            <span className='text-zinc-300'>
+            <span className='text-content-secondary'>
               Review your New Moon intentions—celebrate progress
             </span>
           </li>
           <li className='flex gap-3'>
             <span className='text-lunary-primary-400'>3.</span>
-            <span className='text-zinc-300'>
+            <span className='text-content-secondary'>
               On a separate paper, write what you want to release
             </span>
           </li>
           <li className='flex gap-3'>
             <span className='text-lunary-primary-400'>4.</span>
-            <span className='text-zinc-300'>
+            <span className='text-content-secondary'>
               Safely burn the release paper, visualizing the energy leaving
             </span>
           </li>
           <li className='flex gap-3'>
             <span className='text-lunary-primary-400'>5.</span>
-            <span className='text-zinc-300'>
+            <span className='text-content-secondary'>
               Place crystals in moonlight to charge overnight
             </span>
           </li>
         </ol>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-5'>
-          <h4 className='font-medium text-lunary-primary-300 mb-2'>
-            Moon Water
-          </h4>
-          <p className='text-zinc-400 text-sm'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-5'>
+          <h4 className='font-medium text-content-brand mb-2'>Moon Water</h4>
+          <p className='text-content-muted text-sm'>
             Place a jar of clean water under the Full Moon to charge. Use for
             rituals, watering plants, adding to baths, or drinking (if using
             purified water). Label with the moon sign and date.
@@ -507,23 +505,23 @@ export default function MoonRitualsPage() {
 
       {/* Section 6: Waning */}
       <section id='waning' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           6. Waning & Dark Moon Rituals
         </h2>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-6'>
           <div className='flex items-center gap-3 mb-4'>
             <span className='text-3xl'>🌘</span>
             <div>
-              <h3 className='text-xl font-medium text-zinc-100'>
+              <h3 className='text-xl font-medium text-content-primary'>
                 Waning Moon Energy
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Release • Banishing • Rest
               </p>
             </div>
           </div>
-          <p className='text-zinc-300'>
+          <p className='text-content-secondary'>
             As the Moon shrinks from Full to New, its energy supports letting
             go, banishing negativity, and rest. The Dark Moon (the day or two
             before the New Moon) is especially powerful for deep introspection
@@ -531,10 +529,10 @@ export default function MoonRitualsPage() {
           </p>
         </div>
 
-        <h3 className='text-xl font-medium text-zinc-100 mb-4'>
+        <h3 className='text-xl font-medium text-content-primary mb-4'>
           Waning Moon Ritual Ideas
         </h3>
-        <ul className='space-y-2 text-zinc-300'>
+        <ul className='space-y-2 text-content-secondary'>
           <li>• Banish negative habits, energies, or situations</li>
           <li>• Deep clean and declutter your home</li>
           <li>• Perform cord-cutting rituals for unhealthy attachments</li>
@@ -545,41 +543,41 @@ export default function MoonRitualsPage() {
 
       {/* Section 7: Combining */}
       <section id='combining' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           7. Combining with Crystals, Herbs & Tarot
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Layer your moon rituals with additional tools for enhanced power:
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <Link
             href='/grimoire/crystals'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-2'>Crystals</h3>
-            <p className='text-zinc-400 text-sm'>
+            <h3 className='font-medium text-content-primary mb-2'>Crystals</h3>
+            <p className='text-content-muted text-sm'>
               Moonstone and selenite for lunar energy; clear quartz for
               amplification; black tourmaline for protection during release.
             </p>
           </Link>
           <Link
             href='/grimoire/correspondences/herbs'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-2'>Herbs</h3>
-            <p className='text-zinc-400 text-sm'>
+            <h3 className='font-medium text-content-primary mb-2'>Herbs</h3>
+            <p className='text-content-muted text-sm'>
               Mugwort for dreams and divination; jasmine for Full Moon magic;
               lavender for peace; rosemary for clarity.
             </p>
           </Link>
           <Link
             href='/grimoire/tarot'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium text-zinc-100 mb-2'>Tarot</h3>
-            <p className='text-zinc-400 text-sm'>
+            <h3 className='font-medium text-content-primary mb-2'>Tarot</h3>
+            <p className='text-content-muted text-sm'>
               Draw cards at the New Moon for cycle guidance; reflect on the Moon
               card (XVIII) during rituals; use tarot for ritual divination.
             </p>
@@ -589,20 +587,20 @@ export default function MoonRitualsPage() {
 
       {/* Section 8: Logging */}
       <section id='logging' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           8. How to Log in Book of Shadows
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Recording your moon rituals helps you track patterns, notice what
           works, and build a personal archive of magical practice.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             What to Record
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>• Date, exact moon phase, and moon sign</li>
             <li>• Your intentions or what you released</li>
             <li>• Tools used (candles, crystals, herbs)</li>
@@ -621,7 +619,7 @@ export default function MoonRitualsPage() {
 
       {/* FAQ */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           9. Frequently Asked Questions
         </h2>
 
@@ -629,23 +627,25 @@ export default function MoonRitualsPage() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 {faq.question}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-content-secondary leading-relaxed'>
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-blue-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+      <section className='bg-gradient-to-r from-layer-base/30 to-blue-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
           Track the Moon with Lunary
         </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+        <p className='text-content-muted mb-6 max-w-xl mx-auto'>
           See today&apos;s moon phase, upcoming Full Moons, and personalized
           lunar insights based on your birth chart.
         </p>

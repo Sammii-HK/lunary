@@ -48,7 +48,7 @@ function ScoreDisplay({ score, label }: { score: number; label: string }) {
   return (
     <div className='text-center'>
       <div className={`text-lg font-medium ${colorClass}`}>{score}/10</div>
-      <div className='text-xs text-zinc-500'>{label}</div>
+      <div className='text-xs text-content-muted'>{label}</div>
     </div>
   );
 }
@@ -154,28 +154,30 @@ No single aspect defines a relationship. A healthy relationship usually has a mi
             {Object.entries(aspectTypes).map(([key, type]) => (
               <div
                 key={key}
-                className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'
+                className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'
               >
                 <div className='flex items-center gap-3 mb-2'>
                   <span className='text-2xl font-astro text-lunary-primary-400'>
                     {type.symbol}
                   </span>
                   <div>
-                    <div className='font-medium text-zinc-100 capitalize'>
+                    <div className='font-medium text-content-primary capitalize'>
                       {key}
                     </div>
-                    <div className='text-xs text-zinc-500'>{type.degrees}°</div>
+                    <div className='text-xs text-content-muted'>
+                      {type.degrees}°
+                    </div>
                   </div>
                 </div>
-                <p className='text-sm text-zinc-400'>{type.description}</p>
+                <p className='text-sm text-content-muted'>{type.description}</p>
                 <div className='mt-2'>
                   <span
                     className={`text-xs px-2 py-1 rounded ${
                       type.nature === 'harmonious'
-                        ? 'bg-lunary-success-900/30 text-lunary-success'
+                        ? 'bg-layer-base/30 text-lunary-success'
                         : type.nature === 'challenging'
-                          ? 'bg-lunary-rose-900/30 text-lunary-rose'
-                          : 'bg-lunary-accent-900/30 text-lunary-accent'
+                          ? 'bg-layer-base/30 text-lunary-rose'
+                          : 'bg-layer-base/30 text-lunary-accent'
                     }`}
                   >
                     {type.nature}
@@ -196,7 +198,7 @@ No single aspect defines a relationship. A healthy relationship usually has a mi
               <NavParamLink
                 key={aspect.slug}
                 href={`/grimoire/synastry/aspects/${aspect.slug}`}
-                className='block p-5 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block p-5 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <div className='flex items-start justify-between gap-4'>
                   <div className='flex-1'>
@@ -207,30 +209,30 @@ No single aspect defines a relationship. A healthy relationship usually has a mi
                       ) : (
                         <Sparkles className='h-4 w-4 text-lunary-primary-400' />
                       )}
-                      <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                      <h3 className='text-lg font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                         {aspect.planet1} {aspect.aspect} {aspect.planet2}
                       </h3>
                       <span
                         className={`text-xs px-2 py-0.5 rounded ${
                           aspectTypes[aspect.aspectType].nature === 'harmonious'
-                            ? 'bg-lunary-success-900/30 text-lunary-success'
+                            ? 'bg-layer-base/30 text-lunary-success'
                             : aspectTypes[aspect.aspectType].nature ===
                                 'challenging'
-                              ? 'bg-lunary-rose-900/30 text-lunary-rose'
-                              : 'bg-lunary-accent-900/30 text-lunary-accent'
+                              ? 'bg-layer-base/30 text-lunary-rose'
+                              : 'bg-layer-base/30 text-lunary-accent'
                         }`}
                       >
                         {aspect.aspectType}
                       </span>
                     </div>
-                    <p className='text-sm text-zinc-400 line-clamp-2'>
+                    <p className='text-sm text-content-muted line-clamp-2'>
                       {aspect.overview.slice(0, 150)}...
                     </p>
                     <div className='flex flex-wrap gap-2 mt-3'>
                       {aspect.keywords.slice(0, 3).map((keyword) => (
                         <span
                           key={keyword}
-                          className='text-xs px-2 py-1 rounded bg-zinc-800 text-zinc-400'
+                          className='text-xs px-2 py-1 rounded bg-surface-card text-content-muted'
                         >
                           {keyword}
                         </span>

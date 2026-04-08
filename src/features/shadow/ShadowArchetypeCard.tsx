@@ -94,13 +94,15 @@ export function ShadowArchetypeCard({
   if (!archetype) {
     return (
       <div
-        className={`rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-4 ${className}`}
+        className={`rounded-xl border border-stroke-subtle/50 bg-surface-elevated/30 p-4 ${className}`}
       >
         <div className='flex items-center gap-2 mb-2'>
           <Sparkles className='w-4 h-4 text-lunary-primary-400' />
-          <h3 className='text-sm font-medium text-zinc-100'>Your Archetype</h3>
+          <h3 className='text-sm font-medium text-content-primary'>
+            Your Archetype
+          </h3>
         </div>
-        <p className='text-xs text-zinc-400'>
+        <p className='text-xs text-content-muted'>
           As you use Lunary, we will reveal the archetype emerging in your
           patterns.
         </p>
@@ -110,43 +112,43 @@ export function ShadowArchetypeCard({
 
   return (
     <div
-      className={`rounded-xl border border-lunary-primary-700/30 bg-gradient-to-br from-lunary-primary-950/20 to-zinc-900/60 overflow-hidden ${className}`}
+      className={`rounded-xl border border-lunary-primary-700/30 bg-gradient-to-br from-layer-deep/20 to-surface-elevated/60 overflow-hidden ${className}`}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className='w-full flex items-start justify-between p-4 text-left'
       >
         <div className='flex items-start gap-3'>
-          <div className='shrink-0 w-10 h-10 rounded-full bg-lunary-primary-900/40 border border-lunary-primary-700/50 flex items-center justify-center'>
+          <div className='shrink-0 w-10 h-10 rounded-full bg-layer-base/40 border border-lunary-primary-700/50 flex items-center justify-center'>
             <Sparkles className='w-5 h-5 text-lunary-primary-400' />
           </div>
           <div>
-            <p className='text-xs text-lunary-primary-300/80 mb-1'>
+            <p className='text-xs text-content-brand/80 mb-1'>
               Your Primary Archetype
             </p>
-            <h3 className='text-base font-medium text-zinc-100'>
+            <h3 className='text-base font-medium text-content-primary'>
               {archetype.name}
             </h3>
-            <p className='text-xs text-zinc-400 mt-1 line-clamp-2'>
+            <p className='text-xs text-content-muted mt-1 line-clamp-2'>
               {archetype.shortSummary}
             </p>
           </div>
         </div>
         <div className='shrink-0 ml-2 mt-1'>
           {isExpanded ? (
-            <ChevronUp className='w-5 h-5 text-zinc-500' />
+            <ChevronUp className='w-5 h-5 text-content-muted' />
           ) : (
-            <ChevronDown className='w-5 h-5 text-zinc-500' />
+            <ChevronDown className='w-5 h-5 text-content-muted' />
           )}
         </div>
       </button>
 
       {isExpanded && (
-        <div className='px-4 pb-4 pt-0 border-t border-zinc-800/50 space-y-4'>
+        <div className='px-4 pb-4 pt-0 border-t border-stroke-subtle/50 space-y-4'>
           {isSubscribed ? (
             <>
               <div className='mt-4'>
-                <p className='text-sm text-zinc-300 leading-relaxed whitespace-pre-line'>
+                <p className='text-sm text-content-secondary leading-relaxed whitespace-pre-line'>
                   {archetype.longSummary}
                 </p>
               </div>
@@ -159,21 +161,21 @@ export function ShadowArchetypeCard({
                   </p>
                   <ul className='space-y-1'>
                     {archetype.lightTraits.slice(0, 3).map((trait, i) => (
-                      <li key={i} className='text-xs text-zinc-400'>
+                      <li key={i} className='text-xs text-content-muted'>
                         • {trait}
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className='p-3 rounded-lg bg-zinc-800/30 border border-zinc-700/30'>
-                  <p className='text-xs font-medium text-zinc-400 mb-2 flex items-center gap-1'>
+                <div className='p-3 rounded-lg bg-surface-card/30 border border-stroke-default/30'>
+                  <p className='text-xs font-medium text-content-muted mb-2 flex items-center gap-1'>
                     <Moon className='w-3 h-3' />
                     Shadow Traits
                   </p>
                   <ul className='space-y-1'>
                     {archetype.shadowTraits.slice(0, 3).map((trait, i) => (
-                      <li key={i} className='text-xs text-zinc-500'>
+                      <li key={i} className='text-xs text-content-muted'>
                         • {trait}
                       </li>
                     ))}
@@ -182,15 +184,15 @@ export function ShadowArchetypeCard({
               </div>
 
               {archetype.suggestedWork.length > 0 && (
-                <div className='p-3 rounded-lg bg-lunary-primary-950/20 border border-lunary-primary-800/30'>
-                  <p className='text-xs font-medium text-lunary-primary-300/80 mb-2'>
+                <div className='p-3 rounded-lg bg-layer-deep/20 border border-lunary-primary-800/30'>
+                  <p className='text-xs font-medium text-content-brand/80 mb-2'>
                     Suggested Work
                   </p>
                   <ul className='space-y-1.5'>
                     {archetype.suggestedWork.slice(0, 4).map((work, i) => (
                       <li
                         key={i}
-                        className='text-xs text-zinc-300 flex items-start gap-2'
+                        className='text-xs text-content-secondary flex items-start gap-2'
                       >
                         <span className='text-lunary-primary-400'>•</span>
                         {work}
@@ -202,13 +204,13 @@ export function ShadowArchetypeCard({
             </>
           ) : (
             <div className='mt-4'>
-              <p className='text-xs text-zinc-400 mb-3'>
+              <p className='text-xs text-content-muted mb-3'>
                 {archetype.shortSummary}
               </p>
-              <p className='text-xs text-zinc-400'>
+              <p className='text-xs text-content-muted'>
                 <a
                   href='/pricing?nav=app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   Upgrade to Lunary+
                 </a>{' '}
@@ -234,10 +236,10 @@ export function ArchetypeCompactBadge({
 }: ArchetypeCompactBadgeProps) {
   return (
     <div
-      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lunary-primary-950/30 border border-lunary-primary-700/30 ${className}`}
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-layer-deep/30 border border-lunary-primary-700/30 ${className}`}
     >
       <Sparkles className='w-3 h-3 text-lunary-primary-400' />
-      <span className='text-xs text-lunary-primary-300'>{archetype.name}</span>
+      <span className='text-xs text-content-brand'>{archetype.name}</span>
     </div>
   );
 }

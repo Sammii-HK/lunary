@@ -9,6 +9,7 @@ import { ChevronDown, ChevronUp, Clock, Calendar } from 'lucide-react';
 import type { TransitAspect } from '@/features/horoscope/transitDetails';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { Collapse } from '@/components/ui/Collapse';
 
 dayjs.extend(relativeTime);
 
@@ -193,8 +194,8 @@ export function TarotTransitConnection({
 
   if (loading) {
     return (
-      <div className='mt-4 pt-4 border-t border-zinc-800'>
-        <div className='flex items-center gap-2 text-xs text-zinc-500'>
+      <div className='mt-4 pt-4 border-t border-stroke-subtle'>
+        <div className='flex items-center gap-2 text-xs text-content-muted'>
           <div className='w-3 h-3 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin' />
           <span>Calculating chart connections...</span>
         </div>
@@ -209,8 +210,8 @@ export function TarotTransitConnection({
   // Compact variant - only show current connection
   if (variant === 'compact') {
     return (
-      <div className='mt-4 pt-4 border-t border-zinc-800'>
-        <p className='text-xs text-lunary-accent-300 leading-relaxed'>
+      <div className='mt-4 pt-4 border-t border-stroke-subtle'>
+        <p className='text-xs text-content-brand-accent leading-relaxed'>
           {currentConnection?.compact}
         </p>
       </div>
@@ -247,29 +248,29 @@ export function TarotTransitConnection({
   const renderInsights = (
     insights: Array<{ transit: any; insight: string; relevance: string }>,
   ) => (
-    <div className='space-y-2'>
+    <div className='space-y-2 mt-2'>
       {insights.slice(0, 3).map((insight, idx) => {
         const isOpen = openAccordion === idx;
         return (
           <div
             key={idx}
-            className='rounded-md border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'
+            className='rounded-md border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden'
           >
             <button
               onClick={() => setOpenAccordion(isOpen ? -1 : idx)}
-              className='w-full flex items-center justify-between p-3 text-left hover:bg-zinc-900/50 transition-colors'
+              className='w-full flex items-center justify-between p-3 text-left hover:bg-surface-elevated/50 transition-colors'
             >
               <div className='flex flex-col gap-1 flex-1'>
                 <div className='flex items-center gap-2 justify-between'>
-                  <span className='text-xs font-medium text-lunary-primary-200'>
+                  <span className='text-xs font-medium text-content-secondary'>
                     {insight.transit.transitPlanet} {insight.transit.aspectType}{' '}
                     {insight.transit.natalPlanet}
                   </span>
-                  <span className='text-xs text-lunary-accent-300 mr-2'>
+                  <span className='text-xs text-content-brand-accent mr-2'>
                     {insight.relevance}
                   </span>
                 </div>
-                <p className='text-xs text-zinc-600'>
+                <p className='text-xs text-content-muted'>
                   {renderDegreeWithSymbol(insight.transit.transitDegree)}{' '}
                   {getAspectSymbol(insight.transit.aspectType)}{' '}
                   {renderDegreeWithSymbol(insight.transit.natalDegree)} (
@@ -277,18 +278,18 @@ export function TarotTransitConnection({
                 </p>
               </div>
               {isOpen ? (
-                <ChevronUp className='w-4 h-4 text-zinc-400 flex-shrink-0' />
+                <ChevronUp className='w-4 h-4 text-content-muted flex-shrink-0' />
               ) : (
-                <ChevronDown className='w-4 h-4 text-zinc-400 flex-shrink-0' />
+                <ChevronDown className='w-4 h-4 text-content-muted flex-shrink-0' />
               )}
             </button>
-            {isOpen && (
-              <div className='px-3 pb-3 pt-0 border-t border-zinc-800/50'>
-                <p className='text-xs text-zinc-300 leading-relaxed mt-2'>
+            <Collapse isOpen={isOpen}>
+              <div className='px-3 pb-3 pt-0 border-t border-stroke-subtle/50'>
+                <p className='text-xs text-content-secondary leading-relaxed mt-2'>
                   {insight.insight}
                 </p>
               </div>
-            )}
+            </Collapse>
           </div>
         );
       })}
@@ -301,13 +302,9 @@ export function TarotTransitConnection({
   // If we have both current and historical, show tabs
   if (currentConnection && historicalConnection) {
     return (
-      <div className='rounded-lg border border-lunary-primary-800/30 bg-lunary-primary-950/20 p-4'>
-        <h4 className='text-sm font-medium text-lunary-accent-200 mb-4'>
-          In Your Chart
-        </h4>
-
+      <div>
         {/* Tab navigation */}
-        <div className='flex gap-2 mb-4 border-b border-zinc-800'>
+        <div className='flex gap-2 mb-4 border-b border-stroke-subtle'>
           <button
             onClick={() => {
               setActiveTab('current');
@@ -315,8 +312,8 @@ export function TarotTransitConnection({
             }}
             className={`px-3 py-2 text-xs font-medium transition-colors border-b-2 ${
               activeTab === 'current'
-                ? 'border-lunary-primary-400 text-lunary-primary-200'
-                : 'border-transparent text-zinc-400 hover:text-zinc-300'
+                ? 'border-lunary-primary-400 text-content-secondary'
+                : 'border-transparent text-content-muted hover:text-content-secondary'
             }`}
           >
             <div className='flex items-center gap-2'>
@@ -331,8 +328,8 @@ export function TarotTransitConnection({
             }}
             className={`px-3 py-2 text-xs font-medium transition-colors border-b-2 ${
               activeTab === 'historical'
-                ? 'border-lunary-primary-400 text-lunary-primary-200'
-                : 'border-transparent text-zinc-400 hover:text-zinc-300'
+                ? 'border-lunary-primary-400 text-content-secondary'
+                : 'border-transparent text-content-muted hover:text-content-secondary'
             }`}
           >
             <div className='flex items-center gap-2'>
@@ -357,7 +354,7 @@ export function TarotTransitConnection({
           renderInsights(historicalConnection.perTransitInsights)}
 
         {/* Comparison note */}
-        <p className='text-xs text-zinc-500 mt-4 pt-4 border-t border-zinc-800'>
+        <p className='text-xs text-content-muted mt-4 pt-4 border-t border-stroke-subtle'>
           Compare how the cosmic weather has shifted since you pulled this
           reading.
         </p>
@@ -370,25 +367,13 @@ export function TarotTransitConnection({
     currentConnection?.perTransitInsights &&
     currentConnection.perTransitInsights.length > 0
   ) {
-    return (
-      <div className='rounded-lg border border-lunary-primary-800/30 bg-lunary-primary-950/20 p-4'>
-        <h4 className='text-sm font-medium text-lunary-accent-200 mb-3'>
-          In Your Chart Today
-        </h4>
-        {renderInsights(currentConnection.perTransitInsights)}
-      </div>
-    );
+    return renderInsights(currentConnection.perTransitInsights);
   }
 
   // Fallback to paragraph format if no per-transit insights
   return (
-    <div className='rounded-lg border border-lunary-primary-800/30 bg-lunary-primary-950/20 p-4'>
-      <h4 className='text-sm font-medium text-lunary-accent-200 mb-3'>
-        In Your Chart Today
-      </h4>
-      <p className='text-sm text-zinc-300 leading-relaxed'>
-        {currentConnection?.inDepth}
-      </p>
-    </div>
+    <p className='text-sm text-content-secondary leading-relaxed'>
+      {currentConnection?.inDepth}
+    </p>
   );
 }

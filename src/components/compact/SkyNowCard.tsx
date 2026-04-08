@@ -305,7 +305,7 @@ function DignityTooltip({
     >
       {children}
       {visible && (
-        <span className='pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-[10px] text-zinc-200 shadow-lg'>
+        <span className='pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded border border-stroke-default bg-surface-elevated px-2 py-1 text-[10px] text-content-primary shadow-lg'>
           <span className={`font-mono ${DIGNITY_TEXT_CLASS[dignity]}`}>
             {DIGNITY_ABBR[dignity]}
           </span>{' '}
@@ -478,8 +478,8 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
 
   if (planets.length === 0) {
     return (
-      <div className='py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md animate-pulse'>
-        <div className='h-5 w-32 bg-zinc-800 rounded' />
+      <div className='py-3 px-4 bg-surface-elevated border border-stroke-subtle/50 rounded-md animate-pulse'>
+        <div className='h-5 w-32 bg-surface-card rounded' />
       </div>
     );
   }
@@ -487,7 +487,7 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
   const preview = (
     <div className='w-full'>
       <ExpandableCardHeader
-        icon={<Telescope className='w-4 h-4 text-lunary-secondary-300' />}
+        icon={<Telescope className='w-4 h-4 text-content-brand-secondary' />}
         title='Sky Now'
         badge={
           retrogradeCount > 0 ? `${retrogradeCount} Retrograde` : undefined
@@ -513,7 +513,7 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
               }}
               aria-label='Refresh location used for Sky Now'
               title='Refresh my location'
-              className='p-0.5 rounded-full border border-transparent text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-colors relative'
+              className='p-0.5 rounded-full border border-transparent text-content-muted hover:text-content-secondary hover:border-stroke-default transition-colors relative'
             >
               {/* TODO: add back in with rise and set times functionality */}
               {refreshState === 'success' ? (
@@ -524,7 +524,7 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                 />
               )}
               {showLocationFeedback && locationError && (
-                <span className='absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-zinc-300'>
+                <span className='absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-content-secondary'>
                   Failed
                 </span>
               )}
@@ -535,7 +535,7 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                 event.stopPropagation();
                 setShowChartModal(true);
               }}
-              className='p-0.5 rounded-full border border-transparent text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-colors'
+              className='p-0.5 rounded-full border border-transparent text-content-muted hover:text-content-secondary hover:border-stroke-default transition-colors'
               aria-label='Open chart modal'
               title='Open chart modal'
             >
@@ -556,7 +556,7 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                 data-planet={planet.body}
               >
                 <span
-                  className={`font-astro text-base ${planet.retrograde ? 'text-lunary-error-300' : 'text-zinc-300'}`}
+                  className={`font-astro text-base ${planet.retrograde ? 'text-lunary-error-300' : 'text-content-secondary'}`}
                   title={planet.body}
                 >
                   {getPlanetSymbol(planet.body)}
@@ -565,7 +565,7 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                   className={`text-xs font-astro tracking-wider ${
                     planet.retrograde
                       ? 'text-lunary-error-300'
-                      : 'text-zinc-400'
+                      : 'text-content-muted'
                   }`}
                 >
                   {getZodiacSymbol(planet.sign)}
@@ -600,28 +600,30 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
           return (
             <div
               key={planet.body}
-              className={`py-2 border-b border-zinc-800/30 last:border-0 ${planet.retrograde ? 'text-lunary-error-200' : ''}`}
+              className={`py-2 border-b border-stroke-subtle/30 last:border-0 ${planet.retrograde ? 'text-lunary-error-200' : ''}`}
               data-testid='planet-item'
               data-planet={planet.body}
             >
               <div className='flex items-baseline justify-between gap-2'>
                 <div className='flex items-baseline gap-2'>
                   <span
-                    className={`font-astro text-lg ${planet.retrograde ? 'text-lunary-error-300' : 'text-lunary-secondary-300'}`}
+                    className={`font-astro text-lg ${planet.retrograde ? 'text-lunary-error-300' : 'text-content-brand-secondary'}`}
                   >
                     {getPlanetSymbol(planet.body)}
                   </span>
-                  <span className='text-sm text-zinc-200'>{planet.body}</span>
-                  <span className='font-astro text-zinc-400'>
+                  <span className='text-sm text-content-primary'>
+                    {planet.body}
+                  </span>
+                  <span className='font-astro text-content-muted'>
                     {getZodiacSymbol(planet.sign)}
                   </span>
-                  <span className='text-sm text-zinc-400'>
+                  <span className='text-sm text-content-muted'>
                     {planet.sign} {planet.formattedDegree?.degree || 0}°
                     {planet.formattedDegree?.minute !== undefined &&
                       `${planet.formattedDegree.minute}'`}
                   </span>
                   {natalSignHouseLookup[normalizedSign] != null && (
-                    <span className='text-xs uppercase text-zinc-500'>
+                    <span className='text-xs uppercase text-content-muted'>
                       {natalSignHouseLookup[normalizedSign]}H
                     </span>
                   )}
@@ -644,7 +646,7 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                 </div>
                 <TransitDurationBadge duration={planet.duration} />
               </div>
-              <p className='text-xs text-zinc-400 mt-1 ml-7'>
+              <p className='text-xs text-content-muted mt-1 ml-7'>
                 {getPlanetMeaning(planet.body, planet.sign)}
               </p>
               {planet.retrograde && (
@@ -671,17 +673,17 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
       />
       {showChartModal && (
         <div
-          className='fixed inset-0 z-50 flex items-center justify-center bg-black/80'
+          className='fixed inset-0 z-50 flex items-center justify-center bg-surface-base/80'
           role='presentation'
           onClick={() => setShowChartModal(false)}
         >
           <div
-            className='relative w-[min(90vw,560px)] rounded-[32px] border border-zinc-800 bg-zinc-950 p-6 shadow-2xl'
+            className='relative w-[min(90vw,560px)] rounded-[32px] border border-stroke-subtle bg-surface-base p-6 shadow-2xl'
             onClick={(event) => event.stopPropagation()}
           >
             <button
               type='button'
-              className='absolute right-4 top-4 text-zinc-400 hover:text-zinc-200'
+              className='absolute right-4 top-4 text-content-muted hover:text-content-primary'
               onClick={() => setShowChartModal(false)}
             >
               <X className='w-4 h-4' />

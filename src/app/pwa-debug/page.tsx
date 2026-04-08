@@ -102,35 +102,35 @@ export default function PWADebugPage() {
       <h1 className='text-2xl font-bold'>PWA Debug Status</h1>
 
       <div className='space-y-4'>
-        <section className='bg-zinc-900 p-4 rounded'>
+        <section className='bg-surface-elevated p-4 rounded'>
           <h2 className='font-bold mb-2'>Service Worker</h2>
           <pre className='text-xs overflow-auto'>
             {JSON.stringify(status.serviceWorker, null, 2)}
           </pre>
         </section>
 
-        <section className='bg-zinc-900 p-4 rounded'>
+        <section className='bg-surface-elevated p-4 rounded'>
           <h2 className='font-bold mb-2'>Caches</h2>
           <pre className='text-xs overflow-auto'>
             {JSON.stringify(status.caches, null, 2)}
           </pre>
         </section>
 
-        <section className='bg-zinc-900 p-4 rounded'>
+        <section className='bg-surface-elevated p-4 rounded'>
           <h2 className='font-bold mb-2'>Manifest</h2>
           <pre className='text-xs overflow-auto'>
             {JSON.stringify(status.manifest, null, 2)}
           </pre>
         </section>
 
-        <section className='bg-zinc-900 p-4 rounded'>
+        <section className='bg-surface-elevated p-4 rounded'>
           <h2 className='font-bold mb-2'>Display Mode</h2>
           <pre className='text-xs overflow-auto'>
             {JSON.stringify(status.displayMode, null, 2)}
           </pre>
         </section>
 
-        <section className='bg-zinc-900 p-4 rounded'>
+        <section className='bg-surface-elevated p-4 rounded'>
           <h2 className='font-bold mb-2'>Protocol</h2>
           <pre className='text-xs overflow-auto'>
             {JSON.stringify(status.protocol, null, 2)}
@@ -138,7 +138,7 @@ export default function PWADebugPage() {
         </section>
       </div>
 
-      <div className='bg-lunary-accent-900/30 p-4 rounded border border-lunary-accent-700'>
+      <div className='bg-layer-base/30 p-4 rounded border border-lunary-accent-700'>
         <h3 className='font-bold mb-2'>⚠️ Chrome iOS PWA Requirements</h3>
         <ul className='text-sm space-y-1'>
           <li>
@@ -157,7 +157,7 @@ export default function PWADebugPage() {
                 : 'NO'}
           </li>
         </ul>
-        <p className='text-xs mt-2 text-lunary-accent-200'>
+        <p className='text-xs mt-2 text-content-brand-accent'>
           Chrome iOS requires HTTPS for PWAs. Local HTTP might not work. Try
           Safari instead!
         </p>

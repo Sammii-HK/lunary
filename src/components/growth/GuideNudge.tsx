@@ -53,13 +53,13 @@ export function GuideNudge({ location, className = '' }: GuideNudgeProps) {
   if (isLoading) {
     return (
       <div
-        className={`rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-4 ${className}`}
+        className={`rounded-xl border border-stroke-subtle/50 bg-surface-elevated/30 p-4 ${className}`}
       >
         <div className='flex items-center gap-3'>
-          <div className='w-8 h-8 rounded-full bg-zinc-800 animate-pulse' />
+          <div className='w-8 h-8 rounded-full bg-surface-card animate-pulse' />
           <div className='flex-1 space-y-2'>
-            <div className='h-4 bg-zinc-800 rounded w-3/4 animate-pulse' />
-            <div className='h-3 bg-zinc-800 rounded w-1/2 animate-pulse' />
+            <div className='h-4 bg-surface-card rounded w-3/4 animate-pulse' />
+            <div className='h-3 bg-surface-card rounded w-1/2 animate-pulse' />
           </div>
         </div>
       </div>
@@ -82,24 +82,24 @@ export function GuideNudge({ location, className = '' }: GuideNudgeProps) {
 
   return (
     <div
-      className={`group rounded-xl border border-zinc-800/50 bg-gradient-to-br from-zinc-900/60 to-lunary-primary-950/20 p-4 transition-all hover:border-lunary-primary-700/50 hover:bg-gradient-to-br hover:from-zinc-900/80 hover:to-lunary-primary-950/30 ${className}`}
+      className={`group rounded-xl border border-stroke-subtle/50 bg-gradient-to-br from-surface-elevated/60 to-layer-deep/20 p-4 transition-all hover:border-lunary-primary-700/50 hover:bg-gradient-to-br hover:from-surface-elevated/80 hover:to-layer-deep/30 ${className}`}
     >
       <div className='flex items-start gap-3'>
-        <div className='shrink-0 w-8 h-8 rounded-full bg-lunary-primary-900/40 border border-lunary-primary-700/50 flex items-center justify-center'>
+        <div className='shrink-0 w-8 h-8 rounded-full bg-layer-base/40 border border-lunary-primary-700/50 flex items-center justify-center'>
           <Sparkles className='w-4 h-4 text-lunary-primary-400' />
         </div>
 
         <div className='flex-1 min-w-0'>
-          <h3 className='text-sm font-medium text-zinc-100 mb-1 line-clamp-1'>
+          <h3 className='text-sm font-medium text-content-primary mb-1 line-clamp-1'>
             {hint.title}
           </h3>
-          <p className='text-xs text-zinc-400 leading-relaxed line-clamp-2'>
+          <p className='text-xs text-content-muted leading-relaxed line-clamp-2'>
             {hint.shortText}
           </p>
 
           <Link
             href={guideUrl}
-            className='inline-flex items-center gap-1 mt-2 text-xs font-medium text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+            className='inline-flex items-center gap-1 mt-2 text-xs font-medium text-lunary-primary-400 hover:text-content-brand transition-colors'
           >
             Ask the Astral Guide
             <ChevronRight className='w-3 h-3 group-hover:translate-x-0.5 transition-transform' />
@@ -130,13 +130,13 @@ export function GuideNudgeCompact({
   return (
     <Link
       href={guideUrl}
-      className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-800/50 bg-zinc-900/40 hover:border-lunary-primary-700/50 hover:bg-lunary-primary-950/30 transition-all ${className}`}
+      className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-stroke-subtle/50 bg-surface-elevated/40 hover:border-lunary-primary-700/50 hover:bg-layer-deep/30 transition-all ${className}`}
     >
       <Sparkles className='w-3 h-3 text-lunary-primary-400' />
-      <span className='text-xs text-zinc-300 group-hover:text-zinc-100'>
+      <span className='text-xs text-content-secondary group-hover:text-content-primary'>
         {primaryHint ? primaryHint.title : 'Ask the Astral Guide'}
       </span>
-      <ChevronRight className='w-3 h-3 text-zinc-500 group-hover:text-lunary-primary-400 group-hover:translate-x-0.5 transition-all' />
+      <ChevronRight className='w-3 h-3 text-content-muted group-hover:text-lunary-primary-400 group-hover:translate-x-0.5 transition-all' />
     </Link>
   );
 }

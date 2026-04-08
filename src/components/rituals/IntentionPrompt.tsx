@@ -114,20 +114,20 @@ export function IntentionPrompt() {
   // Show active intention with quick actions
   if (activeIntention) {
     return (
-      <div className='mt-2 bg-lunary-primary-900/20 border border-lunary-primary-800/30 rounded-lg px-3 py-2'>
+      <div className='mt-2 bg-layer-base/20 border border-lunary-primary-800/30 rounded-lg px-3 py-2'>
         <div className='flex items-start gap-2'>
           <Target className='w-3.5 h-3.5 text-lunary-primary-400 mt-0.5 shrink-0' />
           <div className='flex-1 min-w-0'>
             <p className='text-[0.65rem] uppercase tracking-widest text-lunary-primary-400 mb-0.5'>
               {justSet ? 'Intention set' : 'Active intention'}
             </p>
-            <p className='text-xs text-white truncate'>
+            <p className='text-xs text-content-primary truncate'>
               {activeIntention.text}
             </p>
             <div className='flex items-center gap-2 mt-1.5'>
               <Link
                 href='/book-of-shadows?tab=intentions'
-                className='text-[0.65rem] text-lunary-accent hover:text-lunary-accent-100 transition-colors flex items-center gap-0.5'
+                className='text-[0.65rem] text-lunary-accent hover:text-content-brand-accent transition-colors flex items-center gap-0.5'
                 onClick={(e) => e.stopPropagation()}
               >
                 Check in <ChevronRight className='w-3 h-3' />
@@ -154,8 +154,8 @@ export function IntentionPrompt() {
   // Show inline set-intention prompt
   if (showSetForm) {
     return (
-      <div className='mt-2 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-2'>
-        <p className='text-[0.65rem] uppercase tracking-widest text-zinc-500 mb-1.5'>
+      <div className='mt-2 bg-surface-elevated/50 border border-stroke-subtle rounded-lg px-3 py-2'>
+        <p className='text-[0.65rem] uppercase tracking-widest text-content-muted mb-1.5'>
           Set an intention
         </p>
         <div className='flex gap-2'>
@@ -164,7 +164,7 @@ export function IntentionPrompt() {
             value={newIntentionText}
             onChange={(e) => setNewIntentionText(e.target.value)}
             placeholder='What do you want to manifest?'
-            className='flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-lunary-primary'
+            className='flex-1 bg-surface-card border border-stroke-default rounded px-2 py-1.5 text-xs text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary'
             maxLength={200}
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
@@ -195,7 +195,7 @@ export function IntentionPrompt() {
             e.stopPropagation();
             setShowSetForm(false);
           }}
-          className='text-[0.6rem] text-zinc-500 mt-1'
+          className='text-[0.6rem] text-content-muted mt-1'
         >
           Skip
         </button>
@@ -211,7 +211,7 @@ export function IntentionPrompt() {
         e.stopPropagation();
         setShowSetForm(true);
       }}
-      className='mt-2 w-full flex items-center gap-2 text-[0.65rem] text-zinc-400 hover:text-zinc-200 transition-colors'
+      className='mt-2 w-full flex items-center gap-2 text-[0.65rem] text-content-muted hover:text-content-primary transition-colors'
     >
       <Target className='w-3 h-3' />
       Set an intention for today

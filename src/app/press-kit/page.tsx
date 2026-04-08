@@ -125,22 +125,22 @@ const pressQuotes = [
 export default function PressKitPage() {
   return (
     <>
-      <div className='min-h-screen bg-zinc-950 text-white flex flex-col'>
+      <div className='min-h-screen bg-surface-base text-content-primary flex flex-col'>
         <div className='flex-1 w-full max-w-5xl mx-auto space-y-10 px-4 py-10'>
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/50 p-8'>
-            <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/50 p-8'>
+            <p className='text-xs uppercase tracking-[0.4em] text-content-secondary'>
               Press Kit
             </p>
             <h1 className='text-4xl font-semibold'>Lunary Press Kit</h1>
-            <p className='text-lg font-semibold text-lunary-primary-200'>
+            <p className='text-lg font-semibold text-content-secondary'>
               The astronomy-based spiritual platform
             </p>
-            <p className='text-lg text-zinc-200'>
+            <p className='text-lg text-content-primary'>
               Welcome to the official Lunary press kit. Below you'll find
               approved assets, brand guidelines, product information, founder
               details, and resources for media, investors, and partners.
             </p>
-            <p className='text-lg text-zinc-200'>
+            <p className='text-lg text-content-primary'>
               Lunary is building the world's first{' '}
               <strong>Symbolic Intelligence OS</strong> — combining astrology,
               tarot, crystal identification, rituals, and emotional insight with
@@ -149,9 +149,9 @@ export default function PressKitPage() {
             </p>
           </section>
 
-          <section className='space-y-6 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-6 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Brand Assets
               </p>
               <h2 className='text-2xl font-semibold mb-4'>Brand Assets</h2>
@@ -160,7 +160,7 @@ export default function PressKitPage() {
             <div className='space-y-6'>
               <div>
                 <h3 className='text-xl font-semibold mb-3'>Logos</h3>
-                <ul className='list-disc space-y-2 pl-5 text-sm text-zinc-300'>
+                <ul className='list-disc space-y-2 pl-5 text-sm text-content-secondary'>
                   <li>Primary Lunary Logo (Light)</li>
                   <li>Primary Lunary Logo (Dark)</li>
                   <li>Wordmark</li>
@@ -181,10 +181,10 @@ export default function PressKitPage() {
                         className='mb-3 h-20 w-full rounded-xl border border-white/10'
                         style={{ backgroundColor: color.hex }}
                       />
-                      <p className='text-sm font-semibold text-white'>
+                      <p className='text-sm font-semibold text-content-primary'>
                         {color.name}
                       </p>
-                      <p className='text-xs text-zinc-400 font-mono'>
+                      <p className='text-xs text-content-muted font-mono'>
                         {color.hex}
                       </p>
                     </div>
@@ -194,7 +194,7 @@ export default function PressKitPage() {
 
               <div>
                 <h3 className='text-xl font-semibold mb-3'>Typography</h3>
-                <ul className='list-disc space-y-2 pl-5 text-sm text-zinc-300'>
+                <ul className='list-disc space-y-2 pl-5 text-sm text-content-secondary'>
                   <li>
                     Display: <strong>Astronomicon</strong>
                   </li>
@@ -207,7 +207,7 @@ export default function PressKitPage() {
               <div>
                 <Link
                   href='/press-kit/lunary-press-kit.zip'
-                  className='inline-flex rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-lunary-primary-400'
+                  className='inline-flex rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-content-primary transition hover:border-lunary-primary-400'
                 >
                   Download full brand pack: /assets/brand-kit.zip
                 </Link>
@@ -215,14 +215,14 @@ export default function PressKitPage() {
             </div>
           </section>
 
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Product Overview
               </p>
               <h2 className='text-2xl font-semibold mb-4'>Product Overview</h2>
             </div>
-            <p className='text-lg text-zinc-200'>
+            <p className='text-lg text-content-primary'>
               Lunary is a modern spiritual intelligence platform grounded in
               real astronomical calculations. It brings together astrology,
               tarot, numerology, rituals, moon cycles, and crystals, with AI
@@ -231,7 +231,7 @@ export default function PressKitPage() {
             </p>
             <div>
               <h3 className='text-xl font-semibold mb-3'>Core features:</h3>
-              <ul className='list-disc space-y-2 pl-5 text-sm text-zinc-300'>
+              <ul className='list-disc space-y-2 pl-5 text-sm text-content-secondary'>
                 {coreFeatures.map((feature) => (
                   <li key={feature}>
                     <strong>{feature}</strong>
@@ -239,14 +239,14 @@ export default function PressKitPage() {
                 ))}
               </ul>
             </div>
-            <p className='text-lg text-zinc-200'>
+            <p className='text-lg text-content-primary'>
               Lunary unifies everything into a single experience.
             </p>
           </section>
 
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Product Screenshots
               </p>
               <h2 className='text-2xl font-semibold mb-4'>
@@ -255,7 +255,7 @@ export default function PressKitPage() {
             </div>
             <div>
               <h3 className='text-xl font-semibold mb-3'>User Experience</h3>
-              <ul className='list-disc space-y-2 pl-5 text-sm text-zinc-300 mb-4'>
+              <ul className='list-disc space-y-2 pl-5 text-sm text-content-secondary mb-4'>
                 <li>Home Dashboard</li>
                 <li>Daily Horoscope</li>
                 <li>Tarot Reader</li>
@@ -274,7 +274,7 @@ export default function PressKitPage() {
                   key={shot.title}
                   className='rounded-2xl border border-white/10 bg-white/5 p-3'
                 >
-                  <div className='relative mb-3 h-48 w-full overflow-hidden rounded-xl bg-black/40'>
+                  <div className='relative mb-3 h-48 w-full overflow-hidden rounded-xl bg-surface-base/40'>
                     <Image
                       src={shot.src}
                       alt={shot.title}
@@ -283,84 +283,88 @@ export default function PressKitPage() {
                       className='object-contain p-4'
                     />
                   </div>
-                  <p className='text-sm font-semibold text-white'>
+                  <p className='text-sm font-semibold text-content-primary'>
                     {shot.title}
                   </p>
-                  <p className='text-xs text-zinc-400'>{shot.description}</p>
+                  <p className='text-xs text-content-muted'>
+                    {shot.description}
+                  </p>
                 </div>
               ))}
             </div>
             <div>
               <Link
                 href='/press-kit/lunary-press-kit.zip'
-                className='inline-flex text-sm text-lunary-primary-200 underline'
+                className='inline-flex text-sm text-content-secondary underline'
               >
                 Download full screenshot pack: /assets/product-screens.zip
               </Link>
             </div>
           </section>
 
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Press Boilerplate
               </p>
               <h2 className='text-2xl font-semibold mb-4'>About Lunary</h2>
             </div>
-            <blockquote className='border-l-4 border-lunary-primary-400 pl-4 text-lg text-zinc-200 italic'>
+            <blockquote className='border-l-4 border-lunary-primary-400 pl-4 text-lg text-content-primary italic'>
               Lunary is the astronomy-based spiritual intelligence platform that
               blends astronomy-grade accuracy with personalised astrology,
               tarot, ritual guidance, and optional AI chat. Available on web and
               app.
             </blockquote>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Use the above paragraph for press coverage and media mentions.
             </p>
           </section>
 
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Featured In
               </p>
               <h2 className='text-2xl font-semibold mb-4'>As Seen On</h2>
             </div>
             <div className='flex flex-wrap gap-8 items-center justify-center opacity-50'>
               <div className='text-center'>
-                <p className='text-zinc-400 text-sm'>Media Partner</p>
+                <p className='text-content-muted text-sm'>Media Partner</p>
               </div>
               <div className='text-center'>
-                <p className='text-zinc-400 text-sm'>Featured Publication</p>
+                <p className='text-content-muted text-sm'>
+                  Featured Publication
+                </p>
               </div>
               <div className='text-center'>
-                <p className='text-zinc-400 text-sm'>Press Coverage</p>
+                <p className='text-content-muted text-sm'>Press Coverage</p>
               </div>
             </div>
-            <p className='text-xs text-zinc-500 text-center'>
+            <p className='text-xs text-content-muted text-center'>
               Placeholder - logos will be added as press coverage grows.
             </p>
           </section>
 
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Positioning
               </p>
               <h2 className='text-2xl font-semibold mb-4'>
                 Positioning Statement
               </h2>
             </div>
-            <p className='text-lg text-zinc-200'>
+            <p className='text-lg text-content-primary'>
               <strong>
                 Lunary is the first app to bring ancient symbolic systems and
                 modern AI together, creating a deeply personal spiritual
                 intelligence platform for the next generation.
               </strong>
             </p>
-            <p className='text-lg text-zinc-200'>
+            <p className='text-lg text-content-primary'>
               It is the spiritual wellness app for:
             </p>
-            <ul className='list-disc space-y-2 pl-5 text-sm text-zinc-300'>
+            <ul className='list-disc space-y-2 pl-5 text-sm text-content-secondary'>
               <li>meaning-seekers</li>
               <li>intuitives</li>
               <li>astrology lovers</li>
@@ -369,15 +373,15 @@ export default function PressKitPage() {
               <li>emotional explorers</li>
               <li>Gen Z and millennial spiritual communities</li>
             </ul>
-            <p className='text-lg text-zinc-200'>
+            <p className='text-lg text-content-primary'>
               We believe spirituality deserves the same level of design,
               intelligence, and technical excellence as productivity or finance.
             </p>
           </section>
 
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Differentiators
               </p>
               <h2 className='text-2xl font-semibold mb-4'>Differentiators</h2>
@@ -388,22 +392,24 @@ export default function PressKitPage() {
                   <h3 className='text-xl font-semibold'>
                     {index + 1}. {item.title}
                   </h3>
-                  <p className='text-sm text-zinc-300'>{item.description}</p>
+                  <p className='text-sm text-content-secondary'>
+                    {item.description}
+                  </p>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Traction
               </p>
               <h2 className='text-2xl font-semibold mb-4'>
                 Traction Highlights
               </h2>
             </div>
-            <ul className='list-disc space-y-2 pl-5 text-sm text-zinc-300'>
+            <ul className='list-disc space-y-2 pl-5 text-sm text-content-secondary'>
               <li>Thousands of active users</li>
               <li>Multi-tier subscription model</li>
               <li>Daily automated cosmic posts</li>
@@ -414,14 +420,14 @@ export default function PressKitPage() {
               <li>PWA experience + OG generation engine</li>
               <li>Admin tools, analytics, and internal CMS live</li>
             </ul>
-            <p className='text-sm text-zinc-300 mt-4'>
+            <p className='text-sm text-content-secondary mt-4'>
               More features shipped at pre-seed than most competitors.
             </p>
           </section>
 
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Press Quotes
               </p>
               <h2 className='text-2xl font-semibold mb-4'>
@@ -432,10 +438,10 @@ export default function PressKitPage() {
               {pressQuotes.map((quote, index) => (
                 <blockquote
                   key={index}
-                  className='border-l-4 border-lunary-primary-400 pl-4 italic text-zinc-300'
+                  className='border-l-4 border-lunary-primary-400 pl-4 italic text-content-secondary'
                 >
                   <p className='text-lg'>&ldquo;{quote.quote}&rdquo;</p>
-                  <p className='text-sm text-zinc-400 mt-2'>
+                  <p className='text-sm text-content-muted mt-2'>
                     — <em>{quote.attribution}</em>
                   </p>
                 </blockquote>
@@ -443,25 +449,27 @@ export default function PressKitPage() {
             </div>
           </section>
 
-          <section className='grid gap-6 rounded-3xl border border-white/10 bg-black/40 p-6 md:grid-cols-2'>
+          <section className='grid gap-6 rounded-3xl border border-white/10 bg-surface-base/40 p-6 md:grid-cols-2'>
             <div>
               <div>
-                <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+                <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                   Founder
                 </p>
                 <h2 className='text-2xl font-semibold mb-4'>Founder</h2>
               </div>
-              <p className='text-lg font-semibold text-white mb-2'>Sammii</p>
-              <p className='text-sm text-zinc-300 mb-4'>
+              <p className='text-lg font-semibold text-content-primary mb-2'>
+                Sammii
+              </p>
+              <p className='text-sm text-content-secondary mb-4'>
                 Designer, engineer, and solo founder of Lunary. Creator of the
                 astrology engine, Astral Guide chat, design system, brand, and
                 complete product.
               </p>
               <div className='mb-4'>
-                <p className='text-sm font-semibold text-zinc-200 mb-2'>
+                <p className='text-sm font-semibold text-content-primary mb-2'>
                   Former:
                 </p>
-                <ul className='list-disc space-y-1 pl-5 text-sm text-zinc-300'>
+                <ul className='list-disc space-y-1 pl-5 text-sm text-content-secondary'>
                   <li>Senior engineer & designer</li>
                   <li>Built high-performance SaaS platforms</li>
                   <li>
@@ -470,10 +478,10 @@ export default function PressKitPage() {
                 </ul>
               </div>
               <div className='mb-4'>
-                <p className='text-sm font-semibold text-zinc-200 mb-2'>
+                <p className='text-sm font-semibold text-content-primary mb-2'>
                   Sammii writes and speaks on:
                 </p>
-                <ul className='list-disc space-y-1 pl-5 text-sm text-zinc-300'>
+                <ul className='list-disc space-y-1 pl-5 text-sm text-content-secondary'>
                   <li>AI × spirituality</li>
                   <li>digital ritual design</li>
                   <li>symbolic meaning systems</li>
@@ -483,24 +491,24 @@ export default function PressKitPage() {
               </div>
               <Link
                 href='/press-kit/founder-bio.pdf'
-                className='inline-flex rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-lunary-primary-400'
+                className='inline-flex rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-content-primary transition hover:border-lunary-primary-400'
               >
                 Headshot pack: /assets/founder-photos.zip
               </Link>
             </div>
             <div className='space-y-4'>
               <div>
-                <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+                <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                   Contact
                 </p>
                 <h2 className='text-2xl font-semibold mb-4'>Contact</h2>
               </div>
-              <div className='space-y-3 text-sm text-zinc-300'>
+              <div className='space-y-3 text-sm text-content-secondary'>
                 <p>
                   Press enquiries:{' '}
                   <a
                     href='mailto:press@lunary.app'
-                    className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
+                    className='text-content-secondary underline hover:text-content-secondary'
                   >
                     press@lunary.app
                   </a>
@@ -509,7 +517,7 @@ export default function PressKitPage() {
                   Founder:{' '}
                   <a
                     href='mailto:sammi@lunary.app'
-                    className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
+                    className='text-content-secondary underline hover:text-content-secondary'
                   >
                     sammi@lunary.app
                   </a>
@@ -518,7 +526,7 @@ export default function PressKitPage() {
                   Website:{' '}
                   <a
                     href='https://www.lunary.app'
-                    className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
+                    className='text-content-secondary underline hover:text-content-secondary'
                     target='_blank'
                     rel='noopener noreferrer'
                   >
@@ -526,11 +534,13 @@ export default function PressKitPage() {
                   </a>
                 </p>
                 <div className='mt-4'>
-                  <p className='font-semibold text-zinc-200 mb-2'>Social:</p>
+                  <p className='font-semibold text-content-primary mb-2'>
+                    Social:
+                  </p>
                   <div className='flex flex-wrap gap-3'>
                     <a
                       href='https://instagram.com/lunary.app'
-                      className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
+                      className='text-content-secondary underline hover:text-content-secondary'
                       target='_blank'
                       rel='noopener noreferrer'
                     >
@@ -538,7 +548,7 @@ export default function PressKitPage() {
                     </a>
                     <a
                       href='https://tiktok.com/@lunary.app'
-                      className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
+                      className='text-content-secondary underline hover:text-content-secondary'
                       target='_blank'
                       rel='noopener noreferrer'
                     >
@@ -546,7 +556,7 @@ export default function PressKitPage() {
                     </a>
                     <a
                       href='https://discord.gg/2WCJncKrKj'
-                      className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
+                      className='text-content-secondary underline hover:text-content-secondary'
                       target='_blank'
                       rel='noopener noreferrer'
                     >
@@ -558,7 +568,7 @@ export default function PressKitPage() {
                   For investor materials, visit:{' '}
                   <a
                     href='https://www.lunary.app/fundraise'
-                    className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
+                    className='text-content-secondary underline hover:text-content-secondary'
                     target='_blank'
                     rel='noopener noreferrer'
                   >
@@ -569,16 +579,16 @@ export default function PressKitPage() {
             </div>
           </section>
 
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Fact Sheet
               </p>
               <h2 className='text-2xl font-semibold mb-4'>
                 Fact Sheet (Copy/Paste for Journalists)
               </h2>
             </div>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Company:</strong> Lunary
               </p>
@@ -625,14 +635,14 @@ export default function PressKitPage() {
             </div>
           </section>
 
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Additional Assets
               </p>
               <h2 className='text-2xl font-semibold mb-4'>Additional Assets</h2>
             </div>
-            <ul className='list-disc space-y-2 pl-5 text-sm text-zinc-300'>
+            <ul className='list-disc space-y-2 pl-5 text-sm text-content-secondary'>
               <li>Brand guidelines PDF</li>
               <li>Press release templates</li>
               <li>Product demo video</li>
@@ -643,16 +653,16 @@ export default function PressKitPage() {
             </ul>
           </section>
 
-          <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+          <section className='space-y-4 rounded-3xl border border-white/10 bg-surface-base/40 p-6'>
             <div>
-              <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-secondary mb-2'>
                 Media Pack Downloads
               </p>
               <h2 className='text-2xl font-semibold mb-4'>
                 Media Pack Downloads
               </h2>
             </div>
-            <ul className='list-disc space-y-2 pl-5 text-sm text-zinc-300'>
+            <ul className='list-disc space-y-2 pl-5 text-sm text-content-secondary'>
               <li>Press images</li>
               <li>Feature screenshots</li>
               <li>Brand kit</li>
@@ -663,8 +673,8 @@ export default function PressKitPage() {
             </ul>
           </section>
 
-          <section className='rounded-3xl border border-lunary-primary-400/20 bg-lunary-primary-900/10 p-6'>
-            <p className='text-sm text-lunary-primary-100'>
+          <section className='rounded-3xl border border-lunary-primary-400/20 bg-layer-base/10 p-6'>
+            <p className='text-sm text-content-secondary'>
               <em>
                 For anything not listed here, please reach out. We respond
                 quickly to press & investors.

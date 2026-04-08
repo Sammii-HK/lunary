@@ -31,21 +31,21 @@ interface PatternCardProps {
 const COLOR_CLASSES = {
   primary: {
     border: 'border-lunary-primary-800',
-    bg: 'bg-lunary-primary-950/40',
+    bg: 'bg-layer-deep/40',
     icon: 'text-lunary-primary-400',
-    title: 'text-lunary-primary-300',
+    title: 'text-content-brand',
   },
   secondary: {
     border: 'border-lunary-secondary-800',
-    bg: 'bg-lunary-secondary-950/40',
+    bg: 'bg-layer-deep/40',
     icon: 'text-lunary-secondary-400',
-    title: 'text-lunary-secondary-300',
+    title: 'text-content-brand-secondary',
   },
   accent: {
     border: 'border-lunary-accent-800',
-    bg: 'bg-lunary-accent-950/40',
+    bg: 'bg-layer-deep/40',
     icon: 'text-lunary-accent-400',
-    title: 'text-lunary-accent-300',
+    title: 'text-content-brand-accent',
   },
   highlight: {
     border: 'border-lunary-highlight-800',
@@ -55,13 +55,13 @@ const COLOR_CLASSES = {
   },
   rose: {
     border: 'border-lunary-rose-800',
-    bg: 'bg-lunary-rose-950/40',
+    bg: 'bg-layer-deep/40',
     icon: 'text-lunary-rose-400',
     title: 'text-lunary-rose-300',
   },
   success: {
     border: 'border-lunary-success-800',
-    bg: 'bg-lunary-success-950/40',
+    bg: 'bg-layer-deep/40',
     icon: 'text-lunary-success-400',
     title: 'text-lunary-success-300',
   },
@@ -122,7 +122,7 @@ export function PatternCard({
           {collapsible && !locked && (
             <ChevronDown
               className={cn(
-                'w-4 h-4 transition-transform text-zinc-400',
+                'w-4 h-4 transition-transform text-content-muted',
                 isCollapsed && '-rotate-90',
               )}
             />
@@ -132,14 +132,16 @@ export function PatternCard({
 
       {!isCollapsed && (
         <>
-          {subtitle && <p className='text-xs text-zinc-500 mb-3'>{subtitle}</p>}
+          {subtitle && (
+            <p className='text-xs text-content-muted mb-3'>{subtitle}</p>
+          )}
 
           {locked ? (
             <>
               <div className='filter blur-sm pointer-events-none'>
                 {children}
               </div>
-              <div className='absolute inset-0 flex items-center justify-center bg-lunary-bg/80 backdrop-blur-sm'>
+              <div className='absolute inset-0 flex items-center justify-center bg-surface-elevated/80 backdrop-blur-sm'>
                 <button
                   onClick={onUpgradeClick}
                   className={cn(

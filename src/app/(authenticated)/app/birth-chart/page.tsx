@@ -56,7 +56,7 @@ const BirthChartPage = () => {
       <div className='h-full flex items-center justify-center'>
         <div className='text-center'>
           <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4'></div>
-          <p className='text-zinc-400'>Loading your birth chart...</p>
+          <p className='text-content-muted'>Loading your birth chart...</p>
         </div>
       </div>
     );
@@ -68,17 +68,17 @@ const BirthChartPage = () => {
       <div className='h-full space-y-4 p-4 overflow-auto'>
         <div className='flex items-center justify-center min-h-[50vh]'>
           <div className='text-center max-w-lg px-4'>
-            <h1 className='text-xl font-bold text-white mb-4'>
+            <h1 className='text-xl font-bold text-content-primary mb-4'>
               Your Birth Chart Awaits
             </h1>
-            <div className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 rounded-lg p-4 border border-lunary-primary-700 mb-4'>
-              <p className='text-zinc-300 mb-4'>
+            <div className='bg-gradient-to-r from-layer-base/30 to-lunary-rose-900/30 rounded-lg p-4 border border-lunary-primary-700 mb-4'>
+              <p className='text-content-secondary mb-4'>
                 Sign up and unlock your complete cosmic blueprint with our
                 comprehensive birth chart. We calculate 24+ celestial bodies
                 including all planets, asteroids, nodes, and sensitive points
                 for the most detailed astrological analysis.
               </p>
-              <ul className='text-sm text-zinc-400 space-y-2 mb-6 text-left'>
+              <ul className='text-sm text-content-muted space-y-2 mb-6 text-left'>
                 <li className='flex items-start gap-2'>
                   <Sparkles className='w-4 h-4 mt-0.5 flex-shrink-0 text-lunary-primary' />
                   <span>
@@ -120,10 +120,10 @@ const BirthChartPage = () => {
     return (
       <div className='h-full flex items-center justify-center'>
         <div className='text-center max-w-md px-4'>
-          <h1 className='text-2xl font-bold text-white mb-4'>
+          <h1 className='text-2xl font-bold text-content-primary mb-4'>
             Your Birth Chart
           </h1>
-          <p className='text-zinc-300 mb-6'>
+          <p className='text-content-secondary mb-6'>
             To generate your personalized birth chart, you need to provide your
             birthday on your profile.
           </p>
@@ -144,10 +144,10 @@ const BirthChartPage = () => {
     return (
       <div className='h-full flex items-center justify-center'>
         <div className='text-center max-w-md px-4'>
-          <h1 className='text-2xl font-bold text-white mb-4'>
+          <h1 className='text-2xl font-bold text-content-primary mb-4'>
             Generating Birth Chart
           </h1>
-          <p className='text-zinc-300 mb-6'>
+          <p className='text-content-secondary mb-6'>
             Your birth chart is being calculated based on your birthday. Please
             refresh the page in a moment.
           </p>
@@ -166,32 +166,32 @@ const BirthChartPage = () => {
     <div className='h-full overflow-auto' data-testid='birth-chart-page'>
       <div className='flex w-full flex-col gap-4 max-w-2xl sm:max-w-3xl md:max-w-4xl mx-auto p-4 mb-16'>
         {/* Internal Links for SEO */}
-        <nav className='p-4 bg-zinc-900/50 rounded-lg border border-zinc-800'>
-          <p className='text-sm text-zinc-400 mb-3'>
+        <nav className='p-4 bg-surface-elevated/50 rounded-lg border border-stroke-subtle'>
+          <p className='text-sm text-content-muted mb-3'>
             Learn more about your cosmic blueprint:
           </p>
           <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/birth-chart'
-              className='text-xs px-3 py-1.5 bg-lunary-primary-900/30 text-lunary-primary-300 border border-lunary-primary-700/50 rounded-full hover:bg-lunary-primary-900/50 transition-colors'
+              className='text-xs px-3 py-1.5 bg-layer-base/30 text-content-brand border border-lunary-primary-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
             >
               Birth Chart Guide
             </Link>
             <Link
               href='/grimoire/astronomy/planets'
-              className='text-xs px-3 py-1.5 bg-lunary-accent-900/30 text-lunary-accent-300 border border-lunary-accent-700/50 rounded-full hover:bg-lunary-accent-900/50 transition-colors'
+              className='text-xs px-3 py-1.5 bg-layer-base/30 text-content-brand-accent border border-lunary-accent-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
             >
               Planet Meanings
             </Link>
             <Link
               href='/grimoire/houses'
-              className='text-xs px-3 py-1.5 bg-lunary-secondary-900/30 text-lunary-secondary-300 border border-lunary-secondary-700/50 rounded-full hover:bg-lunary-secondary-900/50 transition-colors'
+              className='text-xs px-3 py-1.5 bg-layer-base/30 text-content-brand-secondary border border-lunary-secondary-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
             >
               The 12 Houses
             </Link>
             <Link
               href='/grimoire/zodiac'
-              className='text-xs px-3 py-1.5 bg-lunary-rose-900/30 text-lunary-rose-300 border border-lunary-rose-700/50 rounded-full hover:bg-lunary-rose-900/50 transition-colors'
+              className='text-xs px-3 py-1.5 bg-layer-base/30 text-lunary-rose-300 border border-lunary-rose-700/50 rounded-full hover:bg-layer-base/50 transition-colors'
             >
               Zodiac Signs
             </Link>

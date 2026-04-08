@@ -106,13 +106,13 @@ export default function ShadowWorkPage() {
       />
 
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-6'>
           Shadow Work
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             The Witch&apos;s Guide to Healing
           </span>
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           The shadow is not your enemy—it is the hidden part of yourself that
           holds immense power when integrated. Shadow work is the practice of
           bringing unconscious patterns into awareness, accepting them, and
@@ -120,11 +120,11 @@ export default function ShadowWorkPage() {
         </p>
       </header>
 
-      <div className='bg-lunary-error-900/20 border border-lunary-error-700 rounded-xl p-6 mb-12'>
+      <div className='bg-layer-base/20 border border-lunary-error-700 rounded-xl p-6 mb-12'>
         <h2 className='text-lg font-medium text-lunary-error-300 mb-2'>
           Safety First
         </h2>
-        <p className='text-zinc-300 text-sm'>
+        <p className='text-content-secondary text-sm'>
           Shadow work can surface difficult emotions. If you have trauma or
           mental health concerns, consider working with a therapist alongside
           personal practice. Go slowly, practice self-compassion, and stop if
@@ -133,11 +133,11 @@ export default function ShadowWorkPage() {
         </p>
       </div>
 
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a href='#what-is-shadow' className='hover:text-lunary-primary-400'>
               1. What Is the Shadow?
@@ -178,11 +178,11 @@ export default function ShadowWorkPage() {
 
       {/* Section 1 */}
       <section id='what-is-shadow' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           1. What Is the Shadow?
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           The term &quot;shadow&quot; comes from psychologist Carl Jung. It
           refers to the parts of ourselves we reject, deny, or hide—both from
           others and from our own conscious awareness. These are traits,
@@ -190,11 +190,11 @@ export default function ShadowWorkPage() {
           unacceptable.
         </p>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           The shadow is not inherently &quot;bad.&quot; It often contains:
         </p>
 
-        <ul className='space-y-2 text-zinc-300 mb-6'>
+        <ul className='space-y-2 text-content-secondary mb-6'>
           <li>• Emotions we were taught to suppress (anger, grief, joy)</li>
           <li>• Desires that felt shameful or unsafe to express</li>
           <li>• Talents and power we were told to dim</li>
@@ -202,11 +202,11 @@ export default function ShadowWorkPage() {
           <li>• Parts of ourselves that didn&apos;t fit our environment</li>
         </ul>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-brand mb-3'>
             Why Shadow Work Matters for Witches
           </h3>
-          <p className='text-zinc-300 text-sm'>
+          <p className='text-content-secondary text-sm'>
             Unintegrated shadow drains energy and creates blind spots in magical
             work. Spells cast from unexamined wounds often backfire or manifest
             in distorted ways. Shadow work clears these blocks and gives you
@@ -217,43 +217,47 @@ export default function ShadowWorkPage() {
 
       {/* Section 2: Safety */}
       <section id='safety' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           2. Safety & Self-Regulation
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Shadow work requires a foundation of self-regulation. Before diving
           deep, ensure you have coping strategies in place.
         </p>
 
         <div className='space-y-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Go Slowly</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>Go Slowly</h3>
+            <p className='text-content-muted text-sm'>
               There&apos;s no rush. Work on one aspect at a time. If you feel
               overwhelmed, stop and ground yourself. The shadow isn&apos;t going
               anywhere—you can return later.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Have Support</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Have Support
+            </h3>
+            <p className='text-content-muted text-sm'>
               A trusted friend, therapist, or spiritual community can help you
               process what arises. You don&apos;t have to do this alone.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Practice Self-Compassion
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               The shadow formed as a survival mechanism. It protected you.
               Approach it with gratitude and gentleness, not judgment.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Know Your Limits</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Know Your Limits
+            </h3>
+            <p className='text-content-muted text-sm'>
               If you have trauma, work with a professional. Shadow work is not a
               substitute for therapy. It&apos;s a complement.
             </p>
@@ -263,43 +267,47 @@ export default function ShadowWorkPage() {
 
       {/* Section 3: Recognizing */}
       <section id='recognizing' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           3. Recognizing Your Shadow
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           The shadow reveals itself through patterns. Learn to recognize these
           signs:
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Shadow Signals
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>
-              <strong className='text-zinc-200'>
+              <strong className='text-content-primary'>
                 Strong emotional reactions:
               </strong>{' '}
               Disproportionate anger, envy, or disgust toward someone often
               indicates they&apos;re mirroring something in your shadow.
             </li>
             <li>
-              <strong className='text-zinc-200'>Recurring patterns:</strong> The
-              same relationship dynamics, the same failures, the same situations
-              appearing repeatedly.
+              <strong className='text-content-primary'>
+                Recurring patterns:
+              </strong>{' '}
+              The same relationship dynamics, the same failures, the same
+              situations appearing repeatedly.
             </li>
             <li>
-              <strong className='text-zinc-200'>What you deny:</strong> &quot;I
-              would never...&quot; or &quot;I&apos;m not the kind of person
-              who...&quot;
+              <strong className='text-content-primary'>What you deny:</strong>{' '}
+              &quot;I would never...&quot; or &quot;I&apos;m not the kind of
+              person who...&quot;
             </li>
             <li>
-              <strong className='text-zinc-200'>Dreams:</strong> Symbols,
+              <strong className='text-content-primary'>Dreams:</strong> Symbols,
               characters, and scenarios that disturb or confuse you.
             </li>
             <li>
-              <strong className='text-zinc-200'>Physical symptoms:</strong>{' '}
+              <strong className='text-content-primary'>
+                Physical symptoms:
+              </strong>{' '}
               Unexplained tension, chronic issues without clear cause.
             </li>
           </ul>
@@ -308,20 +316,20 @@ export default function ShadowWorkPage() {
 
       {/* Section 4: Journaling */}
       <section id='journaling' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           4. Shadow Work Journaling Prompts
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Journaling is one of the safest and most effective shadow work tools.
           Write freely without censoring yourself.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Prompts to Explore
           </h3>
-          <ul className='space-y-3 text-zinc-300 text-sm'>
+          <ul className='space-y-3 text-content-secondary text-sm'>
             <li>
               • What trait do I judge most harshly in others? Do I possess it?
             </li>
@@ -340,7 +348,7 @@ export default function ShadowWorkPage() {
         <div className='mt-4'>
           <Link
             href='/book-of-shadows'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-lunary-primary-400 hover:text-content-brand'
           >
             Journal in your Book of Shadows →
           </Link>
@@ -349,23 +357,23 @@ export default function ShadowWorkPage() {
 
       {/* Section 5: Rituals */}
       <section id='rituals' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           5. Shadow Work Rituals
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Ritual gives structure and container for shadow exploration.
         </p>
 
         <div className='space-y-6'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+            <h3 className='text-lg font-medium text-content-primary mb-3'>
               Dark Moon Ritual
             </h3>
-            <p className='text-zinc-400 text-sm mb-3'>
+            <p className='text-content-muted text-sm mb-3'>
               The Dark Moon (day before New Moon) is ideal for shadow work.
             </p>
-            <ol className='space-y-2 text-zinc-400 text-sm'>
+            <ol className='space-y-2 text-content-muted text-sm'>
               <li>1. Create sacred space and ground yourself</li>
               <li>2. Light a black or dark blue candle</li>
               <li>3. Journal on a shadow prompt</li>
@@ -375,15 +383,15 @@ export default function ShadowWorkPage() {
             </ol>
           </div>
 
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+            <h3 className='text-lg font-medium text-content-primary mb-3'>
               Mirror Meditation
             </h3>
-            <p className='text-zinc-400 text-sm mb-3'>
+            <p className='text-content-muted text-sm mb-3'>
               Gazing into your own eyes in dim light can surface shadow
               material.
             </p>
-            <ol className='space-y-2 text-zinc-400 text-sm'>
+            <ol className='space-y-2 text-content-muted text-sm'>
               <li>
                 1. Dim the lights; light candles on either side of a mirror
               </li>
@@ -398,21 +406,21 @@ export default function ShadowWorkPage() {
 
       {/* Section 6: Integration */}
       <section id='integration' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           6. Integration & Ongoing Practice
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Awareness alone is not enough. Integration means accepting and
           embracing what you&apos;ve discovered—making peace with these parts
           rather than fighting them.
         </p>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-brand mb-3'>
             Integration Practices
           </h3>
-          <ul className='space-y-2 text-zinc-300 text-sm'>
+          <ul className='space-y-2 text-content-secondary text-sm'>
             <li>
               • <strong>Dialogue:</strong> Write conversations with your shadow
               parts
@@ -439,7 +447,7 @@ export default function ShadowWorkPage() {
 
       {/* FAQ */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           7. Frequently Asked Questions
         </h2>
 
@@ -447,12 +455,14 @@ export default function ShadowWorkPage() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 {faq.question}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-content-secondary leading-relaxed'>
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>

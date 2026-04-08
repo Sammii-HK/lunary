@@ -13,6 +13,7 @@ import {
 } from '@/features/horoscope';
 import { useSubscription } from '@/hooks/useSubscription';
 import { TransitDurationBadge } from '@/components/TransitDurationBadge';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface TransitWisdomProps {
   birthChart: BirthChartData[];
@@ -81,40 +82,40 @@ const intensityLevelStyles: Record<
   { bg: string; text: string; border: string }
 > = {
   'Life-Defining': {
-    bg: 'bg-lunary-error-950/60',
-    text: 'text-lunary-error-300',
+    bg: 'bg-layer-deep/60',
+    text: 'text-content-error',
     border: 'border-lunary-error-700/50',
   },
   'Highly Prominent': {
-    bg: 'bg-lunary-accent-950/60',
-    text: 'text-lunary-accent-300',
+    bg: 'bg-layer-deep/60',
+    text: 'text-content-brand-accent',
     border: 'border-lunary-accent-700/50',
   },
   Noticeable: {
-    bg: 'bg-lunary-success-950/60',
-    text: 'text-lunary-success-300',
+    bg: 'bg-layer-deep/60',
+    text: 'text-content-success',
     border: 'border-lunary-success-700/50',
   },
   Mild: {
-    bg: 'bg-zinc-900/60',
-    text: 'text-zinc-400',
-    border: 'border-zinc-700/50',
+    bg: 'bg-surface-elevated/60',
+    text: 'text-content-muted',
+    border: 'border-stroke-default/50',
   },
 };
 
 const themeColors: Record<ThemeTag, string> = {
-  Identity: 'bg-amber-900/40 text-amber-300 border-amber-700/40',
-  Creativity: 'bg-pink-900/40 text-pink-300 border-pink-700/40',
-  Boundaries: 'bg-slate-800/60 text-slate-300 border-slate-600/40',
-  Love: 'bg-rose-900/40 text-rose-300 border-rose-700/40',
-  Work: 'bg-blue-900/40 text-blue-300 border-blue-700/40',
-  Healing: 'bg-emerald-900/40 text-emerald-300 border-emerald-700/40',
-  Transformation: 'bg-purple-900/40 text-purple-300 border-purple-700/40',
-  Communication: 'bg-cyan-900/40 text-cyan-300 border-cyan-700/40',
-  Growth: 'bg-green-900/40 text-green-300 border-green-700/40',
-  Intuition: 'bg-indigo-900/40 text-indigo-300 border-indigo-700/40',
-  Power: 'bg-red-900/40 text-red-300 border-red-700/40',
-  Freedom: 'bg-sky-900/40 text-sky-300 border-sky-700/40',
+  Identity: 'tag-identity',
+  Creativity: 'tag-creativity',
+  Boundaries: 'tag-boundaries',
+  Love: 'tag-love',
+  Work: 'tag-work',
+  Healing: 'tag-healing',
+  Transformation: 'tag-transformation',
+  Communication: 'tag-communication',
+  Growth: 'tag-growth',
+  Intuition: 'tag-intuition',
+  Power: 'tag-power',
+  Freedom: 'tag-freedom',
 };
 
 function ThemeTags({ themes }: { themes: ThemeTag[] }) {
@@ -160,9 +161,9 @@ function PremiumSection({ premium }: { premium: TransitDetail['premium'] }) {
   if (!hasContent) return null;
 
   return (
-    <div className='pt-3 mt-3 border-t border-zinc-800/50 space-y-2'>
+    <div className='pt-3 mt-3 border-t border-stroke-subtle/50 space-y-2'>
       {premium.aspectTiming && (
-        <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-zinc-500'>
+        <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-content-muted'>
           <span>
             In orb: {formatTimingDate(premium.aspectTiming.startDate)}
           </span>
@@ -171,26 +172,27 @@ function PremiumSection({ premium }: { premium: TransitDetail['premium'] }) {
         </div>
       )}
       {premium.houseSummary && (
-        <p className='text-xs text-zinc-400'>
-          <span className='text-zinc-500'>Where it lands:</span>{' '}
+        <p className='text-xs text-content-muted'>
+          <span className='text-content-muted'>Where it lands:</span>{' '}
           {premium.houseSummary}
         </p>
       )}
       {premium.natalContext && (
-        <p className='text-xs text-zinc-400'>
-          <span className='text-zinc-500'>Your personal lens:</span>{' '}
+        <p className='text-xs text-content-muted'>
+          <span className='text-content-muted'>Your personal lens:</span>{' '}
           {premium.natalContext}
         </p>
       )}
       {premium.orbExplanation && (
-        <p className='text-xs text-zinc-400'>
-          <span className='text-zinc-500'>How close & strong:</span>{' '}
+        <p className='text-xs text-content-muted'>
+          <span className='text-content-muted'>How close & strong:</span>{' '}
           {premium.orbExplanation}
         </p>
       )}
       {premium.timingSummary && (
-        <p className='text-xs text-zinc-400'>
-          <span className='text-zinc-500'>Timing:</span> {premium.timingSummary}
+        <p className='text-xs text-content-muted'>
+          <span className='text-content-muted'>Timing:</span>{' '}
+          {premium.timingSummary}
         </p>
       )}
       {premium.stackingNotes && (
@@ -214,19 +216,19 @@ const orbBadgeStyles: Record<
   { bg: string; text: string; border: string }
 > = {
   Exact: {
-    bg: 'bg-lunary-primary-950/60',
-    text: 'text-lunary-primary-300',
-    border: 'border-lunary-primary-700/50',
+    bg: 'bg-layer-deep/60',
+    text: 'text-content-brand',
+    border: 'border-stroke-default/50',
   },
   Strong: {
-    bg: 'bg-lunary-secondary-950/60',
-    text: 'text-lunary-secondary-300',
-    border: 'border-lunary-secondary-700/50',
+    bg: 'bg-layer-deep/60',
+    text: 'text-content-brand-secondary',
+    border: 'border-stroke-default/50',
   },
   Subtle: {
-    bg: 'bg-zinc-900/60',
-    text: 'text-zinc-400',
-    border: 'border-zinc-700/50',
+    bg: 'bg-surface-elevated/60',
+    text: 'text-content-muted',
+    border: 'border-stroke-default/50',
   },
 };
 
@@ -268,40 +270,43 @@ function TransitCard({
 
   return (
     <div
-      className={`rounded-lg border ${styles.border} bg-zinc-900/40 p-4 space-y-3`}
+      className={`rounded-lg border ${styles.border} bg-surface-elevated/40 p-4 space-y-3`}
     >
-      <div className='flex items-start gap-3'>
-        <span
-          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${styles.bg} ${styles.text}`}
-        >
-          {detail.intensityLevel}
-        </span>
-        <div className='flex-1 min-w-0'>
-          <h4 className='text-sm font-medium text-zinc-100 leading-tight'>
-            {detail.title}
-          </h4>
-          <p className='text-xs text-zinc-500 mt-0.5'>{detail.header}</p>
+      <div className='space-y-1'>
+        <div className='flex items-center justify-between gap-2'>
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap ${styles.bg} ${styles.text}`}
+          >
+            {detail.intensityLevel}
+          </span>
+          <p className='text-xs text-content-muted'>{detail.header}</p>
         </div>
+        <h4 className='text-sm font-medium text-content-primary leading-tight'>
+          {detail.title}
+        </h4>
       </div>
 
       <div className='flex flex-wrap items-center gap-1.5'>
         <ThemeTags themes={detail.themes} />
         <OrbBadge orbDegrees={detail.orbDegrees} intensity={detail.intensity} />
         {detail.duration && <TransitDurationBadge duration={detail.duration} />}
-        <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border bg-zinc-900 border-zinc-800 text-zinc-400'>
+        <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border bg-surface-elevated border-stroke-subtle text-content-muted'>
           {detail.transitCycle}
         </span>
       </div>
 
-      <p className='text-xs text-zinc-500 leading-relaxed'>
+      <p className='text-xs text-content-muted leading-relaxed'>
         {detail.degreeInfo}
       </p>
 
-      <p className='text-sm text-zinc-300 leading-relaxed'>{detail.meaning}</p>
+      <p className='text-sm text-content-secondary leading-relaxed'>
+        {detail.meaning}
+      </p>
 
       {detail.suggestion && (
-        <p className='text-xs text-zinc-400 italic'>
-          <span className='text-zinc-500'>Try this:</span> {detail.suggestion}
+        <p className='text-xs text-content-muted italic'>
+          <span className='text-content-muted'>Try this:</span>{' '}
+          {detail.suggestion}
         </p>
       )}
 
@@ -311,7 +316,7 @@ function TransitCard({
             <>
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className='flex items-center gap-1 text-xs text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+                className='flex items-center gap-1 text-xs text-lunary-primary-400 hover:text-content-brand transition-colors'
               >
                 <ChevronDown
                   className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
@@ -320,13 +325,15 @@ function TransitCard({
                   ? 'Hide technical insight'
                   : 'More technical insight'}
               </button>
-              {isExpanded && <PremiumSection premium={detail.premium} />}
+              <Collapse isOpen={isExpanded}>
+                <PremiumSection premium={detail.premium} />
+              </Collapse>
             </>
           ) : (
-            <div className='pt-2 mt-2 border-t border-zinc-800/30'>
+            <div className='pt-2 mt-2 border-t border-stroke-subtle/30'>
               <Link
                 href='/pricing?nav=app'
-                className='text-xs text-zinc-500 hover:text-lunary-primary-400 transition-colors'
+                className='text-xs text-content-muted hover:text-lunary-primary-400 transition-colors'
               >
                 Unlock detailed transit breakdowns with Lunary+
               </Link>
@@ -363,7 +370,7 @@ export function TransitWisdom({
   if (details.length === 0) {
     return (
       <div className='text-center py-6'>
-        <p className='text-sm text-zinc-400 leading-relaxed max-w-sm mx-auto'>
+        <p className='text-sm text-content-muted leading-relaxed max-w-sm mx-auto'>
           Nothing major is pulling at your energy today. This is a day to settle
           in and integrate recent shifts rather than push for change.
         </p>

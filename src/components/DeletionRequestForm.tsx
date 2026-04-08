@@ -104,14 +104,14 @@ export function DeletionRequestForm() {
     <div className='mt-6'>
       <StatusBanner />
 
-      <div className='p-5 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
+      <div className='p-5 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
         <div className='flex items-center gap-2 mb-3'>
           <Mail className='h-5 w-5 text-lunary-primary-400' />
-          <h3 className='text-lg font-medium text-white'>
+          <h3 className='text-lg font-medium text-content-primary'>
             Request Deletion Online
           </h3>
         </div>
-        <p className='text-zinc-400 text-sm mb-4'>
+        <p className='text-content-muted text-sm mb-4'>
           Enter the email address associated with your account. We&apos;ll send
           you a verification link to confirm the deletion.
         </p>

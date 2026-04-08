@@ -321,7 +321,7 @@ export default function PricingPage() {
 
   // While platform is being detected, show blank (avoids hydration flash)
   if (isNativeIOS === null) {
-    return <div className='min-h-screen bg-zinc-950' />;
+    return <div className='min-h-screen bg-surface-base' />;
   }
 
   // On iOS, always use Apple IAP — never Stripe
@@ -335,10 +335,10 @@ export default function PricingPage() {
         }}
       >
         <div className='max-w-sm mx-auto w-full'>
-          <h1 className='text-2xl font-semibold text-zinc-100 text-center mb-2'>
+          <h1 className='text-2xl font-semibold text-content-primary text-center mb-2'>
             Lunary+
           </h1>
-          <p className='text-sm text-zinc-400 text-center mb-4'>
+          <p className='text-sm text-content-muted text-center mb-4'>
             Unlock your full cosmic experience
           </p>
           <IOSPaywall
@@ -357,22 +357,22 @@ export default function PricingPage() {
       {productSchemas.map((schema, index) => (
         <span key={index}>{renderJsonLd(schema)}</span>
       ))}
-      <div className='min-h-fit bg-[#0a0a0f] text-zinc-100 flex flex-col'>
+      <div className='min-h-fit bg-[#0a0a0f] text-content-primary flex flex-col'>
         {/* Subtle gradient background */}
-        <div className='fixed inset-0 bg-gradient-to-b from-lunary-primary-950/20 via-transparent to-transparent pointer-events-none' />
+        <div className='fixed inset-0 bg-gradient-to-b from-layer-deep/20 via-transparent to-transparent pointer-events-none' />
 
         {/* Header */}
         <section className='relative pt-24 pb-16 md:pt-32 md:pb-20'>
           <div className='max-w-5xl mx-auto px-6 text-center'>
             {subscriptionStatus === 'trial' && trialDaysRemaining ? (
-              <div className='inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lunary-accent-950 border border-lunary-accent-700 mb-8'>
+              <div className='inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-layer-deep border border-lunary-accent-700 mb-8'>
                 <Sparkles className='w-3.5 h-3.5 text-lunary-accent' />
-                <span className='text-xs font-medium text-lunary-accent-300'>
+                <span className='text-xs font-medium text-content-brand-accent'>
                   {trialDaysRemaining} days left in trial
                 </span>
               </div>
             ) : subscriptionStatus === 'active' ? (
-              <div className='inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lunary-success-950 border border-lunary-success-700 mb-8'>
+              <div className='inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-layer-deep border border-lunary-success-700 mb-8'>
                 <Check className='w-3.5 h-3.5 text-lunary-success' />
                 <span className='text-xs font-medium text-lunary-success-300'>
                   Active subscription
@@ -383,15 +383,15 @@ export default function PricingPage() {
             <h1 className='text-2xl md:text-6xl font-light tracking-tight mb-6'>
               Your cosmic journey
               <br />
-              <span className='text-lunary-accent-300'>starts here</span>
+              <span className='text-content-brand-accent'>starts here</span>
             </h1>
 
-            <p className='text-base md:text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed mb-4'>
+            <p className='text-base md:text-lg text-content-muted max-w-xl mx-auto leading-relaxed mb-4'>
               Start with free access to your birth chart, moon phases, and
               general cosmic insights. Upgrade for personalized readings based
               on your exact birth chart.
             </p>
-            <div className='flex items-center justify-center gap-4 text-sm text-zinc-500'>
+            <div className='flex items-center justify-center gap-4 text-sm text-content-muted'>
               <div className='flex items-center gap-2'>
                 <Check className='w-4 h-4 text-lunary-primary-400' />
                 <span>No credit card required</span>
@@ -407,13 +407,13 @@ export default function PricingPage() {
         {/* Billing Toggle */}
         <section className='relative pb-8'>
           <div className='flex justify-center'>
-            <div className='inline-flex items-center p-1 rounded-full bg-zinc-900/80 border border-zinc-800'>
+            <div className='inline-flex items-center p-1 rounded-full bg-surface-elevated/80 border border-stroke-subtle'>
               <button
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
                   billingCycle === 'monthly'
-                    ? 'bg-zinc-800 text-white'
-                    : 'text-zinc-400 hover:text-zinc-300'
+                    ? 'bg-surface-card text-content-primary'
+                    : 'text-content-muted hover:text-content-secondary'
                 }`}
               >
                 Monthly
@@ -422,12 +422,12 @@ export default function PricingPage() {
                 onClick={() => setBillingCycle('annual')}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
                   billingCycle === 'annual'
-                    ? 'bg-zinc-800 text-white'
-                    : 'text-zinc-400 hover:text-zinc-300'
+                    ? 'bg-surface-card text-content-primary'
+                    : 'text-content-muted hover:text-content-secondary'
                 }`}
               >
                 Annual
-                <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-success-900 text-lunary-success border border-lunary-success-700'>
+                <span className='text-xs px-2 py-0.5 rounded-full bg-layer-base text-lunary-success border border-lunary-success-700'>
                   Save 25%
                 </span>
               </button>
@@ -438,41 +438,39 @@ export default function PricingPage() {
         {/* Which Plan Guide */}
         <section className='relative pb-12'>
           <div className='max-w-4xl mx-auto px-6'>
-            <div className='p-6 md:p-8 bg-zinc-900/40 rounded-2xl border border-zinc-800/60'>
-              <h3 className='text-lg md:text-xl font-light text-zinc-100 mb-6 text-center'>
+            <div className='p-6 md:p-8 bg-surface-elevated/40 rounded-2xl border border-stroke-subtle/60'>
+              <h3 className='text-lg md:text-xl font-light text-content-primary mb-6 text-center'>
                 Which plan is right for me?
               </h3>
               <div className='space-y-3 text-sm'>
-                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-zinc-800/50'>
-                  <span className='text-zinc-400'>
+                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-stroke-subtle/50'>
+                  <span className='text-content-muted'>
                     Try astrology for the first time
                   </span>
-                  <span className='text-lunary-primary-300 font-medium'>
-                    Free
-                  </span>
+                  <span className='text-content-brand font-medium'>Free</span>
                 </div>
-                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-zinc-800/50'>
-                  <span className='text-zinc-400'>
+                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-stroke-subtle/50'>
+                  <span className='text-content-muted'>
                     Build a daily check-in habit
                   </span>
-                  <span className='text-lunary-primary-300 font-medium'>
+                  <span className='text-content-brand font-medium'>
                     Lunary+ ($4.99/mo)
                   </span>
                 </div>
                 <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2'>
-                  <span className='text-zinc-400'>
+                  <span className='text-content-muted'>
                     Explore your patterns in depth with your Astral Guide
                   </span>
-                  <span className='text-lunary-primary-300 font-medium'>
+                  <span className='text-content-brand font-medium'>
                     Lunary+ Pro ($8.99/mo)
                   </span>
                 </div>
               </div>
-              <p className='text-xs text-zinc-500 mt-6 text-center'>
+              <p className='text-xs text-content-muted mt-6 text-center'>
                 Still not sure?{' '}
                 <Link
                   href='#pricing-plans'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   Compare features below
                 </Link>
@@ -487,7 +485,7 @@ export default function PricingPage() {
             <h2 className='sr-only'>Choose Your Plan</h2>
             {loadingPlans ? (
               <div className='flex justify-center py-20'>
-                <div className='w-5 h-5 border-2 border-zinc-700 border-t-lunary-primary rounded-full animate-spin' />
+                <div className='w-5 h-5 border-2 border-stroke-default border-t-lunary-primary rounded-full animate-spin' />
               </div>
             ) : (
               <div className='grid grid-cols-1 md:grid-cols-3 gap-5'>
@@ -512,18 +510,18 @@ export default function PricingPage() {
                       key={plan.id}
                       className={`relative rounded-2xl p-6 flex flex-col transition-all duration-300 border-2 ${
                         isPopular
-                          ? 'bg-gradient-to-b from-lunary-primary-950/40 to-zinc-900/60 border-lunary-primary-700 shadow-xl shadow-lunary-primary-950'
-                          : 'bg-zinc-900/40 border-zinc-800/60 hover:border-zinc-700/60'
+                          ? 'bg-gradient-to-b from-layer-deep/40 to-surface-elevated/60 border-lunary-primary-700 shadow-xl shadow-lunary-primary-950'
+                          : 'bg-surface-elevated/40 border-stroke-subtle/60 hover:border-stroke-default/60'
                       }`}
                     >
                       {isPopular && (
                         <div className='absolute -top-3 left-1/2 -translate-x-1/2'>
-                          <div className='flex items-center gap-1.5 px-3 py-1 rounded-full bg-lunary-primary-900 border border-lunary-primary-700'>
+                          <div className='flex items-center gap-1.5 px-3 py-1 rounded-full bg-layer-base border border-lunary-primary-700'>
                             <Star
                               className='w-3 h-3 text-lunary-accent'
                               fill='currentColor'
                             />
-                            <span className='text-xs font-semibold text-lunary-accent-300'>
+                            <span className='text-xs font-semibold text-content-brand-accent'>
                               Most Popular
                             </span>
                           </div>
@@ -531,13 +529,13 @@ export default function PricingPage() {
                       )}
 
                       <div className='mb-3 md:mb-6'>
-                        <h3 className='text-lg font-medium text-zinc-100 mb-1'>
+                        <h3 className='text-lg font-medium text-content-primary mb-1'>
                           {plan.name}
                         </h3>
                         <p className='text-sm text-lunary-200 mb-2'>
                           {plan.subtitle}
                         </p>
-                        <p className='text-sm text-zinc-400'>
+                        <p className='text-sm text-content-muted'>
                           {plan.description}
                         </p>
                       </div>
@@ -555,11 +553,11 @@ export default function PricingPage() {
                                 plan.displayCurrency,
                               )}
                             </span>
-                            <span className='text-zinc-400 ml-1'>
+                            <span className='text-content-muted ml-1'>
                               /{plan.interval}
                             </span>
                             {plan.interval === 'year' && (
-                              <div className='text-xs text-zinc-600 mt-1'>
+                              <div className='text-xs text-content-muted mt-1'>
                                 {formatPrice(
                                   plan.displayPrice / 12,
                                   plan.displayCurrency,
@@ -574,8 +572,10 @@ export default function PricingPage() {
                       <div className='space-y-3 flex-1 mb-6'>
                         {visibleFeatures.map((feature: string, i: number) => (
                           <div key={i} className='flex items-start gap-2.5'>
-                            <Check className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0' />
-                            <span className='text-zinc-400'>{feature}</span>
+                            <Check className='w-4 h-4 text-content-muted mt-0.5 flex-shrink-0' />
+                            <span className='text-content-muted'>
+                              {feature}
+                            </span>
                           </div>
                         ))}
                         {hasMoreFeatures && (
@@ -606,7 +606,7 @@ export default function PricingPage() {
                                 ? '/app'
                                 : '/auth?signup=true'
                             }
-                            className='w-full block text-center py-3 rounded-xl border border-zinc-800 text-zinc-400 text-sm font-medium hover:bg-zinc-800/50 transition-colors'
+                            className='w-full block text-center py-3 rounded-xl border border-stroke-subtle text-content-muted text-sm font-medium hover:bg-surface-card/50 transition-colors'
                           >
                             {authState.isAuthenticated
                               ? CTA_COPY.pricing.openApp
@@ -617,7 +617,7 @@ export default function PricingPage() {
                           subscription.plan === plan.id ? (
                           <Link
                             href='/profile'
-                            className='w-full block text-center py-3 rounded-xl border border-lunary-primary-600 bg-lunary-primary-900 text-lunary-accent-300 text-sm font-medium hover:bg-lunary-primary-800 transition-colors'
+                            className='w-full block text-center py-3 rounded-xl border border-lunary-primary-600 bg-layer-base text-content-brand-accent text-sm font-medium hover:bg-layer-raised transition-colors'
                           >
                             {CTA_COPY.pricing.currentPlan}
                           </Link>
@@ -644,8 +644,8 @@ export default function PricingPage() {
                             disabled={loading === plan.id}
                             className={`w-full py-3 rounded-xl text-sm font-medium transition-all ${
                               isPopular
-                                ? 'bg-lunary-primary-900 hover:bg-lunary-primary-800 text-lunary-accent-300 border border-lunary-primary-700'
-                                : 'bg-zinc-800/60 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/50'
+                                ? 'bg-layer-base hover:bg-layer-raised text-content-brand-accent border border-lunary-primary-700'
+                                : 'bg-surface-card/60 hover:bg-surface-card text-content-primary border border-stroke-default/50'
                             } disabled:opacity-50`}
                           >
                             {loading === plan.id ? (
@@ -671,14 +671,14 @@ export default function PricingPage() {
               </div>
             )}
 
-            <p className='text-center text-xs text-zinc-600 mt-8'>
+            <p className='text-center text-xs text-content-muted mt-8'>
               All paid plans include a free trial. Cancel anytime.
             </p>
           </div>
         </section>
 
         {/* What's Included */}
-        <section className='relative py-20 border-t border-zinc-800/50'>
+        <section className='relative py-20 border-t border-stroke-subtle/50'>
           <div className='max-w-4xl mx-auto px-6'>
             <h2 className='text-2xl md:text-3xl font-light text-center mb-12'>
               Everything you get with{' '}
@@ -722,16 +722,16 @@ export default function PricingPage() {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className='flex gap-4 p-4 rounded-xl bg-zinc-900/30 border border-zinc-800/50'
+                  className='flex gap-4 p-4 rounded-xl bg-surface-elevated/30 border border-stroke-subtle/50'
                 >
-                  <div className='w-8 h-8 rounded-lg bg-lunary-primary-900 flex items-center justify-center flex-shrink-0'>
+                  <div className='w-8 h-8 rounded-lg bg-layer-base flex items-center justify-center flex-shrink-0'>
                     <Check className='w-4 h-4 text-lunary-accent' />
                   </div>
                   <div>
-                    <h3 className='text-sm font-medium text-zinc-200 mb-1'>
+                    <h3 className='text-sm font-medium text-content-primary mb-1'>
                       {item.title}
                     </h3>
-                    <p className='text-xs text-zinc-400'>{item.desc}</p>
+                    <p className='text-xs text-content-muted'>{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -740,7 +740,7 @@ export default function PricingPage() {
         </section>
 
         {/* Detailed Comparison */}
-        <section className='relative py-20 border-t border-zinc-800/50'>
+        <section className='relative py-20 border-t border-stroke-subtle/50'>
           <div className='max-w-6xl mx-auto px-6'>
             <h2 className='text-2xl md:text-3xl font-light text-center mb-12'>
               Feature comparison
@@ -750,7 +750,7 @@ export default function PricingPage() {
         </section>
 
         {/* FAQ */}
-        <section className='relative py-20 border-t border-zinc-800/50 bg-zinc-900/20'>
+        <section className='relative py-20 border-t border-stroke-subtle/50 bg-surface-elevated/20'>
           <div className='max-w-3xl mx-auto px-6'>
             <h2 className='text-2xl md:text-3xl font-light text-center mb-12'>
               Common questions
@@ -773,12 +773,12 @@ export default function PricingPage() {
         </section>
 
         {/* Newsletter */}
-        <section className='relative py-16 border-t border-zinc-800/50'>
+        <section className='relative py-16 border-t border-stroke-subtle/50'>
           <div className='max-w-xl mx-auto px-6'>
             <NewsletterSignupForm
               align='center'
               source='pricing_page_section'
-              className='border-zinc-800/60 bg-zinc-950/50 shadow-none'
+              className='border-stroke-subtle/60 bg-surface-base/50 shadow-none'
               headline='Not ready yet?'
               description='Get weekly cosmic insights and product updates.'
               ctaLabel='Subscribe'
@@ -788,12 +788,12 @@ export default function PricingPage() {
         </section>
 
         {/* Final CTA */}
-        <section className='relative py-20 border-t border-zinc-800/50'>
+        <section className='relative py-20 border-t border-stroke-subtle/50'>
           <div className='max-w-2xl mx-auto px-6 text-center'>
             <h2 className='text-3xl md:text-4xl font-light mb-4'>
               Ready to get your birth chart?
             </h2>
-            <p className='text-zinc-400 mb-8'>
+            <p className='text-content-muted mb-8'>
               Create your chart for free using your exact birth time and
               location.
             </p>
@@ -807,23 +807,23 @@ export default function PricingPage() {
       </div>
 
       {showAuthModal && (
-        <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
-          <div className='bg-zinc-900 rounded-lg p-4 sm:p-6 w-full max-w-md relative mx-4 sm:mx-0'>
+        <div className='fixed inset-0 bg-surface-base/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
+          <div className='bg-surface-elevated rounded-lg p-4 sm:p-6 w-full max-w-md relative mx-4 sm:mx-0'>
             <button
               onClick={() => {
                 setShowAuthModal(false);
                 setPendingCheckout(null);
               }}
-              className='absolute top-2 right-2 sm:top-4 sm:right-4 text-zinc-400 hover:text-white text-xl'
+              className='absolute top-2 right-2 sm:top-4 sm:right-4 text-content-muted hover:text-content-primary text-xl'
             >
               ×
             </button>
 
             <div className='text-center mb-4 sm:mb-6'>
-              <h3 className='text-lg sm:text-xl font-bold text-white mb-2'>
+              <h3 className='text-lg sm:text-xl font-bold text-content-primary mb-2'>
                 Create your account
               </h3>
-              <p className='text-zinc-300 text-xs sm:text-sm'>
+              <p className='text-content-secondary text-xs sm:text-sm'>
                 Sign up to continue to checkout and start your free trial.
               </p>
             </div>

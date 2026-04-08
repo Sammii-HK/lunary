@@ -21,14 +21,14 @@ export function ReadFullGuidePrompt({
           <Heading
             as='h3'
             variant='h3'
-            className='text-lunary-accent-300 group-hover:text-lunary-accent-200 transition-colors flex items-center gap-2'
+            className='text-content-brand-accent group-hover:text-content-brand-accent transition-colors flex items-center gap-2'
           >
-            <BookOpenIcon className='w-4 h-4 mr-2 text-lunary-accent-300' />
+            <BookOpenIcon className='w-4 h-4 mr-2 text-content-brand-accent' />
             {title}
           </Heading>
-          <p className='text-sm text-zinc-400'>{description}</p>
+          <p className='text-sm text-content-muted'>{description}</p>
         </div>
-        <ArrowRight className='w-4 h-4 text-lunary-accent-400 group-hover:text-lunary-accent-300 transition-colors' />
+        <ArrowRight className='w-4 h-4 text-lunary-accent-400 group-hover:text-content-brand-accent transition-colors' />
       </div>
     </Link>
   );

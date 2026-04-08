@@ -159,12 +159,12 @@ export function QuestionDetailClient({
     <div className='space-y-6'>
       {/* Answers */}
       <div>
-        <h2 className='text-sm font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+        <h2 className='text-sm font-medium text-content-muted uppercase tracking-wide mb-3'>
           {answers.length} Answer{answers.length !== 1 ? 's' : ''}
         </h2>
 
         {answers.length === 0 ? (
-          <p className='text-sm text-zinc-500 py-4'>
+          <p className='text-sm text-content-muted py-4'>
             No answers yet. Be the first to share your cosmic wisdom!
           </p>
         ) : (
@@ -186,8 +186,8 @@ export function QuestionDetailClient({
 
       {/* Answer form */}
       {isAuthenticated && (
-        <div className='border-t border-zinc-800 pt-6'>
-          <h3 className='text-sm font-medium text-zinc-300 mb-3'>
+        <div className='border-t border-stroke-subtle pt-6'>
+          <h3 className='text-sm font-medium text-content-secondary mb-3'>
             Your Answer
           </h3>
           <textarea
@@ -196,21 +196,21 @@ export function QuestionDetailClient({
             placeholder='Share your cosmic wisdom...'
             rows={4}
             maxLength={2000}
-            className='w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-500 resize-none'
+            className='w-full bg-surface-elevated border border-stroke-default rounded-lg px-3 py-2 text-sm text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-500 resize-none'
           />
 
           <div className='flex items-center justify-between mt-3'>
-            <label className='flex items-center gap-2 text-xs text-zinc-400 cursor-pointer'>
+            <label className='flex items-center gap-2 text-xs text-content-muted cursor-pointer'>
               <input
                 type='checkbox'
                 checked={isAnonymous}
                 onChange={(e) => setIsAnonymous(e.target.checked)}
-                className='rounded border-zinc-600'
+                className='rounded border-stroke-strong'
               />
               Post anonymously
             </label>
 
-            <span className='text-xs text-zinc-600'>
+            <span className='text-xs text-content-muted'>
               {answerText.length}/2000
             </span>
           </div>

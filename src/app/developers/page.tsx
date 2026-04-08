@@ -265,29 +265,29 @@ export default function DevelopersPage() {
   return (
     <>
       {renderJsonLd(structuredData)}
-      <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col'>
+      <div className='min-h-screen bg-surface-base text-content-primary flex flex-col'>
         <div className='flex-1 max-w-4xl mx-auto px-4 py-12'>
           {/* Header */}
           <div className='mb-12'>
             <div className='flex items-center gap-3 mb-4'>
-              <div className='p-2 rounded-lg bg-lunary-primary-900/20'>
+              <div className='p-2 rounded-lg bg-layer-base/20'>
                 <Code className='h-6 w-6 text-lunary-primary-400' />
               </div>
               <span className='text-sm text-lunary-primary-400 font-medium'>
                 Developer Documentation
               </span>
             </div>
-            <h1 className='text-4xl font-light text-zinc-100 mb-4'>
+            <h1 className='text-4xl font-light text-content-primary mb-4'>
               Lunary Cosmic API
             </h1>
-            <p className='text-lg text-zinc-400 mb-6'>
+            <p className='text-lg text-content-muted mb-6'>
               Access astronomical data, moon phases, and astrological
               calculations via our free API endpoints. Perfect for building
               cosmic-aware applications.
             </p>
             <Link
               href='/developers/dashboard'
-              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
             >
               <Key className='h-5 w-5' />
               Get Your API Key
@@ -296,75 +296,83 @@ export default function DevelopersPage() {
 
           {/* Features */}
           <div className='grid md:grid-cols-3 gap-4 mb-12'>
-            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
               <Zap className='h-6 w-6 text-lunary-accent mb-3' />
-              <h3 className='font-medium text-zinc-100 mb-1'>
+              <h3 className='font-medium text-content-primary mb-1'>
                 Fast & Reliable
               </h3>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 Edge-deployed for low latency worldwide
               </p>
             </div>
-            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
               <Moon className='h-6 w-6 text-lunary-secondary mb-3' />
-              <h3 className='font-medium text-zinc-100 mb-1'>Real Astronomy</h3>
-              <p className='text-sm text-zinc-400'>
+              <h3 className='font-medium text-content-primary mb-1'>
+                Real Astronomy
+              </h3>
+              <p className='text-sm text-content-muted'>
                 Based on actual astronomical calculations
               </p>
             </div>
-            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+            <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
               <Sparkles className='h-6 w-6 text-lunary-primary-400 mb-3' />
-              <h3 className='font-medium text-zinc-100 mb-1'>Free Tier</h3>
-              <p className='text-sm text-zinc-400'>
+              <h3 className='font-medium text-content-primary mb-1'>
+                Free Tier
+              </h3>
+              <p className='text-sm text-content-muted'>
                 Core endpoints available without authentication
               </p>
             </div>
           </div>
 
           {/* Base URL */}
-          <div className='mb-12 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-            <h2 className='text-sm font-medium text-zinc-400 mb-2'>Base URL</h2>
-            <code className='text-lunary-primary-300 bg-zinc-800 px-3 py-1.5 rounded text-sm'>
+          <div className='mb-12 p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
+            <h2 className='text-sm font-medium text-content-muted mb-2'>
+              Base URL
+            </h2>
+            <code className='text-content-brand bg-surface-card px-3 py-1.5 rounded text-sm'>
               https://lunary.app
             </code>
           </div>
 
           {/* Endpoints */}
           <div className='space-y-8'>
-            <h2 className='text-2xl font-medium text-zinc-100'>Endpoints</h2>
+            <h2 className='text-2xl font-medium text-content-primary'>
+              Endpoints
+            </h2>
 
             {endpoints.map((endpoint, index) => (
               <div
                 key={index}
-                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'
+                className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'
               >
                 <div className='flex items-center gap-3 mb-4'>
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium ${
                       endpoint.method === 'GET'
-                        ? 'bg-lunary-success-900 text-lunary-success'
-                        : 'bg-lunary-secondary-900 text-lunary-secondary'
+                        ? 'bg-layer-base text-lunary-success'
+                        : 'bg-layer-base text-lunary-secondary'
                     }`}
                   >
                     {endpoint.method}
                   </span>
-                  <code className='text-zinc-100 font-mono text-sm'>
+                  <code className='text-content-primary font-mono text-sm'>
                     {endpoint.path}
                   </code>
                   {endpoint.free && (
-                    <span className='px-2 py-1 rounded text-xs bg-lunary-primary-900/20 text-lunary-primary-300'>
+                    <span className='px-2 py-1 rounded text-xs bg-layer-base/20 text-content-brand'>
                       Free
                     </span>
                   )}
                 </div>
 
-                <p className='text-zinc-400 text-sm mb-4'>
+                <p className='text-content-muted text-sm mb-4'>
                   {endpoint.description}
                 </p>
 
                 {endpoint.params && (
                   <div className='mb-4'>
-                    <h4 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2'>
+                    <h4 className='text-xs font-medium text-content-muted uppercase tracking-wider mb-2'>
                       Parameters
                     </h4>
                     <div className='space-y-2'>
@@ -373,16 +381,18 @@ export default function DevelopersPage() {
                           key={i}
                           className='flex items-center gap-2 text-sm'
                         >
-                          <code className='text-lunary-primary-300 bg-zinc-800 px-2 py-0.5 rounded'>
+                          <code className='text-content-brand bg-surface-card px-2 py-0.5 rounded'>
                             {param.name}
                           </code>
-                          <span className='text-zinc-400'>{param.type}</span>
+                          <span className='text-content-muted'>
+                            {param.type}
+                          </span>
                           {param.required && (
                             <span className='text-lunary-error text-xs'>
                               required
                             </span>
                           )}
-                          <span className='text-zinc-400'>
+                          <span className='text-content-muted'>
                             — {param.description}
                           </span>
                         </div>
@@ -393,21 +403,25 @@ export default function DevelopersPage() {
 
                 {endpoint.body && (
                   <div className='mb-4'>
-                    <h4 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2'>
+                    <h4 className='text-xs font-medium text-content-muted uppercase tracking-wider mb-2'>
                       Request Body
                     </h4>
-                    <pre className='text-sm bg-zinc-800 p-3 rounded overflow-x-auto'>
-                      <code className='text-zinc-300'>{endpoint.body}</code>
+                    <pre className='text-sm bg-surface-card p-3 rounded overflow-x-auto'>
+                      <code className='text-content-secondary'>
+                        {endpoint.body}
+                      </code>
                     </pre>
                   </div>
                 )}
 
                 <div>
-                  <h4 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2'>
+                  <h4 className='text-xs font-medium text-content-muted uppercase tracking-wider mb-2'>
                     Response
                   </h4>
-                  <pre className='text-sm bg-zinc-800 p-3 rounded overflow-x-auto'>
-                    <code className='text-zinc-300'>{endpoint.response}</code>
+                  <pre className='text-sm bg-surface-card p-3 rounded overflow-x-auto'>
+                    <code className='text-content-secondary'>
+                      {endpoint.response}
+                    </code>
                   </pre>
                 </div>
               </div>
@@ -416,62 +430,68 @@ export default function DevelopersPage() {
 
           {/* Pricing Tiers */}
           <div className='mt-12'>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               API Pricing
             </h2>
             <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-4'>
-              <div className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <h3 className='font-medium text-zinc-100 mb-1'>Free</h3>
-                <p className='text-2xl font-light text-zinc-100 mb-2'>$0</p>
-                <p className='text-sm text-zinc-400 mb-3'>100 requests/month</p>
-                <ul className='text-xs text-zinc-400 space-y-1'>
+              <div className='p-5 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
+                <h3 className='font-medium text-content-primary mb-1'>Free</h3>
+                <p className='text-2xl font-light text-content-primary mb-2'>
+                  $0
+                </p>
+                <p className='text-sm text-content-muted mb-3'>
+                  100 requests/month
+                </p>
+                <ul className='text-xs text-content-muted space-y-1'>
                   <li>• Basic endpoints only</li>
                   <li>• No API key required</li>
                 </ul>
               </div>
-              <div className='p-5 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-                <h3 className='font-medium text-lunary-primary-300 mb-1'>
-                  Starter
-                </h3>
-                <p className='text-2xl font-light text-zinc-100 mb-2'>
-                  $9<span className='text-sm text-zinc-400'>/mo</span>
+              <div className='p-5 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+                <h3 className='font-medium text-content-brand mb-1'>Starter</h3>
+                <p className='text-2xl font-light text-content-primary mb-2'>
+                  $9<span className='text-sm text-content-muted'>/mo</span>
                 </p>
-                <p className='text-sm text-zinc-400 mb-3'>
+                <p className='text-sm text-content-muted mb-3'>
                   5,000 requests/month
                 </p>
-                <ul className='text-xs text-zinc-400 space-y-1'>
+                <ul className='text-xs text-content-muted space-y-1'>
                   <li>• All endpoints</li>
                   <li>• API key access</li>
                 </ul>
               </div>
-              <div className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <h3 className='font-medium text-zinc-100 mb-1'>Developer</h3>
-                <p className='text-2xl font-light text-zinc-100 mb-2'>
-                  $29<span className='text-sm text-zinc-400'>/mo</span>
+              <div className='p-5 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
+                <h3 className='font-medium text-content-primary mb-1'>
+                  Developer
+                </h3>
+                <p className='text-2xl font-light text-content-primary mb-2'>
+                  $29<span className='text-sm text-content-muted'>/mo</span>
                 </p>
-                <p className='text-sm text-zinc-400 mb-3'>
+                <p className='text-sm text-content-muted mb-3'>
                   25,000 requests/month
                 </p>
-                <ul className='text-xs text-zinc-400 space-y-1'>
+                <ul className='text-xs text-content-muted space-y-1'>
                   <li>• Priority support</li>
                   <li>• Higher rate limits</li>
                 </ul>
               </div>
-              <div className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <h3 className='font-medium text-zinc-100 mb-1'>Business</h3>
-                <p className='text-2xl font-light text-zinc-100 mb-2'>
-                  $99<span className='text-sm text-zinc-400'>/mo</span>
+              <div className='p-5 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
+                <h3 className='font-medium text-content-primary mb-1'>
+                  Business
+                </h3>
+                <p className='text-2xl font-light text-content-primary mb-2'>
+                  $99<span className='text-sm text-content-muted'>/mo</span>
                 </p>
-                <p className='text-sm text-zinc-400 mb-3'>
+                <p className='text-sm text-content-muted mb-3'>
                   100,000 requests/month
                 </p>
-                <ul className='text-xs text-zinc-400 space-y-1'>
+                <ul className='text-xs text-content-muted space-y-1'>
                   <li>• Webhooks</li>
                   <li>• Dedicated support</li>
                 </ul>
               </div>
             </div>
-            <p className='mt-4 text-sm text-zinc-400 text-center'>
+            <p className='mt-4 text-sm text-content-muted text-center'>
               <Link
                 href='/developers/dashboard'
                 className='text-lunary-primary-400 hover:underline'
@@ -484,41 +504,43 @@ export default function DevelopersPage() {
 
           {/* Use Cases */}
           <div className='mt-12'>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Use Cases
             </h2>
             <div className='grid md:grid-cols-2 gap-4'>
-              <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+              <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
                 <Star className='h-5 w-5 text-lunary-primary-400 mb-2' />
-                <h3 className='font-medium text-zinc-100 mb-1'>
+                <h3 className='font-medium text-content-primary mb-1'>
                   ChatGPT Plugins
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   Build GPT Actions that provide cosmic insights to users
                 </p>
               </div>
-              <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+              <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
                 <Moon className='h-5 w-5 text-lunary-secondary mb-2' />
-                <h3 className='font-medium text-zinc-100 mb-1'>Moon Widgets</h3>
-                <p className='text-sm text-zinc-400'>
+                <h3 className='font-medium text-content-primary mb-1'>
+                  Moon Widgets
+                </h3>
+                <p className='text-sm text-content-muted'>
                   Display current moon phase on your website or app
                 </p>
               </div>
-              <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+              <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
                 <Sparkles className='h-5 w-5 text-lunary-accent mb-2' />
-                <h3 className='font-medium text-zinc-100 mb-1'>
+                <h3 className='font-medium text-content-primary mb-1'>
                   Daily Horoscopes
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   Integrate cosmic weather into your daily briefings
                 </p>
               </div>
-              <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+              <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
                 <Code className='h-5 w-5 text-lunary-success mb-2' />
-                <h3 className='font-medium text-zinc-100 mb-1'>
+                <h3 className='font-medium text-content-primary mb-1'>
                   Productivity Apps
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   Sync tasks with moon phases for cosmic productivity
                 </p>
               </div>
@@ -529,12 +551,12 @@ export default function DevelopersPage() {
           <div className='mt-12 text-center'>
             <Link
               href='/developers/dashboard'
-              className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white font-medium text-lg transition-colors'
+              className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-600 hover:bg-layer-high text-white font-medium text-lg transition-colors'
             >
               <Key className='h-5 w-5' />
               Get Started with the API
             </Link>
-            <p className='mt-4 text-sm text-zinc-400'>
+            <p className='mt-4 text-sm text-content-muted'>
               Need enterprise limits or custom features?{' '}
               <a
                 href='mailto:api@lunary.app'

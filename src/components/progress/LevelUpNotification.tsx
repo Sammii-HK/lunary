@@ -102,16 +102,18 @@ export function LevelUpNotification({
               </span>
               <Sparkles className='w-5 h-5 text-lunary-accent' />
             </div>
-            <h2 className='text-2xl font-bold text-white mb-1'>
+            <h2 className='text-2xl font-bold text-content-primary mb-1'>
               {skillTreeName}
             </h2>
-            <p className='text-lg text-zinc-300'>Level {newLevel} Reached</p>
+            <p className='text-lg text-content-secondary'>
+              Level {newLevel} Reached
+            </p>
           </div>
 
           {/* Unlock Message */}
           {unlockMessage && (
             <div className='p-4 rounded-xl bg-gradient-to-br from-lunary-primary/10 to-lunary-accent/10 border border-lunary-primary/20 mb-6'>
-              <p className='text-sm text-zinc-200'>{unlockMessage}</p>
+              <p className='text-sm text-content-primary'>{unlockMessage}</p>
             </div>
           )}
 
@@ -128,7 +130,7 @@ export function LevelUpNotification({
                 <Button
                   variant='ghost'
                   onClick={onClose}
-                  className='text-zinc-400 hover:text-white'
+                  className='text-content-muted hover:text-content-primary'
                 >
                   Continue
                 </Button>

@@ -90,7 +90,7 @@ export function Pagination({
           variant='ghost'
           size='sm'
           asChild
-          className='text-white/60 hover:text-white'
+          className='text-content-primary/60 hover:text-content-primary'
         >
           <Link href={getPageUrl(currentPage - 1)} aria-label='Previous page'>
             <ChevronLeft className='h-4 w-4' />
@@ -102,7 +102,7 @@ export function Pagination({
           variant='ghost'
           size='sm'
           disabled
-          className='text-white/30 cursor-not-allowed'
+          className='text-content-primary/30 cursor-not-allowed'
         >
           <ChevronLeft className='h-4 w-4' />
           <span className='hidden sm:inline'>Previous</span>
@@ -116,7 +116,7 @@ export function Pagination({
             return (
               <span
                 key={`ellipsis-${index}`}
-                className='px-2 text-white/40'
+                className='px-2 text-content-primary/40'
                 aria-hidden
               >
                 ...
@@ -135,7 +135,7 @@ export function Pagination({
               className={`min-w-[36px] ${
                 isCurrentPage
                   ? 'pointer-events-none'
-                  : 'text-white/60 hover:text-white'
+                  : 'text-content-primary/60 hover:text-content-primary'
               }`}
               aria-current={isCurrentPage ? 'page' : undefined}
             >
@@ -157,7 +157,7 @@ export function Pagination({
           variant='ghost'
           size='sm'
           asChild
-          className='text-white/60 hover:text-white'
+          className='text-content-primary/60 hover:text-content-primary'
         >
           <Link href={getPageUrl(currentPage + 1)} aria-label='Next page'>
             <span className='hidden sm:inline'>Next</span>
@@ -169,7 +169,7 @@ export function Pagination({
           variant='ghost'
           size='sm'
           disabled
-          className='text-white/30 cursor-not-allowed'
+          className='text-content-primary/30 cursor-not-allowed'
         >
           <span className='hidden sm:inline'>Next</span>
           <ChevronRight className='h-4 w-4' />

@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 
 const SkeletonCard = () => (
-  <div className='h-32 bg-zinc-800 animate-pulse rounded-xl' />
+  <div className='h-32 bg-surface-card animate-pulse rounded-xl' />
 );
 
 const StreakDisplay = dynamic(
@@ -22,12 +22,12 @@ const CosmicProgress = dynamic(
   {
     loading: () => (
       <div className='space-y-3'>
-        <div className='h-8 w-48 bg-zinc-800 animate-pulse rounded' />
+        <div className='h-8 w-48 bg-surface-card animate-pulse rounded' />
         <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-4'>
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className='h-32 bg-zinc-800 animate-pulse rounded-xl'
+              className='h-32 bg-surface-card animate-pulse rounded-xl'
             />
           ))}
         </div>
@@ -43,7 +43,7 @@ const MonthlyInsights = dynamic(
     })),
   {
     loading: () => (
-      <div className='h-64 bg-zinc-800 animate-pulse rounded-xl' />
+      <div className='h-64 bg-surface-card animate-pulse rounded-xl' />
     ),
   },
 );

@@ -73,18 +73,18 @@ export function Recommendations() {
   }
 
   return (
-    <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-4 md:p-6'>
+    <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-base/60 p-4 md:p-6'>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className='flex w-full items-center justify-between mb-4'
       >
         <div className='flex items-center gap-2'>
           <Sparkles className='w-5 h-5 text-lunary-primary-400' />
-          <h2 className='text-lg font-semibold text-zinc-100'>
+          <h2 className='text-lg font-semibold text-content-primary'>
             You Might Like
           </h2>
         </div>
-        <span className='text-xs text-zinc-400'>
+        <span className='text-xs text-content-muted'>
           {isExpanded ? 'Hide' : 'Show'}
         </span>
       </button>
@@ -95,15 +95,17 @@ export function Recommendations() {
             <Link
               key={idx}
               href={rec.link}
-              className='block rounded-lg border border-zinc-800/60 bg-zinc-900/40 p-3 hover:border-lunary-primary/40 transition-colors'
+              className='block rounded-lg border border-stroke-subtle/60 bg-surface-elevated/40 p-3 hover:border-lunary-primary/40 transition-colors'
             >
               <div className='flex items-start gap-3'>
                 <div className='mt-0.5'>{rec.icon}</div>
                 <div className='flex-1'>
-                  <h3 className='text-sm font-medium text-zinc-200 mb-1'>
+                  <h3 className='text-sm font-medium text-content-primary mb-1'>
                     {rec.title}
                   </h3>
-                  <p className='text-xs text-zinc-400'>{rec.description}</p>
+                  <p className='text-xs text-content-muted'>
+                    {rec.description}
+                  </p>
                 </div>
               </div>
             </Link>

@@ -188,10 +188,10 @@ Wood carries the living essence of the tree long after harvest. Each species has
         faqs={faqs}
       >
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             All Sacred Woods
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Click on any wood to explore its full correspondences, magical uses,
             and practical applications.
           </p>
@@ -200,15 +200,15 @@ Wood carries the living essence of the tree long after harvest. Each species has
               <Link
                 key={name}
                 href={`/grimoire/correspondences/wood/${stringToKebabCase(name)}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-amber-700/50 transition-all'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-amber-700/50 transition-all'
               >
-                <h3 className='text-lg font-medium text-zinc-100 group-hover:text-amber-300 transition-colors mb-2'>
+                <h3 className='text-lg font-medium text-content-primary group-hover:text-amber-300 transition-colors mb-2'>
                   {name}
                 </h3>
-                <p className='text-sm text-zinc-400 mb-2'>
+                <p className='text-sm text-content-muted mb-2'>
                   {data.correspondences.slice(0, 3).join(', ')}
                 </p>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   Planet: {data.planets.join(', ')}
                 </p>
               </Link>

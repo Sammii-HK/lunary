@@ -66,10 +66,10 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
   }
 
   return (
-    <div className='bg-gray-900 rounded-lg p-8 text-center'>
+    <div className='bg-surface-elevated rounded-lg p-8 text-center'>
       <div className='max-w-md mx-auto'>
         {/* Teaser Text */}
-        <div className='mb-6 p-4 bg-gradient-to-r from-lunary-primary-900 to-lunary-highlight-900 rounded-lg border border-lunary-primary-700'>
+        <div className='mb-6 p-4 bg-gradient-to-r from-layer-base to-lunary-highlight-900 rounded-lg border border-lunary-primary-700'>
           <p className='text-lunary-accent text-sm font-medium italic'>
             &ldquo;This is the personalised interpretation for YOUR
             chart.&rdquo;
@@ -78,7 +78,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
 
         <div className='w-16 h-16 bg-gradient-to-br from-lunary-primary to-lunary-secondary rounded-full flex items-center justify-center mx-auto mb-6'>
           <svg
-            className='w-8 h-8 text-white'
+            className='w-8 h-8 text-content-primary'
             fill='none'
             stroke='currentColor'
             viewBox='0 0 24 24'
@@ -122,7 +122,7 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
               <SmartTrialButton fullWidth />
               <Link
                 href='/welcome'
-                className='block text-sm text-gray-400 hover:text-white transition-colors'
+                className='block text-sm text-gray-400 hover:text-content-primary transition-colors'
               >
                 Learn more about Personalised Features
               </Link>
@@ -212,11 +212,11 @@ export function UpgradePrompt() {
   };
 
   return (
-    <div className='fixed bottom-4 right-4 bg-gray-900 border border-gray-700 rounded-lg p-4 max-w-sm z-50'>
+    <div className='fixed bottom-4 right-4 bg-surface-elevated border border-gray-700 rounded-lg p-4 max-w-sm z-50'>
       {isTrialActive && (
         <button
           onClick={handleDismiss}
-          className='absolute top-2 right-2 text-zinc-400 hover:text-zinc-100 transition-colors p-1'
+          className='absolute top-2 right-2 text-content-muted hover:text-content-primary transition-colors p-1'
           aria-label='Dismiss'
         >
           <X className='w-4 h-4' />
@@ -225,7 +225,7 @@ export function UpgradePrompt() {
       <div className='text-sm'>
         {isTrialActive ? (
           <>
-            <p className='text-white font-medium mb-2'>
+            <p className='text-content-primary font-medium mb-2'>
               🌟 Trial: {trialDaysRemaining} days left
             </p>
             <p className='text-gray-400 mb-3'>
@@ -234,7 +234,7 @@ export function UpgradePrompt() {
           </>
         ) : (
           <>
-            <p className='text-white font-medium mb-2'>
+            <p className='text-content-primary font-medium mb-2'>
               Unlock Personalised Features
             </p>
             <p className='text-gray-400 mb-3'>
@@ -254,8 +254,8 @@ export function UpgradePrompt() {
               {isTrialActive ? 'Continue Trial' : 'Upgrade now'}
             </Button>
             {showIOSPaywall && (
-              <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50 p-4'>
-                <div className='bg-zinc-900 rounded-2xl p-6 w-full max-w-md'>
+              <div className='fixed inset-0 bg-surface-base/60 backdrop-blur-sm flex items-end justify-center z-50 p-4'>
+                <div className='bg-surface-elevated rounded-2xl p-6 w-full max-w-md'>
                   <IOSPaywall
                     onSuccess={() => setShowIOSPaywall(false)}
                     onDismiss={() => setShowIOSPaywall(false)}

@@ -126,13 +126,13 @@ export default function SpellcraftFundamentalsPage() {
       />
 
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-6'>
           Spellcasting Fundamentals
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             How Magic Works
           </span>
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           Before casting your first spell, understand the foundational
           principles that make magic effective, ethical, and aligned with your
           intentions. This guide covers everything you need to know to begin
@@ -140,11 +140,11 @@ export default function SpellcraftFundamentalsPage() {
         </p>
       </header>
 
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a href='#what-is-spell' className='hover:text-lunary-primary-400'>
               1. What Is a Spell, Practically?
@@ -198,11 +198,11 @@ export default function SpellcraftFundamentalsPage() {
 
       {/* Section 1: What Is a Spell */}
       <section id='what-is-spell' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           1. What Is a Spell, Practically?
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           A spell is a focused ritual that combines intention, symbolism, and
           directed energy to create change. At its simplest, a spell is a
           structured way of telling the universe (or your subconscious, or the
@@ -210,39 +210,37 @@ export default function SpellcraftFundamentalsPage() {
           transform.
         </p>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Spells work through a combination of psychological focus and symbolic
           action. When you light a candle, speak words of power, or arrange
           crystals with intention, you are engaging multiple senses and layers
           of consciousness in service of your goal.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Core Elements of Any Spell
           </h3>
-          <ul className='space-y-3 text-zinc-300'>
+          <ul className='space-y-3 text-content-secondary'>
             <li>
-              <strong className='text-lunary-primary-300'>Intention:</strong>{' '}
-              What you want to manifest, release, or change
+              <strong className='text-content-brand'>Intention:</strong> What
+              you want to manifest, release, or change
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>Focus:</strong> Your
+              <strong className='text-content-brand'>Focus:</strong> Your
               concentrated attention and emotional engagement
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>
-                Correspondences:
-              </strong>{' '}
+              <strong className='text-content-brand'>Correspondences:</strong>{' '}
               Symbolic tools aligned with your goal (colors, herbs, timing)
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>Action:</strong> The
+              <strong className='text-content-brand'>Action:</strong> The
               physical or verbal acts that anchor your intention
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>Release:</strong>{' '}
-              Letting go of attachment to outcome, trusting the process
+              <strong className='text-content-brand'>Release:</strong> Letting
+              go of attachment to outcome, trusting the process
             </li>
           </ul>
         </div>
@@ -250,14 +248,14 @@ export default function SpellcraftFundamentalsPage() {
 
       {/* Section 2: Intention, Focus, Correspondence */}
       <section id='intention' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           2. Intention, Focus, and Correspondence
         </h2>
 
-        <h3 className='text-xl font-medium text-zinc-100 mb-4'>
+        <h3 className='text-xl font-medium text-content-primary mb-4'>
           Setting Clear Intention
         </h3>
-        <p className='text-zinc-300 leading-relaxed mb-4'>
+        <p className='text-content-secondary leading-relaxed mb-4'>
           Your intention is the foundation of all magic. A vague intention
           produces vague results. Be specific about what you want, frame it
           positively (what you want, not what you are avoiding), and express it
@@ -269,7 +267,7 @@ export default function SpellcraftFundamentalsPage() {
             <h4 className='font-medium text-lunary-error mb-2'>
               Weak Intentions
             </h4>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>• &quot;I don&apos;t want to be broke&quot;</li>
               <li>• &quot;I hope things get better&quot;</li>
               <li>• &quot;Maybe I&apos;ll find love someday&quot;</li>
@@ -279,7 +277,7 @@ export default function SpellcraftFundamentalsPage() {
             <h4 className='font-medium text-lunary-success mb-2'>
               Clear Intentions
             </h4>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>• &quot;I am financially secure and abundant&quot;</li>
               <li>• &quot;My situation improves with each day&quot;</li>
               <li>• &quot;I attract loving, healthy relationships&quot;</li>
@@ -287,17 +285,17 @@ export default function SpellcraftFundamentalsPage() {
           </div>
         </div>
 
-        <h3 className='text-xl font-medium text-zinc-100 mb-4'>
+        <h3 className='text-xl font-medium text-content-primary mb-4'>
           Using Correspondences
         </h3>
-        <p className='text-zinc-300 leading-relaxed mb-4'>
+        <p className='text-content-secondary leading-relaxed mb-4'>
           Correspondences are the symbolic associations that connect physical
           objects, colors, times, and other elements to specific intentions.
           They are not strictly necessary—your focused intention is the most
           powerful element—but they help focus your mind and add layers of
           symbolic meaning.
         </p>
-        <p className='text-zinc-400 text-sm'>
+        <p className='text-content-muted text-sm'>
           Example: For a love spell, you might use pink or red candles (love
           colors), rose quartz (heart crystal), Friday (Venus day), and rose
           petals (love herb). Each element reinforces the intention.
@@ -306,21 +304,21 @@ export default function SpellcraftFundamentalsPage() {
 
       {/* Section 3: Ethics */}
       <section id='ethics' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           3. Ethics of Spellwork
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Ethics are not optional in responsible magical practice. How you use
           your will and energy matters—both for your own wellbeing and for the
           people around you.
         </p>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6 mb-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-4'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-6 mb-6'>
+          <h3 className='text-lg font-medium text-content-brand mb-4'>
             Ethical Guidelines for Spellwork
           </h3>
-          <ul className='space-y-3 text-zinc-300'>
+          <ul className='space-y-3 text-content-secondary'>
             <li>
               <strong>
                 Never attempt to control another person&apos;s will.
@@ -355,7 +353,7 @@ export default function SpellcraftFundamentalsPage() {
 
         <Link
           href='/grimoire/modern-witchcraft/ethics'
-          className='text-lunary-primary-400 hover:text-lunary-primary-300'
+          className='text-lunary-primary-400 hover:text-content-brand'
         >
           Read more about witchcraft ethics →
         </Link>
@@ -363,57 +361,57 @@ export default function SpellcraftFundamentalsPage() {
 
       {/* Section 4: Building a Simple Spell */}
       <section id='building-spell' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           4. Building a Simple Spell (Step by Step)
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Here is a simple framework you can use for any spell. Adapt it to your
           own practice and preferences.
         </p>
 
         <ol className='space-y-4'>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               Step 1: Clarify Your Intention
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Write down exactly what you want. Be specific. Read it aloud. Does
               it feel true? Adjust until it resonates.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               Step 2: Gather Your Materials
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Based on your intention, choose correspondences: a candle color, a
               crystal, herbs, or simply paper and pen. Keep it simple.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               Step 3: Create Sacred Space
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Cleanse your space (smoke, sound, visualization). Ground yourself
               with deep breaths. Set the mood with lighting or music if helpful.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               Step 4: Perform the Working
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Light your candle, speak your intention aloud, visualize the
               outcome, perform any symbolic actions. Stay focused throughout.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               Step 5: Release and Close
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Thank any forces you called upon. Extinguish candles safely. Let
               go of attachment to outcome. Trust that your working is done.
             </p>
@@ -423,36 +421,36 @@ export default function SpellcraftFundamentalsPage() {
 
       {/* Section 5: Timing */}
       <section id='timing' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           5. Timing: Moon, Days, Planets
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Timing can amplify your spellwork by aligning it with natural cycles.
           This is not required—urgent needs can override ideal timing—but it
           adds power when you can plan ahead.
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='text-lg font-medium text-content-primary mb-3'>
               Moon Phases
             </h3>
-            <ul className='space-y-2 text-zinc-400 text-sm'>
+            <ul className='space-y-2 text-content-muted text-sm'>
               <li>
-                <strong className='text-zinc-200'>New Moon:</strong> New
+                <strong className='text-content-primary'>New Moon:</strong> New
                 beginnings, setting intentions
               </li>
               <li>
-                <strong className='text-zinc-200'>Waxing Moon:</strong> Growth,
-                attraction, building
+                <strong className='text-content-primary'>Waxing Moon:</strong>{' '}
+                Growth, attraction, building
               </li>
               <li>
-                <strong className='text-zinc-200'>Full Moon:</strong>{' '}
+                <strong className='text-content-primary'>Full Moon:</strong>{' '}
                 Manifestation, charging, release
               </li>
               <li>
-                <strong className='text-zinc-200'>Waning Moon:</strong>{' '}
+                <strong className='text-content-primary'>Waning Moon:</strong>{' '}
                 Banishing, letting go, endings
               </li>
             </ul>
@@ -463,37 +461,47 @@ export default function SpellcraftFundamentalsPage() {
               Full moon phases guide →
             </Link>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='text-lg font-medium text-content-primary mb-3'>
               Days of the Week
             </h3>
-            <ul className='space-y-2 text-zinc-400 text-sm'>
+            <ul className='space-y-2 text-content-muted text-sm'>
               <li>
-                <strong className='text-zinc-200'>Sunday (Sun):</strong>{' '}
+                <strong className='text-content-primary'>Sunday (Sun):</strong>{' '}
                 Success, vitality
               </li>
               <li>
-                <strong className='text-zinc-200'>Monday (Moon):</strong>{' '}
+                <strong className='text-content-primary'>Monday (Moon):</strong>{' '}
                 Intuition, emotions
               </li>
               <li>
-                <strong className='text-zinc-200'>Tuesday (Mars):</strong>{' '}
+                <strong className='text-content-primary'>
+                  Tuesday (Mars):
+                </strong>{' '}
                 Courage, protection
               </li>
               <li>
-                <strong className='text-zinc-200'>Wednesday (Mercury):</strong>{' '}
+                <strong className='text-content-primary'>
+                  Wednesday (Mercury):
+                </strong>{' '}
                 Communication
               </li>
               <li>
-                <strong className='text-zinc-200'>Thursday (Jupiter):</strong>{' '}
+                <strong className='text-content-primary'>
+                  Thursday (Jupiter):
+                </strong>{' '}
                 Abundance, luck
               </li>
               <li>
-                <strong className='text-zinc-200'>Friday (Venus):</strong> Love,
-                beauty
+                <strong className='text-content-primary'>
+                  Friday (Venus):
+                </strong>{' '}
+                Love, beauty
               </li>
               <li>
-                <strong className='text-zinc-200'>Saturday (Saturn):</strong>{' '}
+                <strong className='text-content-primary'>
+                  Saturday (Saturn):
+                </strong>{' '}
                 Banishing, discipline
               </li>
             </ul>
@@ -503,11 +511,11 @@ export default function SpellcraftFundamentalsPage() {
 
       {/* Section 6: Tools */}
       <section id='tools' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           6. Common Tools
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           You do not need expensive or elaborate tools. Many powerful spells
           require nothing but your intention and voice. However, tools can help
           focus your mind and add symbolic weight to your workings.
@@ -516,59 +524,69 @@ export default function SpellcraftFundamentalsPage() {
         <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
           <Link
             href='/grimoire/candle-magic'
-            className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <span className='text-zinc-100 font-medium'>Candles</span>
-            <p className='text-xs text-zinc-500 mt-1'>Fire element, focus</p>
+            <span className='text-content-primary font-medium'>Candles</span>
+            <p className='text-xs text-content-muted mt-1'>
+              Fire element, focus
+            </p>
           </Link>
           <Link
             href='/grimoire/crystals'
-            className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <span className='text-zinc-100 font-medium'>Crystals</span>
-            <p className='text-xs text-zinc-500 mt-1'>Amplify, store energy</p>
+            <span className='text-content-primary font-medium'>Crystals</span>
+            <p className='text-xs text-content-muted mt-1'>
+              Amplify, store energy
+            </p>
           </Link>
           <Link
             href='/grimoire/correspondences/herbs'
-            className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+            className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <span className='text-zinc-100 font-medium'>Herbs</span>
-            <p className='text-xs text-zinc-500 mt-1'>Specific properties</p>
+            <span className='text-content-primary font-medium'>Herbs</span>
+            <p className='text-xs text-content-muted mt-1'>
+              Specific properties
+            </p>
           </Link>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <span className='text-zinc-100 font-medium'>Paper & Pen</span>
-            <p className='text-xs text-zinc-500 mt-1'>Write intentions</p>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+            <span className='text-content-primary font-medium'>
+              Paper & Pen
+            </span>
+            <p className='text-xs text-content-muted mt-1'>Write intentions</p>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <span className='text-zinc-100 font-medium'>Salt</span>
-            <p className='text-xs text-zinc-500 mt-1'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+            <span className='text-content-primary font-medium'>Salt</span>
+            <p className='text-xs text-content-muted mt-1'>
               Purification, protection
             </p>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <span className='text-zinc-100 font-medium'>Water</span>
-            <p className='text-xs text-zinc-500 mt-1'>Cleansing, moon water</p>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+            <span className='text-content-primary font-medium'>Water</span>
+            <p className='text-xs text-content-muted mt-1'>
+              Cleansing, moon water
+            </p>
           </div>
         </div>
       </section>
 
       {/* Section 7: Recording Results */}
       <section id='recording' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           7. Recording Results in Your Book of Shadows
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Keeping a magical journal—traditionally called a Book of Shadows—helps
           you track what works, notice patterns, and refine your practice over
           time. After each spell, record the details while they are fresh.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             What to Record
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>• Date, time, and moon phase</li>
             <li>• Your exact intention (word for word)</li>
             <li>• Tools and correspondences used</li>
@@ -587,21 +605,21 @@ export default function SpellcraftFundamentalsPage() {
 
       {/* Section 8: When Not to Cast */}
       <section id='when-not-to-cast' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           8. When Not to Cast
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Knowing when to pause is as important as knowing how to cast. Magic
           done from the wrong state of mind or for the wrong reasons often
           backfires or produces unintended consequences.
         </p>
 
-        <div className='bg-lunary-error-900/20 border border-lunary-error-700 rounded-xl p-6'>
+        <div className='bg-layer-base/20 border border-lunary-error-700 rounded-xl p-6'>
           <h3 className='text-lg font-medium text-lunary-error-300 mb-3'>
             Pause Before Casting If...
           </h3>
-          <ul className='space-y-2 text-zinc-300 text-sm'>
+          <ul className='space-y-2 text-content-secondary text-sm'>
             <li>
               • You are extremely emotional (angry, desperate, panicked)—ground
               first
@@ -622,7 +640,7 @@ export default function SpellcraftFundamentalsPage() {
           </ul>
         </div>
 
-        <p className='text-zinc-400 text-sm mt-4'>
+        <p className='text-content-muted text-sm mt-4'>
           When in doubt, wait. Sleep on it. If the urge to cast remains after
           reflection, proceed with clarity.
         </p>
@@ -630,7 +648,7 @@ export default function SpellcraftFundamentalsPage() {
 
       {/* FAQ Section */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           9. Frequently Asked Questions
         </h2>
 
@@ -638,23 +656,25 @@ export default function SpellcraftFundamentalsPage() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 {faq.question}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-content-secondary leading-relaxed'>
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+      <section className='bg-gradient-to-r from-layer-base/30 to-lunary-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
           Ready to Explore Spells?
         </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+        <p className='text-content-muted mb-6 max-w-xl mx-auto'>
           Browse our curated collection of spells for protection, love,
           prosperity, healing, and more. Each includes detailed instructions and
           correspondences.

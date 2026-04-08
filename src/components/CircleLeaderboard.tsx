@@ -56,10 +56,10 @@ export function CircleLeaderboard() {
 
   if (isLoading) {
     return (
-      <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/60 p-4'>
+      <div className='rounded-xl border border-stroke-subtle/60 bg-surface-base/60 p-4'>
         <div className='flex items-center gap-2 mb-3'>
-          <Users className='w-4 h-4 text-zinc-400' />
-          <span className='text-sm font-medium text-zinc-400'>
+          <Users className='w-4 h-4 text-content-muted' />
+          <span className='text-sm font-medium text-content-muted'>
             Circle Leaderboard
           </span>
         </div>
@@ -67,7 +67,7 @@ export function CircleLeaderboard() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className='h-12 bg-zinc-900/50 rounded-lg animate-pulse'
+              className='h-12 bg-surface-elevated/50 rounded-lg animate-pulse'
             />
           ))}
         </div>
@@ -86,14 +86,14 @@ export function CircleLeaderboard() {
   // No friends yet
   if (data.friends.length === 0) {
     return (
-      <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/60 p-4'>
+      <div className='rounded-xl border border-stroke-subtle/60 bg-surface-base/60 p-4'>
         <div className='flex items-center gap-2 mb-3'>
-          <Users className='w-4 h-4 text-zinc-400' />
-          <span className='text-sm font-medium text-zinc-300'>
+          <Users className='w-4 h-4 text-content-muted' />
+          <span className='text-sm font-medium text-content-secondary'>
             Circle Leaderboard
           </span>
         </div>
-        <p className='text-xs text-zinc-500'>
+        <p className='text-xs text-content-muted'>
           Add friends to your circle to compete on the leaderboard!
         </p>
       </div>
@@ -124,12 +124,12 @@ export function CircleLeaderboard() {
   );
 
   return (
-    <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/60 p-4'>
+    <div className='rounded-xl border border-stroke-subtle/60 bg-surface-base/60 p-4'>
       {/* Header */}
       <div className='flex items-center justify-between mb-3'>
         <div className='flex items-center gap-2'>
           <Users className='w-4 h-4 text-lunary-accent' />
-          <span className='text-sm font-medium text-zinc-300'>
+          <span className='text-sm font-medium text-content-secondary'>
             Circle Leaderboard
           </span>
         </div>
@@ -150,8 +150,8 @@ export function CircleLeaderboard() {
               className={cn(
                 'flex items-center gap-3 p-2 rounded-lg transition-colors',
                 isUser
-                  ? 'bg-lunary-primary-900/20 border border-lunary-primary-800/30'
-                  : 'bg-zinc-900/30',
+                  ? 'bg-layer-base/20 border border-lunary-primary-800/30'
+                  : 'bg-surface-elevated/30',
               )}
             >
               {/* Position */}
@@ -161,17 +161,17 @@ export function CircleLeaderboard() {
                   position === 1
                     ? 'bg-yellow-500/20 text-yellow-500'
                     : position === 2
-                      ? 'bg-zinc-400/20 text-zinc-400'
+                      ? 'bg-zinc-400/20 text-content-muted'
                       : position === 3
                         ? 'bg-orange-500/20 text-orange-500'
-                        : 'bg-zinc-800 text-zinc-500',
+                        : 'bg-surface-card text-content-muted',
                 )}
               >
                 {position}
               </span>
 
               {/* Avatar */}
-              <div className='w-8 h-8 rounded-full bg-zinc-800 overflow-hidden'>
+              <div className='w-8 h-8 rounded-full bg-surface-card overflow-hidden'>
                 {isUser ? (
                   <div className='w-full h-full flex items-center justify-center text-xs text-lunary-accent font-semibold'>
                     You
@@ -185,7 +185,7 @@ export function CircleLeaderboard() {
                     className='w-full h-full object-cover'
                   />
                 ) : (
-                  <div className='w-full h-full flex items-center justify-center text-xs text-zinc-500'>
+                  <div className='w-full h-full flex items-center justify-center text-xs text-content-muted'>
                     {entry.name.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -195,7 +195,9 @@ export function CircleLeaderboard() {
               <span
                 className={cn(
                   'flex-1 text-sm truncate',
-                  isUser ? 'text-lunary-accent font-medium' : 'text-zinc-300',
+                  isUser
+                    ? 'text-lunary-accent font-medium'
+                    : 'text-content-secondary',
                 )}
               >
                 {isUser ? 'You' : entry.name}
@@ -206,13 +208,17 @@ export function CircleLeaderboard() {
                 <Flame
                   className={cn(
                     'w-4 h-4',
-                    entry.streak > 0 ? 'text-lunary-rose' : 'text-zinc-600',
+                    entry.streak > 0
+                      ? 'text-lunary-rose'
+                      : 'text-content-muted',
                   )}
                 />
                 <span
                   className={cn(
                     'text-sm font-semibold',
-                    entry.streak > 0 ? 'text-white' : 'text-zinc-500',
+                    entry.streak > 0
+                      ? 'text-content-primary'
+                      : 'text-content-muted',
                   )}
                 >
                   {entry.streak}
@@ -225,10 +231,12 @@ export function CircleLeaderboard() {
 
       {/* Motivational Copy */}
       {motivationalCopy && (
-        <div className='mt-3 pt-3 border-t border-zinc-800/60'>
+        <div className='mt-3 pt-3 border-t border-stroke-subtle/60'>
           <div className='flex items-center gap-2'>
             {motivationalCopy.icon}
-            <p className='text-xs text-zinc-400'>{motivationalCopy.text}</p>
+            <p className='text-xs text-content-muted'>
+              {motivationalCopy.text}
+            </p>
           </div>
         </div>
       )}
@@ -258,6 +266,6 @@ function getMotivationalCopy(
 
   return {
     text: `Keep going to climb the leaderboard!`,
-    icon: <ArrowUp className='w-3.5 h-3.5 text-zinc-500 shrink-0' />,
+    icon: <ArrowUp className='w-3.5 h-3.5 text-content-muted shrink-0' />,
   };
 }

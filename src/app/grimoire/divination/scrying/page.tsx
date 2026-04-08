@@ -250,7 +250,7 @@ Scrying works by relaxing the conscious mind and allowing images to arise from t
           faqs={faqs}
         >
           <section className='mb-12'>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Scrying Methods
             </h2>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -258,12 +258,14 @@ Scrying works by relaxing the conscious mind and allowing images to arise from t
                 <Link
                   key={method.slug}
                   href={`/grimoire/divination/scrying/${method.slug}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-violet-700/50 transition-all'
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-violet-700/50 transition-all'
                 >
-                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-violet-300 transition-colors mb-2'>
+                  <h3 className='text-lg font-medium text-content-primary group-hover:text-violet-300 transition-colors mb-2'>
                     {method.name}
                   </h3>
-                  <p className='text-sm text-zinc-400'>{method.description}</p>
+                  <p className='text-sm text-content-muted'>
+                    {method.description}
+                  </p>
                 </Link>
               ))}
             </div>

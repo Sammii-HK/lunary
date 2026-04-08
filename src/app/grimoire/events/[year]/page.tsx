@@ -412,22 +412,22 @@ const colorClasses: Record<
 > = {
   orange: {
     border: 'border-lunary-rose-700',
-    bg: 'bg-lunary-rose-950',
+    bg: 'bg-layer-deep',
     text: 'text-lunary-rose',
   },
   pink: {
     border: 'border-lunary-rose-700',
-    bg: 'bg-lunary-rose-950',
+    bg: 'bg-layer-deep',
     text: 'text-lunary-rose',
   },
   amber: {
     border: 'border-lunary-accent-700',
-    bg: 'bg-lunary-accent-950',
+    bg: 'bg-layer-deep',
     text: 'text-lunary-accent',
   },
   blue: {
     border: 'border-lunary-secondary-700',
-    bg: 'bg-lunary-secondary-950',
+    bg: 'bg-layer-deep',
     text: 'text-lunary-secondary',
   },
 };
@@ -589,20 +589,20 @@ While these events affect everyone, their impact on your personal chart is uniqu
       {/* Custom content: Events Calendar */}
       <div className='mt-8 space-y-8'>
         {nextYear <= maxYear && (
-          <section className='rounded-2xl border border-zinc-800 bg-zinc-900/50 px-6 py-5'>
-            <Heading as='h2' variant='h3' className='text-zinc-100 mb-3'>
+          <section className='rounded-2xl border border-stroke-subtle bg-surface-elevated/50 px-6 py-5'>
+            <Heading as='h2' variant='h3' className='text-content-primary mb-3'>
               Upcoming events
             </Heading>
             <div className='grid gap-3 md:grid-cols-2'>
               <Link
                 href='/grimoire/events'
-                className='px-4 py-3 rounded-lg border border-zinc-800 bg-zinc-950 text-sm font-medium text-zinc-200 hover:border-lunary-primary-500 transition-colors'
+                className='px-4 py-3 rounded-lg border border-stroke-subtle bg-surface-base text-sm font-medium text-content-primary hover:border-lunary-primary-500 transition-colors'
               >
                 Current astrology events
               </Link>
               <Link
                 href={`/grimoire/events/${nextYear}`}
-                className='px-4 py-3 rounded-lg border border-zinc-800 bg-zinc-950 text-sm font-medium text-zinc-200 hover:border-lunary-primary-500 transition-colors'
+                className='px-4 py-3 rounded-lg border border-stroke-subtle bg-surface-base text-sm font-medium text-content-primary hover:border-lunary-primary-500 transition-colors'
               >
                 Astrology events {nextYear}
               </Link>
@@ -610,12 +610,8 @@ While these events affect everyone, their impact on your personal chart is uniqu
           </section>
         )}
         {/* Quick Summary */}
-        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-          <Heading
-            as='h2'
-            variant='h2'
-            className='text-lunary-primary-300 mb-4'
-          >
+        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+          <Heading as='h2' variant='h2' className='text-content-brand mb-4'>
             {year} At a Glance
           </Heading>
           <div className='grid grid-cols-2 md:grid-cols-5 gap-4 text-center'>
@@ -623,55 +619,57 @@ While these events affect everyone, their impact on your personal chart is uniqu
               <div className='text-3xl font-light text-lunary-primary-400'>
                 {stats.mercuryRetrograde}
               </div>
-              <div className='text-sm text-zinc-400'>Mercury Retrogrades</div>
+              <div className='text-sm text-content-muted'>
+                Mercury Retrogrades
+              </div>
             </div>
             <div>
               <div className='text-3xl font-light text-lunary-primary-400'>
                 {stats.venusRetrograde}
               </div>
-              <div className='text-sm text-zinc-400'>Venus Retrograde</div>
+              <div className='text-sm text-content-muted'>Venus Retrograde</div>
             </div>
             <div>
               <div className='text-3xl font-light text-lunary-primary-400'>
                 {stats.eclipses}
               </div>
-              <div className='text-sm text-zinc-400'>Eclipses</div>
+              <div className='text-sm text-content-muted'>Eclipses</div>
             </div>
             <div>
               <div className='text-3xl font-light text-lunary-primary-400'>
                 {stats.outerPlanetRx}
               </div>
-              <div className='text-sm text-zinc-400'>Outer Planet Rx</div>
+              <div className='text-sm text-content-muted'>Outer Planet Rx</div>
             </div>
             {stats.signChanges > 0 && (
               <div>
                 <div className='text-3xl font-light text-lunary-primary-400'>
                   {stats.signChanges}
                 </div>
-                <div className='text-sm text-zinc-400'>Sign Changes</div>
+                <div className='text-sm text-content-muted'>Sign Changes</div>
               </div>
             )}
           </div>
         </div>
         {eclipseEntries.length > 0 && (
-          <section className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
+          <section className='rounded-2xl border border-stroke-subtle bg-surface-elevated/50 p-6'>
             <Heading as='h2' variant='h2'>
               {year} Eclipse Calendar
             </Heading>
             <div className='max-w-full overflow-x-auto'>
-              <table className='w-full border-collapse border border-zinc-800'>
+              <table className='w-full border-collapse border border-stroke-subtle'>
                 <thead>
-                  <tr className='bg-zinc-800/50'>
-                    <th className='border border-zinc-800 px-3 py-2 text-left text-zinc-200 font-medium'>
+                  <tr className='bg-surface-card/50'>
+                    <th className='border border-stroke-subtle px-3 py-2 text-left text-content-primary font-medium'>
                       Date
                     </th>
-                    <th className='border border-zinc-800 px-3 py-2 text-left text-zinc-200 font-medium'>
+                    <th className='border border-stroke-subtle px-3 py-2 text-left text-content-primary font-medium'>
                       Type
                     </th>
-                    <th className='border border-zinc-800 px-3 py-2 text-left text-zinc-200 font-medium'>
+                    <th className='border border-stroke-subtle px-3 py-2 text-left text-content-primary font-medium'>
                       Sign
                     </th>
-                    <th className='border border-zinc-800 px-3 py-2 text-left text-zinc-200 font-medium'>
+                    <th className='border border-stroke-subtle px-3 py-2 text-left text-content-primary font-medium'>
                       Theme
                     </th>
                   </tr>
@@ -679,16 +677,16 @@ While these events affect everyone, their impact on your personal chart is uniqu
                 <tbody>
                   {eclipseEntries.map((entry) => (
                     <tr key={`${entry.date}-${entry.type}`}>
-                      <td className='border border-zinc-800 px-3 py-2 text-zinc-300'>
+                      <td className='border border-stroke-subtle px-3 py-2 text-content-secondary'>
                         {entry.date}
                       </td>
-                      <td className='border border-zinc-800 px-3 py-2 text-zinc-300'>
+                      <td className='border border-stroke-subtle px-3 py-2 text-content-secondary'>
                         {entry.type}
                       </td>
-                      <td className='border border-zinc-800 px-3 py-2 text-zinc-300'>
+                      <td className='border border-stroke-subtle px-3 py-2 text-content-secondary'>
                         {entry.sign}
                       </td>
-                      <td className='border border-zinc-800 px-3 py-2 text-zinc-300'>
+                      <td className='border border-stroke-subtle px-3 py-2 text-content-secondary'>
                         {entry.theme}
                       </td>
                     </tr>
@@ -720,12 +718,12 @@ While these events affect everyone, their impact on your personal chart is uniqu
                   {category.events.map((event, i) => (
                     <div
                       key={i}
-                      className='flex items-center justify-between py-2 border-b border-zinc-800/50 last:border-0'
+                      className='flex items-center justify-between py-2 border-b border-stroke-subtle/50 last:border-0'
                     >
-                      <span className='text-zinc-100 font-medium'>
+                      <span className='text-content-primary font-medium'>
                         {event.date}
                       </span>
-                      <span className='text-zinc-400 text-sm'>
+                      <span className='text-content-muted text-sm'>
                         {event.description}
                       </span>
                     </div>

@@ -135,26 +135,26 @@ export default function TarotSuitsIndexPage() {
           <div className='flex justify-center mb-4'>
             <Layers className='w-16 h-16 text-violet-400' />
           </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-4'>
             Tarot Suits
           </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
+          <p className='text-lg text-content-muted max-w-2xl mx-auto'>
             The Minor Arcana consists of 56 cards divided into four suits, each
             associated with an element and reflecting different aspects of daily
             life.
           </p>
         </div>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-10'>
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
             Understanding the Suits
           </h2>
-          <p className='text-zinc-400 mb-4'>
+          <p className='text-content-muted mb-4'>
             Each suit contains 14 cards: Ace through Ten, plus four court cards
             (Page, Knight, Queen, King). The suits correspond to the four
             elements and represent different domains of human experience.
           </p>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             When a suit dominates a reading, it indicates which area of life is
             most relevant to your question or situation.
           </p>
@@ -164,7 +164,7 @@ export default function TarotSuitsIndexPage() {
           {Object.entries(tarotSuits).map(([key, suit]) => (
             <section
               key={key}
-              className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-6'
+              className='rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-6'
             >
               <Link
                 href={`/grimoire/tarot/suits/${key}`}
@@ -176,17 +176,17 @@ export default function TarotSuitsIndexPage() {
                   >
                     {suit.name}
                   </h2>
-                  <span className='px-3 py-1 text-sm bg-zinc-800 text-zinc-400 rounded'>
+                  <span className='px-3 py-1 text-sm bg-surface-card text-content-muted rounded'>
                     {suit.element}
                   </span>
                 </div>
               </Link>
-              <p className='text-zinc-400 mb-4'>{suit.qualities}</p>
+              <p className='text-content-muted mb-4'>{suit.qualities}</p>
               <div className='flex flex-wrap gap-2 mb-4'>
                 {suitDetails[key].themes.map((theme) => (
                   <span
                     key={theme}
-                    className='px-2 py-1 text-xs bg-zinc-800/50 text-zinc-400 rounded'
+                    className='px-2 py-1 text-xs bg-surface-card/50 text-content-muted rounded'
                   >
                     {theme}
                   </span>
@@ -202,26 +202,26 @@ export default function TarotSuitsIndexPage() {
           ))}
         </div>
 
-        <div className='border-t border-zinc-800 pt-8 mt-12'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+        <div className='border-t border-stroke-subtle pt-8 mt-12'>
+          <h3 className='text-lg font-medium text-content-primary mb-4'>
             Related Resources
           </h3>
           <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/tarot'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               All Tarot Cards
             </Link>
             <Link
               href='/grimoire/tarot/spreads'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Tarot Spreads
             </Link>
             <Link
               href='/grimoire/reversed-cards-guide'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Reversed Cards
             </Link>

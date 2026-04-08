@@ -47,7 +47,7 @@ export function GiftCard({
   const Icon = config.icon;
 
   return (
-    <div className='rounded-xl border border-zinc-800 bg-zinc-900/80 overflow-hidden'>
+    <div className='rounded-xl border border-stroke-subtle bg-surface-elevated/80 overflow-hidden'>
       {/* Header */}
       <div
         className={cn(
@@ -56,11 +56,13 @@ export function GiftCard({
         )}
       >
         <div className='w-10 h-10 rounded-full bg-white/20 flex items-center justify-center'>
-          <Icon className='w-5 h-5 text-white' />
+          <Icon className='w-5 h-5 text-content-primary' />
         </div>
         <div>
-          <p className='text-sm font-medium text-white'>{config.label}</p>
-          <p className='text-xs text-white/70'>From {senderName}</p>
+          <p className='text-sm font-medium text-content-primary'>
+            {config.label}
+          </p>
+          <p className='text-xs text-content-primary/70'>From {senderName}</p>
         </div>
       </div>
 
@@ -69,10 +71,12 @@ export function GiftCard({
         {giftType === 'tarot_pull' && content.cardName && (
           <div className='space-y-3'>
             <div className='text-center'>
-              <p className='text-xs uppercase tracking-widest text-zinc-500 mb-1'>
+              <p className='text-xs uppercase tracking-widest text-content-muted mb-1'>
                 {content.suit}
               </p>
-              <p className='text-lg font-bold text-white'>{content.cardName}</p>
+              <p className='text-lg font-bold text-content-primary'>
+                {content.cardName}
+              </p>
             </div>
             {content.keywords && content.keywords.length > 0 && (
               <div className='flex flex-wrap justify-center gap-1.5'>
@@ -87,7 +91,7 @@ export function GiftCard({
               </div>
             )}
             {content.message && (
-              <p className='text-sm text-zinc-300 text-center leading-relaxed'>
+              <p className='text-sm text-content-secondary text-center leading-relaxed'>
                 {content.message}
               </p>
             )}
@@ -101,7 +105,7 @@ export function GiftCard({
                 For {content.recipientSign}
               </p>
             )}
-            <p className='text-base text-white leading-relaxed italic'>
+            <p className='text-base text-content-primary leading-relaxed italic'>
               &ldquo;{content.affirmation}&rdquo;
             </p>
           </div>
@@ -111,9 +115,9 @@ export function GiftCard({
       {/* Personal message */}
       {personalMessage && (
         <div className='px-5 pb-5'>
-          <div className='rounded-lg bg-zinc-800/50 p-3 border border-zinc-700/50'>
-            <p className='text-xs text-zinc-500 mb-1'>Personal message</p>
-            <p className='text-sm text-zinc-300'>{personalMessage}</p>
+          <div className='rounded-lg bg-surface-card/50 p-3 border border-stroke-default/50'>
+            <p className='text-xs text-content-muted mb-1'>Personal message</p>
+            <p className='text-sm text-content-secondary'>{personalMessage}</p>
           </div>
         </div>
       )}

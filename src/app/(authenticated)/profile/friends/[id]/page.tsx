@@ -151,7 +151,7 @@ export default function FriendProfilePage() {
     return (
       <div className='flex flex-col items-center justify-center min-h-[400px] gap-4'>
         <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary' />
-        <p className='text-zinc-400'>Loading friend profile...</p>
+        <p className='text-content-muted'>Loading friend profile...</p>
       </div>
     );
   }
@@ -179,7 +179,7 @@ export default function FriendProfilePage() {
       <div className='w-full max-w-3xl'>
         <button
           onClick={() => router.push('/profile?tab=circle')}
-          className='flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-4'
+          className='flex items-center gap-2 text-sm text-content-muted hover:text-content-primary mb-4'
           data-testid='back-to-circle'
         >
           <ArrowLeft className='w-4 h-4' />
@@ -201,14 +201,14 @@ export default function FriendProfilePage() {
                 className='w-full h-full rounded-full object-cover'
               />
             ) : (
-              <RelationshipIcon className='w-8 h-8 text-white' />
+              <RelationshipIcon className='w-8 h-8 text-content-primary' />
             )}
           </div>
           <div>
             <Heading as='h1' variant='h2'>
               {friend.name}
             </Heading>
-            <p className='text-zinc-400 flex items-center gap-2'>
+            <p className='text-content-muted flex items-center gap-2'>
               {friend.sunSign && (
                 <>
                   <span className='font-astro'>
@@ -217,7 +217,7 @@ export default function FriendProfilePage() {
                     ] || friend.sunSign}
                   </span>
                   <span>{friend.sunSign}</span>
-                  <span className='text-zinc-600'>•</span>
+                  <span className='text-content-muted'>•</span>
                 </>
               )}
               <span className='capitalize'>
@@ -232,12 +232,12 @@ export default function FriendProfilePage() {
             >
               <div className='text-center'>
                 <div
-                  className='text-3xl font-bold text-lunary-accent-200'
+                  className='text-3xl font-bold text-content-brand-accent'
                   data-testid='compatibility-score'
                 >
                   {friend.synastry.compatibilityScore}%
                 </div>
-                <div className='text-xs text-zinc-400'>Compatible</div>
+                <div className='text-xs text-content-muted'>Compatible</div>
               </div>
               <ShareSynastry
                 userName={user?.name?.split(' ')[0]}
@@ -293,7 +293,7 @@ export default function FriendProfilePage() {
       {/* Tabs */}
       <div className='w-full max-w-3xl'>
         <div
-          className='flex gap-1 p-1 rounded-lg bg-zinc-800/50 border border-zinc-700/50'
+          className='flex gap-1 p-1 rounded-lg bg-surface-card/50 border border-stroke-default/50'
           data-testid='friend-profile-tabs'
         >
           {[
@@ -308,8 +308,8 @@ export default function FriendProfilePage() {
               data-testid={`tab-${tab.id}`}
               className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors inline-flex items-center justify-center gap-1.5 ${
                 activeTab === tab.id
-                  ? 'bg-lunary-primary-900/50 text-white border border-lunary-primary-700/50'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-layer-base/50 text-white border border-lunary-primary-700/50'
+                  : 'text-content-muted hover:text-content-primary'
               }`}
             >
               <tab.icon className='w-4 h-4' />
@@ -365,27 +365,29 @@ function OverviewTab({
       {/* Compatibility Card */}
       {friend.synastry && (
         <div
-          className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+          className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
           data-testid='overview-compatibility'
         >
-          <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
+          <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
             Compatibility Overview
           </h3>
           <div className='flex items-center gap-6'>
             <div className='text-center'>
-              <div className='text-4xl font-bold text-lunary-accent-200'>
+              <div className='text-4xl font-bold text-content-brand-accent'>
                 {friend.synastry.compatibilityScore}%
               </div>
-              <div className='text-xs text-zinc-400'>Match</div>
+              <div className='text-xs text-content-muted'>Match</div>
             </div>
             <div className='flex-1'>
-              <div className='h-3 bg-zinc-700 rounded-full overflow-hidden mb-3'>
+              <div className='h-3 bg-surface-overlay rounded-full overflow-hidden mb-3'>
                 <div
                   className='h-full bg-gradient-to-r from-lunary-primary to-lunary-highlight'
                   style={{ width: `${friend.synastry.compatibilityScore}%` }}
                 />
               </div>
-              <p className='text-sm text-zinc-300'>{friend.synastry.summary}</p>
+              <p className='text-sm text-content-secondary'>
+                {friend.synastry.summary}
+              </p>
             </div>
           </div>
           <Button
@@ -404,10 +406,10 @@ function OverviewTab({
       {/* Key Placements */}
       {keyPlacements && keyPlacements.length > 0 && (
         <div
-          className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+          className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
           data-testid='key-placements'
         >
-          <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
+          <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
             {friend.name}&apos;s Key Placements
           </h3>
           <div
@@ -417,17 +419,17 @@ function OverviewTab({
             {keyPlacements.map((placement) => (
               <div
                 key={placement.body}
-                className='rounded-lg bg-zinc-800/50 p-3 text-center'
+                className='rounded-lg bg-surface-card/50 p-3 text-center'
               >
-                <div className='text-2xl font-astro text-lunary-accent-200 mb-1'>
+                <div className='text-2xl font-astro text-content-brand-accent mb-1'>
                   {zodiacSymbol[
                     placement.sign.toLowerCase() as keyof typeof zodiacSymbol
                   ] || placement.sign}
                 </div>
-                <div className='text-sm font-medium text-white'>
+                <div className='text-sm font-medium text-content-primary'>
                   {placement.body}
                 </div>
-                <div className='text-xs text-zinc-400'>
+                <div className='text-xs text-content-muted'>
                   {placement.sign} {placement.degree}°{placement.minute}&apos;
                   {placement.retrograde && (
                     <span className='text-lunary-error-300'> ℞</span>
@@ -440,12 +442,12 @@ function OverviewTab({
       )}
 
       {!friend.hasBirthChart && (
-        <div className='rounded-xl border-2 border-dashed border-zinc-700 p-6 text-center'>
-          <Moon className='w-10 h-10 mx-auto text-zinc-600 mb-3' />
-          <h3 className='font-medium text-zinc-300 mb-1'>
+        <div className='rounded-xl border-2 border-dashed border-stroke-default p-6 text-center'>
+          <Moon className='w-10 h-10 mx-auto text-content-muted mb-3' />
+          <h3 className='font-medium text-content-secondary mb-1'>
             Birth Chart Not Available
           </h3>
-          <p className='text-sm text-zinc-500'>
+          <p className='text-sm text-content-muted'>
             {friend.name} hasn&apos;t added their birth details yet
           </p>
         </div>
@@ -460,14 +462,14 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
   if (!synastry) {
     return (
       <div
-        className='rounded-xl border-2 border-dashed border-zinc-700 p-8 text-center'
+        className='rounded-xl border-2 border-dashed border-stroke-default p-8 text-center'
         data-testid='synastry-unavailable'
       >
-        <Sparkles className='w-10 h-10 mx-auto text-zinc-600 mb-3' />
-        <h3 className='font-medium text-zinc-300 mb-1'>
+        <Sparkles className='w-10 h-10 mx-auto text-content-muted mb-3' />
+        <h3 className='font-medium text-content-secondary mb-1'>
           Synastry Not Available
         </h3>
-        <p className='text-sm text-zinc-500'>
+        <p className='text-sm text-content-muted'>
           Both you and your friend need birth charts for synastry analysis
         </p>
       </div>
@@ -481,37 +483,37 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
     <div className='space-y-6' data-testid='synastry-tab-content'>
       {/* Score */}
       <div
-        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
         data-testid='synastry-score-section'
       >
         <div className='flex items-center gap-6'>
           <div className='text-center'>
             <div
-              className='text-4xl font-bold text-lunary-accent-200'
+              className='text-4xl font-bold text-content-brand-accent'
               data-testid='synastry-compatibility-score'
             >
               {synastry.compatibilityScore}%
             </div>
-            <div className='text-xs text-zinc-400'>Compatibility</div>
+            <div className='text-xs text-content-muted'>Compatibility</div>
           </div>
           <div className='flex-1'>
-            <div className='h-3 bg-zinc-700 rounded-full overflow-hidden mb-3'>
+            <div className='h-3 bg-surface-overlay rounded-full overflow-hidden mb-3'>
               <div
                 className='h-full bg-gradient-to-r from-lunary-primary to-lunary-highlight'
                 style={{ width: `${synastry.compatibilityScore}%` }}
               />
             </div>
-            <p className='text-sm text-zinc-300'>{synastry.summary}</p>
+            <p className='text-sm text-content-secondary'>{synastry.summary}</p>
           </div>
         </div>
       </div>
 
       {/* Element Balance */}
       <div
-        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
         data-testid='synastry-element-balance'
       >
-        <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
+        <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
           Element Balance
         </h3>
         <div
@@ -529,24 +531,24 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
             return (
               <div
                 key={element}
-                className='rounded-lg bg-zinc-800/50 p-3 text-center'
+                className='rounded-lg bg-surface-card/50 p-3 text-center'
               >
                 <div
                   className={`text-2xl font-bold bg-gradient-to-r ${colors[element]} bg-clip-text text-transparent`}
                 >
                   {data.combined}
                 </div>
-                <div className='text-xs text-zinc-400 capitalize'>
+                <div className='text-xs text-content-muted capitalize'>
                   {element}
                 </div>
-                <div className='text-[10px] text-zinc-500 mt-1'>
+                <div className='text-[10px] text-content-muted mt-1'>
                   You: {data.person1} / Them: {data.person2}
                 </div>
               </div>
             );
           })}
         </div>
-        <p className='text-xs text-zinc-500 mt-3'>
+        <p className='text-xs text-content-muted mt-3'>
           Elements:{' '}
           <span
             className={
@@ -554,7 +556,7 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
                 ? 'text-green-400'
                 : synastry.elementBalance.compatibility === 'challenging'
                   ? 'text-lunary-error-300'
-                  : 'text-zinc-300'
+                  : 'text-content-secondary'
             }
           >
             {synastry.elementBalance.compatibility}
@@ -564,10 +566,10 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
 
       {/* Modality Balance */}
       <div
-        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
         data-testid='synastry-modality-balance'
       >
-        <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
+        <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
           Modality Balance
         </h3>
         <div
@@ -579,15 +581,15 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
             return (
               <div
                 key={modality}
-                className='rounded-lg bg-zinc-800/50 p-3 text-center'
+                className='rounded-lg bg-surface-card/50 p-3 text-center'
               >
-                <div className='text-2xl font-bold text-zinc-200'>
+                <div className='text-2xl font-bold text-content-primary'>
                   {data.combined}
                 </div>
-                <div className='text-xs text-zinc-400 capitalize'>
+                <div className='text-xs text-content-muted capitalize'>
                   {modality}
                 </div>
-                <div className='text-[10px] text-zinc-500 mt-1'>
+                <div className='text-[10px] text-content-muted mt-1'>
                   You: {data.person1} / Them: {data.person2}
                 </div>
               </div>
@@ -598,10 +600,10 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
 
       {/* Aspects */}
       <div
-        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
         data-testid='synastry-aspects-section'
       >
-        <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
+        <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
           Aspects ({synastry.aspects.length})
         </h3>
 
@@ -661,7 +663,7 @@ function AspectRow({ aspect }: { aspect: SynastryAspect }) {
         Your {aspect.person1Planet} {aspect.aspectType} their{' '}
         {aspect.person2Planet}
       </span>
-      <span className='text-zinc-500'>{aspect.orb.toFixed(1)}°</span>
+      <span className='text-content-muted'>{aspect.orb.toFixed(1)}°</span>
     </div>
   );
 }
@@ -677,10 +679,12 @@ function ChartTab({
 
   if (!birthChart || birthChart.length === 0) {
     return (
-      <div className='rounded-xl border-2 border-dashed border-zinc-700 p-8 text-center'>
-        <Sun className='w-10 h-10 mx-auto text-zinc-600 mb-3' />
-        <h3 className='font-medium text-zinc-300 mb-1'>Chart Not Available</h3>
-        <p className='text-sm text-zinc-500'>
+      <div className='rounded-xl border-2 border-dashed border-stroke-default p-8 text-center'>
+        <Sun className='w-10 h-10 mx-auto text-content-muted mb-3' />
+        <h3 className='font-medium text-content-secondary mb-1'>
+          Chart Not Available
+        </h3>
+        <p className='text-sm text-content-muted'>
           {name} hasn&apos;t added their birth details yet
         </p>
       </div>
@@ -711,7 +715,7 @@ function ChartTab({
       {/* View Toggle */}
       <div className='flex justify-center'>
         <div
-          className='flex gap-1 p-1 rounded-lg bg-zinc-800/50 border border-zinc-700/50'
+          className='flex gap-1 p-1 rounded-lg bg-surface-card/50 border border-stroke-default/50'
           data-testid='chart-view-toggle'
         >
           <button
@@ -719,8 +723,8 @@ function ChartTab({
             data-testid='chart-wheel-button'
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               showWheel
-                ? 'bg-lunary-primary-900/50 text-white border border-lunary-primary-700/50'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-layer-base/50 text-white border border-lunary-primary-700/50'
+                : 'text-content-muted hover:text-content-primary'
             }`}
           >
             Chart Wheel
@@ -730,8 +734,8 @@ function ChartTab({
             data-testid='placements-list-button'
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               !showWheel
-                ? 'bg-lunary-primary-900/50 text-white border border-lunary-primary-700/50'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-layer-base/50 text-white border border-lunary-primary-700/50'
+                : 'text-content-muted hover:text-content-primary'
             }`}
           >
             Placements List
@@ -740,7 +744,7 @@ function ChartTab({
       </div>
 
       {showWheel ? (
-        <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-4'>
+        <div className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-4'>
           <BirthChart
             birthChart={birthChart}
             userName={name}
@@ -791,35 +795,35 @@ function PlacementSection({
   placements: BirthChartData[];
 }) {
   return (
-    <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'>
-      <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
+    <div className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'>
+      <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
         {title}
       </h3>
       <div className='space-y-2'>
         {placements.map((placement) => (
           <div
             key={placement.body}
-            className='flex items-center gap-3 py-2 border-b border-zinc-800 last:border-0'
+            className='flex items-center gap-3 py-2 border-b border-stroke-subtle last:border-0'
           >
-            <div className='w-8 text-xl font-astro text-lunary-accent-300 text-center'>
+            <div className='w-8 text-xl font-astro text-content-brand-accent text-center'>
               {getBodySymbol(placement.body)}
             </div>
-            <div className='w-20 text-sm font-medium text-white'>
+            <div className='w-20 text-sm font-medium text-content-primary'>
               {placement.body}
             </div>
-            <div className='text-xl font-astro text-zinc-400'>
+            <div className='text-xl font-astro text-content-muted'>
               {zodiacSymbol[
                 placement.sign.toLowerCase() as keyof typeof zodiacSymbol
               ] || ''}
             </div>
-            <div className='flex-1 text-sm text-zinc-300'>
+            <div className='flex-1 text-sm text-content-secondary'>
               {placement.sign} {placement.degree}°{placement.minute}&apos;
               {placement.retrograde && (
                 <span className='ml-1 text-lunary-error-300'>℞</span>
               )}
             </div>
             {placement.house && (
-              <div className='text-xs text-zinc-500'>
+              <div className='text-xs text-content-muted'>
                 House {placement.house}
               </div>
             )}
@@ -888,19 +892,21 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[200px] gap-4'>
         <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-lunary-primary' />
-        <p className='text-sm text-zinc-400'>Calculating cosmic timing...</p>
+        <p className='text-sm text-content-muted'>
+          Calculating cosmic timing...
+        </p>
       </div>
     );
   }
 
   if (!friend.hasBirthChart) {
     return (
-      <div className='rounded-xl border-2 border-dashed border-zinc-700 p-8 text-center'>
-        <Calendar className='w-10 h-10 mx-auto text-zinc-600 mb-3' />
-        <h3 className='font-medium text-zinc-300 mb-1'>
+      <div className='rounded-xl border-2 border-dashed border-stroke-default p-8 text-center'>
+        <Calendar className='w-10 h-10 mx-auto text-content-muted mb-3' />
+        <h3 className='font-medium text-content-secondary mb-1'>
           Timing Analysis Unavailable
         </h3>
-        <p className='text-sm text-zinc-500'>
+        <p className='text-sm text-content-muted'>
           {friend.name} needs to add their birth details for timing analysis
         </p>
       </div>
@@ -909,10 +915,10 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
 
   if (error) {
     return (
-      <div className='rounded-xl border-2 border-dashed border-zinc-700 p-8 text-center'>
-        <Calendar className='w-10 h-10 mx-auto text-zinc-600 mb-3' />
-        <h3 className='font-medium text-zinc-300 mb-1'>{error}</h3>
-        <p className='text-sm text-zinc-500'>
+      <div className='rounded-xl border-2 border-dashed border-stroke-default p-8 text-center'>
+        <Calendar className='w-10 h-10 mx-auto text-content-muted mb-3' />
+        <h3 className='font-medium text-content-secondary mb-1'>{error}</h3>
+        <p className='text-sm text-content-muted'>
           Both you and {friend.name} need complete birth charts
         </p>
       </div>
@@ -922,13 +928,13 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
   return (
     <div className='space-y-6' data-testid='timing-tab-content'>
       <div
-        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
         data-testid='timing-windows'
       >
-        <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
+        <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
           Best Times to Connect
         </h3>
-        <p className='text-sm text-zinc-400 mb-4'>
+        <p className='text-sm text-content-muted mb-4'>
           Based on both your transits, here are optimal times for connection.
         </p>
 
@@ -939,12 +945,12 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
                 key={i}
                 className={`flex items-center gap-3 p-3 rounded-lg ${
                   timing.quality === 'great'
-                    ? 'bg-lunary-success-900/20 border border-lunary-success-800/30'
+                    ? 'bg-layer-base/20 border border-lunary-success-800/30'
                     : timing.quality === 'challenging'
-                      ? 'bg-lunary-rose-900/20 border border-lunary-rose-800/30'
+                      ? 'bg-layer-base/20 border border-lunary-rose-800/30'
                       : timing.quality === 'good'
-                        ? 'bg-lunary-secondary-900/20 border border-lunary-secondary-800/30'
-                        : 'bg-zinc-800/50'
+                        ? 'bg-layer-base/20 border border-lunary-secondary-800/30'
+                        : 'bg-surface-card/50'
                 }`}
               >
                 {timing.quality === 'great' && (
@@ -957,13 +963,15 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
                   <Clock className='w-5 h-5 text-lunary-rose-400' />
                 )}
                 {timing.quality === 'neutral' && (
-                  <Calendar className='w-5 h-5 text-zinc-400' />
+                  <Calendar className='w-5 h-5 text-content-muted' />
                 )}
                 <div className='flex-1'>
-                  <div className='text-sm font-medium text-white'>
+                  <div className='text-sm font-medium text-content-primary'>
                     {timing.dateFormatted}
                   </div>
-                  <div className='text-xs text-zinc-400'>{timing.reason}</div>
+                  <div className='text-xs text-content-muted'>
+                    {timing.reason}
+                  </div>
                 </div>
                 {timing.quality === 'great' && (
                   <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-success-800/50 text-lunary-success-300'>
@@ -971,7 +979,7 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
                   </span>
                 )}
                 {timing.quality === 'good' && (
-                  <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-secondary-800/50 text-lunary-secondary-300'>
+                  <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-secondary-800/50 text-content-brand-secondary'>
                     Good
                   </span>
                 )}
@@ -984,17 +992,17 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
             ))}
           </div>
         ) : (
-          <p className='text-sm text-zinc-500 text-center py-4'>
+          <p className='text-sm text-content-muted text-center py-4'>
             No optimal timing windows found in the next 30 days
           </p>
         )}
       </div>
 
       <div
-        className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'
+        className='rounded-xl border border-stroke-default/70 bg-surface-base/90 p-5'
         data-testid='shared-cosmic-events'
       >
-        <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
+        <h3 className='text-sm font-semibold uppercase tracking-wide text-content-muted mb-4'>
           Shared Cosmic Events
         </h3>
         {sharedEvents.length > 0 ? (
@@ -1002,28 +1010,30 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
             {sharedEvents.map((event, i) => (
               <div
                 key={i}
-                className='flex items-start gap-3 p-3 rounded-lg bg-lunary-accent-900/20 border border-lunary-accent-800/30'
+                className='flex items-start gap-3 p-3 rounded-lg bg-layer-base/20 border border-lunary-accent-800/30'
               >
                 <Moon className='w-5 h-5 text-lunary-accent-400 mt-0.5' />
                 <div className='flex-1'>
                   <div className='flex items-center justify-between mb-1'>
-                    <div className='text-sm font-medium text-white'>
+                    <div className='text-sm font-medium text-content-primary'>
                       {event.event}
                     </div>
-                    <div className='text-xs text-zinc-500'>
+                    <div className='text-xs text-content-muted'>
                       {event.dateFormatted}
                     </div>
                   </div>
-                  <div className='text-xs text-zinc-400'>{event.impact}</div>
+                  <div className='text-xs text-content-muted'>
+                    {event.impact}
+                  </div>
                 </div>
-                <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-accent-800/50 text-lunary-accent-300'>
+                <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-accent-800/50 text-content-brand-accent'>
                   Shared Event
                 </span>
               </div>
             ))}
           </div>
         ) : (
-          <p className='text-sm text-zinc-500 text-center py-4'>
+          <p className='text-sm text-content-muted text-center py-4'>
             No shared cosmic events in the next 30 days
           </p>
         )}

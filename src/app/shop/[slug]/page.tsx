@@ -148,7 +148,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   ]);
 
   return (
-    <div className='min-h-screen bg-lunary-bg'>
+    <div className='min-h-screen bg-surface-elevated'>
       {renderJsonLd(productSchema)}
       {renderJsonLd(breadcrumbSchema)}
       <ProductDetail product={product} />

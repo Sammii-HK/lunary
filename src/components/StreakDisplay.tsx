@@ -133,8 +133,8 @@ export function StreakDisplay() {
 
   if (isLoading) {
     return (
-      <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-4 md:p-6'>
-        <div className='h-20 bg-zinc-900/50 rounded-lg animate-pulse' />
+      <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-base/60 p-4 md:p-6'>
+        <div className='h-20 bg-surface-elevated/50 rounded-lg animate-pulse' />
       </div>
     );
   }
@@ -142,18 +142,20 @@ export function StreakDisplay() {
   // Always show component, even if streak is 0
   if (!streak) {
     return (
-      <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-4 md:p-6'>
+      <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-base/60 p-4 md:p-6'>
         <div className='flex items-center gap-3 mb-3'>
           <Flame className='w-5 h-5 text-lunary-rose' />
-          <h2 className='text-lg font-semibold text-zinc-100'>Your Streak</h2>
+          <h2 className='text-lg font-semibold text-content-primary'>
+            Your Streak
+          </h2>
         </div>
         <div className='space-y-3'>
           <div className='flex items-center justify-between'>
-            <span className='text-sm text-zinc-400'>Current Streak</span>
+            <span className='text-sm text-content-muted'>Current Streak</span>
             <span className='text-xl font-bold text-lunary-rose'>0 days</span>
           </div>
-          <div className='pt-2 border-t border-zinc-800/60'>
-            <p className='text-xs text-zinc-400'>
+          <div className='pt-2 border-t border-stroke-subtle/60'>
+            <p className='text-xs text-content-muted'>
               Start your streak today! Check in to begin tracking.
             </p>
           </div>
@@ -169,8 +171,8 @@ export function StreakDisplay() {
     <div
       className={`rounded-2xl border p-4 md:p-6 transition-all duration-500 ${
         isCelebrating
-          ? 'border-lunary-accent/50 bg-gradient-to-br from-lunary-primary-950/40 via-zinc-950/60 to-lunary-accent-950/30 shadow-lg shadow-lunary-accent/10'
-          : 'border-zinc-800/60 bg-zinc-950/60'
+          ? 'border-lunary-accent/50 bg-gradient-to-br from-layer-deep/40 via-surface-base/60 to-lunary-accent-950/30 shadow-lg shadow-lunary-accent/10'
+          : 'border-stroke-subtle/60 bg-surface-base/60'
       }`}
     >
       {/* Celebration Header for Milestones */}
@@ -183,7 +185,7 @@ export function StreakDisplay() {
             </span>
             <Sparkles className='w-4 h-4 text-lunary-accent animate-pulse' />
           </div>
-          <p className='text-sm text-lunary-accent-300/80'>
+          <p className='text-sm text-content-brand-accent/80'>
             {milestone.message}
           </p>
         </div>
@@ -193,9 +195,11 @@ export function StreakDisplay() {
         <Flame
           className={`w-5 h-5 ${isCelebrating ? 'text-lunary-accent animate-pulse' : 'text-lunary-rose'}`}
         />
-        <h2 className='text-lg font-semibold text-zinc-100'>Your Streak</h2>
+        <h2 className='text-lg font-semibold text-content-primary'>
+          Your Streak
+        </h2>
         {milestone && !isCelebrating && (
-          <span className='ml-auto text-xs px-2 py-0.5 rounded-full bg-lunary-primary-900/40 text-lunary-primary-300'>
+          <span className='ml-auto text-xs px-2 py-0.5 rounded-full bg-layer-base/40 text-content-brand'>
             {milestone.emoji} {milestone.title.replace('!', '')}
           </span>
         )}
@@ -203,7 +207,7 @@ export function StreakDisplay() {
 
       <div className='space-y-3'>
         <div className='flex items-center justify-between'>
-          <span className='text-sm text-zinc-400'>Current Streak</span>
+          <span className='text-sm text-content-muted'>Current Streak</span>
           <span
             className={`font-bold ${
               isCelebrating
@@ -219,7 +223,7 @@ export function StreakDisplay() {
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
               <Trophy className='w-4 h-4 text-lunary-accent' />
-              <span className='text-sm text-zinc-400'>Longest Streak</span>
+              <span className='text-sm text-content-muted'>Longest Streak</span>
             </div>
             <span className='text-lg font-semibold text-lunary-accent'>
               {streak.longest} {streak.longest === 1 ? 'day' : 'days'}
@@ -232,8 +236,8 @@ export function StreakDisplay() {
           <NextMilestoneProgress current={streak.current} />
         )}
 
-        <div className='pt-2 border-t border-zinc-800/60'>
-          <p className='text-xs text-zinc-400 mb-3'>
+        <div className='pt-2 border-t border-stroke-subtle/60'>
+          <p className='text-xs text-content-muted mb-3'>
             {streak.current === 0
               ? 'Start your streak today! Check in to begin tracking.'
               : isCelebrating
@@ -269,18 +273,18 @@ function NextMilestoneProgress({ current }: { current: number }) {
   return (
     <div className='space-y-1.5'>
       <div className='flex items-center justify-between text-xs'>
-        <span className='text-zinc-500'>Next milestone</span>
-        <span className='text-zinc-400'>
+        <span className='text-content-muted'>Next milestone</span>
+        <span className='text-content-muted'>
           {nextMilestone.emoji} {nextMilestone.days} days
         </span>
       </div>
-      <div className='h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
+      <div className='h-1.5 bg-surface-card rounded-full overflow-hidden'>
         <div
           className='h-full bg-gradient-to-r from-lunary-primary to-lunary-accent transition-all duration-500'
           style={{ width: `${Math.min(progress, 100)}%` }}
         />
       </div>
-      <p className='text-[10px] text-zinc-500'>
+      <p className='text-[10px] text-content-muted'>
         {nextMilestone.days - current} days to go
       </p>
     </div>

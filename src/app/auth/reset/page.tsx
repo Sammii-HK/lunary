@@ -85,12 +85,12 @@ function ResetPasswordContent() {
   };
 
   return (
-    <div className='min-h-screen bg-black text-white flex items-center justify-center p-4'>
-      <div className='w-full max-w-md bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-2xl p-8 shadow-2xl'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex items-center justify-center p-4'>
+      <div className='w-full max-w-md bg-surface-elevated/80 backdrop-blur-sm border border-stroke-subtle rounded-2xl p-8 shadow-2xl'>
         <div className='text-center mb-8'>
           <div className='text-4xl mb-3'>🔐</div>
           <h1 className='text-3xl font-semibold mb-2'>Reset your password</h1>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-sm text-content-muted'>
             Enter a new password below. Make sure it&apos;s at least 8
             characters long.
           </p>
@@ -102,7 +102,7 @@ function ResetPasswordContent() {
             <div>
               <label
                 htmlFor='token'
-                className='block text-sm font-medium text-zinc-300 mb-2'
+                className='block text-sm font-medium text-content-secondary mb-2'
               >
                 Reset token
               </label>
@@ -111,11 +111,11 @@ function ResetPasswordContent() {
                 name='token'
                 value={token}
                 onChange={(event) => setToken(event.target.value)}
-                className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
+                className='w-full bg-surface-card border border-stroke-default text-content-primary rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
                 placeholder='Paste your reset token'
                 required
               />
-              <p className='mt-2 text-xs text-zinc-400'>
+              <p className='mt-2 text-xs text-content-muted'>
                 Paste the token from your password reset email.
               </p>
             </div>
@@ -124,7 +124,7 @@ function ResetPasswordContent() {
           <div>
             <label
               htmlFor='password'
-              className='block text-sm font-medium text-zinc-300 mb-2'
+              className='block text-sm font-medium text-content-secondary mb-2'
             >
               New password
             </label>
@@ -135,7 +135,7 @@ function ResetPasswordContent() {
               minLength={8}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
+              className='w-full bg-surface-card border border-stroke-default text-content-primary rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
               placeholder='Enter a strong password'
               required
             />
@@ -144,7 +144,7 @@ function ResetPasswordContent() {
           <div>
             <label
               htmlFor='confirmPassword'
-              className='block text-sm font-medium text-zinc-300 mb-2'
+              className='block text-sm font-medium text-content-secondary mb-2'
             >
               Confirm password
             </label>
@@ -155,7 +155,7 @@ function ResetPasswordContent() {
               minLength={8}
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}
-              className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
+              className='w-full bg-surface-card border border-stroke-default text-content-primary rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
               placeholder='Re-enter your new password'
               required
             />
@@ -168,13 +168,13 @@ function ResetPasswordContent() {
           )}
 
           {error && (
-            <div className='bg-lunary-error-900/30 border border-lunary-error-700 text-lunary-error-300 px-4 py-3 rounded-lg text-sm'>
+            <div className='bg-layer-base/30 border border-lunary-error-700 text-lunary-error-300 px-4 py-3 rounded-lg text-sm'>
               {error}
             </div>
           )}
 
           {success && (
-            <div className='bg-lunary-success-900/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm'>
+            <div className='bg-layer-base/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm'>
               {success}
             </div>
           )}
@@ -182,7 +182,7 @@ function ResetPasswordContent() {
           <button
             type='submit'
             disabled={!canSubmit}
-            className='w-full bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-lunary-primary-900 disabled:text-lunary-primary-300/60 text-white font-medium rounded-lg py-3 transition-colors flex items-center justify-center gap-2'
+            className='w-full bg-lunary-primary-600 hover:bg-layer-high disabled:bg-layer-base disabled:text-content-brand/60 text-white font-medium rounded-lg py-3 transition-colors flex items-center justify-center gap-2'
           >
             {loading ? (
               <>
@@ -198,7 +198,7 @@ function ResetPasswordContent() {
         <div className='mt-6 text-center'>
           <button
             onClick={() => router.push('/auth')}
-            className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+            className='text-sm text-content-brand hover:text-content-secondary transition-colors'
           >
             Back to sign in
           </button>
@@ -212,8 +212,8 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className='min-h-screen bg-black text-white flex items-center justify-center p-4'>
-          <div className='text-zinc-400'>Loading...</div>
+        <div className='min-h-screen bg-surface-base text-content-primary flex items-center justify-center p-4'>
+          <div className='text-content-muted'>Loading...</div>
         </div>
       }
     >

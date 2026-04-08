@@ -28,10 +28,10 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
 
   return (
     <div className='w-full max-w-3xl mb-8'>
-      <div className='relative flex p-0.5 rounded-xl bg-zinc-800/60 border border-zinc-700/40'>
+      <div className='relative flex p-0.5 rounded-xl bg-surface-card/60 border border-stroke-default/40'>
         {/* Animated background indicator */}
         <div
-          className='absolute top-0.5 bottom-0.5 rounded-[10px] bg-zinc-700/80 transition-all duration-200 ease-out'
+          className='absolute top-0.5 bottom-0.5 rounded-[10px] bg-surface-overlay/80 transition-all duration-200 ease-out'
           style={{
             width: `calc(${100 / tabs.length}% - 2px)`,
             left: `calc(${(tabs.findIndex((t) => t.id === activeTab) * 100) / tabs.length}% + 1px)`,
@@ -44,7 +44,9 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={`relative z-10 flex-1 px-3 py-2 text-sm font-medium rounded-[10px] transition-colors inline-flex items-center justify-center gap-1.5 ${
-                activeTab === tab.id ? 'text-white' : 'text-zinc-500'
+                activeTab === tab.id
+                  ? 'text-content-primary'
+                  : 'text-content-muted'
               }`}
             >
               <Icon className='w-3.5 h-3.5' />

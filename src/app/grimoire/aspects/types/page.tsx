@@ -96,21 +96,21 @@ export default function AspectTypesIndexPage() {
           <div className='flex justify-center mb-4'>
             <Circle className='w-16 h-16 text-lunary-primary-400' />
           </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-4'>
             Astrological Aspects
           </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
+          <p className='text-lg text-content-muted max-w-2xl mx-auto'>
             Aspects describe the angular relationships between planets. They
             reveal how different parts of your chart interact and influence each
             other.
           </p>
         </div>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-10'>
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
             Understanding Aspects
           </h2>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             The five major aspects are based on geometric divisions of the
             circle. Hard aspects (Square, Opposition) create tension and drive
             change. Soft aspects (Trine, Sextile) bring harmony and ease.
@@ -124,53 +124,55 @@ export default function AspectTypesIndexPage() {
               <Link
                 key={aspect.slug}
                 href={`/grimoire/aspects/types/${aspect.slug}`}
-                className='group block rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                className='group block rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
               >
                 <div className='flex items-center gap-4 mb-3'>
                   <span className='text-3xl'>{aspect.symbol}</span>
                   <div>
-                    <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                    <h3 className='text-lg font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                       {aspect.name}
                     </h3>
-                    <div className='flex items-center gap-3 text-sm text-zinc-400'>
+                    <div className='flex items-center gap-3 text-sm text-content-muted'>
                       <span>{aspect.degrees}</span>
                       <span>•</span>
                       <span>{aspect.nature}</span>
                     </div>
                   </div>
                 </div>
-                <p className='text-sm text-zinc-400'>{aspect.description}</p>
+                <p className='text-sm text-content-muted'>
+                  {aspect.description}
+                </p>
               </Link>
             ))}
           </div>
         </section>
 
-        <div className='border-t border-zinc-800 pt-8'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+        <div className='border-t border-stroke-subtle pt-8'>
+          <h3 className='text-lg font-medium text-content-primary mb-4'>
             Related Resources
           </h3>
           <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/aspects'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               All Aspects
             </Link>
             <Link
               href='/grimoire/astronomy/planets'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Planets
             </Link>
             <Link
               href='/grimoire/houses'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Houses
             </Link>
             <Link
               href='/birth-chart'
-              className='px-4 py-2 rounded-lg bg-lunary-primary-900/30 text-lunary-primary-300 hover:bg-lunary-primary-900/50 transition-colors'
+              className='px-4 py-2 rounded-lg bg-layer-base/30 text-content-brand hover:bg-layer-base/50 transition-colors'
             >
               Calculate Your Chart
             </Link>

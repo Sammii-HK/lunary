@@ -48,7 +48,7 @@ const ASPECT_OFFSETS: { name: AspectType; offset: number; label: string }[] = [
 ];
 
 const ASPECT_COLOURS: Record<AspectType, string> = {
-  conjunction: 'text-lunary-accent-300',
+  conjunction: 'text-content-brand-accent',
   trine: 'text-emerald-400',
   sextile: 'text-sky-400',
   square: 'text-amber-400',
@@ -204,7 +204,7 @@ export function SignTransitTeaser({
   const topTransits = transits.slice(0, 3);
 
   return (
-    <div className='my-6 rounded-xl border border-lunary-primary-700/30 bg-lunary-primary-950/40 overflow-hidden'>
+    <div className='my-6 rounded-xl border border-lunary-primary-700/30 bg-layer-deep/40 overflow-hidden'>
       <div className='px-5 py-3 border-b border-lunary-primary-700/20'>
         <p className='text-xs font-medium text-lunary-accent-400 uppercase tracking-wide'>
           Transits affecting {signDisplay} right now
@@ -221,7 +221,7 @@ export function SignTransitTeaser({
               {t.planetSymbol}
             </span>
             <div className='min-w-0'>
-              <p className='text-sm text-zinc-200'>
+              <p className='text-sm text-content-primary'>
                 <span className='font-medium'>
                   <span className='font-astro'>{t.planetSymbol}</span>{' '}
                   {t.planet}
@@ -230,19 +230,19 @@ export function SignTransitTeaser({
                   <span className='text-xs text-amber-400 ml-1'>℞</span>
                 )}
                 {' in '}
-                <span className='text-lunary-primary-300 font-astro'>
+                <span className='text-content-brand font-astro'>
                   {SIGN_GLYPHS[t.transitSign] || ''}
                 </span>{' '}
                 {t.transitSign} {t.degree}{' '}
                 <span className={ASPECT_COLOURS[t.aspect]}>
                   {t.aspectSymbol} {t.aspect}
                 </span>{' '}
-                <span className='text-lunary-primary-300 font-astro'>
+                <span className='text-content-brand font-astro'>
                   {SIGN_GLYPHS[signDisplay] || ''}
                 </span>{' '}
                 {signDisplay}
               </p>
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-content-muted'>
                 {t.meaning} your {t.themes}
               </p>
             </div>
@@ -250,7 +250,7 @@ export function SignTransitTeaser({
         ))}
       </div>
 
-      <div className='px-5 py-4 border-t border-lunary-primary-700/20 bg-lunary-primary-900/20'>
+      <div className='px-5 py-4 border-t border-lunary-primary-700/20 bg-layer-base/20'>
         <TransitBirthdayInput />
       </div>
     </div>

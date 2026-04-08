@@ -229,7 +229,7 @@ export function SaveToCollection({
           }}
           onMouseEnter={fetchDataOnInteraction}
           disabled={isSaving}
-          className='p-1 rounded-md transition-colors text-zinc-500 hover:text-lunary-primary-300 disabled:opacity-40'
+          className='p-1 rounded-md transition-colors text-content-muted hover:text-content-brand disabled:opacity-40'
           aria-label='Save to collection'
         >
           {isSaving ? (
@@ -284,10 +284,10 @@ export function SaveToCollection({
                       setFolderError(null);
                     }}
                     placeholder='Folder name'
-                    className={`w-full rounded-lg border bg-zinc-900 px-3 py-2 text-sm focus:outline-none ${
+                    className={`w-full rounded-lg border bg-surface-elevated px-3 py-2 text-sm focus:outline-none ${
                       folderError
                         ? 'border-lunary-error-500 focus:border-lunary-error-500'
-                        : 'border-zinc-700 focus:border-lunary-primary'
+                        : 'border-stroke-default focus:border-lunary-primary'
                     }`}
                     autoFocus
                     onKeyDown={(e) => {
@@ -338,8 +338,8 @@ export function SaveToCollection({
                       onClick={() => setSelectedFolderId(null)}
                       className={`p-3 rounded-lg border text-left text-sm transition-colors ${
                         selectedFolderId === null
-                          ? 'border-lunary-primary-500 bg-lunary-primary-900/20 text-white'
-                          : 'border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-600'
+                          ? 'border-lunary-primary-500 bg-layer-base/20 text-white'
+                          : 'border-stroke-default bg-surface-elevated text-content-muted hover:border-stroke-strong'
                       }`}
                     >
                       <span className='block font-medium'>Uncategorized</span>
@@ -351,8 +351,8 @@ export function SaveToCollection({
                         onClick={() => setSelectedFolderId(folder.id)}
                         className={`p-3 rounded-lg border text-left text-sm transition-colors ${
                           selectedFolderId === folder.id
-                            ? 'border-lunary-primary-500 bg-lunary-primary-900/20 text-white'
-                            : 'border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-600'
+                            ? 'border-lunary-primary-500 bg-layer-base/20 text-white'
+                            : 'border-stroke-default bg-surface-elevated text-content-muted hover:border-stroke-strong'
                         }`}
                       >
                         <span className='block font-medium'>{folder.name}</span>
@@ -367,8 +367,8 @@ export function SaveToCollection({
                   </div>
 
                   {availableSuggestions.length > 0 && (
-                    <div className='pt-2 border-t border-zinc-800'>
-                      <p className='text-xs text-zinc-400 mb-2'>
+                    <div className='pt-2 border-t border-stroke-subtle'>
+                      <p className='text-xs text-content-muted mb-2'>
                         Quick create:
                       </p>
                       <div className='flex flex-wrap gap-2'>
@@ -383,7 +383,7 @@ export function SaveToCollection({
                               )
                             }
                             disabled={isCreatingFolder}
-                            className='px-3 py-1.5 rounded-full text-xs border border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:border-lunary-primary-600 hover:text-lunary-primary-300 transition-colors disabled:opacity-50'
+                            className='px-3 py-1.5 rounded-full text-xs border border-stroke-default bg-surface-card/50 text-content-secondary hover:border-lunary-primary-600 hover:text-content-brand transition-colors disabled:opacity-50'
                           >
                             {suggestion.name}
                           </button>
@@ -394,7 +394,7 @@ export function SaveToCollection({
 
                   <button
                     onClick={() => setShowNewFolderInput(true)}
-                    className='flex items-center gap-2 text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors pt-1'
+                    className='flex items-center gap-2 text-sm text-lunary-primary-400 hover:text-content-brand transition-colors pt-1'
                   >
                     <FolderPlus className='w-4 h-4' />
                     <span>Create custom folder</span>
@@ -408,7 +408,7 @@ export function SaveToCollection({
               <Button
                 onClick={handleSave}
                 variant='ghost'
-                className='flex-1 bg-lunary-primary-600/20 hover:bg-lunary-primary-600/30 text-lunary-primary-300 hover:text-lunary-primary-200 border border-lunary-primary-600/30'
+                className='flex-1 bg-lunary-primary-600/20 hover:bg-lunary-primary-600/30 text-content-brand hover:text-content-secondary border border-lunary-primary-600/30'
               >
                 <BookmarkCheck className='w-4 h-4 mr-2' />
                 Save to Collection
@@ -416,7 +416,7 @@ export function SaveToCollection({
               <Button
                 onClick={closeDialog}
                 variant='ghost'
-                className='text-zinc-400 hover:text-zinc-300'
+                className='text-content-muted hover:text-content-secondary'
               >
                 Cancel
               </Button>

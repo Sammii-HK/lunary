@@ -202,10 +202,10 @@ Having karmic debt isn't a curse — souls with karmic debt often evolve faster 
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             The Four Karmic Debt Numbers
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Each Karmic Debt Number carries specific lessons from past lives.
             Click on your number to explore its full meaning and how to heal.
           </p>
@@ -227,10 +227,12 @@ Having karmic debt isn't a curse — souls with karmic debt often evolve faster 
                       Karmic Debt
                     </span>
                   </div>
-                  <h3 className='text-xl font-medium text-zinc-100 group-hover:text-violet-300 transition-colors mb-2'>
+                  <h3 className='text-xl font-medium text-content-primary group-hover:text-violet-300 transition-colors mb-2'>
                     {data.meaning}
                   </h3>
-                  <p className='text-sm text-zinc-400 mb-4'>{data.lesson}</p>
+                  <p className='text-sm text-content-muted mb-4'>
+                    {data.lesson}
+                  </p>
                   <div className='flex flex-wrap gap-1'>
                     {data.keywords.map((kw) => (
                       <span
@@ -248,16 +250,16 @@ Having karmic debt isn't a curse — souls with karmic debt often evolve faster 
         </section>
 
         <section className='mb-12 bg-violet-950/20 border border-violet-900/50 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             How to Identify Your Karmic Debt
           </h2>
-          <div className='space-y-4 text-zinc-400'>
+          <div className='space-y-4 text-content-muted'>
             <p>
               To find karmic debt, calculate your core numbers and note if they
               pass through 13, 14, 16, or 19 before reducing:
             </p>
-            <div className='bg-zinc-900/50 p-4 rounded-lg'>
-              <p className='font-medium text-zinc-200 mb-2'>Example:</p>
+            <div className='bg-surface-elevated/50 p-4 rounded-lg'>
+              <p className='font-medium text-content-primary mb-2'>Example:</p>
               <p className='font-mono text-sm'>
                 Birth date: April 13, 1985
                 <br />
@@ -268,8 +270,10 @@ Having karmic debt isn't a curse — souls with karmic debt often evolve faster 
                 </span>
               </p>
             </div>
-            <div className='bg-zinc-900/50 p-4 rounded-lg'>
-              <p className='font-medium text-zinc-200 mb-2'>Another Example:</p>
+            <div className='bg-surface-elevated/50 p-4 rounded-lg'>
+              <p className='font-medium text-content-primary mb-2'>
+                Another Example:
+              </p>
               <p className='font-mono text-sm'>
                 Name calculation: 32 → 5 (no karmic debt)
                 <br />
@@ -280,14 +284,14 @@ Having karmic debt isn't a curse — souls with karmic debt often evolve faster 
           </div>
         </section>
 
-        <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Healing Your Karmic Debt
           </h2>
           <div className='grid md:grid-cols-2 gap-6'>
             <div>
-              <h3 className='font-medium text-zinc-200 mb-3'>Do:</h3>
-              <ul className='space-y-2 text-zinc-400'>
+              <h3 className='font-medium text-content-primary mb-3'>Do:</h3>
+              <ul className='space-y-2 text-content-muted'>
                 <li className='flex gap-2'>
                   <span className='text-green-400'>✓</span>
                   Accept responsibility for your patterns
@@ -307,8 +311,8 @@ Having karmic debt isn't a curse — souls with karmic debt often evolve faster 
               </ul>
             </div>
             <div>
-              <h3 className='font-medium text-zinc-200 mb-3'>Avoid:</h3>
-              <ul className='space-y-2 text-zinc-400'>
+              <h3 className='font-medium text-content-primary mb-3'>Avoid:</h3>
+              <ul className='space-y-2 text-content-muted'>
                 <li className='flex gap-2'>
                   <span className='text-red-400'>✗</span>
                   Blaming past lives for current problems

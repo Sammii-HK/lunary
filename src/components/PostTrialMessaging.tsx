@@ -38,21 +38,21 @@ export function PostTrialMessaging() {
   }
 
   return (
-    <div className='bg-gradient-to-r from-lunary-primary-900/40 to-pink-900/40 rounded-lg p-6 border border-lunary-primary/30 mb-6'>
+    <div className='bg-gradient-to-r from-layer-base/40 to-pink-900/40 rounded-lg p-6 border border-lunary-primary/30 mb-6'>
       <div className='flex items-start gap-4'>
         <div className='flex-shrink-0 w-12 h-12 rounded-full bg-lunary-primary-500/20 flex items-center justify-center'>
-          <Calendar className='w-6 h-6 text-lunary-primary-300' />
+          <Calendar className='w-6 h-6 text-content-brand' />
         </div>
         <div className='flex-1'>
-          <h3 className='text-lg font-semibold text-white mb-2'>
+          <h3 className='text-lg font-semibold text-content-primary mb-2'>
             You&apos;ve missed {missedInsights} day
             {missedInsights !== 1 ? 's' : ''} of personalised guidance
           </h3>
-          <p className='text-zinc-300 text-sm mb-4'>
+          <p className='text-content-secondary text-sm mb-4'>
             Your daily tarot pulls, personalised horoscopes, and transit
             insights have been waiting. Pick up where you left off.
           </p>
-          <p className='text-lunary-primary-300 text-sm font-medium mb-4'>
+          <p className='text-content-brand text-sm font-medium mb-4'>
             Come back with 3 months free — use code COSMICSEASON at checkout
           </p>
           <div className='flex flex-col sm:flex-row gap-3'>

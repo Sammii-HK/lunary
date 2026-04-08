@@ -531,27 +531,27 @@ export function ShareZodiacSeason({
   }
 
   return (
-    <div className='relative flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-lunary-primary-700/50 bg-lunary-primary-900/5'>
+    <div className='relative flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-lunary-primary-700/50 bg-layer-base/5'>
       <button
         onClick={handleDismiss}
-        className='absolute top-2 right-2 p-1 rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 transition-colors'
+        className='absolute top-2 right-2 p-1 rounded-md text-content-muted hover:text-content-secondary hover:bg-surface-card/50 transition-colors'
         aria-label='Dismiss season banner'
       >
         <X className='w-3.5 h-3.5' />
       </button>
 
-      <div className='flex items-center gap-2 text-sm text-lunary-primary-200'>
+      <div className='flex items-center gap-2 text-sm text-content-secondary'>
         <Sparkles className='w-4 h-4' />
         <span>Welcome to {seasonData.sign} Season!</span>
       </div>
 
-      <p className='text-xs text-zinc-400 text-center'>
+      <p className='text-xs text-content-muted text-center'>
         {seasonData.themes.join(' • ')}
       </p>
 
       <button
         onClick={handleOpen}
-        className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 px-4 py-2 text-sm font-medium text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-lunary-primary-900/20 transition-colors mt-2'
+        className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-layer-base/10 px-4 py-2 text-sm font-medium text-content-secondary hover:text-content-secondary hover:bg-layer-base/20 transition-colors mt-2'
       >
         <Share2 className='w-4 h-4' />
         Share {seasonData.sign} Season
@@ -589,7 +589,7 @@ export function ShareZodiacSeason({
               socialUrls={socialUrls}
             />
 
-            <p className='mt-4 text-xs text-zinc-400 text-center'>
+            <p className='mt-4 text-xs text-content-muted text-center'>
               Explore the cosmic weather at lunary.app
             </p>
           </>
@@ -600,7 +600,7 @@ export function ShareZodiacSeason({
             <p className='text-red-400 mb-4'>{error}</p>
             <button
               onClick={generateCard}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors'
             >
               Try Again
             </button>

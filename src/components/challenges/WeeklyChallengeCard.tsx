@@ -73,7 +73,9 @@ export function WeeklyChallengeCard() {
   };
 
   if (isLoading) {
-    return <div className='h-24 bg-zinc-900/50 rounded-xl animate-pulse' />;
+    return (
+      <div className='h-24 bg-surface-elevated/50 rounded-xl animate-pulse' />
+    );
   }
 
   if (!challenge) return null;
@@ -94,20 +96,20 @@ export function WeeklyChallengeCard() {
   monday.setDate(now.getDate() + mondayOffset);
 
   return (
-    <div className='bg-gradient-to-br from-amber-950/20 to-zinc-900/50 border border-amber-900/30 rounded-xl p-4'>
+    <div className='challenge-card-gradient border border-amber-900/30 rounded-xl p-4'>
       <div className='flex items-start gap-3'>
         <div className='w-8 h-8 bg-amber-900/30 rounded-lg flex items-center justify-center shrink-0'>
-          <Flame className='w-4 h-4 text-amber-400' />
+          <Flame className='w-4 h-4 text-amber-400 challenge-icon' />
         </div>
         <div className='flex-1 min-w-0'>
-          <p className='text-[0.65rem] uppercase tracking-widest text-amber-400/70 mb-0.5'>
+          <p className='text-[0.65rem] uppercase tracking-widest text-amber-400/70 challenge-label mb-0.5'>
             Weekly Challenge
           </p>
-          <p className='text-sm font-medium text-white truncate'>
+          <p className='text-sm font-medium text-content-primary truncate'>
             {challenge.title}
           </p>
           {challenge.todayPrompt && (
-            <p className='text-xs text-zinc-400 mt-1 line-clamp-2'>
+            <p className='text-xs text-content-muted mt-1 line-clamp-2'>
               {challenge.todayPrompt}
             </p>
           )}
@@ -126,7 +128,7 @@ export function WeeklyChallengeCard() {
 
           return (
             <div key={i} className='flex flex-col items-center gap-0.5 flex-1'>
-              <span className='text-[0.55rem] text-zinc-500'>{label}</span>
+              <span className='text-[0.55rem] text-content-muted'>{label}</span>
               <div
                 className={cn(
                   'w-5 h-5 rounded-full flex items-center justify-center',
@@ -135,8 +137,8 @@ export function WeeklyChallengeCard() {
                     : isToday
                       ? 'border-2 border-amber-500/50 text-amber-400'
                       : isFuture
-                        ? 'border border-zinc-800 text-zinc-700'
-                        : 'border border-zinc-700 text-zinc-600',
+                        ? 'border border-stroke-subtle text-content-muted'
+                        : 'border border-stroke-default text-content-muted',
                 )}
               >
                 {isCompleted ? (
@@ -152,12 +154,12 @@ export function WeeklyChallengeCard() {
 
       {/* Check-in button */}
       <div className='mt-3 flex items-center justify-between'>
-        <span className='text-[0.6rem] text-zinc-500'>
+        <span className='text-[0.6rem] text-content-muted'>
           {challenge.participantCount} participant
           {challenge.participantCount !== 1 ? 's' : ''}
         </span>
         {completedToday ? (
-          <span className='text-xs text-amber-400 flex items-center gap-1'>
+          <span className='text-xs text-amber-400 challenge-accent flex items-center gap-1'>
             <Check className='w-3 h-3' />
             Done today
           </span>
@@ -166,7 +168,7 @@ export function WeeklyChallengeCard() {
             size='sm'
             onClick={handleCheckIn}
             disabled={isCheckingIn}
-            className='text-xs bg-amber-600/20 text-amber-300 hover:bg-amber-600/30 border border-amber-700/30'
+            className='text-xs bg-amber-600/20 text-amber-300 challenge-accent hover:bg-amber-600/30 border border-amber-700/30'
           >
             {isCheckingIn ? '...' : 'Check In'}
           </Button>

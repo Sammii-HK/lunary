@@ -71,7 +71,7 @@ export default function MirrorHoursIndexPage() {
   const hubChildren = (
     <>
       <section className='mb-12'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-2xl font-light text-content-primary mb-6'>
           All Mirror Hours
         </h2>
         <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3'>
@@ -79,9 +79,9 @@ export default function MirrorHoursIndexPage() {
             <Link
               key={time}
               href={`/grimoire/mirror-hours/${time.replace(':', '-')}`}
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all text-center group'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 hover:bg-surface-elevated transition-all text-center group'
             >
-              <span className='text-xl font-mono text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+              <span className='text-xl font-mono text-content-primary group-hover:text-content-brand transition-colors'>
                 {time}
               </span>
             </Link>
@@ -92,7 +92,7 @@ export default function MirrorHoursIndexPage() {
   );
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       <SEOContentTemplate
         title='Mirror Hours: Meanings of 11:11, 12:21 & More - Lunary'
         h1='Mirror Hours'

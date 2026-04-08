@@ -142,7 +142,7 @@ export default async function DailyHoroscopePage({
             <Calendar className='w-4 h-4' />
             {today}
           </div>
-          <p className='text-zinc-500 text-xs'>{signData.dates}</p>
+          <p className='text-content-muted text-xs'>{signData.dates}</p>
         </div>
       }
       breadcrumbs={[
@@ -162,23 +162,29 @@ export default async function DailyHoroscopePage({
       childrenPosition='after-description'
     >
       <section className='mb-12 grid gap-4 md:grid-cols-3'>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-2'>Love</h2>
-          <p className='text-sm text-zinc-400'>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
+          <h2 className='text-lg font-medium text-content-primary mb-2'>
+            Love
+          </h2>
+          <p className='text-sm text-content-muted'>
             Keep love simple today. {signData.name} benefits from honest signals
             and gentle pacing.
           </p>
         </div>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-2'>Career</h2>
-          <p className='text-sm text-zinc-400'>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
+          <h2 className='text-lg font-medium text-content-primary mb-2'>
+            Career
+          </h2>
+          <p className='text-sm text-content-muted'>
             Focus on one visible task. Small wins build momentum for
             {signData.name}.
           </p>
         </div>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-2'>Year</h2>
-          <p className='text-sm text-zinc-400'>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
+          <h2 className='text-lg font-medium text-content-primary mb-2'>
+            Year
+          </h2>
+          <p className='text-sm text-content-muted'>
             Today&apos;s choices set a tone. Stay aligned with what you want to
             be known for this year.
           </p>
@@ -188,20 +194,20 @@ export default async function DailyHoroscopePage({
       <nav className='flex items-center justify-between mb-12'>
         <Link
           href={`/grimoire/horoscopes/today/${prevSign.name.toLowerCase()}`}
-          className='flex items-center gap-2 text-zinc-400 hover:text-zinc-300 transition-colors'
+          className='flex items-center gap-2 text-content-muted hover:text-content-secondary transition-colors'
         >
           <ArrowLeft className='w-4 h-4' />
           <span>{prevSign.name}</span>
         </Link>
         <Link
           href='/grimoire/horoscopes/today'
-          className='text-zinc-500 hover:text-zinc-400 text-sm'
+          className='text-content-muted hover:text-content-muted text-sm'
         >
           All Signs
         </Link>
         <Link
           href={`/grimoire/horoscopes/today/${nextSign.name.toLowerCase()}`}
-          className='flex items-center gap-2 text-zinc-400 hover:text-zinc-300 transition-colors'
+          className='flex items-center gap-2 text-content-muted hover:text-content-secondary transition-colors'
         >
           <span>{nextSign.name}</span>
           <ArrowRight className='w-4 h-4' />
@@ -211,19 +217,19 @@ export default async function DailyHoroscopePage({
       <section className='grid md:grid-cols-2 gap-4 mb-12'>
         <Link
           href={`/grimoire/horoscopes/weekly/${sign}`}
-          className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+          className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
         >
           <h3 className='font-medium mb-1'>Weekly Forecast</h3>
-          <p className='text-zinc-400 text-sm'>
+          <p className='text-content-muted text-sm'>
             Extended {signData.name} horoscope for this week.
           </p>
         </Link>
         <Link
           href={`/grimoire/horoscopes/${sign}/${currentYear}/${currentMonth}`}
-          className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+          className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
         >
           <h3 className='font-medium mb-1'>Monthly Forecast</h3>
-          <p className='text-zinc-400 text-sm'>
+          <p className='text-content-muted text-sm'>
             Full {signData.name} outlook for {currentMonthName} {currentYear}.
           </p>
         </Link>

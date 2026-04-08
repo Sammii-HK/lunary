@@ -36,10 +36,10 @@ export default function ReportsPage() {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-zinc-950 flex items-center justify-center'>
+      <div className='min-h-screen bg-surface-base flex items-center justify-center'>
         <div className='text-center'>
           <div className='w-8 h-8 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-zinc-400'>Loading your cosmic reports...</p>
+          <p className='text-content-muted'>Loading your cosmic reports...</p>
         </div>
       </div>
     );
@@ -47,7 +47,7 @@ export default function ReportsPage() {
 
   if (error) {
     return (
-      <div className='min-h-screen bg-zinc-950 flex items-center justify-center p-4'>
+      <div className='min-h-screen bg-surface-base flex items-center justify-center p-4'>
         <div className='text-center'>
           <p className='text-red-400 mb-4'>Error: {error}</p>
           <button
@@ -62,23 +62,23 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className='min-h-screen bg-zinc-950 flex flex-col'>
+    <div className='min-h-screen bg-surface-base flex flex-col'>
       <div className='flex-1'>
         <div className='max-w-4xl mx-auto px-4 py-4 md:py-8'>
-          <h1 className='text-xl md:text-3xl font-bold text-white mb-1.5'>
+          <h1 className='text-xl md:text-3xl font-bold text-content-primary mb-1.5'>
             Weekly Cosmic Reports
           </h1>
-          <p className='text-zinc-400 mb-4'>
+          <p className='text-content-muted mb-4'>
             Your personalized weekly cosmic insights and patterns
           </p>
 
           {reports.length === 0 ? (
-            <div className='bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center'>
-              <p className='text-zinc-300 mb-4'>
+            <div className='bg-surface-elevated border border-stroke-subtle rounded-lg p-4 text-center'>
+              <p className='text-content-secondary mb-4'>
                 No reports available yet. Reports are generated weekly and sent
                 to your email.
               </p>
-              <p className='text-sm text-zinc-500'>
+              <p className='text-sm text-content-muted'>
                 Check back after Sunday to see your first report!
               </p>
             </div>
@@ -108,10 +108,10 @@ function WeeklyReportCard({ report }: { report: WeeklyReport }) {
   });
 
   return (
-    <div className='bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden'>
+    <div className='bg-surface-elevated border border-stroke-subtle rounded-lg overflow-hidden'>
       {/* Header */}
-      <div className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-secondary-900/30 border-b border-zinc-800 px-6 py-4'>
-        <h2 className='text-xl font-semibold text-white'>
+      <div className='bg-gradient-to-r from-layer-base/30 to-lunary-secondary-900/30 border-b border-stroke-subtle px-6 py-4'>
+        <h2 className='text-xl font-semibold text-content-primary'>
           {weekStartStr} - {weekEndStr}
         </h2>
       </div>
@@ -123,7 +123,9 @@ function WeeklyReportCard({ report }: { report: WeeklyReport }) {
             <h3 className='text-sm font-medium text-lunary-accent uppercase tracking-wider mb-3'>
               Weekly Summary
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>{report.summary}</p>
+            <p className='text-content-secondary leading-relaxed'>
+              {report.summary}
+            </p>
           </div>
         )}
 
@@ -137,14 +139,14 @@ function WeeklyReportCard({ report }: { report: WeeklyReport }) {
               {report.moonPhases.map((moon, i) => (
                 <div
                   key={i}
-                  className='flex items-center gap-3 bg-zinc-800/50 rounded-lg p-3'
+                  className='flex items-center gap-3 bg-surface-card/50 rounded-lg p-3'
                 >
                   <span className='text-2xl'>{moon.emoji}</span>
                   <div>
-                    <div className='text-sm font-medium text-white'>
+                    <div className='text-sm font-medium text-content-primary'>
                       {moon.phase}
                     </div>
-                    <div className='text-xs text-zinc-400'>
+                    <div className='text-xs text-content-muted'>
                       {new Date(moon.date).toLocaleDateString('en-US', {
                         weekday: 'short',
                         month: 'short',
@@ -168,18 +170,18 @@ function WeeklyReportCard({ report }: { report: WeeklyReport }) {
               {report.keyTransits.map((transit, i) => (
                 <div
                   key={i}
-                  className='bg-zinc-800/50 rounded-lg p-3 border-l-2 border-lunary-primary'
+                  className='bg-surface-card/50 rounded-lg p-3 border-l-2 border-lunary-primary'
                 >
                   <div className='flex justify-between items-start gap-4'>
                     <div>
-                      <div className='text-sm font-medium text-white mb-1'>
+                      <div className='text-sm font-medium text-content-primary mb-1'>
                         {transit.transit}
                       </div>
-                      <div className='text-sm text-zinc-400'>
+                      <div className='text-sm text-content-muted'>
                         {transit.description}
                       </div>
                     </div>
-                    <div className='text-xs text-zinc-500 whitespace-nowrap'>
+                    <div className='text-xs text-content-muted whitespace-nowrap'>
                       {new Date(transit.date).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -202,14 +204,14 @@ function WeeklyReportCard({ report }: { report: WeeklyReport }) {
               {report.tarotPatterns.dominantThemes &&
                 report.tarotPatterns.dominantThemes.length > 0 && (
                   <div>
-                    <div className='text-xs text-zinc-500 uppercase tracking-wider mb-2'>
+                    <div className='text-xs text-content-muted uppercase tracking-wider mb-2'>
                       Dominant Themes
                     </div>
                     <div className='flex flex-wrap gap-2'>
                       {report.tarotPatterns.dominantThemes.map((theme, i) => (
                         <span
                           key={i}
-                          className='px-3 py-1 bg-lunary-primary-900/30 text-lunary-primary text-sm rounded-full border border-lunary-primary-800'
+                          className='px-3 py-1 bg-layer-base/30 text-lunary-primary text-sm rounded-full border border-lunary-primary-800'
                         >
                           {theme}
                         </span>
@@ -221,19 +223,19 @@ function WeeklyReportCard({ report }: { report: WeeklyReport }) {
               {report.tarotPatterns.frequentCards &&
                 report.tarotPatterns.frequentCards.length > 0 && (
                   <div>
-                    <div className='text-xs text-zinc-500 uppercase tracking-wider mb-2'>
+                    <div className='text-xs text-content-muted uppercase tracking-wider mb-2'>
                       Frequent Cards
                     </div>
                     <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
                       {report.tarotPatterns.frequentCards.map((card, i) => (
                         <div
                           key={i}
-                          className='bg-zinc-800/50 rounded p-2 text-center'
+                          className='bg-surface-card/50 rounded p-2 text-center'
                         >
-                          <div className='text-sm text-white font-medium'>
+                          <div className='text-sm text-content-primary font-medium'>
                             {card.name}
                           </div>
-                          <div className='text-xs text-zinc-400'>
+                          <div className='text-xs text-content-muted'>
                             {card.count}x
                           </div>
                         </div>

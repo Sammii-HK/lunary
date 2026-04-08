@@ -359,7 +359,7 @@ export function ShareDailyInsight() {
     <>
       <button
         onClick={handleOpen}
-        className='flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-400 hover:text-lunary-primary-400 transition-colors rounded-md hover:bg-zinc-800/50'
+        className='flex items-center gap-2 px-3 py-1.5 text-sm text-content-muted hover:text-lunary-primary-400 transition-colors rounded-md hover:bg-surface-card/50'
         aria-label='Share your daily cosmic insight'
       >
         <Share2 className='w-4 h-4' />
@@ -407,7 +407,7 @@ export function ShareDailyInsight() {
             <p className='text-red-400 mb-4'>{error}</p>
             <button
               onClick={generateCard}
-              className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors'
+              className='px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors'
             >
               Try Again
             </button>

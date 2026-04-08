@@ -64,8 +64,11 @@ export const Navbar = () => {
   }
 
   return (
-    <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
-      <div className='flex w-full h-10 items-center justify-around px-2 text-white max-w-lg'>
+    <nav
+      className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stroke-subtle bg-surface-base/95 backdrop-blur'
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      <div className='flex w-full items-center justify-around px-2 py-1 text-content-primary max-w-lg'>
         <NavLink
           href='/app'
           icon={Home}
@@ -164,15 +167,14 @@ const NavLink = ({
       href={href}
       data-nav={dataNav}
       onClick={handleClick}
-      className={`relative flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition ${
-        active ? 'text-lunary-secondary' : 'text-zinc-400 hover:text-zinc-300'
+      className={`relative flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs transition ${
+        active
+          ? 'text-lunary-secondary'
+          : 'text-content-brand hover:text-content-secondary'
       }`}
     >
       <div className='relative'>
-        <Icon
-          className='h-[22px] w-[22px] md:h-6 md:w-6'
-          strokeWidth={active ? 2 : 1.5}
-        />
+        <Icon className='h-6 w-6' strokeWidth={active ? 2 : 1.5} />
         {showBadge && (
           <span className='absolute -top-1 -right-1 h-2 w-2 rounded-full bg-lunary-primary' />
         )}

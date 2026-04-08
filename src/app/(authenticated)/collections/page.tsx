@@ -151,34 +151,31 @@ function CollectionsPageContent() {
   });
 
   const categoryColors: Record<string, string> = {
-    chat: 'bg-lunary-primary-900/20 text-lunary-primary-300 border-lunary-primary-700',
-    ritual: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
+    chat: 'bg-layer-base/20 text-content-brand border-lunary-primary-700',
+    ritual: 'bg-layer-base text-lunary-rose-300 border-lunary-rose-700',
     insight:
-      'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
-    moon_circle:
-      'bg-lunary-primary-900 text-lunary-primary-300 border-lunary-primary-700',
-    tarot:
-      'bg-lunary-accent-900 text-lunary-accent-300 border-lunary-accent-700',
-    journal:
-      'bg-lunary-success-900 text-lunary-success-300 border-lunary-success-700',
+      'bg-layer-base text-content-brand-secondary border-lunary-secondary-700',
+    moon_circle: 'bg-layer-base text-content-brand border-lunary-primary-700',
+    tarot: 'bg-layer-base text-content-brand-accent border-lunary-accent-700',
+    journal: 'bg-layer-base text-lunary-success-300 border-lunary-success-700',
   };
 
   if (authState.loading) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-zinc-400'>Loading...</div>
+        <div className='text-content-muted'>Loading...</div>
       </div>
     );
   }
 
   if (!authState.isAuthenticated) {
     return (
-      <div className='min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
+      <div className='min-h-screen bg-gradient-to-b from-surface-base via-surface-elevated to-surface-base text-content-primary'>
         <div className='max-w-4xl mx-auto p-4'>
           <div className='text-center py-8'>
             <BookOpen className='w-12 h-12 mx-auto mb-3 text-lunary-primary-400' />
             <h1 className='text-xl font-bold mb-3'>Your Lunary Journal</h1>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               Save your favorite insights, rituals, and cosmic guidance in one
               place.
             </p>
@@ -203,11 +200,11 @@ function CollectionsPageContent() {
             </div>
           </div>
           {showAuthModal && (
-            <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
-              <div className='relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-xl'>
+            <div className='fixed inset-0 z-50 flex items-center justify-center bg-surface-base/60 backdrop-blur-sm p-4'>
+              <div className='relative w-full max-w-md rounded-2xl border border-stroke-subtle bg-surface-base p-6 shadow-xl'>
                 <button
                   onClick={() => setShowAuthModal(false)}
-                  className='absolute right-4 top-4 text-zinc-400 hover:text-zinc-200'
+                  className='absolute right-4 top-4 text-content-muted hover:text-content-primary'
                 >
                   ×
                 </button>
@@ -226,14 +223,14 @@ function CollectionsPageContent() {
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-gradient-to-b from-surface-base via-surface-elevated to-surface-base text-content-primary'>
       <div className='max-w-6xl mx-auto p-4'>
         <header className='mb-4'>
           <h1 className='text-xl font-bold mb-1.5 flex items-center gap-2'>
             <BookOpen className='w-5 h-5 text-lunary-primary-400' />
             Your Lunary Journal
           </h1>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Your saved insights, rituals, and cosmic guidance
           </p>
         </header>
@@ -246,7 +243,7 @@ function CollectionsPageContent() {
               className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
                 selectedCategory === null
                   ? 'bg-lunary-primary-600 text-white border-lunary-primary'
-                  : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
+                  : 'bg-surface-card text-content-secondary border-stroke-default hover:bg-surface-overlay'
               }`}
             >
               All
@@ -265,7 +262,7 @@ function CollectionsPageContent() {
                 className={`px-3 py-1.5 rounded-lg text-sm border transition-colors capitalize ${
                   selectedCategory === cat
                     ? 'bg-lunary-primary-600 text-white border-lunary-primary'
-                    : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
+                    : 'bg-surface-card text-content-secondary border-stroke-default hover:bg-surface-overlay'
                 }`}
               >
                 {cat.replace('_', ' ')}
@@ -282,7 +279,7 @@ function CollectionsPageContent() {
                     className={`px-3 py-1.5 rounded-lg text-sm border transition-colors flex items-center gap-2 ${
                       selectedFolder === null
                         ? 'bg-lunary-primary-600 text-white border-lunary-primary'
-                        : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
+                        : 'bg-surface-card text-content-secondary border-stroke-default hover:bg-surface-overlay'
                     }`}
                   >
                     <Folder className='w-4 h-4' />
@@ -295,7 +292,7 @@ function CollectionsPageContent() {
                       className={`px-3 py-1.5 rounded-lg text-sm border transition-colors flex items-center gap-2 ${
                         selectedFolder === folder.id
                           ? 'bg-lunary-primary-600 text-white border-lunary-primary'
-                          : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
+                          : 'bg-surface-card text-content-secondary border-stroke-default hover:bg-surface-overlay'
                       }`}
                       style={{
                         borderColor:
@@ -313,8 +310,8 @@ function CollectionsPageContent() {
                   onClick={() => setShowFolderManagement(!showFolderManagement)}
                   className={`ml-2 p-2 rounded-lg text-sm border transition-colors ${
                     showFolderManagement
-                      ? 'bg-lunary-primary-600/20 text-lunary-primary-300 border-lunary-primary-600'
-                      : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700 hover:text-zinc-300'
+                      ? 'bg-lunary-primary-600/20 text-content-brand border-lunary-primary-600'
+                      : 'bg-surface-card text-content-muted border-stroke-default hover:bg-surface-overlay hover:text-content-secondary'
                   }`}
                   title='Manage folders'
                 >
@@ -323,25 +320,25 @@ function CollectionsPageContent() {
               </div>
 
               {showFolderManagement && (
-                <div className='p-4 rounded-lg border border-zinc-700 bg-zinc-900/50'>
-                  <h3 className='text-sm font-medium text-zinc-300 mb-3'>
+                <div className='p-4 rounded-lg border border-stroke-default bg-surface-elevated/50'>
+                  <h3 className='text-sm font-medium text-content-secondary mb-3'>
                     Manage Folders
                   </h3>
                   <div className='space-y-2'>
                     {folders.map((folder) => (
                       <div
                         key={folder.id}
-                        className='flex items-center justify-between p-2 rounded-lg bg-zinc-800/50 border border-zinc-700'
+                        className='flex items-center justify-between p-2 rounded-lg bg-surface-card/50 border border-stroke-default'
                       >
                         <div className='flex items-center gap-3'>
                           <div
                             className='w-3 h-3 rounded-full'
                             style={{ backgroundColor: folder.color }}
                           />
-                          <span className='text-sm text-zinc-200'>
+                          <span className='text-sm text-content-primary'>
                             {folder.name}
                           </span>
-                          <span className='text-xs text-zinc-400'>
+                          <span className='text-xs text-content-muted'>
                             {folder.itemCount} item
                             {folder.itemCount !== 1 ? 's' : ''}
                           </span>
@@ -349,7 +346,7 @@ function CollectionsPageContent() {
                         <button
                           onClick={() => handleDeleteFolder(folder.id)}
                           disabled={deletingFolderId === folder.id}
-                          className='p-1.5 rounded text-zinc-400 hover:text-lunary-error-400 hover:bg-zinc-700 transition-colors disabled:opacity-50'
+                          className='p-1.5 rounded text-content-muted hover:text-lunary-error-400 hover:bg-surface-overlay transition-colors disabled:opacity-50'
                           title='Delete folder'
                         >
                           {deletingFolderId === folder.id ? (
@@ -361,7 +358,7 @@ function CollectionsPageContent() {
                       </div>
                     ))}
                   </div>
-                  <p className='text-xs text-zinc-400 mt-3'>
+                  <p className='text-xs text-content-muted mt-3'>
                     Deleting a folder will move its items to Uncategorized.
                   </p>
                 </div>
@@ -370,13 +367,13 @@ function CollectionsPageContent() {
           )}
 
           <div className='relative'>
-            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400' />
+            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-content-muted' />
             <input
               type='text'
               placeholder='Search collections...'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className='w-full pl-10 pr-4 py-2 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary'
+              className='w-full pl-10 pr-4 py-2 rounded-lg border border-stroke-default bg-surface-elevated text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary'
             />
           </div>
         </div>
@@ -387,17 +384,17 @@ function CollectionsPageContent() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className='rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 animate-pulse'
+                className='rounded-lg border border-stroke-subtle bg-surface-elevated/30 p-4 animate-pulse'
               >
-                <div className='h-4 bg-zinc-800 rounded w-3/4 mb-2'></div>
-                <div className='h-3 bg-zinc-800 rounded w-1/2'></div>
+                <div className='h-4 bg-surface-card rounded w-3/4 mb-2'></div>
+                <div className='h-3 bg-surface-card rounded w-1/2'></div>
               </div>
             ))}
           </div>
         ) : filteredCollections.length === 0 ? (
-          <div className='text-center py-8 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <BookOpen className='w-10 h-10 mx-auto mb-3 text-zinc-600' />
-            <p className='text-zinc-400 mb-4'>
+          <div className='text-center py-8 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+            <BookOpen className='w-10 h-10 mx-auto mb-3 text-content-muted' />
+            <p className='text-content-muted mb-4'>
               {searchQuery
                 ? 'No collections match your search'
                 : 'No collections yet. Start saving your favorite insights!'}
@@ -405,7 +402,7 @@ function CollectionsPageContent() {
             {!searchQuery && (
               <Link
                 href='/book-of-shadows'
-                className='inline-flex items-center gap-2 px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors'
+                className='inline-flex items-center gap-2 px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors'
               >
                 <Plus className='w-4 h-4' />
                 Start Chatting with Lunary
@@ -418,29 +415,29 @@ function CollectionsPageContent() {
               <button
                 key={collection.id}
                 onClick={() => setSelectedCollection(collection)}
-                className='block rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all group text-left'
+                className='block rounded-lg border border-stroke-subtle bg-surface-elevated/30 p-4 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all group text-left'
               >
                 <div className='flex items-start justify-between mb-3'>
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium border capitalize ${
                       categoryColors[collection.category] ||
-                      'bg-zinc-800 text-zinc-300 border-zinc-700'
+                      'bg-surface-card text-content-secondary border-stroke-default'
                     }`}
                   >
                     {collection.category.replace('_', ' ')}
                   </span>
                   {collection.folderName && (
-                    <span className='text-xs text-zinc-400 flex items-center gap-1'>
+                    <span className='text-xs text-content-muted flex items-center gap-1'>
                       <Folder className='w-3 h-3' />
                       {collection.folderName}
                     </span>
                   )}
                 </div>
-                <h3 className='text-lg font-semibold mb-2 group-hover:text-lunary-primary-300 transition-colors'>
+                <h3 className='text-lg font-semibold mb-2 group-hover:text-content-brand transition-colors'>
                   {collection.title}
                 </h3>
                 {collection.description && (
-                  <p className='text-sm text-zinc-400 mb-3 line-clamp-2'>
+                  <p className='text-sm text-content-muted mb-3 line-clamp-2'>
                     {collection.description}
                   </p>
                 )}
@@ -449,14 +446,14 @@ function CollectionsPageContent() {
                     {collection.tags.slice(0, 3).map((tag, idx) => (
                       <span
                         key={idx}
-                        className='text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400'
+                        className='text-xs px-2 py-0.5 rounded bg-surface-card text-content-muted'
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
                 )}
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   {new Date(collection.createdAt).toLocaleDateString()}
                 </p>
               </button>
@@ -478,12 +475,12 @@ function CollectionsPageContent() {
                     <span
                       className={`inline-block px-2 py-1 rounded text-xs font-medium border capitalize mb-2 ${
                         categoryColors[selectedCollection.category] ||
-                        'bg-zinc-800 text-zinc-300 border-zinc-700'
+                        'bg-surface-card text-content-secondary border-stroke-default'
                       }`}
                     >
                       {selectedCollection.category.replace('_', ' ')}
                     </span>
-                    <h2 className='text-xl font-semibold text-white'>
+                    <h2 className='text-xl font-semibold text-content-primary'>
                       {selectedCollection.title}
                     </h2>
                   </div>
@@ -492,7 +489,7 @@ function CollectionsPageContent() {
               <ModalBody>
                 <div className='space-y-4'>
                   {selectedCollection.folderName && (
-                    <div className='flex items-center gap-2 text-sm text-zinc-400'>
+                    <div className='flex items-center gap-2 text-sm text-content-muted'>
                       <Folder className='w-4 h-4' />
                       {selectedCollection.folderName}
                     </div>
@@ -508,7 +505,7 @@ function CollectionsPageContent() {
                             content?.content ||
                             JSON.stringify(content, null, 2);
                       return (
-                        <p className='text-zinc-300 whitespace-pre-wrap leading-relaxed'>
+                        <p className='text-content-secondary whitespace-pre-wrap leading-relaxed'>
                           {text}
                         </p>
                       );
@@ -520,7 +517,7 @@ function CollectionsPageContent() {
                       {selectedCollection.tags.map((tag, idx) => (
                         <span
                           key={idx}
-                          className='text-xs px-2 py-1 rounded bg-zinc-800 text-zinc-400'
+                          className='text-xs px-2 py-1 rounded bg-surface-card text-content-muted'
                         >
                           {tag}
                         </span>
@@ -528,8 +525,8 @@ function CollectionsPageContent() {
                     </div>
                   )}
 
-                  <div className='flex items-center justify-between pt-4 border-t border-zinc-800'>
-                    <p className='text-xs text-zinc-400'>
+                  <div className='flex items-center justify-between pt-4 border-t border-stroke-subtle'>
+                    <p className='text-xs text-content-muted'>
                       Saved{' '}
                       {new Date(
                         selectedCollection.createdAt,
@@ -545,7 +542,7 @@ function CollectionsPageContent() {
                         handleDeleteCollection(selectedCollection.id)
                       }
                       disabled={deletingCollectionId === selectedCollection.id}
-                      className='text-zinc-400 hover:text-lunary-error-400 hover:bg-lunary-error-900/20'
+                      className='text-content-muted hover:text-lunary-error-400 hover:bg-layer-base/20'
                     >
                       {deletingCollectionId === selectedCollection.id ? (
                         <Loader2 className='w-4 h-4 animate-spin mr-2' />
@@ -570,7 +567,7 @@ export default function CollectionsPage() {
     <Suspense
       fallback={
         <div className='min-h-screen flex items-center justify-center'>
-          <div className='text-zinc-400'>Loading...</div>
+          <div className='text-content-muted'>Loading...</div>
         </div>
       }
     >

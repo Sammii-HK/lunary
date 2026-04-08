@@ -14,26 +14,30 @@ export function AuthorBox({
   lastUpdated,
 }: AuthorBoxProps) {
   return (
-    <aside className='mt-12 pt-8 border-t border-zinc-800'>
+    <aside className='mt-12 pt-8 border-t border-stroke-subtle'>
       <div className='flex flex-col sm:flex-row gap-4 items-start'>
-        <div className='flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-lunary-primary-600 to-lunary-secondary-600 flex items-center justify-center text-white text-2xl font-medium'>
+        <div className='flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-lunary-primary-600 to-lunary-secondary-600 flex items-center justify-center text-content-primary text-2xl font-medium'>
           {name.charAt(0)}
         </div>
         <div className='flex-1'>
-          <p className='text-sm text-zinc-400 mb-1'>Written by</p>
-          <h3 className='text-lg font-medium text-zinc-100 mb-2'>{name}</h3>
-          <p className='text-sm text-zinc-400 leading-relaxed mb-3'>{bio}</p>
-          <div className='flex flex-wrap gap-3 text-xs text-zinc-500'>
+          <p className='text-sm text-content-muted mb-1'>Written by</p>
+          <h3 className='text-lg font-medium text-content-primary mb-2'>
+            {name}
+          </h3>
+          <p className='text-sm text-content-muted leading-relaxed mb-3'>
+            {bio}
+          </p>
+          <div className='flex flex-wrap gap-3 text-xs text-content-muted'>
             <Link
               href='/about'
-              className='hover:text-lunary-primary-300 transition-colors'
+              className='hover:text-content-brand transition-colors'
             >
               About Lunary
             </Link>
             <span>·</span>
             <Link
               href='/grimoire'
-              className='hover:text-lunary-primary-300 transition-colors'
+              className='hover:text-content-brand transition-colors'
             >
               Explore the Grimoire
             </Link>

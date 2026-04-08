@@ -63,7 +63,7 @@ export function SpaceHeader({
   return (
     <div className={cn('space-y-3', className)}>
       <div>
-        <h1 className='text-xl font-semibold text-zinc-100'>
+        <h1 className='text-xl font-semibold text-content-primary'>
           {symbols.length > 0 && (
             <span className='font-astro mr-2 text-lunary-primary-400'>
               {symbols.join('')}
@@ -72,11 +72,11 @@ export function SpaceHeader({
           {title}
         </h1>
         {description && (
-          <p className='text-sm text-zinc-400 mt-1'>{description}</p>
+          <p className='text-sm text-content-muted mt-1'>{description}</p>
         )}
       </div>
 
-      <div className='flex items-center gap-4 text-xs text-zinc-500'>
+      <div className='flex items-center gap-4 text-xs text-content-muted'>
         <div className='flex items-center gap-1'>
           <Users className='w-3.5 h-3.5' />
           <span>

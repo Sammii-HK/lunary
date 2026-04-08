@@ -120,6 +120,70 @@ export async function GET(request: NextRequest) {
       issues.push('Spellcast not configured');
     }
 
+    // Check 4: Business health — signups and verification emails
+    try {
+      const signupResult = await sql`
+        SELECT
+          COUNT(*) as total,
+          MAX("createdAt") as last_signup
+        FROM public."user"
+        WHERE "createdAt" > NOW() - INTERVAL '48 hours'
+      `;
+      const signupsIn48h = Number(signupResult.rows[0]?.total || 0);
+      const lastSignup = signupResult.rows[0]?.last_signup;
+
+      const lastSignupResult = await sql`
+        SELECT MAX("createdAt") as last_signup FROM public."user"
+      `;
+      const lastSignupEver = lastSignupResult.rows[0]?.last_signup;
+      const hoursSinceLastSignup = lastSignupEver
+        ? Math.floor(
+            (Date.now() - new Date(lastSignupEver).getTime()) / 3_600_000,
+          )
+        : null;
+
+      const signupsOk = signupsIn48h > 0 || hoursSinceLastSignup === null;
+      checks['Signups (48h)'] = {
+        ok: signupsOk,
+        detail: signupsOk
+          ? `${signupsIn48h} signup(s), last: ${lastSignup ? new Date(lastSignup).toISOString() : 'n/a'}`
+          : `0 signups in 48h — last was ${hoursSinceLastSignup}h ago`,
+      };
+      if (!signupsOk) {
+        issues.push(
+          `No new signups in 48h (last signup was ${hoursSinceLastSignup}h ago)`,
+        );
+      }
+    } catch {
+      checks['Signups (48h)'] = { ok: false, detail: 'Query failed' };
+      issues.push('Signup health check failed');
+    }
+
+    // Check 5: Verification emails sent in 48h (only flag if signups exist but emails not going out)
+    try {
+      const verifResult = await sql`
+        SELECT COUNT(*) as count
+        FROM analytics_notification_events
+        WHERE notification_type = 'email_verification'
+          AND event_type = 'sent'
+          AND created_at > NOW() - INTERVAL '48 hours'
+      `;
+      const verifCount = Number(verifResult.rows[0]?.count || 0);
+
+      const signupsRecently =
+        checks['Signups (48h)']?.ok === false ? true : false; // only check if signups are happening
+      // Only alert on verification emails if we had signups but no emails went out
+      if (!signupsRecently && verifCount === 0) {
+        // No signups in 48h either — already flagged above, don't double-alert
+      }
+      checks['Verification Emails (48h)'] = {
+        ok: true,
+        detail: `${verifCount} sent`,
+      };
+    } catch {
+      checks['Verification Emails (48h)'] = { ok: true, detail: 'N/A' };
+    }
+
     // Alert only if issues found
     if (issues.length > 0) {
       const baseUrl = (

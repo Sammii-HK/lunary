@@ -137,8 +137,8 @@ export function SmartTrialButton({
             {config.text}
           </Button>
           {showIOSPaywall && (
-            <div className='fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50 p-4'>
-              <div className='bg-zinc-900 rounded-2xl p-6 w-full max-w-md'>
+            <div className='fixed inset-0 bg-surface-base/60 backdrop-blur-sm flex items-end justify-center z-50 p-4'>
+              <div className='bg-surface-elevated rounded-2xl p-6 w-full max-w-md'>
                 <IOSPaywall
                   onSuccess={() => setShowIOSPaywall(false)}
                   onDismiss={() => setShowIOSPaywall(false)}
@@ -186,22 +186,22 @@ export function SmartTrialButton({
       </Button>
 
       {showAuthModal && (
-        <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
-          <div className='bg-zinc-900 rounded-lg p-4 sm:p-6 w-full max-w-md relative mx-4 sm:mx-0'>
+        <div className='fixed inset-0 bg-surface-base/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
+          <div className='bg-surface-elevated rounded-lg p-4 sm:p-6 w-full max-w-md relative mx-4 sm:mx-0'>
             <button
               onClick={() => setShowAuthModal(false)}
-              className='absolute top-2 right-2 sm:top-4 sm:right-4 text-zinc-400 hover:text-white text-xl'
+              className='absolute top-2 right-2 sm:top-4 sm:right-4 text-content-muted hover:text-content-primary text-xl'
             >
               ×
             </button>
 
             <div className='text-center mb-4 sm:mb-6'>
-              <h3 className='text-lg sm:text-xl font-bold text-white mb-2'>
+              <h3 className='text-lg sm:text-xl font-bold text-content-primary mb-2'>
                 {feature && isFreeFeature(feature)
                   ? 'Create your birth chart'
                   : 'See what Lunary+ unlocks'}
               </h3>
-              <p className='text-zinc-300 text-xs sm:text-sm'>
+              <p className='text-content-secondary text-xs sm:text-sm'>
                 {feature && isFreeFeature(feature)
                   ? 'Create an account to access this free feature.'
                   : 'Create an account to begin your cosmic journey with a free trial.'}

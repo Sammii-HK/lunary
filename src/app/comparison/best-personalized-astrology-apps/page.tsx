@@ -64,7 +64,7 @@ export const metadata: Metadata = {
 
 export default function BestPersonalizedAstrologyAppsPage() {
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       <ComparisonPageStructuredData
         competitorName='Co-Star and CHANI'
         featuresCompared={[
@@ -78,17 +78,17 @@ export default function BestPersonalizedAstrologyAppsPage() {
       />
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <div className='mb-8'>
-          <h1 className='text-4xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-4xl font-light text-content-primary mb-4'>
             Best Personalized Astrology Apps {currentYear}
           </h1>
-          <p className='text-lg text-zinc-400'>
+          <p className='text-lg text-content-muted'>
             A comprehensive comparison of the top personalized astrology apps to
             help you find the perfect cosmic companion.
           </p>
         </div>
 
-        <div className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
+        <div className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
             <strong>Note:</strong> This comparison is based on publicly
             available information and focuses on factual differences. We aim to
             be fair and accurate in our assessment of all apps.
@@ -97,316 +97,326 @@ export default function BestPersonalizedAstrologyAppsPage() {
 
         {/* Comprehensive Comparison Table */}
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Complete Feature Comparison
           </h2>
           <div className='overflow-x-auto'>
-            <table className='w-full border-collapse border border-zinc-800'>
+            <table className='w-full border-collapse border border-stroke-subtle'>
               <thead>
-                <tr className='bg-zinc-900'>
-                  <th className='border border-zinc-800 p-4 text-left text-zinc-200'>
+                <tr className='bg-surface-elevated'>
+                  <th className='border border-stroke-subtle p-4 text-left text-content-primary'>
                     Feature
                   </th>
-                  <th className='border border-zinc-800 p-4 text-center text-lunary-primary-300 font-medium'>
+                  <th className='border border-stroke-subtle p-4 text-center text-content-brand font-medium'>
                     <div className='flex items-center justify-center gap-2'>
                       Lunary
                       <Star className='h-4 w-4' />
                     </div>
                   </th>
-                  <th className='border border-zinc-800 p-4 text-center text-zinc-300'>
+                  <th className='border border-stroke-subtle p-4 text-center text-content-secondary'>
                     Co-Star
                   </th>
-                  <th className='border border-zinc-800 p-4 text-center text-zinc-300'>
+                  <th className='border border-stroke-subtle p-4 text-center text-content-secondary'>
                     CHANI
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr className='bg-zinc-900/50'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>
+                <tr className='bg-surface-elevated/50'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>
                       Calculation Method
                     </strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       How birth charts are calculated
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <span className='text-lunary-success font-medium text-sm'>
                       ±1 arcminute accuracy
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted text-sm'>
                       Standard Astrology
                     </span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/30'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>
+                <tr className='bg-surface-elevated/30'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>
                       Personalized Birth Chart
                     </strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       Based on exact birth time, date, location
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/50'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>
+                <tr className='bg-surface-elevated/50'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>
                       Personalized Horoscopes
                     </strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       Based on YOUR chart vs generic zodiac
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <span className='text-lunary-success font-medium text-sm'>
                       Chart-Based
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted text-sm'>
                       Expert-Written
                     </span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/30'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>
+                <tr className='bg-surface-elevated/30'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>
                       Grimoire (2000+ pages)
                     </strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       Spells, rituals, correspondences - 100% free
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/50'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>Tarot Readings</strong>
+                <tr className='bg-surface-elevated/50'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>
+                      Tarot Readings
+                    </strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       Personalized to your chart
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/30'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>
+                <tr className='bg-surface-elevated/30'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>
                       Tarot Pattern Analysis
                     </strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       Identifies themes across your readings
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/50'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>
+                <tr className='bg-surface-elevated/50'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>
                       Book of Shadows Journal
                     </strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       With archetype pattern recognition
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/30'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>Astral Guide Chat</strong>
+                <tr className='bg-surface-elevated/30'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>
+                      Astral Guide Chat
+                    </strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       AI with full chart context
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/50'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>Crystal Guidance</strong>
+                <tr className='bg-surface-elevated/50'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>
+                      Crystal Guidance
+                    </strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       Based on birth chart + current transits
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/30'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>
+                <tr className='bg-surface-elevated/30'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>
                       Real-Time Transit Updates
                     </strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       Updates throughout the day
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400'>—</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted'>—</span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/50'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>Ads</strong>
+                <tr className='bg-surface-elevated/50'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>Ads</strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       Ad-free experience
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <span className='text-lunary-success font-medium text-sm'>
                       None
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted text-sm'>
                       Yes (free tier)
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <span className='text-lunary-success font-medium text-sm'>
                       None
                     </span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/50'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>Free Tier</strong>
+                <tr className='bg-surface-elevated/50'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>Free Tier</strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       What's included free
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <span className='text-lunary-success font-medium text-sm'>
                       Generous (No Ads)
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted text-sm'>
                       Available (With Ads)
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>Limited</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted text-sm'>Limited</span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/30'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>Pricing</strong>
+                <tr className='bg-surface-elevated/30'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>Pricing</strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       Monthly subscription
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <span className='text-lunary-success font-medium'>
                       Free + from $4.99/mo
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted text-sm'>
                       Free + $2.99/mo
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>~$12.99/mo</span>
+                  <td className='border border-stroke-subtle p-4 text-center'>
+                    <span className='text-content-muted text-sm'>
+                      ~$12.99/mo
+                    </span>
                   </td>
                 </tr>
-                <tr className='bg-zinc-900/50'>
-                  <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>Cross-Device Sync</strong>
+                <tr className='bg-surface-elevated/50'>
+                  <td className='border border-stroke-subtle p-4 text-content-secondary'>
+                    <strong className='text-content-primary'>
+                      Cross-Device Sync
+                    </strong>
                     <br />
-                    <span className='text-xs text-zinc-400'>
+                    <span className='text-xs text-content-muted'>
                       Access your chart anywhere
                     </span>
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
+                  <td className='border border-stroke-subtle p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                 </tr>
@@ -417,19 +427,19 @@ export default function BestPersonalizedAstrologyAppsPage() {
 
         {/* Detailed Reviews */}
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Detailed App Reviews
           </h2>
 
           {/* Lunary */}
-          <div className='mb-8 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
+          <div className='mb-8 rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'>
             <div className='flex items-start gap-4 mb-4'>
               <Star className='h-6 w-6 text-lunary-primary-400 flex-shrink-0 mt-1' />
               <div className='flex-1'>
-                <h3 className='text-2xl font-medium text-zinc-100 mb-2'>
+                <h3 className='text-2xl font-medium text-content-primary mb-2'>
                   Lunary - Our Top Pick
                 </h3>
-                <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+                <p className='text-sm text-content-secondary leading-relaxed mb-4'>
                   Lunary stands out for using real astronomical calculations to
                   create truly personalized birth charts and horoscopes. Unlike
                   generic astrology apps, Lunary calculates planetary positions
@@ -439,56 +449,56 @@ export default function BestPersonalizedAstrologyAppsPage() {
                 <div className='space-y-2 mb-4'>
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
-                    <span className='text-sm text-zinc-300'>
+                    <span className='text-sm text-content-secondary'>
                       Real astronomical calculations (not generic astrology)
                     </span>
                   </div>
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
-                    <span className='text-sm text-zinc-300'>
+                    <span className='text-sm text-content-secondary'>
                       Horoscopes personalized to YOUR exact birth chart
                     </span>
                   </div>
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
-                    <span className='text-sm text-zinc-300'>
+                    <span className='text-sm text-content-secondary'>
                       Astral Guide chat with full chart context
                     </span>
                   </div>
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
-                    <span className='text-sm text-zinc-300'>
+                    <span className='text-sm text-content-secondary'>
                       Book of Shadows journal with pattern recognition
                     </span>
                   </div>
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
-                    <span className='text-sm text-zinc-300'>
+                    <span className='text-sm text-content-secondary'>
                       Tarot with pattern analysis & chart-based readings
                     </span>
                   </div>
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
-                    <span className='text-sm text-zinc-300'>
+                    <span className='text-sm text-content-secondary'>
                       Crystals personalized to transits + birth chart
                     </span>
                   </div>
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
-                    <span className='text-sm text-zinc-300'>
+                    <span className='text-sm text-content-secondary'>
                       Real-time transit updates throughout the day
                     </span>
                   </div>
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
-                    <span className='text-sm text-zinc-300'>
+                    <span className='text-sm text-content-secondary'>
                       Free tier with no ads · Paid tiers from $4.99/mo
                     </span>
                   </div>
                 </div>
                 <Link
                   href='/pricing'
-                  className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors text-sm'
+                  className='inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium transition-colors text-sm'
                 >
                   Try Lunary Free
                   <ArrowRight className='h-4 w-4' />
@@ -498,9 +508,11 @@ export default function BestPersonalizedAstrologyAppsPage() {
           </div>
 
           {/* Co-Star */}
-          <div className='mb-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-            <h3 className='text-xl font-medium text-zinc-100 mb-2'>Co-Star</h3>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+          <div className='mb-8 rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-2'>
+              Co-Star
+            </h3>
+            <p className='text-sm text-content-secondary leading-relaxed mb-4'>
               Co-Star offers personalized horoscopes with a minimalist,
               text-based interface and social features. Popular for its unique
               aesthetic and push notifications.
@@ -508,29 +520,31 @@ export default function BestPersonalizedAstrologyAppsPage() {
             <div className='space-y-2'>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
-                <span className='text-sm text-zinc-300'>
+                <span className='text-sm text-content-secondary'>
                   Personalized birth charts
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
-                <span className='text-sm text-zinc-300'>
+                <span className='text-sm text-content-secondary'>
                   Social features for comparing charts
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <span className='h-4 w-4 text-zinc-400'>—</span>
-                <span className='text-sm text-zinc-400'>Ads in free tier</span>
+                <span className='h-4 w-4 text-content-muted'>—</span>
+                <span className='text-sm text-content-muted'>
+                  Ads in free tier
+                </span>
               </div>
               <div className='flex items-center gap-2'>
-                <span className='h-4 w-4 text-zinc-400'>—</span>
-                <span className='text-sm text-zinc-400'>
+                <span className='h-4 w-4 text-content-muted'>—</span>
+                <span className='text-sm text-content-muted'>
                   No tarot, crystals, or magical tools
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <span className='h-4 w-4 text-zinc-400'>—</span>
-                <span className='text-sm text-zinc-400'>
+                <span className='h-4 w-4 text-content-muted'>—</span>
+                <span className='text-sm text-content-muted'>
                   No AI chat assistant or pattern recognition
                 </span>
               </div>
@@ -538,9 +552,11 @@ export default function BestPersonalizedAstrologyAppsPage() {
           </div>
 
           {/* CHANI */}
-          <div className='mb-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-            <h3 className='text-xl font-medium text-zinc-100 mb-2'>CHANI</h3>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+          <div className='mb-8 rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-2'>
+              CHANI
+            </h3>
+            <p className='text-sm text-content-secondary leading-relaxed mb-4'>
               CHANI offers premium curated content from professional astrologers
               with an editorial approach. Good for users who want expert-written
               astrology content, but at a higher price point.
@@ -548,31 +564,31 @@ export default function BestPersonalizedAstrologyAppsPage() {
             <div className='space-y-2'>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
-                <span className='text-sm text-zinc-300'>
+                <span className='text-sm text-content-secondary'>
                   Expert-written content
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
-                <span className='text-sm text-zinc-300'>
+                <span className='text-sm text-content-secondary'>
                   Editorial approach to astrology
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <span className='h-4 w-4 text-zinc-400'>—</span>
-                <span className='text-sm text-zinc-400'>
+                <span className='h-4 w-4 text-content-muted'>—</span>
+                <span className='text-sm text-content-muted'>
                   Higher pricing (~$12.99/mo)
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <span className='h-4 w-4 text-zinc-400'>—</span>
-                <span className='text-sm text-zinc-400'>
+                <span className='h-4 w-4 text-content-muted'>—</span>
+                <span className='text-sm text-content-muted'>
                   No tarot, crystals, Book of Shadows, or AI chat
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <span className='h-4 w-4 text-zinc-400'>—</span>
-                <span className='text-sm text-zinc-400'>
+                <span className='h-4 w-4 text-content-muted'>—</span>
+                <span className='text-sm text-content-muted'>
                   No magical tools or pattern recognition
                 </span>
               </div>
@@ -582,62 +598,66 @@ export default function BestPersonalizedAstrologyAppsPage() {
 
         {/* Why Lunary Wins */}
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Why Lunary is Our Top Pick
           </h2>
-          <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+          <div className='rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'>
+            <p className='text-sm text-content-secondary leading-relaxed mb-4'>
               Lunary is the only astrology app that combines astronomical
               accuracy with a complete magical practice ecosystem:
             </p>
-            <ol className='list-decimal list-inside space-y-3 text-sm text-zinc-300 ml-4'>
+            <ol className='list-decimal list-inside space-y-3 text-sm text-content-secondary ml-4'>
               <li>
-                <strong className='text-zinc-100'>
+                <strong className='text-content-primary'>
                   Real Astronomical Data (±1 arcminute):
                 </strong>{' '}
                 NASA-level accuracy for planetary positions, not generic
                 astrology
               </li>
               <li>
-                <strong className='text-zinc-100'>Astral Guide Chat:</strong> AI
-                assistant with complete knowledge of your birth chart, tarot
+                <strong className='text-content-primary'>
+                  Astral Guide Chat:
+                </strong>{' '}
+                AI assistant with complete knowledge of your birth chart, tarot
                 patterns, and journal entries
               </li>
               <li>
-                <strong className='text-zinc-100'>
+                <strong className='text-content-primary'>
                   Book of Shadows with Pattern Recognition:
                 </strong>{' '}
                 Personal magical journal that identifies archetypes and themes
                 across your entries
               </li>
               <li>
-                <strong className='text-zinc-100'>
+                <strong className='text-content-primary'>
                   Tarot Pattern Analysis:
                 </strong>{' '}
                 Personalized readings based on your chart, plus pattern tracking
                 across all your readings
               </li>
               <li>
-                <strong className='text-zinc-100'>
+                <strong className='text-content-primary'>
                   Crystals with Transit Context:
                 </strong>{' '}
                 Recommendations personalized to both your birth chart AND
                 current transits
               </li>
               <li>
-                <strong className='text-zinc-100'>
+                <strong className='text-content-primary'>
                   Real-Time Transit Updates:
                 </strong>{' '}
                 Updates throughout the day as planetary movements affect your
                 chart
               </li>
               <li>
-                <strong className='text-zinc-100'>No Ads, Free Trial:</strong>{' '}
+                <strong className='text-content-primary'>
+                  No Ads, Free Trial:
+                </strong>{' '}
                 Unlike Co-Star, trial has zero ads. Upgrade when you want full
                 personalization.
               </li>
             </ol>
-            <p className='text-sm text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-sm text-content-secondary leading-relaxed mt-4'>
               Start your free trial today with no credit card required, upgrade
               when you want personalization to your specific chart.
             </p>
@@ -648,7 +668,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
         <section className='text-center mb-12'>
           <Link
             href='/pricing'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium text-lg transition-colors'
           >
             Start Your Free Trial
             <ArrowRight className='h-5 w-5' />
@@ -657,68 +677,76 @@ export default function BestPersonalizedAstrologyAppsPage() {
 
         {/* Explore Grimoire */}
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Explore the Lunary Grimoire
           </h2>
-          <p className='text-sm text-zinc-400 mb-6'>
+          <p className='text-sm text-content-muted mb-6'>
             Discover our comprehensive knowledge library that sets Lunary apart.
           </p>
           <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-3'>
             <Link
               href='/grimoire/guides/birth-chart-complete-guide'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>
+              <span className='text-content-secondary font-medium'>
                 Birth Chart Guide
               </span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <p className='text-xs text-content-muted mt-1'>
                 Complete guide to reading your chart
               </p>
             </Link>
             <Link
               href='/grimoire/astronomy/planets'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>
+              <span className='text-content-secondary font-medium'>
                 Planetary Meanings
               </span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <p className='text-xs text-content-muted mt-1'>
                 Understand astrological planets
               </p>
             </Link>
             <Link
               href='/grimoire/tarot'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>78 Tarot Cards</span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <span className='text-content-secondary font-medium'>
+                78 Tarot Cards
+              </span>
+              <p className='text-xs text-content-muted mt-1'>
                 Major & Minor Arcana meanings
               </p>
             </Link>
             <Link
               href='/grimoire/crystals'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>Crystal Guide</span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <span className='text-content-secondary font-medium'>
+                Crystal Guide
+              </span>
+              <p className='text-xs text-content-muted mt-1'>
                 Properties and correspondences
               </p>
             </Link>
             <Link
               href='/grimoire/zodiac'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>12 Zodiac Signs</span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <span className='text-content-secondary font-medium'>
+                12 Zodiac Signs
+              </span>
+              <p className='text-xs text-content-muted mt-1'>
                 Traits, dates, and compatibility
               </p>
             </Link>
             <Link
               href='/grimoire'
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+              className='p-4 bg-surface-elevated/50 border border-stroke-subtle rounded-lg hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-300 font-medium'>Full Grimoire</span>
-              <p className='text-xs text-zinc-500 mt-1'>
+              <span className='text-content-secondary font-medium'>
+                Full Grimoire
+              </span>
+              <p className='text-xs text-content-muted mt-1'>
                 500+ pages of cosmic wisdom
               </p>
             </Link>
@@ -726,8 +754,8 @@ export default function BestPersonalizedAstrologyAppsPage() {
         </section>
 
         {/* Legal Disclaimer */}
-        <section className='pt-8 border-t border-zinc-800 pb-8'>
-          <p className='text-xs text-zinc-400 leading-relaxed'>
+        <section className='pt-8 border-t border-stroke-subtle pb-8'>
+          <p className='text-xs text-content-muted leading-relaxed'>
             <strong>Disclaimer:</strong> This comparison is based on publicly
             available information as of 2025. Features and pricing may change.
             All competitor names are registered trademarks of their respective

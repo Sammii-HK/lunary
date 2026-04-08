@@ -184,8 +184,8 @@ ${data.celebrities.join(', ')}
               href={`/grimoire/cusps/${c.id}`}
               className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                 c.id === cusp
-                  ? 'bg-lunary-primary-900/30 text-lunary-primary-200 border border-lunary-primary-600'
-                  : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
+                  ? 'bg-layer-base/30 text-content-secondary border border-lunary-primary-600'
+                  : 'bg-surface-card/50 text-content-muted hover:bg-surface-card hover:text-content-primary'
               }`}
             >
               {c.sign1}-{c.sign2}

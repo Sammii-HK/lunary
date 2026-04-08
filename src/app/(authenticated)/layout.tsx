@@ -127,7 +127,9 @@ export default function AuthenticatedLayout({
   if (!mounted || authStatus.loading) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
-        <span className='text-zinc-400 text-sm'>Checking authentication…</span>
+        <span className='text-content-muted text-sm'>
+          Checking authentication…
+        </span>
       </div>
     );
   }
@@ -137,7 +139,7 @@ export default function AuthenticatedLayout({
     // Returning null here causes a blank screen in Capacitor WKWebView.
     return (
       <div className='min-h-screen flex items-center justify-center'>
-        <span className='text-zinc-400 text-sm'>Redirecting…</span>
+        <span className='text-content-muted text-sm'>Redirecting…</span>
       </div>
     );
   }

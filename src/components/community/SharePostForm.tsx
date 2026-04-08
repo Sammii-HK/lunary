@@ -75,7 +75,7 @@ export function SharePostForm({
     <form
       onSubmit={handleSubmit}
       className={cn(
-        'rounded-xl border border-zinc-800/50 bg-zinc-900/50 p-4',
+        'rounded-xl border border-stroke-subtle/50 bg-surface-elevated/50 p-4',
         className,
       )}
     >
@@ -89,7 +89,7 @@ export function SharePostForm({
         placeholder='Share your thoughts with the community...'
         rows={3}
         maxLength={MAX_LENGTH}
-        className='w-full bg-transparent text-sm text-zinc-200 placeholder:text-zinc-600 resize-none outline-none'
+        className='w-full bg-transparent text-sm text-content-primary placeholder:text-content-muted resize-none outline-none'
       />
 
       <div className='flex items-center justify-between mt-3'>
@@ -97,7 +97,7 @@ export function SharePostForm({
           <button
             type='button'
             onClick={() => setIsAnonymous(!isAnonymous)}
-            className='flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors'
+            className='flex items-center gap-1.5 text-xs text-content-muted hover:text-content-secondary transition-colors'
           >
             {isAnonymous ? (
               <EyeOff className='w-3.5 h-3.5' />
@@ -113,8 +113,8 @@ export function SharePostForm({
               charCount > MAX_LENGTH
                 ? 'text-red-400'
                 : charCount >= MIN_LENGTH
-                  ? 'text-zinc-500'
-                  : 'text-zinc-600',
+                  ? 'text-content-muted'
+                  : 'text-content-muted',
             )}
           >
             {charCount}/{MAX_LENGTH}
@@ -132,7 +132,7 @@ export function SharePostForm({
       </div>
 
       {charCount > 0 && charCount < MIN_LENGTH && (
-        <p className='text-xs text-zinc-500 mt-2'>
+        <p className='text-xs text-content-muted mt-2'>
           {MIN_LENGTH - charCount} more characters needed
         </p>
       )}

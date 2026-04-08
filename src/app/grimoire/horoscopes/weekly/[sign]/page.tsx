@@ -152,7 +152,7 @@ export default async function WeeklyHoroscopePage({
             <Calendar className='w-4 h-4' />
             {weekRange}
           </div>
-          <p className='text-zinc-500 text-xs'>{signData.dates}</p>
+          <p className='text-content-muted text-xs'>{signData.dates}</p>
         </div>
       }
       breadcrumbs={[
@@ -172,22 +172,22 @@ export default async function WeeklyHoroscopePage({
       childrenPosition='after-description'
     >
       <section className='mb-12'>
-        <div className='p-8 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+        <div className='p-8 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
           {horoscope ? (
-            <div className='text-zinc-200 leading-relaxed text-lg space-y-4'>
+            <div className='text-content-primary leading-relaxed text-lg space-y-4'>
               {horoscope.split('\n').map((paragraph, i) => (
                 <p key={i}>{paragraph}</p>
               ))}
             </div>
           ) : (
             <div className='text-center'>
-              <p className='text-zinc-400 mb-4'>
+              <p className='text-content-muted mb-4'>
                 Your weekly horoscope is being prepared. Check back soon or get
                 a personalised reading.
               </p>
               <Link
                 href='/grimoire/horoscopes/today'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 View daily horoscope →
               </Link>
@@ -197,23 +197,29 @@ export default async function WeeklyHoroscopePage({
       </section>
 
       <section className='mb-12 grid gap-4 md:grid-cols-3'>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-2'>Love</h2>
-          <p className='text-sm text-zinc-400'>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
+          <h2 className='text-lg font-medium text-content-primary mb-2'>
+            Love
+          </h2>
+          <p className='text-sm text-content-muted'>
             Lean into steady communication. {signData.name} grows love through
             clarity and consistent effort this week.
           </p>
         </div>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-2'>Career</h2>
-          <p className='text-sm text-zinc-400'>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
+          <h2 className='text-lg font-medium text-content-primary mb-2'>
+            Career
+          </h2>
+          <p className='text-sm text-content-muted'>
             Keep priorities tight. Visible progress will open new opportunities
             for {signData.name}.
           </p>
         </div>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
-          <h2 className='text-lg font-medium text-zinc-100 mb-2'>Year</h2>
-          <p className='text-sm text-zinc-400'>
+        <div className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-5'>
+          <h2 className='text-lg font-medium text-content-primary mb-2'>
+            Year
+          </h2>
+          <p className='text-sm text-content-muted'>
             This week supports long-range goals. Make one decision that moves
             your year forward.
           </p>
@@ -223,20 +229,20 @@ export default async function WeeklyHoroscopePage({
       <nav className='flex items-center justify-between mb-12'>
         <Link
           href={`/grimoire/horoscopes/weekly/${prevSign.name.toLowerCase()}`}
-          className='flex items-center gap-2 text-zinc-400 hover:text-zinc-300 transition-colors'
+          className='flex items-center gap-2 text-content-muted hover:text-content-secondary transition-colors'
         >
           <ArrowLeft className='w-4 h-4' />
           <span>{prevSign.name}</span>
         </Link>
         <Link
           href='/grimoire/horoscopes/weekly'
-          className='text-zinc-500 hover:text-zinc-400 text-sm'
+          className='text-content-muted hover:text-content-muted text-sm'
         >
           All Signs
         </Link>
         <Link
           href={`/grimoire/horoscopes/weekly/${nextSign.name.toLowerCase()}`}
-          className='flex items-center gap-2 text-zinc-400 hover:text-zinc-300 transition-colors'
+          className='flex items-center gap-2 text-content-muted hover:text-content-secondary transition-colors'
         >
           <span>{nextSign.name}</span>
           <ArrowRight className='w-4 h-4' />
@@ -246,19 +252,19 @@ export default async function WeeklyHoroscopePage({
       <section className='grid md:grid-cols-2 gap-4 mb-12'>
         <Link
           href={`/grimoire/horoscopes/today/${sign}`}
-          className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+          className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
         >
           <h3 className='font-medium mb-1'>Daily Horoscope</h3>
-          <p className='text-zinc-400 text-sm'>
+          <p className='text-content-muted text-sm'>
             Quick daily insights for {signData.name}.
           </p>
         </Link>
         <Link
           href={`/grimoire/horoscopes/${sign}/${currentYear}/${currentMonth}`}
-          className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+          className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
         >
           <h3 className='font-medium mb-1'>Monthly Forecast</h3>
-          <p className='text-zinc-400 text-sm'>
+          <p className='text-content-muted text-sm'>
             Full {signData.name} outlook for {currentMonthName} {currentYear}.
           </p>
         </Link>

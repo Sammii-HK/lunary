@@ -109,7 +109,7 @@ export default async function BirthChartLandingPage() {
     : null;
 
   return (
-    <div className='min-h-screen bg-lunary-bg'>
+    <div className='min-h-screen bg-surface-elevated'>
       {renderJsonLdMulti([
         createArticleSchema({
           headline: 'Free Birth Chart Calculator & Natal Chart Reading',
@@ -152,12 +152,12 @@ export default async function BirthChartLandingPage() {
           <Heading as='h1' variant='h1'>
             Free Birth Chart Calculator
           </Heading>
-          <p className='text-zinc-400 max-w-2xl mx-auto'>
+          <p className='text-content-muted max-w-2xl mx-auto'>
             Discover your cosmic blueprint with 24+ celestial bodies, planetary
             aspects, dignities, and personalized interpretations — all
             calculated from real astronomical data.
           </p>
-          <p className='text-zinc-500 text-sm max-w-xl mx-auto'>
+          <p className='text-content-muted text-sm max-w-xl mx-auto'>
             Beyond the 10 classical planets — track asteroids, lunar nodes,
             Lilith, Part of Fortune, Vertex, and more.
           </p>
@@ -184,7 +184,7 @@ export default async function BirthChartLandingPage() {
               <Heading as='h2' variant='h2'>
                 See a Real Birth Chart in Action
               </Heading>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 This is Celeste&apos;s actual birth chart — explore every
                 section to see what your chart will include.
               </p>
@@ -198,40 +198,40 @@ export default async function BirthChartLandingPage() {
 
         {/* Feature Highlights */}
         <section className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <div className='flex items-center gap-2 mb-3'>
-              <Target className='w-5 h-5 text-lunary-primary-300' />
-              <h3 className='text-sm font-medium text-white'>
+              <Target className='w-5 h-5 text-content-brand' />
+              <h3 className='text-sm font-medium text-content-primary'>
                 Arcminute Accuracy
               </h3>
             </div>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               Powered by Astronomy Engine, validated to within 1 arcminute of
               NOVAS and JPL Horizons. Every planetary position is calculated to
               1/60th of a degree.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <div className='flex items-center gap-2 mb-3'>
               <Sparkles className='w-5 h-5 text-lunary-accent' />
-              <h3 className='text-sm font-medium text-white'>
+              <h3 className='text-sm font-medium text-content-primary'>
                 24+ Celestial Bodies
               </h3>
             </div>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               Beyond the 10 classical planets — track asteroids (Chiron, Ceres,
               Pallas, Juno, Vesta), lunar nodes, Lilith, Part of Fortune,
               Vertex, and more.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <div className='flex items-center gap-2 mb-3'>
-              <BookOpen className='w-5 h-5 text-lunary-secondary-300' />
-              <h3 className='text-sm font-medium text-white'>
+              <BookOpen className='w-5 h-5 text-content-brand-secondary' />
+              <h3 className='text-sm font-medium text-content-primary'>
                 Educational Interpretations
               </h3>
             </div>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               Every placement comes with a personalized interpretation
               explaining what it means in your chart — perfect for beginners and
               seasoned astrologers alike.
@@ -245,22 +245,22 @@ export default async function BirthChartLandingPage() {
             <Heading as='h2' variant='h2'>
               How Lunary Compares
             </Heading>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               See why Lunary offers the most complete free birth chart
               experience.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg overflow-hidden'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg overflow-hidden'>
             <table className='w-full text-sm'>
               <thead>
-                <tr className='border-b border-zinc-800'>
-                  <th className='text-left p-3 text-zinc-400 font-medium'>
+                <tr className='border-b border-stroke-subtle'>
+                  <th className='text-left p-3 text-content-muted font-medium'>
                     Feature
                   </th>
-                  <th className='text-center p-3 text-lunary-primary-300 font-medium'>
+                  <th className='text-center p-3 text-content-brand font-medium'>
                     Lunary
                   </th>
-                  <th className='text-center p-3 text-zinc-500 font-medium'>
+                  <th className='text-center p-3 text-content-muted font-medium'>
                     Others
                   </th>
                 </tr>
@@ -269,18 +269,20 @@ export default async function BirthChartLandingPage() {
                 {comparisonFeatures.map((row) => (
                   <tr
                     key={row.feature}
-                    className='border-b border-zinc-800/50 last:border-0'
+                    className='border-b border-stroke-subtle/50 last:border-0'
                   >
-                    <td className='p-3 text-zinc-300 text-xs'>{row.feature}</td>
+                    <td className='p-3 text-content-secondary text-xs'>
+                      {row.feature}
+                    </td>
                     <td className='p-3 text-center'>
                       {typeof row.lunary === 'boolean' ? (
                         row.lunary ? (
                           <Check className='w-4 h-4 text-lunary-success-300 mx-auto' />
                         ) : (
-                          <X className='w-4 h-4 text-zinc-600 mx-auto' />
+                          <X className='w-4 h-4 text-content-muted mx-auto' />
                         )
                       ) : (
-                        <span className='text-xs text-lunary-primary-300 font-medium'>
+                        <span className='text-xs text-content-brand font-medium'>
                           {row.lunary}
                         </span>
                       )}
@@ -288,12 +290,12 @@ export default async function BirthChartLandingPage() {
                     <td className='p-3 text-center'>
                       {typeof row.others === 'boolean' ? (
                         row.others ? (
-                          <Check className='w-4 h-4 text-zinc-400 mx-auto' />
+                          <Check className='w-4 h-4 text-content-muted mx-auto' />
                         ) : (
-                          <X className='w-4 h-4 text-zinc-600 mx-auto' />
+                          <X className='w-4 h-4 text-content-muted mx-auto' />
                         )
                       ) : (
-                        <span className='text-xs text-zinc-500'>
+                        <span className='text-xs text-content-muted'>
                           {row.others}
                         </span>
                       )}
@@ -306,42 +308,42 @@ export default async function BirthChartLandingPage() {
         </section>
 
         {/* What Happens Next CTA */}
-        <section className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+        <section className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
           <Heading as='h2' variant='h2'>
             Get Your Birth Chart in 3 Steps
           </Heading>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mt-4'>
             <div className='text-center'>
               <div className='w-8 h-8 rounded-full bg-lunary-primary/20 border border-lunary-primary/40 flex items-center justify-center mx-auto mb-2'>
-                <span className='text-sm text-lunary-primary-300'>1</span>
+                <span className='text-sm text-content-brand'>1</span>
               </div>
-              <h3 className='text-sm font-medium text-white mb-1'>
+              <h3 className='text-sm font-medium text-content-primary mb-1'>
                 Create Your Profile
               </h3>
-              <p className='text-xs text-zinc-400'>
+              <p className='text-xs text-content-muted'>
                 Sign up and enter your birth date, time, and location.
               </p>
             </div>
             <div className='text-center'>
               <div className='w-8 h-8 rounded-full bg-lunary-primary/20 border border-lunary-primary/40 flex items-center justify-center mx-auto mb-2'>
-                <span className='text-sm text-lunary-primary-300'>2</span>
+                <span className='text-sm text-content-brand'>2</span>
               </div>
-              <h3 className='text-sm font-medium text-white mb-1'>
+              <h3 className='text-sm font-medium text-content-primary mb-1'>
                 We Calculate Everything
               </h3>
-              <p className='text-xs text-zinc-400'>
+              <p className='text-xs text-content-muted'>
                 Lunary computes positions for 24+ celestial bodies using
                 Astronomy Engine.
               </p>
             </div>
             <div className='text-center'>
               <div className='w-8 h-8 rounded-full bg-lunary-primary/20 border border-lunary-primary/40 flex items-center justify-center mx-auto mb-2'>
-                <span className='text-sm text-lunary-primary-300'>3</span>
+                <span className='text-sm text-content-brand'>3</span>
               </div>
-              <h3 className='text-sm font-medium text-white mb-1'>
+              <h3 className='text-sm font-medium text-content-primary mb-1'>
                 Explore Your Chart
               </h3>
-              <p className='text-xs text-zinc-400'>
+              <p className='text-xs text-content-muted'>
                 Dive into your Big Three, house placements, aspects, patterns,
                 and personalized interpretations.
               </p>
@@ -363,55 +365,55 @@ export default async function BirthChartLandingPage() {
             <Heading as='h2' variant='h2'>
               Your Chart Powers Everything
             </Heading>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Your birth chart is the foundation. With Lunary+, it unlocks
               personalised features across the entire app.
             </p>
           </div>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 flex gap-3'>
+            <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4 flex gap-3'>
               <Star className='w-5 h-5 text-lunary-accent flex-shrink-0 mt-0.5' />
               <div>
-                <h3 className='text-sm font-medium text-white mb-1'>
+                <h3 className='text-sm font-medium text-content-primary mb-1'>
                   Daily Personalised Horoscopes
                 </h3>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   Readings calculated from your exact natal placements — not
                   just your Sun sign.
                 </p>
               </div>
             </div>
-            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 flex gap-3'>
-              <Orbit className='w-5 h-5 text-lunary-primary-300 flex-shrink-0 mt-0.5' />
+            <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4 flex gap-3'>
+              <Orbit className='w-5 h-5 text-content-brand flex-shrink-0 mt-0.5' />
               <div>
-                <h3 className='text-sm font-medium text-white mb-1'>
+                <h3 className='text-sm font-medium text-content-primary mb-1'>
                   Personal Transit Tracking
                 </h3>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   See how today&apos;s planets interact with your chart and what
                   it means for you specifically.
                 </p>
               </div>
             </div>
-            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 flex gap-3'>
-              <Layers className='w-5 h-5 text-lunary-secondary-300 flex-shrink-0 mt-0.5' />
+            <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4 flex gap-3'>
+              <Layers className='w-5 h-5 text-content-brand-secondary flex-shrink-0 mt-0.5' />
               <div>
-                <h3 className='text-sm font-medium text-white mb-1'>
+                <h3 className='text-sm font-medium text-content-primary mb-1'>
                   Tarot Seeded from Your Placements
                 </h3>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   Daily card draws informed by your natal chart and current
                   transits for deeper relevance.
                 </p>
               </div>
             </div>
-            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 flex gap-3'>
+            <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-4 flex gap-3'>
               <Moon className='w-5 h-5 text-lunary-rose-300 flex-shrink-0 mt-0.5' />
               <div>
-                <h3 className='text-sm font-medium text-white mb-1'>
+                <h3 className='text-sm font-medium text-content-primary mb-1'>
                   Moon Circle Rituals
                 </h3>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   New and full moon ceremonies personalised to your chart&apos;s
                   unique placements.
                 </p>
@@ -437,14 +439,14 @@ export default async function BirthChartLandingPage() {
             {faqs.map((faq) => (
               <details
                 key={faq.question}
-                className='group bg-zinc-900/50 border border-zinc-800 rounded-lg'
+                className='group bg-surface-elevated/50 border border-stroke-subtle rounded-lg'
               >
-                <summary className='flex items-center justify-between p-4 text-sm text-zinc-200 font-medium list-none'>
+                <summary className='flex items-center justify-between p-4 text-sm text-content-primary font-medium list-none'>
                   {faq.question}
-                  <ChevronDown className='w-4 h-4 text-zinc-500 transition-transform group-open:rotate-180' />
+                  <ChevronDown className='w-4 h-4 text-content-muted transition-transform group-open:rotate-180' />
                 </summary>
                 <div className='px-4 pb-4'>
-                  <p className='text-xs text-zinc-400 leading-relaxed'>
+                  <p className='text-xs text-content-muted leading-relaxed'>
                     {faq.answer}
                   </p>
                 </div>
@@ -454,11 +456,11 @@ export default async function BirthChartLandingPage() {
         </section>
 
         {/* Final CTA */}
-        <section className='text-center py-8 border-t border-zinc-800'>
+        <section className='text-center py-8 border-t border-stroke-subtle'>
           <Heading as='h2' variant='h2'>
             Ready to Discover Your Cosmic Blueprint?
           </Heading>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Your birth chart calculation is free. Upgrade to Lunary+ for
             personalised horoscopes, transit tracking, and more.
           </p>

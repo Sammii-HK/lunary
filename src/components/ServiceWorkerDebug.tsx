@@ -169,14 +169,14 @@ export function ServiceWorkerDebug() {
   }
 
   return (
-    <div className='fixed top-20 left-4 right-4 bg-zinc-900 border border-lunary-secondary rounded-lg p-4 text-xs font-mono max-h-96 overflow-auto z-[10001]'>
+    <div className='fixed top-20 left-4 right-4 bg-surface-elevated border border-lunary-secondary rounded-lg p-4 text-xs font-mono max-h-96 overflow-auto z-[10001]'>
       <div className='flex justify-between items-center mb-2'>
         <h3 className='text-lunary-secondary font-bold'>
           🔧 Service Worker Debug
         </h3>
         <button
           onClick={() => setDebugInfo([])}
-          className='text-zinc-400 hover:text-white'
+          className='text-content-muted hover:text-content-primary'
         >
           Clear
         </button>
@@ -192,7 +192,7 @@ export function ServiceWorkerDebug() {
                   ? 'text-lunary-success'
                   : log.includes('⚠️')
                     ? 'text-lunary-accent'
-                    : 'text-zinc-300'
+                    : 'text-content-secondary'
             }
           >
             {log}

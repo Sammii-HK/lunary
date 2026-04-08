@@ -198,7 +198,7 @@ export function ConditionalMainWrapper({
       style={{
         paddingTop: 'var(--global-nav-offset, 0px)',
         paddingBottom: showAppNav
-          ? 'calc(40px + env(safe-area-inset-bottom, 0px))'
+          ? 'calc(64px + env(safe-area-inset-bottom, 0px))'
           : undefined,
         scrollPaddingTop: 'var(--global-nav-offset, 0px)',
         minHeight: '100dvh',

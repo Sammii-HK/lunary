@@ -166,26 +166,26 @@ export default function BirthChartExamplePage() {
   );
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(faqSchema)}
       <div className='max-w-5xl mx-auto px-4 py-12'>
-        <nav className='flex items-center gap-2 text-sm text-zinc-400 mb-8'>
-          <Link href='/' className='hover:text-zinc-300'>
+        <nav className='flex items-center gap-2 text-sm text-content-muted mb-8'>
+          <Link href='/' className='hover:text-content-secondary'>
             Home
           </Link>
           <span>/</span>
-          <Link href='/birth-chart' className='hover:text-zinc-300'>
+          <Link href='/birth-chart' className='hover:text-content-secondary'>
             Birth Chart
           </Link>
           <span>/</span>
-          <span className='text-zinc-400'>Example</span>
+          <span className='text-content-muted'>Example</span>
         </nav>
 
         <header className='mb-12'>
           <h1 className='text-4xl md:text-5xl font-light mb-4'>
             How to Read a Birth Chart
           </h1>
-          <p className='text-xl text-zinc-400 leading-relaxed max-w-3xl'>
+          <p className='text-xl text-content-muted leading-relaxed max-w-3xl'>
             Learn to interpret your natal chart with this visual guide.
             Understand what each planet, sign, and house means in your cosmic
             blueprint.
@@ -194,7 +194,7 @@ export default function BirthChartExamplePage() {
 
         <section className='mb-12'>
           <h2 className='text-2xl font-light mb-6'>The Planets: What</h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Planets represent different types of energy and drives. Each planet
             governs specific aspects of your personality and life.
           </p>
@@ -203,16 +203,18 @@ export default function BirthChartExamplePage() {
               <Link
                 key={element.title}
                 href={element.link}
-                className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors group'
+                className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors group'
               >
                 <div className='flex items-center gap-3 mb-3'>
                   <span className='text-2xl'>{element.symbol}</span>
-                  <h3 className='text-lg font-medium group-hover:text-lunary-primary-300 transition-colors'>
+                  <h3 className='text-lg font-medium group-hover:text-content-brand transition-colors'>
                     {element.title}
                   </h3>
                 </div>
-                <p className='text-zinc-400 text-sm mb-2'>{element.meaning}</p>
-                <p className='text-zinc-500 text-xs italic'>
+                <p className='text-content-muted text-sm mb-2'>
+                  {element.meaning}
+                </p>
+                <p className='text-content-muted text-xs italic'>
                   {element.example}
                 </p>
               </Link>
@@ -222,7 +224,7 @@ export default function BirthChartExamplePage() {
 
         <section className='mb-12'>
           <h2 className='text-2xl font-light mb-6'>The Houses: Where</h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Houses represent different areas of life. When a planet is in a
             house, that planetary energy manifests in that life area.
           </p>
@@ -231,15 +233,17 @@ export default function BirthChartExamplePage() {
               <Link
                 key={house.number}
                 href={`/grimoire/houses/${house.number}${getOrdinalSuffix(house.number)}-house`}
-                className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+                className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
               >
                 <div className='text-2xl font-light text-lunary-primary-400 mb-1'>
                   {house.number}
                 </div>
-                <div className='text-sm font-medium text-zinc-200'>
+                <div className='text-sm font-medium text-content-primary'>
                   {house.name}
                 </div>
-                <div className='text-xs text-zinc-500'>{house.description}</div>
+                <div className='text-xs text-content-muted'>
+                  {house.description}
+                </div>
               </Link>
             ))}
           </div>
@@ -247,14 +251,14 @@ export default function BirthChartExamplePage() {
 
         <section className='mb-12'>
           <h2 className='text-2xl font-light mb-6'>The Signs: How</h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             The zodiac sign a planet is in modifies how that planet's energy
             expresses. Think of the planet as the actor and the sign as the
             costume and style.
           </p>
           <Link
             href='/grimoire/zodiac'
-            className='inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 text-zinc-300 transition-colors'
+            className='inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 text-content-secondary transition-colors'
           >
             Explore All 12 Zodiac Signs
             <ArrowRight className='w-4 h-4' />
@@ -269,12 +273,12 @@ export default function BirthChartExamplePage() {
             {faqs.map((faq, index) => (
               <div
                 key={index}
-                className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'
+                className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30'
               >
-                <h3 className='text-lg font-medium mb-2 text-zinc-100'>
+                <h3 className='text-lg font-medium mb-2 text-content-primary'>
                   {faq.question}
                 </h3>
-                <p className='text-zinc-400'>{faq.answer}</p>
+                <p className='text-content-muted'>{faq.answer}</p>
               </div>
             ))}
           </div>
@@ -285,37 +289,41 @@ export default function BirthChartExamplePage() {
           <div className='grid md:grid-cols-3 gap-4'>
             <Link
               href='/grimoire/guides/birth-chart-complete-guide'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-200'>Complete Birth Chart Guide</span>
+              <span className='text-content-primary'>
+                Complete Birth Chart Guide
+              </span>
             </Link>
             <Link
               href='/grimoire/placements'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-200'>Planet in Sign Meanings</span>
+              <span className='text-content-primary'>
+                Planet in Sign Meanings
+              </span>
             </Link>
             <Link
               href='/grimoire/glossary'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <span className='text-zinc-200'>Astrology Glossary</span>
+              <span className='text-content-primary'>Astrology Glossary</span>
             </Link>
           </div>
         </section>
 
-        <section className='p-8 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-rose-900/20 text-center'>
-          <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+        <section className='p-8 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-layer-base/20 to-lunary-rose-900/20 text-center'>
+          <h2 className='text-2xl font-light text-content-primary mb-4'>
             Generate Your Own Chart
           </h2>
-          <p className='text-zinc-300 mb-6 max-w-xl mx-auto'>
+          <p className='text-content-secondary mb-6 max-w-xl mx-auto'>
             Enter your birth date, time, and location to create your personal
             birth chart and see exactly where each planet was when you were
             born.
           </p>
           <Link
             href='/birth-chart'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-lunary-primary-900/30 hover:bg-lunary-primary-900/50 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-layer-base/30 hover:bg-layer-base/50 border border-lunary-primary-700 text-content-brand font-medium text-lg transition-colors'
           >
             Calculate Your Birth Chart Free
             <ArrowRight className='w-5 h-5' />

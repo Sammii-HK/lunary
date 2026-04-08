@@ -76,7 +76,7 @@ export default function DecansIndexPage() {
   });
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(decansListSchema)}
       {renderJsonLd(
         createBreadcrumbSchema([
@@ -93,7 +93,7 @@ export default function DecansIndexPage() {
         />
 
         <h1 className='text-4xl font-light mb-4'>Zodiac Decans</h1>
-        <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
+        <p className='text-lg text-content-muted mb-8 max-w-3xl'>
           Each zodiac sign is divided into three 10-degree sections called
           decans. Each decan has a sub-ruler that adds unique qualities to your
           Sun sign placement.
@@ -106,7 +106,7 @@ export default function DecansIndexPage() {
             return (
               <div
                 key={sign}
-                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'
+                className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'
               >
                 <div className='flex items-center gap-3 mb-4'>
                   <span className='text-3xl'>{symbol}</span>
@@ -120,16 +120,16 @@ export default function DecansIndexPage() {
                       <Link
                         key={d}
                         href={`/grimoire/decans/${sign}/${d}`}
-                        className='p-4 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 transition-colors group'
+                        className='p-4 rounded-lg bg-surface-card/50 hover:bg-surface-card transition-colors group'
                       >
                         <div className='text-sm text-lunary-primary-400 mb-1'>
                           {d === 1 ? 'First' : d === 2 ? 'Second' : 'Third'}{' '}
                           Decan
                         </div>
-                        <div className='font-medium group-hover:text-lunary-primary-300 transition-colors'>
+                        <div className='font-medium group-hover:text-content-brand transition-colors'>
                           {data.dateRange}
                         </div>
-                        <div className='text-sm text-zinc-400'>
+                        <div className='text-sm text-content-muted'>
                           Sub-ruler: {data.subruler}
                         </div>
                       </Link>

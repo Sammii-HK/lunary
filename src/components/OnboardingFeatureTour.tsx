@@ -146,10 +146,10 @@ export function OnboardingFeatureTour({
   return (
     <div className='space-y-6'>
       <div className='text-center'>
-        <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
+        <h2 className='text-base font-semibold text-content-primary mb-2 md:text-lg'>
           Feature tour
         </h2>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           Here’s how your plan turns the sky into daily guidance.
         </p>
       </div>
@@ -163,7 +163,7 @@ export function OnboardingFeatureTour({
             className={`rounded-full px-3 py-1 text-xs font-medium transition ${
               idx === currentFeature
                 ? 'bg-lunary-primary text-white'
-                : 'border border-zinc-700 text-zinc-300 hover:border-zinc-500'
+                : 'border border-stroke-default text-content-secondary hover:border-stroke-strong'
             }`}
             aria-label={`Show ${feature.title}`}
           >
@@ -172,50 +172,54 @@ export function OnboardingFeatureTour({
         ))}
       </div>
 
-      <div className='rounded-xl border border-zinc-800 bg-zinc-950/60 p-4'>
+      <div className='rounded-xl border border-stroke-subtle bg-surface-base/60 p-4'>
         <div className='flex items-start gap-3'>
           <div className='inline-flex h-10 w-10 items-center justify-center rounded-lg bg-lunary-primary-500/20'>
-            <Icon className='h-5 w-5 text-lunary-primary-300' />
+            <Icon className='h-5 w-5 text-content-brand' />
           </div>
           <div>
-            <h3 className='text-sm font-semibold text-white'>
+            <h3 className='text-sm font-semibold text-content-primary'>
               {Feature.title}
             </h3>
-            <p className='text-xs text-zinc-400 mt-1'>{Feature.description}</p>
+            <p className='text-xs text-content-muted mt-1'>
+              {Feature.description}
+            </p>
           </div>
         </div>
-        <div className='mt-4 space-y-2 text-xs text-zinc-300'>
+        <div className='mt-4 space-y-2 text-xs text-content-secondary'>
           {Feature.highlights.map((item) => (
             <div key={item} className='flex items-start gap-2'>
-              <span className='text-lunary-accent-300 mt-0.5'>•</span>
+              <span className='text-content-brand-accent mt-0.5'>•</span>
               <span>{item}</span>
             </div>
           ))}
         </div>
 
-        <div className='mt-4 rounded-lg border border-zinc-800 bg-zinc-900/40 p-4'>
+        <div className='mt-4 rounded-lg border border-stroke-subtle bg-surface-elevated/40 p-4'>
           <div className='flex items-center justify-between mb-2'>
-            <h4 className='text-xs font-semibold text-zinc-200 uppercase tracking-wide'>
+            <h4 className='text-xs font-semibold text-content-primary uppercase tracking-wide'>
               {isSubscribed && planId !== 'free'
                 ? 'Included in your plan'
                 : 'Included with your account'}
             </h4>
             {isSubscribed && planId !== 'free' && (
-              <span className='text-[10px] uppercase tracking-wide text-lunary-accent-200/80'>
+              <span className='text-[10px] uppercase tracking-wide text-content-brand-accent/80'>
                 Premium
               </span>
             )}
           </div>
-          <div className='space-y-3 text-xs text-zinc-300'>
+          <div className='space-y-3 text-xs text-content-secondary'>
             {planHighlights.map((section) => (
               <div key={section.title} className='space-y-2'>
-                <div className='text-[11px] font-semibold uppercase tracking-wide text-zinc-400'>
+                <div className='text-[11px] font-semibold uppercase tracking-wide text-content-muted'>
                   {section.title}
                 </div>
                 <div className='grid gap-2 sm:grid-cols-2'>
                   {section.items.map((item) => (
                     <div key={item} className='flex items-start gap-2'>
-                      <span className='text-lunary-accent-300 mt-0.5'>•</span>
+                      <span className='text-content-brand-accent mt-0.5'>
+                        •
+                      </span>
                       <span>{item}</span>
                     </div>
                   ))}
@@ -229,7 +233,7 @@ export function OnboardingFeatureTour({
       <div className='flex items-center justify-between gap-3'>
         <button
           onClick={handleSkip}
-          className='px-4 py-2 text-sm text-zinc-400 hover:text-white transition-colors'
+          className='px-4 py-2 text-sm text-content-muted hover:text-content-primary transition-colors'
         >
           Skip
         </button>
@@ -237,7 +241,7 @@ export function OnboardingFeatureTour({
           {currentFeature < features.length - 1 ? (
             <button
               onClick={handleNext}
-              className='inline-flex items-center gap-2 rounded-lg bg-lunary-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-700'
+              className='inline-flex items-center gap-2 rounded-lg bg-lunary-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-layer-high'
             >
               Next
               <ChevronRight className='w-4 h-4' />
@@ -245,7 +249,7 @@ export function OnboardingFeatureTour({
           ) : (
             <button
               onClick={onComplete}
-              className='inline-flex items-center gap-2 rounded-lg bg-lunary-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-700'
+              className='inline-flex items-center gap-2 rounded-lg bg-lunary-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-layer-high'
             >
               Continue
               <ChevronRight className='w-4 h-4' />

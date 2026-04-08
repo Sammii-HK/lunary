@@ -24,11 +24,11 @@ export function FooterSectionPage({
       <MarketingBreadcrumbs />
 
       <header className='space-y-3'>
-        <h1 className='text-2xl md:text-3xl font-semibold text-white'>
+        <h1 className='text-2xl md:text-3xl font-semibold text-content-primary'>
           {title}
         </h1>
         {description && (
-          <p className='text-zinc-300 max-w-2xl'>{description}</p>
+          <p className='text-content-secondary max-w-2xl'>{description}</p>
         )}
       </header>
 
@@ -37,13 +37,13 @@ export function FooterSectionPage({
           <Link
             key={item.href}
             href={item.href}
-            className='rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 transition hover:border-lunary-primary-700 hover:bg-zinc-900/60'
+            className='rounded-xl border border-stroke-subtle bg-surface-base/60 p-5 transition hover:border-lunary-primary-700 hover:bg-surface-elevated/60'
           >
-            <h2 className='text-base font-semibold text-white mb-2'>
+            <h2 className='text-base font-semibold text-content-primary mb-2'>
               {item.title}
             </h2>
             {item.description && (
-              <p className='text-sm text-zinc-400'>{item.description}</p>
+              <p className='text-sm text-content-muted'>{item.description}</p>
             )}
           </Link>
         ))}

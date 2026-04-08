@@ -97,18 +97,18 @@ export default function VerifyEmailPage() {
   const getBackgroundColor = () => {
     switch (status) {
       case 'success':
-        return 'bg-lunary-success-900/20 border-lunary-success-700';
+        return 'bg-layer-base/20 border-lunary-success-700';
       case 'error':
-        return 'bg-lunary-error-900/20 border-lunary-error-700';
+        return 'bg-layer-base/20 border-lunary-error-700';
       case 'expired':
-        return 'bg-lunary-accent-900/20 border-lunary-accent-700';
+        return 'bg-layer-base/20 border-lunary-accent-700';
       default:
-        return 'bg-lunary-secondary-900/20 border-lunary-secondary-700';
+        return 'bg-layer-base/20 border-lunary-secondary-700';
     }
   };
 
   return (
-    <div className='min-h-screen bg-black text-white flex items-center justify-center p-8'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex items-center justify-center p-8'>
       <div className='max-w-md w-full'>
         <div
           className={`border rounded-lg p-8 text-center ${getBackgroundColor()}`}
@@ -122,11 +122,13 @@ export default function VerifyEmailPage() {
             {status === 'expired' && 'Link Expired'}
           </h1>
 
-          <p className='text-zinc-300 mb-6 leading-relaxed'>{message}</p>
+          <p className='text-content-secondary mb-6 leading-relaxed'>
+            {message}
+          </p>
 
           <div className='space-y-3'>
             {status === 'success' && (
-              <div className='text-sm text-zinc-400'>
+              <div className='text-sm text-content-muted'>
                 Redirecting to your profile in 3 seconds...
               </div>
             )}
@@ -135,11 +137,11 @@ export default function VerifyEmailPage() {
               <div className='space-y-3'>
                 <a
                   href='/auth'
-                  className='inline-block bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors'
+                  className='inline-block bg-lunary-primary-600 hover:bg-layer-high text-white px-6 py-3 rounded-lg font-medium transition-colors'
                 >
                   Try Again
                 </a>
-                <div className='text-sm text-zinc-400'>
+                <div className='text-sm text-content-muted'>
                   Need help? Contact support or try signing up again.
                 </div>
               </div>
@@ -153,23 +155,23 @@ export default function VerifyEmailPage() {
                 >
                   Sign Up Again
                 </a>
-                <div className='text-sm text-zinc-400'>
+                <div className='text-sm text-content-muted'>
                   You'll receive a new verification email.
                 </div>
               </div>
             )}
 
             {status === 'verifying' && (
-              <div className='text-sm text-zinc-400'>
+              <div className='text-sm text-content-muted'>
                 This may take a few moments...
               </div>
             )}
           </div>
 
-          <div className='mt-8 pt-6 border-t border-zinc-700'>
+          <div className='mt-8 pt-6 border-t border-stroke-default'>
             <Link
               href='/'
-              className='text-zinc-400 hover:text-white transition-colors text-sm'
+              className='text-content-muted hover:text-content-primary transition-colors text-sm'
             >
               ← Back to Home
             </Link>

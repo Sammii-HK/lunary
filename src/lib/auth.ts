@@ -182,27 +182,52 @@ async function initializeAuth() {
             text = `Verify your email to start your Lunary trial:\n${url}`;
           }
 
-          await emailModule.sendEmail({
-            to: user.email,
-            subject: 'One click to start your trial',
-            html,
-            text,
-            tracking: {
-              userId: user.id || user.email,
-              notificationType: 'email_verification',
-              notificationId: `email-verify-${token}`,
-              utm: {
-                source: 'email',
-                medium: 'auth',
-                campaign: 'email_verification',
-              },
-            },
-          });
-          console.log(`[verification-email] ✅ Sent to ${user.email}`);
+          // Attempt to send with 1 retry on transient failure
+          let lastEmailError: unknown;
+          for (let attempt = 1; attempt <= 2; attempt++) {
+            try {
+              await emailModule.sendEmail({
+                to: user.email,
+                subject: 'One click to start your trial',
+                html,
+                text,
+                tracking: {
+                  userId: user.id || user.email,
+                  notificationType: 'email_verification',
+                  notificationId: `email-verify-${token}`,
+                  utm: {
+                    source: 'email',
+                    medium: 'auth',
+                    campaign: 'email_verification',
+                  },
+                },
+              });
+              lastEmailError = null;
+              console.log(
+                `[verification-email] ✅ Sent to ${user.email} (attempt ${attempt})`,
+              );
+              break;
+            } catch (emailError) {
+              lastEmailError = emailError;
+              console.warn(
+                `[verification-email] Attempt ${attempt} failed:`,
+                emailError,
+              );
+              if (attempt < 2) {
+                await new Promise((r) => setTimeout(r, 1000));
+              }
+            }
+          }
+          if (lastEmailError) {
+            console.error(
+              '[verification-email] ❌ Failed after 2 attempts:',
+              lastEmailError,
+            );
+          }
         } catch (error) {
           // Log but do NOT re-throw — a failed email must not block signup.
           // The user can request a resend from /auth/verify-email.
-          console.error('[verification-email] ❌ Failed to send:', error);
+          console.error('[verification-email] ❌ Unexpected error:', error);
         }
       },
     },

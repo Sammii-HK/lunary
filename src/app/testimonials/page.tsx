@@ -48,10 +48,10 @@ export default function TestimonialsPage() {
           <p className='text-xs tracking-[0.4em] uppercase text-lunary-accent'>
             Featured Voices
           </p>
-          <h1 className='text-3xl font-semibold leading-tight text-white md:text-4xl lg:text-5xl'>
+          <h1 className='text-3xl font-semibold leading-tight text-content-primary md:text-4xl lg:text-5xl'>
             Stories curated from our community.
           </h1>
-          <p className='text-base text-zinc-300'>
+          <p className='text-base text-content-secondary'>
             These testimonials were handpicked by the Lunary team. They
             highlight how cosmic guidance, rituals, and the app experience
             glassify into meaningful change.
@@ -65,11 +65,11 @@ export default function TestimonialsPage() {
             </div>
           )}
           {testimonials === null ? (
-            <div className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-8 text-center text-sm text-zinc-400'>
+            <div className='rounded-3xl border border-stroke-subtle/60 bg-surface-elevated/60 p-8 text-center text-sm text-content-muted'>
               Loading stories…
             </div>
           ) : testimonials.length === 0 ? (
-            <div className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-8 text-center text-sm text-zinc-400'>
+            <div className='rounded-3xl border border-stroke-subtle/60 bg-surface-elevated/60 p-8 text-center text-sm text-content-muted'>
               No featured testimonials yet. Check back soon for fresh stories.
             </div>
           ) : (
@@ -77,13 +77,13 @@ export default function TestimonialsPage() {
               {testimonials.map((testimonial) => (
                 <article
                   key={testimonial.id}
-                  className='flex flex-col rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-6 shadow-[0px_15px_30px_rgba(0,0,0,0.35)] transition hover:border-lunary-secondary'
+                  className='flex flex-col rounded-3xl border border-stroke-subtle/60 bg-surface-elevated/60 p-6 shadow-[0px_15px_30px_rgba(0,0,0,0.35)] transition hover:border-lunary-secondary'
                 >
-                  <p className='text-sm text-zinc-300 leading-relaxed'>
+                  <p className='text-sm text-content-secondary leading-relaxed'>
                     “{testimonial.message}”
                   </p>
-                  <div className='mt-6 flex flex-col gap-1 text-xs uppercase tracking-[0.3em] text-zinc-500'>
-                    <span className='text-sm font-semibold uppercase tracking-[0.3em] text-white'>
+                  <div className='mt-6 flex flex-col gap-1 text-xs uppercase tracking-[0.3em] text-content-muted'>
+                    <span className='text-sm font-semibold uppercase tracking-[0.3em] text-content-primary'>
                       {testimonial.name}
                     </span>
                     <span>

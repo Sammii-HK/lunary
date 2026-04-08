@@ -34,8 +34,8 @@ export function GiftTypeCard({
       className={cn(
         'w-full rounded-xl border p-4 text-left transition-all',
         selected
-          ? 'border-lunary-primary-500 bg-lunary-primary-900/20 ring-1 ring-lunary-primary-500/50'
-          : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700',
+          ? 'border-lunary-primary-500 bg-layer-base/20 ring-1 ring-lunary-primary-500/50'
+          : 'border-stroke-subtle bg-surface-elevated/50 hover:border-stroke-default',
       )}
     >
       <div className='flex items-start gap-3'>
@@ -44,14 +44,14 @@ export function GiftTypeCard({
             'w-10 h-10 rounded-lg flex items-center justify-center shrink-0',
             selected
               ? 'bg-lunary-primary-500/20 text-lunary-primary-400'
-              : 'bg-zinc-800 text-zinc-400',
+              : 'bg-surface-card text-content-muted',
           )}
         >
           <Icon className='w-5 h-5' />
         </div>
         <div>
-          <p className='text-sm font-medium text-white'>{name}</p>
-          <p className='text-xs text-zinc-400 mt-0.5'>{description}</p>
+          <p className='text-sm font-medium text-content-primary'>{name}</p>
+          <p className='text-xs text-content-muted mt-0.5'>{description}</p>
         </div>
       </div>
     </button>

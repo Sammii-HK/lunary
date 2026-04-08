@@ -156,8 +156,8 @@ const calculateAspectsWithDegrees = (
 
 const getOrbColor = (orb: number): string => {
   if (orb <= 2) return 'text-lunary-success-400';
-  if (orb <= 5) return 'text-lunary-accent-300';
-  return 'text-zinc-400';
+  if (orb <= 5) return 'text-content-brand-accent';
+  return 'text-content-muted';
 };
 
 const getAspectStyles = (
@@ -169,41 +169,41 @@ const getAspectStyles = (
   > = {
     conjunction: {
       border: 'border-lunary-primary-400/40',
-      bg: 'bg-lunary-primary-950/40',
-      symbol: 'text-lunary-primary-300',
-      label: 'text-lunary-primary-200',
+      bg: 'bg-layer-deep/40',
+      symbol: 'text-content-brand',
+      label: 'text-content-secondary',
     },
     opposition: {
       border: 'border-lunary-error-300/30',
-      bg: 'bg-lunary-error-950/30',
+      bg: 'bg-layer-deep/30',
       symbol: 'text-lunary-error-300',
       label: 'text-lunary-error-200',
     },
     trine: {
       border: 'border-lunary-success-400/40',
-      bg: 'bg-lunary-success-950/40',
+      bg: 'bg-layer-deep/40',
       symbol: 'text-lunary-success-300',
       label: 'text-lunary-success-200',
     },
     square: {
       border: 'border-lunary-rose-400/40',
-      bg: 'bg-lunary-rose-950/40',
+      bg: 'bg-layer-deep/40',
       symbol: 'text-lunary-rose-300',
       label: 'text-lunary-rose-200',
     },
     sextile: {
       border: 'border-lunary-secondary-400/40',
-      bg: 'bg-lunary-secondary-950/40',
-      symbol: 'text-lunary-secondary-300',
-      label: 'text-lunary-secondary-200',
+      bg: 'bg-layer-deep/40',
+      symbol: 'text-content-brand-secondary',
+      label: 'text-content-brand-secondary',
     },
   };
   return (
     styles[aspectType] || {
-      border: 'border-zinc-700',
-      bg: 'bg-zinc-800/50',
-      symbol: 'text-zinc-400',
-      label: 'text-zinc-300',
+      border: 'border-stroke-default',
+      bg: 'bg-surface-card/50',
+      symbol: 'text-content-muted',
+      label: 'text-content-secondary',
     }
   );
 };
@@ -285,7 +285,7 @@ export function MoonPhaseCard({
   }
 
   return (
-    <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-4'>
+    <div className='rounded-lg border border-lunary-secondary-800 bg-layer-deep/40 p-4'>
       <div className='flex items-start gap-3'>
         <Image
           src={cosmicContext.moonPhase.icon.src}
@@ -296,11 +296,11 @@ export function MoonPhaseCard({
         />
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-2 mb-1'>
-            <p className='text-sm font-medium text-lunary-secondary-300'>
+            <p className='text-sm font-medium text-content-brand-secondary'>
               {cosmicContext.moonPhase.name}
             </p>
             {moonHouse && (
-              <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-primary-900/50 text-lunary-primary-300 border border-lunary-primary-700/30 font-medium'>
+              <span className='text-xs px-2 py-0.5 rounded-full bg-layer-base/50 text-content-brand border border-lunary-primary-700/30 font-medium'>
                 in your {moonHouse}
                 {moonHouse === 1
                   ? 'st'
@@ -317,18 +317,18 @@ export function MoonPhaseCard({
             {cosmicContext.moonPhase.keywords.map((keyword, idx) => (
               <span
                 key={idx}
-                className='text-xs px-2 py-0.5 rounded-full bg-lunary-secondary-900/50 text-lunary-secondary-400 border border-lunary-secondary-800'
+                className='text-xs px-2 py-0.5 rounded-full bg-layer-base/50 text-lunary-secondary-400 border border-lunary-secondary-800'
               >
                 {keyword}
               </span>
             ))}
           </div>
           {moonHouseInterpretation ? (
-            <p className='text-xs text-zinc-300 leading-relaxed mb-2 font-medium'>
+            <p className='text-xs text-content-secondary leading-relaxed mb-2 font-medium'>
               {moonHouseInterpretation}
             </p>
           ) : (
-            <p className='text-xs text-zinc-400 leading-relaxed'>
+            <p className='text-xs text-content-muted leading-relaxed'>
               {cosmicContext.moonPhase.information}
             </p>
           )}
@@ -352,7 +352,7 @@ export function TodaysAspects({
   if (aspects.length === 0) {
     return (
       <div className='text-center py-4'>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           No significant aspects between today&apos;s transits and your birth
           chart.
         </p>
@@ -369,63 +369,62 @@ export function TodaysAspects({
             key={index}
             className={`rounded-lg border ${styles.border} ${styles.bg} p-3`}
           >
-            <div className='flex items-start gap-3'>
-              <div
-                className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${styles.bg} border ${styles.border}`}
-              >
-                <span className={`text-lg ${styles.symbol}`}>
-                  {aspect.aspectSymbol}
-                </span>
-              </div>
-
-              <div className='flex-1 min-w-0'>
-                <div className='flex items-center justify-between mb-0.5'>
+            <div>
+              <div className='flex items-center justify-between mb-0.5'>
+                <div className='flex items-center gap-1.5'>
+                  <span className={`text-base leading-none ${styles.symbol}`}>
+                    {aspect.aspectSymbol}
+                  </span>
                   <span
                     className={`text-sm font-medium capitalize ${styles.label}`}
                   >
                     {aspect.aspectType}
                   </span>
-                  <span className={`text-xs ${getOrbColor(aspect.orb)}`}>
-                    {aspect.orb}°
-                  </span>
                 </div>
-                <p className='text-xs text-zinc-400 mb-1'>
-                  {getAspectDescription(aspect.aspectType)}
-                </p>
-
-                <div className='flex items-center gap-2 text-xs mb-2'>
-                  <span className='text-zinc-300'>{aspect.transitPlanet}</span>
-                  <span className='text-zinc-600'>
-                    {aspect.transitDegree.split(' ')[0]}
-                  </span>
-                  <span className={`${styles.symbol}`}>
-                    {aspect.aspectSymbol}
-                  </span>
-                  <span className='text-zinc-300'>{aspect.natalPlanet}</span>
-                  <span className='text-zinc-600'>
-                    {aspect.natalDegree.split(' ')[0]}
-                  </span>
-                </div>
-
-                <div className='flex flex-wrap items-center gap-1.5 mb-2'>
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${
-                      aspect.duration.isApplying
-                        ? 'bg-lunary-primary-950/60 text-lunary-primary-300 border-lunary-primary-700/50'
-                        : 'bg-zinc-900/60 text-zinc-400 border-zinc-700/50'
-                    }`}
-                  >
-                    {aspect.duration.isApplying ? 'Applying' : 'Separating'}
-                  </span>
-                  <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border bg-zinc-900 border-zinc-800 text-zinc-400'>
-                    {aspect.duration.displayText}
-                  </span>
-                </div>
-
-                <p className='text-xs text-zinc-400 leading-relaxed'>
-                  {aspect.interpretation}
-                </p>
+                <span className={`text-xs ${getOrbColor(aspect.orb)}`}>
+                  {aspect.orb}°
+                </span>
               </div>
+              <p className='text-xs text-content-muted mb-1'>
+                {getAspectDescription(aspect.aspectType)}
+              </p>
+
+              <div className='flex items-center gap-2 text-xs mb-2'>
+                <span className='text-content-secondary'>
+                  {aspect.transitPlanet}
+                </span>
+                <span className='text-content-muted'>
+                  {aspect.transitDegree.split(' ')[0]}
+                </span>
+                <span className={`${styles.symbol}`}>
+                  {aspect.aspectSymbol}
+                </span>
+                <span className='text-content-secondary'>
+                  {aspect.natalPlanet}
+                </span>
+                <span className='text-content-muted'>
+                  {aspect.natalDegree.split(' ')[0]}
+                </span>
+              </div>
+
+              <div className='flex flex-wrap items-center gap-1.5 mb-2'>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${
+                    aspect.duration.isApplying
+                      ? 'bg-layer-deep/60 text-content-brand border-lunary-primary-700/50'
+                      : 'bg-surface-elevated/60 text-content-muted border-stroke-default/50'
+                  }`}
+                >
+                  {aspect.duration.isApplying ? 'Applying' : 'Separating'}
+                </span>
+                <span className='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border bg-surface-elevated border-stroke-subtle text-content-muted'>
+                  {aspect.duration.displayText}
+                </span>
+              </div>
+
+              <p className='text-xs text-content-muted leading-relaxed'>
+                {aspect.interpretation}
+              </p>
             </div>
           </div>
         );

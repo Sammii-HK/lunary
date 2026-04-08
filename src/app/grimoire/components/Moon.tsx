@@ -69,7 +69,7 @@ const Moon = () => {
         <Heading as='h2' variant='h2'>
           Moon Guides & Resources
         </Heading>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           Explore moon phases, full moon names, lunar wisdom, and moon rituals
         </p>
       </div>
@@ -77,23 +77,23 @@ const Moon = () => {
       {/* Complete Guide Banner */}
       <Link
         href='/grimoire/guides/moon-phases-guide'
-        className='block p-4 rounded-lg bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 hover:border-lunary-primary-500 transition-colors group'
+        className='block p-4 rounded-lg bg-gradient-to-r from-layer-base/30 to-lunary-rose-900/30 border border-lunary-primary-700 hover:border-lunary-primary-500 transition-colors group'
       >
         <div className='flex items-center justify-between'>
           <div>
             <Heading
               as='h3'
               variant='h4'
-              className='flex items-center gap-2 text-lunary-primary-300 group-hover:text-lunary-primary-200'
+              className='flex items-center gap-2 text-content-brand group-hover:text-content-secondary'
             >
-              <BookOpenIcon className='w-4 h-4 mr-2 text-lunary-primary-300' />
+              <BookOpenIcon className='w-4 h-4 mr-2 text-content-brand' />
               Read the Complete Moon Phases Guide
             </Heading>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Deep dive into lunar cycles, rituals, and working with moon energy
             </p>
           </div>
-          <ArrowRight className='w-4 h-4 text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors' />
+          <ArrowRight className='w-4 h-4 text-lunary-primary-400 group-hover:text-content-brand transition-colors' />
         </div>
       </Link>
 
@@ -103,23 +103,25 @@ const Moon = () => {
           <Link
             key={section.title}
             href={section.href}
-            className='block p-5 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+            className='block p-5 rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
           >
             <div className='flex items-start gap-4'>
-              <span className='text-zinc-400 group-hover:text-lunary-primary-400 transition-colors mt-1'>
+              <span className='text-content-muted group-hover:text-lunary-primary-400 transition-colors mt-1'>
                 {section.icon}
               </span>
               <div className='flex-1'>
                 <Heading
                   as='h3'
                   variant='h4'
-                  className='text-lunary-secondary-200 group-hover:text-lunary-secondary-300'
+                  className='text-content-brand-secondary group-hover:text-content-brand-secondary'
                 >
                   {section.title}
                 </Heading>
-                <p className='text-sm text-zinc-400'>{section.description}</p>
+                <p className='text-sm text-content-muted'>
+                  {section.description}
+                </p>
               </div>
-              <span className='text-zinc-600 group-hover:text-lunary-primary-400 transition-colors'>
+              <span className='text-content-muted group-hover:text-lunary-primary-400 transition-colors'>
                 →
               </span>
             </div>
@@ -139,17 +141,17 @@ const Moon = () => {
               <Link
                 key={phase}
                 href={`/grimoire/moon/phases/${phaseSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group text-center'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group text-center'
               >
                 <div className='flex justify-center mb-1'>
-                  <div className='w-12 h-12 rounded-full bg-zinc-950/60 flex items-center justify-center'>
+                  <div className='w-12 h-12 rounded-full bg-surface-base/60 flex items-center justify-center'>
                     <MoonPhaseIcon
                       phase={phase as MonthlyMoonPhaseKey}
                       size={32}
                     />
                   </div>
                 </div>
-                <span className='text-sm text-zinc-300 group-hover:text-lunary-primary-300 transition-colors'>
+                <span className='text-sm text-content-secondary group-hover:text-content-brand transition-colors'>
                   {phase}
                 </span>
               </Link>
@@ -170,16 +172,16 @@ const Moon = () => {
               <Link
                 key={moon}
                 href={`/grimoire/moon/full-moons/${monthSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <Heading
                   as='h3'
                   variant='h4'
-                  className='text-zinc-100 group-hover:text-lunary-primary-400 mb-2'
+                  className='text-content-primary group-hover:text-lunary-primary-400 mb-2'
                 >
                   {annualFullMoons[moon as keyof typeof annualFullMoons].name}
                 </Heading>
-                <p className='text-xs text-zinc-400'>{months[index]}</p>
+                <p className='text-xs text-content-muted'>{months[index]}</p>
               </Link>
             );
           })}

@@ -50,10 +50,12 @@ export function CosmicConnections({
                 <NavParamLink
                   key={`${link.href}-${linkIndex}`}
                   href={link.href}
-                  className='flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:border-lunary-primary-600 hover:bg-zinc-800/50 transition-colors text-sm'
+                  className='flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface-elevated/50 border border-stroke-subtle/50 hover:border-lunary-primary-600 hover:bg-surface-card/50 transition-colors text-sm'
                 >
-                  <span className='text-zinc-300 truncate'>{link.label}</span>
-                  {/* <ArrowRight className='h-3 w-3 text-zinc-500 flex-shrink-0' /> */}
+                  <span className='text-content-secondary truncate'>
+                    {link.label}
+                  </span>
+                  {/* <ArrowRight className='h-3 w-3 text-content-muted flex-shrink-0' /> */}
                 </NavParamLink>
               ))}
             </div>

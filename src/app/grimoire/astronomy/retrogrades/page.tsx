@@ -139,34 +139,34 @@ export default function RetrogradesIndexPage() {
           <div className='flex justify-center mb-4'>
             <RotateCcw className='w-16 h-16 text-lunary-primary-400' />
           </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-4'>
             Planetary Retrogrades
           </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
+          <p className='text-lg text-content-muted max-w-2xl mx-auto'>
             When a planet appears to move backward in the sky, it&apos;s
             retrograde. Each planet&apos;s retrograde brings opportunities for
             review, reflection, and revision.
           </p>
         </div>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-10'>
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
             What is Retrograde?
           </h2>
-          <p className='text-zinc-400 mb-4'>
+          <p className='text-content-muted mb-4'>
             Retrograde is an optical illusion caused by the relative positions
             and speeds of Earth and other planets. When a planet is retrograde,
             its energy turns inward — a time for reflection rather than new
             beginnings.
           </p>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Rather than fearing retrogrades, use them as opportunities to
             revisit, revise, and reflect on the themes each planet represents.
           </p>
         </div>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             All Planetary Retrogrades
           </h2>
           <div className='space-y-4'>
@@ -174,27 +174,27 @@ export default function RetrogradesIndexPage() {
               <Link
                 key={retrograde.slug}
                 href={`/grimoire/astronomy/retrogrades/${retrograde.slug}`}
-                className='group flex items-start gap-4 rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                className='group flex items-start gap-4 rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
               >
                 <div className='text-3xl font-astro text-lunary-primary-400'>
                   {retrograde.symbol}
                 </div>
                 <div className='flex-1'>
                   <div className='flex items-center gap-3 mb-1'>
-                    <h3 className='text-xl font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                    <h3 className='text-xl font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                       {retrograde.name}
                     </h3>
                   </div>
-                  <div className='flex gap-4 text-sm text-zinc-400 mb-2'>
+                  <div className='flex gap-4 text-sm text-content-muted mb-2'>
                     <span>{retrograde.frequency}</span>
                     <span>•</span>
                     <span>{retrograde.duration}</span>
                   </div>
-                  <p className='text-sm text-zinc-400'>
+                  <p className='text-sm text-content-muted'>
                     Themes: {retrograde.themes}
                   </p>
                 </div>
-                <div className='text-zinc-600 group-hover:text-lunary-primary-400 transition-colors'>
+                <div className='text-content-muted group-hover:text-lunary-primary-400 transition-colors'>
                   →
                 </div>
               </Link>
@@ -202,32 +202,32 @@ export default function RetrogradesIndexPage() {
           </div>
         </section>
 
-        <div className='border-t border-zinc-800 pt-8'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+        <div className='border-t border-stroke-subtle pt-8'>
+          <h3 className='text-lg font-medium text-content-primary mb-4'>
             Explore More Astrology
           </h3>
           <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/transits'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Transits
             </Link>
             <Link
               href='/grimoire/astronomy'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Astronomy
             </Link>
             <Link
               href='/grimoire/events'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Astrological Events
             </Link>
             <Link
               href='/grimoire/horoscopes'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Horoscopes
             </Link>

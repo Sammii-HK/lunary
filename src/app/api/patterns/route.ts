@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 interface PatternResponse {
   dominantThemes: string[];
-  frequentCards: Array<{ name: string; count: number }>;
+  frequentCards: Array<{ name: string; count: number; keywords: string[] }>;
   suitDistribution: Array<{ suit: string; count: number }>;
 }
 
@@ -31,6 +31,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     `;
 
     const cardFrequency: { [key: string]: number } = {};
+    const cardKeywords: { [key: string]: Set<string> } = {};
     const keywordCounts: { [key: string]: number } = {};
     const suitCounts: { [key: string]: number } = {};
 
@@ -51,6 +52,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         const keywords = card.card?.keywords || card.keywords || [];
         keywords.forEach((keyword: string) => {
           keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+          if (cardName) {
+            if (!cardKeywords[cardName]) cardKeywords[cardName] = new Set();
+            cardKeywords[cardName].add(keyword);
+          }
         });
       });
     });
@@ -64,7 +69,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       .filter(([, count]) => count >= 2)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 10)
-      .map(([name, count]) => ({ name, count: count as number }));
+      .map(([name, count]) => ({
+        name,
+        count: count as number,
+        keywords: Array.from(cardKeywords[name] ?? []).slice(0, 3),
+      }));
 
     const suitDistribution = Object.entries(suitCounts)
       .sort(([, a], [, b]) => b - a)

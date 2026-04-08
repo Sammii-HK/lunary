@@ -82,7 +82,7 @@ export default async function TransitOfTheDayPage() {
     });
 
   return (
-    <div className='min-h-fit bg-zinc-950 text-zinc-100'>
+    <div className='min-h-fit bg-surface-base text-content-primary'>
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <SEOContentTemplate
           title='Transit of the Day | Daily Astrology Timing'
@@ -121,30 +121,30 @@ export default async function TransitOfTheDayPage() {
             },
           ]}
         >
-          <section className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 mb-10'>
-            <p className='text-xs uppercase tracking-[0.3em] text-zinc-500 mb-2'>
+          <section className='rounded-2xl border border-stroke-subtle bg-surface-elevated/50 p-6 mb-10'>
+            <p className='text-xs uppercase tracking-[0.3em] text-content-muted mb-2'>
               {dateLabel}
             </p>
-            <h2 className='text-2xl font-semibold text-zinc-100 mb-3'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-3'>
               {headline}
             </h2>
-            <p className='text-sm text-zinc-300'>{energy}</p>
+            <p className='text-sm text-content-secondary'>{energy}</p>
           </section>
 
           <section className='mb-10'>
-            <h2 className='text-xl font-semibold text-zinc-100 mb-4'>
+            <h2 className='text-xl font-semibold text-content-primary mb-4'>
               Daily highlights
             </h2>
-            <ul className='space-y-2 text-sm text-zinc-300'>
+            <ul className='space-y-2 text-sm text-content-secondary'>
               {highlights.length > 0 ? (
                 highlights.map((item, index) => (
                   <li key={index} className='flex items-start gap-2'>
-                    <span className='text-lunary-primary-300'>•</span>
+                    <span className='text-content-brand'>•</span>
                     <span>{item}</span>
                   </li>
                 ))
               ) : (
-                <li className='text-zinc-400'>
+                <li className='text-content-muted'>
                   Highlights will update soon—check back for today’s transit
                   details.
                 </li>
@@ -152,11 +152,13 @@ export default async function TransitOfTheDayPage() {
             </ul>
           </section>
 
-          <section className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6'>
-            <h2 className='text-xl font-semibold text-zinc-100 mb-3'>
+          <section className='rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-6'>
+            <h2 className='text-xl font-semibold text-content-primary mb-3'>
               Daily timing guidance
             </h2>
-            <p className='text-sm text-zinc-300 leading-relaxed'>{guidance}</p>
+            <p className='text-sm text-content-secondary leading-relaxed'>
+              {guidance}
+            </p>
           </section>
         </SEOContentTemplate>
       </div>

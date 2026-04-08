@@ -82,13 +82,15 @@ export function MilestoneCelebration({
 
           <div className='text-center relative z-10'>
             <div className='w-16 h-16 bg-gradient-to-br from-lunary-primary-500 to-lunary-accent rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-lunary-primary-500/30'>
-              <Sparkles className='w-8 h-8 text-white' />
+              <Sparkles className='w-8 h-8 text-content-primary' />
             </div>
             <p className='text-[0.65rem] uppercase tracking-widest text-lunary-primary-400 mb-2'>
               Milestone Achieved
             </p>
-            <h2 className='text-xl font-bold text-white mb-2'>{title}</h2>
-            <p className='text-sm text-zinc-400 max-w-xs mx-auto'>
+            <h2 className='text-xl font-bold text-content-primary mb-2'>
+              {title}
+            </h2>
+            <p className='text-sm text-content-muted max-w-xs mx-auto'>
               {description}
             </p>
 

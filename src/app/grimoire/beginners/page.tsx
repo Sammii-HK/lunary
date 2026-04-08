@@ -183,7 +183,7 @@ export default function BeginnersGuidePage() {
   ]);
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(faqSchema)}
       {renderJsonLd(articleSchema)}
       {renderJsonLd(breadcrumbSchema)}
@@ -199,67 +199,58 @@ export default function BeginnersGuidePage() {
           <h1 className='text-4xl md:text-5xl font-light mb-4'>
             Beginner&apos;s Guide to Astrology, Tarot & Modern Witchcraft
           </h1>
-          <p className='text-xl text-zinc-400 leading-relaxed max-w-3xl'>
+          <p className='text-xl text-content-muted leading-relaxed max-w-3xl'>
             Welcome to the Lunary Grimoire. This guide introduces the core
             pillars of astrological and magical practice—giving you the
             foundation to explore with confidence and curiosity.
           </p>
         </header>
 
-        <nav className='mb-12 p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+        <nav className='mb-12 p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
           <h2 className='text-lg font-medium mb-4'>Table of Contents</h2>
-          <ol className='space-y-2 text-zinc-400'>
+          <ol className='space-y-2 text-content-muted'>
             <li>
-              <a
-                href='#what-is-grimoire'
-                className='hover:text-lunary-primary-300'
-              >
+              <a href='#what-is-grimoire' className='hover:text-content-brand'>
                 1. What This Grimoire Is (and Is Not)
               </a>
             </li>
             <li>
-              <a href='#how-to-use' className='hover:text-lunary-primary-300'>
+              <a href='#how-to-use' className='hover:text-content-brand'>
                 2. How to Use Lunary if You&apos;re Brand New
               </a>
             </li>
             <li>
-              <a
-                href='#astrology-basics'
-                className='hover:text-lunary-primary-300'
-              >
+              <a href='#astrology-basics' className='hover:text-content-brand'>
                 3. Astrology Basics
               </a>
             </li>
             <li>
-              <a href='#moon-cycles' className='hover:text-lunary-primary-300'>
+              <a href='#moon-cycles' className='hover:text-content-brand'>
                 4. Moon Cycles & Lunar Living
               </a>
             </li>
             <li>
-              <a href='#tarot' className='hover:text-lunary-primary-300'>
+              <a href='#tarot' className='hover:text-content-brand'>
                 5. Tarot as a Mirror
               </a>
             </li>
             <li>
-              <a href='#witchcraft' className='hover:text-lunary-primary-300'>
+              <a href='#witchcraft' className='hover:text-content-brand'>
                 6. Modern Witchcraft & Spellcraft
               </a>
             </li>
             <li>
-              <a
-                href='#safe-practice'
-                className='hover:text-lunary-primary-300'
-              >
+              <a href='#safe-practice' className='hover:text-content-brand'>
                 7. Safe, Ethical Practice
               </a>
             </li>
             <li>
-              <a href='#first-steps' className='hover:text-lunary-primary-300'>
+              <a href='#first-steps' className='hover:text-content-brand'>
                 8. Suggested First Steps
               </a>
             </li>
             <li>
-              <a href='#faq' className='hover:text-lunary-primary-300'>
+              <a href='#faq' className='hover:text-content-brand'>
                 9. FAQ for Beginners
               </a>
             </li>
@@ -273,7 +264,7 @@ export default function BeginnersGuidePage() {
             1. What This Grimoire Is (and Is Not)
           </h2>
 
-          <p className='text-zinc-300 leading-relaxed mb-6'>
+          <p className='text-content-secondary leading-relaxed mb-6'>
             A grimoire is traditionally a personal book of magical knowledge,
             spells, and spiritual insights. The Lunary Grimoire is a modern,
             digital version—a curated library of astrological wisdom, tarot
@@ -286,7 +277,7 @@ export default function BeginnersGuidePage() {
               <h3 className='text-lg font-medium text-lunary-success mb-3'>
                 What This Grimoire Is
               </h3>
-              <ul className='space-y-2 text-zinc-300 text-sm'>
+              <ul className='space-y-2 text-content-secondary text-sm'>
                 <li>• A reference library for self-reflection and learning</li>
                 <li>• Grounded in astronomical accuracy and symbolic wisdom</li>
                 <li>• Tools for self-awareness, not fortune-telling</li>
@@ -300,7 +291,7 @@ export default function BeginnersGuidePage() {
               <h3 className='text-lg font-medium text-lunary-error mb-3'>
                 What This Grimoire Is Not
               </h3>
-              <ul className='space-y-2 text-zinc-300 text-sm'>
+              <ul className='space-y-2 text-content-secondary text-sm'>
                 <li>• Not a replacement for therapy or medical advice</li>
                 <li>• Not a prediction service for locked-in futures</li>
                 <li>• Not a single tradition claiming to be the only way</li>
@@ -310,7 +301,7 @@ export default function BeginnersGuidePage() {
             </div>
           </div>
 
-          <p className='text-zinc-400 text-sm'>
+          <p className='text-content-muted text-sm'>
             Think of this grimoire as a companion for your journey, not a
             rulebook. Take what resonates, leave what doesn&apos;t, and always
             trust your own experience.
@@ -324,7 +315,7 @@ export default function BeginnersGuidePage() {
             2. How to Use Lunary if You&apos;re Brand New
           </h2>
 
-          <p className='text-zinc-300 leading-relaxed mb-6'>
+          <p className='text-content-secondary leading-relaxed mb-6'>
             Lunary is designed to meet you wherever you are. Here&apos;s a
             simple path for absolute beginners:
           </p>
@@ -332,12 +323,12 @@ export default function BeginnersGuidePage() {
           <div className='space-y-4'>
             <Link
               href='/birth-chart'
-              className='block p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='block p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+              <h3 className='text-lg font-medium text-content-primary mb-2'>
                 Step 1: Calculate Your Birth Chart
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Enter your birth date, time, and location to generate your
                 unique cosmic blueprint. This is the foundation of personalized
                 astrology.
@@ -346,12 +337,12 @@ export default function BeginnersGuidePage() {
 
             <Link
               href='/grimoire/zodiac'
-              className='block p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='block p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+              <h3 className='text-lg font-medium text-content-primary mb-2'>
                 Step 2: Learn Your Sun, Moon & Rising
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Your &quot;Big Three&quot; are the most important placements.
                 Start by reading about these three signs to understand your core
                 self.
@@ -360,12 +351,12 @@ export default function BeginnersGuidePage() {
 
             <Link
               href='/tarot'
-              className='block p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='block p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+              <h3 className='text-lg font-medium text-content-primary mb-2'>
                 Step 3: Draw a Daily Tarot Card
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Tarot is a wonderful reflection tool. Start with single-card
                 draws to build familiarity with the deck.
               </p>
@@ -373,12 +364,12 @@ export default function BeginnersGuidePage() {
 
             <Link
               href='/book-of-shadows'
-              className='block p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='block p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+              <h3 className='text-lg font-medium text-content-primary mb-2'>
                 Step 4: Start Your Book of Shadows
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Your personal journal for reflections, dreams, insights, and
                 intentions. This is where your practice becomes truly yours.
               </p>
@@ -393,13 +384,13 @@ export default function BeginnersGuidePage() {
             3. Astrology Basics
           </h2>
 
-          <p className='text-zinc-300 leading-relaxed mb-6'>
+          <p className='text-content-secondary leading-relaxed mb-6'>
             Astrology is the study of celestial patterns as mirrors for human
             experience. At its core are four building blocks: signs, planets,
             houses, and aspects.
           </p>
 
-          <h3 className='text-xl font-medium text-zinc-100 mb-4'>
+          <h3 className='text-xl font-medium text-content-primary mb-4'>
             The 12 Zodiac Signs
           </h3>
           <div className='grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 mb-6'>
@@ -407,21 +398,21 @@ export default function BeginnersGuidePage() {
               <Link
                 key={sign.name}
                 href={`/grimoire/zodiac/${sign.name.toLowerCase()}`}
-                className='p-3 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors text-center'
+                className='p-3 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors text-center'
               >
                 <div className='text-lg mb-1'>{sign.emoji}</div>
-                <div className='text-sm font-medium text-zinc-200'>
+                <div className='text-sm font-medium text-content-primary'>
                   {sign.name}
                 </div>
-                <div className='text-xs text-zinc-500'>{sign.trait}</div>
+                <div className='text-xs text-content-muted'>{sign.trait}</div>
               </Link>
             ))}
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
-            <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-              <h4 className='font-medium text-zinc-100 mb-2'>Planets</h4>
-              <p className='text-zinc-400 text-sm mb-2'>
+            <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+              <h4 className='font-medium text-content-primary mb-2'>Planets</h4>
+              <p className='text-content-muted text-sm mb-2'>
                 Each planet represents a type of energy: Sun (identity), Moon
                 (emotions), Mercury (communication), Venus (love), Mars
                 (action), etc.
@@ -433,9 +424,9 @@ export default function BeginnersGuidePage() {
                 Explore planets →
               </Link>
             </div>
-            <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-              <h4 className='font-medium text-zinc-100 mb-2'>Houses</h4>
-              <p className='text-zinc-400 text-sm mb-2'>
+            <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+              <h4 className='font-medium text-content-primary mb-2'>Houses</h4>
+              <p className='text-content-muted text-sm mb-2'>
                 The 12 houses represent life areas: self, money, communication,
                 home, creativity, health, relationships, transformation, travel,
                 career, community, spirituality.
@@ -451,7 +442,7 @@ export default function BeginnersGuidePage() {
 
           <Link
             href='/grimoire/guides/birth-chart-complete-guide'
-            className='inline-flex items-center gap-2 text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='inline-flex items-center gap-2 text-lunary-primary-400 hover:text-content-brand'
           >
             Read the complete Birth Chart guide
             <ArrowRight className='w-4 h-4' />
@@ -465,38 +456,40 @@ export default function BeginnersGuidePage() {
             4. Moon Cycles & Lunar Living
           </h2>
 
-          <p className='text-zinc-300 leading-relaxed mb-6'>
+          <p className='text-content-secondary leading-relaxed mb-6'>
             The Moon cycles through eight phases roughly every 29.5 days. Many
             practitioners align their intentions, rituals, and self-care with
             these natural rhythms.
           </p>
 
           <div className='grid grid-cols-2 md:grid-cols-4 gap-3 mb-6'>
-            <div className='p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center'>
+            <div className='p-4 rounded-xl border border-stroke-subtle bg-surface-elevated/30 text-center'>
               <div className='text-2xl mb-2'>🌑</div>
-              <div className='font-medium text-zinc-100'>New Moon</div>
-              <div className='text-xs text-zinc-400'>Set intentions</div>
+              <div className='font-medium text-content-primary'>New Moon</div>
+              <div className='text-xs text-content-muted'>Set intentions</div>
             </div>
-            <div className='p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center'>
+            <div className='p-4 rounded-xl border border-stroke-subtle bg-surface-elevated/30 text-center'>
               <div className='text-2xl mb-2'>🌓</div>
-              <div className='font-medium text-zinc-100'>Waxing</div>
-              <div className='text-xs text-zinc-400'>Build & grow</div>
+              <div className='font-medium text-content-primary'>Waxing</div>
+              <div className='text-xs text-content-muted'>Build & grow</div>
             </div>
-            <div className='p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center'>
+            <div className='p-4 rounded-xl border border-stroke-subtle bg-surface-elevated/30 text-center'>
               <div className='text-2xl mb-2'>🌕</div>
-              <div className='font-medium text-zinc-100'>Full Moon</div>
-              <div className='text-xs text-zinc-400'>Illuminate & release</div>
+              <div className='font-medium text-content-primary'>Full Moon</div>
+              <div className='text-xs text-content-muted'>
+                Illuminate & release
+              </div>
             </div>
-            <div className='p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-center'>
+            <div className='p-4 rounded-xl border border-stroke-subtle bg-surface-elevated/30 text-center'>
               <div className='text-2xl mb-2'>🌗</div>
-              <div className='font-medium text-zinc-100'>Waning</div>
-              <div className='text-xs text-zinc-400'>Let go & rest</div>
+              <div className='font-medium text-content-primary'>Waning</div>
+              <div className='text-xs text-content-muted'>Let go & rest</div>
             </div>
           </div>
 
           <Link
             href='/grimoire/guides/moon-phases-guide'
-            className='inline-flex items-center gap-2 text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='inline-flex items-center gap-2 text-lunary-primary-400 hover:text-content-brand'
           >
             Read the complete Moon Phases guide
             <ArrowRight className='w-4 h-4' />
@@ -507,31 +500,31 @@ export default function BeginnersGuidePage() {
         <section id='tarot' className='mb-16 scroll-mt-24'>
           <h2 className='text-3xl font-light mb-6'>5. Tarot as a Mirror</h2>
 
-          <p className='text-zinc-300 leading-relaxed mb-6'>
+          <p className='text-content-secondary leading-relaxed mb-6'>
             Tarot is a 78-card system that reflects your inner landscape. Rather
             than predicting a fixed future, tarot illuminates your current
             situation, offering perspectives and questions for reflection.
           </p>
 
-          <div className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 mb-6'>
-            <h3 className='font-medium text-zinc-100 mb-3'>
+          <div className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 mb-6'>
+            <h3 className='font-medium text-content-primary mb-3'>
               The Deck Structure
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <h4 className='text-sm font-medium text-lunary-primary-300 mb-2'>
+                <h4 className='text-sm font-medium text-content-brand mb-2'>
                   Major Arcana (22 cards)
                 </h4>
-                <p className='text-zinc-400 text-sm'>
+                <p className='text-content-muted text-sm'>
                   Major life themes and soul lessons. The Fool&apos;s journey
                   from innocence through experience to wisdom.
                 </p>
               </div>
               <div>
-                <h4 className='text-sm font-medium text-lunary-primary-300 mb-2'>
+                <h4 className='text-sm font-medium text-content-brand mb-2'>
                   Minor Arcana (56 cards)
                 </h4>
-                <p className='text-zinc-400 text-sm'>
+                <p className='text-content-muted text-sm'>
                   Daily life situations across four suits: Wands (passion), Cups
                   (emotions), Swords (mind), Pentacles (material world).
                 </p>
@@ -542,13 +535,13 @@ export default function BeginnersGuidePage() {
           <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/tarot'
-              className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+              className='text-lunary-primary-400 hover:text-content-brand text-sm'
             >
               Browse all 78 cards →
             </Link>
             <Link
               href='/grimoire/guides/tarot-complete-guide'
-              className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+              className='text-lunary-primary-400 hover:text-content-brand text-sm'
             >
               Read the complete Tarot guide →
             </Link>
@@ -561,16 +554,18 @@ export default function BeginnersGuidePage() {
             6. Modern Witchcraft & Spellcraft
           </h2>
 
-          <p className='text-zinc-300 leading-relaxed mb-6'>
+          <p className='text-content-secondary leading-relaxed mb-6'>
             Modern witchcraft is a practice centered on intention, energy, and
             symbolic action. It draws from folk traditions, psychology, and
             nature-based spirituality. There is no single &quot;right way&quot;
             to practice—many paths exist.
           </p>
 
-          <div className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 mb-6'>
-            <h3 className='font-medium text-zinc-100 mb-3'>Core Practices</h3>
-            <ul className='grid grid-cols-1 md:grid-cols-2 gap-3 text-zinc-300 text-sm'>
+          <div className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 mb-6'>
+            <h3 className='font-medium text-content-primary mb-3'>
+              Core Practices
+            </h3>
+            <ul className='grid grid-cols-1 md:grid-cols-2 gap-3 text-content-secondary text-sm'>
               <li>
                 <strong>Intention setting:</strong> Clarifying what you want to
                 call in or release
@@ -600,13 +595,13 @@ export default function BeginnersGuidePage() {
           <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/modern-witchcraft'
-              className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+              className='text-lunary-primary-400 hover:text-content-brand text-sm'
             >
               Explore Modern Witchcraft →
             </Link>
             <Link
               href='/grimoire/spells/fundamentals'
-              className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+              className='text-lunary-primary-400 hover:text-content-brand text-sm'
             >
               Spellcraft Fundamentals →
             </Link>
@@ -619,16 +614,16 @@ export default function BeginnersGuidePage() {
             7. Safe, Ethical Practice
           </h2>
 
-          <p className='text-zinc-300 leading-relaxed mb-6'>
+          <p className='text-content-secondary leading-relaxed mb-6'>
             Ethics matter in spiritual practice. Lunary emphasizes safety,
             consent, and self-responsibility in all its content.
           </p>
 
-          <div className='p-6 rounded-xl border border-lunary-primary-700 bg-lunary-primary-900/10 mb-6'>
-            <h3 className='font-medium text-lunary-primary-300 mb-3'>
+          <div className='p-6 rounded-xl border border-lunary-primary-700 bg-layer-base/10 mb-6'>
+            <h3 className='font-medium text-content-brand mb-3'>
               Principles of Safe Practice
             </h3>
-            <ul className='space-y-2 text-zinc-300 text-sm'>
+            <ul className='space-y-2 text-content-secondary text-sm'>
               <li>
                 <strong>No manipulation magic:</strong> Never attempt to control
                 another person&apos;s will, emotions, or choices.
@@ -657,7 +652,7 @@ export default function BeginnersGuidePage() {
 
           <Link
             href='/grimoire/modern-witchcraft/ethics'
-            className='inline-flex items-center gap-2 text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='inline-flex items-center gap-2 text-lunary-primary-400 hover:text-content-brand'
           >
             Read more about witchcraft ethics
             <ArrowRight className='w-4 h-4' />
@@ -668,7 +663,7 @@ export default function BeginnersGuidePage() {
         <section id='first-steps' className='mb-16 scroll-mt-24'>
           <h2 className='text-3xl font-light mb-6'>8. Suggested First Steps</h2>
 
-          <p className='text-zinc-300 leading-relaxed mb-6'>
+          <p className='text-content-secondary leading-relaxed mb-6'>
             Feeling overwhelmed? Start here. These five links will give you a
             solid foundation:
           </p>
@@ -676,50 +671,54 @@ export default function BeginnersGuidePage() {
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <Link
               href='/grimoire/guides/birth-chart-complete-guide'
-              className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <h3 className='font-medium text-zinc-100 mb-1'>
+              <h3 className='font-medium text-content-primary mb-1'>
                 1. Birth Chart Guide
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Understand your cosmic blueprint
               </p>
             </Link>
             <Link
               href='/grimoire/guides/moon-phases-guide'
-              className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <h3 className='font-medium text-zinc-100 mb-1'>
+              <h3 className='font-medium text-content-primary mb-1'>
                 2. Moon Phases Guide
               </h3>
-              <p className='text-zinc-400 text-sm'>Align with lunar rhythms</p>
+              <p className='text-content-muted text-sm'>
+                Align with lunar rhythms
+              </p>
             </Link>
             <Link
               href='/grimoire/tarot'
-              className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <h3 className='font-medium text-zinc-100 mb-1'>
+              <h3 className='font-medium text-content-primary mb-1'>
                 3. Tarot Card Meanings
               </h3>
-              <p className='text-zinc-400 text-sm'>Learn the 78 cards</p>
+              <p className='text-content-muted text-sm'>Learn the 78 cards</p>
             </Link>
             <Link
               href='/grimoire/modern-witchcraft/ethics'
-              className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+              className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors'
             >
-              <h3 className='font-medium text-zinc-100 mb-1'>
+              <h3 className='font-medium text-content-primary mb-1'>
                 4. Witchcraft Ethics
               </h3>
-              <p className='text-zinc-400 text-sm'>Practice with integrity</p>
+              <p className='text-content-muted text-sm'>
+                Practice with integrity
+              </p>
             </Link>
             <Link
               href='/book-of-shadows'
-              className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors md:col-span-2'
+              className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-colors md:col-span-2'
             >
-              <h3 className='font-medium text-zinc-100 mb-1'>
+              <h3 className='font-medium text-content-primary mb-1'>
                 5. Start Your Book of Shadows
               </h3>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Your personal journal for reflections, dreams, and magical notes
               </p>
             </Link>
@@ -734,23 +733,23 @@ export default function BeginnersGuidePage() {
             {faqs.map((faq, index) => (
               <div
                 key={index}
-                className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'
+                className='p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30'
               >
-                <h3 className='text-lg font-medium mb-2 text-zinc-100'>
+                <h3 className='text-lg font-medium mb-2 text-content-primary'>
                   {faq.question}
                 </h3>
-                <p className='text-zinc-400'>{faq.answer}</p>
+                <p className='text-content-muted'>{faq.answer}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* CTA Section */}
-        <section className='p-8 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-rose-900/20 text-center mb-12'>
-          <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+        <section className='p-8 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-layer-base/20 to-lunary-rose-900/20 text-center mb-12'>
+          <h2 className='text-2xl font-light text-content-primary mb-4'>
             Ready to Begin Your Journey?
           </h2>
-          <p className='text-zinc-300 mb-6 max-w-xl mx-auto'>
+          <p className='text-content-secondary mb-6 max-w-xl mx-auto'>
             The best way to learn is by doing. Calculate your birth chart, draw
             a tarot card, and start exploring the grimoire at your own pace.
           </p>

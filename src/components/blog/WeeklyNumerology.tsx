@@ -238,10 +238,10 @@ export function WeeklyNumerology({
             <span className='text-xs font-medium text-amber-300'>
               Universal Week
             </span>
-            <p className='text-sm text-zinc-300'>{meaning.name}</p>
+            <p className='text-sm text-content-secondary'>{meaning.name}</p>
           </div>
         </div>
-        <p className='text-xs text-zinc-400'>{meaning.theme}</p>
+        <p className='text-xs text-content-muted'>{meaning.theme}</p>
       </div>
     );
   }
@@ -254,7 +254,7 @@ export function WeeklyNumerology({
         Weekly Numerology
       </h2>
 
-      <div className='rounded-xl border border-amber-700/30 bg-gradient-to-br from-amber-950/20 to-zinc-900 p-6'>
+      <div className='rounded-xl border border-amber-700/30 bg-gradient-to-br from-amber-950/20 to-surface-elevated p-6'>
         {/* Header with number */}
         <div className='flex items-center gap-4 mb-4'>
           <div className='w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-900/30'>
@@ -264,7 +264,7 @@ export function WeeklyNumerology({
           </div>
           <div>
             <h3 className='text-xl font-bold text-amber-300'>{meaning.name}</h3>
-            <p className='text-sm text-zinc-400'>{meaning.theme}</p>
+            <p className='text-sm text-content-muted'>{meaning.theme}</p>
           </div>
         </div>
 
@@ -281,7 +281,7 @@ export function WeeklyNumerology({
         </div>
 
         {/* Energy description */}
-        <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+        <p className='text-sm text-content-secondary leading-relaxed mb-4'>
           {meaning.energy}
         </p>
 
@@ -300,7 +300,7 @@ export function WeeklyNumerology({
               {meaning.bestFor.map((item) => (
                 <li
                   key={item}
-                  className='text-zinc-400 flex items-center gap-2'
+                  className='text-content-muted flex items-center gap-2'
                 >
                   <span className='text-emerald-500'>+</span>
                   {item}
@@ -314,7 +314,7 @@ export function WeeklyNumerology({
               {meaning.avoid.map((item) => (
                 <li
                   key={item}
-                  className='text-zinc-400 flex items-center gap-2'
+                  className='text-content-muted flex items-center gap-2'
                 >
                   <span className='text-rose-500'>-</span>
                   {item}

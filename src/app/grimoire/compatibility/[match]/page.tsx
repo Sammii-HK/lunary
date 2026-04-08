@@ -74,11 +74,11 @@ function ScoreBar({ score, label }: { score: number; label: string }) {
     <div className='space-y-1'>
       {label && (
         <div className='flex justify-between text-sm'>
-          <span className='text-zinc-400'>{label}</span>
-          <span className='text-zinc-300'>{score}/10</span>
+          <span className='text-content-muted'>{label}</span>
+          <span className='text-content-secondary'>{score}/10</span>
         </div>
       )}
-      <div className='h-2 bg-zinc-800 rounded-full overflow-hidden'>
+      <div className='h-2 bg-surface-card rounded-full overflow-hidden'>
         <div
           className={`h-full rounded-full ${
             score >= 8
@@ -182,10 +182,12 @@ export default async function CompatibilityPage({ params }: PageProps) {
             <div className='text-5xl mb-2'>
               {ZODIAC_SYMBOLS[parsed.sign1] || '⭐'}
             </div>
-            <div className='text-xl font-medium text-zinc-100'>
+            <div className='text-xl font-medium text-content-primary'>
               {content.sign1}
             </div>
-            <div className='text-sm text-zinc-400'>{sign1Info.element}</div>
+            <div className='text-sm text-content-muted'>
+              {sign1Info.element}
+            </div>
           </NavParamLink>
           <Heart className='h-8 w-8 text-lunary-rose' />
           <NavParamLink
@@ -195,16 +197,18 @@ export default async function CompatibilityPage({ params }: PageProps) {
             <div className='text-5xl mb-2'>
               {ZODIAC_SYMBOLS[parsed.sign2] || '⭐'}
             </div>
-            <div className='text-xl font-medium text-zinc-100'>
+            <div className='text-xl font-medium text-content-primary'>
               {content.sign2}
             </div>
-            <div className='text-sm text-zinc-400'>{sign2Info.element}</div>
+            <div className='text-sm text-content-muted'>
+              {sign2Info.element}
+            </div>
           </NavParamLink>
         </div>
       </section>
 
       {/* Compatibility Scores */}
-      <section className='mb-8 p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+      <section className='mb-8 p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
         <Heading as='h2' variant='h3' className='text-center mb-6'>
           Compatibility Scores
         </Heading>
@@ -221,13 +225,13 @@ export default async function CompatibilityPage({ params }: PageProps) {
             >
               {content.overallScore}/10
             </div>
-            <div className='text-sm text-zinc-400'>Overall</div>
+            <div className='text-sm text-content-muted'>Overall</div>
           </div>
           <div className='space-y-2'>
             <div className='flex items-center gap-2 text-lunary-rose'>
               <Heart className='h-4 w-4' />
               <span className='text-sm'>Love</span>
-              <span className='ml-auto text-zinc-300 text-sm'>
+              <span className='ml-auto text-content-secondary text-sm'>
                 {content.loveScore}/10
               </span>
             </div>
@@ -237,7 +241,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
             <div className='flex items-center gap-2 text-lunary-secondary'>
               <Users className='h-4 w-4' />
               <span className='text-sm'>Friendship</span>
-              <span className='ml-auto text-zinc-300 text-sm'>
+              <span className='ml-auto text-content-secondary text-sm'>
                 {content.friendshipScore}/10
               </span>
             </div>
@@ -247,7 +251,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
             <div className='flex items-center gap-2 text-lunary-accent'>
               <Briefcase className='h-4 w-4' />
               <span className='text-sm'>Work</span>
-              <span className='ml-auto text-zinc-300 text-sm'>
+              <span className='ml-auto text-content-secondary text-sm'>
                 {content.workScore}/10
               </span>
             </div>
@@ -262,10 +266,13 @@ export default async function CompatibilityPage({ params }: PageProps) {
           <Star className='h-5 w-5 inline mr-2 text-lunary-success' />
           Relationship Strengths
         </Heading>
-        <div className='p-5 rounded-lg border border-lunary-success-700 bg-lunary-success-950 mt-4'>
+        <div className='p-5 rounded-lg border border-lunary-success-700 bg-layer-deep mt-4'>
           <ul className='space-y-3'>
             {content.strengths.map((strength, i) => (
-              <li key={i} className='flex items-start gap-3 text-zinc-300'>
+              <li
+                key={i}
+                className='flex items-start gap-3 text-content-secondary'
+              >
                 <span className='text-lunary-success mt-1'>✓</span>
                 {strength}
               </li>
@@ -280,10 +287,13 @@ export default async function CompatibilityPage({ params }: PageProps) {
           <AlertTriangle className='h-5 w-5 inline mr-2 text-lunary-accent' />
           Potential Challenges
         </Heading>
-        <div className='p-5 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 mt-4'>
+        <div className='p-5 rounded-lg border border-lunary-accent-700 bg-layer-deep mt-4'>
           <ul className='space-y-3'>
             {content.challenges.map((challenge, i) => (
-              <li key={i} className='flex items-start gap-3 text-zinc-300'>
+              <li
+                key={i}
+                className='flex items-start gap-3 text-content-secondary'
+              >
                 <span className='text-lunary-accent mt-1'>!</span>
                 {challenge}
               </li>
@@ -297,8 +307,10 @@ export default async function CompatibilityPage({ params }: PageProps) {
         <Heading as='h2' variant='h3'>
           Advice for This Pairing
         </Heading>
-        <div className='p-5 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 mt-4'>
-          <p className='text-zinc-300 leading-relaxed'>{content.advice}</p>
+        <div className='p-5 rounded-lg border border-lunary-primary-700 bg-layer-base/10 mt-4'>
+          <p className='text-content-secondary leading-relaxed'>
+            {content.advice}
+          </p>
         </div>
       </section>
 
@@ -318,7 +330,7 @@ export default async function CompatibilityPage({ params }: PageProps) {
               <NavParamLink
                 key={signKey}
                 href={`/grimoire/compatibility/${slug}`}
-                className='px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-lunary-primary-300 text-sm transition-colors'
+                className='px-4 py-2 rounded-lg bg-surface-card hover:bg-surface-overlay text-content-secondary hover:text-content-brand text-sm transition-colors'
               >
                 {content.sign1} & {sign.name}
               </NavParamLink>

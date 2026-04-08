@@ -28,7 +28,7 @@ export default function MoonPhaseEventList({
 }: MoonPhaseEventListProps) {
   if (events.length === 0) {
     return (
-      <p className='text-sm text-zinc-500'>
+      <p className='text-sm text-content-muted'>
         Lunar phase data is loading—check back soon.
       </p>
     );
@@ -52,7 +52,7 @@ export default function MoonPhaseEventList({
           <Link
             key={moon.slug}
             href={`/grimoire/moon/${year}/${moon.slug}`}
-            className='group flex items-center justify-between p-4 bg-zinc-900/60 border border-zinc-800/50 rounded-xl hover:bg-zinc-800/60 hover:border-lunary-primary-600 transition-all'
+            className='group flex items-center justify-between p-4 bg-surface-elevated/60 border border-stroke-subtle/50 rounded-xl hover:bg-surface-card/60 hover:border-lunary-primary-600 transition-all'
           >
             <div className='flex items-center gap-4'>
               <Image
@@ -63,15 +63,15 @@ export default function MoonPhaseEventList({
                 className='h-10 w-10'
               />
               <div>
-                <h3 className='font-medium text-white group-hover:text-lunary-primary-300'>
+                <h3 className='font-medium text-content-primary group-hover:text-content-brand'>
                   {title}
                 </h3>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-sm text-content-muted'>
                   {formattedDate} · {formattedTime}
                 </p>
               </div>
             </div>
-            <ArrowRight className='h-5 w-5 text-zinc-600 group-hover:text-lunary-primary-400 transition-colors' />
+            <ArrowRight className='h-5 w-5 text-content-muted group-hover:text-lunary-primary-400 transition-colors' />
           </Link>
         );
       })}

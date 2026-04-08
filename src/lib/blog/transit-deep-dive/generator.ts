@@ -27,17 +27,25 @@ const ZODIAC_SIGNS = [
 function buildPrompt(ctx: TransitGenerationContext): string {
   const parts: string[] = [];
 
-  parts.push(`You are the editorial voice of Lunary, a cosmic knowledge platform. Your writing is witty, historically rich, and grounded in real astrology. You write deep-dive transit guides that help people understand what is coming and how to prepare.
+  parts.push(`You are the editorial voice of Lunary, a cosmic knowledge platform. You write investigative transit deep-dives -- journalism meets astrology. These articles exist alongside evergreen grimoire pieces that cover general planet-in-sign meanings. Your job is to be entirely different: you go into the history books, surface the obscure, and find the human story behind each transit.
 
 Style rules:
 - UK English spelling (colour, honour, realise)
 - Never use em dashes. Use double hyphens (--) or rewrite the sentence
 - Sentence case for headings (not Title Case)
 - Never say "AI-powered" or mention AI. The knowledge comes from Lunary's grimoire
-- Be conversational but authoritative. Think "clever friend who studied history and astrology"
-- Use concrete historical examples, not vague references
+- Be conversational but authoritative. Think "investigative journalist who is also a serious astrologer"
+- USE SPECIFIC NAMES, DATES, AND PEOPLE. "Napoleon was born at the tail end of Pluto in Capricorn" beats "leaders emerged"
+- Surface facts most readers will not know. Avoid the obvious. The reader already knows "Jupiter expands". Tell them what they have never heard
 - Every section should feel like it earns its word count. No filler
 - Sign breakdowns should feel personal and specific, not generic horoscope waffle
+
+CRITICAL DIFFERENTIATION FROM EVERGREEN CONTENT:
+The Lunary grimoire already covers what ${ctx.planet} in ${ctx.sign} means in general. Do NOT repeat those meanings. Instead:
+- Focus on what ACTUALLY HAPPENED during previous transits -- specific events, people, cultural shifts
+- Surface obscure historical facts: who was alive, what they built, what collapsed, what was invented
+- Find the surprising angle: what conventional astrology gets wrong about this transit, what nobody talks about
+- Make the reader feel like they have just been let in on something
 
 Write a deep-dive transit blog post about: ${ctx.planet} ${ctx.transitType} in ${ctx.sign} ${ctx.year}`);
   parts.push('');
@@ -136,10 +144,10 @@ Write a deep-dive transit blog post about: ${ctx.planet} ${ctx.transitType} in $
   parts.push('- "metaDescription": 150-160 chars for Google snippet');
   parts.push('- "keywords": array of 8-12 search terms people would type');
   parts.push(
-    '- "introduction": witty opening hook, why this transit matters NOW, 200-300 words',
+    '- "introduction": open with a specific historical fact or surprising detail to hook the reader -- not a generic "Saturn is the planet of discipline" opener. Ground it in the real world immediately. Why does this particular transit matter right now, and what does history tell us to expect, 200-300 words',
   );
   parts.push(
-    '- "historicalDeepDive": what happened during previous transits, patterns across centuries, 400-600 words',
+    '- "historicalDeepDive": the centrepiece section, 500-700 words. Go deep into the historical record. Name specific people, events, inventions, and cultural movements that coincided with previous transits. Surface at least one obscure or counterintuitive fact the reader is unlikely to know. Identify a repeating pattern across cycles and explain WHY this transit tends to produce it. Do not repeat the general meanings already in the grimoire -- this is the historical case file',
   );
   parts.push(
     '- "astronomicalContext": exact dates, mechanics, retrograde windows explained simply, 200-300 words',
@@ -177,16 +185,16 @@ export async function generateTransitBlogPost(
 ): Promise<TransitBlogContent> {
   const prompt = buildPrompt(ctx);
 
-  // Call claude CLI in --print mode with Haiku
+  // Call claude CLI in --print mode with Sonnet for richer historical depth
   // execFileSync avoids shell injection -- prompt passed via stdin
   const rawOutput = execFileSync(
     'claude',
-    ['--print', '--model', 'haiku', '--output-format', 'text'],
+    ['--print', '--model', 'sonnet', '--output-format', 'text'],
     {
       input: prompt,
       encoding: 'utf-8',
-      maxBuffer: 1024 * 1024, // 1MB
-      timeout: 120_000, // 2 minutes
+      maxBuffer: 4 * 1024 * 1024, // 4MB for longer Sonnet output
+      timeout: 300_000, // 5 minutes
     },
   );
 

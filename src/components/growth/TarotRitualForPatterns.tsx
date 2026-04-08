@@ -228,35 +228,39 @@ export function TarotRitualForPatterns({
 
   return (
     <div
-      className={`rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-4 ${className}`}
+      className={`rounded-xl border border-stroke-subtle/50 bg-surface-elevated/40 p-4 ${className}`}
     >
       <div className='flex items-center gap-2 mb-3'>
-        <div className='w-8 h-8 rounded-full bg-lunary-primary-900/30 border border-lunary-primary-700/30 flex items-center justify-center text-lunary-primary-400'>
+        <div className='w-8 h-8 rounded-full bg-layer-base/30 border border-lunary-primary-700/30 flex items-center justify-center text-lunary-primary-400'>
           {ritual.icon}
         </div>
         <div>
-          <h3 className='text-sm font-medium text-zinc-100'>{ritual.title}</h3>
-          <p className='text-xs text-zinc-500'>{ritual.archetype}</p>
+          <h3 className='text-sm font-medium text-content-primary'>
+            {ritual.title}
+          </h3>
+          <p className='text-xs text-content-muted'>{ritual.archetype}</p>
         </div>
       </div>
 
-      <p className='text-sm text-zinc-300 mb-3'>{ritual.teaser}</p>
+      <p className='text-sm text-content-secondary mb-3'>{ritual.teaser}</p>
 
       {isSubscribed ? (
         <div className='space-y-4'>
-          <div className='p-3 rounded-lg bg-lunary-primary-950/30 border border-lunary-primary-800/30'>
-            <p className='text-xs font-medium text-lunary-primary-300/80 uppercase tracking-wide mb-1'>
+          <div className='p-3 rounded-lg bg-layer-deep/30 border border-lunary-primary-800/30'>
+            <p className='text-xs font-medium text-content-brand/80 uppercase tracking-wide mb-1'>
               Intention
             </p>
-            <p className='text-sm text-zinc-200 italic'>{ritual.intention}</p>
+            <p className='text-sm text-content-primary italic'>
+              {ritual.intention}
+            </p>
           </div>
 
           <div>
-            <p className='text-xs font-medium text-zinc-400 mb-2 flex items-center gap-2'>
+            <p className='text-xs font-medium text-content-muted mb-2 flex items-center gap-2'>
               <Moon className='w-3 h-3' />
               Suggested Timing
             </p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               {ritual.timing}
               <span className='text-lunary-primary-400 ml-2'>
                 (Current: {moonPhase})
@@ -265,14 +269,14 @@ export function TarotRitualForPatterns({
           </div>
 
           <div>
-            <p className='text-xs font-medium text-zinc-400 mb-2'>
+            <p className='text-xs font-medium text-content-muted mb-2'>
               What You Will Need
             </p>
             <ul className='space-y-1'>
               {ritual.ingredients.map((item, i) => (
                 <li
                   key={i}
-                  className='text-xs text-zinc-400 flex items-start gap-2'
+                  className='text-xs text-content-muted flex items-start gap-2'
                 >
                   <span className='text-lunary-primary-400'>•</span>
                   {item}
@@ -282,14 +286,14 @@ export function TarotRitualForPatterns({
           </div>
 
           <div>
-            <p className='text-xs font-medium text-zinc-400 mb-2'>
+            <p className='text-xs font-medium text-content-muted mb-2'>
               Ritual Steps
             </p>
             <ol className='space-y-2'>
               {ritual.steps.map((step, i) => (
                 <li
                   key={i}
-                  className='text-xs text-zinc-300 flex items-start gap-2'
+                  className='text-xs text-content-secondary flex items-start gap-2'
                 >
                   <span className='text-lunary-primary-400 shrink-0 w-4'>
                     {i + 1}.
@@ -300,30 +304,30 @@ export function TarotRitualForPatterns({
             </ol>
           </div>
 
-          <div className='p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/30'>
-            <p className='text-xs font-medium text-zinc-400 mb-1'>
+          <div className='p-3 rounded-lg bg-surface-card/50 border border-stroke-default/30'>
+            <p className='text-xs font-medium text-content-muted mb-1'>
               Affirmation
             </p>
-            <p className='text-sm text-lunary-primary-300 italic'>
+            <p className='text-sm text-content-brand italic'>
               "{ritual.affirmation}"
             </p>
           </div>
 
           <div>
-            <p className='text-xs font-medium text-zinc-400 mb-1'>
+            <p className='text-xs font-medium text-content-muted mb-1'>
               Journaling Anchor
             </p>
-            <p className='text-xs text-zinc-400 italic'>
+            <p className='text-xs text-content-muted italic'>
               {ritual.journalAnchor}
             </p>
           </div>
         </div>
       ) : (
-        <div className='mt-3 pt-3 border-t border-zinc-800/50'>
-          <p className='text-xs text-zinc-400'>
+        <div className='mt-3 pt-3 border-t border-stroke-subtle/50'>
+          <p className='text-xs text-content-muted'>
             <a
               href='/pricing?nav=app'
-              className='text-lunary-primary-400 hover:text-lunary-primary-300'
+              className='text-lunary-primary-400 hover:text-content-brand'
             >
               Upgrade to Lunary+
             </a>{' '}

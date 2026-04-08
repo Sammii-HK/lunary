@@ -24,12 +24,12 @@ export function IOSSubscriptionSection() {
   }, []);
 
   if (loading) {
-    return <div className='h-20 bg-zinc-800 animate-pulse rounded-xl' />;
+    return <div className='h-20 bg-surface-card animate-pulse rounded-xl' />;
   }
 
   if (showPaywall) {
     return (
-      <div className='border border-zinc-800 rounded-xl p-4 bg-zinc-950'>
+      <div className='border border-stroke-subtle rounded-xl p-4 bg-surface-base'>
         <IOSPaywall
           onSuccess={() => {
             setShowPaywall(false);
@@ -51,14 +51,16 @@ export function IOSSubscriptionSection() {
           : planId;
 
     return (
-      <div className='border border-zinc-800 rounded-xl p-4 bg-zinc-950 space-y-3'>
+      <div className='border border-stroke-subtle rounded-xl p-4 bg-surface-base space-y-3'>
         <div className='flex items-center justify-between'>
-          <span className='text-sm text-zinc-400'>Plan</span>
-          <span className='text-sm font-medium text-white'>{planLabel}</span>
+          <span className='text-sm text-content-muted'>Plan</span>
+          <span className='text-sm font-medium text-content-primary'>
+            {planLabel}
+          </span>
         </div>
         <div className='flex items-center justify-between'>
-          <span className='text-sm text-zinc-400'>Billed via</span>
-          <span className='text-sm text-zinc-300'>Apple</span>
+          <span className='text-sm text-content-muted'>Billed via</span>
+          <span className='text-sm text-content-secondary'>Apple</span>
         </div>
         <button
           onClick={() =>
@@ -67,7 +69,7 @@ export function IOSSubscriptionSection() {
               '_system',
             )
           }
-          className='w-full flex items-center justify-center gap-2 border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white py-2 px-3 rounded-lg transition-colors text-sm'
+          className='w-full flex items-center justify-center gap-2 border border-stroke-default hover:border-stroke-strong text-content-secondary hover:text-content-primary py-2 px-3 rounded-lg transition-colors text-sm'
         >
           <Settings size={14} />
           Manage in Apple Settings
@@ -78,12 +80,12 @@ export function IOSSubscriptionSection() {
   }
 
   return (
-    <div className='border border-zinc-800 rounded-xl p-4 bg-zinc-950 space-y-3'>
+    <div className='border border-stroke-subtle rounded-xl p-4 bg-surface-base space-y-3'>
       <div className='text-center space-y-2'>
-        <p className='text-sm font-medium text-zinc-100'>
+        <p className='text-sm font-medium text-content-primary'>
           Unlock your full cosmic potential
         </p>
-        <p className='text-xs text-zinc-400'>
+        <p className='text-xs text-content-muted'>
           Personalised horoscopes, birth charts, and AI guidance
         </p>
       </div>

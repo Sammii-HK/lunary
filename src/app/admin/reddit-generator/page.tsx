@@ -236,14 +236,14 @@ export default function RedditGeneratorPage() {
   };
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-white'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       <div className='container mx-auto px-4 md:px-6 py-6 md:py-8 max-w-5xl'>
         <div className='mb-6'>
           <h1 className='text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3'>
             <MessageCircle className='h-8 w-8 md:h-10 md:w-10' />
             Reddit Generator
           </h1>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Discover posts to answer and generate subreddit-specific content
           </p>
         </div>
@@ -256,7 +256,7 @@ export default function RedditGeneratorPage() {
             className={
               tab === 'discover'
                 ? 'bg-lunary-primary-600'
-                : 'border-zinc-700 text-zinc-400'
+                : 'border-stroke-default text-content-muted'
             }
           >
             <Search className='h-4 w-4 mr-2' />
@@ -268,7 +268,7 @@ export default function RedditGeneratorPage() {
             className={
               tab === 'generate'
                 ? 'bg-lunary-primary-600'
-                : 'border-zinc-700 text-zinc-400'
+                : 'border-stroke-default text-content-muted'
             }
           >
             <Sparkles className='h-4 w-4 mr-2' />
@@ -280,7 +280,7 @@ export default function RedditGeneratorPage() {
             className={
               tab === 'batch'
                 ? 'bg-lunary-primary-600'
-                : 'border-zinc-700 text-zinc-400'
+                : 'border-stroke-default text-content-muted'
             }
           >
             <Zap className='h-4 w-4 mr-2' />
@@ -292,7 +292,7 @@ export default function RedditGeneratorPage() {
           {/* Left: Controls */}
           <div className='space-y-4'>
             {/* Subreddit Selector */}
-            <Card className='bg-zinc-900 border-zinc-800'>
+            <Card className='bg-surface-elevated border-stroke-subtle'>
               <CardHeader className='pb-3'>
                 <CardTitle className='text-sm'>Subreddit</CardTitle>
               </CardHeader>
@@ -304,11 +304,11 @@ export default function RedditGeneratorPage() {
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                       subreddit === sub.name
                         ? 'bg-lunary-primary-600/20 border border-lunary-primary-600 text-white'
-                        : 'bg-zinc-800/50 border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-800'
+                        : 'bg-surface-card/50 border border-transparent text-content-muted hover:text-content-primary hover:bg-surface-card'
                     }`}
                   >
                     <div className='font-medium'>{sub.displayName}</div>
-                    <div className='text-xs text-zinc-500 mt-0.5'>
+                    <div className='text-xs text-content-muted mt-0.5'>
                       {sub.description}
                     </div>
                   </button>
@@ -317,11 +317,11 @@ export default function RedditGeneratorPage() {
             </Card>
 
             {tab === 'batch' ? (
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardHeader className='pb-3'>
                   <CardTitle className='text-sm'>How It Works</CardTitle>
                 </CardHeader>
-                <CardContent className='text-xs text-zinc-400 space-y-2'>
+                <CardContent className='text-xs text-content-muted space-y-2'>
                   <p>
                     Generates a mix of original posts and reply-format answers
                     across all subreddits.
@@ -334,7 +334,7 @@ export default function RedditGeneratorPage() {
               </Card>
             ) : tab === 'discover' ? (
               /* Sort Options */
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardHeader className='pb-3'>
                   <CardTitle className='text-sm'>Sort By</CardTitle>
                 </CardHeader>
@@ -349,7 +349,7 @@ export default function RedditGeneratorPage() {
                         className={
                           sort === s
                             ? 'bg-lunary-primary-600'
-                            : 'border-zinc-700 text-zinc-400'
+                            : 'border-stroke-default text-content-muted'
                         }
                       >
                         {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -361,7 +361,7 @@ export default function RedditGeneratorPage() {
             ) : (
               <>
                 {/* Format Toggle */}
-                <Card className='bg-zinc-900 border-zinc-800'>
+                <Card className='bg-surface-elevated border-stroke-subtle'>
                   <CardHeader className='pb-3'>
                     <CardTitle className='text-sm'>Format</CardTitle>
                   </CardHeader>
@@ -374,7 +374,7 @@ export default function RedditGeneratorPage() {
                         className={
                           format === 'reply'
                             ? 'bg-lunary-primary-600'
-                            : 'border-zinc-700 text-zinc-400'
+                            : 'border-stroke-default text-content-muted'
                         }
                       >
                         Reply
@@ -386,7 +386,7 @@ export default function RedditGeneratorPage() {
                         className={
                           format === 'post'
                             ? 'bg-lunary-primary-600'
-                            : 'border-zinc-700 text-zinc-400'
+                            : 'border-stroke-default text-content-muted'
                         }
                       >
                         Original Post
@@ -397,7 +397,7 @@ export default function RedditGeneratorPage() {
 
                 {/* Quick Questions */}
                 {selectedSub && (
-                  <Card className='bg-zinc-900 border-zinc-800'>
+                  <Card className='bg-surface-elevated border-stroke-subtle'>
                     <CardHeader className='pb-3'>
                       <CardTitle className='text-sm'>
                         Common Questions
@@ -411,7 +411,7 @@ export default function RedditGeneratorPage() {
                             setTopic(q);
                             if (format === 'reply') setQuestion(q);
                           }}
-                          className='w-full text-left px-3 py-1.5 rounded text-xs text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors'
+                          className='w-full text-left px-3 py-1.5 rounded text-xs text-content-muted hover:text-content-primary hover:bg-surface-card transition-colors'
                         >
                           {q}
                         </button>
@@ -431,14 +431,14 @@ export default function RedditGeneratorPage() {
                 <div className='flex items-center justify-between'>
                   <h2 className='text-lg font-medium'>
                     Daily Batch{' '}
-                    <span className='text-zinc-500 text-sm'>
+                    <span className='text-content-muted text-sm'>
                       &middot; {batchItems.length} items
                     </span>
                   </h2>
                   <Button
                     onClick={generateBatch}
                     disabled={generatingBatch}
-                    className='bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
+                    className='bg-lunary-primary-600 hover:bg-layer-high text-white'
                   >
                     {generatingBatch ? (
                       <>
@@ -455,14 +455,14 @@ export default function RedditGeneratorPage() {
                 </div>
 
                 {batchItems.length === 0 && !generatingBatch && (
-                  <Card className='bg-zinc-900 border-zinc-800'>
+                  <Card className='bg-surface-elevated border-stroke-subtle'>
                     <CardContent className='py-12 text-center'>
-                      <Zap className='h-10 w-10 mx-auto mb-4 text-zinc-600' />
-                      <p className='text-zinc-400 mb-2'>
+                      <Zap className='h-10 w-10 mx-auto mb-4 text-content-muted' />
+                      <p className='text-content-muted mb-2'>
                         Generate 5 Reddit-ready posts and replies across
                         subreddits
                       </p>
-                      <p className='text-xs text-zinc-500'>
+                      <p className='text-xs text-content-muted'>
                         Mix of original posts and reply-format answers, rotated
                         daily from common questions
                       </p>
@@ -471,13 +471,16 @@ export default function RedditGeneratorPage() {
                 )}
 
                 {batchItems.map((item, idx) => (
-                  <Card key={idx} className='bg-zinc-900 border-zinc-800'>
+                  <Card
+                    key={idx}
+                    className='bg-surface-elevated border-stroke-subtle'
+                  >
                     <CardHeader className='pb-2'>
                       <div className='flex items-center justify-between'>
                         <div className='flex items-center gap-2'>
                           <Badge
                             variant='outline'
-                            className='border-zinc-700 text-zinc-400'
+                            className='border-stroke-default text-content-muted'
                           >
                             {item.subredditDisplay}
                           </Badge>
@@ -485,13 +488,13 @@ export default function RedditGeneratorPage() {
                             className={
                               item.format === 'post'
                                 ? 'bg-lunary-accent/20 text-lunary-accent border-lunary-accent/30'
-                                : 'bg-lunary-primary-600/20 text-lunary-primary-300 border-lunary-primary-600/30'
+                                : 'bg-lunary-primary-600/20 text-content-brand border-lunary-primary-600/30'
                             }
                           >
                             {item.format}
                           </Badge>
                           {item.flair && (
-                            <Badge className='bg-lunary-secondary-900 text-lunary-secondary border-lunary-secondary-800'>
+                            <Badge className='bg-layer-base text-lunary-secondary border-lunary-secondary-800'>
                               {item.flair}
                             </Badge>
                           )}
@@ -500,7 +503,7 @@ export default function RedditGeneratorPage() {
                           size='sm'
                           variant='outline'
                           onClick={() => copyBatchItem(item, idx)}
-                          className='border-zinc-700 text-zinc-300'
+                          className='border-stroke-default text-content-secondary'
                         >
                           {copiedBatchIdx === idx ? (
                             <Check className='h-4 w-4 text-lunary-success' />
@@ -518,11 +521,11 @@ export default function RedditGeneratorPage() {
                     </CardHeader>
                     <CardContent>
                       {item.title && (
-                        <h3 className='text-sm font-semibold text-white mb-2'>
+                        <h3 className='text-sm font-semibold text-content-primary mb-2'>
                           {item.title}
                         </h3>
                       )}
-                      <div className='text-sm text-zinc-300 bg-zinc-800/50 p-4 rounded-lg whitespace-pre-wrap'>
+                      <div className='text-sm text-content-secondary bg-surface-card/50 p-4 rounded-lg whitespace-pre-wrap'>
                         {item.body}
                       </div>
                     </CardContent>
@@ -535,7 +538,7 @@ export default function RedditGeneratorPage() {
                 <div className='flex items-center justify-between'>
                   <h2 className='text-lg font-medium'>
                     r/{subreddit}{' '}
-                    <span className='text-zinc-500 text-sm'>
+                    <span className='text-content-muted text-sm'>
                       &middot; {sort}
                     </span>
                   </h2>
@@ -544,7 +547,7 @@ export default function RedditGeneratorPage() {
                     size='sm'
                     onClick={loadPosts}
                     disabled={loadingPosts}
-                    className='border-zinc-700 text-zinc-400'
+                    className='border-stroke-default text-content-muted'
                   >
                     <RefreshCw
                       className={`h-3 w-3 mr-1 ${loadingPosts ? 'animate-spin' : ''}`}
@@ -554,12 +557,12 @@ export default function RedditGeneratorPage() {
                 </div>
 
                 {loadingPosts ? (
-                  <div className='text-center py-12 text-zinc-400'>
+                  <div className='text-center py-12 text-content-muted'>
                     <Loader2 className='h-8 w-8 animate-spin mx-auto mb-4' />
                     <p>Loading r/{subreddit} posts...</p>
                   </div>
                 ) : posts.length === 0 ? (
-                  <div className='text-center py-12 text-zinc-500'>
+                  <div className='text-center py-12 text-content-muted'>
                     <Search className='h-10 w-10 mx-auto mb-4 opacity-50' />
                     <p>No posts found. Try a different subreddit or sort.</p>
                   </div>
@@ -568,12 +571,12 @@ export default function RedditGeneratorPage() {
                     {posts.map((post) => (
                       <Card
                         key={post.id}
-                        className='bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors'
+                        className='bg-surface-elevated border-stroke-subtle hover:border-stroke-default transition-colors'
                       >
                         <CardContent className='pt-4 pb-3'>
                           <div className='flex items-start gap-3'>
                             {/* Score */}
-                            <div className='flex flex-col items-center gap-0.5 text-zinc-500 min-w-[40px]'>
+                            <div className='flex flex-col items-center gap-0.5 text-content-muted min-w-[40px]'>
                               <ThumbsUp className='h-3 w-3' />
                               <span className='text-xs font-medium'>
                                 {post.score}
@@ -583,40 +586,40 @@ export default function RedditGeneratorPage() {
                             {/* Content */}
                             <div className='flex-1 min-w-0'>
                               <div className='flex items-start justify-between gap-2'>
-                                <h3 className='text-sm font-medium text-white leading-snug'>
+                                <h3 className='text-sm font-medium text-content-primary leading-snug'>
                                   {post.title}
                                 </h3>
                                 <a
                                   href={post.permalink}
                                   target='_blank'
                                   rel='noopener noreferrer'
-                                  className='flex-shrink-0 text-zinc-500 hover:text-zinc-300'
+                                  className='flex-shrink-0 text-content-muted hover:text-content-secondary'
                                 >
                                   <ArrowUpRight className='h-4 w-4' />
                                 </a>
                               </div>
 
                               {post.selftext && (
-                                <p className='text-xs text-zinc-400 mt-1.5 line-clamp-3'>
+                                <p className='text-xs text-content-muted mt-1.5 line-clamp-3'>
                                   {post.selftext}
                                 </p>
                               )}
 
                               <div className='flex items-center gap-3 mt-2'>
-                                <span className='text-xs text-zinc-500'>
+                                <span className='text-xs text-content-muted'>
                                   u/{post.author}
                                 </span>
-                                <span className='text-xs text-zinc-600 flex items-center gap-1'>
+                                <span className='text-xs text-content-muted flex items-center gap-1'>
                                   <MessageSquare className='h-3 w-3' />
                                   {post.numComments}
                                 </span>
-                                <span className='text-xs text-zinc-600'>
+                                <span className='text-xs text-content-muted'>
                                   {timeAgo(post.created)}
                                 </span>
                                 {post.flair && (
                                   <Badge
                                     variant='outline'
-                                    className='text-xs border-zinc-700 text-zinc-500 py-0'
+                                    className='text-xs border-stroke-default text-content-muted py-0'
                                   >
                                     {post.flair}
                                   </Badge>
@@ -656,10 +659,10 @@ export default function RedditGeneratorPage() {
               /* Generate Tab */
               <>
                 {/* Input */}
-                <Card className='bg-zinc-900 border-zinc-800'>
+                <Card className='bg-surface-elevated border-stroke-subtle'>
                   <CardContent className='pt-6 space-y-4'>
                     <div>
-                      <label className='text-xs text-zinc-400 mb-1 block'>
+                      <label className='text-xs text-content-muted mb-1 block'>
                         Topic
                       </label>
                       <input
@@ -671,12 +674,12 @@ export default function RedditGeneratorPage() {
                             ? 'What question are you answering?'
                             : 'What is the post about?'
                         }
-                        className='w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm placeholder:text-zinc-500'
+                        className='w-full px-4 py-2 bg-surface-card border border-stroke-default rounded-lg text-content-primary text-sm placeholder:text-content-muted'
                       />
                     </div>
                     {format === 'reply' && (
                       <div>
-                        <label className='text-xs text-zinc-400 mb-1 block'>
+                        <label className='text-xs text-content-muted mb-1 block'>
                           Original Question (optional)
                         </label>
                         <textarea
@@ -684,14 +687,14 @@ export default function RedditGeneratorPage() {
                           onChange={(e) => setQuestion(e.target.value)}
                           placeholder="Paste the original question you're replying to..."
                           rows={3}
-                          className='w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm placeholder:text-zinc-500 resize-none'
+                          className='w-full px-4 py-2 bg-surface-card border border-stroke-default rounded-lg text-content-primary text-sm placeholder:text-content-muted resize-none'
                         />
                       </div>
                     )}
                     <Button
                       onClick={generate}
                       disabled={generating || !topic.trim()}
-                      className='w-full bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
+                      className='w-full bg-lunary-primary-600 hover:bg-layer-high text-white'
                     >
                       {generating ? (
                         <>
@@ -707,7 +710,7 @@ export default function RedditGeneratorPage() {
 
                 {/* Output */}
                 {content && (
-                  <Card className='bg-zinc-900 border-zinc-800'>
+                  <Card className='bg-surface-elevated border-stroke-subtle'>
                     <CardHeader>
                       <div className='flex items-center justify-between'>
                         <div className='flex items-center gap-2'>
@@ -716,12 +719,12 @@ export default function RedditGeneratorPage() {
                           </CardTitle>
                           <Badge
                             variant='outline'
-                            className='border-zinc-700 text-zinc-400'
+                            className='border-stroke-default text-content-muted'
                           >
                             {content.format}
                           </Badge>
                           {content.flair && (
-                            <Badge className='bg-lunary-secondary-900 text-lunary-secondary border-lunary-secondary-800'>
+                            <Badge className='bg-layer-base text-lunary-secondary border-lunary-secondary-800'>
                               {content.flair}
                             </Badge>
                           )}
@@ -730,7 +733,7 @@ export default function RedditGeneratorPage() {
                           size='sm'
                           variant='outline'
                           onClick={copyContent}
-                          className='border-zinc-700 text-zinc-300'
+                          className='border-stroke-default text-content-secondary'
                         >
                           {copied ? (
                             <Check className='h-4 w-4 text-lunary-success' />
@@ -747,7 +750,7 @@ export default function RedditGeneratorPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className='text-sm text-zinc-300 bg-zinc-800/50 p-4 rounded-lg whitespace-pre-wrap'>
+                      <div className='text-sm text-content-secondary bg-surface-card/50 p-4 rounded-lg whitespace-pre-wrap'>
                         {content.body}
                       </div>
                     </CardContent>
@@ -756,9 +759,9 @@ export default function RedditGeneratorPage() {
 
                 {/* History */}
                 {history.length > 1 && (
-                  <Card className='bg-zinc-900 border-zinc-800'>
+                  <Card className='bg-surface-elevated border-stroke-subtle'>
                     <CardHeader className='pb-3'>
-                      <CardTitle className='text-sm text-zinc-400'>
+                      <CardTitle className='text-sm text-content-muted'>
                         History ({history.length})
                       </CardTitle>
                     </CardHeader>
@@ -767,16 +770,16 @@ export default function RedditGeneratorPage() {
                         <button
                           key={i}
                           onClick={() => setContent(item)}
-                          className='w-full text-left px-3 py-2 rounded bg-zinc-800/50 hover:bg-zinc-800 transition-colors'
+                          className='w-full text-left px-3 py-2 rounded bg-surface-card/50 hover:bg-surface-card transition-colors'
                         >
                           <div className='flex items-center gap-2'>
                             <Badge
                               variant='outline'
-                              className='text-xs border-zinc-700 text-zinc-500'
+                              className='text-xs border-stroke-default text-content-muted'
                             >
                               {item.subreddit}
                             </Badge>
-                            <span className='text-xs text-zinc-400 truncate'>
+                            <span className='text-xs text-content-muted truncate'>
                               {item.topic}
                             </span>
                           </div>

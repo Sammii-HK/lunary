@@ -517,10 +517,10 @@ export function AuthComponent({
     // If there's an onSuccess callback, don't show sign out - the callback will handle it
     if (onSuccess) {
       return (
-        <div className='w-full max-w-md mx-auto bg-zinc-900 rounded-lg p-6'>
+        <div className='w-full max-w-md mx-auto bg-surface-elevated rounded-lg p-6'>
           <div className='text-center'>
             <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary mx-auto mb-4' />
-            <p className='text-zinc-400'>Processing...</p>
+            <p className='text-content-muted'>Processing...</p>
           </div>
         </div>
       );
@@ -528,10 +528,12 @@ export function AuthComponent({
 
     // Otherwise show sign out option (for modals without onSuccess)
     return (
-      <div className='w-full max-w-md mx-auto bg-zinc-900 rounded-lg p-6'>
+      <div className='w-full max-w-md mx-auto bg-surface-elevated rounded-lg p-6'>
         <div className='text-center mb-6'>
-          <h2 className='text-2xl font-bold text-white mb-2'>Welcome back!</h2>
-          <p className='text-zinc-400'>
+          <h2 className='text-2xl font-bold text-content-primary mb-2'>
+            Welcome back!
+          </h2>
+          <p className='text-content-muted'>
             Signed in as:{' '}
             <span className='text-lunary-accent'>
               {authState.profile?.name || authState.user?.name || 'User'}
@@ -546,7 +548,7 @@ export function AuthComponent({
 
   const containerClasses = compact
     ? 'bg-transparent'
-    : 'w-full max-w-md mx-auto bg-zinc-900 rounded-lg p-6';
+    : 'w-full max-w-md mx-auto bg-surface-elevated rounded-lg p-6';
 
   // Native iOS: Apple Sign In first, email form hidden behind toggle
   if (isNative && !isForgot && !showEmailForm) {
@@ -554,10 +556,10 @@ export function AuthComponent({
       <div className={containerClasses}>
         {!compact && (
           <div className='text-center mb-6'>
-            <h2 className='text-2xl font-bold text-white mb-2'>
+            <h2 className='text-2xl font-bold text-content-primary mb-2'>
               {isSignUp ? 'Get Started' : 'Welcome Back'}
             </h2>
-            <p className='text-zinc-400'>
+            <p className='text-content-muted'>
               {isSignUp
                 ? 'Create your account to begin'
                 : 'Sign in to your cosmic journey'}
@@ -572,7 +574,7 @@ export function AuthComponent({
         )}
 
         {success && (
-          <div className='bg-lunary-success-900/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm mb-4'>
+          <div className='bg-layer-base/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm mb-4'>
             {success}
           </div>
         )}
@@ -600,7 +602,7 @@ export function AuthComponent({
               setError(null);
               setSuccess(null);
             }}
-            className='text-sm text-zinc-500 hover:text-zinc-300 transition-colors'
+            className='text-sm text-content-muted hover:text-content-secondary transition-colors'
           >
             Use email instead
           </button>
@@ -613,7 +615,7 @@ export function AuthComponent({
               setError(null);
               setSuccess(null);
             }}
-            className='text-lunary-accent hover:text-lunary-accent-300 text-sm font-medium transition-colors'
+            className='text-lunary-accent hover:text-content-brand-accent text-sm font-medium transition-colors'
           >
             {isSignUp
               ? 'Already have an account? Sign in'
@@ -622,7 +624,7 @@ export function AuthComponent({
         </div>
 
         <div className='mt-4 text-center'>
-          <p className='text-xs text-zinc-400'>
+          <p className='text-xs text-content-muted'>
             Your data is securely encrypted and synced across devices
           </p>
         </div>
@@ -634,14 +636,14 @@ export function AuthComponent({
     <div className={containerClasses}>
       {!compact && (
         <div className='text-center mb-6'>
-          <h2 className='text-2xl font-bold text-white mb-2'>
+          <h2 className='text-2xl font-bold text-content-primary mb-2'>
             {isSignUp
               ? 'Create Account'
               : isForgot
                 ? 'Reset Your Password'
                 : 'Sign In'}
           </h2>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             {isSignUp
               ? 'Join Lunary to sync your cosmic journey'
               : isForgot
@@ -653,7 +655,7 @@ export function AuthComponent({
 
       {compact && (
         <div className='text-center mb-4'>
-          <p className='text-sm text-zinc-300'>
+          <p className='text-sm text-content-secondary'>
             {isSignUp
               ? 'Create account to save'
               : isForgot
@@ -668,7 +670,7 @@ export function AuthComponent({
           <div>
             <label
               htmlFor='name'
-              className='block text-sm font-medium text-zinc-300 mb-2'
+              className='block text-sm font-medium text-content-secondary mb-2'
             >
               Name
             </label>
@@ -679,7 +681,7 @@ export function AuthComponent({
               required={isSignUp}
               value={formData.name}
               onChange={handleInputChange}
-              className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
+              className={`w-full bg-surface-card border border-stroke-default text-content-primary text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
               placeholder='Enter your name'
             />
           </div>
@@ -689,7 +691,7 @@ export function AuthComponent({
           <div>
             <label
               htmlFor='birthday'
-              className='block text-sm font-medium text-zinc-300 mb-2'
+              className='block text-sm font-medium text-content-secondary mb-2'
             >
               Birthday
             </label>
@@ -701,7 +703,7 @@ export function AuthComponent({
                 setFormData((prev) => ({ ...prev, birthday: isoDate }))
               }
             />
-            <p className='mt-1 text-xs text-zinc-400'>
+            <p className='mt-1 text-xs text-content-muted'>
               Used to create your birth chart
             </p>
           </div>
@@ -710,7 +712,7 @@ export function AuthComponent({
         <div>
           <label
             htmlFor='email'
-            className='block text-sm font-medium text-zinc-300 mb-2'
+            className='block text-sm font-medium text-content-secondary mb-2'
           >
             Email
           </label>
@@ -721,7 +723,7 @@ export function AuthComponent({
             required
             value={formData.email}
             onChange={handleInputChange}
-            className={`w-full bg-zinc-800 border border-zinc-700 text-white text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent placeholder:text-zinc-500 ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
+            className={`w-full bg-surface-card border border-stroke-default text-content-primary text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent placeholder:text-content-muted ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}
             placeholder='Enter your email'
           />
         </div>
@@ -730,7 +732,7 @@ export function AuthComponent({
           <div>
             <label
               htmlFor='password'
-              className='block text-sm font-medium text-zinc-300 mb-2'
+              className='block text-sm font-medium text-content-secondary mb-2'
             >
               Password
             </label>
@@ -742,14 +744,14 @@ export function AuthComponent({
                 required
                 value={formData.password}
                 onChange={handleInputChange}
-                className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent text-base'
+                className='w-full bg-surface-card border border-stroke-default text-content-primary rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent text-base'
                 placeholder='Enter your password'
                 minLength={6}
               />
               <button
                 type='button'
                 onClick={() => setShowPassword(!showPassword)}
-                className='absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-300 transition-colors'
+                className='absolute right-3 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-secondary transition-colors'
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? (
@@ -771,7 +773,7 @@ export function AuthComponent({
                 setError(null);
                 setSuccess(null);
               }}
-              className='text-base text-lunary-accent-300 hover:text-lunary-accent-200 transition-colors'
+              className='text-base text-content-brand-accent hover:text-content-brand-accent transition-colors'
             >
               Forgot password?
             </button>
@@ -785,7 +787,7 @@ export function AuthComponent({
         )}
 
         {success && (
-          <div className='bg-lunary-success-900/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm space-y-2'>
+          <div className='bg-layer-base/30 border border-lunary-success-700 text-lunary-success-300 px-4 py-3 rounded-lg text-sm space-y-2'>
             <p>{success}</p>
             {pendingVerificationEmail && (
               <div className='pt-1 space-y-1'>
@@ -828,7 +830,7 @@ export function AuthComponent({
         <button
           type='submit'
           disabled={loading}
-          className={`w-full bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-lunary-primary-800 disabled:opacity-50 text-white font-medium rounded-lg transition-colors flex items-center justify-center ${compact ? 'py-2 px-3 text-sm' : 'py-3 px-4'}`}
+          className={`w-full bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-layer-raised disabled:opacity-50 text-content-primary font-medium rounded-lg transition-colors flex items-center justify-center ${compact ? 'py-2 px-3 text-sm' : 'py-3 px-4'}`}
         >
           {loading ? (
             <>
@@ -857,7 +859,7 @@ export function AuthComponent({
               setError(null);
               setSuccess(null);
             }}
-            className='text-lunary-accent hover:text-lunary-accent-300 text-sm font-medium transition-colors'
+            className='text-lunary-accent hover:text-content-brand-accent text-sm font-medium transition-colors'
           >
             Remembered your password? Sign in
           </button>
@@ -868,7 +870,7 @@ export function AuthComponent({
               setError(null);
               setSuccess(null);
             }}
-            className='text-lunary-accent hover:text-lunary-accent-300 text-sm font-medium transition-colors'
+            className='text-lunary-accent hover:text-content-brand-accent text-sm font-medium transition-colors'
           >
             {isSignUp
               ? 'Already have an account? Sign in'
@@ -881,7 +883,7 @@ export function AuthComponent({
         <div className='mt-4 text-center'>
           <button
             onClick={() => setShowEmailForm(false)}
-            className='text-sm text-zinc-500 hover:text-zinc-300 transition-colors'
+            className='text-sm text-content-muted hover:text-content-secondary transition-colors'
           >
             Use Apple Sign In instead
           </button>
@@ -889,7 +891,7 @@ export function AuthComponent({
       )}
 
       <div className='mt-4 text-center'>
-        <p className='text-xs text-zinc-400'>
+        <p className='text-xs text-content-muted'>
           Your data is securely encrypted and synced across devices
         </p>
       </div>

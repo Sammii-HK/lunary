@@ -73,7 +73,7 @@ export function SpellCategoryFilter({
               ${
                 isSelected
                   ? 'bg-lunary-primary text-white shadow-lg shadow-lunary-primary/25'
-                  : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                  : 'bg-white/5 text-content-primary/70 hover:bg-white/10 hover:text-content-primary'
               }
             `}
           >

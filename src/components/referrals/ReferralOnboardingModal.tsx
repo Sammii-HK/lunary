@@ -125,15 +125,15 @@ export function ReferralOnboardingModal() {
     <div className='fixed inset-0 z-50 flex items-center justify-center p-4'>
       {/* Backdrop */}
       <div
-        className='absolute inset-0 bg-black/60 backdrop-blur-sm'
+        className='absolute inset-0 bg-surface-base/60 backdrop-blur-sm'
         onClick={dismiss}
       />
 
       {/* Modal */}
-      <div className='relative w-full max-w-sm rounded-2xl border border-zinc-800/60 bg-zinc-900 p-6 shadow-xl'>
+      <div className='relative w-full max-w-sm rounded-2xl border border-stroke-subtle/60 bg-surface-elevated p-6 shadow-xl'>
         <button
           onClick={dismiss}
-          className='absolute top-3 right-3 p-1.5 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors'
+          className='absolute top-3 right-3 p-1.5 rounded-lg text-content-muted hover:text-content-secondary hover:bg-surface-card transition-colors'
           aria-label='Close'
         >
           <X className='w-4 h-4' />
@@ -145,10 +145,10 @@ export function ReferralOnboardingModal() {
           </div>
 
           <div>
-            <h3 className='text-lg font-medium text-zinc-100'>
+            <h3 className='text-lg font-medium text-content-primary'>
               Share Lunary with a friend
             </h3>
-            <p className='mt-2 text-sm text-zinc-400 leading-relaxed'>
+            <p className='mt-2 text-sm text-content-muted leading-relaxed'>
               They get {REFERRAL_TRIAL_DAYS} days of Pro free. You earn a bonus
               week for every friend who joins.
             </p>
@@ -156,15 +156,15 @@ export function ReferralOnboardingModal() {
 
           {referralCode ? (
             <div className='w-full space-y-3'>
-              <div className='flex items-center gap-2 rounded-lg bg-zinc-800/60 border border-zinc-700/50 px-3 py-2'>
-                <span className='flex-1 text-xs text-zinc-300 truncate'>
+              <div className='flex items-center gap-2 rounded-lg bg-surface-card/60 border border-stroke-default/50 px-3 py-2'>
+                <span className='flex-1 text-xs text-content-secondary truncate'>
                   {referralUrl}
                 </span>
               </div>
               <div className='flex gap-2'>
                 <button
                   onClick={handleCopy}
-                  className='flex-1 flex items-center justify-center gap-2 rounded-lg bg-lunary-primary-500/20 border border-lunary-primary-500/30 px-4 py-2.5 text-sm font-medium text-lunary-primary-300 hover:bg-lunary-primary-500/30 transition-colors'
+                  className='flex-1 flex items-center justify-center gap-2 rounded-lg bg-lunary-primary-500/20 border border-lunary-primary-500/30 px-4 py-2.5 text-sm font-medium text-content-brand hover:bg-lunary-primary-500/30 transition-colors'
                 >
                   {copied ? (
                     <>
@@ -181,7 +181,7 @@ export function ReferralOnboardingModal() {
                 {canShare && (
                   <button
                     onClick={handleShare}
-                    className='flex items-center justify-center gap-2 rounded-lg bg-zinc-800 border border-zinc-700/50 px-4 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-700 transition-colors'
+                    className='flex items-center justify-center gap-2 rounded-lg bg-surface-card border border-stroke-default/50 px-4 py-2.5 text-sm font-medium text-content-secondary hover:bg-surface-overlay transition-colors'
                   >
                     <Share2 className='w-4 h-4' />
                     Share
@@ -191,13 +191,13 @@ export function ReferralOnboardingModal() {
             </div>
           ) : (
             <div className='w-full flex justify-center py-2'>
-              <div className='h-5 w-5 animate-spin rounded-full border-2 border-zinc-600 border-t-lunary-primary-400' />
+              <div className='h-5 w-5 animate-spin rounded-full border-2 border-stroke-strong border-t-lunary-primary-400' />
             </div>
           )}
 
           <button
             onClick={dismiss}
-            className='text-xs text-zinc-500 hover:text-zinc-400 transition-colors'
+            className='text-xs text-content-muted hover:text-content-muted transition-colors'
           >
             Maybe later
           </button>

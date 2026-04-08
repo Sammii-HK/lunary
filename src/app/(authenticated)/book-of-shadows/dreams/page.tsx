@@ -27,9 +27,9 @@ function DreamCard({ entry }: { entry: DreamEntry }) {
   return (
     <div className='border-l-2 border-indigo-700/50 pl-4 py-4'>
       <div className='flex items-center gap-2 mb-2'>
-        <span className='text-sm text-zinc-400'>{formattedDate}</span>
+        <span className='text-sm text-content-muted'>{formattedDate}</span>
         {entry.moonPhase && (
-          <span className='text-xs text-zinc-500 flex items-center gap-1'>
+          <span className='text-xs text-content-muted flex items-center gap-1'>
             <Moon className='w-3 h-3' />
             {entry.moonPhase}
           </span>
@@ -40,7 +40,7 @@ function DreamCard({ entry }: { entry: DreamEntry }) {
           </span>
         )}
       </div>
-      <p className='text-white text-sm leading-relaxed line-clamp-4'>
+      <p className='text-content-primary text-sm leading-relaxed line-clamp-4'>
         {entry.content}
       </p>
       <DreamTagChips entry={entry} className='mt-2' />
@@ -80,8 +80,8 @@ export default function DreamsPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className='min-h-screen bg-zinc-950 flex items-center justify-center'>
-        <div className='animate-pulse text-zinc-400'>
+      <div className='min-h-screen bg-surface-base flex items-center justify-center'>
+        <div className='animate-pulse text-content-muted'>
           Gathering your dreams...
         </div>
       </div>
@@ -90,16 +90,18 @@ export default function DreamsPage() {
 
   if (!user) {
     return (
-      <div className='min-h-screen bg-zinc-950 flex items-center justify-center p-4'>
+      <div className='min-h-screen bg-surface-base flex items-center justify-center p-4'>
         <div className='text-center max-w-sm'>
           <Moon className='w-12 h-12 text-indigo-400 mx-auto mb-4' />
-          <h1 className='text-xl font-bold text-white mb-2'>Your Dreams</h1>
-          <p className='text-zinc-400 mb-6'>
+          <h1 className='text-xl font-bold text-content-primary mb-2'>
+            Your Dreams
+          </h1>
+          <p className='text-content-muted mb-6'>
             Track your dreams and discover patterns in your subconscious
           </p>
           <Link
             href='/auth'
-            className='inline-block bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white px-6 py-3 rounded-lg transition-colors'
+            className='inline-block bg-lunary-primary-600 hover:bg-layer-high text-white px-6 py-3 rounded-lg transition-colors'
           >
             Sign In
           </Link>
@@ -109,22 +111,22 @@ export default function DreamsPage() {
   }
 
   return (
-    <div className='min-h-screen bg-zinc-950 pb-24'>
-      <header className='sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800'>
+    <div className='min-h-screen bg-surface-base pb-24'>
+      <header className='sticky top-0 z-10 bg-surface-base/95 backdrop-blur-sm border-b border-stroke-subtle'>
         <div className='px-4 py-4'>
           <div className='flex items-center gap-3'>
             <Link
               href='/book-of-shadows'
-              className='p-2 -ml-2 text-zinc-400 hover:text-white transition-colors'
+              className='p-2 -ml-2 text-content-muted hover:text-content-primary transition-colors'
             >
               <ChevronLeft className='w-5 h-5' />
             </Link>
             <div>
-              <h1 className='text-lg font-bold text-white flex items-center gap-2'>
+              <h1 className='text-lg font-bold text-content-primary flex items-center gap-2'>
                 <Moon className='w-5 h-5 text-indigo-400' />
                 Your Dreams
               </h1>
-              <p className='text-xs text-zinc-400'>
+              <p className='text-xs text-content-muted'>
                 {entries.length} dream{entries.length !== 1 ? 's' : ''} recorded
               </p>
             </div>
@@ -135,16 +137,16 @@ export default function DreamsPage() {
       <div className='px-4 py-6'>
         {entries.length === 0 ? (
           <div className='text-center py-16'>
-            <Moon className='w-12 h-12 text-zinc-700 mx-auto mb-4' />
-            <p className='text-zinc-400 mb-2'>No dreams recorded yet</p>
-            <p className='text-xs text-zinc-500 max-w-xs mx-auto mb-6'>
+            <Moon className='w-12 h-12 text-content-muted mx-auto mb-4' />
+            <p className='text-content-muted mb-2'>No dreams recorded yet</p>
+            <p className='text-xs text-content-muted max-w-xs mx-auto mb-6'>
               When you record dreams, they will appear here, tagged with symbols
               and feelings so you can track patterns over time.
             </p>
             <div className='space-y-3 max-w-xs mx-auto'>
               <Link
                 href='/book-of-shadows'
-                className='flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-lg p-3 text-zinc-300 transition-colors'
+                className='flex items-center justify-center gap-2 bg-surface-elevated hover:bg-surface-card border border-stroke-default rounded-lg p-3 text-content-secondary transition-colors'
               >
                 <Feather className='w-4 h-4' />
                 Write about a dream

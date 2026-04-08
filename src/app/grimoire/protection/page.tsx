@@ -109,13 +109,13 @@ export default function ProtectionPage() {
       />
 
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-6'>
           Energetic Protection
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             Boundaries for Witches & Sensitive Souls
           </span>
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           Protection magic is not about fear—it&apos;s about healthy boundaries.
           Just as you lock your door at night or wash your hands, energetic
           protection maintains your personal space and prevents unwanted
@@ -123,11 +123,11 @@ export default function ProtectionPage() {
         </p>
       </header>
 
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a href='#why-protection' className='hover:text-lunary-primary-400'>
               1. Why Protection Isn&apos;t Fear-Based
@@ -176,22 +176,22 @@ export default function ProtectionPage() {
 
       {/* Section 1 */}
       <section id='why-protection' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           1. Why Protection Isn&apos;t Fear-Based
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Many people shy away from protection magic because it sounds paranoid.
           But protection is simply energetic hygiene. You don&apos;t obsess over
           germs, but you still wash your hands. Energetic protection works the
           same way.
         </p>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-brand mb-3'>
             Healthy Protection Looks Like:
           </h3>
-          <ul className='space-y-2 text-zinc-300 text-sm'>
+          <ul className='space-y-2 text-content-secondary text-sm'>
             <li>• Knowing your energy from others&apos;</li>
             <li>• Maintaining clear boundaries in relationships</li>
             <li>• Cleansing your space regularly (not obsessively)</li>
@@ -200,7 +200,7 @@ export default function ProtectionPage() {
           </ul>
         </div>
 
-        <p className='text-zinc-400 text-sm mt-4'>
+        <p className='text-content-muted text-sm mt-4'>
           The goal is to feel safe, grounded, and confident—not anxious or
           paranoid about unseen threats.
         </p>
@@ -208,38 +208,38 @@ export default function ProtectionPage() {
 
       {/* Section 2 */}
       <section id='internal-external' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           2. Internal vs. External Boundaries
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           True protection works on two levels: internal (your personal energy
           field) and external (your physical space).
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Internal Boundaries
             </h3>
-            <p className='text-zinc-400 text-sm mb-3'>
+            <p className='text-content-muted text-sm mb-3'>
               Your aura, energy field, and personal space.
             </p>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>• Shielding your energy</li>
               <li>• Grounding and centering</li>
               <li>• Emotional boundaries with people</li>
               <li>• Knowing what emotions are yours</li>
             </ul>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               External Boundaries
             </h3>
-            <p className='text-zinc-400 text-sm mb-3'>
+            <p className='text-content-muted text-sm mb-3'>
               Your home, workspace, and physical environment.
             </p>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>• Home warding</li>
               <li>• Space cleansing</li>
               <li>• Protective objects and talismans</li>
@@ -251,20 +251,20 @@ export default function ProtectionPage() {
 
       {/* Section 3: Shielding */}
       <section id='shielding' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           3. Shielding Techniques
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Shielding is the practice of visualizing a protective barrier around
           yourself. It&apos;s the most basic and essential protection technique.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Basic Shield Visualization
           </h3>
-          <ol className='space-y-2 text-zinc-400 text-sm'>
+          <ol className='space-y-2 text-content-muted text-sm'>
             <li>1. Close your eyes and take three deep breaths</li>
             <li>2. Visualize a light at your core (solar plexus)</li>
             <li>3. See that light expand outward in all directions</li>
@@ -278,18 +278,20 @@ export default function ProtectionPage() {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-4 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h4 className='font-medium text-zinc-100 mb-2'>Mirror Shield</h4>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-4 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h4 className='font-medium text-content-primary mb-2'>
+              Mirror Shield
+            </h4>
+            <p className='text-content-muted text-sm'>
               Visualize your shield as mirrored, reflecting negativity back to
               its source without harm.
             </p>
           </div>
-          <div className='p-4 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h4 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-4 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h4 className='font-medium text-content-primary mb-2'>
               Absorptive Shield
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Shield that absorbs and transmutes negative energy into neutral or
               positive. Good for empaths.
             </p>
@@ -299,41 +301,49 @@ export default function ProtectionPage() {
 
       {/* Section 4: Cleansing */}
       <section id='cleansing' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           4. Cleansing Your Space & Aura
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Cleansing clears stagnant or negative energy, making room for fresh,
           positive energy. Regular cleansing prevents buildup and maintains a
           clear environment.
         </p>
 
         <div className='space-y-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Smoke Cleansing</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Smoke Cleansing
+            </h3>
+            <p className='text-content-muted text-sm'>
               Use ethically sourced herbs like rosemary, mugwort, or lavender.
               Open windows, move through each room with intention.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Sound Cleansing</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Sound Cleansing
+            </h3>
+            <p className='text-content-muted text-sm'>
               Bells, singing bowls, clapping, or even loud music can break up
               stagnant energy. Move through the space making sound.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Salt Cleansing</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Salt Cleansing
+            </h3>
+            <p className='text-content-muted text-sm'>
               Sprinkle salt in corners, along windowsills, and at doorways.
               Vacuum or sweep up after 24 hours. Salt absorbs negativity.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Water Cleansing</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Water Cleansing
+            </h3>
+            <p className='text-content-muted text-sm'>
               Visualize running water washing away negativity while showering.
               Use moon water to mop floors or spritz rooms.
             </p>
@@ -343,74 +353,80 @@ export default function ProtectionPage() {
 
       {/* Section 5: Crystals & Herbs */}
       <section id='crystals-herbs' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           5. Protective Crystals & Herbs
         </h2>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-3'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-3'>
               Protective Crystals
             </h3>
-            <ul className='space-y-2 text-zinc-400 text-sm'>
+            <ul className='space-y-2 text-content-muted text-sm'>
               <li>
-                <strong className='text-zinc-200'>Black Tourmaline:</strong>{' '}
+                <strong className='text-content-primary'>
+                  Black Tourmaline:
+                </strong>{' '}
                 Grounding, absorbs negativity
               </li>
               <li>
-                <strong className='text-zinc-200'>Obsidian:</strong> Powerful
-                protection, reveals truth
+                <strong className='text-content-primary'>Obsidian:</strong>{' '}
+                Powerful protection, reveals truth
               </li>
               <li>
-                <strong className='text-zinc-200'>Smoky Quartz:</strong>{' '}
+                <strong className='text-content-primary'>Smoky Quartz:</strong>{' '}
                 Transmutes negative energy
               </li>
               <li>
-                <strong className='text-zinc-200'>Amethyst:</strong> Spiritual
-                protection, intuition
+                <strong className='text-content-primary'>Amethyst:</strong>{' '}
+                Spiritual protection, intuition
               </li>
               <li>
-                <strong className='text-zinc-200'>Tiger&apos;s Eye:</strong>{' '}
+                <strong className='text-content-primary'>
+                  Tiger&apos;s Eye:
+                </strong>{' '}
                 Protective, grounding, confidence
               </li>
             </ul>
             <div className='mt-3'>
               <Link
                 href='/grimoire/crystals'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Full crystal guide →
               </Link>
             </div>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-3'>Protective Herbs</h3>
-            <ul className='space-y-2 text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-3'>
+              Protective Herbs
+            </h3>
+            <ul className='space-y-2 text-content-muted text-sm'>
               <li>
-                <strong className='text-zinc-200'>Rosemary:</strong>{' '}
+                <strong className='text-content-primary'>Rosemary:</strong>{' '}
                 Purification, protection, clarity
               </li>
               <li>
-                <strong className='text-zinc-200'>Basil:</strong> Protective,
-                banishes negativity
+                <strong className='text-content-primary'>Basil:</strong>{' '}
+                Protective, banishes negativity
               </li>
               <li>
-                <strong className='text-zinc-200'>Bay Leaves:</strong>{' '}
+                <strong className='text-content-primary'>Bay Leaves:</strong>{' '}
                 Protection, wishes, psychic work
               </li>
               <li>
-                <strong className='text-zinc-200'>Salt:</strong> Universal
-                purifier and protector
+                <strong className='text-content-primary'>Salt:</strong>{' '}
+                Universal purifier and protector
               </li>
               <li>
-                <strong className='text-zinc-200'>Lavender:</strong> Peace,
-                calming protection
+                <strong className='text-content-primary'>Lavender:</strong>{' '}
+                Peace, calming protection
               </li>
             </ul>
             <div className='mt-3'>
               <Link
                 href='/grimoire/correspondences/herbs'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Full herb guide →
               </Link>
@@ -421,21 +437,21 @@ export default function ProtectionPage() {
 
       {/* Section 6: Home Warding */}
       <section id='home-warding' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           6. Home Warding
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Warding creates a protective boundary around your home. Unlike
           cleansing (which clears energy), warding sets a boundary that prevents
           unwanted energy from entering.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Simple Home Ward
           </h3>
-          <ol className='space-y-2 text-zinc-400 text-sm'>
+          <ol className='space-y-2 text-content-muted text-sm'>
             <li>1. Cleanse your home first (smoke, sound, or salt)</li>
             <li>2. Walk the perimeter of your home clockwise</li>
             <li>3. Visualize a protective light forming at the boundaries</li>
@@ -452,21 +468,21 @@ export default function ProtectionPage() {
 
       {/* Section 7: Empaths */}
       <section id='empaths' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           7. Protection for Empaths
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Empaths absorb others&apos; emotions easily, which can be overwhelming
           without proper boundaries. If you feel drained after social
           situations, protection is essential.
         </p>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-brand mb-3'>
             Empath Protection Tips
           </h3>
-          <ul className='space-y-2 text-zinc-300 text-sm'>
+          <ul className='space-y-2 text-content-secondary text-sm'>
             <li>
               • <strong>Before crowds:</strong> Visualize your shield firmly in
               place
@@ -493,7 +509,7 @@ export default function ProtectionPage() {
 
       {/* FAQ */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           8. Frequently Asked Questions
         </h2>
 
@@ -501,12 +517,14 @@ export default function ProtectionPage() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 {faq.question}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-content-secondary leading-relaxed'>
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>

@@ -188,32 +188,34 @@ export default async function SpellPage({
       >
         <div className='space-y-6'>
           <div className='flex flex-wrap gap-3 text-sm'>
-            <span className='bg-lunary-primary-900/40 text-lunary-primary-300 px-3 py-1 rounded-full'>
+            <span className='bg-layer-base/40 text-content-brand px-3 py-1 rounded-full'>
               {categoryInfo.name}
             </span>
-            <span className='bg-lunary-secondary-900/40 text-lunary-secondary-300 px-3 py-1 rounded-full'>
+            <span className='bg-layer-base/40 text-content-brand-secondary px-3 py-1 rounded-full'>
               {spell.type.replace('_', ' ')}
             </span>
             <span
-              className={`bg-zinc-800 px-3 py-1 rounded-full ${difficultyColors[spell.difficulty]}`}
+              className={`bg-surface-card px-3 py-1 rounded-full ${difficultyColors[spell.difficulty]}`}
             >
               {spell.difficulty}
             </span>
-            <span className='bg-zinc-800 text-zinc-300 px-3 py-1 rounded-full flex items-center gap-1'>
+            <span className='bg-surface-card text-content-secondary px-3 py-1 rounded-full flex items-center gap-1'>
               <Clock className='w-3 h-3' />
               {spell.duration}
             </span>
           </div>
 
-          <section className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+          <section className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
             <h2 className='text-xl font-medium text-lunary-primary-400 mb-3 flex items-center gap-2'>
               <Star className='w-5 h-5' />
               Purpose
             </h2>
-            <p className='text-zinc-200 leading-relaxed'>{spell.purpose}</p>
+            <p className='text-content-primary leading-relaxed'>
+              {spell.purpose}
+            </p>
           </section>
 
-          <section className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+          <section className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
             <h2 className='text-xl font-medium text-lunary-secondary mb-3 flex items-center gap-2'>
               <Moon className='w-5 h-5' />
               Optimal Timing
@@ -221,13 +223,15 @@ export default async function SpellPage({
             <div className='space-y-2 text-sm'>
               {spell.timing.moonPhase && (
                 <div className='flex gap-2'>
-                  <span className='text-zinc-400 min-w-24'>Moon Phase:</span>
+                  <span className='text-content-muted min-w-24'>
+                    Moon Phase:
+                  </span>
                   <div className='flex flex-wrap gap-1'>
                     {spell.timing.moonPhase.map((phase) => (
                       <Link
                         key={phase}
                         href={`/grimoire/moon/phases/${stringToKebabCase(phase)}`}
-                        className='text-lunary-primary-300 hover:text-lunary-primary-200 underline'
+                        className='text-content-brand hover:text-content-secondary underline'
                       >
                         {phase}
                       </Link>
@@ -237,16 +241,20 @@ export default async function SpellPage({
               )}
               {spell.timing.planetaryDay && (
                 <div className='flex gap-2'>
-                  <span className='text-zinc-400 min-w-24'>Best Days:</span>
-                  <span className='text-zinc-200'>
+                  <span className='text-content-muted min-w-24'>
+                    Best Days:
+                  </span>
+                  <span className='text-content-primary'>
                     {spell.timing.planetaryDay.join(', ')}
                   </span>
                 </div>
               )}
               {spell.timing.timeOfDay && (
                 <div className='flex gap-2'>
-                  <span className='text-zinc-400 min-w-24'>Time of Day:</span>
-                  <span className='text-zinc-200'>
+                  <span className='text-content-muted min-w-24'>
+                    Time of Day:
+                  </span>
+                  <span className='text-content-primary'>
                     {spell.timing.timeOfDay}
                   </span>
                 </div>
@@ -254,7 +262,7 @@ export default async function SpellPage({
             </div>
           </section>
 
-          <section className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+          <section className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
             <h2 className='text-xl font-medium text-lunary-success mb-3 flex items-center gap-2'>
               <Leaf className='w-5 h-5' />
               Ingredients
@@ -270,16 +278,16 @@ export default async function SpellPage({
                       {ingredient.name}
                     </span>
                     {ingredient.amount && (
-                      <span className='text-sm text-zinc-400'>
+                      <span className='text-sm text-content-muted'>
                         {ingredient.amount}
                       </span>
                     )}
                   </div>
-                  <p className='text-sm text-zinc-300 mb-1'>
+                  <p className='text-sm text-content-secondary mb-1'>
                     {ingredient.purpose}
                   </p>
                   {ingredient.substitutes && (
-                    <p className='text-xs text-zinc-400'>
+                    <p className='text-xs text-content-muted'>
                       Substitutes: {ingredient.substitutes.join(', ')}
                     </p>
                   )}
@@ -289,7 +297,7 @@ export default async function SpellPage({
           </section>
 
           {spell.tools.length > 0 && (
-            <section className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+            <section className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
               <h2 className='text-xl font-medium text-lunary-rose mb-3'>
                 Tools Needed
               </h2>
@@ -297,7 +305,7 @@ export default async function SpellPage({
                 {spell.tools.map((tool, index) => (
                   <li
                     key={index}
-                    className='text-zinc-200 flex items-center gap-2'
+                    className='text-content-primary flex items-center gap-2'
                   >
                     <span className='w-2 h-2 bg-lunary-rose rounded-full' />
                     {tool}
@@ -307,13 +315,13 @@ export default async function SpellPage({
             </section>
           )}
 
-          <section className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+          <section className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
             <h2 className='text-xl font-medium text-lunary-primary mb-3'>
               Preparation Steps
             </h2>
             <ol className='space-y-2'>
               {spell.preparation.map((step, index) => (
-                <li key={index} className='text-zinc-200 flex gap-3'>
+                <li key={index} className='text-content-primary flex gap-3'>
                   <span className='flex-shrink-0 w-6 h-6 bg-lunary-primary text-white rounded-full flex items-center justify-center text-sm font-medium'>
                     {index + 1}
                   </span>
@@ -323,13 +331,13 @@ export default async function SpellPage({
             </ol>
           </section>
 
-          <section className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+          <section className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
             <h2 className='text-xl font-medium text-lunary-primary-400 mb-3'>
               Ritual Steps
             </h2>
             <ol className='space-y-3'>
               {spell.steps.map((step, index) => (
-                <li key={index} className='text-zinc-200 flex gap-3'>
+                <li key={index} className='text-content-primary flex gap-3'>
                   <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 text-white rounded-full flex items-center justify-center font-medium'>
                     {index + 1}
                   </span>
@@ -339,20 +347,22 @@ export default async function SpellPage({
             </ol>
           </section>
 
-          <section className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+          <section className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
             <h2 className='text-xl font-medium text-lunary-accent mb-3'>
               Correspondences
             </h2>
             <div className='space-y-3 text-sm'>
               {spell.correspondences.elements && (
                 <div>
-                  <span className='text-zinc-400 block mb-1'>Elements:</span>
+                  <span className='text-content-muted block mb-1'>
+                    Elements:
+                  </span>
                   <div className='flex flex-wrap gap-1'>
                     {spell.correspondences.elements.map((element) => (
                       <Link
                         key={element}
                         href={`/grimoire/correspondences/elements`}
-                        className='bg-lunary-accent-900/40 text-lunary-accent-300 px-2 py-1 rounded text-xs hover:bg-lunary-accent-900/60'
+                        className='bg-layer-base/40 text-content-brand-accent px-2 py-1 rounded text-xs hover:bg-layer-base/60'
                       >
                         {element}
                       </Link>
@@ -362,13 +372,13 @@ export default async function SpellPage({
               )}
               {spell.correspondences.colors && (
                 <div>
-                  <span className='text-zinc-400 block mb-1'>Colors:</span>
+                  <span className='text-content-muted block mb-1'>Colors:</span>
                   <div className='flex flex-wrap gap-1'>
                     {spell.correspondences.colors.map((color) => (
                       <Link
                         key={color}
                         href='/grimoire/correspondences/colors'
-                        className='bg-zinc-700 text-zinc-300 px-2 py-1 rounded text-xs hover:bg-zinc-600'
+                        className='bg-surface-overlay text-content-secondary px-2 py-1 rounded text-xs hover:bg-surface-overlay'
                       >
                         {color}
                       </Link>
@@ -378,13 +388,15 @@ export default async function SpellPage({
               )}
               {spell.correspondences.crystals && (
                 <div>
-                  <span className='text-zinc-400 block mb-1'>Crystals:</span>
+                  <span className='text-content-muted block mb-1'>
+                    Crystals:
+                  </span>
                   <div className='flex flex-wrap gap-1'>
                     {spell.correspondences.crystals.map((crystal) => (
                       <Link
                         key={crystal}
                         href={`/grimoire/crystals/${stringToKebabCase(crystal)}`}
-                        className='bg-lunary-primary-900/40 text-lunary-primary-300 px-2 py-1 rounded text-xs hover:bg-lunary-primary-900/60'
+                        className='bg-layer-base/40 text-content-brand px-2 py-1 rounded text-xs hover:bg-layer-base/60'
                       >
                         {crystal}
                       </Link>
@@ -394,13 +406,15 @@ export default async function SpellPage({
               )}
               {spell.correspondences.planets && (
                 <div>
-                  <span className='text-zinc-400 block mb-1'>Planets:</span>
+                  <span className='text-content-muted block mb-1'>
+                    Planets:
+                  </span>
                   <div className='flex flex-wrap gap-1'>
                     {spell.correspondences.planets.map((planet) => (
                       <Link
                         key={planet}
                         href={`/grimoire/astronomy/planets/${planet.toLowerCase()}`}
-                        className='bg-lunary-secondary-900/40 text-lunary-secondary-300 px-2 py-1 rounded text-xs hover:bg-lunary-secondary-900/60'
+                        className='bg-layer-base/40 text-content-brand-secondary px-2 py-1 rounded text-xs hover:bg-layer-base/60'
                       >
                         {planet}
                       </Link>
@@ -411,7 +425,7 @@ export default async function SpellPage({
             </div>
           </section>
 
-          <section className='bg-lunary-error-900/20 border border-red-800 rounded-lg p-6'>
+          <section className='bg-layer-base/20 border border-red-800 rounded-lg p-6'>
             <h2 className='text-xl font-medium text-lunary-error mb-3'>
               Safety & Ethics
             </h2>
@@ -429,7 +443,7 @@ export default async function SpellPage({
           </section>
 
           {spell.variations && spell.variations.length > 0 && (
-            <section className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+            <section className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
               <h2 className='text-xl font-medium text-lunary-secondary mb-3'>
                 Variations
               </h2>
@@ -437,7 +451,7 @@ export default async function SpellPage({
                 {spell.variations.map((variation, index) => (
                   <li
                     key={index}
-                    className='text-zinc-200 flex items-start gap-2'
+                    className='text-content-primary flex items-start gap-2'
                   >
                     <span className='text-lunary-secondary mt-1'>•</span>
                     <span>{variation}</span>
@@ -448,11 +462,11 @@ export default async function SpellPage({
           )}
 
           {spell.history && (
-            <section className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+            <section className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'>
               <h2 className='text-xl font-medium text-lunary-accent mb-3'>
                 Historical Context
               </h2>
-              <p className='text-zinc-200 text-sm leading-relaxed'>
+              <p className='text-content-primary text-sm leading-relaxed'>
                 {spell.history}
               </p>
             </section>

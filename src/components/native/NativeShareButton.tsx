@@ -56,9 +56,10 @@ export function NativeShareButton({
 
   const variantClasses = {
     primary:
-      'bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white border-transparent',
-    secondary: 'bg-zinc-700 hover:bg-zinc-600 text-white border-zinc-600',
-    ghost: 'hover:bg-zinc-800 text-zinc-300 border-transparent',
+      'bg-lunary-primary-600 hover:bg-layer-high text-white border-transparent',
+    secondary:
+      'bg-surface-overlay hover:bg-surface-overlay text-content-primary border-stroke-strong',
+    ghost: 'hover:bg-surface-card text-content-secondary border-transparent',
   };
 
   return (

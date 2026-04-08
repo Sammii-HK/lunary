@@ -69,7 +69,7 @@ export function GenerationalPlanetsSection({
       defaultCollapsed={true}
       persistState={true}
     >
-      <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
+      <div className='bg-surface-elevated rounded-lg p-4 border border-stroke-subtle'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           {generationalPlanets.map((planet) => {
             const interpretation = getPlanetaryInterpretation(planet);
@@ -83,7 +83,7 @@ export function GenerationalPlanetsSection({
                 key={planet.body}
                 className='border-l-2 border-lunary-primary-400 pl-3'
               >
-                <h5 className='text-sm font-medium text-white flex items-center gap-2 flex-wrap'>
+                <h5 className='text-sm font-medium text-content-primary flex items-center gap-2 flex-wrap'>
                   <span className='font-astro text-lg'>
                     {
                       bodiesSymbols[
@@ -99,7 +99,9 @@ export function GenerationalPlanetsSection({
                   )}
                   {dignityStatus && getDignityBadge(dignityStatus)}
                 </h5>
-                <p className='text-xs text-zinc-300 mt-1'>{interpretation}</p>
+                <p className='text-xs text-content-secondary mt-1'>
+                  {interpretation}
+                </p>
               </div>
             );
           })}

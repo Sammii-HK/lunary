@@ -143,10 +143,10 @@ export default function TarotIndexPage() {
       >
         <div className='space-y-12'>
           <section>
-            <h2 className='text-lg md:text-xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-lg md:text-xl font-medium text-content-primary mb-6'>
               Major Arcana (22 Cards)
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               The Major Arcana cards represent significant life events, karmic
               lessons, and the soul&apos;s journey through life.
             </p>
@@ -155,10 +155,10 @@ export default function TarotIndexPage() {
                 <Link
                   key={card.name}
                   href={`/grimoire/tarot/${stringToKebabCase(card.name)}`}
-                  className='group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-violet-700/50 transition-all'
+                  className='group rounded-lg border border-stroke-subtle bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-violet-700/50 transition-all'
                 >
-                  <div className='text-xs text-zinc-400 mb-1'>{index}</div>
-                  <h3 className='font-medium text-zinc-100 group-hover:text-violet-300 transition-colors text-sm'>
+                  <div className='text-xs text-content-muted mb-1'>{index}</div>
+                  <h3 className='font-medium text-content-primary group-hover:text-violet-300 transition-colors text-sm'>
                     {card.name}
                   </h3>
                 </Link>
@@ -167,10 +167,10 @@ export default function TarotIndexPage() {
           </section>
 
           <section>
-            <h2 className='text-lg md:text-xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-lg md:text-xl font-medium text-content-primary mb-6'>
               Minor Arcana (56 Cards)
             </h2>
-            <p className='text-zinc-400 mb-6'>
+            <p className='text-content-muted mb-6'>
               The Minor Arcana is divided into four suits, each associated with
               an element and aspect of life.
             </p>
@@ -179,15 +179,15 @@ export default function TarotIndexPage() {
                 <Link
                   key={key}
                   href={`/grimoire/tarot/suits/${key}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-violet-700/50 transition-all'
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-violet-700/50 transition-all'
                 >
-                  <h3 className='text-lg font-medium text-zinc-100 group-hover:text-violet-300 transition-colors mb-2'>
+                  <h3 className='text-lg font-medium text-content-primary group-hover:text-violet-300 transition-colors mb-2'>
                     {suit.name}
                   </h3>
-                  <p className='text-sm text-zinc-400 mb-2'>
+                  <p className='text-sm text-content-muted mb-2'>
                     Element: {suit.element}
                   </p>
-                  <p className='text-sm text-zinc-400'>{suit.qualities}</p>
+                  <p className='text-sm text-content-muted'>{suit.qualities}</p>
                 </Link>
               ))}
             </div>

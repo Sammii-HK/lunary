@@ -82,14 +82,14 @@ function LockedAdminBackdrop() {
       metric: '8 drafts',
       status: 'Awaiting review',
       icon: BookOpen,
-      accent: 'text-lunary-secondary-300',
+      accent: 'text-content-brand-secondary',
     },
     {
       title: 'Notifications',
       metric: '12.4k subs',
       status: 'Queued',
       icon: Bell,
-      accent: 'text-lunary-primary-300',
+      accent: 'text-content-brand',
     },
     {
       title: 'Shop Manager',
@@ -116,7 +116,7 @@ function LockedAdminBackdrop() {
 
   return (
     <div className='absolute inset-0 overflow-hidden pointer-events-none select-none'>
-      <div className='absolute inset-0 bg-gradient-to-br from-lunary-primary-900/40 via-black to-black opacity-80' />
+      <div className='absolute inset-0 bg-gradient-to-br from-layer-base/40 via-surface-base to-surface-base opacity-80' />
       <div className='absolute inset-0'>
         <div className='h-full w-full bg-[radial-gradient(circle_at_top,_rgba(147,51,234,0.35),_transparent_60%)] opacity-50 blur-3xl' />
       </div>
@@ -134,13 +134,15 @@ function LockedAdminBackdrop() {
                 >
                   <Icon className='h-5 w-5' />
                 </div>
-                <p className='text-sm uppercase tracking-[0.2em] text-white/60'>
+                <p className='text-sm uppercase tracking-[0.2em] text-content-primary/60'>
                   {card.title}
                 </p>
-                <p className='mt-2 text-2xl font-semibold text-white/80'>
+                <p className='mt-2 text-2xl font-semibold text-content-primary/80'>
                   {card.metric}
                 </p>
-                <p className='mt-1 text-sm text-white/50'>{card.status}</p>
+                <p className='mt-1 text-sm text-content-primary/50'>
+                  {card.status}
+                </p>
               </div>
             );
           })}
@@ -162,6 +164,15 @@ export default function AdminDashboard() {
   const [showDebugTools, setShowDebugTools] = useState(false);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [activityLoading, setActivityLoading] = useState(true);
+  const [signupHealth, setSignupHealth] = useState<{
+    signups7d: number;
+    signups48h: number;
+    lastSignupAt: string | null;
+    hoursSinceLastSignup: number | null;
+    verificationEmailsSent48h: number;
+    alert: boolean;
+    alertReason: string | null;
+  } | null>(null);
   const [authIssue, setAuthIssue] = useState<AdminAuthIssueState>({
     type: 'none',
   });
@@ -421,13 +432,22 @@ export default function AdminDashboard() {
     return () => clearInterval(interval);
   }, [isAuthorized]);
 
+  // Fetch signup health
+  useEffect(() => {
+    if (!isAuthorized) return;
+    fetch('/api/admin/health/signups')
+      .then((r) => r.json())
+      .then((d) => setSignupHealth(d))
+      .catch(() => {});
+  }, [isAuthorized]);
+
   // Show loading state while checking authorization
   if (isAuthorized === null) {
     return (
-      <div className='min-h-screen bg-black text-white flex items-center justify-center'>
+      <div className='min-h-screen bg-surface-base text-content-primary flex items-center justify-center'>
         <div className='text-center'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-lunary-primary-400 mx-auto mb-4'></div>
-          <p className='text-zinc-400'>Checking authorization...</p>
+          <p className='text-content-muted'>Checking authorization...</p>
         </div>
       </div>
     );
@@ -437,22 +457,22 @@ export default function AdminDashboard() {
   if (isAuthorized === false) {
     if (authIssue.type === 'no-session') {
       return (
-        <div className='min-h-screen bg-black text-white relative overflow-hidden flex items-center justify-center px-4 py-10'>
+        <div className='min-h-screen bg-surface-base text-content-primary relative overflow-hidden flex items-center justify-center px-4 py-10'>
           <LockedAdminBackdrop />
           <div className='relative z-10 w-full max-w-xl space-y-6'>
             <div className='text-center space-y-3'>
-              <p className='text-xs uppercase tracking-[0.4em] text-white/50'>
+              <p className='text-xs uppercase tracking-[0.4em] text-content-primary/50'>
                 Admin Portal
               </p>
               <h1 className='text-3xl font-light tracking-tight'>
                 Sign in to continue
               </h1>
-              <p className='text-sm text-white/70'>
+              <p className='text-sm text-content-primary/70'>
                 {authIssue.details ||
                   'Use your Lunary admin credentials to access the dashboard.'}
               </p>
             </div>
-            <div className='rounded-3xl border border-white/10 bg-black/70 p-6 shadow-2xl backdrop-blur-2xl'>
+            <div className='rounded-3xl border border-white/10 bg-surface-base/70 p-6 shadow-2xl backdrop-blur-2xl'>
               <AuthComponent onSuccess={handleAuthSuccess} />
             </div>
           </div>
@@ -461,16 +481,16 @@ export default function AdminDashboard() {
     }
 
     return (
-      <div className='min-h-screen bg-black text-white flex items-center justify-center p-4'>
+      <div className='min-h-screen bg-surface-base text-content-primary flex items-center justify-center p-4'>
         <div className='text-center max-w-md space-y-4'>
           <h1 className='text-2xl font-bold text-lunary-error'>
             Access Denied
           </h1>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             {authIssue.details ||
               "You don't have permission to access the admin dashboard."}
           </p>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-sm text-content-muted'>
             Check the browser console for details or update your admin settings.
           </p>
         </div>
@@ -840,19 +860,19 @@ export default function AdminDashboard() {
     switch (status) {
       case 'new':
         return (
-          <Badge className='bg-lunary-success-900 text-lunary-success border-lunary-success-800'>
+          <Badge className='bg-layer-base text-lunary-success border-lunary-success-800'>
             New
           </Badge>
         );
       case 'beta':
         return (
-          <Badge className='bg-lunary-accent-900 text-lunary-accent border-lunary-accent-700'>
+          <Badge className='bg-layer-base text-lunary-accent border-lunary-accent-700'>
             Beta
           </Badge>
         );
       case 'active':
         return (
-          <Badge className='bg-lunary-secondary-900 text-lunary-secondary border-lunary-secondary-800'>
+          <Badge className='bg-layer-base text-lunary-secondary border-lunary-secondary-800'>
             Active
           </Badge>
         );
@@ -862,7 +882,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-white'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       <div className='container mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-10 max-w-7xl'>
         {/* Header */}
         <div className='mb-6 md:mb-8 lg:mb-10'>
@@ -872,12 +892,70 @@ export default function AdminDashboard() {
                 <Settings className='h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12' />
                 Admin Dashboard
               </h1>
-              <p className='text-base md:text-lg lg:text-xl text-zinc-400'>
+              <p className='text-base md:text-lg lg:text-xl text-content-muted'>
                 Manage your cosmic content, automation, and shop
               </p>
             </div>
           </div>
         </div>
+
+        {/* Business Health Banner */}
+        {signupHealth && (
+          <div
+            className={`mb-6 rounded-xl border p-4 flex flex-wrap gap-6 items-center ${
+              signupHealth.alert
+                ? 'bg-red-950/40 border-red-700/50'
+                : 'bg-surface-elevated/60 border-stroke-subtle'
+            }`}
+          >
+            <div className='flex items-center gap-2'>
+              <ShieldCheck
+                className={`h-5 w-5 ${signupHealth.alert ? 'text-red-400' : 'text-lunary-success-400'}`}
+              />
+              <span className='font-semibold text-sm'>Business Health</span>
+              {signupHealth.alert && (
+                <Badge className='bg-red-700/80 text-white border-0 text-xs'>
+                  Alert
+                </Badge>
+              )}
+            </div>
+            <div className='flex flex-wrap gap-4 text-sm text-content-secondary'>
+              <span>
+                <span className='text-content-primary font-medium'>
+                  {signupHealth.signups7d}
+                </span>{' '}
+                signups (7d)
+              </span>
+              <span>
+                <span className='text-content-primary font-medium'>
+                  {signupHealth.signups48h}
+                </span>{' '}
+                signups (48h)
+              </span>
+              <span>
+                Last signup:{' '}
+                <span
+                  className={`font-medium ${signupHealth.alert ? 'text-red-400' : 'text-content-primary'}`}
+                >
+                  {signupHealth.hoursSinceLastSignup !== null
+                    ? `${signupHealth.hoursSinceLastSignup}h ago`
+                    : 'never'}
+                </span>
+              </span>
+              <span>
+                <span className='text-content-primary font-medium'>
+                  {signupHealth.verificationEmailsSent48h}
+                </span>{' '}
+                verification emails (48h)
+              </span>
+            </div>
+            {signupHealth.alertReason && (
+              <p className='w-full text-sm text-red-400 mt-1'>
+                {signupHealth.alertReason}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Organized Sections */}
         {sections.map((section) => (
@@ -888,7 +966,7 @@ export default function AdminDashboard() {
               <div className={section.iconColor}>{section.icon}</div>
               <h2 className='text-xl md:text-2xl font-bold'>{section.title}</h2>
               <Badge
-                className={`ml-auto ${section.borderColor} bg-black/30 text-zinc-300`}
+                className={`ml-auto ${section.borderColor} bg-surface-base/30 text-content-secondary`}
               >
                 {section.tools.length}
               </Badge>
@@ -897,7 +975,7 @@ export default function AdminDashboard() {
               {section.tools.map((tool) => (
                 <Card
                   key={tool.href}
-                  className='group hover:shadow-lg transition-all bg-zinc-900/80 border-zinc-800 hover:border-zinc-600 cursor-pointer'
+                  className='group hover:shadow-lg transition-all bg-surface-elevated/80 border-stroke-subtle hover:border-stroke-strong cursor-pointer'
                 >
                   <Link href={tool.href} className='block h-full'>
                     <CardHeader className='pb-3'>
@@ -914,7 +992,7 @@ export default function AdminDashboard() {
                         </div>
                         {getStatusBadge(tool.status)}
                       </div>
-                      <CardDescription className='text-xs text-zinc-400 line-clamp-2'>
+                      <CardDescription className='text-xs text-content-muted line-clamp-2'>
                         {tool.description}
                       </CardDescription>
                     </CardHeader>
@@ -929,11 +1007,11 @@ export default function AdminDashboard() {
         <div className='mb-8 md:mb-10 lg:mb-12'>
           <button
             onClick={() => setShowDebugTools(!showDebugTools)}
-            className='flex items-center justify-between w-full mb-6 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:bg-zinc-900 transition-colors'
+            className='flex items-center justify-between w-full mb-6 p-4 rounded-lg bg-surface-elevated/50 border border-stroke-subtle/50 hover:bg-surface-elevated transition-colors'
           >
             <div className='flex items-center gap-3'>
-              <Settings className='h-5 w-5 text-zinc-400' />
-              <h2 className='text-lg md:text-xl font-bold text-zinc-400'>
+              <Settings className='h-5 w-5 text-content-muted' />
+              <h2 className='text-lg md:text-xl font-bold text-content-muted'>
                 Debug & Testing
               </h2>
               <Badge className='bg-gray-500/10 text-gray-400 border-gray-500/20 text-xs'>
@@ -941,9 +1019,9 @@ export default function AdminDashboard() {
               </Badge>
             </div>
             {showDebugTools ? (
-              <ChevronUp className='h-5 w-5 text-zinc-400' />
+              <ChevronUp className='h-5 w-5 text-content-muted' />
             ) : (
-              <ChevronDown className='h-5 w-5 text-zinc-400' />
+              <ChevronDown className='h-5 w-5 text-content-muted' />
             )}
           </button>
 
@@ -955,20 +1033,22 @@ export default function AdminDashboard() {
                   {debugTools.map((tool) => (
                     <Card
                       key={tool.href}
-                      className='hover:shadow-lg transition-all bg-zinc-900/50 border-zinc-800/50 hover:border-zinc-700/50'
+                      className='hover:shadow-lg transition-all bg-surface-elevated/50 border-stroke-subtle/50 hover:border-stroke-default/50'
                     >
                       <Link href={tool.href} className='block'>
                         <CardHeader className='pb-3'>
                           <div className='flex items-center justify-between mb-2'>
                             <div className='flex items-center gap-2'>
-                              <div className='text-zinc-400'>{tool.icon}</div>
-                              <CardTitle className='text-sm md:text-base text-zinc-400'>
+                              <div className='text-content-muted'>
+                                {tool.icon}
+                              </div>
+                              <CardTitle className='text-sm md:text-base text-content-muted'>
                                 {tool.title}
                               </CardTitle>
                             </div>
                             {getStatusBadge(tool.status)}
                           </div>
-                          <CardDescription className='text-xs text-zinc-400'>
+                          <CardDescription className='text-xs text-content-muted'>
                             {tool.description}
                           </CardDescription>
                         </CardHeader>
@@ -979,13 +1059,13 @@ export default function AdminDashboard() {
               )}
 
               {/* Substack Testing */}
-              <Card className='bg-zinc-900/50 border-zinc-800/50'>
+              <Card className='bg-surface-elevated/50 border-stroke-subtle/50'>
                 <CardHeader className='pb-4'>
-                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
+                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-content-muted'>
                     <FileText className='h-5 w-5' />
                     Substack Post Testing
                   </CardTitle>
-                  <CardDescription className='text-xs md:text-sm text-zinc-400'>
+                  <CardDescription className='text-xs md:text-sm text-content-muted'>
                     Preview and test Substack posts without publishing
                   </CardDescription>
                 </CardHeader>
@@ -993,7 +1073,7 @@ export default function AdminDashboard() {
                   <div className='space-y-4'>
                     <div className='flex flex-col sm:flex-row gap-4 items-start sm:items-center'>
                       <div className='flex-1'>
-                        <label className='text-xs text-zinc-400 mb-2 block'>
+                        <label className='text-xs text-content-muted mb-2 block'>
                           Week Offset (0 = current week, 1 = next week)
                         </label>
                         <input
@@ -1002,7 +1082,7 @@ export default function AdminDashboard() {
                           onChange={(e) =>
                             setSubstackWeekOffset(parseInt(e.target.value) || 0)
                           }
-                          className='w-full px-4 py-2 bg-zinc-800/50 border border-zinc-700/50 rounded text-white text-sm'
+                          className='w-full px-4 py-2 bg-surface-card/50 border border-stroke-default/50 rounded text-content-primary text-sm'
                           min='0'
                         />
                       </div>
@@ -1010,7 +1090,7 @@ export default function AdminDashboard() {
                         onClick={testSubstackPreview}
                         disabled={substackLoading}
                         variant='outline'
-                        className='h-auto px-6 py-2 bg-lunary-primary-600/50 hover:bg-lunary-primary-700/50 border-lunary-primary-600 text-white transition-all disabled:opacity-50 mt-6 sm:mt-0 text-sm'
+                        className='h-auto px-6 py-2 bg-lunary-primary-600/50 hover:bg-layer-high/50 border-lunary-primary-600 text-white transition-all disabled:opacity-50 mt-6 sm:mt-0 text-sm'
                       >
                         <Eye className='h-4 w-4 mr-2' />
                         {substackLoading ? 'Generating...' : 'Preview Posts'}
@@ -1019,17 +1099,20 @@ export default function AdminDashboard() {
 
                     {substackPreview && (
                       <div className='mt-6 space-y-6'>
-                        <div className='p-4 bg-zinc-800 rounded border border-zinc-700'>
+                        <div className='p-4 bg-surface-card rounded border border-stroke-default'>
                           <div className='flex items-center justify-between mb-4'>
-                            <h3 className='text-lg font-semibold text-white'>
+                            <h3 className='text-lg font-semibold text-content-primary'>
                               Preview Results
                             </h3>
-                            <Badge variant='outline' className='text-zinc-300'>
+                            <Badge
+                              variant='outline'
+                              className='text-content-secondary'
+                            >
                               Week{' '}
                               {substackPreview.metadata?.weekNumber || 'N/A'}
                             </Badge>
                           </div>
-                          <div className='text-sm text-zinc-400 mb-4'>
+                          <div className='text-sm text-content-muted mb-4'>
                             <p>
                               Week:{' '}
                               {substackPreview.metadata?.weekStart
@@ -1059,20 +1142,20 @@ export default function AdminDashboard() {
                               <Badge className='bg-lunary-success-600'>
                                 Free Tier
                               </Badge>
-                              <span className='text-sm text-zinc-400'>
+                              <span className='text-sm text-content-muted'>
                                 {substackPreview.free?.title || 'No title'}
                               </span>
                             </div>
-                            <div className='bg-zinc-900 p-4 rounded border border-zinc-700 max-h-96 overflow-y-auto'>
-                              <h4 className='text-white font-semibold mb-2'>
+                            <div className='bg-surface-elevated p-4 rounded border border-stroke-default max-h-96 overflow-y-auto'>
+                              <h4 className='text-content-primary font-semibold mb-2'>
                                 {substackPreview.free?.title}
                               </h4>
                               {substackPreview.free?.subtitle && (
-                                <p className='text-zinc-300 text-sm mb-2 italic'>
+                                <p className='text-content-secondary text-sm mb-2 italic'>
                                   {substackPreview.free.subtitle}
                                 </p>
                               )}
-                              <div className='text-zinc-400 text-sm whitespace-pre-wrap'>
+                              <div className='text-content-muted text-sm whitespace-pre-wrap'>
                                 {substackPreview.free?.content || 'No content'}
                               </div>
                             </div>
@@ -1084,20 +1167,20 @@ export default function AdminDashboard() {
                               <Badge className='bg-lunary-primary-600'>
                                 Paid Tier
                               </Badge>
-                              <span className='text-sm text-zinc-400'>
+                              <span className='text-sm text-content-muted'>
                                 {substackPreview.paid?.title || 'No title'}
                               </span>
                             </div>
-                            <div className='bg-zinc-900 p-4 rounded border border-zinc-700 max-h-96 overflow-y-auto'>
-                              <h4 className='text-white font-semibold mb-2'>
+                            <div className='bg-surface-elevated p-4 rounded border border-stroke-default max-h-96 overflow-y-auto'>
+                              <h4 className='text-content-primary font-semibold mb-2'>
                                 {substackPreview.paid?.title}
                               </h4>
                               {substackPreview.paid?.subtitle && (
-                                <p className='text-zinc-300 text-sm mb-2 italic'>
+                                <p className='text-content-secondary text-sm mb-2 italic'>
                                   {substackPreview.paid.subtitle}
                                 </p>
                               )}
-                              <div className='text-zinc-400 text-sm whitespace-pre-wrap'>
+                              <div className='text-content-muted text-sm whitespace-pre-wrap'>
                                 {substackPreview.paid?.content || 'No content'}
                               </div>
                             </div>
@@ -1105,7 +1188,7 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Publish Buttons */}
-                        <div className='flex gap-4 pt-4 border-t border-zinc-700'>
+                        <div className='flex gap-4 pt-4 border-t border-stroke-default'>
                           <Button
                             onClick={() => testSubstackPublish('free')}
                             disabled={substackPublishing || !substackPreview}
@@ -1121,7 +1204,7 @@ export default function AdminDashboard() {
                             onClick={() => testSubstackPublish('paid')}
                             disabled={substackPublishing || !substackPreview}
                             variant='outline'
-                            className='flex-1 bg-lunary-primary-600 hover:bg-lunary-primary-700 border-lunary-primary text-white disabled:opacity-50'
+                            className='flex-1 bg-lunary-primary-600 hover:bg-layer-high border-lunary-primary text-white disabled:opacity-50'
                           >
                             <Play className='h-4 w-4 mr-2' />
                             {substackPublishing
@@ -1132,7 +1215,7 @@ export default function AdminDashboard() {
                       </div>
                     )}
 
-                    <p className='text-xs text-zinc-600'>
+                    <p className='text-xs text-content-muted'>
                       Preview shows full post content. Use publish buttons to
                       actually post to Substack (opens in new tab when
                       published).
@@ -1140,20 +1223,20 @@ export default function AdminDashboard() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className='bg-zinc-900/50 border border-zinc-800'>
+              <Card className='bg-surface-elevated/50 border border-stroke-subtle'>
                 <CardHeader className='pb-4'>
-                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
+                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-content-muted'>
                     <ShieldCheck className='h-5 w-5' />
                     Subscription Debug
                   </CardTitle>
-                  <CardDescription className='text-xs md:text-sm text-zinc-400'>
+                  <CardDescription className='text-xs md:text-sm text-content-muted'>
                     Force-refresh Stripe status for a user and view the
                     plan/status.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                    <label className='text-xs text-zinc-400'>
+                    <label className='text-xs text-content-muted'>
                       User ID
                       <input
                         type='text'
@@ -1164,10 +1247,10 @@ export default function AdminDashboard() {
                             userId: e.target.value.trim(),
                           })
                         }
-                        className='mt-1 w-full bg-zinc-900/70 border border-zinc-700 rounded px-3 py-2 text-sm text-white'
+                        className='mt-1 w-full bg-surface-elevated/70 border border-stroke-default rounded px-3 py-2 text-sm text-content-primary'
                       />
                     </label>
-                    <label className='text-xs text-zinc-400'>
+                    <label className='text-xs text-content-muted'>
                       Customer ID
                       <input
                         type='text'
@@ -1178,10 +1261,10 @@ export default function AdminDashboard() {
                             customerId: e.target.value.trim(),
                           })
                         }
-                        className='mt-1 w-full bg-zinc-900/70 border border-zinc-700 rounded px-3 py-2 text-sm text-white'
+                        className='mt-1 w-full bg-surface-elevated/70 border border-stroke-default rounded px-3 py-2 text-sm text-content-primary'
                       />
                     </label>
-                    <label className='text-xs text-zinc-400'>
+                    <label className='text-xs text-content-muted'>
                       Email
                       <input
                         type='email'
@@ -1192,10 +1275,10 @@ export default function AdminDashboard() {
                             userEmail: e.target.value.trim(),
                           })
                         }
-                        className='mt-1 w-full bg-zinc-900/70 border border-zinc-700 rounded px-3 py-2 text-sm text-white'
+                        className='mt-1 w-full bg-surface-elevated/70 border border-stroke-default rounded px-3 py-2 text-sm text-content-primary'
                       />
                     </label>
-                    <label className='text-xs text-zinc-400'>
+                    <label className='text-xs text-content-muted'>
                       Debug Token
                       <div className='flex items-center gap-2 mt-1'>
                         <input
@@ -1207,9 +1290,9 @@ export default function AdminDashboard() {
                               token: e.target.value.trim(),
                             })
                           }
-                          className='flex-1 bg-zinc-900/70 border border-zinc-700 rounded px-3 py-2 text-sm text-white'
+                          className='flex-1 bg-surface-elevated/70 border border-stroke-default rounded px-3 py-2 text-sm text-content-primary'
                         />
-                        <Key className='h-4 w-4 text-zinc-400' />
+                        <Key className='h-4 w-4 text-content-muted' />
                       </div>
                     </label>
                   </div>
@@ -1217,7 +1300,7 @@ export default function AdminDashboard() {
                     <Button
                       onClick={handleSubscriptionDebug}
                       disabled={subscriptionDebugLoading}
-                      className='bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
+                      className='bg-lunary-primary-600 hover:bg-layer-high text-white'
                     >
                       {subscriptionDebugLoading
                         ? 'Checking...'
@@ -1226,7 +1309,7 @@ export default function AdminDashboard() {
                     <Button
                       onClick={() => setSubscriptionDebugResult(null)}
                       variant='outline'
-                      className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                      className='border-stroke-default text-content-secondary hover:bg-surface-card'
                     >
                       Clear result
                     </Button>
@@ -1235,8 +1318,8 @@ export default function AdminDashboard() {
                     <div
                       className={`mt-4 p-3 rounded-lg border ${
                         subscriptionDebugResult.ok
-                          ? 'border-lunary-success bg-lunary-success-950/40'
-                          : 'border-lunary-error bg-lunary-error-950/40'
+                          ? 'border-lunary-success bg-layer-deep/40'
+                          : 'border-lunary-error bg-layer-deep/40'
                       }`}
                     >
                       {subscriptionDebugResult.ok ? (
@@ -1244,7 +1327,7 @@ export default function AdminDashboard() {
                           <p className='text-sm text-lunary-success'>
                             Success (status {subscriptionDebugResult.status})
                           </p>
-                          <div className='text-sm text-zinc-200 mt-3 space-y-1'>
+                          <div className='text-sm text-content-primary mt-3 space-y-1'>
                             <p>
                               Plan:{' '}
                               {subscriptionDebugResult.body?.data?.plan ||
@@ -1279,11 +1362,11 @@ export default function AdminDashboard() {
                           </p>
                         </>
                       )}
-                      <details className='mt-3 text-xs text-zinc-400'>
+                      <details className='mt-3 text-xs text-content-muted'>
                         <summary className='cursor-pointer'>
                           Raw response
                         </summary>
-                        <pre className='mt-2 max-h-80 overflow-x-auto rounded bg-black/40 p-2 text-xs text-zinc-200'>
+                        <pre className='mt-2 max-h-80 overflow-x-auto rounded bg-surface-base/40 p-2 text-xs text-content-primary'>
                           {JSON.stringify(
                             subscriptionDebugResult.body,
                             null,
@@ -1300,13 +1383,13 @@ export default function AdminDashboard() {
         </div>
 
         {/* Automation Manual Triggers */}
-        <Card className='mb-8 md:mb-10 lg:mb-12 bg-zinc-900 border-zinc-800'>
+        <Card className='mb-8 md:mb-10 lg:mb-12 bg-surface-elevated border-stroke-subtle'>
           <CardHeader className='pb-4 md:pb-6'>
             <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
               <Zap className='h-5 w-5 md:h-6 md:w-6' />
               Manual Automation Triggers
             </CardTitle>
-            <CardDescription className='text-sm md:text-base text-zinc-400'>
+            <CardDescription className='text-sm md:text-base text-content-muted'>
               Manually trigger automated creation tasks
             </CardDescription>
           </CardHeader>
@@ -1345,7 +1428,7 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-primary-600 text-white transition-all'
+                className='h-auto p-6 bg-surface-card/50 border-stroke-default hover:bg-surface-card hover:border-lunary-primary-600 text-content-primary transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
                   <Sparkles className='h-8 w-8 text-lunary-primary-400' />
@@ -1353,7 +1436,7 @@ export default function AdminDashboard() {
                     <div className='font-semibold text-base mb-1'>
                       Moon Circle
                     </div>
-                    <div className='text-xs text-zinc-400'>
+                    <div className='text-xs text-content-muted'>
                       Create for today
                     </div>
                   </div>
@@ -1400,13 +1483,15 @@ export default function AdminDashboard() {
                   }
                 }}
                 variant='outline'
-                className='h-auto p-6 bg-zinc-800/50 border-zinc-700 hover:bg-zinc-800 hover:border-lunary-secondary-700 text-white transition-all'
+                className='h-auto p-6 bg-surface-card/50 border-stroke-default hover:bg-surface-card hover:border-lunary-secondary-700 text-content-primary transition-all'
               >
                 <div className='flex flex-col items-center gap-3 w-full'>
                   <Calendar className='h-8 w-8 text-lunary-secondary' />
                   <div className='text-center'>
                     <div className='font-semibold text-base mb-1'>Calendar</div>
-                    <div className='text-xs text-zinc-400'>Generate year</div>
+                    <div className='text-xs text-content-muted'>
+                      Generate year
+                    </div>
                   </div>
                 </div>
               </Button>
@@ -1415,7 +1500,7 @@ export default function AdminDashboard() {
         </Card>
 
         {/* System Status - Responsive */}
-        <Card className='mt-6 md:mt-8 lg:mt-10 bg-zinc-900 border-zinc-800'>
+        <Card className='mt-6 md:mt-8 lg:mt-10 bg-surface-elevated border-stroke-subtle'>
           <CardHeader className='pb-4 md:pb-6'>
             <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
               <Activity className='h-5 w-5 md:h-6 md:w-6' />
@@ -1447,24 +1532,24 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Recent Activity */}
-        <Card className='mt-6 md:mt-8 lg:mt-10 bg-zinc-900 border-zinc-800'>
+        <Card className='mt-6 md:mt-8 lg:mt-10 bg-surface-elevated border-stroke-subtle'>
           <CardHeader className='pb-4 md:pb-6'>
             <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
               <Clock className='h-5 w-5 md:h-6 md:w-6' />
               Recent Activity
             </CardTitle>
-            <CardDescription className='text-sm md:text-base text-zinc-400'>
+            <CardDescription className='text-sm md:text-base text-content-muted'>
               Latest admin actions and automated tasks
             </CardDescription>
           </CardHeader>
           <CardContent>
             {activityLoading ? (
-              <div className='text-center py-6 md:py-8 lg:py-10 text-zinc-400'>
+              <div className='text-center py-6 md:py-8 lg:py-10 text-content-muted'>
                 <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary-400 mx-auto mb-4'></div>
                 <p className='text-sm md:text-base'>Loading activity...</p>
               </div>
             ) : recentActivity.length === 0 ? (
-              <div className='text-center py-6 md:py-8 lg:py-10 text-zinc-400'>
+              <div className='text-center py-6 md:py-8 lg:py-10 text-content-muted'>
                 <Activity className='h-10 w-10 md:h-12 md:w-12 mx-auto mb-4 opacity-50' />
                 <p className='text-sm md:text-base'>No activity yet</p>
                 <p className='text-xs md:text-sm mt-2'>
@@ -1481,15 +1566,15 @@ export default function AdminDashboard() {
                         ? 'text-lunary-error'
                         : activity.status === 'pending'
                           ? 'text-lunary-accent'
-                          : 'text-zinc-400';
+                          : 'text-content-muted';
                   const statusBg =
                     activity.status === 'success'
-                      ? 'bg-lunary-success-950 border-lunary-success-900'
+                      ? 'bg-layer-deep border-lunary-success-900'
                       : activity.status === 'failed'
-                        ? 'bg-lunary-error-950 border-lunary-error-900'
+                        ? 'bg-layer-deep border-lunary-error-900'
                         : activity.status === 'pending'
-                          ? 'bg-lunary-accent-950 border-lunary-accent-900'
-                          : 'bg-zinc-500/10 border-zinc-500/20';
+                          ? 'bg-layer-deep border-lunary-accent-900'
+                          : 'bg-surface-overlay/10 border-stroke-strong/20';
 
                   const activityTypeLabels: Record<string, string> = {
                     cron_execution: 'Cron Job',
@@ -1525,7 +1610,7 @@ export default function AdminDashboard() {
                   return (
                     <div
                       key={activity.id}
-                      className='flex items-start gap-3 p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 transition-colors'
+                      className='flex items-start gap-3 p-3 rounded-lg bg-surface-card/50 border border-stroke-default/50 hover:bg-surface-card transition-colors'
                     >
                       <div
                         className={`p-2 rounded-lg ${statusBg} ${statusColor} flex-shrink-0`}
@@ -1536,7 +1621,7 @@ export default function AdminDashboard() {
                       </div>
                       <div className='flex-1 min-w-0'>
                         <div className='flex items-center gap-2 mb-1'>
-                          <span className='text-sm font-medium text-white'>
+                          <span className='text-sm font-medium text-content-primary'>
                             {activityTypeLabels[activity.activity_type] ||
                               activity.activity_type}
                           </span>
@@ -1546,7 +1631,7 @@ export default function AdminDashboard() {
                             {activity.status}
                           </Badge>
                         </div>
-                        <p className='text-xs text-zinc-400 line-clamp-1'>
+                        <p className='text-xs text-content-muted line-clamp-1'>
                           {activity.message || 'No message'}
                         </p>
                         {activity.error_message && (
@@ -1556,7 +1641,7 @@ export default function AdminDashboard() {
                         )}
                         {activity.metadata &&
                           typeof activity.metadata === 'object' && (
-                            <div className='text-xs text-zinc-400 mt-1'>
+                            <div className='text-xs text-content-muted mt-1'>
                               {activity.metadata.packsCreated &&
                                 `${activity.metadata.packsCreated} packs`}
                               {activity.metadata.postsGenerated &&
@@ -1566,7 +1651,7 @@ export default function AdminDashboard() {
                             </div>
                           )}
                       </div>
-                      <div className='flex-shrink-0 text-xs text-zinc-400'>
+                      <div className='flex-shrink-0 text-xs text-content-muted'>
                         {timeAgo(activity.created_at)}
                       </div>
                     </div>

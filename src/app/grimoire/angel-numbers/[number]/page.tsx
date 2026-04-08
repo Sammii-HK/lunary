@@ -152,38 +152,38 @@ Keywords: ${data.keywords.join(', ')}`}
             {data.number} Correspondences
           </Heading>
           <div className='grid grid-cols-2 md:grid-cols-5 gap-4 mt-4'>
-            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+            <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
               <div className='text-2xl mb-1'>🪐</div>
-              <div className='text-xs text-zinc-400'>Planet</div>
-              <div className='text-sm text-zinc-300'>
+              <div className='text-xs text-content-muted'>Planet</div>
+              <div className='text-sm text-content-secondary'>
                 {data.correspondences.planet}
               </div>
             </div>
-            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+            <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
               <div className='text-2xl mb-1'>🔥</div>
-              <div className='text-xs text-zinc-400'>Element</div>
-              <div className='text-sm text-zinc-300'>
+              <div className='text-xs text-content-muted'>Element</div>
+              <div className='text-sm text-content-secondary'>
                 {data.correspondences.element}
               </div>
             </div>
-            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+            <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
               <div className='text-2xl mb-1'>✨</div>
-              <div className='text-xs text-zinc-400'>Chakra</div>
-              <div className='text-sm text-zinc-300'>
+              <div className='text-xs text-content-muted'>Chakra</div>
+              <div className='text-sm text-content-secondary'>
                 {data.correspondences.chakra}
               </div>
             </div>
-            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+            <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
               <div className='text-2xl mb-1'>💎</div>
-              <div className='text-xs text-zinc-400'>Crystal</div>
-              <div className='text-sm text-zinc-300'>
+              <div className='text-xs text-content-muted'>Crystal</div>
+              <div className='text-sm text-content-secondary'>
                 {data.correspondences.crystal}
               </div>
             </div>
-            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+            <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 text-center'>
               <div className='text-2xl mb-1'>🃏</div>
-              <div className='text-xs text-zinc-400'>Tarot</div>
-              <div className='text-sm text-zinc-300'>
+              <div className='text-xs text-content-muted'>Tarot</div>
+              <div className='text-sm text-content-secondary'>
                 {data.correspondences.tarotCard}
               </div>
             </div>

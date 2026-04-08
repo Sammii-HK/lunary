@@ -18,8 +18,10 @@ export function ShareCustomization({
   if (!hasOptions) return null;
 
   return (
-    <div className='flex flex-col gap-2 pt-2 border-t border-zinc-800'>
-      <p className='text-xs text-zinc-400 uppercase tracking-wider'>Options</p>
+    <div className='flex flex-col gap-2 pt-2 border-t border-stroke-subtle'>
+      <p className='text-xs text-content-muted uppercase tracking-wider'>
+        Options
+      </p>
       <div className='flex flex-col gap-2'>
         {onShowNameChange && (
           <label className='flex items-center gap-3'>
@@ -27,9 +29,9 @@ export function ShareCustomization({
               type='checkbox'
               checked={showName}
               onChange={(e) => onShowNameChange(e.target.checked)}
-              className='w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-lunary-primary-600 focus:ring-lunary-primary-600 focus:ring-offset-0'
+              className='w-4 h-4 rounded border-stroke-default bg-surface-card text-lunary-primary-600 focus:ring-lunary-primary-600 focus:ring-offset-0'
             />
-            <span className='text-sm text-zinc-300'>Show my name</span>
+            <span className='text-sm text-content-secondary'>Show my name</span>
           </label>
         )}
         {onShowPersonalizedBadgeChange && (
@@ -38,9 +40,9 @@ export function ShareCustomization({
               type='checkbox'
               checked={showPersonalizedBadge}
               onChange={(e) => onShowPersonalizedBadgeChange(e.target.checked)}
-              className='w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-lunary-primary-600 focus:ring-lunary-primary-600 focus:ring-offset-0'
+              className='w-4 h-4 rounded border-stroke-default bg-surface-card text-lunary-primary-600 focus:ring-lunary-primary-600 focus:ring-offset-0'
             />
-            <span className='text-sm text-zinc-300'>
+            <span className='text-sm text-content-secondary'>
               Show personalized badge
             </span>
           </label>

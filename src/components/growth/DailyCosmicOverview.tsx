@@ -117,14 +117,18 @@ export function DailyCosmicOverview({
     return (
       <Link
         href='/horoscope'
-        className={`group flex items-center gap-3 rounded-xl border border-zinc-800/50 bg-zinc-900/40 px-4 py-3 transition-all hover:border-lunary-primary-700/50 hover:bg-zinc-900/60 ${className}`}
+        className={`group flex items-center gap-3 rounded-xl border border-stroke-subtle/50 bg-surface-elevated/40 px-4 py-3 transition-all hover:border-lunary-primary-700/50 hover:bg-surface-elevated/60 ${className}`}
       >
         <div className='shrink-0 text-2xl'>{moonSymbol}</div>
         <div className='flex-1 min-w-0'>
-          <p className='text-sm font-medium text-zinc-100'>{moonPhase}</p>
-          <p className='text-xs text-zinc-400 line-clamp-1'>{moonData.short}</p>
+          <p className='text-sm font-medium text-content-primary'>
+            {moonPhase}
+          </p>
+          <p className='text-xs text-content-muted line-clamp-1'>
+            {moonData.short}
+          </p>
         </div>
-        <ChevronRight className='w-4 h-4 text-zinc-500 group-hover:text-lunary-primary-400 group-hover:translate-x-0.5 transition-all' />
+        <ChevronRight className='w-4 h-4 text-content-muted group-hover:text-lunary-primary-400 group-hover:translate-x-0.5 transition-all' />
       </Link>
     );
   }
@@ -132,13 +136,13 @@ export function DailyCosmicOverview({
   if (isLoading) {
     return (
       <div
-        className={`rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-4 ${className}`}
+        className={`rounded-xl border border-stroke-subtle/50 bg-surface-elevated/30 p-4 ${className}`}
       >
         <div className='flex items-center gap-3 mb-3'>
-          <div className='w-10 h-10 rounded-full bg-zinc-800 animate-pulse' />
+          <div className='w-10 h-10 rounded-full bg-surface-card animate-pulse' />
           <div className='flex-1 space-y-2'>
-            <div className='h-4 bg-zinc-800 rounded w-1/3 animate-pulse' />
-            <div className='h-3 bg-zinc-800 rounded w-2/3 animate-pulse' />
+            <div className='h-4 bg-surface-card rounded w-1/3 animate-pulse' />
+            <div className='h-3 bg-surface-card rounded w-2/3 animate-pulse' />
           </div>
         </div>
       </div>
@@ -147,31 +151,33 @@ export function DailyCosmicOverview({
 
   return (
     <div
-      className={`rounded-xl border border-zinc-800/50 bg-gradient-to-br from-zinc-900/60 to-lunary-primary-950/10 p-4 ${className}`}
+      className={`rounded-xl border border-stroke-subtle/50 bg-gradient-to-br from-surface-elevated/60 to-layer-deep/10 p-4 ${className}`}
     >
       <div className='flex items-start gap-3 mb-3'>
-        <div className='shrink-0 w-12 h-12 rounded-full bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center text-2xl'>
+        <div className='shrink-0 w-12 h-12 rounded-full bg-surface-card/50 border border-stroke-default/50 flex items-center justify-center text-2xl'>
           {moonSymbol}
         </div>
         <div className='flex-1'>
           <div className='flex items-center gap-2 mb-1'>
-            <h3 className='text-sm font-medium text-zinc-100'>{moonPhase}</h3>
-            <span className='text-xs text-zinc-500'>Today</span>
+            <h3 className='text-sm font-medium text-content-primary'>
+              {moonPhase}
+            </h3>
+            <span className='text-xs text-content-muted'>Today</span>
           </div>
-          <p className='text-xs text-zinc-400'>{moonData.short}</p>
+          <p className='text-xs text-content-muted'>{moonData.short}</p>
         </div>
       </div>
 
       {dailyEnergy && (
-        <div className='mb-3 p-3 rounded-lg bg-zinc-800/30 border border-zinc-700/30'>
-          <p className='text-xs text-zinc-500 mb-1'>Today's Energy</p>
-          <p className='text-sm text-zinc-300'>{dailyEnergy}</p>
+        <div className='mb-3 p-3 rounded-lg bg-surface-card/30 border border-stroke-default/30'>
+          <p className='text-xs text-content-muted mb-1'>Today's Energy</p>
+          <p className='text-sm text-content-secondary'>{dailyEnergy}</p>
         </div>
       )}
 
       {isSubscribed && focusBullets.length > 0 && (
         <div className='mb-3'>
-          <p className='text-xs font-medium text-zinc-400 mb-2 flex items-center gap-1'>
+          <p className='text-xs font-medium text-content-muted mb-2 flex items-center gap-1'>
             <Sparkles className='w-3 h-3 text-lunary-primary-400' />
             Focus for Today
           </p>
@@ -179,7 +185,7 @@ export function DailyCosmicOverview({
             {focusBullets.map((bullet, i) => (
               <li
                 key={i}
-                className='text-xs text-zinc-400 flex items-start gap-2'
+                className='text-xs text-content-muted flex items-start gap-2'
               >
                 <span className='text-lunary-primary-400'>•</span>
                 {bullet}
@@ -191,7 +197,7 @@ export function DailyCosmicOverview({
 
       <Link
         href='/horoscope'
-        className='group inline-flex items-center gap-1 text-xs font-medium text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+        className='group inline-flex items-center gap-1 text-xs font-medium text-lunary-primary-400 hover:text-content-brand transition-colors'
       >
         Read Your Horoscope
         <ChevronRight className='w-3 h-3 group-hover:translate-x-0.5 transition-transform' />

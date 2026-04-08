@@ -192,10 +192,10 @@ Many people live disconnected from their Soul Urge, pursuing what society expect
         <NumerologyCalculator type='soul-urge' />
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Core Soul Urge Numbers (1-9)
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Each core number from 1-9 carries unique soul desires and
             motivations. Click on your number to explore its full meaning.
           </p>
@@ -207,18 +207,20 @@ Many people live disconnected from their Soul Urge, pursuing what society expect
                 <Link
                   key={number}
                   href={`/grimoire/numerology/soul-urge/${number}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-rose-600 transition-all'
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-rose-600 transition-all'
                 >
                   <div className='flex items-center gap-3 mb-3'>
                     <span className='text-2xl font-light text-lunary-rose-400'>
                       {number}
                     </span>
-                    <span className='text-zinc-400 text-sm'>Soul Urge</span>
+                    <span className='text-content-muted text-sm'>
+                      Soul Urge
+                    </span>
                   </div>
-                  <h3 className='font-medium text-zinc-100 group-hover:text-lunary-rose-300 transition-colors mb-2'>
+                  <h3 className='font-medium text-content-primary group-hover:text-lunary-rose-300 transition-colors mb-2'>
                     {data.meaning}
                   </h3>
-                  <p className='text-sm text-zinc-400 line-clamp-2'>
+                  <p className='text-sm text-content-muted line-clamp-2'>
                     {data.desires[0]}
                   </p>
                 </Link>
@@ -228,10 +230,10 @@ Many people live disconnected from their Soul Urge, pursuing what society expect
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Master Soul Urge Numbers
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Master Numbers (11, 22, 33) carry intensified spiritual energy and
             deeper soul purposes. These numbers are not reduced and indicate
             souls with heightened missions.
@@ -254,10 +256,10 @@ Many people live disconnected from their Soul Urge, pursuing what society expect
                       Master
                     </span>
                   </div>
-                  <h3 className='font-medium text-zinc-100 group-hover:text-amber-300 transition-colors mb-2'>
+                  <h3 className='font-medium text-content-primary group-hover:text-amber-300 transition-colors mb-2'>
                     {data.meaning}
                   </h3>
-                  <p className='text-sm text-zinc-400 line-clamp-2'>
+                  <p className='text-sm text-content-muted line-clamp-2'>
                     {data.desires[0]}
                   </p>
                 </Link>
@@ -266,32 +268,32 @@ Many people live disconnected from their Soul Urge, pursuing what society expect
           </div>
         </section>
 
-        <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Example Calculation
           </h2>
-          <div className='space-y-4 text-zinc-300'>
+          <div className='space-y-4 text-content-secondary'>
             <p>
               <strong>Name:</strong> SAMANTHA LEE JONES
             </p>
-            <div className='bg-zinc-800/50 p-4 rounded-lg font-mono text-sm'>
-              <p className='text-zinc-400 mb-2'>Extract vowels:</p>
+            <div className='bg-surface-card/50 p-4 rounded-lg font-mono text-sm'>
+              <p className='text-content-muted mb-2'>Extract vowels:</p>
               <p>
-                S<span className='text-lunary-primary-300'>A</span>M
-                <span className='text-lunary-primary-300'>A</span>NTH
-                <span className='text-lunary-primary-300'>A</span> L
-                <span className='text-lunary-primary-300'>EE</span> J
-                <span className='text-lunary-primary-300'>O</span>N
-                <span className='text-lunary-primary-300'>E</span>S
+                S<span className='text-content-brand'>A</span>M
+                <span className='text-content-brand'>A</span>NTH
+                <span className='text-content-brand'>A</span> L
+                <span className='text-content-brand'>EE</span> J
+                <span className='text-content-brand'>O</span>N
+                <span className='text-content-brand'>E</span>S
               </p>
-              <p className='mt-2 text-zinc-400'>Vowels: A, A, A, E, E, O, E</p>
-              <p className='text-zinc-400'>
+              <p className='mt-2 text-content-muted'>
+                Vowels: A, A, A, E, E, O, E
+              </p>
+              <p className='text-content-muted'>
                 Values: 1 + 1 + 1 + 5 + 5 + 6 + 5 = 24
               </p>
-              <p className='text-zinc-400'>Reduce: 2 + 4 = 6</p>
-              <p className='mt-2 text-lunary-primary-300'>
-                Soul Urge Number: 6
-              </p>
+              <p className='text-content-muted'>Reduce: 2 + 4 = 6</p>
+              <p className='mt-2 text-content-brand'>Soul Urge Number: 6</p>
             </div>
           </div>
         </section>

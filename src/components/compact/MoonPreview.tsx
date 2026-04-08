@@ -358,8 +358,8 @@ export const MoonPreview = ({
 
   if (!currentMoonPhase) {
     return (
-      <div className='py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md animate-pulse'>
-        <div className='h-5 w-32 bg-zinc-800 rounded' />
+      <div className='py-3 px-4 bg-surface-elevated border border-stroke-subtle/50 rounded-md animate-pulse'>
+        <div className='h-5 w-32 bg-surface-card rounded' />
       </div>
     );
   }
@@ -396,8 +396,10 @@ export const MoonPreview = ({
           </div>
         }
       />
-      {cycleLine && <p className='text-xs text-zinc-400 mt-1'>{cycleLine}</p>}
-      <p className='text-xs text-zinc-400 mt-1'>
+      {cycleLine && (
+        <p className='text-xs text-content-muted mt-1'>{cycleLine}</p>
+      )}
+      <p className='text-xs text-content-muted mt-1'>
         Next shift in {nextPhaseInfo.days}{' '}
         {nextPhaseInfo.days === 1 ? 'day' : 'days'}
       </p>
@@ -410,30 +412,36 @@ export const MoonPreview = ({
         <div className='grid grid-cols-4 gap-2 text-center'>
           <div>
             <span className='block text-base'>{zodiacInfo.elementSymbol}</span>
-            <span className='text-xs text-zinc-400'>{zodiacInfo.element}</span>
+            <span className='text-xs text-content-muted'>
+              {zodiacInfo.element}
+            </span>
           </div>
           <div>
             <span className='block text-base font-astro'>
               {zodiacInfo.rulingPlanetSymbol}
             </span>
-            <span className='text-xs text-zinc-400'>
+            <span className='text-xs text-content-muted'>
               {zodiacInfo.rulingPlanet}
             </span>
           </div>
           <div>
             <span className='block text-base'>{zodiacInfo.modalitySymbol}</span>
-            <span className='text-xs text-zinc-400'>{zodiacInfo.modality}</span>
+            <span className='text-xs text-content-muted'>
+              {zodiacInfo.modality}
+            </span>
           </div>
           <div>
             <span className='block text-base font-astro'>
               {zodiacInfo.zodiacSymbol}
             </span>
-            <span className='text-xs text-zinc-400'>{zodiacInfo.symbol}</span>
+            <span className='text-xs text-content-muted'>
+              {zodiacInfo.symbol}
+            </span>
           </div>
         </div>
       )}
 
-      <p className='text-sm text-zinc-300 leading-relaxed'>
+      <p className='text-sm text-content-secondary leading-relaxed'>
         {getMoonPhaseGuidance(
           currentMoonPhase as MoonPhaseLabels,
           currentMoonConstellationPosition || '',
@@ -442,12 +450,12 @@ export const MoonPreview = ({
 
       {loading ? (
         <div className='space-y-2'>
-          <div className='h-4 w-full bg-zinc-800 rounded animate-pulse' />
-          <div className='h-4 w-3/4 bg-zinc-800 rounded animate-pulse' />
+          <div className='h-4 w-full bg-surface-card rounded animate-pulse' />
+          <div className='h-4 w-3/4 bg-surface-card rounded animate-pulse' />
         </div>
       ) : spells.length > 0 ? (
         <div>
-          <h4 className='text-xs text-lunary-accent-300 capitalize tracking-wide mb-2'>
+          <h4 className='text-xs text-content-brand-accent capitalize tracking-wide mb-2'>
             {iosLabel('Recommended Spells', isNativeIOS)}
           </h4>
           <div className='space-y-2'>
@@ -455,16 +463,16 @@ export const MoonPreview = ({
               <Link
                 key={spell.id}
                 href={`/grimoire/spells/${spell.id}`}
-                className='block p-2 rounded bg-zinc-800/50 hover:bg-zinc-800 transition-colors'
+                className='block p-2 rounded bg-surface-card/50 hover:bg-surface-card transition-colors'
               >
-                <p className='text-sm text-zinc-200'>{spell.title}</p>
-                <p className='text-xs text-zinc-400'>{spell.purpose}</p>
+                <p className='text-sm text-content-primary'>{spell.title}</p>
+                <p className='text-xs text-content-muted'>{spell.purpose}</p>
               </Link>
             ))}
           </div>
           <Link
             href='/grimoire/spells'
-            className='inline-block text-xs text-lunary-accent hover:text-lunary-accent-300 transition-colors mt-2'
+            className='inline-block text-xs text-lunary-accent hover:text-content-brand-accent transition-colors mt-2'
           >
             {iosLabel('Browse all spells', isNativeIOS)}
           </Link>
@@ -473,7 +481,7 @@ export const MoonPreview = ({
 
       <Link
         href='/grimoire/moon'
-        className='inline-block text-xs text-lunary-accent hover:text-lunary-accent-300 transition-colors'
+        className='inline-block text-xs text-lunary-accent hover:text-content-brand-accent transition-colors'
       >
         Learn more about moon phases
       </Link>

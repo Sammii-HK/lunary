@@ -127,7 +127,7 @@ Major Arcana cards often answer Yes or No with a lesson attached. The outcome is
         ctaText='Want a personalized yes/no reading?'
         ctaHref='/tarot'
       >
-        <div className='mt-10 rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 text-sm text-zinc-300'>
+        <div className='mt-10 rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-6 text-sm text-content-secondary'>
           Best used for simple questions. If the question involves multiple
           people, long timelines, or major life decisions, use a spread instead
           of a yes/no pull.

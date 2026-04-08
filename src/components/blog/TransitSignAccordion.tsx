@@ -57,13 +57,13 @@ export function TransitSignAccordion({
               onClick={() => toggle(key)}
               className={cn(
                 'w-full flex items-center justify-between px-4 py-3',
-                'text-left hover:bg-lunary-primary-900/30 transition-colors',
-                isOpen && 'bg-lunary-primary-900/20',
+                'text-left hover:bg-layer-base/30 transition-colors',
+                isOpen && 'bg-layer-base/20',
               )}
             >
               <span className='flex items-center gap-2'>
                 <span className='text-lg text-lunary-accent-400'>{glyph}</span>
-                <span className='font-medium text-lunary-primary-200'>
+                <span className='font-medium text-content-secondary'>
                   {label}
                 </span>
               </span>
@@ -75,7 +75,7 @@ export function TransitSignAccordion({
               />
             </button>
             {isOpen && (
-              <div className='px-4 pb-4 text-lunary-primary-300/90 leading-relaxed'>
+              <div className='px-4 pb-4 text-content-brand/90 leading-relaxed'>
                 {content}
               </div>
             )}

@@ -220,24 +220,24 @@ export default function ABTestingPage() {
   };
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 p-6'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-6'>
       <div className='max-w-7xl mx-auto space-y-6'>
         <div className='flex items-center justify-between'>
           <div>
             <h1 className='text-3xl font-bold mb-2'>A/B Testing Analytics</h1>
-            <p className='text-zinc-400'>
+            <p className='text-content-muted'>
               Analyze conversion experiments and get AI-assisted insights
             </p>
           </div>
           {autoSuggestions.length > 0 && (
-            <Badge className='bg-lunary-primary-900/20 text-lunary-primary-300 border-lunary-primary-700'>
+            <Badge className='bg-layer-base/20 text-content-brand border-lunary-primary-700'>
               {autoSuggestions.length} Auto-Suggestions Available
             </Badge>
           )}
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className='px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-zinc-100'
+            className='px-4 py-2 bg-surface-elevated border border-stroke-default rounded-lg text-content-primary'
           >
             <option value='7d'>Last 7 days</option>
             <option value='30d'>Last 30 days</option>
@@ -250,13 +250,13 @@ export default function ABTestingPage() {
             <Loader2 className='w-8 h-8 animate-spin text-lunary-primary-400' />
           </div>
         ) : tests.length === 0 ? (
-          <Card className='bg-zinc-900 border-zinc-800'>
+          <Card className='bg-surface-elevated border-stroke-subtle'>
             <CardContent className='p-8 text-center'>
-              <BarChart3 className='w-12 h-12 text-zinc-600 mx-auto mb-4' />
-              <p className='text-zinc-400'>
+              <BarChart3 className='w-12 h-12 text-content-muted mx-auto mb-4' />
+              <p className='text-content-muted'>
                 No A/B tests found. Start testing to see results here.
               </p>
-              <p className='text-zinc-500 text-sm mt-2'>
+              <p className='text-content-muted text-sm mt-2'>
                 Events need to include abTest and abVariant in metadata.
               </p>
             </CardContent>
@@ -265,7 +265,7 @@ export default function ABTestingPage() {
           <div className='grid gap-6'>
             {/* Hub Conversion Summary */}
             {hubSummary.length > 0 && (
-              <Card className='bg-zinc-900 border-zinc-800'>
+              <Card className='bg-surface-elevated border-stroke-subtle'>
                 <CardHeader>
                   <div className='flex items-center gap-2'>
                     <BarChart3 className='w-5 h-5 text-lunary-primary-400' />
@@ -273,7 +273,7 @@ export default function ABTestingPage() {
                       Hub Conversion Summary
                     </CardTitle>
                   </div>
-                  <p className='text-sm text-zinc-500'>
+                  <p className='text-sm text-content-muted'>
                     Which grimoire sections convert SEO visitors best
                     (contextual nudge + sticky CTA combined)
                   </p>
@@ -295,21 +295,21 @@ export default function ABTestingPage() {
                       return (
                         <div
                           key={hub.hub}
-                          className='flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-zinc-800/50'
+                          className='flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-surface-card/50'
                         >
-                          <span className='text-sm text-zinc-300 w-40 shrink-0'>
+                          <span className='text-sm text-content-secondary w-40 shrink-0'>
                             {formatHubName(hub.hub)}
                           </span>
-                          <div className='flex-1 h-6 bg-zinc-800 rounded-full overflow-hidden relative'>
+                          <div className='flex-1 h-6 bg-surface-card rounded-full overflow-hidden relative'>
                             <div
                               className='h-full bg-lunary-primary-600 rounded-full transition-all'
                               style={{ width: `${Math.max(barWidth, 1)}%` }}
                             />
                           </div>
-                          <span className='text-sm font-mono text-lunary-primary-300 w-16 text-right'>
+                          <span className='text-sm font-mono text-content-brand w-16 text-right'>
                             {hub.conversionRate.toFixed(1)}%
                           </span>
-                          <span className='text-xs text-zinc-500 w-24 text-right'>
+                          <span className='text-xs text-content-muted w-24 text-right'>
                             {hub.conversions}/{hub.impressions.toLocaleString()}
                           </span>
                         </div>
@@ -322,10 +322,10 @@ export default function ABTestingPage() {
 
             {/* Auto-Apply Suggestions */}
             {autoSuggestions.length > 0 && (
-              <Card className='bg-gradient-to-r from-lunary-primary-900/40 to-pink-900/40 border-lunary-primary-700'>
+              <Card className='bg-gradient-to-r from-layer-base/40 to-pink-900/40 border-lunary-primary-700'>
                 <CardHeader>
                   <div className='flex items-center gap-2'>
-                    <Zap className='w-5 h-5 text-lunary-primary-300' />
+                    <Zap className='w-5 h-5 text-content-brand' />
                     <CardTitle className='text-xl'>
                       Automated Recommendations
                     </CardTitle>
@@ -335,37 +335,37 @@ export default function ABTestingPage() {
                   {autoSuggestions.map((suggestion, idx) => (
                     <div
                       key={idx}
-                      className='p-4 bg-zinc-900/50 rounded-lg border border-zinc-700'
+                      className='p-4 bg-surface-elevated/50 rounded-lg border border-stroke-default'
                     >
                       <div className='flex items-start justify-between mb-3'>
                         <div>
-                          <h4 className='font-semibold text-white mb-1'>
+                          <h4 className='font-semibold text-content-primary mb-1'>
                             {getTestDisplayName(suggestion.testName)}
                           </h4>
-                          <p className='text-sm text-zinc-300'>
+                          <p className='text-sm text-content-secondary'>
                             {suggestion.reason}
                           </p>
                         </div>
-                        <Badge className='bg-lunary-success-900 text-lunary-success border-lunary-success-800'>
+                        <Badge className='bg-layer-base text-lunary-success border-lunary-success-800'>
                           {suggestion.confidence.toFixed(1)}% confidence
                         </Badge>
                       </div>
 
                       {suggestion.changes.length > 0 && (
-                        <div className='mb-3 p-3 bg-zinc-800/50 rounded border border-zinc-700'>
-                          <p className='text-xs text-zinc-400 mb-2'>
+                        <div className='mb-3 p-3 bg-surface-card/50 rounded border border-stroke-default'>
+                          <p className='text-xs text-content-muted mb-2'>
                             Proposed Changes:
                           </p>
                           {suggestion.changes.map(
                             (change: any, cIdx: number) => (
                               <div
                                 key={cIdx}
-                                className='text-xs text-zinc-300 mb-2'
+                                className='text-xs text-content-secondary mb-2'
                               >
                                 <span className='text-lunary-primary-400'>
                                   {change.file}
                                 </span>
-                                <p className='text-zinc-400 mt-1'>
+                                <p className='text-content-muted mt-1'>
                                   {change.description}
                                 </p>
                               </div>
@@ -398,21 +398,24 @@ export default function ABTestingPage() {
             )}
 
             {tests.map((test) => (
-              <Card key={test.testName} className='bg-zinc-900 border-zinc-800'>
+              <Card
+                key={test.testName}
+                className='bg-surface-elevated border-stroke-subtle'
+              >
                 <CardHeader>
                   <div className='flex items-center justify-between'>
                     <div>
                       <CardTitle className='text-xl'>
                         {getTestDisplayName(test.testName)}
                       </CardTitle>
-                      <p className='text-sm text-zinc-500 mt-1'>
+                      <p className='text-sm text-content-muted mt-1'>
                         {test.totalImpressions.toLocaleString()} impressions ·{' '}
                         {test.totalConversions.toLocaleString()} conversions
                       </p>
                     </div>
                     <div className='flex items-center gap-2'>
                       {test.bestVariant && test.isSignificant && (
-                        <Badge className='bg-lunary-accent-900/50 text-lunary-accent-300 border-lunary-accent-700'>
+                        <Badge className='bg-layer-base/50 text-content-brand-accent border-lunary-accent-700'>
                           <Trophy className='w-3 h-3 mr-1' />
                           {formatVariantName(test.bestVariant)}
                         </Badge>
@@ -420,8 +423,8 @@ export default function ABTestingPage() {
                       <Badge
                         className={
                           test.isSignificant
-                            ? 'bg-lunary-success-900 text-lunary-success border-lunary-success-800'
-                            : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                            ? 'bg-layer-base text-lunary-success border-lunary-success-800'
+                            : 'bg-surface-card text-content-muted border-stroke-default'
                         }
                       >
                         {test.isSignificant
@@ -464,12 +467,12 @@ export default function ABTestingPage() {
                           key={variant.name}
                           className={`p-4 rounded-lg border ${
                             isWinner && test.isSignificant
-                              ? 'bg-lunary-success-900/20 border-lunary-success-700'
-                              : 'bg-zinc-800/50 border-zinc-700'
+                              ? 'bg-layer-base/20 border-lunary-success-700'
+                              : 'bg-surface-card/50 border-stroke-default'
                           }`}
                         >
                           <div className='flex items-center justify-between mb-3'>
-                            <h3 className='font-semibold text-zinc-200'>
+                            <h3 className='font-semibold text-content-primary'>
                               {formatVariantName(variant.name)}
                             </h3>
                             {hasHighestRate && variant.impressions > 0 ? (
@@ -480,23 +483,23 @@ export default function ABTestingPage() {
                           </div>
                           <div className='space-y-2'>
                             <div className='flex justify-between text-sm'>
-                              <span className='text-zinc-400'>
+                              <span className='text-content-muted'>
                                 Impressions:
                               </span>
-                              <span className='text-zinc-200 font-medium'>
+                              <span className='text-content-primary font-medium'>
                                 {variant.impressions.toLocaleString()}
                               </span>
                             </div>
                             <div className='flex justify-between text-sm'>
-                              <span className='text-zinc-400'>
+                              <span className='text-content-muted'>
                                 Conversions:
                               </span>
-                              <span className='text-zinc-200 font-medium'>
+                              <span className='text-content-primary font-medium'>
                                 {variant.conversions.toLocaleString()}
                               </span>
                             </div>
                             <div className='flex justify-between text-sm'>
-                              <span className='text-zinc-400'>
+                              <span className='text-content-muted'>
                                 Conversion Rate:
                               </span>
                               <span
@@ -504,7 +507,7 @@ export default function ABTestingPage() {
                                   isWinner && test.isSignificant
                                     ? 'text-lunary-success'
                                     : variant.conversionRate === null
-                                      ? 'text-zinc-500'
+                                      ? 'text-content-muted'
                                       : 'text-lunary-primary-400'
                                 }`}
                               >
@@ -520,21 +523,21 @@ export default function ABTestingPage() {
                   </div>
 
                   {/* Improvement */}
-                  <div className='p-4 bg-lunary-primary-900/10 border border-lunary-primary-700 rounded-lg'>
+                  <div className='p-4 bg-layer-base/10 border border-lunary-primary-700 rounded-lg'>
                     <div className='flex items-center gap-2 mb-2'>
                       <Sparkles className='w-5 h-5 text-lunary-primary-400' />
                       {test.improvement !== null ? (
-                        <span className='font-semibold text-lunary-primary-300'>
+                        <span className='font-semibold text-content-brand'>
                           Best vs Runner-up: {test.improvement > 0 ? '+' : ''}
                           {test.improvement.toFixed(2)}%
                         </span>
                       ) : (
-                        <span className='font-semibold text-zinc-400'>
+                        <span className='font-semibold text-content-muted'>
                           Not enough data to compare
                         </span>
                       )}
                     </div>
-                    <p className='text-sm text-zinc-300'>
+                    <p className='text-sm text-content-secondary'>
                       {test.recommendation}
                     </p>
                   </div>
@@ -544,7 +547,7 @@ export default function ABTestingPage() {
                     <button
                       onClick={() => loadAIInsights(test)}
                       disabled={loadingInsights}
-                      className='w-full px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
+                      className='w-full px-4 py-2 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
                     >
                       {loadingInsights && selectedTest === test.testName ? (
                         <>
@@ -560,11 +563,11 @@ export default function ABTestingPage() {
                     </button>
 
                     {selectedTest === test.testName && aiInsights && (
-                      <div className='mt-4 p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg'>
-                        <h4 className='font-semibold text-lunary-primary-300 mb-2'>
+                      <div className='mt-4 p-4 bg-surface-card/50 border border-stroke-default rounded-lg'>
+                        <h4 className='font-semibold text-content-brand mb-2'>
                           AI Analysis
                         </h4>
-                        <div className='text-sm text-zinc-300 whitespace-pre-wrap'>
+                        <div className='text-sm text-content-secondary whitespace-pre-wrap'>
                           {aiInsights}
                         </div>
                       </div>

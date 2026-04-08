@@ -131,13 +131,13 @@ Select your zodiac sign below to explore detailed monthly predictions.`}
             <Link
               key={sign}
               href={`/grimoire/horoscopes/${sign}/${currentYear}/${currentMonth}`}
-              className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all group'
+              className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 hover:bg-surface-elevated transition-all group'
             >
               <div className='text-4xl mb-3'>{SIGN_SYMBOLS[sign]}</div>
-              <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-accent-300 transition-colors'>
+              <h3 className='text-lg font-medium text-content-primary group-hover:text-content-brand-accent transition-colors'>
                 {SIGN_DISPLAY_NAMES[sign]}
               </h3>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-sm text-content-muted'>
                 {SIGN_ELEMENTS[sign]} Sign
               </p>
             </Link>

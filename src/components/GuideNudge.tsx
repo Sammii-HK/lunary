@@ -30,24 +30,30 @@ export function GuideNudge({ location, className = '' }: GuideNudgeProps) {
 
   return (
     <div
-      className={`rounded-lg border border-lunary-primary-800/50 bg-gradient-to-r from-lunary-primary-950/30 to-transparent p-3 ${className}`}
+      className={`rounded-lg border border-lunary-primary-800/50 bg-gradient-to-r from-layer-deep/30 to-transparent p-3 ${className}`}
     >
       <div className='flex items-start gap-3'>
-        <div className='p-1.5 rounded-md bg-lunary-primary-900/30'>
+        <div className='p-1.5 rounded-md bg-layer-base/30'>
           <Sparkles className='w-4 h-4 text-lunary-primary-400' />
         </div>
         <div className='flex-1 min-w-0'>
           {hasPaidAccess ? (
             <>
-              <p className='text-sm text-zinc-300 mb-1'>{hint.title}</p>
-              <p className='text-xs text-zinc-400 mb-2'>{hint.shortText}</p>
+              <p className='text-sm text-content-secondary mb-1'>
+                {hint.title}
+              </p>
+              <p className='text-xs text-content-muted mb-2'>
+                {hint.shortText}
+              </p>
             </>
           ) : (
-            <p className='text-sm text-zinc-300 mb-2'>{hint.shortText}</p>
+            <p className='text-sm text-content-secondary mb-2'>
+              {hint.shortText}
+            </p>
           )}
           <Link
             href={guideUrl}
-            className='inline-flex items-center gap-1.5 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+            className='inline-flex items-center gap-1.5 text-xs font-medium text-content-brand hover:text-content-secondary transition-colors'
           >
             <Sparkles className='w-3 h-3' />
             Ask the Astral Guide

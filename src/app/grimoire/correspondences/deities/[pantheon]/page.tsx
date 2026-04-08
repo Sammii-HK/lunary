@@ -151,7 +151,7 @@ Working with deities brings divine support and ancient wisdom to your practice. 
       ]}
     >
       <div className='mt-8 space-y-6'>
-        <h2 className='text-2xl font-medium text-zinc-100'>
+        <h2 className='text-2xl font-medium text-content-primary'>
           {pantheonKey} Deities
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
@@ -161,12 +161,12 @@ Working with deities brings divine support and ancient wisdom to your practice. 
               <Link
                 key={deityName}
                 href={`/grimoire/correspondences/deities/${pantheon}/${deitySlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {deityName}
                 </h3>
-                <p className='text-sm text-zinc-300'>
+                <p className='text-sm text-content-secondary'>
                   Domain: {deityData.domain.join(', ')}
                 </p>
               </Link>

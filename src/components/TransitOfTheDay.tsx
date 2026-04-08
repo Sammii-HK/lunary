@@ -226,7 +226,7 @@ export const TransitOfTheDay = () => {
 
       return (
         <div className='locked-preview-redacted mb-2'>
-          <p className='text-xs text-zinc-400'>{contentWithSpaces}</p>
+          <p className='text-xs text-content-muted'>{contentWithSpaces}</p>
         </div>
       );
     }
@@ -267,16 +267,16 @@ export const TransitOfTheDay = () => {
       return (
         <Link
           href='/pricing?nav=app'
-          className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors'
+          className='block py-3 px-4 bg-surface-elevated border border-stroke-subtle/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors'
         >
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
-              <Sparkles className='w-4 h-4 text-lunary-secondary-200' />
-              <span className='text-sm text-lunary-primary-200'>
+              <Sparkles className='w-4 h-4 text-content-brand-secondary' />
+              <span className='text-sm text-content-secondary'>
                 {ctaCopy.transitList}
               </span>
             </div>
-            <ArrowRight className='w-4 h-4 text-lunary-secondary-200' />
+            <ArrowRight className='w-4 h-4 text-content-brand-secondary' />
           </div>
         </Link>
       );
@@ -285,26 +285,28 @@ export const TransitOfTheDay = () => {
     return (
       <Link
         href='/horoscope'
-        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
+        className='block py-3 px-4 bg-surface-elevated border border-stroke-subtle/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
         data-testid='transit-card'
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
             <div className='flex items-center justify-between mb-1'>
               <div className='flex items-center gap-2 align-middle'>
-                <span className='font-astro text-lg text-lunary-secondary-200 align-middle'>
+                <span className='font-astro text-lg text-content-brand-secondary align-middle'>
                   {getPlanetSymbol(generalTransit.planet)}
                 </span>
-                <span className='text-sm text-zinc-200'>Your Next Transit</span>
+                <span className='text-sm text-content-primary'>
+                  Your Next Transit
+                </span>
               </div>
-              <span className='inline-flex items-center text-xs px-2 py-0.5 rounded-md border bg-zinc-900 border-zinc-800 text-zinc-400'>
+              <span className='inline-flex items-center text-xs px-2 py-0.5 rounded-md border bg-surface-elevated border-stroke-subtle text-content-muted'>
                 {formatRelativeTime(dayjs(generalTransit.date))}
               </span>
             </div>
-            <p className='text-sm text-zinc-200 mb-1'>
+            <p className='text-sm text-content-primary mb-1'>
               {generalTransit.planet} {generalTransit.event}
             </p>
-            <p className='text-xs text-zinc-200 mb-2'>
+            <p className='text-xs text-content-primary mb-2'>
               {generalTransit.description.split('.')[0]}.
             </p>
 
@@ -334,7 +336,7 @@ export const TransitOfTheDay = () => {
                     );
                   }
                 }}
-                className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300 hover:bg-lunary-primary-800/80 transition-colors'
+                className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-layer-base/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-content-brand hover:bg-layer-raised/80 transition-colors'
               >
                 <Sparkles className='w-2.5 h-2.5' />
                 Lunary+
@@ -347,12 +349,12 @@ export const TransitOfTheDay = () => {
                 e.stopPropagation();
                 ctaCopy.trackCTAClick('transitList', 'dashboard');
               }}
-              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0'
+              className='flex items-center gap-1.5 text-xs text-content-secondary hover:text-content-secondary transition-colors bg-none border-none p-0'
             >
               {ctaCopy.transitList}
             </button>
           </div>
-          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-secondary-200 transition-colors flex-shrink-0 mt-1' />
+          <ArrowRight className='w-4 h-4 text-content-muted group-hover:text-content-brand-secondary transition-colors flex-shrink-0 mt-1' />
         </div>
       </Link>
     );
@@ -364,31 +366,31 @@ export const TransitOfTheDay = () => {
       return (
         <Link
           href='/horoscope'
-          className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
+          className='block py-3 px-4 bg-surface-elevated border border-stroke-subtle/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
         >
           <div className='flex items-start justify-between gap-3'>
             <div className='flex-1 min-w-0'>
               <div className='flex items-center justify-between mb-1'>
                 <div className='flex items-center gap-2 align-middle'>
-                  <span className='font-astro text-lg text-lunary-secondary-200'>
+                  <span className='font-astro text-lg text-content-brand-secondary'>
                     {getPlanetSymbol(generalTransit.planet)}
                   </span>
-                  <span className='text-sm text-zinc-200'>
+                  <span className='text-sm text-content-primary'>
                     Your Next Transit
                   </span>
                 </div>
-                <span className='inline-flex items-center text-xs px-2 py-0.5 rounded-md border bg-zinc-900 border-zinc-800 text-zinc-400'>
+                <span className='inline-flex items-center text-xs px-2 py-0.5 rounded-md border bg-surface-elevated border-stroke-subtle text-content-muted'>
                   {formatRelativeTime(dayjs(generalTransit.date))}
                 </span>
               </div>
-              <p className='text-sm text-zinc-200 mb-1'>
+              <p className='text-sm text-content-primary mb-1'>
                 {generalTransit.planet} {generalTransit.event}
               </p>
-              <p className='text-xs text-zinc-400 line-clamp-2'>
+              <p className='text-xs text-content-muted line-clamp-2'>
                 {generalTransit.description}
               </p>
             </div>
-            <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-secondary-200 transition-colors flex-shrink-0 mt-1' />
+            <ArrowRight className='w-4 h-4 text-content-muted group-hover:text-content-brand-secondary transition-colors flex-shrink-0 mt-1' />
           </div>
         </Link>
       );
@@ -399,37 +401,39 @@ export const TransitOfTheDay = () => {
   return (
     <Link
       href='/horoscope'
-      className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
+      className='block py-3 px-4 bg-surface-elevated border border-stroke-subtle/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
       data-testid='transit-card'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>
           <div className='flex items-center justify-between mb-1'>
             <div className='flex items-center gap-2 align-middle'>
-              <span className='font-astro text-lg text-lunary-secondary-200'>
+              <span className='font-astro text-lg text-content-brand-secondary'>
                 {getPlanetSymbol(transit.planet)}
               </span>
-              <span className='text-sm text-zinc-200'>Your Next Transit</span>
+              <span className='text-sm text-content-primary'>
+                Your Next Transit
+              </span>
             </div>
-            <span className='inline-flex items-center text-xs px-2 py-0.5 rounded-md border bg-zinc-900 border-zinc-800 text-zinc-400'>
+            <span className='inline-flex items-center text-xs px-2 py-0.5 rounded-md border bg-surface-elevated border-stroke-subtle text-content-muted'>
               {formatRelativeTime(dayjs(transit.date))}
             </span>
           </div>
-          <p className='text-sm text-zinc-200 mb-1'>
+          <p className='text-sm text-content-primary mb-1'>
             {transit.planet} {transit.event}
             {transit.house && (
-              <span className='text-zinc-400'>
+              <span className='text-content-muted'>
                 {' '}
                 your {transit.house}
                 {getOrdinalSuffix(transit.house)} house
               </span>
             )}
           </p>
-          <p className='text-xs text-zinc-400 line-clamp-2'>
+          <p className='text-xs text-content-muted line-clamp-2'>
             {transit.actionableGuidance}
           </p>
         </div>
-        <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-secondary-200 transition-colors flex-shrink-0 mt-1' />
+        <ArrowRight className='w-4 h-4 text-content-muted group-hover:text-content-brand-secondary transition-colors flex-shrink-0 mt-1' />
       </div>
     </Link>
   );

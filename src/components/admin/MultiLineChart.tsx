@@ -7,7 +7,7 @@ interface MultiLineChartProps {
 export function MultiLineChart({ data }: MultiLineChartProps) {
   if (!data.length) {
     return (
-      <div className='flex h-48 items-center justify-center text-sm text-zinc-400'>
+      <div className='flex h-48 items-center justify-center text-sm text-content-muted'>
         Not enough data for this range.
       </div>
     );

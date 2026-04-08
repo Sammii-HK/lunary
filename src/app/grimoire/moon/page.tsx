@@ -74,9 +74,9 @@ function getMoonTypeIcon(type: MoonEvent['type']) {
     case 'blue_moon':
       return <MoonIcon className='w-4 h-4 text-blue-400' />;
     case 'black_moon':
-      return <Circle className='w-4 h-4 text-zinc-600' />;
+      return <Circle className='w-4 h-4 text-content-muted' />;
     case 'micromoon':
-      return <Star className='w-4 h-4 text-zinc-400' />;
+      return <Star className='w-4 h-4 text-content-muted' />;
     default:
       return <MoonIcon className='w-4 h-4 text-lunary-primary-400' />;
   }
@@ -226,7 +226,7 @@ Understanding these phases and aligning your practice with them creates powerful
                 Upcoming Special Moons
               </Heading>
             </div>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Rare and powerful lunar events for {currentYear}–{currentYear + 1}
             </p>
 
@@ -240,32 +240,34 @@ Understanding these phases and aligning your practice with them creates powerful
                     key={`${moon.date}-${moon.type}-${index}`}
                     className={`p-4 rounded-lg border ${
                       isPast
-                        ? 'border-zinc-800/30 bg-zinc-900/20 opacity-60'
-                        : 'border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-lunary-primary-600'
+                        ? 'border-stroke-subtle/30 bg-surface-elevated/20 opacity-60'
+                        : 'border-stroke-subtle/50 bg-surface-elevated/30 hover:bg-surface-elevated/50 hover:border-lunary-primary-600'
                     } transition-all`}
                   >
                     <div className='flex items-start gap-3'>
                       <div className='mt-1'>{getMoonTypeIcon(moon.type)}</div>
                       <div className='flex-1 min-w-0'>
                         <div className='flex items-center gap-2 flex-wrap'>
-                          <span className='font-medium text-zinc-100'>
+                          <span className='font-medium text-content-primary'>
                             {formatMoonType(moon.type)}
                           </span>
-                          <span className='text-xs px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400'>
+                          <span className='text-xs px-2 py-0.5 rounded-full bg-surface-card text-content-muted'>
                             {moon.sign}
                           </span>
                           {isPast && (
-                            <span className='text-xs text-zinc-500'>Past</span>
+                            <span className='text-xs text-content-muted'>
+                              Past
+                            </span>
                           )}
                         </div>
                         <p className='text-sm text-lunary-primary-400 mt-1'>
                           {format(moonDate, 'MMMM d, yyyy')}
                         </p>
-                        <p className='text-xs text-zinc-500 mt-1'>
+                        <p className='text-xs text-content-muted mt-1'>
                           {getMoonTypeDescription(moon.type)}
                         </p>
                         {moon.distanceKm && (
-                          <p className='text-xs text-zinc-600 mt-1'>
+                          <p className='text-xs text-content-muted mt-1'>
                             Distance: {moon.distanceKm.toLocaleString()} km
                           </p>
                         )}
@@ -280,7 +282,7 @@ Understanding these phases and aligning your practice with them creates powerful
             <div className='text-center pt-2'>
               <Link
                 href={`/grimoire/events/${currentYear}`}
-                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+                className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
               >
                 View all {currentYear} cosmic events →
               </Link>

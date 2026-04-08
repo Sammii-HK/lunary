@@ -39,22 +39,22 @@ export function SharePreview({
   if (loading || !imageUrl) {
     return (
       <div
-        className='flex flex-col items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800/50'
+        className='flex flex-col items-center justify-center rounded-lg border border-stroke-default bg-surface-card/50'
         style={{
           aspectRatio: `${dimensions.width} / ${dimensions.height}`,
         }}
       >
         <Loader2 className='w-8 h-8 text-lunary-primary-400 animate-spin mb-4' />
-        <p className='text-zinc-400 text-sm'>Generating your card...</p>
+        <p className='text-content-muted text-sm'>Generating your card...</p>
       </div>
     );
   }
 
   return (
-    <div className='rounded-lg overflow-hidden border border-zinc-700 relative'>
+    <div className='rounded-lg overflow-hidden border border-stroke-default relative'>
       {!imageLoaded && (
         <div
-          className='absolute inset-0 flex items-center justify-center bg-zinc-800/50'
+          className='absolute inset-0 flex items-center justify-center bg-surface-card/50'
           style={{
             aspectRatio: `${dimensions.width} / ${dimensions.height}`,
           }}

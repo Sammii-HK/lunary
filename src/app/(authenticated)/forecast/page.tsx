@@ -1,8 +1,8 @@
 'use client';
 
 import { YearlyForecast } from '@/components/forecast/YearlyForecast';
+import { ForecastTeaser } from '@/components/forecast/ForecastTeaser';
 import { useSubscription } from '@/hooks/useSubscription';
-import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { Heading } from '@/components/ui/Heading';
 
 const currentYear = new Date().getFullYear();
@@ -16,7 +16,7 @@ export default function ForecastPage() {
         <Heading as='h1' variant='h1'>
           {currentYear} Forecast
         </Heading>
-        <p className='text-zinc-400'>
+        <p className='text-content-muted'>
           Major transits, retrogrades, eclipses and key aspects for the year
           ahead. Download as a calendar to track cosmic events.
         </p>
@@ -25,11 +25,7 @@ export default function ForecastPage() {
       {subscription.hasAccess('yearly_forecast') ? (
         <YearlyForecast />
       ) : (
-        <UpgradePrompt
-          featureName='yearly_forecast'
-          title={`Unlock Your ${currentYear} Forecast`}
-          description={`Get insights into major planetary transits, retrogrades, eclipses and key aspects for ${currentYear}.`}
-        />
+        <ForecastTeaser year={currentYear} />
       )}
     </div>
   );

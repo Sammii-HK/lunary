@@ -130,11 +130,11 @@ export function PWAReadyChecker() {
   }
 
   return (
-    <div className='fixed top-4 left-4 right-4 bg-lunary-accent-900/90 border-2 border-lunary-accent-500 rounded-lg p-4 text-sm z-[10000]'>
+    <div className='fixed top-4 left-4 right-4 bg-layer-base/90 border-2 border-lunary-accent-500 rounded-lg p-4 text-sm z-[10000]'>
       <div className='flex items-start gap-3'>
         <div className='text-2xl'>⏳</div>
         <div className='flex-1'>
-          <h3 className='font-bold text-lunary-accent-200 mb-2'>
+          <h3 className='font-bold text-content-brand-accent mb-2'>
             PWA Not Ready - DO NOT Add to Home Screen Yet!
           </h3>
           <div className='space-y-1 text-xs'>
@@ -179,12 +179,12 @@ export function PWAReadyChecker() {
               Controlling Page
             </div>
           </div>
-          <p className='text-lunary-accent-200 mt-3 text-xs'>
+          <p className='text-content-brand-accent mt-3 text-xs'>
             <strong>Wait until all checks are ✅</strong> before adding to home
             screen. Adding too early creates a bookmark instead of a PWA!
           </p>
           {checks.serviceWorker && !checks.serviceWorkerControlling && (
-            <p className='text-lunary-accent-300 mt-2 text-xs font-bold'>
+            <p className='text-content-brand-accent mt-2 text-xs font-bold'>
               ⚠️ Service worker is registered but not controlling. You may need
               to <strong>refresh the page once</strong> for it to take control.
             </p>

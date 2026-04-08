@@ -365,13 +365,13 @@ export default function ArchetypesGuidePage() {
       <GrimoireBreadcrumbs items={breadcrumbItems} />
 
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-6'>
           The 12 Lunary Archetypes
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             A Guide to Your Inner Patterns
           </span>
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           Discover the twelve archetypal patterns that shape your emotional
           cycles, reveal your hidden strengths, and illuminate your spiritual
           themes. Each archetype offers both gifts to embrace and shadows to
@@ -379,11 +379,11 @@ export default function ArchetypesGuidePage() {
         </p>
       </header>
 
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a
               href='#what-are-archetypes'
@@ -432,11 +432,11 @@ export default function ArchetypesGuidePage() {
       </nav>
 
       <section id='what-are-archetypes' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           1. What Are Lunary Archetypes?
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Archetypes are universal patterns of human experience—recurring themes
           that appear across cultures, mythologies, dreams, and individual
           psyches. The concept, developed extensively by psychologist Carl Jung,
@@ -445,7 +445,7 @@ export default function ArchetypesGuidePage() {
           patterns.
         </p>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           The Lunary Archetype System draws on this rich psychological tradition
           while integrating insights from astrology, tarot symbolism, and
           spiritual practice. These twelve archetypes represent distinct modes
@@ -453,42 +453,44 @@ export default function ArchetypesGuidePage() {
           growth.
         </p>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6 mb-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-lg p-6 mb-6'>
+          <h3 className='text-lg font-medium text-content-brand mb-3'>
             Four Dimensions of Archetypal Understanding
           </h3>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <h4 className='text-zinc-100 font-medium mb-2'>Symbolism</h4>
-              <p className='text-zinc-400 text-sm'>
+              <h4 className='text-content-primary font-medium mb-2'>
+                Symbolism
+              </h4>
+              <p className='text-content-muted text-sm'>
                 Each archetype carries symbolic meaning that resonates across
                 cultures and traditions, connecting personal experience to
                 universal themes.
               </p>
             </div>
             <div>
-              <h4 className='text-zinc-100 font-medium mb-2'>
+              <h4 className='text-content-primary font-medium mb-2'>
                 Psychological Influence
               </h4>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Archetypes shape how we perceive situations, make decisions, and
                 relate to others—often operating below conscious awareness.
               </p>
             </div>
             <div>
-              <h4 className='text-zinc-100 font-medium mb-2'>
+              <h4 className='text-content-primary font-medium mb-2'>
                 Spiritual Meaning
               </h4>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Beyond psychology, archetypes point toward deeper spiritual
                 truths about the soul&apos;s journey and purpose.
               </p>
             </div>
             <div>
-              <h4 className='text-zinc-100 font-medium mb-2'>
+              <h4 className='text-content-primary font-medium mb-2'>
                 Cosmic Correspondences
               </h4>
-              <p className='text-zinc-400 text-sm'>
+              <p className='text-content-muted text-sm'>
                 Archetypes connect to tarot cards, planetary influences, dream
                 symbols, and transit cycles, creating a web of meaning.
               </p>
@@ -496,7 +498,7 @@ export default function ArchetypesGuidePage() {
           </div>
         </div>
 
-        <p className='text-zinc-300 leading-relaxed'>
+        <p className='text-content-secondary leading-relaxed'>
           Unlike fixed personality types, archetypes are dynamic. You are not
           permanently one archetype—rather, different patterns become active at
           different times in your life, responding to your circumstances,
@@ -507,11 +509,11 @@ export default function ArchetypesGuidePage() {
       </section>
 
       <section id='how-archetypes-work' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           2. How Archetypes Work in Lunary
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Within the Lunary app, archetypes emerge from patterns in your
           personal practice. Rather than assigning you a fixed type, the system
           recognizes which archetypal energies are most active for you right
@@ -519,41 +521,41 @@ export default function ArchetypesGuidePage() {
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Dream Symbolism
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Recurring motifs in your dreams—water, fire, journeys,
               transformations—point toward active archetypes. Dream patterns
               often reveal what the unconscious is processing.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Tarot Patterns
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               When certain cards appear repeatedly in your readings, they signal
               archetypal themes seeking your attention. Major Arcana cards
               especially correspond to specific archetypes.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Journal Themes
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               The words and themes that appear in your Book of Shadows entries
               reveal what you&apos;re processing. Recurring emotional themes and
               questions point toward active archetypes.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Transit Cycles
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Planetary transits activate different archetypal energies. Saturn
               transits may awaken The Grounded One; Neptune transits may call
               forth The Mystic.
@@ -561,7 +563,7 @@ export default function ArchetypesGuidePage() {
           </div>
         </div>
 
-        <p className='text-zinc-300 leading-relaxed'>
+        <p className='text-content-secondary leading-relaxed'>
           Your personal archetype—the one currently most active in your life—is
           revealed through your engagement with Book of Shadows, tarot readings,
           and other practices within the app. This page provides the reference
@@ -571,7 +573,7 @@ export default function ArchetypesGuidePage() {
       </section>
 
       <section id='the-12-archetypes' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-8'>
+        <h2 className='text-3xl font-light text-content-primary mb-8'>
           3. The 12 Archetypes
         </h2>
 
@@ -580,13 +582,13 @@ export default function ArchetypesGuidePage() {
             <article
               key={archetype.id}
               id={archetype.id}
-              className='border border-zinc-800 rounded-xl p-6 md:p-8'
+              className='border border-stroke-subtle rounded-xl p-6 md:p-8'
             >
-              <h3 className='text-2xl font-light text-zinc-100 mb-4'>
+              <h3 className='text-2xl font-light text-content-primary mb-4'>
                 {archetype.name}
               </h3>
 
-              <p className='text-zinc-300 leading-relaxed mb-6'>
+              <p className='text-content-secondary leading-relaxed mb-6'>
                 {archetype.overview}
               </p>
 
@@ -595,7 +597,7 @@ export default function ArchetypesGuidePage() {
                   <h4 className='text-sm font-medium text-lunary-success mb-3'>
                     Light Traits
                   </h4>
-                  <ul className='space-y-2 text-sm text-zinc-300'>
+                  <ul className='space-y-2 text-sm text-content-secondary'>
                     {archetype.lightTraits.map((trait, index) => (
                       <li key={index} className='flex items-start gap-2'>
                         <span className='text-lunary-success mt-0.5'>•</span>
@@ -609,7 +611,7 @@ export default function ArchetypesGuidePage() {
                   <h4 className='text-sm font-medium text-lunary-error mb-3'>
                     Shadow Traits
                   </h4>
-                  <ul className='space-y-2 text-sm text-zinc-300'>
+                  <ul className='space-y-2 text-sm text-content-secondary'>
                     {archetype.shadowTraits.map((trait, index) => (
                       <li key={index} className='flex items-start gap-2'>
                         <span className='text-lunary-error mt-0.5'>•</span>
@@ -620,11 +622,11 @@ export default function ArchetypesGuidePage() {
                 </div>
               </div>
 
-              <div className='bg-zinc-900/50 border border-zinc-700 rounded-lg p-5'>
-                <h4 className='text-sm font-medium text-lunary-primary-300 mb-3'>
+              <div className='bg-surface-elevated/50 border border-stroke-default rounded-lg p-5'>
+                <h4 className='text-sm font-medium text-content-brand mb-3'>
                   Working With This Archetype
                 </h4>
-                <p className='text-sm text-zinc-300 leading-relaxed'>
+                <p className='text-sm text-content-secondary leading-relaxed'>
                   {archetype.guidance}
                 </p>
               </div>
@@ -634,52 +636,52 @@ export default function ArchetypesGuidePage() {
       </section>
 
       <section id='working-with-archetypes' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           4. Working With Your Archetypes
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Understanding archetypes is not about labeling yourself but about
           recognizing the energies moving through your life. Here are some
           principles for working with archetypal awareness:
         </p>
 
         <div className='space-y-4 mb-6'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Archetypes Are Dynamic
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               You will work with different archetypes at different life stages.
               A major loss might activate The Restorer; a spiritual awakening
               might call forth The Mystic. Trust what is emerging now.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Every Archetype Has Shadow
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               There is no &quot;good&quot; or &quot;bad&quot; archetype. Each
               has light gifts and shadow expressions. Integration means
               developing the gifts while becoming conscious of the shadow.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Multiple Archetypes Coexist
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               While one archetype may be dominant, others are always present.
               You might express The Catalyst in your career while The Empath
               leads in relationships.
             </p>
           </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
+            <h4 className='text-lg font-medium text-content-primary mb-2'>
               Use Archetypes for Self-Compassion
             </h4>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Recognizing an archetypal pattern helps you understand your
               behavior without harsh self-judgment. &quot;The Seeker in me is
               restless&quot; is gentler than &quot;I&apos;m broken.&quot;
@@ -688,11 +690,11 @@ export default function ArchetypesGuidePage() {
         </div>
       </section>
 
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-blue-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+      <section className='bg-gradient-to-r from-layer-base/30 to-blue-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
           Discover Your Active Archetype
         </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+        <p className='text-content-muted mb-6 max-w-xl mx-auto'>
           Your personal archetype emerges from patterns in your practice.
           Explore your Book of Shadows, track your tarot readings, and let
           Lunary reveal which energies are most alive for you right now.

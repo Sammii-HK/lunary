@@ -144,19 +144,19 @@ export function ShareInsightForm({
     <form
       onSubmit={handleSubmit}
       className={cn(
-        'space-y-4 rounded-3xl border border-lunary-primary-700 bg-black/40 p-6 shadow-lg shadow-lunary-primary-900 backdrop-blur',
+        'space-y-4 rounded-3xl border border-lunary-primary-700 bg-surface-base/40 p-6 shadow-lg shadow-lunary-primary-900 backdrop-blur',
         className,
       )}
     >
       <div className='flex items-center gap-3'>
-        <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-lunary-primary-900 text-lunary-accent-200'>
+        <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-layer-base text-content-brand-accent'>
           <Sparkles className='h-5 w-5' />
         </div>
         <div>
-          <h3 className='text-lg font-semibold text-white'>
+          <h3 className='text-lg font-semibold text-content-primary'>
             Share your insight
           </h3>
-          <p className='text-sm text-lunary-accent-100/70'>
+          <p className='text-sm text-content-brand-accent/70'>
             Reflect on the energy of this circle—your words support others.
           </p>
         </div>
@@ -170,10 +170,10 @@ export function ShareInsightForm({
           onChange={(event) =>
             setInsightText(event.target.value.slice(0, MAX_LENGTH))
           }
-          className='min-h-[140px] resize-none border-lunary-primary-700 bg-black/40 text-sm text-white placeholder:text-lunary-accent-200/40 focus-visible:border-lunary-accent-300 focus-visible:ring-lunary-accent-700'
+          className='min-h-[140px] resize-none border-lunary-primary-700 bg-surface-base/40 text-sm text-content-primary placeholder:text-content-brand-accent/40 focus-visible:border-lunary-accent-300 focus-visible:ring-lunary-accent-700'
           maxLength={MAX_LENGTH + 10}
         />
-        <div className='flex items-center justify-between text-xs text-lunary-accent-100/70'>
+        <div className='flex items-center justify-between text-xs text-content-brand-accent/70'>
           <span
             className={cn(
               isTooShort || isTooLong ? 'text-lunary-error-300' : undefined,
@@ -187,15 +187,15 @@ export function ShareInsightForm({
         </div>
       </div>
 
-      <div className='flex items-center justify-between gap-4 rounded-2xl border border-lunary-primary-800 bg-lunary-primary-950 px-4 py-3'>
+      <div className='flex items-center justify-between gap-4 rounded-2xl border border-lunary-primary-800 bg-layer-deep px-4 py-3'>
         <div className='flex-1'>
           <Label
             htmlFor='share-anonymous'
-            className='text-sm font-medium text-white'
+            className='text-sm font-medium text-content-primary'
           >
             Share anonymously
           </Label>
-          <p className='text-xs text-lunary-accent-100/60 mt-0.5'>
+          <p className='text-xs text-content-brand-accent/60 mt-0.5'>
             Your name and profile stay hidden unless toggled off.
           </p>
         </div>
@@ -204,7 +204,7 @@ export function ShareInsightForm({
           checked={isAnonymous}
           onCheckedChange={setIsAnonymous}
           aria-label='Toggle anonymous sharing'
-          className='shrink-0 data-[state=checked]:bg-lunary-primary data-[state=unchecked]:bg-lunary-primary-700'
+          className='shrink-0 data-[state=checked]:bg-lunary-primary data-[state=unchecked]:bg-layer-high'
           thumbClassName='bg-white'
         />
       </div>
@@ -227,7 +227,7 @@ export function ShareInsightForm({
         )}
       </Button>
 
-      <div className='text-xs text-lunary-accent-100/70'>
+      <div className='text-xs text-content-brand-accent/70'>
         <p className='flex items-center gap-1.5'>
           <LockIcon className='h-3.5 w-3.5' />
           Community-ready content only. Moderation keeps things safe.
@@ -237,8 +237,8 @@ export function ShareInsightForm({
             className={cn(
               'mt-2 rounded-xl px-3 py-2',
               status === 'error'
-                ? 'bg-lunary-error-950 text-lunary-error-200'
-                : 'bg-lunary-success-950 text-lunary-success-200',
+                ? 'bg-layer-deep text-lunary-error-200'
+                : 'bg-layer-deep text-lunary-success-200',
             )}
           >
             {message}

@@ -167,7 +167,7 @@ export function IntentionsTab() {
   if (isLoading) {
     return (
       <div className='flex items-center justify-center py-12'>
-        <div className='animate-pulse text-zinc-400 text-sm'>
+        <div className='animate-pulse text-content-muted text-sm'>
           Loading intentions...
         </div>
       </div>
@@ -184,7 +184,7 @@ export function IntentionsTab() {
             value={newIntentionText}
             onChange={(e) => setNewIntentionText(e.target.value)}
             placeholder='What do you want to manifest? Be specific...'
-            className='w-full bg-zinc-900 border border-zinc-700 rounded-lg p-4 text-white placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none'
+            className='w-full bg-surface-elevated border border-stroke-default rounded-lg p-4 text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none'
             rows={3}
             maxLength={500}
             autoFocus
@@ -192,7 +192,7 @@ export function IntentionsTab() {
           <select
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
-            className='w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-lunary-primary'
+            className='w-full bg-surface-elevated border border-stroke-default rounded-lg px-4 py-2 text-content-primary text-sm focus:outline-none focus:border-lunary-primary'
           >
             {INTENTION_CATEGORIES.map((cat) => (
               <option key={cat.value} value={cat.value}>
@@ -225,7 +225,7 @@ export function IntentionsTab() {
       ) : (
         <button
           onClick={() => setShowCreateForm(true)}
-          className='w-full flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-lg p-4 text-zinc-300 transition-colors'
+          className='w-full flex items-center justify-center gap-2 bg-surface-elevated hover:bg-surface-card border border-stroke-default rounded-lg p-4 text-content-secondary transition-colors'
         >
           <Plus className='w-5 h-5' />
           Set New Intention
@@ -235,9 +235,9 @@ export function IntentionsTab() {
       {/* Active intentions */}
       {activeIntentions.length === 0 && completedIntentions.length === 0 ? (
         <div className='text-center py-12'>
-          <Target className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
-          <p className='text-zinc-400'>No intentions yet</p>
-          <p className='text-xs text-zinc-500 mt-1'>
+          <Target className='w-10 h-10 text-content-muted mx-auto mb-3' />
+          <p className='text-content-muted'>No intentions yet</p>
+          <p className='text-xs text-content-muted mt-1'>
             Set an intention to start manifesting with cosmic alignment
           </p>
         </div>
@@ -245,7 +245,7 @@ export function IntentionsTab() {
         <>
           {activeIntentions.length > 0 && (
             <div className='space-y-1'>
-              <p className='text-[0.65rem] uppercase tracking-widest text-zinc-500 mb-2'>
+              <p className='text-[0.65rem] uppercase tracking-widest text-content-muted mb-2'>
                 Active intentions ({activeIntentions.length})
               </p>
               {activeIntentions.map((intention) => (
@@ -264,7 +264,7 @@ export function IntentionsTab() {
             <div className='space-y-1'>
               <button
                 onClick={() => setShowCompleted(!showCompleted)}
-                className='flex items-center gap-2 text-[0.65rem] uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors'
+                className='flex items-center gap-2 text-[0.65rem] uppercase tracking-widest text-content-muted hover:text-content-secondary transition-colors'
               >
                 <Sparkles className='w-3 h-3' />
                 {showCompleted ? 'Hide' : 'Show'} completed (

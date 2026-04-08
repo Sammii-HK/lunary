@@ -53,7 +53,7 @@ export function ReflectionBox({ className = '' }: ReflectionBoxProps) {
     return (
       <button
         onClick={() => setIsExpanded(true)}
-        className={`flex items-center gap-2 text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors ${className}`}
+        className={`flex items-center gap-2 text-sm text-lunary-primary-400 hover:text-content-brand transition-colors ${className}`}
       >
         <BookOpen className='w-4 h-4' />
         Add a reflection
@@ -67,7 +67,7 @@ export function ReflectionBox({ className = '' }: ReflectionBoxProps) {
         value={reflection}
         onChange={(e) => setReflection(e.target.value)}
         placeholder="How does today's horoscope resonate with you?"
-        className='w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none'
+        className='w-full bg-surface-elevated border border-stroke-default rounded-lg p-3 text-sm text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary resize-none'
         rows={3}
         autoFocus
       />
@@ -77,7 +77,7 @@ export function ReflectionBox({ className = '' }: ReflectionBoxProps) {
             setIsExpanded(false);
             setReflection('');
           }}
-          className='text-xs text-zinc-400 hover:text-zinc-300 transition-colors'
+          className='text-xs text-content-muted hover:text-content-secondary transition-colors'
         >
           Cancel
         </button>
@@ -86,8 +86,8 @@ export function ReflectionBox({ className = '' }: ReflectionBoxProps) {
           disabled={!reflection.trim() || isSaving || isSaved}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
             isSaved
-              ? 'bg-lunary-success-900/30 text-lunary-success-400'
-              : 'bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white disabled:bg-zinc-700 disabled:text-zinc-400'
+              ? 'bg-layer-base/30 text-lunary-success-400'
+              : 'bg-lunary-primary-600 hover:bg-layer-high text-white disabled:bg-surface-overlay disabled:text-content-muted'
           }`}
         >
           {isSaving ? (

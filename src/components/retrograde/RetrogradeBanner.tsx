@@ -137,10 +137,10 @@ export function RetrogradeBanner({ className }: RetrogradeBannerProps) {
 
       {/* Other retrograde planets — compact listing */}
       {hasOtherRetrogrades && (
-        <div className='rounded-xl border border-zinc-800/50 bg-zinc-900/50 p-4'>
+        <div className='rounded-xl border border-stroke-subtle/50 bg-surface-elevated/50 p-4'>
           <div className='flex items-center gap-2 mb-2.5'>
-            <RotateCcw className='w-4 h-4 text-zinc-400' />
-            <span className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
+            <RotateCcw className='w-4 h-4 text-content-muted' />
+            <span className='text-xs font-medium text-content-muted uppercase tracking-wide'>
               Also retrograde
             </span>
           </div>
@@ -148,11 +148,11 @@ export function RetrogradeBanner({ className }: RetrogradeBannerProps) {
             {otherRetrogrades.map((planet) => (
               <span
                 key={planet.name}
-                className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-zinc-800/50 border border-zinc-700/40 text-zinc-300'
+                className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-surface-card/50 border border-stroke-default/40 text-content-secondary'
               >
-                <RotateCcw className='w-3 h-3 text-zinc-500' />
+                <RotateCcw className='w-3 h-3 text-content-muted' />
                 <span className='font-medium'>{planet.name}</span>
-                <span className='text-zinc-500'>in {planet.sign}</span>
+                <span className='text-content-muted'>in {planet.sign}</span>
               </span>
             ))}
           </div>

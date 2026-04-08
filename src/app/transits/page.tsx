@@ -119,7 +119,7 @@ export default function TransitsHubPage() {
   );
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(itemListSchema)}
       {renderJsonLd(faqSchema)}
       <div className='max-w-5xl mx-auto px-4 py-8 md:py-12'>
@@ -129,7 +129,7 @@ export default function TransitsHubPage() {
           <h1 className='text-2xl md:text-5xl font-light mb-4'>
             Astrological Transit Calendar
           </h1>
-          <p className='text-base md:text-xl text-zinc-400 leading-relaxed max-w-3xl'>
+          <p className='text-base md:text-xl text-content-muted leading-relaxed max-w-3xl'>
             Track every major cosmic event from 2025-2030. Retrogrades,
             eclipses, moon phases, planetary ingresses—all dates freely
             available to help you plan with cosmic awareness.
@@ -143,7 +143,7 @@ export default function TransitsHubPage() {
               <Link
                 key={category.title}
                 href={category.href}
-                className='group p-6 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                className='group p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
               >
                 <div className='flex items-start gap-4'>
                   <div
@@ -152,14 +152,14 @@ export default function TransitsHubPage() {
                     <Icon className='w-6 h-6' />
                   </div>
                   <div className='flex-1'>
-                    <h2 className='text-xl font-medium mb-2 group-hover:text-lunary-primary-300 transition-colors'>
+                    <h2 className='text-xl font-medium mb-2 group-hover:text-content-brand transition-colors'>
                       {category.title}
                     </h2>
-                    <p className='text-zinc-400 text-sm'>
+                    <p className='text-content-muted text-sm'>
                       {category.description}
                     </p>
                   </div>
-                  <ArrowRight className='w-5 h-5 text-zinc-600 group-hover:text-lunary-primary-400 transition-colors' />
+                  <ArrowRight className='w-5 h-5 text-content-muted group-hover:text-lunary-primary-400 transition-colors' />
                 </div>
               </Link>
             );
@@ -173,7 +173,7 @@ export default function TransitsHubPage() {
               <Link
                 key={year}
                 href={`/grimoire/transits#year-${year}`}
-                className='p-4 text-center rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all'
+                className='p-4 text-center rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 hover:bg-surface-elevated transition-all'
               >
                 <span className='text-lg font-medium'>{year}</span>
               </Link>
@@ -189,32 +189,32 @@ export default function TransitsHubPage() {
             {faqs.map((faq, index) => (
               <div
                 key={index}
-                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'
+                className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/30'
               >
-                <h3 className='text-lg font-medium mb-2 text-zinc-100'>
+                <h3 className='text-lg font-medium mb-2 text-content-primary'>
                   {faq.question}
                 </h3>
-                <p className='text-zinc-400'>{faq.answer}</p>
+                <p className='text-content-muted'>{faq.answer}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className='p-8 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-rose-900/20'>
+        <section className='p-8 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-layer-base/20 to-lunary-rose-900/20'>
           <div className='flex items-start gap-4'>
             <Star className='w-8 h-8 text-lunary-primary-400 flex-shrink-0' />
             <div>
-              <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
+              <h2 className='text-xl font-medium text-content-brand mb-2'>
                 Personalised Transit Readings
               </h2>
-              <p className='text-zinc-300 mb-4'>
+              <p className='text-content-secondary mb-4'>
                 See how current transits affect your personal birth chart.
                 Calculate your chart and get daily insights tailored to your
                 cosmic blueprint.
               </p>
               <Link
                 href='/birth-chart'
-                className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-lunary-primary-900/30 hover:bg-lunary-primary-900/50 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+                className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-layer-base/30 hover:bg-layer-base/50 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
               >
                 Calculate Your Birth Chart
                 <ArrowRight className='w-4 h-4' />

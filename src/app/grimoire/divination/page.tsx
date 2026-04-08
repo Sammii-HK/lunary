@@ -105,13 +105,13 @@ export default function DivinationPage() {
       />
 
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-6'>
           Divination
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             Tools for Reflection & Insight
           </span>
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           Divination is the practice of gaining insight through symbolic tools
           and intuitive interpretation. It is not fortune-telling with fixed
           outcomes, but reflection that illuminates patterns, possibilities, and
@@ -119,11 +119,11 @@ export default function DivinationPage() {
         </p>
       </header>
 
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a href='#what-is' className='hover:text-lunary-primary-400'>
               1. What Divination Is (Reflection, Not Fortune-Locking)
@@ -169,22 +169,22 @@ export default function DivinationPage() {
 
       {/* Section 1 */}
       <section id='what-is' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           1. What Divination Is (Reflection, Not Fortune-Locking)
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Divination is best understood as a mirror, not a crystal ball. It
           reflects your current situation, subconscious patterns, and possible
           trajectories—but it does not lock you into any particular future. You
           always have agency.
         </p>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-brand mb-3'>
             A Healthy Approach to Divination
           </h3>
-          <ul className='space-y-2 text-zinc-300 text-sm'>
+          <ul className='space-y-2 text-content-secondary text-sm'>
             <li>
               • Use divination for reflection and self-understanding, not
               anxiety reduction
@@ -208,27 +208,29 @@ export default function DivinationPage() {
 
       {/* Section 2: Tarot */}
       <section id='tarot' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           2. Tarot & Oracle Cards
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Tarot is a 78-card system with rich symbolic imagery. The Major Arcana
           (22 cards) represent major life themes; the Minor Arcana (56 cards)
           address daily situations across four suits.
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Tarot</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>Tarot</h3>
+            <p className='text-content-muted text-sm'>
               Structured system with standardized meanings. 78 cards: 22 Major
               Arcana + 56 Minor Arcana (4 suits of 14).
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Oracle Cards</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Oracle Cards
+            </h3>
+            <p className='text-content-muted text-sm'>
               Varies by deck. No standardized structure. Often more intuitive
               and less structured than tarot.
             </p>
@@ -238,13 +240,13 @@ export default function DivinationPage() {
         <div className='flex flex-wrap gap-3'>
           <Link
             href='/grimoire/tarot'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-lunary-primary-400 hover:text-content-brand'
           >
             All 78 Tarot cards →
           </Link>
           <Link
             href='/grimoire/guides/tarot-complete-guide'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-lunary-primary-400 hover:text-content-brand'
           >
             Tarot Complete Guide →
           </Link>
@@ -253,21 +255,21 @@ export default function DivinationPage() {
 
       {/* Section 3: Runes */}
       <section id='runes' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           3. Runes & Casting Systems
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Runes are ancient Germanic symbols used for divination and magic. The
           Elder Futhark (24 runes) is the most common system. Runes are cast or
           drawn and interpreted through their traditional meanings.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Basic Rune Reading
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>• Draw a single rune for daily guidance</li>
             <li>• Cast three runes: past, present, future</li>
             <li>• Learn each rune&apos;s meaning gradually</li>
@@ -278,7 +280,7 @@ export default function DivinationPage() {
         <div className='mt-4'>
           <Link
             href='/grimoire/runes'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-lunary-primary-400 hover:text-content-brand'
           >
             Explore Runes →
           </Link>
@@ -287,19 +289,21 @@ export default function DivinationPage() {
 
       {/* Section 4: Pendulum */}
       <section id='pendulum' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>4. Pendulums</h2>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
+          4. Pendulums
+        </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Pendulum divination uses a weighted object on a chain or string.
           Through subtle micro-movements, the pendulum responds to questions—
           typically with yes/no/maybe answers.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Getting Started
           </h3>
-          <ol className='space-y-2 text-zinc-400 text-sm'>
+          <ol className='space-y-2 text-content-muted text-sm'>
             <li>1. Hold the pendulum steady, elbow supported</li>
             <li>2. Ask it to show you &quot;yes&quot; (observe direction)</li>
             <li>
@@ -312,7 +316,7 @@ export default function DivinationPage() {
           </ol>
         </div>
 
-        <p className='text-zinc-400 text-sm mt-4'>
+        <p className='text-content-muted text-sm mt-4'>
           Pendulums work best for simple yes/no questions. For complex
           situations, use tarot or other symbol-rich methods.
         </p>
@@ -320,47 +324,47 @@ export default function DivinationPage() {
 
       {/* Section 5: Scrying */}
       <section id='scrying' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           5. Scrying Methods
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Scrying involves gazing into a reflective or translucent surface to
           receive visions or impressions. It requires a meditative state and
           openness to symbolic imagery.
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Crystal Ball / Glass
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Classic scrying tool. Gaze softly until images or impressions
               arise.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Water (Hydromancy)
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               A dark bowl filled with water. Gaze at the surface in dim light.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Mirror (Catoptromancy)
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               A black mirror or regular mirror in dim candlelight.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
               Flame (Pyromancy)
             </h3>
-            <p className='text-zinc-400 text-sm'>
+            <p className='text-content-muted text-sm'>
               Watch a candle flame or fire for images and movement patterns.
             </p>
           </div>
@@ -369,21 +373,21 @@ export default function DivinationPage() {
 
       {/* Section 6: Dreams */}
       <section id='dreams' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           6. Dreams & Omen Reading
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Dreams communicate through symbols and metaphor. Keeping a dream
           journal helps you recognize recurring patterns and personal symbolism.
           Omens are meaningful signs noticed in waking life.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Dream Journaling Tips
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>
               • Keep a journal by your bed and write immediately upon waking
             </li>
@@ -399,11 +403,11 @@ export default function DivinationPage() {
 
       {/* Section 7: Boundaries */}
       <section id='boundaries' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           7. Safe Questions and Healthy Boundaries
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Not all questions are productive. Some lead to obsessive checking or
           unhealthy dependence on divination.
         </p>
@@ -413,7 +417,7 @@ export default function DivinationPage() {
             <h3 className='font-medium text-lunary-success mb-2'>
               Healthy Questions
             </h3>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>• &quot;What do I need to know about...?&quot;</li>
               <li>• &quot;What is blocking me from...?&quot;</li>
               <li>• &quot;What action would serve my highest good?&quot;</li>
@@ -424,7 +428,7 @@ export default function DivinationPage() {
             <h3 className='font-medium text-lunary-error mb-2'>
               Questions to Avoid
             </h3>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>• Asking the same question repeatedly</li>
               <li>
                 • &quot;Does [specific person] love me?&quot; (ask about your
@@ -439,7 +443,7 @@ export default function DivinationPage() {
 
       {/* FAQ */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           8. Frequently Asked Questions
         </h2>
 
@@ -447,36 +451,38 @@ export default function DivinationPage() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 {faq.question}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-content-secondary leading-relaxed'>
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-violet-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+      <section className='bg-gradient-to-r from-layer-base/30 to-violet-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
           Begin Your Divination Practice
         </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+        <p className='text-content-muted mb-6 max-w-xl mx-auto'>
           Draw a card, cast a rune, or simply reflect on a question. Start where
           you are and let your practice develop.
         </p>
         <div className='flex flex-wrap gap-4 justify-center'>
           <Link
             href='/tarot'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg font-medium transition-colors'
           >
             Draw a Tarot Card
           </Link>
           <Link
             href='/grimoire/tarot'
-            className='px-6 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
+            className='px-6 py-3 border border-lunary-primary text-content-brand hover:bg-layer-base/10 rounded-lg font-medium transition-colors'
           >
             Browse Tarot Cards
           </Link>

@@ -17,26 +17,28 @@ export default function AppsTermsOfServicePage() {
   const lastUpdated = 'March 14, 2026';
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='mb-8'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             Terms of Service: Lunary iOS Apps
           </h1>
-          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-content-muted'>
+            Last Updated: {lastUpdated}
+          </p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
           <section>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               These Terms of Service (&quot;Terms&quot;) govern your access to
               and use of the Lunary iOS applications, including iPrep, Yes/No
               Oracle, Spell Book, and Astrologer&apos;s Ephemeris (collectively,
               the &quot;Apps&quot;) provided by Lunar Computing, Inc.
               (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;).
             </p>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               By downloading and using the Apps, you agree to be bound by these
               Terms. If you do not agree to these Terms, you may not access or
               use the Apps.
@@ -44,16 +46,16 @@ export default function AppsTermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               1. License and Use
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               Subject to your compliance with these Terms, we grant you a
               limited, non-exclusive, non-transferable license to download and
               use the Apps on your Apple device for personal, non-commercial
               use. You may not:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Copy, modify, or create derivative works of the Apps</li>
               <li>
                 Reverse engineer, decompile, disassemble, or attempt to derive
@@ -71,24 +73,24 @@ export default function AppsTermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               2. Account and Authentication
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               2.1 Apple ID Sign In
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               The Apps use Sign in with Apple for authentication. By signing in,
               you are responsible for maintaining the confidentiality of your
               Apple account. You are solely responsible for all activities that
               occur under your account.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               2.2 Age Requirement
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You must be at least 16 years of age to use the Apps. By using the
               Apps, you represent and warrant that you meet this eligibility
               requirement.
@@ -96,14 +98,14 @@ export default function AppsTermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               3. In-App Purchases
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               Some Apps offer premium features available via in-app purchase
               (managed by Apple). When you make a purchase:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 You are purchasing from Apple, not from us. Apple processes all
                 payments.
@@ -114,7 +116,7 @@ export default function AppsTermsOfServicePage() {
                   href='https://support.apple.com/en-us/HT204084'
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   Apple&apos;s refund policy
                 </a>
@@ -127,24 +129,24 @@ export default function AppsTermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               4. Content and Data
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               4.1 Your Data
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You retain ownership of any data you create or store in the Apps
               (e.g., saved readings, notes, collections). Your data is stored
               securely using Apple CloudKit and syncs only to your own Apple
               devices. We do not access your encrypted CloudKit data.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               4.2 App Content
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               The Apps contain content (such as tarot card descriptions, spell
               information, astronomical data, and ephemeris calculations) that
               is provided for informational and entertainment purposes only.
@@ -152,10 +154,10 @@ export default function AppsTermsOfServicePage() {
               advice.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               4.3 Disclaimer of Professional Advice
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               The Apps are tools for spiritual exploration and reflection. They
               are not a substitute for professional consultation with medical
               doctors, therapists, legal advisors, financial advisors, or other
@@ -165,14 +167,14 @@ export default function AppsTermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               5. Prohibited Conduct
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               You agree to use the Apps only for lawful purposes. You agree not
               to:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Use the Apps in any way that violates any applicable law or
                 regulation
@@ -194,13 +196,13 @@ export default function AppsTermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               6. Limitation of Liability
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               TO THE MAXIMUM EXTENT PERMITTED BY LAW:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 The Apps are provided &quot;as is&quot; and &quot;as
                 available&quot; without warranties of any kind
@@ -222,10 +224,10 @@ export default function AppsTermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               7. Termination
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We reserve the right to suspend or terminate your access to the
               Apps if you violate these Terms or engage in prohibited conduct.
               You may delete the Apps at any time from your device.
@@ -233,10 +235,10 @@ export default function AppsTermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               8. Changes to These Terms
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We may update these Terms from time to time. Continued use of the
               Apps following any changes constitutes your acceptance of the new
               Terms. We encourage you to review these Terms periodically.
@@ -244,11 +246,11 @@ export default function AppsTermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               9. Contact Us
             </h2>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Lunar Computing, Inc.</strong>
                 <br />
                 131 Continental Dr, Suite 305
@@ -259,7 +261,7 @@ export default function AppsTermsOfServicePage() {
                 Email:{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   support@lunary.app
                 </a>
@@ -267,38 +269,38 @@ export default function AppsTermsOfServicePage() {
             </div>
           </section>
 
-          <section className='pt-8 border-t border-zinc-800'>
-            <h2 className='text-lg font-medium text-white mb-4'>
+          <section className='pt-8 border-t border-stroke-subtle'>
+            <h2 className='text-lg font-medium text-content-primary mb-4'>
               Related Policies
             </h2>
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/apps/iprep/privacy'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 iPrep Privacy
               </Link>
               <Link
                 href='/apps/yesnooracle/privacy'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Yes/No Oracle Privacy
               </Link>
               <Link
                 href='/apps/spellbook/privacy'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Spell Book Privacy
               </Link>
               <Link
                 href='/apps/ephemeris/privacy'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Ephemeris Privacy
               </Link>
               <Link
                 href='/terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Lunary Web Terms
               </Link>

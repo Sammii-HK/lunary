@@ -8,7 +8,8 @@ import { sendDiscordNotification } from '@/lib/discord';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-const STORY_UTC_HOURS = [9, 12, 15, 19];
+// US/UK crossover times: 8am EDT/1pm BST, noon EDT/5pm BST, 3pm EDT/8pm BST, 6pm EDT/11pm BST
+const STORY_UTC_HOURS = [12, 16, 19, 22];
 
 const VARIANT_TO_HIGHLIGHT: Record<string, string> = {
   daily_moon: 'Moon',

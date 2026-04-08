@@ -51,7 +51,7 @@ const BirthChart = () => {
         <Heading as='h2' variant='h2'>
           Birth Chart Guide
         </Heading>
-        <p className='text-xs md:text:sm text-zinc-400'>
+        <p className='text-xs md:text:sm text-content-muted'>
           Learn about planets, houses, aspects, retrogrades, and astrological
           components
         </p>
@@ -60,23 +60,23 @@ const BirthChart = () => {
       {/* Complete Guide Banner */}
       <Link
         href='/grimoire/guides/birth-chart-complete-guide'
-        className='block p-4 rounded-lg bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 hover:border-lunary-primary-500 group'
+        className='block p-4 rounded-lg bg-gradient-to-r from-layer-base/30 to-lunary-rose-900/30 border border-lunary-primary-700 hover:border-lunary-primary-500 group'
       >
         <div className='flex items-center justify-between'>
           <div>
             <Heading
               as='h3'
               variant='h4'
-              className='text-lunary-primary-300 group-hover:text-lunary-primary-200 flex gap-2 items-center'
+              className='text-content-brand group-hover:text-content-secondary flex gap-2 items-center'
             >
-              <BookOpenIcon className='w-4 h-4 mr-2 text-lunary-primary-300' />{' '}
-              Read the Complete Birth Chart Guide
+              <BookOpenIcon className='w-4 h-4 mr-2 text-content-brand' /> Read
+              the Complete Birth Chart Guide
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-400'>
+            <p className='text-xs md:text:sm text-content-muted'>
               In-depth tutorial on reading and interpreting your natal chart
             </p>
           </div>
-          <span className='text-lunary-primary-400 group-hover:text-lunary-primary-300'>
+          <span className='text-lunary-primary-400 group-hover:text-content-brand'>
             →
           </span>
         </div>
@@ -87,7 +87,7 @@ const BirthChart = () => {
           <Heading as='h2' variant='h2'>
             Planets — &quot;The What&quot;
           </Heading>
-          <p className='text-xs md:text:sm text-zinc-400 mb-4'>
+          <p className='text-xs md:text:sm text-content-muted mb-4'>
             Each planet represents a different type of energy and motivation in
             your birth chart. Understanding their meanings helps you interpret
             how they influence different areas of your life.
@@ -100,10 +100,10 @@ const BirthChart = () => {
               <Link
                 key={planet.name}
                 href={`/grimoire/astronomy/planets/${planetSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <div className='flex gap-3 mb-3 items-center'>
-                  <span className='text-3xl text-zinc-500 font-astro flex-shrink-0'>
+                  <span className='text-3xl text-content-muted font-astro flex-shrink-0'>
                     {
                       symbols.bodies[
                         planet.name.toLowerCase() as keyof typeof symbols.bodies
@@ -114,7 +114,7 @@ const BirthChart = () => {
                     <Heading
                       as='h3'
                       variant='h2'
-                      className='text-zinc-100 mb-0'
+                      className='text-content-primary mb-0'
                     >
                       {planet.name}
                     </Heading>
@@ -129,7 +129,7 @@ const BirthChart = () => {
                       >
                         {planet.element}
                       </span>
-                      <span className='text-xs px-2 py-0.5 rounded bg-zinc-800/50 text-zinc-300'>
+                      <span className='text-xs px-2 py-0.5 rounded bg-surface-card/50 text-content-secondary'>
                         {planet.rulingSign}
                       </span>
                     </div>
@@ -138,37 +138,37 @@ const BirthChart = () => {
 
                 <div className='space-y-2'>
                   <div>
-                    <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                    <p className='text-xs text-content-muted mb-1 font-medium'>
                       In Your Birth Chart:
                     </p>
-                    <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+                    <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
                       {planet.inBirthChart}
                     </p>
                   </div>
 
                   <div>
-                    <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                    <p className='text-xs text-content-muted mb-1 font-medium'>
                       Characteristics:
                     </p>
-                    <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+                    <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
                       {planet.characteristics}
                     </p>
                   </div>
 
                   <div>
-                    <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                    <p className='text-xs text-content-muted mb-1 font-medium'>
                       In Transits:
                     </p>
-                    <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+                    <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
                       {planet.inTransits}
                     </p>
                   </div>
 
-                  <div className='pt-2 border-t border-zinc-700'>
-                    <p className='text-xs text-zinc-400 mb-1 font-medium'>
+                  <div className='pt-2 border-t border-stroke-default'>
+                    <p className='text-xs text-content-muted mb-1 font-medium'>
                       Retrograde:
                     </p>
-                    <p className='text-xs text-zinc-400 leading-relaxed'>
+                    <p className='text-xs text-content-muted leading-relaxed'>
                       {planet.retrograde}
                     </p>
                   </div>
@@ -198,13 +198,13 @@ const BirthChart = () => {
               <Link
                 key={house.number}
                 href={`/grimoire/houses/${houseNumber}${suffix}-house`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <div className='flex items-start gap-3'>
-                  <span className='font-medium text-zinc-100 text-xs md:text:sm group-hover:text-lunary-primary-400'>
+                  <span className='font-medium text-content-primary text-xs md:text:sm group-hover:text-lunary-primary-400'>
                     {house.number}
                   </span>
-                  <p className='text-xs md:text:sm text-zinc-300 flex-1'>
+                  <p className='text-xs md:text:sm text-content-secondary flex-1'>
                     {house.area}
                   </p>
                 </div>
@@ -218,7 +218,7 @@ const BirthChart = () => {
         <Heading as='h2' variant='h2'>
           Aspects — Planetary Relationships
         </Heading>
-        <p className='text-xs md:text:sm text-zinc-400 mb-4'>
+        <p className='text-xs md:text:sm text-content-muted mb-4'>
           Aspects are angles between planets that show how planetary energies
           interact in your chart. They reveal strengths, challenges, and dynamic
           interactions.
@@ -226,7 +226,7 @@ const BirthChart = () => {
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           <Link
             href='/grimoire/aspects/types/conjunction'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
           >
             <Heading
               as='h3'
@@ -235,14 +235,14 @@ const BirthChart = () => {
             >
               Conjunction (0°)
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               Planets merge their energies, intensifying their influence. Can be
               harmonious or challenging depending on the planets involved.
             </p>
           </Link>
           <Link
             href='/grimoire/aspects/types/opposition'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
           >
             <Heading
               as='h3'
@@ -251,7 +251,7 @@ const BirthChart = () => {
             >
               Opposition (180°)
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               Planets face each other, creating tension and balance. Often
               represents internal conflict or complementary forces needing
               integration.
@@ -259,48 +259,48 @@ const BirthChart = () => {
           </Link>
           <Link
             href='/grimoire/aspects/types/trine'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
           >
             <Heading
               as='h3'
               variant='h3'
-              className=' text-lunary-secondary group-hover:text-lunary-secondary-300'
+              className=' text-lunary-secondary group-hover:text-content-brand-secondary'
             >
               Trine (120°)
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               Harmonious flow between planets. Natural talents and ease, but can
               lead to complacency if not actively developed.
             </p>
           </Link>
           <Link
             href='/grimoire/aspects/types/square'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
           >
             <Heading
               as='h3'
               variant='h3'
-              className=' text-lunary-accent group-hover:text-lunary-accent-300'
+              className=' text-lunary-accent group-hover:text-content-brand-accent'
             >
               Square (90°)
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               Creates friction and challenges that force growth. While
               difficult, squares build strength, resilience, and determination.
             </p>
           </Link>
           <Link
             href='/grimoire/aspects/types/sextile'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
           >
             <Heading
               as='h3'
               variant='h3'
-              className=' text-lunary-primary-400 group-hover:text-lunary-primary-300'
+              className=' text-lunary-primary-400 group-hover:text-content-brand'
             >
               Sextile (60°)
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               Opportunities and ease between planets. Less intense than trines,
               requiring some effort to activate. Good for creative
               opportunities.
@@ -313,7 +313,7 @@ const BirthChart = () => {
         <Heading as='h2' variant='h2'>
           Retrogrades — Inner Reflection
         </Heading>
-        <p className='text-xs md:text:sm text-zinc-400 mb-4'>
+        <p className='text-xs md:text:sm text-content-muted mb-4'>
           When planets appear to move backward, their energy turns inward. This
           is a time for review, reflection, and reconnection rather than forward
           action.
@@ -321,7 +321,7 @@ const BirthChart = () => {
         <div className='space-y-3'>
           <Link
             href='/grimoire/astronomy/retrogrades/mercury'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
           >
             <Heading
               as='h3'
@@ -330,19 +330,19 @@ const BirthChart = () => {
             >
               Mercury Retrograde
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed mb-2'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed mb-2'>
               Occurs 3-4 times per year for about 3 weeks. Affects
               communication, technology, travel, and decision-making. Focus on
               review, finish projects, back up data, and be patient with
               communication delays.
             </p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               Best for: Reflection, reconnection, editing, planning
             </p>
           </Link>
           <Link
             href='/grimoire/astronomy/retrogrades/venus'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
           >
             <Heading
               as='h3'
@@ -351,19 +351,19 @@ const BirthChart = () => {
             >
               Venus Retrograde
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed mb-2'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed mb-2'>
               Occurs every 18 months for about 6 weeks. Affects relationships,
               values, finances, and aesthetics. Re-evaluate relationships,
               spending, and what you truly value.
             </p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               Best for: Relationship review, value clarification, financial
               planning
             </p>
           </Link>
           <Link
             href='/grimoire/astronomy/retrogrades/mars'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
           >
             <Heading
               as='h3'
@@ -372,12 +372,12 @@ const BirthChart = () => {
             >
               Mars Retrograde
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed mb-2'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed mb-2'>
               Occurs every 2 years for about 2-3 months. Affects action,
               motivation, and assertiveness. Energy turns inward, focus on
               internal work rather than external action.
             </p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               Best for: Internal reflection, building energy, planning rather
               than action
             </p>
@@ -388,44 +388,44 @@ const BirthChart = () => {
       <section id='transits' className='space-y-4'>
         <Link
           href='/grimoire/transits'
-          className='block text-xl font-medium text-zinc-100 hover:text-lunary-primary-400'
+          className='block text-xl font-medium text-content-primary hover:text-lunary-primary-400'
         >
           <Heading as='h2' variant='h2'>
             Transits — Current Planetary Movements
           </Heading>
         </Link>
-        <p className='text-xs md:text:sm text-zinc-400 mb-4'>
+        <p className='text-xs md:text:sm text-content-muted mb-4'>
           Transits are current planetary positions in relation to your birth
           chart. They show current influences and timing for events and personal
           growth.
         </p>
         <div className='space-y-3'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3' className='mb-2'>
               Understanding Transits
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               Transits activate different parts of your chart at different
               times. Major transits (like Saturn Return, Jupiter Return) mark
               significant life periods. Daily transits show day-to-day
               influences and opportunities.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               Saturn Return (Age 27-30, 57-60)
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               A major life transition marking adulthood and responsibility. A
               time of restructuring, facing reality, and building lasting
               foundations. Often brings challenges that lead to maturity.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3' className='text-lunary-accent mb-2'>
               Jupiter Return (Every 12 years)
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               A period of expansion, growth, and opportunity. New opportunities
               emerge, and you may feel more optimistic and adventurous. A good
               time to take risks and expand horizons.
@@ -439,13 +439,13 @@ const BirthChart = () => {
         <div>
           <Link
             href='/grimoire/rising-sign'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400'
+            className='block text-xl font-medium text-content-primary mb-2 hover:text-lunary-primary-400'
           >
             <Heading as='h2' variant='h2'>
               Rising Sign (Ascendant)
             </Heading>
           </Link>
-          <p className='text-xs md:text:sm text-zinc-400 mb-4'>
+          <p className='text-xs md:text:sm text-content-muted mb-4'>
             Your rising sign, also called the Ascendant, is the zodiac sign that
             was rising on the eastern horizon at your exact moment of birth. It
             represents your outer personality, how others see you, and your
@@ -453,32 +453,32 @@ const BirthChart = () => {
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               What Is the Rising Sign?
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed mb-3'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed mb-3'>
               The rising sign changes approximately every 2 hours, making it the
               most time-sensitive part of your chart. It's calculated using:
             </p>
-            <ul className='list-disc list-inside text-xs md:text:sm text-zinc-300 space-y-1 ml-4'>
+            <ul className='list-disc list-inside text-xs md:text:sm text-content-secondary space-y-1 ml-4'>
               <li>Your exact birth time (most important)</li>
               <li>Your birth location (latitude/longitude)</li>
               <li>Your birth date</li>
             </ul>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed mt-3'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed mt-3'>
               If you don't know your exact birth time, you can use noon as a
               placeholder, but your rising sign may be inaccurate.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               Rising Sign Meanings
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed mb-3'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed mb-3'>
               Your rising sign influences:
             </p>
-            <ul className='list-disc list-inside text-xs md:text:sm text-zinc-300 space-y-1 ml-4'>
+            <ul className='list-disc list-inside text-xs md:text:sm text-content-secondary space-y-1 ml-4'>
               <li>
                 <strong>First impressions:</strong> How others initially
                 perceive you
@@ -501,11 +501,11 @@ const BirthChart = () => {
               </li>
             </ul>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               How Rising Sign Differs from Sun Sign
             </Heading>
-            <div className='space-y-2 text-xs md:text:sm text-zinc-300'>
+            <div className='space-y-2 text-xs md:text:sm text-content-secondary'>
               <p>
                 <strong>Sun Sign:</strong> Your core identity, ego, and life
                 purpose (who you are at your core)
@@ -521,40 +521,40 @@ const BirthChart = () => {
               </p>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               Rising Sign by Element
             </Heading>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <div>
-                <p className='text-xs md:text:sm font-medium text-zinc-200 mb-1'>
+                <p className='text-xs md:text:sm font-medium text-content-primary mb-1'>
                   Fire Rising (Aries, Leo, Sagittarius)
                 </p>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   Energetic, confident, action-oriented first impression
                 </p>
               </div>
               <div>
-                <p className='text-xs md:text:sm font-medium text-zinc-200 mb-1'>
+                <p className='text-xs md:text:sm font-medium text-content-primary mb-1'>
                   Earth Rising (Taurus, Virgo, Capricorn)
                 </p>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   Grounded, practical, reliable first impression
                 </p>
               </div>
               <div>
-                <p className='text-xs md:text:sm font-medium text-zinc-200 mb-1'>
+                <p className='text-xs md:text:sm font-medium text-content-primary mb-1'>
                   Air Rising (Gemini, Libra, Aquarius)
                 </p>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   Communicative, social, intellectual first impression
                 </p>
               </div>
               <div>
-                <p className='text-xs md:text:sm font-medium text-zinc-200 mb-1'>
+                <p className='text-xs md:text:sm font-medium text-content-primary mb-1'>
                   Water Rising (Cancer, Scorpio, Pisces)
                 </p>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   Intuitive, emotional, sensitive first impression
                 </p>
               </div>
@@ -568,27 +568,27 @@ const BirthChart = () => {
         <div>
           <Link
             href='/grimoire/synastry'
-            className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400'
+            className='block text-xl font-medium text-content-primary mb-2 hover:text-lunary-primary-400'
           >
             <Heading as='h2' variant='h2'>
               Synastry: Relationship Compatibility
             </Heading>
           </Link>
-          <p className='text-xs md:text:sm text-zinc-400 mb-4'>
+          <p className='text-xs md:text:sm text-content-muted mb-4'>
             Synastry is the comparison of two birth charts to understand
             relationship dynamics, compatibility, and how two people interact.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               Understanding Synastry
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed mb-3'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed mb-3'>
               Synastry looks at how planets in one person's chart interact with
               planets in another's chart. Key areas to examine:
             </p>
-            <ul className='list-disc list-inside text-xs md:text:sm text-zinc-300 space-y-1 ml-4'>
+            <ul className='list-disc list-inside text-xs md:text:sm text-content-secondary space-y-1 ml-4'>
               <li>
                 <strong>Sun-Moon aspects:</strong> Emotional compatibility and
                 understanding
@@ -611,11 +611,11 @@ const BirthChart = () => {
               </li>
             </ul>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               Compatible Aspects
             </Heading>
-            <div className='space-y-2 text-xs md:text:sm text-zinc-300'>
+            <div className='space-y-2 text-xs md:text:sm text-content-secondary'>
               <p>
                 <strong>Trines (120°):</strong> Easy, harmonious connection.
                 Natural understanding.
@@ -630,11 +630,11 @@ const BirthChart = () => {
               </p>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               Challenging Aspects
             </Heading>
-            <div className='space-y-2 text-xs md:text:sm text-zinc-300'>
+            <div className='space-y-2 text-xs md:text:sm text-content-secondary'>
               <p>
                 <strong>Squares (90°):</strong> Tension and friction, but also
                 growth through challenge.
@@ -649,11 +649,11 @@ const BirthChart = () => {
               </p>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               How to Read Synastry
             </Heading>
-            <div className='space-y-2 text-xs md:text:sm text-zinc-300'>
+            <div className='space-y-2 text-xs md:text:sm text-content-secondary'>
               <p>1. Compare both charts side by side</p>
               <p>
                 2. Look for aspects between planets (especially personal
@@ -674,7 +674,7 @@ const BirthChart = () => {
           </div>
           <Link
             href='/grimoire/synastry/generate'
-            className='block p-4 rounded-lg bg-gradient-to-r from-lunary-rose-900/30 to-lunary-primary-900/30 border border-lunary-rose-700 hover:border-lunary-rose-500 group'
+            className='block p-4 rounded-lg bg-gradient-to-r from-lunary-rose-900/30 to-layer-base/30 border border-lunary-rose-700 hover:border-lunary-rose-500 group'
           >
             <div className='flex items-center justify-between'>
               <div>
@@ -686,7 +686,7 @@ const BirthChart = () => {
                   <HeartIcon className='w-5 h-5' />
                   <span>Generate Your Synastry Chart</span>
                 </Heading>
-                <p className='text-xs md:text:sm text-zinc-400'>
+                <p className='text-xs md:text:sm text-content-muted'>
                   Compare two birth charts to discover relationship
                   compatibility
                 </p>
@@ -705,11 +705,11 @@ const BirthChart = () => {
           Frequently Asked Questions
         </Heading>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               What is a rising sign (Ascendant)?
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               Your rising sign is the zodiac sign that was rising on the eastern
               horizon at your exact time of birth. It represents how you present
               yourself to the world, your outward personality, and your first
@@ -717,23 +717,23 @@ const BirthChart = () => {
               See the Rising Sign section above for detailed information.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               How do I find my birth chart?
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               Lunary automatically generates your birth chart from your profile
               information. You can view your complete birth chart at{' '}
               <a
                 href='/birth-chart'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 underline'
+                className='text-lunary-primary-400 hover:text-content-brand underline'
               >
                 /birth-chart
               </a>{' '}
               or complete your birth details in your{' '}
               <a
                 href='/profile'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 underline'
+                className='text-lunary-primary-400 hover:text-content-brand underline'
               >
                 profile
               </a>
@@ -741,22 +741,22 @@ const BirthChart = () => {
               will be, especially for houses and rising sign.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               What should I do during Mercury Retrograde?
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               Focus on review, reflection, and reconnection. Back up important
               data, review contracts carefully, avoid major purchases if
               possible, and be patient with communication. This is a good time
               to finish projects rather than start new ones.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <Heading as='h3' variant='h3'>
               Are square aspects always bad?
             </Heading>
-            <p className='text-xs md:text:sm text-zinc-300 leading-relaxed'>
+            <p className='text-xs md:text:sm text-content-secondary leading-relaxed'>
               No, squares create tension that forces growth. They show where you
               need to develop strength and overcome challenges. Many successful
               people have prominent squares in their charts. The friction
@@ -766,16 +766,16 @@ const BirthChart = () => {
         </div>
       </section>
 
-      <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
-        <Heading as='h3' variant='h3' className='text-zinc-100 mb-3'>
+      <div className='rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'>
+        <Heading as='h3' variant='h3' className='text-content-primary mb-3'>
           The Core Logic
         </Heading>
-        <p className='text-xs md:text:sm text-zinc-300 leading-relaxed mb-4'>
+        <p className='text-xs md:text:sm text-content-secondary leading-relaxed mb-4'>
           Each planet represents a type of energy or motivation, each house
           represents the life area affected, and the sign adds tone and style.
         </p>
-        <div className='bg-zinc-900/50 rounded p-4 border border-zinc-800/50'>
-          <p className='text-xs md:text:sm text-zinc-200 font-medium'>
+        <div className='bg-surface-elevated/50 rounded p-4 border border-stroke-subtle/50'>
+          <p className='text-xs md:text:sm text-content-primary font-medium'>
             interpretation = planet.energy + sign.expression + house.context
           </p>
         </div>

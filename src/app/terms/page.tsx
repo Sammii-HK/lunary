@@ -17,26 +17,28 @@ export default function TermsOfServicePage() {
   const lastUpdated = 'February 28, 2026';
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='mb-8'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             Terms of Service
           </h1>
-          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-content-muted'>
+            Last Updated: {lastUpdated}
+          </p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
           <section>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Welcome to Lunary. These Terms of Service (&quot;Terms&quot;)
               govern your access to and use of the Lunary website, mobile
               application, and services (collectively, the &quot;Service&quot;)
               provided by Lunar Computing, Inc. (&quot;Lunary,&quot;
               &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;).
             </p>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               By accessing or using the Service, you agree to be bound by these
               Terms. If you do not agree to these Terms, you may not access or
               use the Service.
@@ -44,27 +46,27 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               1. Eligibility and Account Registration
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               1.1 Age Requirement
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You must be at least 16 years of age to use the Service. By using
               the Service, you represent and warrant that you meet this
               eligibility requirement.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               1.2 Account Creation
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               To access certain features of the Service, you must create an
               account. When you create an account, you agree to:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Provide accurate, current, and complete information</li>
               <li>
                 Maintain and promptly update your account information to keep it
@@ -80,10 +82,10 @@ export default function TermsOfServicePage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               1.3 Account Responsibility
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You are responsible for all activities that occur under your
               account. You may not share your account credentials with others or
               allow others to access your account. We reserve the right to
@@ -93,14 +95,14 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               2. Subscriptions and Payments
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               2.1 Subscription Plans
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Lunary offers both free and paid subscription plans. Paid plans
               (&quot;Lunary+&quot;) provide access to additional features as
               described on our pricing page. Subscription features and pricing
@@ -108,15 +110,15 @@ export default function TermsOfServicePage() {
               any material changes.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               2.2 Billing and Payment
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               By subscribing to a paid plan, you authorize us to charge your
               payment method through our payment processor, Stripe, Inc. You
               agree to:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Pay all fees associated with your subscription plan</li>
               <li>Provide valid and current payment information</li>
               <li>
@@ -124,10 +126,10 @@ export default function TermsOfServicePage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               2.3 Auto-Renewal
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Paid subscriptions automatically renew at the end of each billing
               period (monthly or annually, depending on your plan) unless you
               cancel before the renewal date. You will be charged the
@@ -136,24 +138,24 @@ export default function TermsOfServicePage() {
               contacting support.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               2.4 Price Changes
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We reserve the right to change subscription prices. Any price
               changes will be communicated to you at least 30 days before they
               take effect. If you do not agree to the price change, you may
               cancel your subscription before the new price takes effect.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               2.5 Refunds
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               For information about our refund policies, please see our{' '}
               <Link
                 href='/refund'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 Refund Policy
               </Link>
@@ -162,14 +164,14 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               3. Acceptable Use
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               You agree to use the Service only for lawful purposes and in
               accordance with these Terms. You agree not to:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Violate any applicable laws, regulations, or third-party rights
               </li>
@@ -197,11 +199,11 @@ export default function TermsOfServicePage() {
                 Use the Service to send spam or unsolicited communications
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               For complete details, please see our{' '}
               <Link
                 href='/acceptable-use'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 Acceptable Use Policy
               </Link>
@@ -210,14 +212,14 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               4. Intellectual Property
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               4.1 Our Content
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               The Service and its original content (excluding content provided
               by users), features, and functionality are and will remain the
               exclusive property of Lunar Computing, Inc. and its licensors. The
@@ -227,17 +229,17 @@ export default function TermsOfServicePage() {
               service without our prior written consent. See our{' '}
               <Link
                 href='/trademark'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 Trademark Guidelines
               </Link>{' '}
               for more information.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               4.2 Your Content
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You retain ownership of any content you create, upload, or
               otherwise provide through the Service (&quot;User Content&quot;).
               By providing User Content, you grant us a worldwide,
@@ -248,15 +250,15 @@ export default function TermsOfServicePage() {
               others and they have not deleted it.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               4.3 Community Spaces
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               Lunary offers community spaces where you can share posts with
               other users. By posting in a community space, you acknowledge and
               agree that:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Your posts are visible to other members of that space and may be
                 viewed by any authenticated user
@@ -271,7 +273,7 @@ export default function TermsOfServicePage() {
                 removed without notice if they violate our{' '}
                 <Link
                   href='/acceptable-use'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   Acceptable Use Policy
                 </Link>
@@ -286,15 +288,15 @@ export default function TermsOfServicePage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               4.4 Community Q&amp;A
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               Lunary provides a Q&amp;A feature where users can ask and answer
               astrology-related questions. By using this feature, you
               acknowledge and agree that:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Questions and answers are publicly visible and may be viewed by
                 anyone, including users who are not signed in
@@ -317,7 +319,7 @@ export default function TermsOfServicePage() {
                 notice if it violates our{' '}
                 <Link
                   href='/acceptable-use'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   Acceptable Use Policy
                 </Link>
@@ -328,14 +330,14 @@ export default function TermsOfServicePage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               4.5 Social and Interactive Features
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               Lunary offers social features that enable interaction between
               users. By using these features, you acknowledge and agree that:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Cosmic Gifts:</strong> You may send virtual gifts (such
                 as tarot pulls or encouragement messages) to friends on Lunary.
@@ -369,14 +371,14 @@ export default function TermsOfServicePage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               4.6 Referral Program
             </h3>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               Lunary may offer a referral program that rewards you for inviting
               new users. By participating, you agree that:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Referral rewards (such as badges, subscription time, or
                 exclusive content) are earned when referred users activate their
@@ -396,10 +398,10 @@ export default function TermsOfServicePage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               4.7 Feedback
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               If you provide us with any feedback, suggestions, or ideas about
               the Service, you grant us the right to use such feedback without
               any restriction or compensation to you.
@@ -407,15 +409,15 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               5. AI Features and Generated Content
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               Lunary uses artificial intelligence to generate astrological
               content, including horoscopes, interpretations, and chat
               responses. You acknowledge and agree that:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 AI-generated content is created algorithmically and may contain
                 errors or inaccuracies
@@ -436,14 +438,14 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               6. Disclaimer of Warranties
             </h2>
-            <div className='p-4 border border-lunary-accent-700 bg-lunary-accent-950/20 rounded-xl'>
-              <h3 className='text-lg font-medium text-white mb-3'>
+            <div className='p-4 border border-lunary-accent-700 bg-layer-deep/20 rounded-xl'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 Entertainment Purposes Only
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>
+              <p className='text-content-secondary leading-relaxed'>
                 <strong>
                   The Service, including all astrological content, horoscopes,
                   tarot readings, birth chart analyses, and AI-generated
@@ -457,14 +459,14 @@ export default function TermsOfServicePage() {
               </p>
             </div>
 
-            <p className='text-zinc-300 leading-relaxed mt-6'>
+            <p className='text-content-secondary leading-relaxed mt-6'>
               THE SERVICE IS PROVIDED ON AN &quot;AS IS&quot; AND &quot;AS
               AVAILABLE&quot; BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER
               EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED
               WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
               NON-INFRINGEMENT, OR COURSE OF PERFORMANCE.
             </p>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               We do not warrant that: (a) the Service will function
               uninterrupted, secure, or available at any particular time or
               location; (b) any errors or defects will be corrected; (c) the
@@ -474,10 +476,10 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               7. Limitation of Liability
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT
               SHALL LUNAR COMPUTING, INC., ITS DIRECTORS, EMPLOYEES, PARTNERS,
               AGENTS, SUPPLIERS, OR AFFILIATES BE LIABLE FOR ANY INDIRECT,
@@ -492,7 +494,7 @@ export default function TermsOfServicePage() {
               WHETHER OR NOT WE HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH
               DAMAGE.
             </p>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               IN NO EVENT SHALL OUR TOTAL LIABILITY TO YOU FOR ALL CLAIMS
               RELATING TO THE SERVICE EXCEED THE GREATER OF (A) THE AMOUNTS PAID
               BY YOU TO LUNARY IN THE TWELVE (12) MONTHS PRIOR TO THE CLAIM, OR
@@ -501,10 +503,10 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               8. Indemnification
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You agree to defend, indemnify, and hold harmless Lunar Computing,
               Inc. and its officers, directors, employees, and agents from and
               against any claims, liabilities, damages, judgments, awards,
@@ -515,33 +517,33 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               9. Termination
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               9.1 Termination by You
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You may terminate your account at any time by canceling your
               subscription (if applicable) and deleting your account through
               your profile settings, or by contacting us at support@lunary.app.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               9.2 Termination by Us
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We may terminate or suspend your account and access to the Service
               immediately, without prior notice or liability, for any reason,
               including without limitation if you breach these Terms. Upon
               termination, your right to use the Service will immediately cease.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               9.3 Effect of Termination
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Upon termination, all provisions of these Terms which by their
               nature should survive termination shall survive, including
               ownership provisions, warranty disclaimers, indemnity, and
@@ -550,14 +552,14 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               10. Dispute Resolution
             </h2>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               10.1 Informal Resolution
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Before filing a claim against Lunary, you agree to try to resolve
               the dispute informally by contacting us at legal@lunary.app. We
               will attempt to resolve the dispute informally by contacting you
@@ -565,10 +567,10 @@ export default function TermsOfServicePage() {
               submission, you or Lunary may bring a formal proceeding.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               10.2 Arbitration Agreement
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You and Lunary agree that any dispute, claim, or controversy
               arising out of or relating to these Terms or the Service shall be
               resolved by binding arbitration, rather than in court, except that
@@ -578,10 +580,10 @@ export default function TermsOfServicePage() {
               arbitrator&apos;s decision shall be final and binding.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               10.3 Class Action Waiver
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               YOU AND LUNARY AGREE THAT EACH MAY BRING CLAIMS AGAINST THE OTHER
               ONLY IN YOUR OR ITS INDIVIDUAL CAPACITY, AND NOT AS A PLAINTIFF OR
               CLASS MEMBER IN ANY PURPORTED CLASS OR REPRESENTATIVE PROCEEDING.
@@ -589,10 +591,10 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               11. Governing Law
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               These Terms shall be governed by and construed in accordance with
               the laws of the State of Delaware, United States, without regard
               to its conflict of law provisions. Our failure to enforce any
@@ -602,10 +604,10 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               12. Changes to Terms
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               We reserve the right to modify or replace these Terms at any time
               at our sole discretion. If a revision is material, we will provide
               at least 30 days&apos; notice prior to any new terms taking
@@ -617,10 +619,10 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               13. Severability
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               If any provision of these Terms is held to be unenforceable or
               invalid, such provision will be changed and interpreted to
               accomplish the objectives of such provision to the greatest extent
@@ -630,10 +632,10 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               14. Entire Agreement
             </h2>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               These Terms, together with the Privacy Policy, Cookie Policy,
               Acceptable Use Policy, and any other legal notices published by us
               on the Service, constitute the entire agreement between you and
@@ -643,29 +645,29 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               15. iOS App License Terms (Apple App Store)
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               If you downloaded the Lunary app from the Apple App Store, the
               following additional terms apply. These terms are required by
               Apple and are incorporated into these Terms of Service.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               15.1 Acknowledgement
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You acknowledge that this End User License Agreement (EULA) is
               between you and Lunar Computing, Inc. only, and not with Apple
               Inc. (&quot;Apple&quot;). Lunar Computing, Inc., not Apple, is
               solely responsible for the Lunary app and its content.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               15.2 Scope of Licence
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               The licence granted to you for the Lunary app is a
               non-transferable licence to use the application on any
               Apple-branded products that you own or control, subject to the
@@ -675,27 +677,27 @@ export default function TermsOfServicePage() {
               to Apple&apos;s Family Sharing terms.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               15.3 Maintenance and Support
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Lunar Computing, Inc. is solely responsible for providing any
               maintenance and support services for the Lunary app. Apple has no
               obligation whatsoever to furnish any maintenance and support
               services with respect to the app. For support, contact us at{' '}
               <a
                 href='mailto:support@lunary.app'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 support@lunary.app
               </a>
               .
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               15.4 Warranty
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Lunar Computing, Inc. is solely responsible for any product
               warranties, whether express or implied by law, to the extent not
               effectively disclaimed in these Terms. In the event of any failure
@@ -708,10 +710,10 @@ export default function TermsOfServicePage() {
               will be Lunar Computing, Inc.&apos;s sole responsibility.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               15.5 Product Claims
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Lunar Computing, Inc., not Apple, is responsible for addressing
               any claims by you or any third party relating to the app or your
               possession and/or use of the app, including but not limited to:
@@ -721,10 +723,10 @@ export default function TermsOfServicePage() {
               legislation.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               15.6 Intellectual Property Rights
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               In the event of any third-party claim that the app or your
               possession and use of the app infringes that third party&apos;s
               intellectual property rights, Lunar Computing, Inc., not Apple,
@@ -733,10 +735,10 @@ export default function TermsOfServicePage() {
               infringement claim.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               15.7 Legal Compliance
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You represent and warrant that: (a) you are not located in a
               country that is subject to a U.S. Government embargo, or that has
               been designated by the U.S. Government as a &quot;terrorist
@@ -744,20 +746,20 @@ export default function TermsOfServicePage() {
               Government list of prohibited or restricted parties.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               15.8 Third-Party Terms of Agreement
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               You must comply with applicable third-party terms of agreement
               when using the Lunary app. For example, if you have a VoIP
               application, then you must not be in violation of their wireless
               data service agreement when using the app.
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               15.9 Apple as Third-Party Beneficiary
             </h3>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               Apple and its subsidiaries are third-party beneficiaries of this
               EULA. Upon your acceptance of these Terms, Apple will have the
               right (and will be deemed to have accepted the right) to enforce
@@ -766,14 +768,14 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               16. Contact Us
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               If you have any questions about these Terms, please contact us:
             </p>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Lunar Computing, Inc.</strong>
                 <br />
                 131 Continental Dr, Suite 305
@@ -784,7 +786,7 @@ export default function TermsOfServicePage() {
                 Email:{' '}
                 <a
                   href='mailto:legal@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   legal@lunary.app
                 </a>
@@ -792,7 +794,7 @@ export default function TermsOfServicePage() {
                 General Support:{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   support@lunary.app
                 </a>
@@ -800,32 +802,32 @@ export default function TermsOfServicePage() {
             </div>
           </section>
 
-          <section className='pt-8 border-t border-zinc-800'>
-            <h2 className='text-lg font-medium text-white mb-4'>
+          <section className='pt-8 border-t border-stroke-subtle'>
+            <h2 className='text-lg font-medium text-content-primary mb-4'>
               Related Policies
             </h2>
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/privacy'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Privacy Policy
               </Link>
               <Link
                 href='/cookies'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Cookie Policy
               </Link>
               <Link
                 href='/acceptable-use'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Acceptable Use Policy
               </Link>
               <Link
                 href='/refund'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Refund Policy
               </Link>

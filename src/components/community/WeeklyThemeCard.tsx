@@ -32,26 +32,26 @@ export function WeeklyThemeCard({ metadata }: WeeklyThemeCardProps) {
     THEME_PROMPTS[themeData.theme] ?? 'Reflect on this theme in your journal.';
 
   return (
-    <div className='rounded-xl border border-lunary-primary-800/40 bg-gradient-to-br from-lunary-primary-950/40 to-zinc-900 p-4 space-y-3'>
+    <div className='rounded-xl border border-lunary-primary-800/40 bg-gradient-to-br from-layer-deep/40 to-surface-elevated p-4 space-y-3'>
       <div className='flex items-center gap-2'>
         <Calendar className='w-4 h-4 text-lunary-primary-400' />
-        <span className='text-xs font-medium text-lunary-primary-300 uppercase tracking-wide'>
+        <span className='text-xs font-medium text-content-brand uppercase tracking-wide'>
           This Week&apos;s Theme
         </span>
       </div>
 
-      <h3 className='text-base font-semibold text-zinc-100'>
+      <h3 className='text-base font-semibold text-content-primary'>
         {themeData.theme}
       </h3>
 
-      <div className='rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-800/30 p-3'>
+      <div className='rounded-lg bg-layer-base/20 border border-lunary-primary-800/30 p-3'>
         <div className='flex items-center gap-1.5 mb-1.5'>
           <BookOpen className='w-3.5 h-3.5 text-lunary-primary-400' />
-          <span className='text-[10px] font-medium text-lunary-primary-300 uppercase tracking-wide'>
+          <span className='text-[10px] font-medium text-content-brand uppercase tracking-wide'>
             Journal Prompt
           </span>
         </div>
-        <p className='text-xs text-zinc-300 italic'>{prompt}</p>
+        <p className='text-xs text-content-secondary italic'>{prompt}</p>
       </div>
     </div>
   );

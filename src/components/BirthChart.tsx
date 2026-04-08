@@ -251,11 +251,11 @@ export const BirthChart = ({
   return (
     <div className='flex flex-col items-center space-y-4 md:space-y-6'>
       <div className='text-center'>
-        <h2 className='text-lg md:text-xl font-bold text-white mb-2'>
+        <h2 className='text-lg md:text-xl font-bold text-content-primary mb-2'>
           {userName ? `${userName}'s Birth Chart` : 'Birth Chart'}
         </h2>
         {birthDate && (
-          <p className='text-zinc-400 text-xs md:text-sm'>
+          <p className='text-content-muted text-xs md:text-sm'>
             {(() => {
               const parsed = parseIsoDateOnly(birthDate);
               if (!parsed) return birthDate;
@@ -268,8 +268,8 @@ export const BirthChart = ({
       </div>
 
       {/* Color Legend */}
-      <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 w-full max-w-[320px] md:max-w-[360px]'>
-        <h3 className='text-xs font-semibold text-zinc-400 mb-2'>
+      <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-3 w-full max-w-[320px] md:max-w-[360px]'>
+        <h3 className='text-xs font-semibold text-content-muted mb-2'>
           Planet Colors
         </h3>
         <div className='grid grid-cols-2 gap-2 text-xs'>
@@ -278,40 +278,46 @@ export const BirthChart = ({
               className='w-3 h-3 rounded-full'
               style={{ backgroundColor: ELEMENT_COLORS.Fire }}
             />
-            <span className='text-zinc-300'>Fire (Aries, Leo, Sag)</span>
+            <span className='text-content-secondary'>
+              Fire (Aries, Leo, Sag)
+            </span>
           </div>
           <div className='flex items-center gap-2'>
             <div
               className='w-3 h-3 rounded-full'
               style={{ backgroundColor: ELEMENT_COLORS.Earth }}
             />
-            <span className='text-zinc-300'>Earth (Tau, Vir, Cap)</span>
+            <span className='text-content-secondary'>
+              Earth (Tau, Vir, Cap)
+            </span>
           </div>
           <div className='flex items-center gap-2'>
             <div
               className='w-3 h-3 rounded-full'
               style={{ backgroundColor: ELEMENT_COLORS.Air }}
             />
-            <span className='text-zinc-300'>Air (Gem, Lib, Aqu)</span>
+            <span className='text-content-secondary'>Air (Gem, Lib, Aqu)</span>
           </div>
           <div className='flex items-center gap-2'>
             <div
               className='w-3 h-3 rounded-full'
               style={{ backgroundColor: ELEMENT_COLORS.Water }}
             />
-            <span className='text-zinc-300'>Water (Can, Sco, Pis)</span>
+            <span className='text-content-secondary'>
+              Water (Can, Sco, Pis)
+            </span>
           </div>
           <div className='flex items-center gap-2'>
             <div className='w-3 h-3 rounded-full bg-[#C77DFF]' />
-            <span className='text-zinc-300'>Angles (AC, MC, DC)</span>
+            <span className='text-content-secondary'>Angles (AC, MC, DC)</span>
           </div>
           <div className='flex items-center gap-2'>
             <div className='w-3 h-3 rounded-full bg-[#FCD34D]' />
-            <span className='text-zinc-300'>Asteroids</span>
+            <span className='text-content-secondary'>Asteroids</span>
           </div>
           <div className='flex items-center gap-2'>
             <div className='w-3 h-3 rounded-full bg-[#f87171]' />
-            <span className='text-zinc-300'>Retrograde</span>
+            <span className='text-content-secondary'>Retrograde</span>
           </div>
         </div>
       </div>
@@ -320,7 +326,7 @@ export const BirthChart = ({
         <svg
           viewBox='-140 -140 280 280'
           className={cx(
-            'chart-wheel-svg w-full h-full border border-zinc-700 rounded-full bg-zinc-900',
+            'chart-wheel-svg w-full h-full border border-stroke-default rounded-full bg-surface-elevated',
             styles.chartWheel,
           )}
         >
@@ -545,24 +551,24 @@ export const BirthChart = ({
             ({ body, sign, degree, minute, retrograde, house }) => (
               <div
                 key={body}
-                className='flex items-center justify-between p-2 md:p-3 bg-zinc-900 rounded-lg'
+                className='flex items-center justify-between p-2 md:p-3 bg-surface-elevated rounded-lg'
               >
                 <div className='flex items-center space-x-2 md:space-x-3'>
                   <span
                     className={cx(
                       'text-base md:text-lg font-astro',
-                      retrograde ? 'text-red-400' : 'text-white',
+                      retrograde ? 'text-red-400' : 'text-content-primary',
                     )}
                   >
                     {getSymbolForBody(body)}
                   </span>
-                  <span className='font-medium text-white text-sm md:text-base'>
+                  <span className='font-medium text-content-primary text-sm md:text-base'>
                     {body}
                   </span>
                 </div>
 
                 <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>
-                  <span className='text-zinc-300'>
+                  <span className='text-content-secondary'>
                     {degree}°{minute.toString().padStart(2, '0')}&apos;
                   </span>
                   <span className='text-base md:text-lg font-astro'>
@@ -572,9 +578,11 @@ export const BirthChart = ({
                       ]
                     }
                   </span>
-                  <span className='text-zinc-400 hidden sm:inline'>{sign}</span>
+                  <span className='text-content-muted hidden sm:inline'>
+                    {sign}
+                  </span>
                   {house && (
-                    <span className='text-zinc-400 text-xs'>H{house}</span>
+                    <span className='text-content-muted text-xs'>H{house}</span>
                   )}
                   {retrograde && (
                     <span className='text-red-400 text-xs font-medium'>℞</span>
@@ -594,19 +602,19 @@ export const BirthChart = ({
               {angles.map(({ body, sign, degree, minute }) => (
                 <div
                   key={body}
-                  className='flex items-center justify-between p-2 md:p-3 bg-zinc-900 rounded-lg'
+                  className='flex items-center justify-between p-2 md:p-3 bg-surface-elevated rounded-lg'
                 >
                   <div className='flex items-center space-x-2 md:space-x-3'>
                     <span className='text-base md:text-lg font-astro text-lunary-accent'>
                       {getSymbolForBody(body)}
                     </span>
-                    <span className='font-medium text-white text-sm md:text-base'>
+                    <span className='font-medium text-content-primary text-sm md:text-base'>
                       {ANGLE_DISPLAY[body] || body}
                     </span>
                   </div>
 
                   <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>
-                    <span className='text-zinc-300'>
+                    <span className='text-content-secondary'>
                       {degree}°{minute.toString().padStart(2, '0')}&apos;
                     </span>
                     <span className='text-base md:text-lg font-astro'>
@@ -616,7 +624,7 @@ export const BirthChart = ({
                         ]
                       }
                     </span>
-                    <span className='text-zinc-400 hidden sm:inline'>
+                    <span className='text-content-muted hidden sm:inline'>
                       {sign}
                     </span>
                   </div>
@@ -639,7 +647,7 @@ export const BirthChart = ({
                 return (
                   <div
                     key={body}
-                    className='flex items-center justify-between p-2 md:p-3 bg-zinc-900 rounded-lg'
+                    className='flex items-center justify-between p-2 md:p-3 bg-surface-elevated rounded-lg'
                   >
                     <div className='flex items-center space-x-2 md:space-x-3'>
                       <span
@@ -651,13 +659,13 @@ export const BirthChart = ({
                       >
                         {pointSymbol}
                       </span>
-                      <span className='font-medium text-white text-sm md:text-base'>
+                      <span className='font-medium text-content-primary text-sm md:text-base'>
                         {body}
                       </span>
                     </div>
 
                     <div className='flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm'>
-                      <span className='text-zinc-300'>
+                      <span className='text-content-secondary'>
                         {degree}°{minute.toString().padStart(2, '0')}&apos;
                       </span>
                       <span className='text-base md:text-lg font-astro'>
@@ -667,7 +675,7 @@ export const BirthChart = ({
                           ]
                         }
                       </span>
-                      <span className='text-zinc-400 hidden sm:inline'>
+                      <span className='text-content-muted hidden sm:inline'>
                         {sign}
                       </span>
                       {retrograde && (

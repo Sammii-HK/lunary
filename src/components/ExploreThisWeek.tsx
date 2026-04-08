@@ -119,8 +119,8 @@ export function ExploreThisWeek() {
 
   if (isLoading) {
     return (
-      <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-4 md:p-6'>
-        <div className='h-32 bg-zinc-900/50 rounded-lg animate-pulse' />
+      <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-base/60 p-4 md:p-6'>
+        <div className='h-32 bg-surface-elevated/50 rounded-lg animate-pulse' />
       </div>
     );
   }
@@ -158,21 +158,21 @@ export function ExploreThisWeek() {
   );
 
   return (
-    <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-3 md:p-4'>
+    <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-base/60 p-3 md:p-4'>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className='flex w-full items-center justify-between mb-3'
       >
         <div className='flex items-center gap-2'>
           <Calendar className='w-4 h-4 text-lunary-accent' />
-          <h2 className='text-base font-semibold text-zinc-100'>
+          <h2 className='text-base font-semibold text-content-primary'>
             Explore This Week
           </h2>
         </div>
         {isExpanded ? (
-          <ChevronUp className='w-4 h-4 text-zinc-400' />
+          <ChevronUp className='w-4 h-4 text-content-muted' />
         ) : (
-          <ChevronDown className='w-4 h-4 text-zinc-400' />
+          <ChevronDown className='w-4 h-4 text-content-muted' />
         )}
       </button>
 
@@ -180,10 +180,10 @@ export function ExploreThisWeek() {
         <div className='space-y-3'>
           {/* Weekly Theme */}
           {data.weeklyTheme && (
-            <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 p-2.5'>
+            <div className='rounded-lg border border-lunary-primary-700 bg-layer-deep p-2.5'>
               <div className='flex items-start gap-2'>
                 <Sparkles className='w-3.5 h-3.5 text-lunary-accent mt-0.5 flex-shrink-0' />
-                <p className='text-xs text-zinc-200 leading-relaxed'>
+                <p className='text-xs text-content-primary leading-relaxed'>
                   {data.weeklyTheme}
                 </p>
               </div>
@@ -193,7 +193,7 @@ export function ExploreThisWeek() {
           {/* Best Days for Action - More Compact */}
           {significantDays.length > 0 && (
             <div className='space-y-1.5'>
-              <h3 className='text-xs font-medium text-zinc-300 flex items-center gap-1.5'>
+              <h3 className='text-xs font-medium text-content-secondary flex items-center gap-1.5'>
                 <Target className='w-3.5 h-3.5' />
                 Best Days This Week
               </h3>
@@ -203,21 +203,21 @@ export function ExploreThisWeek() {
                   .map((day: WeekDay, idx: number) => (
                     <div
                       key={idx}
-                      className='rounded-lg border border-zinc-800/60 bg-zinc-900/40 p-2'
+                      className='rounded-lg border border-stroke-subtle/60 bg-surface-elevated/40 p-2'
                     >
                       <div className='flex items-center justify-between mb-1'>
-                        <span className='text-xs font-medium text-zinc-200'>
+                        <span className='text-xs font-medium text-content-primary'>
                           {formatDate(day.date)}
                         </span>
                         <span className='text-base'>{day.moonPhase.emoji}</span>
                       </div>
                       <div className='flex items-center gap-1.5 mb-1'>
                         <span className='text-xs'>{day.bestActivity.icon}</span>
-                        <p className='text-xs text-lunary-accent-300 font-medium'>
+                        <p className='text-xs text-content-brand-accent font-medium'>
                           {day.bestActivity.activity}
                         </p>
                       </div>
-                      <p className='text-xs text-zinc-400 leading-tight'>
+                      <p className='text-xs text-content-muted leading-tight'>
                         {day.actionableInsight}
                       </p>
                     </div>
@@ -227,11 +227,11 @@ export function ExploreThisWeek() {
           )}
 
           {/* Quick Actions with Ritual */}
-          <div className='flex flex-wrap gap-1.5 pt-2 border-t border-zinc-800/60'>
+          <div className='flex flex-wrap gap-1.5 pt-2 border-t border-stroke-subtle/60'>
             {ritualPrompt && (
               <Link
                 href={`/book-of-shadows?prompt=${encodeURIComponent(ritualPrompt.prompt)}`}
-                className='inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-2.5 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary-600'
+                className='inline-flex items-center gap-1.5 rounded-lg border border-stroke-default/60 bg-surface-elevated/40 px-2.5 py-1.5 text-xs text-content-secondary transition hover:bg-surface-card/60 hover:border-lunary-primary-600'
               >
                 {ritualPrompt.time === 'morning' ? (
                   <Sunrise className='w-3.5 h-3.5 text-lunary-accent' />
@@ -246,21 +246,21 @@ export function ExploreThisWeek() {
             )}
             <Link
               href='/book-of-shadows?prompt=weekly overview'
-              className='inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-600 bg-lunary-primary-950 px-2.5 py-1.5 text-xs text-lunary-accent-300 transition hover:bg-lunary-primary-900 hover:border-lunary-primary'
+              className='inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-600 bg-layer-deep px-2.5 py-1.5 text-xs text-content-brand-accent transition hover:bg-layer-base hover:border-lunary-primary'
             >
               <Sparkles className='w-3.5 h-3.5' />
               Weekly Overview
             </Link>
             <Link
               href='/tarot'
-              className='inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-2.5 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary-600'
+              className='inline-flex items-center gap-1.5 rounded-lg border border-stroke-default/60 bg-surface-elevated/40 px-2.5 py-1.5 text-xs text-content-secondary transition hover:bg-surface-card/60 hover:border-lunary-primary-600'
             >
               <BookOpen className='w-3.5 h-3.5' />
               Tarot
             </Link>
             <Link
               href='/grimoire/horoscopes'
-              className='inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-2.5 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary-600'
+              className='inline-flex items-center gap-1.5 rounded-lg border border-stroke-default/60 bg-surface-elevated/40 px-2.5 py-1.5 text-xs text-content-secondary transition hover:bg-surface-card/60 hover:border-lunary-primary-600'
             >
               <Calendar className='w-3.5 h-3.5' />
               Horoscope

@@ -177,13 +177,13 @@ export default function CandleMagicPage() {
       />
 
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-6'>
           Candle Magic
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             Colours, Flames & Ritual Fire
           </span>
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           Candle magic is one of the most accessible and powerful forms of
           spellwork. By combining color correspondences, focused intention, and
           the transformative element of fire, candles become vessels for
@@ -191,11 +191,11 @@ export default function CandleMagicPage() {
         </p>
       </header>
 
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a href='#why-candles' className='hover:text-lunary-primary-400'>
               1. Why Candles Are Used in Magic
@@ -241,11 +241,11 @@ export default function CandleMagicPage() {
 
       {/* Section 1: Why Candles */}
       <section id='why-candles' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           1. Why Candles Are Used in Magic
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Fire is transformation made visible. When you light a candle, you
           create a living element that consumes the material (wax) and releases
           energy (light and heat). This mirrors the magical process: taking an
@@ -253,7 +253,7 @@ export default function CandleMagicPage() {
           (manifestation).
         </p>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Candle magic works through sympathetic magic—the principle that
           symbolic actions create real-world results. The candle becomes a focal
           point for your intention. As it burns, it releases your intention into
@@ -261,11 +261,11 @@ export default function CandleMagicPage() {
           potential into reality.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Why Candle Magic Is Popular
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>
               • Accessible: Candles are affordable and available everywhere
             </li>
@@ -283,11 +283,11 @@ export default function CandleMagicPage() {
 
       {/* Section 2: Colors */}
       <section id='colors' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           2. Candle Colours & Their Meanings
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Color is one of the primary ways to align your candle with your
           intention. Each color carries specific energetic properties that
           amplify particular types of magic.
@@ -297,32 +297,34 @@ export default function CandleMagicPage() {
           {CANDLE_COLORS.map((item) => (
             <div
               key={item.color}
-              className='flex items-center gap-3 p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'
+              className='flex items-center gap-3 p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'
             >
               <div
-                className='w-8 h-8 rounded-full border border-zinc-700 flex-shrink-0'
+                className='w-8 h-8 rounded-full border border-stroke-default flex-shrink-0'
                 style={{ backgroundColor: item.hex }}
               />
               <div>
-                <span className='text-zinc-100 font-medium'>{item.color}</span>
-                <p className='text-xs text-zinc-400'>{item.uses}</p>
+                <span className='text-content-primary font-medium'>
+                  {item.color}
+                </span>
+                <p className='text-xs text-content-muted'>{item.uses}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6'>
-          <p className='text-zinc-300 text-sm'>
-            <strong className='text-lunary-primary-300'>Tip:</strong> White
-            candles can substitute for any color in a pinch. They represent pure
-            light and can be charged with any intention.
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-6'>
+          <p className='text-content-secondary text-sm'>
+            <strong className='text-content-brand'>Tip:</strong> White candles
+            can substitute for any color in a pinch. They represent pure light
+            and can be charged with any intention.
           </p>
         </div>
 
         <div className='mt-4'>
           <Link
             href='/grimoire/candle-magic/colors'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-lunary-primary-400 hover:text-content-brand'
           >
             Explore detailed color meanings →
           </Link>
@@ -331,50 +333,54 @@ export default function CandleMagicPage() {
 
       {/* Section 3: Techniques */}
       <section id='techniques' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           3. Anointing, Dressing & Carving
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Preparing a candle—through anointing with oil, dressing with herbs, or
           carving with symbols—adds layers of intention and personalizes the
           working.
         </p>
 
         <div className='space-y-6'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+            <h3 className='text-lg font-medium text-content-primary mb-3'>
               Anointing
             </h3>
-            <p className='text-zinc-400 text-sm mb-3'>
+            <p className='text-content-muted text-sm mb-3'>
               Anointing means coating the candle with oil that corresponds to
               your intention. Olive oil works as a base; add essential oils for
               specific purposes (lavender for peace, cinnamon for prosperity).
             </p>
-            <p className='text-zinc-500 text-xs'>
+            <p className='text-content-muted text-xs'>
               <strong>Direction matters:</strong> For drawing things toward you,
               anoint from top to middle, then bottom to middle. For banishing,
               anoint from middle outward in both directions.
             </p>
           </div>
 
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-3'>Dressing</h3>
-            <p className='text-zinc-400 text-sm mb-3'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+            <h3 className='text-lg font-medium text-content-primary mb-3'>
+              Dressing
+            </h3>
+            <p className='text-content-muted text-sm mb-3'>
               After anointing, you can roll the candle in dried herbs, glitter,
               or powders that correspond to your intention. Be cautious—some
               herbs are flammable and can create unexpected flames.
             </p>
           </div>
 
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-3'>Carving</h3>
-            <p className='text-zinc-400 text-sm mb-3'>
+          <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+            <h3 className='text-lg font-medium text-content-primary mb-3'>
+              Carving
+            </h3>
+            <p className='text-content-muted text-sm mb-3'>
               Use a pin, athame, or sharp tool to carve words, names, dates,
               symbols, or sigils into the candle. Carving personalizes the spell
               and literally inscribes your intention into the wax.
             </p>
-            <p className='text-zinc-500 text-xs'>
+            <p className='text-content-muted text-xs'>
               <strong>Direction:</strong> Carve top-to-bottom for attracting,
               bottom-to-top for releasing or banishing.
             </p>
@@ -384,15 +390,15 @@ export default function CandleMagicPage() {
 
       {/* Section 4: Safety */}
       <section id='safety' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           4. Candle Safety & Ethical Use
         </h2>
 
-        <div className='bg-lunary-error-900/20 border border-lunary-error-700 rounded-xl p-6 mb-6'>
+        <div className='bg-layer-base/20 border border-lunary-error-700 rounded-xl p-6 mb-6'>
           <h3 className='text-lg font-medium text-lunary-error-300 mb-3'>
             Fire Safety Essentials
           </h3>
-          <ul className='space-y-2 text-zinc-300 text-sm'>
+          <ul className='space-y-2 text-content-secondary text-sm'>
             <li>• Never leave burning candles unattended</li>
             <li>• Keep candles away from flammable materials</li>
             <li>• Place on heat-resistant, stable surfaces</li>
@@ -403,7 +409,7 @@ export default function CandleMagicPage() {
           </ul>
         </div>
 
-        <p className='text-zinc-300 leading-relaxed'>
+        <p className='text-content-secondary leading-relaxed'>
           <strong>Ethical use:</strong> Candle magic, like all magic, should
           respect free will. Avoid spells that attempt to control another
           person. Focus on attracting love (not a specific person), creating
@@ -414,11 +420,11 @@ export default function CandleMagicPage() {
 
       {/* Section 5: Reading */}
       <section id='reading' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           5. Reading Candle Flames & Wax
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Many practitioners read the behavior of the flame and the remaining
           wax for additional insight. While these signs can be meaningful,
           always check for practical explanations first (drafts, wick issues,
@@ -426,9 +432,11 @@ export default function CandleMagicPage() {
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Flame Behavior</h3>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Flame Behavior
+            </h3>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>
                 <strong>Strong, steady:</strong> Good energy, focused intention
               </li>
@@ -446,9 +454,11 @@ export default function CandleMagicPage() {
               </li>
             </ul>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Wax Reading</h3>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Wax Reading
+            </h3>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>
                 <strong>Clean burn:</strong> Spell completed successfully
               </li>
@@ -471,66 +481,66 @@ export default function CandleMagicPage() {
 
       {/* Section 6: Simple Ritual */}
       <section id='simple-ritual' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           6. A Simple Candle Ritual
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Here is a basic candle ritual framework you can adapt for any
           intention:
         </p>
 
         <ol className='space-y-4'>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               1. Choose your candle
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Select a color that matches your intention. Cleanse it by holding
               it and visualizing white light clearing any previous energy.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               2. Prepare the candle (optional)
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Carve your intention, name, or symbols. Anoint with oil if
               desired.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               3. Create sacred space
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Ground and center yourself. Clear the space. Set up your altar or
               working area.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               4. State your intention
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Speak your intention clearly, either aloud or silently. Feel it as
               already accomplished.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               5. Light the candle
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               As you light it, visualize your intention being activated. Watch
               the flame and feel your intention releasing into the universe.
             </p>
           </li>
-          <li className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+          <li className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-5'>
             <span className='text-lunary-primary-400 font-medium'>
               6. Close the ritual
             </span>
-            <p className='text-zinc-400 text-sm mt-2'>
+            <p className='text-content-muted text-sm mt-2'>
               Let the candle burn completely if safe, or snuff it (don&apos;t
               blow) and relight later. When done, thank any forces you invoked
               and release the working.
@@ -541,35 +551,35 @@ export default function CandleMagicPage() {
 
       {/* Section 7: Timing */}
       <section id='timing' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           7. Linking with Moon Phases & Planetary Days
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           For added power, align your candle work with cosmic timing:
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='text-lg font-medium text-content-primary mb-3'>
               Moon Phases
             </h3>
-            <ul className='space-y-2 text-zinc-400 text-sm'>
+            <ul className='space-y-2 text-content-muted text-sm'>
               <li>
-                <strong className='text-zinc-200'>New Moon:</strong> New
+                <strong className='text-content-primary'>New Moon:</strong> New
                 beginnings, setting intentions
               </li>
               <li>
-                <strong className='text-zinc-200'>Waxing:</strong> Attracting,
-                building, increasing
+                <strong className='text-content-primary'>Waxing:</strong>{' '}
+                Attracting, building, increasing
               </li>
               <li>
-                <strong className='text-zinc-200'>Full Moon:</strong>{' '}
+                <strong className='text-content-primary'>Full Moon:</strong>{' '}
                 Manifestation, charging, power work
               </li>
               <li>
-                <strong className='text-zinc-200'>Waning:</strong> Banishing,
-                releasing, decreasing
+                <strong className='text-content-primary'>Waning:</strong>{' '}
+                Banishing, releasing, decreasing
               </li>
             </ul>
             <Link
@@ -579,38 +589,38 @@ export default function CandleMagicPage() {
               Moon rituals guide →
             </Link>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='text-lg font-medium text-content-primary mb-3'>
               Planetary Days
             </h3>
-            <ul className='space-y-2 text-zinc-400 text-sm'>
+            <ul className='space-y-2 text-content-muted text-sm'>
               <li>
-                <strong className='text-zinc-200'>Sunday:</strong> Success, gold
-                candles
+                <strong className='text-content-primary'>Sunday:</strong>{' '}
+                Success, gold candles
               </li>
               <li>
-                <strong className='text-zinc-200'>Monday:</strong> Intuition,
-                silver/white candles
+                <strong className='text-content-primary'>Monday:</strong>{' '}
+                Intuition, silver/white candles
               </li>
               <li>
-                <strong className='text-zinc-200'>Tuesday:</strong> Courage, red
-                candles
+                <strong className='text-content-primary'>Tuesday:</strong>{' '}
+                Courage, red candles
               </li>
               <li>
-                <strong className='text-zinc-200'>Wednesday:</strong>{' '}
+                <strong className='text-content-primary'>Wednesday:</strong>{' '}
                 Communication, yellow candles
               </li>
               <li>
-                <strong className='text-zinc-200'>Thursday:</strong> Abundance,
-                green/purple candles
+                <strong className='text-content-primary'>Thursday:</strong>{' '}
+                Abundance, green/purple candles
               </li>
               <li>
-                <strong className='text-zinc-200'>Friday:</strong> Love,
+                <strong className='text-content-primary'>Friday:</strong> Love,
                 pink/red candles
               </li>
               <li>
-                <strong className='text-zinc-200'>Saturday:</strong> Banishing,
-                black candles
+                <strong className='text-content-primary'>Saturday:</strong>{' '}
+                Banishing, black candles
               </li>
             </ul>
           </div>
@@ -619,7 +629,7 @@ export default function CandleMagicPage() {
 
       {/* FAQ */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           8. Frequently Asked Questions
         </h2>
 
@@ -627,36 +637,38 @@ export default function CandleMagicPage() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 {faq.question}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-content-secondary leading-relaxed'>
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-orange-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+      <section className='bg-gradient-to-r from-layer-base/30 to-orange-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
           Explore Candle Magic Further
         </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+        <p className='text-content-muted mb-6 max-w-xl mx-auto'>
           Discover specific candle color meanings, incantations, and detailed
           anointing guides in our Candle Magic section.
         </p>
         <div className='flex flex-wrap gap-4 justify-center'>
           <Link
             href='/grimoire/candle-magic/colors'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg font-medium transition-colors'
           >
             Candle Color Guide
           </Link>
           <Link
             href='/grimoire/spells'
-            className='px-6 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
+            className='px-6 py-3 border border-lunary-primary text-content-brand hover:bg-layer-base/10 rounded-lg font-medium transition-colors'
           >
             Browse Spells
           </Link>

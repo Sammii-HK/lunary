@@ -109,13 +109,13 @@ export default function CorrespondencesPage() {
       />
 
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-6'>
           Magical Correspondences
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             Elements, Colours, Days & More
           </span>
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           Correspondences are the symbolic connections that link physical
           objects, times, and forces to specific magical intentions.
           Understanding correspondences helps you craft more powerful, aligned
@@ -123,11 +123,11 @@ export default function CorrespondencesPage() {
         </p>
       </header>
 
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a href='#what-are' className='hover:text-lunary-primary-400'>
               1. What Are Correspondences?
@@ -168,11 +168,11 @@ export default function CorrespondencesPage() {
 
       {/* Section 1 */}
       <section id='what-are' className='mb-16'>
-        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-content-primary mb-6'>
           1. What Are Correspondences?
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Correspondences are the symbolic relationships between different
           aspects of the natural and magical world. They work through the
           principle of sympathetic magic: &quot;like attracts like.&quot; When
@@ -180,49 +180,49 @@ export default function CorrespondencesPage() {
           color&apos;s association with growth and prosperity to your intention.
         </p>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           These connections are not arbitrary. They developed over centuries of
           observation, tradition, and practical experience. Different cultures
           may have slightly different correspondences, but many overlap—because
           practitioners noticed the same patterns.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Types of Correspondences
           </h3>
           <div className='grid grid-cols-2 gap-3 text-sm'>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Elements</strong> — Fire, Water,
-              Air, Earth, Spirit
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Elements</strong> — Fire,
+              Water, Air, Earth, Spirit
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Colors</strong> — Visual energy
-              and symbolism
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Colors</strong> — Visual
+              energy and symbolism
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Days</strong> — Planetary
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Days</strong> — Planetary
               influences
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Numbers</strong> — Numerological
-              meanings
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Numbers</strong> —
+              Numerological meanings
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Herbs</strong> — Plant energies
-              and properties
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Herbs</strong> — Plant
+              energies and properties
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Crystals</strong> — Mineral
-              vibrations
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Crystals</strong> —
+              Mineral vibrations
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Moon Phases</strong> — Lunar
-              timing
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Moon Phases</strong> —
+              Lunar timing
             </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Planets</strong> — Celestial
-              influences
+            <div className='text-content-muted'>
+              <strong className='text-content-primary'>Planets</strong> —
+              Celestial influences
             </div>
           </div>
         </div>
@@ -230,20 +230,20 @@ export default function CorrespondencesPage() {
 
       {/* Section 2 */}
       <section id='how-to-use' className='mb-16'>
-        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-content-primary mb-6'>
           2. How to Use Correspondence Tables Wisely
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Correspondences are tools, not rules. They enhance your practice when
           used thoughtfully, but rigid adherence can limit your magic.
         </p>
 
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+        <div className='bg-layer-base/20 border border-lunary-primary-700 rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-brand mb-3'>
             Principles for Using Correspondences
           </h3>
-          <ul className='space-y-3 text-zinc-300 text-sm'>
+          <ul className='space-y-3 text-content-secondary text-sm'>
             <li>
               <strong>Start with intention, then add correspondences.</strong>{' '}
               Your intention is primary. Correspondences amplify but don&apos;t
@@ -270,11 +270,11 @@ export default function CorrespondencesPage() {
 
       {/* Section 3: Elements */}
       <section id='elements' className='mb-16'>
-        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-content-primary mb-6'>
           3. The Four/Five Elements
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           The classical elements form the foundation of most correspondence
           systems. Each element governs specific qualities and types of magic.
         </p>
@@ -282,64 +282,64 @@ export default function CorrespondencesPage() {
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
           <Link
             href='/grimoire/correspondences/elements/fire'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-orange-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-orange-600 transition-colors'
           >
             <h3 className='font-medium text-orange-400 mb-2'>🔥 Fire</h3>
-            <p className='text-zinc-400 text-sm mb-2'>
+            <p className='text-content-muted text-sm mb-2'>
               Passion, transformation, courage, will, purification
             </p>
-            <p className='text-zinc-500 text-xs'>
+            <p className='text-content-muted text-xs'>
               Direction: South | Season: Summer | Tools: Candle, athame
             </p>
           </Link>
           <Link
             href='/grimoire/correspondences/elements/water'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-blue-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-blue-600 transition-colors'
           >
             <h3 className='font-medium text-blue-400 mb-2'>💧 Water</h3>
-            <p className='text-zinc-400 text-sm mb-2'>
+            <p className='text-content-muted text-sm mb-2'>
               Emotion, intuition, healing, purification, the unconscious
             </p>
-            <p className='text-zinc-500 text-xs'>
+            <p className='text-content-muted text-xs'>
               Direction: West | Season: Autumn | Tools: Chalice, cauldron
             </p>
           </Link>
           <Link
             href='/grimoire/correspondences/elements/air'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-yellow-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-yellow-600 transition-colors'
           >
             <h3 className='font-medium text-yellow-400 mb-2'>💨 Air</h3>
-            <p className='text-zinc-400 text-sm mb-2'>
+            <p className='text-content-muted text-sm mb-2'>
               Intellect, communication, travel, new beginnings
             </p>
-            <p className='text-zinc-500 text-xs'>
+            <p className='text-content-muted text-xs'>
               Direction: East | Season: Spring | Tools: Wand, incense
             </p>
           </Link>
           <Link
             href='/grimoire/correspondences/elements/earth'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-green-600 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-green-600 transition-colors'
           >
             <h3 className='font-medium text-green-400 mb-2'>🌍 Earth</h3>
-            <p className='text-zinc-400 text-sm mb-2'>
+            <p className='text-content-muted text-sm mb-2'>
               Stability, prosperity, fertility, grounding, manifestation
             </p>
-            <p className='text-zinc-500 text-xs'>
+            <p className='text-content-muted text-xs'>
               Direction: North | Season: Winter | Tools: Pentacle, salt
             </p>
           </Link>
           <Link
             href='/grimoire/correspondences/elements/spirit'
-            className='p-5 rounded-xl border border-zinc-800 bg-violet-900/30 hover:border-violet-400 transition-colors'
+            className='p-5 rounded-xl border border-stroke-subtle bg-violet-900/30 hover:border-violet-400 transition-colors'
           >
             <h3 className='font-medium text-violet-300 mb-2'>
               ✨ Spirit (Akasha)
             </h3>
-            <p className='text-zinc-400 text-sm mb-2'>
+            <p className='text-content-muted text-sm mb-2'>
               The timeless connective force, divine consciousness, and sacred
               presence in every spell
             </p>
-            <p className='text-zinc-500 text-xs'>
+            <p className='text-content-muted text-xs'>
               Direction: Center | Season: All Seasons | Tools: Bell, altar,
               incense
             </p>
@@ -349,59 +349,59 @@ export default function CorrespondencesPage() {
 
       {/* Section 4: Colors & Days */}
       <section id='colors-days' className='mb-16'>
-        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-content-primary mb-6'>
           4. Colours, Days, Numbers
         </h2>
 
-        <h3 className='text-xl font-medium text-zinc-100 mb-4'>
+        <h3 className='text-xl font-medium text-content-primary mb-4'>
           Days of the Week
         </h3>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3 mb-6'>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <span className='font-medium text-zinc-100'>Sunday</span>
-            <span className='text-zinc-400 text-sm'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+            <span className='font-medium text-content-primary'>Sunday</span>
+            <span className='text-content-muted text-sm'>
               {' '}
               — Sun: Success, vitality, leadership
             </span>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <span className='font-medium text-zinc-100'>Monday</span>
-            <span className='text-zinc-400 text-sm'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+            <span className='font-medium text-content-primary'>Monday</span>
+            <span className='text-content-muted text-sm'>
               {' '}
               — Moon: Intuition, dreams, emotions
             </span>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <span className='font-medium text-zinc-100'>Tuesday</span>
-            <span className='text-zinc-400 text-sm'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+            <span className='font-medium text-content-primary'>Tuesday</span>
+            <span className='text-content-muted text-sm'>
               {' '}
               — Mars: Courage, protection, action
             </span>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <span className='font-medium text-zinc-100'>Wednesday</span>
-            <span className='text-zinc-400 text-sm'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+            <span className='font-medium text-content-primary'>Wednesday</span>
+            <span className='text-content-muted text-sm'>
               {' '}
               — Mercury: Communication, travel, learning
             </span>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <span className='font-medium text-zinc-100'>Thursday</span>
-            <span className='text-zinc-400 text-sm'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+            <span className='font-medium text-content-primary'>Thursday</span>
+            <span className='text-content-muted text-sm'>
               {' '}
               — Jupiter: Abundance, luck, expansion
             </span>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
-            <span className='font-medium text-zinc-100'>Friday</span>
-            <span className='text-zinc-400 text-sm'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30'>
+            <span className='font-medium text-content-primary'>Friday</span>
+            <span className='text-content-muted text-sm'>
               {' '}
               — Venus: Love, beauty, relationships
             </span>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 md:col-span-2'>
-            <span className='font-medium text-zinc-100'>Saturday</span>
-            <span className='text-zinc-400 text-sm'>
+          <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 md:col-span-2'>
+            <span className='font-medium text-content-primary'>Saturday</span>
+            <span className='text-content-muted text-sm'>
               {' '}
               — Saturn: Banishing, protection, discipline, endings
             </span>
@@ -411,7 +411,7 @@ export default function CorrespondencesPage() {
         <div className='mt-4'>
           <Link
             href='/grimoire/candle-magic/colors'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-lunary-primary-400 hover:text-content-brand'
           >
             See full color correspondence chart →
           </Link>
@@ -420,21 +420,21 @@ export default function CorrespondencesPage() {
 
       {/* Section 5: Herbs & Crystals */}
       <section id='herbs-crystals' className='mb-16'>
-        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-content-primary mb-6'>
           5. Herbs & Crystals
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Herbs and crystals carry their own energies that can be incorporated
           into spellwork, sachets, baths, and altar arrangements.
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-3'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-3'>
               Common Herb Correspondences
             </h3>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>
                 <strong>Rosemary:</strong> Protection, memory, clarity
               </li>
@@ -461,11 +461,11 @@ export default function CorrespondencesPage() {
               Full herb guide →
             </Link>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-3'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-3'>
               Common Crystal Correspondences
             </h3>
-            <ul className='text-zinc-400 text-sm space-y-1'>
+            <ul className='text-content-muted text-sm space-y-1'>
               <li>
                 <strong>Clear Quartz:</strong> Amplification, clarity
               </li>
@@ -497,21 +497,21 @@ export default function CorrespondencesPage() {
 
       {/* Section 6: Personal Correspondences */}
       <section id='personal' className='mb-16'>
-        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-content-primary mb-6'>
           6. Building Your Own Correspondence List
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           While traditional correspondences are powerful, developing personal
           associations deepens your practice. Pay attention to what resonates
           with you.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Developing Personal Correspondences
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>
               • Notice what colors, scents, and objects make you feel specific
               emotions
@@ -534,7 +534,7 @@ export default function CorrespondencesPage() {
 
       {/* FAQ */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-content-primary mb-6'>
           7. Frequently Asked Questions
         </h2>
 
@@ -542,42 +542,44 @@ export default function CorrespondencesPage() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 {faq.question}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-content-secondary leading-relaxed'>
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-pink-500/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+      <section className='bg-gradient-to-r from-layer-base/30 to-pink-500/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
           Explore Correspondence Tables
         </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+        <p className='text-content-muted mb-6 max-w-xl mx-auto'>
           Dive into detailed correspondence charts for elements, herbs,
           crystals, colors, and more.
         </p>
         <div className='flex flex-wrap gap-4 justify-center'>
           <Link
             href='/grimoire/correspondences/elements'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg font-medium transition-colors'
           >
             Elements
           </Link>
           <Link
             href='/grimoire/crystals'
-            className='px-6 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
+            className='px-6 py-3 border border-lunary-primary text-content-brand hover:bg-layer-base/10 rounded-lg font-medium transition-colors'
           >
             Crystals
           </Link>
           <Link
             href='/grimoire/correspondences/herbs'
-            className='px-6 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
+            className='px-6 py-3 border border-lunary-primary text-content-brand hover:bg-layer-base/10 rounded-lg font-medium transition-colors'
           >
             Herbs
           </Link>

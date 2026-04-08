@@ -59,7 +59,7 @@ export function Breadcrumbs({
   return (
     <>
       <nav
-        className='flex items-center gap-1.5 md:gap-2 text-xs md:text-sm text-zinc-400 mb-6 flex-wrap'
+        className='flex items-center gap-1.5 md:gap-2 text-xs md:text-sm text-content-muted mb-6 flex-wrap'
         aria-label='Breadcrumb'
       >
         <Link
@@ -74,9 +74,9 @@ export function Breadcrumbs({
             key={item.href || item.label}
             className='flex items-center gap-1.5 md:gap-2 flex-shrink-0'
           >
-            <ChevronRight className='w-4 h-4 md:w-5 md:h-5 text-zinc-600 flex-shrink-0' />
+            <ChevronRight className='w-4 h-4 md:w-5 md:h-5 text-content-muted flex-shrink-0' />
             {index === items.length - 1 || !item.href ? (
-              <span className='text-zinc-300 font-medium truncate max-w-[120px] md:max-w-none py-2 px-1'>
+              <span className='text-content-secondary font-medium truncate max-w-[120px] md:max-w-none py-2 px-1'>
                 {item.label}
               </span>
             ) : (

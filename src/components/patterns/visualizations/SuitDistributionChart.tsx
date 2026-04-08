@@ -53,7 +53,7 @@ export function SuitDistributionChart({ data }: SuitDistributionChartProps) {
 
   if (chartData.length === 0) {
     return (
-      <div className='flex items-center justify-center h-[250px] text-sm text-zinc-500'>
+      <div className='flex items-center justify-center h-[250px] text-sm text-content-muted'>
         No suit data available
       </div>
     );
@@ -63,10 +63,10 @@ export function SuitDistributionChart({ data }: SuitDistributionChartProps) {
   if (chartData.length === 1) {
     return (
       <div className='flex flex-col items-center justify-center h-[250px] p-4 text-center'>
-        <p className='text-sm text-zinc-400 mb-2'>
+        <p className='text-sm text-content-muted mb-2'>
           Only {chartData[0].name} cards detected ({chartData[0].count} cards)
         </p>
-        <p className='text-xs text-zinc-500'>
+        <p className='text-xs text-content-muted'>
           This may indicate incomplete pattern data
         </p>
       </div>
@@ -124,7 +124,7 @@ export function SuitDistributionChart({ data }: SuitDistributionChartProps) {
                 className='w-3 h-3 rounded-full'
                 style={{ backgroundColor: item.fill }}
               />
-              <span className='text-xs text-zinc-300'>
+              <span className='text-xs text-content-secondary'>
                 {item.name} ({formatPercentage(item.value)})
               </span>
             </div>

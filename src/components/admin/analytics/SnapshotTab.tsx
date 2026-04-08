@@ -247,8 +247,10 @@ export function SnapshotTab({
       {/* Quick Glance */}
       <section className='space-y-3'>
         <div>
-          <h2 className='text-sm font-medium text-zinc-200'>Quick Glance</h2>
-          <p className='text-xs text-zinc-500'>
+          <h2 className='text-sm font-medium text-content-primary'>
+            Quick Glance
+          </h2>
+          <p className='text-xs text-content-muted'>
             Primary revenue, conversion, and growth signals for investors.
           </p>
         </div>
@@ -271,11 +273,11 @@ export function SnapshotTab({
         <section className='space-y-3'>
           <div className='flex items-center justify-between'>
             <div>
-              <h2 className='text-sm font-medium text-zinc-200 flex items-center gap-2'>
+              <h2 className='text-sm font-medium text-content-primary flex items-center gap-2'>
                 <Sparkles className='h-4 w-4 text-lunary-accent' />
                 Actionable Insights
               </h2>
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-content-muted'>
                 Auto-generated recommendations based on your metrics.
               </p>
             </div>
@@ -289,15 +291,15 @@ export function SnapshotTab({
               Export Insights
             </Button>
           </div>
-          <div className='flex flex-wrap items-center gap-2 rounded-xl border border-zinc-800/60 bg-zinc-950/40 p-3'>
-            <span className='text-xs font-medium text-zinc-400'>
+          <div className='flex flex-wrap items-center gap-2 rounded-xl border border-stroke-subtle/60 bg-surface-base/40 p-3'>
+            <span className='text-xs font-medium text-content-muted'>
               Filter by:
             </span>
             <div className='flex flex-wrap gap-2'>
               <select
                 value={insightTypeFilter}
                 onChange={(e) => data.setInsightTypeFilter(e.target.value)}
-                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500'
+                className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-3 py-1.5 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary-500'
               >
                 <option value='all'>All Types</option>
                 <option value='positive'>Positive</option>
@@ -308,7 +310,7 @@ export function SnapshotTab({
               <select
                 value={insightCategoryFilter}
                 onChange={(e) => data.setInsightCategoryFilter(e.target.value)}
-                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500'
+                className='rounded-lg border border-stroke-subtle bg-surface-elevated/60 px-3 py-1.5 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary-500'
               >
                 <option value='all'>All Categories</option>
                 <option value='retention'>Retention</option>
@@ -319,7 +321,7 @@ export function SnapshotTab({
                 <option value='quality'>Quality</option>
               </select>
             </div>
-            <span className='ml-auto text-xs text-zinc-500'>
+            <span className='ml-auto text-xs text-content-muted'>
               {filteredInsights.length} of {insights.length} insights
             </span>
           </div>
@@ -329,7 +331,7 @@ export function SnapshotTab({
                 <InsightCard key={idx} insight={insight} />
               ))
             ) : (
-              <div className='col-span-2 rounded-xl border border-zinc-800/60 bg-zinc-950/40 px-4 py-6 text-center text-sm text-zinc-400'>
+              <div className='col-span-2 rounded-xl border border-stroke-subtle/60 bg-surface-base/40 px-4 py-6 text-center text-sm text-content-muted'>
                 No insights match the selected filters.
               </div>
             )}
@@ -341,17 +343,17 @@ export function SnapshotTab({
       {(productMaError || integrityWarnings.length > 0) && (
         <div className='space-y-2'>
           {productMaError && (
-            <div className='rounded-xl border border-lunary-error-700/40 bg-lunary-error-950/40 px-4 py-3 text-sm text-lunary-error-200'>
+            <div className='rounded-xl border border-lunary-error-700/40 bg-layer-deep/40 px-4 py-3 text-sm text-lunary-error-200'>
               Signed-in Product MAU exceeds App MAU. Review the canonical
               `app_opened` audit by toggling Show audit.
             </div>
           )}
           {integrityWarnings.length > 0 && (
-            <div className='rounded-xl border border-lunary-warning-600/40 bg-zinc-900/40 px-4 py-3 text-sm text-zinc-200'>
-              <p className='text-xs text-zinc-400'>
+            <div className='rounded-xl border border-lunary-warning-600/40 bg-surface-elevated/40 px-4 py-3 text-sm text-content-primary'>
+              <p className='text-xs text-content-muted'>
                 Integrity checks flag the following:
               </p>
-              <ul className='mt-2 space-y-1 text-xs text-zinc-300'>
+              <ul className='mt-2 space-y-1 text-xs text-content-secondary'>
                 {integrityWarnings.map((warning) => (
                   <li key={warning}>- {warning}</li>
                 ))}
@@ -373,7 +375,7 @@ export function SnapshotTab({
             <MiniStat
               label='Product DAU (last full day)'
               value={activity?.signed_in_product_dau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+              icon={<Activity className='h-5 w-5 text-content-brand' />}
             />
             <MiniStat
               label='Product WAU'
@@ -383,12 +385,14 @@ export function SnapshotTab({
             <MiniStat
               label='Product MAU'
               value={activity?.signed_in_product_mau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
+              icon={
+                <Activity className='h-5 w-5 text-content-brand-secondary' />
+              }
             />
             <MiniStat
               label='Returning product users'
               value={activity?.signed_in_product_returning_users ?? 0}
-              icon={<Sparkles className='h-5 w-5 text-lunary-accent-300' />}
+              icon={<Sparkles className='h-5 w-5 text-content-brand-accent' />}
             />
           </div>
           <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
@@ -411,7 +415,9 @@ export function SnapshotTab({
                 activity?.signed_in_product_stickiness_wau_mau,
                 2,
               )}
-              icon={<Sparkles className='h-5 w-5 text-lunary-secondary-300' />}
+              icon={
+                <Sparkles className='h-5 w-5 text-content-brand-secondary' />
+              }
             />
             <MiniStat
               label='Avg sessions/user'
@@ -421,12 +427,12 @@ export function SnapshotTab({
                   ? activity.signed_in_product_avg_sessions_per_user.toFixed(2)
                   : '—'
               }
-              icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
+              icon={<Target className='h-5 w-5 text-content-brand' />}
             />
             <MiniStat
               label='Total product users'
               value={activity?.signed_in_product_users ?? 0}
-              icon={<Users className='h-5 w-5 text-lunary-accent-300' />}
+              icon={<Users className='h-5 w-5 text-content-brand-accent' />}
             />
           </div>
           <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
@@ -438,12 +444,14 @@ export function SnapshotTab({
             <MiniStat
               label='Engaged Rate (WAU)'
               value={activity?.engaged_rate_wau?.toFixed(1) ?? '—'}
-              icon={<Sparkles className='h-5 w-5 text-lunary-secondary-300' />}
+              icon={
+                <Sparkles className='h-5 w-5 text-content-brand-secondary' />
+              }
             />
             <MiniStat
               label='Engaged Rate (MAU)'
               value={activity?.engaged_rate_mau?.toFixed(1) ?? '—'}
-              icon={<Sparkles className='h-5 w-5 text-lunary-accent-300' />}
+              icon={<Sparkles className='h-5 w-5 text-content-brand-accent' />}
             />
             <MiniStat
               label='Avg Active Days'
@@ -452,7 +460,7 @@ export function SnapshotTab({
                   ? engagementOverview.avg_active_days_per_user.toFixed(2)
                   : '—'
               }
-              icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
+              icon={<Target className='h-5 w-5 text-content-brand' />}
             />
           </div>
         </StatSection>
@@ -470,7 +478,9 @@ export function SnapshotTab({
             <MiniStat
               label='Returning DAU (D1)'
               value={engagementOverview?.returning_dau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
+              icon={
+                <Activity className='h-5 w-5 text-content-brand-secondary' />
+              }
             />
             <MiniStat
               label='Returning WAU overlap'
@@ -480,12 +490,12 @@ export function SnapshotTab({
             <MiniStat
               label='Returning MAU overlap'
               value={engagementOverview?.returning_mau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+              icon={<Activity className='h-5 w-5 text-content-brand' />}
             />
             <MiniStat
               label='Returning Users (range)'
               value={engagementOverview?.returning_users_range ?? 0}
-              icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+              icon={<Target className='h-5 w-5 text-content-brand-accent' />}
             />
           </div>
         </StatSection>
@@ -503,7 +513,7 @@ export function SnapshotTab({
             <MiniStat
               label='App DAU'
               value={appDau}
-              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+              icon={<Activity className='h-5 w-5 text-content-brand' />}
             />
             <MiniStat
               label='App WAU'
@@ -513,18 +523,20 @@ export function SnapshotTab({
             <MiniStat
               label='App MAU'
               value={appMau}
-              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
+              icon={
+                <Activity className='h-5 w-5 text-content-brand-secondary' />
+              }
             />
             <MiniStat
               label='New users (range)'
               value={engagementOverview?.new_users ?? 0}
-              icon={<Target className='h-5 w-5 text-lunary-secondary-300' />}
+              icon={<Target className='h-5 w-5 text-content-brand-secondary' />}
             />
             {appVisits !== null && (
               <MiniStat
                 label='App Visits'
                 value={appVisits}
-                icon={<Loader2 className='h-5 w-5 text-lunary-accent-300' />}
+                icon={<Loader2 className='h-5 w-5 text-content-brand-accent' />}
               />
             )}
           </div>
@@ -535,7 +547,7 @@ export function SnapshotTab({
                 value={
                   appVisitsPerUser !== null ? appVisitsPerUser.toFixed(2) : '—'
                 }
-                icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
+                icon={<Target className='h-5 w-5 text-content-brand' />}
               />
               {includeAudit && canonicalIdentities !== null && (
                 <MiniStat
@@ -563,7 +575,7 @@ export function SnapshotTab({
             <MiniStat
               label='Organic returning'
               value={returningReferrerBreakdown?.organic_returning ?? 0}
-              icon={<Sparkles className='h-5 w-5 text-lunary-primary-300' />}
+              icon={<Sparkles className='h-5 w-5 text-content-brand' />}
             />
             <MiniStat
               label='Direct / brand returning'
@@ -573,7 +585,9 @@ export function SnapshotTab({
             <MiniStat
               label='Internal returning'
               value={returningReferrerBreakdown?.internal_returning ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
+              icon={
+                <Activity className='h-5 w-5 text-content-brand-secondary' />
+              }
             />
           </div>
         </StatSection>
@@ -590,7 +604,7 @@ export function SnapshotTab({
             <MiniStat
               label='1 day'
               value={engagementOverview?.active_days_distribution?.['1'] ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+              icon={<Activity className='h-5 w-5 text-content-brand' />}
             />
             <MiniStat
               label='2-3 days'
@@ -600,19 +614,21 @@ export function SnapshotTab({
             <MiniStat
               label='4-7 days'
               value={engagementOverview?.active_days_distribution?.['4-7'] ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
+              icon={
+                <Activity className='h-5 w-5 text-content-brand-secondary' />
+              }
             />
             <MiniStat
               label='8-14 days'
               value={
                 engagementOverview?.active_days_distribution?.['8-14'] ?? 0
               }
-              icon={<Activity className='h-5 w-5 text-lunary-accent-300' />}
+              icon={<Activity className='h-5 w-5 text-content-brand-accent' />}
             />
             <MiniStat
               label='15+ days'
               value={engagementOverview?.active_days_distribution?.['15+'] ?? 0}
-              icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
+              icon={<Target className='h-5 w-5 text-content-brand' />}
             />
           </div>
         </StatSection>
@@ -620,12 +636,12 @@ export function SnapshotTab({
 
       {/* Content & Funnel */}
       <section className='space-y-3'>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               Content & Funnel
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Grimoire metrics are scoped to `grimoire_viewed`.
             </CardDescription>
           </CardHeader>
@@ -643,7 +659,7 @@ export function SnapshotTab({
                     ? `${grimoireHealth.grimoire_to_app_users} of ${grimoireHealth.grimoire_visitors}`
                     : undefined
                 }
-                icon={<Sparkles className='h-5 w-5 text-lunary-primary-300' />}
+                icon={<Sparkles className='h-5 w-5 text-content-brand' />}
               />
               <MiniStat
                 label='Grimoire MAU'
@@ -654,7 +670,7 @@ export function SnapshotTab({
                 label='Grimoire-only MAU'
                 value={grimoireOnlyMau}
                 icon={
-                  <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                  <Activity className='h-5 w-5 text-content-brand-secondary' />
                 }
               />
               <MiniStat
@@ -665,7 +681,7 @@ export function SnapshotTab({
                     ? grimoireHealth.grimoire_views_per_active_user.toFixed(2)
                     : '—'
                 }
-                icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+                icon={<Activity className='h-5 w-5 text-content-brand' />}
               />
               <MiniStat
                 label='Grimoire return rate'
@@ -674,11 +690,11 @@ export function SnapshotTab({
                     ? `${grimoireHealth.return_to_grimoire_rate.toFixed(2)}%`
                     : '—'
                 }
-                icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+                icon={<Target className='h-5 w-5 text-content-brand-accent' />}
               />
             </div>
-            <div className='rounded-xl border border-zinc-800/30 bg-zinc-950/50 p-4 text-sm text-zinc-300'>
-              <p className='text-xs uppercase tracking-wider text-zinc-400'>
+            <div className='rounded-xl border border-stroke-subtle/30 bg-surface-base/50 p-4 text-sm text-content-secondary'>
+              <p className='text-xs uppercase tracking-wider text-content-muted'>
                 Conversion influence
               </p>
               <div className='mt-2 space-y-1'>
@@ -727,12 +743,12 @@ export function SnapshotTab({
 
       {/* Reach */}
       <section className='space-y-3'>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+        <Card className='border-stroke-subtle/30 bg-surface-elevated/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
               Reach (page_viewed)
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
+            <CardDescription className='text-xs text-content-muted'>
               Reach measures visits. App usage measures product engagement.
             </CardDescription>
           </CardHeader>
@@ -741,7 +757,7 @@ export function SnapshotTab({
               <MiniStat
                 label='Reach DAU'
                 value={reachDau}
-                icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+                icon={<Activity className='h-5 w-5 text-content-brand' />}
               />
               <MiniStat
                 label='Reach WAU'
@@ -752,11 +768,11 @@ export function SnapshotTab({
                 label='Reach MAU'
                 value={reachMau}
                 icon={
-                  <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                  <Activity className='h-5 w-5 text-content-brand-secondary' />
                 }
               />
             </div>
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-content-muted'>
               Reach counts distinct canonical identities with at least one
               `page_viewed` event in the window.
             </p>
@@ -808,33 +824,35 @@ function MomentumSection({
 }) {
   return (
     <div className='space-y-2'>
-      <p className='text-xs uppercase tracking-wider text-zinc-500'>{title}</p>
+      <p className='text-xs uppercase tracking-wider text-content-muted'>
+        {title}
+      </p>
       {rows.map((row) => (
         <div
           key={row.id}
-          className='flex flex-wrap items-start justify-between gap-2 rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-4 py-3 sm:gap-4'
+          className='flex flex-wrap items-start justify-between gap-2 rounded-xl border border-stroke-subtle/40 bg-surface-base/60 px-4 py-3 sm:gap-4'
         >
           <div>
-            <p className='text-xs uppercase tracking-wider text-zinc-500'>
+            <p className='text-xs uppercase tracking-wider text-content-muted'>
               {row.label}
             </p>
-            <p className='text-2xl font-light text-white'>
+            <p className='text-2xl font-light text-content-primary'>
               {row.formatter(row.stats.average)}
             </p>
-            <p className='text-xs text-zinc-500'>7-day rolling</p>
+            <p className='text-xs text-content-muted'>7-day rolling</p>
           </div>
           <div className='text-right text-xs'>
-            <p className='text-sm font-semibold text-white'>
+            <p className='text-sm font-semibold text-content-primary'>
               {row.change !== null
                 ? `${row.change >= 0 ? '+' : ''}${row.change.toLocaleString()}`
                 : 'N/A'}
             </p>
-            <p className='text-[11px] text-zinc-500'>
+            <p className='text-[11px] text-content-muted'>
               {row.percentChange !== null
                 ? `${row.percentChange.toFixed(1)}% vs prior 7d`
                 : 'No prior window'}
             </p>
-            <p className='text-[11px] text-zinc-500'>
+            <p className='text-[11px] text-content-muted'>
               {describeTrend(row.stats.average, row.stats.previousAverage)}
             </p>
           </div>
@@ -874,7 +892,7 @@ function GrowthHistoryCard({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue='weekly' className='space-y-4'>
-          <TabsList className='rounded-lg border border-zinc-800/40 bg-zinc-900/20'>
+          <TabsList className='rounded-lg border border-stroke-subtle/40 bg-surface-elevated/20'>
             <TabsTrigger value='weekly' className='text-xs'>
               Weekly
             </TabsTrigger>
@@ -885,7 +903,7 @@ function GrowthHistoryCard({
 
           <TabsContent value='weekly'>
             {metricSnapshots.weekly.length === 0 ? (
-              <p className='text-sm text-zinc-500'>
+              <p className='text-sm text-content-muted'>
                 No weekly snapshots yet. They are generated every Monday at
                 02:00 UTC.
               </p>
@@ -893,22 +911,34 @@ function GrowthHistoryCard({
               <div className='overflow-x-auto'>
                 <table className='min-w-[600px] w-full text-sm'>
                   <thead>
-                    <tr className='border-b border-zinc-800'>
-                      <th className='py-2 text-left text-zinc-400'>Week</th>
-                      <th className='py-2 text-right text-zinc-400'>Signups</th>
-                      <th className='py-2 text-right text-zinc-400'>WAU</th>
-                      <th className='py-2 text-right text-zinc-400'>Trials</th>
-                      <th className='py-2 text-right text-zinc-400'>
+                    <tr className='border-b border-stroke-subtle'>
+                      <th className='py-2 text-left text-content-muted'>
+                        Week
+                      </th>
+                      <th className='py-2 text-right text-content-muted'>
+                        Signups
+                      </th>
+                      <th className='py-2 text-right text-content-muted'>
+                        WAU
+                      </th>
+                      <th className='py-2 text-right text-content-muted'>
+                        Trials
+                      </th>
+                      <th className='py-2 text-right text-content-muted'>
                         New Paying
                       </th>
-                      <th className='py-2 text-right text-zinc-400'>
+                      <th className='py-2 text-right text-content-muted'>
                         Active Subs
                       </th>
-                      <th className='py-2 text-right text-zinc-400'>MRR</th>
-                      <th className='py-2 text-right text-zinc-400'>
+                      <th className='py-2 text-right text-content-muted'>
+                        MRR
+                      </th>
+                      <th className='py-2 text-right text-content-muted'>
                         Activation
                       </th>
-                      <th className='py-2 text-right text-zinc-400'>Churn</th>
+                      <th className='py-2 text-right text-content-muted'>
+                        Churn
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -917,12 +947,12 @@ function GrowthHistoryCard({
                       return (
                         <tr
                           key={s.period_key}
-                          className='border-b border-zinc-800/40'
+                          className='border-b border-stroke-subtle/40'
                         >
-                          <td className='py-2 font-medium text-zinc-300'>
+                          <td className='py-2 font-medium text-content-secondary'>
                             {s.period_key}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.new_signups}
                             <span
                               className={`ml-1 text-xs ${(delta(s.new_signups, prev?.new_signups) ?? 0) >= 0 ? 'text-lunary-success-400' : 'text-lunary-error-400'}`}
@@ -932,7 +962,7 @@ function GrowthHistoryCard({
                               )}
                             </span>
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.wau}
                             <span
                               className={`ml-1 text-xs ${(delta(s.wau, prev?.wau) ?? 0) >= 0 ? 'text-lunary-success-400' : 'text-lunary-error-400'}`}
@@ -940,26 +970,26 @@ function GrowthHistoryCard({
                               {fmtDelta(delta(s.wau, prev?.wau))}
                             </span>
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.new_trials}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.new_paying_subscribers}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.active_subscribers}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.mrr != null
                               ? `$${s.mrr % 1 ? s.mrr.toFixed(1) : s.mrr}`
                               : '—'}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.activation_rate != null
                               ? `${s.activation_rate}%`
                               : '—'}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.churn_rate != null ? `${s.churn_rate}%` : '—'}
                           </td>
                         </tr>
@@ -973,7 +1003,7 @@ function GrowthHistoryCard({
 
           <TabsContent value='monthly'>
             {metricSnapshots.monthly.length === 0 ? (
-              <p className='text-sm text-zinc-500'>
+              <p className='text-sm text-content-muted'>
                 No monthly snapshots yet. They are generated on the 2nd of each
                 month at 03:00 UTC.
               </p>
@@ -981,22 +1011,34 @@ function GrowthHistoryCard({
               <div className='overflow-x-auto'>
                 <table className='min-w-[600px] w-full text-sm'>
                   <thead>
-                    <tr className='border-b border-zinc-800'>
-                      <th className='py-2 text-left text-zinc-400'>Month</th>
-                      <th className='py-2 text-right text-zinc-400'>Signups</th>
-                      <th className='py-2 text-right text-zinc-400'>MAU</th>
-                      <th className='py-2 text-right text-zinc-400'>Trials</th>
-                      <th className='py-2 text-right text-zinc-400'>
+                    <tr className='border-b border-stroke-subtle'>
+                      <th className='py-2 text-left text-content-muted'>
+                        Month
+                      </th>
+                      <th className='py-2 text-right text-content-muted'>
+                        Signups
+                      </th>
+                      <th className='py-2 text-right text-content-muted'>
+                        MAU
+                      </th>
+                      <th className='py-2 text-right text-content-muted'>
+                        Trials
+                      </th>
+                      <th className='py-2 text-right text-content-muted'>
                         New Paying
                       </th>
-                      <th className='py-2 text-right text-zinc-400'>
+                      <th className='py-2 text-right text-content-muted'>
                         Active Subs
                       </th>
-                      <th className='py-2 text-right text-zinc-400'>MRR</th>
-                      <th className='py-2 text-right text-zinc-400'>
+                      <th className='py-2 text-right text-content-muted'>
+                        MRR
+                      </th>
+                      <th className='py-2 text-right text-content-muted'>
                         Activation
                       </th>
-                      <th className='py-2 text-right text-zinc-400'>Churn</th>
+                      <th className='py-2 text-right text-content-muted'>
+                        Churn
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1005,12 +1047,12 @@ function GrowthHistoryCard({
                       return (
                         <tr
                           key={s.period_key}
-                          className='border-b border-zinc-800/40'
+                          className='border-b border-stroke-subtle/40'
                         >
-                          <td className='py-2 font-medium text-zinc-300'>
+                          <td className='py-2 font-medium text-content-secondary'>
                             {s.period_key}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.new_signups}
                             <span
                               className={`ml-1 text-xs ${(delta(s.new_signups, prev?.new_signups) ?? 0) >= 0 ? 'text-lunary-success-400' : 'text-lunary-error-400'}`}
@@ -1020,7 +1062,7 @@ function GrowthHistoryCard({
                               )}
                             </span>
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.wau}
                             <span
                               className={`ml-1 text-xs ${(delta(s.wau, prev?.wau) ?? 0) >= 0 ? 'text-lunary-success-400' : 'text-lunary-error-400'}`}
@@ -1028,26 +1070,26 @@ function GrowthHistoryCard({
                               {fmtDelta(delta(s.wau, prev?.wau))}
                             </span>
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.new_trials}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.new_paying_subscribers}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.active_subscribers}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.mrr != null
                               ? `$${s.mrr % 1 ? s.mrr.toFixed(1) : s.mrr}`
                               : '—'}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.activation_rate != null
                               ? `${s.activation_rate}%`
                               : '—'}
                           </td>
-                          <td className='py-2 text-right text-zinc-300'>
+                          <td className='py-2 text-right text-content-secondary'>
                             {s.churn_rate != null ? `${s.churn_rate}%` : '—'}
                           </td>
                         </tr>

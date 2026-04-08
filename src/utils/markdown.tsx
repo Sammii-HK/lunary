@@ -57,13 +57,13 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
 
     if (type === 'bold') {
       result.push(
-        <strong key={key++} className='font-semibold text-zinc-100'>
+        <strong key={key++} className='font-semibold text-content-primary'>
           {match[1]}
         </strong>,
       );
     } else if (type === 'italic') {
       result.push(
-        <em key={key++} className='italic text-zinc-200'>
+        <em key={key++} className='italic text-content-primary'>
           {match[1]}
         </em>,
       );
@@ -72,7 +72,7 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
         <Link
           key={`link-${key++}`}
           href={match[2]}
-          className='text-lunary-primary-300 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-300'
+          className='text-content-brand hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-300'
         >
           {match[1]}
         </Link>,
@@ -101,7 +101,10 @@ export function ParsedMarkdown({
       elements.push(
         <ul key={`list-${listKey++}`} className='space-y-2 my-4'>
           {currentList.map((item, i) => (
-            <li key={i} className='flex items-start gap-3 text-zinc-300'>
+            <li
+              key={i}
+              className='flex items-start gap-3 text-content-secondary'
+            >
               <span className='text-lunary-primary-400 mt-1'>•</span>
               <span>{parseInlineMarkdown(item)}</span>
             </li>
@@ -168,7 +171,7 @@ export function ParsedMarkdown({
     elements.push(
       <p
         key={`p-${index}`}
-        className='text-base text-zinc-300 leading-relaxed mb-4'
+        className='text-base text-content-secondary leading-relaxed mb-4'
       >
         {parseInlineMarkdown(trimmed)}
       </p>,

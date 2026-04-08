@@ -24,11 +24,11 @@ export function CTASection({
 
   const variantClasses = {
     primary:
-      'bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300',
+      'bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand',
     secondary:
-      'bg-zinc-800/50 hover:bg-zinc-800/70 border border-zinc-700 text-zinc-200',
+      'bg-surface-card/50 hover:bg-surface-card/70 border border-stroke-default text-content-primary',
     inline:
-      'bg-lunary-primary-800 hover:bg-lunary-primary-700 text-white px-6 py-3 text-base',
+      'bg-layer-raised hover:bg-layer-high text-white px-6 py-3 text-base',
   };
 
   if (variant === 'inline') {
@@ -70,18 +70,18 @@ export function CTABox({
 }: CTABoxProps) {
   const containerClasses =
     variant === 'primary'
-      ? 'rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'
-      : 'rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6';
+      ? 'rounded-lg border border-lunary-primary-700 bg-layer-base/10 p-6'
+      : 'rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-6';
 
   return (
     <div className={`${containerClasses} text-center`}>
-      <h3 className='text-xl font-medium text-zinc-100 mb-2'>{title}</h3>
+      <h3 className='text-xl font-medium text-content-primary mb-2'>{title}</h3>
       {description && (
-        <p className='text-sm text-zinc-300 mb-4'>{description}</p>
+        <p className='text-sm text-content-secondary mb-4'>{description}</p>
       )}
       <Link
         href={href}
-        className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-lunary-primary-800 hover:bg-lunary-primary-700 text-white font-medium transition-colors'
+        className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-layer-raised hover:bg-layer-high text-white font-medium transition-colors'
       >
         {buttonText}
         <ArrowRight className='h-4 w-4' />

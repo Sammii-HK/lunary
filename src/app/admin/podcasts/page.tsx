@@ -407,7 +407,7 @@ export default function PodcastsPage() {
                       {episode.showNotes && (
                         <div>
                           <p className='text-sm font-medium mb-1'>Show Notes</p>
-                          <pre className='text-xs text-muted-foreground bg-zinc-950 p-3 rounded-lg overflow-auto max-h-40'>
+                          <pre className='text-xs text-muted-foreground bg-surface-base p-3 rounded-lg overflow-auto max-h-40'>
                             {JSON.stringify(episode.showNotes, null, 2)}
                           </pre>
                         </div>
@@ -417,7 +417,7 @@ export default function PodcastsPage() {
                       {episode.transcript && (
                         <div>
                           <p className='text-sm font-medium mb-1'>Transcript</p>
-                          <pre className='text-xs text-muted-foreground bg-zinc-950 p-3 rounded-lg overflow-auto max-h-40'>
+                          <pre className='text-xs text-muted-foreground bg-surface-base p-3 rounded-lg overflow-auto max-h-40'>
                             {typeof episode.transcript === 'string'
                               ? episode.transcript
                               : JSON.stringify(episode.transcript, null, 2)}
@@ -485,7 +485,7 @@ export default function PodcastsPage() {
             <CardContent className='space-y-4'>
               {/* Next topic preview */}
               {nextTopicPreview && (
-                <Card className='border-lunary-primary-600/30 bg-lunary-primary-900/5'>
+                <Card className='border-lunary-primary-600/30 bg-layer-base/5'>
                   <CardContent className='pt-4'>
                     <p className='text-sm font-medium flex items-center gap-1.5 mb-2'>
                       <Eye className='h-4 w-4' />
@@ -676,7 +676,7 @@ export default function PodcastsPage() {
                       environment variables.
                     </p>
                     <div className='flex items-center gap-2'>
-                      <code className='flex-1 text-xs bg-zinc-950 p-3 rounded-lg border break-all select-all'>
+                      <code className='flex-1 text-xs bg-surface-base p-3 rounded-lg border break-all select-all'>
                         {refreshToken}
                       </code>
                       <Button variant='outline' size='icon' onClick={copyToken}>

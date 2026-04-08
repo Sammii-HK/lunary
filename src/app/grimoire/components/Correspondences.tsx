@@ -21,10 +21,10 @@ const Correspondences = () => {
   return (
     <div className='space-y-8'>
       <div className='mb-6'>
-        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+        <h2 className='text-2xl md:text-3xl font-light text-content-primary mb-2'>
           Complete Correspondence Guide
         </h2>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           Explore the symbolic connections between elements, colors, planets,
           and magical practices
         </p>
@@ -32,36 +32,36 @@ const Correspondences = () => {
 
       {/* Elements */}
       <section id='elements' className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>Elements</h2>
+        <h2 className='text-xl font-medium text-content-primary'>Elements</h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           {Object.entries(correspondencesData.elements).map(
             ([element, data]) => (
               <div
                 key={element}
-                className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+                className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+                <h3 className='text-lg font-medium text-content-primary mb-3'>
                   {element}
                 </h3>
-                <div className='space-y-2 text-sm text-zinc-300'>
+                <div className='space-y-2 text-sm text-content-secondary'>
                   <div>
-                    <span className='text-zinc-400'>Colors: </span>
+                    <span className='text-content-muted'>Colors: </span>
                     {data.colors.join(', ')}
                   </div>
                   <div>
-                    <span className='text-zinc-400'>Crystals: </span>
+                    <span className='text-content-muted'>Crystals: </span>
                     {data.crystals.join(', ')}
                   </div>
                   <div>
-                    <span className='text-zinc-400'>Herbs: </span>
+                    <span className='text-content-muted'>Herbs: </span>
                     {data.herbs.join(', ')}
                   </div>
                   <div>
-                    <span className='text-zinc-400'>Planets: </span>
+                    <span className='text-content-muted'>Planets: </span>
                     {data.planets.join(', ')}
                   </div>
                   <div>
-                    <span className='text-zinc-400'>Direction: </span>
+                    <span className='text-content-muted'>Direction: </span>
                     {data.directions}
                   </div>
                 </div>
@@ -73,7 +73,7 @@ const Correspondences = () => {
 
       {/* Colors */}
       <section id='colors' className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>Colors</h2>
+        <h2 className='text-xl font-medium text-content-primary'>Colors</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
           {Object.entries(correspondencesData.colors).map(([color, data]) => {
             const colorSlug = stringToKebabCase(color);
@@ -81,18 +81,18 @@ const Correspondences = () => {
               <Link
                 key={color}
                 href={`/grimoire/correspondences/colors/${colorSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {color}
                 </h3>
-                <div className='space-y-2 text-sm text-zinc-300'>
+                <div className='space-y-2 text-sm text-content-secondary'>
                   <div>
-                    <span className='text-zinc-400'>Uses: </span>
+                    <span className='text-content-muted'>Uses: </span>
                     {data.uses.join(', ')}
                   </div>
                   <div>
-                    <span className='text-zinc-400'>Planets: </span>
+                    <span className='text-content-muted'>Planets: </span>
                     {data.planets.join(', ')}
                   </div>
                 </div>
@@ -104,25 +104,29 @@ const Correspondences = () => {
 
       {/* Days */}
       <section id='days' className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>Planetary Days</h2>
+        <h2 className='text-xl font-medium text-content-primary'>
+          Planetary Days
+        </h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
           {Object.entries(correspondencesData.days).map(([day, data]) => (
             <div
               key={day}
-              className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'
+              className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>{day}</h3>
-              <div className='space-y-2 text-sm text-zinc-300'>
+              <h3 className='text-lg font-medium text-content-primary mb-2'>
+                {day}
+              </h3>
+              <div className='space-y-2 text-sm text-content-secondary'>
                 <div>
-                  <span className='text-zinc-400'>Planet: </span>
+                  <span className='text-content-muted'>Planet: </span>
                   {data.planet}
                 </div>
                 <div>
-                  <span className='text-zinc-400'>Element: </span>
+                  <span className='text-content-muted'>Element: </span>
                   {data.element}
                 </div>
                 <div>
-                  <span className='text-zinc-400'>Uses: </span>
+                  <span className='text-content-muted'>Uses: </span>
                   {data.uses.join(', ')}
                 </div>
               </div>
@@ -133,7 +137,7 @@ const Correspondences = () => {
 
       {/* Deities */}
       <section id='deities' className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>Deities</h2>
+        <h2 className='text-xl font-medium text-content-primary'>Deities</h2>
         <div className='space-y-6'>
           {Object.entries(correspondencesData.deities).map(
             ([pantheon, gods]) => {
@@ -142,7 +146,7 @@ const Correspondences = () => {
                 <div key={pantheon}>
                   <Link
                     href={`/grimoire/correspondences/deities/${pantheonSlug}`}
-                    className='block text-lg font-medium text-zinc-200 mb-3 hover:text-lunary-primary-400 transition-colors'
+                    className='block text-lg font-medium text-content-primary mb-3 hover:text-lunary-primary-400 transition-colors'
                   >
                     {pantheon}
                   </Link>
@@ -153,12 +157,12 @@ const Correspondences = () => {
                         <Link
                           key={name}
                           href={`/grimoire/correspondences/deities/${pantheonSlug}/${deitySlug}`}
-                          className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                          className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
                         >
-                          <h4 className='font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
+                          <h4 className='font-medium text-content-primary mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                             {name}
                           </h4>
-                          <div className='text-sm text-zinc-400'>
+                          <div className='text-sm text-content-muted'>
                             Domain: {data.domain.join(', ')}
                           </div>
                         </Link>
@@ -174,7 +178,7 @@ const Correspondences = () => {
 
       {/* Flowers */}
       <section id='flowers' className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>Flowers</h2>
+        <h2 className='text-xl font-medium text-content-primary'>Flowers</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
           {Object.entries(correspondencesData.flowers).map(([flower, data]) => {
             const flowerSlug = stringToKebabCase(flower);
@@ -182,18 +186,18 @@ const Correspondences = () => {
               <Link
                 key={flower}
                 href={`/grimoire/correspondences/flowers/${flowerSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {flower}
                 </h3>
-                <div className='space-y-2 text-sm text-zinc-300'>
+                <div className='space-y-2 text-sm text-content-secondary'>
                   <div>
-                    <span className='text-zinc-400'>Uses: </span>
+                    <span className='text-content-muted'>Uses: </span>
                     {data.uses.join(', ')}
                   </div>
                   <div>
-                    <span className='text-zinc-400'>Planets: </span>
+                    <span className='text-content-muted'>Planets: </span>
                     {data.planets.join(', ')}
                   </div>
                 </div>
@@ -205,7 +209,7 @@ const Correspondences = () => {
 
       {/* Numbers */}
       <section id='numbers' className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>Numbers</h2>
+        <h2 className='text-xl font-medium text-content-primary'>Numbers</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
           {Object.entries(correspondencesData.numbers).map(([num, data]) => {
             const numSlug = stringToKebabCase(num);
@@ -213,18 +217,18 @@ const Correspondences = () => {
               <Link
                 key={num}
                 href={`/grimoire/correspondences/numbers/${numSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {num}
                 </h3>
-                <div className='space-y-2 text-sm text-zinc-300'>
+                <div className='space-y-2 text-sm text-content-secondary'>
                   <div>
-                    <span className='text-zinc-400'>Uses: </span>
+                    <span className='text-content-muted'>Uses: </span>
                     {data.uses.join(', ')}
                   </div>
                   <div>
-                    <span className='text-zinc-400'>Planet: </span>
+                    <span className='text-content-muted'>Planet: </span>
                     {data.planets[0]}
                   </div>
                 </div>
@@ -236,7 +240,7 @@ const Correspondences = () => {
 
       {/* Wood */}
       <section id='wood' className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>Wood</h2>
+        <h2 className='text-xl font-medium text-content-primary'>Wood</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
           {Object.entries(correspondencesData.wood).map(([wood, data]) => {
             const woodSlug = stringToKebabCase(wood);
@@ -244,18 +248,18 @@ const Correspondences = () => {
               <Link
                 key={wood}
                 href={`/grimoire/correspondences/wood/${woodSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {wood}
                 </h3>
-                <div className='space-y-2 text-sm text-zinc-300'>
+                <div className='space-y-2 text-sm text-content-secondary'>
                   <div>
-                    <span className='text-zinc-400'>Uses: </span>
+                    <span className='text-content-muted'>Uses: </span>
                     {data.uses.join(', ')}
                   </div>
                   <div>
-                    <span className='text-zinc-400'>Planets: </span>
+                    <span className='text-content-muted'>Planets: </span>
                     {data.planets.join(', ')}
                   </div>
                 </div>
@@ -267,7 +271,7 @@ const Correspondences = () => {
 
       {/* Herbs */}
       <section id='herbs' className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>Herbs</h2>
+        <h2 className='text-xl font-medium text-content-primary'>Herbs</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
           {Object.entries(correspondencesData.herbs).map(([herb, data]) => {
             const herbSlug = stringToKebabCase(herb);
@@ -275,18 +279,18 @@ const Correspondences = () => {
               <Link
                 key={herb}
                 href={`/grimoire/correspondences/herbs/${herbSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {herb}
                 </h3>
-                <div className='space-y-2 text-sm text-zinc-300'>
+                <div className='space-y-2 text-sm text-content-secondary'>
                   <div>
-                    <span className='text-zinc-400'>Uses: </span>
+                    <span className='text-content-muted'>Uses: </span>
                     {data.uses.join(', ')}
                   </div>
                   <div>
-                    <span className='text-zinc-400'>Planet: </span>
+                    <span className='text-content-muted'>Planet: </span>
                     {data.planets[0]}
                   </div>
                 </div>
@@ -298,7 +302,7 @@ const Correspondences = () => {
 
       {/* Animals */}
       <section id='animals' className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>Animals</h2>
+        <h2 className='text-xl font-medium text-content-primary'>Animals</h2>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
           {Object.entries(correspondencesData.animals).map(([animal, data]) => {
             const animalSlug = stringToKebabCase(animal);
@@ -306,18 +310,18 @@ const Correspondences = () => {
               <Link
                 key={animal}
                 href={`/grimoire/correspondences/animals/${animalSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {animal}
                 </h3>
-                <div className='space-y-2 text-sm text-zinc-300'>
+                <div className='space-y-2 text-sm text-content-secondary'>
                   <div>
-                    <span className='text-zinc-400'>Uses: </span>
+                    <span className='text-content-muted'>Uses: </span>
                     {data.uses.join(', ')}
                   </div>
                   <div>
-                    <span className='text-zinc-400'>Planet: </span>
+                    <span className='text-content-muted'>Planet: </span>
                     {data.planets[0]}
                   </div>
                 </div>
@@ -329,19 +333,19 @@ const Correspondences = () => {
 
       {/* Herb Profiles */}
       <section id='herb-profiles' className='space-y-6'>
-        <h2 className='text-xl font-medium text-zinc-100'>
+        <h2 className='text-xl font-medium text-content-primary'>
           Herb Profiles & Preparations
         </h2>
-        <p className='text-sm text-zinc-400 mb-4'>
+        <p className='text-sm text-content-muted mb-4'>
           Detailed information about working with herbs, including preparations,
           safety, and magical uses.
         </p>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Herb Preparations
             </h3>
-            <div className='space-y-3 text-sm text-zinc-300'>
+            <div className='space-y-3 text-sm text-content-secondary'>
               <div>
                 <strong>Teas:</strong> Steep 1-2 tsp dried herbs in hot water
                 for 5-10 minutes. Strain and drink. Best for gentle, daily
@@ -368,18 +372,18 @@ const Correspondences = () => {
               </div>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Herb Safety & Disclaimer
             </h3>
-            <div className='space-y-3 text-sm text-zinc-300'>
+            <div className='space-y-3 text-sm text-content-secondary'>
               <p className='leading-relaxed'>
                 The information provided here is for{' '}
                 <strong>magical and spiritual purposes only</strong>. This
                 content is not intended as medical advice, diagnosis, or
                 treatment.
               </p>
-              <div className='p-3 bg-lunary-error-950 border border-lunary-error-700 rounded'>
+              <div className='p-3 bg-layer-deep border border-lunary-error-700 rounded'>
                 <strong className='text-lunary-error-300'>
                   Important Disclaimer:
                 </strong>
@@ -400,18 +404,18 @@ const Correspondences = () => {
                   </li>
                 </ul>
               </div>
-              <p className='text-xs text-zinc-400 italic'>
+              <p className='text-xs text-content-muted italic'>
                 For magical purposes, always use herbs responsibly and with
                 respect for their power. When in doubt about safety, consult a
                 qualified practitioner or avoid use.
               </p>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Wildcrafting Ethics
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               When harvesting wild herbs, follow ethical practices: only take
               what you need, never take more than 10% of a plant population,
               harvest away from roads and pollution, obtain permission on
@@ -424,20 +428,20 @@ const Correspondences = () => {
       {/* Individual Herb Profiles */}
       <section id='individual-herbs' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             Individual Herb Profiles
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Detailed profiles of common magical herbs, including their
             properties, uses, and safety information.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <h3 className='text-lg font-medium text-lunary-success mb-2'>
               Sage
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Properties:</strong> Purification, wisdom, protection,
                 longevity
@@ -461,11 +465,11 @@ const Correspondences = () => {
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <h3 className='text-lg font-medium text-lunary-accent mb-2'>
               Rosemary
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Properties:</strong> Memory, protection, purification,
                 love, mental clarity
@@ -488,11 +492,11 @@ const Correspondences = () => {
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <h3 className='text-lg font-medium text-lunary-success mb-2'>
               Basil
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Properties:</strong> Protection, prosperity, love,
                 peace, exorcism
@@ -515,11 +519,11 @@ const Correspondences = () => {
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <h3 className='text-lg font-medium text-lunary-primary-400 mb-2'>
               Lavender
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Properties:</strong> Peace, sleep, purification,
                 protection, love, healing
@@ -542,11 +546,11 @@ const Correspondences = () => {
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <h3 className='text-lg font-medium text-lunary-rose mb-2'>
               Cinnamon
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Properties:</strong> Prosperity, protection, love,
                 success, passion, psychic ability
@@ -570,9 +574,9 @@ const Correspondences = () => {
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <h3 className='text-lg font-medium text-lunary-rose mb-2'>Rose</h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Properties:</strong> Love, beauty, healing, protection,
                 psychic ability, heart chakra
@@ -595,11 +599,11 @@ const Correspondences = () => {
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <h3 className='text-lg font-medium text-lunary-success mb-2'>
               Mint
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Properties:</strong> Prosperity, protection, healing,
                 travel, communication, money
@@ -622,11 +626,11 @@ const Correspondences = () => {
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <h3 className='text-lg font-medium text-lunary-accent mb-2'>
               Chamomile
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Properties:</strong> Peace, sleep, healing, protection,
                 prosperity, purification
@@ -649,11 +653,11 @@ const Correspondences = () => {
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <h3 className='text-lg font-medium text-lunary-primary-400 mb-2'>
               Mugwort
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Properties:</strong> Psychic ability, dreams,
                 protection, astral travel, divination
@@ -678,11 +682,11 @@ const Correspondences = () => {
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <h3 className='text-lg font-medium text-lunary-success mb-2'>
               Thyme
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Properties:</strong> Courage, purification, health,
                 sleep, psychic ability, healing
@@ -705,11 +709,11 @@ const Correspondences = () => {
             </div>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <h3 className='text-lg font-medium text-lunary-secondary mb-2'>
               Eucalyptus
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 <strong>Properties:</strong> Healing, protection, purification,
                 clarity, spiritual cleansing
@@ -737,37 +741,37 @@ const Correspondences = () => {
 
       {/* FAQ */}
       <section id='faq' className='space-y-6'>
-        <h2 className='text-xl font-medium text-zinc-100'>
+        <h2 className='text-xl font-medium text-content-primary'>
           Frequently Asked Questions
         </h2>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               How do I store herbs?
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               Store dried herbs in airtight containers away from light, heat,
               and moisture. Glass jars with tight lids work best. Label with
               name and date. Most herbs keep potency for 1-2 years when stored
               properly.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Can I grow my own magical herbs?
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               Yes! Many magical herbs are easy to grow. Start with common
               varieties like basil, rosemary, mint, and sage. These are hardy,
               fast-growing, and versatile. Consider your climate and growing
               space. Even a windowsill herb garden works for small spaces.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               What's the difference between culinary and magical herbs?
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               Many herbs serve both purposes. Culinary herbs are safe for
               consumption and often used in cooking magic. Magical herbs are
               used for their energetic properties and correspondences. Most
@@ -779,44 +783,44 @@ const Correspondences = () => {
       </section>
 
       {/* Related Topics Section */}
-      <section className='mt-12 pt-8 border-t border-zinc-800/50'>
-        <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+      <section className='mt-12 pt-8 border-t border-stroke-subtle/50'>
+        <h2 className='text-xl font-medium text-content-primary mb-4'>
           Related Topics
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           <Link
             href='/grimoire/candle-magic/colors'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Candle Color Meanings
           </Link>
           <Link
             href='/grimoire/spells'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Spells & Rituals
           </Link>
           <Link
             href='/grimoire/crystals'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Crystal Correspondences
           </Link>
           <Link
             href='/grimoire/moon'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Moon & Timing
           </Link>
           <Link
             href='/grimoire/astronomy/planets'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Planetary Influences
           </Link>
           <Link
             href='/grimoire/numerology'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Number Correspondences
           </Link>

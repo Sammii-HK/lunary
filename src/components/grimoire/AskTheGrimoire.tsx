@@ -51,19 +51,19 @@ const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
 };
 
 const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
-  zodiac: 'bg-lunary-primary-900 text-lunary-accent-300',
-  planet: 'bg-lunary-accent-900 text-lunary-accent-300',
-  tarot: 'bg-lunary-rose-900 text-lunary-rose-300',
-  crystal: 'bg-lunary-secondary-900 text-lunary-secondary-300',
-  ritual: 'bg-lunary-primary-900 text-lunary-primary-300',
-  concept: 'bg-lunary-success-900 text-lunary-success-300',
-  horoscope: 'bg-lunary-primary-900 text-lunary-primary-300',
+  zodiac: 'bg-layer-base text-content-brand-accent',
+  planet: 'bg-layer-base text-content-brand-accent',
+  tarot: 'bg-layer-base text-lunary-rose-300',
+  crystal: 'bg-layer-base text-content-brand-secondary',
+  ritual: 'bg-layer-base text-content-brand',
+  concept: 'bg-layer-base text-lunary-success-300',
+  horoscope: 'bg-layer-base text-content-brand',
   'chinese-zodiac': 'bg-red-500/20 text-red-300',
-  season: 'bg-lunary-rose-900 text-lunary-rose-300',
-  numerology: 'bg-lunary-secondary-900 text-lunary-secondary-300',
+  season: 'bg-layer-base text-lunary-rose-300',
+  numerology: 'bg-layer-base text-content-brand-secondary',
   birthday: 'bg-lunary-highlight-900 text-lunary-highlight-300',
   compatibility: 'bg-lunary-highlight-900 text-lunary-highlight-300',
-  glossary: 'bg-lunary-secondary-900 text-lunary-secondary-300',
+  glossary: 'bg-layer-base text-content-brand-secondary',
   archetype: 'bg-purple-500/20 text-purple-300',
 };
 
@@ -242,8 +242,8 @@ export function AskTheGrimoire({
               transition-all duration-300
               ${
                 isAIMode
-                  ? 'bg-gradient-to-r from-lunary-primary to-lunary-secondary text-white shadow-lg shadow-lunary-primary-700'
-                  : 'bg-zinc-800/60 text-zinc-400 hover:text-white hover:bg-zinc-700/60'
+                  ? 'bg-gradient-to-r from-lunary-primary to-lunary-secondary text-content-primary shadow-lg shadow-lunary-primary-700'
+                  : 'bg-surface-card/60 text-content-muted hover:text-content-primary hover:bg-surface-overlay/60'
               }
             `}
             title={
@@ -288,10 +288,10 @@ export function AskTheGrimoire({
           }
           className={`
             w-full pl-12 pr-12 py-4 
-            bg-black/40 backdrop-blur-xl
+            bg-surface-base/40 backdrop-blur-xl
             border ${isAIMode ? 'border-lunary-secondary-600' : 'border-lunary-primary-700'}
             rounded-2xl
-            text-white placeholder:text-lunary-accent-300/50
+            text-content-primary placeholder:text-content-brand-accent/50
             focus:outline-none focus:ring-2 ${isAIMode ? 'focus:ring-lunary-secondary-700 focus:border-lunary-secondary-700' : 'focus:ring-lunary-primary-9500 focus:border-lunary-primary-9500'}
             transition-all duration-300
             ${variant === 'hero' ? 'text-lg' : 'text-base'}
@@ -310,7 +310,7 @@ export function AskTheGrimoire({
               setIsOpen(false);
               inputRef.current?.focus();
             }}
-            className='absolute inset-y-0 right-0 flex items-center pr-4 text-lunary-accent-600 hover:text-lunary-accent-300 transition-colors'
+            className='absolute inset-y-0 right-0 flex items-center pr-4 text-lunary-accent-600 hover:text-content-brand-accent transition-colors'
             aria-label='Clear search'
           >
             <X className='h-5 w-5' />
@@ -326,7 +326,7 @@ export function AskTheGrimoire({
           role='listbox'
           className='
             absolute top-full left-0 right-0 mt-2 
-            bg-black/90 backdrop-blur-xl
+            bg-surface-base/90 backdrop-blur-xl
             border border-lunary-primary-700 
             rounded-2xl
             shadow-2xl shadow-lunary-primary-950
@@ -370,8 +370,8 @@ export function AskTheGrimoire({
                   transition-colors duration-150
                   ${
                     index === selectedIndex
-                      ? 'bg-lunary-primary-900'
-                      : 'hover:bg-lunary-primary-950'
+                      ? 'bg-layer-base'
+                      : 'hover:bg-layer-deep'
                   }
                 `}
                 onClick={() => setIsOpen(false)}
@@ -388,7 +388,7 @@ export function AskTheGrimoire({
 
                 <div className='flex-1 min-w-0'>
                   <div className='flex items-center gap-2'>
-                    <span className='font-medium text-white truncate'>
+                    <span className='font-medium text-content-primary truncate'>
                       {result.title}
                     </span>
                     <span
@@ -400,7 +400,7 @@ export function AskTheGrimoire({
                       {result.category}
                     </span>
                   </div>
-                  <p className='text-sm text-lunary-accent-300/70 line-clamp-2 mt-0.5'>
+                  <p className='text-sm text-content-brand-accent/70 line-clamp-2 mt-0.5'>
                     {result.summary}
                   </p>
                 </div>
@@ -411,12 +411,12 @@ export function AskTheGrimoire({
           </div>
 
           {/* Footer */}
-          <div className='p-3 border-t border-lunary-primary-800 bg-lunary-primary-950'>
+          <div className='p-3 border-t border-lunary-primary-800 bg-layer-deep'>
             <NavParamLink
               href={`/grimoire/search?q=${encodeURIComponent(query)}`}
               className='
                 flex items-center justify-center gap-2
-                text-sm text-lunary-accent-300 hover:text-white
+                text-sm text-content-brand-accent hover:text-content-primary
                 transition-colors
               '
               onClick={() => setIsOpen(false)}
@@ -433,7 +433,7 @@ export function AskTheGrimoire({
         <div
           className='
             absolute top-full left-0 right-0 mt-2 
-            bg-black/90 backdrop-blur-xl
+            bg-surface-base/90 backdrop-blur-xl
             border border-lunary-primary-700 
             rounded-2xl
             p-6
@@ -442,7 +442,7 @@ export function AskTheGrimoire({
           '
         >
           <Sparkles className='h-8 w-8 text-lunary-accent-700 mx-auto mb-3' />
-          <p className='text-lunary-accent-300/70'>
+          <p className='text-content-brand-accent/70'>
             No cosmic insights found for &quot;{query}&quot;
           </p>
           <p className='text-sm text-lunary-accent-700 mt-1'>

@@ -202,10 +202,10 @@ By converting your full name to numbers and reducing to a single digit (or Maste
         <NumerologyCalculator type='expression' />
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Core Expression Numbers (1-9)
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Each core number reveals unique talents and the way you naturally
             express yourself. Click on your number to explore its full meaning.
           </p>
@@ -217,18 +217,20 @@ By converting your full name to numbers and reducing to a single digit (or Maste
                 <Link
                   key={number}
                   href={`/grimoire/numerology/expression/${number}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                  className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
                 >
                   <div className='flex items-center gap-3 mb-3'>
                     <span className='text-2xl font-light text-lunary-primary-400'>
                       {number}
                     </span>
-                    <span className='text-zinc-400 text-sm'>Expression</span>
+                    <span className='text-content-muted text-sm'>
+                      Expression
+                    </span>
                   </div>
-                  <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-2'>
+                  <h3 className='font-medium text-content-primary group-hover:text-content-brand transition-colors mb-2'>
                     {data.meaning}
                   </h3>
-                  <p className='text-sm text-zinc-400 line-clamp-2'>
+                  <p className='text-sm text-content-muted line-clamp-2'>
                     {data.talents[0]}
                   </p>
                 </Link>
@@ -238,10 +240,10 @@ By converting your full name to numbers and reducing to a single digit (or Maste
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             Master Expression Numbers
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Master Numbers (11, 22, 33) in your Expression indicate
             extraordinary potential and heightened abilities, along with greater
             responsibility to use your gifts.
@@ -264,10 +266,10 @@ By converting your full name to numbers and reducing to a single digit (or Maste
                       Master
                     </span>
                   </div>
-                  <h3 className='font-medium text-zinc-100 group-hover:text-amber-300 transition-colors mb-2'>
+                  <h3 className='font-medium text-content-primary group-hover:text-amber-300 transition-colors mb-2'>
                     {data.meaning}
                   </h3>
-                  <p className='text-sm text-zinc-400 line-clamp-2'>
+                  <p className='text-sm text-content-muted line-clamp-2'>
                     {data.talents[0]}
                   </p>
                 </Link>
@@ -276,22 +278,26 @@ By converting your full name to numbers and reducing to a single digit (or Maste
           </div>
         </section>
 
-        <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <section className='mb-12 bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-4'>
             Example Calculation
           </h2>
-          <div className='space-y-4 text-zinc-300'>
+          <div className='space-y-4 text-content-secondary'>
             <p>
               <strong>Name:</strong> JOHN DAVID SMITH
             </p>
-            <div className='bg-zinc-800/50 p-4 rounded-lg font-mono text-sm'>
-              <p className='text-zinc-400 mb-2'>Convert each letter:</p>
+            <div className='bg-surface-card/50 p-4 rounded-lg font-mono text-sm'>
+              <p className='text-content-muted mb-2'>Convert each letter:</p>
               <p>J=1, O=6, H=8, N=5 → 1+6+8+5 = 20</p>
               <p>D=4, A=1, V=4, I=9, D=4 → 4+1+4+9+4 = 22</p>
               <p>S=1, M=4, I=9, T=2, H=8 → 1+4+9+2+8 = 24</p>
-              <p className='mt-2 text-zinc-400'>Total: 20 + 22 + 24 = 66</p>
-              <p className='text-zinc-400'>Reduce: 6 + 6 = 12 → 1 + 2 = 3</p>
-              <p className='mt-2 text-lunary-primary-300'>
+              <p className='mt-2 text-content-muted'>
+                Total: 20 + 22 + 24 = 66
+              </p>
+              <p className='text-content-muted'>
+                Reduce: 6 + 6 = 12 → 1 + 2 = 3
+              </p>
+              <p className='mt-2 text-content-brand'>
                 Expression Number: 3 (The Communicator)
               </p>
             </div>

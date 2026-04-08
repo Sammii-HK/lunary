@@ -163,27 +163,27 @@ export default function UsersAdminPage() {
   };
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-white'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       <div className='container mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-10 max-w-2xl space-y-10'>
         {/* Unverified users */}
         <section>
           <div className='mb-4'>
             <h1 className='text-2xl font-semibold'>Unverified users</h1>
-            <p className='text-sm text-zinc-400 mt-1'>
+            <p className='text-sm text-content-muted mt-1'>
               Users who signed up but never received a verification email.
             </p>
           </div>
 
           {unverifiedLoading ? (
-            <p className='text-sm text-zinc-500'>Loading…</p>
+            <p className='text-sm text-content-muted'>Loading…</p>
           ) : unverified.length === 0 && !bulkResults ? (
-            <p className='text-sm text-zinc-500'>No unverified users.</p>
+            <p className='text-sm text-content-muted'>No unverified users.</p>
           ) : (
             <>
               {unverified.length > 0 && (
-                <div className='bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4'>
-                  <div className='flex items-center justify-between px-4 py-3 border-b border-zinc-800'>
-                    <label className='flex items-center gap-2 text-sm text-zinc-400 cursor-pointer select-none'>
+                <div className='bg-surface-elevated border border-stroke-subtle rounded-xl overflow-hidden mb-4'>
+                  <div className='flex items-center justify-between px-4 py-3 border-b border-stroke-subtle'>
+                    <label className='flex items-center gap-2 text-sm text-content-muted cursor-pointer select-none'>
                       <input
                         type='checkbox'
                         checked={
@@ -209,7 +209,7 @@ export default function UsersAdminPage() {
                   {unverified.map((u) => (
                     <label
                       key={u.id}
-                      className='flex items-center gap-3 px-4 py-3 border-b border-zinc-800/60 last:border-0 cursor-pointer hover:bg-zinc-800/40 transition-colors'
+                      className='flex items-center gap-3 px-4 py-3 border-b border-stroke-subtle/60 last:border-0 cursor-pointer hover:bg-surface-card/40 transition-colors'
                     >
                       <input
                         type='checkbox'
@@ -221,11 +221,11 @@ export default function UsersAdminPage() {
                         <p className='text-sm font-medium truncate'>
                           {u.name || '(no name)'}
                         </p>
-                        <p className='text-xs text-zinc-400 truncate'>
+                        <p className='text-xs text-content-muted truncate'>
                           {u.email}
                         </p>
                       </div>
-                      <span className='shrink-0 text-xs text-zinc-500'>
+                      <span className='shrink-0 text-xs text-content-muted'>
                         {new Date(u.createdAt).toLocaleDateString('en-GB', {
                           day: 'numeric',
                           month: 'short',
@@ -259,13 +259,13 @@ export default function UsersAdminPage() {
           )}
         </section>
 
-        <hr className='border-zinc-800' />
+        <hr className='border-stroke-subtle' />
 
         {/* Single user lookup */}
         <section>
           <div className='mb-4'>
             <h2 className='text-lg font-semibold'>Look up a user</h2>
-            <p className='text-sm text-zinc-400 mt-1'>
+            <p className='text-sm text-content-muted mt-1'>
               Find a specific user, manually verify their address, or resend
               their email.
             </p>
@@ -278,12 +278,12 @@ export default function UsersAdminPage() {
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && lookup()}
               placeholder='user@example.com'
-              className='flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500'
+              className='flex-1 bg-surface-elevated border border-stroke-default rounded-lg px-4 py-2.5 text-sm text-content-primary placeholder-zinc-500 focus:outline-none focus:border-stroke-strong'
             />
             <button
               onClick={lookup}
               disabled={loading || !email.trim()}
-              className='px-4 py-2.5 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors'
+              className='px-4 py-2.5 bg-surface-overlay hover:bg-surface-overlay disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors'
             >
               {loading ? 'Looking up…' : 'Look up'}
             </button>
@@ -303,13 +303,15 @@ export default function UsersAdminPage() {
 
           {result && (
             <div className='mt-4 space-y-4'>
-              <div className='bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3'>
+              <div className='bg-surface-elevated border border-stroke-subtle rounded-xl p-5 space-y-3'>
                 <div className='flex items-start justify-between gap-4'>
                   <div>
                     <p className='font-medium'>
                       {result.user.name || '(no name)'}
                     </p>
-                    <p className='text-sm text-zinc-400'>{result.user.email}</p>
+                    <p className='text-sm text-content-muted'>
+                      {result.user.email}
+                    </p>
                   </div>
                   <span
                     className={`shrink-0 text-xs px-2.5 py-1 rounded-full font-medium ${
@@ -321,7 +323,7 @@ export default function UsersAdminPage() {
                     {result.user.emailVerified ? 'Verified' : 'Unverified'}
                   </span>
                 </div>
-                <div className='text-xs text-zinc-500 space-y-1'>
+                <div className='text-xs text-content-muted space-y-1'>
                   <p>ID: {result.user.id}</p>
                   <p>
                     Created:{' '}
@@ -367,7 +369,7 @@ export default function UsersAdminPage() {
                 <button
                   onClick={() => doAction('resend')}
                   disabled={actionLoading !== null}
-                  className='flex-1 py-2.5 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors'
+                  className='flex-1 py-2.5 bg-surface-overlay hover:bg-surface-overlay disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors'
                 >
                   {actionLoading === 'resend'
                     ? 'Sending…'

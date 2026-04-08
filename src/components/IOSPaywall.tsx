@@ -208,23 +208,23 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
                 onClick={() => setSelected(config.key)}
                 className={`w-full text-left rounded-xl border p-3.5 transition-colors ${
                   isSelected
-                    ? 'border-lunary-primary bg-zinc-950'
-                    : 'border-zinc-800 bg-zinc-950 hover:border-zinc-600'
+                    ? 'border-lunary-primary bg-surface-base'
+                    : 'border-stroke-subtle bg-surface-base hover:border-stroke-strong'
                 } ${config.popular ? 'pt-5' : ''}`}
               >
                 {/* Name row */}
                 <div className='flex items-center justify-between gap-2'>
                   <div className='flex items-center gap-2 min-w-0'>
-                    <span className='text-sm font-medium text-white truncate'>
+                    <span className='text-sm font-medium text-content-primary truncate'>
                       {config.name}
                     </span>
                     {config.badge && (
-                      <span className='text-xs px-1.5 py-0.5 rounded-full bg-gray-700 text-gray-300 shrink-0'>
+                      <span className='text-xs px-1.5 py-0.5 rounded-full bg-surface-overlay text-gray-300 shrink-0'>
                         {config.badge}
                       </span>
                     )}
                   </div>
-                  <span className='text-sm font-semibold text-white shrink-0'>
+                  <span className='text-sm font-semibold text-content-primary shrink-0'>
                     {getPriceLabel(pkg, config)}
                   </span>
                 </div>
@@ -258,7 +258,7 @@ export function IOSPaywall({ onSuccess, onDismiss }: IOSPaywallProps) {
 
               {/* Expandable feature list */}
               {isExpanded && (
-                <div className='mx-1 mb-1 px-3 py-2.5 rounded-b-xl bg-zinc-900 border border-t-0 border-zinc-800 space-y-1.5'>
+                <div className='mx-1 mb-1 px-3 py-2.5 rounded-b-xl bg-surface-elevated border border-t-0 border-stroke-subtle space-y-1.5'>
                   {config.features.map((feature, i) => (
                     <div key={i} className='flex items-start gap-2'>
                       <Check className='w-3 h-3 text-lunary-primary-400 mt-0.5 shrink-0' />

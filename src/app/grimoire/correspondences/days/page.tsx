@@ -245,10 +245,10 @@ Banishing, protection, boundaries, endings, long-term goals. Use black candles.
         faqs={faqs}
       >
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-2xl font-medium text-content-primary mb-6'>
             All Days of the Week
           </h2>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Click on any day to explore its full correspondences, magical uses,
             and practical applications.
           </p>
@@ -257,13 +257,13 @@ Banishing, protection, boundaries, endings, long-term goals. Use black candles.
               <Link
                 key={name}
                 href={`/grimoire/correspondences/days/${stringToKebabCase(name)}`}
-                className='group flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-zinc-600 transition-all'
+                className='group flex items-center justify-between rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-stroke-strong transition-all'
               >
                 <div>
-                  <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
+                  <h3 className='font-medium text-content-primary group-hover:text-content-brand transition-colors'>
                     {name}
                   </h3>
-                  <p className='text-sm text-zinc-400'>
+                  <p className='text-sm text-content-muted'>
                     {data.correspondences.slice(0, 3).join(' • ')}
                   </p>
                 </div>
@@ -271,7 +271,7 @@ Banishing, protection, boundaries, endings, long-term goals. Use black candles.
                   <p className='text-sm text-lunary-primary-400'>
                     {data.planet}
                   </p>
-                  <p className='text-xs text-zinc-400'>{data.element}</p>
+                  <p className='text-xs text-content-muted'>{data.element}</p>
                 </div>
               </Link>
             ))}

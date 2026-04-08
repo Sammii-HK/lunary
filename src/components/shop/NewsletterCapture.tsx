@@ -45,8 +45,8 @@ export function NewsletterCapture({ initialEmail }: NewsletterCaptureProps) {
 
   if (status === 'success') {
     return (
-      <div className='bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6 text-center'>
-        <p className='text-lunary-primary-300 font-medium text-lg'>
+      <div className='bg-surface-card/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6 text-center'>
+        <p className='text-content-brand font-medium text-lg'>
           You&apos;re in ✦
         </p>
         <p className='text-slate-400 text-sm mt-1'>
@@ -57,8 +57,8 @@ export function NewsletterCapture({ initialEmail }: NewsletterCaptureProps) {
   }
 
   return (
-    <div className='bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6'>
-      <h2 className='text-lg font-medium text-white mb-1'>
+    <div className='bg-surface-card/50 backdrop-blur-sm rounded-xl border border-slate-700 p-6'>
+      <h2 className='text-lg font-medium text-content-primary mb-1'>
         Want more ritual content?
       </h2>
       <p className='text-slate-400 text-sm mb-5'>
@@ -72,7 +72,7 @@ export function NewsletterCapture({ initialEmail }: NewsletterCaptureProps) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder='your@email.com'
           required
-          className='flex-1 rounded-lg bg-slate-900 border border-slate-600 text-white placeholder-slate-500 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
+          className='flex-1 rounded-lg bg-surface-elevated border border-slate-600 text-white placeholder-slate-500 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
         />
         <Button type='submit' variant='lunary' disabled={status === 'loading'}>
           {status === 'loading' ? 'Subscribing…' : 'Subscribe'}

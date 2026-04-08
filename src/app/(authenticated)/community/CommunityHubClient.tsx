@@ -141,8 +141,8 @@ export default function CommunityHubClient() {
       <div className='min-h-screen p-4'>
         <div className='max-w-2xl mx-auto'>
           <div className='flex items-center gap-2 py-4'>
-            <Loader2 className='w-5 h-5 text-zinc-500 animate-spin' />
-            <span className='text-sm text-zinc-500'>
+            <Loader2 className='w-5 h-5 text-content-muted animate-spin' />
+            <span className='text-sm text-content-muted'>
               Loading your spaces...
             </span>
           </div>
@@ -159,7 +159,7 @@ export default function CommunityHubClient() {
         <header className='pt-4 pb-2'>
           <Link
             href='/explore'
-            className='inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors mb-3'
+            className='inline-flex items-center gap-1 text-xs text-content-muted hover:text-content-secondary transition-colors mb-3'
           >
             <ArrowLeft className='w-3.5 h-3.5' />
             Explore
@@ -167,7 +167,7 @@ export default function CommunityHubClient() {
           <Heading variant='h1' as='h1'>
             Community
           </Heading>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-sm text-content-muted'>
             Connect with your cosmic community
           </p>
         </header>
@@ -176,9 +176,9 @@ export default function CommunityHubClient() {
         {needsBirthChart && (
           <Link
             href='/app/birth-chart'
-            className='block rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-950/60 to-zinc-900 p-4 hover:border-lunary-primary-500 transition-colors'
+            className='block rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-layer-deep/60 to-surface-elevated p-4 hover:border-lunary-primary-500 transition-colors'
           >
-            <p className='text-sm text-zinc-200'>
+            <p className='text-sm text-content-primary'>
               Generate your birth chart to join your Sun, Moon, and Rising sign
               spaces
             </p>
@@ -190,10 +190,12 @@ export default function CommunityHubClient() {
 
         {/* No spaces yet */}
         {!hasSpaces && !needsBirthChart && (
-          <div className='rounded-xl border border-zinc-800/50 bg-zinc-900/50 p-4 text-center'>
-            <Users className='w-6 h-6 text-zinc-500 mx-auto mb-2' />
-            <p className='text-sm text-zinc-400'>No community spaces yet</p>
-            <p className='text-xs text-zinc-500 mt-1'>
+          <div className='rounded-xl border border-stroke-subtle/50 bg-surface-elevated/50 p-4 text-center'>
+            <Users className='w-6 h-6 text-content-muted mx-auto mb-2' />
+            <p className='text-sm text-content-muted'>
+              No community spaces yet
+            </p>
+            <p className='text-xs text-content-muted mt-1'>
               Set up your birth chart to get auto-joined to your spaces
             </p>
           </div>
@@ -208,7 +210,7 @@ export default function CommunityHubClient() {
 
           return (
             <section key={type}>
-              <h2 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+              <h2 className='text-xs font-medium text-content-muted uppercase tracking-wide mb-3'>
                 {typeLabel}
               </h2>
               <div className='space-y-2'>
@@ -230,9 +232,9 @@ function SpaceCard({ space }: { space: CommunitySpace }) {
   return (
     <Link
       href={`/community/${space.slug}`}
-      className='flex items-center gap-3 p-3 rounded-lg border border-lunary-primary-700/50 bg-lunary-primary-950/20 hover:border-lunary-primary-600 transition-colors group'
+      className='flex items-center gap-3 p-3 rounded-lg border border-lunary-primary-700/50 bg-layer-deep/20 hover:border-lunary-primary-600 transition-colors group'
     >
-      <div className='w-10 h-10 rounded-lg flex items-center justify-center bg-lunary-primary-900/30 flex-shrink-0'>
+      <div className='w-10 h-10 rounded-lg flex items-center justify-center bg-layer-base/30 flex-shrink-0'>
         {symbol ? (
           <span className='font-astro text-lg text-lunary-primary-400'>
             {symbol.chars}
@@ -243,16 +245,16 @@ function SpaceCard({ space }: { space: CommunitySpace }) {
       </div>
 
       <div className='flex-1 min-w-0'>
-        <span className='text-sm font-medium text-zinc-200 group-hover:text-zinc-100 truncate block'>
+        <span className='text-sm font-medium text-content-primary group-hover:text-content-primary truncate block'>
           {space.title}
         </span>
-        <div className='flex items-center gap-3 text-[11px] text-zinc-500 mt-0.5'>
+        <div className='flex items-center gap-3 text-[11px] text-content-muted mt-0.5'>
           <span>{space.memberCount} members</span>
           <span>{space.postCount} posts</span>
         </div>
       </div>
 
-      <ChevronRight className='w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors flex-shrink-0' />
+      <ChevronRight className='w-4 h-4 text-content-muted group-hover:text-content-muted transition-colors flex-shrink-0' />
     </Link>
   );
 }

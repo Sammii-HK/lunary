@@ -45,11 +45,11 @@ export function AIPromptCard({
   const getPromptTypeColor = () => {
     switch (prompt.promptType) {
       case 'daily':
-        return 'border-lunary-primary/40 bg-lunary-primary-950/20';
+        return 'border-lunary-primary/40 bg-layer-deep/20';
       case 'weekly':
-        return 'border-lunary-secondary-600 bg-lunary-secondary-950';
+        return 'border-lunary-secondary-600 bg-layer-deep';
       default:
-        return 'border-zinc-700/60 bg-zinc-900/40';
+        return 'border-stroke-default/60 bg-surface-elevated/40';
     }
   };
 
@@ -58,7 +58,7 @@ export function AIPromptCard({
       className={`rounded-2xl border transition-all duration-200 ${
         prompt.isNew
           ? `${getPromptTypeColor()} shadow-lg shadow-lunary-primary/10 animate-pulse`
-          : 'border-zinc-700/60 bg-zinc-900/40'
+          : 'border-stroke-default/60 bg-surface-elevated/40'
       }`}
     >
       <button
@@ -69,8 +69,8 @@ export function AIPromptCard({
           <span
             className={`text-xs font-medium px-2 py-1 rounded-full ${
               prompt.promptType === 'daily'
-                ? 'bg-lunary-primary-500/20 text-lunary-primary-300'
-                : 'bg-lunary-secondary-900 text-lunary-secondary-300'
+                ? 'bg-lunary-primary-500/20 text-content-brand'
+                : 'bg-layer-base text-content-brand-secondary'
             }`}
           >
             {getPromptTypeLabel()}
@@ -80,13 +80,13 @@ export function AIPromptCard({
               New
             </span>
           )}
-          <span className='text-sm text-zinc-300 truncate flex-1'>
+          <span className='text-sm text-content-secondary truncate flex-1'>
             {prompt.promptText.substring(0, 60)}
             {prompt.promptText.length > 60 ? '...' : ''}
           </span>
         </div>
         <svg
-          className={`w-4 h-4 text-zinc-400 transition-transform ${
+          className={`w-4 h-4 text-content-muted transition-transform ${
             isExpanded ? 'rotate-180' : ''
           }`}
           fill='none'
@@ -103,8 +103,8 @@ export function AIPromptCard({
       </button>
 
       {isExpanded && (
-        <div className='px-4 pb-4 border-t border-zinc-700/40 pt-3 space-y-3'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
+        <div className='px-4 pb-4 border-t border-stroke-default/40 pt-3 space-y-3'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
             {prompt.promptText}
           </p>
           <button

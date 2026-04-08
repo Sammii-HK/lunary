@@ -78,7 +78,7 @@ export default function HousesIndexPage() {
   });
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       {renderJsonLd(housesListSchema)}
       {renderJsonLd(
         createBreadcrumbSchema([
@@ -95,7 +95,7 @@ export default function HousesIndexPage() {
         />
 
         <h1 className='text-4xl font-light mb-4'>The 12 Astrological Houses</h1>
-        <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
+        <p className='text-lg text-content-muted mb-8 max-w-3xl'>
           The houses in astrology represent different areas of life, from self
           and identity to spirituality and the unconscious. Each house is a
           stage where planets perform their roles.
@@ -107,19 +107,21 @@ export default function HousesIndexPage() {
             return (
               <div
                 key={house}
-                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'
+                className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'
               >
                 <div className='flex items-center gap-3 mb-3'>
                   <span className='text-3xl font-light text-lunary-primary-400'>
                     {house}
                   </span>
-                  <span className='text-xs text-zinc-400'>
+                  <span className='text-xs text-content-muted'>
                     Natural Ruler: {data.naturalSign}
                   </span>
                 </div>
                 <h3 className='text-lg font-medium mb-1'>{data.name}</h3>
-                <p className='text-sm text-zinc-400 mb-2'>{data.lifeArea}</p>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-sm text-content-muted mb-2'>
+                  {data.lifeArea}
+                </p>
+                <p className='text-xs text-content-muted'>
                   {data.keywords.join(' • ')}
                 </p>
               </div>
@@ -133,26 +135,26 @@ export default function HousesIndexPage() {
             <Link
               key={planet}
               href={`/grimoire/houses/${planet}`}
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all text-center group'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all text-center group'
             >
-              <div className='font-medium group-hover:text-lunary-primary-300 transition-colors'>
+              <div className='font-medium group-hover:text-content-brand transition-colors'>
                 {PLANET_HOUSE_DISPLAY[planet]}
               </div>
-              <div className='text-xs text-zinc-400'>in houses</div>
+              <div className='text-xs text-content-muted'>in houses</div>
             </Link>
           ))}
         </div>
 
-        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
+        <div className='p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
+          <h2 className='text-xl font-medium text-content-brand mb-2'>
             Discover Your House Placements
           </h2>
-          <p className='text-zinc-300 mb-4'>
+          <p className='text-content-secondary mb-4'>
             Find out which planets are in which houses in your natal chart.
           </p>
           <Link
             href='/birth-chart'
-            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+            className='inline-flex px-6 py-3 rounded-lg bg-layer-base/20 hover:bg-layer-base/30 border border-lunary-primary-700 text-content-brand font-medium transition-colors'
           >
             View Your Birth Chart
           </Link>

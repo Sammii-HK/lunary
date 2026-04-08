@@ -13,7 +13,7 @@ export default function PWADebugFullPage() {
   return (
     <div className='p-4 space-y-4'>
       <h1 className='text-2xl font-bold'>PWA Debug Tools</h1>
-      <p className='text-sm text-zinc-400'>
+      <p className='text-sm text-content-muted'>
         All PWA debugging components on one page
       </p>
       <div className='space-y-4'>

@@ -145,20 +145,20 @@ export default async function YearSeasonsPage({
           <div className='flex justify-center mb-4'>
             <Sun className='w-16 h-16 text-amber-400' />
           </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
+          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-content-primary mb-4'>
             Zodiac Seasons {year}
           </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
+          <p className='text-lg text-content-muted max-w-2xl mx-auto'>
             Each year cycles through 12 zodiac seasons as the Sun moves through
             the signs. Explore the themes and energy of each season.
           </p>
         </div>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-10'>
+          <h2 className='text-xl font-medium text-content-primary mb-3'>
             Astrological Seasons
           </h2>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             As the Sun transits through each zodiac sign, it brings that
             sign&apos;s energy to everyone, regardless of your natal chart.
             These periods influence collective mood, focus, and opportunities.
@@ -171,38 +171,42 @@ export default async function YearSeasonsPage({
               <Link
                 key={season.slug}
                 href={`/grimoire/seasons/${year}/${season.slug}`}
-                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-amber-700/50 transition-all'
+                className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-5 hover:bg-surface-elevated/50 hover:border-amber-700/50 transition-all'
               >
-                <h3 className='font-medium text-zinc-100 group-hover:text-amber-300 transition-colors mb-2'>
+                <h3 className='font-medium text-content-primary group-hover:text-amber-300 transition-colors mb-2'>
                   {season.name}
                 </h3>
-                <p className='text-sm text-zinc-400 mb-1'>{season.dates}</p>
-                <p className='text-xs text-zinc-400'>{season.element} Season</p>
+                <p className='text-sm text-content-muted mb-1'>
+                  {season.dates}
+                </p>
+                <p className='text-xs text-content-muted'>
+                  {season.element} Season
+                </p>
               </Link>
             ))}
           </div>
         </section>
 
-        <div className='border-t border-zinc-800 pt-8'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-4'>
+        <div className='border-t border-stroke-subtle pt-8'>
+          <h3 className='text-lg font-medium text-content-primary mb-4'>
             Related Resources
           </h3>
           <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/seasons'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               All Seasons
             </Link>
             <Link
               href='/grimoire/zodiac'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Zodiac Signs
             </Link>
             <Link
               href='/grimoire/transits'
-              className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
+              className='px-4 py-2 rounded-lg bg-surface-card text-content-secondary hover:bg-surface-overlay transition-colors'
             >
               Transits
             </Link>

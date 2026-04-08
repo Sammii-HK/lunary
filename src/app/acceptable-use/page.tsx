@@ -14,19 +14,21 @@ export default function AcceptableUsePolicyPage() {
   const lastUpdated = 'February 12, 2026';
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
+    <div className='min-h-screen bg-surface-base text-content-primary flex flex-col pt-16'>
       <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='mb-8'>
-          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-content-primary mb-4'>
             Acceptable Use Policy
           </h1>
-          <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
+          <p className='text-sm text-content-muted'>
+            Last Updated: {lastUpdated}
+          </p>
         </div>
 
         <div className='prose prose-invert prose-zinc max-w-none space-y-8'>
           <section>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               This Acceptable Use Policy (&quot;AUP&quot;) governs your use of
               the Lunary website, application, and services (collectively, the
               &quot;Service&quot;) provided by Lunar Computing, Inc.
@@ -34,13 +36,13 @@ export default function AcceptableUsePolicyPage() {
               &quot;our&quot;). This AUP is part of and incorporated into our{' '}
               <Link
                 href='/terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                className='text-lunary-primary-400 hover:text-content-brand'
               >
                 Terms of Service
               </Link>
               .
             </p>
-            <p className='text-zinc-300 leading-relaxed'>
+            <p className='text-content-secondary leading-relaxed'>
               By using the Service, you agree to comply with this AUP. We may
               update this policy at any time, and continued use of the Service
               after changes constitutes acceptance of the updated policy.
@@ -48,18 +50,18 @@ export default function AcceptableUsePolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               1. Prohibited Activities
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               You agree not to engage in any of the following prohibited
               activities:
             </p>
 
-            <h3 className='text-xl font-medium text-white mb-3'>
+            <h3 className='text-xl font-medium text-content-primary mb-3'>
               1.1 Illegal Activities
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Using the Service for any purpose that violates applicable
                 local, state, national, or international law
@@ -77,10 +79,10 @@ export default function AcceptableUsePolicyPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               1.2 Harmful Content
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Creating, transmitting, or storing content that is hateful,
                 discriminatory, or promotes violence against individuals or
@@ -98,10 +100,10 @@ export default function AcceptableUsePolicyPage() {
               <li>Spreading misinformation or disinformation</li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               1.3 Security Violations
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Attempting to gain unauthorized access to the Service, other
                 accounts, or computer systems
@@ -120,10 +122,10 @@ export default function AcceptableUsePolicyPage() {
               </li>
             </ul>
 
-            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+            <h3 className='text-xl font-medium text-content-primary mb-3 mt-6'>
               1.4 Service Abuse
             </h3>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Using automated scripts, bots, or scrapers to access the Service
                 without authorization
@@ -143,14 +145,14 @@ export default function AcceptableUsePolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               2. AI Chat and Content Guidelines
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               When using our AI-assisted features (including Lunary GPT and chat
               functionalities), you agree to:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Not attempt to manipulate the AI to produce harmful, illegal, or
                 inappropriate content
@@ -173,8 +175,8 @@ export default function AcceptableUsePolicyPage() {
               </li>
             </ul>
 
-            <div className='mt-6 p-4 border border-lunary-accent-700 bg-lunary-accent-950/20 rounded-xl'>
-              <p className='text-zinc-300 text-sm'>
+            <div className='mt-6 p-4 border border-lunary-accent-700 bg-layer-deep/20 rounded-xl'>
+              <p className='text-content-secondary text-sm'>
                 <strong>Note:</strong> AI-generated content may occasionally
                 produce inaccurate or unexpected results. You are responsible
                 for reviewing and using AI content appropriately. Do not rely on
@@ -185,14 +187,14 @@ export default function AcceptableUsePolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               3. Community Spaces
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               When participating in Lunary&apos;s community spaces and Q&amp;A
               features, you agree to:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Treat other community members with respect and kindness</li>
               <li>
                 Not post content that harasses, bullies, intimidates, or targets
@@ -220,7 +222,7 @@ export default function AcceptableUsePolicyPage() {
                 votes
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               Community posts and Q&amp;A content are subject to automated
               content moderation. Questions and answers in Q&amp;A are publicly
               visible. Content that violates these guidelines may be removed
@@ -230,14 +232,14 @@ export default function AcceptableUsePolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               4. Social and Interactive Features
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               When using Lunary&apos;s social features (gifting, compatibility
               invites, friend connections, referrals), you agree to:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Not use gifting to send harassing, threatening, or inappropriate
                 messages to other users
@@ -263,7 +265,7 @@ export default function AcceptableUsePolicyPage() {
                 connections, not commercial exploitation
               </li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               We use automated systems to detect abuse of voting, referral, and
               reward features. Accounts engaging in manipulation may have
               rewards revoked and may be suspended without notice.
@@ -271,10 +273,10 @@ export default function AcceptableUsePolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               5. Account Sharing and Access
             </h2>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 <strong>Personal Use:</strong> Your Lunary account is for your
                 personal use only. You may not share your login credentials with
@@ -299,14 +301,14 @@ export default function AcceptableUsePolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               6. Content You Create
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               You retain ownership of content you create using the Service (such
               as journal entries and notes). However, you agree that:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>
                 Your content must comply with this AUP and our Terms of Service
               </li>
@@ -322,14 +324,14 @@ export default function AcceptableUsePolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               7. Enforcement
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               We reserve the right to investigate and take appropriate action
               against anyone who violates this AUP, including:
             </p>
-            <ul className='list-disc pl-6 text-zinc-300 space-y-2'>
+            <ul className='list-disc pl-6 text-content-secondary space-y-2'>
               <li>Issuing warnings</li>
               <li>
                 Temporarily or permanently suspending or terminating accounts
@@ -340,7 +342,7 @@ export default function AcceptableUsePolicyPage() {
               </li>
               <li>Taking legal action</li>
             </ul>
-            <p className='text-zinc-300 leading-relaxed mt-4'>
+            <p className='text-content-secondary leading-relaxed mt-4'>
               We may take these actions without prior notice and without
               liability to you. Violation of this AUP may also result in the
               termination of your subscription without refund.
@@ -348,19 +350,19 @@ export default function AcceptableUsePolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               8. Reporting Violations
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               If you become aware of any violation of this AUP, please report it
               to us:
             </p>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Report Abuse:</strong>{' '}
                 <a
                   href='mailto:abuse@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   abuse@lunary.app
                 </a>
@@ -368,7 +370,7 @@ export default function AcceptableUsePolicyPage() {
                 <strong>General Support:</strong>{' '}
                 <a
                   href='mailto:support@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   support@lunary.app
                 </a>
@@ -377,21 +379,21 @@ export default function AcceptableUsePolicyPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-semibold text-white mb-4'>
+            <h2 className='text-2xl font-semibold text-content-primary mb-4'>
               9. Contact Us
             </h2>
-            <p className='text-zinc-300 leading-relaxed mb-4'>
+            <p className='text-content-secondary leading-relaxed mb-4'>
               If you have questions about this Acceptable Use Policy, please
               contact us:
             </p>
-            <div className='p-4 border border-zinc-800 bg-zinc-900/30 rounded-xl'>
-              <p className='text-zinc-300'>
+            <div className='p-4 border border-stroke-subtle bg-surface-elevated/30 rounded-xl'>
+              <p className='text-content-secondary'>
                 <strong>Lunar Computing, Inc.</strong>
                 <br />
                 Email:{' '}
                 <a
                   href='mailto:legal@lunary.app'
-                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                  className='text-lunary-primary-400 hover:text-content-brand'
                 >
                   legal@lunary.app
                 </a>
@@ -399,26 +401,26 @@ export default function AcceptableUsePolicyPage() {
             </div>
           </section>
 
-          <section className='pt-8 border-t border-zinc-800'>
-            <h2 className='text-lg font-medium text-white mb-4'>
+          <section className='pt-8 border-t border-stroke-subtle'>
+            <h2 className='text-lg font-medium text-content-primary mb-4'>
               Related Policies
             </h2>
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/terms'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Terms of Service
               </Link>
               <Link
                 href='/privacy'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 Privacy Policy
               </Link>
               <Link
                 href='/dmca'
-                className='text-lunary-primary-400 hover:text-lunary-primary-300 text-sm'
+                className='text-lunary-primary-400 hover:text-content-brand text-sm'
               >
                 DMCA Policy
               </Link>

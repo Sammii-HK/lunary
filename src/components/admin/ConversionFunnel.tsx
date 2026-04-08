@@ -22,7 +22,7 @@ export function ConversionFunnel({
 }: ConversionFunnelProps) {
   if (!stages.length) {
     return (
-      <div className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 text-sm text-zinc-400'>
+      <div className='rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-4 text-sm text-content-muted'>
         No funnel data available for this range.
       </div>
     );
@@ -41,11 +41,13 @@ export function ConversionFunnel({
 
         return (
           <div key={stage.label} className='space-y-2'>
-            <div className='flex items-center justify-between text-sm text-zinc-400'>
-              <span className='font-medium text-zinc-100'>{stage.label}</span>
+            <div className='flex items-center justify-between text-sm text-content-muted'>
+              <span className='font-medium text-content-primary'>
+                {stage.label}
+              </span>
               <span>{stage.value.toLocaleString()}</span>
             </div>
-            <div className='relative h-10 rounded-xl bg-zinc-800/60'>
+            <div className='relative h-10 rounded-xl bg-surface-card/60'>
               <div
                 className={cn(
                   'absolute inset-y-0 rounded-xl bg-gradient-to-r from-lunary-primary-500/70 to-violet-500/80 transition-all',
@@ -53,16 +55,16 @@ export function ConversionFunnel({
                 style={{ width: `${widthPercent}%` }}
               />
               {dropOff && (
-                <div className='absolute inset-y-0 right-3 flex items-center text-xs text-zinc-100'>
+                <div className='absolute inset-y-0 right-3 flex items-center text-xs text-content-primary'>
                   -{dropOff.drop_off_rate.toFixed(1)}%
                 </div>
               )}
             </div>
             {stage.subtitle && (
-              <div className='text-xs text-zinc-400'>{stage.subtitle}</div>
+              <div className='text-xs text-content-muted'>{stage.subtitle}</div>
             )}
             {index < stages.length - 1 && (
-              <div className='flex items-center justify-center text-xs text-zinc-600'>
+              <div className='flex items-center justify-center text-xs text-content-muted'>
                 ↓
               </div>
             )}

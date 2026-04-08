@@ -5,6 +5,7 @@ import { ChevronDown, Sparkles } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
 import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface TarotSeasonReadingProps {
   trendAnalysis: TrendAnalysis | null;
@@ -195,42 +196,45 @@ export function TarotSeasonReading({
 
   return (
     <div
-      className={`rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden ${className}`}
+      className={`rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 overflow-hidden ${className}`}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className='w-full flex items-center justify-between p-4 text-left hover:bg-zinc-800/30 transition-colors'
+        className='w-full flex items-center justify-between p-4 text-left hover:bg-surface-card/30 transition-colors'
       >
         <div className='flex items-center gap-3'>
-          <div className='p-2 rounded-lg bg-lunary-primary-900/30'>
+          <div className='p-2 rounded-lg bg-layer-base/30'>
             <Sparkles className='w-4 h-4 text-lunary-primary-400' />
           </div>
           <div>
-            <p className='text-sm font-medium text-zinc-100'>
+            <p className='text-sm font-medium text-content-primary'>
               Your Tarot Season: {seasonData.name}
             </p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-content-muted'>
               {period}-day pattern reading
             </p>
           </div>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-zinc-500 transition-transform ${
+          className={`w-4 h-4 text-content-muted transition-transform ${
             isExpanded ? 'rotate-180' : ''
           }`}
         />
       </button>
 
-      {isExpanded && (
+      <Collapse isOpen={isExpanded}>
         <div className='px-4 pb-4 space-y-4'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
+          <p className='text-sm text-content-secondary leading-relaxed'>
             {seasonData.summary}
           </p>
 
           {hasTarotPatternsAccess && seasonData.paragraphs.length > 0 && (
             <div className='space-y-3'>
               {seasonData.paragraphs.map((paragraph, i) => (
-                <p key={i} className='text-sm text-zinc-300 leading-relaxed'>
+                <p
+                  key={i}
+                  className='text-sm text-content-secondary leading-relaxed'
+                >
                   {paragraph}
                 </p>
               ))}
@@ -238,15 +242,15 @@ export function TarotSeasonReading({
           )}
 
           {hasTarotPatternsAccess && seasonData.focusBullets.length > 0 && (
-            <div className='pt-3 border-t border-zinc-800/50'>
-              <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2'>
+            <div className='pt-3 border-t border-stroke-subtle/50'>
+              <p className='text-xs font-medium text-content-muted uppercase tracking-wide mb-2'>
                 What to focus on
               </p>
               <ul className='space-y-1.5'>
                 {seasonData.focusBullets.map((bullet, i) => (
                   <li
                     key={i}
-                    className='text-sm text-zinc-300 flex items-start gap-2'
+                    className='text-sm text-content-secondary flex items-start gap-2'
                   >
                     <span className='text-lunary-primary-400 mt-0.5'>•</span>
                     {bullet}
@@ -257,12 +261,12 @@ export function TarotSeasonReading({
           )}
 
           {!hasTarotPatternsAccess && (
-            <p className='text-xs text-zinc-500'>
+            <p className='text-xs text-content-muted'>
               Upgrade for detailed narrative and focus guidance.
             </p>
           )}
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

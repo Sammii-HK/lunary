@@ -271,20 +271,20 @@ export function NumerologyProfileCalculator({
 
   return (
     <NumerologyProfileCalculatorContext.Provider value={value}>
-      <div className='bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 space-y-6'>
+      <div className='bg-surface-elevated/40 border border-stroke-subtle rounded-2xl p-6 space-y-6'>
         <div className='space-y-5'>
           <div>
-            <h3 className='text-xl font-medium text-zinc-100'>
+            <h3 className='text-xl font-medium text-content-primary'>
               Try it with your data
             </h3>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Enter your name and birth date to preview these numerology
               numbers.
             </p>
           </div>
           <div className='grid gap-4 md:grid-cols-2'>
             <div className='space-y-2'>
-              <label className='block text-sm font-medium text-zinc-300'>
+              <label className='block text-sm font-medium text-content-secondary'>
                 {INPUT_INFO[0].label}
               </label>
               <input
@@ -292,21 +292,25 @@ export function NumerologyProfileCalculator({
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
                 placeholder={INPUT_INFO[0].placeholder}
-                className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
+                className='w-full px-4 py-3 bg-surface-card border border-stroke-default rounded-lg text-content-primary placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
               />
-              <p className='text-xs text-zinc-500'>{INPUT_INFO[0].helper}</p>
+              <p className='text-xs text-content-muted'>
+                {INPUT_INFO[0].helper}
+              </p>
             </div>
             <div className='space-y-2'>
-              <label className='block text-sm font-medium text-zinc-300'>
+              <label className='block text-sm font-medium text-content-secondary'>
                 {INPUT_INFO[1].label}
               </label>
               <input
                 type='date'
                 value={birthDate}
                 onChange={(event) => setBirthDate(event.target.value)}
-                className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
+                className='w-full px-4 py-3 bg-surface-card border border-stroke-default rounded-lg text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
               />
-              <p className='text-xs text-zinc-500'>{INPUT_INFO[1].helper}</p>
+              <p className='text-xs text-content-muted'>
+                {INPUT_INFO[1].helper}
+              </p>
             </div>
           </div>
         </div>
@@ -315,7 +319,7 @@ export function NumerologyProfileCalculator({
             <button
               type='button'
               onClick={shareAllNumbers}
-              className='inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-100 transition hover:border-lunary-primary-500 hover:text-white'
+              className='inline-flex items-center gap-2 rounded-full border border-stroke-default px-4 py-2 text-sm font-semibold text-content-primary transition hover:border-lunary-primary-500 hover:text-content-primary'
             >
               <Share2 className='h-4 w-4' />
               Share all numbers
@@ -343,17 +347,17 @@ export function NumerologyProfileCalculator({
               <div className='w-full'>
                 <div className='flex items-start justify-between gap-3'>
                   <div className='space-y-2'>
-                    <div className='text-xs font-semibold uppercase tracking-wide text-zinc-500'>
+                    <div className='text-xs font-semibold uppercase tracking-wide text-content-muted'>
                       {card.description}
                     </div>
                     <div>
-                      <p className='text-2xl font-light text-zinc-200'>
+                      <p className='text-2xl font-light text-content-primary'>
                         {card.title}
                       </p>
-                      <p className='text-5xl font-light text-lunary-primary-300 mt-2'>
+                      <p className='text-5xl font-light text-content-brand mt-2'>
                         {value > 0 ? value : '--'}
                       </p>
-                      <p className='text-sm text-zinc-400 mt-1'>
+                      <p className='text-sm text-content-muted mt-1'>
                         {value > 0 ? meaning : card.helper}
                       </p>
                     </div>
@@ -374,7 +378,7 @@ export function NumerologyProfileCalculator({
                           shareNumber(card.title, value, meaning);
                         }
                       }}
-                      className='flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/80 text-zinc-300 transition hover:border-lunary-primary-500 hover:text-white'
+                      className='flex h-8 w-8 items-center justify-center rounded-full border border-stroke-default bg-surface-elevated/80 text-content-secondary transition hover:border-lunary-primary-500 hover:text-content-primary'
                     >
                       <Share2 className='h-4 w-4' />
                     </span>
@@ -406,7 +410,7 @@ export function NumerologyProfileCalculator({
                         : undefined,
                     })
                   }
-                  className='border border-zinc-800 rounded-2xl p-4 bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 text-left hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400'
+                  className='border border-stroke-subtle rounded-2xl p-4 bg-gradient-to-br from-surface-elevated/80 to-surface-elevated/40 text-left hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400'
                 >
                   {cardBody}
                 </button>
@@ -416,7 +420,7 @@ export function NumerologyProfileCalculator({
             return (
               <div
                 key={card.id}
-                className='border border-zinc-800 rounded-2xl p-4 bg-gradient-to-br from-zinc-900/80 to-zinc-900/40'
+                className='border border-stroke-subtle rounded-2xl p-4 bg-gradient-to-br from-surface-elevated/80 to-surface-elevated/40'
               >
                 {cardBody}
               </div>

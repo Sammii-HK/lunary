@@ -147,7 +147,8 @@ export async function POST(request: NextRequest) {
 
       sent++;
     } catch (error) {
-      console.error(`[Broadcast] Failed for ${user.email}:`, error);
+      const safeEmail = String(user.email).replace(/[\r\n\x00-\x1F\x7F]/g, '');
+      console.error(`[Broadcast] Failed for ${safeEmail}:`, error);
       failed++;
     }
   }

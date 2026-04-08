@@ -2,6 +2,7 @@
 
 import { ParsedMarkdown } from '@/utils/markdown';
 import { Heading } from '@/components/ui/Heading';
+import { Collapse } from '@/components/ui/Collapse';
 
 interface FAQAccordionProps {
   question: string;
@@ -17,21 +18,21 @@ export function FAQAccordion({
   onToggle,
 }: FAQAccordionProps) {
   return (
-    <div className='border border-zinc-800 rounded-lg overflow-hidden bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'>
+    <div className='border border-stroke-subtle rounded-lg overflow-hidden bg-surface-elevated/30 hover:bg-surface-elevated/50 transition-colors'>
       <button
         onClick={onToggle}
-        className='w-full flex items-center justify-between text-left px-5 py-4 hover:bg-zinc-800/30 transition-colors'
+        className='w-full flex items-center justify-between text-left px-5 py-4 hover:bg-surface-card/30 transition-colors'
         aria-expanded={isOpen}
       >
         <Heading
           as='h2'
           variant='h3'
-          className='text-lunary-secondary-200 pr-4'
+          className='text-content-brand-secondary pr-4'
         >
           {question}
         </Heading>
         <svg
-          className={`w-5 h-5 text-zinc-400 flex-shrink-0 transition-transform ${
+          className={`w-5 h-5 text-content-muted flex-shrink-0 transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`}
           fill='none'
@@ -46,13 +47,13 @@ export function FAQAccordion({
           />
         </svg>
       </button>
-      {isOpen && (
-        <div className='px-5 pb-5 text-zinc-300 text-sm leading-relaxed border-t border-zinc-800'>
+      <Collapse isOpen={isOpen}>
+        <div className='px-5 pb-5 text-content-secondary text-sm leading-relaxed border-t border-stroke-subtle'>
           <div className='pt-4'>
             <ParsedMarkdown content={answer} />
           </div>
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

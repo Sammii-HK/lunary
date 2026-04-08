@@ -138,7 +138,7 @@ Understanding the moon's phases helps you align your spiritual practice, rituals
           <Heading as='h2' variant='h2'>
             Full Moons {year}
           </Heading>
-          <p className='text-sm text-zinc-400 mb-6'>
+          <p className='text-sm text-content-muted mb-6'>
             Dates and times reflect your browser’s current timezone.
           </p>
           <MoonPhaseEventList events={fullMoons} year={year} type='full' />
@@ -148,7 +148,7 @@ Understanding the moon's phases helps you align your spiritual practice, rituals
           <Heading as='h2' variant='h2'>
             New Moons {year}
           </Heading>
-          <p className='text-sm text-zinc-400 mb-6'>
+          <p className='text-sm text-content-muted mb-6'>
             Times adjust to your browser’s timezone so every intention is on
             point.
           </p>

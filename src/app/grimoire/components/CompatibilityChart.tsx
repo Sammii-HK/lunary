@@ -996,10 +996,10 @@ export default function CompatibilityChart() {
   };
 
   const getScoreBgColor = (score: number): string => {
-    if (score >= 85) return 'bg-lunary-success-900 border-lunary-success-600';
-    if (score >= 70) return 'bg-lunary-accent-900 border-lunary-accent-600';
-    if (score >= 55) return 'bg-lunary-rose-900 border-lunary-rose-600';
-    return 'bg-lunary-error-900 border-lunary-error-700';
+    if (score >= 85) return 'bg-layer-base border-lunary-success-600';
+    if (score >= 70) return 'bg-layer-base border-lunary-accent-600';
+    if (score >= 55) return 'bg-layer-base border-lunary-rose-600';
+    return 'bg-layer-base border-lunary-error-700';
   };
 
   const result = getCompatibilityResult();
@@ -1008,10 +1008,10 @@ export default function CompatibilityChart() {
   return (
     <article className='space-y-8'>
       <header className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+        <h1 className='text-2xl md:text-3xl font-light text-content-primary mb-2'>
           Compatibility Chart
         </h1>
-        <p className='text-sm text-zinc-400 leading-relaxed'>
+        <p className='text-sm text-content-muted leading-relaxed'>
           Explore compatibility between zodiac signs, elements, moon phases, and
           crystal categories. Discover how different cosmic energies interact,
           complement, and challenge each other. Select two items from the same
@@ -1022,19 +1022,19 @@ export default function CompatibilityChart() {
 
       <section id='compatibility-tool' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             Select Compatibility Type
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Choose the type of compatibility you want to explore. Each type
             provides unique insights into how different energies interact.
           </p>
         </div>
 
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+        <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
           <label
             htmlFor='compatibility-type-selector'
-            className='block text-sm font-medium text-zinc-300 mb-2'
+            className='block text-sm font-medium text-content-secondary mb-2'
           >
             Compatibility Type
           </label>
@@ -1047,7 +1047,7 @@ export default function CompatibilityChart() {
               setSelection2('');
             }}
             aria-label='Select compatibility type'
-            className='w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
+            className='w-full px-4 py-2 bg-surface-card border border-stroke-default rounded-md text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
           >
             <option value='zodiac'>Zodiac Signs</option>
             <option value='element'>Elements</option>
@@ -1057,20 +1057,20 @@ export default function CompatibilityChart() {
         </div>
 
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             Compare Two Items
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Select two items from the chosen category to see their compatibility
             analysis.
           </p>
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <label
               htmlFor='selection-1'
-              className='block text-sm font-medium text-zinc-300 mb-2'
+              className='block text-sm font-medium text-content-secondary mb-2'
             >
               First Selection
             </label>
@@ -1079,7 +1079,7 @@ export default function CompatibilityChart() {
               value={selection1}
               onChange={(e) => setSelection1(e.target.value)}
               aria-label='Select first item for compatibility comparison'
-              className='w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
+              className='w-full px-4 py-2 bg-surface-card border border-stroke-default rounded-md text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
             >
               <option value=''>Select...</option>
               {options.map((option) => (
@@ -1090,10 +1090,10 @@ export default function CompatibilityChart() {
             </select>
           </div>
 
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
             <label
               htmlFor='selection-2'
-              className='block text-sm font-medium text-zinc-300 mb-2'
+              className='block text-sm font-medium text-content-secondary mb-2'
             >
               Second Selection
             </label>
@@ -1102,7 +1102,7 @@ export default function CompatibilityChart() {
               value={selection2}
               onChange={(e) => setSelection2(e.target.value)}
               aria-label='Select second item for compatibility comparison'
-              className='w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
+              className='w-full px-4 py-2 bg-surface-card border border-stroke-default rounded-md text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent'
             >
               <option value=''>Select...</option>
               {options.map((option) => (
@@ -1122,7 +1122,7 @@ export default function CompatibilityChart() {
             aria-atomic='true'
           >
             <div className='flex items-center justify-between mb-4'>
-              <h2 className='text-xl font-medium text-zinc-100'>
+              <h2 className='text-xl font-medium text-content-primary'>
                 Compatibility: {selection1} & {selection2}
               </h2>
               <div
@@ -1132,14 +1132,16 @@ export default function CompatibilityChart() {
               </div>
             </div>
 
-            <p className='text-sm text-zinc-300 mb-4'>{result.description}</p>
+            <p className='text-sm text-content-secondary mb-4'>
+              {result.description}
+            </p>
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-4'>
               <div>
                 <h3 className='text-sm font-medium text-lunary-success mb-2'>
                   Strengths
                 </h3>
-                <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1'>
+                <ul className='list-disc list-inside text-sm text-content-secondary space-y-1'>
                   {result.strengths.map((strength, index) => (
                     <li key={index}>{strength}</li>
                   ))}
@@ -1150,7 +1152,7 @@ export default function CompatibilityChart() {
                 <h3 className='text-sm font-medium text-lunary-rose mb-2'>
                   Challenges
                 </h3>
-                <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1'>
+                <ul className='list-disc list-inside text-sm text-content-secondary space-y-1'>
                   {result.challenges.map((challenge, index) => (
                     <li key={index}>{challenge}</li>
                   ))}
@@ -1161,11 +1163,11 @@ export default function CompatibilityChart() {
         )}
 
         <section id='about-compatibility' className='space-y-6'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h2 className='text-xl font-medium text-content-primary mb-2'>
               Understanding Compatibility Charts
             </h2>
-            <div className='space-y-4 text-sm text-zinc-300 leading-relaxed'>
+            <div className='space-y-4 text-sm text-content-secondary leading-relaxed'>
               <p>
                 Compatibility charts provide insights into how different
                 energies, elements, and cosmic forces interact. These tools help
@@ -1173,7 +1175,7 @@ export default function CompatibilityChart() {
                 phases, and crystal categories.
               </p>
               <div>
-                <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+                <h3 className='text-lg font-medium text-content-brand mb-2'>
                   How to Use This Tool
                 </h3>
                 <ol className='list-decimal list-inside space-y-2 ml-2'>
@@ -1192,7 +1194,7 @@ export default function CompatibilityChart() {
                 </ol>
               </div>
               <div>
-                <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+                <h3 className='text-lg font-medium text-content-brand mb-2'>
                   Interpreting Scores
                 </h3>
                 <ul className='list-disc list-inside space-y-2 ml-2'>
@@ -1214,7 +1216,7 @@ export default function CompatibilityChart() {
                   </li>
                 </ul>
               </div>
-              <p className='text-zinc-400 italic'>
+              <p className='text-content-muted italic'>
                 Remember: Compatibility is just one factor in relationships and
                 connections. Individual charts, personal growth, communication,
                 and mutual respect play equally important roles. Use these

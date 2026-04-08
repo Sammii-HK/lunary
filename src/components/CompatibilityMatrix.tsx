@@ -32,8 +32,8 @@ export function CompatibilityMatrix({ signs }: CompatibilityMatrixProps) {
                   key={key}
                   className={`p-2 text-xs font-medium transition-colors ${
                     hoveredCell?.col === colIndex
-                      ? 'text-lunary-rose-300 bg-lunary-rose-900/30'
-                      : 'text-zinc-400'
+                      ? 'text-lunary-rose-300 bg-layer-base/30'
+                      : 'text-content-muted'
                   }`}
                 >
                   {sign.name.slice(0, 3)}
@@ -47,8 +47,8 @@ export function CompatibilityMatrix({ signs }: CompatibilityMatrixProps) {
                 <td
                   className={`p-2 text-xs font-medium transition-colors ${
                     hoveredCell?.row === rowIndex
-                      ? 'text-lunary-rose-300 bg-lunary-rose-900/30'
-                      : 'text-zinc-400'
+                      ? 'text-lunary-rose-300 bg-layer-base/30'
+                      : 'text-content-muted'
                   }`}
                 >
                   {sign1.name.slice(0, 3)}
@@ -73,8 +73,8 @@ export function CompatibilityMatrix({ signs }: CompatibilityMatrixProps) {
                           isHoveredCell
                             ? 'bg-lunary-rose-700 border-lunary-rose-500'
                             : isHighlighted
-                              ? 'bg-lunary-rose-900/50 border-lunary-rose-700/50'
-                              : 'bg-zinc-800 border-transparent hover:bg-lunary-rose-800 hover:border-lunary-rose-600'
+                              ? 'bg-layer-base/50 border-lunary-rose-700/50'
+                              : 'bg-surface-card border-transparent hover:bg-lunary-rose-800 hover:border-lunary-rose-600'
                         }`}
                         onMouseEnter={() =>
                           setHoveredCell({ row: rowIndex, col: colIndex })
@@ -84,10 +84,10 @@ export function CompatibilityMatrix({ signs }: CompatibilityMatrixProps) {
                         <Heart
                           className={`h-3 w-3 transition-colors ${
                             isHoveredCell
-                              ? 'text-white'
+                              ? 'text-content-primary'
                               : isHighlighted
                                 ? 'text-lunary-rose-400'
-                                : 'text-zinc-600 hover:text-lunary-rose'
+                                : 'text-content-muted hover:text-lunary-rose'
                           }`}
                         />
                       </Link>

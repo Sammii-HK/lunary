@@ -427,16 +427,16 @@ function PlanetInHousesPage({ planet }: { planet: HousePlanet }) {
                   <Link
                     key={house}
                     href={`/grimoire/houses/${planet}/${house}`}
-                    className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                    className='group rounded-xl border border-stroke-subtle bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
                   >
                     <Heading
                       as='h2'
                       variant='h2'
-                      className='text-lunary-accent-200'
+                      className='text-content-brand-accent'
                     >
                       {getOrdinalSuffix(house)} House
                     </Heading>
-                    <p className='text-xs text-zinc-400 mt-1'>
+                    <p className='text-xs text-content-muted mt-1'>
                       {houseData.lifeArea}
                     </p>
                   </Link>

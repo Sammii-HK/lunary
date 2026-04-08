@@ -30,7 +30,7 @@ export function UpgradeNudge({
     return (
       <Link
         href='/pricing?nav=app'
-        className={`flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-lunary-accent-300 transition-colors ${className}`}
+        className={`flex items-center gap-2 text-sm text-lunary-accent-400 hover:text-content-brand-accent transition-colors ${className}`}
       >
         <Sparkles className='w-3.5 h-3.5' />
         <span>{message}</span>
@@ -40,19 +40,19 @@ export function UpgradeNudge({
 
   return (
     <div
-      className={`relative flex items-center gap-3 px-4 py-3 bg-lunary-primary-950 border border-lunary-primary-800 rounded-lg ${className}`}
+      className={`relative flex items-center gap-3 px-4 py-3 bg-layer-deep border border-lunary-primary-800 rounded-lg ${className}`}
     >
       <Sparkles className='w-4 h-4 text-lunary-accent-600 flex-shrink-0' />
       <Link
         href='/pricing?nav=app'
-        className='flex-1 text-sm text-zinc-400 hover:text-zinc-300 transition-colors'
+        className='flex-1 text-sm text-content-muted hover:text-content-secondary transition-colors'
       >
         {message}
       </Link>
       {dismissible && (
         <button
           onClick={() => setDismissed(true)}
-          className='text-zinc-600 hover:text-zinc-400 transition-colors'
+          className='text-content-muted hover:text-content-muted transition-colors'
           aria-label='Dismiss'
         >
           <X className='w-4 h-4' />
@@ -77,15 +77,15 @@ export function UpgradeNudgeBanner({
 
   return (
     <div
-      className={`flex items-center justify-between gap-4 px-4 py-3 bg-gradient-to-r from-lunary-primary-950 to-transparent border border-lunary-primary-800 rounded-lg ${className}`}
+      className={`flex items-center justify-between gap-4 px-4 py-3 bg-gradient-to-r from-layer-deep to-transparent border border-lunary-primary-800 rounded-lg ${className}`}
     >
       <div className='flex items-center gap-3'>
         <Sparkles className='w-4 h-4 text-lunary-accent-400' />
-        <span className='text-sm text-zinc-300'>
+        <span className='text-sm text-content-secondary'>
           {feature} available with{' '}
           <Link
             href='/pricing?nav=app'
-            className='text-lunary-accent hover:text-lunary-accent-300'
+            className='text-lunary-accent hover:text-content-brand-accent'
           >
             Lunary+
           </Link>
@@ -93,7 +93,7 @@ export function UpgradeNudgeBanner({
       </div>
       <button
         onClick={() => setDismissed(true)}
-        className='text-zinc-600 hover:text-zinc-400 transition-colors'
+        className='text-content-muted hover:text-content-muted transition-colors'
         aria-label='Dismiss'
       >
         <X className='w-4 h-4' />
@@ -114,7 +114,7 @@ export function UpgradeNudgeInline({
   return (
     <Link
       href='/pricing?nav=app'
-      className={`inline-flex items-center gap-1.5 text-xs text-lunary-accent-500 hover:text-lunary-accent-300 transition-colors ${className}`}
+      className={`inline-flex items-center gap-1.5 text-xs text-lunary-accent-500 hover:text-content-brand-accent transition-colors ${className}`}
     >
       <Sparkles className='w-3 h-3' />
       <span>{message}</span>
@@ -135,16 +135,20 @@ export function UpgradeNudgeOverlay({
 }: UpgradeNudgeOverlayProps) {
   return (
     <div
-      className={`absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/80 backdrop-blur-sm rounded-lg ${className}`}
+      className={`absolute inset-0 flex flex-col items-center justify-center bg-surface-elevated/80 backdrop-blur-sm rounded-lg ${className}`}
     >
       <Sparkles className='w-6 h-6 text-lunary-accent-400 mb-3' />
-      <p className='text-sm text-zinc-300 text-center mb-1'>{feature}</p>
+      <p className='text-sm text-content-secondary text-center mb-1'>
+        {feature}
+      </p>
       {description && (
-        <p className='text-xs text-zinc-400 text-center mb-3'>{description}</p>
+        <p className='text-xs text-content-muted text-center mb-3'>
+          {description}
+        </p>
       )}
       <Link
         href='/pricing?nav=app'
-        className='px-4 py-2 text-sm bg-lunary-primary-900 text-lunary-accent-300 rounded-lg hover:bg-lunary-primary-800 transition-colors'
+        className='px-4 py-2 text-sm bg-layer-base text-content-brand-accent rounded-lg hover:bg-layer-raised transition-colors'
       >
         Upgrade to Lunary+
       </Link>

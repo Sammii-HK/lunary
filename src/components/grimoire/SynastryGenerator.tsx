@@ -45,16 +45,16 @@ function PersonForm({
   hasUserChart?: boolean;
 }) {
   return (
-    <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+    <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
       <div className='flex items-center justify-between mb-4'>
-        <h3 className='text-lg font-medium text-zinc-100'>{label}</h3>
+        <h3 className='text-lg font-medium text-content-primary'>{label}</h3>
         {hasUserChart && onUseMyChart && (
           <button
             onClick={onUseMyChart}
             className={`text-sm px-3 py-1 rounded-lg transition-colors ${
               useMyChart
                 ? 'bg-lunary-primary-600 text-white'
-                : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                : 'bg-surface-card text-content-muted hover:bg-surface-overlay'
             }`}
           >
             {useMyChart ? '✓ Using My Chart' : 'Use My Chart'}
@@ -63,28 +63,30 @@ function PersonForm({
       </div>
       <div className='space-y-3'>
         <div>
-          <label className='block text-sm text-zinc-400 mb-1'>Name</label>
+          <label className='block text-sm text-content-muted mb-1'>Name</label>
           <input
             type='text'
             value={person.name}
             onChange={(e) => onChange({ ...person, name: e.target.value })}
             placeholder='Enter name'
             disabled={useMyChart}
-            className='w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary disabled:opacity-50'
+            className='w-full px-3 py-2 rounded-lg bg-surface-card border border-stroke-default text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary disabled:opacity-50'
           />
         </div>
         <div>
-          <label className='block text-sm text-zinc-400 mb-1'>Birth Date</label>
+          <label className='block text-sm text-content-muted mb-1'>
+            Birth Date
+          </label>
           <input
             type='date'
             value={person.birthDate}
             onChange={(e) => onChange({ ...person, birthDate: e.target.value })}
             disabled={useMyChart}
-            className='w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-lunary-primary disabled:opacity-50'
+            className='w-full px-3 py-2 rounded-lg bg-surface-card border border-stroke-default text-content-primary focus:outline-none focus:border-lunary-primary disabled:opacity-50'
           />
         </div>
         <div>
-          <label className='block text-sm text-zinc-400 mb-1'>
+          <label className='block text-sm text-content-muted mb-1'>
             Birth Time (optional)
           </label>
           <input
@@ -92,11 +94,11 @@ function PersonForm({
             value={person.birthTime}
             onChange={(e) => onChange({ ...person, birthTime: e.target.value })}
             disabled={useMyChart}
-            className='w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-lunary-primary disabled:opacity-50'
+            className='w-full px-3 py-2 rounded-lg bg-surface-card border border-stroke-default text-content-primary focus:outline-none focus:border-lunary-primary disabled:opacity-50'
           />
         </div>
         <div>
-          <label className='block text-sm text-zinc-400 mb-1'>
+          <label className='block text-sm text-content-muted mb-1'>
             Birth Location (lat, lng)
           </label>
           <input
@@ -107,7 +109,7 @@ function PersonForm({
             }
             placeholder='e.g. 51.5074, -0.1278'
             disabled={useMyChart}
-            className='w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary disabled:opacity-50'
+            className='w-full px-3 py-2 rounded-lg bg-surface-card border border-stroke-default text-content-primary placeholder-zinc-500 focus:outline-none focus:border-lunary-primary disabled:opacity-50'
           />
         </div>
       </div>
@@ -117,9 +119,9 @@ function PersonForm({
 
 function AspectCard({ aspect }: { aspect: SynastryAspect }) {
   const natureColors = {
-    harmonious: 'border-lunary-success-600 bg-lunary-success-900/10',
-    challenging: 'border-lunary-error-600 bg-lunary-error-900/10',
-    neutral: 'border-lunary-accent-600 bg-lunary-accent-900/10',
+    harmonious: 'border-lunary-success-600 bg-layer-base/10',
+    challenging: 'border-lunary-error-600 bg-layer-base/10',
+    neutral: 'border-lunary-accent-600 bg-layer-base/10',
   };
 
   return (
@@ -127,17 +129,19 @@ function AspectCard({ aspect }: { aspect: SynastryAspect }) {
       <div className='flex items-center justify-between mb-2'>
         <div className='flex items-center gap-2'>
           <span className='text-lg'>{aspect.aspectSymbol}</span>
-          <span className='font-medium text-zinc-100'>
+          <span className='font-medium text-content-primary'>
             {aspect.personA.planet} {aspect.aspect} {aspect.personB.planet}
           </span>
         </div>
-        <span className='text-xs text-zinc-400'>orb: {aspect.orb}°</span>
+        <span className='text-xs text-content-muted'>orb: {aspect.orb}°</span>
       </div>
-      <p className='text-sm text-zinc-400'>
+      <p className='text-sm text-content-muted'>
         {aspect.personA.planet} in {aspect.personA.sign} {aspect.aspect}{' '}
         {aspect.personB.planet} in {aspect.personB.sign}
       </p>
-      <p className='text-sm text-zinc-300 mt-2'>{aspect.description}</p>
+      <p className='text-sm text-content-secondary mt-2'>
+        {aspect.description}
+      </p>
     </div>
   );
 }
@@ -150,14 +154,14 @@ function CompatibilityScore({ score }: { score: number }) {
   };
 
   return (
-    <div className='text-center p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+    <div className='text-center p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
       <div className={`text-5xl font-light ${getScoreColor()}`}>{score}</div>
-      <div className='text-sm text-zinc-400 mt-1'>Compatibility Score</div>
+      <div className='text-sm text-content-muted mt-1'>Compatibility Score</div>
       <div className='flex justify-center gap-1 mt-2'>
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`w-4 h-4 ${i < Math.round(score / 20) ? 'text-lunary-accent fill-lunary-accent' : 'text-zinc-700'}`}
+            className={`w-4 h-4 ${i < Math.round(score / 20) ? 'text-lunary-accent fill-lunary-accent' : 'text-content-muted'}`}
           />
         ))}
       </div>
@@ -255,14 +259,14 @@ export default function SynastryGenerator() {
     return (
       <div className='text-center py-12'>
         <LockIcon className='w-16 h-16 text-lunary-primary-400 mx-auto mb-6' />
-        <p className='text-zinc-400 mb-8 max-w-md mx-auto'>
+        <p className='text-content-muted mb-8 max-w-md mx-auto'>
           Compare two birth charts to discover relationship compatibility,
           strengths, and growth areas. Available for Lunary subscribers.
         </p>
         <SmartTrialButton size='lg' />
         <Link
           href='/grimoire/synastry'
-          className='block mt-4 text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
+          className='block mt-4 text-sm text-lunary-primary-400 hover:text-content-brand'
         >
           Learn about synastry →
         </Link>
@@ -287,7 +291,7 @@ export default function SynastryGenerator() {
         </div>
 
         {error && (
-          <div className='mb-6 p-4 rounded-lg bg-lunary-error-900/20 border border-lunary-error-700 flex items-center gap-3'>
+          <div className='mb-6 p-4 rounded-lg bg-layer-base/20 border border-lunary-error-700 flex items-center gap-3'>
             <AlertTriangle className='w-5 h-5 text-lunary-error' />
             <span className='text-lunary-error-300'>{error}</span>
           </div>
@@ -296,7 +300,7 @@ export default function SynastryGenerator() {
         <button
           onClick={handleCalculate}
           disabled={loading || !personA.birthDate || !personB.birthDate}
-          className='w-full py-4 rounded-lg bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-zinc-800 disabled:text-zinc-400 text-white font-medium transition-colors flex items-center justify-center gap-2'
+          className='w-full py-4 rounded-lg bg-lunary-primary-600 hover:bg-layer-high disabled:bg-surface-card disabled:text-content-muted text-white font-medium transition-colors flex items-center justify-center gap-2'
         >
           {loading ? (
             <>
@@ -317,39 +321,39 @@ export default function SynastryGenerator() {
   // Results
   return (
     <div className='space-y-8'>
-      <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+      <div className='p-6 rounded-lg border border-lunary-primary-700 bg-layer-base/10'>
         <div className='flex items-center gap-3 mb-4'>
           <Heart className='w-6 h-6 text-lunary-rose' />
-          <h2 className='text-xl font-medium text-zinc-100'>
+          <h2 className='text-xl font-medium text-content-primary'>
             {personA.name || 'Person A'} & {personB.name || 'Person B'}
           </h2>
         </div>
-        <p className='text-zinc-300'>{result.summary}</p>
+        <p className='text-content-secondary'>{result.summary}</p>
       </div>
 
       <div className='grid md:grid-cols-3 gap-6'>
         <CompatibilityScore score={result.compatibilityScore} />
 
-        <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+        <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
           <h3 className='text-sm font-medium text-lunary-success mb-3 flex items-center gap-2'>
             <Check className='w-4 h-4' /> Strengths
           </h3>
           <ul className='space-y-2'>
             {result.strengths.map((s, i) => (
-              <li key={i} className='text-sm text-zinc-300'>
+              <li key={i} className='text-sm text-content-secondary'>
                 • {s}
               </li>
             ))}
           </ul>
         </div>
 
-        <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+        <div className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
           <h3 className='text-sm font-medium text-lunary-rose mb-3 flex items-center gap-2'>
             <AlertTriangle className='w-4 h-4' /> Growth Areas
           </h3>
           <ul className='space-y-2'>
             {result.challenges.map((c, i) => (
-              <li key={i} className='text-sm text-zinc-300'>
+              <li key={i} className='text-sm text-content-secondary'>
                 • {c}
               </li>
             ))}
@@ -358,7 +362,7 @@ export default function SynastryGenerator() {
       </div>
 
       <div>
-        <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+        <h2 className='text-xl font-medium text-content-primary mb-4'>
           Synastry Aspects ({result.aspects.length})
         </h2>
         <div className='grid md:grid-cols-2 gap-4'>
@@ -370,7 +374,7 @@ export default function SynastryGenerator() {
 
       <button
         onClick={() => setResult(null)}
-        className='w-full py-3 rounded-lg border border-zinc-700 text-zinc-300 hover:bg-zinc-800 transition-colors'
+        className='w-full py-3 rounded-lg border border-stroke-default text-content-secondary hover:bg-surface-card transition-colors'
       >
         Calculate Another Synastry
       </button>

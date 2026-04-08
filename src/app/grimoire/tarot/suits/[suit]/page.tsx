@@ -178,11 +178,11 @@ When ${suitData.name} cards appear in a reading, they bring attention to ${suitD
         <div className='flex items-baseline justify-between gap-4 flex-wrap'>
           <h2
             id='suit-card-list'
-            className='text-xl md:text-2xl font-medium text-zinc-100'
+            className='text-xl md:text-2xl font-medium text-content-primary'
           >
             {suitData.name} Cards
           </h2>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-sm text-content-muted'>
             {cards.length} cards in this suit
           </p>
         </div>

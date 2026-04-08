@@ -39,11 +39,11 @@ function PreviewCard({ title, url, format, onRefresh }: PreviewCardProps) {
   };
 
   return (
-    <div className='border border-zinc-800 rounded-lg overflow-hidden bg-zinc-900/50'>
-      <div className='p-4 border-b border-zinc-800 flex items-center justify-between'>
+    <div className='border border-stroke-subtle rounded-lg overflow-hidden bg-surface-elevated/50'>
+      <div className='p-4 border-b border-stroke-subtle flex items-center justify-between'>
         <div className='flex-1'>
-          <h3 className='text-lg font-medium text-zinc-100'>{title}</h3>
-          <p className='text-xs text-zinc-500 mt-1'>
+          <h3 className='text-lg font-medium text-content-primary'>{title}</h3>
+          <p className='text-xs text-content-muted mt-1'>
             {dimensions.width} × {dimensions.height}px
           </p>
           {imageError && (
@@ -53,42 +53,42 @@ function PreviewCard({ title, url, format, onRefresh }: PreviewCardProps) {
         <div className='flex gap-2'>
           <button
             onClick={handleRefresh}
-            className='p-2 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded transition-colors'
+            className='p-2 text-content-muted hover:text-content-primary hover:bg-surface-card rounded transition-colors'
             title='Refresh image'
           >
             <RefreshCw className='w-4 h-4' />
           </button>
           <button
             onClick={handleCopy}
-            className='relative p-2 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded transition-colors'
+            className='relative p-2 text-content-muted hover:text-content-primary hover:bg-surface-card rounded transition-colors'
             title='Copy URL'
           >
             <Copy className='w-4 h-4' />
             {copied && (
-              <span className='absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-800 text-zinc-200 text-xs px-2 py-1 rounded whitespace-nowrap'>
+              <span className='absolute -top-8 left-1/2 -translate-x-1/2 bg-surface-card text-content-primary text-xs px-2 py-1 rounded whitespace-nowrap'>
                 Copied!
               </span>
             )}
           </button>
         </div>
       </div>
-      <div className='p-4 bg-zinc-950 flex items-center justify-center min-h-[300px]'>
+      <div className='p-4 bg-surface-base flex items-center justify-center min-h-[300px]'>
         {imageLoading && !imageError && (
-          <div className='text-zinc-500 text-sm'>Loading image...</div>
+          <div className='text-content-muted text-sm'>Loading image...</div>
         )}
         {imageError ? (
           <div className='text-center'>
             <p className='text-red-400 mb-2'>Failed to load</p>
             <button
               onClick={handleRefresh}
-              className='text-xs text-zinc-400 hover:text-zinc-200'
+              className='text-xs text-content-muted hover:text-content-primary'
             >
               Try again
             </button>
           </div>
         ) : (
           <div
-            className='relative bg-zinc-900 border border-zinc-800'
+            className='relative bg-surface-elevated border border-stroke-subtle'
             style={{
               width: format === 'story' ? '216px' : '100%',
               maxWidth: format === 'landscape' ? '600px' : '540px',
@@ -444,19 +444,21 @@ export default function SharePreviewPage() {
   const shares = buildShares();
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 p-8'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-8'>
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='mb-8'>
           <h1 className='text-3xl font-light mb-2'>Share OG Image Preview</h1>
-          <p className='text-zinc-400'>
+          <p className='text-content-muted'>
             Preview all share images across different formats
           </p>
           {loading && (
-            <p className='text-sm text-zinc-500 mt-2'>Loading your data...</p>
+            <p className='text-sm text-content-muted mt-2'>
+              Loading your data...
+            </p>
           )}
           {userData && (
-            <p className='text-sm text-zinc-500 mt-2'>
+            <p className='text-sm text-content-muted mt-2'>
               Showing previews for: {userData.firstName}
             </p>
           )}
@@ -470,7 +472,7 @@ export default function SharePreviewPage() {
               className={`px-4 py-2 rounded-lg transition-colors ${
                 format === 'square'
                   ? 'bg-lunary-primary-600 text-white'
-                  : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                  : 'bg-surface-card text-content-secondary hover:bg-surface-overlay'
               }`}
             >
               Square (1080×1080)
@@ -480,7 +482,7 @@ export default function SharePreviewPage() {
               className={`px-4 py-2 rounded-lg transition-colors ${
                 format === 'landscape'
                   ? 'bg-lunary-primary-600 text-white'
-                  : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                  : 'bg-surface-card text-content-secondary hover:bg-surface-overlay'
               }`}
             >
               Landscape (1200×630)
@@ -490,7 +492,7 @@ export default function SharePreviewPage() {
               className={`px-4 py-2 rounded-lg transition-colors ${
                 format === 'story'
                   ? 'bg-lunary-primary-600 text-white'
-                  : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                  : 'bg-surface-card text-content-secondary hover:bg-surface-overlay'
               }`}
             >
               Story (1080×1920)
@@ -499,7 +501,7 @@ export default function SharePreviewPage() {
 
           <button
             onClick={handleRefreshAll}
-            className='flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg transition-colors'
+            className='flex items-center gap-2 px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg transition-colors'
           >
             <RefreshCw className='w-4 h-4' />
             Refresh All
@@ -520,7 +522,7 @@ export default function SharePreviewPage() {
         </div>
 
         {/* Footer */}
-        <div className='mt-12 pt-8 border-t border-zinc-800 text-center text-sm text-zinc-500'>
+        <div className='mt-12 pt-8 border-t border-stroke-subtle text-center text-sm text-content-muted'>
           <p>
             Admin tool for QA and testing.{' '}
             {userData

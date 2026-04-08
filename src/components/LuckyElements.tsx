@@ -21,21 +21,21 @@ export const LuckyElements = () => {
 
   return (
     <div className='py-3 px-4 border border-stone-800 rounded-md w-full'>
-      <div className='grid grid-cols-2 gap-2 text-xs text-zinc-400'>
+      <div className='grid grid-cols-2 gap-2 text-xs text-content-muted'>
         <div className='border border-stone-800 rounded-md p-2'>
-          <div className='text-zinc-200 mb-1'>Lucky Numbers</div>
+          <div className='text-content-primary mb-1'>Lucky Numbers</div>
           <div>{personalization.numbers.join(' • ')}</div>
         </div>
         <div className='border border-stone-800 rounded-md p-2'>
-          <div className='text-zinc-200 mb-1'>Lucky Colors</div>
+          <div className='text-content-primary mb-1'>Lucky Colors</div>
           <div>{personalization.colors.join(' • ')}</div>
         </div>
         <div className='border border-stone-800 rounded-md p-2'>
-          <div className='text-zinc-200 mb-1'>Element</div>
+          <div className='text-content-primary mb-1'>Element</div>
           <div>{personalization.element}</div>
         </div>
         <div className='border border-stone-800 rounded-md p-2'>
-          <div className='text-zinc-200 mb-1'>Daily Rune</div>
+          <div className='text-content-primary mb-1'>Daily Rune</div>
           <div>{personalization.rune.name}</div>
         </div>
       </div>

@@ -74,22 +74,24 @@ export function RitualTracker() {
   const currentRitual = isMorning ? 'morning' : 'evening';
 
   return (
-    <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/60 p-4 md:p-6'>
+    <div className='rounded-2xl border border-stroke-subtle/60 bg-surface-base/60 p-4 md:p-6'>
       <div className='flex items-center justify-between mb-4'>
         <div className='flex items-center gap-2'>
           <Flame className='w-5 h-5 text-lunary-rose' />
-          <h3 className='text-lg font-semibold text-zinc-100'>Ritual Streak</h3>
+          <h3 className='text-lg font-semibold text-content-primary'>
+            Ritual Streak
+          </h3>
         </div>
         <div className='text-right'>
           <div className='text-2xl font-bold text-lunary-rose'>
             {status.ritualStreak}
           </div>
-          <div className='text-xs text-zinc-400'>days</div>
+          <div className='text-xs text-content-muted'>days</div>
         </div>
       </div>
 
       {status.longestRitualStreak > 0 && (
-        <div className='text-xs text-zinc-400 mb-4'>
+        <div className='text-xs text-content-muted mb-4'>
           Longest: {status.longestRitualStreak} days
         </div>
       )}
@@ -150,16 +152,18 @@ export function RitualTracker() {
               pendingRef.current['morning'] = false;
             }
           }}
-          className='flex items-center justify-between p-3 rounded-lg border border-zinc-800/40 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
+          className='flex items-center justify-between p-3 rounded-lg border border-stroke-subtle/40 bg-surface-elevated/30 hover:bg-surface-elevated/50 transition-colors'
         >
           <div className='flex items-center gap-3'>
             <Sunrise className='w-4 h-4 text-lunary-accent' />
-            <span className='text-sm text-zinc-300'>Morning Ritual</span>
+            <span className='text-sm text-content-secondary'>
+              Morning Ritual
+            </span>
           </div>
           {status.morning ? (
             <CheckCircle2 className='w-5 h-5 text-lunary-success' />
           ) : (
-            <Circle className='w-5 h-5 text-zinc-600' />
+            <Circle className='w-5 h-5 text-content-muted' />
           )}
         </Link>
 
@@ -218,22 +222,24 @@ export function RitualTracker() {
               pendingRef.current['evening'] = false;
             }
           }}
-          className='flex items-center justify-between p-3 rounded-lg border border-zinc-800/40 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors'
+          className='flex items-center justify-between p-3 rounded-lg border border-stroke-subtle/40 bg-surface-elevated/30 hover:bg-surface-elevated/50 transition-colors'
         >
           <div className='flex items-center gap-3'>
             <Sunset className='w-4 h-4 text-lunary-primary-500' />
-            <span className='text-sm text-zinc-300'>Evening Ritual</span>
+            <span className='text-sm text-content-secondary'>
+              Evening Ritual
+            </span>
           </div>
           {status.evening ? (
             <CheckCircle2 className='w-5 h-5 text-lunary-success' />
           ) : (
-            <Circle className='w-5 h-5 text-zinc-600' />
+            <Circle className='w-5 h-5 text-content-muted' />
           )}
         </Link>
       </div>
 
       {status.ritualStreak > 0 && (
-        <div className='mt-4 text-xs text-zinc-400 text-center'>
+        <div className='mt-4 text-xs text-content-muted text-center'>
           Keep your streak going! Complete your {currentRitual} ritual today.
         </div>
       )}

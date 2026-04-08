@@ -20,10 +20,10 @@ const Meditation = () => {
   return (
     <div className='space-y-8'>
       <div className='mb-6'>
-        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+        <h2 className='text-2xl md:text-3xl font-light text-content-primary mb-2'>
           Complete Meditation & Mindfulness Guide
         </h2>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           Meditation and mindfulness practices for spiritual growth, energy
           work, and daily well-being. Essential skills for any magical practice.
         </p>
@@ -32,10 +32,10 @@ const Meditation = () => {
       {/* Meditation Techniques Section */}
       <section id='techniques' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             Meditation Techniques
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Different meditation techniques serve different purposes. Experiment
             to find what works for you.
           </p>
@@ -80,15 +80,15 @@ const Meditation = () => {
               <Link
                 key={technique.name}
                 href={`/grimoire/meditation/${techniqueSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-lunary-primary-300 mb-2 group-hover:text-lunary-primary-200 transition-colors'>
+                <h3 className='text-lg font-medium text-content-brand mb-2 group-hover:text-content-secondary transition-colors'>
                   {technique.name}
                 </h3>
-                <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
+                <p className='text-sm text-content-secondary leading-relaxed mb-2'>
                   {technique.description}
                 </p>
-                <p className='text-xs text-zinc-400'>
+                <p className='text-xs text-content-muted'>
                   Best for: {technique.bestFor}
                 </p>
               </Link>
@@ -100,7 +100,7 @@ const Meditation = () => {
       {/* Breathwork Section */}
       <section id='breathwork' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             <Link
               href='/grimoire/meditation/breathwork'
               className='hover:text-lunary-primary-400 transition-colors'
@@ -108,17 +108,17 @@ const Meditation = () => {
               Breathwork Techniques
             </Link>
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Conscious breathing regulates energy, calms the mind, and prepares
             for magical work. Essential for grounding and centering.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Deep Belly Breathing
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>1. Place hand on belly</p>
               <p>2. Inhale slowly through nose, filling belly (4 counts)</p>
               <p>3. Hold breath (4 counts)</p>
@@ -129,11 +129,11 @@ const Meditation = () => {
               </p>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Box Breathing
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>1. Inhale (4 counts)</p>
               <p>2. Hold (4 counts)</p>
               <p>3. Exhale (4 counts)</p>
@@ -144,11 +144,11 @@ const Meditation = () => {
               </p>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Pranayama (Alternate Nostril)
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>1. Close right nostril, inhale through left</p>
               <p>2. Close left nostril, exhale through right</p>
               <p>3. Inhale through right</p>
@@ -166,20 +166,20 @@ const Meditation = () => {
       {/* Grounding Exercises Section */}
       <section id='grounding' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             Grounding Exercises
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Grounding connects you with earth energy, stabilizes your energy,
             and is essential before and after magical work.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Tree Root Visualization
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>1. Sit or stand comfortably</p>
               <p>2. Visualize roots growing from your feet into the earth</p>
               <p>3. Feel roots anchoring deep into the ground</p>
@@ -187,11 +187,11 @@ const Meditation = () => {
               <p>5. Feel stable, centered, and connected</p>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Physical Grounding
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>• Walk barefoot on grass or earth</p>
               <p>• Sit on the ground, back against a tree</p>
               <p>
@@ -207,18 +207,20 @@ const Meditation = () => {
       {/* Centering Section */}
       <section id='centering' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>Centering</h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
+            Centering
+          </h2>
+          <p className='text-sm text-content-muted mb-4'>
             Centering finds your core energy and brings you into balance. It's
             your power source and point of equilibrium.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               How to Center
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>1. Take deep breaths</p>
               <p>2. Focus on your center (solar plexus or heart)</p>
               <p>3. Feel your energy gathering at this point</p>
@@ -236,20 +238,20 @@ const Meditation = () => {
       {/* Journaling Section */}
       <section id='journaling' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             Magical Journaling
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Journaling deepens your practice, tracks progress, and helps you
             understand patterns and growth.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               What to Journal
             </h3>
-            <ul className='list-disc list-inside space-y-1 text-sm text-zinc-300 ml-4'>
+            <ul className='list-disc list-inside space-y-1 text-sm text-content-secondary ml-4'>
               <li>Daily meditation experiences</li>
               <li>Dreams and interpretations</li>
               <li>Spell results and observations</li>
@@ -260,11 +262,11 @@ const Meditation = () => {
               <li>Questions and curiosities</li>
             </ul>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Journaling Prompts
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>• How did I feel during meditation today?</p>
               <p>• What symbols or images appeared?</p>
               <p>• What am I grateful for today?</p>

@@ -9,10 +9,10 @@ interface LuckyElementsProps {
 
 export function LuckyElements({ elements }: LuckyElementsProps) {
   const colors = [
-    'border-lunary-primary-700 bg-lunary-primary-950',
-    'border-lunary-primary-700 bg-lunary-primary-900/10',
+    'border-lunary-primary-700 bg-layer-deep',
+    'border-lunary-primary-700 bg-layer-base/10',
     'border-lunary-highlight-700 bg-lunary-highlight-950',
-    'border-lunary-secondary-700 bg-lunary-secondary-950',
+    'border-lunary-secondary-700 bg-layer-deep',
   ];
 
   return (
@@ -22,7 +22,7 @@ export function LuckyElements({ elements }: LuckyElementsProps) {
           key={index}
           className={`rounded-lg border ${colors[index % colors.length]} p-4 hover:opacity-80 transition-opacity`}
         >
-          <p className='text-sm font-medium text-center text-zinc-100'>
+          <p className='text-sm font-medium text-center text-content-primary'>
             {element}
           </p>
         </div>

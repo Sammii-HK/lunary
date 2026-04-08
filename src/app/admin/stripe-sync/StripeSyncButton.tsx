@@ -40,10 +40,12 @@ export function StripeSyncButton() {
   };
 
   return (
-    <div className='rounded-xl border border-zinc-800 bg-zinc-900/70 p-5 space-y-4'>
+    <div className='rounded-xl border border-stroke-subtle bg-surface-elevated/70 p-5 space-y-4'>
       <div>
-        <h2 className='text-base font-semibold text-white'>Full Stripe sync</h2>
-        <p className='text-sm text-zinc-400 mt-1'>
+        <h2 className='text-base font-semibold text-content-primary'>
+          Full Stripe sync
+        </h2>
+        <p className='text-sm text-content-muted mt-1'>
           Pages through all active, trialing, and past_due Stripe subscriptions
           and upserts any DB row that is missing or has stale status. This
           catches users the weekly cron misses because they have no DB row yet.
@@ -53,7 +55,7 @@ export function StripeSyncButton() {
 
       <button
         type='button'
-        className='rounded-full bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400 disabled:cursor-not-allowed disabled:bg-zinc-700'
+        className='rounded-full bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400 disabled:cursor-not-allowed disabled:bg-surface-overlay'
         disabled={loading}
         onClick={handleSync}
       >
@@ -70,32 +72,34 @@ export function StripeSyncButton() {
         >
           {result.success && result.stats ? (
             <div className='space-y-1 text-sm'>
-              <p className='font-semibold text-white mb-2'>Sync complete</p>
-              <p className='text-zinc-300'>
+              <p className='font-semibold text-content-primary mb-2'>
+                Sync complete
+              </p>
+              <p className='text-content-secondary'>
                 Processed:{' '}
-                <span className='text-white font-medium'>
+                <span className='text-content-primary font-medium'>
                   {result.stats.processed}
                 </span>
               </p>
-              <p className='text-zinc-300'>
+              <p className='text-content-secondary'>
                 Created:{' '}
                 <span className='text-green-400 font-medium'>
                   {result.stats.created}
                 </span>
               </p>
-              <p className='text-zinc-300'>
+              <p className='text-content-secondary'>
                 Updated:{' '}
                 <span className='text-blue-400 font-medium'>
                   {result.stats.updated}
                 </span>
               </p>
-              <p className='text-zinc-300'>
+              <p className='text-content-secondary'>
                 Skipped (already correct):{' '}
-                <span className='text-zinc-400 font-medium'>
+                <span className='text-content-muted font-medium'>
                   {result.stats.skipped}
                 </span>
               </p>
-              <p className='text-zinc-300'>
+              <p className='text-content-secondary'>
                 Unresolved (no user match):{' '}
                 <span className='text-yellow-400 font-medium'>
                   {result.stats.unresolved}

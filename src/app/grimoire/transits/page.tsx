@@ -185,55 +185,57 @@ export default function TransitsIndexPage() {
         />
       }
     >
-      <section className='mb-12 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
-        <h2 className='text-2xl font-semibold text-zinc-100 mb-3'>
+      <section className='mb-12 rounded-2xl border border-stroke-subtle bg-surface-elevated/50 p-6'>
+        <h2 className='text-2xl font-semibold text-content-primary mb-3'>
           Start here
         </h2>
-        <p className='text-sm text-zinc-400 mb-5'>
+        <p className='text-sm text-content-muted mb-5'>
           Use this quick guide to find the most relevant transit now, plus the
           top resources for retrogrades and timing.
         </p>
         <div className='grid gap-3 md:grid-cols-3'>
           <Link
             href='/grimoire/transits/transit-of-the-day'
-            className='rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-300 hover:border-lunary-primary-500 transition-colors'
+            className='rounded-lg border border-stroke-subtle bg-surface-base/60 p-4 text-sm text-content-secondary hover:border-lunary-primary-500 transition-colors'
           >
-            <span className='block text-zinc-100 font-medium'>
+            <span className='block text-content-primary font-medium'>
               Transit of the Day
             </span>
-            <span className='text-zinc-400'>
+            <span className='text-content-muted'>
               Daily timing highlights and key shifts.
             </span>
           </Link>
           <Link
             href={`/grimoire/events/${currentYear}`}
-            className='rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-300 hover:border-lunary-primary-500 transition-colors'
+            className='rounded-lg border border-stroke-subtle bg-surface-base/60 p-4 text-sm text-content-secondary hover:border-lunary-primary-500 transition-colors'
           >
-            <span className='block text-zinc-100 font-medium'>
+            <span className='block text-content-primary font-medium'>
               Current Astrological Events
             </span>
-            <span className='text-zinc-400'>
+            <span className='text-content-muted'>
               Track retrogrades and eclipses.
             </span>
           </Link>
           <Link
             href={`/grimoire/moon/${currentYear}`}
-            className='rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-300 hover:border-lunary-primary-500 transition-colors'
+            className='rounded-lg border border-stroke-subtle bg-surface-base/60 p-4 text-sm text-content-secondary hover:border-lunary-primary-500 transition-colors'
           >
-            <span className='block text-zinc-100 font-medium'>
+            <span className='block text-content-primary font-medium'>
               Lunar Phases & Full Moons Calender
             </span>
-            <span className='text-zinc-400'>Track all new and full moons.</span>
+            <span className='text-content-muted'>
+              Track all new and full moons.
+            </span>
           </Link>
         </div>
       </section>
 
       {/* Popular Upcoming Transits — strong internal links to individual pages */}
       <section className='mb-12'>
-        <h2 className='text-2xl font-semibold text-zinc-100 mb-4'>
+        <h2 className='text-2xl font-semibold text-content-primary mb-4'>
           Popular Upcoming Transits
         </h2>
-        <p className='text-sm text-zinc-400 mb-5'>
+        <p className='text-sm text-content-muted mb-5'>
           These major transits are generating the most interest right now. Each
           page includes exact dates, meaning, and practical guidance.
         </p>
@@ -252,16 +254,16 @@ export default function TransitsIndexPage() {
               <Link
                 key={`popular-${transit.id}`}
                 href={`/grimoire/transits/${transit.id}`}
-                className='flex items-baseline gap-3 rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm hover:border-lunary-primary-500 transition-colors'
+                className='flex items-baseline gap-3 rounded-lg border border-stroke-subtle bg-surface-base/60 p-4 text-sm hover:border-lunary-primary-500 transition-colors'
               >
-                <span className='shrink-0 text-xs text-zinc-500'>
+                <span className='shrink-0 text-xs text-content-muted'>
                   {format(transit.startDate, 'MMM d, yyyy')}
                 </span>
                 <span>
-                  <span className='block font-medium text-zinc-100'>
+                  <span className='block font-medium text-content-primary'>
                     {transit.title}
                   </span>
-                  <span className='text-zinc-400'>
+                  <span className='text-content-muted'>
                     {transit.themes.slice(0, 2).join(', ')}
                   </span>
                 </span>
@@ -271,13 +273,15 @@ export default function TransitsIndexPage() {
       </section>
 
       <section className='mb-12'>
-        <h2 className='text-2xl text-zinc-100 mb-4'>Transit timing by year</h2>
+        <h2 className='text-2xl text-content-primary mb-4'>
+          Transit timing by year
+        </h2>
         <div className='grid gap-4 grid-cols-4 md:grid-cols-8'>
           {years.map((year) => (
             <Link
               key={year}
               href={`/grimoire/transits/year/${year}`}
-              className='p-2 rounded-lg border border-zinc-800 bg-zinc-900/40 text-sm text-center text-zinc-300 transition hover:border-lunary-primary-600'
+              className='p-2 rounded-lg border border-stroke-subtle bg-surface-elevated/40 text-sm text-center text-content-secondary transition hover:border-lunary-primary-600'
             >
               {year}
             </Link>
@@ -286,20 +290,22 @@ export default function TransitsIndexPage() {
       </section>
 
       <section className='mb-12'>
-        <h2 className='text-2xl text-zinc-100 mb-4'>Saturn cycle and timing</h2>
+        <h2 className='text-2xl text-content-primary mb-4'>
+          Saturn cycle and timing
+        </h2>
         <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
           {SATURN_CYCLE_STEPS.map((step) => (
             <div
               key={step.label}
-              className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 text-zinc-300'
+              className='rounded-2xl border border-stroke-subtle bg-surface-elevated/40 p-5 text-content-secondary'
             >
-              <p className='text-xs uppercase tracking-[0.3em] text-zinc-500'>
+              <p className='text-xs uppercase tracking-[0.3em] text-content-muted'>
                 {step.label}
               </p>
-              <h3 className='text-lg my-1 font-light text-zinc-100'>
+              <h3 className='text-lg my-1 font-light text-content-primary'>
                 {step.years}
               </h3>
-              <p className='text-sm text-zinc-500 my-2'>
+              <p className='text-sm text-content-muted my-2'>
                 Ages: {step.ages} · Birth years: {step.birthYears}
               </p>
               <p className='text-sm leading-relaxed'>{step.notes}</p>
@@ -316,7 +322,7 @@ export default function TransitsIndexPage() {
             <div key={year} id={`year-${year}`} className='space-y-4'>
               <h2
                 id={`year-${year}-transits`}
-                className='text-xl font-semibold text-lunary-primary-300'
+                className='text-xl font-semibold text-content-brand'
               >
                 {year} Transits
               </h2>
@@ -325,15 +331,15 @@ export default function TransitsIndexPage() {
                   <Link
                     key={transit.id}
                     href={`/grimoire/transits/${transit.id}`}
-                    className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                    className='p-5 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
                   >
-                    <div className='text-sm text-zinc-400 mb-1'>
+                    <div className='text-sm text-content-muted mb-1'>
                       {transit.dates}
                     </div>
-                    <h3 className='text-lg font-medium mb-2 group-hover:text-lunary-primary-300 transition-colors'>
+                    <h3 className='text-lg font-medium mb-2 group-hover:text-content-brand transition-colors'>
                       {transit.title}
                     </h3>
-                    <p className='text-sm text-zinc-400 line-clamp-2'>
+                    <p className='text-sm text-content-muted line-clamp-2'>
                       Quick snapshot of dates, standout signs, and practical
                       steps so you know why to dive into this transit.
                     </p>
@@ -341,7 +347,7 @@ export default function TransitsIndexPage() {
                       {transit.signs.map((sign) => (
                         <span
                           key={sign}
-                          className='text-xs px-2 py-1 rounded bg-lunary-primary-900/20 text-lunary-primary-300'
+                          className='text-xs px-2 py-1 rounded bg-layer-base/20 text-content-brand'
                         >
                           {sign}
                         </span>

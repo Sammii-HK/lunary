@@ -4,36 +4,42 @@ import { Check, X } from 'lucide-react';
 
 export function PricingComparisonTable() {
   return (
-    <div className='overflow-x-auto rounded-xl border border-zinc-800/60 bg-zinc-900/40'>
+    <div className='overflow-x-auto rounded-xl border border-stroke-subtle/60 bg-surface-elevated/40'>
       <table className='w-full border-collapse text-sm'>
         <thead>
-          <tr className='border-b border-zinc-800/50'>
-            <th className='text-left py-4 px-4 md:px-6 font-light text-sm md:text-base text-zinc-200'>
+          <tr className='border-b border-stroke-subtle/50'>
+            <th className='text-left py-4 px-4 md:px-6 font-light text-sm md:text-base text-content-primary'>
               Feature
             </th>
-            <th className='text-center py-4 px-3 md:px-4 font-light text-zinc-200'>
+            <th className='text-center py-4 px-3 md:px-4 font-light text-content-primary'>
               <div className='text-sm md:text-base'>Free</div>
             </th>
-            <th className='text-center py-4 px-3 md:px-4 font-light text-zinc-200'>
+            <th className='text-center py-4 px-3 md:px-4 font-light text-content-primary'>
               <div className='text-sm md:text-base'>Lunary+</div>
-              <div className='text-xs font-normal text-zinc-500'>$4.99/mo</div>
+              <div className='text-xs font-normal text-content-muted'>
+                $4.99/mo
+              </div>
             </th>
-            <th className='text-center py-4 px-3 md:px-4 font-light text-zinc-200'>
+            <th className='text-center py-4 px-3 md:px-4 font-light text-content-primary'>
               <div className='text-sm md:text-base'>Pro</div>
-              <div className='text-xs font-normal text-zinc-500'>$8.99/mo</div>
+              <div className='text-xs font-normal text-content-muted'>
+                $8.99/mo
+              </div>
             </th>
-            <th className='text-center py-4 px-3 md:px-4 font-light text-zinc-200'>
+            <th className='text-center py-4 px-3 md:px-4 font-light text-content-primary'>
               <div className='text-sm md:text-base'>Pro Annual</div>
-              <div className='text-xs font-normal text-zinc-500'>$89.99/yr</div>
+              <div className='text-xs font-normal text-content-muted'>
+                $89.99/yr
+              </div>
             </th>
           </tr>
         </thead>
         <tbody>
           {/* Horoscope Section */}
-          <tr className='border-b border-zinc-800/50'>
+          <tr className='border-b border-stroke-subtle/50'>
             <td
               colSpan={5}
-              className='py-3 px-4 md:px-6 text-xs uppercase tracking-[0.2em] text-zinc-500 bg-zinc-900/60'
+              className='py-3 px-4 md:px-6 text-xs uppercase tracking-[0.2em] text-content-muted bg-surface-elevated/60'
             >
               Horoscope & Transits
             </td>
@@ -70,10 +76,10 @@ export function PricingComparisonTable() {
           />
 
           {/* Tarot Section */}
-          <tr className='border-b border-zinc-800/50'>
+          <tr className='border-b border-stroke-subtle/50'>
             <td
               colSpan={5}
-              className='py-3 px-4 md:px-6 text-xs uppercase tracking-[0.2em] text-zinc-500 bg-zinc-900/60'
+              className='py-3 px-4 md:px-6 text-xs uppercase tracking-[0.2em] text-content-muted bg-surface-elevated/60'
             >
               Tarot Readings
             </td>
@@ -123,10 +129,10 @@ export function PricingComparisonTable() {
           />
 
           {/* Dashboard Section */}
-          <tr className='border-b border-zinc-800/50'>
+          <tr className='border-b border-stroke-subtle/50'>
             <td
               colSpan={5}
-              className='py-3 px-4 md:px-6 text-xs uppercase tracking-[0.2em] text-zinc-500 bg-zinc-900/60'
+              className='py-3 px-4 md:px-6 text-xs uppercase tracking-[0.2em] text-content-muted bg-surface-elevated/60'
             >
               Dashboard Features
             </td>
@@ -168,10 +174,10 @@ export function PricingComparisonTable() {
           />
 
           {/* Other Features */}
-          <tr className='border-b border-zinc-800/50'>
+          <tr className='border-b border-stroke-subtle/50'>
             <td
               colSpan={5}
-              className='py-3 px-4 md:px-6 text-xs uppercase tracking-[0.2em] text-zinc-500 bg-zinc-900/60'
+              className='py-3 px-4 md:px-6 text-xs uppercase tracking-[0.2em] text-content-muted bg-surface-elevated/60'
             >
               Other Features
             </td>
@@ -240,8 +246,8 @@ function Row({
   freePartial?: boolean;
 }) {
   return (
-    <tr className='border-b border-zinc-800/50 hover:bg-zinc-900/30 transition-colors'>
-      <td className='py-3 px-4 md:px-6 text-xs md:text-sm text-zinc-300'>
+    <tr className='border-b border-stroke-subtle/50 hover:bg-surface-elevated/30 transition-colors'>
+      <td className='py-3 px-4 md:px-6 text-xs md:text-sm text-content-secondary'>
         {feature}
       </td>
       <Cell value={free} partial={freePartial} />
@@ -273,14 +279,14 @@ function Cell({
   if (value === false) {
     return (
       <td className='text-center py-3 px-3 md:px-4'>
-        <X className='w-4 h-4 text-zinc-700 mx-auto' strokeWidth={2} />
+        <X className='w-4 h-4 text-content-muted mx-auto' strokeWidth={2} />
       </td>
     );
   }
 
   return (
     <td
-      className={`text-center py-3 px-3 md:px-4 text-xs ${partial ? 'text-amber-400/90' : 'text-zinc-400'}`}
+      className={`text-center py-3 px-3 md:px-4 text-xs ${partial ? 'text-amber-400/90' : 'text-content-muted'}`}
     >
       {value}
     </td>

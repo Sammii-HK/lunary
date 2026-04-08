@@ -19,7 +19,6 @@ interface TarotPatternsHubProps {
   userTier: UserTier;
   subscriptionStatus?: string;
   onUpgradeClick?: () => void;
-  // Optional props for transit connections
   birthChart?: BirthChartPlacement[];
   userBirthday?: string;
   currentTransits?: AstroChartInformation[];
@@ -31,10 +30,6 @@ export function TarotPatternsHub({
   userTier,
   subscriptionStatus,
   onUpgradeClick,
-  birthChart,
-  userBirthday,
-  currentTransits,
-  userBirthLocation,
 }: TarotPatternsHubProps) {
   // Feature access checks
   const hasAdvancedPatterns = hasFeatureAccess(
@@ -120,7 +115,7 @@ export function TarotPatternsHub({
             collapsible={true}
             defaultCollapsed={true}
           >
-            <div className='flex items-center justify-center h-[250px] text-sm text-zinc-500'>
+            <div className='flex items-center justify-center h-[250px] text-sm text-content-muted'>
               Timeline visualization coming soon
             </div>
           </PatternCard>
@@ -134,20 +129,16 @@ export function TarotPatternsHub({
           allowDrillDown={hasDrillDown}
           locked={!hasBasicPatterns}
           onUpgradeClick={onUpgradeClick}
-          birthChart={birthChart}
-          userBirthday={userBirthday}
-          currentTransits={currentTransits}
-          userBirthLocation={userBirthLocation}
         />
       )}
 
       {/* Upgrade Prompt for Free Users */}
       {userTier === 'free' && (
-        <div className='rounded-xl border border-lunary-accent-800 bg-lunary-accent-950/40 p-4 text-center'>
-          <h3 className='text-lg font-medium text-lunary-accent-300 mb-2'>
+        <div className='rounded-xl border border-lunary-accent-800 bg-layer-deep/40 p-4 text-center'>
+          <h3 className='text-lg font-medium text-content-brand-accent mb-2'>
             Unlock Deeper Pattern Insights
           </h3>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Upgrade to Lunary+ to access extended pattern analysis, radial
             charts, and more.
           </p>

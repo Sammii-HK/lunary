@@ -144,15 +144,17 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
       : config.resultPath;
 
   return (
-    <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 my-8'>
-      <h3 className='text-xl font-medium text-zinc-100 mb-2'>{config.title}</h3>
-      <p className='text-zinc-400 text-sm mb-6'>{config.description}</p>
+    <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 my-8'>
+      <h3 className='text-xl font-medium text-content-primary mb-2'>
+        {config.title}
+      </h3>
+      <p className='text-content-muted text-sm mb-6'>{config.description}</p>
 
       <div className='space-y-4'>
         <div>
           <label
             htmlFor={`${type}-input`}
-            className='block text-sm font-medium text-zinc-300 mb-2'
+            className='block text-sm font-medium text-content-secondary mb-2'
           >
             {config.inputLabel}
           </label>
@@ -163,7 +165,7 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={config.inputPlaceholder}
-              className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
+              className='w-full px-4 py-3 bg-surface-card border border-stroke-default rounded-lg text-content-primary placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
             />
           ) : (
             <input
@@ -171,7 +173,7 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
               type='date'
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
+              className='w-full px-4 py-3 bg-surface-card border border-stroke-default rounded-lg text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
             />
           )}
         </div>
@@ -180,7 +182,7 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
           <div>
             <label
               htmlFor='target-year'
-              className='block text-sm font-medium text-zinc-300 mb-2'
+              className='block text-sm font-medium text-content-secondary mb-2'
             >
               Year to Calculate
             </label>
@@ -195,36 +197,36 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
               }
               min={1900}
               max={2100}
-              className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
+              className='w-full px-4 py-3 bg-surface-card border border-stroke-default rounded-lg text-content-primary focus:outline-none focus:ring-2 focus:ring-lunary-primary-500 focus:border-transparent'
             />
           </div>
         )}
       </div>
 
       {result && result.result > 0 && (
-        <div className='mt-6 pt-6 border-t border-zinc-700'>
+        <div className='mt-6 pt-6 border-t border-stroke-default'>
           <div className='text-center mb-4 space-y-2'>
-            <div className='text-5xl font-light text-lunary-primary-300 mb-2'>
+            <div className='text-5xl font-light text-content-brand mb-2'>
               {result.result}
             </div>
-            <div className='text-lg text-zinc-300'>{meaning}</div>
+            <div className='text-lg text-content-secondary'>{meaning}</div>
             <button
               type='button'
               onClick={openNumberModal}
-              className='text-xs font-semibold text-lunary-primary-300 uppercase tracking-wide transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400'
+              className='text-xs font-semibold text-content-brand uppercase tracking-wide transition hover:text-content-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400'
             >
               Explain this number
             </button>
           </div>
 
-          <div className='bg-zinc-800/50 rounded-lg p-4 mb-4'>
-            <h4 className='text-sm font-medium text-zinc-400 mb-2'>
+          <div className='bg-surface-card/50 rounded-lg p-4 mb-4'>
+            <h4 className='text-sm font-medium text-content-muted mb-2'>
               Calculation Steps:
             </h4>
-            <ol className='space-y-1 text-sm text-zinc-300'>
+            <ol className='space-y-1 text-sm text-content-secondary'>
               {result.steps.map((step, index) => (
                 <li key={index} className='flex gap-2'>
-                  <span className='text-zinc-400'>{index + 1}.</span>
+                  <span className='text-content-muted'>{index + 1}.</span>
                   <span>{step}</span>
                 </li>
               ))}
@@ -232,8 +234,8 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
           </div>
 
           {(type === 'soul-urge' || type === 'expression') && (
-            <div className='bg-zinc-800/30 rounded-lg p-4 mb-4'>
-              <h4 className='text-sm font-medium text-zinc-400 mb-2'>
+            <div className='bg-surface-card/30 rounded-lg p-4 mb-4'>
+              <h4 className='text-sm font-medium text-content-muted mb-2'>
                 {type === 'soul-urge'
                   ? 'Vowel Values (Pythagorean):'
                   : 'Letter Values:'}
@@ -243,13 +245,13 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
                   Object.entries(VOWEL_VALUES).map(([letter, value]) => (
                     <span
                       key={letter}
-                      className='px-2 py-1 bg-zinc-700 rounded text-zinc-300'
+                      className='px-2 py-1 bg-surface-overlay rounded text-content-secondary'
                     >
                       {letter}={value}
                     </span>
                   ))
                 ) : (
-                  <span className='text-zinc-400'>
+                  <span className='text-content-muted'>
                     A-I = 1-9, J-R = 1-9, S-Z = 1-8
                   </span>
                 )}
@@ -259,7 +261,7 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
 
           <NavParamLink
             href={resultUrl}
-            className='flex items-center justify-center gap-2 w-full px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors'
+            className='flex items-center justify-center gap-2 w-full px-4 py-3 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg transition-colors'
           >
             Learn more about{' '}
             {type === 'personal-year'

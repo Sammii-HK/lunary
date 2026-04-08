@@ -94,11 +94,11 @@ function ScoreBar({
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <Icon className={`h-4 w-4 ${textColor}`} />
-          <span className='text-sm text-zinc-300'>{label}</span>
+          <span className='text-sm text-content-secondary'>{label}</span>
         </div>
         <span className={`text-sm font-medium ${textColor}`}>{score}/10</span>
       </div>
-      <div className='h-2 bg-zinc-800 rounded-full overflow-hidden'>
+      <div className='h-2 bg-surface-card rounded-full overflow-hidden'>
         <div
           className={`h-full rounded-full ${colorClass}`}
           style={{ width: `${score * 10}%` }}
@@ -187,16 +187,16 @@ ${aspect.growthPotential}`;
     >
       {/* Compatibility Scores */}
       <section className='mb-8'>
-        <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+        <div className='p-6 rounded-lg border border-stroke-subtle bg-surface-elevated/50'>
           <div className='flex items-center gap-3 mb-6'>
             <span className='text-3xl font-astro text-lunary-primary-400'>
               {aspectType.symbol}
             </span>
             <div>
-              <div className='font-medium text-zinc-100 capitalize'>
+              <div className='font-medium text-content-primary capitalize'>
                 {aspect.aspectType}
               </div>
-              <div className='text-sm text-zinc-500'>
+              <div className='text-sm text-content-muted'>
                 {aspectType.degrees}° • {aspectType.nature}
               </div>
             </div>
@@ -239,7 +239,7 @@ ${aspect.growthPotential}`;
           {aspect.keywords.map((keyword) => (
             <span
               key={keyword}
-              className='px-3 py-1.5 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 text-sm'
+              className='px-3 py-1.5 rounded-lg bg-layer-base/20 border border-lunary-primary-700 text-content-brand text-sm'
             >
               {keyword}
             </span>
@@ -253,10 +253,13 @@ ${aspect.growthPotential}`;
           <Star className='h-5 w-5 inline mr-2 text-lunary-success' />
           Relationship Strengths
         </Heading>
-        <div className='p-5 rounded-lg border border-lunary-success-700 bg-lunary-success-950 mt-4'>
+        <div className='p-5 rounded-lg border border-lunary-success-700 bg-layer-deep mt-4'>
           <ul className='space-y-3'>
             {aspect.strengths.map((strength, i) => (
-              <li key={i} className='flex items-start gap-3 text-zinc-300'>
+              <li
+                key={i}
+                className='flex items-start gap-3 text-content-secondary'
+              >
                 <span className='text-lunary-success mt-1'>✓</span>
                 {strength}
               </li>
@@ -271,10 +274,13 @@ ${aspect.growthPotential}`;
           <AlertTriangle className='h-5 w-5 inline mr-2 text-lunary-accent' />
           Potential Challenges
         </Heading>
-        <div className='p-5 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 mt-4'>
+        <div className='p-5 rounded-lg border border-lunary-accent-700 bg-layer-deep mt-4'>
           <ul className='space-y-3'>
             {aspect.challenges.map((challenge, i) => (
-              <li key={i} className='flex items-start gap-3 text-zinc-300'>
+              <li
+                key={i}
+                className='flex items-start gap-3 text-content-secondary'
+              >
                 <span className='text-lunary-accent mt-1'>!</span>
                 {challenge}
               </li>
@@ -293,17 +299,17 @@ ${aspect.growthPotential}`;
             <NavParamLink
               key={related.slug}
               href={`/grimoire/synastry/aspects/${related.slug}`}
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+              className='p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/30 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all'
             >
               <div className='flex items-center gap-2'>
                 <span className='font-astro text-lunary-primary-400'>
                   {aspectTypes[related.aspectType].symbol}
                 </span>
-                <span className='text-zinc-200'>
+                <span className='text-content-primary'>
                   {related.planet1} {related.aspect} {related.planet2}
                 </span>
               </div>
-              <div className='text-xs text-zinc-500 mt-1'>
+              <div className='text-xs text-content-muted mt-1'>
                 {related.scores.overall}/10 compatibility
               </div>
             </NavParamLink>

@@ -62,12 +62,12 @@ export default function CrystalGalleryPage() {
   ];
 
   return (
-    <div className='min-h-screen bg-black text-white p-8'>
+    <div className='min-h-screen bg-surface-base text-content-primary p-8'>
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='mb-8'>
           <h1 className='text-3xl font-bold mb-4'>Crystal Gallery</h1>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Preview all crystal images with their chakra associations and color
             variations
           </p>
@@ -95,36 +95,40 @@ export default function CrystalGalleryPage() {
             return (
               <div
                 key={crystal.name}
-                className='bg-zinc-900 rounded-lg border border-zinc-700 overflow-hidden'
+                className='bg-surface-elevated rounded-lg border border-stroke-default overflow-hidden'
               >
                 {/* Crystal Header */}
-                <div className='p-6 border-b border-zinc-700'>
+                <div className='p-6 border-b border-stroke-default'>
                   <div className='flex items-center gap-3 mb-3'>
                     <div
                       className='w-4 h-4 rounded-full'
                       style={{ backgroundColor: crystal.color }}
                     ></div>
-                    <h3 className='text-xl font-bold text-white'>
+                    <h3 className='text-xl font-bold text-content-primary'>
                       {crystal.name}
                     </h3>
                   </div>
 
                   <div className='space-y-2 text-sm'>
                     <div className='flex gap-2'>
-                      <span className='text-zinc-400'>Chakra:</span>
-                      <span className='text-white'>{crystal.chakra}</span>
+                      <span className='text-content-muted'>Chakra:</span>
+                      <span className='text-content-primary'>
+                        {crystal.chakra}
+                      </span>
                     </div>
                     <div className='flex gap-2'>
-                      <span className='text-zinc-400'>Element:</span>
-                      <span className='text-white'>{crystal.element}</span>
+                      <span className='text-content-muted'>Element:</span>
+                      <span className='text-content-primary'>
+                        {crystal.element}
+                      </span>
                     </div>
                     <div className='flex gap-2 items-start'>
-                      <span className='text-zinc-400'>Keywords:</span>
+                      <span className='text-content-muted'>Keywords:</span>
                       <div className='flex flex-wrap gap-1'>
                         {crystal.keywords.map((keyword) => (
                           <span
                             key={keyword}
-                            className='px-2 py-1 bg-zinc-800 rounded text-xs text-zinc-300'
+                            className='px-2 py-1 bg-surface-card rounded text-xs text-content-secondary'
                           >
                             {keyword}
                           </span>
@@ -136,13 +140,13 @@ export default function CrystalGalleryPage() {
 
                 {/* Daily Variations */}
                 <div className='p-4'>
-                  <h4 className='text-sm font-medium mb-4 text-zinc-300'>
+                  <h4 className='text-sm font-medium mb-4 text-content-secondary'>
                     Daily Background Variations:
                   </h4>
                   <div className='grid grid-cols-3 gap-2'>
                     {variations.map((variation) => (
                       <div key={variation.date} className='text-center'>
-                        <div className='relative aspect-square rounded border border-zinc-600 mb-2'>
+                        <div className='relative aspect-square rounded border border-stroke-strong mb-2'>
                           <Image
                             src={variation.imageUrl}
                             alt={`${crystal.name} - ${variation.label}`}
@@ -151,7 +155,7 @@ export default function CrystalGalleryPage() {
                             className='rounded'
                           />
                         </div>
-                        <div className='text-xs text-zinc-400'>
+                        <div className='text-xs text-content-muted'>
                           {variation.label}
                         </div>
                       </div>
@@ -167,7 +171,7 @@ export default function CrystalGalleryPage() {
         <div className='mt-8 flex gap-4 justify-center'>
           <a
             href='/admin/daily-posts-preview'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 rounded-md text-white font-medium transition-colors'
+            className='px-6 py-3 bg-lunary-primary-600 hover:bg-layer-high rounded-md text-white font-medium transition-colors'
           >
             ← Daily Posts Preview
           </a>

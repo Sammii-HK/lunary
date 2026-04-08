@@ -8,12 +8,12 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          'text-xs border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
+          'text-xs border-transparent bg-lunary-primary text-white hover:bg-lunary-primary/80',
         secondary:
-          'text-xs border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          'text-xs border-transparent bg-surface-overlay text-content-secondary hover:bg-surface-overlay/80',
         destructive:
-          'text-xs border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
-        outline: 'text-xs text-foreground',
+          'text-xs border-transparent bg-lunary-error text-white hover:bg-lunary-error/80',
+        outline: 'text-xs border-stroke-default text-content-primary',
         success:
           'text-xs border-transparent bg-lunary-success text-white hover:bg-lunary-success-400',
         warning:
@@ -21,9 +21,9 @@ const badgeVariants = cva(
         error:
           'text-xs border-transparent bg-red-500 text-white hover:bg-red-600',
         'cosmic-rose':
-          'text-xs border-transparent bg-[#EE789E] text-white hover:bg-[#EE789E]/80',
+          'text-xs border-transparent bg-[#EE789E] text-content-primary hover:bg-[#EE789E]/80',
         aurora:
-          'text-xs border-transparent bg-[#6B9B7A] text-white hover:bg-[#6B9B7A]/80',
+          'text-xs border-transparent bg-[#6B9B7A] text-content-primary hover:bg-[#6B9B7A]/80',
       },
     },
     defaultVariants: {

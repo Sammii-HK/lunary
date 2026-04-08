@@ -136,17 +136,17 @@ export const InsightCard = memo(function InsightCard({
   return (
     <article
       className={cn(
-        'rounded-2xl border border-lunary-primary-800 bg-gradient-to-br from-lunary-primary-950 via-lunary-primary-950/50 to-transparent p-4 shadow-lg shadow-lunary-primary-950 backdrop-blur',
+        'rounded-2xl border border-lunary-primary-800 bg-gradient-to-br from-layer-deep via-layer-deep/50 to-transparent p-4 shadow-lg shadow-lunary-primary-950 backdrop-blur',
         className,
       )}
     >
-      <div className='flex flex-wrap items-center justify-between gap-2 text-xs text-lunary-accent-100/70'>
+      <div className='flex flex-wrap items-center justify-between gap-2 text-xs text-content-brand-accent/70'>
         <div className='flex flex-wrap items-center gap-2'>
-          <span className='inline-flex items-center rounded-full bg-lunary-primary-900 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-lunary-accent-100'>
+          <span className='inline-flex items-center rounded-full bg-layer-base px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-content-brand-accent'>
             {sourceLabel}
           </span>
           {moonCircle?.moon_phase && (
-            <span className='inline-flex items-center gap-1 text-lunary-accent-100/80'>
+            <span className='inline-flex items-center gap-1 text-content-brand-accent/80'>
               <span
                 className={cn(
                   'h-2 w-2 rounded-full',
@@ -159,7 +159,7 @@ export const InsightCard = memo(function InsightCard({
             </span>
           )}
           {moonCircle?.date && (
-            <time className='text-lunary-accent-200/70'>
+            <time className='text-content-brand-accent/70'>
               {formatDate(moonCircle.date)}
             </time>
           )}
@@ -168,12 +168,12 @@ export const InsightCard = memo(function InsightCard({
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className='ml-auto rounded-lg p-1.5 text-lunary-accent-300/70 transition hover:bg-red-500/20 hover:text-red-300 disabled:opacity-50'
+            className='ml-auto rounded-lg p-1.5 text-content-brand-accent/70 transition hover:bg-red-500/20 hover:text-red-300 disabled:opacity-50'
             aria-label='Delete insight'
             title='Delete insight (admin only)'
           >
             {isDeleting ? (
-              <div className='h-4 w-4 border-2 border-zinc-500 border-t-zinc-200 rounded-full animate-spin' />
+              <div className='h-4 w-4 border-2 border-stroke-strong border-t-zinc-200 rounded-full animate-spin' />
             ) : (
               <Trash2 className='h-4 w-4' />
             )}
@@ -186,7 +186,7 @@ export const InsightCard = memo(function InsightCard({
           <p className='text-xs text-red-300 flex-1'>Delete this insight?</p>
           <button
             onClick={() => setShowDeleteConfirm(false)}
-            className='px-2 py-1 text-xs text-zinc-400 rounded hover:bg-zinc-800 transition-colors'
+            className='px-2 py-1 text-xs text-content-muted rounded hover:bg-surface-card transition-colors'
           >
             Cancel
           </button>
@@ -204,17 +204,17 @@ export const InsightCard = memo(function InsightCard({
           <p className='text-xs text-red-300 flex-1'>{deleteError}</p>
           <button
             onClick={() => setDeleteError(null)}
-            className='text-xs text-zinc-500 underline'
+            className='text-xs text-content-muted underline'
           >
             Dismiss
           </button>
         </div>
       )}
 
-      <p className='mt-3 text-sm leading-relaxed text-white'>
+      <p className='mt-3 text-sm leading-relaxed text-content-primary'>
         {insight.insight_text}
       </p>
-      <div className='mt-4 text-xs text-lunary-accent-200/70'>
+      <div className='mt-4 text-xs text-content-brand-accent/70'>
         Shared on {formatDate(insight.created_at)}
       </div>
     </article>

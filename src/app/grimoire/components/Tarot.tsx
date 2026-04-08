@@ -35,10 +35,10 @@ const Tarot = () => {
   return (
     <div className='space-y-8'>
       <div className='mb-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+        <h1 className='text-2xl md:text-3xl font-light text-content-primary mb-2'>
           Tarot
         </h1>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           Comprehensive guide to tarot cards, suits, and spreads. Learn the
           meanings of all 78 tarot cards including the Major Arcana and Minor
           Arcana.
@@ -48,19 +48,19 @@ const Tarot = () => {
       {/* Complete Guide Banner */}
       <Link
         href='/grimoire/guides/tarot-complete-guide'
-        className='block p-4 rounded-lg bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 hover:border-lunary-primary-500 transition-colors group'
+        className='block p-4 rounded-lg bg-gradient-to-r from-layer-base/30 to-lunary-rose-900/30 border border-lunary-primary-700 hover:border-lunary-primary-500 transition-colors group'
       >
         <div className='flex items-center justify-between'>
           <div>
-            <h3 className='text-lg font-medium text-lunary-primary-300 group-hover:text-lunary-primary-200 transition-colors'>
+            <h3 className='text-lg font-medium text-content-brand group-hover:text-content-secondary transition-colors'>
               📖 Read the Complete Tarot Guide
             </h3>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Master tarot reading with our comprehensive beginner to advanced
               guide
             </p>
           </div>
-          <span className='text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
+          <span className='text-lunary-primary-400 group-hover:text-content-brand transition-colors'>
             →
           </span>
         </div>
@@ -69,8 +69,10 @@ const Tarot = () => {
       {/* Spreads Section - Moved to Top */}
       <section id='spreads' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>Spreads</h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
+            Spreads
+          </h2>
+          <p className='text-sm text-content-muted mb-4'>
             Tarot spreads are layouts that determine how cards are arranged and
             interpreted. Each spread has specific positions with unique
             meanings.
@@ -83,12 +85,12 @@ const Tarot = () => {
               <Link
                 key={spread}
                 href={`/grimoire/tarot/spreads/${spreadSlug}`}
-                className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {tarotSpreads[spread as keyof typeof tarotSpreads].name}
                 </h3>
-                <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
+                <p className='text-sm text-content-secondary leading-relaxed mb-2'>
                   {
                     tarotSpreads[spread as keyof typeof tarotSpreads]
                       .description
@@ -100,7 +102,7 @@ const Tarot = () => {
                 ) &&
                 tarotSpreads[spread as keyof typeof tarotSpreads].instructions
                   .length > 0 ? (
-                  <ul className='list-disc list-inside text-sm text-zinc-400 space-y-1'>
+                  <ul className='list-disc list-inside text-sm text-content-muted space-y-1'>
                     {tarotSpreads[
                       spread as keyof typeof tarotSpreads
                     ].instructions
@@ -114,7 +116,7 @@ const Tarot = () => {
                     )}
                   </ul>
                 ) : (
-                  <p className='text-sm text-zinc-400'>
+                  <p className='text-sm text-content-muted'>
                     {tarotSpreads[spread as keyof typeof tarotSpreads]
                       .instructions || 'Instructions coming soon.'}
                   </p>
@@ -128,10 +130,10 @@ const Tarot = () => {
       {/* Major Arcana Section */}
       <section id='major-arcana' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             Major Arcana
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             The 22 Major Arcana cards represent significant life themes, karmic
             lessons, and spiritual journeys. These cards hold the most profound
             meanings in a tarot reading.
@@ -153,10 +155,10 @@ const Tarot = () => {
       {/* Minor Arcana Section */}
       <section id='minor-arcana' className='space-y-8'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             Minor Arcana
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             The 56 Minor Arcana cards are organized into four suits (Cups,
             Wands, Swords, Pentacles), each representing different aspects of
             daily life and experiences. Each suit corresponds to an element and
@@ -172,15 +174,15 @@ const Tarot = () => {
               <Link
                 key={suit}
                 href={`/grimoire/tarot/suits/${suitSlug}`}
-                className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4 hover:bg-surface-elevated/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
+                <h3 className='text-lg font-medium text-content-primary mb-2 group-hover:text-lunary-primary-400 transition-colors'>
                   {tarotSuits[suit as keyof typeof tarotSuits].name}
                 </h3>
-                <p className='text-xs text-zinc-400 mb-2'>
+                <p className='text-xs text-content-muted mb-2'>
                   Element: {tarotSuits[suit as keyof typeof tarotSuits].element}
                 </p>
-                <p className='text-sm text-zinc-300 leading-relaxed'>
+                <p className='text-sm text-content-secondary leading-relaxed'>
                   {
                     tarotSuits[suit as keyof typeof tarotSuits]
                       .mysticalProperties
@@ -194,7 +196,7 @@ const Tarot = () => {
         {/* All Minor Arcana Cards by Suit */}
         {minorArcanaBySuit.map(({ suitKey, suitName, cards }) => (
           <div key={suitKey} className='space-y-4'>
-            <h3 className='text-lg font-medium text-zinc-100 border-b border-zinc-700 pb-2'>
+            <h3 className='text-lg font-medium text-content-primary border-b border-stroke-default pb-2'>
               {suitName}
             </h3>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
@@ -215,7 +217,7 @@ const Tarot = () => {
       {/* Reversed Cards Section */}
       <section id='reversed-cards' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             <Link
               href='/grimoire/reversed-cards-guide'
               className='hover:text-lunary-primary-400 transition-colors'
@@ -223,7 +225,7 @@ const Tarot = () => {
               Reversed Cards Guide
             </Link>
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Reversed cards (cards that appear upside down) add depth and nuance
             to tarot readings. They don't always mean the opposite of the
             upright meaning—often they indicate internal processes, delays, or
@@ -231,14 +233,14 @@ const Tarot = () => {
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Understanding Reversed Cards
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+            <p className='text-sm text-content-secondary leading-relaxed mb-3'>
               Reversed cards can mean several things depending on context:
             </p>
-            <ul className='list-disc list-inside text-sm text-zinc-300 space-y-2 mb-3'>
+            <ul className='list-disc list-inside text-sm text-content-secondary space-y-2 mb-3'>
               <li>
                 <strong>Blocked energy:</strong> The card's energy is present
                 but not flowing freely
@@ -260,16 +262,16 @@ const Tarot = () => {
                 side of the card's energy
               </li>
             </ul>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               Always consider the card's position in the spread, surrounding
               cards, and your intuition when interpreting reversals.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               How to Read Reversed Cards
             </h3>
-            <div className='space-y-3 text-sm text-zinc-300'>
+            <div className='space-y-3 text-sm text-content-secondary'>
               <div>
                 <strong>1. Check the context:</strong> What question are you
                 asking? What position is the card in?
@@ -289,11 +291,11 @@ const Tarot = () => {
               </div>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Common Reversed Patterns
             </h3>
-            <div className='space-y-3 text-sm text-zinc-300'>
+            <div className='space-y-3 text-sm text-content-secondary'>
               <div>
                 <strong>Major Arcana reversed:</strong> Often indicates internal
                 spiritual work or shadow aspects of major life themes
@@ -314,7 +316,7 @@ const Tarot = () => {
       {/* Card Combinations Section */}
       <section id='card-combinations' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             <Link
               href='/grimoire/card-combinations'
               className='hover:text-lunary-primary-400 transition-colors'
@@ -322,18 +324,18 @@ const Tarot = () => {
               Reading Card Combinations
             </Link>
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Cards don't exist in isolation. Learning to read cards together
             creates richer, more nuanced interpretations. Here are common
             combination patterns.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Element Combinations
             </h3>
-            <div className='space-y-3 text-sm text-zinc-300'>
+            <div className='space-y-3 text-sm text-content-secondary'>
               <div>
                 <strong>Fire + Air:</strong> Action and ideas combine for
                 inspired action and communication
@@ -352,11 +354,11 @@ const Tarot = () => {
               </div>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Number Patterns
             </h3>
-            <div className='space-y-3 text-sm text-zinc-300'>
+            <div className='space-y-3 text-sm text-content-secondary'>
               <div>
                 <strong>Multiple Aces:</strong> New beginnings in multiple areas
                 of life
@@ -375,11 +377,11 @@ const Tarot = () => {
               </div>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Major Arcana Combinations
             </h3>
-            <div className='space-y-3 text-sm text-zinc-300'>
+            <div className='space-y-3 text-sm text-content-secondary'>
               <div>
                 <strong>The Fool + The World:</strong> Beginning and ending of a
                 cycle, completion leading to new start
@@ -398,11 +400,11 @@ const Tarot = () => {
               </div>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               How to Read Combinations
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 1. <strong>Look for themes:</strong> What do the cards have in
                 common?
@@ -427,20 +429,20 @@ const Tarot = () => {
       {/* Tarot Ethics Section */}
       <section id='tarot-ethics' className='space-y-6'>
         <div>
-          <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+          <h2 className='text-xl font-medium text-content-primary mb-2'>
             Tarot Ethics & Best Practices
           </h2>
-          <p className='text-sm text-zinc-400 mb-4'>
+          <p className='text-sm text-content-muted mb-4'>
             Reading tarot for others comes with responsibility. Here are ethical
             guidelines and best practices for tarot readers.
           </p>
         </div>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               When to Read for Others
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 Reading for others can be rewarding but requires skill and
                 sensitivity. Consider reading for others when:
@@ -453,11 +455,11 @@ const Tarot = () => {
               </ul>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Ethical Guidelines
             </h3>
-            <div className='space-y-3 text-sm text-zinc-300'>
+            <div className='space-y-3 text-sm text-content-secondary'>
               <div>
                 <strong>Consent:</strong> Always get permission before reading
                 for someone
@@ -484,11 +486,11 @@ const Tarot = () => {
               </div>
             </div>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Self-Reading Best Practices
             </h3>
-            <div className='space-y-2 text-sm text-zinc-300'>
+            <div className='space-y-2 text-sm text-content-secondary'>
               <p>
                 Reading for yourself is valuable but requires awareness of bias:
               </p>
@@ -506,26 +508,26 @@ const Tarot = () => {
 
       {/* FAQ Section */}
       <section id='faq' className='space-y-6'>
-        <h2 className='text-xl font-medium text-zinc-100'>
+        <h2 className='text-xl font-medium text-content-primary'>
           Frequently Asked Questions
         </h2>
         <div className='space-y-4'>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               What is the difference between Major and Minor Arcana?
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               The Major Arcana consists of 22 cards representing significant
               life themes and spiritual lessons. The Minor Arcana has 56 cards
               organized into four suits (Cups, Wands, Swords, Pentacles) that
               represent everyday experiences and situations.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               How do I interpret reversed cards?
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               Reversed cards typically indicate blocked energy, internal
               processes, or a need to look within. They can also represent the
               opposite of the card's upright meaning or a delay in the energy's
@@ -534,33 +536,33 @@ const Tarot = () => {
               information.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               How often should I cleanse my tarot deck?
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               Cleansing frequency depends on usage. Cleanse after difficult
               readings, when the deck feels heavy, or monthly. Methods include
               placing crystals on the deck, smudging with sage, moonlight
               exposure, or visualization. Choose what resonates with you.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               Can I read tarot for myself?
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               Yes, self-readings are valuable for personal growth and
               introspection. However, be mindful of bias and emotional
               attachment. Take time to reflect, journal your readings, and
               consider seeking another perspective for major decisions.
             </p>
           </div>
-          <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4'>
-            <h3 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+          <div className='rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-4'>
+            <h3 className='text-lg font-medium text-content-brand mb-2'>
               What is the best spread for beginners?
             </h3>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-content-secondary leading-relaxed'>
               The three-card spread (Past, Present, Future) is ideal for
               beginners. It's simple, provides clear context, and helps develop
               card interpretation skills. As you gain confidence, try the Celtic
@@ -571,44 +573,44 @@ const Tarot = () => {
       </section>
 
       {/* Related Topics Section */}
-      <section className='mt-12 pt-8 border-t border-zinc-800/50'>
-        <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+      <section className='mt-12 pt-8 border-t border-stroke-subtle/50'>
+        <h2 className='text-xl font-medium text-content-primary mb-4'>
           Related Topics
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           <Link
             href='/grimoire/divination'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Other Divination Methods
           </Link>
           <Link
             href='/grimoire/spells'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Spellcraft & Magic
           </Link>
           <Link
             href='/grimoire/birth-chart'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Birth Chart Reading
           </Link>
           <Link
             href='/grimoire/crystals'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Crystals for Divination
           </Link>
           <Link
             href='/grimoire/numerology'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Numerology
           </Link>
           <Link
             href='/grimoire/runes'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
+            className='block rounded-lg border border-stroke-subtle/50 bg-surface-elevated/30 p-3 hover:border-lunary-primary-700 hover:bg-surface-elevated/50 transition-all text-sm text-content-secondary hover:text-content-brand'
           >
             Runes
           </Link>

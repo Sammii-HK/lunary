@@ -166,13 +166,13 @@ ${seasonData.displayName} Season falls during ${seasonData.season} in the Northe
       <div className='mt-8 flex justify-between text-sm'>
         <Link
           href={`/grimoire/seasons/${year}/${prevSeason.sign}`}
-          className='text-lunary-primary-400 hover:text-lunary-primary-300'
+          className='text-lunary-primary-400 hover:text-content-brand'
         >
           ← {prevSeason.symbol} {prevSeason.displayName} Season
         </Link>
         <Link
           href={`/grimoire/seasons/${year}/${nextSeason.sign}`}
-          className='text-lunary-primary-400 hover:text-lunary-primary-300'
+          className='text-lunary-primary-400 hover:text-content-brand'
         >
           {nextSeason.displayName} Season {nextSeason.symbol} →
         </Link>

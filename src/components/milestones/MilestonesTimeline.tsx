@@ -37,8 +37,8 @@ const TYPE_ICONS: Record<string, typeof Trophy> = {
 const TYPE_COLORS: Record<string, string> = {
   solar_return: 'text-amber-400 bg-amber-900/30',
   lunar_return: 'text-indigo-400 bg-indigo-900/30',
-  saturn_return: 'text-zinc-300 bg-zinc-800',
-  app_anniversary: 'text-lunary-primary-400 bg-lunary-primary-900/30',
+  saturn_return: 'text-content-secondary bg-surface-card',
+  app_anniversary: 'text-lunary-primary-400 bg-layer-base/30',
   reading_count: 'text-lunary-accent bg-lunary-accent/20',
   journal_count: 'text-emerald-400 bg-emerald-900/30',
   streak: 'text-orange-400 bg-orange-900/30',
@@ -71,7 +71,7 @@ export function MilestonesTimeline() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className='h-16 bg-zinc-900/50 rounded-lg animate-pulse'
+            className='h-16 bg-surface-elevated/50 rounded-lg animate-pulse'
           />
         ))}
       </div>
@@ -81,9 +81,9 @@ export function MilestonesTimeline() {
   if (milestones.length === 0) {
     return (
       <div className='text-center py-8'>
-        <Trophy className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
-        <p className='text-zinc-400 text-sm'>No milestones yet</p>
-        <p className='text-xs text-zinc-500 mt-1'>
+        <Trophy className='w-10 h-10 text-content-muted mx-auto mb-3' />
+        <p className='text-content-muted text-sm'>No milestones yet</p>
+        <p className='text-xs text-content-muted mt-1'>
           Keep practicing to unlock cosmic milestones
         </p>
       </div>
@@ -95,7 +95,7 @@ export function MilestonesTimeline() {
       {milestones.map((milestone, index) => {
         const Icon = TYPE_ICONS[milestone.type] || Trophy;
         const colorClass =
-          TYPE_COLORS[milestone.type] || 'text-zinc-400 bg-zinc-800';
+          TYPE_COLORS[milestone.type] || 'text-content-muted bg-surface-card';
         const date = new Date(milestone.achievedAt);
         const formattedDate = date.toLocaleDateString('en-GB', {
           month: 'short',
@@ -117,14 +117,18 @@ export function MilestonesTimeline() {
                 <Icon className='w-4 h-4' />
               </div>
               {index < milestones.length - 1 && (
-                <div className='w-px h-full bg-zinc-800 min-h-[24px]' />
+                <div className='w-px h-full bg-surface-card min-h-[24px]' />
               )}
             </div>
 
             {/* Content */}
             <div className='pb-4'>
-              <p className='text-sm font-medium text-white'>{title}</p>
-              <p className='text-xs text-zinc-500 mt-0.5'>{formattedDate}</p>
+              <p className='text-sm font-medium text-content-primary'>
+                {title}
+              </p>
+              <p className='text-xs text-content-muted mt-0.5'>
+                {formattedDate}
+              </p>
             </div>
           </div>
         );

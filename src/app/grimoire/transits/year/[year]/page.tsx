@@ -366,8 +366,8 @@ export default async function TransitsYearPage({
       }
     >
       {/* Quick-nav links to individual transit pages — helps Google prefer individual pages over this year page */}
-      <nav className='mb-8 rounded-xl border border-zinc-800 bg-zinc-900/50 p-5'>
-        <p className='text-sm font-medium text-zinc-300 mb-3'>
+      <nav className='mb-8 rounded-xl border border-stroke-subtle bg-surface-elevated/50 p-5'>
+        <p className='text-sm font-medium text-content-secondary mb-3'>
           Looking for a specific transit? Jump to:
         </p>
         <ul className='space-y-1.5'>
@@ -375,10 +375,10 @@ export default async function TransitsYearPage({
             <li key={`nav-${transit.id}`}>
               <Link
                 href={`/grimoire/transits/${transit.id}`}
-                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+                className='text-sm text-lunary-primary-400 hover:text-content-brand transition-colors'
               >
                 {transit.title}{' '}
-                <span className='text-zinc-500'>— {transit.dates}</span>
+                <span className='text-content-muted'>— {transit.dates}</span>
               </Link>
             </li>
           ))}
@@ -390,20 +390,22 @@ export default async function TransitsYearPage({
           <Link
             key={transit.id}
             href={`/grimoire/transits/${transit.id}`}
-            className='rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 hover:border-lunary-primary-600 transition-colors'
+            className='rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-5 hover:border-lunary-primary-600 transition-colors'
           >
-            <div className='text-xs uppercase tracking-[0.25em] text-zinc-500 mb-2'>
+            <div className='text-xs uppercase tracking-[0.25em] text-content-muted mb-2'>
               {transit.dates}
             </div>
-            <h2 className='text-lg font-medium text-zinc-100 mb-2'>
+            <h2 className='text-lg font-medium text-content-primary mb-2'>
               {transit.title}
             </h2>
-            <p className='text-sm text-zinc-400 mb-3'>{transit.description}</p>
+            <p className='text-sm text-content-muted mb-3'>
+              {transit.description}
+            </p>
             <div className='flex flex-wrap gap-2'>
               {transit.signs.map((sign) => (
                 <span
                   key={sign}
-                  className='text-xs px-2 py-1 rounded bg-lunary-primary-900/20 text-lunary-primary-300'
+                  className='text-xs px-2 py-1 rounded bg-layer-base/20 text-content-brand'
                 >
                   {sign}
                 </span>
@@ -419,7 +421,7 @@ export default async function TransitsYearPage({
           <Heading as='h2' variant='h2'>
             {year} Major Conjunctions
           </Heading>
-          <p className='text-zinc-400 mb-6'>
+          <p className='text-content-muted mb-6'>
             Rare planetary alignments that mark significant shifts in collective
             energy. These events happen on cycles of years to centuries.
           </p>
@@ -430,27 +432,27 @@ export default async function TransitsYearPage({
                 className={`rounded-xl border p-5 ${
                   conjunction.significance === 'major'
                     ? 'border-amber-700/50 bg-amber-900/10'
-                    : 'border-zinc-800 bg-zinc-900/40'
+                    : 'border-stroke-subtle bg-surface-elevated/40'
                 }`}
               >
-                <div className='text-xs uppercase tracking-[0.25em] text-zinc-500 mb-2'>
+                <div className='text-xs uppercase tracking-[0.25em] text-content-muted mb-2'>
                   {format(new Date(conjunction.date), 'MMMM d, yyyy')}
                 </div>
-                <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                <h3 className='text-lg font-medium text-content-primary mb-2'>
                   {conjunction.planet1}-{conjunction.planet2} Conjunction
                 </h3>
-                <p className='text-sm text-zinc-400 mb-3'>
+                <p className='text-sm text-content-muted mb-3'>
                   {conjunction.description}
                 </p>
                 <div className='flex flex-wrap gap-2'>
-                  <span className='text-xs px-2 py-1 rounded bg-lunary-primary-900/20 text-lunary-primary-300'>
+                  <span className='text-xs px-2 py-1 rounded bg-layer-base/20 text-content-brand'>
                     {conjunction.sign}
                   </span>
                   <span
                     className={`text-xs px-2 py-1 rounded ${
                       conjunction.significance === 'major'
                         ? 'bg-amber-900/30 text-amber-300'
-                        : 'bg-zinc-800 text-zinc-400'
+                        : 'bg-surface-card text-content-muted'
                     }`}
                   >
                     {conjunction.separation}° separation
@@ -471,14 +473,14 @@ export default async function TransitsYearPage({
           {section.paragraphs?.map((paragraph, index) => (
             <p
               key={`${section.id}-p-${index}`}
-              className='text-zinc-300 leading-relaxed mb-4'
+              className='text-content-secondary leading-relaxed mb-4'
             >
               {paragraph}
             </p>
           ))}
 
           {section.bullets && section.bullets.length > 0 ? (
-            <ul className='space-y-2 text-zinc-300 mb-6'>
+            <ul className='space-y-2 text-content-secondary mb-6'>
               {section.bullets.map((bullet, index) => (
                 <li key={`${section.id}-b-${index}`}>• {bullet}</li>
               ))}
@@ -490,12 +492,16 @@ export default async function TransitsYearPage({
               {section.columns.map((column) => (
                 <div
                   key={column.title}
-                  className='rounded-xl border border-zinc-800 bg-zinc-900/40 p-5'
+                  className='rounded-xl border border-stroke-subtle bg-surface-elevated/40 p-5'
                 >
-                  <Heading as='h3' variant='h3' className='text-zinc-100 mb-3'>
+                  <Heading
+                    as='h3'
+                    variant='h3'
+                    className='text-content-primary mb-3'
+                  >
                     {column.title}
                   </Heading>
-                  <ul className='space-y-2 text-sm text-zinc-400'>
+                  <ul className='space-y-2 text-sm text-content-muted'>
                     {column.bullets.map((bullet, index) => (
                       <li key={`${section.id}-${column.title}-b-${index}`}>
                         • {bullet}
@@ -508,15 +514,11 @@ export default async function TransitsYearPage({
           ) : null}
 
           {section.callout ? (
-            <div className='rounded-xl border border-lunary-primary-700 bg-lunary-primary-900/20 p-6'>
-              <Heading
-                as='h3'
-                variant='h3'
-                className='text-lunary-primary-300 mb-2'
-              >
+            <div className='rounded-xl border border-lunary-primary-700 bg-layer-base/20 p-6'>
+              <Heading as='h3' variant='h3' className='text-content-brand mb-2'>
                 {section.callout.title}
               </Heading>
-              <p className='text-zinc-300 leading-relaxed'>
+              <p className='text-content-secondary leading-relaxed'>
                 {section.callout.body}
               </p>
             </div>

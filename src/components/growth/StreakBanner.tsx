@@ -61,10 +61,10 @@ export function StreakBanner({
     return (
       <Link
         href='/auth'
-        className={`group flex items-center gap-2 rounded-xl border border-zinc-800/50 bg-zinc-900/40 px-4 py-3 transition-all hover:border-lunary-primary-700/50 hover:bg-zinc-900/60 ${className}`}
+        className={`group flex items-center gap-2 rounded-xl border border-stroke-subtle/50 bg-surface-elevated/40 px-4 py-3 transition-all hover:border-lunary-primary-700/50 hover:bg-surface-elevated/60 ${className}`}
       >
-        <Flame className='w-4 h-4 text-zinc-500 group-hover:text-lunary-rose' />
-        <span className='text-sm text-zinc-400 group-hover:text-zinc-200'>
+        <Flame className='w-4 h-4 text-content-muted group-hover:text-lunary-rose' />
+        <span className='text-sm text-content-muted group-hover:text-content-primary'>
           Start your cosmic streak — create your Lunary profile
         </span>
       </Link>
@@ -75,20 +75,24 @@ export function StreakBanner({
     if (variant === 'compact') {
       return (
         <div className={`flex items-center gap-2 ${className}`}>
-          <Flame className='w-4 h-4 text-zinc-500' />
-          <span className='text-xs text-zinc-500'>Start your streak today</span>
+          <Flame className='w-4 h-4 text-content-muted' />
+          <span className='text-xs text-content-muted'>
+            Start your streak today
+          </span>
         </div>
       );
     }
 
     return (
       <div
-        className={`flex items-center gap-3 rounded-xl border border-zinc-800/50 bg-zinc-900/40 px-4 py-3 ${className}`}
+        className={`flex items-center gap-3 rounded-xl border border-stroke-subtle/50 bg-surface-elevated/40 px-4 py-3 ${className}`}
       >
-        <Flame className='w-5 h-5 text-zinc-500' />
+        <Flame className='w-5 h-5 text-content-muted' />
         <div>
-          <p className='text-sm text-zinc-300'>Begin your cosmic streak</p>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-sm text-content-secondary'>
+            Begin your cosmic streak
+          </p>
+          <p className='text-xs text-content-muted'>
             Check in daily to build momentum
           </p>
         </div>
@@ -109,16 +113,16 @@ export function StreakBanner({
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-xl border border-lunary-rose/20 bg-gradient-to-r from-lunary-rose/5 to-zinc-900/60 px-4 py-3 ${className}`}
+      className={`flex items-center gap-3 rounded-xl border border-lunary-rose/20 bg-gradient-to-r from-lunary-rose/5 to-surface-elevated/60 px-4 py-3 ${className}`}
     >
       <div className='shrink-0 w-10 h-10 rounded-full bg-lunary-rose/10 border border-lunary-rose/20 flex items-center justify-center'>
         <Flame className='w-5 h-5 text-lunary-rose' />
       </div>
       <div className='flex-1'>
-        <p className='text-sm font-medium text-zinc-100'>
+        <p className='text-sm font-medium text-content-primary'>
           Your {streak.current}-day Lunary streak is alive
         </p>
-        <p className='text-xs text-zinc-400'>
+        <p className='text-xs text-content-muted'>
           {streak.current >= 7
             ? 'Your consistency is building cosmic momentum'
             : 'Keep showing up to deepen your practice'}
@@ -126,7 +130,7 @@ export function StreakBanner({
       </div>
       {streak.longest > streak.current && (
         <div className='text-right'>
-          <p className='text-xs text-zinc-500'>Best</p>
+          <p className='text-xs text-content-muted'>Best</p>
           <p className='text-sm font-medium text-lunary-accent'>
             {streak.longest} days
           </p>

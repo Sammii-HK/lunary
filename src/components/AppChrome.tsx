@@ -422,7 +422,7 @@ export function AppChrome() {
         >
           <ModalHeader>Share your Lunary experience?</ModalHeader>
           <ModalBody>
-            <p className='text-sm text-zinc-300'>
+            <p className='text-sm text-content-secondary'>
               You&apos;ve been engaging with Lunary for about a week—would you
               mind sharing a quick testimonial while the experience is still
               fresh?

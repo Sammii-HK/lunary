@@ -135,7 +135,7 @@ export default function EclipsesIndexPage() {
       >
         <div className='space-y-12'>
           <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-2xl font-medium text-content-primary mb-6'>
               Types of Eclipses
             </h2>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -146,7 +146,7 @@ export default function EclipsesIndexPage() {
                   className={`group rounded-xl border p-6 transition-all ${
                     eclipse.slug === 'solar'
                       ? 'border-amber-900/50 bg-amber-950/20 hover:bg-amber-950/30 hover:border-amber-600'
-                      : 'border-zinc-700 bg-zinc-900/50 hover:bg-zinc-900/70 hover:border-zinc-500'
+                      : 'border-stroke-default bg-surface-elevated/50 hover:bg-surface-elevated/70 hover:border-stroke-strong'
                   }`}
                 >
                   <div className='flex items-center gap-4 mb-4'>
@@ -154,7 +154,7 @@ export default function EclipsesIndexPage() {
                       className={
                         eclipse.slug === 'solar'
                           ? 'text-amber-400'
-                          : 'text-zinc-300'
+                          : 'text-content-secondary'
                       }
                     >
                       {eclipse.icon}
@@ -162,20 +162,26 @@ export default function EclipsesIndexPage() {
                     <h3
                       className={`text-xl font-medium ${
                         eclipse.slug === 'solar'
-                          ? 'text-zinc-100 group-hover:text-amber-300'
-                          : 'text-zinc-100 group-hover:text-zinc-200'
+                          ? 'text-content-primary group-hover:text-amber-300'
+                          : 'text-content-primary group-hover:text-content-primary'
                       } transition-colors`}
                     >
                       {eclipse.name}
                     </h3>
                   </div>
-                  <p className='text-zinc-400 mb-3'>{eclipse.description}</p>
-                  <div className='text-sm text-zinc-400 mb-3'>
-                    <span className='font-medium text-zinc-400'>Occurs: </span>
+                  <p className='text-content-muted mb-3'>
+                    {eclipse.description}
+                  </p>
+                  <div className='text-sm text-content-muted mb-3'>
+                    <span className='font-medium text-content-muted'>
+                      Occurs:{' '}
+                    </span>
                     {eclipse.occurs}
                   </div>
-                  <div className='text-sm text-zinc-400 mb-4'>
-                    <span className='font-medium text-zinc-400'>Energy: </span>
+                  <div className='text-sm text-content-muted mb-4'>
+                    <span className='font-medium text-content-muted'>
+                      Energy:{' '}
+                    </span>
                     {eclipse.energy}
                   </div>
                   <div className='flex flex-wrap gap-2'>
@@ -185,7 +191,7 @@ export default function EclipsesIndexPage() {
                         className={`text-xs px-2 py-1 rounded ${
                           eclipse.slug === 'solar'
                             ? 'bg-amber-900/30 text-amber-300/70'
-                            : 'bg-zinc-800 text-zinc-400'
+                            : 'bg-surface-card text-content-muted'
                         }`}
                       >
                         {theme}

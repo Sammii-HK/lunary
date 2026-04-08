@@ -32,7 +32,7 @@ export function ShareActions({
         <button
           onClick={onShare}
           disabled={disabled}
-          className='w-full flex items-center justify-center gap-2 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed'
+          className='w-full flex items-center justify-center gap-2 py-3 bg-lunary-primary-600 hover:bg-layer-high text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed'
         >
           <Share2 className='w-4 h-4' />
           Share Image
@@ -42,7 +42,7 @@ export function ShareActions({
       <button
         onClick={onDownload}
         disabled={disabled}
-        className='w-full flex items-center justify-center gap-2 py-3 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+        className='w-full flex items-center justify-center gap-2 py-3 bg-surface-overlay hover:bg-surface-overlay text-content-primary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
       >
         <Download className='w-4 h-4' />
         Save Image
@@ -55,7 +55,7 @@ export function ShareActions({
               href={socialUrls.x}
               target='_blank'
               rel='noopener noreferrer'
-              className='flex-1 flex items-center justify-center gap-2 py-2.5 border border-zinc-700 hover:bg-zinc-800 text-zinc-300 rounded-lg transition-colors text-sm'
+              className='flex-1 flex items-center justify-center gap-2 py-2.5 border border-stroke-default hover:bg-surface-card text-content-secondary rounded-lg transition-colors text-sm'
             >
               <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'>
                 <path d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z' />
@@ -68,7 +68,7 @@ export function ShareActions({
               href={socialUrls.threads}
               target='_blank'
               rel='noopener noreferrer'
-              className='flex-1 flex items-center justify-center gap-2 py-2.5 border border-zinc-700 hover:bg-zinc-800 text-zinc-300 rounded-lg transition-colors text-sm'
+              className='flex-1 flex items-center justify-center gap-2 py-2.5 border border-stroke-default hover:bg-surface-card text-content-secondary rounded-lg transition-colors text-sm'
             >
               <svg
                 className='w-4 h-4'
@@ -84,7 +84,7 @@ export function ShareActions({
             <button
               onClick={onCopyLink}
               disabled={disabled}
-              className='flex-1 flex items-center justify-center gap-2 py-2.5 border border-zinc-700 hover:bg-zinc-800 text-zinc-300 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
+              className='flex-1 flex items-center justify-center gap-2 py-2.5 border border-stroke-default hover:bg-surface-card text-content-secondary rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed'
             >
               {linkCopied ? (
                 <>

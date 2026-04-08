@@ -10,7 +10,7 @@ const TOPIC_COLORS: Record<string, string> = {
   relationships: 'bg-pink-900/40 text-pink-300 border-pink-700/50',
   tarot: 'bg-purple-900/40 text-purple-300 border-purple-700/50',
   career: 'bg-amber-900/40 text-amber-300 border-amber-700/50',
-  general: 'bg-zinc-800/60 text-zinc-300 border-zinc-700/50',
+  general: 'bg-surface-card/60 text-content-secondary border-stroke-default/50',
 };
 
 interface QuestionCardProps {
@@ -42,7 +42,7 @@ export function QuestionCard({
   const topicColor = TOPIC_COLORS[topic] || TOPIC_COLORS.general;
 
   return (
-    <div className='flex gap-3 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 transition-colors'>
+    <div className='flex gap-3 p-4 rounded-lg border border-stroke-subtle bg-surface-elevated/50 hover:border-stroke-default transition-colors'>
       {/* Vote column */}
       <div className='flex flex-col items-center gap-1 min-w-[40px]'>
         <button
@@ -50,18 +50,20 @@ export function QuestionCard({
           className={`p-1 rounded transition-colors ${
             hasVoted
               ? 'text-lunary-primary-400'
-              : 'text-zinc-500 hover:text-zinc-300'
+              : 'text-content-muted hover:text-content-secondary'
           }`}
         >
           <ChevronUp className='w-5 h-5' />
         </button>
-        <span className='text-sm font-medium text-zinc-300'>{voteCount}</span>
+        <span className='text-sm font-medium text-content-secondary'>
+          {voteCount}
+        </span>
       </div>
 
       {/* Content */}
       <div className='flex-1 min-w-0'>
         <Link href={`/community/questions/${id}`} className='block group'>
-          <p className='text-sm text-zinc-200 group-hover:text-white transition-colors line-clamp-2'>
+          <p className='text-sm text-content-primary group-hover:text-content-primary transition-colors line-clamp-2'>
             {text}
           </p>
         </Link>
@@ -73,17 +75,17 @@ export function QuestionCard({
             {topic}
           </span>
 
-          <span className='flex items-center gap-1 text-xs text-zinc-500'>
+          <span className='flex items-center gap-1 text-xs text-content-muted'>
             <MessageCircle className='w-3 h-3' />
             {answerCount}
           </span>
 
-          <span className='text-xs text-zinc-500'>
+          <span className='text-xs text-content-muted'>
             {isAnonymous ? 'Anonymous' : authorName || 'Unknown'}
           </span>
 
           {createdAt && (
-            <span className='text-xs text-zinc-600'>
+            <span className='text-xs text-content-muted'>
               {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
             </span>
           )}

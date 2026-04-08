@@ -132,13 +132,13 @@ export default function AnalyticsPageSWR() {
       {/* Header */}
       <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
         <div>
-          <h1 className='text-3xl font-bold tracking-tight text-white'>
+          <h1 className='text-3xl font-bold tracking-tight text-content-primary'>
             Analytics Dashboard
             <span className='ml-3 rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-400'>
               Auto-updating
             </span>
           </h1>
-          <p className='mt-1 text-sm text-zinc-400'>
+          <p className='mt-1 text-sm text-content-muted'>
             Monitor user engagement, retention, and growth metrics • Updates
             automatically every 5-30 min
           </p>
@@ -146,20 +146,20 @@ export default function AnalyticsPageSWR() {
 
         <div className='flex flex-wrap items-center gap-2'>
           {/* Date Range Picker */}
-          <div className='flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2'>
-            <CalendarRange className='h-4 w-4 text-zinc-400' />
+          <div className='flex items-center gap-2 rounded-lg border border-stroke-subtle bg-surface-elevated/40 px-3 py-2'>
+            <CalendarRange className='h-4 w-4 text-content-muted' />
             <input
               type='date'
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className='bg-transparent text-sm text-zinc-200 outline-none'
+              className='bg-transparent text-sm text-content-primary outline-none'
             />
-            <span className='text-zinc-500'>to</span>
+            <span className='text-content-muted'>to</span>
             <input
               type='date'
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className='bg-transparent text-sm text-zinc-200 outline-none'
+              className='bg-transparent text-sm text-content-primary outline-none'
             />
           </div>
 
@@ -169,7 +169,7 @@ export default function AnalyticsPageSWR() {
             onChange={(e) =>
               setGranularity(e.target.value as 'day' | 'week' | 'month')
             }
-            className='rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-sm text-zinc-200 outline-none'
+            className='rounded-lg border border-stroke-subtle bg-surface-elevated/40 px-3 py-2 text-sm text-content-primary outline-none'
           >
             <option value='day'>Daily</option>
             <option value='week'>Weekly</option>
@@ -187,37 +187,37 @@ export default function AnalyticsPageSWR() {
               <Settings className='h-4 w-4' />
             </Button>
             {showExportMenu && (
-              <div className='absolute right-0 top-full z-10 mt-2 w-48 rounded-lg border border-zinc-800 bg-zinc-900 p-2 shadow-lg'>
+              <div className='absolute right-0 top-full z-10 mt-2 w-48 rounded-lg border border-stroke-subtle bg-surface-elevated p-2 shadow-lg'>
                 <button
                   onClick={handleExportCsv}
-                  className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800'
+                  className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-content-primary hover:bg-surface-card'
                 >
                   <Download className='h-4 w-4' />
                   Export CSV
                 </button>
                 <button
                   onClick={handleExportJson}
-                  className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800'
+                  className='flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-content-primary hover:bg-surface-card'
                 >
                   <Download className='h-4 w-4' />
                   Export JSON
                 </button>
-                <div className='my-2 border-t border-zinc-800' />
-                <label className='flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800'>
+                <div className='my-2 border-t border-stroke-subtle' />
+                <label className='flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-content-primary hover:bg-surface-card'>
                   <input
                     type='checkbox'
                     checked={showProductSeries}
                     onChange={(e) => setShowProductSeries(e.target.checked)}
-                    className='rounded border-zinc-600'
+                    className='rounded border-stroke-strong'
                   />
                   Show product series
                 </label>
-                <label className='flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800'>
+                <label className='flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-content-primary hover:bg-surface-card'>
                   <input
                     type='checkbox'
                     checked={includeAudit}
                     onChange={(e) => setIncludeAudit(e.target.checked)}
-                    className='rounded border-zinc-600'
+                    className='rounded border-stroke-strong'
                   />
                   Show audit data
                 </label>
@@ -228,14 +228,14 @@ export default function AnalyticsPageSWR() {
       </div>
 
       {/* Window Info */}
-      <div className='text-xs text-zinc-500'>
+      <div className='text-xs text-content-muted'>
         WAU window: {wauWindowStart} to {endDate} | MAU window: {mauWindowStart}{' '}
         to {endDate}
       </div>
 
       {/* Error Display */}
       {analyticsData.error && (
-        <div className='rounded-xl border border-lunary-error-700/40 bg-lunary-error-950/40 px-4 py-3 text-sm text-lunary-error-200'>
+        <div className='rounded-xl border border-lunary-error-700/40 bg-layer-deep/40 px-4 py-3 text-sm text-lunary-error-200'>
           {analyticsData.error}
         </div>
       )}
@@ -250,7 +250,7 @@ export default function AnalyticsPageSWR() {
           onValueChange={(v) => setActiveTab(v as Tab)}
           className='space-y-6'
         >
-          <TabsList className='rounded-xl border border-zinc-800/40 bg-zinc-900/20 p-1'>
+          <TabsList className='rounded-xl border border-stroke-subtle/40 bg-surface-elevated/20 p-1'>
             <TabsTrigger
               value='snapshot'
               className='rounded-lg px-4 py-2 text-sm'

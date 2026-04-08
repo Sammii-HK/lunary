@@ -93,18 +93,20 @@ export default function TestOGPage() {
 
   if (!selectedDate) {
     // avoid rendering anything that depends on date until mounted
-    return <div className='p-6 text-zinc-400'>Loading…</div>;
+    return <div className='p-6 text-content-muted'>Loading…</div>;
   }
 
   // const nextMonthDates = getNextMonthDates();
 
   return (
     <div className='flex flex-col items-center gap-6 p-4'>
-      <h1 className='text-3xl font-bold text-white mb-6'>Cosmic OG Preview</h1>
+      <h1 className='text-3xl font-bold text-content-primary mb-6'>
+        Cosmic OG Preview
+      </h1>
 
       {/* Selected Date Image */}
-      <div className='bg-zinc-800 rounded-lg p-6 max-w-2xl w-full'>
-        <h2 className='text-xl font-semibold text-white mb-4 text-center'>
+      <div className='bg-surface-card rounded-lg p-6 max-w-2xl w-full'>
+        <h2 className='text-xl font-semibold text-content-primary mb-4 text-center'>
           Selected Date: {formatDateDisplay(selectedDate)}
         </h2>
         <div className='flex justify-center mb-4'>
@@ -127,36 +129,36 @@ export default function TestOGPage() {
             className='cursor-pointer hover:opacity-90 transition-opacity'
           />
         </div>
-        <p className='text-zinc-400 text-sm text-center'>
+        <p className='text-content-muted text-sm text-center'>
           Click image to view full size (1200×1200px)
         </p>
       </div>
 
       {/* Post Content */}
-      <div className='bg-zinc-800 rounded-lg p-6 max-w-2xl w-full'>
+      <div className='bg-surface-card rounded-lg p-6 max-w-2xl w-full'>
         <h2 className='text-xl font-semibold text-lunary-primary-400 mb-4'>
           Post Content
         </h2>
         {loading ? (
           <div className='animate-pulse'>
-            <div className='h-4 bg-zinc-700 rounded mb-2'></div>
-            <div className='h-4 bg-zinc-700 rounded mb-2'></div>
-            <div className='h-4 bg-zinc-700 rounded mb-2'></div>
+            <div className='h-4 bg-surface-overlay rounded mb-2'></div>
+            <div className='h-4 bg-surface-overlay rounded mb-2'></div>
+            <div className='h-4 bg-surface-overlay rounded mb-2'></div>
           </div>
         ) : postContent ? (
           <div className='space-y-4'>
             {/* <div>
-              <h3 className='text-lg font-medium text-white mb-2'>
+              <h3 className='text-lg font-medium text-content-primary mb-2'>
                 {postContent.primaryEvent?.name} - {postContent.primaryEvent?.energy}
               </h3>
-              <p className='text-zinc-300 text-sm mb-4'>{postContent.date}</p>
+              <p className='text-content-secondary text-sm mb-4'>{postContent.date}</p>
             </div> */}
 
             {/* <div>
-              <h4 className='text-lunary-primary-300 font-medium mb-2'>🌟 Cosmic Highlights</h4>
+              <h4 className='text-content-brand font-medium mb-2'>🌟 Cosmic Highlights</h4>
               <ul className='space-y-1'>
                 {postContent.highlights?.map((highlight, index) => (
-                  <li key={index} className='text-zinc-300 text-sm'>
+                  <li key={index} className='text-content-secondary text-sm'>
                     {highlight}
                   </li>
                 ))}
@@ -164,38 +166,38 @@ export default function TestOGPage() {
             </div>
 
             <div>
-              <h4 className='text-lunary-primary-300 font-medium mb-2'>✨ Today's Guidance</h4>
-              <p className='text-zinc-300 text-sm leading-relaxed'>
+              <h4 className='text-content-brand font-medium mb-2'>✨ Today's Guidance</h4>
+              <p className='text-content-secondary text-sm leading-relaxed'>
                 {postContent.horoscopeSnippet}
               </p>
             </div>
 
-            <div className='pt-2 border-t border-zinc-700'>
+            <div className='pt-2 border-t border-stroke-default'>
               <p className='text-lunary-primary-400 text-sm font-medium'>
                 {postContent.callToAction}
               </p>
             </div> */}
-            <div className='pt-2 border-t border-zinc-700'>
+            <div className='pt-2 border-t border-stroke-default'>
               <p className='text-lunary-primary-400 text-sm font-medium whitespace-pre-line leading-relaxed'>
                 {postContent.snippet}
               </p>
             </div>
           </div>
         ) : (
-          <p className='text-zinc-400'>Failed to load post content</p>
+          <p className='text-content-muted'>Failed to load post content</p>
         )}
       </div>
 
       {/* Monthly Preview Grid */}
       <div className='w-full max-w-6xl'>
-        <h2 className='text-2xl font-bold text-white mb-6 text-center'>
+        <h2 className='text-2xl font-bold text-content-primary mb-6 text-center'>
           30-Day Preview
         </h2>
         <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'>
           {nextMonthDates.map((date, index) => (
             <div
               key={index}
-              className={`bg-zinc-800 rounded-lg p-2 text-center cursor-pointer transition-all hover:bg-zinc-700 ${
+              className={`bg-surface-card rounded-lg p-2 text-center cursor-pointer transition-all hover:bg-surface-overlay ${
                 formatDateForUrl(date) === formatDateForUrl(selectedDate)
                   ? 'ring-2 ring-lunary-primary'
                   : ''
@@ -215,7 +217,7 @@ export default function TestOGPage() {
                 }}
                 className='mb-2 hover:opacity-90 transition-opacity'
               />
-              <p className='text-zinc-300 text-xs font-medium'>
+              <p className='text-content-secondary text-xs font-medium'>
                 {formatDateDisplay(date)}
               </p>
             </div>

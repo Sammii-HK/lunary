@@ -46,29 +46,25 @@ const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
 };
 
 const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
-  zodiac:
-    'bg-lunary-primary-900/20 text-lunary-primary-300 border-lunary-primary-700',
-  planet:
-    'bg-lunary-accent-900 text-lunary-accent-300 border-lunary-accent-700',
-  tarot: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
+  zodiac: 'bg-layer-base/20 text-content-brand border-lunary-primary-700',
+  planet: 'bg-layer-base text-content-brand-accent border-lunary-accent-700',
+  tarot: 'bg-layer-base text-lunary-rose-300 border-lunary-rose-700',
   crystal:
-    'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
-  ritual:
-    'bg-lunary-primary-900 text-lunary-primary-300 border-lunary-primary-700',
-  concept:
-    'bg-lunary-success-900 text-lunary-success-300 border-lunary-success-700',
+    'bg-layer-base text-content-brand-secondary border-lunary-secondary-700',
+  ritual: 'bg-layer-base text-content-brand border-lunary-primary-700',
+  concept: 'bg-layer-base text-lunary-success-300 border-lunary-success-700',
   horoscope:
     'bg-lunary-highlight-900 text-lunary-highlight-300 border-lunary-highlight-700',
   'chinese-zodiac':
-    'bg-lunary-error-900 text-lunary-error-300 border-lunary-error-700',
-  season: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
+    'bg-layer-base text-lunary-error-300 border-lunary-error-700',
+  season: 'bg-layer-base text-lunary-rose-300 border-lunary-rose-700',
   numerology:
-    'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
-  birthday: 'bg-lunary-rose-900 text-lunary-rose-300 border-lunary-rose-700',
+    'bg-layer-base text-content-brand-secondary border-lunary-secondary-700',
+  birthday: 'bg-layer-base text-lunary-rose-300 border-lunary-rose-700',
   compatibility:
     'bg-lunary-highlight-900 text-lunary-highlight-300 border-lunary-highlight-700',
   glossary:
-    'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
+    'bg-layer-base text-content-brand-secondary border-lunary-secondary-700',
   archetype: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
 };
 
@@ -82,8 +78,8 @@ function SearchResultCard({ entry }: SearchResultCardProps) {
       href={`/grimoire/${entry.slug}`}
       className={`
         block p-5 rounded-2xl border
-        bg-black/30 backdrop-blur-sm
-        hover:bg-lunary-primary-900/10 hover:border-lunary-primary-600
+        bg-surface-base/30 backdrop-blur-sm
+        hover:bg-layer-base/10 hover:border-lunary-primary-600
         transition-all duration-300 group
         ${CATEGORY_COLORS[entry.category].split(' ')[2]}
       `}
@@ -101,7 +97,7 @@ function SearchResultCard({ entry }: SearchResultCardProps) {
 
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-3 mb-2'>
-            <h3 className='text-lg font-medium text-white group-hover:text-lunary-primary-200 transition-colors'>
+            <h3 className='text-lg font-medium text-content-primary group-hover:text-content-secondary transition-colors'>
               {entry.title}
             </h3>
             <span
@@ -114,15 +110,13 @@ function SearchResultCard({ entry }: SearchResultCardProps) {
             </span>
           </div>
 
-          <p className='text-sm text-lunary-primary-300/70 mb-3'>
-            {entry.summary}
-          </p>
+          <p className='text-sm text-content-brand/70 mb-3'>{entry.summary}</p>
 
           <div className='flex flex-wrap gap-2'>
             {entry.keywords.slice(0, 5).map((keyword) => (
               <span
                 key={keyword}
-                className='text-xs px-2 py-1 rounded-lg bg-white/5 text-lunary-primary-300/50'
+                className='text-xs px-2 py-1 rounded-lg bg-white/5 text-content-brand/50'
               >
                 {keyword}
               </span>
@@ -153,7 +147,7 @@ function SearchContent({ query }: { query: string }) {
       <GrimoireBreadcrumbs items={breadcrumbItems} />
       {/* Results Header */}
       <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2 text-lunary-primary-300/70'>
+        <div className='flex items-center gap-2 text-content-brand/70'>
           <Sparkles className='h-4 w-4' />
           <span>
             {isDefaultView
@@ -173,10 +167,10 @@ function SearchContent({ query }: { query: string }) {
       ) : (
         <div className='text-center py-16'>
           <Sparkles className='h-12 w-12 text-lunary-primary-400/30 mx-auto mb-4' />
-          <h3 className='text-xl font-medium text-lunary-primary-300 mb-2'>
+          <h3 className='text-xl font-medium text-content-brand mb-2'>
             No cosmic insights found
           </h3>
-          <p className='text-lunary-primary-300/60 max-w-md mx-auto'>
+          <p className='text-content-brand/60 max-w-md mx-auto'>
             Try searching for a zodiac sign, planet, tarot card, crystal, or
             astrological concept.
           </p>
@@ -186,7 +180,7 @@ function SearchContent({ query }: { query: string }) {
       {/* Browse by Category */}
       {isDefaultView && (
         <div className='mt-12 pt-8 border-t border-lunary-primary-700'>
-          <h2 className='text-xl font-medium text-white mb-6'>
+          <h2 className='text-xl font-medium text-content-primary mb-6'>
             Browse by Category
           </h2>
           <div className='grid grid-cols-2 md:grid-cols-3 gap-4'>
@@ -215,10 +209,10 @@ function SearchContent({ query }: { query: string }) {
                 >
                   <span className='text-2xl'>{CATEGORY_ICONS[category]}</span>
                   <div>
-                    <span className='text-white capitalize font-medium'>
+                    <span className='text-content-primary capitalize font-medium'>
                       {category}
                     </span>
-                    <span className='text-lunary-primary-300/50 text-sm block'>
+                    <span className='text-content-brand/50 text-sm block'>
                       {count} {count === 1 ? 'entry' : 'entries'}
                     </span>
                   </div>
@@ -241,7 +235,7 @@ export default async function GrimoireSearchPage({
   const query = params.q || '';
 
   return (
-    <main className='min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#12121a] to-[#0a0a0f] text-white'>
+    <main className='min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#12121a] to-[#0a0a0f] text-content-primary'>
       {/* Header */}
       <div className='border-b border-lunary-primary-700'>
         <div className='max-w-4xl mx-auto px-4 py-6'>
@@ -253,7 +247,7 @@ export default async function GrimoireSearchPage({
             </h1>
           </div>
 
-          <p className='text-lunary-primary-300/70 mb-8 max-w-2xl'>
+          <p className='text-content-brand/70 mb-8 max-w-2xl'>
             Search our cosmic knowledge base for astrology, tarot, crystals,
             rituals, and spiritual wisdom. Find the answers you seek.
           </p>

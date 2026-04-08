@@ -95,12 +95,12 @@ export function CircleInviteCTA() {
   // Show loading skeleton
   if (isLoading) {
     return (
-      <div className='rounded-2xl border border-lunary-primary-700/50 bg-gradient-to-br from-lunary-primary-900/40 via-black/40 to-lunary-highlight-900/40 p-6'>
+      <div className='rounded-2xl border border-stroke-default invite-cta-gradient p-6'>
         <div className='flex items-center gap-3 mb-4'>
-          <div className='w-10 h-10 bg-zinc-800 rounded-full animate-pulse' />
-          <div className='h-6 w-48 bg-zinc-800 rounded animate-pulse' />
+          <div className='w-10 h-10 bg-surface-card rounded-full animate-pulse' />
+          <div className='h-6 w-48 bg-surface-card rounded animate-pulse' />
         </div>
-        <div className='h-12 bg-zinc-800/50 rounded-xl animate-pulse' />
+        <div className='h-12 bg-surface-card/50 rounded-xl animate-pulse' />
       </div>
     );
   }
@@ -108,23 +108,23 @@ export function CircleInviteCTA() {
   // Not logged in - show simple CTA
   if (!user) {
     return (
-      <div className='rounded-2xl border border-lunary-primary-700/50 bg-gradient-to-br from-lunary-primary-900/40 via-black/40 to-lunary-highlight-900/40 p-6'>
+      <div className='rounded-2xl border border-stroke-default invite-cta-gradient p-6'>
         <div className='flex items-center gap-3 mb-4'>
           <div className='w-12 h-12 rounded-full bg-gradient-to-br from-lunary-primary-600 to-lunary-highlight-600 flex items-center justify-center'>
-            <Users className='w-6 h-6 text-white' />
+            <Users className='w-6 h-6 text-content-primary' />
           </div>
           <div>
-            <h3 className='text-lg font-semibold text-white'>
+            <h3 className='text-lg font-semibold text-content-primary'>
               Lunary is better with friends
             </h3>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-sm text-content-muted'>
               Track moon phases together, share insights
             </p>
           </div>
         </div>
         <a
           href='/auth/signup'
-          className='block w-full rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-center text-sm font-semibold text-white hover:opacity-90 transition-opacity'
+          className='block w-full rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-center text-sm font-semibold text-content-primary hover:opacity-90 transition-opacity'
         >
           Create your account
         </a>
@@ -133,17 +133,17 @@ export function CircleInviteCTA() {
   }
 
   return (
-    <div className='rounded-2xl border border-lunary-primary-700/50 bg-gradient-to-br from-lunary-primary-900/40 via-black/40 to-lunary-highlight-900/40 p-5'>
+    <div className='rounded-2xl border border-stroke-default invite-cta-gradient p-5'>
       {/* Header */}
       <div className='flex items-start gap-4 mb-4'>
         <div className='w-12 h-12 rounded-full bg-gradient-to-br from-lunary-primary-600 to-lunary-highlight-600 flex items-center justify-center shrink-0'>
-          <Gift className='w-6 h-6 text-white' />
+          <Gift className='w-6 h-6 text-content-primary' />
         </div>
         <div className='flex-1 min-w-0'>
-          <h3 className='text-lg font-semibold text-white'>
+          <h3 className='text-lg font-semibold text-content-primary'>
             Lunary is better with friends
           </h3>
-          <p className='text-sm text-zinc-400 mt-0.5'>
+          <p className='text-sm text-content-muted mt-0.5'>
             Give friends {REFERRAL_TRIAL_DAYS} days Pro free — earn a bonus week
             per referral
           </p>
@@ -153,7 +153,7 @@ export function CircleInviteCTA() {
       {/* Invite CTA */}
       {referralUrl ? (
         <div className='space-y-3'>
-          <div className='flex items-center gap-2 text-xs text-zinc-500'>
+          <div className='flex items-center gap-2 text-xs text-content-muted'>
             <Sparkles className='w-3.5 h-3.5 text-lunary-accent' />
             <span>
               {referral?.remainingReferrals === 0
@@ -164,14 +164,14 @@ export function CircleInviteCTA() {
           <div className='flex gap-2'>
             <button
               onClick={handleShare}
-              className='flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity'
+              className='flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-sm font-semibold text-content-primary hover:opacity-90 transition-opacity'
             >
               <Share2 className='w-4 h-4' />
               Invite Friends
             </button>
             <button
               onClick={handleCopy}
-              className='flex items-center justify-center gap-2 rounded-xl border border-lunary-primary-600 px-4 py-3 text-sm font-medium text-lunary-accent hover:bg-lunary-primary-950 transition-colors'
+              className='flex items-center justify-center gap-2 rounded-xl border border-lunary-primary-600 px-4 py-3 text-sm font-medium text-lunary-accent hover:bg-layer-deep transition-colors'
             >
               {copied ? (
                 <>
@@ -190,7 +190,7 @@ export function CircleInviteCTA() {
       ) : (
         <a
           href='/profile?tab=circle'
-          className='flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity'
+          className='flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-sm font-semibold text-content-primary hover:opacity-90 transition-opacity'
         >
           <Sparkles className='w-4 h-4' />
           Get your invite link

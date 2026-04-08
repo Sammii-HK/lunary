@@ -25,7 +25,7 @@ export default function OnboardingPreviewPage() {
 
   const previewHeader = (
     <div className='space-y-2'>
-      <div className='text-xs font-medium uppercase tracking-wide text-zinc-500'>
+      <div className='text-xs font-medium uppercase tracking-wide text-content-muted'>
         Preview subscription tier
       </div>
       <div className='flex flex-wrap gap-2'>
@@ -39,7 +39,7 @@ export default function OnboardingPreviewPage() {
               className={`rounded-full px-3 py-1 text-xs font-medium transition ${
                 isActive
                   ? 'bg-lunary-primary text-white'
-                  : 'border border-zinc-700 text-zinc-300 hover:border-zinc-500'
+                  : 'border border-stroke-default text-content-secondary hover:border-stroke-strong'
               }`}
             >
               {plan.label}
@@ -47,7 +47,7 @@ export default function OnboardingPreviewPage() {
           );
         })}
       </div>
-      <div className='text-xs font-medium uppercase tracking-wide text-zinc-500 pt-2'>
+      <div className='text-xs font-medium uppercase tracking-wide text-content-muted pt-2'>
         Preview step
       </div>
       <div className='flex flex-wrap gap-2'>
@@ -60,8 +60,8 @@ export default function OnboardingPreviewPage() {
               onClick={() => setStepId(step.id)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition ${
                 isActive
-                  ? 'bg-zinc-700 text-white'
-                  : 'border border-zinc-700 text-zinc-300 hover:border-zinc-500'
+                  ? 'bg-surface-overlay text-content-primary'
+                  : 'border border-stroke-default text-content-secondary hover:border-stroke-strong'
               }`}
             >
               {step.label}
@@ -73,12 +73,12 @@ export default function OnboardingPreviewPage() {
   );
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-screen bg-surface-base text-content-primary'>
       <div className='mx-auto max-w-3xl px-6 py-8'>
-        <h1 className='text-2xl font-semibold text-white'>
+        <h1 className='text-2xl font-semibold text-content-primary'>
           Onboarding Preview
         </h1>
-        <p className='mt-2 text-sm text-zinc-400'>
+        <p className='mt-2 text-sm text-content-muted'>
           Use the tabs inside the modal to preview onboarding by subscription
           tier.
         </p>

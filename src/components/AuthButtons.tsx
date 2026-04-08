@@ -19,8 +19,8 @@ export function AuthButtons({
   if (loading) {
     return (
       <div className={`flex items-center gap-3 ${className}`}>
-        <div className='animate-pulse bg-zinc-700 h-10 w-20 rounded-full'></div>
-        <div className='animate-pulse bg-zinc-700 h-10 w-20 rounded-full'></div>
+        <div className='animate-pulse bg-surface-overlay h-10 w-20 rounded-full'></div>
+        <div className='animate-pulse bg-surface-overlay h-10 w-20 rounded-full'></div>
       </div>
     );
   }
@@ -31,10 +31,12 @@ export function AuthButtons({
     if (variant === 'navbar') {
       return (
         <div className={`flex items-center gap-3 ${className}`}>
-          <span className='text-sm text-zinc-300'>👋 {displayName}</span>
+          <span className='text-sm text-content-secondary'>
+            👋 {displayName}
+          </span>
           <Link
             href='/profile'
-            className='text-xs text-lunary-secondary hover:text-white transition-colors'
+            className='text-xs text-lunary-secondary hover:text-content-primary transition-colors'
           >
             Profile
           </Link>
@@ -47,14 +49,14 @@ export function AuthButtons({
         className={`flex flex-col sm:flex-row items-center gap-4 ${className}`}
       >
         <div className='text-center'>
-          <p className='text-zinc-300 mb-2'>
+          <p className='text-content-secondary mb-2'>
             Welcome back,{' '}
             <span className='text-lunary-secondary font-medium'>
               {displayName}
             </span>
             !
           </p>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-sm text-content-muted'>
             Your cosmic profile is synced and ready
           </p>
         </div>

@@ -170,13 +170,13 @@ export default function WheelOfTheYearPage() {
       />
 
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <h1 className='text-4xl md:text-5xl font-light text-content-primary mb-6'>
           Wheel of the Year
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             The Eight Sabbats & Seasonal Celebrations
           </span>
         </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
+        <p className='text-xl text-content-muted leading-relaxed'>
           The Wheel of the Year is a cycle of eight festivals marking the
           turning of seasons and the sun&apos;s journey through the year. These
           Sabbats connect practitioners with nature&apos;s rhythms, agricultural
@@ -185,11 +185,11 @@ export default function WheelOfTheYearPage() {
         </p>
       </header>
 
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+      <nav className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6 mb-12'>
+        <h2 className='text-lg font-medium text-content-primary mb-4'>
           Table of Contents
         </h2>
-        <ol className='space-y-2 text-zinc-400'>
+        <ol className='space-y-2 text-content-muted'>
           <li>
             <a href='#what-is-wheel' className='hover:text-lunary-primary-400'>
               1. What Is the Wheel of the Year?
@@ -228,42 +228,46 @@ export default function WheelOfTheYearPage() {
 
       {/* Section 1 */}
       <section id='what-is-wheel' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           1. What Is the Wheel of the Year?
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           The Wheel of the Year is a modern pagan calendar that synthesizes
           ancient Celtic, Germanic, and other European agricultural and solar
           festivals. It marks eight points in the year: two solstices, two
           equinoxes, and four cross-quarter days between them.
         </p>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           This cycle represents the eternal dance between light and dark, growth
           and rest, life and death. By celebrating these turning points, you
           align your practice with nature&apos;s rhythms and the cosmos.
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Greater Sabbats</h3>
-            <p className='text-zinc-400 text-sm mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Greater Sabbats
+            </h3>
+            <p className='text-content-muted text-sm mb-2'>
               Cross-quarter days, often considered more magically powerful:
             </p>
-            <ul className='text-zinc-500 text-sm'>
+            <ul className='text-content-muted text-sm'>
               <li>• Samhain (Oct 31)</li>
               <li>• Imbolc (Feb 1–2)</li>
               <li>• Beltane (May 1)</li>
               <li>• Lammas/Lughnasadh (Aug 1)</li>
             </ul>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Lesser Sabbats</h3>
-            <p className='text-zinc-400 text-sm mb-2'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>
+              Lesser Sabbats
+            </h3>
+            <p className='text-content-muted text-sm mb-2'>
               Solstices and equinoxes, marking solar turning points:
             </p>
-            <ul className='text-zinc-500 text-sm'>
+            <ul className='text-content-muted text-sm'>
               <li>• Yule (Winter Solstice)</li>
               <li>• Ostara (Spring Equinox)</li>
               <li>• Litha (Summer Solstice)</li>
@@ -275,11 +279,11 @@ export default function WheelOfTheYearPage() {
 
       {/* Section 2: The Eight Sabbats */}
       <section id='sabbats' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           2. The Eight Sabbats Overview
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Each Sabbat has distinct themes, traditional practices, and magical
           correspondences. Here is a brief overview of all eight:
         </p>
@@ -288,21 +292,23 @@ export default function WheelOfTheYearPage() {
           {SABBATS.map((sabbat) => (
             <div
               key={sabbat.name}
-              className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'
+              className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'
             >
               <div className='flex flex-wrap items-center gap-3 mb-2'>
-                <h3 className='text-lg font-medium text-zinc-100'>
+                <h3 className='text-lg font-medium text-content-primary'>
                   {sabbat.name}
                 </h3>
-                <span className='text-xs text-lunary-primary-400 bg-lunary-primary-900/30 px-2 py-0.5 rounded'>
+                <span className='text-xs text-lunary-primary-400 bg-layer-base/30 px-2 py-0.5 rounded'>
                   {sabbat.date}
                 </span>
               </div>
-              <p className='text-zinc-300 text-sm mb-2'>{sabbat.theme}</p>
-              <p className='text-zinc-500 text-xs'>
+              <p className='text-content-secondary text-sm mb-2'>
+                {sabbat.theme}
+              </p>
+              <p className='text-content-muted text-xs'>
                 <strong>Focus:</strong> {sabbat.focus}
               </p>
-              <p className='text-zinc-500 text-xs'>
+              <p className='text-content-muted text-xs'>
                 <strong>Colors:</strong> {sabbat.colors}
               </p>
             </div>
@@ -312,40 +318,40 @@ export default function WheelOfTheYearPage() {
 
       {/* Section 3: Working with Seasonal Energy */}
       <section id='working-with' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           3. Working with Seasonal Energy
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           Each season carries its own energetic signature. Aligning your magical
           and spiritual work with these energies amplifies your practice.
         </p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>🌸 Spring</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>🌸 Spring</h3>
+            <p className='text-content-muted text-sm'>
               New beginnings, planting seeds (literal and metaphorical),
               cleansing, fresh starts, fertility magic.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>☀️ Summer</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>☀️ Summer</h3>
+            <p className='text-content-muted text-sm'>
               Growth, abundance, power, vitality, passion, taking action on
               projects, solar magic at its peak.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>🍂 Autumn</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>🍂 Autumn</h3>
+            <p className='text-content-muted text-sm'>
               Harvest, gratitude, preparation, balance, releasing what no longer
               serves, shadow work.
             </p>
           </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>❄️ Winter</h3>
-            <p className='text-zinc-400 text-sm'>
+          <div className='p-5 rounded-xl border border-stroke-subtle bg-surface-elevated/30'>
+            <h3 className='font-medium text-content-primary mb-2'>❄️ Winter</h3>
+            <p className='text-content-muted text-sm'>
               Rest, reflection, ancestor work, divination, inner work, planning,
               honoring the dark.
             </p>
@@ -355,21 +361,21 @@ export default function WheelOfTheYearPage() {
 
       {/* Section 4: Sabbats & Lunar Phases */}
       <section id='lunar-connection' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           4. Sabbats & Lunar Phases
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           While Sabbats follow the solar calendar, many practitioners also
           consider the lunar phase when celebrating. A Sabbat falling on a Full
           Moon is considered especially powerful.
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <h3 className='text-lg font-medium text-content-primary mb-3'>
             Combining Solar & Lunar Cycles
           </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
+          <ul className='space-y-2 text-content-muted text-sm'>
             <li>
               • <strong>New Moon near a Sabbat:</strong> Powerful for new
               beginnings aligned with the season&apos;s theme
@@ -388,7 +394,7 @@ export default function WheelOfTheYearPage() {
         <div className='mt-4'>
           <Link
             href='/grimoire/guides/moon-phases-guide'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
+            className='text-lunary-primary-400 hover:text-content-brand'
           >
             Learn more about moon phases →
           </Link>
@@ -397,44 +403,40 @@ export default function WheelOfTheYearPage() {
 
       {/* Section 5: Integrating */}
       <section id='integrating' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           5. Integrating the Wheel Into Daily Life
         </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
+        <p className='text-content-secondary leading-relaxed mb-6'>
           You don&apos;t need elaborate rituals to honor the Wheel. Here are
           simple ways to connect with seasonal energy:
         </p>
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <ul className='space-y-3 text-zinc-300'>
+        <div className='bg-surface-elevated/50 border border-stroke-subtle rounded-xl p-6'>
+          <ul className='space-y-3 text-content-secondary'>
             <li>
-              <strong className='text-lunary-primary-300'>
+              <strong className='text-content-brand'>
                 Seasonal altar updates:
               </strong>{' '}
               Change decorations, colors, and items on your altar as the seasons
               shift.
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>
-                Seasonal eating:
-              </strong>{' '}
+              <strong className='text-content-brand'>Seasonal eating:</strong>{' '}
               Eat foods that are in season where you live. Cook traditional
               Sabbat recipes.
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>Nature walks:</strong>{' '}
+              <strong className='text-content-brand'>Nature walks:</strong>{' '}
               Observe how your local environment changes through the year.
               Collect seasonal items.
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>Journaling:</strong>{' '}
+              <strong className='text-content-brand'>Journaling:</strong>{' '}
               Reflect on the themes of each season in your Book of Shadows.
             </li>
             <li>
-              <strong className='text-lunary-primary-300'>
-                Small rituals:
-              </strong>{' '}
+              <strong className='text-content-brand'>Small rituals:</strong>{' '}
               Light a candle, speak an intention, or simply pause to acknowledge
               each Sabbat.
             </li>
@@ -444,7 +446,7 @@ export default function WheelOfTheYearPage() {
 
       {/* FAQ */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-3xl font-light text-content-primary mb-6'>
           6. Frequently Asked Questions
         </h2>
 
@@ -452,72 +454,74 @@ export default function WheelOfTheYearPage() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              className='bg-surface-elevated/50 border border-stroke-subtle rounded-lg p-6'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+              <h3 className='text-lg font-medium text-content-primary mb-3'>
                 {faq.question}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-content-secondary leading-relaxed'>
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-amber-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+      <section className='bg-gradient-to-r from-layer-base/30 to-amber-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
+        <h2 className='text-2xl font-light text-content-primary mb-4'>
           Explore Individual Sabbats
         </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+        <p className='text-content-muted mb-6 max-w-xl mx-auto'>
           Dive deeper into each Sabbat with detailed guides, rituals, recipes,
           and correspondences.
         </p>
         <div className='flex flex-wrap gap-3 justify-center'>
           <Link
             href='/grimoire/wheel-of-the-year/samhain'
-            className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm transition-colors'
+            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
           >
             Samhain
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/yule'
-            className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm transition-colors'
+            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
           >
             Yule
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/imbolc'
-            className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm transition-colors'
+            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
           >
             Imbolc
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/ostara'
-            className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm transition-colors'
+            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
           >
             Ostara
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/beltane'
-            className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm transition-colors'
+            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
           >
             Beltane
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/litha'
-            className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm transition-colors'
+            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
           >
             Litha
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/lammas'
-            className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm transition-colors'
+            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
           >
             Lammas
           </Link>
           <Link
             href='/grimoire/wheel-of-the-year/mabon'
-            className='px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm transition-colors'
+            className='px-4 py-2 bg-surface-card hover:bg-surface-overlay text-content-primary rounded-lg text-sm transition-colors'
           >
             Mabon
           </Link>

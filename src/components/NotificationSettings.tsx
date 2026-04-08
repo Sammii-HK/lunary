@@ -577,7 +577,7 @@ export function NotificationSettings() {
 
   if (isLoading) {
     return (
-      <div className='w-full p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
+      <div className='w-full p-4 bg-surface-card rounded-lg border border-stroke-default'>
         <div className='flex items-center justify-center py-4'>
           <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-lunary-primary-400'></div>
         </div>
@@ -587,11 +587,11 @@ export function NotificationSettings() {
 
   if (!('Notification' in window)) {
     return (
-      <div className='w-full p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
-        <h3 className='text-lg font-semibold text-white mb-3'>
+      <div className='w-full p-4 bg-surface-card rounded-lg border border-stroke-default'>
+        <h3 className='text-lg font-semibold text-content-primary mb-3'>
           Push Notifications
         </h3>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-sm text-content-muted'>
           Your browser does not support push notifications.
         </p>
       </div>
@@ -604,11 +604,11 @@ export function NotificationSettings() {
   const hasPushManager = 'PushManager' in window;
 
   return (
-    <div className='w-full p-4 bg-zinc-800 rounded-lg border border-zinc-700'>
-      <h3 className='text-lg font-semibold text-white mb-3'>
+    <div className='w-full p-4 bg-surface-card rounded-lg border border-stroke-default'>
+      <h3 className='text-lg font-semibold text-content-primary mb-3'>
         Push Notifications
       </h3>
-      <p className='text-xs text-zinc-400 mb-4'>
+      <p className='text-xs text-content-muted mb-4'>
         Get notified about moon phases, planetary transits, retrogrades,
         sabbats, and eclipses
       </p>
@@ -628,7 +628,7 @@ export function NotificationSettings() {
           <span>{statusMessage.text}</span>
           <button
             onClick={() => setStatusMessage(null)}
-            className='flex-shrink-0 text-zinc-500 hover:text-zinc-300'
+            className='flex-shrink-0 text-content-muted hover:text-content-secondary'
           >
             &times;
           </button>
@@ -637,11 +637,11 @@ export function NotificationSettings() {
 
       {/* Diagnostic info (only show if there's an issue) */}
       {(!hasVapidKey || !hasServiceWorker || !hasPushManager) && (
-        <div className='mb-4 p-3 bg-zinc-900 rounded border border-zinc-700'>
+        <div className='mb-4 p-3 bg-surface-elevated rounded border border-stroke-default'>
           <p className='text-xs font-medium text-lunary-accent mb-2'>
             ⚠️ Setup Status
           </p>
-          <div className='text-xs space-y-1 text-zinc-400'>
+          <div className='text-xs space-y-1 text-content-muted'>
             {!hasVapidKey && (
               <p className='text-red-400'>
                 ❌ VAPID key not configured (required)
@@ -680,7 +680,7 @@ export function NotificationSettings() {
               <p className='text-sm text-lunary-success font-medium'>
                 🔔 Notifications Enabled
               </p>
-              <p className='text-xs text-zinc-400 mt-1'>
+              <p className='text-xs text-content-muted mt-1'>
                 You'll receive notifications for cosmic events
               </p>
             </div>
@@ -688,13 +688,13 @@ export function NotificationSettings() {
 
           {/* Personalized Tarot Notifications Toggle */}
           {user?.birthday && (
-            <div className='pt-3 border-t border-zinc-700'>
+            <div className='pt-3 border-t border-stroke-default'>
               <div className='flex items-center justify-between mb-2'>
                 <div>
-                  <p className='text-sm text-white font-medium'>
+                  <p className='text-sm text-content-primary font-medium'>
                     🔮 Personalized Daily Tarot
                   </p>
-                  <p className='text-xs text-zinc-400 mt-1'>
+                  <p className='text-xs text-content-muted mt-1'>
                     Get your personalized daily tarot card based on your birth
                     date
                   </p>
@@ -703,7 +703,9 @@ export function NotificationSettings() {
                   onClick={toggleTarotNotifications}
                   disabled={tarotLoading}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    tarotEnabled ? 'bg-lunary-primary-600' : 'bg-zinc-600'
+                    tarotEnabled
+                      ? 'bg-lunary-primary-600'
+                      : 'bg-surface-overlay'
                   } disabled:opacity-50`}
                 >
                   <span
@@ -714,20 +716,20 @@ export function NotificationSettings() {
                 </button>
               </div>
               {tarotLoading && (
-                <p className='text-xs text-zinc-400'>Updating...</p>
+                <p className='text-xs text-content-muted'>Updating...</p>
               )}
             </div>
           )}
 
           {/* Weekly Cosmic Report Toggle */}
           {user?.birthday && (
-            <div className='pt-3 border-t border-zinc-700'>
+            <div className='pt-3 border-t border-stroke-default'>
               <div className='flex items-center justify-between mb-2'>
                 <div>
-                  <p className='text-sm text-white font-medium'>
+                  <p className='text-sm text-content-primary font-medium'>
                     📊 Weekly Cosmic Report
                   </p>
-                  <p className='text-xs text-zinc-400 mt-1'>
+                  <p className='text-xs text-content-muted mt-1'>
                     Receive a weekly email summary of your cosmic journey
                   </p>
                 </div>
@@ -737,7 +739,7 @@ export function NotificationSettings() {
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                     weeklyReportEnabled
                       ? 'bg-lunary-primary-600'
-                      : 'bg-zinc-600'
+                      : 'bg-surface-overlay'
                   } disabled:opacity-50`}
                 >
                   <span
@@ -748,7 +750,7 @@ export function NotificationSettings() {
                 </button>
               </div>
               {weeklyReportLoading && (
-                <p className='text-xs text-zinc-400'>Updating...</p>
+                <p className='text-xs text-content-muted'>Updating...</p>
               )}
             </div>
           )}
@@ -762,7 +764,7 @@ export function NotificationSettings() {
         </div>
       ) : (
         <div className='space-y-3'>
-          <div className='text-xs text-zinc-400 space-y-1'>
+          <div className='text-xs text-content-muted space-y-1'>
             <p>• New & Full Moons</p>
             <p>• Planetary ingresses & retrogrades</p>
             <p>• Sabbats & seasonal shifts</p>
@@ -771,7 +773,7 @@ export function NotificationSettings() {
           <button
             onClick={requestPermission}
             disabled={!hasVapidKey || !hasServiceWorker || !hasPushManager}
-            className='w-full bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white py-2 px-4 rounded-md transition-colors text-sm font-medium'
+            className='w-full bg-lunary-primary-600 hover:bg-layer-high disabled:bg-surface-overlay disabled:cursor-not-allowed text-white py-2 px-4 rounded-md transition-colors text-sm font-medium'
           >
             Enable Notifications
           </button>

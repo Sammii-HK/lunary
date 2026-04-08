@@ -125,29 +125,29 @@ export function DailyCosmicOverview({
 
   return (
     <div
-      className={`rounded-xl border border-zinc-800/60 bg-zinc-950/60 p-4 ${className}`}
+      className={`rounded-xl border border-stroke-subtle/60 bg-surface-base/60 p-4 ${className}`}
     >
       <div className='flex items-center gap-2 mb-3'>
         <Star className='w-4 h-4 text-lunary-accent' />
-        <h3 className='text-sm font-medium text-zinc-200'>
+        <h3 className='text-sm font-medium text-content-primary'>
           Today's Cosmic Energy
         </h3>
       </div>
 
-      <p className='text-sm text-zinc-300 leading-relaxed mb-3'>
+      <p className='text-sm text-content-secondary leading-relaxed mb-3'>
         {cosmicOverview.overview}
       </p>
 
       {hasPersonalTarotAccess && cosmicOverview.focusBullets.length > 0 && (
         <div className='space-y-1.5'>
-          <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
+          <p className='text-xs font-medium text-content-muted uppercase tracking-wide'>
             Best focus for today
           </p>
           <ul className='space-y-1'>
             {cosmicOverview.focusBullets.map((bullet, i) => (
               <li
                 key={i}
-                className='text-xs text-zinc-400 flex items-start gap-2'
+                className='text-xs text-content-muted flex items-start gap-2'
               >
                 <span className='text-lunary-accent mt-0.5'>•</span>
                 {bullet}
@@ -158,10 +158,10 @@ export function DailyCosmicOverview({
       )}
 
       {cosmicOverview.dailyCard && (
-        <div className='mt-3 pt-3 border-t border-zinc-800/50'>
-          <p className='text-xs text-zinc-500'>
+        <div className='mt-3 pt-3 border-t border-stroke-subtle/50'>
+          <p className='text-xs text-content-muted'>
             Daily card:{' '}
-            <span className='text-lunary-primary-300'>
+            <span className='text-content-brand'>
               {cosmicOverview.dailyCard.name}
             </span>
           </p>

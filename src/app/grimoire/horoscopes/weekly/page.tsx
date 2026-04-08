@@ -112,7 +112,7 @@ Weekly horoscopes update because planetary relationships shift, not because of c
       heroContent={
         <div className='text-center space-y-1'>
           <p className='text-sm text-lunary-primary-400'>{weekRange}</p>
-          <p className='text-xs text-zinc-500 uppercase tracking-[0.3em]'>
+          <p className='text-xs text-content-muted uppercase tracking-[0.3em]'>
             Updated every Monday with fresh cosmic context
           </p>
         </div>
@@ -138,14 +138,14 @@ Weekly horoscopes update because planetary relationships shift, not because of c
             <Link
               key={sign.name}
               href={`/grimoire/horoscopes/weekly/${sign.name.toLowerCase()}`}
-              className='group p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-all'
+              className='group p-6 rounded-xl border border-stroke-subtle bg-surface-elevated/30 hover:border-lunary-primary-600 transition-all'
             >
               <div className='text-3xl mb-2'>{sign.symbol}</div>
-              <h2 className='text-lg font-medium group-hover:text-lunary-primary-300 transition-colors'>
+              <h2 className='text-lg font-medium group-hover:text-content-brand transition-colors'>
                 {sign.name}
               </h2>
-              <p className='text-xs text-zinc-500'>{sign.dates}</p>
-              <div className='flex items-center gap-1 mt-3 text-xs text-zinc-400'>
+              <p className='text-xs text-content-muted'>{sign.dates}</p>
+              <div className='flex items-center gap-1 mt-3 text-xs text-content-muted'>
                 <span>{sign.element}</span>
                 <ArrowRight className='w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity' />
               </div>
@@ -153,7 +153,7 @@ Weekly horoscopes update because planetary relationships shift, not because of c
           ))}
         </div>
       </section>
-      <p className='text-sm text-zinc-500'>
+      <p className='text-sm text-content-muted'>
         Planetary themes evolve through the week; revisit this hub as the sky
         shifts.
       </p>
