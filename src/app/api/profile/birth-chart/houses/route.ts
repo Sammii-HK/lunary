@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { generateBirthChartWithHouses } from '@/utils/astrology/birthChart';
-import { type HouseSystem } from '@/utils/astrology/houseSystems';
+import { generateBirthChartWithHouses } from '@utils/astrology/birthChart';
+import { type HouseSystem } from '@utils/astrology/houseSystems';
 
 const HOUSE_SYSTEMS = [
   'whole-sign',

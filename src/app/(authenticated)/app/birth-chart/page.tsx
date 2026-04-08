@@ -14,9 +14,9 @@ import { BirthChart } from '@/components/BirthChart';
 import { BirthChartShowcase } from '@/components/birth-chart-sections/BirthChartShowcase';
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
 import { Sparkles, Moon, Star, Home } from 'lucide-react';
-import { ensureDescendantInChart } from '@/utils/astrology/birth-chart-analysis';
-import { assignHousesToBodies } from '@/utils/astrology/birthChart';
-import type { HouseCusp } from '@/utils/astrology/houseSystems';
+import { ensureDescendantInChart } from '@utils/astrology/birth-chart-analysis';
+import { assignHousesToBodies } from '@utils/astrology/birthChart';
+import type { HouseCusp } from '@utils/astrology/houseSystems';
 
 type HouseSystem =
   | 'placidus'
