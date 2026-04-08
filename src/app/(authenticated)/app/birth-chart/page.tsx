@@ -13,10 +13,12 @@ import { ChartControls } from '@/components/ChartControls';
 import { BirthChart } from '@/components/BirthChart';
 import { BirthChartShowcase } from '@/components/birth-chart-sections/BirthChartShowcase';
 import { ReferralShareCTA } from '@/components/referrals/ReferralShareCTA';
+import { ChartModeToggle } from '@/components/ChartModeToggle';
 import { Sparkles, Moon, Star, Home } from 'lucide-react';
 import { ensureDescendantInChart } from '@utils/astrology/birth-chart-analysis';
 import { assignHousesToBodies } from '@utils/astrology/birthChart';
 import { type ZodiacSystem } from '@utils/astrology/zodiacSystems';
+import { useProgressedChart } from '@/hooks/useProgressedChart';
 import type { HouseCusp } from '@utils/astrology/houseSystems';
 
 type HouseSystem =
@@ -41,6 +43,7 @@ const BirthChartPage = () => {
   const [zodiacSystem, setZodiacSystem] = useState<ZodiacSystem>('tropical');
   const [houses, setHouses] = useState<HouseCusp[] | null>(null);
   const [loadingHouses, setLoadingHouses] = useState(false);
+  const [chartMode, setChartMode] = useState<'natal' | 'progressed'>('natal');
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const originalBirthChartData = user?.birthChart || null;
@@ -48,6 +51,20 @@ const BirthChartPage = () => {
     if (!originalBirthChartData) return null;
     return ensureDescendantInChart(originalBirthChartData);
   }, [originalBirthChartData]);
+
+  const {
+    progressedChart,
+    currentAge,
+    loading: progressionLoading,
+  } = useProgressedChart(userBirthday, birthChartData || undefined);
+
+  // Determine which chart to display based on mode
+  const displayChart = useMemo(() => {
+    if (chartMode === 'progressed' && progressedChart.length > 0) {
+      return progressedChart;
+    }
+    return birthChartData;
+  }, [chartMode, progressedChart, birthChartData]);
 
   const hasChartAccess = hasBirthChartAccess(
     subscription.status,
@@ -358,6 +375,18 @@ const BirthChartPage = () => {
         </nav>
 
         <div className='flex flex-col items-center gap-3'>
+          <ChartModeToggle
+            mode={chartMode}
+            onModeChange={setChartMode}
+            currentAge={currentAge}
+          />
+
+          {chartMode === 'progressed' && progressionLoading && (
+            <div className='text-center text-sm text-content-muted'>
+              Loading progressed chart...
+            </div>
+          )}
+
           <ChartControls
             showAspects={showAspects}
             onToggleAspects={() => setShowAspects(!showAspects)}
@@ -378,7 +407,7 @@ const BirthChartPage = () => {
 
           <div data-testid='chart-visualization'>
             <BirthChart
-              birthChart={birthChartData}
+              birthChart={displayChart}
               houses={houses}
               userName={userName}
               birthDate={userBirthday}
@@ -405,12 +434,25 @@ const BirthChartPage = () => {
         )}
 
         {/* Planetary Interpretations */}
-        {birthChartData && (
+        {displayChart && (
           <div data-testid='planets-list'>
             <BirthChartShowcase
-              birthChart={birthChartData}
+              birthChart={displayChart}
               zodiacSystem={zodiacSystem}
             />
+            {chartMode === 'progressed' && currentAge > 0 && (
+              <div className='mt-6 p-4 bg-surface-elevated/30 rounded-lg border border-stroke-subtle text-sm text-content-secondary'>
+                <p className='mb-2 font-medium text-content-primary'>
+                  Secondary Progressions at Age {currentAge}
+                </p>
+                <p>
+                  These are your progressed chart positions calculated from{' '}
+                  {currentAge} days after your birth date. The progressed chart
+                  shows how your astrological chart evolves over time, with each
+                  day after birth representing one year of life.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
