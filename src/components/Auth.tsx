@@ -830,7 +830,7 @@ export function AuthComponent({
         <button
           type='submit'
           disabled={loading}
-          className={`w-full bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-layer-raised disabled:opacity-50 text-white font-medium rounded-lg transition-colors flex items-center justify-center ${compact ? 'py-2 px-3 text-sm' : 'py-3 px-4'}`}
+          className={`w-full bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-layer-raised disabled:opacity-50 text-content-primary font-medium rounded-lg transition-colors flex items-center justify-center ${compact ? 'py-2 px-3 text-sm' : 'py-3 px-4'}`}
         >
           {loading ? (
             <>

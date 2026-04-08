@@ -32,9 +32,9 @@ export function PersonalTransitImpactCard({
         <span
           className={`px-2 py-1 rounded text-xs font-medium ${
             impact.significance === 'high'
-              ? 'bg-surface-card text-content-error border border-stroke-default'
+              ? 'bg-layer-deep text-lunary-error-400 border border-lunary-error-800'
               : impact.significance === 'medium'
-                ? 'bg-surface-card text-content-brand-secondary border border-stroke-default'
+                ? 'bg-layer-deep text-content-brand-secondary border border-lunary-secondary-800'
                 : 'bg-surface-elevated text-content-muted border border-stroke-default'
           }`}
         >

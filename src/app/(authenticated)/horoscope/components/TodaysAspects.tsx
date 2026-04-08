@@ -44,49 +44,39 @@ const getAspectInterpretation = (
   natalPlanet: string,
   aspectType: string,
 ): string => {
-  const natalThemes: Record<string, string> = {
-    // Planets — what each one governs
-    Sun: 'your core identity and sense of self',
-    Moon: 'your emotional nature and instincts',
-    Mercury: 'your mind, communication, and thinking style',
-    Venus: 'your relationships, values, and what you love',
-    Mars: 'your drive, energy, and how you take action',
-    Jupiter: 'your capacity for growth and good fortune',
-    Saturn: 'your sense of responsibility, limits, and long-term structure',
-    Uranus: 'your need for freedom and your urge to break patterns',
-    Neptune: 'your dreams, intuition, and spiritual sensitivity',
-    Pluto: 'your deepest transformation and personal power',
-    // Chart angles
-    Ascendant:
-      'your rising sign — how you show up in the world and first impressions',
-    Midheaven: 'your Midheaven — your public role, career, and legacy',
-    Descendant:
-      'your Descendant — the cusp of your 7th house, showing what you seek in others and relationships',
-    'Imum Coeli':
-      'your IC — the base of your chart, tied to roots, home, and your private inner world',
-    // Arabic parts (explain what they are)
-    'Part of Spirit':
-      'your Part of Spirit — a point in your chart tied to soul purpose and creative calling',
-    'Part of Fortune':
-      'your Part of Fortune — a point in your chart linked to joy, luck, and material fulfilment',
+  const transitVerbs: Record<string, string> = {
+    Sun: 'is lighting up',
+    Moon: 'is stirring',
+    Mercury: 'is speaking to',
+    Venus: 'is gently lifting',
+    Mars: 'is pushing',
+    Jupiter: 'is opening doors around',
+    Saturn: 'is grounding',
+    Uranus: 'is shaking up',
+    Neptune: 'is softening',
+    Pluto: 'is quietly reshaping',
   };
 
-  const natalTheme = natalThemes[natalPlanet] ?? `your natal ${natalPlanet}`;
+  const natalThemes: Record<string, string> = {
+    Sun: 'your sense of self',
+    Moon: 'your emotions',
+    Mercury: 'how you think and communicate',
+    Venus: 'your relationships',
+    Mars: 'your drive and ambition',
+    Jupiter: 'your path to growth',
+    Saturn: 'your sense of responsibility',
+    Uranus: 'your need for freedom',
+    Neptune: 'your inner world',
+    Pluto: 'your personal power',
+    Ascendant: 'how you show up in the world',
+    Midheaven: 'your public life and career',
+  };
 
-  switch (aspectType) {
-    case 'conjunction':
-      return `${transitPlanet} is merging with ${natalTheme}, intensifying and unifying these energies — a moment of concentrated focus.`;
-    case 'trine':
-      return `${transitPlanet} flows harmoniously with ${natalTheme}, creating natural ease and open channels — lean into what comes effortlessly now.`;
-    case 'sextile':
-      return `${transitPlanet} forms a gentle opportunity with ${natalTheme} — a subtle invitation to engage this energy consciously and act on small openings.`;
-    case 'square':
-      return `${transitPlanet} creates productive tension with ${natalTheme} — this friction is the pressure that catalyses real growth and breakthrough.`;
-    case 'opposition':
-      return `${transitPlanet} pulls at ${natalTheme} from the opposite direction — awareness of both sides of this tension brings integration and balance.`;
-    default:
-      return `${transitPlanet} is influencing ${natalTheme}.`;
-  }
+  const verb = transitVerbs[transitPlanet] || 'is influencing';
+  const natalTheme =
+    natalThemes[natalPlanet] || `your ${natalPlanet.toLowerCase()} energy`;
+
+  return `${transitPlanet} ${verb} ${natalTheme}.`;
 };
 
 const calculateAspectsWithDegrees = (
@@ -104,18 +94,7 @@ const calculateAspectsWithDegrees = (
 
   for (const transit of currentTransits) {
     for (const natal of birthChart) {
-      if (
-        [
-          'North Node',
-          'South Node',
-          'Chiron',
-          'Lilith',
-          'Vertex',
-          'Anti-Vertex',
-          'East Point',
-          'Equatorial Ascendant',
-        ].includes(natal.body)
-      )
+      if (['North Node', 'South Node', 'Chiron', 'Lilith'].includes(natal.body))
         continue;
 
       let diff = Math.abs(transit.eclipticLongitude - natal.eclipticLongitude);
@@ -176,7 +155,7 @@ const calculateAspectsWithDegrees = (
 };
 
 const getOrbColor = (orb: number): string => {
-  if (orb <= 2) return 'text-content-success';
+  if (orb <= 2) return 'text-lunary-success-400';
   if (orb <= 5) return 'text-content-brand-accent';
   return 'text-content-muted';
 };
@@ -189,32 +168,32 @@ const getAspectStyles = (
     { border: string; bg: string; symbol: string; label: string }
   > = {
     conjunction: {
-      border: 'border-lunary-primary-700/60',
-      bg: 'bg-surface-elevated/50',
+      border: 'border-lunary-primary-400/40',
+      bg: 'bg-layer-deep/40',
       symbol: 'text-content-brand',
-      label: 'text-content-brand',
+      label: 'text-content-secondary',
     },
     opposition: {
-      border: 'border-lunary-error-500/60',
-      bg: 'bg-surface-elevated/50',
-      symbol: 'text-content-error',
-      label: 'text-content-error',
+      border: 'border-lunary-error-300/30',
+      bg: 'bg-layer-deep/30',
+      symbol: 'text-lunary-error-300',
+      label: 'text-lunary-error-200',
     },
     trine: {
-      border: 'border-lunary-success-600/60',
-      bg: 'bg-surface-elevated/50',
-      symbol: 'text-content-success',
-      label: 'text-content-success',
+      border: 'border-lunary-success-400/40',
+      bg: 'bg-layer-deep/40',
+      symbol: 'text-lunary-success-300',
+      label: 'text-lunary-success-200',
     },
     square: {
-      border: 'border-lunary-rose/60',
-      bg: 'bg-surface-elevated/50',
-      symbol: 'text-lunary-rose',
-      label: 'text-lunary-rose',
+      border: 'border-lunary-rose-400/40',
+      bg: 'bg-layer-deep/40',
+      symbol: 'text-lunary-rose-300',
+      label: 'text-lunary-rose-200',
     },
     sextile: {
-      border: 'border-lunary-secondary-500/60',
-      bg: 'bg-surface-elevated/50',
+      border: 'border-lunary-secondary-400/40',
+      bg: 'bg-layer-deep/40',
       symbol: 'text-content-brand-secondary',
       label: 'text-content-brand-secondary',
     },
@@ -306,7 +285,7 @@ export function MoonPhaseCard({
   }
 
   return (
-    <div className='rounded-lg border border-lunary-secondary-800 bg-surface-card p-4'>
+    <div className='rounded-lg border border-lunary-secondary-800 bg-layer-deep/40 p-4'>
       <div className='flex items-start gap-3'>
         <Image
           src={cosmicContext.moonPhase.icon.src}
@@ -432,8 +411,8 @@ export function TodaysAspects({
                 <span
                   className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${
                     aspect.duration.isApplying
-                      ? 'bg-layer-high/30 text-content-brand border-stroke-default'
-                      : 'bg-surface-elevated border-stroke-subtle text-content-muted'
+                      ? 'bg-layer-deep/60 text-content-brand border-lunary-primary-700/50'
+                      : 'bg-surface-elevated/60 text-content-muted border-stroke-default/50'
                   }`}
                 >
                   {aspect.duration.isApplying ? 'Applying' : 'Separating'}

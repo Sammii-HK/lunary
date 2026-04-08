@@ -43,10 +43,10 @@ const formatAspectName = (aspectType: string): string => {
 const getAspectColor = (aspectType: string): string => {
   const colors: Record<string, string> = {
     conjunction: 'text-content-brand',
-    trine: 'text-content-success',
+    trine: 'text-emerald-400',
     sextile: 'text-content-brand-accent',
-    square: 'text-lunary-rose',
-    opposition: 'text-content-error',
+    square: 'text-amber-400',
+    opposition: 'text-rose-400',
   };
   return colors[aspectType.toLowerCase()] || 'text-content-muted';
 };

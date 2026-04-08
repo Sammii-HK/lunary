@@ -1,12 +1,10 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
-import { Map, Telescope, X, Check, MapPin, Lock } from 'lucide-react';
+import { Map, Telescope, X, Check, MapPin } from 'lucide-react';
 import { useLocation } from '@/hooks/useLocation';
 import { usePlanetaryChart } from '@/context/AstronomyContext';
 import { BirthChartPlacement, useUser } from '@/context/UserContext';
-import { useSubscription } from '@/hooks/useSubscription';
-import { hasFeatureAccess } from '../../../utils/pricing';
 import { ChartWheelSvg } from '@/app/birth-chart/chart-wheel-svg';
 import {
   ZODIAC_SIGNS,
@@ -232,17 +230,17 @@ const getPlanetDignity = (planet: string, sign: string): Dignity | null => {
 };
 
 const DIGNITY_DOT_CLASS: Record<Dignity, string> = {
-  domicile: 'dignity-domicile-dot',
-  exalted: 'dignity-exalted-dot',
-  detriment: 'dignity-detriment-dot',
-  fall: 'dignity-fall-dot',
+  domicile: 'bg-amber-400/70',
+  exalted: 'bg-yellow-300/80',
+  detriment: 'bg-rose-400/60',
+  fall: 'bg-indigo-400/50',
 };
 
 const DIGNITY_TEXT_CLASS: Record<Dignity, string> = {
-  domicile: 'dignity-domicile-text',
-  exalted: 'dignity-exalted-text',
-  detriment: 'dignity-detriment-text',
-  fall: 'dignity-fall-text',
+  domicile: 'text-amber-400/70',
+  exalted: 'text-yellow-300/80',
+  detriment: 'text-rose-400/60',
+  fall: 'text-indigo-400/60',
 };
 
 const DIGNITY_ABBR: Record<Dignity, string> = {
@@ -317,48 +315,6 @@ function DignityTooltip({
     </span>
   );
 }
-
-const PLANET_DOMAIN: Record<string, string> = {
-  Sun: 'identity & vitality',
-  Moon: 'emotions & instincts',
-  Mercury: 'mind & communication',
-  Venus: 'love & values',
-  Mars: 'drive & action',
-  Jupiter: 'growth & opportunity',
-  Saturn: 'discipline & karma',
-  Uranus: 'change & liberation',
-  Neptune: 'dreams & intuition',
-  Pluto: 'transformation & power',
-};
-
-const HOUSE_KEYWORD: Record<number, string> = {
-  1: 'identity — how you present yourself',
-  2: 'money & self-worth',
-  3: 'communication & learning',
-  4: 'home & roots',
-  5: 'creativity & romance',
-  6: 'health & daily work',
-  7: 'relationships & partnerships',
-  8: 'transformation & shared resources',
-  9: 'travel, beliefs & growth',
-  10: 'career & public life',
-  11: 'community & future goals',
-  12: 'solitude & the subconscious',
-};
-
-const getHouseOrdinal = (n: number): string => {
-  if (n >= 11 && n <= 13) return 'th';
-  switch (n % 10) {
-    case 1:
-      return 'st';
-    case 2:
-      return 'nd';
-    case 3:
-      return 'rd';
-    default:
-      return 'th';
-  }
-};
 
 const getPlanetSymbol = (planet: string): string => {
   const key = planet.toLowerCase() as keyof typeof bodiesSymbols;
@@ -464,12 +420,6 @@ interface SkyNowCardProps {
 export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
   const { user } = useUser();
   const { currentAstrologicalChart } = usePlanetaryChart();
-  const subscription = useSubscription();
-  const hasPaidAccess = hasFeatureAccess(
-    subscription.status,
-    subscription.plan,
-    'personalized_horoscope',
-  );
   const {
     requestLocation,
     loading: locationLoading,
@@ -664,11 +614,6 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                   <span className='text-sm text-content-primary'>
                     {planet.body}
                   </span>
-                  {PLANET_DOMAIN[planet.body] && (
-                    <span className='text-[10px] text-content-muted'>
-                      ({PLANET_DOMAIN[planet.body]})
-                    </span>
-                  )}
                   <span className='font-astro text-content-muted'>
                     {getZodiacSymbol(planet.sign)}
                   </span>
@@ -677,14 +622,11 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
                     {planet.formattedDegree?.minute !== undefined &&
                       `${planet.formattedDegree.minute}'`}
                   </span>
-                  {natalSignHouseLookup[normalizedSign] != null &&
-                    (hasPaidAccess ? (
-                      <span className='text-xs uppercase text-content-muted'>
-                        {natalSignHouseLookup[normalizedSign]}H
-                      </span>
-                    ) : (
-                      <Lock className='h-2.5 w-2.5 text-content-brand' />
-                    ))}
+                  {natalSignHouseLookup[normalizedSign] != null && (
+                    <span className='text-xs uppercase text-content-muted'>
+                      {natalSignHouseLookup[normalizedSign]}H
+                    </span>
+                  )}
                   {planet.retrograde && (
                     <span className='text-xs text-lunary-error-300'>℞</span>
                   )}
@@ -707,22 +649,6 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
               <p className='text-xs text-content-muted mt-1 ml-7'>
                 {getPlanetMeaning(planet.body, planet.sign)}
               </p>
-              {natalSignHouseLookup[normalizedSign] != null &&
-                HOUSE_KEYWORD[natalSignHouseLookup[normalizedSign]] &&
-                (hasPaidAccess ? (
-                  <p className='text-[11px] text-content-brand-secondary/70 mt-0.5 ml-7'>
-                    Active in your {natalSignHouseLookup[normalizedSign]}
-                    {getHouseOrdinal(natalSignHouseLookup[normalizedSign])}{' '}
-                    house of{' '}
-                    {HOUSE_KEYWORD[natalSignHouseLookup[normalizedSign]]}
-                  </p>
-                ) : (
-                  <p className='text-[11px] text-content-muted mt-0.5 ml-7 flex items-center gap-1'>
-                    <Lock className='h-2.5 w-2.5 text-content-brand flex-shrink-0' />
-                    <span>House placement — </span>
-                    <span className='text-content-brand'>Lunary+</span>
-                  </p>
-                ))}
               {planet.retrograde && (
                 <p className='text-xs text-lunary-error-300/80 mt-1 ml-7 leading-relaxed'>
                   {getRetrogradeGuidance(planet.body, planet.sign)}

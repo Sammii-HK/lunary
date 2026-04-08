@@ -98,7 +98,7 @@ export function WeeklyChallengeCard() {
   return (
     <div className='challenge-card-gradient border border-amber-900/30 rounded-xl p-4'>
       <div className='flex items-start gap-3'>
-        <div className='w-8 h-8 bg-amber-900/30 challenge-icon-bg rounded-lg flex items-center justify-center shrink-0'>
+        <div className='w-8 h-8 bg-amber-900/30 rounded-lg flex items-center justify-center shrink-0'>
           <Flame className='w-4 h-4 text-amber-400 challenge-icon' />
         </div>
         <div className='flex-1 min-w-0'>
@@ -168,7 +168,7 @@ export function WeeklyChallengeCard() {
             size='sm'
             onClick={handleCheckIn}
             disabled={isCheckingIn}
-            className='text-xs bg-amber-600/20 text-amber-300 challenge-accent challenge-btn hover:bg-amber-600/30 border border-amber-700/30'
+            className='text-xs bg-amber-600/20 text-amber-300 challenge-accent hover:bg-amber-600/30 border border-amber-700/30'
           >
             {isCheckingIn ? '...' : 'Check In'}
           </Button>

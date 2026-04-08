@@ -303,7 +303,7 @@ const MessageBubble = ({
       <div
         className={`relative max-w-[96%] md:max-w-[80%] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 leading-relaxed shadow-sm transition-colors ${
           isUser
-            ? 'chat-user-bubble border'
+            ? 'chat-user-bubble text-content-primary border'
             : 'bg-surface-elevated/60 text-content-primary border border-stroke-subtle'
         }`}
       >
@@ -1279,7 +1279,7 @@ function BookOfShadowsContent() {
                 type='submit'
                 data-testid='guide-submit'
                 disabled={input.trim().length === 0 || isSubmittingJournal}
-                className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white transition disabled:opacity-40 disabled:cursor-not-allowed ${
+                className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-content-primary transition disabled:opacity-40 disabled:cursor-not-allowed ${
                   isJournalMode
                     ? 'bg-lunary-primary-500 hover:bg-lunary-primary-400'
                     : 'bg-lunary-primary-600 hover:bg-lunary-primary-500'

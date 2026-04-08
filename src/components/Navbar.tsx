@@ -170,7 +170,7 @@ const NavLink = ({
       className={`relative flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs transition ${
         active
           ? 'text-lunary-secondary'
-          : 'text-lunary-primary-400/70 hover:text-lunary-primary-400'
+          : 'text-content-brand hover:text-content-secondary'
       }`}
     >
       <div className='relative'>

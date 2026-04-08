@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dayjs from 'dayjs';
 import dynamic from 'next/dynamic';
@@ -18,9 +18,6 @@ import { FeaturePreview } from './FeaturePreview';
 import { TodaysAspects, MoonPhaseCard } from './TodaysAspects';
 import { TransitWisdom } from './TransitWisdom';
 import { UnifiedTransitList } from './UnifiedTransitList';
-import { usePlanetaryChart } from '@/context/AstronomyContext';
-import { calculateHouse } from '@/lib/astrology/transit-aspects';
-import { ordinal } from '@/lib/copy/transit-copy';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { ShareRetrogradeBadge } from '@/components/share/ShareRetrogradeBadge';
 import { ShareHoroscope } from '@/components/share/ShareHoroscope';
@@ -148,29 +145,6 @@ export function HoroscopeView({
 
   const generalHoroscope = getGeneralHoroscope();
   const birthChart = getBirthChartFromProfile(profile);
-  const { currentAstrologicalChart } = usePlanetaryChart();
-
-  // House placement chips for free users — shows what's active in their chart (locked)
-  const freePlanetTeases = useMemo(() => {
-    if (hasPaidAccess || !birthChart || !currentAstrologicalChart?.length)
-      return [];
-    const ascendant = birthChart.find((p: any) => p.body === 'Ascendant');
-    if (!ascendant) return [];
-    return ['Pluto', 'Neptune', 'Uranus', 'Saturn', 'Jupiter', 'Mars', 'Sun']
-      .map((name) => {
-        const planet = currentAstrologicalChart.find(
-          (p: any) => p.body === name,
-        );
-        if (!planet) return null;
-        const house = calculateHouse(
-          planet.eclipticLongitude,
-          ascendant.eclipticLongitude,
-        );
-        return { planet: name, house };
-      })
-      .filter((x): x is { planet: string; house: number } => x !== null)
-      .slice(0, 4);
-  }, [hasPaidAccess, birthChart, currentAstrologicalChart]);
 
   // Fetch personalized horoscope (paid only)
   useEffect(() => {
@@ -413,40 +387,16 @@ export function HoroscopeView({
       </div>
 
       {/* Cosmic Highlight Card */}
-      <div className='rounded-xl border border-stroke-subtle/70 bg-gradient-to-br from-surface-elevated/70 via-surface-base/70 to-surface-card p-3 space-y-3'>
-        {/* Free users with chart data — show real house teases */}
-        {!hasPaidAccess && freePlanetTeases.length > 0 ? (
-          <>
-            <p className='text-[11px] font-semibold tracking-[0.2em] uppercase text-content-muted'>
-              Active in your chart right now
-            </p>
-            <div className='flex flex-wrap gap-1.5'>
-              {freePlanetTeases.map(({ planet, house }) => (
-                <span
-                  key={planet}
-                  className='inline-flex items-center gap-1 rounded-full border border-stroke-subtle bg-surface-elevated px-2.5 py-1 text-xs text-content-muted'
-                >
-                  {planet}
-                  <span className='text-content-muted/50'>·</span>
-                  {ordinal(house)} house
-                  <Lock className='ml-0.5 h-2.5 w-2.5 text-content-brand' />
-                </span>
-              ))}
-            </div>
-            <p className='text-xs text-content-muted leading-relaxed'>
-              {dailyGuidance}
-            </p>
-          </>
-        ) : (
-          <>
-            <Heading variant='h2' as='h2'>
-              {cosmicHighlight}
-            </Heading>
-            <p className='text-xs md:text-sm text-content-secondary leading-relaxed'>
-              {dailyGuidance}
-            </p>
-          </>
-        )}
+      <div className='rounded-xl border border-stroke-subtle/70 bg-gradient-to-br from-surface-elevated/70 via-surface-base/70 to-layer-deep p-3 space-y-3'>
+        {/* <p className='text-[11px] font-semibold tracking-[0.3em] uppercase text-content-muted'>
+          Cosmic Highlight
+        </p> */}
+        <Heading variant='h2' as='h2'>
+          {cosmicHighlight}
+        </Heading>
+        <p className='text-xs md:text-sm text-content-secondary leading-relaxed'>
+          {dailyGuidance}
+        </p>
 
         {personalizedTeaser && (
           <Link href='/pricing?nav=app' className='block space-y-2 group'>
@@ -493,52 +443,7 @@ export function HoroscopeView({
           className='mt-2 grid grid-cols-2 gap-3 items-stretch'
           data-testid='numerology-section'
         >
-          {/* Personal Day — paid: featured left tile; free: locked right tile */}
-          {hasPaidAccess && personalDay ? (
-            <div className='relative'>
-              <button
-                type='button'
-                onClick={() =>
-                  openNumerologyModal(
-                    'Personal Day',
-                    personalDay.number,
-                    personalDay.meaning,
-                    'Your personal day numerology focus',
-                  )
-                }
-                className='rounded-lg border border-lunary-primary-700/50 px-3 py-2 bg-surface-elevated/60 text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-lunary-primary-400 w-full h-full'
-                data-testid='numerology-month'
-              >
-                <div className='text-xs uppercase tracking-widest text-content-brand'>
-                  Personal Day
-                </div>
-                <div className='text-xl sm:text-2xl font-semibold text-content-success'>
-                  {personalDay.number}
-                </div>
-                <p className='text-[11px] text-content-secondary'>
-                  {personalDay.meaning}
-                </p>
-              </button>
-              <button
-                type='button'
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  shareNumberTile(
-                    'Personal Day',
-                    personalDay.number,
-                    personalDay.meaning,
-                  );
-                }}
-                className='absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full border border-stroke-default bg-surface-base/50 text-content-muted transition hover:border-lunary-primary-500 hover:text-content-primary'
-                aria-label='Share Personal Day'
-              >
-                <Share2 className='h-4 w-4' />
-              </button>
-            </div>
-          ) : null}
-
-          {/* Universal Day — always shown; secondary for paid users */}
+          {/* Universal Day — always interactive */}
           <div className='relative'>
             <button
               type='button'
@@ -581,32 +486,77 @@ export function HoroscopeView({
             </button>
           </div>
 
-          {/* Personal Day — free users: locked if birthday set, prompt if not */}
-          {!hasPaidAccess &&
-            (personalDay ? (
-              <div className='rounded-lg border border-stroke-default px-4 py-3 bg-surface-elevated/40 text-center'>
-                <div className='text-xs uppercase tracking-widest text-content-muted'>
-                  Personal Day
+          {/* Personal Day — paid: modal + share; free: number + badge */}
+          {personalDay ? (
+            <div className='relative'>
+              {hasPaidAccess ? (
+                <>
+                  <button
+                    type='button'
+                    onClick={() =>
+                      openNumerologyModal(
+                        'Personal Day',
+                        personalDay.number,
+                        personalDay.meaning,
+                        'Your personal day numerology focus',
+                      )
+                    }
+                    className='rounded-lg border border-stroke-default px-3 py-2 bg-surface-elevated/40 text-center transition hover:border-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300 w-full h-full'
+                    data-testid='numerology-month'
+                  >
+                    <div className='text-xs uppercase tracking-widest text-content-muted'>
+                      Personal Day
+                    </div>
+                    <div className='text-xl sm:text-2xl font-semibold text-emerald-300'>
+                      {personalDay.number}
+                    </div>
+                    <p className='text-[11px] text-content-secondary'>
+                      {personalDay.meaning}
+                    </p>
+                  </button>
+                  <button
+                    type='button'
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      shareNumberTile(
+                        'Personal Day',
+                        personalDay.number,
+                        personalDay.meaning,
+                      );
+                    }}
+                    className='absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full border border-stroke-default bg-surface-base/50 text-content-muted transition hover:border-emerald-400 hover:text-content-primary'
+                    aria-label='Share Personal Day'
+                  >
+                    <Share2 className='h-4 w-4' />
+                  </button>
+                </>
+              ) : (
+                <div className='rounded-lg border border-stroke-default px-4 py-3 bg-surface-elevated/40 text-center'>
+                  <div className='text-xs uppercase tracking-widest text-content-muted'>
+                    Personal Day
+                  </div>
+                  <Lock className='w-4 h-4 text-content-brand mx-auto mt-2' />
+                  <span className='inline-flex items-center gap-1 mt-1 text-[10px] bg-layer-base/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded text-content-brand'>
+                    <Sparkles className='w-2.5 h-2.5' />
+                    Lunary+
+                  </span>
                 </div>
-                <Lock className='w-4 h-4 text-content-brand mx-auto mt-2' />
-                <span className='inline-flex items-center gap-1 mt-1 text-[10px] bg-layer-base/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded text-content-brand'>
-                  <Sparkles className='w-2.5 h-2.5' />
-                  Lunary+
-                </span>
+              )}
+            </div>
+          ) : (
+            <div className='rounded-lg border border-stroke-default px-4 py-3 bg-surface-elevated/40 text-center'>
+              <div className='text-xs uppercase tracking-widest text-content-muted'>
+                Personal Day
               </div>
-            ) : (
-              <div className='rounded-lg border border-stroke-default px-4 py-3 bg-surface-elevated/40 text-center'>
-                <div className='text-xs uppercase tracking-widest text-content-muted'>
-                  Personal Day
-                </div>
-                <div className='text-xl sm:text-2xl font-semibold text-content-muted'>
-                  ?
-                </div>
-                <p className='text-[11px] text-content-muted'>
-                  Add your birthday to unlock this.
-                </p>
+              <div className='text-xl sm:text-2xl font-semibold text-content-muted'>
+                ?
               </div>
-            ))}
+              <p className='text-[11px] text-content-muted'>
+                Add your birthday to reveal this daily number.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* <p className='text-xs text-content-muted'>
@@ -722,7 +672,7 @@ export function HoroscopeView({
               <div className='space-y-3'>
                 <div className='rounded-lg border border-lunary-error-700/50 bg-surface-elevated/40 p-4 space-y-3'>
                   <div className='flex items-start gap-3'>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-card text-content-error'>
+                    <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-layer-deep/60 text-lunary-error-300'>
                       Highly Prominent
                     </span>
                     <div className='flex-1'>
@@ -735,10 +685,10 @@ export function HoroscopeView({
                     </div>
                   </div>
                   <div className='flex flex-wrap gap-1.5'>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border tag-identity'>
+                    <span className='inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border bg-amber-900/40 text-amber-300 border-amber-700/40'>
                       Identity
                     </span>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border tag-work'>
+                    <span className='inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border bg-blue-900/40 text-blue-300 border-blue-700/40'>
                       Work
                     </span>
                   </div>
@@ -750,7 +700,7 @@ export function HoroscopeView({
                 </div>
                 <div className='rounded-lg border border-lunary-accent-700/50 bg-surface-elevated/40 p-4 space-y-3'>
                   <div className='flex items-start gap-3'>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-card text-content-brand-accent'>
+                    <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-layer-deep/60 text-content-brand-accent'>
                       Noticeable
                     </span>
                     <div className='flex-1'>
@@ -818,9 +768,9 @@ export function HoroscopeView({
             page='horoscope'
             blurredContent={
               <div className='space-y-2'>
-                <div className='rounded-lg border border-stroke-default bg-surface-card p-3'>
+                <div className='rounded-lg border border-lunary-primary-400/40 bg-layer-deep/40 p-3'>
                   <div className='flex items-start gap-3'>
-                    <div className='flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-surface-elevated border border-stroke-default'>
+                    <div className='flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-layer-deep/40 border border-lunary-primary-400/40'>
                       <span className='text-lg text-content-brand'>☌</span>
                     </div>
                     <div className='flex-1'>
@@ -851,9 +801,9 @@ export function HoroscopeView({
                     </div>
                   </div>
                 </div>
-                <div className='rounded-lg border border-stroke-default bg-surface-card p-3'>
+                <div className='rounded-lg border border-lunary-success-400/40 bg-layer-deep/40 p-3'>
                   <div className='flex items-start gap-3'>
-                    <div className='flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-surface-elevated border border-stroke-default'>
+                    <div className='flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-layer-deep/40 border border-lunary-success-400/40'>
                       <span className='text-lg text-lunary-success-300'>△</span>
                     </div>
                     <div className='flex-1'>
@@ -942,7 +892,7 @@ export function HoroscopeView({
                 {solarReturnData.themes.map((theme, index) => (
                   <span
                     key={index}
-                    className='px-2 py-1 rounded border border-stroke-default bg-surface-elevated text-xs text-content-secondary'
+                    className='px-2 py-1 rounded border border-lunary-accent-700 bg-layer-deep text-xs text-content-secondary'
                   >
                     {theme}
                   </span>
@@ -961,7 +911,7 @@ export function HoroscopeView({
             trackingFeature='solar_return_insights'
             page='horoscope'
             blurredContent={
-              <div className='rounded-lg border border-stroke-default bg-surface-elevated p-5 space-y-3'>
+              <div className='rounded-lg border border-lunary-accent-700 bg-layer-deep p-5 space-y-3'>
                 <div className='flex justify-between items-center'>
                   <span className='text-sm text-content-secondary'>
                     Next Solar Return:
@@ -991,13 +941,13 @@ export function HoroscopeView({
                     Year Themes
                   </h4>
                   <div className='flex flex-wrap gap-2'>
-                    <span className='px-2 py-1 rounded border border-stroke-default bg-surface-elevated text-xs text-content-secondary'>
+                    <span className='px-2 py-1 rounded border border-lunary-accent-700 bg-layer-deep text-xs text-content-secondary'>
                       Introspection
                     </span>
-                    <span className='px-2 py-1 rounded border border-stroke-default bg-surface-elevated text-xs text-content-secondary'>
+                    <span className='px-2 py-1 rounded border border-lunary-accent-700 bg-layer-deep text-xs text-content-secondary'>
                       Spiritual Growth
                     </span>
-                    <span className='px-2 py-1 rounded border border-stroke-default bg-surface-elevated text-xs text-content-secondary'>
+                    <span className='px-2 py-1 rounded border border-lunary-accent-700 bg-layer-deep text-xs text-content-secondary'>
                       Inner Wisdom
                     </span>
                   </div>
@@ -1017,7 +967,7 @@ export function HoroscopeView({
           </p>
           <Link
             href='/profile'
-            className='inline-block rounded-lg border border-stroke-default bg-surface-elevated hover:bg-surface-card text-content-brand-accent px-4 py-2 text-sm font-medium transition-colors'
+            className='inline-block rounded-lg border border-lunary-accent-700 bg-layer-deep hover:bg-layer-base text-content-brand-accent px-4 py-2 text-sm font-medium transition-colors'
           >
             Update Profile
           </Link>

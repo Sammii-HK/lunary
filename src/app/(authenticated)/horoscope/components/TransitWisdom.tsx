@@ -82,19 +82,19 @@ const intensityLevelStyles: Record<
   { bg: string; text: string; border: string }
 > = {
   'Life-Defining': {
-    bg: 'bg-surface-card',
+    bg: 'bg-layer-deep/60',
     text: 'text-content-error',
-    border: 'border-stroke-default',
+    border: 'border-lunary-error-700/50',
   },
   'Highly Prominent': {
-    bg: 'bg-surface-card',
+    bg: 'bg-layer-deep/60',
     text: 'text-content-brand-accent',
-    border: 'border-stroke-default',
+    border: 'border-lunary-accent-700/50',
   },
   Noticeable: {
-    bg: 'bg-surface-card',
+    bg: 'bg-layer-deep/60',
     text: 'text-content-success',
-    border: 'border-stroke-default',
+    border: 'border-lunary-success-700/50',
   },
   Mild: {
     bg: 'bg-surface-elevated/60',
@@ -216,12 +216,12 @@ const orbBadgeStyles: Record<
   { bg: string; text: string; border: string }
 > = {
   Exact: {
-    bg: 'bg-surface-card',
+    bg: 'bg-layer-deep/60',
     text: 'text-content-brand',
     border: 'border-stroke-default/50',
   },
   Strong: {
-    bg: 'bg-surface-card',
+    bg: 'bg-layer-deep/60',
     text: 'text-content-brand-secondary',
     border: 'border-stroke-default/50',
   },
@@ -275,7 +275,7 @@ function TransitCard({
       <div className='space-y-1'>
         <div className='flex items-center justify-between gap-2'>
           <span
-            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap border ${styles.bg} ${styles.text} ${styles.border}`}
+            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap ${styles.bg} ${styles.text}`}
           >
             {detail.intensityLevel}
           </span>

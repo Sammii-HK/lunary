@@ -216,7 +216,7 @@ export function FourCardsUpdatedVariant() {
           <div className='space-y-3'>
             <div className='flex justify-end'>
               <div className='max-w-[80%]'>
-                <div className='rounded-2xl chat-user-bubble border px-3.5 py-2.5 text-content-muted text-xs'>
+                <div className='rounded-2xl bg-layer-base border border-lunary-primary-700 px-3.5 py-2.5 text-white text-xs'>
                   What does my birth chart say?
                 </div>
               </div>

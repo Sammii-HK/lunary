@@ -97,7 +97,7 @@ export function ControlVariant() {
           <div className='space-y-3'>
             <div className='flex justify-end'>
               <div className='max-w-[80%]'>
-                <div className='rounded-2xl chat-user-bubble border px-3.5 py-2.5 text-content-muted text-sm leading-relaxed'>
+                <div className='rounded-2xl bg-layer-base border border-lunary-primary-700 px-3.5 py-2.5 text-white text-sm leading-relaxed'>
                   Why am I feeling so restless today?
                 </div>
               </div>

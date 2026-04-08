@@ -211,8 +211,8 @@ export function NewsletterSignupForm({
     <div
       className={cn(
         compact
-          ? 'rounded-xl border border-stroke-default bg-surface-card/80 backdrop-blur-md p-4 sm:p-5'
-          : 'rounded-2xl border border-stroke-default bg-surface-card/70 p-6 sm:p-8 shadow-lg shadow-lunary-primary-900/20 backdrop-blur-lg',
+          ? 'rounded-xl border border-lunary-primary-800/50 bg-layer-deep/60 p-4 sm:p-5'
+          : 'rounded-2xl border border-lunary-primary-800 bg-layer-deep p-6 sm:p-8 shadow-lg shadow-lunary-primary-950 backdrop-blur-lg',
         className,
       )}
     >
@@ -324,8 +324,8 @@ export function NewsletterSignupForm({
               'flex items-start gap-2 text-sm',
               align === 'center' && 'justify-center text-center',
               status === 'error'
-                ? 'text-content-error'
-                : 'text-content-success',
+                ? 'text-lunary-error-300'
+                : 'text-lunary-success-300',
             )}
           >
             {status === 'error' ? (

@@ -29,6 +29,11 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+/** Sanitize string for safe logging (prevent log injection) */
+function sanitizeForLogging(value: unknown): string {
+  return String(value).replace(/[\r\n\x00-\x1F\x7F]/g, '');
+}
+
 /** Extract Sun and Moon sign from a birth_chart JSON array */
 function parsePlacements(birthChart: unknown): {
   sunSign?: string;
@@ -131,7 +136,7 @@ export async function GET(request: NextRequest) {
         counts['paying_7d']++;
       } catch (error) {
         console.error(
-          `[Re-Engagement] paying_7d failed for ${user.email}:`,
+          `[Re-Engagement] paying_7d failed for ${sanitizeForLogging(user.email)}:`,
           error,
         );
         emailsFailed++;
@@ -204,7 +209,7 @@ export async function GET(request: NextRequest) {
         counts['free_3d']++;
       } catch (error) {
         console.error(
-          `[Re-Engagement] free_3d failed for ${user.email}:`,
+          `[Re-Engagement] free_3d failed for ${sanitizeForLogging(user.email)}:`,
           error,
         );
         emailsFailed++;
@@ -276,7 +281,7 @@ export async function GET(request: NextRequest) {
         counts['free_7d']++;
       } catch (error) {
         console.error(
-          `[Re-Engagement] free_7d failed for ${user.email}:`,
+          `[Re-Engagement] free_7d failed for ${sanitizeForLogging(user.email)}:`,
           error,
         );
         emailsFailed++;
@@ -348,7 +353,7 @@ export async function GET(request: NextRequest) {
         counts['free_14d']++;
       } catch (error) {
         console.error(
-          `[Re-Engagement] free_14d failed for ${user.email}:`,
+          `[Re-Engagement] free_14d failed for ${sanitizeForLogging(user.email)}:`,
           error,
         );
         emailsFailed++;
@@ -420,7 +425,7 @@ export async function GET(request: NextRequest) {
         counts['winback_30d']++;
       } catch (error) {
         console.error(
-          `[Re-Engagement] winback_30d failed for ${user.email}:`,
+          `[Re-Engagement] winback_30d failed for ${sanitizeForLogging(user.email)}:`,
           error,
         );
         emailsFailed++;
@@ -461,7 +466,7 @@ export async function GET(request: NextRequest) {
         counts['missed_streak']++;
       } catch (error) {
         console.error(
-          `[Re-Engagement] missed_streak failed for ${user.email}:`,
+          `[Re-Engagement] missed_streak failed for ${sanitizeForLogging(user.email)}:`,
           error,
         );
         emailsFailed++;
@@ -501,7 +506,7 @@ export async function GET(request: NextRequest) {
         counts['milestone']++;
       } catch (error) {
         console.error(
-          `[Re-Engagement] milestone failed for ${user.email}:`,
+          `[Re-Engagement] milestone failed for ${sanitizeForLogging(user.email)}:`,
           error,
         );
         emailsFailed++;
@@ -549,7 +554,7 @@ export async function GET(request: NextRequest) {
         counts['insights_ready']++;
       } catch (error) {
         console.error(
-          `[Re-Engagement] insights_ready failed for ${row.email}:`,
+          `[Re-Engagement] insights_ready failed for ${sanitizeForLogging(row.email)}:`,
           error,
         );
         emailsFailed++;
