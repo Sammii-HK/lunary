@@ -124,7 +124,7 @@ export function CircleInviteCTA() {
         </div>
         <a
           href='/auth/signup'
-          className='block w-full rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-center text-sm font-semibold text-white hover:opacity-90 transition-opacity'
+          className='block w-full rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-center text-sm font-semibold text-content-primary hover:opacity-90 transition-opacity'
         >
           Create your account
         </a>
@@ -137,7 +137,7 @@ export function CircleInviteCTA() {
       {/* Header */}
       <div className='flex items-start gap-4 mb-4'>
         <div className='w-12 h-12 rounded-full bg-gradient-to-br from-lunary-primary-600 to-lunary-highlight-600 flex items-center justify-center shrink-0'>
-          <Gift className='w-6 h-6 text-white' />
+          <Gift className='w-6 h-6 text-content-primary' />
         </div>
         <div className='flex-1 min-w-0'>
           <h3 className='text-lg font-semibold text-content-primary'>
@@ -164,7 +164,7 @@ export function CircleInviteCTA() {
           <div className='flex gap-2'>
             <button
               onClick={handleShare}
-              className='flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity'
+              className='flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-sm font-semibold text-content-primary hover:opacity-90 transition-opacity'
             >
               <Share2 className='w-4 h-4' />
               Invite Friends
@@ -190,7 +190,7 @@ export function CircleInviteCTA() {
       ) : (
         <a
           href='/profile?tab=circle'
-          className='flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity'
+          className='flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-3 text-sm font-semibold text-content-primary hover:opacity-90 transition-opacity'
         >
           <Sparkles className='w-4 h-4' />
           Get your invite link
