@@ -9,7 +9,7 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 export const metadata: Metadata = {
   title: 'Free Birth Chart Calculator & Astrology Guide | Lunary',
   description:
-    'Learn how planets, houses, and signs shape your astrology chart. Generate your free birth chart with Lunary — sign in to unlock your personalised placements and insights.',
+    'Learn how planets, houses, and signs shape your astrology chart. Generate your free birth chart with Lunary — choose your zodiac system (tropical, sidereal, equatorial) and house system. Sign in to unlock your personalised placements and insights.',
   keywords: [
     'birth chart',
     'free birth chart calculator',
@@ -19,6 +19,11 @@ export const metadata: Metadata = {
     'birth chart reading',
     'astrology guide',
     'zodiac',
+    'tropical zodiac',
+    'sidereal zodiac',
+    'house systems',
+    'placidus houses',
+    'whole sign houses',
     'Lunary',
   ],
   openGraph: {
@@ -90,15 +95,22 @@ export default function BirthChartPage() {
         'birth chart reading',
         'astrology guide',
         'zodiac',
+        'tropical zodiac',
+        'sidereal zodiac',
+        'house systems',
         'Lunary',
       ]}
       canonicalUrl='https://lunary.app/grimoire/birth-chart'
       image='https://lunary.app/api/og/cosmic'
       imageAlt='Lunary Birth Chart Calculator'
-      intro='Your birth chart (natal chart) is a snapshot of the sky at the moment you were born. It reveals your astrological blueprint—the positions of planets, signs, houses, and aspects that influence your personality, life path, and potential. Understanding your birth chart helps you understand yourself deeply, recognize your strengths and challenges, and align with your true purpose. This comprehensive guide covers all components of birth charts and how to interpret them.'
+      intro='Your birth chart (natal chart) is a snapshot of the sky at the moment you were born. It reveals your astrological blueprint—the positions of planets, signs, houses, and aspects that influence your personality, life path, and potential. Lunary lets you view your chart in multiple zodiac systems (tropical, sidereal, equatorial) and house systems (whole sign, Placidus, Koch, Porphyry, Alcabitius) to deepen your understanding. Understanding your birth chart helps you understand yourself deeply, recognize your strengths and challenges, and align with your true purpose. This comprehensive guide covers all components of birth charts and how to interpret them.'
       meaning={`A birth chart maps the positions of planets, signs, and houses at your exact moment of birth. Each component reveals different aspects of your personality and life experience. Planets represent different parts of your psyche and life areas. Signs show how those planets express themselves. Houses indicate where in your life these energies manifest. Aspects show how planets interact with each other.
 
 The Big Three—Sun, Moon, and Rising (Ascendant)—form the foundation of your personality. Your Sun sign represents your core identity and ego. Your Moon sign shows your emotional nature and inner needs. Your Rising sign reveals how others see you and your outer personality.
+
+Zodiac systems shift the perspective on your chart. Tropical astrology (the Western standard) uses the Spring Equinox as 0° Aries. Sidereal astrology (used in Vedic traditions) adjusts for the precession of the equinoxes, typically showing signs about 24 degrees earlier. Equatorial astrology uses the celestial equator rather than the ecliptic plane. Each system reveals different sign placements and interpretations. Lunary allows you to explore all three to find the system that resonates most with you.
+
+Similarly, different house systems divide your chart's 12 houses based on different mathematical principles. Placidus is the most common in Western astrology, while whole sign houses are increasingly popular for their simplicity and accuracy. Exploring multiple house systems can deepen your chart interpretation.
 
 Understanding your birth chart helps you recognize your natural talents, work with your challenges, and make choices aligned with your authentic self. It's a tool for self-discovery and personal growth.`}
       howToWorkWith={[
@@ -106,7 +118,9 @@ Understanding your birth chart helps you recognize your natural talents, work wi
         'Learn the meaning of each planet in your chart',
         'Understand your Sun, Moon, and Rising signs',
         'Study the houses and what they represent',
+        'Explore different house systems (Placidus, Whole Sign, Koch, etc.)',
         'Learn about aspects between planets',
+        'Discover how your chart appears in different zodiac systems (tropical, sidereal, equatorial)',
         'Understand planetary retrogrades in your chart',
         'Use your chart for timing important decisions',
         'Combine astrology with other divination methods',

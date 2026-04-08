@@ -4,11 +4,15 @@ import FeaturesPage from '@/components/pages/FeaturesPage';
 export const metadata: Metadata = {
   title: 'Features | Lunary - Your Complete Cosmic Toolkit',
   description:
-    'Complete astrology toolkit: birth charts, full synastry analysis, pattern recognition, tarot spreads, transit calendar with durations, and 2,000+ free educational articles. Learn to read your own chart.',
+    'Complete astrology toolkit: birth charts with flexible house & zodiac systems, full synastry analysis, pattern recognition, tarot spreads, transit calendar with durations, and 2,000+ free educational articles. Learn to read your own chart.',
   keywords: [
     'lunary features',
     'astrology app features',
     'birth chart calculator',
+    'tropical zodiac',
+    'sidereal zodiac',
+    'house systems',
+    'placidus houses',
     'synastry analysis',
     'astrology compatibility',
     'personal horoscope',

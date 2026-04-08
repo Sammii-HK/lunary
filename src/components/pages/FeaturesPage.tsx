@@ -135,7 +135,8 @@ export default function FeaturesPage() {
               'Every placement explained in educational detail',
               'Visual chart wheel with all bodies',
               'Major aspects explained in plain language',
-              '12 houses with Whole Sign system',
+              '12 houses with 5 systems (Whole Sign, Placidus, Koch, Porphyry, Alcabitius)',
+              'Zodiac system flexibility (Tropical, Sidereal, Equatorial)',
               'Elemental & modal balance analysis',
               'Saved to your account for personalized features',
             ]}
